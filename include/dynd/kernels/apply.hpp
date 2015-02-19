@@ -125,6 +125,11 @@ namespace kernels {
     }
   };
 
+  template <typename func_type,
+            int N = args_of<typename funcproto_of<func_type>::type>::type::size>
+  using as_apply_arg_sequence = typename to<
+      typename args_of<typename funcproto_of<func_type>::type>::type, N>::type;
+
   template <typename A, typename I = make_index_sequence<A::size>>
   struct apply_args;
 
@@ -143,6 +148,10 @@ namespace kernels {
             int N = args_of<typename funcproto_of<func_type>::type>::type::size>
   using apply_args_for = apply_args<typename to<
       typename args_of<typename funcproto_of<func_type>::type>::type, N>::type>;
+
+  template <typename func_type, int N>
+  using as_apply_kwd_sequence = typename from<
+      typename args_of<typename funcproto_of<func_type>::type>::type, N>::type;
 
   template <typename T, size_t I>
   struct apply_kwd {
@@ -179,18 +188,25 @@ namespace kernels {
   using apply_kwds_for = apply_kwds<typename from<
       typename args_of<typename funcproto_of<func_type>::type>::type, N>::type>;
 
-  template <kernel_request_t kernreq, typename func_type, func_type func, int N>
+  template <kernel_request_t kernreq, typename func_type, func_type func,
+            typename R, typename A, typename I, typename K, typename J>
   struct apply_function_ck;
 
 #define APPLY_FUNCTION_CK(KERNREQ, ...)                                        \
-  template <typename func_type, func_type func, int N>                         \
-  struct apply_function_ck<KERNREQ, func_type, func, N>                        \
-      : expr_ck<apply_function_ck<KERNREQ, func_type, func, N>, KERNREQ, N>,   \
-        apply_args_for<func_type, N>,                                          \
-        apply_kwds_for<func_type, N> {                                         \
+  template <typename func_type, func_type func, typename R, typename... A,     \
+            size_t... I, typename... K, size_t... J>                           \
+  struct apply_function_ck<KERNREQ, func_type, func, R, type_sequence<A...>,   \
+                           index_sequence<I...>, type_sequence<K...>,          \
+                           index_sequence<J...>>                               \
+      : expr_ck<apply_function_ck<KERNREQ, func_type, func, R,                 \
+                                  type_sequence<A...>, index_sequence<I...>,   \
+                                  type_sequence<K...>, index_sequence<J...>>,  \
+                KERNREQ, sizeof...(A)>,                                        \
+        apply_args<type_sequence<A...>, index_sequence<I...>>,                 \
+        apply_kwds<type_sequence<K...>, index_sequence<J...>> {                \
     typedef apply_function_ck self_type;                                       \
-    typedef apply_args_for<func_type, N> args_type;                            \
-    typedef apply_kwds_for<func_type, N> kwds_type;                            \
+    typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;   \
+    typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;   \
                                                                                \
     __VA_ARGS__ apply_function_ck(args_type args, kwds_type kwds)              \
         : args_type(args), kwds_type(kwds)                                     \
@@ -199,7 +215,7 @@ namespace kernels {
                                                                                \
     __VA_ARGS__ void single(char *dst, char *const *src)                       \
     {                                                                          \
-      single<typename return_of<func_type>::type>(this, this, dst, src);       \
+      single<R>(dst, src);                                                     \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
@@ -220,39 +236,34 @@ namespace kernels {
     }                                                                          \
                                                                                \
   private:                                                                     \
-    template <typename R, typename... A, size_t... I, typename... K,           \
-              size_t... J>                                                     \
-    __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
+    template <typename R2>                                                     \
+    __VA_ARGS__ typename std::enable_if<std::is_same<R2, void>::value,         \
                                         void>::type                            \
-    single(apply_args<type_sequence<A...>, index_sequence<I...>> *             \
-               DYND_IGNORE_UNUSED(args),                                       \
-           apply_kwds<type_sequence<K...>, index_sequence<J...>> *             \
-               DYND_IGNORE_UNUSED(kwds),                                       \
-           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
+    single(char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
     {                                                                          \
-      func(static_cast<apply_arg<A, I> *>(args)->get(src[I])...,               \
-           static_cast<apply_kwd<K, J> *>(kwds)->get()...);                    \
+      func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);        \
     }                                                                          \
                                                                                \
-    template <typename R, typename... A, size_t... I, typename... K,           \
-              size_t... J>                                                     \
-    __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
+    template <typename R2>                                                     \
+    __VA_ARGS__ typename std::enable_if<!std::is_same<R2, void>::value,        \
                                         void>::type                            \
-    single(apply_args<type_sequence<A...>, index_sequence<I...>> *             \
-               DYND_IGNORE_UNUSED(args),                                       \
-           apply_kwds<type_sequence<K...>, index_sequence<J...>> *             \
-               DYND_IGNORE_UNUSED(kwds),                                       \
-           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
+    single(char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
     {                                                                          \
-      *reinterpret_cast<R *>(dst) =                                            \
-          func(static_cast<apply_arg<A, I> *>(args)->get(src[I])...,           \
-               static_cast<apply_kwd<K, J> *>(kwds)->get()...);                \
+      *reinterpret_cast<R2 *>(dst) =                                           \
+          func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);    \
     }                                                                          \
   }
 
   APPLY_FUNCTION_CK(kernel_request_host);
 
 #undef APPLY_FUNCTION_CK
+
+  template <kernel_request_t kernreq, typename func_type, func_type func, int N>
+  using as_apply_function_ck = apply_function_ck<
+      kernreq, func_type, func, typename return_of<func_type>::type,
+      as_apply_arg_sequence<func_type, N>, make_index_sequence<N>,
+      as_apply_kwd_sequence<func_type, N>,
+      make_index_sequence<arity_of<func_type>::value - N>>;
 
   template <kernel_request_t kernreq, typename T, typename mem_func_type, int N>
   struct apply_member_function_ck;

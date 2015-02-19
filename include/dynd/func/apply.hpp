@@ -21,16 +21,15 @@ namespace nd {
               typename... T>
     arrfunc apply(T &&... names)
     {
-      typedef kernels::apply_function_ck<kernreq, func_type, func,
+      typedef kernels::as_apply_function_ck<kernreq, func_type, func,
                                          arity_of<func_type>::value -
-                                             sizeof...(T)> ck_type;
+                                             sizeof...(T)> CKT;
 
-      // as_arrfunc<ck_type>(names...)
       ndt::type self_tp =
           ndt::make_arrfunc<typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);
 
-      return arrfunc(self_tp, &ck_type::instantiate, NULL, NULL);
+      return arrfunc(self_tp, &CKT::instantiate, NULL, NULL);
     }
 
     template <typename func_type, func_type func, typename... T>
