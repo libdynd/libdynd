@@ -149,15 +149,6 @@ namespace kernels {
     }
   };
 
-  template <typename func_type,
-            int N = args_of<typename funcproto_of<func_type>::type>::type::size>
-  using apply_args_for = apply_args<typename to<
-      typename args_of<typename funcproto_of<func_type>::type>::type, N>::type>;
-
-  template <typename func_type, int N>
-  using as_apply_kwd_sequence = typename from<
-      typename args_of<typename funcproto_of<func_type>::type>::type, N>::type;
-
   template <typename T, size_t I>
   struct apply_kwd {
     T m_val;
@@ -190,8 +181,8 @@ namespace kernels {
   };
 
   template <typename func_type, int N>
-  using apply_kwds_for = apply_kwds<typename from<
-      typename args_of<typename funcproto_of<func_type>::type>::type, N>::type>;
+  using as_apply_kwd_sequence = typename from<
+      typename args_of<typename funcproto_of<func_type>::type>::type, N>::type;
 
   template <kernel_request_t kernreq, typename func_type, func_type func,
             typename R, typename A, typename I, typename K, typename J>
@@ -218,7 +209,7 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char *const *src)                       \
+    __VA_ARGS__ void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))   \
     {                                                                          \
       *reinterpret_cast<R *>(dst) =                                            \
           func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);    \
@@ -262,7 +253,8 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *DYND_UNUSED(dst), char *const *src)          \
+    __VA_ARGS__ void single(char *DYND_UNUSED(dst),                            \
+                            char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
       func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);        \
     }                                                                          \
@@ -296,19 +288,26 @@ namespace kernels {
       as_apply_kwd_sequence<func_type, N>,
       make_index_sequence<arity_of<func_type>::value - N>>;
 
-  template <kernel_request_t kernreq, typename T, typename mem_func_type, int N>
+  template <kernel_request_t kernreq, typename T, typename mem_func_type,
+            typename R, typename A, typename I, typename K, typename J>
   struct apply_member_function_ck;
 
 #define APPLY_MEMBER_FUNCTION_CK(KERNREQ, ...)                                 \
-  template <typename T, typename mem_func_type, int N>                         \
-  struct apply_member_function_ck<KERNREQ, T *, mem_func_type, N>              \
-      : expr_ck<apply_member_function_ck<KERNREQ, T *, mem_func_type, N>,      \
-                KERNREQ, N>,                                                   \
-        apply_args_for<mem_func_type, N>,                                      \
-        apply_kwds_for<mem_func_type, N> {                                     \
+  template <typename T, typename mem_func_type, typename R, typename... A,     \
+            size_t... I, typename... K, size_t... J>                           \
+  struct apply_member_function_ck<KERNREQ, T *, mem_func_type, R,              \
+                                  type_sequence<A...>, index_sequence<I...>,   \
+                                  type_sequence<K...>, index_sequence<J...>>   \
+      : expr_ck<apply_member_function_ck<                                      \
+                    KERNREQ, T *, mem_func_type, R, type_sequence<A...>,       \
+                    index_sequence<I...>, type_sequence<K...>,                 \
+                    index_sequence<J...>>,                                     \
+                KERNREQ, sizeof...(A)>,                                        \
+        apply_args<type_sequence<A...>, index_sequence<I...>>,                 \
+        apply_kwds<type_sequence<K...>, index_sequence<J...>> {                \
     typedef apply_member_function_ck self_type;                                \
-    typedef apply_args_for<mem_func_type, N> args_type;                        \
-    typedef apply_kwds_for<mem_func_type, N> kwds_type;                        \
+    typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;   \
+    typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;   \
     typedef std::pair<T *, mem_func_type> data_type;                           \
                                                                                \
     T *obj;                                                                    \
@@ -320,9 +319,10 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char *const *src)                       \
+    __VA_ARGS__ void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))   \
     {                                                                          \
-      single<typename return_of<mem_func_type>::type>(this, this, dst, src);   \
+      *reinterpret_cast<R *>(dst) = (obj->*mem_func)(                          \
+          apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);         \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
@@ -350,51 +350,82 @@ namespace kernels {
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
                 const std::map<nd::string, ndt::type> &tp_vars);               \
+  };                                                                           \
                                                                                \
-  private:                                                                     \
-    template <typename R, typename... A, size_t... I, typename... K,           \
-              size_t... J>                                                     \
-    __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
-                                        void>::type                            \
-    single(apply_args<type_sequence<A...>, index_sequence<I...>> *             \
-               DYND_IGNORE_UNUSED(args),                                       \
-           apply_kwds<type_sequence<K...>, index_sequence<J...>> *             \
-               DYND_IGNORE_UNUSED(kwds),                                       \
-           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
+  template <typename T, typename mem_func_type, typename... A, size_t... I,    \
+            typename... K, size_t... J>                                        \
+  struct apply_member_function_ck<KERNREQ, T *, mem_func_type, void,           \
+                                  type_sequence<A...>, index_sequence<I...>,   \
+                                  type_sequence<K...>, index_sequence<J...>>   \
+      : expr_ck<apply_member_function_ck<                                      \
+                    KERNREQ, T *, mem_func_type, void, type_sequence<A...>,    \
+                    index_sequence<I...>, type_sequence<K...>,                 \
+                    index_sequence<J...>>,                                     \
+                KERNREQ, sizeof...(A)>,                                        \
+        apply_args<type_sequence<A...>, index_sequence<I...>>,                 \
+        apply_kwds<type_sequence<K...>, index_sequence<J...>> {                \
+    typedef apply_member_function_ck self_type;                                \
+    typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;   \
+    typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;   \
+    typedef std::pair<T *, mem_func_type> data_type;                           \
+                                                                               \
+    T *obj;                                                                    \
+    mem_func_type mem_func;                                                    \
+                                                                               \
+    __VA_ARGS__ apply_member_function_ck(T *obj, mem_func_type mem_func,       \
+                                         args_type args, kwds_type kwds)       \
+        : args_type(args), kwds_type(kwds), obj(obj), mem_func(mem_func)       \
     {                                                                          \
-      (obj->*mem_func)(static_cast<apply_arg<A, I> *>(args)->get(src[I])...,   \
-                       static_cast<apply_kwd<K, J> *>(kwds)->get()...);        \
     }                                                                          \
                                                                                \
-    template <typename R, typename... A, size_t... I, typename... K,           \
-              size_t... J>                                                     \
-    __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
-                                        void>::type                            \
-    single(apply_args<type_sequence<A...>, index_sequence<I...>> *             \
-               DYND_IGNORE_UNUSED(args),                                       \
-           apply_kwds<type_sequence<K...>, index_sequence<J...>> *             \
-               DYND_IGNORE_UNUSED(kwds),                                       \
-           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
+    __VA_ARGS__ void single(char *DYND_UNUSED(dst),                            \
+                            char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
-      *reinterpret_cast<R *>(dst) = (obj->*mem_func)(                          \
-          static_cast<apply_arg<A, I> *>(args)->get(src[I])...,                \
-          static_cast<apply_kwd<K, J> *>(kwds)->get()...);                     \
+      (obj->*mem_func)(apply_arg<A, I>::get(src[I])...,                        \
+                       apply_kwd<K, J>::get()...);                             \
     }                                                                          \
+                                                                               \
+    static intptr_t instantiate_without_cuda_launch(                           \
+        const arrfunc_type_data *self,                                         \
+        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
+        const ndt::type *src_tp, const char *const *src_arrmeta,               \
+        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
+        const nd::array &kwds,                                                 \
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+    {                                                                          \
+      self_type::create(                                                       \
+          ckb, kernreq, ckb_offset, self->get_data_as<data_type>()->first,     \
+          detail::make_value_wrapper(self->get_data_as<data_type>()->second),  \
+          args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
+      return ckb_offset;                                                       \
+    }                                                                          \
+                                                                               \
+    static intptr_t                                                            \
+    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,    \
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
+                const char *dst_arrmeta, intptr_t nsrc,                        \
+                const ndt::type *src_tp, const char *const *src_arrmeta,       \
+                kernel_request_t kernreq, const eval::eval_context *ectx,      \
+                const nd::array &kwds,                                         \
+                const std::map<nd::string, ndt::type> &tp_vars);               \
   }
 
   APPLY_MEMBER_FUNCTION_CK(kernel_request_host);
 
-  template <typename T, typename mem_func_type, int N>
-  intptr_t apply_member_function_ck<
-      kernel_request_host, T *, mem_func_type,
-      N>::instantiate(const arrfunc_type_data *self,
-                      const arrfunc_type *self_tp, void *ckb,
-                      intptr_t ckb_offset, const ndt::type &dst_tp,
-                      const char *dst_arrmeta, intptr_t nsrc,
-                      const ndt::type *src_tp, const char *const *src_arrmeta,
-                      kernel_request_t kernreq, const eval::eval_context *ectx,
-                      const nd::array &kwds,
-                      const std::map<nd::string, ndt::type> &tp_vars)
+  template <typename T, typename mem_func_type, typename R, typename... A,
+            size_t... I, typename... K, size_t... J>
+  intptr_t apply_member_function_ck<kernel_request_host, T *, mem_func_type, R,
+                                    type_sequence<A...>, index_sequence<I...>,
+                                    type_sequence<K...>, index_sequence<J...>>::
+      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const nd::array &kwds,
+                  const std::map<nd::string, ndt::type> &tp_vars)
   {
     return instantiate_without_cuda_launch(
         self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -405,19 +436,20 @@ namespace kernels {
 
   APPLY_MEMBER_FUNCTION_CK(kernel_request_cuda_device, __device__);
 
-  template <typename T, typename mem_func_type, int N>
+  template <typename T, typename mem_func_type, typename R, typename... A,
+            size_t... I, typename... K, size_t... J>
   intptr_t apply_member_function_ck<
-      kernel_request_cuda_device, T *, mem_func_type,
-      N>::instantiate(const arrfunc_type_data *self,
-                      const arrfunc_type *self_tp, void *ckb,
-                      intptr_t ckb_offset, const ndt::type &dst_tp,
-                      const char *dst_arrmeta, intptr_t nsrc,
-                      const ndt::type *src_tp, const char *const *src_arrmeta,
-                      kernel_request_t kernreq, const eval::eval_context *ectx,
-                      const nd::array &kwds,
-                      const std::map<nd::string, ndt::type> &tp_vars)
+      kernel_request_cuda_device, T *, mem_func_type, R, type_sequence<A...>,
+      index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const nd::array &kwds,
+                  const std::map<nd::string, ndt::type> &tp_vars)
   {
-    return cuda_launch_ck<N>::template instantiate<
+    return cuda_launch_ck<sizeof...(A)>::template instantiate<
         &instantiate_without_cuda_launch>(
         self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
         src_arrmeta, kernreq, ectx, kwds, tp_vars);
@@ -427,22 +459,32 @@ namespace kernels {
 
 #undef APPLY_MEMBER_FUNCTION_CK
 
-  template <kernel_request_t kernreq, typename func_type, typename A,
-            typename I>
+  template <kernel_request_t kernreq, typename T, typename mem_func_type, int N>
+  using as_apply_member_function_ck = apply_member_function_ck<
+      kernreq, T, mem_func_type, typename return_of<mem_func_type>::type,
+      as_apply_arg_sequence<mem_func_type, N>, make_index_sequence<N>,
+      as_apply_kwd_sequence<mem_func_type, N>,
+      make_index_sequence<arity_of<mem_func_type>::value - N>>;
+
+  template <kernel_request_t kernreq, typename func_type, typename R,
+            typename A, typename I, typename K, typename J>
   struct apply_callable_ck;
 
 #define APPLY_CALLABLE_CK(KERNREQ, ...)                                        \
-  template <typename func_type, typename... A, size_t... I>                    \
-  struct apply_callable_ck<KERNREQ, func_type, type_sequence<A...>,            \
-                           index_sequence<I...>>                               \
-      : expr_ck<apply_callable_ck<KERNREQ, func_type, type_sequence<A...>,     \
-                                  index_sequence<I...>>,                       \
+  template <typename func_type, typename R, typename... A, size_t... I,        \
+            typename... K, size_t... J>                                        \
+  struct apply_callable_ck<KERNREQ, func_type, R, type_sequence<A...>,         \
+                           index_sequence<I...>, type_sequence<K...>,          \
+                           index_sequence<J...>>                               \
+      : expr_ck<apply_callable_ck<KERNREQ, func_type, R, type_sequence<A...>,  \
+                                  index_sequence<I...>, type_sequence<K...>,   \
+                                  index_sequence<J...>>,                       \
                 KERNREQ, sizeof...(A)>,                                        \
         apply_args<type_sequence<A...>, index_sequence<I...>>,                 \
-        apply_kwds_for<func_type, sizeof...(A)> {                              \
+        apply_kwds<type_sequence<K...>, index_sequence<J...>> {                \
     typedef apply_callable_ck self_type;                                       \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;   \
-    typedef apply_kwds_for<func_type, sizeof...(A)> kwds_type;                 \
+    typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;   \
                                                                                \
     func_type func;                                                            \
                                                                                \
@@ -452,9 +494,10 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char *const *src)                       \
+    __VA_ARGS__ void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))   \
     {                                                                          \
-      single<typename return_of<func_type>::type>(this, dst, src);             \
+      *reinterpret_cast<R *>(dst) =                                            \
+          func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);    \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
@@ -482,37 +525,71 @@ namespace kernels {
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
                 const std::map<nd::string, ndt::type> &tp_vars);               \
+  };                                                                           \
                                                                                \
-  private:                                                                     \
-    template <typename R, typename... K, size_t... J>                          \
-    __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
-                                        void>::type                            \
-    single(apply_kwds<type_sequence<K...>, index_sequence<J...>> *             \
-               DYND_IGNORE_UNUSED(kwds),                                       \
-           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
+  template <typename func_type, typename... A, size_t... I, typename... K,     \
+            size_t... J>                                                       \
+  struct apply_callable_ck<KERNREQ, func_type, void, type_sequence<A...>,      \
+                           index_sequence<I...>, type_sequence<K...>,          \
+                           index_sequence<J...>>                               \
+      : expr_ck<apply_callable_ck<KERNREQ, func_type, void,                    \
+                                  type_sequence<A...>, index_sequence<I...>,   \
+                                  type_sequence<K...>, index_sequence<J...>>,  \
+                KERNREQ, sizeof...(A)>,                                        \
+        apply_args<type_sequence<A...>, index_sequence<I...>>,                 \
+        apply_kwds<type_sequence<K...>, index_sequence<J...>> {                \
+    typedef apply_callable_ck self_type;                                       \
+    typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;   \
+    typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;   \
+                                                                               \
+    func_type func;                                                            \
+                                                                               \
+    __VA_ARGS__ apply_callable_ck(func_type func, args_type args,              \
+                                  kwds_type kwds)                              \
+        : args_type(args), kwds_type(kwds), func(func)                         \
     {                                                                          \
-      func(apply_arg<A, I>::get(src[I])...,                                    \
-           static_cast<apply_kwd<K, J> *>(kwds)->get()...);                    \
     }                                                                          \
                                                                                \
-    template <typename R, typename... K, size_t... J>                          \
-    __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
-                                        void>::type                            \
-    single(apply_kwds<type_sequence<K...>, index_sequence<J...>> *             \
-               DYND_IGNORE_UNUSED(kwds),                                       \
-           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
+    __VA_ARGS__ void single(char *DYND_UNUSED(dst),                            \
+                            char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
-      *reinterpret_cast<R *>(dst) =                                            \
-          func(apply_arg<A, I>::get(src[I])...,                                \
-               static_cast<apply_kwd<K, J> *>(kwds)->get()...);                \
+      func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);        \
     }                                                                          \
+                                                                               \
+    static intptr_t instantiate_without_cuda_launch(                           \
+        const arrfunc_type_data *self,                                         \
+        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
+        const ndt::type *src_tp, const char *const *src_arrmeta,               \
+        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
+        const nd::array &kwds,                                                 \
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+    {                                                                          \
+      self_type::create(                                                       \
+          ckb, kernreq, ckb_offset,                                            \
+          detail::make_value_wrapper(*self->get_data_as<func_type>()),         \
+          args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
+      return ckb_offset;                                                       \
+    }                                                                          \
+                                                                               \
+    static intptr_t                                                            \
+    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,    \
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
+                const char *dst_arrmeta, intptr_t nsrc,                        \
+                const ndt::type *src_tp, const char *const *src_arrmeta,       \
+                kernel_request_t kernreq, const eval::eval_context *ectx,      \
+                const nd::array &kwds,                                         \
+                const std::map<nd::string, ndt::type> &tp_vars);               \
   }
 
   APPLY_CALLABLE_CK(kernel_request_host);
 
-  template <typename func_type, typename... A, size_t... I>
-  intptr_t apply_callable_ck<kernel_request_host, func_type,
-                             type_sequence<A...>, index_sequence<I...>>::
+  template <typename func_type, typename R, typename... A, size_t... I,
+            typename... K, size_t... J>
+  intptr_t apply_callable_ck<kernel_request_host, func_type, R,
+                             type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
       instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
@@ -530,9 +607,30 @@ namespace kernels {
 
   APPLY_CALLABLE_CK(kernel_request_cuda_device, __device__);
 
-  template <typename func_type, typename... A, size_t... I>
-  intptr_t apply_callable_ck<kernel_request_cuda_device, func_type,
-                             type_sequence<A...>, index_sequence<I...>>::
+  template <typename func_type, typename R, typename... A, size_t... I,
+            typename... K, size_t... J>
+  intptr_t apply_callable_ck<kernel_request_cuda_device, func_type, R,
+                             type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
+      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const nd::array &kwds,
+                  const std::map<nd::string, ndt::type> &tp_vars)
+  {
+    return cuda_launch_ck<sizeof...(A)>::template instantiate<
+        &instantiate_without_cuda_launch>(
+        self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  }
+
+  template <typename func_type, typename... A, size_t... I, typename... K,
+            size_t... J>
+  intptr_t apply_callable_ck<kernel_request_cuda_device, func_type, void,
+                             type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
       instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
@@ -552,17 +650,20 @@ namespace kernels {
 #undef APPLY_CALLABLE_CK
 
 #define APPLY_CALLABLE_CK(KERNREQ, ...)                                        \
-  template <typename func_type, typename... A, size_t... I>                    \
-  struct apply_callable_ck<KERNREQ, func_type *, type_sequence<A...>,          \
-                           index_sequence<I...>>                               \
-      : expr_ck<apply_callable_ck<KERNREQ, func_type *, type_sequence<A...>,   \
-                                  index_sequence<I...>>,                       \
+  template <typename func_type, typename R, typename... A, size_t... I,        \
+            typename... K, size_t... J>                                        \
+  struct apply_callable_ck<KERNREQ, func_type *, R, type_sequence<A...>,       \
+                           index_sequence<I...>, type_sequence<K...>,          \
+                           index_sequence<J...>>                               \
+      : expr_ck<apply_callable_ck<KERNREQ, func_type *, R,                     \
+                                  type_sequence<A...>, index_sequence<I...>,   \
+                                  type_sequence<K...>, index_sequence<J...>>,  \
                 KERNREQ, sizeof...(A)>,                                        \
         apply_args<type_sequence<A...>, index_sequence<I...>>,                 \
-        apply_kwds_for<func_type, sizeof...(A)> {                              \
+        apply_kwds<type_sequence<K...>, index_sequence<J...>> {                \
     typedef apply_callable_ck self_type;                                       \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;   \
-    typedef apply_kwds_for<func_type, sizeof...(A)> kwds_type;                 \
+    typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;   \
                                                                                \
     func_type *func;                                                           \
                                                                                \
@@ -572,9 +673,10 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char *const *src)                       \
+    __VA_ARGS__ void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))   \
     {                                                                          \
-      single<typename return_of<func_type>::type>(this, dst, src);             \
+      *reinterpret_cast<R *>(dst) =                                            \
+          (*func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...); \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
@@ -602,37 +704,89 @@ namespace kernels {
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
                 const std::map<nd::string, ndt::type> &tp_vars);               \
+  };                                                                           \
                                                                                \
-  private:                                                                     \
-    template <typename R, typename... K, size_t... J>                          \
-    __VA_ARGS__ typename std::enable_if<std::is_same<R, void>::value,          \
-                                        void>::type                            \
-    single(apply_kwds<type_sequence<K...>, index_sequence<J...>> *             \
-               DYND_IGNORE_UNUSED(kwds),                                       \
-           char *DYND_UNUSED(dst), char *const *DYND_IGNORE_UNUSED(src))       \
+  template <typename func_type, typename... A, size_t... I, typename... K,     \
+            size_t... J>                                                       \
+  struct apply_callable_ck<KERNREQ, func_type *, void, type_sequence<A...>,    \
+                           index_sequence<I...>, type_sequence<K...>,          \
+                           index_sequence<J...>>                               \
+      : expr_ck<apply_callable_ck<KERNREQ, func_type *, void,                  \
+                                  type_sequence<A...>, index_sequence<I...>,   \
+                                  type_sequence<K...>, index_sequence<J...>>,  \
+                KERNREQ, sizeof...(A)>,                                        \
+        apply_args<type_sequence<A...>, index_sequence<I...>>,                 \
+        apply_kwds<type_sequence<K...>, index_sequence<J...>> {                \
+    typedef apply_callable_ck self_type;                                       \
+    typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;   \
+    typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;   \
+                                                                               \
+    func_type *func;                                                           \
+                                                                               \
+    __VA_ARGS__ apply_callable_ck(func_type *func, args_type args,             \
+                                  kwds_type kwds)                              \
+        : args_type(args), kwds_type(kwds), func(func)                         \
     {                                                                          \
-      (*func)(apply_arg<A, I>::get(src[I])...,                                 \
-              static_cast<apply_kwd<K, J> *>(kwds)->get()...);                 \
     }                                                                          \
                                                                                \
-    template <typename R, typename... K, size_t... J>                          \
-    __VA_ARGS__ typename std::enable_if<!std::is_same<R, void>::value,         \
-                                        void>::type                            \
-    single(apply_kwds<type_sequence<K...>, index_sequence<J...>> *             \
-               DYND_IGNORE_UNUSED(kwds),                                       \
-           char *dst, char *const *DYND_IGNORE_UNUSED(src))                    \
+    __VA_ARGS__ void single(char *DYND_UNUSED(dst),                            \
+                            char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
-      *reinterpret_cast<R *>(dst) =                                            \
-          (*func)(apply_arg<A, I>::get(src[I])...,                             \
-                  static_cast<apply_kwd<K, J> *>(kwds)->get()...);             \
+      (*func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);     \
     }                                                                          \
+                                                                               \
+    static intptr_t instantiate_without_cuda_launch(                           \
+        const arrfunc_type_data *self,                                         \
+        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
+        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
+        const ndt::type *src_tp, const char *const *src_arrmeta,               \
+        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
+        const nd::array &kwds,                                                 \
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+    {                                                                          \
+                                                                               \
+      self_type::create(                                                       \
+          ckb, kernreq, ckb_offset, *self->get_data_as<func_type *>(),         \
+          args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
+      return ckb_offset;                                                       \
+    }                                                                          \
+                                                                               \
+    static intptr_t                                                            \
+    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,    \
+                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
+                const char *dst_arrmeta, intptr_t nsrc,                        \
+                const ndt::type *src_tp, const char *const *src_arrmeta,       \
+                kernel_request_t kernreq, const eval::eval_context *ectx,      \
+                const nd::array &kwds,                                         \
+                const std::map<nd::string, ndt::type> &tp_vars);               \
   }
 
   APPLY_CALLABLE_CK(kernel_request_host);
 
-  template <typename func_type, typename... A, size_t... I>
-  intptr_t apply_callable_ck<kernel_request_host, func_type *,
-                             type_sequence<A...>, index_sequence<I...>>::
+  template <typename func_type, typename R, typename... A, size_t... I,
+            typename... K, size_t... J>
+  intptr_t apply_callable_ck<kernel_request_host, func_type *, R,
+                             type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
+      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const nd::array &kwds,
+                  const std::map<nd::string, ndt::type> &tp_vars)
+  {
+    return instantiate_without_cuda_launch(
+        self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  }
+
+  template <typename func_type, typename... A, size_t... I, typename... K,
+            size_t... J>
+  intptr_t apply_callable_ck<kernel_request_host, func_type *, void,
+                             type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
       instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
@@ -650,18 +804,11 @@ namespace kernels {
 
   template <kernel_request_t kernreq, typename func_type, int N>
   using as_apply_callable_ck =
-      apply_callable_ck<kernreq, func_type, as_apply_arg_sequence<func_type, N>,
-                        make_index_sequence<N>>;
-
-  /*
-    template <kernel_request_t kernreq, typename func_type, func_type func, int
-    N>
-    using as_apply_function_ck = apply_function_ck<
-        kernreq, func_type, func, typename return_of<func_type>::type,
-        as_apply_arg_sequence<func_type, N>, make_index_sequence<N>,
-        as_apply_kwd_sequence<func_type, N>,
-        make_index_sequence<arity_of<func_type>::value - N>>;
-  */
+      apply_callable_ck<kernreq, func_type, typename return_of<func_type>::type,
+                        as_apply_arg_sequence<func_type, N>,
+                        make_index_sequence<N>,
+                        as_apply_kwd_sequence<func_type, N>,
+                        make_index_sequence<arity_of<func_type>::value - N>>;
 
   template <kernel_request_t kernreq, typename func_type, typename R,
             typename A, typename I, typename K, typename J>
@@ -692,7 +839,7 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *dst, char *const *src)                       \
+    __VA_ARGS__ void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))   \
     {                                                                          \
       *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])...);     \
     }                                                                          \
@@ -747,7 +894,8 @@ namespace kernels {
     {                                                                          \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ void single(char *DYND_UNUSED(dst), char *const *src)          \
+    __VA_ARGS__ void single(char *DYND_UNUSED(dst),                            \
+                            char *const *DYND_IGNORE_UNUSED(src))              \
     {                                                                          \
       func(apply_arg<A, I>::get(src[I])...);                                   \
     }                                                                          \
@@ -800,7 +948,7 @@ namespace kernels {
 
 #ifdef __CUDACC__
 
-  CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_cuda_device, __device__)
+  CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_cuda_device, __device__);
 
   template <typename func_type, typename R, typename... A, size_t... I,
             typename... K, size_t... J>
