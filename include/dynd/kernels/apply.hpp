@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/strided_vals.hpp>
-#include <dynd/kernels/cuda_kernels.hpp>
+#include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 
 namespace dynd {

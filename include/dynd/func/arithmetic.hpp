@@ -8,48 +8,6 @@
 
 namespace dynd {
 
-/*
-      DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,       \
-                                         char *const *src,                     \
-                                         const intptr_t *src_stride,           \
-                                         size_t count)                         \
-      {                                                                        \
-        intptr_t thread_id = get_thread_id<0>();                               \
-        intptr_t thread_count = get_thread_count<0>();                         \
-                                                                               \
-        char *src0 = src[0], *src1 = src[1];                                   \
-        intptr_t src0_stride = src_stride[0], src1_stride = src_stride[1];     \
-        src0 += thread_id * src0_stride;                                       \
-        src1 += thread_id * src1_stride;                                       \
-        dst += thread_id * dst_stride;                                         \
-        for (size_t i = thread_id; i < count; i += thread_count) {             \
-          *reinterpret_cast<R *>(dst) = *reinterpret_cast<A0 *>(src0) SYMBOL * \
-                                        reinterpret_cast<A1 *>(src1);          \
-          dst += thread_count * dst_stride;                                    \
-          src0 += thread_count * src0_stride;                                  \
-          src1 += thread_count * src1_stride;                                  \
-        }                                                                      \
-      }                                                                        \
-*/
-
-/*
-      DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,       \
-                                         char *const *src,                     \
-                                         const intptr_t *src_stride,           \
-                                         size_t count)                         \
-      {                                                                        \
-        char *src0 = src[0], *src1 = src[1];                                   \
-        intptr_t src0_stride = src_stride[0], src1_stride = src_stride[1];     \
-        for (size_t i = 0; i != count; ++i) {                                  \
-          *reinterpret_cast<R *>(dst) = *reinterpret_cast<A0 *>(src0) SYMBOL * \
-                                        reinterpret_cast<A1 *>(src1);          \
-          dst += dst_stride;                                                   \
-          src0 += src0_stride;                                                 \
-          src1 += src1_stride;                                                 \
-        }                                                                      \
-      }                                                                        \
-*/
-
 #define ARITHMETIC_OPERATOR(NAME, SYMBOL)                                      \
   namespace kernels {                                                          \
     template <typename A0, typename A1>                                        \
@@ -68,8 +26,8 @@ namespace dynd {
                                          const A1 *__restrict src1,            \
                                          size_t count)                         \
       {                                                                        \
-        for (size_t i = DYND_THREAD_ID(0); i < count;                      \
-             i += DYND_THREAD_COUNT(0)) {                                  \
+        for (size_t i = DYND_THREAD_ID(0); i < count;                          \
+             i += DYND_THREAD_COUNT(0)) {                                      \
           dst[i] = src0[i] SYMBOL src1[i];                                     \
         }                                                                      \
       }                                                                        \

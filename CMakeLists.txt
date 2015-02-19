@@ -105,7 +105,7 @@ else()
         endif()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fmax-errors=20")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20 -fvectorize")
         # This is a workaround for a CUDA bug with Clang, where it is unable to handle "-std=c++11"
         if (DYND_CUDA)
             set(CUDA_PROPAGATE_HOST_FLAGS OFF)
@@ -383,7 +383,7 @@ set(libdynd_SRC
     src/dynd/kernels/single_comparer_builtin.hpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     src/dynd/kernels/tuple_comparison_kernels.cpp
-    include/dynd/kernels/apply_kernels.hpp
+    include/dynd/kernels/apply.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp
     include/dynd/kernels/buffered_kernels.hpp
@@ -393,7 +393,7 @@ set(libdynd_SRC
     include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
-    include/dynd/kernels/cuda_kernels.hpp
+    include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/date_adapter_kernels.hpp
     include/dynd/kernels/datetime_assignment_kernels.hpp
@@ -562,7 +562,7 @@ if (DYND_CUDA)
     set(CUDA_SEPARABLE_COMPILATION ON)
 
     if(NOT WIN32)
-        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC;-Xcompiler;-O3)
+        set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-std=c++11;-Xcompiler;-fPIC;-Xcompiler;-O3;-Xcompiler;-fvectorize)
     endif()
 
     # Make some warnings into errors and inhibit other warnings

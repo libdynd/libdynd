@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <cmath>
 #include <cstdlib>
+#include <stdlib.h>
 #include <initializer_list>
 #include <limits>
 #include <stdint.h>
@@ -85,7 +86,6 @@
 // No DYND_CONSTEXPR yet, define it as nothing
 #define DYND_CONSTEXPR
 
-#include <stdlib.h>
 // Some C library calls will abort if given bad format strings, etc
 // This RAII class temporarily disables that
 class disable_invalid_parameter_handler {
@@ -112,6 +112,12 @@ public:
 };
 
 #endif // end of compiler vendor checks
+
+#ifdef __CUDACC__
+#define DYND_CUDA_HOST_DEVICE __host__ __device__
+#else
+#define DYND_CUDA_HOST_DEVICE
+#endif
 
 // If being run from the CLING C++ interpreter
 #ifdef DYND_CLING
@@ -419,17 +425,6 @@ void libdynd_cleanup();
 bool built_with_cuda();
 } // namespace dynd
 
-#ifdef __CUDACC__ // We are compiling with NVIDIA's nvcc
-
-// A function that is compiled for both the host and the device
-#define DYND_CUDA_HOST_DEVICE __host__ __device__
-
-#else // We are not compiling with NVIDIA's nvcc
-
-#define DYND_CUDA_HOST_DEVICE
-
-#endif // __CUDACC_
-
 namespace dynd {
 namespace detail {
 
@@ -477,7 +472,7 @@ namespace detail {
     return value_wrapper<T>(value);
   }
 
-#ifdef __CUDA_ARCH__
+#ifdef __CUDACC__
 
   template <intptr_t I>
   __device__ inline typename std::enable_if<I == 0, intptr_t>::type
@@ -533,6 +528,12 @@ namespace detail {
   cuda_device_thread_count()
   {
     return 1;
+  }
+
+  __device__ inline intptr_t cuda_device_thread_count()
+  {
+    return cuda_device_thread_count<0>() * cuda_device_thread_count<1>() *
+           cuda_device_thread_count<2>();
   }
 
 #endif

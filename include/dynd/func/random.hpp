@@ -9,7 +9,7 @@
 #endif
 
 #include <dynd/kernels/expr_kernels.hpp>
-#include <dynd/kernels/cuda_kernels.hpp>
+#include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 namespace dynd {

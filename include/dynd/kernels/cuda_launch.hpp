@@ -5,28 +5,14 @@
 
 #pragma once
 
-#include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/arrfunc_type.hpp>
 #include <dynd/kernels/expr_kernels.hpp>
 
 #ifdef __CUDACC__
 
 namespace dynd {
-
-inline void get_cuda_launch_config(dim3 &grid, dim3 &block,
-                            intptr_t dst_ndim)
-{
-  if (dst_ndim == 2) {
-    std::cout << "cuda 2D" << std::endl;
-    grid = dim3(32, 32, 1);
-    block = dim3(32, 32, 1);
-  } else {
-    grid = 128;
-    block = 128;
-  }
-}
-
 namespace kernels {
+
   template <int N>
   __global__ void cuda_launch_single(char *dst, detail::array_wrapper<char *, N> src,
                                      ckernel_prefix *self)
@@ -45,32 +31,32 @@ namespace kernels {
     func(dst, dst_stride, src, src_stride, count, self);
   }
 
-  template <int Nsrc>
+  template <int N>
   struct cuda_launch_ck
-      : expr_ck<cuda_launch_ck<Nsrc>, kernel_request_host, Nsrc> {
-    typedef cuda_launch_ck<Nsrc> self_type;
+      : expr_ck<cuda_launch_ck<N>, kernel_request_host, N> {
+    typedef cuda_launch_ck self_type;
 
     ckernel_builder<kernel_request_cuda_device> ckb;
-    dim3 blocks;
-    dim3 threads;
+    dim3 grid;
+    dim3 block;
 
-    cuda_launch_ck(dim3 blocks, dim3 threads) : blocks(blocks), threads(threads)
+    cuda_launch_ck(dim3 grid, dim3 block) : grid(grid), block(block)
     {
     }
 
     void single(char *dst, char *const *src)
     {
-      kernels::cuda_launch_single << <blocks, threads>>>
-          (dst, detail::make_array_wrapper<Nsrc>(src), ckb.get());
+      cuda_launch_single<<<grid, block>>>
+          (dst, detail::make_array_wrapper<N>(src), ckb.get());
       throw_if_not_cuda_success();
     }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count)
     {
-      cuda_launch_strided << <blocks, threads>>>
-          (dst, dst_stride, detail::make_array_wrapper<Nsrc>(src),
-           detail::make_array_wrapper<Nsrc>(src_stride), count, ckb.get());
+      cuda_launch_strided<<<grid, block>>>
+          (dst, dst_stride, detail::make_array_wrapper<N>(src),
+           detail::make_array_wrapper<N>(src_stride), count, ckb.get());
       throw_if_not_cuda_success();
     }
 
@@ -101,7 +87,7 @@ namespace kernels {
                 const std::map<nd::string, ndt::type> &tp_vars)
     {
       bool cuda_device_readable = dst_tp.is_cuda_device_readable();
-      for (intptr_t i = 0; i < Nsrc; ++i) {
+      for (intptr_t i = 0; i < N; ++i) {
         cuda_device_readable &= src_tp[i].is_cuda_device_readable();
       }
 
@@ -123,7 +109,21 @@ namespace kernels {
       return res_ckb_offset;
     }
   };
+
+} // namespace dynd::kernels
+
+inline void get_cuda_launch_config(dim3 &grid, dim3 &block,
+                            intptr_t dst_ndim)
+{
+  if (dst_ndim == 2) {
+    grid = dim3(32, 32, 1);
+    block = dim3(32, 32, 1);
+  } else {
+    grid = 128;
+    block = 128;
+  }
 }
-}
+
+} // namespace dynd
 
 #endif // __CUDACC__

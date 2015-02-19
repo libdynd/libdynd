@@ -504,6 +504,38 @@ intptr_t nd::functional::elwise_instantiate_with_child(
 }
 */
 
+template intptr_t nd::functional::elwise_instantiate_with_child<0>(
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+    const dynd::nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+template intptr_t nd::functional::elwise_instantiate_with_child<1>(
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+    const dynd::nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+template intptr_t nd::functional::elwise_instantiate_with_child<2>(
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+    const dynd::nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+template intptr_t nd::functional::elwise_instantiate_with_child<-1>(
+    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+    const dynd::nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
 template <type_id_t dst_type_id, type_id_t src_type_id, int I>
 intptr_t nd::functional::elwise_instantiate_with_child(
     const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
@@ -564,14 +596,6 @@ intptr_t nd::functional::elwise_instantiate(
       child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
       src_arrmeta, kernreq, ectx, kwds, tp_vars);
 }
-
-template intptr_t nd::functional::elwise_instantiate_with_child<0>(
-    const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-    const dynd::nd::array &kwds,
-    const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
 int nd::functional::elwise_resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
