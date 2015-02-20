@@ -389,6 +389,8 @@ struct index_proxy<index_sequence<I0, I...>> {
 #define DYND_IGNORE_UNUSED(NAME) NAME
 #endif
 
+#define DYND_INC_IF_NOT_NULL(POINTER, OFFSET) ((POINTER == NULL) ? NULL : (POINTER + OFFSET))
+
 namespace dynd {
 // These are defined in git_version.cpp, generated from
 // git_version.cpp.in by the CMake build configuration.
