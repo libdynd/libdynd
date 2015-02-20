@@ -528,6 +528,24 @@ namespace nd {
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
+    template <typename T, typename mem_func_type, typename... A, size_t... I,
+              typename... K, size_t... J>
+    intptr_t apply_member_function_ck<
+        kernel_request_host, T *, mem_func_type, void, type_sequence<A...>,
+        index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+        instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                    const char *dst_arrmeta, intptr_t nsrc,
+                    const ndt::type *src_tp, const char *const *src_arrmeta,
+                    kernel_request_t kernreq, const eval::eval_context *ectx,
+                    const nd::array &kwds,
+                    const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      return instantiate_without_cuda_launch(
+          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          src_arrmeta, kernreq, ectx, kwds, tp_vars);
+    }
+
 #ifdef __CUDACC__
 
     APPLY_MEMBER_FUNCTION_CK(kernel_request_cuda_device, __device__);
@@ -537,6 +555,26 @@ namespace nd {
     intptr_t apply_member_function_ck<
         kernel_request_cuda_device, T *, mem_func_type, R, type_sequence<A...>,
         index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+        instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                    const char *dst_arrmeta, intptr_t nsrc,
+                    const ndt::type *src_tp, const char *const *src_arrmeta,
+                    kernel_request_t kernreq, const eval::eval_context *ectx,
+                    const nd::array &kwds,
+                    const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      return cuda_launch_ck<sizeof...(A)>::template instantiate<
+          &instantiate_without_cuda_launch>(
+          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          src_arrmeta, kernreq, ectx, kwds, tp_vars);
+    }
+
+    template <typename T, typename mem_func_type, typename... A, size_t... I,
+              typename... K, size_t... J>
+    intptr_t
+    apply_member_function_ck<kernel_request_cuda_device, T *, mem_func_type,
+                             void, type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
         instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,

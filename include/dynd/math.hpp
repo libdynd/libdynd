@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <dynd/config.hpp>
+
 namespace dynd {
 
 template <typename T>

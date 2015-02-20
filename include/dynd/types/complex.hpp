@@ -467,7 +467,7 @@ DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
   if (isinf(b)) {
     return complex<T>(std::numeric_limits<T>::infinity(), b);
   }
-  if (DYND_ISNAN(a)) {
+  if (isnan(a)) {
     t = (b - b) / (b - b);        // raise invalid if b is not a NaN
     return complex<T>(a, t); // return NaN + NaN i
   }
