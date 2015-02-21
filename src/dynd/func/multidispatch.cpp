@@ -542,7 +542,7 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
   std::shared_ptr<multidispatch_map_type> map(new multidispatch_map_type);
   for (const arrfunc &child : children) {
     std::map<string, ndt::type> tp_vars;
-    if (!child.get_array_type().matches(pattern_tp, tp_vars)) {
+    if (!pattern_tp.matches(child.get_array_type(), tp_vars)) {
       throw std::invalid_argument("could not match arrfuncs");
     }
 

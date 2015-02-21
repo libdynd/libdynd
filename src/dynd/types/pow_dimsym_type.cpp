@@ -194,7 +194,7 @@ bool pow_dimsym_type::matches(const ndt::type &self_tp, const char *self_arrmeta
         // The exponent is always the dim_size inside a fixed_dim_type
         return false;
       }
-      return other_tp.matches(self_arrmeta, get_element_type(), NULL, tp_vars);
+      return m_element_tp.matches(self_arrmeta, other_tp, NULL, tp_vars);
     } else {
       return false;
     }
@@ -224,8 +224,8 @@ bool pow_dimsym_type::matches(const ndt::type &self_tp, const char *self_arrmeta
   }
   // If the exponent is zero, the base doesn't matter, just match the rest
   if (exponent == 0) {
-    return other_tp.matches(self_arrmeta,
-        get_element_type(), NULL, tp_vars);
+    return m_element_tp.matches(self_arrmeta,
+        other_tp, NULL, tp_vars);
   } else if (exponent < 0) {
     return false;
   }
@@ -292,8 +292,8 @@ bool pow_dimsym_type::matches(const ndt::type &self_tp, const char *self_arrmeta
   default:
     return false;
   }
-  return concrete_subtype.matches(self_arrmeta,
-      get_element_type(), NULL, tp_vars);
+  return m_element_tp.matches(self_arrmeta,
+      concrete_subtype, NULL, tp_vars);
 }
 
 /*

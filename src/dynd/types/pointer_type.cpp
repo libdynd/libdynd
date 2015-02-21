@@ -396,15 +396,10 @@ nd::array pointer_type::get_option_nafunc() const
       get_value_type().get_type_id());
 }
 
-bool pointer_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+bool pointer_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
                            const ndt::type &other_tp, const char *other_arrmeta,
                            std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.get_kind() == kind_kind || other_tp.get_kind() == pattern_kind) {
-    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
-                                        self_arrmeta, tp_vars);
-  }
-
   if (other_tp.get_type_id() != pointer_type_id) {
     return false;
   }

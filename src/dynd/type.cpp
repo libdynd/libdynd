@@ -105,12 +105,7 @@ bool ndt::type::matches(const char *arrmeta, const ndt::type &other_tp,
   }
 
   if (is_builtin()) {
-    if (other_tp.is_builtin()) {
-      return false;
-    }
-
-    return other_tp.extended()->matches(other_tp, other_arrmeta, *this, arrmeta,
-                                        tp_vars);
+    return false;
   }
 
   return extended()->matches(*this, arrmeta, other_tp, other_arrmeta, tp_vars);

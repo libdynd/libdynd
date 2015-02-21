@@ -14,16 +14,11 @@ using namespace dynd;
 base_dim_type::~base_dim_type() {
 }
 
-bool base_dim_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
+bool base_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
                             const ndt::type &other_tp,
                             const char *other_arrmeta,
                             std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.get_kind() == kind_kind || other_tp.get_kind() == pattern_kind) {
-    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
-                                        self_arrmeta, tp_vars);
-  }
-
   if (get_type_id() != other_tp.get_type_id()) {
     return false;
   }
