@@ -395,8 +395,8 @@ public:
       kernel_request_t kernreq, const eval::eval_context *ectx,
       const nd::array &kwds) const;
 
-  bool matches(const ndt::type &self_tp, const char *self_arrmeta,
-               const ndt::type &other_tp, const char *other_arrmeta,
+  bool matches(const char *arrmeta, const ndt::type &other_tp,
+               const char *other_arrmeta,
                std::map<nd::string, ndt::type> &tp_vars) const;
 
   void get_dynamic_type_properties(

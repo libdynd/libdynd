@@ -121,16 +121,12 @@ void ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of ellipsis type");
 }
 
-bool ellipsis_dim_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
-                                const ndt::type &other_tp, const char *other_arrmeta,
+bool ellipsis_dim_type::matches(const char *arrmeta, const ndt::type &other_tp,
+                                const char *other_arrmeta,
                                 std::map<nd::string, ndt::type> &tp_vars) const
 {
   if (other_tp.get_type_id() == any_sym_type_id) {
     return true;
-  }
-
-  if (other_tp.get_type_id() != ellipsis_dim_type_id && other_tp.get_kind() == pattern_kind) {
-    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp, self_arrmeta, tp_vars);
   }
 
   if (other_tp.get_ndim() == 0) {
@@ -154,10 +150,10 @@ bool ellipsis_dim_type::matches(const ndt::type &self_tp, const char *self_arrme
         }
       }
     }
-    return other_tp.matches(self_arrmeta, get_element_type(), other_arrmeta, tp_vars);
+    return m_element_tp.matches(arrmeta, other_tp, other_arrmeta, tp_vars);
   } else if (other_tp.get_type_id() == ellipsis_dim_type_id) {
     return m_element_tp.matches(
-        self_arrmeta, other_tp.extended<ellipsis_dim_type>()->m_element_tp, other_arrmeta, tp_vars);
+        arrmeta, other_tp.extended<ellipsis_dim_type>()->m_element_tp, other_arrmeta, tp_vars);
   } else if (other_tp.get_ndim() >= get_ndim() - 1) {
     intptr_t matched_ndim = other_tp.get_ndim() - get_ndim() + 1;
     const nd::string &tv_name = get_name();
@@ -186,8 +182,8 @@ bool ellipsis_dim_type::matches(const ndt::type &self_tp, const char *self_arrme
         }
       }
     }
-    return other_tp.get_type_at_dimension(NULL, matched_ndim)
-        .matches(self_arrmeta, get_element_type(), NULL, tp_vars);
+    return m_element_tp
+        .matches(arrmeta, other_tp.get_type_at_dimension(NULL, matched_ndim), NULL, tp_vars);
   }
 
   return false;

@@ -179,9 +179,7 @@ void any_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
 }
 
 bool any_sym_type::matches(
-    const ndt::type &DYND_UNUSED(self_tp),
-    const char *DYND_UNUSED(self_arrmeta),
-    const ndt::type &DYND_UNUSED(other_tp),
+    const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(other_tp),
     const char *DYND_UNUSED(other_arrmeta),
     std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
 {

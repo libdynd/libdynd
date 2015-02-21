@@ -289,7 +289,9 @@ public:
 
     /**
      * Matches the provided type against another type, both of which may
-     * be symbolic types. Returns true if it matches, false otherwise.
+     * be symbolic types. It should be called with a symbolic type as 'this',
+     * although the other_tp may have symbolic types if each type matches exactly.
+     * Returns true if it matches, false otherwise.
      *
      * This version may be called multiple times in a row, building up the
      * typevars dictionary which is used to enforce consistent usage of

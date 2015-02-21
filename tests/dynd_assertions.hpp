@@ -150,7 +150,7 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
                                                 const dynd::ndt::type &pattern,
                                                 const dynd::ndt::type &actual)
 {
-  if (actual.matches(pattern)) {
+  if (pattern.matches(actual)) {
     return ::testing::AssertionSuccess();
   } else {
     return ::testing::AssertionFailure()

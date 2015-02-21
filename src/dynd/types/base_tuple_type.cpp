@@ -112,8 +112,7 @@ size_t base_tuple_type::get_default_data_size() const
     s = inc_to_alignment(s, ft.get_data_alignment());
     if (!ft.is_builtin()) {
       s += ft.extended()->get_default_data_size();
-    }
-    else {
+    } else {
       s += ft.get_data_size();
     }
   }
@@ -136,8 +135,7 @@ void base_tuple_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
         ft.extended()->get_shape(
             ndim, i + 1, tmpshape.get(),
             arrmeta ? (arrmeta + arrmeta_offsets[fi]) : NULL, NULL);
-      }
-      else {
+      } else {
         stringstream ss;
         ss << "requested too many dimensions from type " << ft;
         throw runtime_error(ss.str());
@@ -146,8 +144,7 @@ void base_tuple_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
         // Copy the shape from the first field
         memcpy(out_shape + i + 1, tmpshape.get() + i + 1,
                (ndim - i - 1) * sizeof(intptr_t));
-      }
-      else {
+      } else {
         // Merge the shape from the rest
         for (intptr_t k = i + 1; k < ndim; ++k) {
           // If we see different sizes, make the output -1
@@ -168,24 +165,20 @@ ndt::type base_tuple_type::apply_linear_index(intptr_t nindices,
 {
   if (nindices == 0) {
     return ndt::type(this, true);
-  }
-  else {
+  } else {
     bool remove_dimension;
     intptr_t start_index, index_stride, dimension_size;
     apply_single_linear_index(*indices, get_field_count(), current_i, &root_tp,
                               remove_dimension, start_index, index_stride,
                               dimension_size);
     if (remove_dimension) {
-      return get_field_type(start_index)
-          .apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_tp,
-                              leading_dimension);
-    }
-    else if (nindices == 1 && start_index == 0 && index_stride == 1 &&
-             dimension_size == get_field_count()) {
+      return get_field_type(start_index).apply_linear_index(
+          nindices - 1, indices + 1, current_i + 1, root_tp, leading_dimension);
+    } else if (nindices == 1 && start_index == 0 && index_stride == 1 &&
+               dimension_size == get_field_count()) {
       // This is a do-nothing index, keep the same type
       return ndt::type(this, true);
-    }
-    else {
+    } else {
       // Take the subset of the fields in-place
       nd::array tmp_field_types(nd::empty(dimension_size, ndt::make_type()));
       ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
@@ -214,8 +207,7 @@ intptr_t base_tuple_type::apply_linear_index(
     // If there are no more indices, copy the arrmeta verbatim
     arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
     return 0;
-  }
-  else {
+  } else {
     const uintptr_t *offsets = get_data_offsets(arrmeta);
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     bool remove_dimension;
@@ -236,8 +228,7 @@ intptr_t base_tuple_type::apply_linear_index(
               nindices - 1, indices + 1, arrmeta + arrmeta_offsets[start_index],
               result_tp, out_arrmeta, embedded_reference, current_i + 1,
               root_tp, true, inout_data, inout_dataref);
-        }
-        else {
+        } else {
           offset += ft.extended()->apply_linear_index(
               nindices - 1, indices + 1, arrmeta + arrmeta_offsets[start_index],
               result_tp, out_arrmeta, embedded_reference, current_i + 1,
@@ -245,8 +236,7 @@ intptr_t base_tuple_type::apply_linear_index(
         }
       }
       return offset;
-    }
-    else {
+    } else {
       intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_arrmeta);
       const tuple_type *result_e_dt = result_tp.extended<tuple_type>();
       for (intptr_t i = 0; i < dimension_size; ++i) {
@@ -405,32 +395,24 @@ void base_tuple_type::foreach_leading(const char *arrmeta, char *data,
   }
 }
 
-bool base_tuple_type::matches(const ndt::type &self_tp, const char *self_arrmeta,
-                              const ndt::type &other_tp, const char *other_arrmeta,
+bool base_tuple_type::matches(const char *arrmeta, const ndt::type &other_tp,
+                              const char *other_arrmeta,
                               std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.get_kind() == kind_kind || other_tp.get_kind() == pattern_kind) {
-    return other_tp.extended()->matches(other_tp, other_arrmeta, self_tp,
-                                        self_arrmeta, tp_vars);
-  }
-
   intptr_t other_field_count =
       other_tp.extended<base_tuple_type>()->get_field_count();
   bool other_variadic = other_tp.extended<base_tuple_type>()->is_variadic();
 
-  if ((m_field_count == other_field_count && !m_variadic) ||
-      (m_field_count >= other_field_count && other_variadic)) {
-    auto arrmeta_offsets =
-        get_arrmeta_offsets_raw();
+  if ((m_field_count == other_field_count && !other_variadic) ||
+      ((other_field_count >= m_field_count) && m_variadic)) {
+    auto arrmeta_offsets = get_arrmeta_offsets_raw();
     // Match against the types
-    const ndt::type *fields =
-        get_field_types_raw();
+    const ndt::type *fields = get_field_types_raw();
     const ndt::type *other_fields =
         other_tp.extended<base_tuple_type>()->get_field_types_raw();
-    for (intptr_t i = 0; i != other_field_count; ++i) {
-      if (!fields[i].matches(
-              self_arrmeta + (self_arrmeta != NULL ? arrmeta_offsets[i] : 0),
-              other_fields[i], other_arrmeta, tp_vars)) {
+    for (intptr_t i = 0; i != m_field_count; ++i) {
+      if (!fields[i].matches(DYND_INC_IF_NOT_NULL(arrmeta, arrmeta_offsets[i]),
+                             other_fields[i], other_arrmeta, tp_vars)) {
         return false;
       }
     }
