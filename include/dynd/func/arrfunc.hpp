@@ -75,14 +75,16 @@ namespace nd {
   namespace detail {
     template <typename T>
     bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
-                        const std::string &DYND_UNUSED(name), const T &DYND_UNUSED(value),
+                        const std::string &DYND_UNUSED(name),
+                        const T &DYND_UNUSED(value),
                         std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return false;
     }
 
-    inline bool is_special_kwd(const arrfunc_type *self_tp, array &DYND_UNUSED(dst),
-                               const std::string &name, const ndt::type &value,
+    inline bool is_special_kwd(const arrfunc_type *self_tp,
+                               array &DYND_UNUSED(dst), const std::string &name,
+                               const ndt::type &value,
                                std::map<nd::string, ndt::type> &tp_vars)
     {
       if (name == "dst_tp") {
@@ -102,7 +104,8 @@ namespace nd {
 
     inline bool is_special_kwd(const arrfunc_type *self_tp, array &dst,
                                const std::string &name, const nd::array &value,
-                               std::map<nd::string, ndt::type> &tp_vars) {
+                               std::map<nd::string, ndt::type> &tp_vars)
+    {
       if (name == "dst_tp") {
         const ndt::type &expected_tp = self_tp->get_return_type();
         if (expected_tp.matches(value.as<ndt::type>(), tp_vars)) {
@@ -122,7 +125,8 @@ namespace nd {
 
         std::stringstream ss;
         ss << "keyword \"dst\" does not match, ";
-        ss << "arrfunc expected dst_tp " << expected_tp << " but passed " << value;
+        ss << "arrfunc expected dst_tp " << expected_tp << " but passed "
+           << value;
         throw std::invalid_argument(ss.str());
       }
 
@@ -130,9 +134,9 @@ namespace nd {
     }
 
     template <typename T>
-    void check_name(const arrfunc_type *af_tp, array &dst, const std::string &name,
-                    const T &value, bool &has_dst_tp, ndt::type *kwd_tp,
-                    std::vector<intptr_t> &available,
+    void check_name(const arrfunc_type *af_tp, array &dst,
+                    const std::string &name, const T &value, bool &has_dst_tp,
+                    ndt::type *kwd_tp, std::vector<intptr_t> &available,
                     std::map<nd::string, ndt::type> &tp_vars)
     {
       intptr_t j = af_tp->get_kwd_index(name);
@@ -158,9 +162,9 @@ namespace nd {
     }
 
     void fill_missing_values(const ndt::type *tp, char *arrmeta,
-                                    const uintptr_t *arrmeta_offsets,
-                                    char *data, const uintptr_t *data_offsets,
-                                    const std::vector<intptr_t> &missing);
+                             const uintptr_t *arrmeta_offsets, char *data,
+                             const uintptr_t *data_offsets,
+                             const std::vector<intptr_t> &missing);
 
     void check_narg(const arrfunc_type *af_tp, intptr_t npos);
 
@@ -178,7 +182,8 @@ namespace nd {
                             const std::vector<intptr_t> &missing,
                             std::map<nd::string, ndt::type> &tp_vars);
 
-    inline char *data_of(array &value) {
+    inline char *data_of(array &value)
+    {
       return const_cast<char *>(value.get_readonly_originptr());
     }
 
@@ -192,7 +197,8 @@ namespace nd {
       {
         validate_types.self = this;
 
-        // Todo: This should be removed, but it seems to trigger an error on travis if it is
+        // Todo: This should be removed, but it seems to trigger an error on
+        // travis if it is
         typedef make_index_sequence<sizeof...(A)> I;
         old_index_proxy<I>::template get_arrmeta(m_arrmeta, m_values);
       }
@@ -236,11 +242,12 @@ namespace nd {
     template <>
     class args<> {
     public:
-      void validate_types(const arrfunc_type *af_tp,
-                   std::vector<ndt::type> &DYND_UNUSED(src_tp),
-                   std::vector<const char *> &DYND_UNUSED(src_arrmeta),
-                   std::vector<char *> &DYND_UNUSED(src_data),
-                   std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+      void validate_types(
+          const arrfunc_type *af_tp,
+          std::vector<ndt::type> &DYND_UNUSED(src_tp),
+          std::vector<const char *> &DYND_UNUSED(src_arrmeta),
+          std::vector<char *> &DYND_UNUSED(src_data),
+          std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
       {
         check_narg(af_tp, 0);
       }
@@ -306,7 +313,8 @@ namespace nd {
 
     public:
       void validate_names(
-          const arrfunc_type *af_tp, array &DYND_UNUSED(dst), std::vector<ndt::type> &DYND_UNUSED(tp),
+          const arrfunc_type *af_tp, array &DYND_UNUSED(dst),
+          std::vector<ndt::type> &DYND_UNUSED(tp),
           std::vector<intptr_t> &available, std::vector<intptr_t> &missing,
           std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
       {
@@ -377,7 +385,8 @@ namespace nd {
           intptr_t j = available[I];
           if (j != -1) {
             nd::forward_as_array(tp[j], arrmeta + arrmeta_offsets[j],
-                             data + data_offsets[j], std::get<I>(self->m_values));
+                                 data + data_offsets[j],
+                                 std::get<I>(self->m_values));
           }
         }
 
@@ -387,8 +396,8 @@ namespace nd {
                         const std::vector<intptr_t> &available) const
         {
           typedef make_index_sequence<sizeof...(K)> I;
-          index_proxy<I>::for_each(*this, tp, arrmeta, arrmeta_offsets,
-                                         data, data_offsets, available);
+          index_proxy<I>::for_each(*this, tp, arrmeta, arrmeta_offsets, data,
+                                   data_offsets, available);
         }
       } fill_available_values;
 
@@ -419,8 +428,8 @@ namespace nd {
         kwds *self;
 
         template <size_t I>
-        void operator()(const arrfunc_type *af_tp, array &dst,
-                        bool &has_dst_tp, std::vector<ndt::type> &kwd_tp,
+        void operator()(const arrfunc_type *af_tp, array &dst, bool &has_dst_tp,
+                        std::vector<ndt::type> &kwd_tp,
                         std::vector<intptr_t> &available,
                         std::map<nd::string, ndt::type> &tp_vars)
         {
@@ -428,8 +437,7 @@ namespace nd {
                      has_dst_tp, kwd_tp.data(), available, tp_vars);
         }
 
-        void operator()(const arrfunc_type *af_tp,
-                        array &dst,
+        void operator()(const arrfunc_type *af_tp, array &dst,
                         std::vector<ndt::type> &tp,
                         std::vector<intptr_t> &available,
                         std::vector<intptr_t> &missing,
@@ -438,8 +446,8 @@ namespace nd {
           bool has_dst_tp = false;
 
           typedef make_index_sequence<sizeof...(K)> I;
-          index_proxy<I>::for_each(*this, af_tp, dst, has_dst_tp, tp,
-                                         available, tp_vars);
+          index_proxy<I>::for_each(*this, af_tp, dst, has_dst_tp, tp, available,
+                                   tp_vars);
 
           intptr_t nkwd = sizeof...(K);
           if (has_dst_tp) {
@@ -613,7 +621,8 @@ namespace nd {
       typedef typename instantiate<
           nd::detail::kwds,
           typename take<type_sequence<T...>,
-                        make_index_sequence<1, sizeof...(T), 2>>::type>::type type;
+                        make_index_sequence<1, sizeof...(T), 2>>::type>::type
+          type;
     };
   }
 } // namespace dynd::nd
@@ -774,15 +783,15 @@ namespace nd {
       arrfunc(&self, self_tp).swap(*this);
     }
 
-/*
- else if (nkwd != 0) {
-        stringstream ss;
-        ss << "arrfunc does not accept keyword arguments, but was provided "
-              "keyword arguments. arrfunc signature is "
-           << ndt::type(self_tp, true);
-        throw std::invalid_argument(ss.str());
-      }
-*/
+    /*
+     else if (nkwd != 0) {
+            stringstream ss;
+            ss << "arrfunc does not accept keyword arguments, but was provided "
+                  "keyword arguments. arrfunc signature is "
+               << ndt::type(self_tp, true);
+            throw std::invalid_argument(ss.str());
+          }
+    */
 
     /** Implements the general call operator */
     template <typename A, typename K>
@@ -862,8 +871,9 @@ namespace nd {
      * operator()(a0, a1, ..., an, kwds<...>(...))
      */
     template <typename... T>
-    typename std::enable_if<sizeof...(T) != 3 &&
-        detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
+    typename std::enable_if<
+        sizeof...(T) != 3 &&
+            detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
         array>::type
     operator()(T &&... a) const
     {
@@ -1032,7 +1042,7 @@ namespace nd {
   arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
   {
     typedef typename ex_for_each<TCK, kernreq, typename outer<A...>::type,
-                              sizeof...(A) >= 2>::type CKT;
+                                 sizeof...(A) >= 2>::type CKT;
     return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
   }
 
@@ -1058,6 +1068,14 @@ namespace nd {
 
       static nd::arrfunc as_arrfunc() { return T::as_arrfunc(); }
     };
+
+    template <typename T>
+    std::ostream &operator<<(std::ostream &o, const arrfunc<T> &rhs)
+    {
+      o << static_cast<nd::arrfunc>(rhs);
+
+      return o;
+    }
 
   } // namespace dynd::nd::decl
 

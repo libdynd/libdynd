@@ -154,8 +154,7 @@ int nd::functional::elwise_resolve_dst_type_with_child(
 static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
                                            intptr_t src_count,
                                            dynd::kernel_request_t kernreq,
-                                           dim3 blocks,
-                                           dim3 threads)
+                                           dim3 blocks, dim3 threads)
 {
   switch (src_count) {
   case 0: {
@@ -221,6 +220,11 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
       pt[i] = pt[i].extended<base_memory_type>()->with_replaced_storage_type(
           ndt::make_ellipsis_dim(dimsname,
                                  param_types[i].without_memory_type()));
+    } else if (param_types[i].get_type_id() == typevar_constructed_type_id) {
+      pt[i] = ndt::make_typevar_constructed(
+          param_types[i].extended<typevar_constructed_type>()->get_name(),
+          ndt::make_ellipsis_dim(
+              dimsname, param_types[i].extended<typevar_constructed_type>()->get_arg()));
     } else {
       pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
     }
@@ -379,10 +383,10 @@ intptr_t nd::functional::elwise_instantiate_with_child(
         new_src_tp[i] =
             src_tp[i].extended<base_memory_type>()->get_element_type();
       }
-      elwise_instantiate_with_child<I>(child, child_tp, cuda_ckb, 0, new_dst_tp,
-                                       dst_arrmeta, nsrc, &new_src_tp[0], src_arrmeta,
-                                       kernreq | kernel_request_cuda_device,
-                                       ectx, kwds, tp_vars);
+      elwise_instantiate_with_child<I>(
+          child, child_tp, cuda_ckb, 0, new_dst_tp, dst_arrmeta, nsrc,
+          &new_src_tp[0], src_arrmeta, kernreq | kernel_request_cuda_device,
+          ectx, kwds, tp_vars);
       // The return is the ckb_offset for the ckb that was passed in,
       // not the CUDA ckb we just created for the CUDA memory.
       return ckb_offset;
@@ -402,8 +406,8 @@ intptr_t nd::functional::elwise_instantiate_with_child(
     if (i == src_count) {
       // No dimensions to lift, call the elementwise instantiate directly
       return child->instantiate(child, child_tp, ckb, ckb_offset, dst_tp,
-                                dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx,
-                                kwds, tp_vars);
+                                dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
+                                ectx, kwds, tp_vars);
     } else {
       intptr_t src_ndim =
           src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
@@ -592,9 +596,9 @@ intptr_t nd::functional::elwise_instantiate(
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-  return elwise_instantiate_with_child(
-      child, child_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-      src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  return elwise_instantiate_with_child(child, child_tp, ckb, ckb_offset, dst_tp,
+                                       dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                                       kernreq, ectx, kwds, tp_vars);
 }
 
 int nd::functional::elwise_resolve_dst_type(

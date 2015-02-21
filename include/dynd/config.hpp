@@ -389,7 +389,8 @@ struct index_proxy<index_sequence<I0, I...>> {
 #define DYND_IGNORE_UNUSED(NAME) NAME
 #endif
 
-#define DYND_INC_IF_NOT_NULL(POINTER, OFFSET) ((POINTER == NULL) ? NULL : (POINTER + OFFSET))
+#define DYND_INC_IF_NOT_NULL(POINTER, OFFSET)                                  \
+  ((POINTER == NULL) ? NULL : (POINTER + OFFSET))
 
 namespace dynd {
 // These are defined in git_version.cpp, generated from
@@ -426,6 +427,32 @@ void libdynd_cleanup();
   */
 bool built_with_cuda();
 } // namespace dynd
+
+#ifdef DYND_CUDA
+
+#define DYND_GET_CUDA_DEVICE_FUNC(NAME, FUNC)                                  \
+  template <typename func_type>                                                \
+  __global__ void NAME(void *res)                                              \
+  {                                                                            \
+    *reinterpret_cast<func_type *>(res) = &FUNC;                               \
+  }                                                                            \
+                                                                               \
+  template <typename func_type>                                                \
+  func_type NAME()                                                             \
+  {                                                                            \
+    func_type func;                                                            \
+    func_type *cuda_device_func;                                               \
+    throw_if_not_cuda_success(                                                 \
+        cudaMalloc(&cuda_device_func, sizeof(func_type)));                     \
+    NAME<func_type> << <1, 1>>> (reinterpret_cast<void *>(cuda_device_func));  \
+    throw_if_not_cuda_success(cudaMemcpy(                                      \
+        &func, cuda_device_func, sizeof(func_type), cudaMemcpyDeviceToHost));  \
+    throw_if_not_cuda_success(cudaFree(cuda_device_func));                     \
+                                                                               \
+    return func;                                                               \
+  }
+
+#endif
 
 namespace dynd {
 namespace detail {
