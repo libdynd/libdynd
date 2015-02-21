@@ -108,7 +108,7 @@ bool ndt::type::matches(const char *arrmeta, const ndt::type &other_tp,
     return false;
   }
 
-  return extended()->matches(*this, arrmeta, other_tp, other_arrmeta, tp_vars);
+  return extended()->matches(arrmeta, other_tp, other_arrmeta, tp_vars);
 }
 
 bool ndt::type::matches(const ndt::type &other_tp,

@@ -396,7 +396,7 @@ nd::array pointer_type::get_option_nafunc() const
       get_value_type().get_type_id());
 }
 
-bool pointer_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
+bool pointer_type::matches(const char *arrmeta,
                            const ndt::type &other_tp, const char *other_arrmeta,
                            std::map<nd::string, ndt::type> &tp_vars) const
 {
@@ -405,8 +405,8 @@ bool pointer_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *se
   }
 
   return m_target_tp.matches(
-      (self_arrmeta == NULL) ? self_arrmeta
-                             : (self_arrmeta + sizeof(pointer_type_arrmeta)),
+      (arrmeta == NULL) ? arrmeta
+                             : (arrmeta + sizeof(pointer_type_arrmeta)),
       other_tp.extended<pointer_type>()->m_target_tp,
       (other_arrmeta == NULL) ? other_arrmeta
                               : (other_arrmeta + sizeof(pointer_type_arrmeta)),

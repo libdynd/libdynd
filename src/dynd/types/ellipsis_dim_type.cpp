@@ -121,8 +121,8 @@ void ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of ellipsis type");
 }
 
-bool ellipsis_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
-                                const ndt::type &other_tp, const char *other_arrmeta,
+bool ellipsis_dim_type::matches(const char *arrmeta, const ndt::type &other_tp,
+                                const char *other_arrmeta,
                                 std::map<nd::string, ndt::type> &tp_vars) const
 {
   if (other_tp.get_type_id() == any_sym_type_id) {
@@ -150,10 +150,10 @@ bool ellipsis_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const cha
         }
       }
     }
-    return m_element_tp.matches(self_arrmeta, other_tp, other_arrmeta, tp_vars);
+    return m_element_tp.matches(arrmeta, other_tp, other_arrmeta, tp_vars);
   } else if (other_tp.get_type_id() == ellipsis_dim_type_id) {
     return m_element_tp.matches(
-        self_arrmeta, other_tp.extended<ellipsis_dim_type>()->m_element_tp, other_arrmeta, tp_vars);
+        arrmeta, other_tp.extended<ellipsis_dim_type>()->m_element_tp, other_arrmeta, tp_vars);
   } else if (other_tp.get_ndim() >= get_ndim() - 1) {
     intptr_t matched_ndim = other_tp.get_ndim() - get_ndim() + 1;
     const nd::string &tv_name = get_name();
@@ -183,7 +183,7 @@ bool ellipsis_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const cha
       }
     }
     return m_element_tp
-        .matches(self_arrmeta, other_tp.get_type_at_dimension(NULL, matched_ndim), NULL, tp_vars);
+        .matches(arrmeta, other_tp.get_type_at_dimension(NULL, matched_ndim), NULL, tp_vars);
   }
 
   return false;

@@ -736,8 +736,7 @@ static ndt::type get_element_type(const ndt::type &dt)
   return dt.extended<fixed_dim_type>()->get_element_type();
 }
 
-bool fixed_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp),
-                             const char *self_arrmeta, const ndt::type &other_tp,
+bool fixed_dim_type::matches(const char *arrmeta, const ndt::type &other_tp,
                              const char *other_arrmeta,
                              std::map<nd::string, ndt::type> &tp_vars) const
 {
@@ -746,24 +745,24 @@ bool fixed_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp),
     return get_fixed_dim_size() ==
                other_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
            m_element_tp.matches(
-               (self_arrmeta == NULL)
-                   ? self_arrmeta
-                   : (self_arrmeta + sizeof(fixed_dim_type_arrmeta)),
+               (arrmeta == NULL)
+                   ? arrmeta
+                   : (arrmeta + sizeof(fixed_dim_type_arrmeta)),
                other_tp.extended<fixed_dim_type>()->m_element_tp,
                (other_arrmeta == NULL)
                    ? other_arrmeta
                    : (other_arrmeta + sizeof(cfixed_dim_type_arrmeta)),
                tp_vars);
   case cfixed_dim_type_id:
-    return self_arrmeta != NULL &&
+    return arrmeta != NULL &&
            get_fixed_dim_size() ==
                other_tp.extended<cfixed_dim_type>()->get_fixed_dim_size() &&
-           get_fixed_stride(self_arrmeta) ==
+           get_fixed_stride(arrmeta) ==
                other_tp.extended<cfixed_dim_type>()->get_fixed_stride() &&
            m_element_tp.matches(
-               (self_arrmeta == NULL)
-                   ? self_arrmeta
-                   : (self_arrmeta + sizeof(fixed_dim_type_arrmeta)),
+               (arrmeta == NULL)
+                   ? arrmeta
+                   : (arrmeta + sizeof(fixed_dim_type_arrmeta)),
                other_tp.extended<cfixed_dim_type>()->get_element_type(),
                (other_arrmeta == NULL)
                    ? other_arrmeta

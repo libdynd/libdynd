@@ -110,7 +110,7 @@ void typevar_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *self_arrmeta,
+bool typevar_dim_type::matches(const char *arrmeta,
                                const ndt::type &other_tp, const char *DYND_UNUSED(other_arrmeta),
                                std::map<nd::string, ndt::type> &tp_vars) const
 {
@@ -123,7 +123,7 @@ bool typevar_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char
     // This typevar hasn't been seen yet
     tv_type = other_tp;
     return m_element_tp.matches(
-        self_arrmeta, other_tp.get_type_at_dimension(NULL, 1),
+        arrmeta, other_tp.get_type_at_dimension(NULL, 1),
         NULL, tp_vars);
   } else {
     // Make sure the type matches previous
@@ -148,7 +148,7 @@ bool typevar_dim_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char
       break;
     }
     return m_element_tp.matches(
-        self_arrmeta, other_tp.get_type_at_dimension(NULL, 1),
+        arrmeta, other_tp.get_type_at_dimension(NULL, 1),
         NULL, tp_vars);
   }
 }

@@ -258,7 +258,7 @@ TEST(TypePatternMatch, Pow)
 TEST(TypePatternMatch, TypeVarConstructed)
 {
 #ifdef DYND_CUDA
-  EXPECT_TRUE(ndt::type("cuda_device[int32]").matches(ndt::type("M[int32]")));
+  EXPECT_TRUE(ndt::type("M[int32]").matches(ndt::type("cuda_device[int32]")));
 //  EXPECT_TRUE(ndt::type("cuda_device[10 * 5 * int32]")
 //                .matches(ndt::type("M[10 * 5 * int32]")));
 // EXPECT_TRUE(

@@ -203,8 +203,7 @@ intptr_t base_struct_type::apply_linear_index(
   }
 }
 
-bool base_struct_type::matches(const ndt::type &DYND_UNUSED(self_tp),
-                               const char *self_arrmeta,
+bool base_struct_type::matches(const char *arrmeta,
                                const ndt::type &other_tp,
                                const char *other_arrmeta,
                                std::map<nd::string, ndt::type> &tp_vars) const
@@ -234,7 +233,7 @@ bool base_struct_type::matches(const ndt::type &DYND_UNUSED(self_tp),
     const ndt::type *other_fields =
         other_tp.extended<base_struct_type>()->get_field_types_raw();
     for (intptr_t i = 0; i < m_field_count; ++i) {
-      if (!fields[i].matches(self_arrmeta, other_fields[i], other_arrmeta,
+      if (!fields[i].matches(arrmeta, other_fields[i], other_arrmeta,
                              tp_vars)) {
         return false;
       }

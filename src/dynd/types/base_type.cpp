@@ -305,7 +305,7 @@ size_t base_type::make_comparison_kernel(
     throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
-bool base_type::matches(const ndt::type &DYND_UNUSED(self_tp), const char *DYND_UNUSED(self_arrmeta),
+bool base_type::matches(const char *DYND_UNUSED(arrmeta),
                         const ndt::type &other_tp, const char *DYND_UNUSED(other_arrmeta),
                         std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
 {
