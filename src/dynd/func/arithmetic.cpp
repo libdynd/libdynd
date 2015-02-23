@@ -25,25 +25,25 @@ using namespace dynd;
   }
 
 #define BUILTIN_TABLE(NAME)                                                    \
-  const create_t nd::decl::NAME::builtin_table[builtin_type_id_count -         \
-                                               2][builtin_type_id_count - 2] = \
-      {{NULL},                                                                 \
-       BUILTIN_ROW(NAME##_ck, int8_t),                                         \
-       BUILTIN_ROW(NAME##_ck, int16_t),                                        \
-       BUILTIN_ROW(NAME##_ck, int32_t),                                        \
-       BUILTIN_ROW(NAME##_ck, int64_t),                                        \
-       {NULL},                                                                 \
-       BUILTIN_ROW(NAME##_ck, uint8_t),                                        \
-       BUILTIN_ROW(NAME##_ck, uint16_t),                                       \
-       BUILTIN_ROW(NAME##_ck, uint32_t),                                       \
-       BUILTIN_ROW(NAME##_ck, uint64_t),                                       \
-       {NULL},                                                                 \
-       {NULL},                                                                 \
-       BUILTIN_ROW(NAME##_ck, float),                                          \
-       BUILTIN_ROW(NAME##_ck, double),                                         \
-       {NULL},                                                                 \
-       BUILTIN_ROW(NAME##_ck, dynd::complex<float>),                           \
-       BUILTIN_ROW(NAME##_ck, dynd::complex<double>)};
+  const create_t nd::NAME::builtin_table[builtin_type_id_count -               \
+                                         2][builtin_type_id_count - 2] = {     \
+      {NULL},                                                                  \
+      BUILTIN_ROW(NAME##_ck, int8_t),                                          \
+      BUILTIN_ROW(NAME##_ck, int16_t),                                         \
+      BUILTIN_ROW(NAME##_ck, int32_t),                                         \
+      BUILTIN_ROW(NAME##_ck, int64_t),                                         \
+      {NULL},                                                                  \
+      BUILTIN_ROW(NAME##_ck, uint8_t),                                         \
+      BUILTIN_ROW(NAME##_ck, uint16_t),                                        \
+      BUILTIN_ROW(NAME##_ck, uint32_t),                                        \
+      BUILTIN_ROW(NAME##_ck, uint64_t),                                        \
+      {NULL},                                                                  \
+      {NULL},                                                                  \
+      BUILTIN_ROW(NAME##_ck, float),                                           \
+      BUILTIN_ROW(NAME##_ck, double),                                          \
+      {NULL},                                                                  \
+      BUILTIN_ROW(NAME##_ck, dynd::complex<float>),                            \
+      BUILTIN_ROW(NAME##_ck, dynd::complex<double>)};
 
 BUILTIN_TABLE(add);
 BUILTIN_TABLE(sub);
@@ -53,10 +53,10 @@ BUILTIN_TABLE(div);
 #undef BUILTIN_TABLE
 #undef BUILTIN_ROW
 
-nd::decl::add nd::add;
-nd::decl::sub nd::sub;
-nd::decl::mul nd::mul;
-nd::decl::div nd::div;
+struct nd::add nd::add;
+struct nd::sub nd::sub;
+struct nd::mul nd::mul;
+struct nd::div nd::div;
 
 nd::array nd::operator+(const nd::array &a0, const nd::array &a1)
 {

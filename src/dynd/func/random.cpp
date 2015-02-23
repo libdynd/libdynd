@@ -17,7 +17,7 @@ __global__ void cuda_device_curand_init(curandState_t *s)
 
 template <kernel_request_t kernreq>
 typename std::enable_if<kernreq == kernel_request_host, nd::arrfunc>::type
-nd::decl::random::uniform::as_arrfunc()
+nd::random::uniform::make()
 {
   std::random_device random_device;
   return nd::as_arrfunc<uniform_ck, kernel_request_host,
@@ -32,7 +32,7 @@ nd::decl::random::uniform::as_arrfunc()
 template <kernel_request_t kernreq>
 typename std::enable_if<kernreq == kernel_request_cuda_device,
                         nd::arrfunc>::type
-nd::decl::random::uniform::as_arrfunc()
+nd::random::uniform::make()
 {
   unsigned int blocks_per_grid = 512;
   unsigned int threads_per_block = 512;
@@ -48,16 +48,16 @@ nd::decl::random::uniform::as_arrfunc()
 
 #endif
 
-nd::arrfunc nd::decl::random::uniform::as_arrfunc()
+nd::arrfunc nd::random::uniform::make()
 {
 #ifdef DYND_CUDA
   return nd::functional::elwise(nd::functional::multidispatch(
       ndt::type("(a: ?R, b: ?R) -> M[R]"),
-      {as_arrfunc<kernel_request_host>(),
-       as_arrfunc<kernel_request_cuda_device>()}));
+      {make<kernel_request_host>(),
+       make<kernel_request_cuda_device>()}));
 #else
-  return nd::functional::elwise(as_arrfunc<kernel_request_host>());
+  return nd::functional::elwise(make<kernel_request_host>());
 #endif
 }
 
-nd::decl::random::uniform nd::random::uniform;
+struct nd::random::uniform nd::random::uniform;
