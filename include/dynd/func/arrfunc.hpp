@@ -1005,38 +1005,32 @@ namespace nd {
     return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
   }
 
-  namespace decl {
-
-    template <typename T>
-    struct arrfunc {
-      const nd::arrfunc &get_self() const
-      {
-        static nd::arrfunc self = as_arrfunc();
-        return self;
-      }
-
-      const ndt::type &get_type() const { return get_self().get_array_type(); }
-
-      operator const nd::arrfunc &() const { return get_self(); }
-
-      template <typename... A>
-      array operator()(A &&... a) const
-      {
-        return get_self()(std::forward<A>(a)...);
-      }
-
-      static nd::arrfunc as_arrfunc() { return T::as_arrfunc(); }
-    };
-
-    template <typename T>
-    std::ostream &operator<<(std::ostream &o, const arrfunc<T> &rhs)
+  template <typename T>
+  struct declfunc {
+    const arrfunc &get_self() const
     {
-      o << static_cast<nd::arrfunc>(rhs);
-
-      return o;
+      static arrfunc self = T::make();
+      return self;
     }
 
-  } // namespace dynd::nd::decl
+    const ndt::type &get_type() const { return get_self().get_array_type(); }
+
+    operator const arrfunc &() const { return get_self(); }
+
+    template <typename... A>
+    array operator()(A &&... a) const
+    {
+      return get_self()(std::forward<A>(a)...);
+    }
+  };
+
+  template <typename T>
+  std::ostream &operator<<(std::ostream &o, const declfunc<T> &rhs)
+  {
+    o << static_cast<arrfunc>(rhs);
+
+    return o;
+  }
 
 } // namespace nd
 

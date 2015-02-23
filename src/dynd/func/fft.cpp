@@ -8,7 +8,7 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::decl::fft::as_arrfunc()
+nd::arrfunc nd::fft::make()
 {
   std::vector<nd::arrfunc> children;
 
@@ -33,7 +33,7 @@ nd::arrfunc nd::decl::fft::as_arrfunc()
       children);
 }
 
-nd::arrfunc nd::decl::ifft::as_arrfunc()
+nd::arrfunc nd::ifft::make()
 {
   std::vector<nd::arrfunc> children;
 
@@ -58,7 +58,7 @@ nd::arrfunc nd::decl::ifft::as_arrfunc()
       children);
 }
 
-nd::arrfunc nd::decl::rfft::as_arrfunc()
+nd::arrfunc nd::rfft::make()
 {
 #ifdef DYND_FFTW
   return nd::as_arrfunc<fftw_ck<fftw_complex, double>>();
@@ -67,7 +67,7 @@ nd::arrfunc nd::decl::rfft::as_arrfunc()
 #endif
 }
 
-nd::arrfunc nd::decl::irfft::as_arrfunc()
+nd::arrfunc nd::irfft::make()
 {
 #ifdef DYND_FFTW
   return nd::as_arrfunc<fftw_ck<double, fftw_complex>>();
@@ -76,8 +76,8 @@ nd::arrfunc nd::decl::irfft::as_arrfunc()
 #endif
 }
 
-nd::decl::fft nd::fft;
-nd::decl::rfft nd::rfft;
+struct nd::fft nd::fft;
+struct nd::rfft nd::rfft;
 
-nd::decl::ifft nd::ifft;
-nd::decl::irfft nd::irfft;
+struct nd::ifft nd::ifft;
+struct nd::irfft nd::irfft;

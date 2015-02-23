@@ -23,7 +23,7 @@ DYND_GET_CUDA_DEVICE_FUNC(get_cuda_device_exp, exp)
 
 #endif
 
-nd::arrfunc nd::decl::cos::as_arrfunc()
+nd::arrfunc nd::cos::make()
 {
 #ifdef DYND_CUDA
   ndt::type pattern_tp("(M[R]) -> M[R]");
@@ -44,7 +44,7 @@ nd::arrfunc nd::decl::cos::as_arrfunc()
   return functional::elwise(functional::multidispatch(pattern_tp, children));
 }
 
-nd::arrfunc nd::decl::sin::as_arrfunc()
+nd::arrfunc nd::sin::make()
 {
 #ifdef DYND_CUDA
   ndt::type pattern_tp("(M[R]) -> M[R]");
@@ -65,7 +65,7 @@ nd::arrfunc nd::decl::sin::as_arrfunc()
   return functional::elwise(functional::multidispatch(pattern_tp, children));
 }
 
-nd::arrfunc nd::decl::tan::as_arrfunc()
+nd::arrfunc nd::tan::make()
 {
 #ifdef DYND_CUDA
   ndt::type pattern_tp("(M[R]) -> M[R]");
@@ -86,7 +86,7 @@ nd::arrfunc nd::decl::tan::as_arrfunc()
   return functional::elwise(functional::multidispatch(pattern_tp, children));
 }
 
-nd::arrfunc nd::decl::exp::as_arrfunc()
+nd::arrfunc nd::exp::make()
 {
 #ifdef DYND_CUDA
   ndt::type pattern_tp("(M[R]) -> M[R]");
@@ -108,7 +108,7 @@ nd::arrfunc nd::decl::exp::as_arrfunc()
 }
 
 
-nd::decl::cos nd::cos;
-nd::decl::sin nd::sin;
-nd::decl::tan nd::tan;
-nd::decl::exp nd::exp;
+struct nd::cos nd::cos;
+struct nd::sin nd::sin;
+struct nd::tan nd::tan;
+struct nd::exp nd::exp;

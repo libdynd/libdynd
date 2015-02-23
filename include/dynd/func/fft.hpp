@@ -14,8 +14,8 @@ namespace nd {
 #ifdef DYND_CUDA
 
   template <typename dst_type, typename src_type, int sign>
-  struct cufft_ck : expr_ck<cufft_ck<dst_type, src_type, sign>,
-                                     kernel_request_host, 1> {
+  struct cufft_ck
+      : expr_ck<cufft_ck<dst_type, src_type, sign>, kernel_request_host, 1> {
     typedef cufft_ck self_type;
 
     cufftHandle plan;
@@ -34,16 +34,17 @@ namespace nd {
           "complex[float64]]");
     }
 
-    static int
-    resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *DYND_UNUSED(self_tp),
-                     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
-                     ndt::type &dst_tp, const nd::array &kwds,
-                     const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static int resolve_dst_type(
+        const arrfunc_type_data *DYND_UNUSED(self),
+        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+        ndt::type &dst_tp, const nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds.p("shape");
-//      if (shape.is_missing()) {
-        dst_tp = src_tp[0];
-  //    }
+      //      if (shape.is_missing()) {
+      dst_tp = src_tp[0];
+      //    }
 
       return 1;
     }
@@ -52,12 +53,9 @@ namespace nd {
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *dst_arrmeta,
-        intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp,
-        const char *const *src_arrmeta,
-        kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx),
+        const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *src_tp, const char *const *src_arrmeta,
+        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
@@ -96,31 +94,21 @@ namespace nd {
 
 #endif
 
-  namespace decl {
+  extern struct fft : declfunc<fft> {
+    static arrfunc make();
+  } fft;
 
-    struct fft : arrfunc<fft> {
-      static nd::arrfunc as_arrfunc();
-    };
+  extern struct ifft : declfunc<ifft> {
+    static arrfunc make();
+  } ifft;
 
-    struct ifft : arrfunc<ifft> {
-      static nd::arrfunc as_arrfunc();
-    };
+  extern struct rfft : declfunc<rfft> {
+    static arrfunc make();
+  } rfft;
 
-    struct rfft : arrfunc<rfft> {
-      static nd::arrfunc as_arrfunc();
-    };
-
-    struct irfft : arrfunc<irfft> {
-      static nd::arrfunc as_arrfunc();
-    };
-
-  } // namespace dynd::nd::decl
-
-  extern decl::fft fft;
-  extern decl::ifft ifft;
-
-  extern decl::rfft rfft;
-  extern decl::irfft irfft;
+  extern struct irfft : declfunc<irfft> {
+    static arrfunc make();
+  } irfft;
 
 } // namespace dynd::nd
 } // namespace dynd

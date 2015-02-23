@@ -9,30 +9,22 @@
 
 namespace dynd {
 namespace nd {
-  namespace decl {
 
-    struct cos : arrfunc<cos> {
-      static nd::arrfunc as_arrfunc();
-    };
+  extern struct cos : declfunc<cos> {
+    static arrfunc make();
+  } cos;
 
-    struct sin : arrfunc<sin> {
-      static nd::arrfunc as_arrfunc();
-    };
+  extern struct sin : declfunc<sin> {
+    static arrfunc make();
+  } sin;
 
-    struct tan : arrfunc<tan> {
-      static nd::arrfunc as_arrfunc();
-    };
+  extern struct tan : declfunc<tan> {
+    static arrfunc make();
+  } tan;
 
-    struct exp : arrfunc<exp> {
-      static nd::arrfunc as_arrfunc();
-    };
-
-  } // namespace dynd::nd::decl
-
-  extern decl::cos cos;
-  extern decl::sin sin;
-  extern decl::tan tan;
-  extern decl::exp exp;
+  extern struct exp : declfunc<exp> {
+    static arrfunc make();
+  } exp;
 
 } // namespace dynd::nd
 } // namespace dynd
