@@ -74,9 +74,4 @@ public:
                     size_t *out_count) const;
 };
 
-namespace init {
-  void base_string_type_init();
-  void base_string_type_cleanup();
-} // namespace init
-
 } // namespace dynd

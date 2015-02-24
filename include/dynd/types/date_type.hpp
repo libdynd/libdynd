@@ -7,7 +7,6 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/date_util.hpp>
-#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -100,7 +99,8 @@ namespace ndt {
   /** Returns type "date" */
   inline const ndt::type &make_date()
   {
-    return *reinterpret_cast<const ndt::type *>(&types::date_tp);
+    static const type date_tp(new date_type(), false);
+    return date_tp;
   }
 } // namespace ndt
 

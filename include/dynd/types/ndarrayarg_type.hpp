@@ -15,7 +15,6 @@
 #pragma once
 
 #include <dynd/array.hpp>
-#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -72,7 +71,8 @@ public:
 namespace ndt {
   inline const ndt::type &make_ndarrayarg()
   {
-    return *reinterpret_cast<const ndt::type *>(&types::ndarrayarg_tp);
+    static const type ndarrayarg_tp(new ndarrayarg_type(), false);
+    return ndarrayarg_tp;
   }
 } // namespace ndt
 

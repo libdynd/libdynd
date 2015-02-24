@@ -410,22 +410,33 @@ extern const char dynd_version_string[];
 #endif
 
 namespace dynd {
+
 /**
  * Function to call for initializing dynd's global state, such
  * as cached ndt::type objects, the arrfunc registry, etc.
  */
-int libdynd_init();
+inline int libdynd_init() { return 0; }
+
 /**
  * Function to call to free all resources associated with
  * dynd's global state, that were initialized by libdynd_init.
  */
-void libdynd_cleanup();
+inline void libdynd_cleanup() {}
+
 /**
   * A function which can be used at runtime to identify whether
   * the build of dynd being linked against was built with CUDA
   * support enabled.
   */
-bool built_with_cuda();
+inline bool built_with_cuda()
+{
+#ifdef DYND_CUDA
+  return true;
+#else
+  return false;
+#endif
+}
+
 } // namespace dynd
 
 #ifdef DYND_CUDA

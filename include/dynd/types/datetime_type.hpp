@@ -10,7 +10,6 @@
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/datetime_util.hpp>
-#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -106,7 +105,8 @@ namespace ndt {
   /** Returns type "datetime" (with abstract/naive time zone) */
   inline const ndt::type &make_datetime()
   {
-    return *reinterpret_cast<const ndt::type *>(&types::datetime_tp);
+    static const type datetime_tp(new datetime_type(tz_abstract), false);
+    return datetime_tp;
   }
   /** Returns type "datetime[tz=<timezone>]" */
   inline ndt::type make_datetime(datetime_tz_t timezone)

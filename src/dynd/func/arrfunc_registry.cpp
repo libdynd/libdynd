@@ -16,10 +16,6 @@
 using namespace std;
 using namespace dynd;
 
-// Probably want to use a concurrent_hash_map, like
-// http://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.htm
-static map<nd::string, nd::arrfunc> *registry;
-
 template <typename T0, typename T1>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
@@ -160,118 +156,102 @@ struct logaddexp2 {
 #endif
 } // anonymous namespace
 
-void init::arrfunc_registry_init()
+std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
 {
-  registry = new map<nd::string, nd::arrfunc>;
-
-  // Arithmetic
-/*
-  func::set_regfunction(
-      "add", make_ufunc(add<int32_t>(), add<int64_t>(), add<dynd_int128>(),
-                        add<uint32_t>(), add<uint64_t>(), add<dynd_uint128>(),
-                        add<float>(), add<double>(), add<complex<float>>(),
-                        add<complex<double>>()));
-*/
-  func::set_regfunction("add", nd::add);
-
-  func::set_regfunction(
-      "subtract",
-      make_ufunc(subtract<int32_t>(), subtract<int64_t>(),
-                 subtract<dynd_int128>(), subtract<float>(), subtract<double>(),
-                 subtract<complex<float>>(), subtract<complex<double>>()));
-  func::set_regfunction(
-      "multiply",
-      make_ufunc(multiply<int32_t>(), multiply<int64_t>(),
-                 /*multiply<dynd_int128>(),*/ multiply<uint32_t>(),
-                 multiply<uint64_t>(), /*multiply<dynd_uint128>(),*/
-                 multiply<float>(), multiply<double>(),
-                 multiply<complex<float>>(), multiply<complex<double>>()));
-  func::set_regfunction(
-      "divide",
-      make_ufunc(
-          divide<int32_t>(), divide<int64_t>(),   /*divide<dynd_int128>(),*/
-          divide<uint32_t>(), divide<uint64_t>(), /*divide<dynd_uint128>(),*/
-          divide<float>(), divide<double>(), divide<complex<float>>(),
-          divide<complex<double>>()));
-  func::set_regfunction(
-      "negative",
-      make_ufunc(negative<int32_t>(), negative<int64_t>(),
-                 negative<dynd_int128>(), negative<float>(), negative<double>(),
-                 negative<complex<float>>(), negative<complex<double>>()));
-  func::set_regfunction("sign", make_ufunc(sign<int32_t>(), sign<int64_t>(),
-                                           sign<dynd_int128>(), sign<float>(),
-                                           sign<double>()));
-  func::set_regfunction("conj", make_ufunc(conj_fn<std::complex<float>>(),
-                                           conj_fn<std::complex<double>>()));
+  // Probably want to use a concurrent_hash_map, like
+  // http://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.htm
+  static map<nd::string, nd::arrfunc> registry;
+  if (registry.empty()) {
+    // Arithmetic
+    /*
+      func::set_regfunction(
+          "add", make_ufunc(add<int32_t>(), add<int64_t>(), add<dynd_int128>(),
+                            add<uint32_t>(), add<uint64_t>(),
+      add<dynd_uint128>(),
+                            add<float>(), add<double>(), add<complex<float>>(),
+                            add<complex<double>>()));
+    */
+    registry["add"] = nd::add;
+    registry["subtract"] = make_ufunc(
+        subtract<int32_t>(), subtract<int64_t>(), subtract<dynd_int128>(),
+        subtract<float>(), subtract<double>(), subtract<complex<float>>(),
+        subtract<complex<double>>());
+    registry["multiply"] =
+        make_ufunc(multiply<int32_t>(), multiply<int64_t>(),
+                   /*multiply<dynd_int128>(),*/ multiply<uint32_t>(),
+                   multiply<uint64_t>(), /*multiply<dynd_uint128>(),*/
+                   multiply<float>(), multiply<double>(),
+                   multiply<complex<float>>(), multiply<complex<double>>());
+    registry["divide"] = make_ufunc(
+        divide<int32_t>(), divide<int64_t>(),   /*divide<dynd_int128>(),*/
+        divide<uint32_t>(), divide<uint64_t>(), /*divide<dynd_uint128>(),*/
+        divide<float>(), divide<double>(), divide<complex<float>>(),
+        divide<complex<double>>());
+    registry["negative"] = make_ufunc(
+        negative<int32_t>(), negative<int64_t>(), negative<dynd_int128>(),
+        negative<float>(), negative<double>(), negative<complex<float>>(),
+        negative<complex<double>>());
+    registry["sign"] =
+        make_ufunc(sign<int32_t>(), sign<int64_t>(), sign<dynd_int128>(),
+                   sign<float>(), sign<double>());
+    registry["conj"] = make_ufunc(conj_fn<std::complex<float>>(),
+                                  conj_fn<std::complex<double>>());
 
 #if !(defined(_MSC_VER) && _MSC_VER < 1700)
-  func::set_regfunction("logaddexp",
-                        make_ufunc(logaddexp<float>(), logaddexp<double>()));
-  func::set_regfunction("logaddexp2",
-                        make_ufunc(logaddexp2<float>(), logaddexp2<double>()));
+    registry["logaddexp"] = make_ufunc(logaddexp<float>(), logaddexp<double>());
+    registry["logaddexp2"] =
+        make_ufunc(logaddexp2<float>(), logaddexp2<double>());
 #endif
 
-  // Trig functions
-  func::set_regfunction(
-      "sin", make_ufunc(&::sinf, static_cast<double (*)(double)>(&::sin)));
-  func::set_regfunction(
-      "cos", make_ufunc(&::cosf, static_cast<double (*)(double)>(&::cos)));
-  func::set_regfunction(
-      "tan", make_ufunc(&::tanf, static_cast<double (*)(double)>(&::tan)));
-  func::set_regfunction(
-      "exp", make_ufunc(&::expf, static_cast<double (*)(double)>(&::exp)));
-  func::set_regfunction(
-      "arcsin", make_ufunc(&::asinf, static_cast<double (*)(double)>(&::asin)));
-  func::set_regfunction(
-      "arccos", make_ufunc(&::acosf, static_cast<double (*)(double)>(&::acos)));
-  func::set_regfunction(
-      "arctan", make_ufunc(&::atanf, static_cast<double (*)(double)>(&::atan)));
-  func::set_regfunction(
-      "arctan2",
-      make_ufunc(&::atan2f, static_cast<double (*)(double, double)>(&::atan2)));
-  func::set_regfunction(
-      "hypot",
-      make_ufunc(&::hypotf, static_cast<double (*)(double, double)>(&::hypot)));
-  func::set_regfunction(
-      "sinh", make_ufunc(&::sinhf, static_cast<double (*)(double)>(&::sinh)));
-  func::set_regfunction(
-      "cosh", make_ufunc(&::coshf, static_cast<double (*)(double)>(&::cosh)));
-  func::set_regfunction(
-      "tanh", make_ufunc(&::tanhf, static_cast<double (*)(double)>(&::tanh)));
+    // Trig functions
+    registry["sin"] =
+        make_ufunc(&::sinf, static_cast<double (*)(double)>(&::sin));
+    registry["cos"] =
+        make_ufunc(&::cosf, static_cast<double (*)(double)>(&::cos));
+    registry["tan"] =
+        make_ufunc(&::tanf, static_cast<double (*)(double)>(&::tan));
+    registry["exp"] =
+        make_ufunc(&::expf, static_cast<double (*)(double)>(&::exp));
+    registry["arcsin"] =
+        make_ufunc(&::asinf, static_cast<double (*)(double)>(&::asin));
+    registry["arccos"] =
+        make_ufunc(&::acosf, static_cast<double (*)(double)>(&::acos));
+    registry["arctan"] =
+        make_ufunc(&::atanf, static_cast<double (*)(double)>(&::atan));
+    registry["arctan2"] = make_ufunc(
+        &::atan2f, static_cast<double (*)(double, double)>(&::atan2));
+    registry["hypot"] = make_ufunc(
+        &::hypotf, static_cast<double (*)(double, double)>(&::hypot));
+    registry["sinh"] =
+        make_ufunc(&::sinhf, static_cast<double (*)(double)>(&::sinh));
+    registry["cosh"] =
+        make_ufunc(&::coshf, static_cast<double (*)(double)>(&::cosh));
+    registry["tanh"] =
+        make_ufunc(&::tanhf, static_cast<double (*)(double)>(&::tanh));
 #if !(defined(_MSC_VER) && _MSC_VER < 1700)
-  func::set_regfunction(
-      "asinh",
-      make_ufunc(&::asinhf, static_cast<double (*)(double)>(&::asinh)));
-  func::set_regfunction(
-      "acosh",
-      make_ufunc(&::acoshf, static_cast<double (*)(double)>(&::acosh)));
-  func::set_regfunction(
-      "atanh",
-      make_ufunc(&::atanhf, static_cast<double (*)(double)>(&::atanh)));
+    registry["asinh"] =
+        make_ufunc(&::asinhf, static_cast<double (*)(double)>(&::asinh));
+    registry["acosh"] =
+        make_ufunc(&::acoshf, static_cast<double (*)(double)>(&::acosh));
+    registry["atanh"] =
+        make_ufunc(&::atanhf, static_cast<double (*)(double)>(&::atanh));
 #endif
 
-  func::set_regfunction(
-      "power",
-      make_ufunc(&powf, static_cast<double (*)(double, double)>(&::pow)));
+    registry["power"] =
+        make_ufunc(&powf, static_cast<double (*)(double, double)>(&::pow));
 
-  func::set_regfunction("uniform", nd::random::uniform);
-}
+    registry["uniform"] = nd::random::uniform;
+  }
 
-void init::arrfunc_registry_cleanup()
-{
-  delete registry;
-  registry = NULL;
-}
-
-const std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
-{
-  return *registry;
+  return registry;
 }
 
 nd::arrfunc func::get_regfunction(const nd::string &name)
 {
-  map<nd::string, nd::arrfunc>::const_iterator it = registry->find(name);
-  if (it != registry->end()) {
+  const std::map<nd::string, nd::arrfunc> &registry = get_regfunctions();
+
+  map<nd::string, nd::arrfunc>::const_iterator it = registry.find(name);
+  if (it != registry.end()) {
     return it->second;
   } else {
     stringstream ss;
@@ -284,5 +264,7 @@ nd::arrfunc func::get_regfunction(const nd::string &name)
 
 void func::set_regfunction(const nd::string &name, const nd::arrfunc &af)
 {
-  (*registry)[name] = af;
+  std::map<nd::string, nd::arrfunc> &registry = get_regfunctions();
+
+  registry[name] = af;
 }

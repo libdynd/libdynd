@@ -12,7 +12,6 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/string_encodings.hpp>
-#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -100,7 +99,8 @@ namespace ndt {
   /** Returns type "string" */
   inline const ndt::type &make_string()
   {
-    return *reinterpret_cast<const ndt::type *>(&types::string_tp);
+    static const type string_tp(new string_type(string_encoding_utf_8), false);
+    return string_tp;
   }
   /** Returns type "string[<encoding>]" */
   inline ndt::type make_string(string_encoding_t encoding)
