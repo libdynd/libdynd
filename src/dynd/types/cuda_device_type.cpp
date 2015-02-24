@@ -63,17 +63,17 @@ cuda_device_type::with_replaced_storage_type(const ndt::type &element_tp) const
 
 void cuda_device_type::data_alloc(char **data, size_t size) const
 {
-  throw_if_not_cuda_success(cudaMalloc(data, size));
+  cuda_throw_if_not_success(cudaMalloc(data, size));
 }
 
 void cuda_device_type::data_zeroinit(char *data, size_t size) const
 {
-  throw_if_not_cuda_success(cudaMemset(data, 0, size));
+  cuda_throw_if_not_success(cudaMemset(data, 0, size));
 }
 
 void cuda_device_type::data_free(char *data) const
 {
-  throw_if_not_cuda_success(cudaFree(data));
+  cuda_throw_if_not_success(cudaFree(data));
 }
 
 intptr_t cuda_device_type::make_assignment_kernel(

@@ -442,12 +442,12 @@ bool built_with_cuda();
   {                                                                            \
     func_type func;                                                            \
     func_type *cuda_device_func;                                               \
-    throw_if_not_cuda_success(                                                 \
+    cuda_throw_if_not_success(                                                 \
         cudaMalloc(&cuda_device_func, sizeof(func_type)));                     \
     NAME<func_type> << <1, 1>>> (reinterpret_cast<void *>(cuda_device_func));  \
-    throw_if_not_cuda_success(cudaMemcpy(                                      \
+    cuda_throw_if_not_success(cudaMemcpy(                                      \
         &func, cuda_device_func, sizeof(func_type), cudaMemcpyDeviceToHost));  \
-    throw_if_not_cuda_success(cudaFree(cuda_device_func));                     \
+    cuda_throw_if_not_success(cudaFree(cuda_device_func));                     \
                                                                                \
     return func;                                                               \
   }

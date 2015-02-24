@@ -49,7 +49,7 @@ cuda_host_type::with_replaced_storage_type(const ndt::type &element_tp) const
 
 void cuda_host_type::data_alloc(char **data, size_t size) const
 {
-  throw_if_not_cuda_success(cudaHostAlloc(data, size, m_cuda_host_flags));
+  cuda_throw_if_not_success(cudaHostAlloc(data, size, m_cuda_host_flags));
 }
 
 void cuda_host_type::data_zeroinit(char *data, size_t size) const
@@ -59,7 +59,7 @@ void cuda_host_type::data_zeroinit(char *data, size_t size) const
 
 void cuda_host_type::data_free(char *data) const
 {
-  throw_if_not_cuda_success(cudaFreeHost(data));
+  cuda_throw_if_not_success(cudaFreeHost(data));
 }
 
 intptr_t cuda_host_type::make_assignment_kernel(
