@@ -286,7 +286,7 @@ public:
 
 #ifdef __CUDACC__
 
-void throw_if_not_cuda_success(cudaError_t);
+void cuda_throw_if_not_success(cudaError_t);
 
 template <typename self_type, typename... A>
 __global__ void cuda_device_init(ckernel_prefix *rawself,
@@ -315,13 +315,13 @@ class ckernel_builder<kernel_request_cuda_device>
             for (std::multimap<std::size_t, void *>::iterator i =
                      available_blocks.begin();
                  i != available_blocks.end(); ++i) {
-              throw_if_not_cuda_success(cudaFree(i->second));
+              cuda_throw_if_not_success(cudaFree(i->second));
             }
             available_blocks.clear();
             for (std::map<void *, std::size_t>::iterator i =
          used_blocks.begin();
                  i != used_blocks.end(); ++i) {
-              throw_if_not_cuda_success(cudaFree(i->first));
+              cuda_throw_if_not_success(cudaFree(i->first));
             }
             used_blocks.clear();
       */
@@ -337,7 +337,7 @@ class ckernel_builder<kernel_request_cuda_device>
         res = available_block->second;
         available_blocks.erase(available_block);
       } else {
-        throw_if_not_cuda_success(cudaMalloc(&res, n));
+        cuda_throw_if_not_success(cudaMalloc(&res, n));
       }
 
       used_blocks.insert(std::make_pair(res, n));
@@ -375,7 +375,7 @@ public:
 
   void *copy(void *dst, const void *src, size_t size)
   {
-    throw_if_not_cuda_success(
+    cuda_throw_if_not_success(
         cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice));
     return dst;
   }

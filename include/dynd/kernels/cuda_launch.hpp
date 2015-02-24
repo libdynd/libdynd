@@ -50,7 +50,7 @@ namespace nd {
     {
       detail::cuda_launch_single << <grid, block>>>
           (dst, dynd::detail::make_array_wrapper<N>(src), ckb.get());
-      throw_if_not_cuda_success();
+      cuda_throw_if_not_success();
     }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -59,7 +59,7 @@ namespace nd {
       detail::cuda_launch_strided << <grid, block>>>
           (dst, dst_stride, dynd::detail::make_array_wrapper<N>(src),
            dynd::detail::make_array_wrapper<N>(src_stride), count, ckb.get());
-      throw_if_not_cuda_success();
+      cuda_throw_if_not_success();
     }
 
     static intptr_t instantiate(

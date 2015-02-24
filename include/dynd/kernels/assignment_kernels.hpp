@@ -181,7 +181,7 @@ namespace kernels {
       expr_single_t single = child->get_function<expr_single_t>();
 
       single(this->dst, src, child);
-      throw_if_not_cuda_success(
+      cuda_throw_if_not_success(
           cudaMemcpy(dst, this->dst, data_size, cudaMemcpyHostToDevice));
     }
   };
@@ -194,7 +194,7 @@ namespace kernels {
 
     void single(char *dst, char *const *src)
     {
-      throw_if_not_cuda_success(
+      cuda_throw_if_not_success(
           cudaMemcpy(dst, *src, data_size, cudaMemcpyHostToDevice));
     }
   };
@@ -216,7 +216,7 @@ namespace kernels {
       ckernel_prefix *child = this->get_child_ckernel();
       expr_single_t single = child->get_function<expr_single_t>();
 
-      throw_if_not_cuda_success(
+      cuda_throw_if_not_success(
           cudaMemcpy(this->src, *src, data_size, cudaMemcpyDeviceToHost));
       single(dst, &this->src, child);
     }
@@ -230,7 +230,7 @@ namespace kernels {
 
     void single(char *dst, char *const *src)
     {
-      throw_if_not_cuda_success(
+      cuda_throw_if_not_success(
           cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToHost));
     }
   };
@@ -243,7 +243,7 @@ namespace kernels {
 
     void single(char *dst, char *const *src)
     {
-      throw_if_not_cuda_success(
+      cuda_throw_if_not_success(
           cudaMemcpy(dst, *src, data_size, cudaMemcpyDeviceToDevice));
     }
   };

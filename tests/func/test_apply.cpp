@@ -119,13 +119,14 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
 #define GET_CUDA_DEVICE_FUNC_BODY(NAME)                                        \
   decltype(&NAME) func;                                                        \
   decltype(&NAME) *cuda_device_func;                                           \
-  throw_if_not_cuda_success(                                                   \
+  cuda_throw_if_not_success(                                                   \
       cudaMalloc(&cuda_device_func, sizeof(decltype(&NAME))));                 \
-  get_cuda_device_##NAME << <1, 1>>> (reinterpret_cast<void *>(cuda_device_func));                       \
-  throw_if_not_cuda_success(cudaMemcpy(&func, cuda_device_func,                \
+  get_cuda_device_##NAME << <1, 1>>>                                           \
+      (reinterpret_cast<void *>(cuda_device_func));                            \
+  cuda_throw_if_not_success(cudaMemcpy(&func, cuda_device_func,                \
                                        sizeof(decltype(&NAME)),                \
                                        cudaMemcpyDeviceToHost));               \
-  throw_if_not_cuda_success(cudaFree(cuda_device_func));                       \
+  cuda_throw_if_not_success(cudaFree(cuda_device_func));                       \
   return func;
 #endif
 
@@ -292,9 +293,9 @@ TEST(Apply, Function)
 
 
   af = nd::functional::apply<kernel_request_host, decltype(&func5), &func5>();
-  EXPECT_ARR_EQ(TestFixture::To(1251L), af(TestFixture::To({{1242L, 23L, -5L}, {925L, -836L, -14L}})));
+  EXPECT_ARR_EQ(TestFixture::To(1251L), af(TestFixture::To({{1242L, 23L, -5L},
+  {925L, -836L, -14L}})));
   */
-
 
   af = nd::functional::apply<kernel_request_host, decltype(&func6), &func6>();
   EXPECT_ARR_EQ(TestFixture::To(8),

@@ -126,7 +126,7 @@ public:
     template <typename T>
     static inline T Dereference(const T* ptr) {
         T tmp;
-        throw_if_not_cuda_success(cudaMemcpy(&tmp, ptr, sizeof(T), cudaMemcpyDeviceToHost));
+        cuda_throw_if_not_success(cudaMemcpy(&tmp, ptr, sizeof(T), cudaMemcpyDeviceToHost));
         return tmp;
     }
 
