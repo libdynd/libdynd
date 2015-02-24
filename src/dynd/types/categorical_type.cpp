@@ -622,14 +622,23 @@ static nd::array property_ndo_get_ints(const nd::array& n) {
     return n.view_scalars(cd->get_storage_type());
 }
 
-static size_t categorical_array_properties_size;
-static pair<string, gfunc::callable> *categorical_array_properties;
+static size_t categorical_array_properties_size() { return 1; }
+
+static const pair<string, gfunc::callable> *categorical_array_properties()
+{
+  static pair<string, gfunc::callable> categorical_array_properties[1] = {
+      pair<string, gfunc::callable>(
+          "ints", gfunc::make_callable(&property_ndo_get_ints, "self"))};
+
+  return categorical_array_properties;
+}
+
 void categorical_type::get_dynamic_array_properties(
                 const std::pair<std::string, gfunc::callable> **out_properties,
                 size_t *out_count) const
 {
-  *out_properties = categorical_array_properties;
-  *out_count = categorical_array_properties_size;
+  *out_properties = categorical_array_properties();
+  *out_count = categorical_array_properties_size();
 }
 
 static nd::array property_type_get_categories(const ndt::type& d) {
@@ -664,19 +673,4 @@ void categorical_type::get_dynamic_type_properties(
 
     *out_properties = categorical_type_properties;
     *out_count = sizeof(categorical_type_properties) / sizeof(categorical_type_properties[0]);
-}
-
-void init::categorical_type_init()
-{
-  categorical_array_properties_size = 1;
-  categorical_array_properties =
-      new pair<string, gfunc::callable>[categorical_array_properties_size];
-  categorical_array_properties[0] = pair<string, gfunc::callable>(
-      "ints", gfunc::make_callable(&property_ndo_get_ints, "self"));
-}
-
-void init::categorical_type_cleanup()
-{
-  delete[] categorical_array_properties;
-  categorical_array_properties = NULL;
 }

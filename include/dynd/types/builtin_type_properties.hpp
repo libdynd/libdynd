@@ -38,9 +38,4 @@ size_t make_builtin_type_elwise_property_setter_kernel(
                 const char *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx);
 
-namespace init {
-  void builtins_type_init();
-  void builtins_type_cleanup();
-} // namespace init
-
 } // namespace dynd

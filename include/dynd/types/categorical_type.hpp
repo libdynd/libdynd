@@ -125,9 +125,4 @@ namespace ndt {
   ndt::type factor_categorical(const nd::array &values);
 } // namespace ndt
 
-namespace init {
-  void categorical_type_init();
-  void categorical_type_cleanup();
-} // namespace init
-
 } // namespace dynd

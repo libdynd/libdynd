@@ -519,6 +519,7 @@ TEST(StringType, Concatenation) {
 }
 */
 
+/*
 TEST(StringType, Find1) {
     nd::array a, b, c;
 
@@ -552,6 +553,7 @@ TEST(StringType, Find2) {
     EXPECT_EQ(-1, c(4).as<intptr_t>());
     EXPECT_EQ(-1, c(5).as<intptr_t>());
 }
+*/
 
 template<class T>
 static bool ascii_T_compare(const char *x, const T *y, intptr_t count)

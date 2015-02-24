@@ -23,8 +23,21 @@ static nd::array property_complex_conj(const nd::array& n) {
     return n.replace_dtype(ndt::make_property(n.get_dtype(), "conj"));
 }
 
-static size_t complex_array_properties_size;
-static pair<string, gfunc::callable> *complex_array_properties;
+static size_t complex_array_properties_size() { return 3; }
+
+static const pair<string, gfunc::callable> *complex_array_properties()
+{
+  static const pair<string, gfunc::callable> complex_array_properties[3] = {
+      pair<string, gfunc::callable>(
+          "real", gfunc::make_callable(&property_complex_real, "self")),
+      pair<string, gfunc::callable>(
+          "imag", gfunc::make_callable(&property_complex_imag, "self")),
+      pair<string, gfunc::callable>(
+          "conj", gfunc::make_callable(&property_complex_conj, "self"))};
+
+  return complex_array_properties;
+}
+
 void dynd::get_builtin_type_dynamic_array_properties(
                 type_id_t builtin_type_id,
                 const std::pair<std::string, gfunc::callable> **out_properties,
@@ -33,8 +46,8 @@ void dynd::get_builtin_type_dynamic_array_properties(
     switch (builtin_type_id) {
         case complex_float32_type_id:
         case complex_float64_type_id:
-            *out_properties = complex_array_properties;
-            *out_count = complex_array_properties_size;
+            *out_properties = complex_array_properties();
+            *out_count = complex_array_properties_size();
             break;
         default:
             *out_properties = NULL;
@@ -253,23 +266,4 @@ size_t dynd::make_builtin_type_elwise_property_setter_kernel(
   ss << "dynd type " << ndt::type(builtin_type_id)
      << " given an invalid property index " << dst_elwise_property_index;
   throw runtime_error(ss.str());
-}
-
-void init::builtins_type_init()
-{
-  complex_array_properties_size = 3;
-  complex_array_properties =
-      new pair<string, gfunc::callable>[complex_array_properties_size];
-  complex_array_properties[0] = pair<string, gfunc::callable>(
-      "real", gfunc::make_callable(&property_complex_real, "self"));
-  complex_array_properties[1] = pair<string, gfunc::callable>(
-      "imag", gfunc::make_callable(&property_complex_imag, "self"));
-  complex_array_properties[2] = pair<string, gfunc::callable>(
-      "conj", gfunc::make_callable(&property_complex_conj, "self"));
-}
-
-void init::builtins_type_cleanup()
-{
-  delete[] complex_array_properties;
-  complex_array_properties = NULL;
 }

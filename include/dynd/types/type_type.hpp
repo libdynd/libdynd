@@ -7,7 +7,6 @@
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
-#include <dynd/types/static_type_instances.hpp>
 
 namespace dynd {
 
@@ -75,7 +74,8 @@ namespace ndt {
   /** Returns type "type" */
   inline const ndt::type &make_type()
   {
-    return *reinterpret_cast<const ndt::type *>(&types::type_tp);
+    static const type type_tp(new type_type(), false);
+    return type_tp;
   }
 
   inline ndt::type make_type(const ndt::type &pattern_tp)
