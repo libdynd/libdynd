@@ -31,6 +31,11 @@ if [ "$1" == "-version" ]; then
     exit 0
 fi
 
+if [ "$1" == "-cuda" ]; then
+    echo @DYND_CUDA_01@
+    exit 0
+fi
+
 echo Usage: $0 OPTION
 echo Print information for linking libdynd.
 echo
@@ -39,6 +44,7 @@ echo   -lflag       Prints the linker option to link libdynd.
 echo   -libname     Prints the name of the libdynd library.
 echo   -libpath     Prints the full path of the libdynd library.
 echo   -includedir  Prints the directory with the libdynd include files.
+echo   -cuda        Prints whether libdynd was built with CUDA.
 echo   -version     Prints the version of libdynd.
 exit 1
 

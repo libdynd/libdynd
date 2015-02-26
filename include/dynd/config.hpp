@@ -434,7 +434,7 @@ inline void libdynd_cleanup() {}
   * the build of dynd being linked against was built with CUDA
   * support enabled.
   */
-inline bool built_with_cuda();
+bool built_with_cuda();
 
 } // namespace dynd
 
