@@ -18,6 +18,12 @@
 #include <type_traits>
 #include <utility>
 
+#ifdef __NVCC__
+#ifndef DYND_CUDA
+#define DYND_CUDA
+#endif
+#endif
+
 #ifdef DYND_CUDA
 #include <cuda_runtime.h>
 #endif
@@ -428,14 +434,7 @@ inline void libdynd_cleanup() {}
   * the build of dynd being linked against was built with CUDA
   * support enabled.
   */
-inline bool built_with_cuda()
-{
-#ifdef DYND_CUDA
-  return true;
-#else
-  return false;
-#endif
-}
+bool built_with_cuda();
 
 } // namespace dynd
 

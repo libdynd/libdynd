@@ -61,9 +61,14 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 if(DYND_CUDA)
-    # CUDA 6.5, which has experimental C++11 support,
-    # is the minimum required
+    set(DYND_CUDA_01 1)
+
+    # CUDA 6.5, which has experimental C++11 support, is the minimum required
     find_package(CUDA 6.5 REQUIRED)
+
+    add_definitions(-DDYND_CUDA)
+else()
+    set(DYND_CUDA_01 0)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH
@@ -452,6 +457,7 @@ set(libdynd_SRC
     # Main
     src/dynd/array.cpp
     src/dynd/array_range.cpp
+    src/dynd/config.cpp
     src/dynd/dim_iter.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
