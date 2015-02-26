@@ -145,44 +145,42 @@ CompareDyNDArrayToJSON(const char *expr1, const char *expr2, const char *json,
   return CompareDyNDArrays(expr1, expr2, a, b);
 }
 
-inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
-                                                const char *expr2,
-                                                const dynd::ndt::type &pattern,
-                                                const dynd::ndt::type &actual)
+inline ::testing::AssertionResult
+MatchNdtTypes(const char *expr1, const char *expr2,
+              const dynd::ndt::type &pattern, const dynd::ndt::type &candidate)
 {
-  if (pattern.matches(actual)) {
+  if (pattern.match(candidate)) {
     return ::testing::AssertionSuccess();
   } else {
     return ::testing::AssertionFailure()
-           << "The type of " << expr2 << " does not match pattern " << expr1
-           << "\n" << expr1 << " has value " << pattern << ",\n" << expr2
-           << " has value " << actual << ".";
+           << "The type of candidate " << expr2 << " does not match pattern "
+           << expr1 << "\n" << expr1 << " has value " << pattern << ",\n"
+           << expr2 << " has value " << candidate << ".";
   }
 }
 
-inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
-                                                const char *expr2,
-                                                const char *pattern,
-                                                const dynd::ndt::type &actual)
+inline ::testing::AssertionResult
+MatchNdtTypes(const char *expr1, const char *expr2, const char *pattern,
+              const dynd::ndt::type &candidate)
 {
-  return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern), actual);
+  return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern), candidate);
 }
 
 inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
                                                 const char *expr2,
                                                 const dynd::ndt::type &pattern,
-                                                const char *actual)
+                                                const char *candidate)
 {
-  return MatchNdtTypes(expr1, expr2, pattern, dynd::ndt::type(actual));
+  return MatchNdtTypes(expr1, expr2, pattern, dynd::ndt::type(candidate));
 }
 
 inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
                                                 const char *expr2,
                                                 const char *pattern,
-                                                const char *actual)
+                                                const char *candidate)
 {
   return MatchNdtTypes(expr1, expr2, dynd::ndt::type(pattern),
-                       dynd::ndt::type(actual));
+                       dynd::ndt::type(candidate));
 }
 
 /**
@@ -211,8 +209,14 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
 #define EXPECT_JSON_EQ_ARR(expected, actual)                                   \
   EXPECT_PRED_FORMAT2(CompareDyNDArrayToJSON, expected, actual)
 
-#define EXPECT_TYPE_MATCHES(pattern, actual)                                   \
-  EXPECT_PRED_FORMAT2(MatchNdtTypes, pattern, actual)
+/**
+ * Macro to validate that a candidate type matches against
+ * the provided pattern.
+ *
+ * EXPECT_TYPE_MATCH("Fixed * T", "10 * int32");
+ */
+#define EXPECT_TYPE_MATCH(pattern, candidate)                                \
+  EXPECT_PRED_FORMAT2(MatchNdtTypes, pattern, candidate)
 
 inline float rel_error(float expected, float actual)
 {

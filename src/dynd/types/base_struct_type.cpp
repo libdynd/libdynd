@@ -203,38 +203,39 @@ intptr_t base_struct_type::apply_linear_index(
   }
 }
 
-bool base_struct_type::matches(const char *arrmeta,
-                               const ndt::type &other_tp,
-                               const char *other_arrmeta,
-                               std::map<nd::string, ndt::type> &tp_vars) const
+bool base_struct_type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                             const char *candidate_arrmeta,
+                             std::map<nd::string, ndt::type> &tp_vars) const
 {
-  intptr_t other_field_count =
-      other_tp.extended<base_struct_type>()->get_field_count();
-  bool other_variadic = other_tp.extended<base_tuple_type>()->is_variadic();
+  intptr_t candidate_field_count =
+      candidate_tp.extended<base_struct_type>()->get_field_count();
+  bool candidate_variadic =
+      candidate_tp.extended<base_tuple_type>()->is_variadic();
 
-  if ((m_field_count == other_field_count && !other_variadic) ||
-      ((other_field_count >= m_field_count) && m_variadic)) {
+  if ((m_field_count == candidate_field_count && !candidate_variadic) ||
+      ((candidate_field_count >= m_field_count) && m_variadic)) {
     // Compare the field names
-    if (m_field_count == other_field_count) {
+    if (m_field_count == candidate_field_count) {
       if (!get_field_names().equals_exact(
-              other_tp.extended<base_struct_type>()->get_field_names())) {
+              candidate_tp.extended<base_struct_type>()->get_field_names())) {
         return false;
       }
-    } else {
+    }
+    else {
       nd::array leading_field_names = get_field_names();
       if (!leading_field_names.equals_exact(
-              other_tp.extended<base_struct_type>()->get_field_names()(
+              candidate_tp.extended<base_struct_type>()->get_field_names()(
                   irange() < m_field_count))) {
         return false;
       }
     }
 
     const ndt::type *fields = get_field_types_raw();
-    const ndt::type *other_fields =
-        other_tp.extended<base_struct_type>()->get_field_types_raw();
+    const ndt::type *candidate_fields =
+        candidate_tp.extended<base_struct_type>()->get_field_types_raw();
     for (intptr_t i = 0; i < m_field_count; ++i) {
-      if (!fields[i].matches(arrmeta, other_fields[i], other_arrmeta,
-                             tp_vars)) {
+      if (!fields[i].match(arrmeta, candidate_fields[i], candidate_arrmeta,
+                           tp_vars)) {
         return false;
       }
     }

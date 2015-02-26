@@ -14,15 +14,15 @@ using namespace dynd;
 base_dim_type::~base_dim_type() {
 }
 
-bool base_dim_type::matches(const char *arrmeta, const ndt::type &other_tp,
-                            const char *other_arrmeta,
-                            std::map<nd::string, ndt::type> &tp_vars) const
+bool base_dim_type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                          const char *candidate_arrmeta,
+                          std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (get_type_id() != other_tp.get_type_id()) {
+  if (get_type_id() != candidate_tp.get_type_id()) {
     return false;
   }
 
-  return m_element_tp.matches(arrmeta,
-                              other_tp.extended<base_dim_type>()->m_element_tp,
-                              other_arrmeta, tp_vars);
+  return m_element_tp.match(
+      arrmeta, candidate_tp.extended<base_dim_type>()->m_element_tp,
+      candidate_arrmeta, tp_vars);
 }

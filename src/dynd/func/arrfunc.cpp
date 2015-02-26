@@ -151,7 +151,7 @@ void nd::detail::validate_kwd_types(const arrfunc_type *af_tp,
       expected_tp = expected_tp.p("value_type").as<ndt::type>();
     }
 
-    if (!expected_tp.matches(actual_tp.value_type(), tp_vars)) {
+    if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
       std::stringstream ss;
       ss << "keyword \"" << af_tp->get_kwd_name(j) << "\" does not match, ";
       ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp;
@@ -201,7 +201,7 @@ void nd::detail::check_arg(const arrfunc_type *af_tp, intptr_t i,
                            std::map<nd::string, ndt::type> &tp_vars)
 {
   ndt::type expected_tp = af_tp->get_pos_type(i);
-  if (!expected_tp.matches(NULL, actual_tp.value_type(), actual_arrmeta,
+  if (!expected_tp.match(NULL, actual_tp.value_type(), actual_arrmeta,
                                       tp_vars)) {
     std::stringstream ss;
     ss << "positional argument " << i << " to arrfunc does not match, ";

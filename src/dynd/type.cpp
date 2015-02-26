@@ -96,11 +96,11 @@ ndt::type ndt::type::at_array(int nindices, const irange *indices) const
   }
 }
 
-bool ndt::type::matches(const char *arrmeta, const ndt::type &other_tp,
-                        const char *other_arrmeta,
-                        std::map<nd::string, ndt::type> &tp_vars) const
+bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                      const char *candidate_arrmeta,
+                      std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (extended() == other_tp.extended()) {
+  if (extended() == candidate_tp.extended()) {
     return true;
   }
 
@@ -108,19 +108,19 @@ bool ndt::type::matches(const char *arrmeta, const ndt::type &other_tp,
     return false;
   }
 
-  return extended()->matches(arrmeta, other_tp, other_arrmeta, tp_vars);
+  return extended()->match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
 }
 
-bool ndt::type::matches(const ndt::type &other_tp,
-                        std::map<nd::string, ndt::type> &tp_vars) const
+bool ndt::type::match(const ndt::type &candidate_tp,
+                      std::map<nd::string, ndt::type> &tp_vars) const
 {
-  return matches(NULL, other_tp, NULL, tp_vars);
+  return match(NULL, candidate_tp, NULL, tp_vars);
 }
 
-bool ndt::type::matches(const ndt::type &other_tp) const
+bool ndt::type::match(const ndt::type &candidate_tp) const
 {
   std::map<nd::string, ndt::type> tp_vars;
-  return matches(other_tp, tp_vars);
+  return match(candidate_tp, tp_vars);
 }
 
 nd::array ndt::type::p(const char *property_name) const

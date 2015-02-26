@@ -52,9 +52,9 @@ public:
                                    memory_block_data *embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
-    bool matches(const char *arrmeta, const ndt::type &other_tp,
-                 const char *other_arrmeta,
-                 std::map<nd::string, ndt::type> &tp_vars) const;
+    bool match(const char *arrmeta, const ndt::type &candidate_tp,
+               const char *candidate_arrmeta,
+               std::map<nd::string, ndt::type> &tp_vars) const;
 
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,

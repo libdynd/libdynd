@@ -357,17 +357,17 @@ intptr_t option_type::make_assignment_kernel(
       ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
 }
 
-bool option_type::matches(const char *arrmeta, const ndt::type &other_tp,
-                          const char *other_arrmeta,
-                          std::map<nd::string, ndt::type> &tp_vars) const
+bool option_type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                        const char *candidate_arrmeta,
+                        std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.get_type_id() != option_type_id) {
+  if (candidate_tp.get_type_id() != option_type_id) {
     return false;
   }
 
-  return m_value_tp.matches(arrmeta,
-                            other_tp.extended<option_type>()->m_value_tp,
-                            other_arrmeta, tp_vars);
+  return m_value_tp.match(arrmeta,
+                          candidate_tp.extended<option_type>()->m_value_tp,
+                          candidate_arrmeta, tp_vars);
 }
 
 static ndt::type property_get_value_type(const ndt::type &tp)

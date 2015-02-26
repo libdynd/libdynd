@@ -288,28 +288,33 @@ public:
     }
 
     /**
-     * Matches the provided type against another type, both of which may
-     * be symbolic types. It should be called with a symbolic type as 'this',
-     * although the other_tp may have symbolic types if each type matches exactly.
+     * Matches the provided candidate type against the current type. The
+     * 'this' type is the pattern to match against, and may be symbolic
+     * or concrete. If it is concrete, the candidate type must be equal
+     * for the match to succeed.
+     *
+     * The candidate type may also be symbolic.
+     *
      * Returns true if it matches, false otherwise.
      *
-     * This version may be called multiple times in a row, building up the
+     * This function may be called multiple times in a row, building up the
      * typevars dictionary which is used to enforce consistent usage of
      * type vars.
      *
      * \param arrmeta     The arrmeta for this type, maybe NULL.
-     * \param other_tp    A symbolic (or concrete) type to match against.
-     * \param other_arrmeta     The arrmeta for the other type, maybe NULL.
+     * \param candidate_tp    A type to match against this one.
+     * \param candidate_arrmeta   The arrmeta for the candidate type,
+     *                            may be NULL.
      * \param tp_vars     A map of names to matched type vars.
      */
-    bool matches(const char *arrmeta, const ndt::type &other_tp,
-                 const char *other_arrmeta,
-                 std::map<nd::string, ndt::type> &tp_vars) const;
+    bool match(const char *arrmeta, const ndt::type &candidate_tp,
+               const char *candidate_arrmeta,
+               std::map<nd::string, ndt::type> &tp_vars) const;
 
-    bool matches(const ndt::type &other_tp,
-                 std::map<nd::string, ndt::type> &tp_vars) const;
+    bool match(const ndt::type &candidate_tp,
+               std::map<nd::string, ndt::type> &tp_vars) const;
 
-    bool matches(const ndt::type &other_tp) const;
+    bool match(const ndt::type &candidate_tp) const;
 
     /**
      * Accesses a dynamic property of the type.

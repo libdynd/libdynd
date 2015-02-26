@@ -178,11 +178,13 @@ void any_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   throw runtime_error(ss.str());
 }
 
-bool any_sym_type::matches(
-    const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(other_tp),
-    const char *DYND_UNUSED(other_arrmeta),
+bool any_sym_type::match(
+    const char *DYND_UNUSED(arrmeta),
+    const ndt::type &DYND_UNUSED(candidate_tp),
+    const char *DYND_UNUSED(candidate_arrmeta),
     std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
 {
+  // "Any" matches against everything
   return true;
 }
 

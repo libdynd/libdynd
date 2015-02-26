@@ -223,25 +223,27 @@ void fixed_dimsym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   throw runtime_error(ss.str());
 }
 
-bool fixed_dimsym_type::matches(const char *arrmeta, const ndt::type &other_tp,
-                                const char *other_arrmeta,
-                                std::map<nd::string, ndt::type> &tp_vars) const
+bool fixed_dimsym_type::match(const char *arrmeta,
+                              const ndt::type &candidate_tp,
+                              const char *candidate_arrmeta,
+                              std::map<nd::string, ndt::type> &tp_vars) const
 {
-  switch (other_tp.get_type_id()) {
+  switch (candidate_tp.get_type_id()) {
   case fixed_dim_type_id:
-    return m_element_tp.matches(
-        arrmeta, other_tp.extended<fixed_dim_type>()->get_element_type(),
-        DYND_INC_IF_NOT_NULL(other_arrmeta, sizeof(fixed_dim_type_arrmeta)),
+    return m_element_tp.match(
+        arrmeta, candidate_tp.extended<fixed_dim_type>()->get_element_type(),
+        DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(fixed_dim_type_arrmeta)),
         tp_vars);
   case cfixed_dim_type_id:
-    return m_element_tp.matches(
-        arrmeta, other_tp.extended<cfixed_dim_type>()->get_element_type(),
-        DYND_INC_IF_NOT_NULL(other_arrmeta, sizeof(cfixed_dim_type_arrmeta)),
+    return m_element_tp.match(
+        arrmeta, candidate_tp.extended<cfixed_dim_type>()->get_element_type(),
+        DYND_INC_IF_NOT_NULL(candidate_arrmeta,
+                             sizeof(cfixed_dim_type_arrmeta)),
         tp_vars);
   case fixed_dimsym_type_id:
-    return m_element_tp.matches(
-        arrmeta, other_tp.extended<fixed_dimsym_type>()->get_element_type(),
-        other_arrmeta, tp_vars);
+    return m_element_tp.match(
+        arrmeta, candidate_tp.extended<fixed_dimsym_type>()->get_element_type(),
+        candidate_arrmeta, tp_vars);
   case any_sym_type_id:
     return true;
   default:

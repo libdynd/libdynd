@@ -148,17 +148,17 @@ void base_memory_type::arrmeta_destruct(char *arrmeta) const
   }
 }
 
-bool base_memory_type::matches(const char *arrmeta, const ndt::type &other_tp,
-                               const char *other_arrmeta,
-                               std::map<nd::string, ndt::type> &tp_vars) const
+bool base_memory_type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                             const char *candidate_arrmeta,
+                             std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.get_kind() != memory_kind) {
+  if (candidate_tp.get_kind() != memory_kind) {
     return false;
   }
 
-  return m_element_tp.matches(
-      arrmeta, other_tp.extended<base_memory_type>()->m_element_tp,
-      other_arrmeta, tp_vars);
+  return m_element_tp.match(
+      arrmeta, candidate_tp.extended<base_memory_type>()->m_element_tp,
+      candidate_arrmeta, tp_vars);
 }
 
 static ndt::type property_get_storage_type(const ndt::type &tp)

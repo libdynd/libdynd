@@ -614,27 +614,28 @@ void cfixed_dim_type::foreach_leading(const char *arrmeta, char *data,
   }
 }
 
-bool cfixed_dim_type::matches(const char *arrmeta, const ndt::type &other_tp,
-                              const char *other_arrmeta,
-                              std::map<nd::string, ndt::type> &tp_vars) const
+bool cfixed_dim_type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                            const char *candidate_arrmeta,
+                            std::map<nd::string, ndt::type> &tp_vars) const
 {
-  switch (other_tp.get_type_id()) {
+  switch (candidate_tp.get_type_id()) {
   case fixed_dim_type_id:
+    // TODO XXX This must also validate the stride in the fixed_dim arrmeta
     return m_dim_size ==
-               other_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
-           m_element_tp.matches(
+               candidate_tp.extended<fixed_dim_type>()->get_fixed_dim_size() &&
+           m_element_tp.match(
                DYND_INC_IF_NOT_NULL(arrmeta, sizeof(cfixed_dim_type_arrmeta)),
-               other_tp.extended<base_dim_type>()->get_element_type(),
-               DYND_INC_IF_NOT_NULL(other_arrmeta,
+               candidate_tp.extended<base_dim_type>()->get_element_type(),
+               DYND_INC_IF_NOT_NULL(candidate_arrmeta,
                                     sizeof(fixed_dim_type_arrmeta)),
                tp_vars);
   case cfixed_dim_type_id:
-    return m_dim_size == other_tp.extended<cfixed_dim_type>()->m_dim_size &&
-           m_stride == other_tp.extended<cfixed_dim_type>()->m_stride &&
-           m_element_tp.matches(
+    return m_dim_size == candidate_tp.extended<cfixed_dim_type>()->m_dim_size &&
+           m_stride == candidate_tp.extended<cfixed_dim_type>()->m_stride &&
+           m_element_tp.match(
                DYND_INC_IF_NOT_NULL(arrmeta, sizeof(cfixed_dim_type_arrmeta)),
-               other_tp.extended<cfixed_dim_type>()->m_element_tp,
-               DYND_INC_IF_NOT_NULL(other_arrmeta,
+               candidate_tp.extended<cfixed_dim_type>()->m_element_tp,
+               DYND_INC_IF_NOT_NULL(candidate_arrmeta,
                                     sizeof(cfixed_dim_type_arrmeta)),
                tp_vars);
   default:

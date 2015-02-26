@@ -109,9 +109,9 @@ public:
   virtual void data_zeroinit(char *data, size_t size) const = 0;
   virtual void data_free(char *data) const = 0;
 
-  virtual bool matches(const char *arrmeta, const ndt::type &other_tp,
-                       const char *other_arrmeta,
-                       std::map<nd::string, ndt::type> &tp_vars) const;
+  virtual bool match(const char *arrmeta, const ndt::type &candidate_tp,
+                     const char *candidate_arrmeta,
+                     std::map<nd::string, ndt::type> &tp_vars) const;
 
   virtual void get_dynamic_type_properties(
       const std::pair<std::string, gfunc::callable> **out_properties,

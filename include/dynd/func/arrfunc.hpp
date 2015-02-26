@@ -89,7 +89,7 @@ namespace nd {
     {
       if (name == "dst_tp") {
         const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.matches(value, tp_vars)) {
+        if (expected_tp.match(value, tp_vars)) {
           return true;
         }
 
@@ -108,7 +108,7 @@ namespace nd {
     {
       if (name == "dst_tp") {
         const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.matches(value.as<ndt::type>(), tp_vars)) {
+        if (expected_tp.match(value.as<ndt::type>(), tp_vars)) {
           return true;
         }
 
@@ -118,7 +118,7 @@ namespace nd {
         throw std::invalid_argument(ss.str());
       } else if (name == "dst") {
         const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.matches(value.get_type(), tp_vars)) {
+        if (expected_tp.match(value.get_type(), tp_vars)) {
           dst = value;
           return true;
         }
