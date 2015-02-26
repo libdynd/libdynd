@@ -110,36 +110,36 @@ void typevar_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
     throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_dim_type::matches(const char *arrmeta,
-                               const ndt::type &other_tp, const char *DYND_UNUSED(other_arrmeta),
-                               std::map<nd::string, ndt::type> &tp_vars) const
+bool typevar_dim_type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                             const char *DYND_UNUSED(candidate_arrmeta),
+                             std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (!other_tp.is_dim()) {
+  if (!candidate_tp.is_dim()) {
     return false;
   }
 
   ndt::type &tv_type = tp_vars[get_name()];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
-    tv_type = other_tp;
-    return m_element_tp.matches(
-        arrmeta, other_tp.get_type_at_dimension(NULL, 1),
-        NULL, tp_vars);
-  } else {
+    tv_type = candidate_tp;
+    return m_element_tp.match(
+        arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
+  }
+  else {
     // Make sure the type matches previous
     // instances of the type var
-    if (other_tp.get_type_id() != tv_type.get_type_id()) {
+    if (candidate_tp.get_type_id() != tv_type.get_type_id()) {
       return false;
     }
-    switch (other_tp.get_type_id()) {
+    switch (candidate_tp.get_type_id()) {
     case fixed_dim_type_id:
-      if (other_tp.extended<fixed_dim_type>()->get_fixed_dim_size() !=
+      if (candidate_tp.extended<fixed_dim_type>()->get_fixed_dim_size() !=
           tv_type.extended<fixed_dim_type>()->get_fixed_dim_size()) {
         return false;
       }
       break;
     case cfixed_dim_type_id:
-      if (other_tp.extended<cfixed_dim_type>()->get_fixed_dim_size() !=
+      if (candidate_tp.extended<cfixed_dim_type>()->get_fixed_dim_size() !=
           tv_type.extended<cfixed_dim_type>()->get_fixed_dim_size()) {
         return false;
       }
@@ -147,9 +147,8 @@ bool typevar_dim_type::matches(const char *arrmeta,
     default:
       break;
     }
-    return m_element_tp.matches(
-        arrmeta, other_tp.get_type_at_dimension(NULL, 1),
-        NULL, tp_vars);
+    return m_element_tp.match(
+        arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
   }
 }
 

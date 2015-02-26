@@ -553,9 +553,9 @@ public:
                            comparison_type_t comptype,
                            const eval::eval_context *ectx) const;
 
-    virtual bool matches(const char *arrmeta, const ndt::type &other_tp,
-                         const char *other_arrmeta,
-                         std::map<nd::string, ndt::type> &tp_vars) const;
+    virtual bool match(const char *arrmeta, const ndt::type &candidate_tp,
+                       const char *candidate_arrmeta,
+                       std::map<nd::string, ndt::type> &tp_vars) const;
 
     /**
      * Call the callback on each element of the array with given data/arrmeta along the leading

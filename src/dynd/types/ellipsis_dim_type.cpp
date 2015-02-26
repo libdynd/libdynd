@@ -121,15 +121,17 @@ void ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of ellipsis type");
 }
 
-bool ellipsis_dim_type::matches(const char *arrmeta, const ndt::type &other_tp,
-                                const char *other_arrmeta,
-                                std::map<nd::string, ndt::type> &tp_vars) const
+bool ellipsis_dim_type::match(const char *arrmeta,
+                              const ndt::type &candidate_tp,
+                              const char *candidate_arrmeta,
+                              std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.get_type_id() == any_sym_type_id) {
+  // TODO XXX This is wrong, "Any" could represent a type that doesn't match against this one...
+  if (candidate_tp.get_type_id() == any_sym_type_id) {
     return true;
   }
 
-  if (other_tp.get_ndim() == 0) {
+  if (candidate_tp.get_ndim() == 0) {
     const nd::string &tv_name = get_name();
     if (!tv_name.is_null()) {
       ndt::type &tv_type = tp_vars[tv_name];
@@ -137,7 +139,8 @@ bool ellipsis_dim_type::matches(const char *arrmeta, const ndt::type &other_tp,
         // This typevar hasn't been seen yet, make it
         // be an empty dim fragment
         tv_type = ndt::make_dim_fragment();
-      } else {
+      }
+      else {
         // Make sure the type matches previous
         // instances of the type var, which is
         // always ok from the zero dims case
@@ -150,40 +153,48 @@ bool ellipsis_dim_type::matches(const char *arrmeta, const ndt::type &other_tp,
         }
       }
     }
-    return m_element_tp.matches(arrmeta, other_tp, other_arrmeta, tp_vars);
-  } else if (other_tp.get_type_id() == ellipsis_dim_type_id) {
-    return m_element_tp.matches(
-        arrmeta, other_tp.extended<ellipsis_dim_type>()->m_element_tp, other_arrmeta, tp_vars);
-  } else if (other_tp.get_ndim() >= get_ndim() - 1) {
-    intptr_t matched_ndim = other_tp.get_ndim() - get_ndim() + 1;
+    return m_element_tp.match(arrmeta, candidate_tp, candidate_arrmeta,
+                                tp_vars);
+  }
+  else if (candidate_tp.get_type_id() == ellipsis_dim_type_id) {
+    return m_element_tp.match(
+        arrmeta, candidate_tp.extended<ellipsis_dim_type>()->m_element_tp,
+        candidate_arrmeta, tp_vars);
+  }
+  else if (candidate_tp.get_ndim() >= get_ndim() - 1) {
+    intptr_t matched_ndim = candidate_tp.get_ndim() - get_ndim() + 1;
     const nd::string &tv_name = get_name();
     if (!tv_name.is_null()) {
       ndt::type &tv_type = tp_vars[tv_name];
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet, so it's
         // a dim fragment of the given size.
-        tv_type = ndt::make_dim_fragment(matched_ndim, other_tp);
-      } else {
+        tv_type = ndt::make_dim_fragment(matched_ndim, candidate_tp);
+      }
+      else {
         // Make sure the type matches previous  instances of the type var,
         // which in this case means they should broadcast together.
         if (tv_type.get_type_id() == dim_fragment_type_id) {
           ndt::type result =
               tv_type.extended<dim_fragment_type>()->broadcast_with_type(
-                  matched_ndim, other_tp);
+                  matched_ndim, candidate_tp);
           if (result.is_null()) {
             return false;
-          } else {
+          }
+          else {
             tv_type.swap(result);
           }
-        } else {
+        }
+        else {
           // Inconsistent type var usage, previously
           // wasn't a dim fragment
           return false;
         }
       }
     }
-    return m_element_tp
-        .matches(arrmeta, other_tp.get_type_at_dimension(NULL, matched_ndim), NULL, tp_vars);
+    return m_element_tp.match(
+        arrmeta, candidate_tp.get_type_at_dimension(NULL, matched_ndim), NULL,
+        tp_vars);
   }
 
   return false;

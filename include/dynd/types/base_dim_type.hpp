@@ -100,9 +100,9 @@ public:
       char *dst_arrmeta, const char *src_arrmeta,
       memory_block_data *embedded_reference) const = 0;
 
-  virtual bool matches(const char *arrmeta, const ndt::type &other_tp,
-                       const char *other_arrmeta,
-                       std::map<nd::string, ndt::type> &tp_vars) const;
+  virtual bool match(const char *arrmeta, const ndt::type &candidate_tp,
+                     const char *candidate_arrmeta,
+                     std::map<nd::string, ndt::type> &tp_vars) const;
 };
 
 } // namespace dynd

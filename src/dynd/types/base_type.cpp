@@ -305,15 +305,18 @@ size_t base_type::make_comparison_kernel(
     throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
-bool base_type::matches(const char *DYND_UNUSED(arrmeta),
-                        const ndt::type &other_tp, const char *DYND_UNUSED(other_arrmeta),
-                        std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+bool base_type::match(
+    const char *DYND_UNUSED(arrmeta), const ndt::type &candidate_tp,
+    const char *DYND_UNUSED(candidate_arrmeta),
+    std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
 {
-  if (other_tp.is_builtin()) {
+  // The default match implementation is equality, pattern types
+  // must override this virtual function.
+  if (candidate_tp.is_builtin()) {
     return false;
   }
 
-  return *this == *other_tp.extended();
+  return *this == *candidate_tp.extended();
 }
 
 void base_type::foreach_leading(const char *DYND_UNUSED(arrmeta),

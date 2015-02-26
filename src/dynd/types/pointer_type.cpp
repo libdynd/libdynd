@@ -396,20 +396,20 @@ nd::array pointer_type::get_option_nafunc() const
       get_value_type().get_type_id());
 }
 
-bool pointer_type::matches(const char *arrmeta,
-                           const ndt::type &other_tp, const char *other_arrmeta,
-                           std::map<nd::string, ndt::type> &tp_vars) const
+bool pointer_type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                         const char *candidate_arrmeta,
+                         std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.get_type_id() != pointer_type_id) {
+  if (candidate_tp.get_type_id() != pointer_type_id) {
     return false;
   }
 
-  return m_target_tp.matches(
-      (arrmeta == NULL) ? arrmeta
-                             : (arrmeta + sizeof(pointer_type_arrmeta)),
-      other_tp.extended<pointer_type>()->m_target_tp,
-      (other_arrmeta == NULL) ? other_arrmeta
-                              : (other_arrmeta + sizeof(pointer_type_arrmeta)),
+  // TODO XXX If the arrmeta is non-null, need to compare the offset and the
+  //          data reference
+  return m_target_tp.match(
+      DYND_INC_IF_NOT_NULL(arrmeta, sizeof(pointer_type_arrmeta)),
+      candidate_tp.extended<pointer_type>()->m_target_tp,
+      DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(pointer_type_arrmeta)),
       tp_vars);
 }
 

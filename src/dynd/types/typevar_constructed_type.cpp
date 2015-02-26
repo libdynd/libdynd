@@ -27,7 +27,7 @@ typevar_constructed_type::typevar_constructed_type(const nd::string &name,
     ss << " is not valid, it must be alphanumeric and begin with a capital";
     throw type_error(ss.str());
   }
-//else if (!args.get_type().matches(args_pattern)) {
+//else if (!args.get_type().match(args_pattern)) {
   //  stringstream ss;
     //ss << "dynd constructed typevar must have args matching " << args_pattern
       // << ", which " << args.get_type() << " does not";
@@ -121,20 +121,19 @@ typevar_constructed_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
   throw type_error("Cannot store data of typevar_constructed type");
 }
 
-bool typevar_constructed_type::matches(
-    const char *arrmeta,
-    const ndt::type &other_tp, const char *other_arrmeta,
+bool typevar_constructed_type::match(
+    const char *arrmeta, const ndt::type &candidate_tp,
+    const char *candidate_arrmeta,
     std::map<nd::string, ndt::type> &tp_vars) const
 {
-  if (other_tp.get_type_id() == typevar_constructed_type_id) {
-    return m_arg.matches(
-        arrmeta,
-        other_tp.extended<typevar_constructed_type>()->m_arg, other_arrmeta,
-        tp_vars);
+  if (candidate_tp.get_type_id() == typevar_constructed_type_id) {
+    return m_arg.match(arrmeta,
+                         candidate_tp.extended<typevar_constructed_type>()->m_arg,
+                         candidate_arrmeta, tp_vars);
   }
 
-  if (other_tp.get_kind() != memory_kind) {
-    if (m_arg.matches(arrmeta, other_tp, other_arrmeta, tp_vars)) {
+  if (candidate_tp.get_kind() != memory_kind) {
+    if (m_arg.match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars)) {
       ndt::type &tv_type = tp_vars[m_name];
       if (tv_type.is_null()) {
         tv_type = ndt::make_type<void>();
@@ -147,12 +146,13 @@ bool typevar_constructed_type::matches(
   ndt::type &tv_type = tp_vars[m_name];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
-    tv_type = other_tp.extended<base_memory_type>()->with_replaced_storage_type(ndt::make_type<void>());
+    tv_type = candidate_tp.extended<base_memory_type>()->with_replaced_storage_type(
+        ndt::make_type<void>());
   }
 
-  return m_arg.matches(
-      arrmeta, other_tp.extended<base_memory_type>()->get_element_type(),
-      other_arrmeta, tp_vars);
+  return m_arg.match(
+      arrmeta, candidate_tp.extended<base_memory_type>()->get_element_type(),
+      candidate_arrmeta, tp_vars);
 }
 
 static nd::array property_get_name(const ndt::type &tp)
