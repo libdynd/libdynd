@@ -8,7 +8,7 @@
 using namespace std;
 using namespace dynd;
 
-bool built_with_cuda()
+bool dynd::built_with_cuda()
 {
 #ifdef DYND_CUDA
   return true;
