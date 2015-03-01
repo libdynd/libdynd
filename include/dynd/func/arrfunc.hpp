@@ -620,9 +620,9 @@ namespace nd {
     struct as_kwds {
       typedef typename instantiate<
           nd::detail::kwds,
-          typename take<type_sequence<T...>,
-                        make_index_sequence<1, sizeof...(T), 2>>::type>::type
-          type;
+          typename dynd::take<type_sequence<T...>,
+                              make_index_sequence<1, sizeof...(T), 2>>::type>::
+          type type;
     };
   }
 } // namespace dynd::nd
