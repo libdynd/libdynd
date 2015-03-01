@@ -124,17 +124,16 @@ TEST(MultiDispatchArrfunc, Values)
 
 /**
 TODO: This test broken when the order of resolve_option_values and
-resolve_dst_type changed.
-      It needs to be fixed.
+      resolve_dst_type changed. It should be fixed when we sort out multidispatch.
 
 TEST(MultiDispatchArrfunc, Dims)
 {
   vector<nd::arrfunc> funcs;
   // Instead of making a multidispatch arrfunc, then lifting it,
   // we lift multiple arrfuncs, then make a multidispatch arrfunc from them.
-  funcs.push_back(lift_arrfunc(nd::apply::make(&manip0)));
-  funcs.push_back(lift_arrfunc(nd::apply::make(&manip1)));
-  nd::arrfunc af = make_multidispatch_arrfunc(funcs.size(), &funcs[0]);
+  funcs.push_back(nd::functional::elwise(nd::functional::apply(&manip0)));
+  funcs.push_back(nd::functional::elwise(nd::functional::apply(&manip1)));
+  nd::arrfunc af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
   nd::array a, b, c;
 
   // Exactly match (int, int) -> real

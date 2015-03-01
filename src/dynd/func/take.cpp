@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/take_arrfunc.hpp>
+#include <dynd/func/take.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/shape_tools.hpp>
@@ -149,8 +149,8 @@ static int resolve_take_dst_type(
 static intptr_t instantiate_masked_take(
     const arrfunc_type_data *DYND_UNUSED(af_self),
     const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp,
+    const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -213,8 +213,8 @@ static intptr_t instantiate_masked_take(
 static intptr_t instantiate_indexed_take(
     const arrfunc_type_data *DYND_UNUSED(af_self),
     const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp,
+    const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -271,24 +271,23 @@ static intptr_t instantiate_indexed_take(
                                 kernel_request_single, ectx, kwds);
 }
 
-static intptr_t
-instantiate_take(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
-                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                 const char *const *src_arrmeta, kernel_request_t kernreq,
-                 const eval::eval_context *ectx, const nd::array &kwds,
-                 const std::map<nd::string, ndt::type> &tp_vars)
+static intptr_t instantiate_take(
+    const arrfunc_type_data *af_self, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
     return instantiate_masked_take(af_self, af_tp, ckb, ckb_offset, dst_tp,
-                                   dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-                                   ectx, kwds, tp_vars);
+                                   dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                                   kernreq, ectx, kwds, tp_vars);
   } else if (mask_el_tp.get_type_id() ==
              (type_id_t)type_id_of<intptr_t>::value) {
     return instantiate_indexed_take(af_self, af_tp, ckb, ckb_offset, dst_tp,
-                                    dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-                                    ectx, kwds, tp_vars);
+                                    dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                                    kernreq, ectx, kwds, tp_vars);
   } else {
     stringstream ss;
     ss << "take: unsupported type for the index " << mask_el_tp
@@ -297,21 +296,13 @@ instantiate_take(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
   }
 }
 
-nd::arrfunc kernels::make_take_arrfunc()
+nd::arrfunc nd::take::make()
 {
   // Masked take: (M * T, M * bool) -> var * T
   // Indexed take: (M * T, N * intptr) -> N * T
   // Combined: (M * T, N * Ix) -> R * T
-  static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
-  static ndt::type func_proto =
-      ndt::make_arrfunc(ndt::make_tuple(param_types), ndt::type("R * T"));
-  nd::array af = nd::empty(func_proto);
-  arrfunc_type_data *out_af =
-      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  // Create the data for the arrfunc
-  out_af->free = NULL;
-  out_af->resolve_dst_type = &resolve_take_dst_type;
-  out_af->instantiate = &instantiate_take;
-  af.flag_as_immutable();
-  return af;
+  return arrfunc(ndt::type("(Dims... * T, N * Ix) -> R * T"), &instantiate_take,
+                 NULL, &resolve_take_dst_type);
 }
+
+struct nd::take nd::take;

@@ -313,7 +313,6 @@ TYPED_TEST_P(FFT1D, KroneckerDelta)
 }
 */
 
-/*
 TEST(FFT1D, Shift)
 {
   double vals0[9] = {0.0, 1.0, 2.0, 3.0, 4.0, -4.0, -3.0, -2.0, -1.0};
@@ -321,10 +320,10 @@ TEST(FFT1D, Shift)
   nd::array x0 = nd::empty<double[9]>();
   x0.vals() = vals0;
 
-  nd::array y0 = fftshift(x0);
+  nd::array y0 = nd::fftshift(x0);
   EXPECT_JSON_EQ_ARR("[-4, -3, -2, -1, 0, 1, 2, 3, 4]", y0);
 
-  y0 = ifftshift(y0);
+  y0 = nd::ifftshift(y0);
   EXPECT_ARR_EQ(x0, y0);
 
   double vals1[10] = {0.0, 1.0, 2.0, 3.0, 4.0, -5.0, -4.0, -3.0, -2.0, -1.0};
@@ -332,13 +331,12 @@ TEST(FFT1D, Shift)
   nd::array x1 = nd::empty<double[10]>();
   x1.vals() = vals1;
 
-  nd::array y1 = fftshift(x1);
+  nd::array y1 = nd::fftshift(x1);
   EXPECT_JSON_EQ_ARR("[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4]", y1);
 
-  y1 = ifftshift(y1);
+  y1 = nd::ifftshift(y1);
   EXPECT_ARR_EQ(x1, y1);
 }
-*/
 
 /*
 TYPED_TEST_P(RFFT1D, Linear)
@@ -614,7 +612,6 @@ TYPED_TEST_P(FFT2D, KroneckerDelta)
 }
 */
 
-/*
 TEST(FFT2D, Shift)
 {
   double vals0[3][3] = {{0.0, 1.0, 2.0}, {3.0, 4.0, -4.0}, {-3.0, -2.0, -1.0}};
@@ -622,7 +619,7 @@ TEST(FFT2D, Shift)
   nd::array x0 = nd::empty<double[3][3]>();
   x0.vals() = vals0;
 
-  nd::array y0 = fftshift(x0);
+  nd::array y0 = nd::fftshift(x0);
   EXPECT_EQ(y0(0, 0).as<double>(), -1.0);
   EXPECT_EQ(y0(0, 1).as<double>(), -3.0);
   EXPECT_EQ(y0(0, 2).as<double>(), -2.0);
@@ -633,7 +630,7 @@ TEST(FFT2D, Shift)
   EXPECT_EQ(y0(2, 1).as<double>(), 3.0);
   EXPECT_EQ(y0(2, 2).as<double>(), 4.0);
 
-  y0 = ifftshift(y0);
+  y0 = nd::ifftshift(y0);
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
       EXPECT_EQ(y0(i, j).as<double>(), x0(i, j).as<double>());
@@ -645,7 +642,7 @@ TEST(FFT2D, Shift)
   nd::array x1 = nd::empty<double[4][2]>();
   x1.vals() = vals1;
 
-  nd::array y1 = fftshift(x1);
+  nd::array y1 = nd::fftshift(x1);
   EXPECT_EQ(y1(0, 0).as<double>(), 7.0);
   EXPECT_EQ(y1(0, 1).as<double>(), -6.0);
   EXPECT_EQ(y1(1, 0).as<double>(), -1.0);
@@ -655,7 +652,7 @@ TEST(FFT2D, Shift)
   EXPECT_EQ(y1(3, 0).as<double>(), 8.0);
   EXPECT_EQ(y1(3, 1).as<double>(), 1.0);
 
-  y1 = ifftshift(y1);
+  y1 = nd::ifftshift(y1);
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < 2; ++j) {
       EXPECT_EQ(y1(i, j).as<double>(), x1(i, j).as<double>());
@@ -667,7 +664,7 @@ TEST(FFT2D, Shift)
   nd::array x2 = nd::empty<double[2][3]>();
   x2.vals() = vals2;
 
-  nd::array y2 = fftshift(x2);
+  nd::array y2 = nd::fftshift(x2);
   EXPECT_EQ(y2(0, 0).as<double>(), 7.0);
   EXPECT_EQ(y2(0, 1).as<double>(), 8.0);
   EXPECT_EQ(y2(0, 2).as<double>(), -6.0);
@@ -675,7 +672,7 @@ TEST(FFT2D, Shift)
   EXPECT_EQ(y2(1, 1).as<double>(), 0.0);
   EXPECT_EQ(y2(1, 2).as<double>(), 5.0);
 
-  y2 = ifftshift(y2);
+  y2 = nd::ifftshift(y2);
   for (int i = 0; i < 2; ++i) {
     for (int j = 0; j < 3; ++j) {
       EXPECT_EQ(y2(i, j).as<double>(), x2(i, j).as<double>());
@@ -683,6 +680,7 @@ TEST(FFT2D, Shift)
   }
 }
 
+/*
 TYPED_TEST_P(RFFT2D, Linear)
 {
   nd::array x0 = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],

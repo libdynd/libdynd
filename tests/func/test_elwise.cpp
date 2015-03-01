@@ -16,7 +16,7 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
-#include <dynd/func/take_arrfunc.hpp>
+#include <dynd/func/take.hpp>
 #include <dynd/func/call_callable.hpp>
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
