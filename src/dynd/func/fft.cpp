@@ -89,7 +89,7 @@ nd::array nd::fftshift(const nd::array &x)
   for (intptr_t i = 0; i < x.get_ndim(); ++i) {
     intptr_t p = y.get_dim_size();
     intptr_t q = (p + 1) / 2;
-    y = nd::take(y, nd::concatenate(nd::range(q, p), nd::range(q)));
+    y = take(y, nd::concatenate(nd::range(q, p), nd::range(q)));
     y = y.rotate();
   }
   return y;
@@ -101,7 +101,7 @@ nd::array nd::ifftshift(const nd::array &x)
   for (intptr_t i = 0; i < x.get_ndim(); ++i) {
     intptr_t p = y.get_dim_size();
     intptr_t q = p - (p + 1) / 2;
-    y = nd::take(y, nd::concatenate(nd::range(q, p), nd::range(q)));
+    y = take(y, nd::concatenate(nd::range(q, p), nd::range(q)));
     y = y.rotate();
   }
   return y;
