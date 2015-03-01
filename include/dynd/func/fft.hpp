@@ -110,5 +110,21 @@ namespace nd {
     static arrfunc make();
   } irfft;
 
+  /**
+   * Shifts the zero-frequency element to the center of an array.
+   */
+  nd::array fftshift(const nd::array &x);
+
+  /**
+   * Inverts fftshift.
+   */
+  nd::array ifftshift(const nd::array &x);
+
+  /**
+   * Returns the sample frequencies of a discrete Fourier transform, with units
+   * of cycles per seconds.
+   */
+  nd::array fftspace(intptr_t count, double step = 1.0);
+
 } // namespace dynd::nd
 } // namespace dynd

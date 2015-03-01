@@ -324,7 +324,7 @@ set(libdynd_SRC
     src/dynd/func/permute.cpp
     src/dynd/func/random.cpp
     src/dynd/func/rolling_arrfunc.cpp
-    src/dynd/func/take_arrfunc.cpp
+    src/dynd/func/take.cpp
     src/dynd/func/take_by_pointer_arrfunc.cpp
     include/dynd/func/arithmetic.hpp
     include/dynd/func/arrfunc.hpp
@@ -348,7 +348,7 @@ set(libdynd_SRC
     include/dynd/func/permute.hpp
     include/dynd/func/random.hpp
     include/dynd/func/rolling_arrfunc.hpp
-    include/dynd/func/take_arrfunc.hpp
+    include/dynd/func/take.hpp
     include/dynd/func/take_by_pointer_arrfunc.hpp
     # Iter
     src/dynd/iter/string_iter.cpp
