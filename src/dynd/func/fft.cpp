@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/fft.hpp>
-#include <dynd/func/take_arrfunc.hpp>
+#include <dynd/func/take.hpp>
 
 using namespace std;
 using namespace dynd;

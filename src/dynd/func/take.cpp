@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/take_arrfunc.hpp>
+#include <dynd/func/take.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/shape_tools.hpp>
@@ -301,18 +301,8 @@ nd::arrfunc nd::take::make()
   // Masked take: (M * T, M * bool) -> var * T
   // Indexed take: (M * T, N * intptr) -> N * T
   // Combined: (M * T, N * Ix) -> R * T
-  static ndt::type param_types[2] = {ndt::type("Dims... * T"), ndt::type("N * Ix")};
-  static ndt::type func_proto =
-      ndt::make_arrfunc(ndt::make_tuple(param_types), ndt::type("R * T"));
-  nd::array af = nd::empty(func_proto);
-  arrfunc_type_data *out_af =
-      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  // Create the data for the arrfunc
-  out_af->free = NULL;
-  out_af->resolve_dst_type = &resolve_take_dst_type;
-  out_af->instantiate = &instantiate_take;
-  af.flag_as_immutable();
-  return af;
+  return arrfunc(ndt::type("(Dims... * T, N * Ix) -> R * T"), &instantiate_take,
+                 NULL, &resolve_take_dst_type);
 }
 
 struct nd::take nd::take;
