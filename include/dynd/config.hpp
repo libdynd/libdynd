@@ -248,11 +248,7 @@ struct index_proxy<index_sequence<I0>> {
   template <typename F, typename... A>
   static void for_each(F f, A &&... a)
   {
-#if defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__)
-    f.operator()<I0>(std::forward<A>(a)...);
-#else
-    f.template operator()<I0>(std::forward<A>(a)...);
-#endif
+    f.template on_each<I0>(std::forward<A>(a)...);
   }
 
   template <typename R, typename... A>
@@ -346,11 +342,7 @@ struct index_proxy<index_sequence<I0, I...>> {
   template <typename F, typename... A>
   static void for_each(F f, A &&... a)
   {
-#if defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__)
-    f.operator()<I0>(std::forward<A>(a)...);
-#else
-    f.template operator()<I0>(std::forward<A>(a)...);
-#endif
+    f.template on_each<I0>(std::forward<A>(a)...);
     index_proxy<index_sequence<I...>>::for_each(f, std::forward<A>(a)...);
   }
 };
