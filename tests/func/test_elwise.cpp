@@ -22,6 +22,9 @@
 #include <dynd/json_parser.hpp>
 #include "../dynd_assertions.hpp"
 
+using namespace std;
+using namespace dynd;
+
 struct callable0 {
   DYND_CUDA_HOST_DEVICE int operator()(int x, int y) const { return x + y; }
 };

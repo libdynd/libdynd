@@ -182,7 +182,7 @@ namespace nd {
         intptr_t size, dst_stride, src_stride[N];
         if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride,
                                    &child_dst_tp, &child_dst_arrmeta)) {
-          stringstream ss;
+          std::stringstream ss;
           ss << "make_elwise_strided_dimension_expr_kernel: error processing "
                 "type " << dst_tp << " as strided";
           throw type_error(ss.str());
@@ -209,10 +209,10 @@ namespace nd {
             }
             finished &= src_ndim == 1;
           } else {
-            stringstream ss;
+            std::stringstream ss;
             ss << "make_elwise_strided_dimension_expr_kernel: expected strided "
                   "or fixed dim, got " << src_tp[i];
-            throw runtime_error(ss.str());
+            throw std::runtime_error(ss.str());
           }
         }
 
@@ -306,7 +306,7 @@ namespace nd {
         intptr_t size, dst_stride;
         if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride,
                                    &child_dst_tp, &child_dst_arrmeta)) {
-          stringstream ss;
+          std::stringstream ss;
           ss << "make_elwise_strided_dimension_expr_kernel: error processing "
                 "type " << dst_tp << " as strided";
           throw type_error(ss.str());
@@ -430,7 +430,7 @@ namespace nd {
         intptr_t size, dst_stride;
         if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride,
                                    &child_dst_tp, &child_dst_arrmeta)) {
-          stringstream ss;
+          std::stringstream ss;
           ss << "make_elwise_strided_dimension_expr_kernel: error processing "
                 "type " << dst_tp << " as strided";
           throw type_error(ss.str());
@@ -558,7 +558,7 @@ namespace nd {
         intptr_t size, dst_stride;
         if (!dst_tp.get_as_strided(dst_arrmeta, &size, &dst_stride,
                                    &child_dst_tp, &child_dst_arrmeta)) {
-          stringstream ss;
+          std::stringstream ss;
           ss << "make_elwise_strided_dimension_expr_kernel: error processing "
                 "type " << dst_tp << " as strided";
           throw type_error(ss.str());
@@ -659,7 +659,7 @@ namespace nd {
           }
         } else {
           if (this->dst_offset != 0) {
-            throw runtime_error(
+            throw std::runtime_error(
                 "Cannot assign to an uninitialized dynd var_dim "
                 "which has a non-zero offset");
           }
@@ -867,7 +867,7 @@ namespace nd {
           dim_size = dst_vddd->size;
         } else {
           if (this->dst_offset != 0) {
-            throw runtime_error(
+            throw std::runtime_error(
                 "Cannot assign to an uninitialized dynd var_dim "
                 "which has a non-zero offset");
           }

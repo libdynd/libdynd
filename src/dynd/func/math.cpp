@@ -14,7 +14,46 @@ using namespace dynd;
 
 namespace dynd {
 
-DYND_GET_CUDA_DEVICE_FUNC(get_cuda_device_cos, cos)
+// Trying to figure out what's going on here, getting the error message
+//  math.cu
+//
+//c:\users\mwiebe\appdata\local\temp\tmpxft_00001264_00000000-5_math.cudafe1.stub.c(5): error C2970: 'dynd::nd::functional::apply_function_ck' : template parameter 'func' : 'cos' : an expression involving objects with internal linkage cannot be used as a non-type argument
+//
+//          C:\Dev\dynd-python\libraries\libdynd\include\dynd/kernels/apply.hpp(192) : see declaration of 'dynd::nd::functional::apply_function_ck'
+//
+//c:\users\mwiebe\appdata\local\temp\tmpxft_00001264_00000000-5_math.cudafe1.stub.c(6): error C2970: 'dynd::nd::functional::apply_function_ck' : template parameter 'func' : 'cos' : an expression involving objects with internal linkage cannot be used as a non-type argument
+//
+//          C:\Dev\dynd-python\libraries\libdynd\include\dynd/kernels/apply.hpp(192) : see declaration of 'dynd::nd::functional::apply_function_ck'
+//
+//c:\users\mwiebe\appdata\local\temp\tmpxft_00001264_00000000-5_math.cudafe1.stub.c(7): error C2970: 'dynd::nd::functional::apply_function_ck' : template parameter 'func' : 'cos' : an expression involving objects with internal linkage cannot be used as a non-type argument
+//
+//          C:\Dev\dynd-python\libraries\libdynd\include\dynd/kernels/apply.hpp(192) : see declaration of 'dynd::nd::functional::apply_function_ck'
+//
+//  CMake Error at libdynd_generated_math.cu.obj.cmake:264 (message):
+//    Error generating file
+//    C:/Dev/dynd-python/build_cuda/libraries/libdynd/CMakeFiles/libdynd.dir/src/dynd/func/RelWithDebInfo/libdynd_generated_math.cu.obj
+
+template <typename func_type>
+__global__ void get_cuda_device_cos(void *res)
+{
+  *reinterpret_cast<func_type *>(res) = static_cast<func_type>(&::dynd::cos);
+}
+
+template <typename func_type>
+func_type get_cuda_device_cos()
+{
+  func_type func;
+  func_type *cuda_device_func;
+  cuda_throw_if_not_success(cudaMalloc(&cuda_device_func, sizeof(func_type)));
+  get_cuda_device_cos<func_type> << <1, 1>>> (reinterpret_cast<void *>(cuda_device_func));
+  cuda_throw_if_not_success(cudaMemcpy(
+      &func, cuda_device_func, sizeof(func_type), cudaMemcpyDeviceToHost));
+  cuda_throw_if_not_success(cudaFree(cuda_device_func));
+
+  return func;
+}
+
+//DYND_GET_CUDA_DEVICE_FUNC(get_cuda_device_cos, cos)
 DYND_GET_CUDA_DEVICE_FUNC(get_cuda_device_sin, sin)
 DYND_GET_CUDA_DEVICE_FUNC(get_cuda_device_tan, tan)
 DYND_GET_CUDA_DEVICE_FUNC(get_cuda_device_exp, exp)

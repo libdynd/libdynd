@@ -207,7 +207,7 @@ namespace nd {
         args *self;
 
         template <size_t I>
-        void operator()(const arrfunc_type *af_tp,
+        void on_each(const arrfunc_type *af_tp,
                         std::vector<ndt::type> &src_tp,
                         std::vector<const char *> &src_arrmeta,
                         std::vector<char *> &src_data,
@@ -361,7 +361,7 @@ namespace nd {
         kwds *self;
 
         template <size_t I>
-        void operator()(typename as_<K, const char *>::type... names)
+        void on_each(typename as_<K, const char *>::type... names)
         {
           self->m_names[I] = get<I>(names...);
         }
@@ -377,7 +377,7 @@ namespace nd {
         kwds *self;
 
         template <size_t I>
-        void operator()(const ndt::type *tp, char *arrmeta,
+        void on_each(const ndt::type *tp, char *arrmeta,
                         const uintptr_t *arrmeta_offsets, char *data,
                         const uintptr_t *data_offsets,
                         const std::vector<intptr_t> &available) const
@@ -428,7 +428,7 @@ namespace nd {
         kwds *self;
 
         template <size_t I>
-        void operator()(const arrfunc_type *af_tp, array &dst, bool &has_dst_tp,
+        void on_each(const arrfunc_type *af_tp, array &dst, bool &has_dst_tp,
                         std::vector<ndt::type> &kwd_tp,
                         std::vector<intptr_t> &available,
                         std::map<nd::string, ndt::type> &tp_vars)

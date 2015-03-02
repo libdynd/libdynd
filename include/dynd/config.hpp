@@ -248,11 +248,7 @@ struct index_proxy<index_sequence<I0>> {
   template <typename F, typename... A>
   static void for_each(F f, A &&... a)
   {
-#if defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__)
-    f.operator()<I0>(std::forward<A>(a)...);
-#else
-    f.template operator()<I0>(std::forward<A>(a)...);
-#endif
+    f.template on_each<I0>(std::forward<A>(a)...);
   }
 
   template <typename R, typename... A>
@@ -266,7 +262,7 @@ template <size_t I0, size_t... I>
 struct index_proxy<index_sequence<I0, I...>> {
   enum { size = index_sequence<I0, I...>::size };
 
-#if !(defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__))
+#if !(defined(_MSC_VER) && (_MSC_VER == 1800))
   template <typename R, typename... A>
   static R make(A &&... a)
   {
@@ -283,7 +279,7 @@ struct index_proxy<index_sequence<I0, I...>> {
   template <typename R, typename A0>
   static R make(A0 &&a0)
   {
-    return R(get<I0>(std::forward<A0>(a0))...);
+    return R(get<I0>(std::forward<A0>(a0)));
   }
   template <typename R, typename A0, typename A1>
   static R make(A0 &&a0, A1 &&a1)
@@ -346,11 +342,7 @@ struct index_proxy<index_sequence<I0, I...>> {
   template <typename F, typename... A>
   static void for_each(F f, A &&... a)
   {
-#if defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__)
-    f.operator()<I0>(std::forward<A>(a)...);
-#else
-    f.template operator()<I0>(std::forward<A>(a)...);
-#endif
+    f.template on_each<I0>(std::forward<A>(a)...);
     index_proxy<index_sequence<I...>>::for_each(f, std::forward<A>(a)...);
   }
 };
@@ -444,7 +436,7 @@ bool built_with_cuda();
   template <typename func_type>                                                \
   __global__ void NAME(void *res)                                              \
   {                                                                            \
-    *reinterpret_cast<func_type *>(res) = &FUNC;                               \
+    *reinterpret_cast<func_type *>(res) = static_cast<func_type>(&FUNC);       \
   }                                                                            \
                                                                                \
   template <typename func_type>                                                \

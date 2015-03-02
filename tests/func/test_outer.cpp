@@ -15,6 +15,9 @@
 #include <dynd/func/outer.hpp>
 #include <dynd/func/random.hpp>
 
+using namespace std;
+using namespace dynd;
+
 static double func0(double x, double y, double z) { return x + y + z; }
 
 TEST(Outer, 1D)

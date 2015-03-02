@@ -8,9 +8,6 @@
 #include <dynd/types/base_type.hpp>
 #include <dynd/type.hpp>
 
-using namespace std;
-using namespace dynd;
-
 namespace dynd {
 
 /**
@@ -39,9 +36,9 @@ public:
         m_storage_arrmeta_offset(storage_arrmeta_offset)
   {
     if (element_tp.get_kind() == memory_kind) {
-      stringstream ss;
+      std::stringstream ss;
       ss << "a memory space cannot be specified for type " << element_tp;
-      throw runtime_error(ss.str());
+      throw std::runtime_error(ss.str());
     }
   }
 

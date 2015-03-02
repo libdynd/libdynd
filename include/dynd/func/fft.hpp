@@ -58,7 +58,7 @@ namespace nd {
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
+                                                            {
       const size_stride_t *dst_size_stride =
           reinterpret_cast<const size_stride_t *>(dst_arrmeta);
       const size_stride_t *src_size_stride =
@@ -67,22 +67,23 @@ namespace nd {
       array axes = kwds.p("axes");
       array shape = kwds.p("shape");
 
-      int ndim = src_tp[0].get_ndim();
+      int ndim = static_cast<int>(src_tp[0].get_ndim());
 
-      int rank = axes.is_missing() ? ndim : (ndim - 1);
-      int istride = src_size_stride[ndim - 1].stride / sizeof(src_type);
-      int idist = src_size_stride[0].stride / sizeof(src_type);
-      int ostride = dst_size_stride[ndim - 1].stride / sizeof(dst_type);
-      int odist = dst_size_stride[0].stride / sizeof(dst_type);
+      int rank = static_cast<int>(axes.is_missing() ? ndim : (ndim - 1));
+      int istride = static_cast<int>(src_size_stride[ndim - 1].stride / sizeof(src_type));
+      int idist = static_cast<int>(src_size_stride[0].stride / sizeof(src_type));
+      int ostride = static_cast<int>(dst_size_stride[ndim - 1].stride / sizeof(dst_type));
+      int odist = static_cast<int>(dst_size_stride[0].stride / sizeof(dst_type));
 
       std::vector<int> n(rank), inembed(rank), onembed(rank);
       for (int i = 0, j = axes.is_missing() ? 0 : 1; j < ndim; ++i, ++j) {
-        n[i] = src_size_stride[j].dim_size;
-        inembed[i] = src_size_stride[j].dim_size;
-        onembed[i] = dst_size_stride[j].dim_size;
+        n[i] = static_cast<int>(src_size_stride[j].dim_size);
+        inembed[i] = static_cast<int>(src_size_stride[j].dim_size);
+        onembed[i] = static_cast<int>(dst_size_stride[j].dim_size);
       }
 
-      int batch = axes.is_missing() ? 1 : src_size_stride[0].dim_size;
+      int batch =
+          static_cast<int>(axes.is_missing() ? 1 : src_size_stride[0].dim_size);
 
       self_type *self = self_type::create(ckb, kernreq, ckb_offset);
       cufftPlanMany(&self->plan, rank, n.data(), inembed.data(), istride, idist,

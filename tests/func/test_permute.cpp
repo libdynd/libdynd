@@ -16,6 +16,9 @@
 #include <dynd/func/outer.hpp>
 #include <dynd/func/permute.hpp>
 
+using namespace std;
+using namespace dynd;
+
 static void func0(double &x, int y) { x = 3.5 * y; }
 
 /*

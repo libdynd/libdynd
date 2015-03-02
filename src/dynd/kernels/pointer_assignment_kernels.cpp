@@ -6,6 +6,7 @@
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
 
 using namespace std;
+using namespace dynd;
 
 namespace {
     template <typename T>
