@@ -8,9 +8,6 @@
 #include <dynd/types/base_type.hpp>
 #include <dynd/type.hpp>
 
-using namespace std;
-using namespace dynd;
-
 namespace dynd {
 
 /**
