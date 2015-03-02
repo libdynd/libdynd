@@ -84,8 +84,9 @@ include_directories(thirdparty/datetime/include)
 set(DYND_LINK_LIBS cephes datetime)
 
 if(WIN32)
-    # Treat warnings as errors (-WX does this)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc")
+    # -WX: Treat warnings as errors
+    # -bigobj: Allow lots of symbols (assignment_kernels.cpp and assignment_kernels.cu need this flag)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 18)
             message(FATAL_ERROR "Only MSVC 2013 (Version 18.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
@@ -660,19 +661,6 @@ add_custom_target(libdynd_gen DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/p
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
                             PROPERTIES GENERATED true)
 add_dependencies(libdynd libdynd_gen)
-
-# This file generates a huge number of inline functions, need to use /bigobj
-# on MSVC to allow this
-if(WIN32)
-    set_source_files_properties(src/dynd/kernels/assignment_kernels.cpp
-        PROPERTIES
-            COMPILE_FLAGS /bigobj)
-    if(DYND_CUDA)
-        set_source_files_properties(src/dynd/kernels/assignment_kernels.cu
-            PROPERTIES
-                COMPILE_FLAGS /bigobj)
-    endif()
-endif()
 
 # Copy the headers from cephes that need to be installed with libdynd
 file(COPY thirdparty/cephes/rename.h
