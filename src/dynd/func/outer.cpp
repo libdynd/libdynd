@@ -7,6 +7,9 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
 
+using namespace std;
+using namespace dynd;
+
 nd::arrfunc nd::functional::outer(const arrfunc &child)
 {
   return nd::arrfunc(outer_make_type(child.get_type()), child,

@@ -14,7 +14,7 @@ namespace dynd { namespace nd {
 namespace detail {
   template <typename T>
   struct ensure_immutable_contig {
-    inline static enable_if<is_dynd_scalar<T>::value, bool> run(nd::array &a)
+    inline static std::enable_if<is_dynd_scalar<T>::value, bool> run(nd::array &a)
     {
       const ndt::type &tp = a.get_type();
       if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
