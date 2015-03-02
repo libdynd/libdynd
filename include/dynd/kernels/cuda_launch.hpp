@@ -77,7 +77,7 @@ namespace nd {
       return ckb_offset;
     }
 
-    template <arrfunc_instantiate_t instantiate>
+    template <arrfunc_instantiate_t instantiate_p>
     static intptr_t
     instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                 void *ckb, intptr_t ckb_offset, const ndt::type dst_tp,
@@ -104,7 +104,7 @@ namespace nd {
         kernreq |= kernel_request_cuda_device;
         ckb_offset = 0;
       }
-      instantiate(self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+      instantiate_p(self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                   src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
 
       return res_ckb_offset;
