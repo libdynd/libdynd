@@ -7,6 +7,8 @@
 
 #include "inc_gtest.hpp"
 
+#include <memory>
+
 #include <dynd/json_parser.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/type_promotion.hpp>
@@ -345,25 +347,24 @@ struct test_class {
 
 inline ::testing::AssertionResult
 AssertArrayNear(const char *expected_expr, const char *actual_expr,
-                const char *rel_error_max_expr, const nd::array &expected,
-                const nd::array &actual, double rel_error_max)
+                const char *rel_error_max_expr, const dynd::nd::array &expected,
+                const dynd::nd::array &actual, double rel_error_max)
 {
-  const ndt::type &expected_tp = expected.get_type();
-  const ndt::type &actual_tp = actual.get_type();
-  if (expected_tp.get_type_id() == cuda_device_type_id &&
-      actual_tp.get_type_id() == cuda_device_type_id) {
+  const dynd::ndt::type &expected_tp = expected.get_type();
+  const dynd::ndt::type &actual_tp = actual.get_type();
+  if (expected_tp.get_type_id() == dynd::cuda_device_type_id &&
+      actual_tp.get_type_id() == dynd::cuda_device_type_id) {
     return AssertArrayNear(expected_expr, actual_expr, rel_error_max_expr,
                            expected.to_host(), actual.to_host(), rel_error_max);
   }
 
-  test_class<dynd::complex<double>> *c =
-      new test_class<dynd::complex<double>>(rel_error_max);
+  std::unique_ptr<test_class<dynd::complex<double>>> c(new test_class<dynd::complex<double>>(rel_error_max));
 
-  nd::arrfunc af = nd::functional::elwise(nd::functional::apply(c));
+  dynd::nd::arrfunc af =
+      dynd::nd::functional::elwise(dynd::nd::functional::apply(c.get()));
   af(expected, actual);
 
   bool res = c->flag;
-  delete c;
 
   if (res) {
     return ::testing::AssertionSuccess();
