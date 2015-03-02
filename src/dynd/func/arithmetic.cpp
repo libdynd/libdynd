@@ -6,7 +6,6 @@
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/array.hpp>
 
-using namespace std;
 using namespace dynd;
 
 #define BUILTIN_ROW(NAME, A0)                                                  \

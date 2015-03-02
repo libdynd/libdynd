@@ -262,7 +262,7 @@ template <size_t I0, size_t... I>
 struct index_proxy<index_sequence<I0, I...>> {
   enum { size = index_sequence<I0, I...>::size };
 
-#if !(defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__))
+#if !(defined(_MSC_VER) && (_MSC_VER == 1800))
   template <typename R, typename... A>
   static R make(A &&... a)
   {
@@ -279,7 +279,7 @@ struct index_proxy<index_sequence<I0, I...>> {
   template <typename R, typename A0>
   static R make(A0 &&a0)
   {
-    return R(get<I0>(std::forward<A0>(a0))...);
+    return R(get<I0>(std::forward<A0>(a0)));
   }
   template <typename R, typename A0, typename A1>
   static R make(A0 &&a0, A1 &&a1)
