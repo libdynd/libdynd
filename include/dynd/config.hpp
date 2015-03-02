@@ -436,7 +436,7 @@ bool built_with_cuda();
   template <typename func_type>                                                \
   __global__ void NAME(void *res)                                              \
   {                                                                            \
-    *reinterpret_cast<func_type *>(res) = &FUNC;                               \
+    *reinterpret_cast<func_type *>(res) = static_cast<func_type>(&FUNC);       \
   }                                                                            \
                                                                                \
   template <typename func_type>                                                \
