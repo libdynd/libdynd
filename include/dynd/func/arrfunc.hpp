@@ -985,6 +985,18 @@ namespace nd {
       {
         return as_arrfunc<CKT...>(self_tp, data);
       }
+
+      template <typename... CKT>
+      arrfunc apply(const ndt::type &self_tp) const
+      {
+        return as_arrfunc<CKT...>(self_tp);
+      }
+
+      template <typename... CKT, typename T>
+      arrfunc apply(const ndt::type &self_tp, const T &data) const
+      {
+        return as_arrfunc<CKT...>(self_tp, data);
+      }
     };
   }
 
