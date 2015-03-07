@@ -6,12 +6,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(libdynd)
 
-# Set the build type if it wasn't specified
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Set the build type." FORCE)
-    # Set the possible values of the build type
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo" "MinSizeRel")
-endif()
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
@@ -71,7 +66,7 @@ if(DYND_CUDA)
     set(DYND_CUDA_01 1)
 
     # CUDA 6.5, which has experimental C++11 support, is the minimum required
-    find_package(CUDA 6.5 REQUIRED)
+    find_package(CUDA_DyND 6.5 REQUIRED)
 
     add_definitions(-DDYND_CUDA)
 else()
