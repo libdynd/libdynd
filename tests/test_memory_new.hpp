@@ -36,7 +36,7 @@ public:
 
 #ifdef DYND_CUDA
 
-typedef integral_constant<kernel_request_t, kernel_request_cuda_device>
+typedef std::integral_constant<dynd::kernel_request_t, dynd::kernel_request_cuda_device>
     CUDADeviceKernelRequest;
 
 template <>
@@ -44,7 +44,7 @@ class Memory<CUDADeviceKernelRequest> : public ::testing::Test {
 public:
   static const dynd::kernel_request_t KernelRequest = CUDADeviceKernelRequest::value;
 
-  static dynd::nd::array To(const nd::array &a) { return a.to_cuda_device(); }
+  static dynd::nd::array To(const dynd::nd::array &a) { return a.to_cuda_device(); }
 
   // This is a workaround for a CUDA bug
   template <typename T>
