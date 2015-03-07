@@ -20,6 +20,7 @@
 using namespace std;
 using namespace dynd;
 
+#if defined(_WIN32) && defined(DYND_CUDA)
 // Workaround for CUDA NVCC bug where it deduces a reference to a function
 // pointer instead of a function pointer in decltype.
 template <typename T>
@@ -27,6 +28,9 @@ struct cuda_decltype_workaround {
   typedef std::remove_reference<std::remove_pointer<T>::type>::type *type;
 };
 #define CUDA_DECLTYPE_WORKAROUND(x) cuda_decltype_workaround<decltype(x)>::type
+#else
+#define CUDA_DECLTYPE_WORKAROUND(x) decltype(x)
+#endif
 
 template <typename T>
 class Apply : public Memory<T> {
