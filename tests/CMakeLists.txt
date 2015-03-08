@@ -115,21 +115,14 @@ source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
 source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
 if (DYND_CUDA)
-    # Replace some source files with their CUDA versions
+    # Specify that some source files are CUDA files
     foreach(filename_CPP
             func/test_apply.cpp
             func/test_elwise.cpp
             func/test_random.cpp
             types/test_complex_type.cpp
         )
-        get_filename_component(filename_DIR ${filename_CPP} PATH)
-        get_filename_component(filename_WE ${filename_CPP} NAME_WE)
-        set(filename_CU ${CMAKE_CURRENT_BINARY_DIR}/${filename_DIR}/${filename_WE}.cu)
-        # FindCUDA.cmake is not robust to backslashes in Windows paths
-        STRING(REGEX REPLACE "\\\\" "/" filename_CU ${filename_CU})
-        file(WRITE ${filename_CU} "\#include \"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\"")
-        list(REMOVE_ITEM tests_SRC ${filename_CPP})
-        list(APPEND tests_SRC ${filename_CU})
+        set_property(SOURCE ${filename_CPP} PROPERTY CUDA_SOURCE_FILE TRUE)
     endforeach(filename_CPP)
 endif()
 

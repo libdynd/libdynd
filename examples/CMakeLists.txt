@@ -11,8 +11,8 @@ include_directories(
   )
 
 if (DYND_CUDA)
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/simple_example.cu" "\#include \"${CMAKE_CURRENT_SOURCE_DIR}/simple_example.cpp\"")
-  cuda_add_executable(simple_example ${CMAKE_CURRENT_BINARY_DIR}/simple_example.cu
+  set_property(SOURCE "simple_example.cpp" PROPERTY CUDA_SOURCE_FILE TRUE)
+  cuda_add_executable(simple_example simple_example.cpp
     OPTIONS -ldynddev -L${CMAKE_BINARY_DIR}
   )
   set(LINK_LIBS ${LINK_LIBS} libdynddev)

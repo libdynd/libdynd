@@ -1176,6 +1176,13 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       endif()
 
       set(_cuda_host_flags "${_cuda_host_flags}\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
+
+      # nvcc should not propagate -std=c++11 to the host compiler, as it causes warnings and errors
+      set(_cuda_fix_cxx11 TRUE)
+
+      if (_cuda_fix_cxx11)
+        string(REPLACE "-std=c++11" "" _cuda_host_flags "${_cuda_host_flags}")
+      endif()
     endif()
 
     # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list
@@ -1200,11 +1207,15 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   set(_cuda_wrap_generated_files "")
 
   # Iterate over the macro arguments and create custom
-  # commands for all the .cu files.
+  # commands for all the CUDA source files.
   foreach(file ${ARGN})
     # Ignore any file marked as a HEADER_FILE_ONLY
     get_source_file_property(_is_header ${file} HEADER_FILE_ONLY)
-    if(${file} MATCHES "\\.cu$" AND NOT _is_header)
+    # Override the file extension for any file marked as a CUDA_SOURCE_FILE
+    get_source_file_property(_is_cuda_source ${file} CUDA_SOURCE_FILE)
+    if((${file} MATCHES "\\.cu$" OR _is_cuda_source) AND NOT _is_header)
+      # Force nvcc to process this file as CUDA source
+      set(format_flag "-x=cu")
 
       # Allow per source file overrides of the format.
       get_source_file_property(_cuda_source_format ${file} CUDA_SOURCE_PROPERTY_FORMAT)
@@ -1261,9 +1272,9 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
         set(generated_file_path "${cuda_compile_output_dir}/${CMAKE_CFG_INTDIR}")
         set(generated_file_basename "${cuda_target}_generated_${basename}${generated_extension}")
         if(CUDA_SEPARABLE_COMPILATION)
-          set(format_flag "-dc")
+          set(format_flag "${format_flag};-dc")
         else()
-          set(format_flag "-c")
+          set(format_flag "${format_flag};-c")
         endif()
       endif()
 
