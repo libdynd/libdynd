@@ -14,8 +14,8 @@ namespace detail {
 
   template <typename func_type, typename... B>
   struct funcproto {
-    typedef typename funcproto<decltype(&func_type::operator()), B...>::type
-        type;
+    typedef
+        typename funcproto<decltype(&func_type::operator()), B...>::type type;
   };
 
   template <typename R, typename... A, typename... B>
@@ -85,8 +85,9 @@ namespace nd {
 
     template <typename A, size_t I>
     struct apply_arg {
-      typedef typename std::remove_cv<
-          typename std::remove_reference<A>::type>::type D;
+      typedef
+          typename std::remove_cv<typename std::remove_reference<A>::type>::type
+              D;
 
       apply_arg(const ndt::type &DYND_UNUSED(tp),
                 const char *DYND_UNUSED(arrmeta),
@@ -161,7 +162,8 @@ namespace nd {
       {
         if (val.get_type().get_type_id() == pointer_type_id) {
           m_val = val.f("dereference").as<T>();
-        } else {
+        }
+        else {
           m_val = val.as<T>();
         }
       }
@@ -227,16 +229,16 @@ namespace nd {
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
       dst += DYND_THREAD_ID(0) * dst_stride;                                   \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         *reinterpret_cast<R *>(dst) =                                          \
             func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);  \
         dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -294,14 +296,14 @@ namespace nd {
     {                                                                          \
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);      \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -382,16 +384,16 @@ namespace nd {
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
       dst += DYND_THREAD_ID(0) * dst_stride;                                   \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         *reinterpret_cast<R *>(dst) = (obj->*mem_func)(                        \
             apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);       \
         dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -466,15 +468,15 @@ namespace nd {
     {                                                                          \
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         (obj->*mem_func)(apply_arg<A, I>::get(src[I])...,                      \
                          apply_kwd<K, J>::get()...);                           \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -512,9 +514,10 @@ namespace nd {
 
     template <typename T, typename mem_func_type, typename R, typename... A,
               size_t... I, typename... K, size_t... J>
-    intptr_t apply_member_function_ck<
-        kernel_request_host, T *, mem_func_type, R, type_sequence<A...>,
-        index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+    intptr_t
+    apply_member_function_ck<kernel_request_host, T *, mem_func_type, R,
+                             type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
         instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -530,9 +533,10 @@ namespace nd {
 
     template <typename T, typename mem_func_type, typename... A, size_t... I,
               typename... K, size_t... J>
-    intptr_t apply_member_function_ck<
-        kernel_request_host, T *, mem_func_type, void, type_sequence<A...>,
-        index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+    intptr_t
+    apply_member_function_ck<kernel_request_host, T *, mem_func_type, void,
+                             type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
         instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -552,9 +556,10 @@ namespace nd {
 
     template <typename T, typename mem_func_type, typename R, typename... A,
               size_t... I, typename... K, size_t... J>
-    intptr_t apply_member_function_ck<
-        kernel_request_cuda_device, T *, mem_func_type, R, type_sequence<A...>,
-        index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+    intptr_t
+    apply_member_function_ck<kernel_request_cuda_device, T *, mem_func_type, R,
+                             type_sequence<A...>, index_sequence<I...>,
+                             type_sequence<K...>, index_sequence<J...>>::
         instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -643,16 +648,16 @@ namespace nd {
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
       dst += DYND_THREAD_ID(0) * dst_stride;                                   \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         *reinterpret_cast<R *>(dst) =                                          \
             func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);  \
         dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -722,14 +727,14 @@ namespace nd {
     {                                                                          \
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         func(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);      \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -866,16 +871,16 @@ namespace nd {
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
       dst += DYND_THREAD_ID(0) * dst_stride;                                   \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         *reinterpret_cast<R *>(dst) = (*func)(apply_arg<A, I>::get(src[I])..., \
                                               apply_kwd<K, J>::get()...);      \
         dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -945,14 +950,14 @@ namespace nd {
     {                                                                          \
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         (*func)(apply_arg<A, I>::get(src[I])..., apply_kwd<K, J>::get()...);   \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -1074,15 +1079,15 @@ namespace nd {
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
       dst += DYND_THREAD_ID(0) * dst_stride;                                   \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         *reinterpret_cast<R *>(dst) = func(apply_arg<A, I>::get(src[I])...);   \
         dst += DYND_THREAD_COUNT(0) * dst_stride;                              \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \
@@ -1152,14 +1157,14 @@ namespace nd {
     {                                                                          \
       dynd::detail::array_wrapper<char *, sizeof...(A)> src;                   \
                                                                                \
-      for (size_t j = 0; j < sizeof...(A); ++j) {                              \
+      for (size_t j = 0; j != sizeof...(A); ++j) {                             \
         src[j] = src_copy[j] + DYND_THREAD_ID(0) * src_stride[j];              \
       }                                                                        \
                                                                                \
-      for (size_t i = DYND_THREAD_ID(0); i < count;                            \
+      for (std::ptrdiff_t i = DYND_THREAD_ID(0); i < (std::ptrdiff_t)count;    \
            i += DYND_THREAD_COUNT(0)) {                                        \
         func(apply_arg<A, I>::get(src[I])...);                                 \
-        for (size_t j = 0; j < sizeof...(A); ++j) {                            \
+        for (size_t j = 0; j != sizeof...(A); ++j) {                           \
           src[j] += DYND_THREAD_COUNT(0) * src_stride[j];                      \
         }                                                                      \
       }                                                                        \

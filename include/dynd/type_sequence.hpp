@@ -334,7 +334,7 @@ struct type_proxy<type_sequence<>> {
   template <typename F, typename... A>
   static typename std::result_of<F(A...)>::type apply(F f, A &&... a)
   {
-    return f.operator()(std::forward<A>(a)...);
+    return f.apply(std::forward<A>(a)...);
   }
 };
 #endif // _MSC_VER
@@ -344,11 +344,7 @@ struct type_proxy<type_sequence<T...>> {
   template <typename F, typename... A>
   static typename std::result_of<F(A...)>::type apply(F f, A &&... a)
   {
-#if defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__)
-    return f.operator()<T...>(std::forward<A>(a)...);
-#else
-    return f.template operator()<T...>(std::forward<A>(a)...);
-#endif
+    return f.template apply<T...>(std::forward<A>(a)...);
   }
 };
 

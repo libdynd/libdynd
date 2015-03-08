@@ -20,6 +20,18 @@
 using namespace std;
 using namespace dynd;
 
+#if defined(_WIN32) && defined(DYND_CUDA)
+// Workaround for CUDA NVCC bug where it deduces a reference to a function
+// pointer instead of a function pointer in decltype.
+template <typename T>
+struct cuda_decltype_workaround {
+  typedef std::remove_reference<std::remove_pointer<T>::type>::type *type;
+};
+#define CUDA_DECLTYPE_WORKAROUND(x) cuda_decltype_workaround<decltype(x)>::type
+#else
+#define CUDA_DECLTYPE_WORKAROUND(x) decltype(x)
+#endif
+
 template <typename T>
 class Apply : public Memory<T> {
 };
@@ -94,7 +106,7 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
 #define GET_HOST_FUNC(NAME)                                                    \
   template <kernel_request_t kernreq>                                          \
   typename std::enable_if<kernreq == kernel_request_host,                      \
-                          decltype(&NAME)>::type get_##NAME()                  \
+                          CUDA_DECLTYPE_WORKAROUND(&NAME)>::type get_##NAME()  \
   {                                                                            \
     return &NAME;                                                              \
   }
@@ -105,9 +117,9 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
                                                                                \
   template <>                                                                  \
   struct NAME##_as_callable<kernel_request_host>                               \
-      : func_wrapper<kernel_request_host, decltype(&NAME)> {                   \
+      : func_wrapper<kernel_request_host, CUDA_DECLTYPE_WORKAROUND(&NAME)> {   \
     NAME##_as_callable()                                                       \
-        : func_wrapper<kernel_request_host, decltype(&NAME)>(                  \
+        : func_wrapper<kernel_request_host, CUDA_DECLTYPE_WORKAROUND(&NAME)>(  \
               get_##NAME<kernel_request_host>())                               \
     {                                                                          \
     }                                                                          \
@@ -117,15 +129,15 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
 #define GET_CUDA_DEVICE_FUNC_BODY(NAME) return &NAME;
 #else
 #define GET_CUDA_DEVICE_FUNC_BODY(NAME)                                        \
-  decltype(&NAME) func;                                                        \
-  decltype(&NAME) *cuda_device_func;                                           \
+  CUDA_DECLTYPE_WORKAROUND(&NAME) func;                                        \
+  CUDA_DECLTYPE_WORKAROUND(&NAME) * cuda_device_func;                          \
   cuda_throw_if_not_success(                                                   \
-      cudaMalloc(&cuda_device_func, sizeof(decltype(&NAME))));                 \
+      cudaMalloc(&cuda_device_func, sizeof(CUDA_DECLTYPE_WORKAROUND(&NAME)))); \
   get_cuda_device_##NAME << <1, 1>>>                                           \
       (reinterpret_cast<void *>(cuda_device_func));                            \
-  cuda_throw_if_not_success(cudaMemcpy(&func, cuda_device_func,                \
-                                       sizeof(decltype(&NAME)),                \
-                                       cudaMemcpyDeviceToHost));               \
+  cuda_throw_if_not_success(cudaMemcpy(                                        \
+      &func, cuda_device_func, sizeof(CUDA_DECLTYPE_WORKAROUND(&NAME)),        \
+      cudaMemcpyDeviceToHost));                                                \
   cuda_throw_if_not_success(cudaFree(cuda_device_func));                       \
   return func;
 #endif
@@ -135,13 +147,14 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
 #define GET_CUDA_DEVICE_FUNC(NAME)                                             \
   __global__ void get_cuda_device_##NAME(void *res)                            \
   {                                                                            \
-    *reinterpret_cast<decltype(&NAME) *>(res) = &NAME;                         \
+    *reinterpret_cast<CUDA_DECLTYPE_WORKAROUND(&NAME) *>(res) = &NAME;         \
   }                                                                            \
                                                                                \
   template <kernel_request_t kernreq>                                          \
-  DYND_CUDA_HOST_DEVICE typename std::enable_if<                               \
-      kernreq == kernel_request_cuda_device, decltype(&NAME)>::type            \
-      get_##NAME()                                                             \
+  DYND_CUDA_HOST_DEVICE                                                        \
+      typename std::enable_if<kernreq == kernel_request_cuda_device,           \
+                              CUDA_DECLTYPE_WORKAROUND(&NAME)>::type           \
+          get_##NAME()                                                         \
   {                                                                            \
     GET_CUDA_DEVICE_FUNC_BODY(NAME)                                            \
   }
@@ -152,9 +165,11 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
                                                                                \
   template <>                                                                  \
   struct NAME##_as_callable<kernel_request_cuda_device>                        \
-      : func_wrapper<kernel_request_cuda_device, decltype(&NAME)> {            \
+      : func_wrapper<kernel_request_cuda_device,                               \
+                     CUDA_DECLTYPE_WORKAROUND(&NAME)> {                        \
     DYND_CUDA_HOST_DEVICE NAME##_as_callable()                                 \
-        : func_wrapper<kernel_request_cuda_device, decltype(&NAME)>(           \
+        : func_wrapper<kernel_request_cuda_device,                             \
+                       CUDA_DECLTYPE_WORKAROUND(&NAME)>(                       \
               get_##NAME<kernel_request_cuda_device>())                        \
     {                                                                          \
     }                                                                          \
@@ -287,21 +302,25 @@ TEST(Apply, Function)
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
 
   /*
-    af = nd::functional::apply<kernel_request_host, decltype(&func4), &func4>();
+    af = nd::functional::apply<kernel_request_host,
+  decltype(&func4), &func4>();
     EXPECT_ARR_EQ(TestFixture::To(166.765), af(nd::array({9.14, -2.7, 15.32}),
                                                nd::array({0.0, 0.65, 11.0})));
 
 
-  af = nd::functional::apply<kernel_request_host, decltype(&func5), &func5>();
+  af = nd::functional::apply<kernel_request_host,
+  decltype(&func5), &func5>();
   EXPECT_ARR_EQ(TestFixture::To(1251L), af(TestFixture::To({{1242L, 23L, -5L},
   {925L, -836L, -14L}})));
   */
 
-  af = nd::functional::apply<kernel_request_host, decltype(&func6), &func6>();
+  af = nd::functional::apply<kernel_request_host,
+                             decltype(&func6), &func6>();
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::functional::apply<kernel_request_host, decltype(&func7), &func7>();
+  af = nd::functional::apply<kernel_request_host,
+                             decltype(&func7), &func7>();
   EXPECT_ARR_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
