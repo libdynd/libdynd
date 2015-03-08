@@ -543,14 +543,9 @@ if (DYND_CUDA)
             src/dynd/kernels/assignment_kernels.cpp
             src/dynd/kernels/ckernel_builder.cpp
         )
-        get_filename_component(filename_DIR ${filename_CPP} PATH)
-        get_filename_component(filename_WE ${filename_CPP} NAME_WE)
-        set(filename_CU ${CMAKE_CURRENT_BINARY_DIR}/${filename_DIR}/${filename_WE}.cu)
-        # FindCUDA.cmake is not robust to backslashes in Windows paths
-        STRING(REGEX REPLACE "\\\\" "/" filename_CU ${filename_CU})
-        file(WRITE ${filename_CU} "\#include \"${CMAKE_CURRENT_SOURCE_DIR}/${filename_CPP}\"")
         list(REMOVE_ITEM libdynd_SRC ${filename_CPP})
-        list(APPEND libdynddev_SRC ${filename_CU})
+        list(APPEND libdynddev_SRC ${filename_CPP})
+        set_property(SOURCE ${filename_CPP} PROPERTY CUDA_SOURCE_FILE TRUE)
     endforeach(filename_CPP)
 
     set(CUDA_SEPARABLE_COMPILATION ON)
@@ -562,7 +557,7 @@ if (DYND_CUDA)
     # Make some warnings into errors and inhibit other warnings
     set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-Werror=cross-execution-space-call;
         -Xcudafe;--diag_suppress=boolean_controlling_expr_is_constant;
-        -Xcudafe;--diag_suppress=cc_clobber_ignored)
+        -Xcudafe;--diag_suppress=cc_clobber_ignored;)
     if(NOT WIN32)
         set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};
             -Xcompiler;-Wno-unused;-Xcompiler;-Wno-unused-parameter)
