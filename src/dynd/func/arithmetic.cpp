@@ -4,23 +4,21 @@
 //
 
 #include <dynd/func/arithmetic.hpp>
+#include <dynd/kernels/arithmetic.hpp>
 #include <dynd/array.hpp>
 
 using namespace dynd;
 
 #define BUILTIN_ROW(NAME, A0)                                                  \
   {                                                                            \
-    NULL, &create<kernels::NAME<A0, int8_t>>,                                  \
-        &create<kernels::NAME<A0, int16_t>>,                                   \
-        &create<kernels::NAME<A0, int32_t>>,                                   \
-        &create<kernels::NAME<A0, int64_t>>, NULL,                             \
-        &create<kernels::NAME<A0, uint8_t>>,                                   \
-        &create<kernels::NAME<A0, uint16_t>>,                                  \
-        &create<kernels::NAME<A0, uint32_t>>,                                  \
-        &create<kernels::NAME<A0, uint64_t>>, NULL, NULL,                      \
-        &create<kernels::NAME<A0, float>>, &create<kernels::NAME<A0, double>>, \
-        NULL, &create<kernels::NAME<A0, dynd::complex<float>>>,                \
-        &create<kernels::NAME<A0, dynd::complex<double>>>,                     \
+    NULL, &create<nd::NAME<A0, int8_t>>, &create<nd::NAME<A0, int16_t>>,       \
+        &create<nd::NAME<A0, int32_t>>, &create<nd::NAME<A0, int64_t>>, NULL,  \
+        &create<nd::NAME<A0, uint8_t>>, &create<nd::NAME<A0, uint16_t>>,       \
+        &create<nd::NAME<A0, uint32_t>>, &create<nd::NAME<A0, uint64_t>>,      \
+        NULL, NULL, &create<nd::NAME<A0, float>>,                              \
+        &create<nd::NAME<A0, double>>, NULL,                                   \
+        &create<nd::NAME<A0, dynd::complex<float>>>,                           \
+        &create<nd::NAME<A0, dynd::complex<double>>>,                          \
   }
 
 #define BUILTIN_TABLE(NAME)                                                    \

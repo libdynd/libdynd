@@ -382,6 +382,7 @@ set(libdynd_SRC
     src/dynd/kernels/tuple_assignment_kernels.cpp
     src/dynd/kernels/tuple_comparison_kernels.cpp
     include/dynd/kernels/apply.hpp
+    include/dynd/kernels/arithmetic.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp
     include/dynd/kernels/buffered_kernels.hpp
