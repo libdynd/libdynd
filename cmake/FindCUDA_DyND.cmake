@@ -1176,6 +1176,13 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       endif()
 
       set(_cuda_host_flags "${_cuda_host_flags}\nset(CMAKE_HOST_FLAGS_${config_upper} ${_cuda_C_FLAGS})")
+
+      # nvcc should not propagate -std=c++11 to the host compiler, as it causes warnings and errors
+      set(_cuda_fix_cxx11 TRUE)
+
+      if (_cuda_fix_cxx11)
+        string(REPLACE "-std=c++11" "" _cuda_host_flags "${_cuda_host_flags}")
+      endif()
     endif()
 
     # Note that if we ever want CUDA_NVCC_FLAGS_<CONFIG> to be string (instead of a list

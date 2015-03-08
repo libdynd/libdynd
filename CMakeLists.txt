@@ -104,10 +104,6 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20 -Wno-type-limits")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
-        # This is a workaround for a CUDA bug with Clang, where it is unable to handle "-std=c++11"
-        if (DYND_CUDA)
-            set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-        endif()
     endif()
 endif()
 
