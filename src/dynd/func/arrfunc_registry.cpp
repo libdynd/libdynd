@@ -12,6 +12,7 @@
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/random.hpp>
 #include <dynd/func/arithmetic.hpp>
+#include <dynd/func/take.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -241,6 +242,7 @@ std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
         make_ufunc(&powf, static_cast<double (*)(double, double)>(&::pow));
 
     registry["uniform"] = nd::random::uniform;
+    registry["take"] = nd::take;
   }
 
   return registry;
