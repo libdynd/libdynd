@@ -120,6 +120,7 @@ if (DYND_CUDA)
             func/test_apply.cpp
             func/test_elwise.cpp
             func/test_random.cpp
+            func/test_multidispatch.cpp
             types/test_complex_type.cpp
         )
         set_property(SOURCE ${filename_CPP} PROPERTY CUDA_SOURCE_FILE TRUE)

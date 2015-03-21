@@ -15,6 +15,7 @@
 #include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
+#include <dynd/func/random.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -124,7 +125,8 @@ TEST(MultiDispatchArrfunc, Values)
 
 /**
 TODO: This test broken when the order of resolve_option_values and
-      resolve_dst_type changed. It should be fixed when we sort out multidispatch.
+      resolve_dst_type changed. It should be fixed when we sort out
+multidispatch.
 
 TEST(MultiDispatchArrfunc, Dims)
 {
@@ -169,4 +171,32 @@ TEST(MultidispatchArrfunc, Untitled)
       ndt::type("(R) -> R"), {nd::functional::apply(&tester<int>),
                               nd::functional::apply(&tester<double>),
                               nd::functional::apply(&tester<unsigned>)});
+}
+
+template <typename T>
+struct callable0 {
+  DYND_CUDA_HOST_DEVICE T operator()(T x, T y) const { return x + y; }
+};
+
+TEST(MultidispatchFunc, CudaHostDevice)
+{
+  nd::arrfunc af = nd::functional::multidispatch(
+      ndt::type("(M[R], M[R]) -> M[R]"),
+      {nd::functional::apply<callable0<int>>(),
+       nd::functional::apply<kernel_request_cuda_device, callable0<int>>()});
+
+  std::cout << af(1, 2) << std::endl;
+  std::cout << af(nd::array(1).to_cuda_device(), nd::array(2).to_cuda_device())
+            << std::endl;
+
+  nd::arrfunc af1 = nd::functional::elwise(af);
+  std::cout << af1 << std::endl;
+
+  nd::array a = nd::random::uniform(kwds("dst_tp", ndt::type("10 * int32")));
+  nd::array b = nd::random::uniform(kwds("dst_tp", ndt::type("10 * int32")));
+
+  std::cout << af1(a, b) << std::endl;
+  std::cout << af1(a.to_cuda_device(), b.to_cuda_device()) << std::endl;
+
+//  std::exit(-1);
 }

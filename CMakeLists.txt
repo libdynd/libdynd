@@ -401,6 +401,7 @@ set(libdynd_SRC
     include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/func/fft.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
+    include/dynd/kernels/multidispatch.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/option_kernels.hpp
     include/dynd/kernels/pointer_assignment_kernels.hpp
@@ -418,6 +419,7 @@ set(libdynd_SRC
     include/dynd/kernels/time_assignment_kernels.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
     include/dynd/kernels/tuple_comparison_kernels.hpp
+    include/dynd/kernels/virtual.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/executable_memory_block_windows_x64.cpp
