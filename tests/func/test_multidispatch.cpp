@@ -173,6 +173,9 @@ TEST(MultidispatchArrfunc, Untitled)
                               nd::functional::apply(&tester<unsigned>)});
 }
 
+#ifdef DYND_CUDA
+
+/*
 template <typename T>
 struct callable0 {
   DYND_CUDA_HOST_DEVICE T operator()(T x, T y) const { return x + y; }
@@ -200,3 +203,6 @@ TEST(MultidispatchFunc, CudaHostDevice)
 
 //  std::exit(-1);
 }
+*/
+
+#endif

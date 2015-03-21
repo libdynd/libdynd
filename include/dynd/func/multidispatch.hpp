@@ -26,6 +26,10 @@ namespace nd {
     }
 
     arrfunc multidispatch(const ndt::type &self_tp,
+                          const std::vector<arrfunc> &children,
+                          const std::vector<std::string> &ignore_vars);
+
+    arrfunc multidispatch(const ndt::type &self_tp,
                           const std::vector<arrfunc> &children);
 
   } // namespace dynd::nd::functional

@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/fft.hpp>
+#include <dynd/func/multidispatch.hpp>
 #include <dynd/func/take.hpp>
 
 using namespace std;
@@ -31,7 +32,7 @@ nd::arrfunc nd::fft::make()
       ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, axes: "
                 "?Fixed * int64, "
                 "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
-      children);
+      children, {"N"});
 }
 
 nd::arrfunc nd::ifft::make()
@@ -56,7 +57,7 @@ nd::arrfunc nd::ifft::make()
       ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, "
                 "axes: ?Fixed * int64, "
                 "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
-      children);
+      children, {"N"});
 }
 
 nd::arrfunc nd::rfft::make()

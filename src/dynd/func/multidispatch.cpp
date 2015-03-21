@@ -418,8 +418,10 @@ nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
                  &resolve_multidispatch_dst_type, NULL);
 }
 
-nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
-                                          const std::vector<arrfunc> &children)
+nd::arrfunc
+nd::functional::multidispatch(const ndt::type &self_tp,
+                              const std::vector<arrfunc> &children,
+                              const std::vector<std::string> &ignore_vars)
 {
   intptr_t nkwd = children[0].get_type()->get_nkwd();
 
@@ -448,7 +450,10 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
     if (vars_init) {
       std::vector<string> tmp;
       for (const auto &pair : tp_vars) {
-        tmp.push_back(pair.first);
+        if (std::find(ignore_vars.begin(), ignore_vars.end(),
+                      pair.first.str()) == ignore_vars.end()) {
+          tmp.push_back(pair.first);
+        }
       }
 
       if (vars->size() != tmp.size() ||
@@ -458,7 +463,10 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
       }
     } else {
       for (const auto &pair : tp_vars) {
-        vars->push_back(pair.first);
+        if (std::find(ignore_vars.begin(), ignore_vars.end(),
+                      pair.first.str()) == ignore_vars.end()) {
+          vars->push_back(pair.first);
+        }
       }
       vars_init = true;
     }
@@ -473,4 +481,10 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
 
   return as_arrfunc<multidispatch_ck>(self_tp,
                                       multidispatch_ck::data_type(map, vars));
+}
+
+nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
+                                          const std::vector<arrfunc> &children)
+{
+  return multidispatch(self_tp, children, {});
 }
