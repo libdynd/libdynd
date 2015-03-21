@@ -306,6 +306,8 @@ public:
     return m_kwd_struct.extended<struct_type>()->get_field_index(arg_name);
   }
 
+  void get_vars(std::unordered_set<std::string> &vars) const;
+
   bool has_kwd(const std::string &name) const {
     return get_kwd_index(name) != -1;
   }

@@ -81,6 +81,10 @@ public:
   virtual intptr_t get_dim_size(const char *arrmeta = NULL,
                                 const char *data = NULL) const = 0;
 
+  virtual void get_vars(std::unordered_set<std::string> &vars) const {
+    m_element_tp.get_vars(vars);
+  }
+
   /**
    * Constructs the nd::array arrmeta for one dimension of this type, leaving
    * the arrmeta for deeper dimensions uninitialized. Returns the size of

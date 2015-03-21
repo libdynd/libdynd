@@ -437,6 +437,16 @@ nd::functional::multidispatch(const ndt::type &self_tp,
       self_tp.extended<arrfunc_type>()->get_return_type());
 
   std::shared_ptr<std::vector<string>> vars(new std::vector<string>);
+/*
+  for (auto &var : self_tp.get_vars()) {
+    if (std::find(ignore_vars.begin(), ignore_vars.end(), var) ==
+        ignore_vars.end()) {
+      std::cout << var << std::endl;
+      vars->push_back(var);
+    }
+  }
+*/
+
   bool vars_init = false;
 
   std::shared_ptr<multidispatch_ck::map_type> map(

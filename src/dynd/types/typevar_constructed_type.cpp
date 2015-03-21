@@ -35,6 +35,12 @@ typevar_constructed_type::typevar_constructed_type(const nd::string &name,
   //}
 }
 
+void typevar_constructed_type::get_vars(std::unordered_set<std::string> &vars) const
+{
+  vars.insert(m_name.str());
+  m_arg.get_vars(vars);
+}
+
 void typevar_constructed_type::print_data(std::ostream &DYND_UNUSED(o),
                                           const char *DYND_UNUSED(arrmeta),
                                           const char *DYND_UNUSED(data)) const
