@@ -58,6 +58,11 @@ option_type::~option_type()
 {
 }
 
+void option_type::get_vars(std::unordered_set<std::string> &vars) const
+{
+  m_value_tp.get_vars(vars);
+}
+
 const ndt::type &option_type::make_nafunc_type()
 {
   static ndt::type static_instance = ndt::make_cstruct(

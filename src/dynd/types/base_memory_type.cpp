@@ -38,6 +38,11 @@ void base_memory_type::get_strides(size_t i, intptr_t *out_strides,
   m_element_tp.extended()->get_strides(i, out_strides, arrmeta);
 }
 
+void base_memory_type::get_vars(std::unordered_set<std::string> &vars) const
+{
+  m_element_tp.get_vars(vars);
+}
+
 ndt::type base_memory_type::apply_linear_index(intptr_t nindices,
                                                const irange *indices,
                                                size_t current_i,

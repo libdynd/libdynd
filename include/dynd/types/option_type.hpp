@@ -47,6 +47,8 @@ public:
     return m_value_tp.get_default_data_size();
   }
 
+  void get_vars(std::unordered_set<std::string> &vars) const;
+
   /** Returns the type that m_nafunc has */
   static const ndt::type &make_nafunc_type();
 

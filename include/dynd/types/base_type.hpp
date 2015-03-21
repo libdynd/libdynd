@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <unordered_set>
 #include <vector>
 
 #include <dynd/config.hpp>
@@ -570,6 +571,10 @@ public:
     virtual void foreach_leading(const char *arrmeta, char *data,
                                  foreach_fn_t callback,
                                  void *callback_data) const;
+
+
+    virtual void get_vars(std::unordered_set<std::string> &DYND_UNUSED(vars)) const {
+    }
 
     /**
      * If a subclass implements this, it should return an nd::array

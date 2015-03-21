@@ -184,6 +184,13 @@ ndt::type arrfunc_type::get_canonical_type() const
   return ndt::make_arrfunc(tmp_pos_types, tmp_kwd_types, tmp_return_type);
 }
 
+void arrfunc_type::get_vars(std::unordered_set<std::string> &vars) const
+{
+  m_return_type.get_vars(vars);
+  m_pos_tuple.get_vars(vars);
+  m_kwd_struct.get_vars(vars);
+}
+
 ndt::type arrfunc_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
     size_t DYND_UNUSED(current_i), const ndt::type &DYND_UNUSED(root_tp),
@@ -466,9 +473,10 @@ static array_preamble *function___call__(const array_preamble *params,
     dynd_arrmeta[i] = args[i + 1].get_arrmeta();
   }
   ckernel_builder<kernel_request_host> ckb;
-  af->instantiate(af, af_tp, &ckb, 0, args[0].get_type(), args[0].get_arrmeta(), nargs,
-                  src_tp, dynd_arrmeta, kernel_request_single,
-                  &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
+  af->instantiate(af, af_tp, &ckb, 0, args[0].get_type(), args[0].get_arrmeta(),
+                  nargs, src_tp, dynd_arrmeta, kernel_request_single,
+                  &eval::default_eval_context, nd::array(),
+                  std::map<nd::string, ndt::type>());
   // Call the ckernel
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   char *in_ptrs[max_args];

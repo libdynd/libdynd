@@ -28,6 +28,8 @@ public:
 
   ndt::type get_arg() const { return m_arg; }
 
+  void get_vars(std::unordered_set<std::string> &vars) const;
+
   void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
   void print_type(std::ostream &o) const;

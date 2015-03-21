@@ -27,6 +27,12 @@ typevar_dim_type::typevar_dim_type(const nd::string &name,
     }
 }
 
+void typevar_dim_type::get_vars(std::unordered_set<std::string> &vars) const
+{
+  vars.insert(m_name.str());
+  m_element_tp.get_vars(vars);
+}
+
 void typevar_dim_type::print_data(std::ostream &DYND_UNUSED(o),
                                 const char *DYND_UNUSED(arrmeta),
                                 const char *DYND_UNUSED(data)) const

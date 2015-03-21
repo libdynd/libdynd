@@ -157,6 +157,12 @@ void base_tuple_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
   }
 }
 
+void base_tuple_type::get_vars(std::unordered_set<std::string> &vars) const {
+  for (intptr_t i = 0; i < m_field_count; ++i) {
+    get_field_type(i).get_vars(vars);
+  }
+}
+
 ndt::type base_tuple_type::apply_linear_index(intptr_t nindices,
                                               const irange *indices,
                                               size_t current_i,
@@ -418,8 +424,7 @@ bool base_tuple_type::match(const char *arrmeta, const ndt::type &candidate_tp,
       }
     }
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }

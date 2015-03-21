@@ -48,6 +48,8 @@ public:
 
   virtual size_t get_default_data_size() const;
 
+  virtual void get_vars(std::unordered_set<std::string> &vars) const;
+
   virtual void print_data(std::ostream &o, const char *arrmeta,
                           const char *data) const;
 

@@ -76,6 +76,8 @@ public:
     return unchecked_fixed_dim_get<uintptr_t>(m_arrmeta_offsets, i);
   }
 
+  virtual void get_vars(std::unordered_set<std::string> &vars) const;
+
   bool is_variadic() const { return m_variadic; }
 
   void print_data(std::ostream &o, const char *arrmeta, const char *data) const;

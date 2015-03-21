@@ -36,6 +36,8 @@ public:
 
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
 
+    void get_vars(std::unordered_set<std::string> &vars) const;
+
     bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
 
     bool operator==(const base_type &rhs) const;
