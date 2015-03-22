@@ -409,6 +409,74 @@ struct type_id_of<std::complex<double>> {
   enum { value = complex_float64_type_id };
 };
 
+template <type_id_t type_id>
+struct type_of;
+
+template <>
+struct type_of<int8_type_id> {
+  typedef int8_t type;
+};
+template <>
+struct type_of<int16_type_id> {
+  typedef int16_t type;
+};
+template <>
+struct type_of<int32_type_id> {
+  typedef int type;
+};
+template <>
+struct type_of<int64_type_id> {
+  typedef long long type;
+};
+template <>
+struct type_of<int128_type_id> {
+  typedef dynd_int128 type;
+};
+template <>
+struct type_of<uint8_type_id> {
+  typedef uint8_t type;
+};
+template <>
+struct type_of<uint16_type_id> {
+  typedef uint16_t type;
+};
+template <>
+struct type_of<uint32_type_id> {
+  typedef unsigned type;
+};
+template <>
+struct type_of<uint64_type_id> {
+  typedef unsigned long long type;
+};
+template <>
+struct type_of<uint128_type_id> {
+  typedef dynd_uint128 type;
+};
+template <>
+struct type_of<float16_type_id> {
+  typedef dynd_float16 type;
+};
+template <>
+struct type_of<float32_type_id> {
+  typedef float type;
+};
+template <>
+struct type_of<float64_type_id> {
+  typedef double type;
+};
+template <>
+struct type_of<float128_type_id> {
+  typedef dynd_float128 type;
+};
+template <>
+struct type_of<complex_float32_type_id> {
+  typedef complex<float> type;
+};
+template <>
+struct type_of<complex_float64_type_id> {
+  typedef complex<double> type;
+};
+
 // Type trait for the kind
 template <typename T>
 struct dynd_kind_of;
@@ -647,6 +715,29 @@ namespace detail {
 
     T &operator()(type_id_t i) { return at(i); }
     const T &operator()(type_id_t i) const { return at(i); }
+  };
+
+  template <typename T>
+  class array_by_type_id<T, 2> {
+    T m_data[builtin_type_id_count][builtin_type_id_count];
+
+  public:
+    array_by_type_id(const std::initializer_list<
+        std::pair<std::pair<type_id_t, type_id_t>, T>> &data)
+    {
+      for (const std::pair<std::pair<type_id_t, type_id_t>, T> &pair : data) {
+        m_data[pair.first.first][pair.first.second] = pair.second;
+      }
+    }
+
+    T *data() { return m_data; }
+    const T *data() const { return m_data; }
+
+    T &at(type_id_t i, type_id_t j) { return m_data[i][j]; }
+    const T &at(type_id_t i, type_id_t j) const { return m_data[i][j]; }
+
+    T &operator()(type_id_t i, type_id_t j) { return at(i, j); }
+    const T &operator()(type_id_t i, type_id_t j) const { return at(i, j); }
   };
 
 } // namespace dynd::detail

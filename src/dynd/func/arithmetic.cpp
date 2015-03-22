@@ -27,6 +27,30 @@ struct nd::minus nd::minus;
 
 nd::array nd::operator-(const nd::array &a0) { return nd::minus(a0); }
 
+nd::arrfunc nd::add::make()
+{
+  return functional::elwise(as_arrfunc<virtual_add_ck>());
+}
+
+struct nd::add nd::add;
+
+nd::array nd::operator+(const nd::array &a0, const nd::array &a1)
+{
+  return nd::add(a0, a1);
+}
+
+nd::arrfunc nd::subtract::make()
+{
+  return functional::elwise(as_arrfunc<virtual_subtract_ck>());
+}
+
+struct nd::subtract nd::subtract;
+
+nd::array nd::operator-(const nd::array &a0, const nd::array &a1)
+{
+  return nd::subtract(a0, a1);
+}
+
 #define BUILTIN_ROW(NAME, A0)                                                  \
   {                                                                            \
     NULL, &create<nd::NAME<A0, int8_t>>, &create<nd::NAME<A0, int16_t>>,       \
@@ -60,28 +84,14 @@ nd::array nd::operator-(const nd::array &a0) { return nd::minus(a0); }
       BUILTIN_ROW(NAME##_ck, dynd::complex<float>),                            \
       BUILTIN_ROW(NAME##_ck, dynd::complex<double>)};
 
-BUILTIN_TABLE(add);
-BUILTIN_TABLE(sub);
 BUILTIN_TABLE(mul);
 BUILTIN_TABLE(div);
 
 #undef BUILTIN_TABLE
 #undef BUILTIN_ROW
 
-struct nd::add nd::add;
-struct nd::sub nd::sub;
 struct nd::mul nd::mul;
 struct nd::div nd::div;
-
-nd::array nd::operator+(const nd::array &a0, const nd::array &a1)
-{
-  return nd::add(a0, a1);
-}
-
-nd::array nd::operator-(const nd::array &a0, const nd::array &a1)
-{
-  return nd::sub(a0, a1);
-}
 
 nd::array nd::operator*(const nd::array &a0, const nd::array &a1)
 {

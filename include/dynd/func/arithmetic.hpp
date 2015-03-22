@@ -17,6 +17,14 @@ namespace nd {
     static arrfunc make();
   } minus;
 
+  extern struct add : declfunc<add> {
+    static arrfunc make();
+  } add;
+
+  extern struct subtract : declfunc<subtract> {
+    static arrfunc make();
+  } subtract;
+
 #define ARITHMETIC_OPERATOR(NAME)                                              \
   extern struct NAME : declfunc<NAME> {                                        \
     static const create_t                                                      \
@@ -75,8 +83,6 @@ namespace nd {
     }                                                                          \
   } NAME;
 
-  ARITHMETIC_OPERATOR(add);
-  ARITHMETIC_OPERATOR(sub);
   ARITHMETIC_OPERATOR(mul);
   ARITHMETIC_OPERATOR(div);
 
