@@ -642,7 +642,7 @@ execute_process(COMMAND ${CMAKE_COMMAND}
 add_executable(ppgen include/dynd/pp/gen.cpp)
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
         DEPENDS include/dynd/pp/gen.cpp
-        COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+        COMMAND ppgen 16 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 add_custom_target(libdynd_gen DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp)
 # Make libdynd depend on libdynd_gen to make sure gen.hpp is there when it builds
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
