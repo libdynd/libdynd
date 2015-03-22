@@ -9,6 +9,14 @@
 namespace dynd {
 namespace nd {
 
+  extern struct plus : declfunc<plus> {
+    static arrfunc make();
+  } plus;
+
+  extern struct minus : declfunc<minus> {
+    static arrfunc make();
+  } minus;
+
 #define ARITHMETIC_OPERATOR(NAME)                                              \
   extern struct NAME : declfunc<NAME> {                                        \
     static const create_t                                                      \

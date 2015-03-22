@@ -187,6 +187,12 @@ namespace nd {
       return const_cast<char *>(value.get_readonly_originptr());
     }
 
+    inline char *data_of(const array &value)
+    {
+      return const_cast<char *>(value.get_readonly_originptr());
+    }
+
+
     template <typename... A>
     class args {
       std::tuple<A...> m_values;

@@ -344,6 +344,7 @@ set(libdynd_SRC
     include/dynd/iter/string_iter.hpp
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
+    src/dynd/kernels/arithmetic.cpp
     src/dynd/kernels/var_dim_assignment_kernels.cpp
     src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp

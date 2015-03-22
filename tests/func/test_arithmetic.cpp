@@ -10,6 +10,7 @@
 
 #include "../test_memory_new.hpp"
 
+#include <dynd/func/arithmetic.hpp>
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
 
@@ -254,6 +255,21 @@ TYPED_TEST_P(Arithmetic, ComplexScalar)
   EXPECT_EQ(dynd::complex<double>(0, -2), c(1).as<dynd::complex<double>>());
   EXPECT_EQ(dynd::complex<double>(0, -3), c(2).as<dynd::complex<double>>());
 }
+
+/*
+TEST(Arithmetic, Plus) {
+  nd::array a = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.5, 9.0};
+  std::cout << a << std::endl;
+
+  std::cout << nd::plus << std::endl;
+  std::cout << nd::plus(a) << std::endl;
+
+  std::cout << nd::minus << std::endl;
+  std::cout << nd::minus(a) << std::endl;
+
+  std::exit(-1);
+}
+*/
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,
                            ScalarOnTheRight, ScalarOnTheLeft, ComplexScalar);

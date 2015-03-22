@@ -9,6 +9,24 @@
 
 using namespace dynd;
 
+nd::arrfunc nd::plus::make()
+{
+  return functional::elwise(as_arrfunc<multidispatch_plus_ck>());
+}
+
+struct nd::plus nd::plus;
+
+nd::array nd::operator+(const nd::array &a0) { return nd::plus(a0); }
+
+nd::arrfunc nd::minus::make()
+{
+  return functional::elwise(as_arrfunc<multidispatch_minus_ck>());
+}
+
+struct nd::minus nd::minus;
+
+nd::array nd::operator-(const nd::array &a0) { return nd::minus(a0); }
+
 #define BUILTIN_ROW(NAME, A0)                                                  \
   {                                                                            \
     NULL, &create<nd::NAME<A0, int8_t>>, &create<nd::NAME<A0, int16_t>>,       \
