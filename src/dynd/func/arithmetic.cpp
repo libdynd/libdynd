@@ -29,7 +29,7 @@ nd::array nd::operator-(const nd::array &a0) { return nd::minus(a0); }
 
 nd::arrfunc nd::add::make()
 {
-  return functional::elwise(as_arrfunc<virtual_add_ck>());
+  return functional::elwise(as_arrfunc<multidispatch_add_ck>());
 }
 
 struct nd::add nd::add;
@@ -41,7 +41,7 @@ nd::array nd::operator+(const nd::array &a0, const nd::array &a1)
 
 nd::arrfunc nd::subtract::make()
 {
-  return functional::elwise(as_arrfunc<virtual_subtract_ck>());
+  return functional::elwise(as_arrfunc<multidispatch_subtract_ck>());
 }
 
 struct nd::subtract nd::subtract;
@@ -53,7 +53,7 @@ nd::array nd::operator-(const nd::array &a0, const nd::array &a1)
 
 nd::arrfunc nd::multiply::make()
 {
-  return functional::elwise(as_arrfunc<virtual_multiply_ck>());
+  return functional::elwise(as_arrfunc<multidispatch_multiply_ck>());
 }
 
 struct nd::multiply nd::multiply;
@@ -65,7 +65,7 @@ nd::array nd::operator*(const nd::array &a0, const nd::array &a1)
 
 nd::arrfunc nd::divide::make()
 {
-  return functional::elwise(as_arrfunc<virtual_divide_ck>());
+  return functional::elwise(as_arrfunc<multidispatch_divide_ck>());
 }
 
 struct nd::divide nd::divide;

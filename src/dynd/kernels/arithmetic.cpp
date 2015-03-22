@@ -50,22 +50,22 @@ ndt::type nd::multidispatch_minus_ck::make_type()
 #define MAKE_PAIR(I, J)                                                        \
   std::make_pair(std::make_pair(I, J), as_arrfunc<add_ck<I, J>>())
 
-detail::array_by_type_id<nd::arrfunc, 2> nd::virtual_add_ck::children(
+detail::array_by_type_id<nd::arrfunc, 2> nd::multidispatch_add_ck::children(
     {MAKE_PAIRS(DYND_BUILTIN_TYPE_IDS, DYND_BUILTIN_TYPE_IDS)});
 
 #undef MAKE_PAIR
 
-ndt::type nd::virtual_add_ck::make_type() { return ndt::type("(A0, A1) -> R"); }
+ndt::type nd::multidispatch_add_ck::make_type() { return ndt::type("(A0, A1) -> R"); }
 
 #define MAKE_PAIR(I, J)                                                        \
   std::make_pair(std::make_pair(I, J), as_arrfunc<subtract_ck<I, J>>())
 
-detail::array_by_type_id<nd::arrfunc, 2> nd::virtual_subtract_ck::children(
+detail::array_by_type_id<nd::arrfunc, 2> nd::multidispatch_subtract_ck::children(
     {MAKE_PAIRS(DYND_BUILTIN_TYPE_IDS, DYND_BUILTIN_TYPE_IDS)});
 
 #undef MAKE_PAIR
 
-ndt::type nd::virtual_subtract_ck::make_type()
+ndt::type nd::multidispatch_subtract_ck::make_type()
 {
   return ndt::type("(A0, A1) -> R");
 }
@@ -73,12 +73,12 @@ ndt::type nd::virtual_subtract_ck::make_type()
 #define MAKE_PAIR(I, J)                                                        \
   std::make_pair(std::make_pair(I, J), as_arrfunc<multiply_ck<I, J>>())
 
-detail::array_by_type_id<nd::arrfunc, 2> nd::virtual_multiply_ck::children(
+detail::array_by_type_id<nd::arrfunc, 2> nd::multidispatch_multiply_ck::children(
     {MAKE_PAIRS(DYND_BUILTIN_TYPE_IDS, DYND_BUILTIN_TYPE_IDS)});
 
 #undef MAKE_PAIR
 
-ndt::type nd::virtual_multiply_ck::make_type()
+ndt::type nd::multidispatch_multiply_ck::make_type()
 {
   return ndt::type("(A0, A1) -> R");
 }
@@ -86,12 +86,12 @@ ndt::type nd::virtual_multiply_ck::make_type()
 #define MAKE_PAIR(I, J)                                                        \
   std::make_pair(std::make_pair(I, J), as_arrfunc<divide_ck<I, J>>())
 
-detail::array_by_type_id<nd::arrfunc, 2> nd::virtual_divide_ck::children(
+detail::array_by_type_id<nd::arrfunc, 2> nd::multidispatch_divide_ck::children(
     {MAKE_PAIRS(DYND_BUILTIN_TYPE_IDS, DYND_BUILTIN_TYPE_IDS)});
 
 #undef MAKE_PAIR
 
-ndt::type nd::virtual_divide_ck::make_type()
+ndt::type nd::multidispatch_divide_ck::make_type()
 {
   return ndt::type("(A0, A1) -> R");
 }
