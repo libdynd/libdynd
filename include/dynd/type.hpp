@@ -718,10 +718,8 @@ namespace ndt {
 
     /**
      * If the type is a strided dimension type, where the dimension has a fixed
-     *size
-     * and the data is at addresses `dst`, `dst + stride`, etc, this extracts
-     *those
-     * values and returns true.
+     * size and the data is at addresses `dst`, `dst + stride`, etc, this
+     * extracts those values and returns true.
      *
      * \param arrmeta  The arrmeta for the type.
      * \param out_el_tp  Is filled with the element type.
@@ -763,17 +761,16 @@ namespace ndt {
     }
     /**
      * \brief Constructs the iterdata for processing iteration of the specified
-     *shape.
+     *        shape.
      *
      * \param iterdata  The allocated iterdata to construct.
      * \param inout_arrmeta  The arrmeta corresponding to the type for the
-     *iterdata construction.
-     *                        This is modified in place to become the arrmeta
-     *for the array data type.
+     *                       iterdata construction. This is modified in place to
+     *                       become the arrmeta for the array data type.
      * \param ndim      Number of iteration dimensions.
      * \param shape     The iteration shape.
      * \param out_uniform_type  This is populated with the type of each iterated
-     *element
+     *                          element
      */
     void iterdata_construct(iterdata_common *iterdata,
                             const char **inout_arrmeta, intptr_t ndim,
@@ -805,17 +802,16 @@ namespace ndt {
 
     /**
      * Constructs an iterdata which can be broadcast to the left indefinitely,
-     * by capping
-     * off the iterdata with a iterdata_broadcasting_terminator.
+     * by capping off the iterdata with a iterdata_broadcasting_terminator.
+     *
      * \param iterdata  The allocated iterdata to construct.
      * \param inout_arrmeta  The arrmeta corresponding to the type for the
-     * iterdata construction.
-     *                        This is modified in place to become the arrmeta
-     * for the array data type.
+     *                       iterdata construction. This is modified in place to
+     *                       become the arrmeta for the array data type.
      * \param ndim      Number of iteration dimensions.
      * \param shape     The iteration shape.
      * \param out_uniform_tp  This is populated with the type of each iterated
-     * element
+     *                        element
      */
     void broadcasted_iterdata_construct(iterdata_common *iterdata,
                                         const char **inout_arrmeta,
