@@ -622,4 +622,32 @@ struct is_type_bool<bool> {
   enum { value = true };
 };
 
+namespace detail {
+
+  template <typename T, int N>
+  class array_by_type_id;
+
+  template <typename T>
+  class array_by_type_id<T, 1> {
+    T m_data[builtin_type_id_count];
+
+  public:
+    array_by_type_id(const std::initializer_list<std::pair<type_id_t, T>> &data)
+    {
+      for (const std::pair<type_id_t, T> &pair : data) {
+        m_data[pair.first] = pair.second;
+      }
+    }
+
+    T *data() { return m_data; }
+    const T *data() const { return m_data; }
+
+    T &at(type_id_t i) { return m_data[i]; }
+    const T &at(type_id_t i) const { return m_data[i]; }
+
+    T &operator()(type_id_t i) { return at(i); }
+    const T &operator()(type_id_t i) const { return at(i); }
+  };
+
+} // namespace dynd::detail
 } // namespace dynd

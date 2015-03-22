@@ -8,30 +8,22 @@
 using namespace std;
 using namespace dynd;
 
-const nd::arrfunc nd::multidispatch_plus_ck::children[builtin_type_id_count -
-                                                      2] = {
-    arrfunc(),                      arrfunc(),                      arrfunc(),
-    as_arrfunc<plus_ck<int32_t>>(), as_arrfunc<plus_ck<int64_t>>(), arrfunc(),
-    arrfunc(),                      arrfunc(),                      arrfunc(),
-    arrfunc(),                      arrfunc(),                      arrfunc(),
-    as_arrfunc<plus_ck<float>>(),   as_arrfunc<plus_ck<double>>(),  arrfunc(),
-    arrfunc(),                      arrfunc(),
-};
+detail::array_by_type_id<nd::arrfunc, 1> nd::multidispatch_plus_ck::children(
+    {std::make_pair(int32_type_id, as_arrfunc<plus_ck<int32_t>>()),
+     std::make_pair(int64_type_id, as_arrfunc<plus_ck<int64_t>>()),
+     std::make_pair(float32_type_id, as_arrfunc<plus_ck<float>>()),
+     std::make_pair(float64_type_id, as_arrfunc<plus_ck<double>>())});
 
 ndt::type nd::multidispatch_plus_ck::make_type()
 {
   return ndt::type("(R) -> R");
 }
 
-const nd::arrfunc nd::multidispatch_minus_ck::children[builtin_type_id_count -
-                                                       2] = {
-    arrfunc(),                       arrfunc(),                       arrfunc(),
-    as_arrfunc<minus_ck<int32_t>>(), as_arrfunc<minus_ck<int64_t>>(), arrfunc(),
-    arrfunc(),                       arrfunc(),                       arrfunc(),
-    arrfunc(),                       arrfunc(),                       arrfunc(),
-    as_arrfunc<minus_ck<float>>(),   as_arrfunc<minus_ck<double>>(),  arrfunc(),
-    arrfunc(),                       arrfunc(),
-};
+detail::array_by_type_id<nd::arrfunc, 1> nd::multidispatch_minus_ck::children(
+    {std::make_pair(int32_type_id, as_arrfunc<minus_ck<int32_t>>()),
+     std::make_pair(int64_type_id, as_arrfunc<minus_ck<int64_t>>()),
+     std::make_pair(float32_type_id, as_arrfunc<minus_ck<float>>()),
+     std::make_pair(float64_type_id, as_arrfunc<minus_ck<double>>())});
 
 ndt::type nd::multidispatch_minus_ck::make_type()
 {

@@ -17,7 +17,7 @@ namespace nd {
                      ndt::type &out_dst_tp, const dynd::nd::array &kwds,
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
-      const arrfunc &child = CKT::children[src_tp[0].get_type_id() - bool_type_id];
+      const arrfunc &child = CKT::children(src_tp[0].get_type_id());
       return child.get()->resolve_dst_type(self, self_tp, nsrc, src_tp,
                                            throw_on_error, out_dst_tp, kwds,
                                            tp_vars);
@@ -31,7 +31,7 @@ namespace nd {
                 const eval::eval_context *ectx, const dynd::nd::array &kwds,
                 const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
-      const arrfunc &child = CKT::children[src_tp[0].get_type_id() - bool_type_id];
+      const arrfunc &child = CKT::children(src_tp[0].get_type_id());
       return child.get()->instantiate(self, self_tp, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                       kernreq, ectx, kwds, tp_vars);
@@ -50,9 +50,9 @@ namespace nd {
     static ndt::type make_type()
     {
       std::map<string, ndt::type> tp_vars;
-      tp_vars["R"] = ndt::make_type<R>();
+      tp_vars["T"] = ndt::make_type<R>();
 
-      return ndt::substitute(ndt::type("(R) -> R"), tp_vars, true);
+      return ndt::substitute(ndt::type("(T) -> T"), tp_vars, true);
     }
 
     static int resolve_dst_type(
@@ -83,7 +83,7 @@ namespace nd {
   };
 
   struct multidispatch_plus_ck : single_dispatch_ck<multidispatch_plus_ck> {
-    static const arrfunc children[builtin_type_id_count - 2];
+    static dynd::detail::array_by_type_id<arrfunc, 1> children;
 
     static ndt::type make_type();
   };
@@ -100,9 +100,9 @@ namespace nd {
     static ndt::type make_type()
     {
       std::map<string, ndt::type> tp_vars;
-      tp_vars["R"] = ndt::make_type<R>();
+      tp_vars["T"] = ndt::make_type<R>();
 
-      return ndt::substitute(ndt::type("(R) -> R"), tp_vars, true);
+      return ndt::substitute(ndt::type("(T) -> T"), tp_vars, true);
     }
 
     static int resolve_dst_type(
@@ -133,7 +133,7 @@ namespace nd {
   };
 
   struct multidispatch_minus_ck : single_dispatch_ck<multidispatch_minus_ck> {
-    static const arrfunc children[builtin_type_id_count - 2];
+    static dynd::detail::array_by_type_id<arrfunc, 1> children;
 
     static ndt::type make_type();
   };
