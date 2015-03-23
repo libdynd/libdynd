@@ -437,15 +437,15 @@ nd::functional::multidispatch(const ndt::type &self_tp,
       self_tp.extended<arrfunc_type>()->get_return_type());
 
   std::shared_ptr<std::vector<string>> vars(new std::vector<string>);
-/*
-  for (auto &var : self_tp.get_vars()) {
-    if (std::find(ignore_vars.begin(), ignore_vars.end(), var) ==
-        ignore_vars.end()) {
-      std::cout << var << std::endl;
-      vars->push_back(var);
+  /*
+    for (auto &var : self_tp.get_vars()) {
+      if (std::find(ignore_vars.begin(), ignore_vars.end(), var) ==
+          ignore_vars.end()) {
+        std::cout << var << std::endl;
+        vars->push_back(var);
+      }
     }
-  }
-*/
+  */
 
   bool vars_init = false;
 
@@ -497,4 +497,70 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
                                           const std::vector<arrfunc> &children)
 {
   return multidispatch(self_tp, children, {});
+}
+
+namespace dynd {
+namespace nd {
+  namespace functional {
+
+    template <int N>
+    static typename std::enable_if<N == 1, arrfunc>::type
+    multidispatch_by_type_id(const ndt::type &pattern_tp,
+                             const std::vector<arrfunc> &children)
+    {
+      arrfunc *data = new arrfunc[builtin_type_id_count];
+
+      for (const arrfunc &child : children) {
+        std::map<string, ndt::type> tp_vars;
+        if (!pattern_tp.match(child.get_array_type(), tp_vars)) {
+          throw std::invalid_argument("could not match arrfuncs");
+        }
+
+        const ndt::type &src_tp0 = child.get_type()->get_pos_type(0);
+
+        data[src_tp0.get_type_id()] = child;
+      }
+
+      return as_arrfunc<multidispatch_by_type_id_ck<1>>(pattern_tp, data);
+    }
+
+    template <int N>
+    static typename std::enable_if<N == 2, arrfunc>::type
+    multidispatch_by_type_id(const ndt::type &pattern_tp,
+                             const std::vector<arrfunc> &children)
+    {
+      arrfunc(*data)[builtin_type_id_count] =
+          new arrfunc[builtin_type_id_count][builtin_type_id_count];
+
+      for (const arrfunc &child : children) {
+        std::map<string, ndt::type> tp_vars;
+        if (!pattern_tp.match(child.get_array_type(), tp_vars)) {
+          throw std::invalid_argument("could not match arrfuncs");
+        }
+
+        const ndt::type &src_tp0 = child.get_type()->get_pos_type(0);
+        const ndt::type &src_tp1 = child.get_type()->get_pos_type(1);
+
+        data[src_tp0.get_type_id()][src_tp1.get_type_id()] = child;
+      }
+
+      return as_arrfunc<multidispatch_by_type_id_ck<2>>(pattern_tp, data);
+    }
+
+  } // namespace dynd::nd::functional
+} // namespace dynd::nd
+} // namespace dynd
+
+nd::arrfunc
+nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
+                                         const std::vector<arrfunc> &children)
+{
+  switch (pattern_tp.extended<arrfunc_type>()->get_npos()) {
+  case 1:
+    return multidispatch_by_type_id<1>(pattern_tp, children);
+  case 2:
+    return multidispatch_by_type_id<2>(pattern_tp, children);
+  default:
+    throw std::runtime_error("unsupported");
+  }
 }

@@ -722,6 +722,8 @@ namespace detail {
     T m_data[builtin_type_id_count][builtin_type_id_count];
 
   public:
+    array_by_type_id() {}
+
     array_by_type_id(const std::initializer_list<
         std::pair<std::pair<type_id_t, type_id_t>, T>> &data)
     {

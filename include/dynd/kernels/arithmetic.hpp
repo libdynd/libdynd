@@ -53,16 +53,10 @@ namespace nd {
     }
   };
 
-  struct multidispatch_plus_ck
-      : multidispatch_by_type_id_ck<multidispatch_plus_ck, 1> {
-    static dynd::detail::array_by_type_id<arrfunc, 1> children;
-
-    static ndt::type make_type();
-  };
-
-  template <typename A0>
-  struct minus_ck : expr_ck<minus_ck<A0>, kernel_request_cuda_host_device, 1> {
+  template <type_id_t I0>
+  struct minus_ck : expr_ck<minus_ck<I0>, kernel_request_cuda_host_device, 1> {
     typedef minus_ck self_type;
+    typedef typename type_of<I0>::type A0;
     typedef decltype(-std::declval<A0>()) R;
 
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
@@ -104,13 +98,6 @@ namespace nd {
       self_type::create(ckb, kernreq, ckb_offset);
       return ckb_offset;
     }
-  };
-
-  struct multidispatch_minus_ck
-      : multidispatch_by_type_id_ck<multidispatch_minus_ck, 1> {
-    static dynd::detail::array_by_type_id<arrfunc, 1> children;
-
-    static ndt::type make_type();
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -161,12 +148,6 @@ namespace nd {
 
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
-  };
-
-  struct multidispatch_add_ck : multidispatch_by_type_id_ck<multidispatch_add_ck, 2> {
-    static dynd::detail::array_by_type_id<arrfunc, 2> children;
-
-    static ndt::type make_type();
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -220,13 +201,6 @@ namespace nd {
     }
   };
 
-  struct multidispatch_subtract_ck
-      : multidispatch_by_type_id_ck<multidispatch_subtract_ck, 2> {
-    static dynd::detail::array_by_type_id<arrfunc, 2> children;
-
-    static ndt::type make_type();
-  };
-
   template <type_id_t I0, type_id_t I1>
   struct multiply_ck
       : expr_ck<multiply_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
@@ -278,13 +252,6 @@ namespace nd {
     }
   };
 
-  struct multidispatch_multiply_ck
-      : multidispatch_by_type_id_ck<multidispatch_multiply_ck, 2> {
-    static dynd::detail::array_by_type_id<arrfunc, 2> children;
-
-    static ndt::type make_type();
-  };
-
   template <type_id_t I0, type_id_t I1>
   struct divide_ck
       : expr_ck<divide_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
@@ -334,13 +301,6 @@ namespace nd {
       self_type::create(ckb, kernreq, ckb_offset);
       return ckb_offset;
     }
-  };
-
-  struct multidispatch_divide_ck
-      : multidispatch_by_type_id_ck<multidispatch_divide_ck, 2> {
-    static dynd::detail::array_by_type_id<arrfunc, 2> children;
-
-    static ndt::type make_type();
   };
 
 } // namespace dynd::nd

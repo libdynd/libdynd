@@ -344,7 +344,6 @@ set(libdynd_SRC
     include/dynd/iter/string_iter.hpp
     # Kernels
     src/dynd/kernels/assignment_kernels.cpp
-    src/dynd/kernels/arithmetic.cpp
     src/dynd/kernels/var_dim_assignment_kernels.cpp
     src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
@@ -395,6 +394,7 @@ set(libdynd_SRC
     include/dynd/kernels/datetime_assignment_kernels.hpp
     include/dynd/kernels/datetime_adapter_kernels.hpp
     include/dynd/kernels/date_expr_kernels.hpp
+    include/dynd/kernels/elwise.hpp
     include/dynd/kernels/elwise_expr_kernels.hpp
     include/dynd/kernels/expr_kernels.hpp
     include/dynd/kernels/expr_kernel_generator.hpp
