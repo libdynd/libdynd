@@ -23,10 +23,18 @@ DYND_GET_CUDA_DEVICE_FUNC(get_cuda_device_exp, exp)
 
 #endif
 
-// CUDA WORKAROUND: For some reason, CUDA hates cos, and generates inscrutable
-//                  compile errors with it. It's happy with 'mycos' though.
-float mycos(float x) {return cos(x);}
-double mycos(double x) {return cos(x);}
+namespace {
+// CUDA and MSVC 2015 WORKAROUND: Using these functions directly in the apply
+//                                template does not compile.
+float mycos(float x) { return cos(x); }
+double mycos(double x) { return cos(x); }
+float mysin(float x) { return sin(x); }
+double mysin(double x) { return sin(x); }
+float mytan(float x) { return tan(x); }
+double mytan(double x) { return tan(x); }
+float myexp(float x) { return exp(x); }
+double myexp(double x) { return exp(x); }
+} // anonymous namespace
 
 nd::arrfunc nd::cos::make()
 {
@@ -58,8 +66,8 @@ nd::arrfunc nd::sin::make()
 #endif
 
   vector<nd::arrfunc> children;
-  children.push_back(functional::apply<float (*)(float), &dynd::sin>());
-  children.push_back(functional::apply<double (*)(double), &dynd::sin>());
+  children.push_back(functional::apply<float (*)(float), &mysin>());
+  children.push_back(functional::apply<double (*)(double), &mysin>());
 #ifdef DYND_CUDA
   children.push_back(functional::apply<kernel_request_cuda_device>(
       get_cuda_device_sin<float (*)(float)>()));
@@ -79,8 +87,8 @@ nd::arrfunc nd::tan::make()
 #endif
 
   vector<nd::arrfunc> children;
-  children.push_back(functional::apply<float (*)(float), &dynd::tan>());
-  children.push_back(functional::apply<double (*)(double), &dynd::tan>());
+  children.push_back(functional::apply<float (*)(float), &mytan>());
+  children.push_back(functional::apply<double (*)(double), &mytan>());
 #ifdef DYND_CUDA
   children.push_back(functional::apply<kernel_request_cuda_device>(
       get_cuda_device_tan<float (*)(float)>()));
@@ -100,8 +108,8 @@ nd::arrfunc nd::exp::make()
 #endif
 
   vector<nd::arrfunc> children;
-  children.push_back(functional::apply<float (*)(float), &dynd::exp>());
-  children.push_back(functional::apply<double (*)(double), &dynd::exp>());
+  children.push_back(functional::apply<float (*)(float), &myexp>());
+  children.push_back(functional::apply<double (*)(double), &myexp>());
 #ifdef DYND_CUDA
   children.push_back(functional::apply<kernel_request_cuda_device>(
       get_cuda_device_exp<float (*)(float)>()));
@@ -111,7 +119,6 @@ nd::arrfunc nd::exp::make()
 
   return functional::elwise(functional::multidispatch(pattern_tp, children));
 }
-
 
 struct nd::cos nd::cos;
 struct nd::sin nd::sin;

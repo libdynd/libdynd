@@ -198,8 +198,6 @@ intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indic
                             remove_dimension, start_index, index_stride, dimension_size);
             if (remove_dimension) {
                 // First dereference to point at the actual element
-                const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-                const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(*inout_data);
                 *inout_data = d->begin + md->offset + start_index * md->stride;
                 if (*inout_dataref) {
                     memory_block_decref(*inout_dataref);

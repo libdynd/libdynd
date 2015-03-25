@@ -255,10 +255,10 @@ intptr_t json_type::make_assignment_kernel(
             }
             case string_type_id:
             case fixedstring_type_id: {
-                string_to_json_ck *self =
+                string_to_json_ck *stoj =
                     string_to_json_ck::create(ckb, kernreq, ckb_offset);
-                self->m_dst_arrmeta = dst_arrmeta;
-                self->m_validate = (ectx->errmode != assign_error_nocheck);
+                stoj->m_dst_arrmeta = dst_arrmeta;
+                stoj->m_validate = (ectx->errmode != assign_error_nocheck);
                 if (src_tp.get_type_id() == string_type_id) {
                     return make_blockref_string_assignment_kernel(
                         ckb, ckb_offset, dst_arrmeta, string_encoding_utf_8,

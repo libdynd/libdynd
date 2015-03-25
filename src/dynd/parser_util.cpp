@@ -102,9 +102,9 @@ bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
                                    "invalid unicode escape sequence in string");
         }
         for (int i = 0; i < 4; ++i) {
-          char c = *begin++;
-          if (!(('0' <= c && c <= '9') || ('A' <= c && c <= 'F') ||
-                ('a' <= c && c <= 'f'))) {
+          char d = *begin++;
+          if (!(('0' <= d && d <= '9') || ('A' <= d && d <= 'F') ||
+                ('a' <= d && d <= 'f'))) {
             throw parse::parse_error(
                 begin - 1, "invalid unicode escape sequence in string");
           }
@@ -117,9 +117,9 @@ bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
                                    "invalid unicode escape sequence in string");
         }
         for (int i = 0; i < 8; ++i) {
-          char c = *begin++;
-          if (!(('0' <= c && c <= '9') || ('A' <= c && c <= 'F') ||
-                ('a' <= c && c <= 'f'))) {
+          char d = *begin++;
+          if (!(('0' <= d && d <= '9') || ('A' <= d && d <= 'F') ||
+                ('a' <= d && d <= 'f'))) {
             throw parse::parse_error(
                 begin - 1, "invalid unicode escape sequence in string");
           }
@@ -178,14 +178,14 @@ void parse::unescape_string(const char *strbegin, const char *strend,
         }
         uint32_t cp = 0;
         for (int i = 0; i < 4; ++i) {
-          char c = *strbegin++;
+          char d = *strbegin++;
           cp *= 16;
-          if ('0' <= c && c <= '9') {
-            cp += c - '0';
-          } else if ('A' <= c && c <= 'F') {
-            cp += c - 'A' + 10;
-          } else if ('a' <= c && c <= 'f') {
-            cp += c - 'a' + 10;
+          if ('0' <= d && d <= '9') {
+            cp += d - '0';
+          } else if ('A' <= d && d <= 'F') {
+            cp += d - 'A' + 10;
+          } else if ('a' <= d && d <= 'f') {
+            cp += d - 'a' + 10;
           } else {
             cp = '?';
           }
@@ -199,14 +199,14 @@ void parse::unescape_string(const char *strbegin, const char *strend,
         }
         uint32_t cp = 0;
         for (int i = 0; i < 8; ++i) {
-          char c = *strbegin++;
+          char d = *strbegin++;
           cp *= 16;
-          if ('0' <= c && c <= '9') {
-            cp += c - '0';
-          } else if ('A' <= c && c <= 'F') {
-            cp += c - 'A' + 10;
-          } else if ('a' <= c && c <= 'f') {
-            cp += c - 'a' + 10;
+          if ('0' <= d && d <= '9') {
+            cp += d - '0';
+          } else if ('A' <= d && d <= 'F') {
+            cp += d - 'A' + 10;
+          } else if ('a' <= d && d <= 'f') {
+            cp += d - 'a' + 10;
           } else {
             cp = '?';
           }

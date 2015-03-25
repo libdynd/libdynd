@@ -177,8 +177,9 @@ void dynd::executable_memory_block_debug_print(const memory_block_data *memblock
 #ifdef _M_X64
         for (size_t j = 0, j_end = vac.m_functions.size(); j != j_end; ++j) {
             const RUNTIME_FUNCTION &rf = vac.m_functions[j];
-            o << indent << "  RUNTIME_FUNCTION{" << (void *)rf.BeginAddress;
-            o << ", " << (void *)rf.EndAddress << ", " << (void *)rf.UnwindData << "}\n";
+            o << indent << "  RUNTIME_FUNCTION{" << (void *)(uintptr_t)rf.BeginAddress;
+            o << ", " << (void *)(uintptr_t)rf.EndAddress << ", "
+              << (void *)(uintptr_t)rf.UnwindData << "}\n";
         }
 #endif
     }
