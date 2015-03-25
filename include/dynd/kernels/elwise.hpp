@@ -48,14 +48,14 @@ namespace nd {
                       kernel_request_cuda_host_device, N> {
       typedef elwise_ck self_type;
 
-      intptr_t size;
-      intptr_t dst_stride, src_stride[N];
+      intptr_t m_size;
+      intptr_t m_dst_stride, m_src_stride[N];
 
       DYND_CUDA_HOST_DEVICE elwise_ck(intptr_t size, intptr_t dst_stride,
                                       const intptr_t *src_stride)
-          : size(size), dst_stride(dst_stride)
+          : m_size(size), m_dst_stride(dst_stride)
       {
-        memcpy(this->src_stride, src_stride, sizeof(this->src_stride));
+        memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
       }
 
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
@@ -63,7 +63,7 @@ namespace nd {
         ckernel_prefix *child = this->get_child_ckernel();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
-        opchild(dst, this->dst_stride, src, this->src_stride, this->size,
+        opchild(dst, m_dst_stride, src, m_src_stride, m_size,
                 child);
       }
 
@@ -85,7 +85,7 @@ namespace nd {
 
         for (size_t i = DYND_THREAD_ID(J); i < count;
              i += DYND_THREAD_COUNT(J)) {
-          opchild(dst, this->dst_stride, src_loop, this->src_stride, this->size,
+          opchild(dst, m_dst_stride, src_loop, m_src_stride, m_size,
                   child);
           dst += DYND_THREAD_COUNT(J) * dst_stride;
           for (int j = 0; j != N; ++j) {
@@ -185,11 +185,11 @@ namespace nd {
                       kernel_request_cuda_host_device, 0> {
       typedef elwise_ck self_type;
 
-      intptr_t size;
-      intptr_t dst_stride;
+      intptr_t m_size;
+      intptr_t m_dst_stride;
 
       DYND_CUDA_HOST_DEVICE elwise_ck(intptr_t size, intptr_t dst_stride)
-          : size(size), dst_stride(dst_stride)
+          : m_size(size), m_dst_stride(dst_stride)
       {
       }
 
@@ -197,7 +197,7 @@ namespace nd {
       {
         ckernel_prefix *child = this->get_child_ckernel();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
-        opchild(dst, this->dst_stride, src, NULL, this->size, child);
+        opchild(dst, m_dst_stride, src, NULL, m_size, child);
       }
 
       DYND_CUDA_HOST_DEVICE void
@@ -213,7 +213,7 @@ namespace nd {
 
         for (size_t i = DYND_THREAD_ID(J); i < count;
              i += DYND_THREAD_COUNT(J)) {
-          opchild(dst, this->dst_stride, NULL, NULL, this->size, child);
+          opchild(dst, m_dst_stride, NULL, NULL, m_size, child);
           dst += DYND_THREAD_COUNT(J) * dst_stride;
         }
       }
@@ -286,17 +286,17 @@ namespace nd {
                       kernel_request_host, N> {
       typedef elwise_ck self_type;
 
-      intptr_t size;
-      intptr_t dst_stride, src_stride[N], src_offset[N];
-      bool is_src_var[N];
+      intptr_t m_size;
+      intptr_t m_dst_stride, m_src_stride[N], m_src_offset[N];
+      bool m_is_src_var[N];
 
       elwise_ck(intptr_t size, intptr_t dst_stride, const intptr_t *src_stride,
                 const intptr_t *src_offset, const bool *is_src_var)
-          : size(size), dst_stride(dst_stride)
+          : m_size(size), m_dst_stride(dst_stride)
       {
-        memcpy(this->src_stride, src_stride, sizeof(this->src_stride));
-        memcpy(this->src_offset, src_offset, sizeof(this->src_offset));
-        memcpy(this->is_src_var, is_src_var, sizeof(this->is_src_var));
+        memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
+        memcpy(m_src_offset, src_offset, sizeof(m_src_offset));
+        memcpy(m_is_src_var, is_src_var, sizeof(m_is_src_var));
       }
 
       void single(char *dst, char *const *src)
@@ -305,28 +305,28 @@ namespace nd {
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         // Broadcast all the src 'var' dimensions to dst
-        intptr_t dim_size = this->size;
+        intptr_t dim_size = m_size;
         char *modified_src[N];
         intptr_t modified_src_stride[N];
         for (int i = 0; i < N; ++i) {
-          if (this->is_src_var[i]) {
+          if (m_is_src_var[i]) {
             var_dim_type_data *vddd =
                 reinterpret_cast<var_dim_type_data *>(src[i]);
-            modified_src[i] = vddd->begin + this->src_offset[i];
+            modified_src[i] = vddd->begin + m_src_offset[i];
             if (vddd->size == 1) {
               modified_src_stride[i] = 0;
             } else if (vddd->size == static_cast<size_t>(dim_size)) {
-              modified_src_stride[i] = this->src_stride[i];
+              modified_src_stride[i] = m_src_stride[i];
             } else {
               throw broadcast_error(dim_size, vddd->size, "strided", "var");
             }
           } else {
             // strided dimensions were fully broadcast in the kernel factory
             modified_src[i] = src[i];
-            modified_src_stride[i] = this->src_stride[i];
+            modified_src_stride[i] = m_src_stride[i];
           }
         }
-        opchild(dst, this->dst_stride, modified_src, modified_src_stride,
+        opchild(dst, m_dst_stride, modified_src, modified_src_stride,
                 dim_size, child);
       }
 
@@ -445,11 +445,11 @@ namespace nd {
                       kernel_request_host, 0> {
       typedef elwise_ck self_type;
 
-      intptr_t size;
-      intptr_t dst_stride;
+      intptr_t m_size;
+      intptr_t m_dst_stride;
 
       elwise_ck(intptr_t size, intptr_t dst_stride)
-          : size(size), dst_stride(dst_stride)
+          : m_size(size), m_dst_stride(dst_stride)
       {
       }
 
@@ -459,8 +459,8 @@ namespace nd {
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         // Broadcast all the src 'var' dimensions to dst
-        intptr_t dim_size = this->size;
-        opchild(dst, this->dst_stride, NULL, NULL, dim_size, child);
+        intptr_t dim_size = m_size;
+        opchild(dst, m_dst_stride, NULL, NULL, dim_size, child);
       }
 
       void strided(char *dst, intptr_t dst_stride,
@@ -536,24 +536,24 @@ namespace nd {
                       kernel_request_host, N> {
       typedef elwise_ck self_type;
 
-      memory_block_data *dst_memblock;
-      size_t dst_target_alignment;
-      intptr_t dst_stride, dst_offset, src_stride[N], src_offset[N],
-          src_size[N];
-      bool is_src_var[N];
+      memory_block_data *m_dst_memblock;
+      size_t m_dst_target_alignment;
+      intptr_t m_dst_stride, m_dst_offset, m_src_stride[N], m_src_offset[N],
+          m_src_size[N];
+      bool m_is_src_var[N];
 
       elwise_ck(memory_block_data *dst_memblock, size_t dst_target_alignment,
                 intptr_t dst_stride, intptr_t dst_offset,
                 const intptr_t *src_stride, const intptr_t *src_offset,
                 const intptr_t *src_size, const bool *is_src_var)
-          : dst_memblock(dst_memblock),
-            dst_target_alignment(dst_target_alignment), dst_stride(dst_stride),
-            dst_offset(dst_offset)
+          : m_dst_memblock(dst_memblock),
+            m_dst_target_alignment(dst_target_alignment), m_dst_stride(dst_stride),
+            m_dst_offset(dst_offset)
       {
-        memcpy(this->src_stride, src_stride, sizeof(this->src_stride));
-        memcpy(this->src_offset, src_offset, sizeof(this->src_offset));
-        memcpy(this->src_size, src_size, sizeof(this->src_size));
-        memcpy(this->is_src_var, is_src_var, sizeof(this->is_src_var));
+        memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
+        memcpy(m_src_offset, src_offset, sizeof(m_src_offset));
+        memcpy(m_src_size, src_size, sizeof(m_src_size));
+        memcpy(m_is_src_var, is_src_var, sizeof(m_is_src_var));
       }
 
       void single(char *dst, char *const *src)
@@ -571,35 +571,35 @@ namespace nd {
         if (dst_vddd->begin != NULL) {
           // If the destination already has allocated data, broadcast to that
           // data
-          modified_dst = dst_vddd->begin + this->dst_offset;
+          modified_dst = dst_vddd->begin + m_dst_offset;
           // Broadcast all the inputs to the existing destination dimension size
           dim_size = dst_vddd->size;
           for (int i = 0; i < N; ++i) {
-            if (this->is_src_var[i]) {
+            if (m_is_src_var[i]) {
               var_dim_type_data *vddd =
                   reinterpret_cast<var_dim_type_data *>(src[i]);
-              modified_src[i] = vddd->begin + this->src_offset[i];
+              modified_src[i] = vddd->begin + m_src_offset[i];
               if (vddd->size == 1) {
                 modified_src_stride[i] = 0;
               } else if (vddd->size == static_cast<size_t>(dim_size)) {
-                modified_src_stride[i] = this->src_stride[i];
+                modified_src_stride[i] = m_src_stride[i];
               } else {
                 throw broadcast_error(dim_size, vddd->size, "var", "var");
               }
             } else {
               modified_src[i] = src[i];
-              if (this->src_size[i] == 1) {
+              if (m_src_size[i] == 1) {
                 modified_src_stride[i] = 0;
-              } else if (this->src_size[i] == dim_size) {
-                modified_src_stride[i] = this->src_stride[i];
+              } else if (m_src_size[i] == dim_size) {
+                modified_src_stride[i] = m_src_stride[i];
               } else {
-                throw broadcast_error(dim_size, this->src_size[i], "var",
+                throw broadcast_error(dim_size, m_src_size[i], "var",
                                       "strided");
               }
             }
           }
         } else {
-          if (this->dst_offset != 0) {
+          if (m_dst_offset != 0) {
             throw std::runtime_error(
                 "Cannot assign to an uninitialized dynd var_dim "
                 "which has a non-zero offset");
@@ -607,37 +607,37 @@ namespace nd {
           // Broadcast all the inputs together to get the destination size
           dim_size = 1;
           for (int i = 0; i < N; ++i) {
-            if (this->is_src_var[i]) {
+            if (m_is_src_var[i]) {
               var_dim_type_data *vddd =
                   reinterpret_cast<var_dim_type_data *>(src[i]);
-              modified_src[i] = vddd->begin + this->src_offset[i];
+              modified_src[i] = vddd->begin + m_src_offset[i];
               if (vddd->size == 1) {
                 modified_src_stride[i] = 0;
               } else if (dim_size == 1) {
                 dim_size = vddd->size;
-                modified_src_stride[i] = this->src_stride[i];
+                modified_src_stride[i] = m_src_stride[i];
               } else if (vddd->size == static_cast<size_t>(dim_size)) {
-                modified_src_stride[i] = this->src_stride[i];
+                modified_src_stride[i] = m_src_stride[i];
               } else {
                 throw broadcast_error(dim_size, vddd->size, "var", "var");
               }
             } else {
               modified_src[i] = src[i];
-              if (this->src_size[i] == 1) {
+              if (m_src_size[i] == 1) {
                 modified_src_stride[i] = 0;
-              } else if (this->src_size[i] == dim_size) {
-                modified_src_stride[i] = this->src_stride[i];
+              } else if (m_src_size[i] == dim_size) {
+                modified_src_stride[i] = m_src_stride[i];
               } else if (dim_size == 1) {
-                dim_size = this->src_size[i];
-                modified_src_stride[i] = this->src_stride[i];
+                dim_size = m_src_size[i];
+                modified_src_stride[i] = m_src_stride[i];
               } else {
-                throw broadcast_error(dim_size, this->src_size[i], "var",
+                throw broadcast_error(dim_size, m_src_size[i], "var",
                                       "strided");
               }
             }
           }
           // Allocate the output
-          memory_block_data *memblock = this->dst_memblock;
+          memory_block_data *memblock = m_dst_memblock;
           if (memblock->m_type == objectarray_memory_block_type) {
             memory_block_objectarray_allocator_api *allocator =
                 get_memory_block_objectarray_allocator_api(memblock);
@@ -650,8 +650,8 @@ namespace nd {
 
             // Allocate the output array data
             char *dst_end = NULL;
-            allocator->allocate(memblock, dim_size * this->dst_stride,
-                                this->dst_target_alignment, &dst_vddd->begin,
+            allocator->allocate(memblock, dim_size * m_dst_stride,
+                                m_dst_target_alignment, &dst_vddd->begin,
                                 &dst_end);
           }
           modified_dst = dst_vddd->begin;
@@ -660,7 +660,7 @@ namespace nd {
         if (dim_size <= 1) {
           modified_dst_stride = 0;
         } else {
-          modified_dst_stride = this->dst_stride;
+          modified_dst_stride = m_dst_stride;
         }
         opchild(modified_dst, modified_dst_stride, modified_src,
                 modified_src_stride, dim_size, child);
@@ -778,15 +778,15 @@ namespace nd {
                       kernel_request_host, 0> {
       typedef elwise_ck self_type;
 
-      memory_block_data *dst_memblock;
-      size_t dst_target_alignment;
-      intptr_t dst_stride, dst_offset;
+      memory_block_data *m_dst_memblock;
+      size_t m_dst_target_alignment;
+      intptr_t m_dst_stride, m_dst_offset;
 
       elwise_ck(memory_block_data *dst_memblock, size_t dst_target_alignment,
                 intptr_t dst_stride, intptr_t dst_offset)
-          : dst_memblock(dst_memblock),
-            dst_target_alignment(dst_target_alignment), dst_stride(dst_stride),
-            dst_offset(dst_offset)
+          : m_dst_memblock(dst_memblock),
+            m_dst_target_alignment(dst_target_alignment), m_dst_stride(dst_stride),
+            m_dst_offset(dst_offset)
       {
       }
 
@@ -803,11 +803,11 @@ namespace nd {
         if (dst_vddd->begin != NULL) {
           // If the destination already has allocated data, broadcast to that
           // data
-          modified_dst = dst_vddd->begin + this->dst_offset;
+          modified_dst = dst_vddd->begin + m_dst_offset;
           // Broadcast all the inputs to the existing destination dimension size
           dim_size = dst_vddd->size;
         } else {
-          if (this->dst_offset != 0) {
+          if (m_dst_offset != 0) {
             throw std::runtime_error(
                 "Cannot assign to an uninitialized dynd var_dim "
                 "which has a non-zero offset");
@@ -815,7 +815,7 @@ namespace nd {
           // Broadcast all the inputs together to get the destination size
           dim_size = 1;
           // Allocate the output
-          memory_block_data *memblock = this->dst_memblock;
+          memory_block_data *memblock = m_dst_memblock;
           if (memblock->m_type == objectarray_memory_block_type) {
             memory_block_objectarray_allocator_api *allocator =
                 get_memory_block_objectarray_allocator_api(memblock);
@@ -828,8 +828,8 @@ namespace nd {
 
             // Allocate the output array data
             char *dst_end = NULL;
-            allocator->allocate(memblock, dim_size * this->dst_stride,
-                                this->dst_target_alignment, &dst_vddd->begin,
+            allocator->allocate(memblock, dim_size * m_dst_stride,
+                                m_dst_target_alignment, &dst_vddd->begin,
                                 &dst_end);
           }
           modified_dst = dst_vddd->begin;
@@ -838,7 +838,7 @@ namespace nd {
         if (dim_size <= 1) {
           modified_dst_stride = 0;
         } else {
-          modified_dst_stride = this->dst_stride;
+          modified_dst_stride = m_dst_stride;
         }
         opchild(modified_dst, modified_dst_stride, NULL, NULL, dim_size, child);
       }

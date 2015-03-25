@@ -872,6 +872,15 @@ namespace nd {
     }
 
     /**
+    * operator()(kwds<...>(...))
+    */
+    template <typename... K>
+    array operator()(detail::kwds<K...> &&k) const
+    {
+      return call(detail::args<>(), std::forward<detail::kwds<K...>>(k));
+    }
+
+    /**
      * operator()(a0, a1, ..., an, kwds<...>(...))
      */
     template <typename... T>

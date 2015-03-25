@@ -89,8 +89,8 @@ namespace detail {
   };
 
   template <typename T, T start, T stop, T step>
-      struct make_integer_sequence<-1, T, start, stop, step>
-      : make_integer_sequence < start<stop, T, start, stop, step> {
+  struct make_integer_sequence<-1, T, start, stop, step>
+      : make_integer_sequence<(start < stop), T, start, stop, step> {
   };
 
   template <typename T, T start, T stop, T step>
@@ -353,18 +353,30 @@ struct type_proxy<type_sequence<T...>> {
   }
 };
 
-template <size_t I, typename A0, typename... A>
-typename std::enable_if<I == 0, A0>::type get(A0 &&a0, A &&...)
-{
-  return a0;
-}
+namespace detail {
+  template <size_t I, typename... A>
+  struct get_impl;
 
-template <size_t I, typename A0, typename... A>
-typename std::enable_if<I != 0,
-                        typename at<type_sequence<A0, A...>, I>::type>::type
-get(A0 &&, A &&... a)
+  template <typename A0, typename... A>
+  struct get_impl<0, A0, A...> {
+    typedef A0 result_type;
+    static result_type get(A0 &&a0, A &&...) { return a0; }
+  };
+
+  template <size_t I, typename A0, typename... A>
+  struct get_impl<I, A0, A...> {
+    typedef typename get_impl<I - 1, A...>::result_type result_type;
+    static result_type get(A0 &&, A &&... a)
+    {
+      return get_impl<I - 1, A...>::get(std::forward<A>(a)...);
+    }
+  };
+} // namespace detail
+
+template <size_t I, typename... A>
+typename detail::get_impl<I, A...>::result_type get(A &&... a)
 {
-  return get<I - 1>(std::forward<A>(a)...);
+  return detail::get_impl<I, A...>::get(std::forward<A>(a)...);
 }
 
 } // namespace dynd
