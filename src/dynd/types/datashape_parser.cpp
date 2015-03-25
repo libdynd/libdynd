@@ -224,14 +224,14 @@ static bool parse_quoted_string(const char *&rbegin, const char *end,
         }
         uint32_t cp = 0;
         for (int i = 0; i < 4; ++i) {
-          char c = *begin++;
+          char d = *begin++;
           cp *= 16;
-          if ('0' <= c && c <= '9') {
-            cp += c - '0';
-          } else if ('A' <= c && c <= 'F') {
-            cp += c - 'A' + 10;
-          } else if ('a' <= c && c <= 'f') {
-            cp += c - 'a' + 10;
+          if ('0' <= d && d <= '9') {
+            cp += d - '0';
+          } else if ('A' <= d && d <= 'F') {
+            cp += d - 'A' + 10;
+          } else if ('a' <= d && d <= 'f') {
+            cp += d - 'a' + 10;
           } else {
             throw datashape_parse_error(
                 begin - 1, "invalid unicode escape sequence in string");
