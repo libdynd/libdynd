@@ -113,8 +113,13 @@ template <typename T, T... I>
 using make_integer_sequence =
     typename detail::make_integer_sequence<-1, T, I...>::type;
 
+// Fails in MSVC 2015 CTP 6 with two levels of alias, therefore don't go through
+// make_integer_sequence alias, use detail::make_integer_sequence directly.
+// https://connect.microsoft.com/VisualStudio/feedback/details/1200294/code-with-two-levels-of-alias-templates-and-variadic-packs-fails-to-compile
+//template <size_t... I>
+//using make_index_sequence = make_integer_sequence<size_t, I...>;
 template <size_t... I>
-using make_index_sequence = make_integer_sequence<size_t, I...>;
+using make_index_sequence = typename detail::make_integer_sequence<-1, size_t, I...>::type;
 
 template <typename T, T I0>
 struct front<integer_sequence<T, I0>> {
