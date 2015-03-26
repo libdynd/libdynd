@@ -187,6 +187,11 @@ namespace nd {
       return const_cast<char *>(value.get_readonly_originptr());
     }
 
+    inline char *data_of(const array &value)
+    {
+      return const_cast<char *>(value.get_readonly_originptr());
+    }
+
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
@@ -207,11 +212,10 @@ namespace nd {
         args *self;
 
         template <size_t I>
-        void on_each(const arrfunc_type *af_tp,
-                        std::vector<ndt::type> &src_tp,
-                        std::vector<const char *> &src_arrmeta,
-                        std::vector<char *> &src_data,
-                        std::map<nd::string, ndt::type> &tp_vars) const
+        void on_each(const arrfunc_type *af_tp, std::vector<ndt::type> &src_tp,
+                     std::vector<const char *> &src_arrmeta,
+                     std::vector<char *> &src_data,
+                     std::map<nd::string, ndt::type> &tp_vars) const
         {
           auto &value = std::get<I>(self->m_values);
           const ndt::type &tp = ndt::type_of(value);
@@ -378,9 +382,9 @@ namespace nd {
 
         template <size_t I>
         void on_each(const ndt::type *tp, char *arrmeta,
-                        const uintptr_t *arrmeta_offsets, char *data,
-                        const uintptr_t *data_offsets,
-                        const std::vector<intptr_t> &available) const
+                     const uintptr_t *arrmeta_offsets, char *data,
+                     const uintptr_t *data_offsets,
+                     const std::vector<intptr_t> &available) const
         {
           intptr_t j = available[I];
           if (j != -1) {
@@ -429,9 +433,9 @@ namespace nd {
 
         template <size_t I>
         void on_each(const arrfunc_type *af_tp, array &dst, bool &has_dst_tp,
-                        std::vector<ndt::type> &kwd_tp,
-                        std::vector<intptr_t> &available,
-                        std::map<nd::string, ndt::type> &tp_vars)
+                     std::vector<ndt::type> &kwd_tp,
+                     std::vector<intptr_t> &available,
+                     std::map<nd::string, ndt::type> &tp_vars)
         {
           check_name(af_tp, dst, self->m_names[I], std::get<I>(self->m_values),
                      has_dst_tp, kwd_tp.data(), available, tp_vars);
@@ -620,9 +624,9 @@ namespace nd {
     struct as_kwds {
       typedef typename instantiate<
           nd::detail::kwds,
-          typename dynd::take<type_sequence<T...>,
-                              make_index_sequence<1, sizeof...(T), 2>>::type>::
-          type type;
+          typename dynd::take<
+              type_sequence<T...>,
+              make_index_sequence<1, sizeof...(T), 2>>::type>::type type;
     };
   }
 } // namespace dynd::nd
@@ -707,15 +711,16 @@ namespace nd {
     }
 
     template <typename T>
-    arrfunc(const ndt::type &self_tp, const T &data,
+    arrfunc(const ndt::type &self_tp, T &&data,
             arrfunc_instantiate_t instantiate,
             arrfunc_resolve_option_values_t resolve_option_values,
             arrfunc_resolve_dst_type_t resolve_dst_type,
             arrfunc_free_t free = NULL)
         : m_value(empty(self_tp))
     {
-      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
-          data, instantiate, resolve_option_values, resolve_dst_type, free);
+      new (m_value.get_readwrite_originptr())
+          arrfunc_type_data(std::forward<T>(data), instantiate,
+                            resolve_option_values, resolve_dst_type, free);
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -868,6 +873,15 @@ namespace nd {
     }
 
     /**
+    * operator()(kwds<...>(...))
+    */
+    template <typename... K>
+    array operator()(detail::kwds<K...> &&k) const
+    {
+      return call(detail::args<>(), std::forward<detail::kwds<K...>>(k));
+    }
+
+    /**
      * operator()(a0, a1, ..., an, kwds<...>(...))
      */
     template <typename... T>
@@ -926,6 +940,9 @@ namespace nd {
     arrfunc multidispatch(const ndt::type &self_tp,
                           const std::vector<arrfunc> &children);
 
+    arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
+                                     const std::vector<arrfunc> &children);
+
   } // namespace dynd::nd::functional
 
   template <typename CKT>
@@ -951,17 +968,18 @@ namespace nd {
   }
 
   template <typename CKT, typename T>
-  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
+  arrfunc as_arrfunc(const ndt::type &self_tp, T &&data)
   {
-    return arrfunc(self_tp, data, dynd::detail::get_instantiate<CKT>(),
+    return arrfunc(self_tp, std::forward<T>(data),
+                   dynd::detail::get_instantiate<CKT>(),
                    dynd::detail::get_resolve_option_values<CKT>(),
                    dynd::detail::get_resolve_dst_type<CKT>());
   }
 
   template <typename CKT, typename T>
-  arrfunc as_arrfunc(const T &data)
+  arrfunc as_arrfunc(T &&data)
   {
-    return as_arrfunc<CKT>(CKT::make_type(), data);
+    return as_arrfunc<CKT>(CKT::make_type(), std::forward<T>(data));
   }
 
   template <typename CKT0, typename CKT1, typename... CKT, typename T>
@@ -1015,6 +1033,55 @@ namespace nd {
     typedef typename ex_for_each<TCK, kernreq, typename outer<A...>::type,
                                  sizeof...(A) >= 2>::type CKT;
     return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
+  }
+
+
+
+  template <template <type_id_t> class CKT>
+  struct insert_child0 {
+    template <type_id_t I>
+    void on_each(std::vector<nd::arrfunc> &children)
+    {
+      children.push_back(nd::as_arrfunc<CKT<I>>());
+    }
+  };
+
+  template <template <type_id_t> class CKT, typename I0>
+  std::vector<arrfunc> as_arrfuncs()
+  {
+    std::vector<arrfunc> arrfuncs;
+    index_proxy<I0>::for_each(insert_child0<CKT>(), arrfuncs);
+
+    return arrfuncs;
+  }
+
+
+
+  template <template <type_id_t, type_id_t> class CKT, type_id_t I>
+  struct insert_child {
+    template <type_id_t J>
+    void on_each(std::vector<nd::arrfunc> &children)
+    {
+      children.push_back(nd::as_arrfunc<CKT<I, J>>());
+    }
+  };
+
+  template <template <type_id_t, type_id_t> class CKT, typename J>
+  struct insert_children {
+    template <type_id_t I>
+    void on_each(std::vector<nd::arrfunc> &children) const
+    {
+      index_proxy<J>::for_each(insert_child<CKT, I>(), children);
+    }
+  };
+
+  template <template <type_id_t, type_id_t> class CKT, typename I0, typename I1>
+  std::vector<arrfunc> as_arrfuncs()
+  {
+    std::vector<arrfunc> arrfuncs;
+    index_proxy<I0>::for_each(insert_children<CKT, I1>(), arrfuncs);
+
+    return arrfuncs;
   }
 
   template <typename T>

@@ -832,7 +832,9 @@ namespace nd {
     friend class array_vals_at;
   };
 
-  // These are defined in func/arithmetic.cpp
+  array operator+(const array &a0);
+  array operator-(const array &a0);
+
   array operator+(const array &op0, const array &op1);
   array operator-(const array &op0, const array &op1);
   array operator/(const array &op0, const array &op1);

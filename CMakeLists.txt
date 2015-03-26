@@ -394,6 +394,7 @@ set(libdynd_SRC
     include/dynd/kernels/datetime_assignment_kernels.hpp
     include/dynd/kernels/datetime_adapter_kernels.hpp
     include/dynd/kernels/date_expr_kernels.hpp
+    include/dynd/kernels/elwise.hpp
     include/dynd/kernels/elwise_expr_kernels.hpp
     include/dynd/kernels/expr_kernels.hpp
     include/dynd/kernels/expr_kernel_generator.hpp
@@ -641,7 +642,7 @@ execute_process(COMMAND ${CMAKE_COMMAND}
 add_executable(ppgen include/dynd/pp/gen.cpp)
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
         DEPENDS include/dynd/pp/gen.cpp
-        COMMAND ppgen 8 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
+        COMMAND ppgen 16 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
 add_custom_target(libdynd_gen DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp)
 # Make libdynd depend on libdynd_gen to make sure gen.hpp is there when it builds
 set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
