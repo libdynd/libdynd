@@ -711,15 +711,16 @@ namespace nd {
     }
 
     template <typename T>
-    arrfunc(const ndt::type &self_tp, const T &data,
+    arrfunc(const ndt::type &self_tp, T &&data,
             arrfunc_instantiate_t instantiate,
             arrfunc_resolve_option_values_t resolve_option_values,
             arrfunc_resolve_dst_type_t resolve_dst_type,
             arrfunc_free_t free = NULL)
         : m_value(empty(self_tp))
     {
-      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
-          data, instantiate, resolve_option_values, resolve_dst_type, free);
+      new (m_value.get_readwrite_originptr())
+          arrfunc_type_data(std::forward<T>(data), instantiate,
+                            resolve_option_values, resolve_dst_type, free);
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -967,17 +968,18 @@ namespace nd {
   }
 
   template <typename CKT, typename T>
-  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
+  arrfunc as_arrfunc(const ndt::type &self_tp, T &&data)
   {
-    return arrfunc(self_tp, data, dynd::detail::get_instantiate<CKT>(),
+    return arrfunc(self_tp, std::forward<T>(data),
+                   dynd::detail::get_instantiate<CKT>(),
                    dynd::detail::get_resolve_option_values<CKT>(),
                    dynd::detail::get_resolve_dst_type<CKT>());
   }
 
   template <typename CKT, typename T>
-  arrfunc as_arrfunc(const T &data)
+  arrfunc as_arrfunc(T &&data)
   {
-    return as_arrfunc<CKT>(CKT::make_type(), data);
+    return as_arrfunc<CKT>(CKT::make_type(), std::forward<T>(data));
   }
 
   template <typename CKT0, typename CKT1, typename... CKT, typename T>

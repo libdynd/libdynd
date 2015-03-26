@@ -413,7 +413,7 @@ nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
   }
 
   // TODO: Component arrfuncs might be arrays, not just scalars
-  return arrfunc(ndt::make_generic_funcproto(nargs), sorted_af,
+  return arrfunc(ndt::make_generic_funcproto(nargs), std::move(sorted_af),
                  &instantiate_multidispatch_af, NULL,
                  &resolve_multidispatch_dst_type, NULL);
 }
@@ -508,7 +508,7 @@ namespace nd {
     multidispatch_by_type_id(const ndt::type &pattern_tp,
                              const std::vector<arrfunc> &children)
     {
-      arrfunc *data = new arrfunc[builtin_type_id_count];
+      unique_ptr<arrfunc[]> data(new arrfunc[builtin_type_id_count]);
 
       for (const arrfunc &child : children) {
         std::map<string, ndt::type> tp_vars;
@@ -521,7 +521,7 @@ namespace nd {
         data[src_tp0.get_type_id()] = child;
       }
 
-      return as_arrfunc<multidispatch_by_type_id_ck<1>>(pattern_tp, data);
+      return as_arrfunc<multidispatch_by_type_id_ck<1>>(pattern_tp, move(data));
     }
 
     template <int N>
@@ -529,8 +529,8 @@ namespace nd {
     multidispatch_by_type_id(const ndt::type &pattern_tp,
                              const std::vector<arrfunc> &children)
     {
-      arrfunc(*data)[builtin_type_id_count] =
-          new arrfunc[builtin_type_id_count][builtin_type_id_count];
+      unique_ptr<arrfunc[][builtin_type_id_count]> data(
+          new arrfunc[builtin_type_id_count][builtin_type_id_count]);
 
       for (const arrfunc &child : children) {
         std::map<string, ndt::type> tp_vars;
@@ -544,7 +544,7 @@ namespace nd {
         data[src_tp0.get_type_id()][src_tp1.get_type_id()] = child;
       }
 
-      return as_arrfunc<multidispatch_by_type_id_ck<2>>(pattern_tp, data);
+      return as_arrfunc<multidispatch_by_type_id_ck<2>>(pattern_tp, move(data));
     }
 
   } // namespace dynd::nd::functional

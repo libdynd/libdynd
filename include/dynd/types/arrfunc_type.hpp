@@ -164,15 +164,29 @@ public:
   }
 
   template <typename T>
-  arrfunc_type_data(const T &data, arrfunc_instantiate_t instantiate,
+  arrfunc_type_data(T &&data, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free = NULL)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type),
-        free(free == NULL ? &destroy_wrapper<T> : free)
+        free(free == NULL
+                 ? &destroy_wrapper<typename std::remove_reference<T>::type>
+                 : free)
   {
-    new (this->data) T(data);
+    new (this->data)(typename std::remove_reference<T>::type)(
+        std::forward<T>(data));
+  }
+
+  template <typename T>
+  arrfunc_type_data(T *data, arrfunc_instantiate_t instantiate,
+                    arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_resolve_dst_type_t resolve_dst_type,
+                    arrfunc_free_t free = NULL)
+      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+        resolve_dst_type(resolve_dst_type), free(free)
+  {
+	  new (this->data) (T*)(data);
   }
 
   ~arrfunc_type_data()

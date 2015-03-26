@@ -138,7 +138,8 @@ namespace nd {
                        ndt::type &out_dst_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const arrfunc *data = *self->get_data_as<const arrfunc *>();
+        const arrfunc *data =
+            (*self->get_data_as<const std::unique_ptr<nd::arrfunc[]>>()).get();
 
         const arrfunc &child = data[src_tp[0].get_type_id()];
         return child.get()->resolve_dst_type(self, self_tp, nsrc, src_tp,
@@ -155,7 +156,8 @@ namespace nd {
                   const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const arrfunc *data = *self->get_data_as<const arrfunc *>();
+        const arrfunc *data =
+            (*self->get_data_as<const std::unique_ptr<nd::arrfunc[]>>()).get();
 
         const arrfunc &child = data[src_tp[0].get_type_id()];
         return child.get()->instantiate(self, self_tp, ckb, ckb_offset, dst_tp,
@@ -175,7 +177,9 @@ namespace nd {
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc(*data)[builtin_type_id_count] =
-            *self->get_data_as<const arrfunc(*)[builtin_type_id_count]>();
+            (*self->get_data_as<
+                 const std::unique_ptr<nd::arrfunc[][builtin_type_id_count]>>())
+                .get();
 
         const arrfunc &child =
             data[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
@@ -194,7 +198,9 @@ namespace nd {
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc(*data)[builtin_type_id_count] =
-            *self->get_data_as<const arrfunc(*)[builtin_type_id_count]>();
+            (*self->get_data_as<
+                 const std::unique_ptr<nd::arrfunc[][builtin_type_id_count]>>())
+                .get();
 
         const arrfunc &child =
             data[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
