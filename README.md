@@ -1,3 +1,5 @@
+![DyND Logo](docs/logo/dynd_logo_320px.png)
+
 The DyND Library
 ================
 
