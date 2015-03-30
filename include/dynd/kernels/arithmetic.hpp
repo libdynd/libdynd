@@ -28,7 +28,7 @@ namespace nd {
 
     static int resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -75,7 +75,7 @@ namespace nd {
 
     static int resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -130,7 +130,7 @@ namespace nd {
 
     static int resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -176,7 +176,7 @@ namespace nd {
 
     static int resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -227,7 +227,7 @@ namespace nd {
 
     static int resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -278,7 +278,7 @@ namespace nd {
 
     static int resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))

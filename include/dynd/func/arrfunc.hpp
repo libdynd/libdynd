@@ -823,16 +823,19 @@ namespace nd {
           kwds.as_array(ndt::make_struct(self_tp->get_kwd_names(), kwd_tp),
                         available, missing);
 
+      // ...
+      char *data = new char[get()->size * arrfunc_type_data::data_size];
+
       // Resolve the optional keyword arguments
       if (self->resolve_option_values != NULL) {
-        self->resolve_option_values(self, self_tp, arg_tp.size(),
+        self->resolve_option_values(self, self_tp, data, arg_tp.size(),
                                     arg_tp.empty() ? NULL : arg_tp.data(),
                                     kwds_as_array, tp_vars);
       }
 
       // Resolve the destination type
       if (self->resolve_dst_type != NULL) {
-        self->resolve_dst_type(self, self_tp, arg_tp.size(),
+        self->resolve_dst_type(self, self_tp, data, arg_tp.size(),
                                arg_tp.empty() ? NULL : arg_tp.data(), true,
                                dst_tp, kwds_as_array, tp_vars);
       } else {
@@ -843,9 +846,6 @@ namespace nd {
       if (dst.is_null()) {
         dst = empty(dst_tp);
       }
-
-      // ...
-      char *data = new char[get()->size * arrfunc_type_data::data_size];
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;

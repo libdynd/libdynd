@@ -25,14 +25,13 @@ namespace nd {
 
     int outer_resolve_dst_type(
         const arrfunc_type_data *self, const arrfunc_type *self_tp,
-        intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+        char *data, intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
         ndt::type &dst_tp, const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
-
     int outer_resolve_dst_type_with_child(
         const arrfunc_type_data *child, const arrfunc_type *child_tp,
-        intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+        char *data, intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
         ndt::type &dst_tp, const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars);
 

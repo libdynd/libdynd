@@ -180,7 +180,7 @@ static intptr_t instantiate_neighborhood(
 
 static void resolve_neighborhood_option_values(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+    const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
     const ndt::type *DYND_UNUSED(src_tp), nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
@@ -188,7 +188,7 @@ static void resolve_neighborhood_option_values(
 
 static int resolve_neighborhood_dst_type(
     const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *self_tp,
-    intptr_t, const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+    char *DYND_UNUSED(data), intptr_t, const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
     ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {

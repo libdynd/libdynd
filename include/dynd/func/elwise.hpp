@@ -74,18 +74,18 @@ namespace nd {
 
     void elwise_resolve_option_values(
         const arrfunc_type_data *self, const arrfunc_type *self_tp,
-        intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
+        char *data, intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
         const std::map<nd::string, ndt::type> &tp_vars);
 
     int elwise_resolve_dst_type(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+        char *data, intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
         ndt::type &dst_tp, const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
     int elwise_resolve_dst_type_with_child(
         const arrfunc_type_data *child, const arrfunc_type *child_tp,
-        intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+        char *data, intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
         ndt::type &dst_tp, const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars);
 

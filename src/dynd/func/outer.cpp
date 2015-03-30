@@ -127,13 +127,14 @@ intptr_t nd::functional::outer_instantiate(
 }
 
 int nd::functional::outer_resolve_dst_type_with_child(
-    const arrfunc_type_data *child, const arrfunc_type *child_tp, intptr_t nsrc,
+    const arrfunc_type_data *child, const arrfunc_type *child_tp,
+    char *DYND_UNUSED(data), intptr_t nsrc,
     const ndt::type *src_tp, int throw_on_error, ndt::type &dst_tp,
     const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   if (child->resolve_dst_type != NULL) {
-    if (!child->resolve_dst_type(child, child_tp, nsrc, src_tp, throw_on_error,
+    if (!child->resolve_dst_type(child, child_tp, NULL, nsrc, src_tp, throw_on_error,
                                  dst_tp, kwds, tp_vars)) {
       return 0;
     }
@@ -160,7 +161,7 @@ int nd::functional::outer_resolve_dst_type_with_child(
 
 int nd::functional::outer_resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
     ndt::type &dst_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
@@ -170,5 +171,5 @@ int nd::functional::outer_resolve_dst_type(
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
   return outer_resolve_dst_type_with_child(
-      child, child_tp, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
+      child, child_tp, NULL, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
 }

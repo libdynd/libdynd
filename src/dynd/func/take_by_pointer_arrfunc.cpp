@@ -100,7 +100,7 @@ static intptr_t instantiate_take_by_pointer(
 
 static int resolve_take_by_pointer_dst_type(
     const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
-    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
     ndt::type &out_dst_tp,
     const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {

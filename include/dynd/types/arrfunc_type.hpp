@@ -76,8 +76,8 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * \returns  True on success, false on error (if throw_on_error was false).
  */
 typedef int (*arrfunc_resolve_dst_type_t)(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, intptr_t nsrc,
-    const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
+    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
@@ -91,7 +91,8 @@ typedef int (*arrfunc_resolve_dst_type_t)(
  * \param kwds    An array of the.
  */
 typedef void (*arrfunc_resolve_option_values_t)(
-    const arrfunc_type_data *self, const arrfunc_type *self_tp, intptr_t nsrc,
+    const arrfunc_type_data *self, const arrfunc_type *self_tp,
+    char *data, intptr_t nsrc,
     const ndt::type *src_tp, nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars);
 

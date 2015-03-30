@@ -12,7 +12,7 @@ using namespace dynd;
 
 void nd::functional::elwise_resolve_option_values(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-    intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars)
 {
   const arrfunc_type_data *child =
@@ -20,13 +20,13 @@ void nd::functional::elwise_resolve_option_values(
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-  return child->resolve_option_values(child, child_tp, nsrc, src_tp, kwds,
+  return child->resolve_option_values(child, child_tp, NULL, nsrc, src_tp, kwds,
                                       tp_vars);
 }
 
 int nd::functional::elwise_resolve_dst_type_with_child(
     const arrfunc_type_data *child_af, const arrfunc_type *child_af_tp,
-    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
     ndt::type &out_dst_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
@@ -45,7 +45,7 @@ int nd::functional::elwise_resolve_dst_type_with_child(
       }
     }
     if (!child_af->resolve_dst_type(
-            child_af, child_af_tp, nsrc,
+            child_af, child_af_tp, NULL, nsrc,
             child_src_tp.empty() ? NULL : child_src_tp.data(), throw_on_error,
             child_dst_tp, kwds, tp_vars)) {
       return 0;
@@ -603,7 +603,7 @@ intptr_t nd::functional::elwise_instantiate(
 
 int nd::functional::elwise_resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
     ndt::type &dst_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
@@ -613,5 +613,5 @@ int nd::functional::elwise_resolve_dst_type(
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
   return elwise_resolve_dst_type_with_child(
-      child, child_tp, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
+      child, child_tp, NULL, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
 }

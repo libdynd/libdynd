@@ -108,8 +108,8 @@ static void free_rolling_arrfunc_data(arrfunc_type_data *self_af)
 } // anonymous namespace
 
 static int resolve_rolling_dst_type(
-    const arrfunc_type_data *af_self, const arrfunc_type *af_tp, intptr_t nsrc,
-    const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
+    const arrfunc_type_data *af_self, const arrfunc_type *af_tp, char *DYND_UNUSED(data),
+    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 
 {
@@ -130,7 +130,7 @@ static int resolve_rolling_dst_type(
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    if (!child_af->resolve_dst_type(child_af, af_tp, 1, &child_src_tp,
+    if (!child_af->resolve_dst_type(child_af, af_tp, NULL, 1, &child_src_tp,
                                     throw_on_error, child_dst_tp, kwds,
                                     tp_vars)) {
       return 0;
