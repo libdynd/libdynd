@@ -824,18 +824,18 @@ namespace nd {
                         available, missing);
 
       // ...
-      char *data = new char[get()->size * arrfunc_type_data::data_size];
+      std::unique_ptr<char[]> data(new char[get()->size * arrfunc_type_data::data_size]);
 
       // Resolve the optional keyword arguments
       if (self->resolve_option_values != NULL) {
-        self->resolve_option_values(self, self_tp, data, arg_tp.size(),
+        self->resolve_option_values(self, self_tp, data.get(), arg_tp.size(),
                                     arg_tp.empty() ? NULL : arg_tp.data(),
                                     kwds_as_array, tp_vars);
       }
 
       // Resolve the destination type
       if (self->resolve_dst_type != NULL) {
-        self->resolve_dst_type(self, self_tp, data, arg_tp.size(),
+        self->resolve_dst_type(self, self_tp, data.get(), arg_tp.size(),
                                arg_tp.empty() ? NULL : arg_tp.data(), true,
                                dst_tp, kwds_as_array, tp_vars);
       } else {
@@ -849,7 +849,7 @@ namespace nd {
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self, self_tp, data, &ckb, 0, dst_tp, dst.get_arrmeta(),
+      self->instantiate(self, self_tp, data.get(), &ckb, 0, dst_tp, dst.get_arrmeta(),
                         arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
                         arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
                         kernel_request_single, &eval::default_eval_context,
@@ -857,9 +857,6 @@ namespace nd {
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
       fn(dst.get_readwrite_originptr(),
          arg_data.empty() ? NULL : arg_data.data(), ckb.get());
-
-      // ...
-      delete[] data;
 
       return dst;
     }
