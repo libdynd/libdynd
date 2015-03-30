@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <dynd/config.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/base_type.hpp>
