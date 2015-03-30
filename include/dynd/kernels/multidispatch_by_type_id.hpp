@@ -31,14 +31,14 @@ namespace nd {
 
     static intptr_t
     instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *ectx, const dynd::nd::array &kwds,
                 const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       const arrfunc &child = CKT::children(src_tp[0].get_type_id());
-      return child.get()->instantiate(self, self_tp, ckb, ckb_offset, dst_tp,
+      return child.get()->instantiate(self, self_tp, NULL, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                       kernreq, ectx, kwds, tp_vars);
     }
@@ -62,7 +62,7 @@ namespace nd {
 
     static intptr_t
     instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *ectx, const dynd::nd::array &kwds,
@@ -70,7 +70,7 @@ namespace nd {
     {
       const arrfunc &child =
           CKT::children(src_tp[0].get_type_id(), src_tp[1].get_type_id());
-      return child.get()->instantiate(self, self_tp, ckb, ckb_offset, dst_tp,
+      return child.get()->instantiate(self, self_tp, NULL, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                       kernreq, ectx, kwds, tp_vars);
     }

@@ -111,6 +111,7 @@ namespace nd {
 
       static intptr_t
       instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  char *DYND_UNUSED(data),
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -118,7 +119,7 @@ namespace nd {
                   const array &kwds, const std::map<string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child = find(self, tp_vars);
-        return child->instantiate(child, self_tp, ckb, ckb_offset, dst_tp,
+        return child->instantiate(child, self_tp, NULL, ckb, ckb_offset, dst_tp,
                                   dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                   kernreq, ectx, kwds, tp_vars);
       }
@@ -149,6 +150,7 @@ namespace nd {
 
       static intptr_t
       instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  char *DYND_UNUSED(data),
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -160,7 +162,7 @@ namespace nd {
             (*self->get_data_as<const std::unique_ptr<nd::arrfunc[]>>()).get();
 
         const arrfunc &child = data[src_tp[0].get_type_id()];
-        return child.get()->instantiate(self, self_tp, ckb, ckb_offset, dst_tp,
+        return child.get()->instantiate(self, self_tp, NULL, ckb, ckb_offset, dst_tp,
                                         dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                         kernreq, ectx, kwds, tp_vars);
       }
@@ -190,6 +192,7 @@ namespace nd {
 
       static intptr_t
       instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+                  char *DYND_UNUSED(data),
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -204,7 +207,7 @@ namespace nd {
 
         const arrfunc &child =
             data[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
-        return child.get()->instantiate(self, self_tp, ckb, ckb_offset, dst_tp,
+        return child.get()->instantiate(self, self_tp, NULL, ckb, ckb_offset, dst_tp,
                                         dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                         kernreq, ectx, kwds, tp_vars);
       }

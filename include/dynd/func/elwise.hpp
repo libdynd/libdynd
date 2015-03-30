@@ -22,7 +22,7 @@ namespace nd {
 
     intptr_t elwise_instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+        char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
         const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
         const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
         const eval::eval_context *ectx, const dynd::nd::array &kwds,
@@ -47,7 +47,7 @@ namespace nd {
      * \param ectx  The evaluation context.
      */
     intptr_t elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+        const arrfunc_type_data *child, const arrfunc_type *child_tp, char *data, void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
         dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -56,7 +56,7 @@ namespace nd {
 
     template <int I>
     intptr_t elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+        const arrfunc_type_data *child, const arrfunc_type *child_tp, char *data, void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
         dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -65,7 +65,7 @@ namespace nd {
 
     template <type_id_t dst_dim_id, type_id_t src_dim_id, int I>
     intptr_t elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+        const arrfunc_type_data *child, const arrfunc_type *child_tp, char *data, void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *ectx,

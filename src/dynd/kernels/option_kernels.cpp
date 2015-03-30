@@ -427,7 +427,7 @@ struct nafunc {
 
   static intptr_t instantiate_is_avail(
       const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+      const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
       const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
       intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
       kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
@@ -465,7 +465,7 @@ struct nafunc {
 
   static intptr_t instantiate_assign_na(
       const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+      const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
       const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
       intptr_t DYND_UNUSED(nsrc),
       const ndt::type *DYND_UNUSED(src_tp),
@@ -507,7 +507,7 @@ struct nafunc {
 
 intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
@@ -556,7 +556,7 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
 
 intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,

@@ -69,7 +69,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -131,7 +131,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -191,7 +191,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -263,7 +263,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -311,7 +311,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,

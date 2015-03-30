@@ -181,7 +181,7 @@ struct is_double_precision<T[N]> {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, const char *const *src_arrmeta,

@@ -54,11 +54,12 @@ class arrfunc_type_data;
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*arrfunc_instantiate_t)(
-    const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    const arrfunc_type_data *self, const arrfunc_type *self_tp, char *data,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Resolves the destination type for this arrfunc based on the types
@@ -137,10 +138,13 @@ public:
   arrfunc_resolve_option_values_t resolve_option_values;
   arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_free_t free;
+  const size_t size;
+
+  static const size_t data_size = 64;
 
   arrfunc_type_data()
       : instantiate(NULL), resolve_option_values(NULL), resolve_dst_type(NULL),
-        free(NULL)
+        free(NULL), size(1)
   {
     static_assert((sizeof(arrfunc_type_data) & 7) == 0,
                        "arrfunc_type_data must have size divisible by 8");
@@ -148,18 +152,18 @@ public:
 
   arrfunc_type_data(arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
-                    arrfunc_resolve_dst_type_t resolve_dst_type)
+                    arrfunc_resolve_dst_type_t resolve_dst_type, size_t size = 1)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
-        resolve_dst_type(resolve_dst_type)
+        resolve_dst_type(resolve_dst_type), size(size)
   {
   }
 
   arrfunc_type_data(arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free)
+                    arrfunc_free_t free, size_t size = 1)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
-        resolve_dst_type(resolve_dst_type), free(free)
+        resolve_dst_type(resolve_dst_type), free(free), size(size)
   {
   }
 
@@ -167,12 +171,12 @@ public:
   arrfunc_type_data(T &&data, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free = NULL)
+                    arrfunc_free_t free = NULL, size_t size = 1)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type),
         free(free == NULL
                  ? &destroy_wrapper<typename std::remove_reference<T>::type>
-                 : free)
+                 : free), size(size)
   {
     new (this->data)(typename std::remove_reference<T>::type)(
         std::forward<T>(data));
@@ -182,11 +186,11 @@ public:
   arrfunc_type_data(T *data, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free = NULL)
+                    arrfunc_free_t free = NULL, size_t size = 1)
       : instantiate(instantiate), resolve_option_values(resolve_option_values),
-        resolve_dst_type(resolve_dst_type), free(free)
+        resolve_dst_type(resolve_dst_type), free(free), size(size)
   {
-	  new (this->data) (T*)(data);
+    new (this->data) (T*)(data);
   }
 
   ~arrfunc_type_data()

@@ -277,7 +277,7 @@ get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
 
 static intptr_t instantiate_multidispatch_af(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -303,7 +303,7 @@ static intptr_t instantiate_multidispatch_af(
         }
       }
       if (j == nsrc) {
-        return af.get()->instantiate(af.get(), af.get_type(), ckb, ckb_offset,
+        return af.get()->instantiate(af.get(), af.get_type(), NULL, ckb, ckb_offset,
                                      dst_tp, dst_arrmeta, nsrc, src_tp,
                                      src_arrmeta, kernreq, ectx, kwds, tp_vars);
       } else {

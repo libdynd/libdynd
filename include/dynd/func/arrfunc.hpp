@@ -690,24 +690,16 @@ namespace nd {
   class arrfunc {
     nd::array m_value;
 
-    // Todo: Delete this constructor. For now, make it private.
-    arrfunc(const arrfunc_type_data *self, const ndt::type &self_tp)
-        : m_value(empty(self_tp))
-    {
-      *reinterpret_cast<arrfunc_type_data *>(
-          m_value.get_readwrite_originptr()) = *self;
-    }
-
   public:
     arrfunc() {}
 
     arrfunc(const ndt::type &self_tp, arrfunc_instantiate_t instantiate,
             arrfunc_resolve_option_values_t resolve_option_values,
-            arrfunc_resolve_dst_type_t resolve_dst_type)
+            arrfunc_resolve_dst_type_t resolve_dst_type, size_t size = 1)
         : m_value(empty(self_tp))
     {
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
-          instantiate, resolve_option_values, resolve_dst_type);
+          instantiate, resolve_option_values, resolve_dst_type, size);
     }
 
     template <typename T>
@@ -715,12 +707,12 @@ namespace nd {
             arrfunc_instantiate_t instantiate,
             arrfunc_resolve_option_values_t resolve_option_values,
             arrfunc_resolve_dst_type_t resolve_dst_type,
-            arrfunc_free_t free = NULL)
+            arrfunc_free_t free = NULL, size_t size = 1)
         : m_value(empty(self_tp))
     {
       new (m_value.get_readwrite_originptr())
           arrfunc_type_data(std::forward<T>(data), instantiate,
-                            resolve_option_values, resolve_dst_type, free);
+                            resolve_option_values, resolve_dst_type, free, size);
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -758,6 +750,7 @@ namespace nd {
 
     void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
 
+/*
     template <typename... T>
     void set_as_option(arrfunc_resolve_option_values_t resolve_option_values,
                        T &&... names)
@@ -787,6 +780,7 @@ namespace nd {
 
       arrfunc(&self, self_tp).swap(*this);
     }
+*/
 
     /*
      else if (nkwd != 0) {
@@ -850,9 +844,12 @@ namespace nd {
         dst = empty(dst_tp);
       }
 
+      // ...
+      char *data = new char[get()->size * arrfunc_type_data::data_size];
+
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self, self_tp, &ckb, 0, dst_tp, dst.get_arrmeta(),
+      self->instantiate(self, self_tp, data, &ckb, 0, dst_tp, dst.get_arrmeta(),
                         arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
                         arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
                         kernel_request_single, &eval::default_eval_context,
@@ -860,6 +857,9 @@ namespace nd {
       expr_single_t fn = ckb.get()->get_function<expr_single_t>();
       fn(dst.get_readwrite_originptr(),
          arg_data.empty() ? NULL : arg_data.data(), ckb.get());
+
+      // ...
+      delete[] data;
 
       return dst;
     }

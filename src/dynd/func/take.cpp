@@ -148,7 +148,7 @@ static int resolve_take_dst_type(
 
 static intptr_t instantiate_masked_take(
     const arrfunc_type_data *DYND_UNUSED(af_self),
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -212,7 +212,7 @@ static intptr_t instantiate_masked_take(
 
 static intptr_t instantiate_indexed_take(
     const arrfunc_type_data *DYND_UNUSED(af_self),
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -272,7 +272,7 @@ static intptr_t instantiate_indexed_take(
 }
 
 static intptr_t instantiate_take(
-    const arrfunc_type_data *af_self, const arrfunc_type *af_tp, void *ckb,
+    const arrfunc_type_data *af_self, const arrfunc_type *af_tp, char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -280,12 +280,12 @@ static intptr_t instantiate_take(
 {
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
-    return instantiate_masked_take(af_self, af_tp, ckb, ckb_offset, dst_tp,
+    return instantiate_masked_take(af_self, af_tp, NULL, ckb, ckb_offset, dst_tp,
                                    dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                    kernreq, ectx, kwds, tp_vars);
   } else if (mask_el_tp.get_type_id() ==
              (type_id_t)type_id_of<intptr_t>::value) {
-    return instantiate_indexed_take(af_self, af_tp, ckb, ckb_offset, dst_tp,
+    return instantiate_indexed_take(af_self, af_tp, NULL, ckb, ckb_offset, dst_tp,
                                     dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                     kernreq, ectx, kwds, tp_vars);
   } else {

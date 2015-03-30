@@ -107,7 +107,7 @@ size_t adapt_type::make_operand_to_value_assignment_kernel(
   const arrfunc_type_data *af = m_forward.get();
   if (af != NULL) {
     return af->instantiate(
-        af, m_forward.get_type(), ckb, ckb_offset, m_value_type, dst_arrmeta, -1,
+        af, m_forward.get_type(), NULL, ckb, ckb_offset, m_value_type, dst_arrmeta, -1,
         &m_operand_type, &src_arrmeta, kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
   } else {
     stringstream ss;
@@ -126,7 +126,7 @@ size_t adapt_type::make_value_to_operand_assignment_kernel(
   const arrfunc_type_data *af = m_reverse.get();
   if (af != NULL) {
     return af->instantiate(
-        af, m_reverse.get_type(), ckb, ckb_offset, m_operand_type, src_arrmeta, -1,
+        af, m_reverse.get_type(), NULL, ckb, ckb_offset, m_operand_type, src_arrmeta, -1,
         &m_value_type, &dst_arrmeta, kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
   } else {
     stringstream ss;

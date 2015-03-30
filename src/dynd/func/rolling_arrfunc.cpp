@@ -152,7 +152,7 @@ static int resolve_rolling_dst_type(
 // TODO This should handle both strided and var cases
 static intptr_t
 instantiate_strided(const arrfunc_type_data *af_self,
-                    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
+                    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
                     intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                     const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -219,7 +219,7 @@ instantiate_strided(const arrfunc_type_data *af_self,
 
   const char *src_winop_meta = self->m_src_winop_meta.get();
   return window_af->instantiate(
-      window_af, window_af_tp, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
+      window_af, window_af_tp, NULL, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
       nsrc, &self->m_src_winop_meta.get_type(), &src_winop_meta,
       kernel_request_strided, ectx, kwds, tp_vars);
 }
