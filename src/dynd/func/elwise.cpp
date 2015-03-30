@@ -281,7 +281,7 @@ nd::arrfunc nd::functional::elwise(const arrfunc &child)
       (child.get()->resolve_option_values == NULL)
           ? NULL
           : &elwise_resolve_option_values,
-      child_tp->has_kwd("dst_tp") ? NULL : &elwise_resolve_dst_type, NULL, child.get()->size + 1);
+      child_tp->has_kwd("dst_tp") ? NULL : &elwise_resolve_dst_type, NULL, child.get()->level + 1);
 }
 
 intptr_t nd::functional::elwise_instantiate_with_child(

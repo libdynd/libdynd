@@ -826,7 +826,7 @@ namespace nd {
                         available, missing);
 
       // ...
-      std::unique_ptr<char[]> data(new char[get()->size * arrfunc_type_data::data_size]);
+      std::unique_ptr<char[]> data(new char[get()->level * arrfunc_type_data::data_size]);
 
       // Resolve the optional keyword arguments
       if (self->resolve_option_values != NULL) {
