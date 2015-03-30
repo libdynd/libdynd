@@ -391,7 +391,7 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
 
 intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -418,7 +418,7 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
         nd::cuda_launch_ck<1>::create(ckb, kernreq, ckb_offset, 1, 1);
     // Make the assignment on the device
     make_cuda_device_builtin_type_assignment_kernel(
-        NULL, NULL, &self->ckb, 0, dst_tp, NULL, 1, src_tp, NULL,
+        NULL, NULL, NULL, &self->ckb, 0, dst_tp, NULL, 1, src_tp, NULL,
         kernreq | kernel_request_cuda_device, ectx, kwds, tp_vars);
     // Return the offset for the original ckb
     return ckb_offset;
@@ -431,7 +431,7 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
 
 intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -462,7 +462,7 @@ intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
 
 intptr_t dynd::make_cuda_from_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,

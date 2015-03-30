@@ -34,8 +34,8 @@ before_script:
   - if [ "$CXX" = "g++" ] || [ "$CXX" = "clang++" ]; then sudo apt-get -y install g++-4.7; sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.7 90; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.7"; fi
   - if [ "$VALGRIND" == "ON" ]; then sudo apt-get -y install valgrind; fi
-  - if [ "$DYND_CUDA" == "ON" ]; then wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1204/x86_64/cuda-repo-ubuntu1204_6.5-14_amd64.deb;
-    sudo dpkg -i cuda-repo-ubuntu1204_6.5-14_amd64.deb; sudo apt-get update; sudo apt-get -y install cuda; fi
+  - if [ "$DYND_CUDA" == "ON" ]; then wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1204/x86_64/cuda-repo-ubuntu1204_7.0-28_amd64.deb;
+    sudo dpkg -i cuda-repo-ubuntu1204_7.0-28_amd64.deb; sudo apt-get update; sudo apt-get -y install cuda; fi
   - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -y install libfftw3-dev; fi
   - if [ "$PYTHON" == "ON" ]; then sudo pip install numpy cython; fi
   - if [ "$ASAN" == "ON" ]; then export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'; fi
