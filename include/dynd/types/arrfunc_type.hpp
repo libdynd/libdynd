@@ -54,11 +54,12 @@ class arrfunc_type_data;
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*arrfunc_instantiate_t)(
-    const arrfunc_type_data *self, const arrfunc_type *self_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    const arrfunc_type_data *self, const arrfunc_type *self_tp, char *data,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Resolves the destination type for this arrfunc based on the types
@@ -75,9 +76,10 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * \returns  True on success, false on error (if throw_on_error was false).
  */
 typedef int (*arrfunc_resolve_dst_type_t)(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, intptr_t nsrc,
-    const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
+    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+    ndt::type &out_dst_tp, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Resolves any missing keyword arguments for this arrfunc based on
@@ -90,8 +92,8 @@ typedef int (*arrfunc_resolve_dst_type_t)(
  * \param kwds    An array of the.
  */
 typedef void (*arrfunc_resolve_option_values_t)(
-    const arrfunc_type_data *self, const arrfunc_type *self_tp, intptr_t nsrc,
-    const ndt::type *src_tp, nd::array &kwds,
+    const arrfunc_type_data *self, const arrfunc_type *self_tp, char *data,
+    intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
@@ -122,34 +124,40 @@ class arrfunc_type_data {
 
 public:
   /**
-   * Some memory for the arrfunc to use. If this is not
-   * enough space to hold all the data by value, should allocate
-   * space on the heap, and free it when free is called.
-   *
    * On 32-bit platforms, if the size changes, it may be
    * necessary to use
    * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
    * to ensure the total struct size is divisible by 64 bits.
    */
-  char data[4 * 8];
+  static const size_t data_size = 4 * 8 + ((sizeof(void *) == 4) ? 4 : 0);
 
+  /**
+   * Some memory for the arrfunc to use. If this is not
+   * enough space to hold all the data by value, should allocate
+   * space on the heap, and free it when free is called.
+   */
+  char data[data_size];
+
+  size_t level;
   arrfunc_instantiate_t instantiate;
   arrfunc_resolve_option_values_t resolve_option_values;
   arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_free_t free;
 
   arrfunc_type_data()
-      : instantiate(NULL), resolve_option_values(NULL), resolve_dst_type(NULL),
-        free(NULL)
+      : level(1), instantiate(NULL), resolve_option_values(NULL),
+        resolve_dst_type(NULL), free(NULL)
   {
     static_assert((sizeof(arrfunc_type_data) & 7) == 0,
-                       "arrfunc_type_data must have size divisible by 8");
+                  "arrfunc_type_data must have size divisible by 8");
   }
 
   arrfunc_type_data(arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
-                    arrfunc_resolve_dst_type_t resolve_dst_type)
-      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+                    arrfunc_resolve_dst_type_t resolve_dst_type,
+                    size_t level = 1)
+      : level(level), instantiate(instantiate),
+        resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type)
   {
   }
@@ -157,8 +165,9 @@ public:
   arrfunc_type_data(arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free)
-      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+                    arrfunc_free_t free, size_t level = 1)
+      : level(level), instantiate(instantiate),
+        resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type), free(free)
   {
   }
@@ -167,8 +176,9 @@ public:
   arrfunc_type_data(T &&data, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free = NULL)
-      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+                    arrfunc_free_t free = NULL, size_t level = 1)
+      : level(level), instantiate(instantiate),
+        resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type),
         free(free == NULL
                  ? &destroy_wrapper<typename std::remove_reference<T>::type>
@@ -182,11 +192,12 @@ public:
   arrfunc_type_data(T *data, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free = NULL)
-      : instantiate(instantiate), resolve_option_values(resolve_option_values),
+                    arrfunc_free_t free = NULL, size_t level = 1)
+      : level(level), instantiate(instantiate),
+        resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type), free(free)
   {
-	  new (this->data) (T*)(data);
+    new (this->data)(T *)(data);
   }
 
   ~arrfunc_type_data()
@@ -322,7 +333,8 @@ public:
 
   void get_vars(std::unordered_set<std::string> &vars) const;
 
-  bool has_kwd(const std::string &name) const {
+  bool has_kwd(const std::string &name) const
+  {
     return get_kwd_index(name) != -1;
   }
 
@@ -346,23 +358,23 @@ public:
     return m_kwd_struct.extended<tuple_type>()->get_field_count();
   }
 
-/*
-  bool matches(intptr_t j, const ndt::type &actual_tp,
-               std::map<nd::string, ndt::type> &typevars) const
-  {
-    ndt::type expected_tp = get_kwd_type(j);
-    if (expected_tp.get_type_id() == option_type_id) {
-      expected_tp = expected_tp.p("value_type").as<ndt::type>();
+  /*
+    bool matches(intptr_t j, const ndt::type &actual_tp,
+                 std::map<nd::string, ndt::type> &typevars) const
+    {
+      ndt::type expected_tp = get_kwd_type(j);
+      if (expected_tp.get_type_id() == option_type_id) {
+        expected_tp = expected_tp.p("value_type").as<ndt::type>();
+      }
+      if (!actual_tp.value_type().matches(expected_tp, typevars)) {
+        std::stringstream ss;
+        ss << "keyword \"" << get_kwd_name(j) << "\" does not match, ";
+        ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp;
+        throw std::invalid_argument(ss.str());
+      }
+      return true;
     }
-    if (!actual_tp.value_type().matches(expected_tp, typevars)) {
-      std::stringstream ss;
-      ss << "keyword \"" << get_kwd_name(j) << "\" does not match, ";
-      ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp;
-      throw std::invalid_argument(ss.str());
-    }
-    return true;
-  }
-*/
+  */
 
   /** Returns the number of optional arguments. */
   intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
@@ -474,8 +486,7 @@ namespace ndt {
       ndt::type arg_tp[sizeof...(A)] = {
           make_cuda_device(make_type<typename std::remove_cv<
               typename std::remove_reference<A>::type>::type>())...};
-      return make_arrfunc(ndt::make_tuple(arg_tp),
-                          ret_tp);
+      return make_arrfunc(ndt::make_tuple(arg_tp), ret_tp);
     }
 
     template <typename... T>

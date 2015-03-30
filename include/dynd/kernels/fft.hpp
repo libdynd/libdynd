@@ -170,7 +170,7 @@ struct is_double_precision<T[N]> {
 
     static void resolve_option_values(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
@@ -181,7 +181,7 @@ struct is_double_precision<T[N]> {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -249,7 +249,7 @@ struct is_double_precision<T[N]> {
     template <bool real_to_complex>
     static typename std::enable_if<real_to_complex, int>::type resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
         ndt::type &dst_tp, const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -278,7 +278,7 @@ struct is_double_precision<T[N]> {
     static typename std::enable_if<!real_to_complex, int>::type
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
         ndt::type &dst_tp, const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -301,12 +301,12 @@ struct is_double_precision<T[N]> {
 
     static int
     resolve_dst_type(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                     intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+                     char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
                      ndt::type &dst_tp, const nd::array &kwds,
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       return resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
-          self, self_tp, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
+          self, self_tp, NULL, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
     }
   };
 

@@ -22,7 +22,7 @@ namespace {
 // Functions for the unary assignment as an arrfunc
 
 static intptr_t instantiate_assignment_ckernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -66,7 +66,7 @@ static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
 }
 
 static intptr_t instantiate_property_ckernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,

@@ -108,8 +108,8 @@ static void free_rolling_arrfunc_data(arrfunc_type_data *self_af)
 } // anonymous namespace
 
 static int resolve_rolling_dst_type(
-    const arrfunc_type_data *af_self, const arrfunc_type *af_tp, intptr_t nsrc,
-    const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
+    const arrfunc_type_data *af_self, const arrfunc_type *af_tp, char *DYND_UNUSED(data),
+    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 
 {
@@ -130,7 +130,7 @@ static int resolve_rolling_dst_type(
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    if (!child_af->resolve_dst_type(child_af, af_tp, 1, &child_src_tp,
+    if (!child_af->resolve_dst_type(child_af, af_tp, NULL, 1, &child_src_tp,
                                     throw_on_error, child_dst_tp, kwds,
                                     tp_vars)) {
       return 0;
@@ -152,7 +152,7 @@ static int resolve_rolling_dst_type(
 // TODO This should handle both strided and var cases
 static intptr_t
 instantiate_strided(const arrfunc_type_data *af_self,
-                    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb,
+                    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
                     intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                     const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -219,7 +219,7 @@ instantiate_strided(const arrfunc_type_data *af_self,
 
   const char *src_winop_meta = self->m_src_winop_meta.get();
   return window_af->instantiate(
-      window_af, window_af_tp, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
+      window_af, window_af_tp, NULL, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
       nsrc, &self->m_src_winop_meta.get_type(), &src_winop_meta,
       kernel_request_strided, ectx, kwds, tp_vars);
 }

@@ -16,7 +16,8 @@ namespace nd {
   namespace functional {
 
     intptr_t elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+        const arrfunc_type_data *child, const arrfunc_type *child_tp, char *data,
+        void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
         dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -25,7 +26,8 @@ namespace nd {
 
     template <int I>
     intptr_t elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
+        const arrfunc_type_data *child, const arrfunc_type *child_tp, char *data,
+        void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
         dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -63,8 +65,7 @@ namespace nd {
         ckernel_prefix *child = this->get_child_ckernel();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
-        opchild(dst, m_dst_stride, src, m_src_stride, m_size,
-                child);
+        opchild(dst, m_dst_stride, src, m_src_stride, m_size, child);
       }
 
       DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
@@ -85,8 +86,7 @@ namespace nd {
 
         for (size_t i = DYND_THREAD_ID(J); i < count;
              i += DYND_THREAD_COUNT(J)) {
-          opchild(dst, m_dst_stride, src_loop, m_src_stride, m_size,
-                  child);
+          opchild(dst, m_dst_stride, src_loop, m_src_stride, m_size, child);
           dst += DYND_THREAD_COUNT(J) * dst_stride;
           for (int j = 0; j != N; ++j) {
             src_loop[j] += DYND_THREAD_COUNT(J) * src_stride[j];
@@ -101,11 +101,11 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -165,17 +165,17 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_instantiate_with_child < (I == -1)
                      ? -1
-                     : (I - 1) > (child, child_tp, ckb, ckb_offset,
+                     : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
                                   child_src_tp, child_src_arrmeta, kernreq,
                                   ectx, kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
-        return child->instantiate(child, child_tp, ckb, ckb_offset,
-                                  child_dst_tp, child_dst_arrmeta, nsrc,
-                                  child_src_tp, child_src_arrmeta, kernreq,
-                                  ectx, kwds, tp_vars);
+        return child->instantiate(
+            child, child_tp, NULL, ckb, ckb_offset,
+            child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp,
+            child_src_arrmeta, kernreq, ectx, kwds, tp_vars);
       }
     };
 
@@ -225,6 +225,7 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
+                  char *DYND_UNUSED(data),
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *DYND_UNUSED(src_tp),
@@ -262,13 +263,13 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_instantiate_with_child < (I == -1)
                      ? -1
-                     : (I - 1) > (child, child_tp, ckb, ckb_offset,
+                     : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
                                   NULL, kernreq, ectx, kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
-        return child->instantiate(child, child_tp, ckb, ckb_offset,
+        return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
                                   NULL, kernreq, ectx, kwds, tp_vars);
       }
@@ -326,8 +327,8 @@ namespace nd {
             modified_src_stride[i] = m_src_stride[i];
           }
         }
-        opchild(dst, m_dst_stride, modified_src, modified_src_stride,
-                dim_size, child);
+        opchild(dst, m_dst_stride, modified_src, modified_src_stride, dim_size,
+                child);
       }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -351,7 +352,7 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -426,13 +427,13 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_instantiate_with_child < (I == -1)
                      ? -1
-                     : (I - 1) > (child, child_tp, ckb, ckb_offset,
+                     : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
                                   child_src_tp, child_src_arrmeta,
                                   kernel_request_strided, ectx, kwds, tp_vars);
         }
         // Instantiate the elementwise handler
-        return child->instantiate(child, child_tp, ckb, ckb_offset,
+        return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
                                   child_src_tp, child_src_arrmeta,
                                   kernel_request_strided, ectx, kwds, tp_vars);
@@ -480,7 +481,7 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *DYND_UNUSED(src_tp),
                   const char *const *DYND_UNUSED(src_arrmeta),
@@ -512,14 +513,14 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_instantiate_with_child < (I == -1)
                      ? -1
-                     : (I - 1) > (child, child_tp, ckb, ckb_offset,
+                     : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
                                   NULL, kernel_request_strided, ectx, kwds,
                                   tp_vars);
         }
         // Instantiate the elementwise handler
         return child->instantiate(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            child, child_tp, NULL, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             nsrc, NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
       }
     };
@@ -547,8 +548,8 @@ namespace nd {
                 const intptr_t *src_stride, const intptr_t *src_offset,
                 const intptr_t *src_size, const bool *is_src_var)
           : m_dst_memblock(dst_memblock),
-            m_dst_target_alignment(dst_target_alignment), m_dst_stride(dst_stride),
-            m_dst_offset(dst_offset)
+            m_dst_target_alignment(dst_target_alignment),
+            m_dst_stride(dst_stride), m_dst_offset(dst_offset)
       {
         memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
         memcpy(m_src_offset, src_offset, sizeof(m_src_offset));
@@ -687,7 +688,7 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -759,13 +760,13 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_instantiate_with_child < (I == -1)
                      ? -1
-                     : (I - 1) > (child, child_tp, ckb, ckb_offset,
+                     : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
                                   child_src_tp, child_src_arrmeta,
                                   kernel_request_strided, ectx, kwds, tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
-        return child->instantiate(child, child_tp, ckb, ckb_offset,
+        return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
                                   child_src_tp, child_src_arrmeta,
                                   kernel_request_strided, ectx, kwds, tp_vars);
@@ -785,8 +786,8 @@ namespace nd {
       elwise_ck(memory_block_data *dst_memblock, size_t dst_target_alignment,
                 intptr_t dst_stride, intptr_t dst_offset)
           : m_dst_memblock(dst_memblock),
-            m_dst_target_alignment(dst_target_alignment), m_dst_stride(dst_stride),
-            m_dst_offset(dst_offset)
+            m_dst_target_alignment(dst_target_alignment),
+            m_dst_stride(dst_stride), m_dst_offset(dst_offset)
       {
       }
 
@@ -850,6 +851,7 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
+                  char *DYND_UNUSED(data),
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *DYND_UNUSED(src_tp),
@@ -884,14 +886,14 @@ namespace nd {
         if (!finished) {
           return nd::functional::elwise_instantiate_with_child < (I == -1)
                      ? -1
-                     : (I - 1) > (child, child_tp, ckb, ckb_offset,
+                     : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
                                   NULL, kernel_request_strided, ectx, kwds,
                                   tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
         return child->instantiate(
-            child, child_tp, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
+            child, child_tp, NULL, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
             nsrc, NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
       }
     };
