@@ -133,7 +133,7 @@ public:
    * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
    * to ensure the total struct size is divisible by 64 bits.
    */
-  char data[4 * 8];
+  char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
 
   arrfunc_instantiate_t instantiate;
   arrfunc_resolve_option_values_t resolve_option_values;
