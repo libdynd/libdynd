@@ -401,7 +401,7 @@ namespace nd {
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
@@ -484,7 +484,7 @@ namespace nd {
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
@@ -527,7 +527,7 @@ namespace nd {
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -546,7 +546,7 @@ namespace nd {
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -570,7 +570,7 @@ namespace nd {
     {
       return cuda_launch_ck<sizeof...(A)>::template instantiate<
           &instantiate_without_cuda_launch>(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -590,7 +590,7 @@ namespace nd {
     {
       return cuda_launch_ck<sizeof...(A)>::template instantiate<
           &instantiate_without_cuda_launch>(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -665,7 +665,7 @@ namespace nd {
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
@@ -742,7 +742,7 @@ namespace nd {
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
@@ -783,7 +783,7 @@ namespace nd {
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -806,7 +806,7 @@ namespace nd {
     {
       return cuda_launch_ck<sizeof...(A)>::template instantiate<
           &instantiate_without_cuda_launch>(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -825,7 +825,7 @@ namespace nd {
     {
       return cuda_launch_ck<sizeof...(A)>::template instantiate<
           &instantiate_without_cuda_launch>(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -888,7 +888,7 @@ namespace nd {
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
@@ -965,7 +965,7 @@ namespace nd {
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *self,                                         \
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
@@ -1006,7 +1006,7 @@ namespace nd {
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -1024,7 +1024,7 @@ namespace nd {
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -1095,7 +1095,7 @@ namespace nd {
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *DYND_UNUSED(self),                            \
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
@@ -1172,7 +1172,7 @@ namespace nd {
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
         const arrfunc_type_data *DYND_UNUSED(self),                            \
-        const arrfunc_type *DYND_UNUSED(self_tp), void *ckb,                   \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
@@ -1212,7 +1212,7 @@ namespace nd {
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -1235,7 +1235,7 @@ namespace nd {
     {
       return cuda_launch_ck<arity_of<func_type>::value>::template instantiate<
           &instantiate_without_cuda_launch>(
-          self, self_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
