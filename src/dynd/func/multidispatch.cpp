@@ -413,7 +413,7 @@ nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
   }
 
   // TODO: Component arrfuncs might be arrays, not just scalars
-  return arrfunc(ndt::make_generic_funcproto(nargs), std::move(sorted_af),
+  return arrfunc(ndt::make_generic_funcproto(nargs), std::move(sorted_af), 0,
                  &instantiate_multidispatch_af, NULL,
                  &resolve_multidispatch_dst_type, NULL);
 }
