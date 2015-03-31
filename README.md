@@ -3,7 +3,7 @@
 The DyND Library
 ================
 
-TravisCI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/qu6mth15w2gbe8v4?svg=true)](https://ci.appveyor.com/project/mwiebe/libdynd)
+TravisCI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/qu6mth15w2gbe8v4?svg=true)](https://ci.appveyor.com/project/libdynd/libdynd)
 
 The core DyND developer team consists of
 [Mark Wiebe](https://github.com/mwiebe) and
