@@ -301,7 +301,7 @@ nd::arrfunc nd::take::make()
   // Masked take: (M * T, M * bool) -> var * T
   // Indexed take: (M * T, N * intptr) -> N * T
   // Combined: (M * T, N * Ix) -> R * T
-  return arrfunc(ndt::type("(Dims... * T, N * Ix) -> R * T"), &instantiate_take,
+  return arrfunc(ndt::type("(Dims... * T, N * Ix) -> R * T"), 0, &instantiate_take,
                  NULL, &resolve_take_dst_type);
 }
 

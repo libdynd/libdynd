@@ -695,26 +695,27 @@ namespace nd {
   public:
     arrfunc() {}
 
-    arrfunc(const ndt::type &self_tp, arrfunc_instantiate_t instantiate,
+    arrfunc(const ndt::type &self_tp, size_t data_size,
+            arrfunc_instantiate_t instantiate,
             arrfunc_resolve_option_values_t resolve_option_values,
-            arrfunc_resolve_dst_type_t resolve_dst_type, size_t size = 1)
+            arrfunc_resolve_dst_type_t resolve_dst_type)
         : m_value(empty(self_tp))
     {
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
-          instantiate, resolve_option_values, resolve_dst_type, size);
+          data_size, instantiate, resolve_option_values, resolve_dst_type);
     }
 
     template <typename T>
-    arrfunc(const ndt::type &self_tp, T &&data,
+    arrfunc(const ndt::type &self_tp, T &&static_data, size_t data_size,
             arrfunc_instantiate_t instantiate,
             arrfunc_resolve_option_values_t resolve_option_values,
             arrfunc_resolve_dst_type_t resolve_dst_type,
-            arrfunc_free_t free = NULL, size_t size = 1)
+            arrfunc_free_t free = NULL)
         : m_value(empty(self_tp))
     {
-      new (m_value.get_readwrite_originptr())
-          arrfunc_type_data(std::forward<T>(data), instantiate,
-                            resolve_option_values, resolve_dst_type, free, size);
+      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
+          std::forward<T>(static_data), data_size, instantiate,
+          resolve_option_values, resolve_dst_type, free);
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -752,37 +753,41 @@ namespace nd {
 
     void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
 
-/*
-    template <typename... T>
-    void set_as_option(arrfunc_resolve_option_values_t resolve_option_values,
-                       T &&... names)
-    {
-      // TODO: This function makes some assumptions about types not being option
-      //       already, etc. We need this functionality, but probably can find
-      //       a better way later.
+    /*
+        template <typename... T>
+        void set_as_option(arrfunc_resolve_option_values_t
+       resolve_option_values,
+                           T &&... names)
+        {
+          // TODO: This function makes some assumptions about types not being
+       option
+          //       already, etc. We need this functionality, but probably can
+       find
+          //       a better way later.
 
-      intptr_t missing[sizeof...(T)] = {get_type()->get_kwd_index(names)...};
+          intptr_t missing[sizeof...(T)] =
+       {get_type()->get_kwd_index(names)...};
 
-      nd::array new_kwd_types = get_type()->get_kwd_types().eval_copy();
-      auto new_kwd_types_ptr = reinterpret_cast<ndt::type *>(
-          new_kwd_types.get_readwrite_originptr());
-      for (size_t i = 0; i < sizeof...(T); ++i) {
-        new_kwd_types_ptr[missing[i]] =
-            ndt::make_option(new_kwd_types_ptr[missing[i]]);
-      }
-      new_kwd_types.flag_as_immutable();
+          nd::array new_kwd_types = get_type()->get_kwd_types().eval_copy();
+          auto new_kwd_types_ptr = reinterpret_cast<ndt::type *>(
+              new_kwd_types.get_readwrite_originptr());
+          for (size_t i = 0; i < sizeof...(T); ++i) {
+            new_kwd_types_ptr[missing[i]] =
+                ndt::make_option(new_kwd_types_ptr[missing[i]]);
+          }
+          new_kwd_types.flag_as_immutable();
 
-      arrfunc_type_data self(get()->instantiate, resolve_option_values,
-                             get()->resolve_dst_type, get()->free);
-      std::memcpy(self.data, get()->data, sizeof(get()->data));
-      ndt::type self_tp = ndt::make_arrfunc(
-          get_type()->get_pos_tuple(),
-          ndt::make_struct(get_type()->get_kwd_names(), new_kwd_types),
-          get_type()->get_return_type());
+          arrfunc_type_data self(get()->instantiate, resolve_option_values,
+                                 get()->resolve_dst_type, get()->free);
+          std::memcpy(self.data, get()->data, sizeof(get()->data));
+          ndt::type self_tp = ndt::make_arrfunc(
+              get_type()->get_pos_tuple(),
+              ndt::make_struct(get_type()->get_kwd_names(), new_kwd_types),
+              get_type()->get_return_type());
 
-      arrfunc(&self, self_tp).swap(*this);
-    }
-*/
+          arrfunc(&self, self_tp).swap(*this);
+        }
+    */
 
     /*
      else if (nkwd != 0) {
@@ -826,7 +831,7 @@ namespace nd {
                         available, missing);
 
       // ...
-      std::unique_ptr<char[]> data(new char[get()->level * arrfunc_type_data::data_size]);
+      std::unique_ptr<char[]> data(new char[get()->data_size]);
 
       // Resolve the optional keyword arguments
       if (self->resolve_option_values != NULL) {
@@ -851,8 +856,9 @@ namespace nd {
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self, self_tp, data.get(), &ckb, 0, dst_tp, dst.get_arrmeta(),
-                        arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+      self->instantiate(self, self_tp, data.get(), &ckb, 0, dst_tp,
+                        dst.get_arrmeta(), arg_tp.size(),
+                        arg_tp.empty() ? NULL : arg_tp.data(),
                         arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
                         kernel_request_single, &eval::default_eval_context,
                         kwds_as_array, tp_vars);
@@ -947,7 +953,7 @@ namespace nd {
   template <typename CKT>
   arrfunc as_arrfunc(const ndt::type &self_tp)
   {
-    return arrfunc(self_tp, dynd::detail::get_instantiate<CKT>(),
+    return arrfunc(self_tp, 0, dynd::detail::get_instantiate<CKT>(),
                    dynd::detail::get_resolve_option_values<CKT>(),
                    dynd::detail::get_resolve_dst_type<CKT>());
   }
@@ -969,7 +975,7 @@ namespace nd {
   template <typename CKT, typename T>
   arrfunc as_arrfunc(const ndt::type &self_tp, T &&data)
   {
-    return arrfunc(self_tp, std::forward<T>(data),
+    return arrfunc(self_tp, std::forward<T>(data), 0,
                    dynd::detail::get_instantiate<CKT>(),
                    dynd::detail::get_resolve_option_values<CKT>(),
                    dynd::detail::get_resolve_dst_type<CKT>());
@@ -1034,8 +1040,6 @@ namespace nd {
     return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
   }
 
-
-
   template <template <type_id_t> class CKT>
   struct insert_child0 {
     template <type_id_t I>
@@ -1053,8 +1057,6 @@ namespace nd {
 
     return arrfuncs;
   }
-
-
 
   template <template <type_id_t, type_id_t> class CKT, type_id_t I>
   struct insert_child {

@@ -129,75 +129,77 @@ public:
    * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
    * to ensure the total struct size is divisible by 64 bits.
    */
-  static const size_t data_size = 4 * 8 + ((sizeof(void *) == 4) ? 4 : 0);
+  static const size_t static_data_size =
+      4 * 8 + ((sizeof(void *) == 4) ? 4 : 0);
 
   /**
    * Some memory for the arrfunc to use. If this is not
    * enough space to hold all the data by value, should allocate
    * space on the heap, and free it when free is called.
    */
-  char data[data_size];
+  char static_data[static_data_size];
 
-  size_t level;
+  size_t data_size;
   arrfunc_instantiate_t instantiate;
   arrfunc_resolve_option_values_t resolve_option_values;
   arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_free_t free;
 
   arrfunc_type_data()
-      : level(1), instantiate(NULL), resolve_option_values(NULL),
+      : data_size(0), instantiate(NULL), resolve_option_values(NULL),
         resolve_dst_type(NULL), free(NULL)
   {
     static_assert((sizeof(arrfunc_type_data) & 7) == 0,
                   "arrfunc_type_data must have size divisible by 8");
   }
 
-  arrfunc_type_data(arrfunc_instantiate_t instantiate,
+  arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
-                    arrfunc_resolve_dst_type_t resolve_dst_type,
-                    size_t level = 1)
-      : level(level), instantiate(instantiate),
+                    arrfunc_resolve_dst_type_t resolve_dst_type)
+      : data_size(data_size), instantiate(instantiate),
         resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type)
   {
   }
 
-  arrfunc_type_data(arrfunc_instantiate_t instantiate,
+  arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free, size_t level = 1)
-      : level(level), instantiate(instantiate),
+                    arrfunc_free_t free)
+      : data_size(data_size), instantiate(instantiate),
         resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type), free(free)
   {
   }
 
   template <typename T>
-  arrfunc_type_data(T &&data, arrfunc_instantiate_t instantiate,
+  arrfunc_type_data(T &&static_data, size_t data_size,
+                    arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free = NULL, size_t level = 1)
-      : level(level), instantiate(instantiate),
+                    arrfunc_free_t free = NULL)
+      : data_size(data_size), instantiate(instantiate),
         resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type),
         free(free == NULL
                  ? &destroy_wrapper<typename std::remove_reference<T>::type>
                  : free)
   {
-    new (this->data)(typename std::remove_reference<T>::type)(
-        std::forward<T>(data));
+    new (this->static_data)(typename std::remove_reference<T>::type)(
+        std::forward<T>(static_data));
   }
 
   template <typename T>
-  arrfunc_type_data(T *data, arrfunc_instantiate_t instantiate,
+  arrfunc_type_data(T *static_data, size_t data_size,
+                    arrfunc_instantiate_t instantiate,
                     arrfunc_resolve_option_values_t resolve_option_values,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free = NULL, size_t level = 1)
-      : level(level), instantiate(instantiate),
+                    arrfunc_free_t free = NULL)
+      : data_size(data_size), instantiate(instantiate),
         resolve_option_values(resolve_option_values),
         resolve_dst_type(resolve_dst_type), free(free)
   {
-    new (this->data)(T *)(data);
+    new (this->static_data)(T *)(static_data);
   }
 
   ~arrfunc_type_data()
@@ -214,26 +216,26 @@ public:
   template <typename T>
   T *get_data_as()
   {
-    if (sizeof(T) > sizeof(data)) {
+    if (sizeof(T) > sizeof(static_data)) {
       throw std::runtime_error("data does not fit");
     }
     if ((int)scalar_align_of<T>::value >
         (int)scalar_align_of<uint64_t>::value) {
       throw std::runtime_error("data requires stronger alignment");
     }
-    return reinterpret_cast<T *>(data);
+    return reinterpret_cast<T *>(static_data);
   }
   template <typename T>
   const T *get_data_as() const
   {
-    if (sizeof(T) > sizeof(data)) {
+    if (sizeof(T) > sizeof(static_data)) {
       throw std::runtime_error("data does not fit");
     }
     if ((int)scalar_align_of<T>::value >
         (int)scalar_align_of<uint64_t>::value) {
       throw std::runtime_error("data requires stronger alignment");
     }
-    return reinterpret_cast<const T *>(data);
+    return reinterpret_cast<const T *>(static_data);
   }
 };
 
