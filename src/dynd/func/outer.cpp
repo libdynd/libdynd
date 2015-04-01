@@ -118,7 +118,7 @@ intptr_t nd::functional::outer_instantiate(
     new_src_arrmeta.push_back(new_src_arrmeta_holder[i].get());
   }
 
-  ckb_offset = elwise_instantiate(
+  ckb_offset = elwise_virtual_ck::instantiate(
       child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(),
       new_src_arrmeta.data(), kernreq, ectx, kwds, tp_vars);
   delete[] new_src_arrmeta_holder;
