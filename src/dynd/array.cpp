@@ -2210,7 +2210,7 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
       const arrfunc_type *af_tp =
           dtp.extended<option_type>()->get_assign_na_arrfunc_type();
       ckernel_builder<kernel_request_host> ckb;
-      nd::functional::elwise_instantiate_with_child<0>(
+      nd::functional::elwise_virtual_ck::instantiate_with_child<0>(
           af, af_tp, NULL, &ckb, tp.get_ndim(), tp, arrmeta, 0, NULL, NULL,
           kernel_request_single, ectx, nd::array(),
           std::map<nd::string, ndt::type>());

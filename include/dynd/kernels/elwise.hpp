@@ -6,33 +6,73 @@
 #pragma once
 
 #include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/virtual.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
 namespace nd {
   namespace functional {
 
-    intptr_t elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, char *data,
-        void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-        dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-        const dynd::nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &tp_vars);
+    struct elwise_virtual_ck : virtual_ck<elwise_virtual_ck> {
+      static void resolve_option_values(
+          const arrfunc_type_data *self, const arrfunc_type *self_tp,
+          char *data, intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
+          const std::map<nd::string, ndt::type> &tp_vars);
 
-    template <int I>
-    intptr_t elwise_instantiate_with_child(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, char *data,
-        void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-        dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-        const dynd::nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &tp_vars);
+      static int
+      resolve_dst_type(const arrfunc_type_data *self,
+                       const arrfunc_type *self_tp, char *data, intptr_t nsrc,
+                       const ndt::type *src_tp, int throw_on_error,
+                       ndt::type &dst_tp, const dynd::nd::array &kwds,
+                       const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+      static int resolve_dst_type_with_child(
+          const arrfunc_type_data *child, const arrfunc_type *child_tp,
+          char *data, intptr_t nsrc, const ndt::type *src_tp,
+          int throw_on_error, ndt::type &dst_tp, const dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+      static intptr_t
+      instantiate(const arrfunc_type_data *self,
+                  const arrfunc_type *DYND_UNUSED(self_tp), char *data,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  dynd::kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const dynd::nd::array &kwds,
+                  const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+      static intptr_t instantiate_with_child(
+          const arrfunc_type_data *child, const arrfunc_type *child_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+          const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
+          const eval::eval_context *ectx, const dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+      template <int I>
+      static intptr_t instantiate_with_child(
+          const arrfunc_type_data *child, const arrfunc_type *child_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+          const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
+          const eval::eval_context *ectx, const dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+      template <type_id_t dst_dim_id, type_id_t src_dim_id, int I>
+      static intptr_t instantiate_with_child(
+          const arrfunc_type_data *child, const arrfunc_type *child_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+          const char *const *src_arrmeta, kernel_request_t kernreq,
+          const eval::eval_context *ectx, const dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars);
+    };
+
 
     /**
      * Generic expr kernel + destructor for a strided dimension with
@@ -163,7 +203,7 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
@@ -172,10 +212,10 @@ namespace nd {
         }
 
         // Instantiate the elementwise handler
-        return child->instantiate(
-            child, child_tp, NULL, ckb, ckb_offset,
-            child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp,
-            child_src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
+                                  child_dst_tp, child_dst_arrmeta, nsrc,
+                                  child_src_tp, child_src_arrmeta, kernreq,
+                                  ectx, kwds, tp_vars);
       }
     };
 
@@ -225,10 +265,9 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  char *DYND_UNUSED(data),
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *DYND_UNUSED(src_tp),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
                   const char *const *DYND_UNUSED(src_arrmeta),
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
@@ -261,7 +300,7 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
@@ -352,11 +391,11 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -425,7 +464,7 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
@@ -481,9 +520,9 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *DYND_UNUSED(src_tp),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
                   const char *const *DYND_UNUSED(src_arrmeta),
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
@@ -511,7 +550,7 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
@@ -519,9 +558,10 @@ namespace nd {
                                   tp_vars);
         }
         // Instantiate the elementwise handler
-        return child->instantiate(
-            child, child_tp, NULL, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            nsrc, NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
+        return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
+                                  child_dst_tp, child_dst_arrmeta, nsrc, NULL,
+                                  NULL, kernel_request_strided, ectx, kwds,
+                                  tp_vars);
       }
     };
 
@@ -688,11 +728,11 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -758,7 +798,7 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
@@ -851,10 +891,9 @@ namespace nd {
 
       static size_t
       instantiate(const arrfunc_type_data *child, const arrfunc_type *child_tp,
-                  char *DYND_UNUSED(data),
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *DYND_UNUSED(src_tp),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
                   const char *const *DYND_UNUSED(src_arrmeta),
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
@@ -884,7 +923,7 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
@@ -892,9 +931,10 @@ namespace nd {
                                   tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
-        return child->instantiate(
-            child, child_tp, NULL, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-            nsrc, NULL, NULL, kernel_request_strided, ectx, kwds, tp_vars);
+        return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
+                                  child_dst_tp, child_dst_arrmeta, nsrc, NULL,
+                                  NULL, kernel_request_strided, ectx, kwds,
+                                  tp_vars);
       }
     };
 
