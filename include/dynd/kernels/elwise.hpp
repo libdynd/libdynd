@@ -17,6 +17,9 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
+    // elwise_virtual_ck does multidispatch to the templated elwise_ck with the
+    // right number of args
+
     struct elwise_virtual_ck : virtual_ck<elwise_virtual_ck> {
       static void resolve_option_values(
           const arrfunc_type_data *self, const arrfunc_type *self_tp,
@@ -73,7 +76,6 @@ namespace nd {
           const std::map<dynd::nd::string, ndt::type> &tp_vars);
     };
 
-
     /**
      * Generic expr kernel + destructor for a strided dimension with
      * a fixed number of src operands.
@@ -113,23 +115,19 @@ namespace nd {
                                          const intptr_t *src_stride,
                                          size_t count)
       {
-        enum { J = (I == -1 || I > 1) ? -1 : (I + 1) };
-
         ckernel_prefix *child = this->get_child_ckernel();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
-        dst += DYND_THREAD_ID(J) * dst_stride;
         char *src_loop[N];
         for (int j = 0; j != N; ++j) {
-          src_loop[j] = src[j] + DYND_THREAD_ID(J) * src_stride[j];
+          src_loop[j] = src[j];
         }
 
-        for (size_t i = DYND_THREAD_ID(J); i < count;
-             i += DYND_THREAD_COUNT(J)) {
+        for (size_t i = 0; i < count; i += 1) {
           opchild(dst, m_dst_stride, src_loop, m_src_stride, m_size, child);
-          dst += DYND_THREAD_COUNT(J) * dst_stride;
+          dst += dst_stride;
           for (int j = 0; j != N; ++j) {
-            src_loop[j] += DYND_THREAD_COUNT(J) * src_stride[j];
+            src_loop[j] += src_stride[j];
           }
         }
       }
@@ -203,7 +201,8 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child <
+                         (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
@@ -244,17 +243,12 @@ namespace nd {
       strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
               const intptr_t *DYND_UNUSED(src_stride), size_t count)
       {
-        enum { J = (I == -1 || I > 1) ? -1 : (I + 1) };
-
         ckernel_prefix *child = this->get_child_ckernel();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
-        dst += DYND_THREAD_ID(J) * dst_stride;
-
-        for (size_t i = DYND_THREAD_ID(J); i < count;
-             i += DYND_THREAD_COUNT(J)) {
+        for (size_t i = 0; i < count; i += 1) {
           opchild(dst, m_dst_stride, NULL, NULL, m_size, child);
-          dst += DYND_THREAD_COUNT(J) * dst_stride;
+          dst += dst_stride;
         }
       }
 
@@ -300,7 +294,8 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child <
+                         (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
@@ -464,7 +459,8 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child <
+                         (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
@@ -550,7 +546,8 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child <
+                         (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
@@ -798,7 +795,8 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child <
+                         (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc,
@@ -923,7 +921,8 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child < (I == -1)
+          return nd::functional::elwise_virtual_ck::instantiate_with_child <
+                         (I == -1)
                      ? -1
                      : (I - 1) > (child, child_tp, NULL, ckb, ckb_offset,
                                   child_dst_tp, child_dst_arrmeta, nsrc, NULL,
