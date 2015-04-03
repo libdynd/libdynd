@@ -9,61 +9,6 @@
 using namespace std;
 using namespace dynd;
 
-#ifdef __CUDACC__
-static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
-                                           intptr_t src_count,
-                                           dynd::kernel_request_t kernreq,
-                                           dim3 blocks, dim3 threads)
-{
-  switch (src_count) {
-  case 0: {
-    typedef nd::cuda_launch_ck<0> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
-    return &self->ckb;
-  }
-  case 1: {
-    typedef nd::cuda_launch_ck<1> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
-    return &self->ckb;
-  }
-  case 2: {
-    typedef nd::cuda_launch_ck<2> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
-    return &self->ckb;
-  }
-  case 3: {
-    typedef nd::cuda_launch_ck<3> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
-    return &self->ckb;
-  }
-  case 4: {
-    typedef nd::cuda_launch_ck<4> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
-    return &self->ckb;
-  }
-  case 5: {
-    typedef nd::cuda_launch_ck<5> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
-    return &self->ckb;
-  }
-  case 6: {
-    typedef nd::cuda_launch_ck<6> self_type;
-    self_type *self =
-        self_type::create(ckb, kernreq, ckb_offset, blocks, threads);
-    return &self->ckb;
-  }
-  default:
-    throw runtime_error("elwise with src_count > 6 not implemented yet");
-  }
-}
-#endif // __CUDACC__
-
 void nd::functional::elwise_virtual_ck::resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
@@ -212,66 +157,6 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate(
   if (!child_tp->get_return_type().is_symbolic()) {
     dst_ndim -= child_tp->get_return_type().get_ndim();
   }
-
-#ifdef __CUDACC__
-  if (dst_tp.get_type_id() == cuda_device_type_id) {
-    // If everything is CUDA device memory, then instantiate a CUDA
-    // proxy ckernel, and add the cuda_device request flag to the kernreq.
-    bool src_all_device = true;
-    for (intptr_t i = 0; i < src_count; ++i) {
-      src_all_device =
-          src_all_device && (src_tp[i].get_type_id() == cuda_device_type_id);
-    }
-
-    if (src_all_device) {
-      if ((kernreq & kernel_request_memory) != kernel_request_host) {
-        throw invalid_argument(
-            "got CUDA device_types, but not kernel_request_host");
-      }
-      /*
-            int blocks, threads;
-            try {
-              if (kwds.p("blocks").is_missing()) {
-                blocks = 256;
-              } else {
-                blocks = kwds.p("blocks").as<int>();
-              }
-            } catch (...) {
-              blocks = 256;
-            }
-            try {
-              if (kwds.p("threads").is_missing()) {
-                threads = 256;
-              } else {
-                threads = kwds.p("threads").as<int>();
-              }
-            } catch (...) {
-              threads = 256;
-            }
-      */
-
-      dim3 grid, block;
-      get_cuda_launch_config(grid, block, dst_ndim);
-
-      void *cuda_ckb = create_cuda_device_trampoline(ckb, ckb_offset, src_count,
-                                                     kernreq, grid, block);
-      ndt::type new_dst_tp =
-          dst_tp.extended<base_memory_type>()->get_element_type();
-      vector<ndt::type> new_src_tp(src_count);
-      for (intptr_t i = 0; i < src_count; ++i) {
-        new_src_tp[i] =
-            src_tp[i].extended<base_memory_type>()->get_element_type();
-      }
-      elwise_virtual_ck::instantiate(
-          child, child_tp, NULL, cuda_ckb, 0, new_dst_tp, dst_arrmeta, nsrc,
-          &new_src_tp[0], src_arrmeta, kernreq | kernel_request_cuda_device,
-          ectx, kwds, tp_vars);
-      // The return is the ckb_offset for the ckb that was passed in,
-      // not the CUDA ckb we just created for the CUDA memory.
-      return ckb_offset;
-    }
-  }
-#endif // __CUDACC__
 
   if (dst_ndim == 0) {
     intptr_t i = 0;
