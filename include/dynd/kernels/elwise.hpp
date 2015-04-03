@@ -26,17 +26,17 @@ namespace nd {
           char *data, intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
           const std::map<nd::string, ndt::type> &tp_vars);
 
-      static int
+      static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const arrfunc_type *self_tp, char *data, intptr_t nsrc,
-                       const ndt::type *src_tp, int throw_on_error,
-                       ndt::type &dst_tp, const dynd::nd::array &kwds,
+                       const ndt::type *src_tp, ndt::type &dst_tp,
+                       const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
-      static int resolve_dst_type_with_child(
+      static void resolve_dst_type_with_child(
           const arrfunc_type_data *child, const arrfunc_type *child_tp,
-          char *data, intptr_t nsrc, const ndt::type *src_tp,
-          int throw_on_error, ndt::type &dst_tp, const dynd::nd::array &kwds,
+          char *data, intptr_t nsrc, const ndt::type *src_tp, ndt::type &dst_tp,
+          const dynd::nd::array &kwds,
           const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
       static intptr_t
@@ -191,10 +191,10 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child(child, child_tp, NULL, ckb, ckb_offset,
-                                  child_dst_tp, child_dst_arrmeta, nsrc,
-                                  child_src_tp, child_src_arrmeta, kernreq,
-                                  ectx, kwds, tp_vars);
+          return nd::functional::elwise_virtual_ck::instantiate_with_child(
+              child, child_tp, NULL, ckb, ckb_offset, child_dst_tp,
+              child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta, kernreq,
+              ectx, kwds, tp_vars);
         }
 
         // Instantiate the elementwise handler
@@ -281,9 +281,10 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child(child, child_tp, NULL, ckb, ckb_offset,
-                                  child_dst_tp, child_dst_arrmeta, nsrc, NULL,
-                                  NULL, kernreq, ectx, kwds, tp_vars);
+          return nd::functional::elwise_virtual_ck::instantiate_with_child(
+              child, child_tp, NULL, ckb, ckb_offset, child_dst_tp,
+              child_dst_arrmeta, nsrc, NULL, NULL, kernreq, ectx, kwds,
+              tp_vars);
         }
 
         // Instantiate the elementwise handler
@@ -443,10 +444,10 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child(child, child_tp, NULL, ckb, ckb_offset,
-                                  child_dst_tp, child_dst_arrmeta, nsrc,
-                                  child_src_tp, child_src_arrmeta,
-                                  kernel_request_strided, ectx, kwds, tp_vars);
+          return nd::functional::elwise_virtual_ck::instantiate_with_child(
+              child, child_tp, NULL, ckb, ckb_offset, child_dst_tp,
+              child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
+              kernel_request_strided, ectx, kwds, tp_vars);
         }
         // Instantiate the elementwise handler
         return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
@@ -527,10 +528,10 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child(child, child_tp, NULL, ckb, ckb_offset,
-                                  child_dst_tp, child_dst_arrmeta, nsrc, NULL,
-                                  NULL, kernel_request_strided, ectx, kwds,
-                                  tp_vars);
+          return nd::functional::elwise_virtual_ck::instantiate_with_child(
+              child, child_tp, NULL, ckb, ckb_offset, child_dst_tp,
+              child_dst_arrmeta, nsrc, NULL, NULL, kernel_request_strided, ectx,
+              kwds, tp_vars);
         }
         // Instantiate the elementwise handler
         return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
@@ -773,10 +774,10 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child(child, child_tp, NULL, ckb, ckb_offset,
-                                  child_dst_tp, child_dst_arrmeta, nsrc,
-                                  child_src_tp, child_src_arrmeta,
-                                  kernel_request_strided, ectx, kwds, tp_vars);
+          return nd::functional::elwise_virtual_ck::instantiate_with_child(
+              child, child_tp, NULL, ckb, ckb_offset, child_dst_tp,
+              child_dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
+              kernel_request_strided, ectx, kwds, tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
         return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
@@ -896,10 +897,10 @@ namespace nd {
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
-          return nd::functional::elwise_virtual_ck::instantiate_with_child(child, child_tp, NULL, ckb, ckb_offset,
-                                  child_dst_tp, child_dst_arrmeta, nsrc, NULL,
-                                  NULL, kernel_request_strided, ectx, kwds,
-                                  tp_vars);
+          return nd::functional::elwise_virtual_ck::instantiate_with_child(
+              child, child_tp, NULL, ckb, ckb_offset, child_dst_tp,
+              child_dst_arrmeta, nsrc, NULL, NULL, kernel_request_strided, ectx,
+              kwds, tp_vars);
         }
         // All the types matched, so instantiate the elementwise handler
         return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,

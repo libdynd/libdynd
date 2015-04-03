@@ -9,52 +9,63 @@
 using namespace std;
 using namespace dynd;
 
-struct take_by_pointer_outer_ck : nd::expr_ck<take_by_pointer_outer_ck, kernel_request_host, 2> {
-    const intptr_t dst_size, dst_stride;
-    const intptr_t src1_stride;
+struct take_by_pointer_outer_ck
+    : nd::expr_ck<take_by_pointer_outer_ck, kernel_request_host, 2> {
+  const intptr_t dst_size, dst_stride;
+  const intptr_t src1_stride;
 
-    take_by_pointer_outer_ck(intptr_t dst_size, intptr_t dst_stride, intptr_t src1_stride)
-      : dst_size(dst_size), dst_stride(dst_stride), src1_stride(src1_stride) {
+  take_by_pointer_outer_ck(intptr_t dst_size, intptr_t dst_stride,
+                           intptr_t src1_stride)
+      : dst_size(dst_size), dst_stride(dst_stride), src1_stride(src1_stride)
+  {
+  }
+
+  void single(char *dst, char *const *src)
+  {
+    ckernel_prefix *child = get_child_ckernel();
+    expr_single_t child_fn = child->get_function<expr_single_t>();
+
+    char *src_copy[2] = {src[0], src[1]};
+    for (intptr_t i = 0; i < dst_size; ++i) {
+      child_fn(dst, src_copy, child);
+      dst += dst_stride;
+      src_copy[1] += src1_stride;
     }
-
-    void single(char *dst, char *const *src) {
-        ckernel_prefix *child = get_child_ckernel();
-        expr_single_t child_fn = child->get_function<expr_single_t>();
-
-        char *src_copy[2] = {src[0], src[1]};
-        for (intptr_t i = 0; i < dst_size; ++i) {
-            child_fn(dst, src_copy, child);
-            dst += dst_stride;
-            src_copy[1] += src1_stride;
-        }
-    }
+  }
 };
 
-struct take_by_pointer_ck : nd::expr_ck<take_by_pointer_ck, kernel_request_host, 2> {
-    const intptr_t src0_size, src0_stride;
-    const intptr_t src1_inner_stride;
+struct take_by_pointer_ck
+    : nd::expr_ck<take_by_pointer_ck, kernel_request_host, 2> {
+  const intptr_t src0_size, src0_stride;
+  const intptr_t src1_inner_stride;
 
-    take_by_pointer_ck(intptr_t src0_size, intptr_t src0_stride, intptr_t src1_inner_stride)
-      : src0_size(src0_size), src0_stride(src0_stride), src1_inner_stride(src1_inner_stride) {
-    }
+  take_by_pointer_ck(intptr_t src0_size, intptr_t src0_stride,
+                     intptr_t src1_inner_stride)
+      : src0_size(src0_size), src0_stride(src0_stride),
+        src1_inner_stride(src1_inner_stride)
+  {
+  }
 
-    void single(char *dst, char *const *src) {
-        ckernel_prefix *child = get_child_ckernel();
-        expr_single_t child_fn = child->get_function<expr_single_t>();
+  void single(char *dst, char *const *src)
+  {
+    ckernel_prefix *child = get_child_ckernel();
+    expr_single_t child_fn = child->get_function<expr_single_t>();
 
-        intptr_t i = apply_single_index(*reinterpret_cast<const intptr_t *>(src[1]), src0_size, NULL);
-        char *src_copy[2] = {src[0] + i * src0_stride, src[1] + src1_inner_stride};
-        child_fn(dst, src_copy, child);
-    }
+    intptr_t i = apply_single_index(*reinterpret_cast<const intptr_t *>(src[1]),
+                                    src0_size, NULL);
+    char *src_copy[2] = {src[0] + i * src0_stride, src[1] + src1_inner_stride};
+    child_fn(dst, src_copy, child);
+  }
 };
 
 static intptr_t instantiate_take_by_pointer(
     const arrfunc_type_data *DYND_UNUSED(af_self),
     const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   intptr_t ndim = src_tp[0].get_ndim();
 
@@ -93,46 +104,34 @@ static intptr_t instantiate_take_by_pointer(
         src_size_stride[0][i].stride, src_size_stride[1][1].stride);
   }
 
-  return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_el_tp, dst_el_meta,
-                                src_el_tp[0], src_el_meta[0],
+  return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_el_tp,
+                                dst_el_meta, src_el_tp[0], src_el_meta[0],
                                 kernel_request_single, ectx, kwds);
 }
 
-static int resolve_take_by_pointer_dst_type(
+static void resolve_take_by_pointer_dst_type(
     const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
-    ndt::type &out_dst_tp,
-    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
+    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (nsrc != 2) {
-    if (throw_on_error) {
-      stringstream ss;
-      ss << "Wrong number of arguments to take arrfunc with prototype ";
-      ss << af_tp << ", got " << nsrc << " arguments";
-      throw invalid_argument(ss.str());
-    }
-    else {
-      return 0;
-    }
+    stringstream ss;
+    ss << "Wrong number of arguments to take arrfunc with prototype ";
+    ss << af_tp << ", got " << nsrc << " arguments";
+    throw invalid_argument(ss.str());
   }
 
   ndt::type idx_el_tp = src_tp[1].get_dtype();
   if (idx_el_tp.get_type_id() != (type_id_t)type_id_of<intptr_t>::value) {
-    if (throw_on_error) {
       stringstream ss;
       ss << "take: unsupported type for the index " << idx_el_tp
          << ", need intptr";
       throw invalid_argument(ss.str());
-    }
-    else {
-      return 0;
-    }
   }
 
   out_dst_tp = ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL),
                                    ndt::make_pointer(src_tp[0].get_dtype()));
-
-  return 1;
 }
 
 nd::arrfunc dynd::make_take_by_pointer_arrfunc()

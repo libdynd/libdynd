@@ -186,9 +186,9 @@ static void resolve_neighborhood_option_values(
 {
 }
 
-static int resolve_neighborhood_dst_type(
+static void resolve_neighborhood_dst_type(
     const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *self_tp,
-    char *DYND_UNUSED(data), intptr_t, const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
+    char *DYND_UNUSED(data), intptr_t, const ndt::type *src_tp,
     ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
@@ -223,8 +223,6 @@ static int resolve_neighborhood_dst_type(
   dimvector shape(ndim);
   src_tp[0].extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
   out_dst_tp = ndt::substitute_shape(out_dst_tp, ndim, shape.get());
-
-  return 0;
 }
 
 static void free_neighborhood(arrfunc_type_data *self_af)

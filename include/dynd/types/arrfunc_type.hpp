@@ -75,11 +75,10 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  *
  * \returns  True on success, false on error (if throw_on_error was false).
  */
-typedef int (*arrfunc_resolve_dst_type_t)(
+typedef void (*arrfunc_resolve_dst_type_t)(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
-    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
-    ndt::type &out_dst_tp, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
+    intptr_t nsrc, const ndt::type *src_tp, ndt::type &out_dst_tp,
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Resolves any missing keyword arguments for this arrfunc based on

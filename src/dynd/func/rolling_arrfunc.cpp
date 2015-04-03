@@ -107,21 +107,19 @@ static void free_rolling_arrfunc_data(arrfunc_type_data *self_af)
 }
 } // anonymous namespace
 
-static int resolve_rolling_dst_type(
-    const arrfunc_type_data *af_self, const arrfunc_type *af_tp, char *DYND_UNUSED(data),
-    intptr_t nsrc, const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+static void
+resolve_rolling_dst_type(const arrfunc_type_data *af_self,
+                         const arrfunc_type *af_tp, char *DYND_UNUSED(data),
+                         intptr_t nsrc, const ndt::type *src_tp,
+                         ndt::type &out_dst_tp, const nd::array &kwds,
+                         const std::map<nd::string, ndt::type> &tp_vars)
 
 {
   if (nsrc != 1) {
-    if (throw_on_error) {
-      stringstream ss;
-      ss << "Wrong number of arguments to rolling arrfunc with prototype ";
-      ss << af_tp << ", got " << nsrc << " arguments";
-      throw invalid_argument(ss.str());
-    } else {
-      return 0;
-    }
+    stringstream ss;
+    ss << "Wrong number of arguments to rolling arrfunc with prototype ";
+    ss << af_tp << ", got " << nsrc << " arguments";
+    throw invalid_argument(ss.str());
   }
   rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
   const arrfunc_type_data *child_af = data->window_op.get();
@@ -130,11 +128,8 @@ static int resolve_rolling_dst_type(
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    if (!child_af->resolve_dst_type(child_af, af_tp, NULL, 1, &child_src_tp,
-                                    throw_on_error, child_dst_tp, kwds,
-                                    tp_vars)) {
-      return 0;
-    }
+    child_af->resolve_dst_type(child_af, af_tp, NULL, 1, &child_src_tp,
+                               child_dst_tp, kwds, tp_vars);
   } else {
     child_dst_tp = data->window_op.get_type()->get_return_type();
   }
@@ -145,19 +140,16 @@ static int resolve_rolling_dst_type(
     out_dst_tp =
         ndt::make_fixed_dim(src_tp[0].get_dim_size(NULL, NULL), child_dst_tp);
   }
-
-  return 1;
 }
 
 // TODO This should handle both strided and var cases
-static intptr_t
-instantiate_strided(const arrfunc_type_data *af_self,
-                    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
-                    intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                    const char *const *src_arrmeta, kernel_request_t kernreq,
-                    const eval::eval_context *ectx, const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
+static intptr_t instantiate_strided(
+    const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {
   typedef strided_rolling_ck self_type;
   rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
