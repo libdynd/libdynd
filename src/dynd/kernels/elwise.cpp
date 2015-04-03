@@ -191,8 +191,8 @@ void nd::functional::elwise_virtual_ck::resolve_option_values(
                                       tp_vars);
 }
 
-intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
-    const arrfunc_type_data *child, const arrfunc_type *child_tp,
+intptr_t nd::functional::elwise_virtual_ck::instantiate(
+    const arrfunc_type_data *self, const arrfunc_type *self_tp,
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -200,6 +200,11 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
     const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
+  const arrfunc_type_data *child =
+      self->get_data_as<dynd::nd::arrfunc>()->get();
+  const arrfunc_type *child_tp =
+      self->get_data_as<dynd::nd::arrfunc>()->get_type();
+
   intptr_t src_count = child_tp->get_npos();
 
   // Check if no lifting is required
@@ -257,7 +262,7 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
         new_src_tp[i] =
             src_tp[i].extended<base_memory_type>()->get_element_type();
       }
-      elwise_virtual_ck::instantiate_with_child(
+      elwise_virtual_ck::instantiate(
           child, child_tp, NULL, cuda_ckb, 0, new_dst_tp, dst_arrmeta, nsrc,
           &new_src_tp[0], src_arrmeta, kernreq | kernel_request_cuda_device,
           ectx, kwds, tp_vars);
@@ -322,14 +327,13 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {
-      return elwise_virtual_ck::instantiate_with_child<fixed_dim_type_id,
-                                                       fixed_dim_type_id>(
-          child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+      return elwise_virtual_ck::instantiate<fixed_dim_type_id,
+                                            fixed_dim_type_id>(
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
           src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
     } else if (src_all_strided_or_var) {
-      return elwise_virtual_ck::instantiate_with_child<fixed_dim_type_id,
-                                                       var_dim_type_id>(
-          child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+      return elwise_virtual_ck::instantiate<fixed_dim_type_id, var_dim_type_id>(
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
           src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
     } else {
       // TODO
@@ -337,9 +341,8 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
     break;
   case var_dim_type_id:
     if (src_all_strided_or_var) {
-      return elwise_virtual_ck::instantiate_with_child<var_dim_type_id,
-                                                       fixed_dim_type_id>(
-          child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+      return elwise_virtual_ck::instantiate<var_dim_type_id, fixed_dim_type_id>(
+          self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
           src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
     } else {
       // TODO
@@ -365,8 +368,8 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
 }
 
 template <type_id_t dst_type_id, type_id_t src_type_id>
-intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
-    const arrfunc_type_data *child, const arrfunc_type *child_tp,
+intptr_t nd::functional::elwise_virtual_ck::instantiate(
+    const arrfunc_type_data *self, const arrfunc_type *self_tp,
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -374,55 +377,39 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
     const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
-  switch (child_tp->get_npos()) {
-  case 0:
-    return elwise_ck<dst_type_id, src_type_id, 0>::instantiate(
-        child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-        src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-  case 1:
-    return elwise_ck<dst_type_id, src_type_id, 1>::instantiate(
-        child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-        src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-  case 2:
-    return elwise_ck<dst_type_id, src_type_id, 2>::instantiate(
-        child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-        src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-  case 3:
-    return elwise_ck<dst_type_id, src_type_id, 3>::instantiate(
-        child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-        src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-  case 4:
-    return elwise_ck<dst_type_id, src_type_id, 4>::instantiate(
-        child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-        src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-  case 5:
-    return elwise_ck<dst_type_id, src_type_id, 5>::instantiate(
-        child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-        src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-  case 6:
-    return elwise_ck<dst_type_id, src_type_id, 6>::instantiate(
-        child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-        src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-  default:
-    throw runtime_error("elwise with src_count > 6 not implemented yet");
-  }
-}
-
-intptr_t nd::functional::elwise_virtual_ck::instantiate(
-    const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-    const dynd::nd::array &kwds,
-    const std::map<dynd::nd::string, ndt::type> &tp_vars)
-{
-  const arrfunc_type_data *child =
-      self->get_data_as<dynd::nd::arrfunc>()->get();
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-  return elwise_virtual_ck::instantiate_with_child(
-      child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-      src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  switch (child_tp->get_npos()) {
+  case 0:
+    return elwise_ck<dst_type_id, src_type_id, 0>::instantiate(
+        self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  case 1:
+    return elwise_ck<dst_type_id, src_type_id, 1>::instantiate(
+        self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  case 2:
+    return elwise_ck<dst_type_id, src_type_id, 2>::instantiate(
+        self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  case 3:
+    return elwise_ck<dst_type_id, src_type_id, 3>::instantiate(
+        self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  case 4:
+    return elwise_ck<dst_type_id, src_type_id, 4>::instantiate(
+        self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  case 5:
+    return elwise_ck<dst_type_id, src_type_id, 5>::instantiate(
+        self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  case 6:
+    return elwise_ck<dst_type_id, src_type_id, 6>::instantiate(
+        self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  default:
+    throw runtime_error("elwise with src_count > 6 not implemented yet");
+  }
 }
