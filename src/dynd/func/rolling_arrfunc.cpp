@@ -110,8 +110,8 @@ static void free_rolling_arrfunc_data(arrfunc_type_data *self_af)
 static void
 resolve_rolling_dst_type(const arrfunc_type_data *af_self,
                          const arrfunc_type *af_tp, char *DYND_UNUSED(data),
-                         intptr_t nsrc, const ndt::type *src_tp,
-                         ndt::type &out_dst_tp, const nd::array &kwds,
+                         ndt::type &dst_tp, intptr_t nsrc,
+                         const ndt::type *src_tp, const nd::array &kwds,
                          const std::map<nd::string, ndt::type> &tp_vars)
 
 {
@@ -128,16 +128,16 @@ resolve_rolling_dst_type(const arrfunc_type_data *af_self,
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    child_af->resolve_dst_type(child_af, af_tp, NULL, 1, &child_src_tp,
-                               child_dst_tp, kwds, tp_vars);
+    child_af->resolve_dst_type(child_af, af_tp, NULL, child_dst_tp, 1,
+                               &child_src_tp, kwds, tp_vars);
   } else {
     child_dst_tp = data->window_op.get_type()->get_return_type();
   }
 
   if (src_tp[0].get_type_id() == var_dim_type_id) {
-    out_dst_tp = ndt::make_var_dim(child_dst_tp);
+    dst_tp = ndt::make_var_dim(child_dst_tp);
   } else {
-    out_dst_tp =
+    dst_tp =
         ndt::make_fixed_dim(src_tp[0].get_dim_size(NULL, NULL), child_dst_tp);
   }
 }

@@ -255,7 +255,7 @@ namespace nd {
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, ndt::type &dst_tp,
+        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
         const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
@@ -282,7 +282,7 @@ namespace nd {
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, ndt::type &dst_tp,
+        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
         const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
@@ -302,13 +302,12 @@ namespace nd {
 
     static void
     resolve_dst_type(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                     char *DYND_UNUSED(data), intptr_t nsrc,
-                     const ndt::type *src_tp, ndt::type &dst_tp,
-                     const nd::array &kwds,
+                     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+                     const ndt::type *src_tp, const nd::array &kwds,
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
-          self, self_tp, NULL, nsrc, src_tp, dst_tp, kwds, tp_vars);
+          self, self_tp, NULL, dst_tp, nsrc, src_tp, kwds, tp_vars);
     }
   };
 

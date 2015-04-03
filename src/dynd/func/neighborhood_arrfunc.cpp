@@ -13,7 +13,8 @@ using namespace std;
 using namespace dynd;
 
 template <int N>
-struct neighborhood_ck : nd::expr_ck<neighborhood_ck<N>, kernel_request_host, N> {
+struct neighborhood_ck
+    : nd::expr_ck<neighborhood_ck<N>, kernel_request_host, N> {
   typedef neighborhood_ck<N> self_type;
 
   intptr_t dst_stride;
@@ -77,11 +78,11 @@ struct neighborhood {
 template <int N>
 static intptr_t instantiate_neighborhood(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds, const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   neighborhood *nh = *af_self->get_data_as<neighborhood *>();
   nd::arrfunc nh_op = nh->op;
@@ -169,10 +170,10 @@ static intptr_t instantiate_neighborhood(
   }
 
   ckb_offset = nh_op.get()->instantiate(
-      nh_op.get(), nh_op.get_type(), NULL, ckb, ckb_offset, nh_dst_tp, nh_dst_arrmeta,
-      nsrc, nh_src_tp, nh_src_arrmeta, kernel_request_single, ectx,
-      struct_concat(
-          kwds, pack("start_stop", reinterpret_cast<intptr_t>(nh->start_stop))),
+      nh_op.get(), nh_op.get_type(), NULL, ckb, ckb_offset, nh_dst_tp,
+      nh_dst_arrmeta, nsrc, nh_src_tp, nh_src_arrmeta, kernel_request_single,
+      ectx, struct_concat(kwds, pack("start_stop", reinterpret_cast<intptr_t>(
+                                                       nh->start_stop))),
       tp_vars);
 
   return ckb_offset;
@@ -180,16 +181,17 @@ static intptr_t instantiate_neighborhood(
 
 static void resolve_neighborhood_option_values(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *DYND_UNUSED(src_tp), nd::array &DYND_UNUSED(kwds),
+    const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+    nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
 }
 
 static void resolve_neighborhood_dst_type(
     const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *self_tp,
-    char *DYND_UNUSED(data), intptr_t, const ndt::type *src_tp,
-    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   // TODO: Should be able to express the match/subsitution without special code
@@ -216,13 +218,13 @@ static void resolve_neighborhood_dst_type(
   */
   //  out_dst_tp = ndt::substitute(af_tp->get_return_type(), typevars, false);
 
-  out_dst_tp = self_tp->get_return_type();
+  dst_tp = self_tp->get_return_type();
 
   // swap in the input dimension values for the Fixed**N
   intptr_t ndim = src_tp[0].get_ndim();
   dimvector shape(ndim);
   src_tp[0].extended()->get_shape(ndim, 0, shape.get(), NULL, NULL);
-  out_dst_tp = ndt::substitute_shape(out_dst_tp, ndim, shape.get());
+  dst_tp = ndt::substitute_shape(dst_tp, ndim, shape.get());
 }
 
 static void free_neighborhood(arrfunc_type_data *self_af)

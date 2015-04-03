@@ -11,11 +11,12 @@ using namespace dynd;
 
 static intptr_t
 instantiate_copy(const arrfunc_type_data *self, const arrfunc_type *af_tp,
-                 char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                 const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                 const ndt::type *src_tp,
+                 char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                 const ndt::type &dst_tp, const char *dst_arrmeta,
+                 intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                 const eval::eval_context *ectx, const nd::array &kwds, const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                 const eval::eval_context *ectx, const nd::array &kwds,
+                 const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (dst_tp.is_builtin()) {
     if (src_tp[0].is_builtin()) {
@@ -45,8 +46,8 @@ instantiate_copy(const arrfunc_type_data *self, const arrfunc_type *af_tp,
 
 static void resolve_dst_copy_type(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), intptr_t nsrc,
-    const ndt::type *src_tp, ndt::type &out_dst_tp,
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
@@ -56,7 +57,7 @@ static void resolve_dst_copy_type(
     throw std::invalid_argument(ss.str());
   }
 
-  out_dst_tp = src_tp[0].get_canonical_type();
+  dst_tp = src_tp[0].get_canonical_type();
 }
 
 static nd::arrfunc make_copy_arrfunc_instance()

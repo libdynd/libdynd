@@ -323,8 +323,8 @@ static intptr_t instantiate_multidispatch_af(
 
 static void resolve_multidispatch_dst_type(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
@@ -340,7 +340,7 @@ static void resolve_multidispatch_dst_type(
         }
       }
       if (isrc == nsrc) {
-        out_dst_tp =
+        dst_tp =
             ndt::substitute(af.get_type()->get_return_type(), typevars, true);
         return;
       }

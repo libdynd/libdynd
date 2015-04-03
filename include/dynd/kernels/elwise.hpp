@@ -28,14 +28,14 @@ namespace nd {
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
-                       const arrfunc_type *self_tp, char *data, intptr_t nsrc,
-                       const ndt::type *src_tp, ndt::type &dst_tp,
-                       const dynd::nd::array &kwds,
+                       const arrfunc_type *self_tp, char *data,
+                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
       static void resolve_dst_type_with_child(
           const arrfunc_type_data *child, const arrfunc_type *child_tp,
-          char *data, intptr_t nsrc, const ndt::type *src_tp, ndt::type &dst_tp,
+          char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
           const dynd::nd::array &kwds,
           const std::map<dynd::nd::string, ndt::type> &tp_vars);
 

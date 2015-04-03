@@ -130,12 +130,12 @@ intptr_t nd::functional::outer_instantiate(
 
 void nd::functional::outer_resolve_dst_type_with_child(
     const arrfunc_type_data *child, const arrfunc_type *child_tp,
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-    ndt::type &dst_tp, const dynd::nd::array &kwds,
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   if (child->resolve_dst_type != NULL) {
-    child->resolve_dst_type(child, child_tp, NULL, nsrc, src_tp, dst_tp, kwds,
+    child->resolve_dst_type(child, child_tp, NULL, dst_tp, nsrc, src_tp, kwds,
                             tp_vars);
   } else {
     dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
@@ -157,8 +157,8 @@ void nd::functional::outer_resolve_dst_type_with_child(
 
 void nd::functional::outer_resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-    ndt::type &dst_tp, const dynd::nd::array &kwds,
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   const arrfunc_type_data *child =
@@ -166,6 +166,6 @@ void nd::functional::outer_resolve_dst_type(
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-  outer_resolve_dst_type_with_child(child, child_tp, NULL, nsrc, src_tp, dst_tp,
+  outer_resolve_dst_type_with_child(child, child_tp, NULL, dst_tp, nsrc, src_tp,
                                     kwds, tp_vars);
 }

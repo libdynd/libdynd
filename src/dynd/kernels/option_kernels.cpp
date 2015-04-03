@@ -455,11 +455,11 @@ struct nafunc {
 
   static void resolve_is_avail_dst_type(
       const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
+      const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
       const ndt::type *DYND_UNUSED(src_tp),
-      ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    out_dst_tp = ndt::make_type<dynd_bool>();
+    dst_tp = ndt::make_type<dynd_bool>();
   }
 
   static intptr_t instantiate_assign_na(

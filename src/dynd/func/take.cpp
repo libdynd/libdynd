@@ -108,8 +108,8 @@ struct indexed_take_ck
 
 static void resolve_take_dst_type(
     const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-    ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (nsrc != 2) {
@@ -120,15 +120,15 @@ static void resolve_take_dst_type(
   }
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
-    out_dst_tp = ndt::make_var_dim(
+    dst_tp = ndt::make_var_dim(
         src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
   } else if (mask_el_tp.get_type_id() ==
              (type_id_t)type_id_of<intptr_t>::value) {
     if (src_tp[1].get_type_id() == var_dim_type_id) {
-      out_dst_tp = ndt::make_var_dim(
+      dst_tp = ndt::make_var_dim(
           src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
     } else {
-      out_dst_tp = ndt::make_fixed_dim(
+      dst_tp = ndt::make_fixed_dim(
           src_tp[1].get_dim_size(NULL, NULL),
           src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
     }
