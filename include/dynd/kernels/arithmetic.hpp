@@ -29,11 +29,12 @@ namespace nd {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
+        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      out_dst_tp = ndt::make_type<R>();
+      dst_tp = ndt::make_type<R>();
     }
 
     static intptr_t instantiate(
@@ -75,11 +76,12 @@ namespace nd {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
+        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      out_dst_tp = ndt::make_type<R>();
+      dst_tp = ndt::make_type<R>();
     }
 
     static intptr_t instantiate(
@@ -129,11 +131,12 @@ namespace nd {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
+        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      out_dst_tp = ndt::make_type<R>();
+      dst_tp = ndt::make_type<R>();
     }
 
     static ndt::type make_type()
@@ -174,11 +177,12 @@ namespace nd {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
+        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      out_dst_tp = ndt::make_type<R>();
+      dst_tp = ndt::make_type<R>();
     }
 
     static intptr_t instantiate(
@@ -224,11 +228,12 @@ namespace nd {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
+        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      out_dst_tp = ndt::make_type<R>();
+      dst_tp = ndt::make_type<R>();
     }
 
     static intptr_t instantiate(
@@ -274,11 +279,12 @@ namespace nd {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
+        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      out_dst_tp = ndt::make_type<R>();
+      dst_tp = ndt::make_type<R>();
     }
 
     static intptr_t instantiate(

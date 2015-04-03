@@ -842,8 +842,8 @@ namespace nd {
 
       // Resolve the destination type
       if (self->resolve_dst_type != NULL) {
-        self->resolve_dst_type(self, self_tp, data.get(), arg_tp.size(),
-                               arg_tp.empty() ? NULL : arg_tp.data(), dst_tp,
+        self->resolve_dst_type(self, self_tp, data.get(), dst_tp, arg_tp.size(),
+                               arg_tp.empty() ? NULL : arg_tp.data(),
                                kwds_as_array, tp_vars);
       } else {
         dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);

@@ -67,17 +67,15 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  *
  * \param self  The arrfunc.
  * \param af_tp  The function prototype of the arrfunc.
+ * \param dst_tp  To be filled with the destination type.
  * \param nsrc  The number of source parameters.
  * \param src_tp  An array of the source types.
- * \param throw_on_error  If true, should throw when there's an error, if
- *                        false, should return 0 when there's an error.
- * \param out_dst_tp  To be filled with the destination type.
  *
  * \returns  True on success, false on error (if throw_on_error was false).
  */
 typedef void (*arrfunc_resolve_dst_type_t)(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
-    intptr_t nsrc, const ndt::type *src_tp, ndt::type &out_dst_tp,
+    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 /**

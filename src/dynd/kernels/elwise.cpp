@@ -66,8 +66,8 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
 
 void nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
     const arrfunc_type_data *child_af, const arrfunc_type *child_af_tp,
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-    ndt::type &out_dst_tp, const dynd::nd::array &kwds,
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   intptr_t ndim = 0;
@@ -84,10 +84,9 @@ void nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
         child_src_tp[i] = src_tp[i];
       }
     }
-    child_af->resolve_dst_type(child_af, child_af_tp, NULL, nsrc,
-                               child_src_tp.empty() ? NULL
-                                                    : child_src_tp.data(),
-                               child_dst_tp, kwds, tp_vars);
+    child_af->resolve_dst_type(
+        child_af, child_af_tp, NULL, child_dst_tp, nsrc,
+        child_src_tp.empty() ? NULL : child_src_tp.data(), kwds, tp_vars);
   } else {
     // TODO: Should pattern match the source types here
     for (intptr_t i = 0; i < nsrc; ++i) {
@@ -98,16 +97,15 @@ void nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
         ndt::substitute(child_af_tp->get_return_type(), tp_vars, false);
   }
   if (nsrc == 0) {
-    out_dst_tp =
-        tp_vars.at("Dims").extended<dim_fragment_type>()->apply_to_dtype(
-            child_dst_tp.without_memory_type());
+    dst_tp = tp_vars.at("Dims").extended<dim_fragment_type>()->apply_to_dtype(
+        child_dst_tp.without_memory_type());
     if (child_dst_tp.get_kind() == memory_kind) {
-      out_dst_tp =
+      dst_tp =
           child_dst_tp.extended<base_memory_type>()->with_replaced_storage_type(
-              out_dst_tp);
+              dst_tp);
     }
 
-     return;
+    return;
   }
 
   // Then build the type for the rest of the dimensions
@@ -171,13 +169,13 @@ void nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
       child_dst_tp = tp;
     }
   }
-  out_dst_tp = child_dst_tp;
+  dst_tp = child_dst_tp;
 }
 
 void nd::functional::elwise_virtual_ck::resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-    ndt::type &dst_tp, const dynd::nd::array &kwds,
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   const arrfunc_type_data *child =
@@ -185,8 +183,8 @@ void nd::functional::elwise_virtual_ck::resolve_dst_type(
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-  elwise_virtual_ck::resolve_dst_type_with_child(child, child_tp, NULL, nsrc,
-                                                 src_tp, dst_tp, kwds, tp_vars);
+  elwise_virtual_ck::resolve_dst_type_with_child(child, child_tp, NULL, dst_tp,
+                                                 nsrc, src_tp, kwds, tp_vars);
 }
 
 void nd::functional::elwise_virtual_ck::resolve_option_values(
