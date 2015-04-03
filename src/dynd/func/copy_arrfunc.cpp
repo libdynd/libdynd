@@ -43,24 +43,20 @@ instantiate_copy(const arrfunc_type_data *self, const arrfunc_type *af_tp,
   }
 }
 
-static int resolve_dst_copy_type(
+static void resolve_dst_copy_type(
     const arrfunc_type_data *DYND_UNUSED(self),
     const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), intptr_t nsrc,
-    const ndt::type *src_tp, int throw_on_error, ndt::type &out_dst_tp,
+    const ndt::type *src_tp, ndt::type &out_dst_tp,
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (nsrc != 1) {
-    if (throw_on_error) {
-      stringstream ss;
-      ss << "arrfunc 'copy' expected 1 argument, got " << nsrc;
-      throw std::invalid_argument(ss.str());
-    } else {
-      return 0;
-    }
+    stringstream ss;
+    ss << "arrfunc 'copy' expected 1 argument, got " << nsrc;
+    throw std::invalid_argument(ss.str());
   }
+
   out_dst_tp = src_tp[0].get_canonical_type();
-  return 1;
 }
 
 static nd::arrfunc make_copy_arrfunc_instance()

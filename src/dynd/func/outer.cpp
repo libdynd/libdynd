@@ -35,7 +35,8 @@ ndt::type nd::functional::outer_make_type(const arrfunc_type *child_tp)
       pt[i] = ndt::make_typevar_constructed(
           param_types[i].extended<typevar_constructed_type>()->get_name(),
           ndt::make_ellipsis_dim(
-              dimsname, param_types[i].extended<typevar_constructed_type>()->get_arg()));
+              dimsname,
+              param_types[i].extended<typevar_constructed_type>()->get_arg()));
     } else {
       pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
     }
@@ -59,9 +60,10 @@ ndt::type nd::functional::outer_make_type(const arrfunc_type *child_tp)
 }
 
 intptr_t nd::functional::outer_instantiate(
-    const arrfunc_type_data *child, const arrfunc_type *child_tp, char *DYND_UNUSED(data), void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    const arrfunc_type_data *child, const arrfunc_type *child_tp,
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
     dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
     const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
@@ -101,8 +103,8 @@ intptr_t nd::functional::outer_instantiate(
             .extended<base_dim_type>()
             ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i], NULL);
       } else {
-      new_tp.extended<base_dim_type>()->arrmeta_copy_construct_onedim(
-          new_arrmeta, src_arrmeta[i], NULL);
+        new_tp.extended<base_dim_type>()->arrmeta_copy_construct_onedim(
+            new_arrmeta, src_arrmeta[i], NULL);
       }
       old_tp =
           old_tp.get_type_at_dimension(const_cast<char **>(src_arrmeta + i), 1);
@@ -119,28 +121,24 @@ intptr_t nd::functional::outer_instantiate(
   }
 
   ckb_offset = elwise_virtual_ck::instantiate(
-      child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, new_src_tp.data(),
-      new_src_arrmeta.data(), kernreq, ectx, kwds, tp_vars);
+      child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+      new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx, kwds, tp_vars);
   delete[] new_src_arrmeta_holder;
 
   return ckb_offset;
 }
 
-int nd::functional::outer_resolve_dst_type_with_child(
+void nd::functional::outer_resolve_dst_type_with_child(
     const arrfunc_type_data *child, const arrfunc_type *child_tp,
-    char *DYND_UNUSED(data), intptr_t nsrc,
-    const ndt::type *src_tp, int throw_on_error, ndt::type &dst_tp,
-    const dynd::nd::array &kwds,
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
+    ndt::type &dst_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   if (child->resolve_dst_type != NULL) {
-    if (!child->resolve_dst_type(child, child_tp, NULL, nsrc, src_tp, throw_on_error,
-                                 dst_tp, kwds, tp_vars)) {
-      return 0;
-    }
+    child->resolve_dst_type(child, child_tp, NULL, nsrc, src_tp, dst_tp, kwds,
+                            tp_vars);
   } else {
-    dst_tp =
-        ndt::substitute(child_tp->get_return_type(), tp_vars, false);
+    dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
   }
 
   ndt::type tp = dst_tp.without_memory_type();
@@ -155,13 +153,11 @@ int nd::functional::outer_resolve_dst_type_with_child(
   } else {
     dst_tp = tp;
   }
-
-  return 1;
 }
 
-int nd::functional::outer_resolve_dst_type(
+void nd::functional::outer_resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
     ndt::type &dst_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
@@ -170,6 +166,6 @@ int nd::functional::outer_resolve_dst_type(
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-  return outer_resolve_dst_type_with_child(
-      child, child_tp, NULL, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
+  outer_resolve_dst_type_with_child(child, child_tp, NULL, nsrc, src_tp, dst_tp,
+                                    kwds, tp_vars);
 }

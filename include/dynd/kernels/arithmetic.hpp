@@ -26,21 +26,20 @@ namespace nd {
       return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
     }
 
-    static int resolve_dst_type(
+    static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       out_dst_tp = ndt::make_type<R>();
-      return 1;
     }
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -73,21 +72,20 @@ namespace nd {
       return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
     }
 
-    static int resolve_dst_type(
+    static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       out_dst_tp = ndt::make_type<R>();
-      return 1;
     }
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -115,8 +113,8 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -128,15 +126,14 @@ namespace nd {
       return ckb_offset;
     }
 
-    static int resolve_dst_type(
+    static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       out_dst_tp = ndt::make_type<R>();
-      return 1;
     }
 
     static ndt::type make_type()
@@ -174,21 +171,20 @@ namespace nd {
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
 
-    static int resolve_dst_type(
+    static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       out_dst_tp = ndt::make_type<R>();
-      return 1;
     }
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -225,21 +221,20 @@ namespace nd {
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
 
-    static int resolve_dst_type(
+    static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       out_dst_tp = ndt::make_type<R>();
-      return 1;
     }
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -276,21 +271,20 @@ namespace nd {
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
 
-    static int resolve_dst_type(
+    static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), int DYND_UNUSED(throw_on_error),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
         ndt::type &out_dst_tp, const dynd::nd::array &DYND_UNUSED(kwds),
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       out_dst_tp = ndt::make_type<R>();
-      return 1;
     }
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,

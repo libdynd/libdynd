@@ -64,10 +64,10 @@ static void *create_cuda_device_trampoline(void *ckb, intptr_t ckb_offset,
 }
 #endif // __CUDACC__
 
-int nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
+void nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
     const arrfunc_type_data *child_af, const arrfunc_type *child_af_tp,
     char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-    int throw_on_error, ndt::type &out_dst_tp, const dynd::nd::array &kwds,
+    ndt::type &out_dst_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   intptr_t ndim = 0;
@@ -84,12 +84,10 @@ int nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
         child_src_tp[i] = src_tp[i];
       }
     }
-    if (!child_af->resolve_dst_type(
-            child_af, child_af_tp, NULL, nsrc,
-            child_src_tp.empty() ? NULL : child_src_tp.data(), throw_on_error,
-            child_dst_tp, kwds, tp_vars)) {
-      return 0;
-    }
+    child_af->resolve_dst_type(child_af, child_af_tp, NULL, nsrc,
+                               child_src_tp.empty() ? NULL
+                                                    : child_src_tp.data(),
+                               child_dst_tp, kwds, tp_vars);
   } else {
     // TODO: Should pattern match the source types here
     for (intptr_t i = 0; i < nsrc; ++i) {
@@ -109,7 +107,7 @@ int nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
               out_dst_tp);
     }
 
-    return 1;
+     return;
   }
 
   // Then build the type for the rest of the dimensions
@@ -134,11 +132,7 @@ int nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
                 shape_i[j] = shape_at_j;
               }
             } else if (shape_i[j] != shape_at_j) {
-              if (throw_on_error) {
-                throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
-              } else {
-                return 0;
-              }
+              throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
             }
             break;
           case cfixed_dim_type_id:
@@ -148,21 +142,13 @@ int nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
                 shape_i[j] = shape_at_j;
               }
             } else if (shape_i[j] != shape_at_j) {
-              if (throw_on_error) {
-                throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
-              } else {
-                return 0;
-              }
+              throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
             }
             break;
           case var_dim_type_id:
             break;
           default:
-            if (throw_on_error) {
-              throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
-            } else {
-              return 0;
-            }
+            throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
           }
           tp = tp.get_dtype(tp.get_ndim() - 1);
         }
@@ -186,14 +172,12 @@ int nd::functional::elwise_virtual_ck::resolve_dst_type_with_child(
     }
   }
   out_dst_tp = child_dst_tp;
-
-  return 1;
 }
 
-int nd::functional::elwise_virtual_ck::resolve_dst_type(
+void nd::functional::elwise_virtual_ck::resolve_dst_type(
     const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
     char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-    int throw_on_error, ndt::type &dst_tp, const dynd::nd::array &kwds,
+    ndt::type &dst_tp, const dynd::nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   const arrfunc_type_data *child =
@@ -201,9 +185,8 @@ int nd::functional::elwise_virtual_ck::resolve_dst_type(
   const arrfunc_type *child_tp =
       self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-  return elwise_virtual_ck::resolve_dst_type_with_child(
-      child, child_tp, NULL, nsrc, src_tp, throw_on_error, dst_tp, kwds,
-      tp_vars);
+  elwise_virtual_ck::resolve_dst_type_with_child(child, child_tp, NULL, nsrc,
+                                                 src_tp, dst_tp, kwds, tp_vars);
 }
 
 void nd::functional::elwise_virtual_ck::resolve_option_values(
@@ -351,11 +334,13 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
   case fixed_dim_type_id:
   case cfixed_dim_type_id:
     if (src_all_strided) {
-      return elwise_virtual_ck::instantiate_with_child<fixed_dim_type_id, fixed_dim_type_id>(
+      return elwise_virtual_ck::instantiate_with_child<fixed_dim_type_id,
+                                                       fixed_dim_type_id>(
           child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
           src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
     } else if (src_all_strided_or_var) {
-      return elwise_virtual_ck::instantiate_with_child<fixed_dim_type_id, var_dim_type_id>(
+      return elwise_virtual_ck::instantiate_with_child<fixed_dim_type_id,
+                                                       var_dim_type_id>(
           child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
           src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
     } else {
@@ -364,7 +349,8 @@ intptr_t nd::functional::elwise_virtual_ck::instantiate_with_child(
     break;
   case var_dim_type_id:
     if (src_all_strided_or_var) {
-      return elwise_virtual_ck::instantiate_with_child<var_dim_type_id, fixed_dim_type_id>(
+      return elwise_virtual_ck::instantiate_with_child<var_dim_type_id,
+                                                       fixed_dim_type_id>(
           child, child_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
           src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
     } else {

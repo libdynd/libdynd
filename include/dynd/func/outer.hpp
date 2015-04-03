@@ -23,16 +23,16 @@ namespace nd {
         const eval::eval_context *ectx, const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
-    int outer_resolve_dst_type(
-        const arrfunc_type_data *self, const arrfunc_type *self_tp,
-        char *data, intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
-        ndt::type &dst_tp, const dynd::nd::array &kwds,
+    void outer_resolve_dst_type(
+        const arrfunc_type_data *self, const arrfunc_type *self_tp, char *data,
+        intptr_t nsrc, const ndt::type *src_tp, ndt::type &dst_tp,
+        const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
-    int outer_resolve_dst_type_with_child(
+    void outer_resolve_dst_type_with_child(
         const arrfunc_type_data *child, const arrfunc_type *child_tp,
-        char *data, intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
-        ndt::type &dst_tp, const dynd::nd::array &kwds,
+        char *data, intptr_t nsrc, const ndt::type *src_tp, ndt::type &dst_tp,
+        const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
   } // namespace dynd::nd::functional

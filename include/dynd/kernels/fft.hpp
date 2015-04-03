@@ -23,112 +23,115 @@ namespace dynd {
 
 namespace nd {
 
-namespace detail {
+  namespace detail {
 
-  template <typename dst_type, typename src_type>
-  struct fftw_plan {
-    typedef ::fftw_plan type;
-  };
+    template <typename dst_type, typename src_type>
+    struct fftw_plan {
+      typedef ::fftw_plan type;
+    };
 
-  template <>
-  struct fftw_plan<fftw_complex, fftw_complex> {
-    typedef ::fftw_plan type;
-  };
+    template <>
+    struct fftw_plan<fftw_complex, fftw_complex> {
+      typedef ::fftw_plan type;
+    };
 
-  template <>
-  struct fftw_plan<double, fftw_complex> {
-    typedef ::fftw_plan type;
-  };
+    template <>
+    struct fftw_plan<double, fftw_complex> {
+      typedef ::fftw_plan type;
+    };
 
-  template <>
-  struct fftw_plan<fftw_complex, double> {
-    typedef ::fftw_plan type;
-  };
+    template <>
+    struct fftw_plan<fftw_complex, double> {
+      typedef ::fftw_plan type;
+    };
 
-  template <>
-  struct fftw_plan<fftwf_complex, fftwf_complex> {
-    typedef ::fftwf_plan type;
-  };
+    template <>
+    struct fftw_plan<fftwf_complex, fftwf_complex> {
+      typedef ::fftwf_plan type;
+    };
 
-  fftwf_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                int howmany_rank,
-                                const fftw_iodim *howmany_dims,
-                                fftwf_complex *in, fftwf_complex *out, int sign,
-                                unsigned flags);
+    fftwf_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
+                                  int howmany_rank,
+                                  const fftw_iodim *howmany_dims,
+                                  fftwf_complex *in, fftwf_complex *out,
+                                  int sign, unsigned flags);
 
-  ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                 int howmany_rank,
-                                 const fftw_iodim *howmany_dims,
-                                 fftw_complex *in, fftw_complex *out, int sign,
-                                 unsigned flags);
+    ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
+                                   int howmany_rank,
+                                   const fftw_iodim *howmany_dims,
+                                   fftw_complex *in, fftw_complex *out,
+                                   int sign, unsigned flags);
 
-  inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                        int howmany_rank,
-                                        const fftw_iodim *howmany_dims,
-                                        double *in, fftw_complex *out, int sign,
-                                        unsigned flags)
-  {
-    if (sign != 0) {
+    inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
+                                          int howmany_rank,
+                                          const fftw_iodim *howmany_dims,
+                                          double *in, fftw_complex *out,
+                                          int sign, unsigned flags)
+    {
+      if (sign != 0) {
+      }
+
+      return ::fftw_plan_guru_dft_r2c(rank, dims, howmany_rank, howmany_dims,
+                                      in, out, flags);
     }
 
-    return ::fftw_plan_guru_dft_r2c(rank, dims, howmany_rank, howmany_dims, in,
-                                    out, flags);
-  }
+    inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
+                                          int howmany_rank,
+                                          const fftw_iodim *howmany_dims,
+                                          fftw_complex *in, double *out,
+                                          int sign, unsigned flags)
+    {
+      if (sign != 0) {
+      }
 
-  inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                        int howmany_rank,
-                                        const fftw_iodim *howmany_dims,
-                                        fftw_complex *in, double *out, int sign,
-                                        unsigned flags)
-  {
-    if (sign != 0) {
+      return ::fftw_plan_guru_dft_c2r(rank, dims, howmany_rank, howmany_dims,
+                                      in, out, flags);
     }
 
-    return ::fftw_plan_guru_dft_c2r(rank, dims, howmany_rank, howmany_dims, in,
-                                    out, flags);
+    inline void fftw_execute_dft(const ::fftwf_plan plan, ::fftwf_complex *in,
+                                 ::fftwf_complex *out)
+    {
+      ::fftwf_execute_dft(plan, in, out);
+    }
+
+    inline void fftw_execute_dft(const ::fftw_plan plan, ::fftw_complex *in,
+                                 ::fftw_complex *out)
+    {
+      ::fftw_execute_dft(plan, in, out);
+    }
+
+    inline void fftw_execute_dft(const ::fftw_plan plan, double *in,
+                                 ::fftw_complex *out)
+    {
+      ::fftw_execute_dft_r2c(plan, in, out);
+    }
+
+    inline void fftw_execute_dft(const ::fftw_plan plan, ::fftw_complex *in,
+                                 double *out)
+    {
+      ::fftw_execute_dft_c2r(plan, in, out);
+    }
+
+    inline void fftw_destroy_plan(::fftwf_plan plan)
+    {
+      ::fftwf_destroy_plan(plan);
+    }
+
+    inline void fftw_destroy_plan(::fftw_plan plan)
+    {
+      ::fftw_destroy_plan(plan);
+    }
   }
 
-  inline void fftw_execute_dft(const ::fftwf_plan plan, ::fftwf_complex *in,
-                               ::fftwf_complex *out)
-  {
-    ::fftwf_execute_dft(plan, in, out);
-  }
+  template <typename T>
+  struct is_double_precision {
+    static const bool value = std::is_same<T, double>::value;
+  };
 
-  inline void fftw_execute_dft(const ::fftw_plan plan, ::fftw_complex *in,
-                               ::fftw_complex *out)
-  {
-    ::fftw_execute_dft(plan, in, out);
-  }
-
-  inline void fftw_execute_dft(const ::fftw_plan plan, double *in,
-                               ::fftw_complex *out)
-  {
-    ::fftw_execute_dft_r2c(plan, in, out);
-  }
-
-  inline void fftw_execute_dft(const ::fftw_plan plan, ::fftw_complex *in,
-                               double *out)
-  {
-    ::fftw_execute_dft_c2r(plan, in, out);
-  }
-
-  inline void fftw_destroy_plan(::fftwf_plan plan)
-  {
-    ::fftwf_destroy_plan(plan);
-  }
-
-  inline void fftw_destroy_plan(::fftw_plan plan) { ::fftw_destroy_plan(plan); }
-}
-
-template <typename T>
-struct is_double_precision {
-  static const bool value = std::is_same<T, double>::value;
-};
-
-template <typename T, int N>
-struct is_double_precision<T[N]> {
-  static const bool value = is_double_precision<T>::value;
-};
+  template <typename T, int N>
+  struct is_double_precision<T[N]> {
+    static const bool value = is_double_precision<T>::value;
+  };
 
   template <typename fftw_dst_type, typename fftw_src_type, int sign = 0>
   struct fftw_ck : expr_ck<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
@@ -136,13 +139,13 @@ struct is_double_precision<T[N]> {
     typedef typename std::conditional<
         std::is_same<fftw_dst_type, fftw_complex>::value, complex<double>,
         typename std::conditional<
-            std::is_same<fftw_dst_type, fftwf_complex>::value,
-            complex<float>, fftw_dst_type>::type>::type dst_type;
+            std::is_same<fftw_dst_type, fftwf_complex>::value, complex<float>,
+            fftw_dst_type>::type>::type dst_type;
     typedef typename std::conditional<
         std::is_same<fftw_src_type, fftw_complex>::value, complex<double>,
         typename std::conditional<
-            std::is_same<fftw_src_type, fftwf_complex>::value,
-            complex<float>, fftw_src_type>::type>::type src_type;
+            std::is_same<fftw_src_type, fftwf_complex>::value, complex<float>,
+            fftw_src_type>::type>::type src_type;
 
     typedef typename detail::fftw_plan<fftw_dst_type, fftw_src_type>::type
         plan_type;
@@ -170,8 +173,9 @@ struct is_double_precision<T[N]> {
 
     static void resolve_option_values(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+        nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       if (kwds.p("flags").is_missing()) {
@@ -181,9 +185,9 @@ struct is_double_precision<T[N]> {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        intptr_t DYND_UNUSED(nsrc),
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+        const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, const char *const *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &kwds,
@@ -247,11 +251,12 @@ struct is_double_precision<T[N]> {
     }
 
     template <bool real_to_complex>
-    static typename std::enable_if<real_to_complex, int>::type resolve_dst_type(
+    static typename std::enable_if<real_to_complex, void>::type
+    resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
-        ndt::type &dst_tp, const nd::array &kwds,
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, ndt::type &dst_tp,
+        const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape;
@@ -270,17 +275,15 @@ struct is_double_precision<T[N]> {
                             1;
       dst_tp = ndt::make_fixed_dim(ndim, src_shape.get(),
                                    ndt::make_type<complex<double>>());
-
-      return 0;
     }
 
     template <bool real_to_complex>
-    static typename std::enable_if<!real_to_complex, int>::type
+    static typename std::enable_if<!real_to_complex, void>::type
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp, int DYND_UNUSED(throw_on_error),
-        ndt::type &dst_tp, const nd::array &kwds,
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, ndt::type &dst_tp,
+        const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds.p("shape");
@@ -295,18 +298,17 @@ struct is_double_precision<T[N]> {
             reinterpret_cast<const intptr_t *>(shape.get_readonly_originptr()),
             ndt::make_type<complex<double>>());
       }
-
-      return 0;
     }
 
-    static int
+    static void
     resolve_dst_type(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                     char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
-                     ndt::type &dst_tp, const nd::array &kwds,
+                     char *DYND_UNUSED(data), intptr_t nsrc,
+                     const ndt::type *src_tp, ndt::type &dst_tp,
+                     const nd::array &kwds,
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
-      return resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
-          self, self_tp, NULL, nsrc, src_tp, throw_on_error, dst_tp, kwds, tp_vars);
+      resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
+          self, self_tp, NULL, nsrc, src_tp, dst_tp, kwds, tp_vars);
     }
   };
 

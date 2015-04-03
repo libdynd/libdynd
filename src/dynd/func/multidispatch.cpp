@@ -277,11 +277,12 @@ get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
 
 static intptr_t instantiate_multidispatch_af(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
@@ -303,9 +304,9 @@ static intptr_t instantiate_multidispatch_af(
         }
       }
       if (j == nsrc) {
-        return af.get()->instantiate(af.get(), af.get_type(), NULL, ckb, ckb_offset,
-                                     dst_tp, dst_arrmeta, nsrc, src_tp,
-                                     src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        return af.get()->instantiate(
+            af.get(), af.get_type(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+            nsrc, src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       } else {
         return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
                                      dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -320,9 +321,9 @@ static intptr_t instantiate_multidispatch_af(
   throw invalid_argument(ss.str());
 }
 
-static int resolve_multidispatch_dst_type(
+static void resolve_multidispatch_dst_type(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp, int throw_on_error,
+    char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
     ndt::type &out_dst_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
@@ -341,26 +342,22 @@ static int resolve_multidispatch_dst_type(
       if (isrc == nsrc) {
         out_dst_tp =
             ndt::substitute(af.get_type()->get_return_type(), typevars, true);
-        return 1;
+        return;
       }
     }
   }
 
-  if (throw_on_error) {
-    stringstream ss;
-    ss << "Failed to find suitable signature in multidispatch resolution with "
-          "input types (";
-    for (intptr_t isrc = 0; isrc < nsrc; ++isrc) {
-      ss << src_tp[isrc];
-      if (isrc != nsrc - 1) {
-        ss << ", ";
-      }
+  stringstream ss;
+  ss << "Failed to find suitable signature in multidispatch resolution with "
+        "input types (";
+  for (intptr_t isrc = 0; isrc < nsrc; ++isrc) {
+    ss << src_tp[isrc];
+    if (isrc != nsrc - 1) {
+      ss << ", ";
     }
-    ss << ")";
-    throw type_error(ss.str());
-  } else {
-    return 0;
   }
+  ss << ")";
+  throw type_error(ss.str());
 }
 
 nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
