@@ -136,9 +136,9 @@ public:
    */
   char static_data[static_data_size];
 
-  size_t data_size;
+  const size_t data_size;
   arrfunc_instantiate_t instantiate;
-  arrfunc_resolve_option_values_t resolve_option_values;
+  const arrfunc_resolve_option_values_t resolve_option_values;
   arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_free_t free;
 

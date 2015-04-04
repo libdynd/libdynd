@@ -3,28 +3,28 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/copy_arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/copy.hpp>
 
 using namespace std;
 using namespace dynd;
 
-static intptr_t
-instantiate_copy(const arrfunc_type_data *self, const arrfunc_type *af_tp,
-                 char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                 const ndt::type &dst_tp, const char *dst_arrmeta,
-                 intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                 const char *const *src_arrmeta, kernel_request_t kernreq,
-                 const eval::eval_context *ectx, const nd::array &kwds,
-                 const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+intptr_t nd::copy_ck::instantiate(
+    const arrfunc_type_data *self, const arrfunc_type *af_tp,
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (dst_tp.is_builtin()) {
     if (src_tp[0].is_builtin()) {
       if (dst_tp.extended() == src_tp[0].extended()) {
         return make_pod_typed_data_assignment_kernel(
-            ckb, ckb_offset,
-            detail::builtin_data_sizes[dst_tp.unchecked_get_builtin_type_id()],
-            detail::builtin_data_alignments
+            ckb, ckb_offset, dynd::detail::builtin_data_sizes
+                                 [dst_tp.unchecked_get_builtin_type_id()],
+            dynd::detail::builtin_data_alignments
                 [dst_tp.unchecked_get_builtin_type_id()],
             kernreq);
       } else {
@@ -44,7 +44,7 @@ instantiate_copy(const arrfunc_type_data *self, const arrfunc_type *af_tp,
   }
 }
 
-static void resolve_dst_copy_type(
+void nd::copy_ck::resolve_dst_type(
     const arrfunc_type_data *DYND_UNUSED(self),
     const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
@@ -52,33 +52,10 @@ static void resolve_dst_copy_type(
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (nsrc != 1) {
-    stringstream ss;
+    std::stringstream ss;
     ss << "arrfunc 'copy' expected 1 argument, got " << nsrc;
     throw std::invalid_argument(ss.str());
   }
 
   dst_tp = src_tp[0].get_canonical_type();
-}
-
-static nd::arrfunc make_copy_arrfunc_instance()
-{
-  nd::array af = nd::empty(ndt::type("(A... * S) -> B... * T"));
-  arrfunc_type_data *out_af =
-      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  out_af->free = NULL;
-  out_af->resolve_dst_type = &resolve_dst_copy_type;
-  out_af->instantiate = &instantiate_copy;
-  af.flag_as_immutable();
-  return af;
-}
-
-const nd::arrfunc &dynd::make_copy_arrfunc()
-{
-  static nd::arrfunc af = make_copy_arrfunc_instance();
-  return af;
-}
-
-const nd::arrfunc &dynd::make_broadcast_copy_arrfunc()
-{
-  throw runtime_error("TODO: distinguish copy and broadcast_copy");
 }

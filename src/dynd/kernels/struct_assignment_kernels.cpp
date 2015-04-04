@@ -13,7 +13,7 @@
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/func/copy_arrfunc.hpp>
+#include <dynd/func/copy.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -81,7 +81,7 @@ size_t dynd::make_struct_assignment_kernel(
   }
 
   return make_tuple_unary_op_ckernel(
-      make_copy_arrfunc().get(), make_copy_arrfunc().get_type(), ckb,
+      nd::copy.get(), nd::copy.get_type(), ckb,
       ckb_offset, field_count, dst_sd->get_data_offsets(dst_arrmeta),
       dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
       src_data_offsets.get(), &src_fields_tp[0], src_fields_arrmeta.get(),

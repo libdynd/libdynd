@@ -299,7 +299,7 @@ set(libdynd_SRC
     src/dynd/func/arrfunc.cpp
     src/dynd/func/arrfunc_registry.cpp
     src/dynd/func/callable.cpp
-    src/dynd/func/copy_arrfunc.cpp
+    src/dynd/func/copy.cpp
     src/dynd/func/chain.cpp
     src/dynd/func/elwise.cpp
     src/dynd/func/elwise_gfunc.cpp
@@ -308,7 +308,7 @@ set(libdynd_SRC
     src/dynd/func/lift_reduction_arrfunc.cpp
     src/dynd/func/math.cpp
     src/dynd/func/multidispatch.cpp
-    src/dynd/func/neighborhood_arrfunc.cpp
+    src/dynd/func/neighborhood.cpp
     src/dynd/func/outer.cpp
     src/dynd/func/permute.cpp
     src/dynd/func/random.cpp
@@ -320,7 +320,7 @@ set(libdynd_SRC
     include/dynd/func/arrfunc_registry.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
-    include/dynd/func/copy_arrfunc.hpp
+    include/dynd/func/copy.hpp
     include/dynd/func/chain.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/elwise_gfunc.hpp
@@ -332,7 +332,7 @@ set(libdynd_SRC
     include/dynd/func/make_callable.hpp
     include/dynd/func/math.hpp
     include/dynd/func/multidispatch.hpp
-    include/dynd/func/neighborhood_arrfunc.hpp
+    include/dynd/func/neighborhood.hpp
     include/dynd/func/outer.hpp
     include/dynd/func/permute.hpp
     include/dynd/func/random.hpp
@@ -352,6 +352,7 @@ set(libdynd_SRC
     src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
+    src/dynd/kernels/copy.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/date_adapter_kernels.cpp
     src/dynd/kernels/datetime_assignment_kernels.cpp
@@ -394,6 +395,7 @@ set(libdynd_SRC
     include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
+    include/dynd/kernels/copy.hpp
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/date_adapter_kernels.hpp
