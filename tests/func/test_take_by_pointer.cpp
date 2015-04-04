@@ -13,7 +13,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/take_by_pointer_arrfunc.hpp>
+#include <dynd/func/take_by_pointer.hpp>
 
 using namespace std;
 using namespace dynd;

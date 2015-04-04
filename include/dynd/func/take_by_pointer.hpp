@@ -11,12 +11,16 @@
 #include <dynd/types/pointer_type.hpp>
 
 namespace dynd {
+namespace nd {
 
-/**
- * Create an arrfunc which applies an indexed take/"fancy indexing" operation,
- * but stores the pointers.
- *
- */
-nd::arrfunc make_take_by_pointer_arrfunc();
+  /**
+   * Create an arrfunc which applies an indexed take/"fancy indexing" operation,
+   * but stores the pointers.
+   *
+   */
+  extern struct take_by_pointer : declfunc<take_by_pointer> {
+    static arrfunc make();
+  } take_by_pointer;
 
+} // namespace dynd::nd
 } // namespace dynd
