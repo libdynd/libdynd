@@ -300,7 +300,7 @@ set(libdynd_SRC
     src/dynd/func/arrfunc_registry.cpp
     src/dynd/func/callable.cpp
     src/dynd/func/copy_arrfunc.cpp
-    src/dynd/func/chain_arrfunc.cpp
+    src/dynd/func/chain.cpp
     src/dynd/func/elwise.cpp
     src/dynd/func/elwise_gfunc.cpp
     src/dynd/func/elwise_reduce_gfunc.cpp
@@ -321,7 +321,7 @@ set(libdynd_SRC
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
     include/dynd/func/copy_arrfunc.hpp
-    include/dynd/func/chain_arrfunc.hpp
+    include/dynd/func/chain.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/elwise_gfunc.hpp
     include/dynd/func/elwise_reduce_gfunc.hpp
@@ -348,6 +348,7 @@ set(libdynd_SRC
     src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
+    src/dynd/kernels/chain.cpp
     src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
@@ -386,6 +387,7 @@ set(libdynd_SRC
     include/dynd/kernels/buffered_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
+    include/dynd/kernels/chain.hpp
     include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp

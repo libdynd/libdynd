@@ -19,7 +19,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/func/call_callable.hpp>
-#include <dynd/func/chain_arrfunc.hpp>
+#include <dynd/func/chain.hpp>
 #include <dynd/func/copy_arrfunc.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/arrfunc_registry.hpp>
@@ -27,9 +27,10 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ChainArrFunc, Simple) {
+TEST(ChainArrFunc, Simple)
+{
   const nd::arrfunc &copy = make_copy_arrfunc();
-  const nd::arrfunc &chained = make_chain_arrfunc(
+  const nd::arrfunc &chained = nd::functional::chain(
       copy, func::get_regfunction("sin"), ndt::make_type<double>());
   nd::array a = nd::empty<double>();
   chained("0.0", kwds("dst", a));
