@@ -312,7 +312,7 @@ set(libdynd_SRC
     src/dynd/func/outer.cpp
     src/dynd/func/permute.cpp
     src/dynd/func/random.cpp
-    src/dynd/func/rolling_arrfunc.cpp
+    src/dynd/func/rolling.cpp
     src/dynd/func/take.cpp
     src/dynd/func/take_by_pointer_arrfunc.cpp
     include/dynd/func/arithmetic.hpp
@@ -336,7 +336,7 @@ set(libdynd_SRC
     include/dynd/func/outer.hpp
     include/dynd/func/permute.hpp
     include/dynd/func/random.hpp
-    include/dynd/func/rolling_arrfunc.hpp
+    include/dynd/func/rolling.hpp
     include/dynd/func/take.hpp
     include/dynd/func/take_by_pointer_arrfunc.hpp
     # Iter
@@ -372,6 +372,7 @@ set(libdynd_SRC
     src/dynd/kernels/outer.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
     src/dynd/kernels/reduction_kernels.cpp
+    src/dynd/kernels/rolling.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
@@ -416,6 +417,7 @@ set(libdynd_SRC
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/pointer_assignment_kernels.hpp
     include/dynd/kernels/reduction_kernels.hpp
+    include/dynd/kernels/rolling.hpp
     include/dynd/kernels/single_assigner_builtin.hpp
     include/dynd/kernels/single_assigner_builtin_int128.hpp
     include/dynd/kernels/single_assigner_builtin_uint128.hpp

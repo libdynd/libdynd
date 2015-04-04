@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/rolling_arrfunc.hpp>
+#include <dynd/func/rolling.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/func/call_callable.hpp>
@@ -22,7 +22,7 @@ using namespace dynd;
 TEST(Rolling, BuiltinSum_Kernel)
 {
   nd::arrfunc sum_1d = kernels::make_builtin_sum1d_arrfunc(float64_type_id);
-  nd::arrfunc rolling_sum = make_rolling_arrfunc(sum_1d, 4);
+  nd::arrfunc rolling_sum = nd::functional::rolling(sum_1d, 4);
 
   double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
   nd::array a = adata;
@@ -43,7 +43,7 @@ TEST(Rolling, BuiltinSum_Kernel)
 TEST(Rolling, BuiltinMean_Kernel) {
     nd::arrfunc mean_1d =
         kernels::make_builtin_mean1d_arrfunc(float64_type_id, 0);
-    nd::arrfunc rolling_sum = make_rolling_arrfunc(mean_1d, 4);
+    nd::arrfunc rolling_sum = nd::functional::rolling(mean_1d, 4);
 
     double adata[] = {1, 3, 7, 2, 9, 4, -5, 100, 2, -20, 3, 9, 18};
     nd::array a = adata;
