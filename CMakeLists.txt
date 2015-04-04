@@ -308,7 +308,7 @@ set(libdynd_SRC
     src/dynd/func/lift_reduction_arrfunc.cpp
     src/dynd/func/math.cpp
     src/dynd/func/multidispatch.cpp
-    src/dynd/func/neighborhood_arrfunc.cpp
+    src/dynd/func/neighborhood.cpp
     src/dynd/func/outer.cpp
     src/dynd/func/permute.cpp
     src/dynd/func/random.cpp
@@ -332,7 +332,7 @@ set(libdynd_SRC
     include/dynd/func/make_callable.hpp
     include/dynd/func/math.hpp
     include/dynd/func/multidispatch.hpp
-    include/dynd/func/neighborhood_arrfunc.hpp
+    include/dynd/func/neighborhood.hpp
     include/dynd/func/outer.hpp
     include/dynd/func/permute.hpp
     include/dynd/func/random.hpp
