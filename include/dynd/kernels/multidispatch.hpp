@@ -44,6 +44,74 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
+    /**
+     * Placeholder hard-coded function for determining allowable
+     * implicit conversions during dispatch. Allowing conversions based
+     * on ``kind`` of the following forms:
+     *
+     * uint -> uint, where the size is nondecreasing
+     * uint -> int, where the size is increasing
+     * int -> int, where the size is nondecreasing
+     * uint -> real, where the size is increasing
+     * int -> real, where the size is increasing
+     * real -> real, where the size is nondecreasing
+     * real -> complex, where the size of the real component is nondecreasing
+     *
+     */
+    inline bool
+    can_implicitly_convert(const ndt::type &src, const ndt::type &dst,
+                           std::map<nd::string, ndt::type> &typevars)
+    {
+      if (src == dst) {
+        return true;
+      }
+      if (src.get_ndim() > 0 || dst.get_ndim() > 0) {
+        ndt::type src_dtype, dst_dtype;
+        if (src.match(dst, typevars)) {
+          return can_implicitly_convert(src.get_dtype(), dst.get_dtype(),
+                                        typevars);
+        } else {
+          return false;
+        }
+      }
+
+      if (src.get_kind() == uint_kind &&
+          (dst.get_kind() == uint_kind || dst.get_kind() == int_kind ||
+           dst.get_kind() == real_kind)) {
+        return src.get_data_size() < dst.get_data_size();
+      }
+      if (src.get_kind() == int_kind &&
+          (dst.get_kind() == int_kind || dst.get_kind() == real_kind)) {
+        return src.get_data_size() < dst.get_data_size();
+      }
+      if (src.get_kind() == real_kind) {
+        if (dst.get_kind() == real_kind) {
+          return src.get_data_size() < dst.get_data_size();
+        } else if (dst.get_kind() == complex_kind) {
+          return src.get_data_size() * 2 <= dst.get_data_size();
+        }
+      }
+      return false;
+    }
+
+    struct old_multidispatch_ck : virtual_ck<old_multidispatch_ck> {
+      static intptr_t
+      instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
+                  char *data, void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const nd::array &kwds,
+                  const std::map<dynd::nd::string, ndt::type> &tp_vars);
+
+      static void
+      resolve_dst_type(const arrfunc_type_data *af_self,
+                       const arrfunc_type *af_tp, char *data, ndt::type &dst_tp,
+                       intptr_t nsrc, const ndt::type *src_tp,
+                       const nd::array &kwds,
+                       const std::map<nd::string, ndt::type> &tp_vars);
+    };
+
     struct multidispatch_ck : virtual_ck<multidispatch_ck> {
       typedef std::unordered_map<std::vector<ndt::type>, arrfunc> map_type;
 

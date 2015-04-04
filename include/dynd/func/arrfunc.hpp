@@ -717,11 +717,9 @@ namespace nd {
             arrfunc_free_t free = NULL)
         : m_value(empty(self_tp))
     {
-/*
       if (resolve_option_values == NULL) {
         throw std::invalid_argument("resolve_option_values cannot be NULL");
       }
-*/
 
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
           std::forward<T>(static_data), data_size, instantiate,
