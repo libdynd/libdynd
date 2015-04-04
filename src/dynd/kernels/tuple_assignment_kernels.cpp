@@ -12,7 +12,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/func/copy_arrfunc.hpp>
+#include <dynd/func/copy.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -137,7 +137,7 @@ size_t dynd::make_tuple_identical_assignment_kernel(
   }
 
   return make_tuple_unary_op_ckernel(
-      make_copy_arrfunc().get(), make_copy_arrfunc().get_type(), ckb,
+      nd::copy.get(), nd::copy.get_type(), ckb,
       ckb_offset, field_count, sd->get_data_offsets(dst_arrmeta),
       sd->get_field_types_raw(), dst_fields_arrmeta.get(),
       sd->get_data_offsets(src_arrmeta), sd->get_field_types_raw(),
@@ -192,7 +192,7 @@ size_t dynd::make_tuple_assignment_kernel(
   }
 
   return make_tuple_unary_op_ckernel(
-      make_copy_arrfunc().get(), make_copy_arrfunc().get_type(), ckb,
+      nd::copy.get(), nd::copy.get_type(), ckb,
       ckb_offset, field_count, dst_sd->get_data_offsets(dst_arrmeta),
       dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
       src_sd->get_data_offsets(src_arrmeta), src_sd->get_field_types_raw(),
@@ -231,7 +231,7 @@ size_t dynd::make_broadcast_to_tuple_assignment_kernel(
   vector<uintptr_t> src_data_offsets(field_count, 0);
 
   return make_tuple_unary_op_ckernel(
-      make_copy_arrfunc().get(), make_copy_arrfunc().get_type(), ckb,
+      nd::copy.get(), nd::copy.get_type(), ckb,
       ckb_offset, field_count, dst_sd->get_data_offsets(dst_arrmeta),
       dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
       &src_data_offsets[0], &src_fields_tp[0], &src_fields_arrmeta[0], kernreq,

@@ -701,11 +701,12 @@ namespace nd {
             arrfunc_resolve_dst_type_t resolve_dst_type)
         : m_value(empty(self_tp))
     {
-/*
-      if (resolve_option_values == NULL) {
-        throw std::invalid_argument("resolve_option_values cannot be NULL");
-      }
-*/
+      /*
+            if (resolve_option_values == NULL) {
+              throw std::invalid_argument("resolve_option_values cannot be
+         NULL");
+            }
+      */
 
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
           data_size, instantiate, resolve_option_values, resolve_dst_type);
@@ -719,11 +720,12 @@ namespace nd {
             arrfunc_free_t free = NULL)
         : m_value(empty(self_tp))
     {
-/*
-      if (resolve_option_values == NULL) {
-        throw std::invalid_argument("resolve_option_values cannot be NULL");
-      }
-*/
+      /*
+            if (resolve_option_values == NULL) {
+              throw std::invalid_argument("resolve_option_values cannot be
+         NULL");
+            }
+      */
 
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
           std::forward<T>(static_data), data_size, instantiate,
@@ -1106,7 +1108,14 @@ namespace nd {
       return self;
     }
 
-    const ndt::type &get_type() const { return get_self().get_array_type(); }
+    const arrfunc_type_data *get() const { return get_self().get(); }
+
+    const arrfunc_type *get_type() const { return get_self().get_type(); }
+
+    const ndt::type &get_array_type() const
+    {
+      return get_self().get_array_type();
+    }
 
     operator const arrfunc &() const { return get_self(); }
 
