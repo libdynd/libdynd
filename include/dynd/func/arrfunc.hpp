@@ -701,10 +701,9 @@ namespace nd {
             arrfunc_resolve_dst_type_t resolve_dst_type)
         : m_value(empty(self_tp))
     {
-      //      if (resolve_option_values == NULL) {
-      //      throw std::invalid_argument("resolve_option_values cannot be
-      //      NULL");
-      //  }
+      if (resolve_option_values == NULL) {
+        throw std::invalid_argument("resolve_option_values cannot be NULL");
+      }
 
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
           data_size, instantiate, resolve_option_values, resolve_dst_type);

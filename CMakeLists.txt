@@ -373,6 +373,7 @@ set(libdynd_SRC
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
+    src/dynd/kernels/take.cpp
     src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_comparer_builtin.hpp
@@ -418,6 +419,7 @@ set(libdynd_SRC
     include/dynd/kernels/string_numeric_assignment_kernels.hpp
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
+    include/dynd/kernels/take.hpp
     include/dynd/kernels/time_assignment_kernels.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
     include/dynd/kernels/tuple_comparison_kernels.hpp
