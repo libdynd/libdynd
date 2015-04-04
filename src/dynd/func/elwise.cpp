@@ -82,6 +82,12 @@ nd::arrfunc nd::functional::elwise(const arrfunc &child)
 {
   const arrfunc_type *child_tp = child.get_type();
 
+/*
+  if (child.get()->resolve_option_values == NULL) {
+    throw std::runtime_error("elwise child has NULL resolve_option_values");
+  }
+*/
+
   return dynd::nd::arrfunc(
       elwise_make_type(child.get_type()), child,
       child.get()->data_size + sizeof(ndt::type),
