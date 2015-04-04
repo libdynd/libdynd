@@ -5,7 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/adapt_type.hpp>
-#include <dynd/func/chain_arrfunc.hpp>
+#include <dynd/func/chain.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -34,16 +34,14 @@ adapt_type::adapt_type(const ndt::type &operand_type,
   // If the operand is an expression, make a buffering arrfunc
   if (m_operand_type.get_kind() == expr_kind && !m_forward.is_null() &&
       m_operand_type != m_forward.get_type()->get_pos_type(0)) {
-    m_forward = make_chain_arrfunc(
+    m_forward = nd::functional::chain(
         make_arrfunc_from_assignment(m_forward.get_type()->get_pos_type(0),
                                      m_operand_type, assign_error_default),
         m_forward, m_forward.get_type()->get_pos_type(0));
   }
 }
 
-adapt_type::~adapt_type()
-{
-}
+adapt_type::~adapt_type() {}
 
 void adapt_type::print_data(std::ostream &DYND_UNUSED(o),
                             const char *DYND_UNUSED(arrmeta),
@@ -60,9 +58,9 @@ void adapt_type::print_type(std::ostream &o) const
   o << "]";
 }
 
-bool adapt_type::is_lossless_assignment(const ndt::type &DYND_UNUSED(dst_tp),
-                                        const ndt::type &DYND_UNUSED(src_tp))
-    const
+bool
+adapt_type::is_lossless_assignment(const ndt::type &DYND_UNUSED(dst_tp),
+                                   const ndt::type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
@@ -106,9 +104,10 @@ size_t adapt_type::make_operand_to_value_assignment_kernel(
 {
   const arrfunc_type_data *af = m_forward.get();
   if (af != NULL) {
-    return af->instantiate(
-        af, m_forward.get_type(), NULL, ckb, ckb_offset, m_value_type, dst_arrmeta, -1,
-        &m_operand_type, &src_arrmeta, kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
+    return af->instantiate(af, m_forward.get_type(), NULL, ckb, ckb_offset,
+                           m_value_type, dst_arrmeta, -1, &m_operand_type,
+                           &src_arrmeta, kernreq, ectx, nd::array(),
+                           std::map<nd::string, ndt::type>());
   } else {
     stringstream ss;
     ss << "Cannot apply ";
@@ -125,9 +124,10 @@ size_t adapt_type::make_value_to_operand_assignment_kernel(
 {
   const arrfunc_type_data *af = m_reverse.get();
   if (af != NULL) {
-    return af->instantiate(
-        af, m_reverse.get_type(), NULL, ckb, ckb_offset, m_operand_type, src_arrmeta, -1,
-        &m_value_type, &dst_arrmeta, kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
+    return af->instantiate(af, m_reverse.get_type(), NULL, ckb, ckb_offset,
+                           m_operand_type, src_arrmeta, -1, &m_value_type,
+                           &dst_arrmeta, kernreq, ectx, nd::array(),
+                           std::map<nd::string, ndt::type>());
   } else {
     stringstream ss;
     ss << "Cannot apply ";
