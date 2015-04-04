@@ -487,7 +487,7 @@ nd::functional::multidispatch(const ndt::type &self_tp,
   }
 
   return as_arrfunc<multidispatch_ck>(self_tp,
-                                      multidispatch_ck::data_type(map, vars));
+                                      multidispatch_ck::data_type(map, vars), 0);
 }
 
 nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
@@ -518,7 +518,7 @@ namespace nd {
         data[src_tp0.get_type_id()] = child;
       }
 
-      return as_arrfunc<multidispatch_by_type_id_ck<1>>(pattern_tp, move(data));
+      return as_arrfunc<multidispatch_by_type_id_ck<1>>(pattern_tp, move(data), 0);
     }
 
     template <int N>
@@ -541,7 +541,7 @@ namespace nd {
         data[src_tp0.get_type_id()][src_tp1.get_type_id()] = child;
       }
 
-      return as_arrfunc<multidispatch_by_type_id_ck<2>>(pattern_tp, move(data));
+      return as_arrfunc<multidispatch_by_type_id_ck<2>>(pattern_tp, move(data), 0);
     }
 
   } // namespace dynd::nd::functional

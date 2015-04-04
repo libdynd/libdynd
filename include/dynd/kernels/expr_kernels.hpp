@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/ckernel_builder.hpp>
+#include <dynd/types/arrfunc_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -72,6 +73,15 @@ namespace nd {
           src_copy[j] += src_stride[j];                                        \
         }                                                                      \
       }                                                                        \
+    }                                                                          \
+                                                                               \
+    static void resolve_option_values(                                         \
+        const arrfunc_type_data *DYND_UNUSED(self),                            \
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),     \
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),      \
+        nd::array &DYND_UNUSED(kwds),                                          \
+        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+    {                                                                          \
     }                                                                          \
   };
 

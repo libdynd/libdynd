@@ -701,6 +701,11 @@ namespace nd {
             arrfunc_resolve_dst_type_t resolve_dst_type)
         : m_value(empty(self_tp))
     {
+      //      if (resolve_option_values == NULL) {
+      //      throw std::invalid_argument("resolve_option_values cannot be
+      //      NULL");
+      //  }
+
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
           data_size, instantiate, resolve_option_values, resolve_dst_type);
     }
@@ -951,9 +956,9 @@ namespace nd {
   } // namespace dynd::nd::functional
 
   template <typename CKT>
-  arrfunc as_arrfunc(const ndt::type &self_tp)
+  arrfunc as_arrfunc(const ndt::type &self_tp, size_t data_size)
   {
-    return arrfunc(self_tp, 0, dynd::detail::get_instantiate<CKT>(),
+    return arrfunc(self_tp, data_size, dynd::detail::get_instantiate<CKT>(),
                    dynd::detail::get_resolve_option_values<CKT>(),
                    dynd::detail::get_resolve_dst_type<CKT>());
   }
@@ -961,7 +966,7 @@ namespace nd {
   template <typename CKT>
   arrfunc as_arrfunc()
   {
-    return as_arrfunc<CKT>(CKT::make_type());
+    return as_arrfunc<CKT>(CKT::make_type(), 0);
   }
 
   template <typename CKT0, typename CKT1, typename... CKT>
@@ -973,9 +978,10 @@ namespace nd {
   }
 
   template <typename CKT, typename T>
-  arrfunc as_arrfunc(const ndt::type &self_tp, T &&data)
+  arrfunc as_arrfunc(const ndt::type &self_tp, T &&static_data,
+                     size_t data_size)
   {
-    return arrfunc(self_tp, std::forward<T>(data), 0,
+    return arrfunc(self_tp, std::forward<T>(static_data), data_size,
                    dynd::detail::get_instantiate<CKT>(),
                    dynd::detail::get_resolve_option_values<CKT>(),
                    dynd::detail::get_resolve_dst_type<CKT>());
@@ -984,7 +990,7 @@ namespace nd {
   template <typename CKT, typename T>
   arrfunc as_arrfunc(T &&data)
   {
-    return as_arrfunc<CKT>(CKT::make_type(), std::forward<T>(data));
+    return as_arrfunc<CKT>(CKT::make_type(), std::forward<T>(data), 0);
   }
 
   template <typename CKT0, typename CKT1, typename... CKT, typename T>
