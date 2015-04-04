@@ -68,7 +68,7 @@ void nd::functional::unary_heap_chain_ck::destruct_children()
  * ``buf_tp`` as the intermediate type, without creating a temporary chained
  * arrfunc.
  */
-static intptr_t make_chain_buf_tp_ckernel(
+intptr_t nd::functional::make_chain_buf_tp_ckernel(
     const arrfunc_type_data *first, const arrfunc_type *first_tp,
     const arrfunc_type_data *second, const arrfunc_type *second_tp,
     const ndt::type &buf_tp, void *ckb, intptr_t ckb_offset,
