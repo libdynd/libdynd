@@ -60,13 +60,13 @@ nd::arrfunc nd::functional::permute(const arrfunc &child,
   switch (child_tp->get_npos()) {
   case 2:
     return as_arrfunc<kernels::permute_ck<2>>(self_tp,
-                                              std::make_pair(child, perm));
+                                              std::make_pair(child, perm), 0);
   case 3:
     return as_arrfunc<kernels::permute_ck<3>>(self_tp,
-                                              std::make_pair(child, perm));
+                                              std::make_pair(child, perm), 0);
   case 4:
     return as_arrfunc<kernels::permute_ck<4>>(self_tp,
-                                              std::make_pair(child, perm));
+                                              std::make_pair(child, perm), 0);
   default:
     throw std::runtime_error("not yet implemented");
   }
