@@ -517,17 +517,16 @@ size_t date_type::make_elwise_property_setter_kernel(
 }
 
 namespace {
-struct date_is_avail_ck {
-  static void single(char *dst, char *const *src,
-                     ckernel_prefix *DYND_UNUSED(self))
+struct date_is_avail_ck
+    : nd::expr_ck<date_is_avail_ck, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
   {
     int32_t date = **reinterpret_cast<int32_t *const *>(src);
     *dst = date != DYND_DATE_NA;
   }
 
-  static void strided(char *dst, intptr_t dst_stride, char *const *src,
-                      const intptr_t *src_stride, size_t count,
-                      ckernel_prefix *DYND_UNUSED(self))
+  void strided(char *dst, intptr_t dst_stride, char *const *src,
+               const intptr_t *src_stride, size_t count)
   {
     const char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
@@ -538,75 +537,21 @@ struct date_is_avail_ck {
       src0 += src0_stride;
     }
   }
-
-  static intptr_t instantiate(
-      const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-      kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(kwds),
-      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    if (src_tp[0].get_type_id() != option_type_id ||
-        src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
-            date_type_id) {
-      stringstream ss;
-      ss << "Expected source type ?date, got " << src_tp[0];
-      throw type_error(ss.str());
-    }
-    if (dst_tp.get_type_id() != bool_type_id) {
-      stringstream ss;
-      ss << "Expected destination type bool, got " << dst_tp;
-      throw type_error(ss.str());
-    }
-    ckernel_prefix *ckp =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-    ckp->set_expr_function<date_is_avail_ck>(kernreq);
-    return ckb_offset;
-  }
 };
 
-struct date_assign_na_ck {
-  static void single(char *dst, char *const *DYND_UNUSED(src),
-                     ckernel_prefix *DYND_UNUSED(self))
+struct date_assign_na_ck
+    : nd::expr_ck<date_assign_na_ck, kernel_request_host, 1> {
+  void single(char *dst, char *const *DYND_UNUSED(src))
   {
     *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
   }
 
-  static void strided(char *dst, intptr_t dst_stride,
-                      char *const *DYND_UNUSED(src),
-                      const intptr_t *DYND_UNUSED(src_stride), size_t count,
-                      ckernel_prefix *DYND_UNUSED(self))
+  void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+               const intptr_t *DYND_UNUSED(src_stride), size_t count)
   {
     for (size_t i = 0; i != count; ++i, dst += dst_stride) {
       *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
     }
-  }
-
-  static intptr_t instantiate(
-      const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-      intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(kwds),
-      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    if (dst_tp.get_type_id() != option_type_id ||
-        dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
-            date_type_id) {
-      stringstream ss;
-      ss << "Expected destination type ?date, got " << dst_tp;
-      throw type_error(ss.str());
-    }
-    ckernel_prefix *ckp =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-    ckp->set_expr_function<date_assign_na_ck>(kernreq);
-    return ckb_offset;
   }
 };
 } // anonymous namespace
@@ -619,9 +564,10 @@ nd::array date_type::get_option_nafunc() const
       reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
   arrfunc_type_data *assign_na = is_avail + 1;
 
-  is_avail->instantiate = &date_is_avail_ck::instantiate;
-  assign_na->instantiate = &date_assign_na_ck::instantiate;
-  naf.flag_as_immutable();
+  new (is_avail)
+      arrfunc_type_data(0, &date_is_avail_ck::instantiate, NULL, NULL);
+  new (assign_na)
+      arrfunc_type_data(0, &date_assign_na_ck::instantiate, NULL, NULL);
   return naf;
 }
 

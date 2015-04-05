@@ -270,8 +270,8 @@ void datetime_type::get_dynamic_type_properties(
     size_t *out_count) const
 {
   *out_properties = NULL; // datetime_type_properties;
-  *out_count = 0; // sizeof(datetime_type_properties) /
-                  // sizeof(datetime_type_properties[0]);
+  *out_count = 0;         // sizeof(datetime_type_properties) /
+                          // sizeof(datetime_type_properties[0]);
 }
 
 ///////// functions on the type
@@ -283,7 +283,7 @@ static nd::array fn_type_now(const ndt::type &DYND_UNUSED(dt))
   // fill_current_local_datetime(&fields);
   // nd::array result = nd::empty(dt);
   //*reinterpret_cast<int64_t *>(result.get_readwrite_originptr()) =
-  //dt.to_ticks();
+  // dt.to_ticks();
   // Make the result immutable (we own the only reference to the data at this
   // point)
   // result.flag_as_immutable();
@@ -810,17 +810,16 @@ size_t datetime_type::make_elwise_property_setter_kernel(
 }
 
 namespace {
-struct datetime_is_avail_ck {
-  static void single(char *dst, char *const *src,
-                     ckernel_prefix *DYND_UNUSED(self))
+struct datetime_is_avail_ck
+    : nd::expr_ck<datetime_is_avail_ck, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
   {
     int64_t v = **reinterpret_cast<int64_t *const *>(src);
     *dst = v != DYND_DATETIME_NA;
   }
 
-  static void strided(char *dst, intptr_t dst_stride, char *const *src,
-                      const intptr_t *src_stride, size_t count,
-                      ckernel_prefix *DYND_UNUSED(self))
+  void strided(char *dst, intptr_t dst_stride, char *const *src,
+               const intptr_t *src_stride, size_t count)
   {
     const char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
@@ -831,75 +830,21 @@ struct datetime_is_avail_ck {
       src0 += src0_stride;
     }
   }
-
-  static intptr_t instantiate(
-      const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-      intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-      kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(kwds),
-      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    if (src_tp[0].get_type_id() != option_type_id ||
-        src_tp[0].extended<option_type>()->get_value_type().get_type_id() !=
-            datetime_type_id) {
-      stringstream ss;
-      ss << "Expected source type ?datetime, got " << src_tp[0];
-      throw type_error(ss.str());
-    }
-    if (dst_tp.get_type_id() != bool_type_id) {
-      stringstream ss;
-      ss << "Expected destination type bool, got " << dst_tp;
-      throw type_error(ss.str());
-    }
-    ckernel_prefix *ckp =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-    ckp->set_expr_function<datetime_is_avail_ck>(kernreq);
-    return ckb_offset;
-  }
 };
 
-struct datetime_assign_na_ck {
-  static void single(char *dst, char *const *DYND_UNUSED(src),
-                     ckernel_prefix *DYND_UNUSED(self))
+struct datetime_assign_na_ck
+    : nd::expr_ck<datetime_assign_na_ck, kernel_request_host, 1> {
+  void single(char *dst, char *const *DYND_UNUSED(src))
   {
     *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
   }
 
-  static void strided(char *dst, intptr_t dst_stride,
-                      char *const *DYND_UNUSED(src),
-                      const intptr_t *DYND_UNUSED(src_stride), size_t count,
-                      ckernel_prefix *DYND_UNUSED(self))
+  void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+               const intptr_t *DYND_UNUSED(src_stride), size_t count)
   {
     for (size_t i = 0; i != count; ++i, dst += dst_stride) {
       *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
     }
-  }
-
-  static intptr_t instantiate(
-      const arrfunc_type_data *DYND_UNUSED(self),
-      const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-      const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-      intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-      const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(kwds),
-      const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    if (dst_tp.get_type_id() != option_type_id ||
-        dst_tp.extended<option_type>()->get_value_type().get_type_id() !=
-            datetime_type_id) {
-      stringstream ss;
-      ss << "Expected destination type ?datetime, got " << dst_tp;
-      throw type_error(ss.str());
-    }
-    ckernel_prefix *ckp =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
-    ckp->set_expr_function<datetime_assign_na_ck>(kernreq);
-    return ckb_offset;
   }
 };
 } // anonymous namespace
@@ -911,10 +856,10 @@ nd::array datetime_type::get_option_nafunc() const
       reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
   arrfunc_type_data *assign_na = is_avail + 1;
 
-  // Use a typevar instead of option[T] to avoid a circular dependency
-  is_avail->instantiate = &datetime_is_avail_ck::instantiate;
-  assign_na->instantiate = &datetime_assign_na_ck::instantiate;
-  naf.flag_as_immutable();
+  new (is_avail)
+      arrfunc_type_data(0, &datetime_is_avail_ck::instantiate, NULL, NULL);
+  new (assign_na)
+      arrfunc_type_data(0, &datetime_assign_na_ck::instantiate, NULL, NULL);
   return naf;
 }
 
