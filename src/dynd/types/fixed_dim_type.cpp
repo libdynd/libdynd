@@ -517,9 +517,10 @@ intptr_t fixed_dim_type::make_assignment_kernel(
 
     if (src_tp.get_ndim() < dst_tp.get_ndim()) {
       src_stride = 0;
-      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1>::create(
-          ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride,
-          &src_stride);
+      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id,
+                                1>::create(ckb, kernreq, ckb_offset,
+                                           get_fixed_dim_size(), dst_md->stride,
+                                           &src_stride);
 
       return ::make_assignment_kernel(
           self, af_tp, ckb, ckb_offset, m_element_tp,
@@ -527,9 +528,10 @@ intptr_t fixed_dim_type::make_assignment_kernel(
           kernel_request_strided, ectx, kwds);
     } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
                                      &src_el_tp, &src_el_arrmeta)) {
-      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1>::create(
-          ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride,
-          &src_stride);
+      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id,
+                                1>::create(ckb, kernreq, ckb_offset,
+                                           get_fixed_dim_size(), dst_md->stride,
+                                           &src_stride);
 
       // Check for a broadcasting error
       if (src_size != 1 && get_fixed_dim_size() != src_size) {
@@ -570,10 +572,10 @@ nd::array fixed_dim_type::get_option_nafunc() const
       reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
   arrfunc_type_data *assign_na = is_avail + 1;
 
-  // Use a typevar instead of option[T] to avoid a circular dependency
-  is_avail->instantiate = &kernels::fixed_dim_is_avail_ck::instantiate;
-  assign_na->instantiate = &kernels::fixed_dim_assign_na_ck::instantiate;
-  naf.flag_as_immutable();
+  new (is_avail) arrfunc_type_data(
+      0, &kernels::fixed_dim_is_avail_ck::instantiate, NULL, NULL);
+  new (assign_na) arrfunc_type_data(
+      0, &kernels::fixed_dim_assign_na_ck::instantiate, NULL, NULL);
   return naf;
 }
 
