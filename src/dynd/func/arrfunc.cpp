@@ -124,10 +124,15 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
     throw type_error(ss.str());
   }
   ndt::type prop_tp = ndt::make_property(tp, propname);
-  return nd::arrfunc(
-      ndt::make_arrfunc(ndt::make_tuple(tp), prop_tp.value_type()),
-      prop_tp.release(), 0, &instantiate_property_ckernel, NULL, NULL,
-      &delete_property_arrfunc_data);
+  nd::array af =
+      nd::empty(ndt::make_arrfunc(ndt::make_tuple(tp), prop_tp.value_type()));
+  arrfunc_type_data *out_af =
+      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
+  out_af->free = &delete_property_arrfunc_data;
+  *out_af->get_data_as<const base_type *>() = prop_tp.release();
+  out_af->instantiate = &instantiate_property_ckernel;
+  af.flag_as_immutable();
+  return af;
 }
 
 void nd::detail::validate_kwd_types(const arrfunc_type *af_tp,
