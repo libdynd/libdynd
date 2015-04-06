@@ -12,20 +12,19 @@
 using namespace std;
 using namespace dynd;
 
-
 namespace {
 
 struct lifted_reduction_arrfunc_data {
-    // Pointer to the child arrfunc
-    nd::arrfunc child_elwise_reduction;
-    nd::arrfunc child_dst_initialization;
-    nd::array reduction_identity;
-    // The types of the child ckernel and this one
-    const ndt::type *child_data_types;
-    ndt::type data_types[2];
-    intptr_t reduction_ndim;
-    bool associative, commutative, right_associative;
-    shortvector<bool> reduction_dimflags;
+  // Pointer to the child arrfunc
+  nd::arrfunc child_elwise_reduction;
+  nd::arrfunc child_dst_initialization;
+  nd::array reduction_identity;
+  // The types of the child ckernel and this one
+  const ndt::type *child_data_types;
+  ndt::type data_types[2];
+  intptr_t reduction_ndim;
+  bool associative, commutative, right_associative;
+  shortvector<bool> reduction_dimflags;
 };
 
 static void delete_lifted_reduction_arrfunc_data(arrfunc_type_data *self_af)
@@ -37,12 +36,12 @@ static void delete_lifted_reduction_arrfunc_data(arrfunc_type_data *self_af)
 
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds), const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
+    const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   lifted_reduction_arrfunc_data *data =
       *af_self->get_data_as<lifted_reduction_arrfunc_data *>();
@@ -92,8 +91,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
       if (keepdims) {
         lifted_dst_type = ndt::make_fixed_dim(1, lifted_dst_type);
       }
-    }
-    else {
+    } else {
       ndt::type subtype = lifted_arr_type.get_type_at_dimension(NULL, i);
       switch (subtype.get_type_id()) {
       case fixed_dimsym_type_id:
@@ -122,13 +120,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
     }
   }
 
-  nd::array af = nd::empty(
-      ndt::make_arrfunc(ndt::make_tuple(lifted_arr_type), lifted_dst_type));
-  arrfunc_type_data *out_af =
-      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   lifted_reduction_arrfunc_data *self = new lifted_reduction_arrfunc_data;
-  *out_af->get_data_as<lifted_reduction_arrfunc_data *>() = self;
-  out_af->free = &delete_lifted_reduction_arrfunc_data;
   self->child_elwise_reduction = elwise_reduction_arr;
   self->child_dst_initialization = dst_initialization_arr;
   if (!reduction_identity.is_null()) {
@@ -136,8 +128,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
         reduction_identity.get_type() ==
             elwise_reduction_tp->get_return_type()) {
       self->reduction_identity = reduction_identity;
-    }
-    else {
+    } else {
       self->reduction_identity =
           nd::empty(elwise_reduction_tp->get_return_type());
       self->reduction_identity.vals() = reduction_identity;
@@ -154,7 +145,8 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
   memcpy(self->reduction_dimflags.get(), reduction_dimflags,
          sizeof(bool) * reduction_ndim);
 
-  out_af->instantiate = &instantiate_lifted_reduction_arrfunc_data;
-  af.flag_as_immutable();
-  return af;
+  return nd::arrfunc(
+      ndt::make_arrfunc(ndt::make_tuple(lifted_arr_type), lifted_dst_type),
+      self, 0, &instantiate_lifted_reduction_arrfunc_data, NULL, NULL,
+      &delete_lifted_reduction_arrfunc_data);
 }
