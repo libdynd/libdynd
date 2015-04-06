@@ -139,7 +139,7 @@ public:
   const size_t data_size;
   arrfunc_instantiate_t instantiate;
   const arrfunc_resolve_option_values_t resolve_option_values;
-  arrfunc_resolve_dst_type_t resolve_dst_type;
+  const arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_free_t free;
 
   arrfunc_type_data()

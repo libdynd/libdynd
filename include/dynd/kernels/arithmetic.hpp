@@ -36,21 +36,6 @@ namespace nd {
     {
       dst_tp = ndt::make_type<R>();
     }
-
-    static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      self_type::create(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    }
   };
 
   template <type_id_t I0>
@@ -83,21 +68,6 @@ namespace nd {
     {
       dst_tp = ndt::make_type<R>();
     }
-
-    static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      self_type::create(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -111,21 +81,6 @@ namespace nd {
     {
       *reinterpret_cast<R *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) + *reinterpret_cast<A1 *>(src[1]);
-    }
-
-    static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      self_type::create(ckb, kernreq, ckb_offset);
-      return ckb_offset;
     }
 
     static void resolve_dst_type(
@@ -184,21 +139,6 @@ namespace nd {
     {
       dst_tp = ndt::make_type<R>();
     }
-
-    static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      self_type::create(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -235,21 +175,6 @@ namespace nd {
     {
       dst_tp = ndt::make_type<R>();
     }
-
-    static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      self_type::create(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -285,21 +210,6 @@ namespace nd {
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       dst_tp = ndt::make_type<R>();
-    }
-
-    static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      self_type::create(ckb, kernreq, ckb_offset);
-      return ckb_offset;
     }
   };
 

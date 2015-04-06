@@ -120,3 +120,13 @@ intptr_t nd::functional::unary_heap_chain_ck::instantiate(
       icd->second.get_type(), icd->buf_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
       src_tp, src_arrmeta, kernreq, ectx);
 }
+
+void nd::functional::unary_heap_chain_ck::resolve_dst_type(
+    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *self_tp,
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *DYND_UNUSED(src_tp),
+    const dynd::nd::array &DYND_UNUSED(kwds),
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
+{
+  dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
+}
