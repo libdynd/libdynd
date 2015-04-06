@@ -57,6 +57,13 @@ namespace nd {
                   const char *const *src_arrmeta, kernel_request_t kernreq,
                   const eval::eval_context *ectx, const nd::array &kwds,
                   const std::map<nd::string, ndt::type> &tp_vars);
+
+      static void
+      resolve_dst_type(const arrfunc_type_data *self,
+                       const arrfunc_type *self_tp, char *data,
+                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const dynd::nd::array &kwds,
+                       const std::map<dynd::nd::string, ndt::type> &tp_vars);
     };
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
