@@ -305,10 +305,10 @@ namespace nd {
       }
 
       void validate_types(const arrfunc_type *af_tp,
-        std::vector<ndt::type> &src_tp,
-        std::vector<const char *> &src_arrmeta,
-        std::vector<char *> &src_data,
-        std::map<nd::string, ndt::type> &tp_vars) const
+                          std::vector<ndt::type> &src_tp,
+                          std::vector<const char *> &src_arrmeta,
+                          std::vector<char *> &src_data,
+                          std::map<nd::string, ndt::type> &tp_vars) const
       {
         check_narg(af_tp, m_size);
 
@@ -991,9 +991,9 @@ namespace nd {
 
     template <typename A0, typename A1, typename A2, typename A3, typename... K>
     typename std::enable_if<detail::is_variadic_args<A0, A1, A2, A3>::value,
-      array>::type
-      operator()(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3,
-      const detail::kwds<K...> &kwds) const
+                            array>::type
+    operator()(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3,
+               const detail::kwds<K...> &kwds) const
     {
       return call(detail::args<array, array, array, array, array>(
                       std::forward<A0>(a0), std::forward<A1>(a1),
@@ -1171,6 +1171,31 @@ namespace nd {
     index_proxy<I0>::for_each(insert_children<CKT, I1>(), arrfuncs);
 
     return arrfuncs;
+  }
+
+  template <template <int> class CKT, typename T>
+  arrfunc as_arrfunc(const ndt::type &self_tp, T &&data, size_t data_size)
+  {
+    switch (self_tp.extended<arrfunc_type>()->get_npos()) {
+    case 0:
+      return as_arrfunc<CKT<0>>(self_tp, std::forward<T>(data), data_size);
+    case 1:
+      return as_arrfunc<CKT<1>>(self_tp, std::forward<T>(data), data_size);
+    case 2:
+      return as_arrfunc<CKT<2>>(self_tp, std::forward<T>(data), data_size);
+    case 3:
+      return as_arrfunc<CKT<3>>(self_tp, std::forward<T>(data), data_size);
+    case 4:
+      return as_arrfunc<CKT<4>>(self_tp, std::forward<T>(data), data_size);
+    case 5:
+      return as_arrfunc<CKT<5>>(self_tp, std::forward<T>(data), data_size);
+    case 6:
+      return as_arrfunc<CKT<6>>(self_tp, std::forward<T>(data), data_size);
+    case 7:
+      return as_arrfunc<CKT<7>>(self_tp, std::forward<T>(data), data_size);
+    default:
+      throw std::runtime_error("arrfunc with nsrc > 7 not implemented yet");
+    }
   }
 
   template <typename T>
