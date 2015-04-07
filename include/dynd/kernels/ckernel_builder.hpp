@@ -15,13 +15,6 @@
 
 namespace dynd {
 
-class arrfunc_type;
-class arrfunc_type_data;
-
-namespace nd {
-  class string;
-}
-
 /**
  * Increments a ``ckb_offset`` variable (offset into a ckernel_builder)
  * by the provided increment. The increment needs to be aligned to 8 bytes,
