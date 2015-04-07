@@ -289,16 +289,64 @@ namespace nd {
       }
     };
 
+    template <>
+    class args<intptr_t, const ndt::type *, const char *const *,
+               char *const *> {
+      intptr_t m_size;
+      const ndt::type *m_types;
+      const char *const *m_arrmetas;
+      char *const *m_datas;
+
+    public:
+      args(intptr_t size, const ndt::type *types, const char *const *arrmetas,
+           char *const *datas)
+          : m_size(size), m_types(types), m_arrmetas(arrmetas), m_datas(datas)
+      {
+      }
+
+      void validate_types(const arrfunc_type *af_tp,
+        std::vector<ndt::type> &src_tp,
+        std::vector<const char *> &src_arrmeta,
+        std::vector<char *> &src_data,
+        std::map<nd::string, ndt::type> &tp_vars) const
+      {
+        check_narg(af_tp, m_size);
+
+        for (intptr_t i = 0; i < m_size; ++i) {
+          const ndt::type &tp = m_types[i];
+          const char *arrmeta = m_arrmetas[i];
+
+          check_arg(af_tp, i, tp, arrmeta, tp_vars);
+
+          src_tp[i] = tp;
+          src_arrmeta[i] = arrmeta;
+          src_data[i] = m_datas[i];
+        }
+      }
+    };
+
+    /**
+     * A metafunction to distinguish the general C++ variadic arguments versus
+     * the special args<> for bypassing the C++ interface layer.
+     */
     template <typename... T>
     struct is_variadic_args {
       enum { value = true };
     };
-
     template <typename T0, typename T1>
     struct is_variadic_args<T0, T1> {
       enum {
-        value = !std::is_convertible<T0, intptr_t>::value ||
-                !std::is_convertible<T1, array *>::value
+        value = !(std::is_convertible<T0, intptr_t>::value &&
+                  std::is_convertible<T1, array *>::value)
+      };
+    };
+    template <typename T0, typename T1, typename T2, typename T3>
+    struct is_variadic_args<T0, T1, T2, T3> {
+      enum {
+        value = !(std::is_convertible<T0, intptr_t>::value &&
+                  std::is_convertible<T1, const ndt::type *>::value &&
+                  std::is_convertible<T2, const char *const *>::value &&
+                  std::is_convertible<T3, char *const *>::value)
       };
     };
 
@@ -905,7 +953,7 @@ namespace nd {
      */
     template <typename... T>
     typename std::enable_if<
-        sizeof...(T) != 3 &&
+        sizeof...(T) != 3 && sizeof...(T) != 5 &&
             detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
         array>::type
     operator()(T &&... a) const
@@ -938,6 +986,31 @@ namespace nd {
     {
       return call(detail::args<intptr_t, array *>(std::forward<A0>(a0),
                                                   std::forward<A1>(a1)),
+                  kwds);
+    }
+
+    template <typename A0, typename A1, typename A2, typename A3, typename... K>
+    typename std::enable_if<detail::is_variadic_args<A0, A1, A2, A3>::value,
+      array>::type
+      operator()(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3,
+      const detail::kwds<K...> &kwds) const
+    {
+      return call(detail::args<array, array, array, array, array>(
+                      std::forward<A0>(a0), std::forward<A1>(a1),
+                      std::forward<A2>(a2), std::forward<A3>(a3)),
+                  kwds);
+    }
+
+    template <typename A0, typename A1, typename A2, typename A3, typename... K>
+    typename std::enable_if<!detail::is_variadic_args<A0, A1, A2, A3>::value,
+                            array>::type
+    operator()(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3,
+               const detail::kwds<K...> &kwds) const
+    {
+      return call(detail::args<intptr_t, const ndt::type *, const char *const *,
+                               char *const *>(
+                      std::forward<A0>(a0), std::forward<A1>(a1),
+                      std::forward<A2>(a2), std::forward<A3>(a3)),
                   kwds);
     }
 
