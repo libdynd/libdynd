@@ -231,26 +231,16 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
 {
   if (!rhs.is_null()) {
     if (rhs.get_type().get_type_id() == arrfunc_type_id) {
-      if (rhs.is_immutable()) {
-        const arrfunc_type_data *af =
-            reinterpret_cast<const arrfunc_type_data *>(
-                rhs.get_readonly_originptr());
-        if (af->instantiate != NULL) {
-          // It's valid: immutable, arrfunc type, contains
-          // instantiate function.
-          m_value = rhs;
-        } else {
-          throw invalid_argument("Require a non-empty arrfunc, "
-                                 "provided arrfunc has NULL "
-                                 "instantiate function");
-        }
+      const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
+          rhs.get_readonly_originptr());
+      if (af->instantiate != NULL) {
+        // It's valid: immutable, arrfunc type, contains
+        // instantiate function.
+        m_value = rhs;
       } else {
-        stringstream ss;
-        ss << "Require an immutable arrfunc, provided arrfunc";
-        rhs.get_type().extended()->print_data(ss, rhs.get_arrmeta(),
-                                              rhs.get_readonly_originptr());
-        ss << " is not immutable";
-        throw invalid_argument(ss.str());
+        throw invalid_argument("Require a non-empty arrfunc, "
+                               "provided arrfunc has NULL "
+                               "instantiate function");
       }
     } else {
       stringstream ss;
