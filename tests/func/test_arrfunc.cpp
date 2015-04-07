@@ -141,6 +141,40 @@ TEST(Arrfunc, DynamicCall)
   EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
 }
 
+TEST(Arrfunc, DecomposedDynamicCall)
+{
+  nd::arrfunc af;
+
+  nd::array values[3] = {7, 2.5, 5};
+  ndt::type types[3] = {values[0].get_type(), values[1].get_type(),
+                        values[2].get_type()};
+  const char *const arrmetas[3] = {values[0].get_arrmeta(),
+                                   values[1].get_arrmeta(),
+                                   values[2].get_arrmeta()};
+  char *const datas[3] = {values[0].get_ndo()->m_data_pointer,
+                          values[1].get_ndo()->m_data_pointer,
+                          values[2].get_ndo()->m_data_pointer};
+  const char *names[3] = {"x", "y", "z"};
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; });
+  EXPECT_EQ(26.5, af(3, types, arrmetas, datas).as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
+  EXPECT_EQ(26.5, af(2, types, arrmetas, datas, kwds(1, names + 2, values + 2))
+                      .as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
+  EXPECT_EQ(26.5, af(1, types, arrmetas, datas, kwds(2, names + 1, values + 1))
+                      .as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
+  EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
+}
+
 TEST(ArrFunc, KeywordParsing)
 {
   nd::arrfunc af0 =
