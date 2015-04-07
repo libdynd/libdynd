@@ -21,21 +21,11 @@ namespace nd {
      * Lifts the provided ckernel, broadcasting it as necessary to execute
      * across the additional dimensions in the ``lifted_types`` array.
      *
-     * This version is for 'expr' ckernels.
-     *
      * \param child  The arrfunc being lifted
-     * \param ckb  The ckernel_builder into which to place the ckernel.
-     * \param ckb_offset  Where within the ckernel_builder to place the
-     *ckernel.
-     * \param dst_tp  The destination type to lift to.
-     * \param dst_arrmeta  The destination arrmeta to lift to.
-     * \param src_tp  The source types to lift to.
-     * \param src_arrmeta  The source arrmetas to lift to.
-     * \param kernreq  Either kernel_request_single or kernel_request_strided,
-     *                 as required by the caller.
-     * \param ectx  The evaluation context.
      */
     arrfunc elwise(const arrfunc &child);
+
+    arrfunc elwise(const ndt::type &self_tp, const arrfunc &child);
 
     ndt::type elwise_make_type(const arrfunc_type *child_tp);
 

@@ -79,7 +79,8 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
   return ndt::make_arrfunc(ndt::make_tuple(out_param_types), kwd_tp, ret_tp);
 }
 
-nd::arrfunc nd::functional::elwise(const arrfunc &child)
+nd::arrfunc nd::functional::elwise(const ndt::type &self_tp,
+                                   const arrfunc &child)
 {
   if (child.get()->resolve_dst_type == NULL) {
     throw std::runtime_error("elwise child has NULL resolve_dst_type");
@@ -88,7 +89,11 @@ nd::arrfunc nd::functional::elwise(const arrfunc &child)
     throw std::runtime_error("elwise child has NULL resolve_option_values");
   }
 
-  return as_arrfunc<elwise_virtual_ck>(elwise_make_type(child.get_type()),
-                                       child, child.get()->data_size +
-                                                  sizeof(ndt::type));
+  return as_arrfunc<elwise_virtual_ck>(self_tp, child, child.get()->data_size +
+                                                           sizeof(ndt::type));
+}
+
+nd::arrfunc nd::functional::elwise(const arrfunc &child)
+{
+  return elwise(elwise_make_type(child.get_type()), child);
 }

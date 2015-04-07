@@ -68,14 +68,26 @@ void nd::functional::unary_heap_chain_ck::destruct_children()
  * ``buf_tp`` as the intermediate type, without creating a temporary chained
  * arrfunc.
  */
-intptr_t nd::functional::make_chain_buf_tp_ckernel(
-    const arrfunc_type_data *first, const arrfunc_type *first_tp,
-    const arrfunc_type_data *second, const arrfunc_type *second_tp,
-    const ndt::type &buf_tp, void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+intptr_t nd::functional::unary_heap_chain_ck::instantiate(
+    const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
+    char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(kwds),
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
+  const instantiate_chain_data *icd =
+      af_self->get_data_as<instantiate_chain_data>();
+
+  const arrfunc_type_data *first = icd->first.get();
+  const arrfunc_type *first_tp = icd->first.get_type();
+
+  const arrfunc_type_data *second = icd->second.get();
+  const arrfunc_type *second_tp = icd->second.get_type();
+
+  const ndt::type &buf_tp = icd->buf_tp;
+
   if (first_tp->get_npos() == 1) {
     intptr_t root_ckb_offset = ckb_offset;
     nd::functional::unary_heap_chain_ck *self =
@@ -85,7 +97,7 @@ intptr_t nd::functional::make_chain_buf_tp_ckernel(
     self->m_buf_arrmeta.arrmeta_default_construct(true);
     self->m_buf_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
     ckb_offset = first->instantiate(
-        first, first_tp, NULL, ckb, ckb_offset, buf_tp,
+        first, first_tp, data, ckb, ckb_offset, buf_tp,
         self->m_buf_arrmeta.get(), first_tp->get_npos(), src_tp, src_arrmeta,
         kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
     reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -95,30 +107,13 @@ intptr_t nd::functional::make_chain_buf_tp_ckernel(
     self->m_second_offset = ckb_offset - root_ckb_offset;
     const char *buf_arrmeta = self->m_buf_arrmeta.get();
     ckb_offset = second->instantiate(
-        second, second_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-        first_tp->get_npos(), &buf_tp, &buf_arrmeta, kernreq, ectx, nd::array(),
-        std::map<nd::string, ndt::type>());
+        second, second_tp, data + first->data_size, ckb, ckb_offset,
+        dst_tp, dst_arrmeta, first_tp->get_npos(), &buf_tp, &buf_arrmeta,
+        kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
     return ckb_offset;
   } else {
     throw runtime_error("Multi-parameter arrfunc chaining is not implemented");
   }
-}
-
-intptr_t nd::functional::unary_heap_chain_ck::instantiate(
-    const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-{
-  const instantiate_chain_data *icd =
-      af_self->get_data_as<instantiate_chain_data>();
-  return make_chain_buf_tp_ckernel(
-      icd->first.get(), icd->first.get_type(), icd->second.get(),
-      icd->second.get_type(), icd->buf_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
-      src_tp, src_arrmeta, kernreq, ectx);
 }
 
 void nd::functional::unary_heap_chain_ck::resolve_dst_type(
