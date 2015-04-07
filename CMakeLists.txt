@@ -358,7 +358,6 @@ set(libdynd_SRC
     src/dynd/kernels/datetime_assignment_kernels.cpp
     src/dynd/kernels/datetime_adapter_kernels.cpp
     src/dynd/kernels/date_expr_kernels.cpp
-    src/dynd/kernels/elwise.cpp
     src/dynd/kernels/elwise_expr_kernels.cpp
     src/dynd/kernels/expr_kernel_generator.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp

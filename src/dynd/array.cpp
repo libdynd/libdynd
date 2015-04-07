@@ -2205,6 +2205,9 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
   } else {
     const ndt::type &dtp = tp.get_dtype().value_type();
     if (dtp.get_type_id() == option_type_id) {
+      throw std::runtime_error("nd::assign_na is not yet implemented");
+
+      /*
       const arrfunc_type_data *af =
           dtp.extended<option_type>()->get_assign_na_arrfunc();
       const arrfunc_type *af_tp =
@@ -2219,6 +2222,7 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
       ckernel_prefix *ckp = ckb.get();
       expr_single_t ckp_fn = ckp->get_function<expr_single_t>();
       ckp_fn(data, NULL, ckp);
+      */
     } else {
       stringstream ss;
       ss << "Cannot assign missing value token NA to dtype " << dtp;

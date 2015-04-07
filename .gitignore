@@ -7,6 +7,7 @@ build
 debug
 
 *.swp
+.DS_Store
 
 *.a
 *.so

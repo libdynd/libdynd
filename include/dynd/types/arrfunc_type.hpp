@@ -70,8 +70,6 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * \param dst_tp  To be filled with the destination type.
  * \param nsrc  The number of source parameters.
  * \param src_tp  An array of the source types.
- *
- * \returns  True on success, false on error (if throw_on_error was false).
  */
 typedef void (*arrfunc_resolve_dst_type_t)(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
