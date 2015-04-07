@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/types/arrfunc_type.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 
 #ifdef __CUDACC__
 

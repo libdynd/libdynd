@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 
 namespace dynd {
@@ -17,7 +17,7 @@ namespace kernels {
 
   template <int N>
   struct permute_ck<N, true>
-      : nd::expr_ck<permute_ck<N, true>, kernel_request_cuda_host_device, N> {
+      : nd::base_kernel<permute_ck<N, true>, kernel_request_cuda_host_device, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];
@@ -121,7 +121,7 @@ namespace kernels {
 
   template <int N>
   struct permute_ck<N, false>
-      : nd::expr_ck<permute_ck<N, false>, kernel_request_host, N> {
+      : nd::base_kernel<permute_ck<N, false>, kernel_request_host, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];

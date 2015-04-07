@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <dynd/kernels/expr_kernels.hpp>
-#include <dynd/kernels/virtual.hpp>
+#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
-  struct masked_take_ck : expr_ck<masked_take_ck, kernel_request_host, 2> {
+  struct masked_take_ck : base_kernel<masked_take_ck, kernel_request_host, 2> {
     ndt::type m_dst_tp;
     const char *m_dst_meta;
     intptr_t m_dim_size, m_src0_stride, m_mask_stride;
@@ -34,7 +34,7 @@ namespace nd {
    * CKernel which does an indexed take operation. The child ckernel
    * should be a single unary operation.
    */
-  struct indexed_take_ck : expr_ck<indexed_take_ck, kernel_request_host, 2> {
+  struct indexed_take_ck : base_kernel<indexed_take_ck, kernel_request_host, 2> {
     intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
     intptr_t m_src0_dim_size, m_src0_stride;
 
@@ -52,7 +52,7 @@ namespace nd {
                 const std::map<nd::string, ndt::type> &tp_vars);
   };
 
-  struct take_ck : virtual_ck<take_ck> {
+  struct take_ck : base_virtual_kernel<take_ck> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                 char *data, void *ckb, intptr_t ckb_offset,

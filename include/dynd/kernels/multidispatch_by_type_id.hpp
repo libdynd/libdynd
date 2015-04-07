@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/kernels/virtual.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
@@ -16,7 +16,7 @@ namespace nd {
 
   template <typename CKT>
   struct multidispatch_by_type_id_ck<CKT, 1>
-      : virtual_ck<multidispatch_by_type_id_ck<CKT, 1>> {
+      : base_virtual_kernel<multidispatch_by_type_id_ck<CKT, 1>> {
     static void
     resolve_dst_type(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                      char *DYND_UNUSED(data), intptr_t nsrc,
@@ -47,7 +47,7 @@ namespace nd {
 
   template <typename CKT>
   struct multidispatch_by_type_id_ck<CKT, 2>
-      : virtual_ck<multidispatch_by_type_id_ck<CKT, 2>> {
+      : base_virtual_kernel<multidispatch_by_type_id_ck<CKT, 2>> {
     static void
     resolve_dst_type(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                      char *DYND_UNUSED(data), intptr_t nsrc,

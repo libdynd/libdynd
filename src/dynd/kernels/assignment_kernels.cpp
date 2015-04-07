@@ -15,7 +15,7 @@ namespace dynd {
 namespace kernels {
   template <class T>
   struct aligned_fixed_size_copy_assign_type
-      : nd::expr_ck<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
+      : nd::base_kernel<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
                 1> {
     void single(char *dst, char *const *src)
     {
@@ -40,7 +40,7 @@ namespace kernels {
 
   template <>
   struct aligned_fixed_size_copy_assign<1>
-      : nd::expr_ck<aligned_fixed_size_copy_assign<1>, kernel_request_host, 1> {
+      : nd::base_kernel<aligned_fixed_size_copy_assign<1>, kernel_request_host, 1> {
     void single(char *dst, char *const *src) { *dst = **src; }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -73,7 +73,7 @@ namespace kernels {
 
   template <int N>
   struct unaligned_fixed_size_copy_assign
-      : nd::expr_ck<unaligned_fixed_size_copy_assign<N>, kernel_request_host, 1> {
+      : nd::base_kernel<unaligned_fixed_size_copy_assign<N>, kernel_request_host, 1> {
     static void single(char *dst, char *const *src) { memcpy(dst, *src, N); }
 
     static void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -90,7 +90,7 @@ namespace kernels {
   };
 
   struct unaligned_copy_ck
-      : nd::expr_ck<unaligned_copy_ck, kernel_request_host, 1> {
+      : nd::base_kernel<unaligned_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size) {}

@@ -6,8 +6,8 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
-#include <dynd/kernels/virtual.hpp>
+#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/types/expr_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
@@ -22,7 +22,7 @@ namespace {
 ////////////////////////////////////////////////////////////////
 // Functions for the unary assignment as an arrfunc
 
-struct unary_assignment_ck : nd::virtual_ck<unary_assignment_ck> {
+struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
   static intptr_t
   instantiate(const arrfunc_type_data *self, const arrfunc_type *af_tp,
               char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,

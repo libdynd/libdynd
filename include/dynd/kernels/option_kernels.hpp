@@ -6,8 +6,8 @@
 #pragma once
 
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
-#include <dynd/kernels/virtual.hpp>
+#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -15,7 +15,7 @@ namespace nd {
 
     template <typename T>
     struct is_avail_int_ck
-        : expr_ck<is_avail_int_ck<T>, kernel_request_host, 1> {
+        : base_kernel<is_avail_int_ck<T>, kernel_request_host, 1> {
       void single(char *dst, char *const *src)
       {
         *dst = **reinterpret_cast<T *const *>(src) !=
@@ -37,7 +37,7 @@ namespace nd {
 
     template <typename T>
     struct assign_na_int_ck
-        : expr_ck<assign_na_int_ck<T>, kernel_request_host, 1> {
+        : base_kernel<assign_na_int_ck<T>, kernel_request_host, 1> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *reinterpret_cast<T *>(dst) = std::numeric_limits<T>::min();
@@ -60,7 +60,7 @@ namespace nd {
 
   template <>
   struct is_avail_ck<dynd_bool>
-      : expr_ck<is_avail_ck<dynd_bool>, kernel_request_host, 1> {
+      : base_kernel<is_avail_ck<dynd_bool>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -150,7 +150,7 @@ namespace nd {
 
   template <>
   struct is_avail_ck<float>
-      : expr_ck<is_avail_ck<float>, kernel_request_host, 1> {
+      : base_kernel<is_avail_ck<float>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -170,7 +170,7 @@ namespace nd {
 
   template <>
   struct is_avail_ck<double>
-      : expr_ck<is_avail_ck<double>, kernel_request_host, 1> {
+      : base_kernel<is_avail_ck<double>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -190,7 +190,7 @@ namespace nd {
 
   template <>
   struct is_avail_ck<complex<float>>
-      : expr_ck<is_avail_ck<complex<float>>, kernel_request_host, 1> {
+      : base_kernel<is_avail_ck<complex<float>>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -210,7 +210,7 @@ namespace nd {
 
   template <>
   struct is_avail_ck<complex<double>>
-      : expr_ck<is_avail_ck<complex<double>>, kernel_request_host, 1> {
+      : base_kernel<is_avail_ck<complex<double>>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -230,7 +230,7 @@ namespace nd {
 
   template <>
   struct is_avail_ck<void>
-      : expr_ck<is_avail_ck<void>, kernel_request_host, 1> {
+      : base_kernel<is_avail_ck<void>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -249,7 +249,7 @@ namespace nd {
   };
 
   template <typename T>
-  struct is_avail_ck<T *> : expr_ck<is_avail_ck<T *>, kernel_request_host, 1> {
+  struct is_avail_ck<T *> : base_kernel<is_avail_ck<T *>, kernel_request_host, 1> {
     void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
     {
       throw std::runtime_error("is_avail for pointers is not yet implemented");
@@ -280,7 +280,7 @@ namespace nd {
 
   template <>
   struct assign_na_ck<dynd_bool>
-      : expr_ck<assign_na_ck<dynd_bool>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<dynd_bool>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -309,7 +309,7 @@ namespace nd {
 
   template <>
   struct assign_na_ck<float>
-      : expr_ck<assign_na_ck<float>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<float>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -318,7 +318,7 @@ namespace nd {
 
   template <>
   struct assign_na_ck<double>
-      : expr_ck<assign_na_ck<double>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<double>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -327,7 +327,7 @@ namespace nd {
 
   template <>
   struct assign_na_ck<dynd::complex<float>>
-      : expr_ck<assign_na_ck<dynd::complex<float>>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<dynd::complex<float>>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -336,7 +336,7 @@ namespace nd {
 
   template <>
   struct assign_na_ck<dynd::complex<double>>
-      : expr_ck<assign_na_ck<dynd::complex<double>>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<dynd::complex<double>>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -345,7 +345,7 @@ namespace nd {
 
   template <>
   struct assign_na_ck<void>
-      : expr_ck<assign_na_ck<void>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<void>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -354,7 +354,7 @@ namespace nd {
 
   template <typename T>
   struct assign_na_ck<T *>
-      : expr_ck<assign_na_ck<T *>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<T *>, kernel_request_host, 1> {
     void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
     {
       throw std::runtime_error("assign_na for pointers is not yet implemented");

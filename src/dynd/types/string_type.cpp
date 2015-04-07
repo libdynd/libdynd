@@ -337,7 +337,7 @@ void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
 
 namespace {
 struct string_is_avail_ck
-    : nd::expr_ck<string_is_avail_ck, kernel_request_host, 1> {
+    : nd::base_kernel<string_is_avail_ck, kernel_request_host, 1> {
   void single(char *dst, char *const *src)
   {
     string_type_data *std = *reinterpret_cast<string_type_data *const *>(src);
@@ -359,7 +359,7 @@ struct string_is_avail_ck
 };
 
 struct string_assign_na_ck
-    : nd::expr_ck<string_assign_na_ck, kernel_request_host, 1> {
+    : nd::base_kernel<string_assign_na_ck, kernel_request_host, 1> {
   void single(char *dst, char *const *DYND_UNUSED(src))
   {
     string_type_data *std = reinterpret_cast<string_type_data *>(dst);

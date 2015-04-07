@@ -14,15 +14,15 @@ namespace nd {
   /**
    * Some common shared implementation details of a CRTP
    * (curiously recurring template pattern) base class to help
-   * create ckernels.
+   * create kernels.
    */
-  template <class CKT, kernel_request_t kernreq, int N>
-  struct expr_ck;
+  template <typename T, kernel_request_t kernreq, int N>
+  struct base_kernel;
 
-#define EXPR_CK(KERNREQ, ...)                                                  \
-  template <typename CKT>                                                      \
-  struct expr_ck<CKT, KERNREQ, -1> {                                           \
-    typedef CKT self_type;                                                     \
+#define BASE_KERNEL(KERNREQ, ...)                                              \
+  template <typename T>                                                        \
+  struct base_kernel<T, KERNREQ, -1> {                                         \
+    typedef T self_type;                                                       \
                                                                                \
     ckernel_prefix base;                                                       \
                                                                                \
@@ -218,10 +218,10 @@ namespace nd {
     }                                                                          \
   };                                                                           \
                                                                                \
-  template <typename CKT>                                                      \
-  struct expr_ck<CKT, KERNREQ, 0> : expr_ck<CKT, KERNREQ, -1> {                \
-    typedef CKT self_type;                                                     \
-    typedef expr_ck<CKT, KERNREQ, -1> parent_type;                             \
+  template <typename T>                                                        \
+  struct base_kernel<T, KERNREQ, 0> : base_kernel<T, KERNREQ, -1> {            \
+    typedef T self_type;                                                       \
+    typedef base_kernel<T, KERNREQ, -1> parent_type;                           \
                                                                                \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
                              char *const *DYND_UNUSED(src),                    \
@@ -236,10 +236,10 @@ namespace nd {
     }                                                                          \
   };                                                                           \
                                                                                \
-  template <typename CKT, int N>                                               \
-  struct expr_ck<CKT, KERNREQ, N> : expr_ck<CKT, KERNREQ, -1> {                \
-    typedef CKT self_type;                                                     \
-    typedef expr_ck<CKT, KERNREQ, -1> parent_type;                             \
+  template <typename T, int N>                                                 \
+  struct base_kernel<T, KERNREQ, N> : base_kernel<T, KERNREQ, -1> {            \
+    typedef T self_type;                                                       \
+    typedef base_kernel<T, KERNREQ, -1> parent_type;                           \
                                                                                \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *src, \
                              const intptr_t *src_stride, size_t count)         \
@@ -257,15 +257,15 @@ namespace nd {
     }                                                                          \
   };
 
-  EXPR_CK(kernel_request_host);
+  BASE_KERNEL(kernel_request_host);
 
-  template <typename CKT>
+  template <typename T>
   template <typename... A>
-  typename expr_ck<CKT, kernel_request_host, -1>::self_type *
-  expr_ck<CKT, kernel_request_host, -1>::create(void *ckb,
-                                                kernel_request_t kernreq,
-                                                intptr_t &inout_ckb_offset,
-                                                A &&... args)
+  typename base_kernel<T, kernel_request_host, -1>::self_type *
+  base_kernel<T, kernel_request_host, -1>::create(void *ckb,
+                                                  kernel_request_t kernreq,
+                                                  intptr_t &inout_ckb_offset,
+                                                  A &&... args)
   {
     switch (kernreq & kernel_request_memory) {
     case kernel_request_host:
@@ -277,13 +277,12 @@ namespace nd {
     }
   }
 
-  template <typename CKT>
+  template <typename T>
   template <typename... A>
-  typename expr_ck<CKT, kernel_request_host, -1>::self_type *
-  expr_ck<CKT, kernel_request_host, -1>::create_leaf(void *ckb,
-                                                     kernel_request_t kernreq,
-                                                     intptr_t &inout_ckb_offset,
-                                                     A &&... args)
+  typename base_kernel<T, kernel_request_host, -1>::self_type *
+  base_kernel<T, kernel_request_host, -1>::create_leaf(
+      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
+      A &&... args)
   {
     switch (kernreq & kernel_request_memory) {
     case kernel_request_host:
@@ -297,12 +296,12 @@ namespace nd {
 
 #ifdef __CUDACC__
 
-  EXPR_CK(kernel_request_cuda_device, __device__);
+  BASE_KERNEL(kernel_request_cuda_device, __device__);
 
-  template <typename CKT>
+  template <typename T>
   template <typename... A>
-  typename expr_ck<CKT, kernel_request_cuda_device, -1>::self_type *
-  expr_ck<CKT, kernel_request_cuda_device, -1>::create(
+  typename base_kernel<T, kernel_request_cuda_device, -1>::self_type *
+  base_kernel<T, kernel_request_cuda_device, -1>::create(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
@@ -317,10 +316,10 @@ namespace nd {
     }
   }
 
-  template <typename CKT>
+  template <typename T>
   template <typename... A>
-  typename expr_ck<CKT, kernel_request_cuda_device, -1>::self_type *
-  expr_ck<CKT, kernel_request_cuda_device, -1>::create_leaf(
+  typename base_kernel<T, kernel_request_cuda_device, -1>::self_type *
+  base_kernel<T, kernel_request_cuda_device, -1>::create_leaf(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
@@ -339,12 +338,12 @@ namespace nd {
 
 #ifdef DYND_CUDA
 
-  EXPR_CK(kernel_request_cuda_host_device, DYND_CUDA_HOST_DEVICE);
+  BASE_KERNEL(kernel_request_cuda_host_device, DYND_CUDA_HOST_DEVICE);
 
-  template <typename CKT>
+  template <typename T>
   template <typename... A>
-  typename expr_ck<CKT, kernel_request_cuda_host_device, -1>::self_type *
-  expr_ck<CKT, kernel_request_cuda_host_device, -1>::create(
+  typename base_kernel<T, kernel_request_cuda_host_device, -1>::self_type *
+  base_kernel<T, kernel_request_cuda_host_device, -1>::create(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
@@ -365,10 +364,10 @@ namespace nd {
     }
   }
 
-  template <typename CKT>
+  template <typename T>
   template <typename... A>
-  typename expr_ck<CKT, kernel_request_cuda_host_device, -1>::self_type *
-  expr_ck<CKT, kernel_request_cuda_host_device, -1>::create_leaf(
+  typename base_kernel<T, kernel_request_cuda_host_device, -1>::self_type *
+  base_kernel<T, kernel_request_cuda_host_device, -1>::create_leaf(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
@@ -391,14 +390,14 @@ namespace nd {
 
 #endif
 
-#undef EXPR_CK
+#undef BASE_KERNEL
 
   typedef void *(*create_t)(void *, kernel_request_t, intptr_t &);
 
-  template <typename CKT>
+  template <typename T>
   void *create(void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset)
   {
-    return CKT::create(ckb, kernreq, inout_ckb_offset);
+    return T::create(ckb, kernreq, inout_ckb_offset);
   }
 
 } // namespace dynd::nd

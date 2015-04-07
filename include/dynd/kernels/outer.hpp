@@ -5,14 +5,13 @@
 
 #pragma once
 
-#include <dynd/kernels/virtual.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct outer_ck : virtual_ck<outer_ck> {
+    struct outer_ck : base_virtual_kernel<outer_ck> {
       static intptr_t instantiate(
           const arrfunc_type_data *self, const arrfunc_type *self_tp,
           char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,

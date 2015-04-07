@@ -8,7 +8,7 @@
 #include <curand_kernel.h>
 #endif
 
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/func/arrfunc.hpp>
 
@@ -28,8 +28,8 @@ namespace nd {
 
   template <typename G, typename R>
   struct uniform_int_ck<kernel_request_host, G, R>
-      : expr_ck<uniform_int_ck<kernel_request_host, G, R>, kernel_request_host,
-                0> {
+      : base_kernel<uniform_int_ck<kernel_request_host, G, R>,
+                    kernel_request_host, 0> {
     typedef uniform_int_ck self_type;
 
     G &g;
@@ -52,8 +52,9 @@ namespace nd {
 
     static void resolve_option_values(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+        nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array a = kwds.p("a");
@@ -69,7 +70,8 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+        const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -90,8 +92,8 @@ namespace nd {
 
   template <typename G, typename R>
   struct uniform_real_ck<kernel_request_host, G, R>
-      : expr_ck<uniform_real_ck<kernel_request_host, G, R>, kernel_request_host,
-                0> {
+      : base_kernel<uniform_real_ck<kernel_request_host, G, R>,
+                    kernel_request_host, 0> {
     typedef uniform_real_ck self_type;
 
     G &g;
@@ -114,8 +116,9 @@ namespace nd {
 
     static void resolve_option_values(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+        nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array a = kwds.p("a");
@@ -131,7 +134,8 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+        const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -151,8 +155,8 @@ namespace nd {
 
   template <typename S>
   struct uniform_real_ck<kernel_request_cuda_device, S, double>
-      : expr_ck<uniform_real_ck<kernel_request_cuda_device, S, double>,
-                kernel_request_cuda_device, 0> {
+      : base_kernel<uniform_real_ck<kernel_request_cuda_device, S, double>,
+                    kernel_request_cuda_device, 0> {
     typedef uniform_real_ck self_type;
 
     S *s;
@@ -191,7 +195,8 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+        const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -218,8 +223,8 @@ namespace nd {
 
   template <typename G, typename R>
   struct uniform_complex_ck<kernel_request_host, G, R>
-      : expr_ck<uniform_complex_ck<kernel_request_host, G, R>,
-                kernel_request_host, 0> {
+      : base_kernel<uniform_complex_ck<kernel_request_host, G, R>,
+                    kernel_request_host, 0> {
     typedef uniform_complex_ck self_type;
 
     G &g;
@@ -246,8 +251,9 @@ namespace nd {
 
     static void resolve_option_values(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+        nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array a = kwds.p("a");
@@ -263,7 +269,8 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+        const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -283,7 +290,7 @@ namespace nd {
 
   template <typename S>
   struct uniform_complex_ck<kernel_request_cuda_device, S, complex<double>>
-      : expr_ck<
+      : base_kernel<
             uniform_complex_ck<kernel_request_cuda_device, S, complex<double>>,
             kernel_request_cuda_device, 0> {
     typedef uniform_complex_ck self_type;
@@ -311,7 +318,8 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+        const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
