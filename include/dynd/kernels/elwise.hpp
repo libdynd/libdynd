@@ -48,29 +48,20 @@ namespace nd {
         intptr_t ndim = 0;
         // First get the type for the child arrfunc
         ndt::type child_dst_tp;
-        if (child_af->resolve_dst_type != NULL) {
-          std::vector<ndt::type> child_src_tp(nsrc);
-          for (intptr_t i = 0; i < nsrc; ++i) {
-            intptr_t child_ndim_i = child_af_tp->get_pos_type(i).get_ndim();
-            if (child_ndim_i < src_tp[i].get_ndim()) {
-              child_src_tp[i] = src_tp[i].get_dtype(child_ndim_i);
-              ndim = std::max(ndim, src_tp[i].get_ndim() - child_ndim_i);
-            } else {
-              child_src_tp[i] = src_tp[i];
-            }
+        std::vector<ndt::type> child_src_tp(nsrc);
+        for (intptr_t i = 0; i < nsrc; ++i) {
+          intptr_t child_ndim_i = child_af_tp->get_pos_type(i).get_ndim();
+          if (child_ndim_i < src_tp[i].get_ndim()) {
+            child_src_tp[i] = src_tp[i].get_dtype(child_ndim_i);
+            ndim = std::max(ndim, src_tp[i].get_ndim() - child_ndim_i);
+          } else {
+            child_src_tp[i] = src_tp[i];
           }
-          child_af->resolve_dst_type(
-              child_af, child_af_tp, NULL, child_dst_tp, nsrc,
-              child_src_tp.empty() ? NULL : child_src_tp.data(), kwds, tp_vars);
-        } else {
-          // TODO: Should pattern match the source types here
-          for (intptr_t i = 0; i < nsrc; ++i) {
-            ndim = std::max(ndim, src_tp[i].get_ndim() -
-                                      child_af_tp->get_pos_type(i).get_ndim());
-          }
-          child_dst_tp =
-              ndt::substitute(child_af_tp->get_return_type(), tp_vars, false);
         }
+        child_af->resolve_dst_type(
+            child_af, child_af_tp, NULL, child_dst_tp, nsrc,
+            child_src_tp.empty() ? NULL : child_src_tp.data(), kwds, tp_vars);
+
         if (nsrc == 0) {
           dst_tp =
               tp_vars.at("Dims").extended<dim_fragment_type>()->apply_to_dtype(
@@ -244,11 +235,10 @@ namespace nd {
         case cfixed_dim_type_id:
           if (src_all_strided) {
             return elwise_ck<fixed_dim_type_id, fixed_dim_type_id,
-                                     N>::instantiate(self, self_tp, NULL, ckb,
-                                                     ckb_offset, dst_tp,
-                                                     dst_arrmeta, nsrc, src_tp,
-                                                     src_arrmeta, kernreq, ectx,
-                                                     kwds, tp_vars);
+                             N>::instantiate(self, self_tp, NULL, ckb,
+                                             ckb_offset, dst_tp, dst_arrmeta,
+                                             nsrc, src_tp, src_arrmeta, kernreq,
+                                             ectx, kwds, tp_vars);
           } else if (src_all_strided_or_var) {
             return elwise_ck<fixed_dim_type_id, var_dim_type_id,
                              N>::instantiate(self, self_tp, NULL, ckb,

@@ -367,7 +367,6 @@ set(libdynd_SRC
     src/dynd/kernels/multidispatch.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/option_kernels.cpp
-    src/dynd/kernels/outer.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
     src/dynd/kernels/reduction_kernels.cpp
     src/dynd/kernels/rolling.cpp

@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/elwise.hpp>
+#include <dynd/kernels/elwise.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 

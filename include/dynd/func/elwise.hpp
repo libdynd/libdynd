@@ -8,7 +8,6 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
-#include <dynd/kernels/elwise.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
