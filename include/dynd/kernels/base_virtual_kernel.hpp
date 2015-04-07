@@ -5,11 +5,13 @@
 
 #pragma once
 
+#include <dynd/types/arrfunc_type.hpp>
+
 namespace dynd {
 namespace nd {
 
-  template <typename CKT>
-  struct virtual_ck {
+  template <typename T>
+  struct base_virtual_kernel {
     static void resolve_option_values(
         const arrfunc_type_data *DYND_UNUSED(self),
         const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),

@@ -7,7 +7,7 @@
 
 #include <dynd/strided_vals.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
 namespace detail {
@@ -200,7 +200,7 @@ namespace nd {
   struct apply_function_ck<KERNREQ, func_type, func, R, type_sequence<A...>,   \
                            index_sequence<I...>, type_sequence<K...>,          \
                            index_sequence<J...>>                               \
-      : expr_ck<apply_function_ck<KERNREQ, func_type, func, R,                 \
+      : base_kernel<apply_function_ck<KERNREQ, func_type, func, R,             \
                                   type_sequence<A...>, index_sequence<I...>,   \
                                   type_sequence<K...>, index_sequence<J...>>,  \
                 KERNREQ, sizeof...(A)>,                                        \
@@ -267,7 +267,7 @@ namespace nd {
   struct apply_function_ck<KERNREQ, func_type, func, void,                     \
                            type_sequence<A...>, index_sequence<I...>,          \
                            type_sequence<K...>, index_sequence<J...>>          \
-      : expr_ck<apply_function_ck<KERNREQ, func_type, func, void,              \
+      : base_kernel<apply_function_ck<KERNREQ, func_type, func, void,              \
                                   type_sequence<A...>, index_sequence<I...>,   \
                                   type_sequence<K...>, index_sequence<J...>>,  \
                 KERNREQ, sizeof...(A)>,                                        \
@@ -349,7 +349,7 @@ namespace nd {
   struct apply_member_function_ck<KERNREQ, T *, mem_func_type, R,              \
                                   type_sequence<A...>, index_sequence<I...>,   \
                                   type_sequence<K...>, index_sequence<J...>>   \
-      : expr_ck<apply_member_function_ck<                                      \
+      : base_kernel<apply_member_function_ck<                                      \
                     KERNREQ, T *, mem_func_type, R, type_sequence<A...>,       \
                     index_sequence<I...>, type_sequence<K...>,                 \
                     index_sequence<J...>>,                                     \
@@ -432,7 +432,7 @@ namespace nd {
   struct apply_member_function_ck<KERNREQ, T *, mem_func_type, void,           \
                                   type_sequence<A...>, index_sequence<I...>,   \
                                   type_sequence<K...>, index_sequence<J...>>   \
-      : expr_ck<apply_member_function_ck<                                      \
+      : base_kernel<apply_member_function_ck<                                      \
                     KERNREQ, T *, mem_func_type, void, type_sequence<A...>,    \
                     index_sequence<I...>, type_sequence<K...>,                 \
                     index_sequence<J...>>,                                     \
@@ -616,7 +616,7 @@ namespace nd {
   struct apply_callable_ck<KERNREQ, func_type, R, type_sequence<A...>,         \
                            index_sequence<I...>, type_sequence<K...>,          \
                            index_sequence<J...>>                               \
-      : expr_ck<apply_callable_ck<KERNREQ, func_type, R, type_sequence<A...>,  \
+      : base_kernel<apply_callable_ck<KERNREQ, func_type, R, type_sequence<A...>,  \
                                   index_sequence<I...>, type_sequence<K...>,   \
                                   index_sequence<J...>>,                       \
                 KERNREQ, sizeof...(A)>,                                        \
@@ -695,7 +695,7 @@ namespace nd {
   struct apply_callable_ck<KERNREQ, func_type, void, type_sequence<A...>,      \
                            index_sequence<I...>, type_sequence<K...>,          \
                            index_sequence<J...>>                               \
-      : expr_ck<apply_callable_ck<KERNREQ, func_type, void,                    \
+      : base_kernel<apply_callable_ck<KERNREQ, func_type, void,                    \
                                   type_sequence<A...>, index_sequence<I...>,   \
                                   type_sequence<K...>, index_sequence<J...>>,  \
                 KERNREQ, sizeof...(A)>,                                        \
@@ -839,7 +839,7 @@ namespace nd {
   struct apply_callable_ck<KERNREQ, func_type *, R, type_sequence<A...>,       \
                            index_sequence<I...>, type_sequence<K...>,          \
                            index_sequence<J...>>                               \
-      : expr_ck<apply_callable_ck<KERNREQ, func_type *, R,                     \
+      : base_kernel<apply_callable_ck<KERNREQ, func_type *, R,                     \
                                   type_sequence<A...>, index_sequence<I...>,   \
                                   type_sequence<K...>, index_sequence<J...>>,  \
                 KERNREQ, sizeof...(A)>,                                        \
@@ -918,7 +918,7 @@ namespace nd {
   struct apply_callable_ck<KERNREQ, func_type *, void, type_sequence<A...>,    \
                            index_sequence<I...>, type_sequence<K...>,          \
                            index_sequence<J...>>                               \
-      : expr_ck<apply_callable_ck<KERNREQ, func_type *, void,                  \
+      : base_kernel<apply_callable_ck<KERNREQ, func_type *, void,                  \
                                   type_sequence<A...>, index_sequence<I...>,   \
                                   type_sequence<K...>, index_sequence<J...>>,  \
                 KERNREQ, sizeof...(A)>,                                        \
@@ -1047,7 +1047,7 @@ namespace nd {
   struct construct_then_apply_callable_ck<                                     \
       KERNREQ, func_type, R, type_sequence<A...>, index_sequence<I...>,        \
       type_sequence<K...>, index_sequence<J...>>                               \
-      : expr_ck<construct_then_apply_callable_ck<                              \
+      : base_kernel<construct_then_apply_callable_ck<                              \
                     KERNREQ, func_type, R, type_sequence<A...>,                \
                     index_sequence<I...>, type_sequence<K...>,                 \
                     index_sequence<J...>>,                                     \
@@ -1124,7 +1124,7 @@ namespace nd {
   struct construct_then_apply_callable_ck<                                     \
       KERNREQ, func_type, void, type_sequence<A...>, index_sequence<I...>,     \
       type_sequence<K...>, index_sequence<J...>>                               \
-      : expr_ck<construct_then_apply_callable_ck<                              \
+      : base_kernel<construct_then_apply_callable_ck<                              \
                     KERNREQ, func_type, void, type_sequence<A...>,             \
                     index_sequence<I...>, type_sequence<K...>,                 \
                     index_sequence<J...>>,                                     \

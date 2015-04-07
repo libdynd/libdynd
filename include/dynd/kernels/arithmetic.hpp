@@ -1,13 +1,14 @@
 #pragma once
 
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/multidispatch_by_type_id.hpp>
 
 namespace dynd {
 namespace nd {
 
   template <type_id_t I0>
-  struct plus_ck : expr_ck<plus_ck<I0>, kernel_request_cuda_host_device, 1> {
+  struct plus_ck
+      : base_kernel<plus_ck<I0>, kernel_request_cuda_host_device, 1> {
     typedef plus_ck self_type;
     typedef typename type_of<I0>::type A0;
     typedef decltype(+std::declval<A0>()) R;
@@ -39,7 +40,8 @@ namespace nd {
   };
 
   template <type_id_t I0>
-  struct minus_ck : expr_ck<minus_ck<I0>, kernel_request_cuda_host_device, 1> {
+  struct minus_ck
+      : base_kernel<minus_ck<I0>, kernel_request_cuda_host_device, 1> {
     typedef minus_ck self_type;
     typedef typename type_of<I0>::type A0;
     typedef decltype(-std::declval<A0>()) R;
@@ -71,7 +73,8 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct add_ck : expr_ck<add_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
+  struct add_ck
+      : base_kernel<add_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
     typedef add_ck self_type;
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
@@ -107,7 +110,7 @@ namespace nd {
 
   template <type_id_t I0, type_id_t I1>
   struct subtract_ck
-      : expr_ck<subtract_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
+      : base_kernel<subtract_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
     typedef subtract_ck self_type;
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
@@ -143,7 +146,7 @@ namespace nd {
 
   template <type_id_t I0, type_id_t I1>
   struct multiply_ck
-      : expr_ck<multiply_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
+      : base_kernel<multiply_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
     typedef multiply_ck self_type;
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
@@ -179,7 +182,7 @@ namespace nd {
 
   template <type_id_t I0, type_id_t I1>
   struct divide_ck
-      : expr_ck<divide_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
+      : base_kernel<divide_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
     typedef divide_ck self_type;
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;

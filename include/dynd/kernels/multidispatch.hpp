@@ -8,8 +8,8 @@
 #include <set>
 #include <unordered_map>
 
-#include <dynd/kernels/expr_kernels.hpp>
-#include <dynd/kernels/virtual.hpp>
+#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/type.hpp>
 
 namespace std {
@@ -94,7 +94,7 @@ namespace nd {
       return false;
     }
 
-    struct old_multidispatch_ck : virtual_ck<old_multidispatch_ck> {
+    struct old_multidispatch_ck : base_virtual_kernel<old_multidispatch_ck> {
       static intptr_t
       instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
                   char *data, void *ckb, intptr_t ckb_offset,
@@ -112,7 +112,7 @@ namespace nd {
                        const std::map<nd::string, ndt::type> &tp_vars);
     };
 
-    struct multidispatch_ck : virtual_ck<multidispatch_ck> {
+    struct multidispatch_ck : base_virtual_kernel<multidispatch_ck> {
       typedef std::unordered_map<std::vector<ndt::type>, arrfunc> map_type;
 
       struct data_type {
@@ -196,7 +196,7 @@ namespace nd {
 
     template <>
     struct multidispatch_by_type_id_ck<1>
-        : virtual_ck<multidispatch_by_type_id_ck<1>> {
+        : base_virtual_kernel<multidispatch_by_type_id_ck<1>> {
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
@@ -234,7 +234,7 @@ namespace nd {
 
     template <>
     struct multidispatch_by_type_id_ck<2>
-        : virtual_ck<multidispatch_by_type_id_ck<2>> {
+        : base_virtual_kernel<multidispatch_by_type_id_ck<2>> {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const arrfunc_type *self_tp, char *DYND_UNUSED(data),

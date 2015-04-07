@@ -10,7 +10,7 @@
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
@@ -86,9 +86,9 @@ namespace kernels {
    * create ckernels.
    */
   template <class CKT>
-  struct unary_ck : nd::expr_ck<CKT, kernel_request_host, 1> {
+  struct unary_ck : nd::base_kernel<CKT, kernel_request_host, 1> {
     typedef CKT self_type;
-    typedef nd::expr_ck<CKT, kernel_request_host, 1> parent_type;
+    typedef nd::base_kernel<CKT, kernel_request_host, 1> parent_type;
 
     static void single_wrapper(char *dst, char *const *src,
                                ckernel_prefix *rawself)
@@ -139,8 +139,8 @@ namespace kernels {
   };
 
   template <class dst_type, class src_type, assign_error_mode errmode>
-  struct assign_ck : nd::expr_ck<assign_ck<dst_type, src_type, errmode>,
-                             kernel_request_host, 1> {
+  struct assign_ck : nd::base_kernel<assign_ck<dst_type, src_type, errmode>,
+                                     kernel_request_host, 1> {
     void single(char *dst, char *const *src)
     {
       single_assigner_builtin<dst_type, src_type, errmode>::assign(
@@ -151,8 +151,8 @@ namespace kernels {
 
   template <class dst_type, class src_type>
   struct assign_ck<dst_type, src_type, assign_error_nocheck>
-      : nd::expr_ck<assign_ck<dst_type, src_type, assign_error_nocheck>,
-                kernel_request_cuda_host_device, 1> {
+      : nd::base_kernel<assign_ck<dst_type, src_type, assign_error_nocheck>,
+                        kernel_request_cuda_host_device, 1> {
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
       single_assigner_builtin<dst_type, src_type, assign_error_nocheck>::assign(
@@ -400,25 +400,28 @@ size_t make_cuda_pod_typed_data_assignment_kernel(
     size_t data_size, size_t data_alignment, kernel_request_t kernreq);
 
 intptr_t make_cuda_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 intptr_t make_cuda_from_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 #endif // DYND_CUDA
 } // namespace dynd

@@ -8,7 +8,7 @@
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/virtual.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -43,7 +43,7 @@ namespace nd {
       void destruct_children();
     };
 
-    struct rolling_ck : virtual_ck<rolling_ck> {
+    struct rolling_ck : base_virtual_kernel<rolling_ck> {
       static intptr_t
       instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
                   char *data, void *ckb, intptr_t ckb_offset,

@@ -4,14 +4,14 @@
 //
 
 #include <dynd/func/take_by_pointer.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
-#include <dynd/kernels/virtual.hpp>
+#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
 
 struct take_by_pointer_outer_ck
-    : nd::expr_ck<take_by_pointer_outer_ck, kernel_request_host, 2> {
+    : nd::base_kernel<take_by_pointer_outer_ck, kernel_request_host, 2> {
   const intptr_t dst_size, dst_stride;
   const intptr_t src1_stride;
 
@@ -36,7 +36,7 @@ struct take_by_pointer_outer_ck
 };
 
 struct take_by_pointer_ck
-    : nd::expr_ck<take_by_pointer_ck, kernel_request_host, 2> {
+    : nd::base_kernel<take_by_pointer_ck, kernel_request_host, 2> {
   const intptr_t src0_size, src0_stride;
   const intptr_t src1_inner_stride;
 
@@ -59,7 +59,7 @@ struct take_by_pointer_ck
   }
 };
 
-struct take_by_pointer_virtual_ck : nd::virtual_ck<take_by_pointer_virtual_ck> {
+struct take_by_pointer_virtual_ck : nd::base_virtual_kernel<take_by_pointer_virtual_ck> {
   static intptr_t
   instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
               const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),

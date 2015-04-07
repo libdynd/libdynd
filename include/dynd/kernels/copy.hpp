@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include <dynd/kernels/virtual.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
-  struct copy_ck : virtual_ck<copy_ck> {
+  struct copy_ck : base_virtual_kernel<copy_ck> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const arrfunc_type *af_tp,
                 char *data, void *ckb, intptr_t ckb_offset,

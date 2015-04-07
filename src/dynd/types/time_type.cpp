@@ -461,7 +461,7 @@ size_t time_type::make_elwise_property_setter_kernel(
 
 namespace {
 struct time_is_avail_ck
-    : nd::expr_ck<time_is_avail_ck, kernel_request_host, 1> {
+    : nd::base_kernel<time_is_avail_ck, kernel_request_host, 1> {
   void single(char *dst, char *const *src)
   {
     int64_t v = **reinterpret_cast<int64_t *const *>(src);
@@ -483,7 +483,7 @@ struct time_is_avail_ck
 };
 
 struct time_assign_na_ck
-    : nd::expr_ck<time_assign_na_ck, kernel_request_host, 1> {
+    : nd::base_kernel<time_assign_na_ck, kernel_request_host, 1> {
   void single(char *dst, char *const *DYND_UNUSED(src))
   {
     *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA;

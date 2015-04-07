@@ -8,7 +8,7 @@
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/buffer_storage.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -35,7 +35,7 @@ namespace nd {
      * dynamically allocated on the heap.
      */
     struct unary_heap_chain_ck
-        : expr_ck<unary_heap_chain_ck, kernel_request_host, 1> {
+        : base_kernel<unary_heap_chain_ck, kernel_request_host, 1> {
       // The offset to the second child ckernel
       intptr_t m_second_offset;
       ndt::type m_buf_tp;

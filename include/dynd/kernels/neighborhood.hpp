@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/substitute_shape.hpp>
 
 namespace dynd {
@@ -28,7 +28,7 @@ namespace nd {
 
     template <int N>
     struct neighborhood_ck
-        : expr_ck<neighborhood_ck<N>, kernel_request_host, N> {
+        : base_kernel<neighborhood_ck<N>, kernel_request_host, N> {
       typedef neighborhood_ck<N> self_type;
 
       intptr_t dst_stride;

@@ -518,7 +518,7 @@ size_t date_type::make_elwise_property_setter_kernel(
 
 namespace {
 struct date_is_avail_ck
-    : nd::expr_ck<date_is_avail_ck, kernel_request_host, 1> {
+    : nd::base_kernel<date_is_avail_ck, kernel_request_host, 1> {
   void single(char *dst, char *const *src)
   {
     int32_t date = **reinterpret_cast<int32_t *const *>(src);
@@ -540,7 +540,7 @@ struct date_is_avail_ck
 };
 
 struct date_assign_na_ck
-    : nd::expr_ck<date_assign_na_ck, kernel_request_host, 1> {
+    : nd::base_kernel<date_assign_na_ck, kernel_request_host, 1> {
   void single(char *dst, char *const *DYND_UNUSED(src))
   {
     *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;

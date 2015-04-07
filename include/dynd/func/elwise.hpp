@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/expr_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/elwise.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
