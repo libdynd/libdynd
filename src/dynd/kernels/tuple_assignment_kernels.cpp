@@ -64,7 +64,7 @@ intptr_t dynd::make_tuple_unary_op_ckernel(
   tuple_unary_op_ck *self = tuple_unary_op_ck::create(ckb, kernreq, ckb_offset);
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
-    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
+    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset);
     self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<tuple_unary_op_ck>(root_ckb_offset);
     tuple_unary_op_item &field = self->m_fields[i];
     field.child_kernel_offset = ckb_offset - root_ckb_offset;
@@ -89,7 +89,7 @@ intptr_t dynd::make_tuple_unary_op_ckernel(
   tuple_unary_op_ck *self = tuple_unary_op_ck::create(ckb, kernreq, ckb_offset);
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
-    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->ensure_capacity(ckb_offset);
+    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset);
     self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<tuple_unary_op_ck>(root_ckb_offset);
     tuple_unary_op_item &field = self->m_fields[i];
     field.child_kernel_offset = ckb_offset - root_ckb_offset;

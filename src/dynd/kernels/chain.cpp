@@ -101,15 +101,15 @@ intptr_t nd::functional::unary_heap_chain_ck::instantiate(
         self->m_buf_arrmeta.get(), first_tp->get_npos(), src_tp, src_arrmeta,
         kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
     reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-        ->ensure_capacity(ckb_offset);
+        ->reserve(ckb_offset);
     self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                ->get_at<nd::functional::unary_heap_chain_ck>(root_ckb_offset);
     self->m_second_offset = ckb_offset - root_ckb_offset;
     const char *buf_arrmeta = self->m_buf_arrmeta.get();
     ckb_offset = second->instantiate(
-        second, second_tp, data + first->data_size, ckb, ckb_offset,
-        dst_tp, dst_arrmeta, first_tp->get_npos(), &buf_tp, &buf_arrmeta,
-        kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
+        second, second_tp, data + first->data_size, ckb, ckb_offset, dst_tp,
+        dst_arrmeta, first_tp->get_npos(), &buf_tp, &buf_arrmeta, kernreq, ectx,
+        nd::array(), std::map<nd::string, ndt::type>());
     return ckb_offset;
   } else {
     throw runtime_error("Multi-parameter arrfunc chaining is not implemented");
