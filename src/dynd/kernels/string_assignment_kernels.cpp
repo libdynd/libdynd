@@ -63,7 +63,7 @@ size_t dynd::make_fixedstring_assignment_kernel(
 {
     typedef fixedstring_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
-    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     self->m_dst_data_size = dst_data_size;
@@ -157,7 +157,7 @@ size_t dynd::make_blockref_string_assignment_kernel(
 {
     typedef blockref_string_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
-    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_dst_encoding = dst_encoding;
     self->m_src_encoding = src_encoding;
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
@@ -240,7 +240,7 @@ size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
 {
     typedef fixedstring_to_blockref_string_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
-    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_dst_encoding = dst_encoding;
     self->m_src_encoding = src_encoding;
     self->m_src_element_size = src_element_size;
@@ -294,7 +294,7 @@ size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
 {
     typedef blockref_string_to_fixedstring_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
-    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
     self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
     self->m_dst_data_size = dst_data_size;
@@ -335,7 +335,7 @@ size_t dynd::make_any_to_string_assignment_kernel(
     throw runtime_error(ss.str());
   }
 
-  self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_dst_string_tp = dst_tp;
   self->m_dst_arrmeta = dst_arrmeta;
   self->m_src_tp = src_tp;

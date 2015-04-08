@@ -61,7 +61,7 @@ intptr_t ndarrayarg_type::make_assignment_kernel(
     const eval::eval_context *DYND_UNUSED(ectx), const nd::array &DYND_UNUSED(kwds)) const
 {
     if (this == dst_tp.extended() && src_tp.get_type_id() == ndarrayarg_type_id) {
-        ndarrayarg_assign_ck::create_leaf(ckb, kernreq, ckb_offset);
+        ndarrayarg_assign_ck::make(ckb, kernreq, ckb_offset);
         return ckb_offset;
     }
 

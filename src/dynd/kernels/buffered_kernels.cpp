@@ -110,7 +110,7 @@ size_t dynd::make_buffered_ckernel(
 {
   typedef buffered_ck self_type;
   intptr_t root_ckb_offset = ckb_offset;
-  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // Prepare the type and buffer info the ckernel needs
   self->m_nsrc = nsrc;
   self->m_bufs.resize(nsrc);

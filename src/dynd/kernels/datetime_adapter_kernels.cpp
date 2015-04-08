@@ -121,7 +121,7 @@ static intptr_t instantiate_int_multiply_and_offset_arrfunc(
     ss << src_tp[0] << ") -> " << dst_tp;
     throw type_error(ss.str());
   }
-  self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_factor_offset = *self_af->get_data_as<pair<Tdst, Tdst>>();
   return ckb_offset;
 }
@@ -171,7 +171,7 @@ static intptr_t instantiate_int_offset_and_divide_arrfunc(
     ss << src_tp[0] << ") -> " << dst_tp;
     throw type_error(ss.str());
   }
-  self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_offset_divisor = *self_af->get_data_as<pair<Tdst, Tdst>>();
   return ckb_offset;
 }

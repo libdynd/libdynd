@@ -152,7 +152,7 @@ namespace nd {
 
         for (intptr_t i = 0; i < ndim; ++i) {
           typedef dynd::nd::functional::neighborhood_ck<N> self_type;
-          self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+          self_type *self = self_type::make(ckb, kernreq, ckb_offset);
 
           self->dst_stride = dst_shape[i].stride;
           for (intptr_t j = 0; j < N; ++j) {

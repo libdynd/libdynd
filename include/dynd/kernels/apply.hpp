@@ -255,7 +255,7 @@ namespace nd {
                 const nd::array &kwds,                                         \
                 const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))   \
     {                                                                          \
-      self_type::create(ckb, kernreq, ckb_offset,                              \
+      self_type::make(ckb, kernreq, ckb_offset,                              \
                         args_type(src_tp, src_arrmeta, kwds),                  \
                         kwds_type(kwds));                                      \
       return ckb_offset;                                                       \
@@ -320,7 +320,7 @@ namespace nd {
                 const nd::array &kwds,                                         \
                 const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))   \
     {                                                                          \
-      self_type::create(ckb, kernreq, ckb_offset,                              \
+      self_type::make(ckb, kernreq, ckb_offset,                              \
                         args_type(src_tp, src_arrmeta, kwds),                  \
                         kwds_type(kwds));                                      \
       return ckb_offset;                                                       \
@@ -409,7 +409,7 @@ namespace nd {
         const nd::array &kwds,                                                 \
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
-      self_type::create(                                                       \
+      self_type::make(                                                       \
           ckb, kernreq, ckb_offset, self->get_data_as<data_type>()->first,     \
           dynd::detail::make_value_wrapper(                                    \
               self->get_data_as<data_type>()->second),                         \
@@ -492,7 +492,7 @@ namespace nd {
         const nd::array &kwds,                                                 \
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
-      self_type::create(                                                       \
+      self_type::make(                                                       \
           ckb, kernreq, ckb_offset, self->get_data_as<data_type>()->first,     \
           dynd::detail::make_value_wrapper(                                    \
               self->get_data_as<data_type>()->second),                         \
@@ -673,7 +673,7 @@ namespace nd {
         const nd::array &kwds,                                                 \
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
-      self_type::create(                                                       \
+      self_type::make(                                                       \
           ckb, kernreq, ckb_offset,                                            \
           dynd::detail::make_value_wrapper(*self->get_data_as<func_type>()),   \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
@@ -750,7 +750,7 @@ namespace nd {
         const nd::array &kwds,                                                 \
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
-      self_type::create(                                                       \
+      self_type::make(                                                       \
           ckb, kernreq, ckb_offset,                                            \
           dynd::detail::make_value_wrapper(*self->get_data_as<func_type>()),   \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
@@ -897,7 +897,7 @@ namespace nd {
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
                                                                                \
-      self_type::create(                                                       \
+      self_type::make(                                                       \
           ckb, kernreq, ckb_offset, *self->get_data_as<func_type *>(),         \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
@@ -974,7 +974,7 @@ namespace nd {
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
                                                                                \
-      self_type::create(                                                       \
+      self_type::make(                                                       \
           ckb, kernreq, ckb_offset, *self->get_data_as<func_type *>(),         \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
@@ -1103,7 +1103,7 @@ namespace nd {
         const nd::array &kwds,                                                 \
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
-      self_type::create(ckb, kernreq, ckb_offset,                              \
+      self_type::make(ckb, kernreq, ckb_offset,                              \
                         args_type(src_tp, src_arrmeta, kwds),                  \
                         kwds_type(kwds));                                      \
       return ckb_offset;                                                       \
@@ -1180,7 +1180,7 @@ namespace nd {
         const nd::array &kwds,                                                 \
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
-      self_type::create(ckb, kernreq, ckb_offset,                              \
+      self_type::make(ckb, kernreq, ckb_offset,                              \
                         args_type(src_tp, src_arrmeta, kwds),                  \
                         kwds_type(kwds));                                      \
       return ckb_offset;                                                       \

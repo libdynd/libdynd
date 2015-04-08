@@ -239,7 +239,7 @@ namespace nd {
       nd::array src = nd::empty(src_tp[0]);
       nd::array dst = nd::empty(dst_tp);
 
-      fftw_ck::create(
+      fftw_ck::make(
           ckb, kernreq, ckb_offset,
           detail::fftw_plan_guru_dft(
               rank, dims.get(), howmany_rank, howmany_dims.get(),

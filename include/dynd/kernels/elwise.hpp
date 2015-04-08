@@ -34,9 +34,10 @@ namespace nd {
     struct elwise_virtual_ck : base_virtual_kernel<elwise_virtual_ck<N>> {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
-                       const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-                       ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, const dynd::nd::array &kwds,
+                       const arrfunc_type *DYND_UNUSED(self_tp),
+                       char *DYND_UNUSED(data), ndt::type &dst_tp,
+                       intptr_t nsrc, const ndt::type *src_tp,
+                       const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child_af =
@@ -62,7 +63,7 @@ namespace nd {
             child_src_tp.empty() ? NULL : child_src_tp.data(), kwds, tp_vars);
 
         // ...
-//        new (data) ndt::type(child_dst_tp);
+        //        new (data) ndt::type(child_dst_tp);
 
         if (nsrc == 0) {
           dst_tp =
@@ -166,15 +167,14 @@ namespace nd {
           const std::map<dynd::nd::string, ndt::type> &tp_vars)
 
       {
-        std::cout << "elwise::instantiate" << std::endl;
-
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
         const arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-//        ndt::type &child_dst_tp = *reinterpret_cast<ndt::type *>(data);
-  //      std::cout << child_dst_tp << std::endl;
+        //        ndt::type &child_dst_tp = *reinterpret_cast<ndt::type
+        //        *>(data);
+        //      std::cout << child_dst_tp << std::endl;
 
         // Check if no lifting is required
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -397,8 +397,8 @@ namespace nd {
           }
         }
 
-        self_type::create(ckb, kernreq, ckb_offset, size, dst_stride,
-                          dynd::detail::make_array_wrapper<N>(src_stride));
+        self_type::make(ckb, kernreq, ckb_offset, size, dst_stride,
+                        dynd::detail::make_array_wrapper<N>(src_stride));
         kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;
 
         // If there are still dimensions to broadcast, recursively lift more
@@ -493,7 +493,7 @@ namespace nd {
           throw type_error(ss.str());
         }
 
-        self_type::create(ckb, kernreq, ckb_offset, size, dst_stride);
+        self_type::make(ckb, kernreq, ckb_offset, size, dst_stride);
         kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;
 
         bool finished = dst_ndim == 1;
@@ -663,8 +663,8 @@ namespace nd {
           }
         }
 
-        self_type::create(ckb, kernreq, ckb_offset, size, dst_stride,
-                          src_stride, src_offset, is_src_var);
+        self_type::make(ckb, kernreq, ckb_offset, size, dst_stride, src_stride,
+                        src_offset, is_src_var);
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
@@ -753,7 +753,7 @@ namespace nd {
         }
 
         bool finished = dst_ndim == 1;
-        self_type::create(ckb, kernreq, ckb_offset, size, dst_stride);
+        self_type::make(ckb, kernreq, ckb_offset, size, dst_stride);
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
@@ -1001,10 +1001,10 @@ namespace nd {
           }
         }
 
-        self_type::create(ckb, kernreq, ckb_offset, dst_md->blockref,
-                          dst_vdd->get_target_alignment(), dst_md->stride,
-                          dst_md->offset, src_stride, src_offset, src_size,
-                          is_src_var);
+        self_type::make(ckb, kernreq, ckb_offset, dst_md->blockref,
+                        dst_vdd->get_target_alignment(), dst_md->stride,
+                        dst_md->offset, src_stride, src_offset, src_size,
+                        is_src_var);
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
@@ -1130,9 +1130,9 @@ namespace nd {
 
         bool finished = dst_ndim == 1;
 
-        self_type::create(ckb, kernreq, ckb_offset, dst_md->blockref,
-                          dst_vdd->get_target_alignment(), dst_md->stride,
-                          dst_md->offset);
+        self_type::make(ckb, kernreq, ckb_offset, dst_md->blockref,
+                        dst_vdd->get_target_alignment(), dst_md->stride,
+                        dst_md->offset);
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {

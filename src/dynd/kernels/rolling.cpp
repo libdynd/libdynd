@@ -88,7 +88,7 @@ intptr_t nd::functional::rolling_ck::instantiate(
   rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
 
   intptr_t root_ckb_offset = ckb_offset;
-  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   const arrfunc_type_data *window_af = data->window_op.get();
   const arrfunc_type *window_af_tp = data->window_op.get_type();
   ndt::type dst_el_tp, src_el_tp;

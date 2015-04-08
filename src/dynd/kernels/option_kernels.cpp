@@ -293,34 +293,34 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
 {
   switch (src_tp->get_dtype().get_type_id()) {
   case bool_type_id:
-    nd::is_avail_ck<dynd_bool>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<dynd_bool>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int8_type_id:
-    nd::is_avail_ck<int8_t>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<int8_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int16_type_id:
-    nd::is_avail_ck<int16_t>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<int16_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int32_type_id:
-    nd::is_avail_ck<int32_t>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<int32_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int64_type_id:
-    nd::is_avail_ck<int64_t>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<int64_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int128_type_id:
-    nd::is_avail_ck<dynd_int128>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<dynd_int128>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case float32_type_id:
-    nd::is_avail_ck<float>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<float>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case float64_type_id:
-    nd::is_avail_ck<double>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<double>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case complex_float32_type_id:
-    nd::is_avail_ck<dynd::complex<float>>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<dynd::complex<float>>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case complex_float64_type_id:
-    nd::is_avail_ck<dynd::complex<double>>::create(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<dynd::complex<double>>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   default:
     throw type_error("fixed_dim_is_avail: expected built-in type");
@@ -340,34 +340,34 @@ intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
 {
   switch (dst_tp.get_dtype().get_type_id()) {
   case bool_type_id:
-    nd::assign_na_ck<dynd_bool>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<dynd_bool>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int8_type_id:
-    nd::assign_na_ck<int8_t>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<int8_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int16_type_id:
-    nd::assign_na_ck<int16_t>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<int16_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int32_type_id:
-    nd::assign_na_ck<int32_t>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<int32_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int64_type_id:
-    nd::assign_na_ck<int64_t>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<int64_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int128_type_id:
-    nd::assign_na_ck<dynd_int128>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<dynd_int128>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case float32_type_id:
-    nd::assign_na_ck<float>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<float>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case float64_type_id:
-    nd::assign_na_ck<double>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<double>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case complex_float32_type_id:
-    nd::assign_na_ck<dynd::complex<float>>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<dynd::complex<float>>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case complex_float64_type_id:
-    nd::assign_na_ck<dynd::complex<double>>::create(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<dynd::complex<double>>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   default:
     throw type_error("fixed_dim_assign_na: expected built-in type");
