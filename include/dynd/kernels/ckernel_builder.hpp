@@ -26,7 +26,7 @@ inline void inc_ckb_offset(intptr_t &inout_ckb_offset, size_t inc)
 }
 
 template <class T>
-inline void inc_ckb_offset(intptr_t &inout_ckb_offset)
+void inc_ckb_offset(intptr_t &inout_ckb_offset)
 {
   inc_ckb_offset(inout_ckb_offset, sizeof(T));
 }
@@ -86,12 +86,12 @@ public:
    *
    * NOTE: This function ensures that there is room for
    *       another base at the end, so if you are sure
-   *       that you're a leaf kernel, use ensure_capacity_leaf
+   *       that you're a leaf kernel, use reserve_leaf
    *       instead.
    */
-  void ensure_capacity(intptr_t requested_capacity)
+  void reserve(intptr_t requested_capacity)
   {
-    ensure_capacity_leaf(requested_capacity + sizeof(ckernel_prefix));
+    reserve_leaf(requested_capacity + sizeof(ckernel_prefix));
   }
 
   /**
@@ -100,7 +100,7 @@ public:
    * should only be called during the construction phase
    * of the kernel when constructing a leaf kernel.
    */
-  void ensure_capacity_leaf(intptr_t requested_capacity)
+  void reserve_leaf(intptr_t requested_capacity)
   {
     if (m_capacity < requested_capacity) {
       // Grow by a factor of 1.5
@@ -138,7 +138,7 @@ public:
   {
     intptr_t ckb_offset = inout_ckb_offset;
     inc_ckb_offset<T>(inout_ckb_offset);
-    ensure_capacity(inout_ckb_offset);
+    reserve(inout_ckb_offset);
     return reinterpret_cast<T *>(m_data + ckb_offset);
   }
 
@@ -153,7 +153,7 @@ public:
   {
     intptr_t ckb_offset = inout_ckb_offset;
     inc_ckb_offset<T>(inout_ckb_offset);
-    ensure_capacity_leaf(inout_ckb_offset);
+    reserve(inout_ckb_offset);
     return reinterpret_cast<T *>(m_data + ckb_offset);
   }
 
@@ -278,9 +278,6 @@ public:
       }
     }
   }
-
-  friend int ckernel_builder_ensure_capacity_leaf(void *ckb,
-                                                  intptr_t requested_capacity);
 };
 
 #ifdef __CUDACC__
@@ -410,129 +407,5 @@ public:
 };
 
 #endif
-
-/**
- * C API function for constructing a ckernel_builder object
- * in place. The `ckb` pointer must point to memory which
- * has sizeof(ckernel_builder) bytes (== 128 + 2 * sizeof(void *)),
- * and is aligned appropriately to 8 bytes.
- *
- * After a ckernel_builder instance is initialized this way,
- * all the other ckernel_builder functions can be used on it,
- * and when it is no longer needed, it must be destructed
- * by calling `ckernel_builder_destruct`.
- *
- * \param ckb  Pointer to the ckernel_builder instance. Must have
- *             128 + 2 * sizeof(void *), and alignment 8.
- */
-inline void ckernel_builder_construct(void *ckb)
-{
-  // Use the placement new operator to initialize in-place
-  new (ckb) ckernel_builder<kernel_request_host>();
-}
-
-/**
- * C API function for destroying a valid ckernel_builder object
- * in place. The `ckb` pointer must point to memory which
- * was previously initialized with `ckernel_buidler_construct`
- *
- * \param ckb  Pointer to the ckernel_builder instance.
- */
-inline void ckernel_builder_destruct(void *ckb)
-{
-  // Call the destructor
-  ckernel_builder<kernel_request_host> *ckb_ptr =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
-  ckb_ptr->~ckernel_builder<kernel_request_host>();
-}
-
-/**
- * C API function for resetting a valid ckernel_builder object
- * to an uninitialized state.
- *
- * \param ckb  Pointer to the ckernel_builder instance.
- */
-inline void ckernel_builder_reset(void *ckb)
-{
-  ckernel_builder<kernel_request_host> *ckb_ptr =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
-  ckb_ptr->reset();
-}
-
-/**
- * C API function for ensuring that the kernel's data
- * is at least the required number of bytes. It
- * should only be called during the construction phase
- * of the kernel when constructing a leaf kernel.
- *
- * If the created kernel has a child kernel, use
- * the function `ckernel_builder_ensure_capacity` instead.
- *
- * \param ckb  Pointer to the ckernel_builder instance.
- * \param requested_capacity  The number of bytes required by the ckernel.
- *
- * \returns  0 on success, -1 on memory allocation failure.
- */
-inline int ckernel_builder_ensure_capacity_leaf(void *ckb,
-                                                intptr_t requested_capacity)
-{
-  ckernel_builder<kernel_request_host> *ckb_ptr =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb);
-  if (ckb_ptr->m_capacity < requested_capacity) {
-    // Grow by a factor of 1.5
-    // https://github.com/facebook/folly/blob/master/folly/docs/FBVector.md
-    intptr_t grown_capacity = ckb_ptr->m_capacity * 3 / 2;
-    if (requested_capacity < grown_capacity) {
-      requested_capacity = grown_capacity;
-    }
-    char *new_data;
-    if (ckb_ptr->using_static_data()) {
-      // If we were previously using the static data, do a malloc
-      new_data = reinterpret_cast<char *>(malloc(requested_capacity));
-      // If the allocation succeeded, copy the old data as the realloc would
-      if (new_data != NULL) {
-        memcpy(new_data, ckb_ptr->m_data, ckb_ptr->m_capacity);
-      }
-    } else {
-      // Otherwise do a realloc
-      new_data = reinterpret_cast<char *>(
-          realloc(ckb_ptr->m_data, requested_capacity));
-    }
-    if (new_data == NULL) {
-      ckb_ptr->destroy();
-      ckb_ptr->m_data = NULL;
-      return -1;
-    }
-    // Zero out the newly allocated capacity
-    memset(reinterpret_cast<char *>(new_data) + ckb_ptr->m_capacity, 0,
-           requested_capacity - ckb_ptr->m_capacity);
-    ckb_ptr->m_data = new_data;
-    ckb_ptr->m_capacity = requested_capacity;
-  }
-  return 0;
-}
-
-/**
- * C API function for ensuring that the kernel's data
- * is at least the required number of bytes. It
- * should only be called during the construction phase
- * of the kernel when constructing a leaf kernel.
- *
- * This function allocates the requested capacity, plus enough
- * space for an empty child kernel to ensure safe destruction
- * during error handling. If a leaf kernel is being constructed,
- * use `ckernel_builder_ensure_capacity_leaf` instead.
- *
- * \param ckb  Pointer to the ckernel_builder instance.
- * \param requested_capacity  The number of bytes required by the ckernel.
- *
- * \returns  0 on success, -1 on memory allocation failure.
- */
-inline int ckernel_builder_ensure_capacity(void *ckb,
-                                           intptr_t requested_capacity)
-{
-  return ckernel_builder_ensure_capacity_leaf(ckb, requested_capacity +
-                                                       sizeof(ckernel_prefix));
-}
 
 } // namespace dynd

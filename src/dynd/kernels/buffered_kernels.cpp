@@ -13,7 +13,8 @@ using namespace dynd;
 
 namespace {
 
-struct buffered_ck : public nd::base_kernel<buffered_ck, kernel_request_host, -1> {
+struct buffered_ck
+    : public nd::base_kernel<buffered_ck, kernel_request_host, -1> {
   typedef buffered_ck self_type;
   intptr_t m_nsrc;
   vector<intptr_t> m_src_buf_ck_offsets;
@@ -101,11 +102,11 @@ struct buffered_ck : public nd::base_kernel<buffered_ck, kernel_request_host, -1
 } // anonymous namespace
 
 size_t dynd::make_buffered_ckernel(
-    const arrfunc_type_data *af, const arrfunc_type *af_tp,
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-    const ndt::type *src_tp_for_af, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    const arrfunc_type_data *af, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const ndt::type *src_tp_for_af,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
   typedef buffered_ck self_type;
   intptr_t root_ckb_offset = ckb_offset;
@@ -118,29 +119,30 @@ size_t dynd::make_buffered_ckernel(
   for (intptr_t i = 0; i < nsrc; ++i) {
     if (src_tp[i] == src_tp_for_af[i]) {
       buffered_arrmeta[i] = src_arrmeta[i];
-    }
-    else {
+    } else {
       self->m_bufs[i].allocate(src_tp_for_af[i]);
       buffered_arrmeta[i] = self->m_bufs[i].get_arrmeta();
     }
   }
   // Instantiate the arrfunc being buffered
-  ckb_offset = af->instantiate(af, af_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                               nsrc, src_tp_for_af, &buffered_arrmeta[0], kernreq,
-                               ectx, nd::array(), std::map<nd::string, ndt::type>());
+  ckb_offset =
+      af->instantiate(af, af_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                      nsrc, src_tp_for_af, &buffered_arrmeta[0], kernreq, ectx,
+                      nd::array(), std::map<nd::string, ndt::type>());
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->ensure_capacity(ckb_offset);
+      ->reserve(ckb_offset);
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   // Instantiate assignments for all the buffered operands
   for (intptr_t i = 0; i < nsrc; ++i) {
     if (!self->m_bufs[i].is_null()) {
       self->m_src_buf_ck_offsets[i] = ckb_offset - root_ckb_offset;
-      ckb_offset = make_assignment_kernel(NULL, NULL,
-          ckb, ckb_offset, src_tp_for_af[i], self->m_bufs[i].get_arrmeta(),
-          src_tp[i], src_arrmeta[i], kernreq, ectx, nd::array());
+      ckb_offset =
+          make_assignment_kernel(NULL, NULL, ckb, ckb_offset, src_tp_for_af[i],
+                                 self->m_bufs[i].get_arrmeta(), src_tp[i],
+                                 src_arrmeta[i], kernreq, ectx, nd::array());
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->ensure_capacity(ckb_offset);
+          ->reserve(ckb_offset);
       if (i < nsrc - 1) {
         self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                    ->get_at<self_type>(root_ckb_offset);

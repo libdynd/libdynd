@@ -53,7 +53,7 @@ namespace nd {
     {                                                                          \
       intptr_t ckb_offset = inout_ckb_offset;                                  \
       inc_ckb_offset<self_type>(inout_ckb_offset);                             \
-      ckb->ensure_capacity(inout_ckb_offset);                                  \
+      ckb->reserve(inout_ckb_offset);                                          \
       ckernel_prefix *rawself =                                                \
           ckb->template get_at<ckernel_prefix>(ckb_offset);                    \
       return ckb->template init<self_type>(rawself, kernreq,                   \
@@ -74,7 +74,7 @@ namespace nd {
     {                                                                          \
       intptr_t ckb_offset = inout_ckb_offset;                                  \
       inc_ckb_offset<self_type>(inout_ckb_offset);                             \
-      ckb->ensure_capacity_leaf(inout_ckb_offset);                             \
+      ckb->reserve_leaf(inout_ckb_offset);                                     \
       ckernel_prefix *rawself =                                                \
           ckb->template get_at<ckernel_prefix>(ckb_offset);                    \
       return ckb->template init<self_type>(rawself, kernreq,                   \
