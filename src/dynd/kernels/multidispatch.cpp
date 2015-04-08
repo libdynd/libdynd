@@ -56,26 +56,25 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
 }
 
 void nd::functional::old_multidispatch_ck::resolve_dst_type(
-    const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
+    char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {
-  const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
+  const vector<nd::arrfunc> *icd = self->get_data_as<vector<nd::arrfunc>>();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
-    const nd::arrfunc &af = (*icd)[i];
-    if (nsrc == af.get_type()->get_npos()) {
+    const nd::arrfunc &child = (*icd)[i];
+    if (nsrc == child.get_type()->get_npos()) {
       intptr_t isrc;
       std::map<nd::string, ndt::type> typevars;
       for (isrc = 0; isrc < nsrc; ++isrc) {
         if (!can_implicitly_convert(
-                src_tp[isrc], af.get_type()->get_pos_type(isrc), typevars)) {
+                src_tp[isrc], child.get_type()->get_pos_type(isrc), typevars)) {
           break;
         }
       }
       if (isrc == nsrc) {
-        dst_tp =
-            ndt::substitute(af.get_type()->get_return_type(), typevars, true);
+        child.get()->resolve_dst_type(child.get(), child.get_type(), data,
+                                      dst_tp, nsrc, src_tp, kwds, tp_vars);
         return;
       }
     }

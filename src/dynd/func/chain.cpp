@@ -33,5 +33,5 @@ nd::arrfunc nd::functional::chain(const nd::arrfunc &first,
   return as_arrfunc<unary_heap_chain_ck>(
       ndt::make_arrfunc(first.get_type()->get_pos_tuple(),
                         second.get_type()->get_return_type()),
-      icd, 0);
+      icd, first.get()->data_size + second.get()->data_size);
 }

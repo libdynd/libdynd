@@ -12,6 +12,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/elwise.hpp>
+#include <dynd/kernels/elwise.hpp>
 #include <dynd/kernels/option_kernels.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/func/callable.hpp>

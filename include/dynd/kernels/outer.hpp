@@ -7,6 +7,7 @@
 
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/kernels/elwise.hpp>
 
 namespace dynd {
 namespace nd {
