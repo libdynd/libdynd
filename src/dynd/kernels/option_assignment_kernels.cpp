@@ -200,7 +200,7 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
       dst_tp.extended<option_type>()->get_value_type();
   const ndt::type &src_val_tp =
       src_tp[0].extended<option_type>()->get_value_type();
-  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // instantiate src_is_avail
   const arrfunc_type_data *af =
       src_tp[0].extended<option_type>()->get_is_avail_arrfunc();
@@ -251,7 +251,7 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
   }
   const ndt::type &src_val_tp =
       src_tp[0].extended<option_type>()->get_value_type();
-  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // instantiate src_is_avail
   const arrfunc_type_data *af =
       src_tp[0].extended<option_type>()->get_is_avail_arrfunc();
@@ -353,7 +353,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   switch (tid) {
   case bool_type_id: {
     string_to_option_bool_ck *self =
-        string_to_option_bool_ck::create_leaf(ckb, kernreq, ckb_offset);
+        string_to_option_bool_ck::make(ckb, kernreq, ckb_offset);
     self->m_errmode = ectx->errmode;
     return ckb_offset;
   }
@@ -366,7 +366,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   case float32_type_id:
   case float64_type_id: {
     string_to_option_number_ck *self =
-        string_to_option_number_ck::create_leaf(ckb, kernreq, ckb_offset);
+        string_to_option_number_ck::make(ckb, kernreq, ckb_offset);
     self->m_tid = tid;
     self->m_errmode = ectx->errmode;
     return ckb_offset;
@@ -386,7 +386,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   // missing value tokens, then uses the standard value assignment
   intptr_t root_ckb_offset = ckb_offset;
   string_to_option_tp_ck *self =
-      string_to_option_tp_ck::create(ckb, kernreq, ckb_offset);
+      string_to_option_tp_ck::make(ckb, kernreq, ckb_offset);
   // First child ckernel is the value assignment
   ckb_offset = ::make_assignment_kernel(
       NULL, NULL, ckb, ckb_offset,

@@ -91,7 +91,7 @@ intptr_t nd::functional::unary_heap_chain_ck::instantiate(
   if (first_tp->get_npos() == 1) {
     intptr_t root_ckb_offset = ckb_offset;
     nd::functional::unary_heap_chain_ck *self =
-        nd::functional::unary_heap_chain_ck::create(ckb, kernreq, ckb_offset);
+        nd::functional::unary_heap_chain_ck::make(ckb, kernreq, ckb_offset);
     self->m_buf_tp = buf_tp;
     arrmeta_holder(buf_tp).swap(self->m_buf_arrmeta);
     self->m_buf_arrmeta.arrmeta_default_construct(true);

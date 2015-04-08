@@ -86,7 +86,7 @@ static intptr_t instantiate_int_offset_arrfunc(
     ss << src_tp[0] << ") -> " << dst_tp;
     throw type_error(ss.str());
   }
-  self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_offset = *self_af->get_data_as<Tdst>();
   return ckb_offset;
 }

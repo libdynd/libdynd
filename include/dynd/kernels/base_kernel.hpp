@@ -48,8 +48,8 @@ namespace nd {
      * to the position after it. \                                             \
      */                                                                        \
     template <typename CKBT, typename... A>                                    \
-    static self_type *create(CKBT *ckb, kernel_request_t kernreq,              \
-                             intptr_t &inout_ckb_offset, A &&... args)         \
+    static self_type *make(CKBT *ckb, kernel_request_t kernreq,                \
+                           intptr_t &inout_ckb_offset, A &&... args)           \
     {                                                                          \
       intptr_t ckb_offset = inout_ckb_offset;                                  \
       inc_ckb_offset<self_type>(inout_ckb_offset);                             \
@@ -61,29 +61,8 @@ namespace nd {
     }                                                                          \
                                                                                \
     template <typename... A>                                                   \
-    static self_type *create(void *ckb, kernel_request_t kernreq,              \
-                             intptr_t &inout_ckb_offset, A &&... args);        \
-                                                                               \
-    /** \                                                                      \
-     * Creates the ckernel, and increments ``inckb_offset`` \                  \
-     * to the position after it. \                                             \
-     */                                                                        \
-    template <typename CKBT, typename... A>                                    \
-    static self_type *create_leaf(CKBT *ckb, kernel_request_t kernreq,         \
-                                  intptr_t &inout_ckb_offset, A &&... args)    \
-    {                                                                          \
-      intptr_t ckb_offset = inout_ckb_offset;                                  \
-      inc_ckb_offset<self_type>(inout_ckb_offset);                             \
-      ckb->reserve_leaf(inout_ckb_offset);                                     \
-      ckernel_prefix *rawself =                                                \
-          ckb->template get_at<ckernel_prefix>(ckb_offset);                    \
-      return ckb->template init<self_type>(rawself, kernreq,                   \
-                                           std::forward<A>(args)...);          \
-    }                                                                          \
-                                                                               \
-    template <typename... A>                                                   \
-    static self_type *create_leaf(void *ckb, kernel_request_t kernreq,         \
-                                  intptr_t &inout_ckb_offset, A &&... args);   \
+    static self_type *make(void *ckb, kernel_request_t kernreq,                \
+                           intptr_t &inout_ckb_offset, A &&... args);          \
                                                                                \
     /** Initializes just the base.function member. */                          \
     __VA_ARGS__ void init_kernfunc(kernel_request_t kernreq)                   \
@@ -193,7 +172,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),                                    \
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
-      self_type::create(ckb, kernreq, ckb_offset);                             \
+      self_type::make(ckb, kernreq, ckb_offset);                               \
       return ckb_offset;                                                       \
     }                                                                          \
                                                                                \
@@ -262,31 +241,14 @@ namespace nd {
   template <typename T>
   template <typename... A>
   typename base_kernel<T, kernel_request_host, -1>::self_type *
-  base_kernel<T, kernel_request_host, -1>::create(void *ckb,
-                                                  kernel_request_t kernreq,
-                                                  intptr_t &inout_ckb_offset,
-                                                  A &&... args)
+  base_kernel<T, kernel_request_host, -1>::make(void *ckb,
+                                                kernel_request_t kernreq,
+                                                intptr_t &inout_ckb_offset,
+                                                A &&... args)
   {
     switch (kernreq & kernel_request_memory) {
     case kernel_request_host:
-      return self_type::create(
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-          kernreq, inout_ckb_offset, std::forward<A>(args)...);
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
-  }
-
-  template <typename T>
-  template <typename... A>
-  typename base_kernel<T, kernel_request_host, -1>::self_type *
-  base_kernel<T, kernel_request_host, -1>::create_leaf(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_host:
-      return self_type::create_leaf(
+      return self_type::make(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
           kernreq, inout_ckb_offset, std::forward<A>(args)...);
     default:
@@ -301,31 +263,13 @@ namespace nd {
   template <typename T>
   template <typename... A>
   typename base_kernel<T, kernel_request_cuda_device, -1>::self_type *
-  base_kernel<T, kernel_request_cuda_device, -1>::create(
+  base_kernel<T, kernel_request_cuda_device, -1>::make(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
     switch (kernreq & kernel_request_memory) {
     case kernel_request_cuda_device:
-      return self_type::create(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
-  }
-
-  template <typename T>
-  template <typename... A>
-  typename base_kernel<T, kernel_request_cuda_device, -1>::self_type *
-  base_kernel<T, kernel_request_cuda_device, -1>::create_leaf(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_cuda_device:
-      return self_type::create_leaf(
+      return self_type::make(
           reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
           kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
           std::forward<A>(args)...);
@@ -343,42 +287,18 @@ namespace nd {
   template <typename T>
   template <typename... A>
   typename base_kernel<T, kernel_request_cuda_host_device, -1>::self_type *
-  base_kernel<T, kernel_request_cuda_host_device, -1>::create(
+  base_kernel<T, kernel_request_cuda_host_device, -1>::make(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
     switch (kernreq & kernel_request_memory) {
     case kernel_request_host:
-      return self_type::create(
+      return self_type::make(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
           kernreq, inout_ckb_offset, std::forward<A>(args)...);
 #ifdef __CUDACC__
     case kernel_request_cuda_device:
-      return self_type::create(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
-#endif
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
-  }
-
-  template <typename T>
-  template <typename... A>
-  typename base_kernel<T, kernel_request_cuda_host_device, -1>::self_type *
-  base_kernel<T, kernel_request_cuda_host_device, -1>::create_leaf(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_host:
-      return self_type::create_leaf(
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-          kernreq, inout_ckb_offset, std::forward<A>(args)...);
-#ifdef __CUDACC__
-    case kernel_request_cuda_device:
-      return self_type::create_leaf(
+      return self_type::make(
           reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
           kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
           std::forward<A>(args)...);
@@ -392,12 +312,12 @@ namespace nd {
 
 #undef BASE_KERNEL
 
-  typedef void *(*create_t)(void *, kernel_request_t, intptr_t &);
+  typedef void *(*make_t)(void *, kernel_request_t, intptr_t &);
 
   template <typename T>
-  void *create(void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset)
+  void *make(void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset)
   {
-    return T::create(ckb, kernreq, inout_ckb_offset);
+    return T::make(ckb, kernreq, inout_ckb_offset);
   }
 
 } // namespace dynd::nd

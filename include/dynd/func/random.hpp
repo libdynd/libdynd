@@ -82,7 +82,7 @@ namespace nd {
       R a = kwds.p("a").as<R>();
       R b = kwds.p("b").as<R>();
 
-      self_type::create(ckb, kernreq, ckb_offset, g.get(), a, b);
+      self_type::make(ckb, kernreq, ckb_offset, g.get(), a, b);
       return ckb_offset;
     }
   };
@@ -146,7 +146,7 @@ namespace nd {
       R a = kwds.p("a").as<R>();
       R b = kwds.p("b").as<R>();
 
-      self_type::create(ckb, kernreq, ckb_offset, g.get(), a, b);
+      self_type::make(ckb, kernreq, ckb_offset, g.get(), a, b);
       return ckb_offset;
     }
   };
@@ -205,13 +205,13 @@ namespace nd {
     {
       if ((kernreq & kernel_request_memory) == kernel_request_host) {
         typedef cuda_launch_ck<0> self_type;
-        self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+        self_type *self = self_type::make(ckb, kernreq, ckb_offset, 1, 1);
         ckb = &self->ckb;
         kernreq |= kernel_request_cuda_device;
         ckb_offset = 0;
       }
 
-      self_type::create(ckb, kernreq, ckb_offset, *self->get_data_as<S *>());
+      self_type::make(ckb, kernreq, ckb_offset, *self->get_data_as<S *>());
       return ckb_offset;
     }
   };
@@ -281,7 +281,7 @@ namespace nd {
       R a = kwds.p("a").as<R>();
       R b = kwds.p("b").as<R>();
 
-      self_type::create(ckb, kernreq, ckb_offset, g.get(), a, b);
+      self_type::make(ckb, kernreq, ckb_offset, g.get(), a, b);
       return ckb_offset;
     }
   };
@@ -328,13 +328,13 @@ namespace nd {
     {
       if ((kernreq & kernel_request_memory) == kernel_request_host) {
         typedef cuda_launch_ck<0> self_type;
-        self_type *self = self_type::create(ckb, kernreq, ckb_offset, 1, 1);
+        self_type *self = self_type::make(ckb, kernreq, ckb_offset, 1, 1);
         ckb = &self->ckb;
         kernreq |= kernel_request_cuda_device;
         ckb_offset = 0;
       }
 
-      self_type::create(ckb, kernreq, ckb_offset, *self->get_data_as<S *>());
+      self_type::make(ckb, kernreq, ckb_offset, *self->get_data_as<S *>());
       return ckb_offset;
     }
   };

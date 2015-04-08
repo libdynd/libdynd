@@ -162,7 +162,7 @@ size_t dynd::make_byteswap_assignment_function(
     }
 
     // Otherwise use the general case ckernel
-    byteswap_ck *self = byteswap_ck::create_leaf(ckb, kernreq, ckb_offset);
+    byteswap_ck *self = byteswap_ck::make(ckb, kernreq, ckb_offset);
     self->m_data_size = data_size;
     return ckb_offset;
 }
@@ -201,7 +201,7 @@ size_t dynd::make_pairwise_byteswap_assignment_function(
 
     // Otherwise use the general case ckernel
     pairwise_byteswap_ck *self =
-        pairwise_byteswap_ck::create_leaf(ckb, kernreq, ckb_offset);
+        pairwise_byteswap_ck::make(ckb, kernreq, ckb_offset);
     self->m_data_size = data_size;
     return ckb_offset;
 }

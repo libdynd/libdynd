@@ -67,7 +67,7 @@ intptr_t nd::masked_take_ck::instantiate(
 {
   typedef nd::masked_take_ck self_type;
 
-  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
 
   if (dst_tp.get_type_id() != var_dim_type_id) {
     stringstream ss;
@@ -158,7 +158,7 @@ intptr_t nd::indexed_take_ck::instantiate(
 {
   typedef nd::indexed_take_ck self_type;
 
-  self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
 
   ndt::type dst_el_tp;
   const char *dst_el_meta;

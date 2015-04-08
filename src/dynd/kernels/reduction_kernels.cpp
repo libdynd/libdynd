@@ -180,7 +180,7 @@ struct mean1d_arrfunc_data {
   {
     typedef double_mean1d_ck self_type;
     mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();
-    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     intptr_t src_dim_size, src_stride;
     ndt::type src_el_tp;
     const char *src_el_arrmeta;

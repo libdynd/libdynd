@@ -50,7 +50,7 @@ size_t dynd::make_string_to_date_assignment_kernel(
         throw runtime_error(ss.str());
     }
 
-    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_src_string_tp = src_string_tp;
     self->m_src_arrmeta = src_arrmeta;
     self->m_errmode = ectx->errmode;
@@ -95,7 +95,7 @@ size_t dynd::make_date_to_string_assignment_kernel(
         throw runtime_error(ss.str());
     }
 
-    self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+    self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_dst_string_tp = dst_string_tp;
     self->m_dst_arrmeta = dst_arrmeta;
     self->m_ectx = *ectx;

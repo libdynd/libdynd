@@ -308,7 +308,7 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
   if (src_elwise_property_index < field_count) {
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     const ndt::type &field_type = get_field_type(src_elwise_property_index);
-    self_type *self = self_type::create(ckb, kernreq, ckb_offset);
+    self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_field_offset =
         get_data_offsets(src_arrmeta)[src_elwise_property_index];
     return ::make_assignment_kernel(

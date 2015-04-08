@@ -383,7 +383,7 @@ size_t pointer_type::make_operand_to_value_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  operand_to_value_ck::create(ckb, kernreq, ckb_offset);
+  operand_to_value_ck::make(ckb, kernreq, ckb_offset);
   return ::make_assignment_kernel(NULL, NULL, ckb, ckb_offset, m_target_tp,
                                   dst_arrmeta, m_target_tp,
                                   src_arrmeta + sizeof(pointer_type_arrmeta),

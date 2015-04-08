@@ -300,7 +300,7 @@ static intptr_t make_arrfunc_to_string_assignment_kernel(
     const eval::eval_context *ectx)
 {
   typedef arrfunc_to_string_ck self_type;
-  self_type *self = self_type::create_leaf(ckb, kernreq, ckb_offset);
+  self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // The kernel data owns a reference to this type
   self->m_src_tp = src_tp;
   self->m_dst_string_dt = dst_string_dt;

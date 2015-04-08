@@ -97,12 +97,12 @@ struct take_by_pointer_virtual_ck : nd::base_virtual_kernel<take_by_pointer_virt
       }
     }
 
-    take_by_pointer_outer_ck::create(
+    take_by_pointer_outer_ck::make(
         ckb, kernreq, ckb_offset, dst_size_stride[0].dim_size,
         dst_size_stride[0].stride, src_size_stride[1][0].stride);
 
     for (intptr_t i = 0; i < ndim; ++i) {
-      take_by_pointer_ck::create(ckb, kernel_request_single, ckb_offset,
+      take_by_pointer_ck::make(ckb, kernel_request_single, ckb_offset,
                                  src_size_stride[0][i].dim_size,
                                  src_size_stride[0][i].stride,
                                  src_size_stride[1][1].stride);

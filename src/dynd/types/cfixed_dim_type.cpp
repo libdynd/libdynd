@@ -555,7 +555,7 @@ intptr_t cfixed_dim_type::make_assignment_kernel(
 
     if (src_tp.get_ndim() < dst_tp.get_ndim()) {
       kernels::strided_assign_ck *ck_self =
-          kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
+          kernels::strided_assign_ck::make(ckb, kernreq, ckb_offset);
       ck_self->m_size = get_fixed_dim_size();
       ck_self->m_dst_stride = get_fixed_stride();
       // If the src has fewer dimensions, broadcast it across this one
@@ -567,7 +567,7 @@ intptr_t cfixed_dim_type::make_assignment_kernel(
     } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
                                      &src_el_tp, &src_el_arrmeta)) {
       kernels::strided_assign_ck *ck_self =
-          kernels::strided_assign_ck::create(ckb, kernreq, ckb_offset);
+          kernels::strided_assign_ck::make(ckb, kernreq, ckb_offset);
       ck_self->m_size = get_fixed_dim_size();
       ck_self->m_dst_stride = get_fixed_stride();
       ck_self->m_src_stride = src_stride;
