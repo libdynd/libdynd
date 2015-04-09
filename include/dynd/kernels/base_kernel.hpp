@@ -47,7 +47,7 @@ namespace nd {
     static self_type *reserve(CKBT *ckb, intptr_t ckb_offset,                  \
                               size_t requested_capacity)                       \
     {                                                                          \
-      ckb->ensure_capacity(requested_capacity);                                \
+      ckb->reserve(requested_capacity);                                        \
       return get_self(ckb, ckb_offset);                                        \
     }                                                                          \
                                                                                \
