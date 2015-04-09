@@ -10,7 +10,7 @@
 
 #include <dynd/types/datashape_formatter.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dimsym_type.hpp>
+#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
@@ -128,7 +128,7 @@ TEST(DataShapeFormatter, DTypeUniformArrays)
 {
   EXPECT_EQ(
       "Fixed * Fixed * Fixed * int32",
-      format_datashape(ndt::make_fixed_dimsym(ndt::make_type<int32_t>(), 3),
+      format_datashape(ndt::make_fixed_dim_kind(ndt::make_type<int32_t>(), 3),
                        "", false));
   EXPECT_EQ("var * int32",
             format_datashape(ndt::make_var_dim(ndt::make_type<int32_t>()), "",
@@ -142,7 +142,7 @@ TEST(DataShapeFormatter, DTypeUniformArrays)
                                  3, ndt::make_type<int32_t>())),
                              "", false));
   EXPECT_EQ("var * Fixed * int32",
-            format_datashape(ndt::make_var_dim(ndt::make_fixed_dimsym(
+            format_datashape(ndt::make_var_dim(ndt::make_fixed_dim_kind(
                                  ndt::make_type<int32_t>())),
                              "", false));
 }

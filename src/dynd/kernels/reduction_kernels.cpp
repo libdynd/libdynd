@@ -5,7 +5,7 @@
 
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/array.hpp>
-#include <dynd/types/fixed_dimsym_type.hpp>
+#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 
 using namespace std;
@@ -129,7 +129,7 @@ nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 {
   nd::arrfunc sum_ew = kernels::make_builtin_sum_reduction_arrfunc(tid);
   bool reduction_dimflags[1] = {true};
-  return lift_reduction_arrfunc(sum_ew, ndt::make_fixed_dimsym(ndt::type(tid)),
+  return lift_reduction_arrfunc(sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)),
                                 nd::array(), false, 1, reduction_dimflags, true,
                                 true, false, 0);
 }
@@ -222,7 +222,7 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     throw type_error(ss.str());
   }
   nd::array mean1d = nd::empty(ndt::make_arrfunc(
-      ndt::make_tuple(ndt::make_fixed_dimsym(ndt::make_type<double>())),
+      ndt::make_tuple(ndt::make_fixed_dim_kind(ndt::make_type<double>())),
       ndt::make_type<double>()));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());

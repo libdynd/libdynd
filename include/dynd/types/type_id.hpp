@@ -151,8 +151,6 @@ enum type_id_t {
   ndarrayarg_type_id,
 
   // Named symbolic types
-  // "Fixed", an symbolic fixed array dimension type
-//  fixed_dimsym_type_id,
   // "Any", matching any type (dimensions and dtype)
   any_sym_type_id,
 

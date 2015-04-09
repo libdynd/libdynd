@@ -900,7 +900,7 @@ namespace ndt {
 
     template <typename T, int N>
     struct type_from<nd::strided_vals<T, N>> {
-      static type make() { return make_fixed_dimsym(type_from<T>::make(), N); }
+      static type make() { return make_fixed_dim_kind(type_from<T>::make(), N); }
     };
 
     template <typename T, int N>

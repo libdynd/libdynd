@@ -6,7 +6,7 @@
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/fixed_dimsym_type.hpp>
+#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -171,7 +171,7 @@ ndt::type dim_fragment_type::apply_to_dtype(const ndt::type& dtp) const
                     tp = ndt::make_var_dim(tp);
                     break;
                 case dim_fragment_fixed_sym:
-                    tp = ndt::make_fixed_dimsym(tp);
+                    tp = ndt::make_fixed_dim_kind(tp);
                     break;
                 default:
                     tp = ndt::make_fixed_dim(m_tagged_dims[i], tp);
