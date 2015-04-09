@@ -321,7 +321,7 @@ static size_t make_expr_type_offset_applier(void *ckb, intptr_t ckb_offset,
     inc_ckb_offset(ckb_offset, sizeof(expr_type_offset_applier_general_extra) +
                                    src_count * sizeof(size_t));
     reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-        ->reserve(ckb_offset);
+        ->reserve(ckb_offset + sizeof(ckernel_prefix));
     expr_type_offset_applier_general_extra *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->get_at<expr_type_offset_applier_general_extra>(root_ckb_offset);

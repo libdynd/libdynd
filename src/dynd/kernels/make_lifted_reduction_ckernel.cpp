@@ -856,7 +856,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   }
   // Make sure there's capacity for the next ckernel
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->reserve(ckb_offset);
+      ->reserve(ckb_offset + sizeof(ckernel_prefix));
   // Need to retrieve 'e' again because it may have moved
   e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->get_at<strided_inner_reduction_kernel_extra>(root_ckb_offset);
@@ -1000,7 +1000,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   }
   // Make sure there's capacity for the next ckernel
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->reserve(ckb_offset);
+      ->reserve(ckb_offset + sizeof(ckernel_prefix));
   // Need to retrieve 'e' again because it may have moved
   e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->get_at<strided_inner_broadcast_kernel_extra>(root_ckb_offset);

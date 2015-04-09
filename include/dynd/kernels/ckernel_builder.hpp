@@ -82,25 +82,9 @@ public:
    * This function ensures that the ckernel's data
    * is at least the required number of bytes. It
    * should only be called during the construction phase
-   * of the kernel.
-   *
-   * NOTE: This function ensures that there is room for
-   *       another base at the end, so if you are sure
-   *       that you're a leaf kernel, use reserve_leaf
-   *       instead.
-   */
-  void reserve(intptr_t requested_capacity)
-  {
-    reserve_leaf(requested_capacity + sizeof(ckernel_prefix));
-  }
-
-  /**
-   * This function ensures that the ckernel's data
-   * is at least the required number of bytes. It
-   * should only be called during the construction phase
    * of the kernel when constructing a leaf kernel.
    */
-  void reserve_leaf(intptr_t requested_capacity)
+  void reserve(intptr_t requested_capacity)
   {
     if (m_capacity < requested_capacity) {
       // Grow by a factor of 1.5

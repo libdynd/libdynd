@@ -186,7 +186,7 @@ size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset,
     ckb_offset += e->buf[1].data_size;
   }
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->reserve(ckb_offset);
+      ->reserve(ckb_offset + sizeof(ckernel_prefix));
   // Have to re-retrieve 'e', because allocating the buffer data may invalidate
   // it
   e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
