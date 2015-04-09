@@ -65,7 +65,7 @@ namespace nd {
     }                                                                          \
                                                                                \
     /** \                                                                      \
-     * Creates the ckernel, and increments ``inckb_offset`` \                  \
+     * Creates the ckernel, and increments ``inckb_offset``  \                 \
      * to the position after it. \                                             \
      */                                                                        \
     template <typename CKBT, typename... A>                                    \
