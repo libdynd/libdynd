@@ -94,13 +94,14 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
     } else {
       ndt::type subtype = lifted_arr_type.get_type_at_dimension(NULL, i);
       switch (subtype.get_type_id()) {
-      case fixed_dimsym_type_id:
-        lifted_dst_type = ndt::make_fixed_dimsym(lifted_dst_type);
-        break;
       case fixed_dim_type_id:
-        lifted_dst_type = ndt::make_fixed_dim(
-            subtype.extended<fixed_dim_type>()->get_fixed_dim_size(),
-            lifted_dst_type);
+        if (subtype.get_kind() == kind_kind) {
+          lifted_dst_type = ndt::make_fixed_dimsym(lifted_dst_type);
+        } else {
+          lifted_dst_type = ndt::make_fixed_dim(
+              subtype.extended<fixed_dim_type>()->get_fixed_dim_size(),
+              lifted_dst_type);
+        }
         break;
       case cfixed_dim_type_id:
         lifted_dst_type = ndt::make_fixed_dim(

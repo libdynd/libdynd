@@ -20,8 +20,9 @@
 using namespace std;
 using namespace dynd;
 
+// fixed_dim_kind_type
 fixed_dimsym_type::fixed_dimsym_type(const ndt::type &element_tp)
-    : base_dim_type(fixed_dimsym_type_id, kind_kind, element_tp, 0,
+    : base_dim_type(fixed_dim_type_id, kind_kind, element_tp, 0,
                     element_tp.get_data_alignment(), sizeof(size_stride_t),
                     type_flag_symbolic, true)
 {
@@ -146,7 +147,9 @@ bool fixed_dimsym_type::operator==(const base_type &rhs) const
   if (this == &rhs) {
     return true;
   }
-  else if (rhs.get_type_id() != fixed_dimsym_type_id) {
+  else if (rhs.get_type_id() != fixed_dim_type_id) {
+    return false;
+  } else if (rhs.get_kind() != kind_kind) {
     return false;
   }
   else {
@@ -230,20 +233,22 @@ bool fixed_dimsym_type::match(const char *arrmeta,
 {
   switch (candidate_tp.get_type_id()) {
   case fixed_dim_type_id:
-    return m_element_tp.match(
-        arrmeta, candidate_tp.extended<fixed_dim_type>()->get_element_type(),
-        DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(fixed_dim_type_arrmeta)),
-        tp_vars);
+    if (candidate_tp.get_kind() == kind_kind) {
+      return m_element_tp.match(
+          arrmeta, candidate_tp.extended<fixed_dimsym_type>()->get_element_type(),
+          candidate_arrmeta, tp_vars);
+    } else {
+      return m_element_tp.match(
+          arrmeta, candidate_tp.extended<fixed_dim_type>()->get_element_type(),
+          DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(fixed_dim_type_arrmeta)),
+          tp_vars);
+    }
   case cfixed_dim_type_id:
     return m_element_tp.match(
         arrmeta, candidate_tp.extended<cfixed_dim_type>()->get_element_type(),
         DYND_INC_IF_NOT_NULL(candidate_arrmeta,
                              sizeof(cfixed_dim_type_arrmeta)),
         tp_vars);
-  case fixed_dimsym_type_id:
-    return m_element_tp.match(
-        arrmeta, candidate_tp.extended<fixed_dimsym_type>()->get_element_type(),
-        candidate_arrmeta, tp_vars);
   case any_sym_type_id:
     return true;
   default:

@@ -349,8 +349,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       return result;
     }
   }
-  else if (tp.get_type_id() == fixed_dim_type_id ||
-           tp.get_type_id() == fixed_dimsym_type_id) {
+  else if (tp.get_type_id() == fixed_dim_type_id) {
     ndt::type arr_tp = tp;
     ndt::type el_tp = arr_tp.extended<base_dim_type>()->get_element_type();
     size_t el_data_size = el_tp.get_data_size();
@@ -360,7 +359,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
         offset_is_aligned(reinterpret_cast<size_t>(data_ptr),
                           arr_tp.get_data_alignment())) {
       intptr_t dim_size = data_size / el_data_size;
-      if (arr_tp.get_type_id() == fixed_dim_type_id) {
+      if (arr_tp.get_kind() != kind_kind) {
         if (arr_tp.extended<fixed_dim_type>()->get_fixed_dim_size() != dim_size) {
           return nd::array();
         }

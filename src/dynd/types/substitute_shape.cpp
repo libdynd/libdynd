@@ -57,28 +57,29 @@ static void substitute_shape_visitor(const ndt::type &tp,
       substitute_shape_visitor(subtp, 0, extra, subtp, out_was_transformed);
     }
     switch (tp.get_type_id()) {
-    case fixed_dimsym_type_id:
-      if (dim_size >= 0) {
-        out_transformed_tp = ndt::make_fixed_dim(dim_size, subtp);
-        out_was_transformed = true;
-      }
-      else {
-        ssd->throw_error();
-      }
-      return;
     case fixed_dim_type_id:
-      if (dim_size < 0 ||
-          dim_size == tp.extended<fixed_dim_type>()->get_fixed_dim_size()) {
-        if (!out_was_transformed) {
-          out_transformed_tp = tp;
+      if (tp.get_kind() == kind_kind) {
+        if (dim_size >= 0) {
+          out_transformed_tp = ndt::make_fixed_dim(dim_size, subtp);
+          out_was_transformed = true;
         }
         else {
-          out_transformed_tp = ndt::make_fixed_dim(
-              tp.extended<fixed_dim_type>()->get_fixed_dim_size(), subtp);
+          ssd->throw_error();
         }
-      }
-      else {
-        ssd->throw_error();
+      } else {
+        if (dim_size < 0 ||
+            dim_size == tp.extended<fixed_dim_type>()->get_fixed_dim_size()) {
+          if (!out_was_transformed) {
+            out_transformed_tp = tp;
+          }
+          else {
+            out_transformed_tp = ndt::make_fixed_dim(
+                tp.extended<fixed_dim_type>()->get_fixed_dim_size(), subtp);
+          }
+        }
+        else {
+          ssd->throw_error();
+        }
       }
       break;
     case cfixed_dim_type_id:

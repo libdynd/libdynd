@@ -50,13 +50,14 @@ void pow_dimsym_type::print_type(std::ostream& o) const
 {
   switch (m_base_tp.get_type_id()) {
   case fixed_dim_type_id:
-    o << m_base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
+    if (m_base_tp.get_kind() == kind_kind) {
+      o << "Fixed";
+    } else {
+      o << m_base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
+    }
     break;
   case cfixed_dim_type_id:
     o << m_base_tp.extended<cfixed_dim_type>()->get_fixed_dim_size();
-    break;
-  case fixed_dimsym_type_id:
-    o << "Fixed";
     break;
   case var_dim_type_id:
     o << "var";
@@ -257,21 +258,21 @@ bool pow_dimsym_type::match(const char *arrmeta, const ndt::type &candidate_tp,
   // Now make sure the base_tp is repeated the right number of times
   ndt::type concrete_subtype = candidate_tp;
   switch (base_tp.get_type_id()) {
-  case fixed_dimsym_type_id:
-    for (intptr_t i = 0; i < exponent; ++i) {
-      switch (concrete_subtype.get_type_id()) {
-      case fixed_dimsym_type_id:
-      case fixed_dim_type_id:
-      case cfixed_dim_type_id:
-        concrete_subtype =
-            concrete_subtype.extended<base_dim_type>()->get_element_type();
-        break;
-      default:
-        return false;
-      }
-    }
-    break;
   case fixed_dim_type_id: {
+    if (base_tp.get_kind() == kind_kind) {
+      for (intptr_t i = 0; i < exponent; ++i) {
+        switch (concrete_subtype.get_type_id()) {
+        case fixed_dim_type_id:
+        case cfixed_dim_type_id:
+          concrete_subtype =
+              concrete_subtype.extended<base_dim_type>()->get_element_type();
+          break;
+        default:
+          return false;
+        }
+      }
+      break;
+    } else {
     intptr_t dim_size =
         base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
     for (intptr_t i = 0; i < exponent; ++i) {
@@ -286,6 +287,7 @@ bool pow_dimsym_type::match(const char *arrmeta, const ndt::type &candidate_tp,
       }
     }
     break;
+    }
   }
   case var_dim_type_id:
     for (intptr_t i = 0; i < exponent; ++i) {

@@ -29,12 +29,15 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
     for (int i = 0; i < ndim; ++i) {
         switch (dtp.get_type_id()) {
             case fixed_dim_type_id:
-                out_tagged_dims[i] = dtp.extended<fixed_dim_type>()->get_fixed_dim_size();
+                if (dtp.get_kind() == kind_kind) {
+                    out_tagged_dims[i] = -2;
+                } else {
+                    out_tagged_dims[i] = dtp.extended<fixed_dim_type>()->get_fixed_dim_size();
+                }
                 break;
             case cfixed_dim_type_id:
                 out_tagged_dims[i] = tp.extended<fixed_dim_type>()->get_fixed_dim_size();
                 break;
-            case fixed_dimsym_type_id:
             case offset_dim_type_id:
                 out_tagged_dims[i] = -2;
                 break;
@@ -61,11 +64,17 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
         intptr_t tagged_dim = tagged_dims[i], dim_size;
         switch (tp.get_type_id()) {
             case fixed_dim_type_id:
-                dim_size = tp.extended<fixed_dim_type>()->get_fixed_dim_size();
-                if (tagged_dim < 0 || tagged_dim == 1) {
-                    out_tagged_dims[i] = dim_size;
-                } else if (tagged_dim != dim_size) {
+                if (tp.get_kind() == kind_kind) {
+                    if (tagged_dim < 0) {
+                        out_tagged_dims[i] = -2;
+                    }
+                } else {
+                    dim_size = tp.extended<fixed_dim_type>()->get_fixed_dim_size();
+                    if (tagged_dim < 0 || tagged_dim == 1) {
+                        out_tagged_dims[i] = dim_size;
+                    } else if (tagged_dim != dim_size) {
                     return false;
+                    }
                 }
                 break;
             case cfixed_dim_type_id:
@@ -76,7 +85,6 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
                     return false;
                 }
                 break;
-            case fixed_dimsym_type_id:
             case offset_dim_type_id:
                 if (tagged_dim < 0) {
                     out_tagged_dims[i] = -2;
