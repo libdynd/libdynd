@@ -508,7 +508,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
     if (src_type_id >= 0 && src_type_id < builtin_type_id_count) {
         ckb_offset = make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
         builtin_to_string_kernel_extra *e =
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<builtin_to_string_kernel_extra>(ckb_offset);
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<builtin_to_string_kernel_extra>(ckb_offset);
         e->base.set_function<expr_single_t>(builtin_to_string_kernel_extra::single);
         e->base.destructor = builtin_to_string_kernel_extra::destruct;
         // The kernel data owns this reference

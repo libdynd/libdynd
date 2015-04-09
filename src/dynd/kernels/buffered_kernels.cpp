@@ -130,7 +130,7 @@ size_t dynd::make_buffered_ckernel(
                       nsrc, src_tp_for_af, &buffered_arrmeta[0], kernreq, ectx,
                       nd::array(), std::map<nd::string, ndt::type>());
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->reserve(ckb_offset);
+      ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   // Instantiate assignments for all the buffered operands
@@ -142,7 +142,7 @@ size_t dynd::make_buffered_ckernel(
                                  self->m_bufs[i].get_arrmeta(), src_tp[i],
                                  src_arrmeta[i], kernreq, ectx, nd::array());
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->reserve(ckb_offset);
+          ->reserve(ckb_offset + sizeof(ckernel_prefix));
       if (i < nsrc - 1) {
         self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                    ->get_at<self_type>(root_ckb_offset);

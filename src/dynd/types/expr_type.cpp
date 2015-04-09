@@ -289,7 +289,7 @@ static size_t make_expr_type_offset_applier(void *ckb, intptr_t ckb_offset,
   case 2: {
     expr_type_offset_applier_extra<2> *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck_leaf<expr_type_offset_applier_extra<2>>(ckb_offset);
+            ->alloc_ck<expr_type_offset_applier_extra<2>>(ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
     e->base.set_function<expr_single_t>(
         &expr_type_offset_applier_extra<2>::single);
@@ -299,7 +299,7 @@ static size_t make_expr_type_offset_applier(void *ckb, intptr_t ckb_offset,
   case 3: {
     expr_type_offset_applier_extra<3> *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck_leaf<expr_type_offset_applier_extra<3>>(ckb_offset);
+            ->alloc_ck<expr_type_offset_applier_extra<3>>(ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
     e->base.set_function<expr_single_t>(
         &expr_type_offset_applier_extra<3>::single);
@@ -309,7 +309,7 @@ static size_t make_expr_type_offset_applier(void *ckb, intptr_t ckb_offset,
   case 4: {
     expr_type_offset_applier_extra<4> *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck_leaf<expr_type_offset_applier_extra<4>>(ckb_offset);
+            ->alloc_ck<expr_type_offset_applier_extra<4>>(ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
     e->base.set_function<expr_single_t>(
         &expr_type_offset_applier_extra<4>::single);
@@ -321,7 +321,7 @@ static size_t make_expr_type_offset_applier(void *ckb, intptr_t ckb_offset,
     inc_ckb_offset(ckb_offset, sizeof(expr_type_offset_applier_general_extra) +
                                    src_count * sizeof(size_t));
     reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-        ->reserve(ckb_offset);
+        ->reserve(ckb_offset + sizeof(ckernel_prefix));
     expr_type_offset_applier_general_extra *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->get_at<expr_type_offset_applier_general_extra>(root_ckb_offset);
@@ -347,7 +347,7 @@ static size_t make_src_deref_ckernel(void *ckb, intptr_t ckb_offset)
 {
   ckernel_prefix *self =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+          ->alloc_ck<ckernel_prefix>(ckb_offset);
   self->set_function<expr_single_t>(&src_deref_single);
   self->destructor = &kernels::destroy_trivial_parent_ckernel;
   return ckb_offset;

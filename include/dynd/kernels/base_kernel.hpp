@@ -43,8 +43,29 @@ namespace nd {
       return ckb->template get_at<self_type>(ckb_offset);                      \
     }                                                                          \
                                                                                \
+    template <typename CKBT>                                                   \
+    static self_type *reserve(CKBT *ckb, intptr_t ckb_offset,                  \
+                              size_t requested_capacity)                       \
+    {                                                                          \
+      ckb->reserve(requested_capacity);                                        \
+      return get_self(ckb, ckb_offset);                                        \
+    }                                                                          \
+                                                                               \
+    static self_type *reserve(void *ckb, kernel_request_t kernreq,             \
+                              intptr_t ckb_offset, size_t requested_capacity)  \
+    {                                                                          \
+      switch (kernreq & kernel_request_memory) {                               \
+      case kernel_request_host:                                                \
+        return reserve(                                                        \
+            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),     \
+            ckb_offset, requested_capacity);                                   \
+      default:                                                                 \
+        throw std::invalid_argument("unrecognized ckernel request");           \
+      }                                                                        \
+    }                                                                          \
+                                                                               \
     /** \                                                                      \
-     * Creates the ckernel, and increments ``inckb_offset`` \                  \
+     * Creates the ckernel, and increments ``inckb_offset``  \                 \
      * to the position after it. \                                             \
      */                                                                        \
     template <typename CKBT, typename... A>                                    \

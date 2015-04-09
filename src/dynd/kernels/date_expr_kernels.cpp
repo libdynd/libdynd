@@ -175,7 +175,7 @@ public:
 
         date_strftime_kernel_extra *e =
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-                ->alloc_ck_leaf<date_strftime_kernel_extra>(ckb_offset);
+                ->alloc_ck<date_strftime_kernel_extra>(ckb_offset);
         switch (kernreq) {
             case kernel_request_single:
                 e->base.set_function<expr_single_t>(&date_strftime_kernel_extra::single_unary);
@@ -328,7 +328,7 @@ public:
 
       date_replace_kernel_extra *e =
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-              ->alloc_ck_leaf<date_replace_kernel_extra>(ckb_offset);
+              ->alloc_ck<date_replace_kernel_extra>(ckb_offset);
       switch (kernreq) {
       case kernel_request_single:
         e->base.set_function<expr_single_t>(

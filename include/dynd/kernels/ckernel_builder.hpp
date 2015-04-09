@@ -82,25 +82,9 @@ public:
    * This function ensures that the ckernel's data
    * is at least the required number of bytes. It
    * should only be called during the construction phase
-   * of the kernel.
-   *
-   * NOTE: This function ensures that there is room for
-   *       another base at the end, so if you are sure
-   *       that you're a leaf kernel, use reserve_leaf
-   *       instead.
-   */
-  void reserve(intptr_t requested_capacity)
-  {
-    reserve_leaf(requested_capacity + sizeof(ckernel_prefix));
-  }
-
-  /**
-   * This function ensures that the ckernel's data
-   * is at least the required number of bytes. It
-   * should only be called during the construction phase
    * of the kernel when constructing a leaf kernel.
    */
-  void reserve_leaf(intptr_t requested_capacity)
+  void reserve(intptr_t requested_capacity)
   {
     if (m_capacity < requested_capacity) {
       // Grow by a factor of 1.5
@@ -135,21 +119,6 @@ public:
    */
   template <class T>
   T *alloc_ck(intptr_t &inout_ckb_offset)
-  {
-    intptr_t ckb_offset = inout_ckb_offset;
-    inc_ckb_offset<T>(inout_ckb_offset);
-    reserve(inout_ckb_offset);
-    return reinterpret_cast<T *>(m_data + ckb_offset);
-  }
-
-  /**
-   * For use during construction. This function ensures that the
-   * ckernel_builder has enough capacity, increments the provided
-   * offset appropriately based on the size of T, and returns a pointer
-   * to the allocated ckernel.
-   */
-  template <class T>
-  T *alloc_ck_leaf(intptr_t &inout_ckb_offset)
   {
     intptr_t ckb_offset = inout_ckb_offset;
     inc_ckb_offset<T>(inout_ckb_offset);

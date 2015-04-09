@@ -211,7 +211,7 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate dst_assign_na
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->reserve_leaf(ckb_offset);
+      ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
@@ -222,7 +222,7 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
                       nsrc, NULL, NULL, kernreq, ectx, kwds, tp_vars);
   // instantiate value_assign
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->reserve(ckb_offset);
+      ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_value_assign_offset = ckb_offset - root_ckb_offset;
@@ -262,7 +262,7 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate value_assign
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-      ->reserve_leaf(ckb_offset);
+      ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_value_assign_offset = ckb_offset - root_ckb_offset;

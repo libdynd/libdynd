@@ -104,7 +104,7 @@ namespace {
             // This is a leaf kernel, so no additional allocation is needed
             extra_type *e =
                 reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-                    ->alloc_ck_leaf<extra_type>(ckb_offset);
+                    ->alloc_ck<extra_type>(ckb_offset);
             switch (kernreq) {
                 case kernel_request_single:
                     e->base().set_function(m_op_pair.single);

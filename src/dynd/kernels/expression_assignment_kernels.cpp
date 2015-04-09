@@ -194,7 +194,7 @@ size_t dynd::make_expression_assignment_kernel(
         intptr_t buffer_data_offset = ckb_offset;
         inc_ckb_offset(ckb_offset, e->buffer_data_size);
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->reserve(ckb_offset);
+            ->reserve(ckb_offset + sizeof(ckernel_prefix));
         // This may have invalidated the 'e' pointer, so get it again!
         e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                 ->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -232,7 +232,7 @@ size_t dynd::make_expression_assignment_kernel(
       intptr_t buffer_data_offset = ckb_offset;
       inc_ckb_offset(ckb_offset, e->buffer_data_size);
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->reserve(ckb_offset);
+          ->reserve(ckb_offset + sizeof(ckernel_prefix));
       // This may have invalidated the 'e' pointer, so get it again!
       e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -272,7 +272,7 @@ size_t dynd::make_expression_assignment_kernel(
         size_t buffer_data_offset = ckb_offset;
         inc_ckb_offset(ckb_offset, buffer_data_size);
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->reserve(ckb_offset);
+            ->reserve(ckb_offset + sizeof(ckernel_prefix));
         // This may have invalidated the 'e' pointer, so get it again!
         e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                 ->get_at<buffered_kernel_extra>(root_ckb_offset);
@@ -301,7 +301,7 @@ size_t dynd::make_expression_assignment_kernel(
       size_t buffer_data_offset = ckb_offset;
       inc_ckb_offset(ckb_offset, buffer_data_size);
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->reserve(ckb_offset);
+          ->reserve(ckb_offset + sizeof(ckernel_prefix));
       // This may have invalidated the 'e' pointer, so get it again!
       e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->get_at<buffered_kernel_extra>(root_ckb_offset);

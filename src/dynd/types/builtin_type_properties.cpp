@@ -184,7 +184,7 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-                          ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+                          ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   switch (builtin_type_id) {
   case complex_float32_type_id:
     switch (src_elwise_property_index) {
@@ -237,7 +237,7 @@ size_t dynd::make_builtin_type_elwise_property_setter_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-                          ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+                          ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   switch (builtin_type_id) {
   case complex_float32_type_id:
     switch (dst_elwise_property_index) {

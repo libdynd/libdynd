@@ -101,7 +101,7 @@ intptr_t nd::functional::unary_heap_chain_ck::instantiate(
         self->m_buf_arrmeta.get(), first_tp->get_npos(), src_tp, src_arrmeta,
         kernreq, ectx, nd::array(), std::map<nd::string, ndt::type>());
     reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-        ->reserve(ckb_offset);
+        ->reserve(ckb_offset + sizeof(ckernel_prefix));
     self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                ->get_at<nd::functional::unary_heap_chain_ck>(root_ckb_offset);
     self->m_second_offset = ckb_offset - root_ckb_offset;
