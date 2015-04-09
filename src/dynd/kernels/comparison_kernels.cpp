@@ -101,7 +101,7 @@ size_t dynd::make_builtin_type_comparison_kernel(
     // No need to reserve more space, the space for a leaf is already there
     ckernel_prefix *result =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+            ->alloc_ck<ckernel_prefix>(ckb_offset);
     result->set_function<expr_predicate_t>(
         compare_kernel_table[src0_type_id - bool_type_id]
                             [src1_type_id - bool_type_id][comptype]);

@@ -78,7 +78,7 @@ size_t dynd::make_blockref_bytes_assignment_kernel(
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   blockref_bytes_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck_leaf<blockref_bytes_kernel_extra>(ckb_offset);
+          ->alloc_ck<blockref_bytes_kernel_extra>(ckb_offset);
   e->base.set_function<expr_single_t>(&blockref_bytes_kernel_extra::single);
   e->dst_alignment = dst_alignment;
   e->src_alignment = src_alignment;
@@ -140,7 +140,7 @@ size_t dynd::make_fixedbytes_to_blockref_bytes_assignment_kernel(
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   fixedbytes_to_blockref_bytes_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck_leaf<fixedbytes_to_blockref_bytes_kernel_extra>(
+          ->alloc_ck<fixedbytes_to_blockref_bytes_kernel_extra>(
               ckb_offset);
   e->base.set_function<expr_single_t>(
       &fixedbytes_to_blockref_bytes_kernel_extra::single);

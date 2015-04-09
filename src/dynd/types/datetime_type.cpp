@@ -735,7 +735,7 @@ size_t datetime_type::make_elwise_property_getter_kernel(
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   datetime_property_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck_leaf<datetime_property_kernel_extra>(ckb_offset);
+          ->alloc_ck<datetime_property_kernel_extra>(ckb_offset);
   switch (src_property_index) {
   case datetimeprop_struct:
     e->base.set_function<expr_single_t>(&get_property_kernel_struct_single);
@@ -792,7 +792,7 @@ size_t datetime_type::make_elwise_property_setter_kernel(
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   datetime_property_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck_leaf<datetime_property_kernel_extra>(ckb_offset);
+          ->alloc_ck<datetime_property_kernel_extra>(ckb_offset);
   switch (dst_property_index) {
   case datetimeprop_struct:
     e->base.set_function<expr_single_t>(&set_property_kernel_struct_single);

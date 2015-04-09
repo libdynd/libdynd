@@ -461,7 +461,7 @@ intptr_t categorical_type::make_assignment_kernel(
           make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
       category_to_categorical_kernel_extra *e =
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-              ->alloc_ck_leaf<category_to_categorical_kernel_extra>(ckb_offset);
+              ->alloc_ck<category_to_categorical_kernel_extra>(ckb_offset);
       switch (m_storage_type.get_type_id()) {
       case uint8_type_id:
         e->base.set_function<expr_single_t>(

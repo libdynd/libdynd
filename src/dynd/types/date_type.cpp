@@ -470,7 +470,7 @@ size_t date_type::make_elwise_property_getter_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-                          ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+                          ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   switch (src_property_index) {
   case dateprop_year:
     e->set_function<expr_single_t>(&get_property_kernel_year_single);
@@ -503,7 +503,7 @@ size_t date_type::make_elwise_property_setter_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-                          ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+                          ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   switch (dst_property_index) {
   case dateprop_struct:
     e->set_function<expr_single_t>(&set_property_kernel_struct_single);

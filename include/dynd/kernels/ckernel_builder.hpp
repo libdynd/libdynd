@@ -127,21 +127,6 @@ public:
   }
 
   /**
-   * For use during construction. This function ensures that the
-   * ckernel_builder has enough capacity, increments the provided
-   * offset appropriately based on the size of T, and returns a pointer
-   * to the allocated ckernel.
-   */
-  template <class T>
-  T *alloc_ck_leaf(intptr_t &inout_ckb_offset)
-  {
-    intptr_t ckb_offset = inout_ckb_offset;
-    inc_ckb_offset<T>(inout_ckb_offset);
-    reserve(inout_ckb_offset);
-    return reinterpret_cast<T *>(m_data + ckb_offset);
-  }
-
-  /**
    * For use during construction, gets the ckernel component
    * at the requested offset.
    */

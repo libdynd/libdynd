@@ -52,7 +52,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(
                 type_id_t tid,
                 kernel_request_t kernreq)
 {
-    ckernel_prefix *ckp = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *ckp = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
     switch (tid) {
         case int32_type_id:
             ckp->set_expr_function<sum_reduction<int32_t, int32_t> >(kernreq);

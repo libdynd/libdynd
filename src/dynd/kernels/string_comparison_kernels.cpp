@@ -250,7 +250,7 @@ size_t dynd::make_fixedstring_comparison_kernel(
       DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
     fixedstring_compare_kernel_extra *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<fixedstring_compare_kernel_extra>(ckb_offset);
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<fixedstring_compare_kernel_extra>(ckb_offset);
     e->base.set_function<expr_predicate_t>(
         fixedstring_comparisons_table[lookup[encoding]][comptype]);
     e->string_size = string_size;
@@ -368,7 +368,7 @@ size_t dynd::make_string_comparison_kernel(
       DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint16_t),
       DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint32_t)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
-    ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck_leaf<ckernel_prefix>(ckb_offset);
+    ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
     e->set_function<expr_predicate_t>(
         string_comparisons_table[lookup[encoding]][comptype]);
     return ckb_offset;
