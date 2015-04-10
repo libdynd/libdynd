@@ -15,7 +15,6 @@
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
@@ -201,7 +200,7 @@ TEST(DateType, ToStructFunction) {
     EXPECT_EQ(ndt::make_property(d, "struct"),
                     b.get_type());
     b = b.eval();
-    EXPECT_EQ(ndt::make_cstruct(ndt::make_type<int16_t>(), "year",
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<int16_t>(), "year",
                         ndt::make_type<int8_t>(), "month",
                         ndt::make_type<int8_t>(), "day"),
                     b.get_type());
@@ -223,20 +222,12 @@ TEST(DateType, ToStruct) {
     a = nd::array("1955-03-13").ucast(d).eval();
 
     // This is the default struct produced
-    ds = ndt::make_cstruct(ndt::make_type<int32_t>(), "year", ndt::make_type<int8_t>(), "month", ndt::make_type<int8_t>(), "day");
+    ds = ndt::make_struct(ndt::make_type<int32_t>(), "year", ndt::make_type<int8_t>(), "month", ndt::make_type<int8_t>(), "day");
     b = nd::empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b(0).as<int32_t>());
     EXPECT_EQ(3, b(1).as<int8_t>());
     EXPECT_EQ(13, b(2).as<int8_t>());
-
-    // This should work too
-    ds = ndt::make_cstruct(ndt::make_type<int16_t>(), "month", ndt::make_type<int16_t>(), "year", ndt::make_type<float>(), "day");
-    b = nd::empty(ds);
-    b.vals() = a;
-    EXPECT_EQ(1955, b(1).as<int16_t>());
-    EXPECT_EQ(3, b(0).as<int16_t>());
-    EXPECT_EQ(13, b(2).as<float>());
 
     // This should work too
     ds = ndt::make_struct(ndt::make_type<int16_t>(), "month", ndt::make_type<int16_t>(), "year", ndt::make_type<float>(), "day");
@@ -252,23 +243,11 @@ TEST(DateType, FromStruct) {
     nd::array a, b;
 
     // This is the default struct accepted
-    ds = ndt::make_cstruct(ndt::make_type<int32_t>(), "year", ndt::make_type<int8_t>(), "month", ndt::make_type<int8_t>(), "day");
+    ds = ndt::make_struct(ndt::make_type<int32_t>(), "year", ndt::make_type<int8_t>(), "month", ndt::make_type<int8_t>(), "day");
     a = nd::empty(ds);
     a(0).vals() = 1955;
     a(1).vals() = 3;
     a(2).vals() = 13;
-    b = nd::empty(d);
-    b.vals() = a;
-    EXPECT_EQ(1955, b.p("year").as<int32_t>());
-    EXPECT_EQ(3,    b.p("month").as<int32_t>());
-    EXPECT_EQ(13,   b.p("day").as<int32_t>());
-
-    // This should work too
-    ds = ndt::make_cstruct(ndt::make_type<int16_t>(), "month", ndt::make_type<int16_t>(), "year", ndt::make_type<float>(), "day");
-    a = nd::empty(ds);
-    a.p("year").vals() = 1955;
-    a.p("month").vals() = 3;
-    a.p("day").vals() = 13;
     b = nd::empty(d);
     b.vals() = a;
     EXPECT_EQ(1955, b.p("year").as<int32_t>());

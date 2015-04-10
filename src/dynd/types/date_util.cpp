@@ -7,7 +7,7 @@
 
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/date_parser.hpp>
-#include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -247,7 +247,7 @@ date_ymd date_ymd::get_current_local_date()
  
 const ndt::type& date_ymd::type()
 {
-    static ndt::type tp = ndt::make_cstruct(
+    static ndt::type tp = ndt::make_struct(
             ndt::make_type<int16_t>(), "year",
             ndt::make_type<int8_t>(), "month",
             ndt::make_type<int8_t>(), "day");

@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/func/callable.hpp>
-#include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/ndarrayarg_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
@@ -200,7 +200,7 @@ namespace detail {
             return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value)));
         }
         static ndt::type make_parameters_type(const char *name0) {
-            return ndt::make_cstruct(make_parameter_type<P0>::make(), name0);
+            return ndt::make_struct(make_parameter_type<P0>::make(), name0);
         }
     };
 
@@ -218,7 +218,7 @@ namespace detail {
                             unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value)));
         }
         static ndt::type make_parameters_type(const char *name0, const char *name1) {
-            return ndt::make_cstruct(make_parameter_type<P0>::make(), name0,
+            return ndt::make_struct(make_parameter_type<P0>::make(), name0,
                             make_parameter_type<P1>::make(), name1);
         }
     };
@@ -239,7 +239,7 @@ namespace detail {
                             unbox_param<P2>::unbox(p + dcs_offset_of<T0, T1, T2>::value)));
         }
         static ndt::type make_parameters_type(const char *name0, const char *name1, const char *name2) {
-            return ndt::make_cstruct(make_parameter_type<P0>::make(), name0,
+            return ndt::make_struct(make_parameter_type<P0>::make(), name0,
                             make_parameter_type<P1>::make(), name1,
                             make_parameter_type<P2>::make(), name2);
         }
@@ -269,7 +269,7 @@ namespace detail {
             field_types[1] = make_parameter_type<P1>::make();
             field_types[2] = make_parameter_type<P2>::make();
             field_types[3] = make_parameter_type<P3>::make();
-            return ndt::make_cstruct(
+            return ndt::make_struct(
                 nd::make_strided_string_array(field_names, 4), field_types);
         }
     };
@@ -302,7 +302,7 @@ namespace detail {
             field_types[2] = make_parameter_type<P2>::make();
             field_types[3] = make_parameter_type<P3>::make();
             field_types[4] = make_parameter_type<P4>::make();
-            return ndt::make_cstruct(
+            return ndt::make_struct(
                 nd::make_strided_string_array(field_names, 5), field_types);
         }
     };
