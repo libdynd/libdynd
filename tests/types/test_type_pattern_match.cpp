@@ -205,18 +205,6 @@ TEST(TypePatternMatch, NestedArrFuncProto)
               "(3 * int32, func: (2 * int32) -> float64) -> 3 * float64")));
 }
 
-TEST(TypePatternMatch, Strided)
-{
-  // cfixed and fixed can match against strided
-  EXPECT_TYPE_MATCH("Fixed * int32", "cfixed[3] * int32");
-  EXPECT_TYPE_MATCH("Fixed * int32", "3 * int32");
-  // cfixed can match against strided if the sizes match
-  EXPECT_TYPE_MATCH("cfixed[3] * int32", "3 * int32");
-  // Things do not hold in other cases
-  EXPECT_FALSE(ndt::type("3 * int32").match(ndt::type("cfixed[3] * int32")));
-  EXPECT_FALSE(ndt::type("cfixed[3] * int32").match(ndt::type("4 * int32")));
-}
-
 TEST(TypePatternMatch, Pow)
 {
   // Match pow_dimsym against itself

@@ -12,7 +12,6 @@
 #include <dynd/array.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/func/callable.hpp>
@@ -485,11 +484,11 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
                     broadcast_error);
     k.reset();
 
-    // Assignment initialized var array -> cfixed array
-    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
+    // Assignment initialized var array -> fixed array
+    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = parse_json("var * int32", "[3, 5, 7]");
-    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
@@ -500,11 +499,11 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
     EXPECT_EQ(7, a(2).as<int>());
     k.reset();
 
-    // Error assignment initialized var array -> cfixed array
-    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
+    // Error assignment initialized var array -> fixed array
+    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = parse_json("var * int32", "[3, 5, 7, 9]");
-    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
@@ -514,11 +513,11 @@ TEST(VarArrayDType, AssignVarFixedKernel) {
                     broadcast_error);
     k.reset();
 
-    // Error assignment uninitialized var array -> cfixed array
-    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<int>()));
+    // Error assignment uninitialized var array -> fixed array
+    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
     a.vals() = 0;
     b = nd::empty(ndt::make_var_dim(ndt::make_type<int>()));
-    EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
+    EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,

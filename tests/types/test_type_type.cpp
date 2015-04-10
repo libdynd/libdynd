@@ -10,7 +10,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -126,7 +126,7 @@ TEST(DTypeDType, FixedArrayRefCount) {
     d = ndt::type("Fixed * 12 * int");
 
     // 1D Fixed Array
-    a = nd::empty(ndt::make_cfixed_dim(10, ndt::make_type()));
+    a = nd::empty(ndt::make_fixed_dim(10, ndt::make_type()));
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());

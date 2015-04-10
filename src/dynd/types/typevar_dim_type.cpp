@@ -144,12 +144,6 @@ bool typevar_dim_type::match(const char *arrmeta, const ndt::type &candidate_tp,
         return false;
       }
       break;
-    case cfixed_dim_type_id:
-      if (candidate_tp.extended<cfixed_dim_type>()->get_fixed_dim_size() !=
-          tv_type.extended<cfixed_dim_type>()->get_fixed_dim_size()) {
-        return false;
-      }
-      break;
     default:
       break;
     }

@@ -11,7 +11,6 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
@@ -80,31 +79,6 @@ static void substitute_shape_visitor(const ndt::type &tp,
         else {
           ssd->throw_error();
         }
-      }
-      break;
-    case cfixed_dim_type_id:
-      if (dim_size < 0 ||
-          dim_size == tp.extended<cfixed_dim_type>()->get_fixed_dim_size()) {
-        // If nothing was transformed, it's all good!
-        if (!out_was_transformed) {
-          out_transformed_tp = tp;
-        }
-        // Can only substitute here if the size of the data type remained the
-        // same
-        else if (subtp.get_data_size() ==
-                 tp.extended<cfixed_dim_type>()
-                     ->get_element_type()
-                     .get_data_size()) {
-          out_transformed_tp = ndt::make_cfixed_dim(
-              tp.extended<cfixed_dim_type>()->get_fixed_dim_size(), subtp,
-              tp.extended<cfixed_dim_type>()->get_fixed_stride());
-        }
-        else {
-          ssd->throw_error();
-        }
-      }
-      else {
-        ssd->throw_error();
       }
       break;
     case var_dim_type_id:

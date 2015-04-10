@@ -14,7 +14,6 @@
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/ctuple_type.hpp>
@@ -279,60 +278,6 @@ static ndt::type parse_fixed_dim_parameters(const char *&rbegin,
     }
     rbegin = begin;
     return ndt::make_fixed_dim(dim_size, element_tp);
-  } else {
-    throw datashape_parse_error(begin, "expected opening '['");
-  }
-}
-
-// cfixed_type : cfixed[N] * rhs_expression
-// cfixed_type : cfixed[N, stride=M] * rhs_expression
-static ndt::type parse_cfixed_dim_parameters(const char *&rbegin,
-                                             const char *end,
-                                             map<string, ndt::type> &symtable)
-{
-  const char *begin = rbegin;
-  if (parse_token_ds(begin, end, '[')) {
-    const char *saved_begin = begin;
-    string dim_size_str = parse_number(begin, end);
-    intptr_t dim_size;
-    intptr_t stride = numeric_limits<intptr_t>::min();
-    if (!dim_size_str.empty()) {
-      dim_size = (intptr_t)std::atoll(dim_size_str.c_str());
-      if (dim_size < 0) {
-        throw datashape_parse_error(saved_begin, "dim size cannot be negative");
-      }
-      if (parse_token_ds(begin, end, ',')) {
-        saved_begin = begin;
-        if (!parse_token_ds(begin, end, "stride")) {
-          throw datashape_parse_error(begin,
-                                      "expected keyword parameter 'stride'");
-        }
-        // bytes type with an alignment
-        if (!parse_token_ds(begin, end, '=')) {
-          throw datashape_parse_error(begin, "expected an =");
-        }
-        string stride_str = parse_number(begin, end);
-        stride = (intptr_t)std::atoll(stride_str.c_str());
-      }
-      if (!parse_token_ds(begin, end, ']')) {
-        throw datashape_parse_error(begin, "expected closing ']'");
-      }
-      if (!parse_token_ds(begin, end, '*')) {
-        throw datashape_parse_error(begin, "expected dimension separator '*'");
-      }
-      ndt::type element_tp = parse_datashape(begin, end, symtable);
-      if (element_tp.is_null()) {
-        throw datashape_parse_error(begin, "expected element type");
-      }
-      rbegin = begin;
-      if (stride == numeric_limits<intptr_t>::min()) {
-        return ndt::make_cfixed_dim(dim_size, element_tp);
-      } else {
-        return ndt::make_cfixed_dim(dim_size, element_tp, stride);
-      }
-    } else {
-      throw datashape_parse_error(saved_begin, "expected dimension size");
-    }
   } else {
     throw datashape_parse_error(begin, "expected opening '['");
   }
@@ -1237,8 +1182,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = parse_cuda_host_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "cuda_device")) {
       result = parse_cuda_device_parameters(begin, end, symtable);
-    } else if (parse::compare_range_to_literal(nbegin, nend, "cfixed")) {
-      result = parse_cfixed_dim_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "fixed")) {
       result = parse_fixed_dim_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "option")) {

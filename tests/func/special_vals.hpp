@@ -7,7 +7,7 @@
 #define _DYND__SPECIAL_VALS_HPP_
 
 #include <dynd/array.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 
 dynd::nd::array factorial_vals() {
@@ -68642,7 +68642,7 @@ dynd::nd::array airy_vals() {
         {{2.16496252073799e-18, -8.42056795401777e-18}, {1.89820995674936e+16, 7.31974920340701e+16}}
     };
 
-    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::cfixed_dim_from_array<double[2][2]>::make()));
+    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::fixed_dim_from_array<double[2][2]>::make()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = aibi;
 

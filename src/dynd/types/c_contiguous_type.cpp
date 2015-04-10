@@ -158,6 +158,9 @@ bool c_contiguous_type::match(const char *arrmeta,
                               const char *candidate_arrmeta,
                               std::map<nd::string, ndt::type> &tp_vars) const
 {
+  std::cout << candidate_tp << std::endl;
+  std::cout << candidate_tp.is_c_contiguous(candidate_arrmeta) << std::endl;
+
   if (candidate_tp.get_type_id() == c_contiguous_type_id) {
     return m_child_tp.match(
         arrmeta, candidate_tp.extended<c_contiguous_type>()->m_child_tp,

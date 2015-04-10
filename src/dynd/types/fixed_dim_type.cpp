@@ -6,7 +6,6 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
@@ -71,7 +70,7 @@ bool fixed_dim_type::is_c_contiguous(const char *arrmeta) const
   }
 
   const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(arrmeta);
-  if (static_cast<intptr_t>(m_element_tp.get_data_size()) == ss->stride) {
+  if (static_cast<intptr_t>(m_element_tp.get_default_data_size()) == ss->stride) {
     return m_element_tp.is_c_contiguous(arrmeta + sizeof(size_stride_t));
   }
 
@@ -662,8 +661,7 @@ void fixed_dim_type::reorder_default_constructed_strides(
   for (size_t i = 0; i < ndim; ++i) {
     intptr_t stride;
     switch (last_src_tp.get_type_id()) {
-    case fixed_dim_type_id:
-    case cfixed_dim_type_id: {
+    case fixed_dim_type_id: {
       const fixed_dim_type_arrmeta *md =
           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
       stride = md->stride;
@@ -769,22 +767,7 @@ bool fixed_dim_type::match(const char *arrmeta, const ndt::type &candidate_tp,
                candidate_tp.extended<fixed_dim_type>()->m_element_tp,
                (candidate_arrmeta == NULL)
                    ? candidate_arrmeta
-                   : (candidate_arrmeta + sizeof(cfixed_dim_type_arrmeta)),
-               tp_vars);
-  case cfixed_dim_type_id:
-    // TODO XXX This could be a bit more lenient if arrmeta is NULL
-    return arrmeta != NULL &&
-           get_fixed_dim_size() ==
-               candidate_tp.extended<cfixed_dim_type>()->get_fixed_dim_size() &&
-           get_fixed_stride(arrmeta) ==
-               candidate_tp.extended<cfixed_dim_type>()->get_fixed_stride() &&
-           m_element_tp.match(
-               (arrmeta == NULL) ? arrmeta
-                                 : (arrmeta + sizeof(fixed_dim_type_arrmeta)),
-               candidate_tp.extended<cfixed_dim_type>()->get_element_type(),
-               (candidate_arrmeta == NULL)
-                   ? candidate_arrmeta
-                   : (candidate_arrmeta + sizeof(cfixed_dim_type_arrmeta)),
+                   : (candidate_arrmeta + sizeof(fixed_dim_type_arrmeta)),
                tp_vars);
   case c_contiguous_type_id:
     return is_c_contiguous(arrmeta) &&

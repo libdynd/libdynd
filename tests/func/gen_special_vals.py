@@ -46,7 +46,7 @@ def make_special_vals(func_name, *args):
 
             return 'dynd::ndt::make_type<{}>()'.format(prefix)
 
-        return 'dynd::ndt::cfixed_dim_from_array<{}>::make()'.format(prefix + suffix)
+        return 'dynd::ndt::fixed_dim_from_array<{}>::make()'.format(prefix + suffix)
 
     def decl_asgn_static_array(name, vals):
         return 'static {} {}{} = {{\n        {}\n    }};\n'.format(ctype(vals), name, dims(vals),
@@ -345,7 +345,7 @@ outfile.write('#ifndef _DYND__SPECIAL_VALS_HPP_\n')
 outfile.write('#define _DYND__SPECIAL_VALS_HPP_\n')
 outfile.write('\n')
 outfile.write('#include <dynd/array.hpp>\n')
-outfile.write('#include <dynd/types/cfixed_dim_type.hpp>\n')
+outfile.write('#include <dynd/types/fixed_dim_type.hpp>\n')
 outfile.write('#include <dynd/types/tuple_type.hpp>\n')
 outfile.write('\n')
 outfile.write(make_factorial_vals())

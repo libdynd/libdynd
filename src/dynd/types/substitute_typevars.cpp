@@ -10,7 +10,7 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
@@ -60,6 +60,10 @@ ndt::type ndt::detail::internal_substitute(
       return ndt::make_cuda_device(ndt::substitute(pattern.extended<base_memory_type>()->get_element_type(),
         typevars, concrete));
 #endif
+    case c_contiguous_type_id:
+      return ndt::make_c_contiguous(ndt::substitute(
+          pattern.extended<c_contiguous_type>()->get_child_type(), typevars,
+          concrete));
     case pointer_type_id:
       return ndt::make_pointer(
           ndt::substitute(pattern.extended<pointer_type>()->get_target_type(),
@@ -81,11 +85,6 @@ ndt::type ndt::detail::internal_substitute(
           ndt::substitute(pattern.extended<fixed_dim_type>()->get_element_type(),
                           typevars, concrete));
       }
-    case cfixed_dim_type_id:
-      return ndt::make_cfixed_dim(
-          pattern.extended<cfixed_dim_type>()->get_fixed_dim_size(),
-          ndt::substitute(pattern.extended<cfixed_dim_type>()->get_element_type(),
-                          typevars, concrete));
     case var_dim_type_id:
       return ndt::make_var_dim(
           ndt::substitute(pattern.extended<var_dim_type>()->get_element_type(),
@@ -188,12 +187,6 @@ ndt::type ndt::detail::internal_substitute(
                       pattern.extended<typevar_dim_type>()->get_element_type(),
                       typevars, concrete));
             }
-          case cfixed_dim_type_id:
-            return ndt::make_cfixed_dim(
-                it->second.extended<cfixed_dim_type>()->get_fixed_dim_size(),
-                ndt::substitute(
-                    pattern.extended<typevar_dim_type>()->get_element_type(),
-                    typevars, concrete));
           case var_dim_type_id:
             return ndt::make_var_dim(ndt::substitute(
                 pattern.extended<typevar_dim_type>()->get_element_type(), typevars,

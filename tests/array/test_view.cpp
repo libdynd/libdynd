@@ -43,23 +43,6 @@ TEST(View, SameType) {
     EXPECT_EQ(a.get_ndo(), b.get_ndo());
 }
 
-TEST(View, CFixedToFixed) {
-    nd::array a = nd::empty("cfixed[5] * cfixed[3] * int32");
-    nd::array b;
-
-    b = nd::view(a, ndt::type("5 * cfixed[3] * int32"));
-    EXPECT_EQ(ndt::type("5 * cfixed[3] * int32"), b.get_type());
-    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(a.get_shape(), b.get_shape());
-    EXPECT_EQ(a.get_strides(), b.get_strides());
-
-    b = nd::view(a, ndt::type("5 * 3 * int32"));
-    EXPECT_EQ(ndt::type("5 * 3 * int32"), b.get_type());
-    EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
-    EXPECT_EQ(a.get_shape(), b.get_shape());
-    EXPECT_EQ(a.get_strides(), b.get_strides());
-}
-
 TEST(View, Errors) {
     nd::array a = nd::empty("5 * 3 * int32");
 
@@ -191,7 +174,7 @@ TEST(View, WeakerAlignment) {
 
     int64_t aval = 0x0102030405060708LL;
     a = nd::make_bytes_array(reinterpret_cast<const char *>(&aval), sizeof(aval), sizeof(aval));
-    b = nd::view(a, ndt::type("cfixed[2] * int32"));
+    b = nd::view(a, ndt::type("2 * int32"));
 #ifdef DYND_BIG_ENDIAN
     EXPECT_EQ(0x01020304, b(0).as<int32_t>());
     EXPECT_EQ(0x05060708, b(1).as<int32_t>());

@@ -163,7 +163,6 @@ set(libdynd_SRC
     src/dynd/types/byteswap_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/c_contiguous_type.cpp
-    src/dynd/types/cfixed_dim_type.cpp
     src/dynd/types/char_type.cpp
     src/dynd/types/convert_type.cpp
     src/dynd/types/cstruct_type.cpp
@@ -260,7 +259,6 @@ set(libdynd_SRC
     include/dynd/types/fixedstring_type.hpp
     include/dynd/types/property_type.hpp
     include/dynd/types/type_alignment.hpp
-    include/dynd/types/cfixed_dim_type.hpp
     include/dynd/types/cstruct_type.hpp
     include/dynd/types/groupby_type.hpp
     include/dynd/types/json_type.hpp

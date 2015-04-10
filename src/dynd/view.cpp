@@ -6,7 +6,6 @@
 #include <dynd/view.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/bytes_type.hpp>
@@ -35,7 +34,6 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
                      dynd::memory_block_data *embedded_reference)
 {
   switch (tp.get_type_id()) {
-  case cfixed_dim_type_id:
   case fixed_dim_type_id: {
     // All the strided dim types share the same arrmeta, so can be
     // treated uniformly here
@@ -51,26 +49,6 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
       }
       fixed_dim_type_arrmeta *view_md =
           reinterpret_cast<fixed_dim_type_arrmeta *>(view_arrmeta);
-      if (try_view(sdt->get_element_type(),
-                   arrmeta + sizeof(fixed_dim_type_arrmeta),
-                   view_fdt->get_element_type(),
-                   view_arrmeta + sizeof(fixed_dim_type_arrmeta),
-                   embedded_reference)) {
-        *view_md = *md;
-        return true;
-      } else {
-        return false;
-      }
-    }
-    case cfixed_dim_type_id: { // strided as cfixed
-      const cfixed_dim_type *view_fdt = view_tp.extended<cfixed_dim_type>();
-      // The size and stride must match exactly in this case
-      if (md->dim_size != view_fdt->get_fixed_dim_size() ||
-          md->stride != view_fdt->get_fixed_stride()) {
-        return false;
-      }
-      cfixed_dim_type_arrmeta *view_md =
-          reinterpret_cast<cfixed_dim_type_arrmeta *>(view_arrmeta);
       if (try_view(sdt->get_element_type(),
                    arrmeta + sizeof(fixed_dim_type_arrmeta),
                    view_fdt->get_element_type(),

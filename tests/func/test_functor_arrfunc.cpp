@@ -14,7 +14,7 @@
 #include <dynd/array.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -154,7 +154,7 @@ TYPED_TEST_P(FunctorArrfunc_FuncRetRes, FuncRetRes) {
 
   TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-  a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+  a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
 
   a.vals() = vals1[0];
   af = nd::functional::apply(
@@ -170,7 +170,7 @@ TYPED_TEST_P(FunctorArrfunc_FuncRetRes, FuncRetRes) {
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(12, res.as<TypeParam>());
 
-  b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+  b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
 
   a.vals() = vals1[0];
   b.vals() = vals1[1];
@@ -181,7 +181,7 @@ TYPED_TEST_P(FunctorArrfunc_FuncRetRes, FuncRetRes) {
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(14, res.as<TypeParam>());
 
-  a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
+  a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
 
   a.vals() = vals1;
   af = nd::functional::apply(
@@ -221,7 +221,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
 
   TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-  a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+  a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
 
   a.vals() = vals1[0];
   af = nd::functional::apply(Callable1(&func1));
@@ -235,7 +235,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(12, res.as<TypeParam>());
 
-  b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+  b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
 
   a.vals() = vals1[0];
   b.vals() = vals1[1];
@@ -244,7 +244,7 @@ TYPED_TEST_P(FunctorArrfunc_CallRetRes, CallRetRes) {
   EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
   EXPECT_EQ(14, res.as<TypeParam>());
 
-  a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
+  a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
 
   a.vals() = vals1;
   af = nd::functional::apply(Callable3(&func3));
@@ -352,7 +352,7 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
 
     TypeParam vals1[2][3] = {{0, 1, 2}, {3, 4, 5}};
 
-    a = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+    a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     af = nd::functional::apply(FuncWrapper1(&func1), &FuncWrapper1::meth);
@@ -366,7 +366,7 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(12, res.as<TypeParam>());
 
-    b = nd::empty(ndt::make_cfixed_dim(3, ndt::make_type<TypeParam>()));
+    b = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<TypeParam>()));
 
     a.vals() = vals1[0];
     b.vals() = vals1[1];
@@ -375,7 +375,7 @@ TYPED_TEST_P(FunctorArrfunc_MethRetRes, MethRetRes) {
     EXPECT_EQ(ndt::make_type<TypeParam>(), res.get_type());
     EXPECT_EQ(14, res.as<TypeParam>());
 
-    a = nd::empty(ndt::cfixed_dim_from_array<TypeParam[2][3]>::make());
+    a = nd::empty(ndt::fixed_dim_from_array<TypeParam[2][3]>::make());
 
     a.vals() = vals1;
     af = nd::functional::apply(FuncWrapper3(&func3), &FuncWrapper3::meth);

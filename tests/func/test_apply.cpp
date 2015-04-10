@@ -15,7 +15,6 @@
 #include <dynd/array.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/func/call_callable.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -151,10 +150,9 @@ FUNC_WRAPPER(kernel_request_cuda_device, __device__);
   }                                                                            \
                                                                                \
   template <kernel_request_t kernreq>                                          \
-  DYND_CUDA_HOST_DEVICE                                                        \
-      typename std::enable_if<kernreq == kernel_request_cuda_device,           \
-                              CUDA_DECLTYPE_WORKAROUND(&NAME)>::type           \
-          get_##NAME()                                                         \
+  DYND_CUDA_HOST_DEVICE typename std::enable_if<                               \
+      kernreq == kernel_request_cuda_device,                                   \
+      CUDA_DECLTYPE_WORKAROUND(&NAME)>::type get_##NAME()                      \
   {                                                                            \
     GET_CUDA_DEVICE_FUNC_BODY(NAME)                                            \
   }
@@ -302,25 +300,22 @@ TEST(Apply, Function)
   EXPECT_ARR_EQ(TestFixture::To(12U), af());
 
   /*
+  af = nd::functional::apply<kernel_request_host, decltype(&func4), &func4>();
+  std::cout << af.get_array_type() << std::endl;
+  EXPECT_ARR_EQ(TestFixture::To(166.765), af(nd::array({9.14, -2.7, 15.32}),
+                                             nd::array({0.0, 0.65, 11.0})));
+
     af = nd::functional::apply<kernel_request_host,
-  decltype(&func4), &func4>();
-    EXPECT_ARR_EQ(TestFixture::To(166.765), af(nd::array({9.14, -2.7, 15.32}),
-                                               nd::array({0.0, 0.65, 11.0})));
+    decltype(&func5), &func5>();
+    EXPECT_ARR_EQ(TestFixture::To(1251L), af(TestFixture::To({{1242L, 23L, -5L},
+    {925L, -836L, -14L}})));
+    */
 
-
-  af = nd::functional::apply<kernel_request_host,
-  decltype(&func5), &func5>();
-  EXPECT_ARR_EQ(TestFixture::To(1251L), af(TestFixture::To({{1242L, 23L, -5L},
-  {925L, -836L, -14L}})));
-  */
-
-  af = nd::functional::apply<kernel_request_host,
-                             decltype(&func6), &func6>();
+  af = nd::functional::apply<kernel_request_host, decltype(&func6), &func6>();
   EXPECT_ARR_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
-  af = nd::functional::apply<kernel_request_host,
-                             decltype(&func7), &func7>();
+  af = nd::functional::apply<kernel_request_host, decltype(&func7), &func7>();
   EXPECT_ARR_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
