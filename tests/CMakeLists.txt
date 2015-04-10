@@ -29,6 +29,7 @@ set(tests_SRC
     types/test_align_type.cpp
     types/test_bytes_type.cpp
     types/test_byteswap_type.cpp
+    types/test_c_contiguous_type.cpp
     types/test_categorical_type.cpp
     types/test_complex_type.cpp
     types/test_convert_type.cpp

@@ -111,6 +111,13 @@ bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
   return extended()->match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
 }
 
+bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
+                      const char *candidate_arrmeta) const
+{
+  std::map<nd::string, ndt::type> tp_vars;
+  return match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
+}
+
 bool ndt::type::match(const ndt::type &candidate_tp,
                       std::map<nd::string, ndt::type> &tp_vars) const
 {

@@ -18,7 +18,7 @@
 namespace dynd {
 
 /**
- * Increments the offset value so that it is aligned to the requested alignment 
+ * Increments the offset value so that it is aligned to the requested alignment
  * NOTE: The alignment must be a power of two.
  */
 inline size_t inc_to_alignment(size_t offset, size_t alignment)
@@ -323,6 +323,9 @@ namespace ndt {
                const char *candidate_arrmeta,
                std::map<nd::string, ndt::type> &tp_vars) const;
 
+    bool match(const char *arrmeta, const ndt::type &candidate_tp,
+               const char *candidate_arrmeta) const;
+
     bool match(const ndt::type &candidate_tp,
                std::map<nd::string, ndt::type> &tp_vars) const;
 
@@ -501,6 +504,15 @@ namespace ndt {
                (m_extended->get_flags() &
                 (type_flag_blockref | type_flag_destructor)) == 0;
       }
+    }
+
+    bool is_c_contiguous(const char *arrmeta) const
+    {
+      if (is_builtin()) {
+        return true;
+      }
+
+      return m_extended->is_c_contiguous(arrmeta);
     }
 
     bool is_scalar() const { return is_builtin() || m_extended->is_scalar(); }
@@ -900,7 +912,10 @@ namespace ndt {
 
     template <typename T, int N>
     struct type_from<nd::strided_vals<T, N>> {
-      static type make() { return make_fixed_dim_kind(type_from<T>::make(), N); }
+      static type make()
+      {
+        return make_fixed_dim_kind(type_from<T>::make(), N);
+      }
     };
 
     template <typename T, int N>

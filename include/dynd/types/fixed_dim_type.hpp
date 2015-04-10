@@ -44,6 +44,8 @@ public:
 
     void print_type(std::ostream& o) const;
 
+    bool is_c_contiguous(const char *arrmeta) const;
+
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
     void transform_child_types(type_transform_fn_t transform_fn,
