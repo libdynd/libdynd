@@ -10,7 +10,7 @@
 #include <dynd/parser_util.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/types/arrfunc_type.hpp>
-#include <dynd/types/fixed_dimsym_type.hpp>
+#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
@@ -1114,7 +1114,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
           } else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
             result = make_var_dim(element_tp, exponent);
           } else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
-            result = make_fixed_dimsym(element_tp, exponent);
+            result = make_fixed_dim_kind(element_tp, exponent);
           } else if (isupper(*bbegin)) {
             result = make_typevar_dim(nd::string(bbegin, bend), element_tp,
                                       exponent);
@@ -1136,7 +1136,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                   parse_datashape(begin, end, symtable));
             } else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
               result = ndt::make_pow_dimsym(
-                  ndt::make_fixed_dimsym(ndt::make_type<void>()), exponent_name,
+                  ndt::make_fixed_dim_kind(ndt::make_type<void>()), exponent_name,
                   parse_datashape(begin, end, symtable));
             } else if (isupper(*bbegin)) {
               result = ndt::make_pow_dimsym(
@@ -1169,7 +1169,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       } else if (parse::compare_range_to_literal(nbegin, nend, "var")) {
         result = ndt::make_var_dim(element_tp);
       } else if (parse::compare_range_to_literal(nbegin, nend, "Fixed")) {
-        result = ndt::make_fixed_dimsym(element_tp);
+        result = ndt::make_fixed_dim_kind(element_tp);
       } else if (isupper(*nbegin)) {
         result = ndt::make_typevar_dim(nd::string(nbegin, nend), element_tp);
       } else {

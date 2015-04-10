@@ -15,11 +15,11 @@
 
 namespace dynd {
 
-class fixed_dimsym_type : public base_dim_type {
+class fixed_dim_kind_type : public base_dim_type {
 public:
-  fixed_dimsym_type(const ndt::type &element_tp);
+  fixed_dim_kind_type(const ndt::type &element_tp);
 
-  virtual ~fixed_dimsym_type();
+  virtual ~fixed_dim_kind_type();
 
   size_t get_default_data_size() const;
 
@@ -83,15 +83,15 @@ public:
 };
 
 namespace ndt {
-  ndt::type make_fixed_dimsym(const ndt::type &element_tp);
+  ndt::type make_fixed_dim_kind(const ndt::type &element_tp);
 
-  inline ndt::type make_fixed_dimsym(const ndt::type &uniform_tp,
+  inline ndt::type make_fixed_dim_kind(const ndt::type &uniform_tp,
                                       intptr_t ndim)
   {
     if (ndim > 0) {
-      ndt::type result = make_fixed_dimsym(uniform_tp);
+      ndt::type result = make_fixed_dim_kind(uniform_tp);
       for (intptr_t i = 1; i < ndim; ++i) {
-        result = make_fixed_dimsym(result);
+        result = make_fixed_dim_kind(result);
       }
       return result;
     }

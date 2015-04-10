@@ -185,7 +185,7 @@ set(libdynd_SRC
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/expr_type.cpp
     src/dynd/types/fixed_dim_type.cpp
-    src/dynd/types/fixed_dimsym_type.cpp
+    src/dynd/types/fixed_dim_kind_type.cpp
     src/dynd/types/fixedbytes_type.cpp
     src/dynd/types/fixedstring_type.cpp
     src/dynd/types/arrfunc_type.cpp
@@ -253,7 +253,7 @@ set(libdynd_SRC
     include/dynd/types/dynd_uint128.hpp
     include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
-    include/dynd/types/fixed_dimsym_type.hpp
+    include/dynd/types/fixed_dim_kind_type.hpp
     include/dynd/types/fixedbytes_type.hpp
     include/dynd/types/fixedstring_type.hpp
     include/dynd/types/property_type.hpp

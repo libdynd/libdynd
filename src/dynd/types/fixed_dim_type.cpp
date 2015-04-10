@@ -306,6 +306,8 @@ bool fixed_dim_type::operator==(const base_type &rhs) const
     return true;
   } else if (rhs.get_type_id() != fixed_dim_type_id) {
     return false;
+  } else if (rhs.get_kind() == kind_kind) {
+    return false;
   } else {
     const fixed_dim_type *dt = static_cast<const fixed_dim_type *>(&rhs);
     return m_element_tp == dt->m_element_tp && m_dim_size == dt->m_dim_size;

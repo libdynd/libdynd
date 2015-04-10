@@ -18,7 +18,7 @@
 namespace dynd {
 
 /**
- * Increments the offset value so that it is aligned to the requested alignment
+ * Increments the offset value so that it is aligned to the requested alignment 
  * NOTE: The alignment must be a power of two.
  */
 inline size_t inc_to_alignment(size_t offset, size_t alignment)
@@ -900,7 +900,7 @@ namespace ndt {
 
     template <typename T, int N>
     struct type_from<nd::strided_vals<T, N>> {
-      static type make() { return make_fixed_dimsym(type_from<T>::make(), N); }
+      static type make() { return make_fixed_dim_kind(type_from<T>::make(), N); }
     };
 
     template <typename T, int N>
