@@ -56,9 +56,6 @@ void pow_dimsym_type::print_type(std::ostream& o) const
       o << m_base_tp.extended<fixed_dim_type>()->get_fixed_dim_size();
     }
     break;
-  case cfixed_dim_type_id:
-    o << m_base_tp.extended<cfixed_dim_type>()->get_fixed_dim_size();
-    break;
   case var_dim_type_id:
     o << "var";
     break;

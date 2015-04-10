@@ -89,6 +89,13 @@ namespace nd {
 
 namespace ndt {
 
+  template <class T>
+  struct fixed_dim_from_array;
+
+  type make_var_dim(const type &element_tp);
+  type make_fixed_dim(size_t dim_size, const type &element_tp);
+  ndt::type make_c_contiguous(const ndt::type &child_tp);
+
   /**
    * This class represents a data type.
    *
@@ -867,7 +874,6 @@ namespace ndt {
 
   // Forward declarations
   type make_pointer(const type &target_tp);
-  type make_cfixed_dim(size_t size, const type &element_tp);
 
   namespace detail {
     template <typename T>
@@ -895,7 +901,7 @@ namespace ndt {
     struct exact_type_from<T[N]> {
       static type make()
       {
-        return make_cfixed_dim(N, exact_type_from<T>::make());
+        return ndt::make_c_contiguous(fixed_dim_from_array<T[N]>::make());
       }
     };
 
@@ -918,10 +924,12 @@ namespace ndt {
       }
     };
 
+/*
     template <typename T, int N>
     struct type_from<T[N]> {
       static type make() { return make_cfixed_dim(N, type_from<T>::make()); }
     };
+*/
 
   } // namespace detail
 
@@ -988,6 +996,18 @@ namespace ndt {
    */
   type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
                  bool &out_any_var);
+
+  template <class T>
+  struct fixed_dim_from_array {
+    static inline ndt::type make() { return ndt::make_type<T>(); }
+  };
+  template <class T, int N>
+  struct fixed_dim_from_array<T[N]> {
+    static inline ndt::type make()
+    {
+      return ndt::make_fixed_dim(N, ndt::fixed_dim_from_array<T>::make());
+    }
+  };
 
   /**
    * Returns the type of an array constructed from a value.

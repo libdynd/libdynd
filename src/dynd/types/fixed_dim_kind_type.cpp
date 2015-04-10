@@ -7,7 +7,6 @@
 #include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
@@ -236,12 +235,6 @@ bool fixed_dim_kind_type::match(const char *arrmeta,
                                sizeof(fixed_dim_type_arrmeta)),
           tp_vars);
     }
-  case cfixed_dim_type_id:
-    return m_element_tp.match(
-        arrmeta, candidate_tp.extended<cfixed_dim_type>()->get_element_type(),
-        DYND_INC_IF_NOT_NULL(candidate_arrmeta,
-                             sizeof(cfixed_dim_type_arrmeta)),
-        tp_vars);
   case any_sym_type_id:
     return true;
   default:

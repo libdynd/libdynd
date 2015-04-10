@@ -7,7 +7,6 @@
 
 #include <dynd/func/callable.hpp>
 #include <dynd/types/cstruct_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/ndarrayarg_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
@@ -111,7 +110,7 @@ template <typename T> struct make_parameter_type {inline static ndt::type make()
 template <typename T> struct make_parameter_type<T &> : public make_parameter_type<T> {};
 template <typename T> struct make_parameter_type<const T> : public make_parameter_type<T> {};
 template <typename T, int N> struct make_parameter_type<T[N]> {inline static ndt::type make() {
-        return ndt::make_cfixed_dim(N, ndt::make_type<T>());
+        return ndt::fixed_dim_from_array<T[N]>::make();
     }};
 // Use ndarrayarg to pass nd::array as a parameter. This is a borrowed reference
 // to an nd::array owned by the caller.

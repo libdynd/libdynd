@@ -33,6 +33,10 @@ cstruct_type::cstruct_type(const nd::array &field_names,
         offs = inc_to_alignment(offs, field_tp.get_data_alignment());
         data_offsets[i] = offs;
         size_t field_element_size = field_tp.get_data_size();
+        // This is a hack to make cstruct work while we remove it
+        if (field_tp.get_type_id() == fixed_dim_type_id) {
+            field_element_size = field_tp.get_default_data_size();
+        }
         if (field_element_size == 0) {
             stringstream ss;
             ss << "Cannot create dynd ctuple type with type " << field_tp;

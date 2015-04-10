@@ -6,7 +6,6 @@
 
 #include <dynd/kernels/elwise_expr_kernels.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;

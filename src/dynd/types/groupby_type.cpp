@@ -9,7 +9,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/pointer_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/func/make_callable.hpp>
@@ -40,7 +40,7 @@ groupby_type::groupby_type(const ndt::type& data_values_tp,
                     ndt::make_pointer(by_values_tp), "by");
     m_members.arrmeta_size = m_operand_type.get_arrmeta_size();
     const categorical_type *cd = m_groups_type.extended<categorical_type>();
-    m_value_type = ndt::make_cfixed_dim(cd->get_category_count(),
+    m_value_type = ndt::make_fixed_dim(cd->get_category_count(),
                     ndt::make_var_dim(data_values_tp.at_single(0)));
     m_members.flags = inherited_flags(m_value_type.get_flags(), m_operand_type.get_flags());
 }
@@ -170,13 +170,13 @@ namespace {
             }
 
             const ndt::type& result_tp = gd->get_value_type();
-            const cfixed_dim_type *fad = result_tp.extended<cfixed_dim_type>();
-            intptr_t fad_stride = fad->get_fixed_stride();
+            const fixed_dim_type *fad = result_tp.extended<fixed_dim_type>();
+            intptr_t fad_stride = reinterpret_cast<const size_stride_t *>(e->dst_arrmeta)->stride;
             const var_dim_type *vad = static_cast<const var_dim_type *>(
                 fad->get_element_type().extended());
             const var_dim_type_arrmeta *vad_md =
                 reinterpret_cast<const var_dim_type_arrmeta *>(
-                    e->dst_arrmeta + sizeof(cfixed_dim_type_arrmeta));
+                    e->dst_arrmeta + sizeof(fixed_dim_type_arrmeta));
             if (vad_md->offset != 0) {
               throw runtime_error("dynd groupby: destination var_dim offset "
                                   "must be zero to allocate output");
@@ -306,10 +306,10 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
   // The destination element type and arrmeta
   const ndt::type &dst_element_tp =
       static_cast<const var_dim_type *>(
-          m_value_type.extended<cfixed_dim_type>()->get_element_type().extended())
+          m_value_type.extended<fixed_dim_type>()->get_element_type().extended())
           ->get_element_type();
   const char *dst_element_arrmeta = dst_arrmeta +
-                                    sizeof(cfixed_dim_type_arrmeta) +
+                                    sizeof(fixed_dim_type_arrmeta) +
                                     sizeof(var_dim_type_arrmeta);
   // Get source element type and arrmeta
   ndt::type src_element_tp = m_operand_type;

@@ -8,7 +8,6 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/type_alignment.hpp>
@@ -1226,6 +1225,7 @@ static void cast_dtype(const ndt::type &dt,
         ndt::type child_dt, child_replacement_tp;
         switch (dt.get_type_id()) {
         case cfixed_dim_type_id: {
+/*
           const cfixed_dim_type *dt_fdd = dt.extended<cfixed_dim_type>();
           const cfixed_dim_type *r_fdd = static_cast<const cfixed_dim_type *>(
               e->replacement_tp.extended());
@@ -1235,6 +1235,8 @@ static void cast_dtype(const ndt::type &dt,
             child_dt = dt_fdd->get_element_type();
             child_replacement_tp = r_fdd->get_element_type();
           }
+*/
+          throw std::runtime_error("trying to cast dtype");
           break;
         }
         case var_dim_type_id: {

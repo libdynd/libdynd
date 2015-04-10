@@ -13,7 +13,7 @@
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
+#include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
@@ -175,13 +175,13 @@ TEST(DataShapeParser, FixedDim)
   EXPECT_EQ(ndt::type("7 * 7 * 7 * float32"), ndt::type("7**3 * float32"));
 }
 
-TEST(DataShapeParser, CFixedDim)
+TEST(DataShapeParser, CContiguous)
 {
-  EXPECT_EQ(ndt::make_cfixed_dim(3, ndt::make_type<dynd_bool>()),
-            ndt::type("cfixed[3] * bool"));
+  EXPECT_EQ(ndt::make_c_contiguous(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>())),
+            ndt::type("c_contiguous[3 * bool]"));
   EXPECT_EQ(
-      ndt::make_cfixed_dim(4, ndt::make_cfixed_dim(3, ndt::make_type<float>())),
-      ndt::type("cfixed[4] * cfixed[3] * float32"));
+      ndt::make_c_contiguous(make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_type<float>()))),
+      ndt::type("c_contiguous[4 * 3 * float32]"));
 }
 
 TEST(DataShapeParser, VarDim)

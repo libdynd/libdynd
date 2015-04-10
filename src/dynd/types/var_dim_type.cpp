@@ -4,7 +4,6 @@
 //
 
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>

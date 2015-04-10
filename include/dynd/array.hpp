@@ -24,18 +24,6 @@ namespace dynd {
 namespace ndt {
   type make_var_dim(const type &element_tp);
   type make_fixed_dim(size_t dim_size, const type &element_tp);
-
-  template <class T>
-  struct fixed_dim_from_array {
-    static inline ndt::type make() { return ndt::make_type<T>(); }
-  };
-  template <class T, int N>
-  struct fixed_dim_from_array<T[N]> {
-    static inline ndt::type make()
-    {
-      return ndt::make_fixed_dim(N, ndt::fixed_dim_from_array<T>::make());
-    }
-  };
 } // namespace ndt;
 
 namespace nd {

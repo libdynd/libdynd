@@ -6,7 +6,6 @@
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>

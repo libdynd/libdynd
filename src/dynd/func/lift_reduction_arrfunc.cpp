@@ -6,7 +6,6 @@
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -102,11 +101,6 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
               subtype.extended<fixed_dim_type>()->get_fixed_dim_size(),
               lifted_dst_type);
         }
-        break;
-      case cfixed_dim_type_id:
-        lifted_dst_type = ndt::make_fixed_dim(
-            subtype.extended<cfixed_dim_type>()->get_fixed_dim_size(),
-            lifted_dst_type);
         break;
       case var_dim_type_id:
         lifted_dst_type = ndt::make_var_dim(lifted_dst_type);

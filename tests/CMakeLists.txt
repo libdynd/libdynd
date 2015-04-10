@@ -33,7 +33,6 @@ set(tests_SRC
     types/test_categorical_type.cpp
     types/test_complex_type.cpp
     types/test_convert_type.cpp
-    types/test_cfixed_dim_type.cpp
     types/test_char_type.cpp
     types/test_cstruct_type.cpp
     types/test_ctuple_type.cpp

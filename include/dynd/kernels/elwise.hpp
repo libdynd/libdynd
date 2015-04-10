@@ -11,7 +11,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 namespace dynd {
@@ -95,17 +94,6 @@ namespace nd {
                 case fixed_dim_type_id:
                   shape_at_j =
                       tp.extended<fixed_dim_type>()->get_fixed_dim_size();
-                  if (shape_i[j] < 0 || shape_i[j] == 1) {
-                    if (shape_at_j != 1) {
-                      shape_i[j] = shape_at_j;
-                    }
-                  } else if (shape_i[j] != shape_at_j) {
-                    throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
-                  }
-                  break;
-                case cfixed_dim_type_id:
-                  shape_at_j =
-                      tp.extended<cfixed_dim_type>()->get_fixed_dim_size();
                   if (shape_i[j] < 0 || shape_i[j] == 1) {
                     if (shape_at_j != 1) {
                       shape_i[j] = shape_at_j;

@@ -12,7 +12,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -119,7 +118,7 @@ TEST(DataShapeFormatter, ArrayUniformArrays) {
       format_datashape(nd::empty(ndt::make_var_dim(ndt::make_type<int32_t>())),
                        "", false));
   EXPECT_EQ("var * 3 * int32",
-            format_datashape(nd::empty(ndt::make_var_dim(ndt::make_cfixed_dim(
+            format_datashape(nd::empty(ndt::make_var_dim(ndt::make_fixed_dim(
                                  3, ndt::make_type<int32_t>()))),
                              "", false));
 }
@@ -133,10 +132,6 @@ TEST(DataShapeFormatter, DTypeUniformArrays)
   EXPECT_EQ("var * int32",
             format_datashape(ndt::make_var_dim(ndt::make_type<int32_t>()), "",
                              false));
-  EXPECT_EQ("var * 3 * int32",
-            format_datashape(ndt::make_var_dim(ndt::make_cfixed_dim(
-                                 3, ndt::make_type<int32_t>())),
-                             "", false));
   EXPECT_EQ("var * 3 * int32",
             format_datashape(ndt::make_var_dim(ndt::make_fixed_dim(
                                  3, ndt::make_type<int32_t>())),
@@ -157,7 +152,7 @@ TEST(DataShapeFormatter, ArrayStructs) {
                                     ndt::make_var_dim(ndt::make_cstruct(
                                         ndt::make_type<int32_t>(), "a",
                                         ndt::make_type<int8_t>(), "b")), "x",
-                                    ndt::make_cfixed_dim(5, ndt::make_var_dim(
+                                    ndt::make_fixed_dim(5, ndt::make_var_dim(
                                         ndt::make_type<uint8_t>())), "y")), "", false));
 }
 
@@ -171,7 +166,7 @@ TEST(DataShapeFormatter, DTypeStructs) {
                                     ndt::make_var_dim(ndt::make_cstruct(
                                         ndt::make_type<int32_t>(), "a",
                                         ndt::make_type<int8_t>(), "b")), "x",
-                                    ndt::make_cfixed_dim(5, ndt::make_var_dim(
+                                    ndt::make_fixed_dim(5, ndt::make_var_dim(
                                         ndt::make_type<uint8_t>())), "y"), "", false));
     EXPECT_EQ(
         "{x: 7 * {a: int32, b: int8}, y: var * 4 * uint8}",

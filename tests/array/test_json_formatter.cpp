@@ -13,7 +13,6 @@
 #include <dynd/json_formatter.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>

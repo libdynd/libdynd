@@ -7,7 +7,6 @@
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
@@ -75,19 +74,6 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
     }
     format_datashape(o, fad->get_element_type(),
                      arrmeta + (arrmeta ? sizeof(fixed_dim_type_arrmeta) : 0),
-                     data, indent, multiline);
-    break;
-  }
-  case cfixed_dim_type_id: {
-    const cfixed_dim_type *fad = tp.extended<cfixed_dim_type>();
-    intptr_t dim_size = fad->get_fixed_dim_size();
-    o << dim_size << " * ";
-    // Allow data to keep going only if the dimension size is 1
-    if (dim_size != 1) {
-      data = NULL;
-    }
-    format_datashape(o, fad->get_element_type(),
-                     arrmeta + (arrmeta ? sizeof(cfixed_dim_type_arrmeta) : 0),
                      data, indent, multiline);
     break;
   }
