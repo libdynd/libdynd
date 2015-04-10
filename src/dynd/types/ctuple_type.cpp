@@ -75,7 +75,7 @@ void ctuple_type::transform_child_types(type_transform_fn_t transform_fn,
   }
   if (was_transformed) {
     tmp_field_types.flag_as_immutable();
-    out_transformed_tp = ndt::make_ctuple(tmp_field_types);
+    out_transformed_tp = ndt::type(new ctuple_type(tmp_field_types), true);
     out_was_transformed = true;
   }
   else {
@@ -94,7 +94,7 @@ ndt::type ctuple_type::get_canonical_type() const
   }
 
   tmp_field_types.flag_as_immutable();
-  return ndt::make_ctuple(tmp_field_types);
+  return ndt::type(new ctuple_type(tmp_field_types), true);
 }
 
 ndt::type ctuple_type::at_single(intptr_t i0, const char **inout_arrmeta,

@@ -9,7 +9,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/ctuple_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -2246,8 +2246,8 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     flags &= field_values[i].get_flags();
   }
 
-  ndt::type result_type = ndt::make_ctuple(field_types);
-  const ctuple_type *fsd = result_type.extended<ctuple_type>();
+  ndt::type result_type = ndt::make_tuple(field_types);
+  const tuple_type *fsd = result_type.extended<tuple_type>();
   char *data_ptr = NULL;
 
   array result(make_array_memory_block(fsd->get_arrmeta_size(),

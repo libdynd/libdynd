@@ -20,7 +20,6 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
-#include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 
@@ -103,11 +102,6 @@ ndt::type ndt::detail::internal_substitute(
               concrete));
     case tuple_type_id:
       return ndt::make_tuple(
-          substitute_type_array(
-              pattern.extended<base_tuple_type>()->get_field_types(), typevars,
-              concrete));
-    case ctuple_type_id:
-      return ndt::make_ctuple(
           substitute_type_array(
               pattern.extended<base_tuple_type>()->get_field_types(), typevars,
               concrete));
