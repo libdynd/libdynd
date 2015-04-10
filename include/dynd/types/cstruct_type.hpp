@@ -29,152 +29,144 @@ namespace dynd {
  * C structs.
  */
 class cstruct_type : public base_struct_type {
-    nd::array m_data_offsets;
-    std::vector<std::pair<std::string, gfunc::callable> > m_array_properties;
+  nd::array m_data_offsets;
+  std::vector<std::pair<std::string, gfunc::callable>> m_array_properties;
 
-    void create_array_properties();
+  void create_array_properties();
 
-    // Special constructor to break the property parameter cycle in
-    // create_array_properties
-    cstruct_type(int, int);
+  // Special constructor to break the property parameter cycle in
+  // create_array_properties
+  cstruct_type(int, int);
+
 public:
-    cstruct_type(const nd::array &field_names, const nd::array &field_types);
-    virtual ~cstruct_type();
+  cstruct_type(const nd::array &field_names, const nd::array &field_types);
+  virtual ~cstruct_type();
 
-    size_t get_default_data_size() const {
-        return get_data_size();
-    }
+  size_t get_default_data_size() const { return get_data_size(); }
 
-    inline const nd::array &get_data_offsets() const {
-        return m_data_offsets;
-    }
+  inline const nd::array &get_data_offsets() const { return m_data_offsets; }
 
-    const uintptr_t *get_data_offsets(const char *DYND_UNUSED(arrmeta)) const {
-        return reinterpret_cast<const uintptr_t *>(
-            m_data_offsets.get_readonly_originptr());
-    }
+  const uintptr_t *get_data_offsets(const char *DYND_UNUSED(arrmeta)) const
+  {
+    return reinterpret_cast<const uintptr_t *>(
+        m_data_offsets.get_readonly_originptr());
+  }
 
-    inline const uintptr_t *get_data_offsets_raw() const {
-        return reinterpret_cast<const uintptr_t *>(
-            m_data_offsets.get_readonly_originptr());
-    }
-    inline const uintptr_t& get_data_offset(intptr_t i) const {
-        return get_data_offsets_raw()[i];
-    }
+  inline const uintptr_t *get_data_offsets_raw() const
+  {
+    return reinterpret_cast<const uintptr_t *>(
+        m_data_offsets.get_readonly_originptr());
+  }
+  inline const uintptr_t &get_data_offset(intptr_t i) const
+  {
+    return get_data_offsets_raw()[i];
+  }
 
-    void print_type(std::ostream& o) const;
+  void print_type(std::ostream &o) const;
 
-    void transform_child_types(type_transform_fn_t transform_fn,
-                               intptr_t arrmeta_offset, void *extra,
-                               ndt::type &out_transformed_tp,
-                               bool &out_was_transformed) const;
-    ndt::type get_canonical_type() const;
+  void transform_child_types(type_transform_fn_t transform_fn,
+                             intptr_t arrmeta_offset, void *extra,
+                             ndt::type &out_transformed_tp,
+                             bool &out_was_transformed) const;
+  ndt::type get_canonical_type() const;
 
-    ndt::type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
+  ndt::type at_single(intptr_t i0, const char **inout_arrmeta,
+                      const char **inout_data) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+  bool is_lossless_assignment(const ndt::type &dst_tp,
+                              const ndt::type &src_tp) const;
 
-    bool operator==(const base_type& rhs) const;
+  bool operator==(const base_type &rhs) const;
 
-    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
+  void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                           const std::string &indent) const;
 
-    intptr_t make_assignment_kernel(
-        const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        const ndt::type &src_tp, const char *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *ectx,
-        const nd::array &kwds) const;
+  intptr_t make_assignment_kernel(
+      const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+      intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+      const ndt::type &src_tp, const char *src_arrmeta,
+      kernel_request_t kernreq, const eval::eval_context *ectx,
+      const nd::array &kwds) const;
 
-    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                  const ndt::type &src0_dt,
-                                  const char *src0_arrmeta,
-                                  const ndt::type &src1_dt,
-                                  const char *src1_arrmeta,
-                                  comparison_type_t comptype,
-                                  const eval::eval_context *ectx) const;
+  size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
+                                const ndt::type &src0_dt,
+                                const char *src0_arrmeta,
+                                const ndt::type &src1_dt,
+                                const char *src1_arrmeta,
+                                comparison_type_t comptype,
+                                const eval::eval_context *ectx) const;
 
-    void get_dynamic_type_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
-    void get_dynamic_array_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+  void get_dynamic_type_properties(
+      const std::pair<std::string, gfunc::callable> **out_properties,
+      size_t *out_count) const;
+  void get_dynamic_array_properties(
+      const std::pair<std::string, gfunc::callable> **out_properties,
+      size_t *out_count) const;
 }; // class cstruct_type
 
 namespace ndt {
-  inline ndt::type make_empty_cstruct()
+  /** Makes a cstruct type with the specified fields */
+  inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0)
   {
-    // TODO: return a static instance
-    nd::array field_names = nd::empty(0, ndt::make_string());
-    nd::array field_types = nd::empty(0, ndt::make_type());
+    const std::string *names[1] = {&name0};
+    nd::array field_names = nd::make_strided_string_array(names, 1);
+    nd::array field_types = nd::empty(1, ndt::make_type());
+    unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+    field_types.flag_as_immutable();
     return ndt::type(new cstruct_type(field_names, field_types), false);
   }
 
+  /** Makes a cstruct type with the specified fields */
+  inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
+                                const ndt::type &tp1, const std::string &name1)
+  {
+    const std::string *names[2] = {&name0, &name1};
+    nd::array field_names = nd::make_strided_string_array(names, 2);
+    nd::array field_types = nd::empty(2, ndt::make_type());
+    unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
+    unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
+    field_types.flag_as_immutable();
+    return ndt::type(new cstruct_type(field_names, field_types), false);
+  }
 
-    /** Makes a cstruct type with the specified fields */
-    inline ndt::type make_cstruct(const nd::array &field_names,
-                                 const nd::array &field_types)
-    {
-        return ndt::type(new cstruct_type(field_names, field_types), false);
+  /**
+   * Checks whether a set of offsets can be used for cstruct.
+   *
+   * Because cstruct does not support customizable offset (use struct for
+   * that), this function can be used to check that offsets are compatible with
+   * cstruct.
+   *
+   * \param field_count  The number of array entries in `field_types` and
+   *`field_offsets`
+   * \param field_types  An array of the field types.
+   * \param field_offsets  The offsets corresponding to the types.
+   * \param total_size  The total size of the struct in bytes.
+   *
+   * \returns  True if constructing a cstruct with the same types and field
+   *offsets will
+   *           produce the provided offsets.
+   */
+  inline bool is_cstruct_compatible_offsets(size_t field_count,
+                                            const ndt::type *field_types,
+                                            const uintptr_t *field_offsets,
+                                            size_t total_size)
+  {
+    size_t offset = 0, max_alignment = 1;
+    for (size_t i = 0; i != field_count; ++i) {
+      uintptr_t field_data_alignment = field_types[i].get_data_alignment();
+      uintptr_t field_data_size = field_types[i].get_data_size();
+      offset = inc_to_alignment(offset, field_data_alignment);
+      if (field_offsets[i] != offset || field_data_size == 0) {
+        return false;
+      }
+      max_alignment = (field_data_alignment > max_alignment)
+                          ? field_data_alignment
+                          : max_alignment;
+      offset += field_data_size;
     }
-
-
-    /** Makes a cstruct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0)
-    {
-        const std::string *names[1] = {&name0};
-        nd::array field_names = nd::make_strided_string_array(names, 1);
-        nd::array field_types = nd::empty(1, ndt::make_type());
-        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        field_types.flag_as_immutable();
-        return ndt::make_cstruct(field_names, field_types);
-    }
-
-    /** Makes a cstruct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
-                                 const ndt::type &tp1, const std::string &name1)
-    {
-        const std::string *names[2] = {&name0, &name1};
-        nd::array field_names = nd::make_strided_string_array(names, 2);
-        nd::array field_types = nd::empty(2, ndt::make_type());
-        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
-        field_types.flag_as_immutable();
-        return ndt::make_cstruct(field_names, field_types);
-    }
-
-    /**
-     * Checks whether a set of offsets can be used for cstruct.
-     *
-     * Because cstruct does not support customizable offset (use struct for
-     * that), this function can be used to check that offsets are compatible with
-     * cstruct.
-     *
-     * \param field_count  The number of array entries in `field_types` and `field_offsets`
-     * \param field_types  An array of the field types.
-     * \param field_offsets  The offsets corresponding to the types.
-     * \param total_size  The total size of the struct in bytes.
-     *
-     * \returns  True if constructing a cstruct with the same types and field offsets will
-     *           produce the provided offsets.
-     */
-    inline bool is_cstruct_compatible_offsets(size_t field_count,
-                    const ndt::type *field_types, const uintptr_t *field_offsets, size_t total_size)
-    {
-        size_t offset = 0, max_alignment = 1;
-        for (size_t i = 0; i != field_count; ++i) {
-            uintptr_t field_data_alignment = field_types[i].get_data_alignment();
-            uintptr_t field_data_size = field_types[i].get_data_size();
-            offset = inc_to_alignment(offset, field_data_alignment);
-            if (field_offsets[i] != offset || field_data_size == 0) {
-                return false;
-            }
-            max_alignment = (field_data_alignment > max_alignment) ? field_data_alignment : max_alignment;
-            offset += field_data_size;
-        }
-        offset = inc_to_alignment(offset, max_alignment);
-        return total_size == offset;
-    }
+    offset = inc_to_alignment(offset, max_alignment);
+    return total_size == offset;
+  }
 } // namespace ndt
 
 } // namespace dynd
