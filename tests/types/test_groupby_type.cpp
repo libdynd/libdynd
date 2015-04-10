@@ -16,7 +16,6 @@
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/func/callable.hpp>
 
 #include "dynd_assertions.hpp"
@@ -104,7 +103,7 @@ TEST(GroupByDType, Struct) {
                     ndt::make_fixedstring(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array
-    ndt::type d = ndt::make_cstruct(ndt::make_string(), "name", ndt::make_type<float>(), "height",
+    ndt::type d = ndt::make_struct(ndt::make_string(), "name", ndt::make_type<float>(), "height",
                     ndt::make_fixedstring(1, string_encoding_ascii), "gender");
     nd::array a = nd::empty(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
@@ -141,7 +140,7 @@ TEST(GroupByDType, Struct) {
 
 TEST(GroupByDType, StructSubset) {
     // Create a simple structured array
-    ndt::type d = ndt::make_cstruct(ndt::make_string(), "lastname",
+    ndt::type d = ndt::make_struct(ndt::make_string(), "lastname",
                     ndt::make_string(), "firstname",
                     ndt::make_fixedstring(1, string_encoding_ascii), "gender");
     nd::array a = nd::empty(7, d);
@@ -219,7 +218,7 @@ TEST(GroupByDType, StructUnsortedCats) {
     nd::array gender_cats = nd::array(gender_cats_vals);
 
     // Create a simple structured array
-    ndt::type d = ndt::make_cstruct(ndt::make_string(), "name", ndt::make_type<float>(), "height",
+    ndt::type d = ndt::make_struct(ndt::make_string(), "name", ndt::make_type<float>(), "height",
                     ndt::make_fixedstring(1, string_encoding_ascii), "gender");
     nd::array a = nd::empty(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};

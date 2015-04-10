@@ -143,21 +143,6 @@ namespace ndt {
         return ndt::make_cstruct(field_names, field_types);
     }
 
-    /** Makes a cstruct type with the specified fields */
-    inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
-                                 const ndt::type &tp1, const std::string &name1,
-                                 const ndt::type &tp2, const std::string &name2)
-    {
-        const std::string *names[3] = {&name0, &name1, &name2};
-        nd::array field_names = nd::make_strided_string_array(names, 3);
-        nd::array field_types = nd::empty(3, ndt::make_type());
-        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 1) = tp1;
-        unchecked_fixed_dim_get_rw<ndt::type>(field_types, 2) = tp2;
-        field_types.flag_as_immutable();
-        return ndt::make_cstruct(field_names, field_types);
-    }
-
     /**
      * Checks whether a set of offsets can be used for cstruct.
      *
