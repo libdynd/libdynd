@@ -10,6 +10,7 @@
 #include <dynd/parser_util.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -595,6 +596,28 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
   }
 }
 
+// c_contiguous_type : c_contiguous_type[child_type]
+// This is called after 'c_contiguous' is already matched
+static ndt::type parse_c_contiguous_parameters(const char *&rbegin,
+                                               const char *end,
+                                               map<string, ndt::type> &symtable)
+{
+  const char *begin = rbegin;
+  if (parse_token_ds(begin, end, '[')) {
+    ndt::type tp = parse_datashape(begin, end, symtable);
+    if (tp.is_null()) {
+      throw datashape_parse_error(begin, "expected a type parameter");
+    }
+    if (!parse_token_ds(begin, end, ']')) {
+      throw datashape_parse_error(begin, "expected closing ']'");
+    }
+    rbegin = begin;
+    return ndt::make_c_contiguous(tp);
+  } else {
+    throw datashape_parse_error(begin, "expected opening '['");
+  }
+}
+
 // cuda_host_type : cuda_host[storage_type]
 // This is called after 'cuda_host' is already matched
 static ndt::type parse_cuda_host_parameters(const char *&rbegin,
@@ -1136,8 +1159,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                   parse_datashape(begin, end, symtable));
             } else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
               result = ndt::make_pow_dimsym(
-                  ndt::make_fixed_dim_kind(ndt::make_type<void>()), exponent_name,
-                  parse_datashape(begin, end, symtable));
+                  ndt::make_fixed_dim_kind(ndt::make_type<void>()),
+                  exponent_name, parse_datashape(begin, end, symtable));
             } else if (isupper(*bbegin)) {
               result = ndt::make_pow_dimsym(
                   ndt::make_typevar_dim(nd::string(bbegin, bend),
@@ -1208,6 +1231,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = parse_byteswap_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "bytes")) {
       result = parse_bytes_parameters(begin, end);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "c_contiguous")) {
+      result = parse_c_contiguous_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "cuda_host")) {
       result = parse_cuda_host_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "cuda_device")) {

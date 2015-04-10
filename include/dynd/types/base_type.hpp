@@ -417,6 +417,8 @@ public:
     virtual void get_strides(size_t i, intptr_t *out_strides,
                              const char *arrmeta) const;
 
+    virtual bool is_c_contiguous(const char *arrmeta) const;
+
     /**
      * Classifies the order the axes occur in the memory
      * layout of the array.

@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/cfixed_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -61,6 +62,20 @@ void fixed_dim_type::print_data(std::ostream &o, const char *arrmeta,
 void fixed_dim_type::print_type(std::ostream &o) const
 {
   o << m_dim_size << " * " << m_element_tp;
+}
+
+bool fixed_dim_type::is_c_contiguous(const char *arrmeta) const
+{
+  if (arrmeta == NULL) {
+    return false;
+  }
+
+  const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(arrmeta);
+  if (static_cast<intptr_t>(m_element_tp.get_data_size()) == ss->stride) {
+    return m_element_tp.is_c_contiguous(arrmeta + sizeof(size_stride_t));
+  }
+
+  return false;
 }
 
 bool fixed_dim_type::is_expression() const
@@ -520,10 +535,9 @@ intptr_t fixed_dim_type::make_assignment_kernel(
 
     if (src_tp.get_ndim() < dst_tp.get_ndim()) {
       src_stride = 0;
-      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id,
-                                1>::make(ckb, kernreq, ckb_offset,
-                                           get_fixed_dim_size(), dst_md->stride,
-                                           &src_stride);
+      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1>::make(
+          ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride,
+          &src_stride);
 
       return ::make_assignment_kernel(
           self, af_tp, ckb, ckb_offset, m_element_tp,
@@ -531,10 +545,9 @@ intptr_t fixed_dim_type::make_assignment_kernel(
           kernel_request_strided, ectx, kwds);
     } else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride,
                                      &src_el_tp, &src_el_arrmeta)) {
-      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id,
-                                1>::make(ckb, kernreq, ckb_offset,
-                                           get_fixed_dim_size(), dst_md->stride,
-                                           &src_stride);
+      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1>::make(
+          ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride,
+          &src_stride);
 
       // Check for a broadcasting error
       if (src_size != 1 && get_fixed_dim_size() != src_size) {
@@ -773,6 +786,11 @@ bool fixed_dim_type::match(const char *arrmeta, const ndt::type &candidate_tp,
                    ? candidate_arrmeta
                    : (candidate_arrmeta + sizeof(cfixed_dim_type_arrmeta)),
                tp_vars);
+  case c_contiguous_type_id:
+    return is_c_contiguous(arrmeta) &&
+           match(arrmeta,
+                 candidate_tp.extended<c_contiguous_type>()->get_child_type(),
+                 candidate_arrmeta, tp_vars);
   default:
     return false;
   }

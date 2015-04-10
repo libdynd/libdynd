@@ -132,6 +132,11 @@ void base_type::get_strides(size_t DYND_UNUSED(i),
     // Default to scalar behavior
 }
 
+bool base_type::is_c_contiguous(const char *DYND_UNUSED(arrmeta)) const
+{
+    return false;
+}
+
 axis_order_classification_t
 base_type::classify_axis_order(const char *DYND_UNUSED(arrmeta)) const
 {

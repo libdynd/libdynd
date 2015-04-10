@@ -146,6 +146,9 @@ enum type_id_t {
   // A tuple type with fixed layout
   ctuple_type_id,
 
+  // ...
+  c_contiguous_type_id,
+
   option_type_id,
 
   ndarrayarg_type_id,
