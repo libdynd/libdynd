@@ -122,7 +122,7 @@ void cstruct_type::transform_child_types(type_transform_fn_t transform_fn,
     if (was_any_transformed) {
         tmp_field_types.flag_as_immutable();
         if (!switch_to_struct) {
-            out_transformed_tp = ndt::make_cstruct(m_field_names, tmp_field_types);
+            out_transformed_tp = ndt::type(new cstruct_type(m_field_names, tmp_field_types), true);
         } else {
             out_transformed_tp = ndt::make_struct(m_field_names, tmp_field_types);
         }
@@ -144,7 +144,7 @@ ndt::type cstruct_type::get_canonical_type() const
     }
 
     tmp_field_types.flag_as_immutable();
-    return ndt::make_cstruct(m_field_names, tmp_field_types);
+    return ndt::type(new cstruct_type(m_field_names, tmp_field_types), true);
 }
 
 ndt::type cstruct_type::at_single(intptr_t i0,
