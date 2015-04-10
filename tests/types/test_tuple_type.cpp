@@ -11,7 +11,6 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/tuple_type.hpp>
-#include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/func/callable.hpp>

@@ -17,9 +17,7 @@
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
-#include <dynd/types/ctuple_type.hpp>
 
 using namespace std;
 using namespace dynd;

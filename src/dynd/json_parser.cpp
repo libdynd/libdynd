@@ -10,7 +10,6 @@
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/time_type.hpp>

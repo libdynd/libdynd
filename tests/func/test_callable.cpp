@@ -14,7 +14,6 @@
 #include <dynd/func/make_callable.hpp>
 #include <dynd/func/call_callable.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
 
 using namespace std;
@@ -400,7 +399,7 @@ TEST(GFuncCallable, DTypeParam) {
     a = nd::empty(c.get_parameters_type());
 
     // With a base_type
-    tmp = ndt::make_cstruct(ndt::make_type<dynd::complex<float> >(), "A", ndt::make_type<int8_t>(), "B");
+    tmp = ndt::make_struct(ndt::make_type<dynd::complex<float> >(), "A", ndt::make_type<int8_t>(), "B");
     *(const void**)a.get_ndo()->m_data_pointer = tmp.extended();
     r = c.call_generic(a);
     EXPECT_EQ(ndt::make_type<size_t>(), r.get_type());

@@ -165,8 +165,6 @@ set(libdynd_SRC
     src/dynd/types/c_contiguous_type.cpp
     src/dynd/types/char_type.cpp
     src/dynd/types/convert_type.cpp
-    src/dynd/types/cstruct_type.cpp
-    src/dynd/types/ctuple_type.cpp
     src/dynd/types/cuda_host_type.cpp
     src/dynd/types/cuda_device_type.cpp
     src/dynd/types/datashape_formatter.cpp
@@ -232,7 +230,6 @@ set(libdynd_SRC
     include/dynd/types/categorical_type.hpp
     include/dynd/types/char_type.hpp
     include/dynd/types/convert_type.hpp
-    include/dynd/types/ctuple_type.hpp
     include/dynd/types/cuda_host_type.hpp
     include/dynd/types/cuda_device_type.hpp
     include/dynd/types/datashape_formatter.hpp
@@ -259,7 +256,6 @@ set(libdynd_SRC
     include/dynd/types/fixedstring_type.hpp
     include/dynd/types/property_type.hpp
     include/dynd/types/type_alignment.hpp
-    include/dynd/types/cstruct_type.hpp
     include/dynd/types/groupby_type.hpp
     include/dynd/types/json_type.hpp
     include/dynd/types/ndarrayarg_type.hpp
@@ -267,7 +263,6 @@ set(libdynd_SRC
     include/dynd/types/pointer_type.hpp
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
-    include/dynd/types/cstruct_type.hpp
     include/dynd/types/substitute_shape.hpp
     include/dynd/types/substitute_typevars.hpp
     include/dynd/types/time_parser.hpp

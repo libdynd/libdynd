@@ -11,7 +11,6 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/property_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/unary_expr_type.hpp>
 #include <dynd/types/option_type.hpp>
