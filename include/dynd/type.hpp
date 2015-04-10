@@ -18,7 +18,7 @@
 namespace dynd {
 
 /**
- * Increments the offset value so that it is aligned to the requested alignment
+ * Increments the offset value so that it is aligned to the requested alignment 
  * NOTE: The alignment must be a power of two.
  */
 inline size_t inc_to_alignment(size_t offset, size_t alignment)
