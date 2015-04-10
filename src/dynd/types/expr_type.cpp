@@ -5,7 +5,7 @@
 
 #include <dynd/types/expr_type.hpp>
 #include <dynd/shortvector.hpp>
-#include <dynd/types/ctuple_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
@@ -22,14 +22,14 @@ expr_type::expr_type(const ndt::type &value_type, const ndt::type &operand_type,
           operand_type.get_arrmeta_size(), value_type.get_ndim()),
       m_value_type(value_type), m_operand_type(operand_type), m_kgen(kgen)
 {
-  if (operand_type.get_type_id() != ctuple_type_id) {
+  if (operand_type.get_type_id() != tuple_type_id) {
     stringstream ss;
-    ss << "expr_type can only be constructed with a ctuple as its operand, "
+    ss << "expr_type can only be constructed with a tuple as its operand, "
           "given ";
     ss << operand_type;
     throw runtime_error(ss.str());
   }
-  const ctuple_type *fsd = operand_type.extended<ctuple_type>();
+  const tuple_type *fsd = operand_type.extended<tuple_type>();
   size_t field_count = fsd->get_field_count();
   if (field_count == 1) {
     throw runtime_error("expr_type is for 2 or more operands, use "
@@ -59,7 +59,7 @@ void expr_type::print_data(std::ostream &DYND_UNUSED(o),
 
 void expr_type::print_type(std::ostream &o) const
 {
-  const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
+  const tuple_type *fsd = m_operand_type.extended<tuple_type>();
   size_t field_count = fsd->get_field_count();
   o << "expr<";
   o << m_value_type;
@@ -80,7 +80,7 @@ expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
 {
   if (m_kgen->is_elwise()) {
     intptr_t undim = get_ndim();
-    const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
+    const tuple_type *fsd = m_operand_type.extended<tuple_type>();
     size_t field_count = fsd->get_field_count();
 
     ndt::type result_value_dt = m_value_type.apply_linear_index(
@@ -99,7 +99,7 @@ expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
                                                  current_i, root_tp, false);
       }
     }
-    ndt::type result_operand_type = ndt::make_ctuple(result_src_dt);
+    ndt::type result_operand_type = ndt::make_tuple(result_src_dt);
     expr_kernel_generator_incref(m_kgen);
     return ndt::make_expr(result_value_dt, result_operand_type, m_kgen);
   } else {
@@ -119,9 +119,9 @@ intptr_t expr_type::apply_linear_index(
   if (m_kgen->is_elwise()) {
     intptr_t undim = get_ndim();
     const expr_type *out_ed = result_tp.extended<expr_type>();
-    const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
-    const ctuple_type *out_fsd =
-        static_cast<const ctuple_type *>(out_ed->m_operand_type.extended());
+    const tuple_type *fsd = m_operand_type.extended<tuple_type>();
+    const tuple_type *out_fsd =
+        static_cast<const tuple_type *>(out_ed->m_operand_type.extended());
     const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
     const size_t *out_arrmeta_offsets = out_fsd->get_arrmeta_offsets_raw();
     size_t field_count = fsd->get_field_count();
@@ -167,7 +167,7 @@ void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
 
   // Get each operand shape, and broadcast them together
   dimvector shape(undim);
-  const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
+  const tuple_type *fsd = m_operand_type.extended<tuple_type>();
   const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
   size_t field_count = fsd->get_field_count();
   for (size_t fi = 0; fi != field_count; ++fi) {
@@ -358,7 +358,7 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  const ctuple_type *fsd = m_operand_type.extended<ctuple_type>();
+  const tuple_type *fsd = m_operand_type.extended<tuple_type>();
 
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
