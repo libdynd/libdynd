@@ -106,17 +106,6 @@ public:
 
 namespace ndt {
   /** Makes a cstruct type with the specified fields */
-  inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0)
-  {
-    const std::string *names[1] = {&name0};
-    nd::array field_names = nd::make_strided_string_array(names, 1);
-    nd::array field_types = nd::empty(1, ndt::make_type());
-    unchecked_fixed_dim_get_rw<ndt::type>(field_types, 0) = tp0;
-    field_types.flag_as_immutable();
-    return ndt::type(new cstruct_type(field_names, field_types), false);
-  }
-
-  /** Makes a cstruct type with the specified fields */
   inline ndt::type make_cstruct(const ndt::type &tp0, const std::string &name0,
                                 const ndt::type &tp1, const std::string &name1)
   {

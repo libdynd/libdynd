@@ -23,6 +23,10 @@ class struct_type : public base_struct_type {
 
   void create_array_properties();
 
+  // Special constructor to break the property parameter cycle in
+  // create_array_properties
+  struct_type(int, int);
+
 protected:
   uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const
   {
@@ -30,13 +34,8 @@ protected:
   }
 
 public:
-  inline struct_type(const nd::array &field_names, const nd::array &field_types,
-                     bool variadic)
-      : base_struct_type(struct_type_id, field_names, field_types,
-                         type_flag_none, true, variadic)
-  {
-    create_array_properties();
-  }
+  struct_type(const nd::array &field_names, const nd::array &field_types,
+                     bool variadic);
 
   virtual ~struct_type();
 
