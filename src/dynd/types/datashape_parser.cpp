@@ -14,9 +14,7 @@
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
@@ -820,7 +818,6 @@ static bool parse_struct_item_general(const char *&rbegin, const char *end,
 }
 
 // struct : LBRACE record_item record_item* RBRACE
-// cstruct : 'c{' record_item record_item* RBRACE
 static ndt::type parse_struct(const char *&rbegin, const char *end,
                               map<string, ndt::type> &symtable)
 {
@@ -829,26 +826,18 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   vector<ndt::type> field_type_list;
   string field_name;
   ndt::type field_type;
-  bool cprefixed = false, variadic = false;
+  bool variadic = false;
 
   if (!parse_token_ds(begin, end, '{')) {
-    if (parse_token_ds(begin, end, "c{")) {
-      cprefixed = true;
-    } else {
-      return ndt::type(uninitialized_type_id);
-    }
+    return ndt::type(uninitialized_type_id);
   }
   if (parse_token_ds(begin, end, '}')) {
     // Empty struct
     rbegin = begin;
-    if (cprefixed) {
-      return ndt::make_empty_cstruct();
-    } else {
-      return ndt::make_empty_struct();
-    }
+    return ndt::make_empty_struct();
   }
   for (;;) {
-    if (!cprefixed && parse_token_ds(begin, end, "...")) {
+    if (parse_token_ds(begin, end, "...")) {
       if (!parse_token_ds(begin, end, '}')) {
         throw datashape_parse_error(begin, "expected '}'");
       }
@@ -878,11 +867,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   }
 
   rbegin = begin;
-  if (cprefixed) {
-    return ndt::make_cstruct(field_name_list, field_type_list);
-  } else {
-    return ndt::make_struct(field_name_list, field_type_list, variadic);
-  }
+  return ndt::make_struct(field_name_list, field_type_list, variadic);
 }
 
 // funcproto_kwds : record_item, record_item*

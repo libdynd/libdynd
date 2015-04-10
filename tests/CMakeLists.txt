@@ -34,7 +34,6 @@ set(tests_SRC
     types/test_complex_type.cpp
     types/test_convert_type.cpp
     types/test_char_type.cpp
-    types/test_cstruct_type.cpp
     types/test_cuda_host_type.cpp
     types/test_cuda_device_type.cpp
     types/test_datashape_formatter.cpp
