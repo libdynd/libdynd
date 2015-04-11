@@ -385,32 +385,35 @@ TEST(GFuncCallable, ArrayParam) {
     EXPECT_EQ(3, r.as<int>());
 }
 
-static size_t ndt_type_param(const ndt::type& d) {
-    return d.get_data_size();
+static size_t ndt_type_param(const ndt::type &d)
+{
+  return d.get_default_data_size();
 }
 
-TEST(GFuncCallable, DTypeParam) {
-    // Create the callable
-    gfunc::callable c = gfunc::make_callable(&ndt_type_param, "d");
+TEST(GFuncCallable, DTypeParam)
+{
+  // Create the callable
+  gfunc::callable c = gfunc::make_callable(&ndt_type_param, "d");
 
-    // Call it and see that it gave what we want
-    ndt::type tmp;
-    nd::array a, r;
-    a = nd::empty(c.get_parameters_type());
+  // Call it and see that it gave what we want
+  ndt::type tmp;
+  nd::array a, r;
+  a = nd::empty(c.get_parameters_type());
 
-    // With a base_type
-    tmp = ndt::make_struct(ndt::make_type<dynd::complex<float> >(), "A", ndt::make_type<int8_t>(), "B");
-    *(const void**)a.get_ndo()->m_data_pointer = tmp.extended();
-    r = c.call_generic(a);
-    EXPECT_EQ(ndt::make_type<size_t>(), r.get_type());
-    EXPECT_EQ(12u, r.as<size_t>());
+  // With a base_type
+  tmp = ndt::make_struct(ndt::make_type<dynd::complex<float>>(), "A",
+                         ndt::make_type<int8_t>(), "B");
+  *(const void **)a.get_ndo()->m_data_pointer = tmp.extended();
+  r = c.call_generic(a);
+  EXPECT_EQ(ndt::make_type<size_t>(), r.get_type());
+  EXPECT_EQ(12u, r.as<size_t>());
 
-    // With a builtin type
-    tmp = ndt::make_type<uint64_t>();
-    *(void**)a.get_ndo()->m_data_pointer = (void *)tmp.get_type_id();
-    r = c.call_generic(a);
-    EXPECT_EQ(ndt::make_type<size_t>(), r.get_type());
-    EXPECT_EQ(8u, r.as<size_t>());
+  // With a builtin type
+  tmp = ndt::make_type<uint64_t>();
+  *(void **)a.get_ndo()->m_data_pointer = (void *)tmp.get_type_id();
+  r = c.call_generic(a);
+  EXPECT_EQ(ndt::make_type<size_t>(), r.get_type());
+  EXPECT_EQ(8u, r.as<size_t>());
 }
 
 static string string_return(int a, int b, int c) {
