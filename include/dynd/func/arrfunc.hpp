@@ -16,6 +16,15 @@
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/type_type.hpp>
 
+/**
+ * This macro creates a C++ metafunction which can tell you whether a class
+ * has a member function called NAME. For example,
+ *
+ *   DYND_HAS_MEM_FUNC(add);
+ *
+ * will create a metafunction called `has_add`. The metafunction can be used
+ * as `has_add<MyClass>::value`.
+ */
 #define DYND_HAS_MEM_FUNC(NAME)                                                \
   template <typename T, typename S>                                            \
   class DYND_PP_PASTE(has_, NAME) {                                            \
@@ -32,6 +41,12 @@
   public:                                                                      \
     static bool const value = sizeof(test<T>(0)) == sizeof(true_type);         \
   }
+
+/**
+ * This macro creates a C++ metafunction which can give you a member function
+ * or NULL if there is no member function. This is generally intended for
+ * extracting static member functions.
+ */
 #define DYND_GET_MEM_FUNC(TYPE, NAME)                                          \
   template <typename T, bool DYND_PP_PASTE(has_, NAME)>                        \
   typename std::enable_if<DYND_PP_PASTE(has_, NAME), TYPE>::type               \
@@ -61,11 +76,13 @@ namespace ndt {
 }
 
 namespace detail {
+  // Each of these creates the has_NAME metapredicate
   DYND_HAS_MEM_FUNC(make_type);
   DYND_HAS_MEM_FUNC(instantiate);
   DYND_HAS_MEM_FUNC(resolve_option_values);
   DYND_HAS_MEM_FUNC(resolve_dst_type);
   DYND_HAS_MEM_FUNC(free);
+  // Each of these creates the get_NAME metafunction
   DYND_GET_MEM_FUNC(arrfunc_make_type_t, make_type);
   DYND_GET_MEM_FUNC(arrfunc_instantiate_t, instantiate);
   DYND_GET_MEM_FUNC(arrfunc_resolve_option_values_t, resolve_option_values);
@@ -75,6 +92,12 @@ namespace detail {
 
 namespace nd {
   namespace detail {
+    /**
+     * Presently, there are some specially treated keyword arguments in
+     * arrfuncs. The "dst_tp" keyword argument always tells the desired
+     * output type, and the "dst" keyword argument always provides an
+     * output array.
+     */
     template <typename T>
     bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
                         const std::string &DYND_UNUSED(name),
@@ -194,6 +217,7 @@ namespace nd {
       return const_cast<char *>(value.get_readonly_originptr());
     }
 
+    /** A holder class for the array arguments */
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
@@ -259,6 +283,7 @@ namespace nd {
       }
     };
 
+    /** A way to pass a run-time array of array arguments */
     template <>
     class args<intptr_t, nd::array *> {
       intptr_t m_size;
@@ -289,6 +314,10 @@ namespace nd {
       }
     };
 
+    /**
+     * A way to pass a run-time array of array arguments, split up into the
+     * type/arrmeta/data components
+     */
     template <>
     class args<intptr_t, const ndt::type *, const char *const *,
                char *const *> {
@@ -350,6 +379,7 @@ namespace nd {
       };
     };
 
+    /** A holder class for the keyword arguments */
     template <typename... K>
     class kwds;
 
@@ -681,6 +711,13 @@ namespace nd {
   }
 } // namespace dynd::nd
 
+/**
+ * A function to provide keyword arguments to an arrfunc. The arguments
+ * must alternate between the keyword name and the argument value.
+ *
+ *   arrfunc af = <some arrfunc>;
+ *   af(arr1, arr2, kwds("firstkwarg", kwval1, "second", kwval2));
+ */
 template <typename... T>
 typename std::enable_if<nd::detail::is_variadic_kwds<T...>::value,
                         typename nd::detail::as_kwds<T...>::type>::type
@@ -695,6 +732,10 @@ kwds(T &&... t)
       decltype(kwds(std::forward<T>(t)...))>(std::forward<T>(t)...);
 }
 
+/**
+ * A special way to provide the keyword argument as an array of
+ * names and an array of nd::array values.
+ */
 template <typename... T>
 typename std::enable_if<
     !nd::detail::is_variadic_kwds<T...>::value,
@@ -705,8 +746,15 @@ kwds(T &&... t)
       std::forward<T>(t)...);
 }
 
+/**
+ * Empty keyword args.
+ */
 inline nd::detail::kwds<> kwds() { return nd::detail::kwds<>(); }
 
+/**
+ * TODO: This `as_array` metafunction should either go somewhere better (this
+ *       file is for arrfunc), or be in a detail:: namespace.
+ */
 template <typename T>
 struct as_array {
   typedef nd::array type;
@@ -734,7 +782,7 @@ struct as_array<nd::array &> {
 
 namespace nd {
   /**
-   * Holds a single instance of an arrfunc in an immutable nd::array,
+   * Holds a single instance of an arrfunc in an nd::array,
    * providing some more direct convenient interface.
    */
   class arrfunc {
@@ -784,7 +832,7 @@ namespace nd {
 
     /**
       * Constructor from an nd::array. Validates that the input
-      * has "arrfunc" type and is immutable.
+      * has "arrfunc" type.
       */
     arrfunc(const nd::array &rhs);
 
@@ -822,10 +870,8 @@ namespace nd {
                            T &&... names)
         {
           // TODO: This function makes some assumptions about types not being
-       option
-          //       already, etc. We need this functionality, but probably can
-       find
-          //       a better way later.
+          //       option already, etc. We need this functionality, but probably
+          //       can find a better way later.
 
           intptr_t missing[sizeof...(T)] =
        {get_type()->get_kwd_index(names)...};
