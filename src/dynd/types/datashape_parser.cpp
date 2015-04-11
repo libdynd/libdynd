@@ -539,8 +539,8 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
   }
 }
 
-// c_contiguous_type : c_contiguous_type[child_type]
-// This is called after 'c_contiguous' is already matched
+// c_contiguous_type : C[child_type]
+// This is called after 'C' is already matched
 static ndt::type parse_c_contiguous_parameters(const char *&rbegin,
                                                const char *end,
                                                map<string, ndt::type> &symtable)
@@ -1146,7 +1146,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = parse_byteswap_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "bytes")) {
       result = parse_bytes_parameters(begin, end);
-    } else if (parse::compare_range_to_literal(nbegin, nend, "c_contiguous")) {
+    } else if (parse::compare_range_to_literal(nbegin, nend, "C")) {
       result = parse_c_contiguous_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "cuda_host")) {
       result = parse_cuda_host_parameters(begin, end, symtable);
@@ -1158,10 +1158,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = parse_option_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "adapt")) {
       result = parse_adapt_parameters(begin, end, symtable);
-    } else if (parse::compare_range_to_literal(nbegin, nend, "c")) {
-      // Fall through to struct/tuple cases to allow "c{" and "c("
-      // matching
-      --begin;
     } else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
       result = ndt::make_any_sym();
     } else if (isupper(*nbegin)) {

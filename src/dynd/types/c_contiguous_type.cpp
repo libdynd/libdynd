@@ -9,10 +9,11 @@ using namespace std;
 using namespace dynd;
 
 c_contiguous_type::c_contiguous_type(const ndt::type &child_tp)
-    : base_type(c_contiguous_type_id, child_tp.get_kind(),
-                child_tp.get_data_size(), child_tp.get_data_alignment(),
-                child_tp.get_flags(), child_tp.get_arrmeta_size(),
-                child_tp.get_ndim(), 0),
+    : base_type(c_contiguous_type_id, kind_kind, 0, 1,
+                type_flag_symbolic |
+                    (child_tp.get_flags() & (type_flags_value_inherited |
+                                             type_flags_operand_inherited)),
+                0, child_tp.get_ndim(), 0),
       m_child_tp(child_tp)
 {
   // Restrict c_contiguous_type to fixed_dim_type (and, eventually, tuple_type
@@ -21,12 +22,6 @@ c_contiguous_type::c_contiguous_type(const ndt::type &child_tp)
     throw std::invalid_argument(
         "c_contiguous_type must have a child that is a fixed_dim_type");
   }
-
-  // Propagate the inherited flags from the element
-  //  m_members.flags |=
-  //    (child_tp.get_flags() &
-  //   ((type_flags_operand_inherited | type_flags_value_inherited) &
-  //  ~type_flag_scalar));
 }
 
 void c_contiguous_type::print_data(std::ostream &o, const char *arrmeta,
@@ -37,7 +32,7 @@ void c_contiguous_type::print_data(std::ostream &o, const char *arrmeta,
 
 void c_contiguous_type::print_type(std::ostream &o) const
 {
-  o << "c_contiguous[" << m_child_tp << "]";
+  o << "C[" << m_child_tp << "]";
 }
 
 void c_contiguous_type::get_shape(intptr_t ndim, intptr_t i,
@@ -123,44 +118,32 @@ bool c_contiguous_type::operator==(const base_type &rhs) const
   }
 }
 
-void c_contiguous_type::arrmeta_default_construct(char *arrmeta,
-                                                  bool blockref_alloc) const
+void c_contiguous_type::arrmeta_default_construct(
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
-  if (!m_child_tp.is_builtin()) {
-    m_child_tp.extended()->arrmeta_default_construct(arrmeta, blockref_alloc);
-  }
-
-  if (!m_child_tp.is_c_contiguous(arrmeta)) {
-    throw std::runtime_error(
-        "c_contiguous_type must construct arrmeta that is c_contiguous");
-  }
+  stringstream ss;
+  ss << "Cannot default construct arrmeta for symbolic type "
+     << ndt::type(this, true);
+  throw runtime_error(ss.str());
 }
 
 void c_contiguous_type::arrmeta_copy_construct(
-    char *dst_arrmeta, const char *src_arrmeta,
-    memory_block_data *embedded_reference) const
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
-  if (!m_child_tp.is_builtin()) {
-    m_child_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta,
-                                                  embedded_reference);
-  }
+  stringstream ss;
+  ss << "Cannot copy construct arrmeta for symbolic type "
+     << ndt::type(this, true);
+  throw runtime_error(ss.str());
 }
 
-void c_contiguous_type::arrmeta_destruct(char *arrmeta) const
-{
-  if (!m_child_tp.is_builtin()) {
-    m_child_tp.extended()->arrmeta_destruct(arrmeta);
-  }
-}
+void c_contiguous_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
 
 bool c_contiguous_type::match(const char *arrmeta,
                               const ndt::type &candidate_tp,
                               const char *candidate_arrmeta,
                               std::map<nd::string, ndt::type> &tp_vars) const
 {
-  std::cout << candidate_tp << std::endl;
-  std::cout << candidate_tp.is_c_contiguous(candidate_arrmeta) << std::endl;
-
   if (candidate_tp.get_type_id() == c_contiguous_type_id) {
     return m_child_tp.match(
         arrmeta, candidate_tp.extended<c_contiguous_type>()->m_child_tp,

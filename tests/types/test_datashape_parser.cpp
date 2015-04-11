@@ -170,10 +170,10 @@ TEST(DataShapeParser, FixedDim)
 TEST(DataShapeParser, CContiguous)
 {
   EXPECT_EQ(ndt::make_c_contiguous(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>())),
-            ndt::type("c_contiguous[3 * bool]"));
+            ndt::type("C[3 * bool]"));
   EXPECT_EQ(
       ndt::make_c_contiguous(make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_type<float>()))),
-      ndt::type("c_contiguous[4 * 3 * float32]"));
+      ndt::type("C[4 * 3 * float32]"));
 }
 
 TEST(DataShapeParser, VarDim)
