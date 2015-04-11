@@ -496,11 +496,11 @@ void arrfunc_type::get_dynamic_array_functions(
       pair<string, gfunc::callable>(
           "execute",
           gfunc::callable(
-              ndt::type("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+              ndt::type("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
                         "p1:ndarrayarg,p2:ndarrayarg,"
                         "p3:ndarrayarg,p4:ndarrayarg}"),
               &function___call__, NULL, 3,
-              nd::empty("c{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+              nd::empty("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
                         "p1:ndarrayarg,p2:ndarrayarg,"
                         "p3:ndarrayarg,p4:ndarrayarg}")))};
 
