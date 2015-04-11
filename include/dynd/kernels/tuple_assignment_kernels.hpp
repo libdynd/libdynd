@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 namespace dynd {

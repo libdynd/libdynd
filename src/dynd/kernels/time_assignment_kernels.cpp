@@ -5,7 +5,6 @@
 
 #include <dynd/kernels/time_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/types/cstruct_type.hpp>
 
 using namespace std;
 using namespace dynd;

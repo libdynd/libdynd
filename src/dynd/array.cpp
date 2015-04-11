@@ -9,7 +9,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/ctuple_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -2136,6 +2136,12 @@ nd::array nd::groupby(const nd::array &data_values, const nd::array &by_values,
       gbdt.extended()->get_arrmeta_size(), gbdt.extended()->get_data_size(),
       gbdt.extended()->get_data_alignment(), &data_ptr));
 
+  // Set the arrmeta for the struct (which consists of two pointers)
+  intptr_t *struct_data_offsets =
+      reinterpret_cast<intptr_t *>(result.get_arrmeta());
+  struct_data_offsets[0] = 0;
+  struct_data_offsets[1] = sizeof(void *);
+
   // Set the arrmeta for the data values
   pointer_type_arrmeta *pmeta;
   pmeta = gbdt_ext->get_data_values_pointer_arrmeta(result.get_arrmeta());
@@ -2246,18 +2252,25 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     flags &= field_values[i].get_flags();
   }
 
-  ndt::type result_type = ndt::make_ctuple(field_types);
-  const ctuple_type *fsd = result_type.extended<ctuple_type>();
+  ndt::type result_type = ndt::make_tuple(field_types);
+  const tuple_type *fsd = result_type.extended<tuple_type>();
   char *data_ptr = NULL;
 
   array result(make_array_memory_block(fsd->get_arrmeta_size(),
-                                       fsd->get_data_size(),
+                                       fsd->get_default_data_size(),
                                        fsd->get_data_alignment(), &data_ptr));
   // Set the array properties
   result.get_ndo()->m_type = result_type.release();
   result.get_ndo()->m_data_pointer = data_ptr;
   result.get_ndo()->m_data_reference = NULL;
   result.get_ndo()->m_flags = flags;
+
+  // Set the data offsets arrmeta for the tuple type. It's a bunch of pointer
+  // types, so the offsets are pretty simple.
+  intptr_t *data_offsets = reinterpret_cast<intptr_t *>(result.get_arrmeta());
+  for (size_t i = 0; i != field_count; ++i) {
+    data_offsets[i] = i * sizeof(void *);
+  }
 
   // Copy all the needed arrmeta
   const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();

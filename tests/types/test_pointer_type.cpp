@@ -57,16 +57,18 @@ TEST(PointerType, IsTypeSubarray) {
     EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(ndt::type("pointer[int32]")));
 }
 
-TEST(PointerType, Dereference) {
-    int vals[4] = {5, -1, 7, 3};
+TEST(PointerType, Dereference)
+{
+  int vals[4] = {5, -1, 7, 3};
 
-    nd::array a(vals);
-    a = combine_into_tuple(1, &a)(0);
+  nd::array a(vals);
+  a = combine_into_tuple(1, &a);
+  a = a(0);
 
-    nd::array b = a.f("dereference");
-    EXPECT_EQ(a.get_type(), ndt::make_pointer(b.get_type()));
-    EXPECT_EQ(b(0).as<int>(), 5);
-    EXPECT_EQ(b(1).as<int>(), -1);
-    EXPECT_EQ(b(2).as<int>(), 7);
-    EXPECT_EQ(b(3).as<int>(), 3);
+  nd::array b = a.f("dereference");
+  EXPECT_EQ(a.get_type(), ndt::make_pointer(b.get_type()));
+  EXPECT_EQ(b(0).as<int>(), 5);
+  EXPECT_EQ(b(1).as<int>(), -1);
+  EXPECT_EQ(b(2).as<int>(), 7);
+  EXPECT_EQ(b(3).as<int>(), 3);
 }

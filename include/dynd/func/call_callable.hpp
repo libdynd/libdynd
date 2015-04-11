@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/func/callable.hpp>
-#include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/type_type.hpp>
@@ -83,7 +83,7 @@ namespace detail {
 
 inline nd::array callable::call() const
 {
-    const cstruct_type *fsdt = m_parameters_type.extended<cstruct_type>();
+    const struct_type *fsdt = m_parameters_type.extended<struct_type>();
     intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 0) {
@@ -91,7 +91,7 @@ inline nd::array callable::call() const
             // Fill the missing parameters with their defaults, if available
             for (intptr_t i = 0; i < parameter_count; ++i) {
                 uintptr_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
-                uintptr_t data_offset = fsdt->get_data_offset(i);
+                uintptr_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
                 typed_data_copy(fsdt->get_field_type(i),
                                 params.get_arrmeta() + arrmeta_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
@@ -110,7 +110,7 @@ inline nd::array callable::call() const
 template<class T>
 inline nd::array callable::call(const T& p0) const
 {
-    const cstruct_type *fsdt = m_parameters_type.extended<cstruct_type>();
+    const struct_type *fsdt = m_parameters_type.extended<struct_type>();
     intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (parameter_count != 1) {
@@ -118,7 +118,7 @@ inline nd::array callable::call(const T& p0) const
             // Fill the missing parameters with their defaults, if available
             for (intptr_t i = 1; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
-                size_t data_offset = fsdt->get_data_offset(i);
+                size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
                 typed_data_copy(fsdt->get_field_type(i),
                                 params.get_arrmeta() + arrmeta_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
@@ -133,7 +133,7 @@ inline nd::array callable::call(const T& p0) const
     }
     detail::callable_argument_setter<T>::set(fsdt->get_field_type(0),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(0),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(0),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[0],
                     p0);
     return call_generic(params);
 }
@@ -141,7 +141,7 @@ inline nd::array callable::call(const T& p0) const
 template<class T0, class T1>
 inline nd::array callable::call(const T0& p0, const T1& p1) const
 {
-    const cstruct_type *fsdt = m_parameters_type.extended<cstruct_type>();
+    const struct_type *fsdt = m_parameters_type.extended<struct_type>();
     intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 2) {
@@ -149,7 +149,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
             // Fill the missing parameters with their defaults, if available
             for (intptr_t i = 2; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
-                size_t data_offset = fsdt->get_data_offset(i);
+                size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
                 typed_data_copy(fsdt->get_field_type(i),
                                 params.get_arrmeta() + arrmeta_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
@@ -164,11 +164,11 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_type(0),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(0),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(0),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[0],
                     p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_type(1),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(1),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(1),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[1],
                     p1);
     return call_generic(params);
 }
@@ -176,7 +176,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1) const
 template<class T0, class T1, class T2>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 {
-    const cstruct_type *fsdt = m_parameters_type.extended<cstruct_type>();
+    const struct_type *fsdt = m_parameters_type.extended<struct_type>();
     intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 3) {
@@ -184,7 +184,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
             // Fill the missing parameters with their defaults, if available
             for (intptr_t i = 3; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
-                size_t data_offset = fsdt->get_data_offset(i);
+                size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
                 typed_data_copy(fsdt->get_field_type(i),
                                 params.get_arrmeta() + arrmeta_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
@@ -199,15 +199,15 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_type(0),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(0),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(0),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[0],
                     p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_type(1),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(1),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(1),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[1],
                     p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_type(2),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(2),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(2),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[2],
                     p2);
     return call_generic(params);
 }
@@ -215,7 +215,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2) const
 template<class T0, class T1, class T2, class T3>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3) const
 {
-    const cstruct_type *fsdt = m_parameters_type.extended<cstruct_type>();
+    const struct_type *fsdt = m_parameters_type.extended<struct_type>();
     intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 4) {
@@ -223,7 +223,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
             // Fill the missing parameters with their defaults, if available
             for (intptr_t i = 4; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
-                size_t data_offset = fsdt->get_data_offset(i);
+                size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
                 typed_data_copy(fsdt->get_field_type(i),
                                 params.get_arrmeta() + arrmeta_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
@@ -238,19 +238,19 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_type(0),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(0),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(0),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[0],
                     p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_type(1),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(1),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(1),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[1],
                     p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_type(2),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(2),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(2),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[2],
                     p2);
     detail::callable_argument_setter<T3>::set(fsdt->get_field_type(3),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(3),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(3),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[3],
                     p3);
     return call_generic(params);
 }
@@ -258,7 +258,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
 template<class T0, class T1, class T2, class T3, class T4>
 inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const T3& p3, const T4& p4) const
 {
-    const cstruct_type *fsdt = m_parameters_type.extended<cstruct_type>();
+    const struct_type *fsdt = m_parameters_type.extended<struct_type>();
     intptr_t parameter_count = fsdt->get_field_count();
     nd::array params = nd::empty(m_parameters_type);
     if (fsdt->get_field_count() != 5) {
@@ -266,7 +266,7 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
             // Fill the missing parameters with their defaults, if available
             for (intptr_t i = 5; i < parameter_count; ++i) {
                 size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
-                size_t data_offset = fsdt->get_data_offset(i);
+                size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
                 typed_data_copy(fsdt->get_field_type(i),
                                 params.get_arrmeta() + arrmeta_offset,
                                 params.get_ndo()->m_data_pointer + data_offset,
@@ -281,23 +281,23 @@ inline nd::array callable::call(const T0& p0, const T1& p1, const T2& p2, const 
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_type(0),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(0),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(0),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[0],
                     p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_type(1),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(1),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(1),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[1],
                     p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_type(2),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(2),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(2),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[2],
                     p2);
     detail::callable_argument_setter<T3>::set(fsdt->get_field_type(3),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(3),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(3),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[3],
                     p3);
     detail::callable_argument_setter<T4>::set(fsdt->get_field_type(4),
                     params.get_arrmeta() + fsdt->get_arrmeta_offset(4),
-                    params.get_ndo()->m_data_pointer + fsdt->get_data_offset(4),
+                    params.get_ndo()->m_data_pointer + fsdt->get_data_offsets(params.get_arrmeta())[4],
                     p4);
     return call_generic(params);
 }

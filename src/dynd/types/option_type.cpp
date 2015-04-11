@@ -65,7 +65,7 @@ void option_type::get_vars(std::unordered_set<std::string> &vars) const
 
 const ndt::type &option_type::make_nafunc_type()
 {
-  static ndt::type static_instance = ndt::make_cstruct(
+  static ndt::type static_instance = ndt::make_struct(
       ndt::make_arrfunc(ndt::make_tuple(ndt::make_typevar("T")),
                         ndt::make_type<dynd_bool>()),
       "is_avail", ndt::make_arrfunc(0, NULL, ndt::make_typevar("T")),

@@ -8,7 +8,7 @@
 #include <dynd/types/time_util.hpp>
 #include <dynd/types/time_parser.hpp>
 #include <dynd/types/date_util.hpp>
-#include <dynd/types/cstruct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -115,7 +115,7 @@ time_hmst time_hmst::get_current_local_time()
  
 const ndt::type& time_hmst::type()
 {
-    static ndt::type tp = ndt::make_cstruct(
+    static ndt::type tp = ndt::make_struct(
             ndt::make_type<int8_t>(), "hour",
             ndt::make_type<int8_t>(), "minute",
             ndt::make_type<int8_t>(), "second",

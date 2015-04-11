@@ -14,9 +14,7 @@
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/cstruct_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/ctuple_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
@@ -820,7 +818,6 @@ static bool parse_struct_item_general(const char *&rbegin, const char *end,
 }
 
 // struct : LBRACE record_item record_item* RBRACE
-// cstruct : 'c{' record_item record_item* RBRACE
 static ndt::type parse_struct(const char *&rbegin, const char *end,
                               map<string, ndt::type> &symtable)
 {
@@ -829,26 +826,18 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   vector<ndt::type> field_type_list;
   string field_name;
   ndt::type field_type;
-  bool cprefixed = false, variadic = false;
+  bool variadic = false;
 
   if (!parse_token_ds(begin, end, '{')) {
-    if (parse_token_ds(begin, end, "c{")) {
-      cprefixed = true;
-    } else {
-      return ndt::type(uninitialized_type_id);
-    }
+    return ndt::type(uninitialized_type_id);
   }
   if (parse_token_ds(begin, end, '}')) {
     // Empty struct
     rbegin = begin;
-    if (cprefixed) {
-      return ndt::make_empty_cstruct();
-    } else {
-      return ndt::make_empty_struct();
-    }
+    return ndt::make_empty_struct();
   }
   for (;;) {
-    if (!cprefixed && parse_token_ds(begin, end, "...")) {
+    if (parse_token_ds(begin, end, "...")) {
       if (!parse_token_ds(begin, end, '}')) {
         throw datashape_parse_error(begin, "expected '}'");
       }
@@ -878,11 +867,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   }
 
   rbegin = begin;
-  if (cprefixed) {
-    return ndt::make_cstruct(field_name_list, field_type_list);
-  } else {
-    return ndt::make_struct(field_name_list, field_type_list, variadic);
-  }
+  return ndt::make_struct(field_name_list, field_type_list, variadic);
 }
 
 // funcproto_kwds : record_item, record_item*
@@ -934,78 +919,68 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
 }
 
 // tuple : LPAREN tuple_item tuple_item* RPAREN
-// ctuple : 'c(' tuple_item tuple_item* RPAREN
-// funcproto : tuple -> type// tuple : LPAREN tuple_item tuple_item* RPAREN
-// ctuple : 'c(' tuple_item tuple_item* RPAREN
 // funcproto : tuple -> type
 static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                                           map<string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   vector<ndt::type> field_type_list;
-  bool cprefixed = false, variadic = false;
+  bool variadic = false;
 
   if (!parse_token_ds(begin, end, '(')) {
-    if (parse_token_ds(begin, end, "c(")) {
-      cprefixed = true;
-    } else {
-      return ndt::type(uninitialized_type_id);
-    }
+    return ndt::type(uninitialized_type_id);
   }
   if (!parse_token_ds(begin, end, ')')) {
     for (;;) {
       ndt::type tp;
-      if (!cprefixed) {
-        // Look ahead to see if we've got "BARENAME:" or "..., BARENAME:" coming
-        // next, and if so, parse the keyword arguments and return.
-        const char *saved_begin = begin, *kwds_begin = begin;
-        const char *field_name_begin, *field_name_end;
-        if (parse_token_ds(begin, end, "...") &&
-            parse_token_ds(begin, end, ',')) {
-          variadic = true;
-          kwds_begin = begin;
-        }
-        parse::skip_whitespace_and_pound_comments(begin, end);
-        if (parse::parse_name_no_ws(begin, end, field_name_begin,
-                                    field_name_end)) {
-          if (parse_token_ds(begin, end, ':')) {
-            // process the keyword arguments
-            ndt::type funcproto_kwd;
-            begin = kwds_begin;
-            funcproto_kwd = parse_funcproto_kwds(begin, end, symtable);
-            if (!funcproto_kwd.is_null()) {
-              if (!parse_token_ds(begin, end, "->")) {
-                rbegin = begin;
-                return ndt::make_tuple(field_type_list);
-              }
-
-              ndt::type return_type = parse_datashape(begin, end, symtable);
-              if (return_type.is_null()) {
-                throw datashape_parse_error(
-                    begin, "expected function prototype return type");
-              }
-              rbegin = begin;
-              return ndt::make_arrfunc(
-                  ndt::make_tuple(field_type_list, variadic), funcproto_kwd,
-                  return_type);
-            } else {
-              throw datashape_parse_error(
-                  begin, "expected funcproto keyword arguments");
-            }
-          }
-        }
-        begin = saved_begin;
-
-        // Look ahead again to see if the tuple ends with "...)", in which case
-        // it's a variadic tuple.
-        if (parse_token_ds(begin, end, "...")) {
-          if (parse_token_ds(begin, end, ')')) {
-            variadic = true;
-            break;
-          }
-        }
-        begin = saved_begin;
+      // Look ahead to see if we've got "BARENAME:" or "..., BARENAME:" coming
+      // next, and if so, parse the keyword arguments and return.
+      const char *saved_begin = begin, *kwds_begin = begin;
+      const char *field_name_begin, *field_name_end;
+      if (parse_token_ds(begin, end, "...") &&
+          parse_token_ds(begin, end, ',')) {
+        variadic = true;
+        kwds_begin = begin;
       }
+      parse::skip_whitespace_and_pound_comments(begin, end);
+      if (parse::parse_name_no_ws(begin, end, field_name_begin,
+                                  field_name_end)) {
+        if (parse_token_ds(begin, end, ':')) {
+          // process the keyword arguments
+          ndt::type funcproto_kwd;
+          begin = kwds_begin;
+          funcproto_kwd = parse_funcproto_kwds(begin, end, symtable);
+          if (!funcproto_kwd.is_null()) {
+            if (!parse_token_ds(begin, end, "->")) {
+              rbegin = begin;
+              return ndt::make_tuple(field_type_list);
+            }
+
+            ndt::type return_type = parse_datashape(begin, end, symtable);
+            if (return_type.is_null()) {
+              throw datashape_parse_error(
+                  begin, "expected function prototype return type");
+            }
+            rbegin = begin;
+            return ndt::make_arrfunc(ndt::make_tuple(field_type_list, variadic),
+                                     funcproto_kwd, return_type);
+          } else {
+            throw datashape_parse_error(begin,
+                                        "expected funcproto keyword arguments");
+          }
+        }
+      }
+      begin = saved_begin;
+
+      // Look ahead again to see if the tuple ends with "...)", in which case
+      // it's a variadic tuple.
+      if (parse_token_ds(begin, end, "...")) {
+        if (parse_token_ds(begin, end, ')')) {
+          variadic = true;
+          break;
+        }
+      }
+      begin = saved_begin;
 
       tp = parse_datashape(begin, end, symtable);
 
@@ -1027,30 +1002,25 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
     }
   }
 
-  if (cprefixed) {
+  // It might be a function prototype, check for the "->" token
+  if (!parse_token_ds(begin, end, "->")) {
     rbegin = begin;
-    return ndt::make_ctuple(field_type_list);
-  } else {
-    // It might be a function prototype, check for the "->" token
-    if (!parse_token_ds(begin, end, "->")) {
-      rbegin = begin;
-      return ndt::make_tuple(field_type_list, variadic);
-    }
-
-    ndt::type return_type = parse_datashape(begin, end, symtable);
-    if (return_type.is_null()) {
-      throw datashape_parse_error(begin,
-                                  "expected function prototype return type");
-    }
-    rbegin = begin;
-    // TODO: I suspect because of the change away from immutable default
-    // construction, and
-    //       the requirement that arrays into arrfunc constructors are
-    //       immutable, that too
-    //       many copies may be occurring.
-    return ndt::make_arrfunc(ndt::make_tuple(field_type_list, variadic),
-                             return_type);
+    return ndt::make_tuple(field_type_list, variadic);
   }
+
+  ndt::type return_type = parse_datashape(begin, end, symtable);
+  if (return_type.is_null()) {
+    throw datashape_parse_error(begin,
+                                "expected function prototype return type");
+  }
+  rbegin = begin;
+  // TODO: I suspect because of the change away from immutable default
+  // construction, and
+  //       the requirement that arrays into arrfunc constructors are
+  //       immutable, that too
+  //       many copies may be occurring.
+  return ndt::make_arrfunc(ndt::make_tuple(field_type_list, variadic),
+                           return_type);
 }
 
 //    datashape_nooption : dim ASTERISK datashape

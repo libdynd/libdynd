@@ -16,14 +16,21 @@
 using namespace std;
 using namespace dynd;
 
+struct_type::struct_type(const nd::array &field_names,
+                         const nd::array &field_types, bool variadic)
+    : base_struct_type(struct_type_id, field_names, field_types, type_flag_none,
+                       true, variadic)
+{
+      create_array_properties();
+}
+
 struct_type::~struct_type() {}
 
 static bool is_simple_identifier_name(const char *begin, const char *end)
 {
   if (begin == end) {
     return false;
-  }
-  else {
+  } else {
     char c = *begin++;
     if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
       return false;
@@ -50,8 +57,7 @@ void struct_type::print_type(std::ostream &o) const
     const string_type_data &fn = get_field_name_raw(i);
     if (is_simple_identifier_name(fn.begin, fn.end)) {
       o.write(fn.begin, fn.end - fn.begin);
-    }
-    else {
+    } else {
       print_escaped_utf8_string(o, fn.begin, fn.end, true);
     }
     o << " : " << get_field_type(i);
@@ -82,8 +88,7 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn,
     out_transformed_tp =
         ndt::make_struct(m_field_names, tmp_field_types, m_variadic);
     out_was_transformed = true;
-  }
-  else {
+  } else {
     out_transformed_tp = ndt::type(this, true);
   }
 }
@@ -102,14 +107,30 @@ ndt::type struct_type::get_canonical_type() const
   return ndt::make_struct(m_field_names, tmp_field_types, m_variadic);
 }
 
+ndt::type struct_type::at_single(intptr_t i0, const char **inout_arrmeta,
+                                 const char **inout_data) const
+{
+  // Bounds-checking of the index
+  i0 = apply_single_index(i0, m_field_count, NULL);
+  if (inout_arrmeta) {
+    char *arrmeta = const_cast<char *>(*inout_arrmeta);
+    // Modify the arrmeta
+    *inout_arrmeta += get_arrmeta_offsets_raw()[i0];
+    // If requested, modify the data
+    if (inout_data) {
+      *inout_data += get_arrmeta_data_offsets(arrmeta)[i0];
+    }
+  }
+  return get_field_type(i0);
+}
+
 bool struct_type::is_lossless_assignment(const ndt::type &dst_tp,
                                          const ndt::type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    }
-    else if (src_tp.get_type_id() == struct_type_id) {
+    } else if (src_tp.get_type_id() == struct_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -127,17 +148,14 @@ intptr_t struct_type::make_assignment_kernel(
     if (this == src_tp.extended()) {
       return make_tuple_identical_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta, kernreq, ectx);
-    }
-    else if (src_tp.get_kind() == struct_kind) {
+    } else if (src_tp.get_kind() == struct_kind) {
       return make_struct_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                            src_tp, src_arrmeta, kernreq, ectx);
-    }
-    else if (src_tp.is_builtin()) {
+    } else if (src_tp.is_builtin()) {
       return make_broadcast_to_tuple_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
           ectx);
-    }
-    else {
+    } else {
       return src_tp.extended()->make_assignment_kernel(
           self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx, kwds);
@@ -161,8 +179,7 @@ size_t struct_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
     if (*this == *src1_dt.extended()) {
       return make_tuple_comparison_kernel(
           ckb, ckb_offset, src0_dt, src0_arrmeta, src1_arrmeta, comptype, ectx);
-    }
-    else if (src1_dt.get_kind() == struct_kind) {
+    } else if (src1_dt.get_kind() == struct_kind) {
       // TODO
     }
   }
@@ -174,11 +191,9 @@ bool struct_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  }
-  else if (rhs.get_type_id() != struct_type_id) {
+  } else if (rhs.get_type_id() != struct_type_id) {
     return false;
-  }
-  else {
+  } else {
     const struct_type *dt = static_cast<const struct_type *>(&rhs);
     return get_data_alignment() == dt->get_data_alignment() &&
            m_field_types.equals_exact(dt->m_field_types) &&
@@ -260,12 +275,10 @@ static array_preamble *property_get_array_field(const array_preamble *params,
     string field_name =
         udt.value_type().extended<struct_type>()->get_field_name(i);
     return n.replace_dtype(ndt::make_property(udt, field_name, i)).release();
-  }
-  else {
+  } else {
     if (undim == 0) {
       return n(i).release();
-    }
-    else {
+    } else {
       shortvector<irange> idx(undim + 1);
       idx[undim] = irange(i);
       return n.at_array(undim + 1, idx.get()).release();
@@ -273,10 +286,42 @@ static array_preamble *property_get_array_field(const array_preamble *params,
   }
 }
 
+static nd::array make_self_names()
+{
+    const char *selfname = "self";
+    return nd::make_strided_string_array(&selfname, 1);
+}
+
+static nd::array make_self_types()
+{
+  nd::array result = nd::empty(1, ndt::make_type());
+  unchecked_fixed_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
+  result.flag_as_immutable();
+  return result;
+}
+
+struct_type::struct_type(int, int)
+    : base_struct_type(struct_type_id, make_self_names(), make_self_types(),
+                       type_flag_none, false, false)
+{
+    // Equivalent to ndt::make_struct(ndt::make_ndarrayarg(), "self");
+    // but hardcoded to break the dependency of struct_type::array_parameters_type
+    uintptr_t metaoff[1] = {0};
+    m_arrmeta_offsets = nd::array(metaoff);
+    // The data offsets also consist of one zero
+//    m_data_offsets = m_arrmeta_offsets;
+    // Inherit any operand flags from the fields
+    m_members.flags |=
+        (ndt::make_ndarrayarg().get_flags() & type_flags_operand_inherited);
+    m_members.data_alignment = sizeof(void *);
+    m_members.arrmeta_size = 0;
+    m_members.data_size = sizeof(void *);
+    // Leave m_array_properties so there is no reference loop
+}
+
 void struct_type::create_array_properties()
 {
-  ndt::type array_parameters_type =
-      ndt::make_cstruct(ndt::make_ndarrayarg(), "self");
+  ndt::type array_parameters_type(new struct_type(0, 0), false);
 
   m_array_properties.resize(m_field_count);
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
