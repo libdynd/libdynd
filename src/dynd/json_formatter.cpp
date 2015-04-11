@@ -294,7 +294,6 @@ static void format_json_dim(output_data& out, const ndt::type& dt, const char *a
 {
   out.write('[');
   switch (dt.get_type_id()) {
-  case cfixed_dim_type_id:
   case fixed_dim_type_id: {
     const base_dim_type *sad = dt.extended<base_dim_type>();
     const fixed_dim_type_arrmeta *md =

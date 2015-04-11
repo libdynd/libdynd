@@ -601,7 +601,6 @@ size_t dynd::make_elwise_dimension_expr_kernel(
   for (size_t i = 0; i != src_count; ++i) {
     switch (src_tp[i].get_type_id()) {
     case fixed_dim_type_id:
-    case cfixed_dim_type_id:
       break;
     case var_dim_type_id:
       src_all_strided = false;
@@ -620,7 +619,6 @@ size_t dynd::make_elwise_dimension_expr_kernel(
   // destination type
   switch (dst_tp.get_type_id()) {
   case fixed_dim_type_id:
-  case cfixed_dim_type_id:
     if (src_all_strided) {
       return make_elwise_strided_dimension_expr_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,

@@ -679,7 +679,6 @@ static void parse_dim_json(const ndt::type &tp, const char *arrmeta,
 {
   switch (tp.get_type_id()) {
   case fixed_dim_type_id:
-  case cfixed_dim_type_id:
     parse_strided_dim_json(tp, arrmeta, out_data, begin, end, ectx);
     break;
   case var_dim_type_id:

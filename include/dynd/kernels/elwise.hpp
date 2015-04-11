@@ -204,7 +204,6 @@ namespace nd {
               src_tp[i].get_ndim() - child_tp->get_pos_type(i).get_ndim();
           switch (src_tp[i].get_type_id()) {
           case fixed_dim_type_id:
-          case cfixed_dim_type_id:
             break;
           case var_dim_type_id:
             src_all_strided = false;
@@ -223,7 +222,6 @@ namespace nd {
         // destination type
         switch (dst_tp.get_type_id()) {
         case fixed_dim_type_id:
-        case cfixed_dim_type_id:
           if (src_all_strided) {
             return elwise_ck<fixed_dim_type_id, fixed_dim_type_id,
                              N>::instantiate(self, self_tp, data, ckb,

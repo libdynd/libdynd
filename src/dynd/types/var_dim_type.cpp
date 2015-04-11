@@ -602,8 +602,7 @@ intptr_t var_dim_type::make_assignment_kernel(
   } else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
     throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
   } else {
-    if (dst_tp.get_type_id() == fixed_dim_type_id ||
-        dst_tp.get_type_id() == cfixed_dim_type_id) {
+    if (dst_tp.get_type_id() == fixed_dim_type_id) {
       // var_dim to fixed_dim
       return make_var_to_fixed_dim_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
