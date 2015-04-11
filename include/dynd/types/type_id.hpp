@@ -130,8 +130,6 @@ enum type_id_t {
 
   // A fixed-sized strided array dimension type
   fixed_dim_type_id,
-  // A fixed-sized, fixed-stride array dimension type
-  cfixed_dim_type_id,
   // A dimension made up of offsets
   offset_dim_type_id,
   // A variable-sized array dimension type
@@ -139,14 +137,10 @@ enum type_id_t {
 
   // A struct type with variable layout
   struct_type_id,
-  // A struct type with fixed layout
-  cstruct_type_id,
   // A tuple type with variable layout
   tuple_type_id,
-  // A tuple type with fixed layout
-  ctuple_type_id,
 
-  // ...
+  // A type that enforces C contiguity
   c_contiguous_type_id,
 
   option_type_id,

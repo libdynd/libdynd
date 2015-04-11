@@ -260,7 +260,6 @@ bool pow_dimsym_type::match(const char *arrmeta, const ndt::type &candidate_tp,
       for (intptr_t i = 0; i < exponent; ++i) {
         switch (concrete_subtype.get_type_id()) {
         case fixed_dim_type_id:
-        case cfixed_dim_type_id:
           concrete_subtype =
               concrete_subtype.extended<base_dim_type>()->get_element_type();
           break;

@@ -125,18 +125,14 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "json");
   case fixed_dim_type_id:
     return (o << "fixed_dim");
-  case cfixed_dim_type_id:
-    return (o << "cfixed_dim");
   case var_dim_type_id:
     return (o << "var_dim");
   case struct_type_id:
     return (o << "struct");
-  case cstruct_type_id:
-    return (o << "cstruct");
   case tuple_type_id:
     return (o << "tuple");
-  case ctuple_type_id:
-    return (o << "ctuple");
+  case c_contiguous_type_id:
+    return (o << "C");
   case option_type_id:
     return (o << "option");
   case ndarrayarg_type_id:
