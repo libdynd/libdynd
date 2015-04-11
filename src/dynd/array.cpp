@@ -2257,13 +2257,20 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   char *data_ptr = NULL;
 
   array result(make_array_memory_block(fsd->get_arrmeta_size(),
-                                       fsd->get_data_size(),
+                                       fsd->get_default_data_size(),
                                        fsd->get_data_alignment(), &data_ptr));
   // Set the array properties
   result.get_ndo()->m_type = result_type.release();
   result.get_ndo()->m_data_pointer = data_ptr;
   result.get_ndo()->m_data_reference = NULL;
   result.get_ndo()->m_flags = flags;
+
+  // Set the data offsets arrmeta for the tuple type. It's a bunch of pointer
+  // types, so the offsets are pretty simple.
+  intptr_t *data_offsets = reinterpret_cast<intptr_t *>(result.get_arrmeta());
+  for (size_t i = 0; i != field_count; ++i) {
+    data_offsets[i] = i * sizeof(void *);
+  }
 
   // Copy all the needed arrmeta
   const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
