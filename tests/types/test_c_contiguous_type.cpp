@@ -21,39 +21,30 @@ TEST(CContiguousType, Basic)
   ndt::type tp = ndt::make_c_contiguous(ndt::type("10 * int32"));
 
   EXPECT_EQ(c_contiguous_type_id, tp.get_type_id());
-  EXPECT_EQ(dim_kind, tp.get_kind());
+  EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_FALSE(tp.is_expression());
-  EXPECT_EQ(tp, ndt::type("c_contiguous[10 * int32]"));
+  EXPECT_EQ(tp, ndt::type("C[10 * int32]"));
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));
+  EXPECT_TRUE(tp.is_symbolic());
 
   EXPECT_THROW(ndt::make_c_contiguous(ndt::type("int32")), invalid_argument);
 }
 
 TEST(CContiguousType, PatternMatch)
 {
-  EXPECT_TRUE(ndt::type("c_contiguous[10 * int32]")
-                  .match(ndt::type("c_contiguous[10 * int32]")));
-  EXPECT_TRUE(ndt::type("c_contiguous[10 * T]")
-                  .match(ndt::type("c_contiguous[10 * int32]")));
-  EXPECT_FALSE(ndt::type("c_contiguous[10 * int32]")
-                   .match(ndt::type("c_contiguous[10 * T]")));
-  EXPECT_TRUE(ndt::type("c_contiguous[Fixed * int32]")
-                  .match(ndt::type("c_contiguous[10 * int32]")));
-  EXPECT_FALSE(ndt::type("c_contiguous[10 * int32]")
-                   .match(ndt::type("c_contiguous[Fixed * int32]")));
+  EXPECT_TRUE(ndt::type("C[10 * int32]").match(ndt::type("C[10 * int32]")));
+  EXPECT_TRUE(ndt::type("C[10 * T]").match(ndt::type("C[10 * int32]")));
+  EXPECT_FALSE(ndt::type("C[10 * int32]").match(ndt::type("C[10 * T]")));
+  EXPECT_TRUE(ndt::type("C[Fixed * int32]").match(ndt::type("C[10 * int32]")));
+  EXPECT_FALSE(ndt::type("C[10 * int32]").match(ndt::type("C[Fixed * int32]")));
 
-  EXPECT_FALSE(
-      ndt::type("c_contiguous[Fixed * int32]").match(ndt::type("10 *int32")));
-  EXPECT_FALSE(
-      ndt::type("Fixed * int32").match(ndt::type("c_contiguous[10 *int32]")));
+  EXPECT_FALSE(ndt::type("C[Fixed * int32]").match(ndt::type("10 *int32")));
+  EXPECT_FALSE(ndt::type("Fixed * int32").match(ndt::type("C[10 *int32]")));
 
-  nd::array a = nd::empty(ndt::type("c_contiguous[10 * int32]"));
-  nd::array b = nd::empty(ndt::type("10 * int32"));
+  nd::array a = nd::empty(ndt::type("10 * int32"));
   EXPECT_TRUE(
-      a.get_type().match(a.get_arrmeta(), b.get_type(), b.get_arrmeta()));
-  EXPECT_TRUE(
-      b.get_type().match(b.get_arrmeta(), a.get_type(), a.get_arrmeta()));
+      ndt::type("C[10 * int32]").match(NULL, a.get_type(), a.get_arrmeta()));
 }
 
 /*
@@ -126,26 +117,34 @@ TEST(CFixedDimType, Create) {
 
 TEST(CFixedDimType, CreateCOrder) {
     intptr_t shape[3] = {2, 3, 4};
-    ndt::type d = ndt::make_cfixed_dim(3, shape, ndt::make_type<int16_t>(), NULL);
+    ndt::type d = ndt::make_cfixed_dim(3, shape, ndt::make_type<int16_t>(),
+NULL);
     EXPECT_EQ(3, d.get_ndim());
     EXPECT_EQ(3, d.get_strided_ndim());
     EXPECT_EQ(cfixed_dim_type_id, d.get_type_id());
-    EXPECT_EQ(ndt::make_cfixed_dim(2, shape+1, ndt::make_type<int16_t>(), NULL), d.at(0));
-    EXPECT_EQ(ndt::make_cfixed_dim(1, shape+2, ndt::make_type<int16_t>(), NULL), d.at(0,0));
+    EXPECT_EQ(ndt::make_cfixed_dim(2, shape+1, ndt::make_type<int16_t>(), NULL),
+d.at(0));
+    EXPECT_EQ(ndt::make_cfixed_dim(1, shape+2, ndt::make_type<int16_t>(), NULL),
+d.at(0,0));
     EXPECT_EQ(ndt::make_type<int16_t>(), d.at(0,0,0));
     // Check that the shape is right and the strides are in F-order
     EXPECT_EQ(2, d.extended<cfixed_dim_type>()->get_fixed_dim_size());
     EXPECT_EQ(24, d.extended<cfixed_dim_type>()->get_fixed_stride());
-    EXPECT_EQ(3, static_cast<const cfixed_dim_type *>(d.at(0).extended())->get_fixed_dim_size());
-    EXPECT_EQ(8, static_cast<const cfixed_dim_type *>(d.at(0).extended())->get_fixed_stride());
-    EXPECT_EQ(4, static_cast<const cfixed_dim_type *>(d.at(0,0).extended())->get_fixed_dim_size());
-    EXPECT_EQ(2, static_cast<const cfixed_dim_type *>(d.at(0,0).extended())->get_fixed_stride());
+    EXPECT_EQ(3, static_cast<const cfixed_dim_type
+*>(d.at(0).extended())->get_fixed_dim_size());
+    EXPECT_EQ(8, static_cast<const cfixed_dim_type
+*>(d.at(0).extended())->get_fixed_stride());
+    EXPECT_EQ(4, static_cast<const cfixed_dim_type
+*>(d.at(0,0).extended())->get_fixed_dim_size());
+    EXPECT_EQ(2, static_cast<const cfixed_dim_type
+*>(d.at(0,0).extended())->get_fixed_stride());
 }
 
 TEST(CFixedDimType, CreateFOrder) {
     int axis_perm[3] = {0, 1, 2};
     intptr_t shape[3] = {2, 3, 4};
-    ndt::type d = ndt::make_cfixed_dim(3, shape, ndt::make_type<int16_t>(), axis_perm);
+    ndt::type d = ndt::make_cfixed_dim(3, shape, ndt::make_type<int16_t>(),
+axis_perm);
     EXPECT_EQ(3, d.get_ndim());
     EXPECT_EQ(3, d.get_strided_ndim());
     EXPECT_EQ(48u, d.get_data_size());
@@ -156,10 +155,14 @@ TEST(CFixedDimType, CreateFOrder) {
     // Check that the shape is right and the strides are in F-order
     EXPECT_EQ(2, d.extended<cfixed_dim_type>()->get_fixed_dim_size());
     EXPECT_EQ(2, d.extended<cfixed_dim_type>()->get_fixed_stride());
-    EXPECT_EQ(3, static_cast<const cfixed_dim_type *>(d.at(0).extended())->get_fixed_dim_size());
-    EXPECT_EQ(4, static_cast<const cfixed_dim_type *>(d.at(0).extended())->get_fixed_stride());
-    EXPECT_EQ(4, static_cast<const cfixed_dim_type *>(d.at(0,0).extended())->get_fixed_dim_size());
-    EXPECT_EQ(12, static_cast<const cfixed_dim_type *>(d.at(0,0).extended())->get_fixed_stride());
+    EXPECT_EQ(3, static_cast<const cfixed_dim_type
+*>(d.at(0).extended())->get_fixed_dim_size());
+    EXPECT_EQ(4, static_cast<const cfixed_dim_type
+*>(d.at(0).extended())->get_fixed_stride());
+    EXPECT_EQ(4, static_cast<const cfixed_dim_type
+*>(d.at(0,0).extended())->get_fixed_dim_size());
+    EXPECT_EQ(12, static_cast<const cfixed_dim_type
+*>(d.at(0,0).extended())->get_fixed_stride());
 }
 
 TEST(CFixedDimType, Basic) {
@@ -187,7 +190,8 @@ TEST(CFixedDimType, Basic) {
 }
 
 TEST(CFixedDimType, SimpleIndex) {
-    nd::array a = parse_json("cfixed[2] * cfixed[3] * int16", "[[1, 2, 3], [4, 5, 6]]");
+    nd::array a = parse_json("cfixed[2] * cfixed[3] * int16", "[[1, 2, 3], [4,
+5, 6]]");
     ASSERT_EQ(ndt::make_cfixed_dim(2,
                     ndt::make_cfixed_dim(3, ndt::make_type<int16_t>())),
                 a.get_type());
@@ -221,10 +225,12 @@ TEST(CFixedDimType, AssignKernel_ScalarToFixed) {
     a.vals() = 0;
     b = 9.0;
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(),
+b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
-    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
+    k(a.get_readwrite_originptr(), const_cast<char
+*>(b.get_readonly_originptr()));
     EXPECT_EQ(9, a(0).as<int>());
     EXPECT_EQ(9, a(1).as<int>());
     EXPECT_EQ(9, a(2).as<int>());
@@ -240,10 +246,12 @@ TEST(CFixedDimType, AssignKernel_FixedToFixed) {
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(),
+b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
-    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
+    k(a.get_readwrite_originptr(), const_cast<char
+*>(b.get_readonly_originptr()));
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
     EXPECT_EQ(7, a(2).as<int>());
@@ -257,7 +265,8 @@ TEST(CFixedDimType, AssignKernel_FixedToScalarError) {
     a = 9.0;
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
-    EXPECT_THROW(make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(),
+    EXPECT_THROW(make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(),
+a.get_arrmeta(),
                                         b.get_type(), b.get_arrmeta(),
                                         kernel_request_single,
                                         &eval::default_eval_context,
@@ -277,10 +286,12 @@ TEST(CFixedDimType, AssignCFixedToFixedKernel) {
     b = vals_int;
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(),
+b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
-    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
+    k(a.get_readwrite_originptr(), const_cast<char
+*>(b.get_readonly_originptr()));
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
     EXPECT_EQ(7, a(2).as<int>());
@@ -292,10 +303,12 @@ TEST(CFixedDimType, AssignCFixedToFixedKernel) {
     b = vals_int_single;
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(),
+b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
-    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
+    k(a.get_readwrite_originptr(), const_cast<char
+*>(b.get_readonly_originptr()));
     EXPECT_EQ(9, a(0).as<int>());
     EXPECT_EQ(9, a(1).as<int>());
     EXPECT_EQ(9, a(2).as<int>());
@@ -307,10 +320,12 @@ TEST(CFixedDimType, AssignCFixedToFixedKernel) {
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(),
+b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
-    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
+    k(a.get_readwrite_originptr(), const_cast<char
+*>(b.get_readonly_originptr()));
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
     EXPECT_EQ(7, a(2).as<int>());
@@ -322,10 +337,12 @@ TEST(CFixedDimType, AssignCFixedToFixedKernel) {
     b = parse_json("cfixed[1] * int32", "[9]");
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(),
+b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
-    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
+    k(a.get_readwrite_originptr(), const_cast<char
+*>(b.get_readonly_originptr()));
     EXPECT_EQ(9, a(0).as<int>());
     EXPECT_EQ(9, a(1).as<int>());
     EXPECT_EQ(9, a(2).as<int>());
@@ -376,12 +393,19 @@ TEST(CFixedDimType, FromCArray) {
         ndt::type("cfixed[3] * cfixed[5] * cfixed[8] * cfixed[10] * int32"));
 
     EXPECT_EQ(ndt::cfixed_dim_from_array<float>::make(), ndt::type("float32"));
-    EXPECT_EQ(ndt::cfixed_dim_from_array<float[1]>::make(), ndt::type("cfixed[1] * float32"));
-    EXPECT_EQ(ndt::cfixed_dim_from_array<float[2]>::make(), ndt::type("cfixed[2] * float32"));
-    EXPECT_EQ(ndt::cfixed_dim_from_array<float[3]>::make(), ndt::type("cfixed[3] * float32"));
-    EXPECT_EQ(ndt::cfixed_dim_from_array<float[2][1]>::make(), ndt::type("cfixed[2] * cfixed[1] * float32"));
-    EXPECT_EQ(ndt::cfixed_dim_from_array<float[1][2]>::make(), ndt::type("cfixed[1] * cfixed[2] * float32"));
-    EXPECT_EQ(ndt::cfixed_dim_from_array<float[3][3]>::make(), ndt::type("cfixed[3] * cfixed[3] * float32"));
-    EXPECT_EQ(ndt::cfixed_dim_from_array<float[3][5][8][10]>::make(), ndt::type("cfixed[3] * cfixed[5] * cfixed[8] * cfixed[10] * float32"));
+    EXPECT_EQ(ndt::cfixed_dim_from_array<float[1]>::make(), ndt::type("cfixed[1]
+* float32"));
+    EXPECT_EQ(ndt::cfixed_dim_from_array<float[2]>::make(), ndt::type("cfixed[2]
+* float32"));
+    EXPECT_EQ(ndt::cfixed_dim_from_array<float[3]>::make(), ndt::type("cfixed[3]
+* float32"));
+    EXPECT_EQ(ndt::cfixed_dim_from_array<float[2][1]>::make(),
+ndt::type("cfixed[2] * cfixed[1] * float32"));
+    EXPECT_EQ(ndt::cfixed_dim_from_array<float[1][2]>::make(),
+ndt::type("cfixed[1] * cfixed[2] * float32"));
+    EXPECT_EQ(ndt::cfixed_dim_from_array<float[3][3]>::make(),
+ndt::type("cfixed[3] * cfixed[3] * float32"));
+    EXPECT_EQ(ndt::cfixed_dim_from_array<float[3][5][8][10]>::make(),
+ndt::type("cfixed[3] * cfixed[5] * cfixed[8] * cfixed[10] * float32"));
 }
 */
