@@ -107,6 +107,23 @@ ndt::type struct_type::get_canonical_type() const
   return ndt::make_struct(m_field_names, tmp_field_types, m_variadic);
 }
 
+ndt::type struct_type::at_single(intptr_t i0, const char **inout_arrmeta,
+                                 const char **inout_data) const
+{
+  // Bounds-checking of the index
+  i0 = apply_single_index(i0, m_field_count, NULL);
+  if (inout_arrmeta) {
+    char *arrmeta = const_cast<char *>(*inout_arrmeta);
+    // Modify the arrmeta
+    *inout_arrmeta += get_arrmeta_offsets_raw()[i0];
+    // If requested, modify the data
+    if (inout_data) {
+      *inout_data += get_arrmeta_data_offsets(arrmeta)[i0];
+    }
+  }
+  return get_field_type(i0);
+}
+
 bool struct_type::is_lossless_assignment(const ndt::type &dst_tp,
                                          const ndt::type &src_tp) const
 {

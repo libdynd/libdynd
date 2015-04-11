@@ -2136,6 +2136,12 @@ nd::array nd::groupby(const nd::array &data_values, const nd::array &by_values,
       gbdt.extended()->get_arrmeta_size(), gbdt.extended()->get_data_size(),
       gbdt.extended()->get_data_alignment(), &data_ptr));
 
+  // Set the arrmeta for the struct (which consists of two pointers)
+  intptr_t *struct_data_offsets =
+      reinterpret_cast<intptr_t *>(result.get_arrmeta());
+  struct_data_offsets[0] = 0;
+  struct_data_offsets[1] = sizeof(void *);
+
   // Set the arrmeta for the data values
   pointer_type_arrmeta *pmeta;
   pmeta = gbdt_ext->get_data_values_pointer_arrmeta(result.get_arrmeta());
