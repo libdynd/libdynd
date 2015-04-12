@@ -38,9 +38,9 @@ enum type_kind_t {
   // For any dimension types which have elements of all the same type
   dim_kind,
 
-  // For struct_type_id and cstruct_type_id
+  // For structs
   struct_kind,
-  // For tuple_type_id and ctuple_type_id
+  // For tuples
   tuple_kind,
 
   // For types whose value itself is dynamically typed
