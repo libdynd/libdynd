@@ -122,21 +122,16 @@ public:
    * Fills in the array of default data offsets based on the data sizes
    * and alignments of the types.
    */
-  static void fill_default_data_offsets(intptr_t n, const ndt::type *tps,
+  static void fill_default_data_offsets(intptr_t nfields,
+                                        const ndt::type *field_tps,
                                         uintptr_t *out_data_offsets)
   {
-    size_t offs = 0;
-    if (n > 0) {
+    if (nfields > 0) {
       out_data_offsets[0] = 0;
-      for (intptr_t i = 1; i < n; ++i) {
-        const ndt::type &tp = tps[i - 1];
-        if (!tp.is_builtin()) {
-          offs += tp.extended()->get_default_data_size();
-        }
-        else {
-          offs += tp.get_data_size();
-        }
-        offs = inc_to_alignment(offs, tps[i].get_data_alignment());
+      size_t offs = 0;
+      for (intptr_t i = 1; i < nfields; ++i) {
+        offs += field_tps[i - 1].get_default_data_size();
+        offs = inc_to_alignment(offs, field_tps[i].get_data_alignment());
         out_data_offsets[i] = offs;
       }
     }

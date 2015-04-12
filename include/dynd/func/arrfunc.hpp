@@ -383,6 +383,7 @@ namespace nd {
     template <typename... K>
     class kwds;
 
+    /** The case of no keyword arguments being provided */
     template <>
     class kwds<> {
       void fill_values(const ndt::type *tp, char *arrmeta,
@@ -402,6 +403,7 @@ namespace nd {
           std::vector<intptr_t> &available, std::vector<intptr_t> &missing,
           std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
       {
+        // No keywords provided, so all are missing
         for (intptr_t j : af_tp->get_option_kwd_indices()) {
           missing.push_back(j);
         }
@@ -409,6 +411,7 @@ namespace nd {
         check_nkwd(af_tp, available, missing);
       }
 
+      /** Converts the keyword args + filled in defaults into an nd::array */
       array as_array(const ndt::type &tp,
                      const std::vector<intptr_t> &available,
                      const std::vector<intptr_t> &missing) const
@@ -642,16 +645,17 @@ namespace nd {
                      const std::vector<intptr_t> &missing) const
       {
         array res = empty_shell(tp);
+        auto field_count = tp.extended<base_struct_type>()->get_field_count();
+        auto field_types =
+            tp.extended<base_struct_type>()->get_field_types_raw();
         struct_type::fill_default_data_offsets(
-            res.get_dim_size(),
-            tp.extended<base_struct_type>()->get_field_types_raw(),
+            field_count, field_types,
             reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
 
         fill_values(
-            tp.extended<base_struct_type>()->get_field_types_raw(),
-            res.get_arrmeta(), res.get_type()
-                                   .extended<base_struct_type>()
-                                   ->get_arrmeta_offsets_raw(),
+            field_types, res.get_arrmeta(), res.get_type()
+                                                .extended<base_struct_type>()
+                                                ->get_arrmeta_offsets_raw(),
             res.get_readwrite_originptr(),
             res.get_type().extended<base_struct_type>()->get_data_offsets(
                 res.get_arrmeta()),
@@ -907,14 +911,13 @@ namespace nd {
           }
     */
 
-    /** Implements the general call operator */
+    /** Implements the general call operator which returns an array */
     template <typename A, typename K>
     array call(const A &args, const K &kwds) const
     {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = get_type();
 
-      // ...
       ndt::type dst_tp;
       array dst;
 
