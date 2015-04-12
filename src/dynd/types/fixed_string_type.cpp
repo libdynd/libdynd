@@ -137,7 +137,7 @@ void fixed_string_type::print_data(std::ostream &o,
 
 void fixed_string_type::print_type(std::ostream& o) const
 {
-    o << "string[" << m_stringsize;
+    o << "fixed_string[" << m_stringsize;
     if (m_encoding != string_encoding_utf_8) {
         o << ",'" << m_encoding << "'";
     }

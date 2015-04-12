@@ -103,16 +103,16 @@ TEST(DataShapeParser, StringAtoms)
             ndt::type("string['ucs-2']"));
   // String with size
   EXPECT_EQ(ndt::make_fixed_string(1, string_encoding_utf_8),
-            ndt::type("string[1]"));
+            ndt::type("fixed_string[1]"));
   EXPECT_EQ(ndt::make_fixed_string(100, string_encoding_utf_8),
-            ndt::type("string[100]"));
+            ndt::type("fixed_string[100]"));
   // String with size and encoding
   EXPECT_EQ(ndt::make_fixed_string(1, string_encoding_ascii),
-            ndt::type("string[1, 'A']"));
+            ndt::type("fixed_string[1, 'A']"));
   EXPECT_EQ(ndt::make_fixed_string(10, string_encoding_utf_8),
-            ndt::type("string[10, 'U8']"));
+            ndt::type("fixed_string[10, 'U8']"));
   EXPECT_EQ(ndt::make_fixed_string(1000, string_encoding_utf_16),
-            ndt::type("string[1000,'U16']"));
+            ndt::type("fixed_string[1000,'U16']"));
 }
 
 TEST(DataShapeParser, Unaligned)
@@ -289,22 +289,22 @@ TEST(DataShapeParser, ErrorBasic)
 TEST(DataShapeParser, ErrorString)
 {
   try {
-    ndt::type("string[");
+    ndt::type("fixed_string[");
     EXPECT_TRUE(false);
   }
   catch (const runtime_error &e) {
     string msg = e.what();
-    EXPECT_TRUE(msg.find("line 1, column 8") != string::npos);
-    EXPECT_TRUE(msg.find("expected a size integer or string encoding") !=
+    EXPECT_TRUE(msg.find("line 1, column 14") != string::npos);
+    EXPECT_TRUE(msg.find("expected a size integer") !=
                 string::npos);
   }
   try {
-    ndt::type("string[0]");
+    ndt::type("fixed_string[0]");
     EXPECT_TRUE(false);
   }
   catch (const runtime_error &e) {
     string msg = e.what();
-    EXPECT_TRUE(msg.find("line 1, column 8") != string::npos);
+    EXPECT_TRUE(msg.find("line 1, column 14") != string::npos);
     EXPECT_TRUE(msg.find("string size cannot be zero") != string::npos);
   }
   try {
@@ -326,21 +326,21 @@ TEST(DataShapeParser, ErrorString)
     EXPECT_TRUE(msg.find("expected closing ']'") != string::npos);
   }
   try {
-    ndt::type("string[3,'U8',10]");
+    ndt::type("fixed_string[3,'U8',10]");
     EXPECT_TRUE(false);
   }
   catch (const runtime_error &e) {
     string msg = e.what();
-    EXPECT_TRUE(msg.find("line 1, column 14") != string::npos);
+    EXPECT_TRUE(msg.find("line 1, column 20") != string::npos);
     EXPECT_TRUE(msg.find("expected closing ']'") != string::npos);
   }
   try {
-    ndt::type("string[3,3]");
+    ndt::type("fixed_string[3,3]");
     EXPECT_TRUE(false);
   }
   catch (const runtime_error &e) {
     string msg = e.what();
-    EXPECT_TRUE(msg.find("line 1, column 10") != string::npos);
+    EXPECT_TRUE(msg.find("line 1, column 16") != string::npos);
     EXPECT_TRUE(msg.find("expected a string encoding") != string::npos);
   }
 }
@@ -482,8 +482,8 @@ TEST(DataShapeParser, KivaLoanDataShape)
       "    id: int64,\n"
       "    name: string,\n"
       "    description: {\n"
-      "        languages: var * string[2],\n"
-      "    #    texts: map(string[2], string),\n"
+      "        languages: var * fixed_string[2],\n"
+      "    #    texts: map(fixed_string[2], string),\n"
       "    },\n"
       "    status: string, # LoanStatusType,\n"
       "    funded_amount: float64,\n"
@@ -504,7 +504,7 @@ TEST(DataShapeParser, KivaLoanDataShape)
       "search, map null -> false on import?\n"
       "    delinquent: bool,\n"
       "    location: {\n"
-      "        country_code: string[2],\n"
+      "        country_code: fixed_string[2],\n"
       "        country: string,\n"
       "        town: string,\n"
       "        geo: {\n"
@@ -521,7 +521,7 @@ TEST(DataShapeParser, KivaLoanDataShape)
       "    borrowers: var * {\n"
       "        first_name: string,\n"
       "        last_name: string,\n"
-      "        gender: string[2], # GenderType\n"
+      "        gender: fixed_string[2], # GenderType\n"
       "        pictured: bool,\n"
       "    },\n"
       "    terms: {\n"

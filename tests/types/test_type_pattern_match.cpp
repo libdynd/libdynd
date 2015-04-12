@@ -164,16 +164,16 @@ TEST(TypePatternMatch, Categorical)
 
 TEST(TypePatternMatch, FixedBytes)
 {
-  EXPECT_TRUE(ndt::type("FixedBytes").match(ndt::type("bytes[8]")));
-  EXPECT_TRUE(ndt::type("FixedBytes").match(ndt::type("bytes[16]")));
+  EXPECT_TRUE(ndt::type("FixedBytes").match(ndt::type("fixed_bytes[8]")));
+  EXPECT_TRUE(ndt::type("FixedBytes").match(ndt::type("fixed_bytes[16]")));
   EXPECT_FALSE(ndt::type("FixedBytes").match(ndt::type("bytes")));
   EXPECT_FALSE(ndt::type("FixedBytes").match(ndt::type("int32")));
 }
 
 TEST(TypePatternMatch, FixedString)
 {
-  EXPECT_TRUE(ndt::type("FixedString").match(ndt::type("string[8]")));
-  EXPECT_TRUE(ndt::type("FixedString").match(ndt::type("string[16]")));
+  EXPECT_TRUE(ndt::type("FixedString").match(ndt::type("fixed_string[8]")));
+  EXPECT_TRUE(ndt::type("FixedString").match(ndt::type("fixed_string[16]")));
   EXPECT_FALSE(ndt::type("FixedString").match(ndt::type("string")));
   EXPECT_FALSE(ndt::type("FixedString").match(ndt::type("int32")));
 }
