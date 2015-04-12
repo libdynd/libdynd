@@ -8,7 +8,7 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 
@@ -71,7 +71,7 @@ namespace detail {
                 reinterpret_cast<string_type_data*>(data)->begin = const_cast<char *>(value);
                 reinterpret_cast<string_type_data*>(data)->end = const_cast<char *>(value + N - 1);
             } else {
-                typed_data_assign(paramtype, arrmeta, data, ndt::make_fixedstring(N, string_encoding_utf_8),
+                typed_data_assign(paramtype, arrmeta, data, ndt::make_fixed_string(N, string_encoding_utf_8),
                         NULL, value);
             }
         }

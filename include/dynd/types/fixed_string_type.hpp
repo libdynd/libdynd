@@ -2,7 +2,7 @@
 // Copyright (C) 2011-15 DyND Developers
 // BSD 2-Clause License, see LICENSE.txt
 //
-// The fixedstring type represents a string with
+// The fixed_string type represents a string with
 // a particular encoding, stored in a fixed-size
 // buffer.
 //
@@ -16,14 +16,14 @@
 
 namespace dynd {
 
-class fixedstring_type : public base_string_type {
+class fixed_string_type : public base_string_type {
     intptr_t m_stringsize;
     string_encoding_t m_encoding;
 
 public:
-    fixedstring_type(intptr_t stringsize, string_encoding_t encoding);
+    fixed_string_type(intptr_t stringsize, string_encoding_t encoding);
 
-    virtual ~fixedstring_type();
+    virtual ~fixed_string_type();
 
     string_encoding_t get_encoding() const {
         return m_encoding;
@@ -79,9 +79,9 @@ public:
 };
 
 namespace ndt {
-    inline ndt::type make_fixedstring(intptr_t stringsize,
+    inline ndt::type make_fixed_string(intptr_t stringsize,
                     string_encoding_t encoding = string_encoding_utf_8) {
-        return ndt::type(new fixedstring_type(stringsize, encoding), false);
+        return ndt::type(new fixed_string_type(stringsize, encoding), false);
     }
 } // namespace ndt
 

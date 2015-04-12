@@ -10,7 +10,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/categorical_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/array_range.hpp>
@@ -20,7 +20,7 @@ using namespace dynd;
 
 TEST(CategoricalType, Create) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type d;
@@ -64,7 +64,7 @@ TEST(CategoricalType, Create) {
 
 TEST(CategoricalType, Convert) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type cd = ndt::make_categorical(a);
@@ -83,11 +83,11 @@ TEST(CategoricalType, Convert) {
 
 TEST(CategoricalType, Compare) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     const char *b_vals[] = {"foo", "bar"};
-    nd::array b = nd::empty(2, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array b = nd::empty(2, ndt::make_fixed_string(3, string_encoding_ascii));
     b.vals() = b_vals;
 
     ndt::type da = ndt::make_categorical(a);
@@ -109,7 +109,7 @@ TEST(CategoricalType, Compare) {
 
 TEST(CategoricalType, Unique) {
     const char *a_vals[] = {"foo", "bar", "foo"};
-    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     EXPECT_THROW(ndt::make_categorical(a), std::runtime_error);
@@ -122,11 +122,11 @@ TEST(CategoricalType, Unique) {
 
 TEST(CategoricalType, FactorFixedString) {
     const char *string_cats_vals[] = {"bar", "foo"};
-    nd::array string_cats = nd::empty(2, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array string_cats = nd::empty(2, ndt::make_fixed_string(3, string_encoding_ascii));
     string_cats.vals() = string_cats_vals;
 
     const char *a_vals[] = {"foo", "bar", "foo"};
-    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type da = ndt::factor_categorical(a);
@@ -165,7 +165,7 @@ TEST(CategoricalType, FactorInt) {
 
 TEST(CategoricalType, Values) {
     const char *a_vals[] = {"foo", "bar", "baz"};
-    nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array a = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
     a.vals() = a_vals;
 
     ndt::type dt = ndt::make_categorical(a);
@@ -206,7 +206,7 @@ TEST(CategoricalType, ValuesLonger) {
 
 TEST(CategoricalType, AssignFixedString) {
     const char *cat_vals[] = {"foo", "bar", "baz"};
-    nd::array cat = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array cat = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
     cat.vals() = cat_vals;
 
     ndt::type dt = ndt::make_categorical(cat);
@@ -263,7 +263,7 @@ TEST(CategoricalType, AssignInt) {
 
 TEST(CategoricalType, AssignRange) {
     const char *cat_vals[] = {"foo", "bar", "baz"};
-    nd::array cat = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+    nd::array cat = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
     cat.vals() = cat_vals;
 
     ndt::type dt = ndt::make_categorical(cat);

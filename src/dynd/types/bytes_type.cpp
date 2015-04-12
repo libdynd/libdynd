@@ -6,7 +6,7 @@
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 
@@ -138,8 +138,8 @@ intptr_t bytes_type::make_assignment_kernel(
                                 src_tp.get_data_alignment(), src_arrmeta,
                                 kernreq, ectx);
             }
-            case fixedbytes_type_id: {
-                return make_fixedbytes_to_blockref_bytes_assignment_kernel(ckb, ckb_offset,
+            case fixed_bytes_type_id: {
+                return make_fixed_bytes_to_blockref_bytes_assignment_kernel(ckb, ckb_offset,
                                 get_data_alignment(), dst_arrmeta,
                                 src_tp.get_data_size(), src_tp.get_data_alignment(),
                                 kernreq, ectx);

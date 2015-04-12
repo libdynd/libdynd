@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/bytes_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/func/call_callable.hpp>
@@ -106,13 +106,13 @@ TEST(StringType, Basic) {
     a = std::string("abcdefg");
     EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
     EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
-    // Make it a fixedstring for this test
-    a = a.ucast(ndt::make_fixedstring(7, string_encoding_utf_8)).eval();
+    // Make it a fixed_string for this test
+    a = a.ucast(ndt::make_fixed_string(7, string_encoding_utf_8)).eval();
 
     // Convert to a blockref string type with the same utf8 codec
     b = a.ucast(ndt::make_string(string_encoding_utf_8));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_8),
-                    ndt::make_fixedstring(7, string_encoding_utf_8)),
+                    ndt::make_fixed_string(7, string_encoding_utf_8)),
                 b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
@@ -122,7 +122,7 @@ TEST(StringType, Basic) {
     // Convert to a blockref string type with the utf16 codec
     b = a.ucast(ndt::make_string(string_encoding_utf_16));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_16),
-                    ndt::make_fixedstring(7, string_encoding_utf_8)),
+                    ndt::make_fixed_string(7, string_encoding_utf_8)),
                 b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
@@ -132,7 +132,7 @@ TEST(StringType, Basic) {
     // Convert to a blockref string type with the utf32 codec
     b = a.ucast(ndt::make_string(string_encoding_utf_32));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_32),
-                    ndt::make_fixedstring(7, string_encoding_utf_8)),
+                    ndt::make_fixed_string(7, string_encoding_utf_8)),
                 b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
@@ -142,7 +142,7 @@ TEST(StringType, Basic) {
     // Convert to a blockref string type with the ascii codec
     b = a.ucast(ndt::make_string(string_encoding_ascii));
     EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_ascii),
-                    ndt::make_fixedstring(7, string_encoding_utf_8)),
+                    ndt::make_fixed_string(7, string_encoding_utf_8)),
                 b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::make_string(string_encoding_ascii),
@@ -153,15 +153,15 @@ TEST(StringType, Basic) {
 TEST(StringType, AccessFlags) {
     nd::array a, b;
 
-    // Default construction from a string produces an immutable fixedstring
+    // Default construction from a string produces an immutable fixed_string
     a = std::string("testing one two three testing one two three four five testing one two three four five six seven");
     EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
-    // Turn it into a fixedstring type for this test
-    a = a.ucast(ndt::make_fixedstring(95, string_encoding_utf_8)).eval();
-    EXPECT_EQ(ndt::make_fixedstring(95, string_encoding_utf_8), a.get_type());
+    // Turn it into a fixed_string type for this test
+    a = a.ucast(ndt::make_fixed_string(95, string_encoding_utf_8)).eval();
+    EXPECT_EQ(ndt::make_fixed_string(95, string_encoding_utf_8), a.get_type());
 
     // Converting to a blockref string of the same encoding produces a reference
-    // into the fixedstring value
+    // into the fixed_string value
     b = a.ucast(ndt::make_string(string_encoding_utf_8)).eval();
     EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_access_flags());
     EXPECT_EQ(ndt::make_string(string_encoding_utf_8), b.get_type());

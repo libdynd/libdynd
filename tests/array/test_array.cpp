@@ -13,7 +13,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 
 using namespace std;
@@ -619,7 +619,7 @@ TEST(Array, Storage) {
 
     nd::array b = a.storage();
     EXPECT_EQ(ndt::make_fixed_dim(2, ndt::make_fixed_dim(3, ndt::make_type<int>())), a.get_type());
-    EXPECT_EQ(ndt::make_fixed_dim(2, ndt::make_fixed_dim(3, ndt::make_fixedbytes(4, 4))), b.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(2, ndt::make_fixed_dim(3, ndt::make_fixed_bytes(4, 4))), b.get_type());
     EXPECT_EQ(a.get_readonly_originptr(), b.get_readonly_originptr());
     EXPECT_EQ(a.get_shape(), b.get_shape());
     EXPECT_EQ(a.get_strides(), b.get_strides());

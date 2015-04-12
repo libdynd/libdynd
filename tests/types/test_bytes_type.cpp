@@ -10,7 +10,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/bytes_type.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/string_type.hpp>
 

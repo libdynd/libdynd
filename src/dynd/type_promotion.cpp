@@ -188,9 +188,9 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
     // HACK for getting simple string type promotions.
     // TODO: Do this properly in a pluggable manner.
     if ((tp0_val.get_type_id() == string_type_id ||
-                    tp0_val.get_type_id() == fixedstring_type_id) &&
+                    tp0_val.get_type_id() == fixed_string_type_id) &&
                 (tp1_val.get_type_id() == string_type_id ||
-                    tp1_val.get_type_id() == fixedstring_type_id)) {
+                    tp1_val.get_type_id() == fixed_string_type_id)) {
         // Always promote to the default utf-8 string (for now, maybe return encoding, etc later?)
         return ndt::make_string();
     }

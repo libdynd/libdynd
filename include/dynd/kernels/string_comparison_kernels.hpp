@@ -12,12 +12,12 @@
 namespace dynd {
 
 /**
- * Makes a kernel which compares fixedstrings.
+ * Makes a kernel which compares fixed_strings.
  *
  * \param string_size  The number of characters (1, 2, or 4-bytes each) in the string.
  * \param encoding  The encoding of the string.
  */
-size_t make_fixedstring_comparison_kernel(
+size_t make_fixed_string_comparison_kernel(
                 void *ckb, intptr_t ckb_offset,
                 size_t string_size, string_encoding_t encoding,
                 comparison_type_t comptype,

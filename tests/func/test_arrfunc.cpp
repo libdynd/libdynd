@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/func/apply.hpp>
@@ -28,11 +28,11 @@ TEST(ArrFunc, Assignment)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::make_type<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::make_fixedstring(16), af.get_type()->get_pos_type(0));
+  ASSERT_EQ(ndt::make_fixed_string(16), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
 
@@ -274,11 +274,11 @@ TEST(ArrFunc, AssignmentAsExpr)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::make_type<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::make_fixedstring(16), af.get_type()->get_pos_type(0));
+  ASSERT_EQ(ndt::make_fixed_string(16), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
 

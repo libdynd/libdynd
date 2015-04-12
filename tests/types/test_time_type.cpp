@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/property_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/struct_type.hpp>

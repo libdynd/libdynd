@@ -117,23 +117,23 @@ intptr_t char_type::make_assignment_kernel(
         }
         switch (src_tp.get_type_id()) {
             case char_type_id: {
-                // Use the fixedstring assignment to do this conversion
+                // Use the fixed_string assignment to do this conversion
                 const char_type *src_fs = src_tp.extended<char_type>();
-                return make_fixedstring_assignment_kernel(
+                return make_fixed_string_assignment_kernel(
                     ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_data_size(), src_fs->m_encoding, kernreq, ectx);
             }
-            case fixedstring_type_id: {
-                // Use the fixedstring assignment to do this conversion
+            case fixed_string_type_id: {
+                // Use the fixed_string assignment to do this conversion
                 const base_string_type *src_fs = src_tp.extended<base_string_type>();
-                return make_fixedstring_assignment_kernel(
+                return make_fixed_string_assignment_kernel(
                     ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_data_size(), src_fs->get_encoding(), kernreq,
                     ectx);
             }
             case string_type_id: {
                 const base_string_type *src_fs = src_tp.extended<base_string_type>();
-                return make_blockref_string_to_fixedstring_assignment_kernel(
+                return make_blockref_string_to_fixed_string_assignment_kernel(
                     ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_encoding(), kernreq, ectx);
             }
@@ -149,17 +149,17 @@ intptr_t char_type::make_assignment_kernel(
     }
     else {
         switch (dst_tp.get_type_id()) {
-            case fixedstring_type_id: {
-                // Use the fixedstring assignment to do this conversion
+            case fixed_string_type_id: {
+                // Use the fixed_string assignment to do this conversion
                 const base_string_type *dst_fs = dst_tp.extended<base_string_type>();
-                return make_fixedstring_assignment_kernel(
+                return make_fixed_string_assignment_kernel(
                     ckb, ckb_offset, dst_fs->get_data_size(),
                     dst_fs->get_encoding(), get_data_size(), m_encoding,
                     kernreq, ectx);
             }
             case string_type_id: {
                 const base_string_type *dst_fs = dst_tp.extended<base_string_type>();
-                return make_fixedstring_to_blockref_string_assignment_kernel(
+                return make_fixed_string_to_blockref_string_assignment_kernel(
                     ckb, ckb_offset, dst_arrmeta, dst_fs->get_encoding(),
                     get_data_size(), m_encoding, kernreq, ectx);
             }

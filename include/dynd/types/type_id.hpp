@@ -105,7 +105,7 @@ enum type_id_t {
   // blockref primitive types
   bytes_type_id,
   // A bytes buffer of a fixed size
-  fixedbytes_type_id,
+  fixed_bytes_type_id,
 
   // A single string character
   char_type_id,
@@ -113,7 +113,7 @@ enum type_id_t {
   // A variable-sized string type
   string_type_id,
   // A NULL-terminated string buffer of a fixed size
-  fixedstring_type_id,
+  fixed_string_type_id,
 
   // A categorical (enum-like) type
   categorical_type_id,

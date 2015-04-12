@@ -12,11 +12,11 @@
 
 namespace dynd {
 
-class fixedbytes_type : public base_bytes_type {
+class fixed_bytes_type : public base_bytes_type {
 public:
-    fixedbytes_type(intptr_t element_size, intptr_t alignment);
+    fixed_bytes_type(intptr_t element_size, intptr_t alignment);
 
-    virtual ~fixedbytes_type();
+    virtual ~fixed_bytes_type();
 
     void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
 
@@ -52,8 +52,8 @@ namespace ndt {
      * Creates a bytes<size, alignment> type, for representing
      * raw, uninterpreted bytes.
      */
-    inline ndt::type make_fixedbytes(intptr_t element_size, intptr_t alignment) {
-        return ndt::type(new fixedbytes_type(element_size, alignment), false);
+    inline ndt::type make_fixed_bytes(intptr_t element_size, intptr_t alignment) {
+        return ndt::type(new fixed_bytes_type(element_size, alignment), false);
     }
 } // namespace ndt
 

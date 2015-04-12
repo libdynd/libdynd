@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/byteswap_type.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
 
 using namespace std;
@@ -24,7 +24,7 @@ TEST(AlignDType, Create) {
   // The value has the native byte-order type
   EXPECT_EQ(d.value_type(), ndt::make_type<float>());
   // The storage is bytes with alignment 1
-  EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(4, 1));
+  EXPECT_EQ(d.storage_type(), ndt::make_fixed_bytes(4, 1));
   // The alignment of the type is 1
   EXPECT_EQ(1u, d.get_data_alignment());
   EXPECT_TRUE(d.is_expression());
@@ -64,10 +64,10 @@ TEST(AlignDType, Chained) {
   // make sure that is handled properly at the type object level.
   ndt::type d = make_unaligned(ndt::make_byteswap<int>());
   EXPECT_EQ(ndt::make_byteswap(ndt::make_type<int>(),
-                               ndt::make_view(ndt::make_fixedbytes(4, 4),
-                                              ndt::make_fixedbytes(4, 1))),
+                               ndt::make_view(ndt::make_fixed_bytes(4, 4),
+                                              ndt::make_fixed_bytes(4, 1))),
             d);
-  EXPECT_EQ(ndt::make_fixedbytes(4, 1), d.storage_type());
+  EXPECT_EQ(ndt::make_fixed_bytes(4, 1), d.storage_type());
   EXPECT_EQ(ndt::make_type<int>(), d.value_type());
 }
 

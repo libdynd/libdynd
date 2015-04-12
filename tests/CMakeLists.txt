@@ -42,10 +42,10 @@ set(tests_SRC
     types/test_date_type.cpp
     types/test_datetime_type.cpp
     types/test_fixed_dim_type.cpp
-    types/test_fixedbytes_type.cpp
     types/test_fixed_bytes_kind_type.cpp
-    types/test_fixedstring_type.cpp
+    types/test_fixed_bytes_type.cpp
     types/test_fixed_string_kind_type.cpp
+    types/test_fixed_string_type.cpp
     types/test_groupby_type.cpp
     types/test_json_type.cpp
     types/test_option_type.cpp

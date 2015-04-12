@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/types/convert_type.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -23,7 +23,7 @@ TEST(ByteswapDType, Create) {
     // The value has the native byte-order type
     EXPECT_EQ(d.value_type(), ndt::make_type<float>());
     // The storage is the a bytes type with matching storage and alignment
-    EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(4, 4));
+    EXPECT_EQ(d.storage_type(), ndt::make_fixed_bytes(4, 4));
     EXPECT_TRUE(d.is_expression());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
@@ -32,7 +32,7 @@ TEST(ByteswapDType, Create) {
     // The value has the native byte-order type
     EXPECT_EQ(d.value_type(), ndt::make_type<dynd::complex<double> >());
     // The storage is the a bytes type with matching storage and alignment
-    EXPECT_EQ(d.storage_type(), ndt::make_fixedbytes(16, scalar_align_of<dynd::complex<double> >::value));
+    EXPECT_EQ(d.storage_type(), ndt::make_fixed_bytes(16, scalar_align_of<dynd::complex<double> >::value));
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 

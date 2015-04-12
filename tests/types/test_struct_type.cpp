@@ -12,7 +12,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/byteswap_type.hpp>
@@ -118,7 +118,7 @@ TEST(StructType, CreateThreeField) {
     // Struct with three fields
     ndt::type d1 = ndt::make_type<int64_t>();
     ndt::type d2 = ndt::make_type<int32_t>();
-    ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
+    ndt::type d3 = ndt::make_fixed_string(5, string_encoding_utf_8);
     dt = ndt::make_struct(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(struct_type_id, dt.get_type_id());
     EXPECT_EQ(0u, dt.get_data_size());
@@ -130,7 +130,7 @@ TEST(StructType, CreateThreeField) {
     EXPECT_EQ(3, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
-    EXPECT_EQ(ndt::make_fixedstring(5, string_encoding_utf_8), tdt->get_field_type(2));
+    EXPECT_EQ(ndt::make_fixed_string(5, string_encoding_utf_8), tdt->get_field_type(2));
     EXPECT_EQ("x", tdt->get_field_name(0));
     EXPECT_EQ("y", tdt->get_field_name(1));
     EXPECT_EQ("z", tdt->get_field_name(2));
@@ -142,7 +142,7 @@ TEST(StructType, ReplaceScalarTypes) {
     // Struct with three fields
     ndt::type d1 = ndt::make_type<dynd::complex<double> >();
     ndt::type d2 = ndt::make_type<int32_t>();
-    ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
+    ndt::type d3 = ndt::make_fixed_string(5, string_encoding_utf_8);
     dt = ndt::make_struct(d1, "x", d2, "y", d3, "z");
     dt2 = dt.with_replaced_scalar_types(ndt::make_type<int16_t>());
     EXPECT_EQ(ndt::make_struct(
@@ -158,7 +158,7 @@ TEST(StructType, TypeAt) {
     // Struct with three fields
     ndt::type d1 = ndt::make_type<dynd::complex<double> >();
     ndt::type d2 = ndt::make_type<int32_t>();
-    ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_8);
+    ndt::type d3 = ndt::make_fixed_string(5, string_encoding_utf_8);
     dt = ndt::make_struct(d1, "x", d2, "y", d3, "z");
 
     // indexing into a type with a slice produces another
@@ -174,7 +174,7 @@ TEST(StructType, CanonicalType) {
     // Struct with three fields
     ndt::type d1 = ndt::make_convert<dynd::complex<double>, float>();
     ndt::type d2 = ndt::make_byteswap<int32_t>();
-    ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_32);
+    ndt::type d3 = ndt::make_fixed_string(5, string_encoding_utf_32);
     dt = ndt::make_struct(d1, "x", d2, "y", d3, "z");
     EXPECT_EQ(ndt::make_struct(ndt::make_type<dynd::complex<double> >(), "x",
                                 ndt::make_type<int32_t>(), "y",
@@ -185,7 +185,7 @@ TEST(StructType, CanonicalType) {
 TEST(StructType, IsExpression) {
     ndt::type d1 = ndt::make_type<float>();
     ndt::type d2 = ndt::make_byteswap<int32_t>();
-    ndt::type d3 = ndt::make_fixedstring(5, string_encoding_utf_32);
+    ndt::type d3 = ndt::make_fixed_string(5, string_encoding_utf_32);
     ndt::type d = ndt::make_struct(d1, "x", d2, "y", d3, "z");
 
     EXPECT_TRUE(d.is_expression());

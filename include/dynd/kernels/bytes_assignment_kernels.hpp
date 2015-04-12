@@ -22,7 +22,7 @@ size_t make_blockref_bytes_assignment_kernel(
 /**
  * Makes a kernel which copies fixed-size bytes to bytes.
  */
-size_t make_fixedbytes_to_blockref_bytes_assignment_kernel(
+size_t make_fixed_bytes_to_blockref_bytes_assignment_kernel(
                 void *ckb, intptr_t ckb_offset,
                 size_t dst_alignment, const char *dst_arrmeta,
                 intptr_t src_element_size, size_t src_alignment,

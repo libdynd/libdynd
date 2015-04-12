@@ -5,7 +5,7 @@
 
 #include <algorithm>
 
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
@@ -17,8 +17,8 @@
 using namespace std;
 using namespace dynd;
 
-fixedstring_type::fixedstring_type(intptr_t stringsize, string_encoding_t encoding)
-    : base_string_type(fixedstring_type_id, 0, 1, type_flag_scalar, 0),
+fixed_string_type::fixed_string_type(intptr_t stringsize, string_encoding_t encoding)
+    : base_string_type(fixed_string_type_id, 0, 1, type_flag_scalar, 0),
             m_stringsize(stringsize), m_encoding(encoding)
 {
     switch (encoding) {
@@ -37,15 +37,15 @@ fixedstring_type::fixedstring_type(intptr_t stringsize, string_encoding_t encodi
             m_members.data_alignment = 4;
             break;
         default:
-            throw runtime_error("Unrecognized string encoding in dynd fixedstring type constructor");
+            throw runtime_error("Unrecognized string encoding in dynd fixed_string type constructor");
     }
 }
 
-fixedstring_type::~fixedstring_type()
+fixed_string_type::~fixed_string_type()
 {
 }
 
-void fixedstring_type::get_string_range(const char **out_begin,
+void fixed_string_type::get_string_range(const char **out_begin,
                                         const char **out_end,
                                         const char *DYND_UNUSED(arrmeta),
                                         const char *data) const
@@ -84,7 +84,7 @@ void fixedstring_type::get_string_range(const char **out_begin,
     }
 }
 
-void fixedstring_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
+void fixed_string_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
                                             char *dst, const char *utf8_begin,
                                             const char *utf8_end,
                                             const eval::eval_context *ectx)
@@ -112,7 +112,7 @@ void fixedstring_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
     }
 }
 
-void fixedstring_type::print_data(std::ostream &o,
+void fixed_string_type::print_data(std::ostream &o,
                                   const char *DYND_UNUSED(arrmeta),
                                   const char *data) const
 {
@@ -135,7 +135,7 @@ void fixedstring_type::print_data(std::ostream &o,
     o << "\"";
 }
 
-void fixedstring_type::print_type(std::ostream& o) const
+void fixed_string_type::print_type(std::ostream& o) const
 {
     o << "string[" << m_stringsize;
     if (m_encoding != string_encoding_utf_8) {
@@ -144,12 +144,12 @@ void fixedstring_type::print_type(std::ostream& o) const
     o << "]";
 }
 
-ndt::type fixedstring_type::get_canonical_type() const
+ndt::type fixed_string_type::get_canonical_type() const
 {
     return ndt::type(this, true);
 }
 
-bool fixedstring_type::is_lossless_assignment(
+bool fixed_string_type::is_lossless_assignment(
                 const ndt::type& DYND_UNUSED(dst_tp),
                 const ndt::type& DYND_UNUSED(src_tp)) const
 {
@@ -158,19 +158,19 @@ bool fixedstring_type::is_lossless_assignment(
     return false;
 }
 
-bool fixedstring_type::operator==(const base_type& rhs) const
+bool fixed_string_type::operator==(const base_type& rhs) const
 {
     if (this == &rhs) {
         return true;
-    } else if (rhs.get_type_id() != fixedstring_type_id) {
+    } else if (rhs.get_type_id() != fixed_string_type_id) {
         return false;
     } else {
-        const fixedstring_type *dt = static_cast<const fixedstring_type*>(&rhs);
+        const fixed_string_type *dt = static_cast<const fixed_string_type*>(&rhs);
         return m_encoding == dt->m_encoding && m_stringsize == dt->m_stringsize;
     }
 }
 
-intptr_t fixedstring_type::make_assignment_kernel(
+intptr_t fixed_string_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
@@ -178,15 +178,15 @@ intptr_t fixedstring_type::make_assignment_kernel(
 {
     if (this == dst_tp.extended()) {
         switch (src_tp.get_type_id()) {
-            case fixedstring_type_id: {
-                const fixedstring_type *src_fs = src_tp.extended<fixedstring_type>();
-                return make_fixedstring_assignment_kernel(
+            case fixed_string_type_id: {
+                const fixed_string_type *src_fs = src_tp.extended<fixed_string_type>();
+                return make_fixed_string_assignment_kernel(
                     ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_data_size(), src_fs->m_encoding, kernreq, ectx);
             }
             case string_type_id: {
                 const base_string_type *src_fs = src_tp.extended<base_string_type>();
-                return make_blockref_string_to_fixedstring_assignment_kernel(
+                return make_blockref_string_to_fixed_string_assignment_kernel(
                     ckb, ckb_offset, get_data_size(), m_encoding,
                     src_fs->get_encoding(), kernreq, ectx);
             }
@@ -215,7 +215,7 @@ intptr_t fixedstring_type::make_assignment_kernel(
     }
 }
 
-size_t fixedstring_type::make_comparison_kernel(
+size_t fixed_string_type::make_comparison_kernel(
     void *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
     const char *src0_arrmeta, const ndt::type &src1_dt,
     const char *src1_arrmeta, comparison_type_t comptype,
@@ -223,7 +223,7 @@ size_t fixedstring_type::make_comparison_kernel(
 {
     if (this == src0_dt.extended()) {
         if (*this == *src1_dt.extended()) {
-            return make_fixedstring_comparison_kernel(ckb, ckb_offset,
+            return make_fixed_string_comparison_kernel(ckb, ckb_offset,
                             m_stringsize, m_encoding,
                             comptype, ectx);
         } else if (src1_dt.get_kind() == string_kind) {
@@ -242,7 +242,7 @@ size_t fixedstring_type::make_comparison_kernel(
     throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
-void fixedstring_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
+void fixed_string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
             const char *arrmeta, const char *data,
             const memory_block_ptr& ref,
             intptr_t buffer_max_mem,

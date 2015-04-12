@@ -105,12 +105,12 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "pointer");
   case bytes_type_id:
     return (o << "bytes");
-  case fixedbytes_type_id:
-    return (o << "fixedbytes");
+  case fixed_bytes_type_id:
+    return (o << "fixed_bytes");
   case string_type_id:
     return (o << "string");
-  case fixedstring_type_id:
-    return (o << "fixedstring");
+  case fixed_string_type_id:
+    return (o << "fixed_string");
   case categorical_type_id:
     return (o << "categorical");
   case date_type_id:

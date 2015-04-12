@@ -17,14 +17,14 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
-#include <dynd/types/fixed_bytes_kind_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/datetime_type.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_kind_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/type_alignment.hpp>
@@ -398,7 +398,7 @@ static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
     }
     rbegin = begin;
     if (string_size != 0) {
-      return ndt::make_fixedstring(string_size, encoding);
+      return ndt::make_fixed_string(string_size, encoding);
     } else {
       return ndt::make_string(encoding);
     }
@@ -515,7 +515,7 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
     if (parse_token_ds(begin, end, ']')) {
       // Fixed bytes with just a size parameter
       rbegin = begin;
-      return ndt::make_fixedbytes(atoi(size_val.c_str()), 1);
+      return ndt::make_fixed_bytes(atoi(size_val.c_str()), 1);
     }
     if (!parse_token_ds(begin, end, ',')) {
       throw datashape_parse_error(begin,
@@ -535,7 +535,7 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_fixedbytes(atoi(size_val.c_str()),
+    return ndt::make_fixed_bytes(atoi(size_val.c_str()),
                                 atoi(align_val.c_str()));
   } else {
     return ndt::make_bytes(1);
