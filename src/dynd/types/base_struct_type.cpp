@@ -43,7 +43,7 @@ base_struct_type::base_struct_type(type_id_t type_id,
     throw invalid_argument(ss.str());
   }
 
-  m_members.kind = struct_kind;
+  m_members.kind = variadic ? kind_kind : struct_kind;
 }
 
 base_struct_type::~base_struct_type() {}
