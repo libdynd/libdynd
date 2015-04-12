@@ -9,6 +9,9 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/types/pow_dimsym_type.hpp>
+#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/categorical_type.hpp>
+#include <dynd/types/categorical_kind_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -70,9 +73,9 @@ TEST(TypePatternMatch, Any)
   EXPECT_FALSE(ndt::type("int32").match(ndt::type("Any")));
   EXPECT_FALSE(ndt::type("T").match(ndt::type("Any")));
   // TODO: This should fail to match
-//  EXPECT_FALSE(ndt::type("Fixed**2 * T").match(ndt::type("Any")));
+  //  EXPECT_FALSE(ndt::type("Fixed**2 * T").match(ndt::type("Any")));
   // TODO: This should fail to match
-//  EXPECT_FALSE(ndt::type("... * float32").match(ndt::type("Any")));
+  //  EXPECT_FALSE(ndt::type("... * float32").match(ndt::type("Any")));
 
   // TODO: This should match
   EXPECT_TYPE_MATCH("... * T", "Any");
@@ -118,7 +121,7 @@ TEST(TypePatternMatch, VariadicStruct)
   EXPECT_TYPE_MATCH("{x: int32, ...}", "{x: int32}");
   EXPECT_TYPE_MATCH("{...}", "{x: int32, y: int64}");
   EXPECT_TYPE_MATCH("{...}", "{x: int32, y: int64, z: float32}");
-  EXPECT_TYPE_MATCH("{x: int32, ...}","{x: int32, y: int64, z: float32}");
+  EXPECT_TYPE_MATCH("{x: int32, ...}", "{x: int32, y: int64, z: float32}");
   EXPECT_FALSE(ndt::type("{x: int32, y: int64, z: float32}")
                    .match(ndt::type("{y: int32, ...}")));
   EXPECT_FALSE(ndt::type("{y: int64, ...}")
@@ -144,9 +147,35 @@ TEST(TypePatternMatch, Option)
   EXPECT_TYPE_MATCH("M * {x: T, y: T, u: ?S, v: S}",
                     "100 * {x: ?int32, y: ?int32, u: ?int16, v: int16}");
 
-  EXPECT_FALSE(ndt::type("M * {x: T, y: T, u: S, v: S}")
-                   .match(ndt::type(
-                       "100 * {x: ?int32, y: ?int32, u: ?int16, v: int16}")));
+  EXPECT_FALSE(ndt::type("M * {x: T, y: T, u: S, v: S}").match(
+      ndt::type("100 * {x: ?int32, y: ?int32, u: ?int16, v: int16}")));
+}
+
+TEST(TypePatternMatch, Categorical)
+{
+  const char *a_vals[] = {"foo", "bar", "baz"};
+  nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+  a.vals() = a_vals;
+
+  EXPECT_TRUE(ndt::type("Categorical").match(ndt::make_categorical(a)));
+  EXPECT_TRUE(ndt::type("Categorical").match(ndt::type("Categorical")));
+  EXPECT_FALSE(ndt::type("Categorical").match(ndt::type("int32")));
+}
+
+TEST(TypePatternMatch, FixedBytes)
+{
+  EXPECT_TRUE(ndt::type("FixedBytes").match(ndt::type("bytes[8]")));
+  EXPECT_TRUE(ndt::type("FixedBytes").match(ndt::type("bytes[16]")));
+  EXPECT_FALSE(ndt::type("FixedBytes").match(ndt::type("bytes")));
+  EXPECT_FALSE(ndt::type("FixedBytes").match(ndt::type("int32")));
+}
+
+TEST(TypePatternMatch, FixedString)
+{
+  EXPECT_TRUE(ndt::type("FixedString").match(ndt::type("string[8]")));
+  EXPECT_TRUE(ndt::type("FixedString").match(ndt::type("string[16]")));
+  EXPECT_FALSE(ndt::type("FixedString").match(ndt::type("string")));
+  EXPECT_FALSE(ndt::type("FixedString").match(ndt::type("int32")));
 }
 
 TEST(TypePatternMatch, ArrFuncProto)
@@ -189,20 +218,16 @@ TEST(TypePatternMatch, NestedArrFuncProto)
 {
   EXPECT_TYPE_MATCH("(N * S, (M * S) -> T) -> N * T",
                     "(3 * int32, (2 * int32) -> float64) -> 3 * float64");
-  EXPECT_FALSE(
-      ndt::type("(N * S, (M * S) -> T) -> N * T")
-          .match(ndt::type(
-              "(3 * int32, (2 * float64) -> float64) -> 3 * float64")));
+  EXPECT_FALSE(ndt::type("(N * S, (M * S) -> T) -> N * T").match(
+      ndt::type("(3 * int32, (2 * float64) -> float64) -> 3 * float64")));
   EXPECT_FALSE(ndt::type("(3 * int32, (2 * int32) -> float64) -> 2 * float64")
                    .match(ndt::type("(N * S, (M * S) -> T) -> N * T")));
   EXPECT_TYPE_MATCH("(N * S, (M * S) -> T) -> N * T",
                     "(3 * int32, (2 * int32) -> float64) -> 3 * float64");
   EXPECT_TYPE_MATCH("(N * S, func: (M * S) -> T) -> N * T",
                     "(3 * int32, func: (2 * int32) -> float64) -> 3 * float64");
-  EXPECT_FALSE(
-      ndt::type("(N * S, funk: (M * S) -> T) -> N * T")
-          .match(ndt::type(
-              "(3 * int32, func: (2 * int32) -> float64) -> 3 * float64")));
+  EXPECT_FALSE(ndt::type("(N * S, funk: (M * S) -> T) -> N * T").match(
+      ndt::type("(3 * int32, func: (2 * int32) -> float64) -> 3 * float64")));
 }
 
 TEST(TypePatternMatch, Pow)

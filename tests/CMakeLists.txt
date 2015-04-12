@@ -30,6 +30,7 @@ set(tests_SRC
     types/test_bytes_type.cpp
     types/test_byteswap_type.cpp
     types/test_c_contiguous_type.cpp
+    types/test_categorical_kind_type.cpp
     types/test_categorical_type.cpp
     types/test_complex_type.cpp
     types/test_convert_type.cpp
@@ -42,7 +43,9 @@ set(tests_SRC
     types/test_datetime_type.cpp
     types/test_fixed_dim_type.cpp
     types/test_fixedbytes_type.cpp
+    types/test_fixed_bytes_kind_type.cpp
     types/test_fixedstring_type.cpp
+    types/test_fixed_string_kind_type.cpp
     types/test_groupby_type.cpp
     types/test_json_type.cpp
     types/test_option_type.cpp
