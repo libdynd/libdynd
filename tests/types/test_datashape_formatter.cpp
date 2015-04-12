@@ -14,7 +14,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/func/callable.hpp>
 
 using namespace std;
@@ -71,17 +71,17 @@ TEST(DataShapeFormatter, ArrayStringAtoms) {
     EXPECT_EQ("string", format_datashape(
                     nd::empty(ndt::make_string(string_encoding_ucs_2)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    nd::empty(ndt::make_fixedstring(1, string_encoding_utf_8)), "", false));
+                    nd::empty(ndt::make_fixed_string(1, string_encoding_utf_8)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    nd::empty(ndt::make_fixedstring(10, string_encoding_utf_8)), "", false));
+                    nd::empty(ndt::make_fixed_string(10, string_encoding_utf_8)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    nd::empty(ndt::make_fixedstring(10, string_encoding_ascii)), "", false));
+                    nd::empty(ndt::make_fixed_string(10, string_encoding_ascii)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    nd::empty(ndt::make_fixedstring(10, string_encoding_utf_16)), "", false));
+                    nd::empty(ndt::make_fixed_string(10, string_encoding_utf_16)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    nd::empty(ndt::make_fixedstring(10, string_encoding_utf_32)), "", false));
+                    nd::empty(ndt::make_fixed_string(10, string_encoding_utf_32)), "", false));
     EXPECT_EQ("string", format_datashape(
-                    nd::empty(ndt::make_fixedstring(10, string_encoding_ucs_2)), "", false));
+                    nd::empty(ndt::make_fixed_string(10, string_encoding_ucs_2)), "", false));
 }
 
 TEST(DataShapeFormatter, DTypeStringAtoms) {
@@ -97,17 +97,17 @@ TEST(DataShapeFormatter, DTypeStringAtoms) {
     EXPECT_EQ("string", format_datashape(
                     ndt::make_string(string_encoding_ucs_2), "", false));
     EXPECT_EQ("string", format_datashape(
-                    ndt::make_fixedstring(1, string_encoding_utf_8), "", false));
+                    ndt::make_fixed_string(1, string_encoding_utf_8), "", false));
     EXPECT_EQ("string", format_datashape(
-                    ndt::make_fixedstring(10, string_encoding_utf_8), "", false));
+                    ndt::make_fixed_string(10, string_encoding_utf_8), "", false));
     EXPECT_EQ("string", format_datashape(
-                    ndt::make_fixedstring(10, string_encoding_ascii), "", false));
+                    ndt::make_fixed_string(10, string_encoding_ascii), "", false));
     EXPECT_EQ("string", format_datashape(
-                    ndt::make_fixedstring(10, string_encoding_utf_16), "", false));
+                    ndt::make_fixed_string(10, string_encoding_utf_16), "", false));
     EXPECT_EQ("string", format_datashape(
-                    ndt::make_fixedstring(10, string_encoding_utf_32), "", false));
+                    ndt::make_fixed_string(10, string_encoding_utf_32), "", false));
     EXPECT_EQ("string", format_datashape(
-                    ndt::make_fixedstring(10, string_encoding_ucs_2), "", false));
+                    ndt::make_fixed_string(10, string_encoding_ucs_2), "", false));
 }
 
 TEST(DataShapeFormatter, ArrayUniformArrays) {

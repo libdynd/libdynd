@@ -37,7 +37,7 @@ void view_type::print_data(std::ostream& o, const char *arrmeta, const char *dat
 {
     // Allow calling print_data in the special case that the view
     // is being used just to align the data
-    if (m_operand_type.get_type_id() == fixedbytes_type_id) {
+    if (m_operand_type.get_type_id() == fixed_bytes_type_id) {
         switch (m_operand_type.get_data_size()) {
             case 1:
                 m_value_type.print_data(o, arrmeta, data);
@@ -78,7 +78,7 @@ void view_type::print_data(std::ostream& o, const char *arrmeta, const char *dat
 void view_type::print_type(std::ostream& o) const
 {
     // Special case printing of alignment to make it more human-readable
-    if (m_value_type.get_data_alignment() != 1 && m_operand_type.get_type_id() == fixedbytes_type_id &&
+    if (m_value_type.get_data_alignment() != 1 && m_operand_type.get_type_id() == fixed_bytes_type_id &&
                     m_operand_type.get_data_alignment() == 1) {
         o << "unaligned[" << m_value_type << "]";
     } else {

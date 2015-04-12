@@ -17,7 +17,7 @@ using namespace std;
 using namespace dynd;
 
 fixed_string_kind_type::fixed_string_kind_type()
-    : base_string_type(fixedstring_type_id, kind_kind, 0, 0,
+    : base_string_type(fixed_string_type_id, kind_kind, 0, 0,
                        type_flag_scalar | type_flag_symbolic, 0)
 {
 }
@@ -94,7 +94,7 @@ bool fixed_string_kind_type::operator==(const base_type &rhs) const
     return true;
   } else {
     return rhs.get_kind() == kind_kind &&
-           rhs.get_type_id() == fixedstring_type_id;
+           rhs.get_type_id() == fixed_string_type_id;
   }
 }
 
@@ -162,7 +162,7 @@ bool fixed_string_kind_type::match(
     const char *DYND_UNUSED(candidate_arrmeta),
     std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
 {
-  return candidate_tp.get_type_id() == fixedstring_type_id;
+  return candidate_tp.get_type_id() == fixed_string_type_id;
 }
 
 void fixed_string_kind_type::get_dynamic_type_properties(

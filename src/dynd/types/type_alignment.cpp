@@ -5,7 +5,7 @@
 
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/view_type.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
@@ -18,13 +18,13 @@ ndt::type ndt::make_unaligned(const ndt::type& value_type)
     // Only do something if it requires alignment
     if (value_type.get_kind() != expr_kind) {
       return ndt::make_view(
-          value_type, ndt::make_fixedbytes(value_type.get_data_size(), 1));
+          value_type, ndt::make_fixed_bytes(value_type.get_data_size(), 1));
     } else {
       const ndt::type &sdt = value_type.storage_type();
       return ndt::type(
           value_type.extended<base_expr_type>()->with_replaced_storage_type(
               ndt::make_view(sdt,
-                             ndt::make_fixedbytes(sdt.get_data_size(), 1))));
+                             ndt::make_fixed_bytes(sdt.get_data_size(), 1))));
     }
   } else {
     return value_type;

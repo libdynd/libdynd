@@ -17,7 +17,7 @@
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/view_type.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -52,7 +52,7 @@ TEST(ArrayViews, OneDimensionalRawMemory) {
     b = a(1 <= irange() < 73).view_scalars<uint64_t>();
     EXPECT_EQ(
         ndt::make_fixed_dim(9, ndt::make_view(ndt::make_type<uint64_t>(),
-                                              ndt::make_fixedbytes(8, 1))),
+                                              ndt::make_fixed_bytes(8, 1))),
         b.get_type());
     EXPECT_EQ(1u, b.get_shape().size());
     EXPECT_EQ(9, b.get_shape()[0]);

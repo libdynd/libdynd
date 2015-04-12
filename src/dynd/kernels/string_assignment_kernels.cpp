@@ -15,10 +15,10 @@ using namespace std;
 using namespace dynd;
 
 /////////////////////////////////////////
-// fixedstring to fixedstring assignment
+// fixed_string to fixed_string assignment
 
 namespace {
-    struct fixedstring_assign_ck : public kernels::unary_ck<fixedstring_assign_ck> {
+    struct fixed_string_assign_ck : public kernels::unary_ck<fixed_string_assign_ck> {
         next_unicode_codepoint_t m_next_fn;
         append_unicode_codepoint_t m_append_fn;
         intptr_t m_dst_data_size, m_src_data_size;
@@ -34,7 +34,7 @@ namespace {
 
             while (src < src_end && dst < dst_end) {
                 cp = next_fn(const_cast<const char *&>(src), src_end);
-                // The fixedstring type uses null-terminated strings
+                // The fixed_string type uses null-terminated strings
                 if (cp == 0) {
                     // Null-terminate the destination string, and we're done
                     memset(dst, 0, dst_end - dst);
@@ -54,14 +54,14 @@ namespace {
     };
 } // anonymous namespace
 
-size_t dynd::make_fixedstring_assignment_kernel(
+size_t dynd::make_fixed_string_assignment_kernel(
                 void *ckb, intptr_t ckb_offset,
                 intptr_t dst_data_size, string_encoding_t dst_encoding,
                 intptr_t src_data_size, string_encoding_t src_encoding,
                 kernel_request_t kernreq,
                 const eval::eval_context *ectx)
 {
-    typedef fixedstring_assign_ck self_type;
+    typedef fixed_string_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
     self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
@@ -168,10 +168,10 @@ size_t dynd::make_blockref_string_assignment_kernel(
 }
 
 /////////////////////////////////////////
-// fixedstring to blockref string assignment
+// fixed_string to blockref string assignment
 
 namespace {
-    struct fixedstring_to_blockref_string_assign_ck : public kernels::unary_ck<fixedstring_to_blockref_string_assign_ck> {
+    struct fixed_string_to_blockref_string_assign_ck : public kernels::unary_ck<fixed_string_to_blockref_string_assign_ck> {
         string_encoding_t m_dst_encoding, m_src_encoding;
         intptr_t m_src_element_size;
         next_unicode_codepoint_t m_next_fn;
@@ -232,13 +232,13 @@ namespace {
     };
 } // anonymous namespace
 
-size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
+size_t dynd::make_fixed_string_to_blockref_string_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     string_encoding_t dst_encoding, intptr_t src_element_size,
     string_encoding_t src_encoding, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-    typedef fixedstring_to_blockref_string_assign_ck self_type;
+    typedef fixed_string_to_blockref_string_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
     self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_dst_encoding = dst_encoding;
@@ -251,10 +251,10 @@ size_t dynd::make_fixedstring_to_blockref_string_assignment_kernel(
 }
 
 /////////////////////////////////////////
-// blockref string to fixedstring assignment
+// blockref string to fixed_string assignment
 
 namespace {
-    struct blockref_string_to_fixedstring_assign_ck : public kernels::unary_ck<blockref_string_to_fixedstring_assign_ck> {
+    struct blockref_string_to_fixed_string_assign_ck : public kernels::unary_ck<blockref_string_to_fixed_string_assign_ck> {
         next_unicode_codepoint_t m_next_fn;
         append_unicode_codepoint_t m_append_fn;
         intptr_t m_dst_data_size, m_src_element_size;
@@ -287,12 +287,12 @@ namespace {
     };
 } // anonymous namespace
 
-size_t dynd::make_blockref_string_to_fixedstring_assignment_kernel(
+size_t dynd::make_blockref_string_to_fixed_string_assignment_kernel(
     void *ckb, intptr_t ckb_offset, intptr_t dst_data_size,
     string_encoding_t dst_encoding, string_encoding_t src_encoding,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-    typedef blockref_string_to_fixedstring_assign_ck self_type;
+    typedef blockref_string_to_fixed_string_assign_ck self_type;
     assign_error_mode errmode = ectx->errmode;
     self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);

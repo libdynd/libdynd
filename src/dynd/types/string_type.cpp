@@ -9,7 +9,7 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/iter/string_iter.hpp>
@@ -262,8 +262,8 @@ intptr_t string_type::make_assignment_kernel(
           ckb, ckb_offset, dst_arrmeta, get_encoding(), src_arrmeta,
           src_tp.extended<base_string_type>()->get_encoding(), kernreq, ectx);
     }
-    case fixedstring_type_id: {
-      return make_fixedstring_to_blockref_string_assignment_kernel(
+    case fixed_string_type_id: {
+      return make_fixed_string_to_blockref_string_assignment_kernel(
           ckb, ckb_offset, dst_arrmeta, get_encoding(), src_tp.get_data_size(),
           src_tp.extended<base_string_type>()->get_encoding(), kernreq, ectx);
     }

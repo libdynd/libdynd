@@ -20,7 +20,7 @@
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/type_alignment.hpp>
@@ -102,16 +102,16 @@ TEST(DataShapeParser, StringAtoms)
   EXPECT_EQ(ndt::make_string(string_encoding_ucs_2),
             ndt::type("string['ucs-2']"));
   // String with size
-  EXPECT_EQ(ndt::make_fixedstring(1, string_encoding_utf_8),
+  EXPECT_EQ(ndt::make_fixed_string(1, string_encoding_utf_8),
             ndt::type("string[1]"));
-  EXPECT_EQ(ndt::make_fixedstring(100, string_encoding_utf_8),
+  EXPECT_EQ(ndt::make_fixed_string(100, string_encoding_utf_8),
             ndt::type("string[100]"));
   // String with size and encoding
-  EXPECT_EQ(ndt::make_fixedstring(1, string_encoding_ascii),
+  EXPECT_EQ(ndt::make_fixed_string(1, string_encoding_ascii),
             ndt::type("string[1, 'A']"));
-  EXPECT_EQ(ndt::make_fixedstring(10, string_encoding_utf_8),
+  EXPECT_EQ(ndt::make_fixed_string(10, string_encoding_utf_8),
             ndt::type("string[10, 'U8']"));
-  EXPECT_EQ(ndt::make_fixedstring(1000, string_encoding_utf_16),
+  EXPECT_EQ(ndt::make_fixed_string(1000, string_encoding_utf_16),
             ndt::type("string[1000,'U16']"));
 }
 

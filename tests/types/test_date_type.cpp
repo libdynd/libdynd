@@ -12,7 +12,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/property_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/struct_type.hpp>
@@ -161,15 +161,15 @@ TEST(DateType, DateProperties) {
 TEST(DateType, DatePropertyConvertOfString) {
     nd::array a, b, c;
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
-    a = nd::array(strs).ucast(ndt::make_fixedstring(10, string_encoding_ascii)).eval();
+    a = nd::array(strs).ucast(ndt::make_fixed_string(10, string_encoding_ascii)).eval();
     b = a.ucast(ndt::make_date());
     EXPECT_EQ(ndt::make_fixed_dim(
-                  3, ndt::make_fixedstring(10, string_encoding_ascii)),
+                  3, ndt::make_fixed_string(10, string_encoding_ascii)),
               a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(
                   3, ndt::make_convert(
                          ndt::make_date(),
-                         ndt::make_fixedstring(10, string_encoding_ascii))),
+                         ndt::make_fixed_string(10, string_encoding_ascii))),
               b.get_type());
 
     // year property

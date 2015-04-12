@@ -9,7 +9,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -114,7 +114,7 @@ static void format_string_datashape(std::ostream &o, const ndt::type &tp)
 {
   switch (tp.get_type_id()) {
   case string_type_id:
-  case fixedstring_type_id:
+  case fixed_string_type_id:
     // data shape only has one kind of string
     o << "string";
     break;

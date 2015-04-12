@@ -4,7 +4,7 @@
 //
 
 #include <dynd/types/byteswap_type.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/byteswap_kernels.hpp>
 
@@ -15,7 +15,7 @@ byteswap_type::byteswap_type(const ndt::type& value_type)
     : base_expr_type(byteswap_type_id, expr_kind, value_type.get_data_size(),
                             value_type.get_data_alignment(), type_flag_scalar, 0),
                     m_value_type(value_type),
-                    m_operand_type(ndt::make_fixedbytes(value_type.get_data_size(), value_type.get_data_alignment()))
+                    m_operand_type(ndt::make_fixed_bytes(value_type.get_data_size(), value_type.get_data_alignment()))
 {
     if (!value_type.is_builtin()) {
         throw dynd::type_error("byteswap_type: Only built-in types are supported presently");
@@ -28,7 +28,7 @@ byteswap_type::byteswap_type(const ndt::type& value_type, const ndt::type& opera
             m_value_type(value_type), m_operand_type(operand_type)
 {
     // Only a bytes type be the operand to the byteswap
-    if (operand_type.value_type().get_type_id() != fixedbytes_type_id) {
+    if (operand_type.value_type().get_type_id() != fixed_bytes_type_id) {
         std::stringstream ss;
         ss << "byteswap_type: The operand to the type must have a value type of bytes, not " << operand_type.value_type();
         throw dynd::type_error(ss.str());
@@ -36,7 +36,7 @@ byteswap_type::byteswap_type(const ndt::type& value_type, const ndt::type& opera
     // Automatically realign if needed
     if (operand_type.value_type().get_data_alignment() < value_type.get_data_alignment()) {
         m_operand_type = ndt::make_view(operand_type,
-                        ndt::make_fixedbytes(operand_type.get_data_size(), value_type.get_data_alignment()));
+                        ndt::make_fixed_bytes(operand_type.get_data_size(), value_type.get_data_alignment()));
     }
 }
 
@@ -53,7 +53,7 @@ void byteswap_type::print_data(std::ostream& DYND_UNUSED(o), const char *DYND_UN
 void byteswap_type::print_type(std::ostream &o) const
 {
     o << "byteswap[" << m_value_type;
-    if (m_operand_type.get_type_id() != fixedbytes_type_id) {
+    if (m_operand_type.get_type_id() != fixed_bytes_type_id) {
         o << ", " << m_operand_type;
     }
     o << "]";

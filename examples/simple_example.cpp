@@ -8,7 +8,7 @@
 #include <dynd/array.hpp>
 #include <dynd/view.hpp>
 #include <dynd/types/convert_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/array_range.hpp>

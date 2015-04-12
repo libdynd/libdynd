@@ -14,7 +14,7 @@
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/bytes_type.hpp>
-#include <dynd/types/fixedbytes_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
@@ -737,12 +737,12 @@ static void as_storage_type(const ndt::type &dt,
   if (dt.is_scalar() && dt.get_type_id() != pointer_type_id) {
     const ndt::type &storage_dt = dt.storage_type();
     if (storage_dt.is_builtin()) {
-      out_transformed_tp = ndt::make_fixedbytes(
+      out_transformed_tp = ndt::make_fixed_bytes(
           storage_dt.get_data_size(), storage_dt.get_data_alignment());
       out_was_transformed = true;
     } else if (storage_dt.is_pod() &&
                storage_dt.extended()->get_arrmeta_size() == 0) {
-      out_transformed_tp = ndt::make_fixedbytes(
+      out_transformed_tp = ndt::make_fixed_bytes(
           storage_dt.get_data_size(), storage_dt.get_data_alignment());
       out_was_transformed = true;
     } else if (storage_dt.get_type_id() == string_type_id) {

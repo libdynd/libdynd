@@ -10,7 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
@@ -52,7 +52,7 @@ TEST(Elwise, UnaryExpr_StridedDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
   // Lift the arrfunc
   nd::arrfunc af = nd::functional::elwise(af_base);
 
@@ -73,7 +73,7 @@ TEST(Elwise, UnaryExpr_VarDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
   // Lift the arrfunc
   nd::arrfunc af = nd::functional::elwise(af_base);
 
@@ -95,7 +95,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
   nd::arrfunc af = nd::functional::elwise(af_base);
@@ -131,7 +131,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
   nd::arrfunc af = nd::functional::elwise(af_base);
@@ -162,7 +162,7 @@ TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixedstring(16), assign_error_default);
+      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
   // Lift the arrfunc
   nd::arrfunc af = nd::functional::elwise(af_base);
 

@@ -8,7 +8,7 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/iter/string_iter.hpp>
@@ -254,7 +254,7 @@ intptr_t json_type::make_assignment_kernel(
                     src_arrmeta, string_encoding_utf_8, kernreq, ectx);
             }
             case string_type_id:
-            case fixedstring_type_id: {
+            case fixed_string_type_id: {
                 string_to_json_ck *stoj =
                     string_to_json_ck::make(ckb, kernreq, ckb_offset);
                 stoj->m_dst_arrmeta = dst_arrmeta;
@@ -266,7 +266,7 @@ intptr_t json_type::make_assignment_kernel(
                         src_tp.extended<base_string_type>()->get_encoding(),
                         kernel_request_single, ectx);
                 } else {
-                    return make_fixedstring_to_blockref_string_assignment_kernel(
+                    return make_fixed_string_to_blockref_string_assignment_kernel(
                         ckb, ckb_offset, dst_arrmeta, string_encoding_utf_8,
                         src_tp.get_data_size(),
                         src_tp.extended<base_string_type>()->get_encoding(),
@@ -295,8 +295,8 @@ intptr_t json_type::make_assignment_kernel(
                 ckb, ckb_offset, dst_arrmeta,
                 dst_tp.extended<base_string_type>()->get_encoding(), src_arrmeta,
                 string_encoding_utf_8, kernreq, ectx);
-        } else if(dst_tp.get_type_id() == fixedstring_type_id) {
-            return make_blockref_string_to_fixedstring_assignment_kernel(
+        } else if(dst_tp.get_type_id() == fixed_string_type_id) {
+            return make_blockref_string_to_fixed_string_assignment_kernel(
                 ckb, ckb_offset, dst_tp.get_data_size(),
                 dst_tp.extended<base_string_type>()->get_encoding(),
                 string_encoding_utf_8, kernreq, ectx);

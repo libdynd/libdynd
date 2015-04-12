@@ -5,7 +5,7 @@
 
 #include <dynd/iter/string_iter.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/array.hpp>
 
 using namespace dynd;

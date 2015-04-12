@@ -9,7 +9,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/types/pow_dimsym_type.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
 
@@ -154,7 +154,7 @@ TEST(TypePatternMatch, Option)
 TEST(TypePatternMatch, Categorical)
 {
   const char *a_vals[] = {"foo", "bar", "baz"};
-  nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
+  nd::array a = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
   a.vals() = a_vals;
 
   EXPECT_TRUE(ndt::type("Categorical").match(ndt::make_categorical(a)));

@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
