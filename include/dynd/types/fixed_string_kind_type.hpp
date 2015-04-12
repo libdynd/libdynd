@@ -1,0 +1,80 @@
+//
+// Copyright (C) 2011-15 DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
+#pragma once
+
+#include <dynd/type.hpp>
+#include <dynd/types/base_string_type.hpp>
+
+namespace dynd {
+
+class fixed_string_kind_type : public base_string_type {
+public:
+  fixed_string_kind_type();
+
+  virtual ~fixed_string_kind_type();
+
+  size_t get_default_data_size() const;
+
+  void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
+
+  void print_type(std::ostream &o) const;
+
+  bool is_expression() const;
+  bool is_unique_data_owner(const char *arrmeta) const;
+  ndt::type get_canonical_type() const;
+
+  bool is_lossless_assignment(const ndt::type &dst_tp,
+                              const ndt::type &src_tp) const;
+
+  string_encoding_t get_encoding() const;
+
+  void get_string_range(const char **out_begin, const char **out_end,
+                        const char *arrmeta, const char *data) const;
+
+  void make_string_iter(
+      dim_iter *out_di, string_encoding_t encoding, const char *arrmeta,
+      const char *data, const memory_block_ptr &ref,
+      intptr_t buffer_max_mem = 65536,
+      const eval::eval_context *ectx = &eval::default_eval_context) const;
+
+  bool operator==(const base_type &rhs) const;
+
+  void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
+  void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                              memory_block_data *embedded_reference) const;
+  void arrmeta_reset_buffers(char *arrmeta) const;
+  void arrmeta_finalize_buffers(char *arrmeta) const;
+  void arrmeta_destruct(char *arrmeta) const;
+  void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                           const std::string &indent) const;
+
+  void data_destruct(const char *arrmeta, char *data) const;
+  void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
+                             size_t count) const;
+
+  bool match(const char *arrmeta, const ndt::type &candidate_tp,
+             const char *candidate_arrmeta,
+             std::map<nd::string, ndt::type> &tp_vars) const;
+
+  void get_dynamic_type_properties(
+      const std::pair<std::string, gfunc::callable> **out_properties,
+      size_t *out_count) const;
+  void get_dynamic_array_properties(
+      const std::pair<std::string, gfunc::callable> **out_properties,
+      size_t *out_count) const;
+  void get_dynamic_array_functions(
+      const std::pair<std::string, gfunc::callable> **out_functions,
+      size_t *out_count) const;
+};
+
+namespace ndt {
+  inline ndt::type make_fixed_string_kind()
+  {
+    return ndt::type(new fixed_string_kind_type(), false);
+  }
+} // namespace ndt
+
+} // namespace dynd

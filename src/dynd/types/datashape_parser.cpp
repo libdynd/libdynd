@@ -18,6 +18,8 @@
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixedstring_type.hpp>
+#include <dynd/types/fixed_string_kind_type.hpp>
+#include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/json_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/time_type.hpp>
@@ -37,6 +39,7 @@
 #include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/types/any_sym_type.hpp>
@@ -1160,6 +1163,12 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = parse_adapt_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
       result = ndt::make_any_sym();
+    } else if (parse::compare_range_to_literal(nbegin, nend, "Categorical")) {
+      result = ndt::make_categorical_kind();
+    } else if (parse::compare_range_to_literal(nbegin, nend, "FixedBytes")) {
+      result = ndt::make_fixed_bytes_kind();
+    } else if (parse::compare_range_to_literal(nbegin, nend, "FixedString")) {
+      result = ndt::make_fixed_string_kind();
     } else if (isupper(*nbegin)) {
       if (!parse_token_ds(begin, end, '[')) {
         result = ndt::make_typevar(nd::string(nbegin, nend));

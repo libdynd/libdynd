@@ -18,7 +18,7 @@
 using namespace std;
 using namespace dynd;
 
-TEST(CategoricalDType, Create) {
+TEST(CategoricalType, Create) {
     const char *a_vals[] = {"foo", "bar", "baz"};
     nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
@@ -62,7 +62,7 @@ TEST(CategoricalDType, Create) {
     EXPECT_EQ(ndt::make_type<int32_t>(), d.p("category_type").as<ndt::type>());
 }
 
-TEST(CategoricalDType, Convert) {
+TEST(CategoricalType, Convert) {
     const char *a_vals[] = {"foo", "bar", "baz"};
     nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
@@ -81,7 +81,7 @@ TEST(CategoricalDType, Convert) {
     EXPECT_EQ(sd, cvt.value_type());
 }
 
-TEST(CategoricalDType, Compare) {
+TEST(CategoricalType, Compare) {
     const char *a_vals[] = {"foo", "bar", "baz"};
     nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
@@ -107,7 +107,7 @@ TEST(CategoricalDType, Compare) {
     EXPECT_FALSE(da == di);
 }
 
-TEST(CategoricalDType, Unique) {
+TEST(CategoricalType, Unique) {
     const char *a_vals[] = {"foo", "bar", "foo"};
     nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
@@ -120,7 +120,7 @@ TEST(CategoricalDType, Unique) {
     EXPECT_THROW(ndt::make_categorical(i), std::runtime_error);
 }
 
-TEST(CategoricalDType, FactorFixedString) {
+TEST(CategoricalType, FactorFixedString) {
     const char *string_cats_vals[] = {"bar", "foo"};
     nd::array string_cats = nd::empty(2, ndt::make_fixedstring(3, string_encoding_ascii));
     string_cats.vals() = string_cats_vals;
@@ -133,7 +133,7 @@ TEST(CategoricalDType, FactorFixedString) {
     EXPECT_EQ(ndt::make_categorical(string_cats), da);
 }
 
-TEST(CategoricalDType, FactorString) {
+TEST(CategoricalType, FactorString) {
     const char *cats_vals[] = {"bar", "foo", "foot"};
     const char *a_vals[] = {"foo", "bar", "foot", "foo", "bar"};
     nd::array cats = cats_vals, a = a_vals;
@@ -142,7 +142,7 @@ TEST(CategoricalDType, FactorString) {
     EXPECT_EQ(ndt::make_categorical(cats), da);
 }
 
-TEST(CategoricalDType, FactorStringLonger) {
+TEST(CategoricalType, FactorStringLonger) {
     const char *cats_vals[] = {"a", "abcdefghijklmnopqrstuvwxyz", "bar", "foo", "foot", "z"};
     const char *a_vals[] = {"foo", "bar", "foot", "foo", "bar", "abcdefghijklmnopqrstuvwxyz",
                     "foot", "foo", "z", "a", "abcdefghijklmnopqrstuvwxyz"};
@@ -150,7 +150,7 @@ TEST(CategoricalDType, FactorStringLonger) {
     EXPECT_EQ(ndt::make_categorical(cats_vals), da);
 }
 
-TEST(CategoricalDType, FactorInt) {
+TEST(CategoricalType, FactorInt) {
     int int_cats_vals[] = {0, 10};
     nd::array int_cats = nd::empty(2, ndt::make_type<int32_t>());
     int_cats.vals() = int_cats_vals;
@@ -163,7 +163,7 @@ TEST(CategoricalDType, FactorInt) {
     EXPECT_EQ(ndt::make_categorical(int_cats), di);
 }
 
-TEST(CategoricalDType, Values) {
+TEST(CategoricalType, Values) {
     const char *a_vals[] = {"foo", "bar", "baz"};
     nd::array a = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     a.vals() = a_vals;
@@ -181,7 +181,7 @@ TEST(CategoricalDType, Values) {
     EXPECT_THROW(static_cast<const categorical_type*>(dt.extended())->get_value_from_category("zzz"), std::runtime_error);
 }
 
-TEST(CategoricalDType, ValuesLonger) {
+TEST(CategoricalType, ValuesLonger) {
     const char *cats_vals[] = {"foo", "abcdefghijklmnopqrstuvwxyz", "z", "bar", "a", "foot"};
     const char *a_vals[] = {"foo", "z", "abcdefghijklmnopqrstuvwxyz",
                     "z", "bar", "a", "foot", "a", "abcdefghijklmnopqrstuvwxyz", "foo", "bar", "foo", "foot"};
@@ -204,7 +204,7 @@ TEST(CategoricalDType, ValuesLonger) {
     }
 }
 
-TEST(CategoricalDType, AssignFixedString) {
+TEST(CategoricalType, AssignFixedString) {
     const char *cat_vals[] = {"foo", "bar", "baz"};
     nd::array cat = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     cat.vals() = cat_vals;
@@ -233,7 +233,7 @@ TEST(CategoricalDType, AssignFixedString) {
     EXPECT_EQ("foo", tmp(0).as<string>());
 }
 
-TEST(CategoricalDType, AssignInt) {
+TEST(CategoricalType, AssignInt) {
     int32_t cat_vals[] = {10, 100, 1000};
     nd::array cat = cat_vals;
 
@@ -261,7 +261,7 @@ TEST(CategoricalDType, AssignInt) {
 
 }
 
-TEST(CategoricalDType, AssignRange) {
+TEST(CategoricalType, AssignRange) {
     const char *cat_vals[] = {"foo", "bar", "baz"};
     nd::array cat = nd::empty(3, ndt::make_fixedstring(3, string_encoding_ascii));
     cat.vals() = cat_vals;
@@ -288,14 +288,14 @@ TEST(CategoricalDType, AssignRange) {
     EXPECT_EQ("bar", a(8).as<string>());
 }
 
-TEST(CategoricalDType, CategoriesProperty) {
+TEST(CategoricalType, CategoriesProperty) {
     const char *cats_vals[] = {"this", "is", "a", "test"};
     nd::array cats = cats_vals;
     ndt::type cd = ndt::make_categorical(cats_vals);
     EXPECT_TRUE(cats.equals_exact(cd.p("categories")));
 }
 
-TEST(CategoricalDType, AssignFromOther) {
+TEST(CategoricalType, AssignFromOther) {
     int cats_values[] = {3, 6, 100, 1000};
     ndt::type cd = ndt::make_categorical(cats_values);
     int16_t a_values[] = {6, 3, 100, 3, 1000, 100, 6, 1000};
