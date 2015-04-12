@@ -11,6 +11,7 @@
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/type.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 namespace std {
 
@@ -197,6 +198,16 @@ namespace nd {
     template <>
     struct multidispatch_by_type_id_ck<1>
         : base_virtual_kernel<multidispatch_by_type_id_ck<1>> {
+      struct static_data {
+        std::shared_ptr<std::vector<arrfunc>> children;
+        arrfunc default_child;
+
+        static_data(const std::shared_ptr<std::vector<arrfunc>> &children,
+                    const arrfunc &default_child)
+            : children(children), default_child(default_child)
+        {
+        }
+      };
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
@@ -205,10 +216,14 @@ namespace nd {
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const arrfunc *data =
-            (*self->get_data_as<const std::unique_ptr<nd::arrfunc[]>>()).get();
+        const static_data *data = self->get_data_as<static_data>();
 
-        const arrfunc &child = data[src_tp[0].get_type_id()];
+        arrfunc child = (*(data->children))[src_tp[0].get_type_id()];
+        if (child.is_null()) {
+          std::cout << "NULL child" << std::endl;
+          child = data->default_child;
+        }
+
         child.get()->resolve_dst_type(self, self_tp, NULL, dst_tp, nsrc, src_tp,
                                       kwds, tp_vars);
       }
@@ -222,10 +237,13 @@ namespace nd {
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const arrfunc *data =
-            (*self->get_data_as<const std::unique_ptr<nd::arrfunc[]>>()).get();
+        const static_data *data = self->get_data_as<static_data>();
 
-        const arrfunc &child = data[src_tp[0].get_type_id()];
+        arrfunc child = (*(data->children))[src_tp[0].get_type_id()];
+        if (child.is_null()) {
+          child = data->default_child;
+        }
+
         return child.get()->instantiate(
             self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);

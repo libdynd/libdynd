@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/chain.hpp>
-#include <dynd/kernels/chain.hpp>
+#include <dynd/kernels/chain_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -13,6 +13,10 @@ nd::arrfunc nd::functional::chain(const nd::arrfunc &first,
                                   const nd::arrfunc &second,
                                   const ndt::type &buf_tp)
 {
+  if (first.get_type()->get_npos() != 1) {
+    throw runtime_error("Multi-parameter arrfunc chaining is not implemented");
+  }
+
   if (second.get_type()->get_npos() != 1) {
     stringstream ss;
     ss << "Cannot chain functions " << first << " and " << second
@@ -25,13 +29,9 @@ nd::arrfunc nd::functional::chain(const nd::arrfunc &first,
                         "type is not implemented");
   }
 
-  instantiate_chain_data icd;
-  icd.first = first;
-  icd.second = second;
-  icd.buf_tp = buf_tp;
-
-  return as_arrfunc<unary_heap_chain_ck>(
+  return as_arrfunc<chain_kernel>(
       ndt::make_arrfunc(first.get_type()->get_pos_tuple(),
                         second.get_type()->get_return_type()),
-      icd, first.get()->data_size + second.get()->data_size);
+      chain_kernel::static_data(first, second, buf_tp),
+      first.get()->data_size + second.get()->data_size);
 }

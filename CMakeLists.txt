@@ -349,7 +349,7 @@ set(libdynd_SRC
     src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
-    src/dynd/kernels/chain.cpp
+    src/dynd/kernels/chain_kernel.cpp
     src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
@@ -391,7 +391,7 @@ set(libdynd_SRC
     include/dynd/kernels/buffered_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
-    include/dynd/kernels/chain.hpp
+    include/dynd/kernels/chain_kernel.hpp
     include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp
