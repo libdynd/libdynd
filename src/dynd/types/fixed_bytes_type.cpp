@@ -55,7 +55,7 @@ void fixed_bytes_type::print_data(std::ostream& o, const char *DYND_UNUSED(arrme
 
 void fixed_bytes_type::print_type(std::ostream& o) const
 {
-    o << "bytes[" << get_data_size();
+    o << "fixed_bytes[" << get_data_size();
     size_t alignment = get_data_alignment();
     if (alignment != 1) {
         o << ", align=" << get_data_alignment();

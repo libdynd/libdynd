@@ -185,7 +185,7 @@ TEST(VarArrayDType, DTypeSubscriptStridedVarNested) {
 
 TEST(VarArrayDType, DTypeSubscriptFixedVarStruct) {
     nd::array n = parse_json("2 * var * {first_name: string, last_name: string, "
-                    "gender: string[1], pictured: bool,}",
+                    "gender: fixed_string[1], pictured: bool,}",
                     "[[{\"first_name\":\"Frank\",\"last_name\":\"Abrams\",\"gender\":\"M\",\"pictured\":true}],"
                     "[{\"first_name\":\"Melissa\",\"last_name\":\"Philips\",\"gender\":\"F\",\"pictured\":false}]]");
 
@@ -195,7 +195,7 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarStruct) {
     EXPECT_EQ("Philips", nlastname(1,0).as<string>());
 
     nd::array ngender = n.p("gender");
-    EXPECT_EQ(ndt::type("2 * var * string[1]"), ngender.get_type());
+    EXPECT_EQ(ndt::type("2 * var * fixed_string[1]"), ngender.get_type());
     EXPECT_EQ("M", ngender(0,0).as<string>());
     EXPECT_EQ("F", ngender(1,0).as<string>());
 }

@@ -361,10 +361,34 @@ static string_encoding_t string_to_encoding(const char *error_begin,
 
 // string_type : string |
 //               string['encoding']
-//               string[NUMBER] |
-//               string[NUMBER,'encoding']
 // This is called after 'string' is already matched
 static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
+{
+  const char *begin = rbegin;
+  if (parse_token_ds(begin, end, '[')) {
+    const char *saved_begin = begin;
+    string encoding_str;
+    string_encoding_t encoding = string_encoding_utf_8;
+    if (!parse_quoted_string(begin, end, encoding_str)) {
+      throw datashape_parse_error(saved_begin,
+                                  "expected a string encoding");
+    }
+    encoding = string_to_encoding(saved_begin, encoding_str);
+    if (!parse_token_ds(begin, end, ']')) {
+      throw datashape_parse_error(begin, "expected closing ']'");
+    }
+    rbegin = begin;
+    return ndt::make_string(encoding);
+  } else {
+    return ndt::make_string(string_encoding_utf_8);
+  }
+}
+
+// fixed_string_type : fixed_string[NUMBER] |
+//                     fixed_string[NUMBER,'encoding']
+// This is called after 'fixed_string' is already matched
+static ndt::type parse_fixed_string_parameters(const char *&rbegin,
+                                               const char *end)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
@@ -388,8 +412,7 @@ static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
       }
     } else {
       if (!parse_quoted_string(begin, end, encoding_str)) {
-        throw datashape_parse_error(
-            saved_begin, "expected a size integer or string encoding");
+        throw datashape_parse_error(saved_begin, "expected a size integer");
       }
       encoding = string_to_encoding(saved_begin, encoding_str);
     }
@@ -397,14 +420,10 @@ static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    if (string_size != 0) {
-      return ndt::make_fixed_string(string_size, encoding);
-    } else {
-      return ndt::make_string(encoding);
-    }
-  } else {
-    return ndt::make_string(string_encoding_utf_8);
+    return ndt::make_fixed_string(string_size, encoding);
   }
+
+  throw datashape_parse_error(begin, "expected opening '['");
 }
 
 // char_type : char | char[encoding]
@@ -486,8 +505,7 @@ static ndt::type parse_byteswap_parameters(const char *&rbegin, const char *end,
   }
 }
 
-// byte_type : bytes[<size>] | bytes[align=<alignment>] | bytes[<size>,
-// align=<alignment>]
+// bytes_type : bytes[align=<alignment>]
 // This is called after 'bytes' is already matched
 static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
 {
@@ -508,6 +526,19 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
       rbegin = begin;
       return ndt::make_bytes(atoi(align_val.c_str()));
     }
+    throw datashape_parse_error(begin, "expected 'align'");
+  } else {
+    return ndt::make_bytes(1);
+  }
+}
+
+// fixed_bytes_type : fixed_bytes[<size>] | fixed_bytes[<size>, align=<alignment>]
+// This is called after 'fixed_bytes' is already matched
+static ndt::type parse_fixed_bytes_parameters(const char *&rbegin,
+                                              const char *end)
+{
+  const char *begin = rbegin;
+  if (parse_token_ds(begin, end, '[')) {
     string size_val = parse_number(begin, end);
     if (size_val.empty()) {
       throw datashape_parse_error(begin, "expected 'align' or an integer");
@@ -536,10 +567,9 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
     }
     rbegin = begin;
     return ndt::make_fixed_bytes(atoi(size_val.c_str()),
-                                atoi(align_val.c_str()));
-  } else {
-    return ndt::make_bytes(1);
+                                 atoi(align_val.c_str()));
   }
+  throw datashape_parse_error(begin, "expected opening '['");
 }
 
 // c_contiguous_type : C[child_type]
@@ -1133,6 +1163,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = ndt::make_type(parse_datashape(begin, end, symtable));
     } else if (parse::compare_range_to_literal(nbegin, nend, "string")) {
       result = parse_string_parameters(begin, end);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "fixed_string")) {
+      result = parse_fixed_string_parameters(begin, end);
     } else if (parse::compare_range_to_literal(nbegin, nend, "complex")) {
       result = parse_complex_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "datetime")) {
@@ -1149,6 +1181,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = parse_byteswap_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "bytes")) {
       result = parse_bytes_parameters(begin, end);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "fixed_bytes")) {
+      result = parse_fixed_bytes_parameters(begin, end);
     } else if (parse::compare_range_to_literal(nbegin, nend, "C")) {
       result = parse_c_contiguous_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "cuda_host")) {

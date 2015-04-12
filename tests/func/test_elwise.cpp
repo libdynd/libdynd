@@ -58,7 +58,7 @@ TEST(Elwise, UnaryExpr_StridedDim)
 
   // Test it on some data
   ckernel_builder<kernel_request_host> ckb;
-  nd::array in = nd::empty(3, "string[16]");
+  nd::array in = nd::empty(3, "fixed_string[16]");
   in(0).vals() = "172";
   in(1).vals() = "-139";
   in(2).vals() = "12345";
@@ -78,10 +78,10 @@ TEST(Elwise, UnaryExpr_VarDim)
   nd::arrfunc af = nd::functional::elwise(af_base);
 
   const char *in[5] = {"172", "-139", "12345", "-1111", "284"};
-  nd::array a = nd::empty("var * string[16]");
+  nd::array a = nd::empty("var * fixed_string[16]");
   a.vals() = in;
   nd::array out = af(a);
-  EXPECT_EQ(ndt::type("var * string[16]"), a.get_type());
+  EXPECT_EQ(ndt::type("var * fixed_string[16]"), a.get_type());
   EXPECT_EQ(ndt::type("var * int32"), out.get_type());
   EXPECT_EQ(5, out.get_shape()[0]);
   EXPECT_EQ(172, out(0).as<int>());
@@ -102,7 +102,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
 
   // Test it on some data
   ndt::type dst_tp("var * int32");
-  ndt::type src_tp("5 * string[16]");
+  ndt::type src_tp("5 * fixed_string[16]");
   ckernel_builder<kernel_request_host> ckb;
   nd::array in = nd::empty(src_tp);
   nd::array out = nd::empty(dst_tp);
@@ -138,7 +138,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
 
   // Test it on some data
   ckernel_builder<kernel_request_host> ckb;
-  nd::array in = nd::empty("var * string[16]");
+  nd::array in = nd::empty("var * fixed_string[16]");
   nd::array out = nd::empty("var * int32");
   const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
   in.vals() = in_vals;
@@ -167,7 +167,7 @@ TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
   nd::arrfunc af = nd::functional::elwise(af_base);
 
   // Test it on some data
-  nd::array in = nd::empty("3 * var * string[16]");
+  nd::array in = nd::empty("3 * var * fixed_string[16]");
   const char *in_vals0[] = {"172", "-139", "12345", "-1111", "284"};
   const char *in_vals1[] = {"989767"};
   const char *in_vals2[] = {"1", "2", "4"};
