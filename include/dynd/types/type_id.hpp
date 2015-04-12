@@ -185,7 +185,7 @@ enum type_id_t {
   dim_fragment_type_id,
 
   // The number of built-in, atomic types (including uninitialized and void)
-  builtin_type_id_count = 19
+  builtin_type_id_count = 19,
 };
 #define DYND_BUILTIN_TYPE_ID_COUNT 19
 

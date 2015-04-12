@@ -369,9 +369,10 @@ namespace nd {
     template <int N>
     static typename std::enable_if<N == 1, arrfunc>::type
     multidispatch_by_type_id(const ndt::type &pattern_tp,
-                             const std::vector<arrfunc> &children)
+                             const std::vector<arrfunc> &children,
+                             const arrfunc &default_child)
     {
-      unique_ptr<arrfunc[]> data(new arrfunc[builtin_type_id_count]);
+      shared_ptr<std::vector<arrfunc>> data(new std::vector<arrfunc>(100));
 
       for (const arrfunc &child : children) {
         std::map<string, ndt::type> tp_vars;
@@ -381,11 +382,12 @@ namespace nd {
 
         const ndt::type &src_tp0 = child.get_type()->get_pos_type(0);
 
-        data[src_tp0.get_type_id()] = child;
+        (*data)[src_tp0.get_type_id()] = child;
       }
 
-      return as_arrfunc<multidispatch_by_type_id_ck<1>>(pattern_tp, move(data),
-                                                        0);
+      return as_arrfunc<multidispatch_by_type_id_ck<1>>(
+          pattern_tp,
+          multidispatch_by_type_id_ck<1>::static_data(data, default_child), 0);
     }
 
     template <int N>
@@ -422,7 +424,22 @@ nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
 {
   switch (pattern_tp.extended<arrfunc_type>()->get_npos()) {
   case 1:
-    return multidispatch_by_type_id<1>(pattern_tp, children);
+    return multidispatch_by_type_id<1>(pattern_tp, children, arrfunc());
+  case 2:
+    return multidispatch_by_type_id<2>(pattern_tp, children);
+  default:
+    throw std::runtime_error("unsupported");
+  }
+}
+
+nd::arrfunc
+nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
+                                         const std::vector<arrfunc> &children,
+                                         const arrfunc &default_child)
+{
+  switch (pattern_tp.extended<arrfunc_type>()->get_npos()) {
+  case 1:
+    return multidispatch_by_type_id<1>(pattern_tp, children, default_child);
   case 2:
     return multidispatch_by_type_id<2>(pattern_tp, children);
   default:
