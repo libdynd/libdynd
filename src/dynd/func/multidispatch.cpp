@@ -416,10 +416,9 @@ nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
   }
 }
 
-template <bool own_children>
 nd::arrfunc nd::functional::multidispatch_by_type_id(
     const ndt::type &pattern_tp, intptr_t size, const arrfunc *children,
-    const arrfunc &default_child, intptr_t index)
+    const arrfunc &default_child, bool own_children, intptr_t index)
 {
   for (intptr_t j = 0; j < size; ++j) {
     const arrfunc &child = children[j];
@@ -431,17 +430,17 @@ nd::arrfunc nd::functional::multidispatch_by_type_id(
     }
   }
 
-  typedef multidispatch_by_type_id_kernel<own_children, 1> kernel_type;
+  if (own_children) {
+    typedef multidispatch_by_type_id_kernel<true, 1> kernel_type;
+    return arrfunc::make<kernel_type>(
+        pattern_tp, make_shared<typename kernel_type::static_data>(
+                        size, children, default_child, index),
+        0);
+  }
+
+  typedef multidispatch_by_type_id_kernel<false, 1> kernel_type;
   return arrfunc::make<kernel_type>(
       pattern_tp, make_shared<typename kernel_type::static_data>(
                       size, children, default_child, index),
       0);
 }
-
-template nd::arrfunc nd::functional::multidispatch_by_type_id<true>(
-    const ndt::type &pattern_tp, intptr_t size, const arrfunc *children,
-    const arrfunc &default_child, intptr_t index);
-
-template nd::arrfunc nd::functional::multidispatch_by_type_id<false>(
-    const ndt::type &pattern_tp, intptr_t size, const arrfunc *children,
-    const arrfunc &default_child, intptr_t index);
