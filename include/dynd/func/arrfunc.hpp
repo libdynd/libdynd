@@ -888,7 +888,6 @@ namespace nd {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = get_type();
 
-      ndt::type dst_tp;
       array dst;
 
       // ...
@@ -908,13 +907,15 @@ namespace nd {
         if (!self_tp->get_return_type().match(NULL, dst.get_type(),
           dst.get_arrmeta(), tp_vars)) {
           std::stringstream ss;
-          ss << "provided \"dst\" nd::array does not match ";
-          ss << "arrfunc return type " << self_tp->get_return_type();
+          ss << "provided \"dst\" type " << dst.get_type()
+             << " does not match arrfunc return type "
+             << self_tp->get_return_type();
           throw std::invalid_argument(ss.str());
         }
       }
 
-      // Validate the keyword arguments
+      // Validate the keyword arguments, and does substitutions to make
+      // them concrete
       detail::validate_kwd_types(self_tp, kwd_tp, available, missing, tp_vars);
 
       // ...
@@ -933,6 +934,7 @@ namespace nd {
       }
 
       // Construct the destination array, if it was not provided
+      ndt::type dst_tp;
       if (dst.is_null()) {
         // Resolve the destination type
         if (self->resolve_dst_type != NULL) {
@@ -945,6 +947,21 @@ namespace nd {
         }
 
         dst = empty(dst_tp);
+      } else if (self->resolve_dst_type != NULL) {
+        // In this case, with dst_tp already populated, resolve_dst_type
+        // must not overwrite it
+        dst_tp = dst.get_type();
+        self->resolve_dst_type(self, self_tp, data.get(), dst_tp, arg_tp.size(),
+                               arg_tp.empty() ? NULL : arg_tp.data(),
+                               kwds_as_array, tp_vars);
+        // Sanity error check against rogue resolve_test_type
+        if (dst_tp.extended() != dst.get_type().extended()) {
+          std::stringstream ss;
+          ss << "Arrfunc internal error: resolve_dst_type modified a dst_tp "
+                "provided for output, transforming " << dst.get_type()
+             << " into " << dst_tp;
+          throw std::runtime_error(ss.str());
+        }
       }
 
       // Generate and evaluate the ckernel
