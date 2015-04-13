@@ -7,24 +7,14 @@ namespace dynd {
 namespace nd {
 
   template <type_id_t I0>
-  struct plus_ck
-      : base_kernel<plus_ck<I0>, kernel_request_cuda_host_device, 1> {
-    typedef plus_ck self_type;
+  struct plus_kernel
+      : base_kernel<plus_kernel<I0>, kernel_request_cuda_host_device, 1> {
     typedef typename type_of<I0>::type A0;
     typedef decltype(+std::declval<A0>()) R;
 
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
       *reinterpret_cast<R *>(dst) = +*reinterpret_cast<A0 *>(src[0]);
-    }
-
-    static ndt::type make_type()
-    {
-      std::map<string, ndt::type> tp_vars;
-      tp_vars["A0"] = ndt::make_type<A0>();
-      tp_vars["R"] = ndt::make_type<R>();
-
-      return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
     }
 
     static void resolve_dst_type(
@@ -37,12 +27,20 @@ namespace nd {
     {
       dst_tp = ndt::make_type<R>();
     }
+
+    static ndt::type make_type()
+    {
+      std::map<string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::make_type<A0>();
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
+    }
   };
 
   template <type_id_t I0>
-  struct minus_ck
-      : base_kernel<minus_ck<I0>, kernel_request_cuda_host_device, 1> {
-    typedef minus_ck self_type;
+  struct minus_kernel
+      : base_kernel<minus_kernel<I0>, kernel_request_cuda_host_device, 1> {
     typedef typename type_of<I0>::type A0;
     typedef decltype(-std::declval<A0>()) R;
 

@@ -110,7 +110,7 @@ nd::arrfunc dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                const ndt::type &src_tp,
                                                assign_error_mode errmode)
 {
-  return nd::as_arrfunc<unary_assignment_ck>(
+  return nd::arrfunc::make<unary_assignment_ck>(
       ndt::make_arrfunc(ndt::make_tuple(src_tp), dst_tp), errmode, 0);
 }
 

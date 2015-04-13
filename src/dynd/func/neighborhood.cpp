@@ -47,5 +47,5 @@ nd::arrfunc nd::functional::neighborhood(const nd::arrfunc &neighborhood_op,
   }
 
   std::shared_ptr<neighborhood_data> nh(new nd::functional::neighborhood_data(neighborhood_op, nh_ndim));
-  return as_arrfunc<neighborhood_ck<1>>(self_tp, nh, 0);
+  return arrfunc::make<neighborhood_ck<1>>(self_tp, nh, 0);
 }

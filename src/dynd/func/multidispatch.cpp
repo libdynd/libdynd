@@ -277,8 +277,8 @@ nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
   }
 
   // TODO: Component arrfuncs might be arrays, not just scalars
-  return as_arrfunc<old_multidispatch_ck>(ndt::make_generic_funcproto(nargs),
-                                          std::move(sorted_af), 0);
+  return arrfunc::make<old_multidispatch_ck>(ndt::make_generic_funcproto(nargs),
+                                             std::move(sorted_af), 0);
 }
 
 nd::arrfunc
@@ -352,7 +352,7 @@ nd::functional::multidispatch(const ndt::type &self_tp,
     (*map)[tp_vals] = child;
   }
 
-  return as_arrfunc<multidispatch_ck>(
+  return arrfunc::make<multidispatch_ck>(
       self_tp, multidispatch_ck::data_type(map, vars), 0);
 }
 
@@ -396,7 +396,7 @@ namespace nd {
         data[src_tp0.get_type_id()][src_tp1.get_type_id()] = child;
       }
 
-      return as_arrfunc<multidispatch_by_type_id_kernel<false, 2>>(
+      return arrfunc::make<multidispatch_by_type_id_kernel<false, 2>>(
           pattern_tp, move(data), 0);
     }
 

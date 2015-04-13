@@ -267,7 +267,7 @@ TEST(Arithmetic, Plus) {
   std::cout << nd::minus << std::endl;
   std::cout << nd::minus(a) << std::endl;
 
-//  std::exit(-1);
+  std::exit(-1);
 }
 */
 
