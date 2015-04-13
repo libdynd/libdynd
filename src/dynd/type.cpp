@@ -100,10 +100,13 @@ bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
                       const char *candidate_arrmeta,
                       std::map<nd::string, ndt::type> &tp_vars) const
 {
+  // A type being matched against itself works for both type id and more
+  // complicated types
   if (extended() == candidate_tp.extended()) {
     return true;
   }
 
+  // Builtin types only match against themselves
   if (is_builtin()) {
     return false;
   }

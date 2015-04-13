@@ -5,6 +5,7 @@
 
 #include <dynd/func/chain.hpp>
 #include <dynd/kernels/chain_kernel.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -28,6 +29,14 @@ nd::arrfunc nd::functional::chain(const nd::arrfunc &first,
     throw runtime_error("Chaining functions without a provided intermediate "
                         "type is not implemented");
   }
+
+  /* // TODO: Something like this should work
+  map<nd::string, ndt::type> tp_vars;
+  second.get_type()->get_pos_type(0).match(first.get_type()->get_return_type(),
+                                           tp_vars);
+  ndt::type return_tp =
+      ndt::substitute(second.get_type()->get_return_type(), tp_vars, false);
+  */
 
   return as_arrfunc<chain_kernel>(
       ndt::make_arrfunc(first.get_type()->get_pos_tuple(),

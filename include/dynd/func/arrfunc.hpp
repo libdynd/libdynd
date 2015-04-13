@@ -108,51 +108,26 @@ namespace nd {
     }
 
     inline bool is_special_kwd(const arrfunc_type *self_tp,
-                               array &DYND_UNUSED(dst), const std::string &name,
-                               const ndt::type &value,
-                               std::map<nd::string, ndt::type> &tp_vars)
+                               array &dst, const std::string &name,
+                               const ndt::type &value)
     {
       if (name == "dst_tp") {
-        const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.match(value, tp_vars)) {
-          return true;
-        }
-
-        std::stringstream ss;
-        ss << "keyword \"dst_tp\" does not match, ";
-        ss << "arrfunc expected " << expected_tp << " but passed " << value;
-        throw std::invalid_argument(ss.str());
+        dst = nd::empty(value);
+        return true;
       }
 
       return false;
     }
 
     inline bool is_special_kwd(const arrfunc_type *self_tp, array &dst,
-                               const std::string &name, const nd::array &value,
-                               std::map<nd::string, ndt::type> &tp_vars)
+                               const std::string &name, const nd::array &value)
     {
       if (name == "dst_tp") {
-        const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.match(value.as<ndt::type>(), tp_vars)) {
-          return true;
-        }
-
-        std::stringstream ss;
-        ss << "keyword \"dst_tp\" does not match, ";
-        ss << "arrfunc expected " << expected_tp << " but passed " << value;
-        throw std::invalid_argument(ss.str());
+        dst = nd::empty(value.as<ndt::type>());
+        return true;
       } else if (name == "dst") {
-        const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.match(value.get_type(), tp_vars)) {
-          dst = value;
-          return true;
-        }
-
-        std::stringstream ss;
-        ss << "keyword \"dst\" does not match, ";
-        ss << "arrfunc expected dst_tp " << expected_tp << " but passed "
-           << value;
-        throw std::invalid_argument(ss.str());
+        dst = value;
+        return true;
       }
 
       return false;
@@ -161,12 +136,11 @@ namespace nd {
     template <typename T>
     void check_name(const arrfunc_type *af_tp, array &dst,
                     const std::string &name, const T &value, bool &has_dst_tp,
-                    ndt::type *kwd_tp, std::vector<intptr_t> &available,
-                    std::map<nd::string, ndt::type> &tp_vars)
+                    ndt::type *kwd_tp, std::vector<intptr_t> &available)
     {
       intptr_t j = af_tp->get_kwd_index(name);
       if (j == -1) {
-        if (is_special_kwd(af_tp, dst, name, value, tp_vars)) {
+        if (is_special_kwd(af_tp, dst, name, value)) {
           has_dst_tp = true;
         } else {
           std::stringstream ss;
@@ -397,11 +371,10 @@ namespace nd {
       }
 
     public:
-      void validate_names(
-          const arrfunc_type *af_tp, array &DYND_UNUSED(dst),
-          std::vector<ndt::type> &DYND_UNUSED(tp),
-          std::vector<intptr_t> &available, std::vector<intptr_t> &missing,
-          std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+      void validate_names(const arrfunc_type *af_tp, array &DYND_UNUSED(dst),
+                          std::vector<ndt::type> &DYND_UNUSED(tp),
+                          std::vector<intptr_t> &available,
+                          std::vector<intptr_t> &missing) const
       {
         // No keywords provided, so all are missing
         for (intptr_t j : af_tp->get_option_kwd_indices()) {
@@ -517,24 +490,22 @@ namespace nd {
         template <size_t I>
         void on_each(const arrfunc_type *af_tp, array &dst, bool &has_dst_tp,
                      std::vector<ndt::type> &kwd_tp,
-                     std::vector<intptr_t> &available,
-                     std::map<nd::string, ndt::type> &tp_vars)
+                     std::vector<intptr_t> &available)
         {
           check_name(af_tp, dst, self->m_names[I], std::get<I>(self->m_values),
-                     has_dst_tp, kwd_tp.data(), available, tp_vars);
+                     has_dst_tp, kwd_tp.data(), available);
         }
 
         void operator()(const arrfunc_type *af_tp, array &dst,
                         std::vector<ndt::type> &tp,
                         std::vector<intptr_t> &available,
-                        std::vector<intptr_t> &missing,
-                        std::map<nd::string, ndt::type> &tp_vars) const
+                        std::vector<intptr_t> &missing) const
         {
           bool has_dst_tp = false;
 
           typedef make_index_sequence<sizeof...(K)> I;
-          index_proxy<I>::for_each(*this, af_tp, dst, has_dst_tp, tp, available,
-                                   tp_vars);
+          index_proxy<I>::for_each(*this, af_tp, dst, has_dst_tp, tp,
+                                   available);
 
           intptr_t nkwd = sizeof...(K);
           if (has_dst_tp) {
@@ -616,14 +587,13 @@ namespace nd {
       void validate_names(const arrfunc_type *af_tp, array &dst,
                           std::vector<ndt::type> &kwd_tp,
                           std::vector<intptr_t> &available,
-                          std::vector<intptr_t> &missing,
-                          std::map<nd::string, ndt::type> &tp_vars) const
+                          std::vector<intptr_t> &missing) const
       {
         bool has_dst_tp = false;
 
         for (intptr_t i = 0; i < m_size; ++i) {
           check_name(af_tp, dst, m_names[i], m_values[i], has_dst_tp,
-                     kwd_tp.data(), available, tp_vars);
+                     kwd_tp.data(), available);
         }
 
         intptr_t nkwd = m_size;
@@ -922,18 +892,29 @@ namespace nd {
       array dst;
 
       // ...
-      std::map<nd::string, ndt::type> tp_vars;
-
-      // ...
       std::vector<ndt::type> kwd_tp(self_tp->get_nkwd());
       std::vector<intptr_t> available, missing;
-      kwds.validate_names(self_tp, dst, kwd_tp, available, missing, tp_vars);
+      kwds.validate_names(self_tp, dst, kwd_tp, available, missing);
 
+      std::map<nd::string, ndt::type> tp_vars;
       std::vector<ndt::type> arg_tp(self_tp->get_npos());
       std::vector<const char *> arg_arrmeta(self_tp->get_npos());
       std::vector<char *> arg_data(self_tp->get_npos());
+      // Validate the array arguments
       args.validate_types(self_tp, arg_tp, arg_arrmeta, arg_data, tp_vars);
 
+      // Validate the destination type, if it was provided
+      if (!dst.is_null()) {
+        if (!self_tp->get_return_type().match(NULL, dst.get_type(),
+          dst.get_arrmeta(), tp_vars)) {
+          std::stringstream ss;
+          ss << "provided \"dst\" nd::array does not match ";
+          ss << "arrfunc return type " << self_tp->get_return_type();
+          throw std::invalid_argument(ss.str());
+        }
+      }
+
+      // Validate the keyword arguments
       detail::validate_kwd_types(self_tp, kwd_tp, available, missing, tp_vars);
 
       // ...
@@ -951,17 +932,18 @@ namespace nd {
                                     kwds_as_array, tp_vars);
       }
 
-      // Resolve the destination type
-      if (self->resolve_dst_type != NULL) {
-        self->resolve_dst_type(self, self_tp, data.get(), dst_tp, arg_tp.size(),
-                               arg_tp.empty() ? NULL : arg_tp.data(),
-                               kwds_as_array, tp_vars);
-      } else {
-        dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
-      }
-
-      // Construct the destination array
+      // Construct the destination array, if it was not provided
       if (dst.is_null()) {
+        // Resolve the destination type
+        if (self->resolve_dst_type != NULL) {
+          self->resolve_dst_type(
+              self, self_tp, data.get(), dst_tp, arg_tp.size(),
+              arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array, tp_vars);
+        }
+        else {
+          dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
+        }
+
         dst = empty(dst_tp);
       }
 
