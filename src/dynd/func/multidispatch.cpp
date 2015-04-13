@@ -409,8 +409,6 @@ nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
                                          const std::vector<arrfunc> &children)
 {
   switch (pattern_tp.extended<arrfunc_type>()->get_npos()) {
-  case 1:
-    return multidispatch_by_type_id<1>(pattern_tp, children, arrfunc(), 0);
   case 2:
     return multidispatch_by_type_id<2>(pattern_tp, children);
   default:
