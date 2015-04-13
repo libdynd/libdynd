@@ -359,6 +359,15 @@ ndt::type ndt::detail::internal_substitute(
             "Cannot substitute into an unnamed ellipsis typevar");
       }
     }
+    case any_sym_type_id: {
+      if (concrete) {
+        stringstream ss;
+        ss << "The dynd type " << pattern << " is not concrete as required";
+        throw invalid_argument(ss.str());
+      } else {
+        return pattern;
+      }
+    }
     default:
       break;
   }

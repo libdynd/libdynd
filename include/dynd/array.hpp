@@ -1172,7 +1172,7 @@ namespace nd {
 
   /**
    * Constructs an uninitialized array with uninitialized arrmeta of the
-   * given dtype.
+   * given dtype. Default-sized space for data is allocated.
    *
    * IMPORTANT: You should use nd::empty normally. If you use this function,
    *            you must manually initialize the arrmeta as well.

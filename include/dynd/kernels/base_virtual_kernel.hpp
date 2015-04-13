@@ -21,7 +21,9 @@ namespace nd {
                      const dynd::nd::array &DYND_UNUSED(kwds),
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
-      dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
+      if (dst_tp.is_null()) {
+        dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
+      }
     }
 
     static void resolve_option_values(
