@@ -107,7 +107,7 @@ namespace nd {
       return false;
     }
 
-    inline bool is_special_kwd(const arrfunc_type *self_tp,
+    inline bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
                                array &dst, const std::string &name,
                                const ndt::type &value)
     {
@@ -119,8 +119,9 @@ namespace nd {
       return false;
     }
 
-    inline bool is_special_kwd(const arrfunc_type *self_tp, array &dst,
-                               const std::string &name, const nd::array &value)
+    inline bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
+                               array &dst, const std::string &name,
+                               const nd::array &value)
     {
       if (name == "dst_tp") {
         dst = nd::empty(value.as<ndt::type>());

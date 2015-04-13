@@ -117,7 +117,8 @@ bool typevar_type::match(const char *DYND_UNUSED(arrmeta),
     return *this == *candidate_tp.extended();
   }
 
-  if (!candidate_tp.is_scalar()) {
+  if (candidate_tp.get_ndim() > 0 ||
+      candidate_tp.get_type_id() == any_sym_type_id) {
     return false;
   }
 
