@@ -234,8 +234,7 @@ nd::arrfunc::arrfunc(const nd::array &rhs)
       const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
           rhs.get_readonly_originptr());
       if (af->instantiate != NULL) {
-        // It's valid: immutable, arrfunc type, contains
-        // instantiate function.
+        // It's valid: arrfunc type, contains instantiate function.
         m_value = rhs;
       } else {
         throw invalid_argument("Require a non-empty arrfunc, "

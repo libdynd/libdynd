@@ -107,6 +107,7 @@ TEST(TypePatternMatch, Struct)
   EXPECT_TYPE_MATCH("A... * {x: T, y: T}", "100 * {x: int32, y: int32}");
   EXPECT_TYPE_MATCH("M * {x: T, y: T, u: S, v: S}",
                     "100 * {x: int32, y: int32, u: int16, v: int16}");
+  EXPECT_TYPE_MATCH("T", "{x: int32}");
 
   EXPECT_FALSE(ndt::type("100 * {x: int32, y: int32, u: int16, v: int32}")
                    .match(ndt::type("M * {x: T, y: T, u: S, v: S}")));

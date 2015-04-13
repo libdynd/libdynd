@@ -16,6 +16,15 @@
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/type_type.hpp>
 
+/**
+ * This macro creates a C++ metafunction which can tell you whether a class
+ * has a member function called NAME. For example,
+ *
+ *   DYND_HAS_MEM_FUNC(add);
+ *
+ * will create a metafunction called `has_add`. The metafunction can be used
+ * as `has_add<MyClass>::value`.
+ */
 #define DYND_HAS_MEM_FUNC(NAME)                                                \
   template <typename T, typename S>                                            \
   class DYND_PP_PASTE(has_, NAME) {                                            \
@@ -32,6 +41,12 @@
   public:                                                                      \
     static bool const value = sizeof(test<T>(0)) == sizeof(true_type);         \
   }
+
+/**
+ * This macro creates a C++ metafunction which can give you a member function
+ * or NULL if there is no member function. This is generally intended for
+ * extracting static member functions.
+ */
 #define DYND_GET_MEM_FUNC(TYPE, NAME)                                          \
   template <typename T, bool DYND_PP_PASTE(has_, NAME)>                        \
   typename std::enable_if<DYND_PP_PASTE(has_, NAME), TYPE>::type               \
@@ -61,11 +76,13 @@ namespace ndt {
 }
 
 namespace detail {
+  // Each of these creates the has_NAME metapredicate
   DYND_HAS_MEM_FUNC(make_type);
   DYND_HAS_MEM_FUNC(instantiate);
   DYND_HAS_MEM_FUNC(resolve_option_values);
   DYND_HAS_MEM_FUNC(resolve_dst_type);
   DYND_HAS_MEM_FUNC(free);
+  // Each of these creates the get_NAME metafunction
   DYND_GET_MEM_FUNC(arrfunc_make_type_t, make_type);
   DYND_GET_MEM_FUNC(arrfunc_instantiate_t, instantiate);
   DYND_GET_MEM_FUNC(arrfunc_resolve_option_values_t, resolve_option_values);
@@ -75,6 +92,12 @@ namespace detail {
 
 namespace nd {
   namespace detail {
+    /**
+     * Presently, there are some specially treated keyword arguments in
+     * arrfuncs. The "dst_tp" keyword argument always tells the desired
+     * output type, and the "dst" keyword argument always provides an
+     * output array.
+     */
     template <typename T>
     bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
                         const std::string &DYND_UNUSED(name),
@@ -84,52 +107,28 @@ namespace nd {
       return false;
     }
 
-    inline bool is_special_kwd(const arrfunc_type *self_tp,
-                               array &DYND_UNUSED(dst), const std::string &name,
-                               const ndt::type &value,
-                               std::map<nd::string, ndt::type> &tp_vars)
+    inline bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
+                               array &dst, const std::string &name,
+                               const ndt::type &value)
     {
       if (name == "dst_tp") {
-        const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.match(value, tp_vars)) {
-          return true;
-        }
-
-        std::stringstream ss;
-        ss << "keyword \"dst_tp\" does not match, ";
-        ss << "arrfunc expected " << expected_tp << " but passed " << value;
-        throw std::invalid_argument(ss.str());
+        dst = nd::empty(value);
+        return true;
       }
 
       return false;
     }
 
-    inline bool is_special_kwd(const arrfunc_type *self_tp, array &dst,
-                               const std::string &name, const nd::array &value,
-                               std::map<nd::string, ndt::type> &tp_vars)
+    inline bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
+                               array &dst, const std::string &name,
+                               const nd::array &value)
     {
       if (name == "dst_tp") {
-        const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.match(value.as<ndt::type>(), tp_vars)) {
-          return true;
-        }
-
-        std::stringstream ss;
-        ss << "keyword \"dst_tp\" does not match, ";
-        ss << "arrfunc expected " << expected_tp << " but passed " << value;
-        throw std::invalid_argument(ss.str());
+        dst = nd::empty(value.as<ndt::type>());
+        return true;
       } else if (name == "dst") {
-        const ndt::type &expected_tp = self_tp->get_return_type();
-        if (expected_tp.match(value.get_type(), tp_vars)) {
-          dst = value;
-          return true;
-        }
-
-        std::stringstream ss;
-        ss << "keyword \"dst\" does not match, ";
-        ss << "arrfunc expected dst_tp " << expected_tp << " but passed "
-           << value;
-        throw std::invalid_argument(ss.str());
+        dst = value;
+        return true;
       }
 
       return false;
@@ -138,12 +137,11 @@ namespace nd {
     template <typename T>
     void check_name(const arrfunc_type *af_tp, array &dst,
                     const std::string &name, const T &value, bool &has_dst_tp,
-                    ndt::type *kwd_tp, std::vector<intptr_t> &available,
-                    std::map<nd::string, ndt::type> &tp_vars)
+                    ndt::type *kwd_tp, std::vector<intptr_t> &available)
     {
       intptr_t j = af_tp->get_kwd_index(name);
       if (j == -1) {
-        if (is_special_kwd(af_tp, dst, name, value, tp_vars)) {
+        if (is_special_kwd(af_tp, dst, name, value)) {
           has_dst_tp = true;
         } else {
           std::stringstream ss;
@@ -194,6 +192,7 @@ namespace nd {
       return const_cast<char *>(value.get_readonly_originptr());
     }
 
+    /** A holder class for the array arguments */
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
@@ -259,6 +258,7 @@ namespace nd {
       }
     };
 
+    /** A way to pass a run-time array of array arguments */
     template <>
     class args<intptr_t, nd::array *> {
       intptr_t m_size;
@@ -289,6 +289,10 @@ namespace nd {
       }
     };
 
+    /**
+     * A way to pass a run-time array of array arguments, split up into the
+     * type/arrmeta/data components
+     */
     template <>
     class args<intptr_t, const ndt::type *, const char *const *,
                char *const *> {
@@ -350,9 +354,11 @@ namespace nd {
       };
     };
 
+    /** A holder class for the keyword arguments */
     template <typename... K>
     class kwds;
 
+    /** The case of no keyword arguments being provided */
     template <>
     class kwds<> {
       void fill_values(const ndt::type *tp, char *arrmeta,
@@ -366,12 +372,12 @@ namespace nd {
       }
 
     public:
-      void validate_names(
-          const arrfunc_type *af_tp, array &DYND_UNUSED(dst),
-          std::vector<ndt::type> &DYND_UNUSED(tp),
-          std::vector<intptr_t> &available, std::vector<intptr_t> &missing,
-          std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+      void validate_names(const arrfunc_type *af_tp, array &DYND_UNUSED(dst),
+                          std::vector<ndt::type> &DYND_UNUSED(tp),
+                          std::vector<intptr_t> &available,
+                          std::vector<intptr_t> &missing) const
       {
+        // No keywords provided, so all are missing
         for (intptr_t j : af_tp->get_option_kwd_indices()) {
           missing.push_back(j);
         }
@@ -379,6 +385,7 @@ namespace nd {
         check_nkwd(af_tp, available, missing);
       }
 
+      /** Converts the keyword args + filled in defaults into an nd::array */
       array as_array(const ndt::type &tp,
                      const std::vector<intptr_t> &available,
                      const std::vector<intptr_t> &missing) const
@@ -484,24 +491,22 @@ namespace nd {
         template <size_t I>
         void on_each(const arrfunc_type *af_tp, array &dst, bool &has_dst_tp,
                      std::vector<ndt::type> &kwd_tp,
-                     std::vector<intptr_t> &available,
-                     std::map<nd::string, ndt::type> &tp_vars)
+                     std::vector<intptr_t> &available)
         {
           check_name(af_tp, dst, self->m_names[I], std::get<I>(self->m_values),
-                     has_dst_tp, kwd_tp.data(), available, tp_vars);
+                     has_dst_tp, kwd_tp.data(), available);
         }
 
         void operator()(const arrfunc_type *af_tp, array &dst,
                         std::vector<ndt::type> &tp,
                         std::vector<intptr_t> &available,
-                        std::vector<intptr_t> &missing,
-                        std::map<nd::string, ndt::type> &tp_vars) const
+                        std::vector<intptr_t> &missing) const
         {
           bool has_dst_tp = false;
 
           typedef make_index_sequence<sizeof...(K)> I;
-          index_proxy<I>::for_each(*this, af_tp, dst, has_dst_tp, tp, available,
-                                   tp_vars);
+          index_proxy<I>::for_each(*this, af_tp, dst, has_dst_tp, tp,
+                                   available);
 
           intptr_t nkwd = sizeof...(K);
           if (has_dst_tp) {
@@ -583,14 +588,13 @@ namespace nd {
       void validate_names(const arrfunc_type *af_tp, array &dst,
                           std::vector<ndt::type> &kwd_tp,
                           std::vector<intptr_t> &available,
-                          std::vector<intptr_t> &missing,
-                          std::map<nd::string, ndt::type> &tp_vars) const
+                          std::vector<intptr_t> &missing) const
       {
         bool has_dst_tp = false;
 
         for (intptr_t i = 0; i < m_size; ++i) {
           check_name(af_tp, dst, m_names[i], m_values[i], has_dst_tp,
-                     kwd_tp.data(), available, tp_vars);
+                     kwd_tp.data(), available);
         }
 
         intptr_t nkwd = m_size;
@@ -612,16 +616,17 @@ namespace nd {
                      const std::vector<intptr_t> &missing) const
       {
         array res = empty_shell(tp);
+        auto field_count = tp.extended<base_struct_type>()->get_field_count();
+        auto field_types =
+            tp.extended<base_struct_type>()->get_field_types_raw();
         struct_type::fill_default_data_offsets(
-            res.get_dim_size(),
-            tp.extended<base_struct_type>()->get_field_types_raw(),
+            field_count, field_types,
             reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
 
         fill_values(
-            tp.extended<base_struct_type>()->get_field_types_raw(),
-            res.get_arrmeta(), res.get_type()
-                                   .extended<base_struct_type>()
-                                   ->get_arrmeta_offsets_raw(),
+            field_types, res.get_arrmeta(), res.get_type()
+                                                .extended<base_struct_type>()
+                                                ->get_arrmeta_offsets_raw(),
             res.get_readwrite_originptr(),
             res.get_type().extended<base_struct_type>()->get_data_offsets(
                 res.get_arrmeta()),
@@ -681,6 +686,13 @@ namespace nd {
   }
 } // namespace dynd::nd
 
+/**
+ * A function to provide keyword arguments to an arrfunc. The arguments
+ * must alternate between the keyword name and the argument value.
+ *
+ *   arrfunc af = <some arrfunc>;
+ *   af(arr1, arr2, kwds("firstkwarg", kwval1, "second", kwval2));
+ */
 template <typename... T>
 typename std::enable_if<nd::detail::is_variadic_kwds<T...>::value,
                         typename nd::detail::as_kwds<T...>::type>::type
@@ -695,6 +707,10 @@ kwds(T &&... t)
       decltype(kwds(std::forward<T>(t)...))>(std::forward<T>(t)...);
 }
 
+/**
+ * A special way to provide the keyword argument as an array of
+ * names and an array of nd::array values.
+ */
 template <typename... T>
 typename std::enable_if<
     !nd::detail::is_variadic_kwds<T...>::value,
@@ -705,8 +721,15 @@ kwds(T &&... t)
       std::forward<T>(t)...);
 }
 
+/**
+ * Empty keyword args.
+ */
 inline nd::detail::kwds<> kwds() { return nd::detail::kwds<>(); }
 
+/**
+ * TODO: This `as_array` metafunction should either go somewhere better (this
+ *       file is for arrfunc), or be in a detail:: namespace.
+ */
 template <typename T>
 struct as_array {
   typedef nd::array type;
@@ -734,7 +757,7 @@ struct as_array<nd::array &> {
 
 namespace nd {
   /**
-   * Holds a single instance of an arrfunc in an immutable nd::array,
+   * Holds a single instance of an arrfunc in an nd::array,
    * providing some more direct convenient interface.
    */
   class arrfunc {
@@ -784,7 +807,7 @@ namespace nd {
 
     /**
       * Constructor from an nd::array. Validates that the input
-      * has "arrfunc" type and is immutable.
+      * has "arrfunc" type.
       */
     arrfunc(const nd::array &rhs);
 
@@ -822,10 +845,8 @@ namespace nd {
                            T &&... names)
         {
           // TODO: This function makes some assumptions about types not being
-       option
-          //       already, etc. We need this functionality, but probably can
-       find
-          //       a better way later.
+          //       option already, etc. We need this functionality, but probably
+          //       can find a better way later.
 
           intptr_t missing[sizeof...(T)] =
        {get_type()->get_kwd_index(names)...};
@@ -861,30 +882,41 @@ namespace nd {
           }
     */
 
-    /** Implements the general call operator */
+    /** Implements the general call operator which returns an array */
     template <typename A, typename K>
     array call(const A &args, const K &kwds) const
     {
       const arrfunc_type_data *self = get();
       const arrfunc_type *self_tp = get_type();
 
-      // ...
-      ndt::type dst_tp;
       array dst;
-
-      // ...
-      std::map<nd::string, ndt::type> tp_vars;
 
       // ...
       std::vector<ndt::type> kwd_tp(self_tp->get_nkwd());
       std::vector<intptr_t> available, missing;
-      kwds.validate_names(self_tp, dst, kwd_tp, available, missing, tp_vars);
+      kwds.validate_names(self_tp, dst, kwd_tp, available, missing);
 
+      std::map<nd::string, ndt::type> tp_vars;
       std::vector<ndt::type> arg_tp(self_tp->get_npos());
       std::vector<const char *> arg_arrmeta(self_tp->get_npos());
       std::vector<char *> arg_data(self_tp->get_npos());
+      // Validate the array arguments
       args.validate_types(self_tp, arg_tp, arg_arrmeta, arg_data, tp_vars);
 
+      // Validate the destination type, if it was provided
+      if (!dst.is_null()) {
+        if (!self_tp->get_return_type().match(NULL, dst.get_type(),
+          dst.get_arrmeta(), tp_vars)) {
+          std::stringstream ss;
+          ss << "provided \"dst\" type " << dst.get_type()
+             << " does not match arrfunc return type "
+             << self_tp->get_return_type();
+          throw std::invalid_argument(ss.str());
+        }
+      }
+
+      // Validate the keyword arguments, and does substitutions to make
+      // them concrete
       detail::validate_kwd_types(self_tp, kwd_tp, available, missing, tp_vars);
 
       // ...
@@ -902,18 +934,35 @@ namespace nd {
                                     kwds_as_array, tp_vars);
       }
 
-      // Resolve the destination type
-      if (self->resolve_dst_type != NULL) {
+      // Construct the destination array, if it was not provided
+      ndt::type dst_tp;
+      if (dst.is_null()) {
+        // Resolve the destination type
+        if (self->resolve_dst_type != NULL) {
+          self->resolve_dst_type(
+              self, self_tp, data.get(), dst_tp, arg_tp.size(),
+              arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array, tp_vars);
+        }
+        else {
+          dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
+        }
+
+        dst = empty(dst_tp);
+      } else if (self->resolve_dst_type != NULL) {
+        // In this case, with dst_tp already populated, resolve_dst_type
+        // must not overwrite it
+        dst_tp = dst.get_type();
         self->resolve_dst_type(self, self_tp, data.get(), dst_tp, arg_tp.size(),
                                arg_tp.empty() ? NULL : arg_tp.data(),
                                kwds_as_array, tp_vars);
-      } else {
-        dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
-      }
-
-      // Construct the destination array
-      if (dst.is_null()) {
-        dst = empty(dst_tp);
+        // Sanity error check against rogue resolve_test_type
+        if (dst_tp.extended() != dst.get_type().extended()) {
+          std::stringstream ss;
+          ss << "Arrfunc internal error: resolve_dst_type modified a dst_tp "
+                "provided for output, transforming " << dst.get_type()
+             << " into " << dst_tp;
+          throw std::runtime_error(ss.str());
+        }
       }
 
       // Generate and evaluate the ckernel
