@@ -28,7 +28,7 @@ namespace nd {
           ndt::make_arrfunc<typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);
 
-      return as_arrfunc<CKT>(self_tp, 0);
+      return arrfunc::make<CKT>(self_tp, 0);
     }
 
     template <typename func_type, func_type func, typename... T>
@@ -56,7 +56,7 @@ namespace nd {
           ndt::make_arrfunc<kernreq, typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);
 
-      return as_arrfunc<ck_type>(self_tp, func, 0);
+      return arrfunc::make<ck_type>(self_tp, func, 0);
     }
 
     template <typename func_type, typename... T>
@@ -80,7 +80,7 @@ namespace nd {
           ndt::make_arrfunc<kernreq, typename funcproto_of<func_type>::type>(
               std::forward<T>(names)...);
 
-      return as_arrfunc<ck_type>(self_tp, func, 0);
+      return arrfunc::make<ck_type>(self_tp, func, 0);
     }
 
 
@@ -116,7 +116,7 @@ namespace nd {
           kernreq, typename funcproto_of<R (T::*)(A...)>::type>(
           std::forward<S>(names)...);
 
-      return as_arrfunc<ck_type>(self_tp,
+      return arrfunc::make<ck_type>(self_tp,
                                  typename ck_type::data_type(obj, mem_func), 0);
     }
 
@@ -142,7 +142,7 @@ namespace nd {
           kernreq, typename funcproto_of<func_type, K...>::type>(
           std::forward<T>(names)...);
 
-      return as_arrfunc<ck_type>(self_tp, 0);
+      return arrfunc::make<ck_type>(self_tp, 0);
     }
 
     /**

@@ -11,7 +11,7 @@ using namespace dynd;
 
 nd::arrfunc nd::copy::make()
 {
-  return as_arrfunc<copy_ck>(ndt::type("(A... * S) -> B... * T"), 0);
+  return arrfunc::make<copy_ck>(ndt::type("(A... * S) -> B... * T"), 0);
 }
 
 struct nd::copy nd::copy;

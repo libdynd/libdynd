@@ -188,6 +188,7 @@ enum type_id_t {
   builtin_type_id_count = 19,
 };
 #define DYND_BUILTIN_TYPE_ID_COUNT 19
+#define DYND_TYPE_ID_MAX 100
 
 enum type_flags_t {
   // A symbolic name instead of just "0"

@@ -370,24 +370,10 @@ namespace nd {
     static typename std::enable_if<N == 1, arrfunc>::type
     multidispatch_by_type_id(const ndt::type &pattern_tp,
                              const std::vector<arrfunc> &children,
-                             const arrfunc &default_child)
+                             const arrfunc &default_child, intptr_t index)
     {
-      shared_ptr<std::vector<arrfunc>> data(new std::vector<arrfunc>(100));
-
-      for (const arrfunc &child : children) {
-        std::map<string, ndt::type> tp_vars;
-        if (!pattern_tp.match(child.get_array_type(), tp_vars)) {
-          throw std::invalid_argument("could not match arrfuncs");
-        }
-
-        const ndt::type &src_tp0 = child.get_type()->get_pos_type(0);
-
-        (*data)[src_tp0.get_type_id()] = child;
-      }
-
-      return as_arrfunc<multidispatch_by_type_id_ck<1>>(
-          pattern_tp,
-          multidispatch_by_type_id_ck<1>::static_data(data, default_child), 0);
+      return multidispatch_by_type_id(pattern_tp, children.size(),
+                                      children.data(), default_child, index);
     }
 
     template <int N>
@@ -410,8 +396,8 @@ namespace nd {
         data[src_tp0.get_type_id()][src_tp1.get_type_id()] = child;
       }
 
-      return as_arrfunc<multidispatch_by_type_id_ck<2>>(pattern_tp, move(data),
-                                                        0);
+      return as_arrfunc<multidispatch_by_type_id_kernel<false, 2>>(
+          pattern_tp, move(data), 0);
     }
 
   } // namespace dynd::nd::functional
@@ -423,8 +409,6 @@ nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
                                          const std::vector<arrfunc> &children)
 {
   switch (pattern_tp.extended<arrfunc_type>()->get_npos()) {
-  case 1:
-    return multidispatch_by_type_id<1>(pattern_tp, children, arrfunc());
   case 2:
     return multidispatch_by_type_id<2>(pattern_tp, children);
   default:
@@ -432,17 +416,31 @@ nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
   }
 }
 
-nd::arrfunc
-nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
-                                         const std::vector<arrfunc> &children,
-                                         const arrfunc &default_child)
+nd::arrfunc nd::functional::multidispatch_by_type_id(
+    const ndt::type &pattern_tp, intptr_t size, const arrfunc *children,
+    const arrfunc &default_child, bool own_children, intptr_t index)
 {
-  switch (pattern_tp.extended<arrfunc_type>()->get_npos()) {
-  case 1:
-    return multidispatch_by_type_id<1>(pattern_tp, children, default_child);
-  case 2:
-    return multidispatch_by_type_id<2>(pattern_tp, children);
-  default:
-    throw std::runtime_error("unsupported");
+  for (intptr_t j = 0; j < size; ++j) {
+    const arrfunc &child = children[j];
+    if (!child.is_null()) {
+      std::map<string, ndt::type> tp_vars;
+      if (!pattern_tp.match(child.get_array_type(), tp_vars)) {
+        //        throw std::invalid_argument("could not match arrfuncs");
+      }
+    }
   }
+
+  if (own_children) {
+    typedef multidispatch_by_type_id_kernel<true, 1> kernel_type;
+    return arrfunc::make<kernel_type>(
+        pattern_tp, make_shared<typename kernel_type::static_data>(
+                        size, children, default_child, index),
+        0);
+  }
+
+  typedef multidispatch_by_type_id_kernel<false, 1> kernel_type;
+  return arrfunc::make<kernel_type>(
+      pattern_tp, make_shared<typename kernel_type::static_data>(
+                      size, children, default_child, index),
+      0);
 }

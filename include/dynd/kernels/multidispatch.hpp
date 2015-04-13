@@ -192,40 +192,72 @@ namespace nd {
       }
     };
 
-    template <int N>
-    struct multidispatch_by_type_id_ck;
+    namespace detail {
+      template <bool own_children, int N>
+      struct multidispatch_by_type_id_kernel_static_data;
 
-    template <>
-    struct multidispatch_by_type_id_ck<1>
-        : base_virtual_kernel<multidispatch_by_type_id_ck<1>> {
-      struct static_data {
-        std::shared_ptr<std::vector<arrfunc>> children;
+      template <>
+      struct multidispatch_by_type_id_kernel_static_data<true, 1> {
+        arrfunc children[DYND_TYPE_ID_MAX + 1];
         arrfunc default_child;
+        intptr_t i0;
 
-        static_data(const std::shared_ptr<std::vector<arrfunc>> &children,
-                    const arrfunc &default_child)
-            : children(children), default_child(default_child)
+        multidispatch_by_type_id_kernel_static_data(
+            intptr_t size, const arrfunc *children,
+            const arrfunc &default_child, intptr_t i0)
+            : default_child(default_child), i0(i0)
         {
+          for (intptr_t j = 0; j < size; ++j) {
+            const arrfunc &child = children[j];
+            if (!child.is_null()) {
+              const ndt::type &tp = child.get_type()->get_pos_type(i0);
+              this->children[tp.get_type_id()] = child;
+            }
+          }
         }
       };
 
+      template <>
+      struct multidispatch_by_type_id_kernel_static_data<false, 1> {
+        const arrfunc *children;
+        const arrfunc &default_child;
+        intptr_t i0;
+
+        multidispatch_by_type_id_kernel_static_data(
+            intptr_t DYND_UNUSED(size), const arrfunc *children,
+            const arrfunc &default_child, intptr_t i0)
+            : children(children), default_child(default_child), i0(i0)
+        {
+        }
+      };
+    }
+
+    template <bool own_children, int N>
+    struct multidispatch_by_type_id_kernel;
+
+    template <bool own_children>
+    struct multidispatch_by_type_id_kernel<own_children, 1>
+        : base_virtual_kernel<
+              multidispatch_by_type_id_kernel<own_children, 1>> {
+
+      typedef detail::multidispatch_by_type_id_kernel_static_data<own_children, 1>
+          static_data;
+
       static void
       resolve_dst_type(const arrfunc_type_data *self,
-                       const arrfunc_type *self_tp, char *DYND_UNUSED(data),
-                       ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, const dynd::nd::array &kwds,
-                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                       const arrfunc_type *DYND_UNUSED(self_tp),
+                       char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t,
+                       const ndt::type *src_tp, const dynd::nd::array &,
+                       const std::map<dynd::nd::string, ndt::type> &)
       {
-        const static_data *data = self->get_data_as<static_data>();
+        const std::shared_ptr<static_data> &data =
+            *self->get_data_as<std::shared_ptr<static_data>>();
+        const ndt::type &tp = (data->i0 == -1) ? dst_tp : src_tp[data->i0];
 
-        arrfunc child = (*(data->children))[src_tp[0].get_type_id()];
+        arrfunc child = data->children[tp.get_type_id()];
         if (child.is_null()) {
-          std::cout << "NULL child" << std::endl;
           child = data->default_child;
         }
-
-        child.get()->resolve_dst_type(self, self_tp, NULL, dst_tp, nsrc, src_tp,
-                                      kwds, tp_vars);
       }
 
       static intptr_t
@@ -237,9 +269,11 @@ namespace nd {
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const static_data *data = self->get_data_as<static_data>();
+        const std::shared_ptr<static_data> &data =
+            *self->get_data_as<std::shared_ptr<static_data>>();
+        const ndt::type &tp = (data->i0 == -1) ? dst_tp : src_tp[data->i0];
 
-        arrfunc child = (*(data->children))[src_tp[0].get_type_id()];
+        arrfunc child = data->children[tp.get_type_id()];
         if (child.is_null()) {
           child = data->default_child;
         }
@@ -250,9 +284,10 @@ namespace nd {
       }
     };
 
-    template <>
-    struct multidispatch_by_type_id_ck<2>
-        : base_virtual_kernel<multidispatch_by_type_id_ck<2>> {
+    template <bool own_children>
+    struct multidispatch_by_type_id_kernel<own_children, 2>
+        : base_virtual_kernel<
+              multidispatch_by_type_id_kernel<own_children, 2>> {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const arrfunc_type *self_tp, char *DYND_UNUSED(data),
