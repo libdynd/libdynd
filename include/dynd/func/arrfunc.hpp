@@ -906,7 +906,7 @@ namespace nd {
       // Validate the destination type, if it was provided
       if (!dst.is_null()) {
         if (!self_tp->get_return_type().match(NULL, dst.get_type(),
-          dst.get_arrmeta(), tp_vars)) {
+                                              dst.get_arrmeta(), tp_vars)) {
           std::stringstream ss;
           ss << "provided \"dst\" type " << dst.get_type()
              << " does not match arrfunc return type "
@@ -942,8 +942,7 @@ namespace nd {
           self->resolve_dst_type(
               self, self_tp, data.get(), dst_tp, arg_tp.size(),
               arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array, tp_vars);
-        }
-        else {
+        } else {
           dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
         }
 
@@ -1074,6 +1073,79 @@ namespace nd {
     {
       return (*this)(std::forward<A>(a)..., kwds());
     }
+
+    template <typename T>
+    static arrfunc make(const ndt::type &self_tp, size_t data_size)
+    {
+      return arrfunc(self_tp, data_size, dynd::detail::get_instantiate<T>(),
+                     dynd::detail::get_resolve_option_values<T>(),
+                     dynd::detail::get_resolve_dst_type<T>());
+    }
+
+    template <typename T>
+    static arrfunc make(size_t data_size)
+    {
+      return make<T>(T::make_type(), data_size);
+    }
+
+    template <typename T>
+    static void make(arrfunc &res, size_t data_size)
+    {
+      res = make<T>(T::make_type(), data_size);
+    }
+
+    template <typename T, typename static_data_type>
+    static arrfunc make(const ndt::type &self_tp,
+                        static_data_type &&static_data, size_t data_size)
+    {
+      return arrfunc(self_tp, std::forward<static_data_type>(static_data),
+                     data_size, dynd::detail::get_instantiate<T>(),
+                     dynd::detail::get_resolve_option_values<T>(),
+                     dynd::detail::get_resolve_dst_type<T>());
+    }
+
+    template <typename T, typename static_data_type>
+    static arrfunc make(static_data_type &&static_data)
+    {
+      return arrfunc::make<T>(T::make_type(),
+                              std::forward<static_data_type>(static_data), 0);
+    }
+
+    template <template <type_id_t> class T>
+    struct insert_child0 {
+      template <type_id_t I>
+      void on_each(std::vector<nd::arrfunc> &children)
+      {
+        children.push_back(nd::arrfunc::make<T<I>>(0));
+      }
+    };
+
+    template <template <type_id_t> class T, typename I0>
+    static std::vector<arrfunc> make_all()
+    {
+      std::vector<arrfunc> arrfuncs;
+      index_proxy<I0>::for_each(insert_child0<T>(), arrfuncs);
+
+      return arrfuncs;
+    }
+
+    template <template <type_id_t> class T>
+    struct ex_insert_child0 {
+      template <type_id_t I>
+      void on_each(arrfunc *children, bool overwrite)
+      {
+        arrfunc &child = children[I];
+        if (child.is_null() || overwrite) {
+          child = arrfunc::make<T<I>>(0);
+        }
+      }
+    };
+
+    template <template <type_id_t> class T, typename I0>
+    static void make_all(arrfunc *children, bool overwrite = false)
+    {
+      index_proxy<I0>::for_each(ex_insert_child0<T>(), children, overwrite);
+    }
   };
 
   namespace functional {
@@ -1086,26 +1158,12 @@ namespace nd {
 
   } // namespace dynd::nd::functional
 
-  template <typename CKT>
-  arrfunc as_arrfunc(const ndt::type &self_tp, size_t data_size)
-  {
-    return arrfunc(self_tp, data_size, dynd::detail::get_instantiate<CKT>(),
-                   dynd::detail::get_resolve_option_values<CKT>(),
-                   dynd::detail::get_resolve_dst_type<CKT>());
-  }
-
-  template <typename CKT>
-  arrfunc as_arrfunc()
-  {
-    return as_arrfunc<CKT>(CKT::make_type(), 0);
-  }
-
   template <typename CKT0, typename CKT1, typename... CKT>
   arrfunc as_arrfunc(const ndt::type &self_tp)
   {
-    return functional::multidispatch(
-        self_tp,
-        {as_arrfunc<CKT0>(), as_arrfunc<CKT1>(), as_arrfunc<CKT>()...});
+    return functional::multidispatch(self_tp, {arrfunc::make<CKT0>(0),
+                                               arrfunc::make<CKT1>(0),
+                                               arrfunc::make<CKT>(0)...});
   }
 
   template <typename CKT, typename T>
@@ -1118,18 +1176,12 @@ namespace nd {
                    dynd::detail::get_resolve_dst_type<CKT>());
   }
 
-  template <typename CKT, typename T>
-  arrfunc as_arrfunc(T &&data)
-  {
-    return as_arrfunc<CKT>(CKT::make_type(), std::forward<T>(data), 0);
-  }
-
   template <typename CKT0, typename CKT1, typename... CKT, typename T>
   arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
   {
-    return functional::multidispatch(self_tp, {as_arrfunc<CKT0>(data),
-                                               as_arrfunc<CKT1>(data),
-                                               as_arrfunc<CKT>(data)...});
+    return functional::multidispatch(self_tp, {arrfunc::make<CKT0>(data),
+                                               arrfunc::make<CKT1>(data),
+                                               arrfunc::make<CKT>(data)...});
   }
 
   namespace detail {
@@ -1182,7 +1234,7 @@ namespace nd {
     template <type_id_t I>
     void on_each(std::vector<nd::arrfunc> &children)
     {
-      children.push_back(nd::as_arrfunc<CKT<I>>());
+      children.push_back(nd::arrfunc::make<CKT<I>>(0));
     }
   };
 
@@ -1200,7 +1252,7 @@ namespace nd {
     template <type_id_t J>
     void on_each(std::vector<nd::arrfunc> &children)
     {
-      children.push_back(nd::as_arrfunc<CKT<I, J>>());
+      children.push_back(nd::arrfunc::make<CKT<I, J>>(0));
     }
   };
 
@@ -1227,21 +1279,21 @@ namespace nd {
   {
     switch (self_tp.extended<arrfunc_type>()->get_npos()) {
     case 0:
-      return as_arrfunc<CKT<0>>(self_tp, std::forward<T>(data), data_size);
+      return arrfunc::make<CKT<0>>(self_tp, std::forward<T>(data), data_size);
     case 1:
-      return as_arrfunc<CKT<1>>(self_tp, std::forward<T>(data), data_size);
+      return arrfunc::make<CKT<1>>(self_tp, std::forward<T>(data), data_size);
     case 2:
-      return as_arrfunc<CKT<2>>(self_tp, std::forward<T>(data), data_size);
+      return arrfunc::make<CKT<2>>(self_tp, std::forward<T>(data), data_size);
     case 3:
-      return as_arrfunc<CKT<3>>(self_tp, std::forward<T>(data), data_size);
+      return arrfunc::make<CKT<3>>(self_tp, std::forward<T>(data), data_size);
     case 4:
-      return as_arrfunc<CKT<4>>(self_tp, std::forward<T>(data), data_size);
+      return arrfunc::make<CKT<4>>(self_tp, std::forward<T>(data), data_size);
     case 5:
-      return as_arrfunc<CKT<5>>(self_tp, std::forward<T>(data), data_size);
+      return arrfunc::make<CKT<5>>(self_tp, std::forward<T>(data), data_size);
     case 6:
-      return as_arrfunc<CKT<6>>(self_tp, std::forward<T>(data), data_size);
+      return arrfunc::make<CKT<6>>(self_tp, std::forward<T>(data), data_size);
     case 7:
-      return as_arrfunc<CKT<7>>(self_tp, std::forward<T>(data), data_size);
+      return arrfunc::make<CKT<7>>(self_tp, std::forward<T>(data), data_size);
     default:
       throw std::runtime_error("arrfunc with nsrc > 7 not implemented yet");
     }

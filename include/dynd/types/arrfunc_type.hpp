@@ -310,6 +310,10 @@ public:
 
   const ndt::type &get_pos_type(intptr_t i) const
   {
+    if (i == -1) {
+      return get_return_type();
+    }
+
     return m_pos_tuple.extended<tuple_type>()->get_field_type(i);
   }
 

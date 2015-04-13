@@ -59,7 +59,8 @@ struct take_by_pointer_ck
   }
 };
 
-struct take_by_pointer_virtual_ck : nd::base_virtual_kernel<take_by_pointer_virtual_ck> {
+struct take_by_pointer_virtual_ck
+    : nd::base_virtual_kernel<take_by_pointer_virtual_ck> {
   static intptr_t
   instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
               const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
@@ -103,9 +104,9 @@ struct take_by_pointer_virtual_ck : nd::base_virtual_kernel<take_by_pointer_virt
 
     for (intptr_t i = 0; i < ndim; ++i) {
       take_by_pointer_ck::make(ckb, kernel_request_single, ckb_offset,
-                                 src_size_stride[0][i].dim_size,
-                                 src_size_stride[0][i].stride,
-                                 src_size_stride[1][1].stride);
+                               src_size_stride[0][i].dim_size,
+                               src_size_stride[0][i].stride,
+                               src_size_stride[1][1].stride);
     }
 
     return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_el_tp,
@@ -144,7 +145,7 @@ nd::arrfunc nd::take_by_pointer::make()
 {
   static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
 
-  return as_arrfunc<take_by_pointer_virtual_ck>(
+  return arrfunc::make<take_by_pointer_virtual_ck>(
       ndt::make_arrfunc(ndt::make_tuple(param_types),
                         ndt::type("R * pointer[T]")),
       0);
