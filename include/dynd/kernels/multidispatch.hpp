@@ -240,15 +240,16 @@ namespace nd {
         : base_virtual_kernel<
               multidispatch_by_type_id_kernel<own_children, 1>> {
 
-      typedef detail::multidispatch_by_type_id_kernel_static_data<own_children, 1>
-          static_data;
+      typedef detail::multidispatch_by_type_id_kernel_static_data<
+          own_children, 1> static_data;
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const arrfunc_type *DYND_UNUSED(self_tp),
-                       char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t,
-                       const ndt::type *src_tp, const dynd::nd::array &,
-                       const std::map<dynd::nd::string, ndt::type> &)
+                       char *DYND_UNUSED(data), ndt::type &dst_tp,
+                       intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                       const dynd::nd::array &DYND_UNUSED(kwds),
+                       const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         const std::shared_ptr<static_data> &data =
             *self->get_data_as<std::shared_ptr<static_data>>();
@@ -258,6 +259,9 @@ namespace nd {
         if (child.is_null()) {
           child = data->default_child;
         }
+
+//        child.get()->resolve_dst_type(self, self_tp, NULL, dst_tp, nsrc, src_tp,
+  //                                    kwds, tp_vars);
       }
 
       static intptr_t

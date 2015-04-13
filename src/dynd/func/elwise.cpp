@@ -89,8 +89,8 @@ nd::arrfunc nd::functional::elwise(const ndt::type &self_tp,
     throw std::runtime_error("elwise child has NULL resolve_option_values");
   }
 
-  return as_arrfunc<elwise_virtual_ck>(self_tp, child, child.get()->data_size +
-                                                           sizeof(ndt::type));
+  return arrfunc::make<elwise_virtual_ck>(
+      self_tp, child, child.get()->data_size + sizeof(ndt::type));
 }
 
 nd::arrfunc nd::functional::elwise(const arrfunc &child)

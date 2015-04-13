@@ -12,7 +12,7 @@ using namespace dynd;
 
 nd::arrfunc nd::functional::outer(const arrfunc &child)
 {
-  return as_arrfunc<outer_ck>(outer_make_type(child.get_type()), child, 0);
+  return arrfunc::make<outer_ck>(outer_make_type(child.get_type()), child, 0);
 }
 
 ndt::type nd::functional::outer_make_type(const arrfunc_type *child_tp)

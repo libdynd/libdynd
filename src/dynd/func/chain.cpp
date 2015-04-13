@@ -38,7 +38,7 @@ nd::arrfunc nd::functional::chain(const nd::arrfunc &first,
       ndt::substitute(second.get_type()->get_return_type(), tp_vars, false);
   */
 
-  return as_arrfunc<chain_kernel>(
+  return arrfunc::make<chain_kernel>(
       ndt::make_arrfunc(first.get_type()->get_pos_tuple(),
                         second.get_type()->get_return_type()),
       chain_kernel::static_data(first, second, buf_tp),
