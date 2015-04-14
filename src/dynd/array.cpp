@@ -1084,7 +1084,7 @@ bool nd::array::op_sorting_less(const array &rhs) const
                          &eval::default_eval_context);
   expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
   const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get());
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator<(const array &rhs) const
@@ -1095,7 +1095,7 @@ bool nd::array::operator<(const array &rhs) const
                          &eval::default_eval_context);
   expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
   const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get());
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator<=(const array &rhs) const
@@ -1106,7 +1106,7 @@ bool nd::array::operator<=(const array &rhs) const
                          &eval::default_eval_context);
   expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
   const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get());
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator==(const array &rhs) const
@@ -1117,7 +1117,7 @@ bool nd::array::operator==(const array &rhs) const
                          &eval::default_eval_context);
   expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
   const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get());
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator!=(const array &rhs) const
@@ -1128,7 +1128,7 @@ bool nd::array::operator!=(const array &rhs) const
                          &eval::default_eval_context);
   expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
   const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get());
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator>=(const array &rhs) const
@@ -1139,7 +1139,7 @@ bool nd::array::operator>=(const array &rhs) const
                          &eval::default_eval_context);
   expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
   const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get());
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator>(const array &rhs) const
@@ -1150,7 +1150,7 @@ bool nd::array::operator>(const array &rhs) const
                          &eval::default_eval_context);
   expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
   const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get());
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::equals_exact(const array &rhs) const
@@ -1166,7 +1166,7 @@ bool nd::array::equals_exact(const array &rhs) const
                            &eval::default_eval_context);
     expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
     const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-    return fn(src, k.get());
+    return fn(src, k.get()) != 0;
   } else if (get_type().get_type_id() == var_dim_type_id) {
     // If there's a leading var dimension, convert it to strided and compare
     // (Note: this is an inefficient hack)
