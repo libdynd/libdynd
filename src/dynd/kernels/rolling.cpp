@@ -10,7 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-void nd::functional::strided_rolling_ck::single(char *dst, char *src)
+void nd::functional::strided_rolling_ck::single(char *dst, char *const *src)
 {
   ckernel_prefix *nachild = get_child_ckernel();
   ckernel_prefix *wopchild = get_child_ckernel(m_window_op_offset);
@@ -23,7 +23,7 @@ void nd::functional::strided_rolling_ck::single(char *dst, char *src)
   }
   // Use stride trickery to do this as one strided call
   if (m_dim_size >= m_window_size) {
-    wopchild_fn(dst + m_dst_stride * (m_window_size - 1), m_dst_stride, &src,
+    wopchild_fn(dst + m_dst_stride * (m_window_size - 1), m_dst_stride, src,
                 &m_src_stride, m_dim_size - m_window_size + 1, wopchild);
   }
 }
@@ -36,7 +36,7 @@ void nd::functional::strided_rolling_ck::destruct_children()
   base.destroy_child_ckernel(m_window_op_offset);
 }
 
-void nd::functional::var_rolling_ck::single(char *dst, char *src)
+void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
 {
   // Get the child ckernels
   ckernel_prefix *nachild = get_child_ckernel();
@@ -47,7 +47,7 @@ void nd::functional::var_rolling_ck::single(char *dst, char *src)
   var_dim_type_data *dst_dat = reinterpret_cast<var_dim_type_data *>(dst);
   intptr_t dst_stride =
       reinterpret_cast<const var_dim_type_arrmeta *>(m_dst_meta)->stride;
-  var_dim_type_data *src_dat = reinterpret_cast<var_dim_type_data *>(src);
+  var_dim_type_data *src_dat = reinterpret_cast<var_dim_type_data *>(src[0]);
   char *src_arr_ptr = src_dat->begin + m_src_offset;
   intptr_t dim_size = src_dat->size;
   // Allocate the output data

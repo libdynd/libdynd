@@ -17,13 +17,14 @@ namespace {
 /**
  * A ckernel which assigns option[S] to option[T].
  */
-struct option_to_option_ck : public kernels::unary_ck<option_to_option_ck> {
+struct option_to_option_ck
+    : nd::base_kernel<option_to_option_ck, kernel_request_host, 1> {
   // The default child is the src is_avail ckernel
   // This child is the dst assign_na ckernel
   size_t m_dst_assign_na_offset;
   size_t m_value_assign_offset;
 
-  inline void single(char *dst, char *src)
+  void single(char *dst, char *const *src)
   {
     // Check whether the value is available
     // TODO: Would be nice to do this as a predicate
@@ -31,13 +32,13 @@ struct option_to_option_ck : public kernels::unary_ck<option_to_option_ck> {
     ckernel_prefix *src_is_avail = get_child_ckernel();
     expr_single_t src_is_avail_fn = src_is_avail->get_function<expr_single_t>();
     dynd_bool avail = false;
-    src_is_avail_fn(reinterpret_cast<char *>(&avail), &src, src_is_avail);
+    src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
     if (avail) {
       // It's available, copy using value assignment
       ckernel_prefix *value_assign = get_child_ckernel(m_value_assign_offset);
       expr_single_t value_assign_fn =
           value_assign->get_function<expr_single_t>();
-      value_assign_fn(dst, &src, value_assign);
+      value_assign_fn(dst, src, value_assign);
     } else {
       // It's not available, assign an NA
       ckernel_prefix *dst_assign_na = get_child_ckernel(m_dst_assign_na_offset);
@@ -47,8 +48,8 @@ struct option_to_option_ck : public kernels::unary_ck<option_to_option_ck> {
     }
   }
 
-  inline void strided(char *dst, intptr_t dst_stride, char *src,
-                      intptr_t src_stride, size_t count)
+  void strided(char *dst, intptr_t dst_stride, char *const *src,
+               const intptr_t *src_stride, size_t count)
   {
     // Three child ckernels
     ckernel_prefix *src_is_avail = get_child_ckernel();
@@ -65,24 +66,25 @@ struct option_to_option_ck : public kernels::unary_ck<option_to_option_ck> {
     while (count > 0) {
       size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
       count -= chunk_size;
-      src_is_avail_fn(reinterpret_cast<char *>(avail), 1, &src, &src_stride,
+      src_is_avail_fn(reinterpret_cast<char *>(avail), 1, src, src_stride,
                       chunk_size, src_is_avail);
       void *avail_ptr = avail;
+      char *src_copy = src[0];
       do {
         // Process a run of available values
         void *next_avail_ptr = memchr(avail_ptr, 0, chunk_size);
         if (!next_avail_ptr) {
-          value_assign_fn(dst, dst_stride, &src, &src_stride, chunk_size,
+          value_assign_fn(dst, dst_stride, &src_copy, src_stride, chunk_size,
                           value_assign);
           dst += chunk_size * dst_stride;
-          src += chunk_size * src_stride;
+          src += chunk_size * src_stride[0];
           break;
         } else if (next_avail_ptr > avail_ptr) {
           size_t segment_size = (char *)next_avail_ptr - (char *)avail_ptr;
-          value_assign_fn(dst, dst_stride, &src, &src_stride, segment_size,
+          value_assign_fn(dst, dst_stride, &src_copy, src_stride, segment_size,
                           value_assign);
           dst += segment_size * dst_stride;
-          src += segment_size * src_stride;
+          src_copy += segment_size * src_stride[0];
           chunk_size -= segment_size;
           avail_ptr = next_avail_ptr;
         }
@@ -92,14 +94,14 @@ struct option_to_option_ck : public kernels::unary_ck<option_to_option_ck> {
           dst_assign_na_fn(dst, dst_stride, NULL, NULL, chunk_size,
                            dst_assign_na);
           dst += chunk_size * dst_stride;
-          src += chunk_size * src_stride;
+          src_copy += chunk_size * src_stride[0];
           break;
         } else if (next_avail_ptr > avail_ptr) {
           size_t segment_size = (char *)next_avail_ptr - (char *)avail_ptr;
           dst_assign_na_fn(dst, dst_stride, NULL, NULL, segment_size,
                            dst_assign_na);
           dst += segment_size * dst_stride;
-          src += segment_size * src_stride;
+          src_copy += segment_size * src_stride[0];
           chunk_size -= segment_size;
           avail_ptr = next_avail_ptr;
         }
@@ -107,7 +109,7 @@ struct option_to_option_ck : public kernels::unary_ck<option_to_option_ck> {
     }
   }
 
-  inline void destruct_children()
+  void destruct_children()
   {
     // src_is_avail
     get_child_ckernel()->destroy();
@@ -121,11 +123,12 @@ struct option_to_option_ck : public kernels::unary_ck<option_to_option_ck> {
 /**
  * A ckernel which assigns option[S] to T.
  */
-struct option_to_value_ck : public kernels::unary_ck<option_to_value_ck> {
+struct option_to_value_ck
+    : nd::base_kernel<option_to_value_ck, kernel_request_host, 1> {
   // The default child is the src_is_avail ckernel
   size_t m_value_assign_offset;
 
-  inline void single(char *dst, char *src)
+  void single(char *dst, char *const *src)
   {
     ckernel_prefix *src_is_avail = get_child_ckernel();
     expr_single_t src_is_avail_fn = src_is_avail->get_function<expr_single_t>();
@@ -133,16 +136,16 @@ struct option_to_value_ck : public kernels::unary_ck<option_to_value_ck> {
     expr_single_t value_assign_fn = value_assign->get_function<expr_single_t>();
     // Make sure it's not an NA
     dynd_bool avail = false;
-    src_is_avail_fn(reinterpret_cast<char *>(&avail), &src, src_is_avail);
+    src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
     if (!avail) {
       throw overflow_error("cannot assign an NA value to a non-option type");
     }
     // Copy using value assignment
-    value_assign_fn(dst, &src, value_assign);
+    value_assign_fn(dst, src, value_assign);
   }
 
-  inline void strided(char *dst, intptr_t dst_stride, char *src,
-                      intptr_t src_stride, size_t count)
+  void strided(char *dst, intptr_t dst_stride, char *const *src,
+               const intptr_t *src_stride, size_t count)
   {
     // Two child ckernels
     ckernel_prefix *src_is_avail = get_child_ckernel();
@@ -153,22 +156,23 @@ struct option_to_value_ck : public kernels::unary_ck<option_to_value_ck> {
         value_assign->get_function<expr_strided_t>();
     // Process in chunks using the dynd default buffer size
     dynd_bool avail[DYND_BUFFER_CHUNK_SIZE];
+    char *src_copy = src[0];
     while (count > 0) {
       size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
-      src_is_avail_fn(reinterpret_cast<char *>(avail), 1, &src, &src_stride,
+      src_is_avail_fn(reinterpret_cast<char *>(avail), 1, &src_copy, src_stride,
                       chunk_size, src_is_avail);
       if (memchr(avail, 0, chunk_size) != NULL) {
         throw overflow_error("cannot assign an NA value to a non-option type");
       }
-      value_assign_fn(dst, dst_stride, &src, &src_stride, chunk_size,
+      value_assign_fn(dst, dst_stride, &src_copy, src_stride, chunk_size,
                       value_assign);
       dst += chunk_size * dst_stride;
-      src += chunk_size * src_stride;
+      src_copy += chunk_size * src_stride[0];
       count -= chunk_size;
     }
   }
 
-  inline void destruct_children()
+  void destruct_children()
   {
     // src_is_avail
     get_child_ckernel()->destroy();
@@ -273,35 +277,35 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
 
 namespace {
 struct string_to_option_bool_ck
-    : public kernels::unary_ck<string_to_option_bool_ck> {
+    : nd::base_kernel<string_to_option_bool_ck, kernel_request_host, 1> {
   assign_error_mode m_errmode;
 
-  inline void single(char *dst, char *src)
+  void single(char *dst, char *const *src)
   {
-    const string_type_data *std = reinterpret_cast<string_type_data *>(src);
+    const string_type_data *std = reinterpret_cast<string_type_data *>(src[0]);
     parse::string_to_bool(dst, std->begin, std->end, true, m_errmode);
   }
 };
 
 struct string_to_option_number_ck
-    : public kernels::unary_ck<string_to_option_number_ck> {
+    : nd::base_kernel<string_to_option_number_ck, kernel_request_host, 1> {
   type_id_t m_tid;
   assign_error_mode m_errmode;
 
-  inline void single(char *dst, char *src)
+  void single(char *dst, char *const *src)
   {
-    const string_type_data *std = reinterpret_cast<string_type_data *>(src);
+    const string_type_data *std = reinterpret_cast<string_type_data *>(src[0]);
     parse::string_to_number(dst, m_tid, std->begin, std->end, true, m_errmode);
   }
 };
 
 struct string_to_option_tp_ck
-    : public kernels::unary_ck<string_to_option_tp_ck> {
+    : nd::base_kernel<string_to_option_tp_ck, kernel_request_host, 1> {
   intptr_t m_dst_assign_na_offset;
 
-  inline void single(char *dst, char *src)
+  void single(char *dst, char *const *src)
   {
-    const string_type_data *std = reinterpret_cast<string_type_data *>(src);
+    const string_type_data *std = reinterpret_cast<string_type_data *>(src[0]);
     if (parse::matches_option_type_na_token(std->begin, std->end)) {
       // It's not available, assign an NA
       ckernel_prefix *dst_assign_na = get_child_ckernel(m_dst_assign_na_offset);
@@ -313,11 +317,11 @@ struct string_to_option_tp_ck
       ckernel_prefix *value_assign = get_child_ckernel();
       expr_single_t value_assign_fn =
           value_assign->get_function<expr_single_t>();
-      value_assign_fn(dst, &src, value_assign);
+      value_assign_fn(dst, src, value_assign);
     }
   }
 
-  inline void destruct_children()
+  void destruct_children()
   {
     // value_assign
     get_child_ckernel()->destroy();

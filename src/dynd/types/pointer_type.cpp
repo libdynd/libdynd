@@ -362,18 +362,19 @@ intptr_t pointer_type::make_assignment_kernel(
 
 namespace {
 
-struct operand_to_value_ck : public kernels::unary_ck<operand_to_value_ck> {
-  inline void single(char *dst, char *src)
+struct operand_to_value_ck
+    : nd::base_kernel<operand_to_value_ck, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
   {
     ckernel_prefix *copy_value = get_child_ckernel();
     expr_single_t copy_value_fn = copy_value->get_function<expr_single_t>();
     // The src value is a pointer, and copy_value_fn expects a pointer
     // to that pointer
-    char **src_ptr = reinterpret_cast<char **>(src);
+    char **src_ptr = reinterpret_cast<char **>(src[0]);
     copy_value_fn(dst, src_ptr, copy_value);
   }
 
-  inline void destruct_children() { get_child_ckernel()->destroy(); }
+  void destruct_children() { get_child_ckernel()->destroy(); }
 };
 
 } // anonymous namespace

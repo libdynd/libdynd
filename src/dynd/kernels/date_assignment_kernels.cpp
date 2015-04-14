@@ -13,17 +13,17 @@ using namespace dynd;
 // string to date assignment
 
 namespace {
-    struct string_to_date_ck : public kernels::unary_ck<string_to_date_ck> {
+    struct string_to_date_ck : nd::base_kernel<string_to_date_ck, kernel_request_host, 1> {
         ndt::type m_src_string_tp;
         const char *m_src_arrmeta;
         assign_error_mode m_errmode;
         date_parse_order_t m_date_parse_order;
         int m_century_window;
 
-        inline void single(char *dst, const char *src)
+        void single(char *dst, char *const *src)
         {
             const base_string_type *bst = static_cast<const base_string_type *>(m_src_string_tp.extended());
-            const string& s = bst->get_utf8_string(m_src_arrmeta, src, m_errmode);
+            const string& s = bst->get_utf8_string(m_src_arrmeta, src[0], m_errmode);
             date_ymd ymd;
             // TODO: properly distinguish "date" and "option[date]" with respect to NA support
             if (s == "NA") {
@@ -62,15 +62,15 @@ size_t dynd::make_string_to_date_assignment_kernel(
 // date to string assignment
 
 namespace {
-    struct date_to_string_ck : public kernels::unary_ck<date_to_string_ck> {
+    struct date_to_string_ck : nd::base_kernel<date_to_string_ck, kernel_request_host, 1> {
         ndt::type m_dst_string_tp;
         const char *m_dst_arrmeta;
         eval::eval_context m_ectx;
 
-        inline void single(char *dst, const char *src)
+        void single(char *dst, char *const *src)
         {
             date_ymd ymd;
-            ymd.set_from_days(*reinterpret_cast<const int32_t *>(src));
+            ymd.set_from_days(*reinterpret_cast<const int32_t *>(src[0]));
             string s = ymd.to_str();
             if (s.empty()) {
                 s = "NA";
