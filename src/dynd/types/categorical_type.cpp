@@ -196,16 +196,18 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
                                         const char *arrmeta)
 {
     nd::array categories = nd::empty(uniques.size(), element_tp);
-    unary_ckernel_builder k;
+    ckernel_builder<kernel_request_host> k;
     make_assignment_kernel(
         NULL, NULL, &k, 0, element_tp,
         categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), element_tp,
         arrmeta, kernel_request_single, &eval::default_eval_context, nd::array());
+    expr_single_t fn = k.get()->get_function<expr_single_t>();
 
     intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get_arrmeta())->stride;
     char *dst_ptr = categories.get_readwrite_originptr();
     for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
-        k(dst_ptr, const_cast<char *>(*it));
+        char *src = const_cast<char *>(*it);
+        fn(dst_ptr, &src, k.get());
         dst_ptr += stride;
     }
     categories.get_type().extended()->arrmeta_finalize_buffers(categories.get_arrmeta());
@@ -408,13 +410,15 @@ nd::array categorical_type::get_categories() const
     const char *el_arrmeta;
     categories.get_type().get_as_strided(categories.get_arrmeta(), &dim_size,
                                          &stride, &el_tp, &el_arrmeta);
-    unary_ckernel_builder k;
+    ckernel_builder<kernel_request_host> k;
     ::make_assignment_kernel(NULL, NULL, &k, 0, m_category_tp, el_arrmeta, el_tp,
                              get_category_arrmeta(), kernel_request_single,
                              &eval::default_eval_context, nd::array());
+    expr_single_t fn = k.get()->get_function<expr_single_t>();
     for (intptr_t i = 0; i < dim_size; ++i) {
-      k(categories.get_readwrite_originptr() + i * stride,
-        const_cast<char *>(get_category_data_from_value((uint32_t)i)));
+      char *src = const_cast<char *>(get_category_data_from_value((uint32_t)i));
+      fn(categories.get_readwrite_originptr() + i * stride,
+        &src, k.get());
     }
     return categories;
 }

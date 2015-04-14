@@ -185,11 +185,13 @@ void dynd::typed_data_copy(const ndt::type& tp,
     if (tp.is_pod()) {
         memcpy(dst_data, src_data, data_size);
     } else {
-        unary_ckernel_builder k;
+        ckernel_builder<kernel_request_host> k;
         make_assignment_kernel(NULL, NULL, &k, 0, tp, dst_arrmeta, tp, src_arrmeta,
                                kernel_request_single,
                                &eval::default_eval_context, nd::array());
-        k(dst_data, const_cast<char *>(src_data));
+        expr_single_t fn = k.get()->get_function<expr_single_t>();
+        char *src = const_cast<char *>(src_data);
+        fn(dst_data, &src, k.get());
     }
 }
 
@@ -203,10 +205,12 @@ void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
   DYND_ASSERT_ALIGNED(src, 0, src_dt.get_data_alignment(),
                       "src type: " << src_tp << ", dst type: " << dst_tp);
 
-  unary_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   make_assignment_kernel(NULL, NULL, &k, 0, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                          kernel_request_single, ectx, nd::array());
-  k(dst_data, const_cast<char *>(src_data));
+  expr_single_t fn = k.get()->get_function<expr_single_t>();
+  char *src = const_cast<char *>(src_data);
+  fn(dst_data, &src, k.get());
 }
 
 void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
