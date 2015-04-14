@@ -1078,65 +1078,79 @@ void nd::array::assign_na()
 
 bool nd::array::op_sorting_less(const array &rhs) const
 {
-  comparison_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                          rhs.get_arrmeta(), comparison_type_sorting_less,
                          &eval::default_eval_context);
-  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator<(const array &rhs) const
 {
-  comparison_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                          rhs.get_arrmeta(), comparison_type_less,
                          &eval::default_eval_context);
-  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator<=(const array &rhs) const
 {
-  comparison_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                          rhs.get_arrmeta(), comparison_type_less_equal,
                          &eval::default_eval_context);
-  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator==(const array &rhs) const
 {
-  comparison_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                          rhs.get_arrmeta(), comparison_type_equal,
                          &eval::default_eval_context);
-  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator!=(const array &rhs) const
 {
-  comparison_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                          rhs.get_arrmeta(), comparison_type_not_equal,
                          &eval::default_eval_context);
-  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator>=(const array &rhs) const
 {
-  comparison_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                          rhs.get_arrmeta(), comparison_type_greater_equal,
                          &eval::default_eval_context);
-  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::operator>(const array &rhs) const
 {
-  comparison_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                          rhs.get_arrmeta(), comparison_type_greater,
                          &eval::default_eval_context);
-  return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
+  return fn(src, k.get()) != 0;
 }
 
 bool nd::array::equals_exact(const array &rhs) const
@@ -1146,11 +1160,13 @@ bool nd::array::equals_exact(const array &rhs) const
   } else if (get_type() != rhs.get_type()) {
     return false;
   } else if (get_ndim() == 0) {
-    comparison_ckernel_builder k;
+    ckernel_builder<kernel_request_host> k;
     make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                            rhs.get_arrmeta(), comparison_type_equal,
                            &eval::default_eval_context);
-    return k(get_readonly_originptr(), rhs.get_readonly_originptr());
+    expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+    const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
+    return fn(src, k.get()) != 0;
   } else if (get_type().get_type_id() == var_dim_type_id) {
     // If there's a leading var dimension, convert it to strided and compare
     // (Note: this is an inefficient hack)
@@ -1170,13 +1186,15 @@ bool nd::array::equals_exact(const array &rhs) const
     try {
       array_iter<0, 2> iter(*this, rhs);
       if (!iter.empty()) {
-        comparison_ckernel_builder k;
+        ckernel_builder<kernel_request_host> k;
         make_comparison_kernel(&k, 0, iter.get_uniform_dtype<0>(),
                                iter.arrmeta<0>(), iter.get_uniform_dtype<1>(),
                                iter.arrmeta<1>(), comparison_type_not_equal,
                                &eval::default_eval_context);
+        expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
         do {
-          if (k(iter.data<0>(), iter.data<1>())) {
+          const char *const src[2] = {iter.data<0>(), iter.data<1>()};
+          if (fn(src, k.get())) {
             return false;
           }
         } while (iter.next());
@@ -2011,10 +2029,11 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
       memcmp(n_arrmeta, arrmeta, element_tp.get_arrmeta_size()) == 0) {
     // First, a version where the arrmeta is identical, so we can
     // make do with only a single comparison kernel
-    comparison_ckernel_builder k_n_less_d;
+    ckernel_builder<kernel_request_host> k_n_less_d;
     make_comparison_kernel(&k_n_less_d, 0, element_tp, n_arrmeta, element_tp,
                            n_arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
+    expr_predicate_t fn_n_less_d = k_n_less_d.get()->get_function<expr_predicate_t>();
 
     // TODO: support any type of array dimension
     if (n.get_type().get_type_id() != fixed_dim_type_id) {
@@ -2034,10 +2053,12 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
 
       // In order for the data to always match up with the arrmeta, need to have
       // trial_data first and data second in the comparison operations.
-      if (k_n_less_d(data, trial_data)) {
+      const char *const src_try0[2] = {data, trial_data};
+      const char *const src_try1[2] = {trial_data, data};
+      if (fn_n_less_d(src_try0, k_n_less_d.get())) {
         // value < arr[trial]
         last = trial;
-      } else if (k_n_less_d(trial_data, data)) {
+      } else if (fn_n_less_d(src_try1, k_n_less_d.get())) {
         // value > arr[trial]
         first = trial + 1;
       } else {
@@ -2048,13 +2069,17 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
   } else {
     // Second, a version where the arrmeta are different, so
     // we need to get a kernel for each comparison direction.
-    comparison_ckernel_builder k_n_less_d, k_d_less_n;
+    ckernel_builder<kernel_request_host> k_n_less_d;
     make_comparison_kernel(&k_n_less_d, 0, element_tp, n_arrmeta, element_tp,
                            arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
+    expr_predicate_t f_n_less_d = k_n_less_d.get()->get_function<expr_predicate_t>();
+
+    ckernel_builder<kernel_request_host> k_d_less_n;
     make_comparison_kernel(&k_d_less_n, 0, element_tp, arrmeta, element_tp,
                            n_arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
+    expr_predicate_t f_d_less_n = k_d_less_n.get()->get_function<expr_predicate_t>();
 
     // TODO: support any type of array dimension
     if (n.get_type().get_type_id() != fixed_dim_type_id) {
@@ -2074,10 +2099,12 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
 
       // In order for the data to always match up with the arrmeta, need to have
       // trial_data first and data second in the comparison operations.
-      if (k_d_less_n(data, trial_data)) {
+      const char *const src_try0[2] = {data, trial_data};
+      const char *const src_try1[2] = {trial_data, data};
+      if (f_d_less_n(src_try0, k_d_less_n.get())) {
         // value < arr[trial]
         last = trial;
-      } else if (k_n_less_d(trial_data, data)) {
+      } else if (f_n_less_d(src_try1, k_n_less_d.get())) {
         // value > arr[trial]
         first = trial + 1;
       } else {

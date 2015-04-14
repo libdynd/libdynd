@@ -18,45 +18,11 @@
 #include <map>
 
 namespace dynd {
-
-/**
- * See the ckernel_builder class documentation
- * for details about how ckernels can be built and
- * used.
- *
- * This kernel type is for ckernels which assign a
- * strided sequence of data values from one
- * type/arrmeta source to a different type/arrmeta
- * destination, using the `unary_strided_operation_t`
- * function prototype.
- */
-class assignment_strided_ckernel_builder
-    : public ckernel_builder<kernel_request_host> {
-public:
-  assignment_strided_ckernel_builder() : ckernel_builder<kernel_request_host>()
-  {
-  }
-
-  inline expr_strided_t get_function() const
-  {
-    return get()->get_function<expr_strided_t>();
-  }
-
-  /** Calls the function to do the assignment */
-  inline void operator()(char *dst, intptr_t dst_stride, char *src,
-                         intptr_t src_stride, size_t count) const
-  {
-    ckernel_prefix *kdp = get();
-    expr_strided_t fn = kdp->get_function<expr_strided_t>();
-    fn(dst, dst_stride, &src, &src_stride, count, kdp);
-  }
-};
-
-namespace kernels {
+namespace nd {
 
   template <class dst_type, class src_type, assign_error_mode errmode>
-  struct assign_ck : nd::base_kernel<assign_ck<dst_type, src_type, errmode>,
-                                     kernel_request_host, 1> {
+  struct assign_ck : base_kernel<assign_ck<dst_type, src_type, errmode>,
+                                 kernel_request_host, 1> {
     void single(char *dst, char *const *src)
     {
       single_assigner_builtin<dst_type, src_type, errmode>::assign(
@@ -67,8 +33,8 @@ namespace kernels {
 
   template <class dst_type, class src_type>
   struct assign_ck<dst_type, src_type, assign_error_nocheck>
-      : nd::base_kernel<assign_ck<dst_type, src_type, assign_error_nocheck>,
-                        kernel_request_cuda_host_device, 1> {
+      : base_kernel<assign_ck<dst_type, src_type, assign_error_nocheck>,
+                    kernel_request_cuda_host_device, 1> {
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
       single_assigner_builtin<dst_type, src_type, assign_error_nocheck>::assign(
@@ -165,7 +131,8 @@ namespace kernels {
   };
 
 #endif
-} // namespace kernels
+
+} // namespace dynd::nd
 
 /**
  * Creates an assignment kernel for one data value from the

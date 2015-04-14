@@ -230,13 +230,14 @@ categorical_type::categorical_type(const nd::array &categories, bool presorted)
 
     const char *categories_element_arrmeta =
         categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta);
-    comparison_ckernel_builder k;
+    ckernel_builder<kernel_request_host> k;
     ::make_comparison_kernel(&k, 0, m_category_tp, categories_element_arrmeta,
                              m_category_tp, categories_element_arrmeta,
                              comparison_type_sorting_less,
                              &eval::default_eval_context);
+    expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
 
-    cmp less(k.get_function(), k.get());
+    cmp less(fn, k.get());
     set<const char *, cmp> uniques(less);
 
     m_value_to_category_index =
@@ -270,7 +271,7 @@ categorical_type::categorical_type(const nd::array &categories, bool presorted)
         &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value,
                                               category_count),
         sorter(categories.get_readonly_originptr(), categories_stride,
-               k.get_function(), k.get()));
+               fn, k.get()));
 
     // invert the m_category_index_to_value permutation
     for (intptr_t i = 0; i < category_count; ++i) {
@@ -598,12 +599,13 @@ ndt::type dynd::ndt::factor_categorical(const nd::array &values)
   values_eval.get_type().get_as_strided(values_eval.get_arrmeta(), &dim_size,
                                         &stride, &el_tp, &el_arrmeta);
 
-  comparison_ckernel_builder k;
+  ckernel_builder<kernel_request_host> k;
   ::make_comparison_kernel(&k, 0, el_tp, el_arrmeta, el_tp, el_arrmeta,
                            comparison_type_sorting_less,
                            &eval::default_eval_context);
+  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
 
-  cmp less(k.get_function(), k.get());
+  cmp less(fn, k.get());
   set<const char *, cmp> uniques(less);
 
   for (intptr_t i = 0; i < dim_size; ++i) {
