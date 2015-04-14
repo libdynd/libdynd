@@ -12,11 +12,12 @@ using namespace std;
 using namespace dynd;
 
 namespace dynd {
-namespace kernels {
+namespace nd {
+
   template <class T>
   struct aligned_fixed_size_copy_assign_type
-      : nd::base_kernel<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
-                1> {
+      : base_kernel<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
+                    1> {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<T *>(dst) = **reinterpret_cast<T *const *>(src);
@@ -40,7 +41,7 @@ namespace kernels {
 
   template <>
   struct aligned_fixed_size_copy_assign<1>
-      : nd::base_kernel<aligned_fixed_size_copy_assign<1>, kernel_request_host, 1> {
+      : base_kernel<aligned_fixed_size_copy_assign<1>, kernel_request_host, 1> {
     void single(char *dst, char *const *src) { *dst = **src; }
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -73,7 +74,8 @@ namespace kernels {
 
   template <int N>
   struct unaligned_fixed_size_copy_assign
-      : nd::base_kernel<unaligned_fixed_size_copy_assign<N>, kernel_request_host, 1> {
+      : base_kernel<unaligned_fixed_size_copy_assign<N>, kernel_request_host,
+                    1> {
     static void single(char *dst, char *const *src) { memcpy(dst, *src, N); }
 
     static void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -90,7 +92,7 @@ namespace kernels {
   };
 
   struct unaligned_copy_ck
-      : nd::base_kernel<unaligned_copy_ck, kernel_request_host, 1> {
+      : base_kernel<unaligned_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size) {}
@@ -109,7 +111,8 @@ namespace kernels {
       }
     }
   };
-} // namespace kernels
+
+} // namespace dynd::nd
 } // namespace dynd
 
 intptr_t dynd::make_assignment_kernel(
@@ -154,51 +157,51 @@ size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb,
     // Aligned specialization tables
     switch (data_size) {
     case 1:
-      kernels::aligned_fixed_size_copy_assign<1>::make(ckb, kernreq,
-                                                         ckb_offset);
+      nd::aligned_fixed_size_copy_assign<1>::make(ckb, kernreq,
+                                                       ckb_offset);
       return ckb_offset;
     case 2:
-      kernels::aligned_fixed_size_copy_assign<2>::make(ckb, kernreq,
-                                                         ckb_offset);
+      nd::aligned_fixed_size_copy_assign<2>::make(ckb, kernreq,
+                                                       ckb_offset);
       return ckb_offset;
     case 4:
-      kernels::aligned_fixed_size_copy_assign<4>::make(ckb, kernreq,
-                                                         ckb_offset);
+      nd::aligned_fixed_size_copy_assign<4>::make(ckb, kernreq,
+                                                       ckb_offset);
       return ckb_offset;
     case 8:
-      kernels::aligned_fixed_size_copy_assign<8>::make(ckb, kernreq,
-                                                         ckb_offset);
+      nd::aligned_fixed_size_copy_assign<8>::make(ckb, kernreq,
+                                                       ckb_offset);
       return ckb_offset;
     default:
-      kernels::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
+      nd::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
       return ckb_offset;
     }
   } else {
     // Unaligned specialization tables
     switch (data_size) {
     case 2:
-      kernels::unaligned_fixed_size_copy_assign<2>::make(ckb, kernreq,
-                                                           ckb_offset);
+      nd::unaligned_fixed_size_copy_assign<2>::make(ckb, kernreq,
+                                                         ckb_offset);
       return ckb_offset;
     case 4:
-      kernels::unaligned_fixed_size_copy_assign<4>::make(ckb, kernreq,
-                                                           ckb_offset);
+      nd::unaligned_fixed_size_copy_assign<4>::make(ckb, kernreq,
+                                                         ckb_offset);
       return ckb_offset;
     case 8:
-      kernels::unaligned_fixed_size_copy_assign<8>::make(ckb, kernreq,
-                                                           ckb_offset);
+      nd::unaligned_fixed_size_copy_assign<8>::make(ckb, kernreq,
+                                                         ckb_offset);
       return ckb_offset;
     default:
-      kernels::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
+      nd::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
       return ckb_offset;
     }
   }
 }
 
-static nd::make_t
-    assign_make[builtin_type_id_count - 2][builtin_type_id_count - 2][4] = {
+static nd::make_t assign_make[builtin_type_id_count - 2][builtin_type_id_count -
+                                                         2][4] = {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, errmode)               \
-  &nd::make<kernels::assign_ck<dst_type, src_type, errmode>>
+  &nd::make<nd::assign_ck<dst_type, src_type, errmode>>
 
 #define ERROR_MODE_LEVEL(dst_type, src_type)                                   \
   {                                                                            \
@@ -225,19 +228,19 @@ static nd::make_t
         ERROR_MODE_LEVEL(dst_type, dynd_float16),                              \
         ERROR_MODE_LEVEL(dst_type, float), ERROR_MODE_LEVEL(dst_type, double), \
         ERROR_MODE_LEVEL(dst_type, dynd_float128),                             \
-        ERROR_MODE_LEVEL(dst_type, dynd::complex<float>),                            \
-        ERROR_MODE_LEVEL(dst_type, dynd::complex<double>)                            \
+        ERROR_MODE_LEVEL(dst_type, dynd::complex<float>),                      \
+        ERROR_MODE_LEVEL(dst_type, dynd::complex<double>)                      \
   }
 
-        SRC_TYPE_LEVEL(dynd_bool),      SRC_TYPE_LEVEL(int8_t),
-        SRC_TYPE_LEVEL(int16_t),        SRC_TYPE_LEVEL(int32_t),
-        SRC_TYPE_LEVEL(int64_t),        SRC_TYPE_LEVEL(dynd_int128),
-        SRC_TYPE_LEVEL(uint8_t),        SRC_TYPE_LEVEL(uint16_t),
-        SRC_TYPE_LEVEL(uint32_t),       SRC_TYPE_LEVEL(uint64_t),
-        SRC_TYPE_LEVEL(dynd_uint128),   SRC_TYPE_LEVEL(dynd_float16),
-        SRC_TYPE_LEVEL(float),          SRC_TYPE_LEVEL(double),
-        SRC_TYPE_LEVEL(dynd_float128),  SRC_TYPE_LEVEL(dynd::complex<float>),
-        SRC_TYPE_LEVEL(dynd::complex<double>)
+    SRC_TYPE_LEVEL(dynd_bool),            SRC_TYPE_LEVEL(int8_t),
+    SRC_TYPE_LEVEL(int16_t),              SRC_TYPE_LEVEL(int32_t),
+    SRC_TYPE_LEVEL(int64_t),              SRC_TYPE_LEVEL(dynd_int128),
+    SRC_TYPE_LEVEL(uint8_t),              SRC_TYPE_LEVEL(uint16_t),
+    SRC_TYPE_LEVEL(uint32_t),             SRC_TYPE_LEVEL(uint64_t),
+    SRC_TYPE_LEVEL(dynd_uint128),         SRC_TYPE_LEVEL(dynd_float16),
+    SRC_TYPE_LEVEL(float),                SRC_TYPE_LEVEL(double),
+    SRC_TYPE_LEVEL(dynd_float128),        SRC_TYPE_LEVEL(dynd::complex<float>),
+    SRC_TYPE_LEVEL(dynd::complex<double>)
 #undef SRC_TYPE_LEVEL
 #undef ERROR_MODE_LEVEL
 #undef SINGLE_OPERATION_PAIR_LEVEL
@@ -254,7 +257,7 @@ size_t dynd::make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
       src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
       errmode != assign_error_default) {
     (*assign_make[dst_type_id - bool_type_id][src_type_id -
-                                                bool_type_id][errmode])(
+                                              bool_type_id][errmode])(
         ckb, kernreq, ckb_offset);
     return ckb_offset;
   } else {
@@ -391,9 +394,10 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
 
 intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {
@@ -431,9 +435,10 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
 
 intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -453,8 +458,8 @@ intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
     throw runtime_error(ss.str());
   }
 
-  kernels::cuda_host_to_device_assign_ck::make(ckb, kernreq, ckb_offset,
-                                                 dst_tp.get_data_size());
+  nd::cuda_host_to_device_assign_ck::make(ckb, kernreq, ckb_offset,
+                                               dst_tp.get_data_size());
   return make_builtin_type_assignment_kernel(
       ckb, ckb_offset, dst_tp.get_type_id(), src_tp->get_type_id(),
       kernel_request_single, errmode);
@@ -462,9 +467,10 @@ intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
 
 intptr_t dynd::make_cuda_from_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -484,8 +490,8 @@ intptr_t dynd::make_cuda_from_device_builtin_type_assignment_kernel(
     throw type_error(ss.str());
   }
 
-  kernels::cuda_device_to_host_assign_ck::make(ckb, kernreq, ckb_offset,
-                                                 src_tp->get_data_size());
+  nd::cuda_device_to_host_assign_ck::make(ckb, kernreq, ckb_offset,
+                                               src_tp->get_data_size());
   return make_builtin_type_assignment_kernel(
       ckb, ckb_offset, dst_tp.without_memory_type().get_type_id(),
       src_tp->without_memory_type().get_type_id(), kernel_request_single,
@@ -499,18 +505,18 @@ size_t dynd::make_cuda_pod_typed_data_assignment_kernel(
 {
   if (dst_device) {
     if (src_device) {
-      kernels::cuda_device_to_device_copy_ck::make(out, kernreq, offset_out,
-                                                     data_size);
+      nd::cuda_device_to_device_copy_ck::make(out, kernreq, offset_out,
+                                                   data_size);
       return offset_out;
     } else {
-      kernels::cuda_host_to_device_copy_ck::make(out, kernreq, offset_out,
-                                                   data_size);
+      nd::cuda_host_to_device_copy_ck::make(out, kernreq, offset_out,
+                                                 data_size);
       return offset_out;
     }
   } else {
     if (src_device) {
-      kernels::cuda_device_to_host_copy_ck::make(out, kernreq, offset_out,
-                                                   data_size);
+      nd::cuda_device_to_host_copy_ck::make(out, kernreq, offset_out,
+                                                 data_size);
       return offset_out;
     } else {
       return make_pod_typed_data_assignment_kernel(out, offset_out, data_size,
