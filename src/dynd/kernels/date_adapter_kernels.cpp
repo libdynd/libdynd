@@ -55,14 +55,16 @@ static bool parse_days_since(const char *begin, const char *end,
 
 namespace {
 template <class Tsrc, class Tdst>
-struct int_offset_ck : public kernels::unary_ck<int_offset_ck<Tsrc, Tdst>> {
+struct int_offset_ck
+    : nd::base_kernel<int_offset_ck<Tsrc, Tdst>, kernel_request_host, 1> {
   Tdst m_offset;
 
-  Tdst operator()(Tsrc value)
+  void single(char *dst, char *const *src)
   {
-    return value != std::numeric_limits<Tsrc>::min()
-               ? static_cast<Tdst>(value) + m_offset
-               : std::numeric_limits<Tdst>::min();
+    Tsrc value = *reinterpret_cast<Tsrc *>(src[0]);
+    *reinterpret_cast<Tdst *>(dst) = value != std::numeric_limits<Tsrc>::min()
+                                         ? static_cast<Tdst>(value) + m_offset
+                                         : std::numeric_limits<Tdst>::min();
   }
 };
 

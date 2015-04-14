@@ -34,8 +34,7 @@ void inc_ckb_offset(intptr_t &inout_ckb_offset)
 /**
  * Function pointers + data for a hierarchical
  * kernel which operates on type/arrmeta in
- * some configuration. Individual kernel types
- * are handled by the classes unary_ckernel_builder, etc.
+ * some configuration.
  *
  * The data placed in the kernel's data must
  * be relocatable with a memcpy, it must not rely on its

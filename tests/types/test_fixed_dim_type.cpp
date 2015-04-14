@@ -104,7 +104,7 @@ TEST(FixedDimType, SimpleIndex) {
 
 TEST(FixedDimType, AssignKernel_ScalarToFixed) {
     nd::array a, b;
-    unary_ckernel_builder k;
+    ckernel_builder<kernel_request_host> k;
 
     // Assignment scalar -> fixed array
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
@@ -114,7 +114,9 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed) {
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
-    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
+    expr_single_t fn = k.get()->get_function<expr_single_t>();
+    char *src = const_cast<char *>(b.get_readonly_originptr());
+    fn(a.get_readwrite_originptr(), &src, k.get());
     EXPECT_EQ(9, a(0).as<int>());
     EXPECT_EQ(9, a(1).as<int>());
     EXPECT_EQ(9, a(2).as<int>());
@@ -122,7 +124,7 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed) {
 
 TEST(FixedDimType, AssignKernel_FixedToFixed) {
     nd::array a, b;
-    unary_ckernel_builder k;
+    ckernel_builder<kernel_request_host> k;
 
     // Assignment fixed array -> fixed array
     a = nd::empty(ndt::make_fixed_dim(3, ndt::make_type<int>()));
@@ -133,7 +135,9 @@ TEST(FixedDimType, AssignKernel_FixedToFixed) {
     make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
-    k(a.get_readwrite_originptr(), const_cast<char *>(b.get_readonly_originptr()));
+    expr_single_t fn = k.get()->get_function<expr_single_t>();
+    char *src = const_cast<char *>(b.get_readonly_originptr());
+    fn(a.get_readwrite_originptr(), &src, k.get());
     EXPECT_EQ(3, a(0).as<int>());
     EXPECT_EQ(5, a(1).as<int>());
     EXPECT_EQ(7, a(2).as<int>());
@@ -141,7 +145,7 @@ TEST(FixedDimType, AssignKernel_FixedToFixed) {
 
 TEST(FixedDimType, AssignKernel_FixedToScalarError) {
     nd::array a, b;
-    unary_ckernel_builder k;
+    ckernel_builder<kernel_request_host> k;
 
     // Assignment fixed array -> scalar
     a = 9.0;
