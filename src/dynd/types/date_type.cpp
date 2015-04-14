@@ -355,55 +355,69 @@ void date_type::get_dynamic_array_functions(
 ///////// property accessor kernels (used by property_type)
 
 namespace {
-void get_property_kernel_year_single(char *dst, char *const *src,
-                                     ckernel_prefix *DYND_UNUSED(self))
-{
-  date_ymd ymd;
-  ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
-  *reinterpret_cast<int32_t *>(dst) = ymd.year;
-}
 
-void get_property_kernel_month_single(char *dst, char *const *src,
-                                      ckernel_prefix *DYND_UNUSED(self))
-{
-  date_ymd ymd;
-  ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
-  *reinterpret_cast<int32_t *>(dst) = ymd.month;
-}
-
-void get_property_kernel_day_single(char *dst, char *const *src,
-                                    ckernel_prefix *DYND_UNUSED(self))
-{
-  date_ymd ymd;
-  ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
-  *reinterpret_cast<int32_t *>(dst) = ymd.day;
-}
-
-void get_property_kernel_weekday_single(char *dst, char *const *src,
-                                        ckernel_prefix *DYND_UNUSED(self))
-{
-  int32_t days = **reinterpret_cast<int32_t *const *>(src);
-  // 1970-01-05 is Monday
-  int weekday = (int)((days - 4) % 7);
-  if (weekday < 0) {
-    weekday += 7;
+struct date_get_year_kernel
+    : nd::base_kernel<date_get_year_kernel, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
+  {
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.year;
   }
-  *reinterpret_cast<int32_t *>(dst) = weekday;
-}
+};
 
-void get_property_kernel_struct_single(char *dst, char *const *src,
-                                       ckernel_prefix *DYND_UNUSED(self))
-{
-  date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
-  dst_struct->set_from_days(**reinterpret_cast<int32_t *const *>(src));
-}
+struct date_get_month_kernel
+    : nd::base_kernel<date_get_month_kernel, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
+  {
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.month;
+  }
+};
 
-void set_property_kernel_struct_single(char *dst, char *const *src,
-                                       ckernel_prefix *DYND_UNUSED(self))
-{
-  const date_ymd *src_struct = *reinterpret_cast<date_ymd *const *>(src);
-  *reinterpret_cast<int32_t *>(dst) = src_struct->to_days();
-}
+struct date_get_day_kernel
+    : nd::base_kernel<date_get_day_kernel, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
+  {
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.day;
+  }
+};
+
+struct date_get_weekday_kernel
+    : nd::base_kernel<date_get_weekday_kernel, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
+  {
+    int32_t days = **reinterpret_cast<int32_t *const *>(src);
+    // 1970-01-05 is Monday
+    int weekday = (int)((days - 4) % 7);
+    if (weekday < 0) {
+      weekday += 7;
+    }
+    *reinterpret_cast<int32_t *>(dst) = weekday;
+  }
+};
+
+struct date_get_struct_kernel
+    : nd::base_kernel<date_get_struct_kernel, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
+  {
+    date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
+    dst_struct->set_from_days(**reinterpret_cast<int32_t *const *>(src));
+  }
+};
+
+struct date_set_struct_kernel
+    : nd::base_kernel<date_set_struct_kernel, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
+  {
+    const date_ymd *src_struct = *reinterpret_cast<date_ymd *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = src_struct->to_days();
+  }
+};
+
 } // anonymous namespace
 
 namespace {
@@ -466,25 +480,21 @@ size_t date_type::make_elwise_property_getter_kernel(
     const char *DYND_UNUSED(src_arrmeta), size_t src_property_index,
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-  ckb_offset =
-      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
-  ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-                          ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   switch (src_property_index) {
   case dateprop_year:
-    e->set_function<expr_single_t>(&get_property_kernel_year_single);
+    date_get_year_kernel::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case dateprop_month:
-    e->set_function<expr_single_t>(&get_property_kernel_month_single);
+    date_get_month_kernel::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case dateprop_day:
-    e->set_function<expr_single_t>(&get_property_kernel_day_single);
+    date_get_day_kernel::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case dateprop_weekday:
-    e->set_function<expr_single_t>(&get_property_kernel_weekday_single);
+    date_get_weekday_kernel::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case dateprop_struct:
-    e->set_function<expr_single_t>(&get_property_kernel_struct_single);
+    date_get_struct_kernel::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   default:
     stringstream ss;
@@ -499,13 +509,9 @@ size_t date_type::make_elwise_property_setter_kernel(
     size_t dst_property_index, const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
-  ckb_offset =
-      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
-  ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-                          ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   switch (dst_property_index) {
   case dateprop_struct:
-    e->set_function<expr_single_t>(&set_property_kernel_struct_single);
+    date_set_struct_kernel::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   default:
     stringstream ss;

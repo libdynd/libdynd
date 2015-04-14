@@ -18,33 +18,6 @@
 #include <map>
 
 namespace dynd {
-/**
- * See the ckernel_builder class documentation
- * for details about how ckernels can be built and
- * used.
- *
- * This kernel type is for ckernels which assign one
- * data value from one type/arrmeta source to
- * a different type/arrmeta destination, using
- * the `unary_single_operation_t` function prototype.
- */
-class unary_ckernel_builder : public ckernel_builder<kernel_request_host> {
-public:
-  unary_ckernel_builder() : ckernel_builder<kernel_request_host>() {}
-
-  inline expr_single_t get_function() const
-  {
-    return get()->get_function<expr_single_t>();
-  }
-
-  /** Calls the function to do the assignment */
-  inline void operator()(char *dst, char *src) const
-  {
-    ckernel_prefix *kdp = get();
-    expr_single_t fn = kdp->get_function<expr_single_t>();
-    fn(dst, &src, kdp);
-  }
-};
 
 /**
  * See the ckernel_builder class documentation
@@ -80,63 +53,6 @@ public:
 };
 
 namespace kernels {
-
-  /**
-   * A CRTP (curiously recurring template pattern) base class to help
-   * create ckernels.
-   */
-  template <class CKT>
-  struct unary_ck : nd::base_kernel<CKT, kernel_request_host, 1> {
-    typedef CKT self_type;
-    typedef nd::base_kernel<CKT, kernel_request_host, 1> parent_type;
-
-    static void single_wrapper(char *dst, char *const *src,
-                               ckernel_prefix *rawself)
-    {
-      return parent_type::get_self(rawself)->single(dst, *src);
-    }
-
-    static void strided_wrapper(char *dst, intptr_t dst_stride,
-                                char *const *src, const intptr_t *src_stride,
-                                size_t count, ckernel_prefix *rawself)
-    {
-      return parent_type::get_self(rawself)
-          ->strided(dst, dst_stride, *src, *src_stride, count);
-    }
-
-    template <class R, class T0>
-    inline void call_single_typed(char *dst, char *src, R (self_type::*)(T0))
-    {
-      *reinterpret_cast<R *>(dst) = static_cast<self_type *>(this)->operator()(
-          *reinterpret_cast<const T0 *>(src));
-    }
-
-    /**
-     * Default single implementation calls operator(), which
-     * should look similar to int32_t operator()(int64_t val).
-     *
-     * This can also be implemented directly in self_type to provide
-     * more controlled behavior or for non-trivial types.
-     */
-    void single(char *dst, char *src)
-    {
-      call_single_typed(dst, src, &self_type::operator());
-    }
-
-    /**
-     * Default strided implementation calls single repeatedly.
-     */
-    void strided(char *dst, intptr_t dst_stride, char *src, intptr_t src_stride,
-                 size_t count)
-    {
-      self_type *self = parent_type::get_self(&this->base);
-      for (size_t i = 0; i != count; ++i) {
-        self->single(dst, src);
-        dst += dst_stride;
-        src += src_stride;
-      }
-    }
-  };
 
   template <class dst_type, class src_type, assign_error_mode errmode>
   struct assign_ck : nd::base_kernel<assign_ck<dst_type, src_type, errmode>,
@@ -338,47 +254,6 @@ size_t make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
 size_t make_kernreq_to_single_kernel_adapter(void *ckb, intptr_t ckb_offset,
                                              int nsrc,
                                              kernel_request_t kernreq);
-
-namespace kernels {
-  /**
-   * Generic assignment kernel + destructor for a strided dimension.
-   * This requires that the child kernel be created with the
-   * kernel_request_strided type of kernel.
-   */
-  struct strided_assign_ck : public kernels::unary_ck<strided_assign_ck> {
-    intptr_t m_size;
-    intptr_t m_dst_stride, m_src_stride;
-
-    inline void single(char *dst, char *src)
-    {
-      ckernel_prefix *child = get_child_ckernel();
-      expr_strided_t child_fn = child->get_function<expr_strided_t>();
-      child_fn(dst, m_dst_stride, &src, &m_src_stride, m_size, child);
-    }
-
-    inline void strided(char *dst, intptr_t dst_stride, char *src,
-                        intptr_t src_stride, size_t count)
-    {
-      ckernel_prefix *child = get_child_ckernel();
-      expr_strided_t child_fn = child->get_function<expr_strided_t>();
-      intptr_t inner_size = m_size, inner_dst_stride = m_dst_stride,
-               inner_src_stride = m_src_stride;
-      for (size_t i = 0; i != count; ++i) {
-        child_fn(dst, inner_dst_stride, &src, &inner_src_stride, inner_size,
-                 child);
-        dst += dst_stride;
-        src += src_stride;
-      }
-    }
-
-    inline void destruct_children()
-    {
-      // Destroy the child ckernel
-      get_child_ckernel()->destroy();
-    }
-  };
-
-} // namespace kernels
 
 #ifdef DYND_CUDA
 /**

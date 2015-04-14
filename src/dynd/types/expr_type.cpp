@@ -220,22 +220,21 @@ bool expr_type::operator==(const base_type &rhs) const
 
 namespace {
 template <int N>
-struct expr_type_offset_applier_extra {
+struct expr_type_offset_applier_extra
+    : nd::base_kernel<expr_type_offset_applier_extra<N>, kernel_request_host,
+                      1> {
   typedef expr_type_offset_applier_extra<N> extra_type;
 
-  ckernel_prefix base;
   size_t offsets[N];
 
   // Only the single kernel is needed for this one
-  static void single(char *dst, char *const *src, ckernel_prefix *extra)
+  void single(char *dst, char *const *src)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    const size_t *offsets = e->offsets;
     char *src_modified[N];
     for (int i = 0; i < N; ++i) {
       src_modified[i] = src[i] + offsets[i];
     }
-    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    ckernel_prefix *echild = this->get_child_ckernel();
     expr_single_t opchild = echild->get_function<expr_single_t>();
     opchild(dst, src_modified, echild);
   }
@@ -246,24 +245,23 @@ struct expr_type_offset_applier_extra {
   }
 };
 
-struct expr_type_offset_applier_general_extra {
+struct expr_type_offset_applier_general_extra
+    : nd::base_kernel<expr_type_offset_applier_general_extra,
+                      kernel_request_host, 1> {
   typedef expr_type_offset_applier_general_extra extra_type;
 
-  ckernel_prefix base;
   size_t src_count;
   // After this are src_count size_t offsets
 
   // Only the single kernel is needed for this one
-  static void single(char *dst, char *const *src, ckernel_prefix *extra)
+  void single(char *dst, char *const *src)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    size_t src_count = e->src_count;
-    const size_t *offsets = reinterpret_cast<const size_t *>(e + 1);
+    const size_t *offsets = reinterpret_cast<const size_t *>(this + 1);
     shortvector<char *> src_modified(src_count);
     for (size_t i = 0; i != src_count; ++i) {
       src_modified[i] = src[i] + offsets[i];
     }
-    ckernel_prefix *echild = extra->get_child_ckernel(
+    ckernel_prefix *echild = this->get_child_ckernel(
         sizeof(extra_type) + src_count * sizeof(size_t));
     expr_single_t opchild = echild->get_function<expr_single_t>();
     opchild(dst, src_modified.get(), echild);
@@ -278,7 +276,8 @@ struct expr_type_offset_applier_general_extra {
 };
 } // anonymous namespace
 
-static size_t make_expr_type_offset_applier(void *ckb, intptr_t ckb_offset,
+static size_t make_expr_type_offset_applier(void *ckb, kernel_request_t kernreq,
+                                            intptr_t ckb_offset,
                                             size_t src_count,
                                             const intptr_t *src_data_offsets)
 {
@@ -288,49 +287,28 @@ static size_t make_expr_type_offset_applier(void *ckb, intptr_t ckb_offset,
   switch (src_count) {
   case 2: {
     expr_type_offset_applier_extra<2> *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck<expr_type_offset_applier_extra<2>>(ckb_offset);
+        expr_type_offset_applier_extra<2>::make(ckb, kernreq, ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-    e->base.set_function<expr_single_t>(
-        &expr_type_offset_applier_extra<2>::single);
-    e->base.destructor = &expr_type_offset_applier_extra<2>::destruct;
     return ckb_offset;
   }
   case 3: {
     expr_type_offset_applier_extra<3> *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck<expr_type_offset_applier_extra<3>>(ckb_offset);
+        expr_type_offset_applier_extra<3>::make(ckb, kernreq, ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-    e->base.set_function<expr_single_t>(
-        &expr_type_offset_applier_extra<3>::single);
-    e->base.destructor = &expr_type_offset_applier_extra<3>::destruct;
     return ckb_offset;
   }
   case 4: {
     expr_type_offset_applier_extra<4> *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck<expr_type_offset_applier_extra<4>>(ckb_offset);
+        expr_type_offset_applier_extra<4>::make(ckb, kernreq, ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
-    e->base.set_function<expr_single_t>(
-        &expr_type_offset_applier_extra<4>::single);
-    e->base.destructor = &expr_type_offset_applier_extra<4>::destruct;
     return ckb_offset;
   }
   default: {
-    intptr_t root_ckb_offset = ckb_offset;
-    inc_ckb_offset(ckb_offset, sizeof(expr_type_offset_applier_general_extra) +
-                                   src_count * sizeof(size_t));
-    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-        ->reserve(ckb_offset + sizeof(ckernel_prefix));
     expr_type_offset_applier_general_extra *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->get_at<expr_type_offset_applier_general_extra>(root_ckb_offset);
+        expr_type_offset_applier_general_extra::make(ckb, kernreq, ckb_offset);
     e->src_count = src_count;
     size_t *out_offsets = reinterpret_cast<size_t *>(e + 1);
     memcpy(out_offsets, src_data_offsets, src_count * sizeof(size_t));
-    e->base.set_function<expr_single_t>(
-        &expr_type_offset_applier_general_extra::single);
-    e->base.destructor = &expr_type_offset_applier_general_extra::destruct;
     return ckb_offset;
   }
   }
@@ -360,8 +338,6 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
 {
   const tuple_type *fsd = m_operand_type.extended<tuple_type>();
 
-  ckb_offset =
-      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   ckb_offset = make_src_deref_ckernel(ckb, ckb_offset);
   size_t input_count = fsd->get_field_count();
   const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
@@ -388,8 +364,8 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
   // If there were any non-zero pointer offsets, we need to add a kernel
   // adapter which applies those offsets.
   if (nonzero_offsets) {
-    ckb_offset = make_expr_type_offset_applier(ckb, ckb_offset, input_count,
-                                               src_data_offsets.get());
+    ckb_offset = make_expr_type_offset_applier(
+        ckb, kernreq, ckb_offset, input_count, src_data_offsets.get());
   }
   return m_kgen->make_expr_kernel(
       ckb, ckb_offset, m_value_type, dst_arrmeta, input_count, &src_dt[0],

@@ -107,53 +107,47 @@ void type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
   }
 }
 
-static void
-typed_data_assignment_kernel_single(char *dst, char *const *src,
-                                    ckernel_prefix *DYND_UNUSED(self))
-{
-  // Free the destination reference
-  base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
-  // Copy the pointer and count the reference
-  const base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
-  reinterpret_cast<type_type_data *>(dst)->tp = bd;
-  base_type_xincref(bd);
-}
-
 namespace {
-struct string_to_type_kernel_extra {
-  typedef string_to_type_kernel_extra extra_type;
 
-  ckernel_prefix base;
+struct typed_data_assignment_kernel
+    : nd::base_kernel<typed_data_assignment_kernel, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
+  {
+    // Free the destination reference
+    base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
+    // Copy the pointer and count the reference
+    const base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
+    reinterpret_cast<type_type_data *>(dst)->tp = bd;
+    base_type_xincref(bd);
+  }
+};
+
+struct string_to_type_kernel
+    : nd::base_kernel<string_to_type_kernel, kernel_request_host, 1> {
   const base_string_type *src_string_dt;
   const char *src_arrmeta;
   assign_error_mode errmode;
 
-  static void single(char *dst, char *const *src, ckernel_prefix *extra)
-  {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    const string &s =
-        e->src_string_dt->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
-    ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
-  }
+  ~string_to_type_kernel() { base_type_xdecref(src_string_dt); }
 
-  static void destruct(ckernel_prefix *extra)
+  void single(char *dst, char *const *src)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    base_type_xdecref(e->src_string_dt);
+    const string &s =
+        src_string_dt->get_utf8_string(src_arrmeta, src[0], errmode);
+    ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
   }
 };
 
-struct type_to_string_kernel_extra {
-  typedef type_to_string_kernel_extra extra_type;
-
-  ckernel_prefix base;
+struct type_to_string_kernel
+    : nd::base_kernel<type_to_string_kernel, kernel_request_host, 1> {
   const base_string_type *dst_string_dt;
   const char *dst_arrmeta;
   eval::eval_context ectx;
 
-  static void single(char *dst, char *const *src, ckernel_prefix *extra)
+  ~type_to_string_kernel() { base_type_xdecref(dst_string_dt); }
+
+  void single(char *dst, char *const *src)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
     const base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
     stringstream ss;
     if (is_builtin_type(bd)) {
@@ -161,16 +155,10 @@ struct type_to_string_kernel_extra {
     } else {
       bd->print_type(ss);
     }
-    e->dst_string_dt->set_from_utf8_string(e->dst_arrmeta, dst, ss.str(),
-                                           &e->ectx);
-  }
-
-  static void destruct(ckernel_prefix *extra)
-  {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    base_type_xdecref(e->dst_string_dt);
+    dst_string_dt->set_from_utf8_string(dst_arrmeta, dst, ss.str(), &ectx);
   }
 };
+
 } // anonymous namespace
 
 intptr_t type_type::make_assignment_kernel(
@@ -179,23 +167,14 @@ intptr_t type_type::make_assignment_kernel(
     const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
-  ckb_offset =
-      make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
-
   if (this == dst_tp.extended()) {
     if (src_tp.get_type_id() == type_type_id) {
-      ckernel_prefix *e =
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-              ->alloc_ck<ckernel_prefix>(ckb_offset);
-      e->set_function<expr_single_t>(typed_data_assignment_kernel_single);
+      typed_data_assignment_kernel::make(ckb, kernreq, ckb_offset);
       return ckb_offset;
     } else if (src_tp.get_kind() == string_kind) {
       // String to type
-      string_to_type_kernel_extra *e =
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-              ->alloc_ck<string_to_type_kernel_extra>(ckb_offset);
-      e->base.set_function<expr_single_t>(&string_to_type_kernel_extra::single);
-      e->base.destructor = &string_to_type_kernel_extra::destruct;
+      string_to_type_kernel *e =
+          string_to_type_kernel::make(ckb, kernreq, ckb_offset);
       // The kernel data owns a reference to this type
       e->src_string_dt =
           static_cast<const base_string_type *>(ndt::type(src_tp).release());
@@ -210,11 +189,8 @@ intptr_t type_type::make_assignment_kernel(
   } else {
     if (dst_tp.get_kind() == string_kind) {
       // Type to string
-      type_to_string_kernel_extra *e =
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-              ->alloc_ck<type_to_string_kernel_extra>(ckb_offset);
-      e->base.set_function<expr_single_t>(&type_to_string_kernel_extra::single);
-      e->base.destructor = &type_to_string_kernel_extra::destruct;
+      type_to_string_kernel *e =
+          type_to_string_kernel::make(ckb, kernreq, ckb_offset);
       // The kernel data owns a reference to this type
       e->dst_string_dt =
           static_cast<const base_string_type *>(ndt::type(dst_tp).release());

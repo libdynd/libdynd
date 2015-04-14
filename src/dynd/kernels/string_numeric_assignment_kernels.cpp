@@ -71,8 +71,8 @@ struct string_to_builtin_auxdata {
   assign_error_mode errmode;
 };
 
-struct string_to_builtin_kernel_extra {
-  typedef string_to_builtin_kernel_extra extra_type;
+struct string_to_builtin_kernel {
+  typedef string_to_builtin_kernel extra_type;
 
   ckernel_prefix base;
   const base_string_type *src_string_tp;
@@ -118,8 +118,8 @@ static void raise_string_cast_overflow_error(const ndt::type &dst_tp,
 static void string_to_bool_single(char *dst, char *const *src,
                                   ckernel_prefix *extra)
 {
-  string_to_builtin_kernel_extra *e =
-      reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+  string_to_builtin_kernel *e =
+      reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
   string s =
       e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
@@ -199,8 +199,8 @@ template <typename T>
 struct string_to_int {
   static void single(char *dst, char *const *src, ckernel_prefix *extra)
   {
-    string_to_builtin_kernel_extra *e =
-        reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string_to_builtin_kernel *e =
+        reinterpret_cast<string_to_builtin_kernel *>(extra);
     string s =
         e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
@@ -241,8 +241,8 @@ template <typename T>
 struct string_to_uint {
   static void single(char *dst, char *const *src, ckernel_prefix *extra)
   {
-    string_to_builtin_kernel_extra *e =
-        reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+    string_to_builtin_kernel *e =
+        reinterpret_cast<string_to_builtin_kernel *>(extra);
     string s =
         e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
@@ -280,8 +280,8 @@ struct string_to_uint {
 static void string_to_int128_single(char *dst, char *const *src,
                                     ckernel_prefix *extra)
 {
-  string_to_builtin_kernel_extra *e =
-      reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+  string_to_builtin_kernel *e =
+      reinterpret_cast<string_to_builtin_kernel *>(extra);
   string s =
       e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
@@ -319,8 +319,8 @@ static void string_to_int128_single(char *dst, char *const *src,
 static void string_to_uint128_single(char *dst, char *const *src,
                                      ckernel_prefix *extra)
 {
-  string_to_builtin_kernel_extra *e =
-      reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+  string_to_builtin_kernel *e =
+      reinterpret_cast<string_to_builtin_kernel *>(extra);
   string s =
       e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
@@ -352,8 +352,8 @@ static void string_to_uint128_single(char *dst, char *const *src,
 static void string_to_float32_single(char *dst, char *const *src,
                                      ckernel_prefix *extra)
 {
-  string_to_builtin_kernel_extra *e =
-      reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+  string_to_builtin_kernel *e =
+      reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
   string s =
       e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
@@ -388,8 +388,8 @@ static void string_to_float32_single(char *dst, char *const *src,
 static void string_to_float64_single(char *dst, char *const *src,
                                      ckernel_prefix *extra)
 {
-  string_to_builtin_kernel_extra *e =
-      reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+  string_to_builtin_kernel *e =
+      reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
   string s =
       e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
@@ -402,8 +402,8 @@ static void string_to_float64_single(char *dst, char *const *src,
 static void string_to_float16_single(char *dst, char *const *src,
                                      ckernel_prefix *extra)
 {
-  string_to_builtin_kernel_extra *e =
-      reinterpret_cast<string_to_builtin_kernel_extra *>(extra);
+  string_to_builtin_kernel *e =
+      reinterpret_cast<string_to_builtin_kernel *>(extra);
   double tmp;
   string_to_float64_single(reinterpret_cast<char *>(&tmp), src, extra);
   *reinterpret_cast<dynd_float16 *>(dst) = dynd_float16(tmp, e->errmode);
@@ -457,12 +457,12 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
   if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id) {
     ckb_offset =
         make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
-    string_to_builtin_kernel_extra *e =
+    string_to_builtin_kernel *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck<string_to_builtin_kernel_extra>(ckb_offset);
+            ->alloc_ck<string_to_builtin_kernel>(ckb_offset);
     e->base.set_function<expr_single_t>(
         static_string_to_builtin_kernels[dst_type_id - bool_type_id]);
-    e->base.destructor = &string_to_builtin_kernel_extra::destruct;
+    e->base.destructor = &string_to_builtin_kernel::destruct;
     // The kernel data owns this reference
     e->src_string_tp = static_cast<const base_string_type *>(
         ndt::type(src_string_tp).release());
