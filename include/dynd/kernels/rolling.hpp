@@ -8,6 +8,7 @@
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
@@ -20,25 +21,27 @@ namespace nd {
       arrfunc window_op;
     };
 
-    struct strided_rolling_ck : kernels::unary_ck<strided_rolling_ck> {
+    struct strided_rolling_ck
+        : base_kernel<strided_rolling_ck, kernel_request_host, 1> {
       intptr_t m_window_size;
       intptr_t m_dim_size, m_dst_stride, m_src_stride;
       size_t m_window_op_offset;
       arrmeta_holder m_src_winop_meta;
 
-      void single(char *dst, char *src);
+      void single(char *dst, char *const *src);
 
       void destruct_children();
     };
 
-    struct var_rolling_ck : kernels::unary_ck<var_rolling_ck> {
+    struct var_rolling_ck
+        : base_kernel<var_rolling_ck, kernel_request_host, 1> {
       intptr_t m_window_size;
       intptr_t m_src_stride, m_src_offset;
       ndt::type m_dst_tp;
       const char *m_dst_meta;
       size_t m_window_op_offset;
 
-      void single(char *dst, char *src);
+      void single(char *dst, char *const *src);
 
       void destruct_children();
     };

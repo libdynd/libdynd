@@ -277,15 +277,16 @@ void arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
 // arrfunc to string assignment
 
 namespace {
-struct arrfunc_to_string_ck : public kernels::unary_ck<arrfunc_to_string_ck> {
+struct arrfunc_to_string_ck
+    : nd::base_kernel<arrfunc_to_string_ck, kernel_request_host, 1> {
   ndt::type m_src_tp, m_dst_string_dt;
   const char *m_dst_arrmeta;
   eval::eval_context m_ectx;
 
-  inline void single(char *dst, const char *src)
+  void single(char *dst, char *const *src)
   {
     const arrfunc_type_data *af =
-        reinterpret_cast<const arrfunc_type_data *>(src);
+        reinterpret_cast<const arrfunc_type_data *>(src[0]);
     stringstream ss;
     print_arrfunc(ss, m_src_tp.extended<arrfunc_type>(), af);
     m_dst_string_dt.extended<base_string_type>()->set_from_utf8_string(
@@ -473,10 +474,10 @@ static array_preamble *function___call__(const array_preamble *params,
     dynd_arrmeta[i] = args[i + 1].get_arrmeta();
   }
   ckernel_builder<kernel_request_host> ckb;
-  af->instantiate(af, af_tp, NULL, &ckb, 0, args[0].get_type(), args[0].get_arrmeta(),
-                  nargs, src_tp, dynd_arrmeta, kernel_request_single,
-                  &eval::default_eval_context, nd::array(),
-                  std::map<nd::string, ndt::type>());
+  af->instantiate(af, af_tp, NULL, &ckb, 0, args[0].get_type(),
+                  args[0].get_arrmeta(), nargs, src_tp, dynd_arrmeta,
+                  kernel_request_single, &eval::default_eval_context,
+                  nd::array(), std::map<nd::string, ndt::type>());
   // Call the ckernel
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   char *in_ptrs[max_args];

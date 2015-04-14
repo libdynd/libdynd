@@ -220,8 +220,7 @@ bool base_struct_type::match(const char *arrmeta, const ndt::type &candidate_tp,
               candidate_tp.extended<base_struct_type>()->get_field_names())) {
         return false;
       }
-    }
-    else {
+    } else {
       nd::array leading_field_names = get_field_names();
       if (!leading_field_names.equals_exact(
               candidate_tp.extended<base_struct_type>()->get_field_names()(
@@ -274,24 +273,24 @@ ndt::type base_struct_type::get_elwise_property_type(
 
 namespace {
 struct struct_property_getter_ck
-    : public kernels::unary_ck<struct_property_getter_ck> {
+    : nd::base_kernel<struct_property_getter_ck, kernel_request_host, 1> {
   size_t m_field_offset;
 
-  inline void single(char *dst, char *src)
+  void single(char *dst, char *const *src)
   {
     ckernel_prefix *child = get_child_ckernel();
     expr_single_t child_fn = child->get_function<expr_single_t>();
-    src += m_field_offset;
-    child_fn(dst, &src, child);
+    char *src_copy = src[0] + m_field_offset;
+    child_fn(dst, &src_copy, child);
   }
 
-  inline void strided(char *dst, intptr_t dst_stride, char *src,
-                      intptr_t src_stride, size_t count)
+  void strided(char *dst, intptr_t dst_stride, char *const *src,
+               const intptr_t *src_stride, size_t count)
   {
     ckernel_prefix *child = get_child_ckernel();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
-    src += m_field_offset;
-    child_fn(dst, dst_stride, &src, &src_stride, count, child);
+    char *src_copy = src[0] + m_field_offset;
+    child_fn(dst, dst_stride, &src_copy, src_stride, count, child);
   }
 
   inline void destruct_children() { get_child_ckernel()->destroy(); }

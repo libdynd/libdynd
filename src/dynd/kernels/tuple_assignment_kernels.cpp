@@ -24,10 +24,11 @@ struct tuple_unary_op_item {
   size_t src_data_offset;
 };
 
-struct tuple_unary_op_ck : public kernels::unary_ck<tuple_unary_op_ck> {
+struct tuple_unary_op_ck
+    : nd::base_kernel<tuple_unary_op_ck, kernel_request_host, 1> {
   vector<tuple_unary_op_item> m_fields;
 
-  inline void single(char *dst, char *src)
+  void single(char *dst, char *const *src)
   {
     const tuple_unary_op_item *fi = &m_fields[0];
     intptr_t field_count = m_fields.size();
@@ -38,12 +39,12 @@ struct tuple_unary_op_ck : public kernels::unary_ck<tuple_unary_op_ck> {
       const tuple_unary_op_item &item = fi[i];
       child = get_child_ckernel(item.child_kernel_offset);
       child_fn = child->get_function<expr_single_t>();
-      char *child_src = src + item.src_data_offset;
+      char *child_src = src[0] + item.src_data_offset;
       child_fn(dst + item.dst_data_offset, &child_src, child);
     }
   }
 
-  inline void destruct_children()
+  void destruct_children()
   {
     for (size_t i = 0; i < m_fields.size(); ++i) {
       base.destroy_child_ckernel(m_fields[i].child_kernel_offset);
@@ -53,26 +54,29 @@ struct tuple_unary_op_ck : public kernels::unary_ck<tuple_unary_op_ck> {
 } // anonymous namespace
 
 intptr_t dynd::make_tuple_unary_op_ckernel(
-    const arrfunc_type_data *af, const arrfunc_type *af_tp,
-    void *ckb, intptr_t ckb_offset, intptr_t field_count,
-    const uintptr_t *dst_offsets, const ndt::type *dst_tp,
-    const char *const *dst_arrmeta, const uintptr_t *src_offsets,
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    const arrfunc_type_data *af, const arrfunc_type *af_tp, void *ckb,
+    intptr_t ckb_offset, intptr_t field_count, const uintptr_t *dst_offsets,
+    const ndt::type *dst_tp, const char *const *dst_arrmeta,
+    const uintptr_t *src_offsets, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
   intptr_t root_ckb_offset = ckb_offset;
   tuple_unary_op_ck *self = tuple_unary_op_ck::make(ckb, kernreq, ckb_offset);
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
-    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-    self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<tuple_unary_op_ck>(root_ckb_offset);
+    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+        ->reserve(ckb_offset + sizeof(ckernel_prefix));
+    self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+               ->get_at<tuple_unary_op_ck>(root_ckb_offset);
     tuple_unary_op_item &field = self->m_fields[i];
     field.child_kernel_offset = ckb_offset - root_ckb_offset;
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
-    ckb_offset = af->instantiate(
-        af, af_tp, NULL, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i],
-        &src_arrmeta[i], kernel_request_single, ectx, nd::array(), std::map<nd::string, ndt::type>());
+    ckb_offset = af->instantiate(af, af_tp, NULL, ckb, ckb_offset, dst_tp[i],
+                                 dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i],
+                                 kernel_request_single, ectx, nd::array(),
+                                 std::map<nd::string, ndt::type>());
   }
   return ckb_offset;
 }
@@ -89,15 +93,18 @@ intptr_t dynd::make_tuple_unary_op_ckernel(
   tuple_unary_op_ck *self = tuple_unary_op_ck::make(ckb, kernreq, ckb_offset);
   self->m_fields.resize(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
-    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
-    self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<tuple_unary_op_ck>(root_ckb_offset);
+    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+        ->reserve(ckb_offset + sizeof(ckernel_prefix));
+    self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+               ->get_at<tuple_unary_op_ck>(root_ckb_offset);
     tuple_unary_op_item &field = self->m_fields[i];
     field.child_kernel_offset = ckb_offset - root_ckb_offset;
     field.dst_data_offset = dst_offsets[i];
     field.src_data_offset = src_offsets[i];
     ckb_offset = af[i]->instantiate(
-        af[i], af_tp[i], NULL, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], 1, &src_tp[i],
-        &src_arrmeta[i], kernel_request_single, ectx, nd::array(), std::map<nd::string, ndt::type>());
+        af[i], af_tp[i], NULL, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], 1,
+        &src_tp[i], &src_arrmeta[i], kernel_request_single, ectx, nd::array(),
+        std::map<nd::string, ndt::type>());
   }
   return ckb_offset;
 }
@@ -137,28 +144,29 @@ size_t dynd::make_tuple_identical_assignment_kernel(
   }
 
   return make_tuple_unary_op_ckernel(
-      nd::copy.get(), nd::copy.get_type(), ckb,
-      ckb_offset, field_count, sd->get_data_offsets(dst_arrmeta),
-      sd->get_field_types_raw(), dst_fields_arrmeta.get(),
-      sd->get_data_offsets(src_arrmeta), sd->get_field_types_raw(),
-      src_fields_arrmeta.get(), kernreq, ectx);
+      nd::copy.get(), nd::copy.get_type(), ckb, ckb_offset, field_count,
+      sd->get_data_offsets(dst_arrmeta), sd->get_field_types_raw(),
+      dst_fields_arrmeta.get(), sd->get_data_offsets(src_arrmeta),
+      sd->get_field_types_raw(), src_fields_arrmeta.get(), kernreq, ectx);
 }
 
 /////////////////////////////////////////
 // struct/tuple to different struct/tuple assignment
 // (matches up fields by number, not name in struct case)
 
-size_t dynd::make_tuple_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tuple_tp,
-    const char *dst_arrmeta, const ndt::type &src_tuple_tp,
-    const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+size_t dynd::make_tuple_assignment_kernel(void *ckb, intptr_t ckb_offset,
+                                          const ndt::type &dst_tuple_tp,
+                                          const char *dst_arrmeta,
+                                          const ndt::type &src_tuple_tp,
+                                          const char *src_arrmeta,
+                                          kernel_request_t kernreq,
+                                          const eval::eval_context *ectx)
 {
   if (src_tuple_tp.get_kind() != tuple_kind &&
       src_tuple_tp.get_kind() != struct_kind) {
     stringstream ss;
-    ss << "make_tuple_assignment_kernel: provided source type "
-       << src_tuple_tp << " is not of tuple or struct kind";
+    ss << "make_tuple_assignment_kernel: provided source type " << src_tuple_tp
+       << " is not of tuple or struct kind";
     throw runtime_error(ss.str());
   }
   if (dst_tuple_tp.get_kind() != tuple_kind &&
@@ -192,11 +200,10 @@ size_t dynd::make_tuple_assignment_kernel(
   }
 
   return make_tuple_unary_op_ckernel(
-      nd::copy.get(), nd::copy.get_type(), ckb,
-      ckb_offset, field_count, dst_sd->get_data_offsets(dst_arrmeta),
-      dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
-      src_sd->get_data_offsets(src_arrmeta), src_sd->get_field_types_raw(),
-      src_fields_arrmeta.get(), kernreq, ectx);
+      nd::copy.get(), nd::copy.get_type(), ckb, ckb_offset, field_count,
+      dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
+      dst_fields_arrmeta.get(), src_sd->get_data_offsets(src_arrmeta),
+      src_sd->get_field_types_raw(), src_fields_arrmeta.get(), kernreq, ectx);
 }
 
 /////////////////////////////////////////
@@ -231,9 +238,8 @@ size_t dynd::make_broadcast_to_tuple_assignment_kernel(
   vector<uintptr_t> src_data_offsets(field_count, 0);
 
   return make_tuple_unary_op_ckernel(
-      nd::copy.get(), nd::copy.get_type(), ckb,
-      ckb_offset, field_count, dst_sd->get_data_offsets(dst_arrmeta),
-      dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
-      &src_data_offsets[0], &src_fields_tp[0], &src_fields_arrmeta[0], kernreq,
-      ectx);
+      nd::copy.get(), nd::copy.get_type(), ckb, ckb_offset, field_count,
+      dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
+      dst_fields_arrmeta.get(), &src_data_offsets[0], &src_fields_tp[0],
+      &src_fields_arrmeta[0], kernreq, ectx);
 }

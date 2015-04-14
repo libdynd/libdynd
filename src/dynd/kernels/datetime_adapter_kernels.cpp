@@ -89,15 +89,18 @@ static bool parse_datetime_since(const char *begin, const char *end,
 namespace {
 template <class Tsrc, class Tdst>
 struct int_multiply_and_offset_ck
-    : public kernels::unary_ck<int_multiply_and_offset_ck<Tsrc, Tdst>> {
+    : nd::base_kernel<int_multiply_and_offset_ck<Tsrc, Tdst>, kernel_request_host,
+                  1> {
   pair<Tdst, Tdst> m_factor_offset;
 
-  Tdst operator()(Tsrc value)
+  void single(char *dst, char *const *src)
   {
-    return value != std::numeric_limits<Tsrc>::min()
-               ? m_factor_offset.first * static_cast<Tdst>(value) +
-                     m_factor_offset.second
-               : std::numeric_limits<Tdst>::min();
+    Tsrc value = *reinterpret_cast<Tsrc *>(src[0]);
+    *reinterpret_cast<Tdst *>(dst) =
+        value != std::numeric_limits<Tsrc>::min()
+            ? m_factor_offset.first * static_cast<Tdst>(value) +
+                  m_factor_offset.second
+            : std::numeric_limits<Tdst>::min();
   }
 };
 
@@ -137,16 +140,18 @@ nd::arrfunc make_int_multiply_and_offset_arrfunc(Tdst factor, Tdst offset,
 
 template <class Tsrc, class Tdst>
 struct int_offset_and_divide_ck
-    : public kernels::unary_ck<int_offset_and_divide_ck<Tsrc, Tdst>> {
+    : nd::base_kernel<int_offset_and_divide_ck<Tsrc, Tdst>, kernel_request_host,
+                      1> {
   pair<Tdst, Tdst> m_offset_divisor;
 
-  Tdst operator()(Tsrc value)
+  void single(char *dst, char *const *src)
   {
+    Tsrc value = *reinterpret_cast<Tsrc *>(src[0]);
     if (value != std::numeric_limits<Tsrc>::min()) {
       value += m_offset_divisor.first;
-      return floordiv(value, m_offset_divisor.second);
+      *reinterpret_cast<Tdst *>(dst) = floordiv(value, m_offset_divisor.second);
     } else {
-      return std::numeric_limits<Tdst>::min();
+      *reinterpret_cast<Tdst *>(dst) = std::numeric_limits<Tdst>::min();
     }
   }
 };

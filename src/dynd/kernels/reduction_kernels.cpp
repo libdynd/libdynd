@@ -12,98 +12,95 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-    template<class T, class Accum>
-    struct sum_reduction {
-        static void single(char *dst, char *const *src,
-                           ckernel_prefix *DYND_UNUSED(self))
-        {
-            *reinterpret_cast<T *>(dst) =
-                *reinterpret_cast<T *>(dst) +
-                **reinterpret_cast<T *const *>(src);
-        }
+template <class T, class Accum>
+struct sum_reduction
+    : nd::base_kernel<sum_reduction<T, Accum>, kernel_request_host, 1> {
+  void single(char *dst, char *const *src)
+  {
+    *reinterpret_cast<T *>(dst) =
+        *reinterpret_cast<T *>(dst) + **reinterpret_cast<T *const *>(src);
+  }
 
-        static void strided(char *dst, intptr_t dst_stride,
-                            char *const *src, const intptr_t *src_stride,
-                            size_t count, ckernel_prefix *DYND_UNUSED(self))
-        {
-            char *src0 = src[0];
-            intptr_t src0_stride = src_stride[0];
-            if (dst_stride == 0) {
-                Accum s = 0;
-                for (size_t i = 0; i < count; ++i) {
-                    s = s + *reinterpret_cast<T *>(src0);
-                    src0 += src0_stride;
-                }
-                *reinterpret_cast<T *>(dst) = static_cast<T>(*reinterpret_cast<T *>(dst) + s);
-            } else {
-                for (size_t i = 0; i < count; ++i) {
-                    *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(dst) + *reinterpret_cast<T *>(src0);
-                    dst += dst_stride;
-                    src0 += src0_stride;
-                }
-            }
-        }
-    };
+  void strided(char *dst, intptr_t dst_stride, char *const *src,
+               const intptr_t *src_stride, size_t count)
+  {
+    char *src0 = src[0];
+    intptr_t src0_stride = src_stride[0];
+    if (dst_stride == 0) {
+      Accum s = 0;
+      for (size_t i = 0; i < count; ++i) {
+        s = s + *reinterpret_cast<T *>(src0);
+        src0 += src0_stride;
+      }
+      *reinterpret_cast<T *>(dst) =
+          static_cast<T>(*reinterpret_cast<T *>(dst) + s);
+    } else {
+      for (size_t i = 0; i < count; ++i) {
+        *reinterpret_cast<T *>(dst) =
+            *reinterpret_cast<T *>(dst) + *reinterpret_cast<T *>(src0);
+        dst += dst_stride;
+        src0 += src0_stride;
+      }
+    }
+  }
+};
 } // anonymous namespace
 
-
-intptr_t kernels::make_builtin_sum_reduction_ckernel(
-                void *ckb, intptr_t ckb_offset,
-                type_id_t tid,
-                kernel_request_t kernreq)
+intptr_t kernels::make_builtin_sum_reduction_ckernel(void *ckb,
+                                                     intptr_t ckb_offset,
+                                                     type_id_t tid,
+                                                     kernel_request_t kernreq)
 {
-    ckernel_prefix *ckp = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
-    switch (tid) {
-        case int32_type_id:
-            ckp->set_expr_function<sum_reduction<int32_t, int32_t> >(kernreq);
-            break;
-        case int64_type_id:
-            ckp->set_expr_function<sum_reduction<int64_t, int64_t> >(kernreq);
-            break;
-        case float32_type_id:
-            ckp->set_expr_function<sum_reduction<float, double> >(kernreq);
-            break;
-        case float64_type_id:
-            ckp->set_expr_function<sum_reduction<double, double> >(kernreq);
-            break;
-        case complex_float32_type_id:
-            ckp->set_expr_function<
-                sum_reduction<complex<float>, complex<float> > >(
-                kernreq);
-            break;
-        case complex_float64_type_id:
-            ckp->set_expr_function<
-                sum_reduction<complex<double>, complex<double> > >(
-                kernreq);
-            break;
-        default: {
-            stringstream ss;
-            ss << "make_builtin_sum_reduction_ckernel: data type ";
-            ss << ndt::type(tid) << " is not supported";
-            throw type_error(ss.str());
-        }
-    }
+  switch (tid) {
+  case int32_type_id:
+    sum_reduction<int32_t, int32_t>::make(ckb, kernreq, ckb_offset);
+    break;
+  case int64_type_id:
+    sum_reduction<int64_t, int64_t>::make(ckb, kernreq, ckb_offset);
+    break;
+  case float32_type_id:
+    sum_reduction<float, double>::make(ckb, kernreq, ckb_offset);
+    break;
+  case float64_type_id:
+    sum_reduction<double, double>::make(ckb, kernreq, ckb_offset);
+    break;
+  case complex_float32_type_id:
+    sum_reduction<complex<float>, complex<float>>::make(ckb, kernreq,
+                                                        ckb_offset);
+    break;
+  case complex_float64_type_id:
+    sum_reduction<complex<double>, complex<double>>::make(ckb, kernreq,
+                                                          ckb_offset);
+    break;
+  default: {
+    stringstream ss;
+    ss << "make_builtin_sum_reduction_ckernel: data type ";
+    ss << ndt::type(tid) << " is not supported";
+    throw type_error(ss.str());
+  }
+  }
 
-    return ckb_offset;
+  return ckb_offset;
 }
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
     const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+    const nd::array &DYND_UNUSED(kwds),
+    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
-    if (dst_tp != src_tp[0]) {
-        stringstream ss;
-        ss << "dynd sum reduction: the source type, " << src_tp[0]
-           << ", does not match the destination type, " << dst_tp;
-        throw type_error(ss.str());
-    }
-    return kernels::make_builtin_sum_reduction_ckernel(
-        ckb, ckb_offset, dst_tp.get_type_id(), kernreq);
+  if (dst_tp != src_tp[0]) {
+    stringstream ss;
+    ss << "dynd sum reduction: the source type, " << src_tp[0]
+       << ", does not match the destination type, " << dst_tp;
+    throw type_error(ss.str());
+  }
+  return kernels::make_builtin_sum_reduction_ckernel(
+      ckb, ckb_offset, dst_tp.get_type_id(), kernreq);
 }
 
 nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
@@ -129,33 +126,34 @@ nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
 {
   nd::arrfunc sum_ew = kernels::make_builtin_sum_reduction_arrfunc(tid);
   bool reduction_dimflags[1] = {true};
-  return lift_reduction_arrfunc(sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)),
-                                nd::array(), false, 1, reduction_dimflags, true,
-                                true, false, 0);
+  return lift_reduction_arrfunc(
+      sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)), nd::array(), false, 1,
+      reduction_dimflags, true, true, false, 0);
 }
 
 namespace {
-struct double_mean1d_ck : public kernels::unary_ck<double_mean1d_ck> {
+struct double_mean1d_ck
+    : nd::base_kernel<double_mean1d_ck, kernel_request_host, 1> {
   intptr_t m_minp;
   intptr_t m_src_dim_size, m_src_stride;
 
-  inline void single(char *dst, char *src)
+  void single(char *dst, char *const *src)
   {
     intptr_t minp = m_minp, countp = 0;
     intptr_t src_dim_size = m_src_dim_size, src_stride = m_src_stride;
     double result = 0;
+    char *src_copy = src[0];
     for (intptr_t i = 0; i < src_dim_size; ++i) {
-      double v = *reinterpret_cast<double *>(src);
+      double v = *reinterpret_cast<double *>(src_copy);
       if (!dynd::isnan(v)) {
         result += v;
         ++countp;
       }
-      src += src_stride;
+      src_copy += src_stride;
     }
     if (countp >= minp) {
       *reinterpret_cast<double *>(dst) = result / countp;
-    }
-    else {
+    } else {
       *reinterpret_cast<double *>(dst) = numeric_limits<double>::quiet_NaN();
     }
   }
@@ -169,14 +167,16 @@ struct mean1d_arrfunc_data {
     delete *self_af->get_data_as<mean1d_arrfunc_data *>();
   }
 
-  static intptr_t instantiate(
-      const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-      char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-      const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-      const ndt::type *src_tp,
-      const char *const *src_arrmeta, kernel_request_t kernreq,
-      const eval::eval_context *DYND_UNUSED(ectx),
-      const nd::array &DYND_UNUSED(kwds), const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+  static intptr_t
+  instantiate(const arrfunc_type_data *af_self,
+              const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+              void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+              const ndt::type *src_tp, const char *const *src_arrmeta,
+              kernel_request_t kernreq,
+              const eval::eval_context *DYND_UNUSED(ectx),
+              const nd::array &DYND_UNUSED(kwds),
+              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     typedef double_mean1d_ck self_type;
     mean1d_arrfunc_data *data = *af_self->get_data_as<mean1d_arrfunc_data *>();
