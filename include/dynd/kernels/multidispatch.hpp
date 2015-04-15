@@ -247,25 +247,26 @@ namespace nd {
       resolve_dst_type(const arrfunc_type_data *self,
                        const arrfunc_type *DYND_UNUSED(self_tp),
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
-                       intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                       const dynd::nd::array &DYND_UNUSED(kwds),
-                       const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                       intptr_t nsrc, const ndt::type *src_tp,
+                       const dynd::nd::array &kwds,
+                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
+        std::cout << "multidispatch_by_type_id_kernel::resolve_dst_type" << std::endl;
+
         const std::shared_ptr<static_data> &data =
             *self->get_data_as<std::shared_ptr<static_data>>();
         const ndt::type &tp = (data->i0 == -1) ? dst_tp : src_tp[data->i0];
-
         arrfunc child = data->children[tp.get_type_id()];
         if (child.is_null()) {
           child = data->default_child;
         }
 
-//        child.get()->resolve_dst_type(self, self_tp, NULL, dst_tp, nsrc, src_tp,
-  //                                    kwds, tp_vars);
+        child.get()->resolve_dst_type(child.get(), child.get_type(), NULL, dst_tp, nsrc, src_tp,
+                                      kwds, tp_vars);
       }
 
       static intptr_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+      instantiate(const arrfunc_type_data *self, const arrfunc_type *DYND_UNUSED(self_tp),
                   char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
@@ -273,6 +274,8 @@ namespace nd {
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
+        std::cout << "multidispatch_by_type_id_kernel::instantiate" << std::endl;
+
         const std::shared_ptr<static_data> &data =
             *self->get_data_as<std::shared_ptr<static_data>>();
         const ndt::type &tp = (data->i0 == -1) ? dst_tp : src_tp[data->i0];
@@ -283,7 +286,7 @@ namespace nd {
         }
 
         return child.get()->instantiate(
-            self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            child.get(), child.get_type(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       }
     };
