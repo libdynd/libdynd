@@ -6,7 +6,9 @@
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/func/elwise.hpp>
+#include <dynd/func/call.hpp>
 #include <dynd/kernels/arithmetic.hpp>
+#include <array>
 
 using namespace dynd;
 
@@ -31,11 +33,23 @@ nd::arrfunc nd::minus::default_child;
 
 nd::arrfunc nd::minus::make()
 {
-  arrfunc::make_all<minus_kernel, arithmetic_type_ids>(children);
+  arrfunc self = functional::call(ndt::type("(Any) -> Any"), nd::minus);
 
-  return functional::elwise(functional::multidispatch_by_type_id(
-      ndt::type("(Any) -> Any"), DYND_TYPE_ID_MAX + 1, children, default_child,
-      false));
+  // ...
+  for (const std::pair<const type_id_t, arrfunc> &pair :
+       arrfunc::make_all<minus_kernel, arithmetic_type_ids>()) {
+    children[pair.first] = pair.second;
+  }
+
+  // ...
+  for (type_id_t i0 : dim_type_ids::vals()) {
+    ndt::type child_tp = ndt::type("(Fixed * Any) -> Fixed * Any");
+    children[i0] = functional::elwise(child_tp, self);
+  }
+
+  return functional::multidispatch_by_type_id(self.get_array_type(),
+                                              DYND_TYPE_ID_MAX + 1, children,
+                                              default_child, false);
 }
 
 struct nd::minus nd::minus;

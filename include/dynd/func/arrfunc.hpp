@@ -763,6 +763,9 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
+  template <typename T>
+  struct declfunc;
+
   /**
    * Holds a single instance of an arrfunc in an nd::array,
    * providing some more direct convenient interface.
@@ -1150,10 +1153,10 @@ namespace nd {
     }
 
     template <template <type_id_t> class T, typename I0>
-    static std::vector<arrfunc> make_all()
+    static std::map<type_id_t, arrfunc> make_all()
     {
-      std::vector<arrfunc> arrfuncs;
-      make_all<T, I0>(arrfuncs.data());
+      std::map<type_id_t, arrfunc> arrfuncs;
+      index_proxy<I0>::for_each(detail::make_all<T>(), arrfuncs);
 
       return arrfuncs;
     }
@@ -1166,6 +1169,42 @@ namespace nd {
 
       return arrfuncs;
     }
+
+    /*
+        template <template <type_id_t...> class T>
+        struct X {
+          template <type_id_t I0>
+          void on_each(arrfunc *res)
+          {
+            res[I0] = T<I0>::make();
+          }
+        };
+
+        template <template <template <type_id_t...> class T, type_id_t...> class
+       T,
+                  template <type_id_t...> class U>
+        struct Y {
+          template <type_id_t I0>
+          void on_each(arrfunc *res)
+          {
+            res[I0] = T<U, I0>::make();
+          }
+        };
+
+        template <template <type_id_t...> class T, typename I0>
+        static void make_all(arrfunc *res)
+        {
+          index_proxy<I0>::for_each(X<T>(), res);
+        }
+
+        template <template <template <type_id_t...> class T, type_id_t...> class
+       T0,
+                  template <type_id_t...> class T1, typename I0>
+        static void make_all(arrfunc *res)
+        {
+          index_proxy<I0>::for_each(Y<T0, T1>(), res);
+        }
+    */
   };
 
   namespace detail {
@@ -1179,6 +1218,18 @@ namespace nd {
         if (func.is_null() || overwrite) {
           func = arrfunc::make<T<I0>>(0);
         }
+      }
+
+      template <type_id_t I0>
+      void on_each(std::map<type_id_t, arrfunc> &res)
+      {
+        res[I0] = arrfunc::make<T<I0>>(0);
+      }
+
+      template <type_id_t I0>
+      void on_each(std::vector<arrfunc> &res)
+      {
+        res.push_back(arrfunc::make<T<I0>>(0));
       }
     };
 

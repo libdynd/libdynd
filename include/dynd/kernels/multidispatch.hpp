@@ -254,14 +254,19 @@ namespace nd {
         const std::shared_ptr<static_data> &data =
             *self->get_data_as<std::shared_ptr<static_data>>();
         const ndt::type &tp = (data->i0 == -1) ? dst_tp : src_tp[data->i0];
-
         arrfunc child = data->children[tp.get_type_id()];
         if (child.is_null()) {
           child = data->default_child;
         }
 
-//        child.get()->resolve_dst_type(self, self_tp, NULL, dst_tp, nsrc, src_tp,
-  //                                    kwds, tp_vars);
+/*
+        Uncomment this for the unary arithmetic operators
+
+        child.get()->resolve_dst_type(child.get(), child.get_type(), NULL, dst_tp, nsrc, src_tp,
+                                      kwds, tp_vars);
+*/
+
+
       }
 
       static intptr_t
@@ -281,6 +286,14 @@ namespace nd {
         if (child.is_null()) {
           child = data->default_child;
         }
+
+/*
+        Uncomment this for the unary arithmetic operators
+
+        return child.get()->instantiate(
+            child.get(), child.get_type(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+*/
 
         return child.get()->instantiate(
             self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,

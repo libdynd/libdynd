@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <array>
 #include <type_traits>
 
 namespace dynd {
@@ -48,11 +49,18 @@ struct alternate;
 
 template <typename T, T... I>
 struct integer_sequence {
-//  static_assert(std::is_integral<T>::value,
-  //              "integer_sequence must be instantiated with an integral type");
+  //  static_assert(std::is_integral<T>::value,
+  //              "integer_sequence must be instantiated with an integral
+  //              type");
 
   enum { size = sizeof...(I) };
   typedef T type;
+
+  static const std::array<T, size> &vals()
+  {
+    static const std::array<T, size> vals = {{I...}};
+    return vals;
+  }
 };
 
 template <size_t... I>
@@ -116,10 +124,11 @@ using make_integer_sequence =
 // Fails in MSVC 2015 CTP 6 with two levels of alias, therefore don't go through
 // make_integer_sequence alias, use detail::make_integer_sequence directly.
 // https://connect.microsoft.com/VisualStudio/feedback/details/1200294/code-with-two-levels-of-alias-templates-and-variadic-packs-fails-to-compile
-//template <size_t... I>
-//using make_index_sequence = make_integer_sequence<size_t, I...>;
+// template <size_t... I>
+// using make_index_sequence = make_integer_sequence<size_t, I...>;
 template <size_t... I>
-using make_index_sequence = typename detail::make_integer_sequence<-1, size_t, I...>::type;
+using make_index_sequence =
+    typename detail::make_integer_sequence<-1, size_t, I...>::type;
 
 template <typename T, T I0>
 struct front<integer_sequence<T, I0>> {
@@ -300,9 +309,9 @@ struct for_each<F, type_sequence<type_sequence<T0...>>, true> {
 
 template <template <typename...> class F, typename... T0, typename... T>
 struct for_each<F, type_sequence<type_sequence<T0...>, T...>, true> {
-  typedef typename join<type_sequence<F<T0...>>,
-                        typename for_each<F, type_sequence<T...>, true>::type>::type
-      type;
+  typedef typename join<
+      type_sequence<F<T0...>>,
+      typename for_each<F, type_sequence<T...>, true>::type>::type type;
 };
 
 template <typename...>
