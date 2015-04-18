@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <array>
 #include <type_traits>
 
 namespace dynd {
