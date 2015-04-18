@@ -12,18 +12,6 @@
 
 using namespace dynd;
 
-namespace {
-
-template <template <type_id_t...> class T, type_id_t...>
-struct arithmetic_arrfunc_factory;
-
-template <template <type_id_t...> class T, type_id_t I0>
-struct arithmetic_arrfunc_factory<T, I0> {
-  static nd::arrfunc make() { return nd::arrfunc::make<T<I0>>(0); }
-};
-
-} // anonymous namespace
-
 nd::arrfunc nd::plus::children[DYND_TYPE_ID_MAX + 1];
 nd::arrfunc nd::plus::default_child;
 
@@ -39,13 +27,6 @@ nd::arrfunc nd::plus::make()
 struct nd::plus nd::plus;
 
 nd::array nd::operator+(const nd::array &a0) { return nd::plus(a0); }
-
-namespace {
-
-template <type_id_t I0>
-using minus_arrfunc_factory = arithmetic_arrfunc_factory<nd::minus_kernel, I0>;
-
-} // anonymous namespace
 
 nd::arrfunc nd::minus::children[DYND_TYPE_ID_MAX + 1];
 nd::arrfunc nd::minus::default_child;
