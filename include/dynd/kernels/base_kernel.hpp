@@ -15,8 +15,14 @@ namespace nd {
    * Some common shared implementation details of a CRTP
    * (curiously recurring template pattern) base class to help
    * create kernels.
+   *
+   * For most ckernels, the structure is not known beyond that
+   * the ckernel_prefix is at the beginning. In some, such
+   * as the reduction ckernel, more is known, in which case
+   * CKP may be overriden.
    */
-  template <typename T, kernel_request_t kernreq, int N>
+  template <typename T, kernel_request_t kernreq, int N,
+            typename CKP = ckernel_prefix>
   struct base_kernel;
 
 /**
@@ -29,8 +35,8 @@ namespace nd {
  * with a single and strided kernel function.
  */
 #define BASE_KERNEL(KERNREQ, ...)                                              \
-  template <typename T>                                                        \
-  struct base_kernel<T, KERNREQ, -1> : ckernel_prefix {                        \
+  template <typename T, typename CKP>                                          \
+  struct base_kernel<T, KERNREQ, -1, CKP> : CKP {                              \
     typedef T self_type;                                                       \
                                                                                \
     DYND_CUDA_HOST_DEVICE static self_type *get_self(ckernel_prefix *rawself)  \
@@ -218,10 +224,10 @@ namespace nd {
     }                                                                          \
   };                                                                           \
                                                                                \
-  template <typename T>                                                        \
-  struct base_kernel<T, KERNREQ, 0> : base_kernel<T, KERNREQ, -1> {            \
+  template <typename T, typename CKP>                                          \
+  struct base_kernel<T, KERNREQ, 0, CKP> : base_kernel<T, KERNREQ, -1, CKP> {  \
     typedef T self_type;                                                       \
-    typedef base_kernel<T, KERNREQ, -1> parent_type;                           \
+    typedef base_kernel<T, KERNREQ, -1, CKP> parent_type;                      \
                                                                                \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
                              char *const *DYND_UNUSED(src),                    \
@@ -236,10 +242,10 @@ namespace nd {
     }                                                                          \
   };                                                                           \
                                                                                \
-  template <typename T, int N>                                                 \
-  struct base_kernel<T, KERNREQ, N> : base_kernel<T, KERNREQ, -1> {            \
+  template <typename T, int N, typename CKP>                                   \
+  struct base_kernel<T, KERNREQ, N, CKP> : base_kernel<T, KERNREQ, -1, CKP> {  \
     typedef T self_type;                                                       \
-    typedef base_kernel<T, KERNREQ, -1> parent_type;                           \
+    typedef base_kernel<T, KERNREQ, -1, CKP> parent_type;                      \
                                                                                \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *src, \
                              const intptr_t *src_stride, size_t count)         \
@@ -259,13 +265,13 @@ namespace nd {
 
   BASE_KERNEL(kernel_request_host);
 
-  template <typename T>
+  template <typename T, typename CKP>
   template <typename... A>
-  typename base_kernel<T, kernel_request_host, -1>::self_type *
-  base_kernel<T, kernel_request_host, -1>::make(void *ckb,
-                                                kernel_request_t kernreq,
-                                                intptr_t &inout_ckb_offset,
-                                                A &&... args)
+  typename base_kernel<T, kernel_request_host, -1, CKP>::self_type *
+  base_kernel<T, kernel_request_host, -1, CKP>::make(void *ckb,
+                                                     kernel_request_t kernreq,
+                                                     intptr_t &inout_ckb_offset,
+                                                     A &&... args)
   {
     // Disallow requests from a different memory space
     switch (kernreq & kernel_request_memory) {
@@ -283,10 +289,10 @@ namespace nd {
 
   BASE_KERNEL(kernel_request_cuda_device, __device__);
 
-  template <typename T>
+  template <typename T, typename CKP>
   template <typename... A>
-  typename base_kernel<T, kernel_request_cuda_device, -1>::self_type *
-  base_kernel<T, kernel_request_cuda_device, -1>::make(
+  typename base_kernel<T, kernel_request_cuda_device, -1, CKP>::self_type *
+  base_kernel<T, kernel_request_cuda_device, -1, CKP>::make(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
@@ -307,10 +313,10 @@ namespace nd {
 
   BASE_KERNEL(kernel_request_cuda_host_device, DYND_CUDA_HOST_DEVICE);
 
-  template <typename T>
+  template <typename T, typename CKP>
   template <typename... A>
-  typename base_kernel<T, kernel_request_cuda_host_device, -1>::self_type *
-  base_kernel<T, kernel_request_cuda_host_device, -1>::make(
+  typename base_kernel<T, kernel_request_cuda_host_device, -1, CKP>::self_type *
+  base_kernel<T, kernel_request_cuda_host_device, -1, CKP>::make(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {

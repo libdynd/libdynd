@@ -9,13 +9,14 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
 
 namespace {
 
-struct ckernel_reduction_prefix : ckernel_prefix {
+struct reduction_ckernel_prefix : ckernel_prefix {
   // This function pointer is for all the calls of the function
   // on a given destination data address after the "first call".
   expr_strided_t followup_call_function;
@@ -57,8 +58,10 @@ struct ckernel_reduction_prefix : ckernel_prefix {
  *  - The child followup_call function must be *strided*.
  *
  */
-struct strided_initial_reduction_kernel_extra : ckernel_reduction_prefix {
-  typedef strided_initial_reduction_kernel_extra extra_type;
+struct strided_initial_reduction_kernel_extra
+    : nd::base_kernel<strided_initial_reduction_kernel_extra,
+                      kernel_request_host, 1, reduction_ckernel_prefix> {
+  typedef strided_initial_reduction_kernel_extra self_type;
 
   // The code assumes that size >= 1
   intptr_t size;
@@ -66,10 +69,9 @@ struct strided_initial_reduction_kernel_extra : ckernel_reduction_prefix {
 
   static void single_first(char *dst, char *const *src, ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_reduction_prefix *echild =
-        reinterpret_cast<ckernel_reduction_prefix *>(
-            extra->get_child_ckernel(sizeof(extra_type)));
+    self_type *e = reinterpret_cast<self_type *>(extra);
+    reduction_ckernel_prefix *echild =
+        reinterpret_cast<reduction_ckernel_prefix *>(e->get_child_ckernel());
     // The first call at the "dst" address
     expr_single_t opchild_first_call =
         echild->get_first_call_function<expr_single_t>();
@@ -86,10 +88,9 @@ struct strided_initial_reduction_kernel_extra : ckernel_reduction_prefix {
                             const intptr_t *src_stride, size_t count,
                             ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_reduction_prefix *echild =
-        reinterpret_cast<ckernel_reduction_prefix *>(
-            extra->get_child_ckernel(sizeof(extra_type)));
+    self_type *e = reinterpret_cast<self_type *>(extra);
+    reduction_ckernel_prefix *echild =
+        reinterpret_cast<reduction_ckernel_prefix *>(e->get_child_ckernel());
     expr_strided_t opchild_followup_call = echild->get_followup_call_function();
     expr_single_t opchild_first_call =
         echild->get_first_call_function<expr_single_t>();
@@ -131,10 +132,9 @@ struct strided_initial_reduction_kernel_extra : ckernel_reduction_prefix {
                                const intptr_t *src_stride, size_t count,
                                ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_reduction_prefix *echild =
-        reinterpret_cast<ckernel_reduction_prefix *>(
-            extra->get_child_ckernel(sizeof(extra_type)));
+    self_type *e = reinterpret_cast<self_type *>(extra);
+    reduction_ckernel_prefix *echild =
+        reinterpret_cast<reduction_ckernel_prefix *>(e->get_child_ckernel());
     expr_strided_t opchild_followup_call = echild->get_followup_call_function();
     intptr_t inner_size = e->size;
     intptr_t inner_src_stride = e->src_stride;
@@ -148,9 +148,9 @@ struct strided_initial_reduction_kernel_extra : ckernel_reduction_prefix {
     }
   }
 
-  static void destruct(ckernel_prefix *self)
+  void destruct_children()
   {
-    self->destroy_child_ckernel(sizeof(extra_type));
+    get_child_ckernel()->destroy();
   }
 };
 
@@ -168,8 +168,10 @@ struct strided_initial_reduction_kernel_extra : ckernel_reduction_prefix {
  *  - The child followup_call function must be *strided*.
  *
  */
-struct strided_initial_broadcast_kernel_extra : ckernel_reduction_prefix {
-  typedef strided_initial_broadcast_kernel_extra extra_type;
+struct strided_initial_broadcast_kernel_extra
+    : nd::base_kernel<strided_initial_broadcast_kernel_extra,
+                      kernel_request_host, 1, reduction_ckernel_prefix> {
+  typedef strided_initial_broadcast_kernel_extra self_type;
 
   // The code assumes that size >= 1
   intptr_t size;
@@ -177,10 +179,9 @@ struct strided_initial_broadcast_kernel_extra : ckernel_reduction_prefix {
 
   static void single_first(char *dst, char *const *src, ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_reduction_prefix *echild =
-        reinterpret_cast<ckernel_reduction_prefix *>(
-            extra->get_child_ckernel(sizeof(extra_type)));
+    self_type *e = reinterpret_cast<self_type *>(extra);
+    reduction_ckernel_prefix *echild =
+        reinterpret_cast<reduction_ckernel_prefix *>(e->get_child_ckernel());
     expr_strided_t opchild_first_call =
         echild->get_first_call_function<expr_strided_t>();
     opchild_first_call(dst, e->dst_stride, src, &e->src_stride, e->size,
@@ -191,10 +192,9 @@ struct strided_initial_broadcast_kernel_extra : ckernel_reduction_prefix {
                             const intptr_t *src_stride, size_t count,
                             ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_reduction_prefix *echild =
-        reinterpret_cast<ckernel_reduction_prefix *>(
-            extra->get_child_ckernel(sizeof(extra_type)));
+    self_type *e = reinterpret_cast<self_type *>(extra);
+    reduction_ckernel_prefix *echild =
+        reinterpret_cast<reduction_ckernel_prefix *>(e->get_child_ckernel());
     expr_strided_t opchild_first_call =
         echild->get_first_call_function<expr_strided_t>();
     expr_strided_t opchild_followup_call = echild->get_followup_call_function();
@@ -231,10 +231,9 @@ struct strided_initial_broadcast_kernel_extra : ckernel_reduction_prefix {
                                const intptr_t *src_stride, size_t count,
                                ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_reduction_prefix *echild =
-        reinterpret_cast<ckernel_reduction_prefix *>(
-            extra->get_child_ckernel(sizeof(extra_type)));
+    self_type *e = reinterpret_cast<self_type *>(extra);
+    reduction_ckernel_prefix *echild =
+        reinterpret_cast<reduction_ckernel_prefix *>(e->get_child_ckernel());
     expr_strided_t opchild_followup_call = echild->get_followup_call_function();
     intptr_t inner_size = e->size;
     intptr_t inner_dst_stride = e->dst_stride;
@@ -249,9 +248,9 @@ struct strided_initial_broadcast_kernel_extra : ckernel_reduction_prefix {
     }
   }
 
-  static void destruct(ckernel_prefix *self)
+  void destruct_children()
   {
-    self->destroy_child_ckernel(sizeof(extra_type));
+    get_child_ckernel()->destroy();
   }
 };
 
@@ -268,8 +267,10 @@ struct strided_initial_broadcast_kernel_extra : ckernel_reduction_prefix {
  *  - The child reduction kernel must be *strided*.
  *
  */
-struct strided_inner_reduction_kernel_extra : ckernel_reduction_prefix {
-  typedef strided_inner_reduction_kernel_extra extra_type;
+struct strided_inner_reduction_kernel_extra
+    : nd::base_kernel<strided_inner_reduction_kernel_extra, kernel_request_host,
+                      1, reduction_ckernel_prefix> {
+  typedef strided_inner_reduction_kernel_extra self_type;
 
   // The code assumes that size >= 1
   intptr_t size;
@@ -281,11 +282,10 @@ struct strided_inner_reduction_kernel_extra : ckernel_reduction_prefix {
 
   static void single_first(char *dst, char *const *src, ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
-    ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
-        reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
+    self_type *e = reinterpret_cast<self_type *>(extra);
+    ckernel_prefix *echild_reduce = e->get_child_ckernel();
+    ckernel_prefix *echild_dst_init =
+        e->get_child_ckernel(e->dst_init_kernel_offset);
     // The first call to initialize the "dst" value
     expr_single_t opchild_dst_init =
         echild_dst_init->get_function<expr_single_t>();
@@ -303,9 +303,9 @@ struct strided_inner_reduction_kernel_extra : ckernel_reduction_prefix {
   static void single_first_with_ident(char *dst, char *const *src,
                                       ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
+        extra->get_child_ckernel(sizeof(self_type));
     ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     // The first call to initialize the "dst" value
@@ -322,9 +322,9 @@ struct strided_inner_reduction_kernel_extra : ckernel_reduction_prefix {
                             const intptr_t *src_stride, size_t count,
                             ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
+        extra->get_child_ckernel(sizeof(self_type));
     ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     expr_single_t opchild_dst_init =
@@ -372,9 +372,9 @@ struct strided_inner_reduction_kernel_extra : ckernel_reduction_prefix {
                                        const intptr_t *src_stride, size_t count,
                                        ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
+        extra->get_child_ckernel(sizeof(self_type));
     ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     expr_single_t opchild_ident = echild_ident->get_function<expr_single_t>();
@@ -413,9 +413,9 @@ struct strided_inner_reduction_kernel_extra : ckernel_reduction_prefix {
                                const intptr_t *src_stride, size_t count,
                                ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
+        extra->get_child_ckernel(sizeof(self_type));
     // No initialization, all reduction
     expr_strided_t opchild_reduce =
         echild_reduce->get_function<expr_strided_t>();
@@ -431,16 +431,15 @@ struct strided_inner_reduction_kernel_extra : ckernel_reduction_prefix {
     }
   }
 
-  static void destruct(ckernel_prefix *self)
+  void destruct_children()
   {
-    extra_type *e = reinterpret_cast<extra_type *>(self);
-    if (e->ident_ref != NULL) {
-      memory_block_decref(e->ident_ref);
+    if (ident_ref != NULL) {
+      memory_block_decref(ident_ref);
     }
     // The reduction kernel
-    self->destroy_child_ckernel(sizeof(extra_type));
+    get_child_ckernel()->destroy();
     // The destination initialization kernel
-    self->destroy_child_ckernel(e->dst_init_kernel_offset);
+    destroy_child_ckernel(dst_init_kernel_offset);
   }
 };
 
@@ -457,8 +456,10 @@ struct strided_inner_reduction_kernel_extra : ckernel_reduction_prefix {
  *  - The child destination initialization kernel must be *strided*.
  *
  */
-struct strided_inner_broadcast_kernel_extra : ckernel_reduction_prefix {
-  typedef strided_inner_broadcast_kernel_extra extra_type;
+struct strided_inner_broadcast_kernel_extra
+    : nd::base_kernel<strided_inner_broadcast_kernel_extra, kernel_request_host,
+                      1, reduction_ckernel_prefix> {
+  typedef strided_inner_broadcast_kernel_extra self_type;
 
   // The code assumes that size >= 1
   intptr_t size;
@@ -470,7 +471,7 @@ struct strided_inner_broadcast_kernel_extra : ckernel_reduction_prefix {
 
   static void single_first(char *dst, char *const *src, ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     expr_strided_t opchild_dst_init =
@@ -483,11 +484,11 @@ struct strided_inner_broadcast_kernel_extra : ckernel_reduction_prefix {
   static void single_first_with_ident(char *dst, char *const *src,
                                       ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
+        extra->get_child_ckernel(sizeof(self_type));
     expr_strided_t opchild_ident = echild_ident->get_function<expr_strided_t>();
     expr_strided_t opchild_reduce =
         echild_reduce->get_function<expr_strided_t>();
@@ -506,11 +507,11 @@ struct strided_inner_broadcast_kernel_extra : ckernel_reduction_prefix {
                             const intptr_t *src_stride, size_t count,
                             ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
+        extra->get_child_ckernel(sizeof(self_type));
     expr_strided_t opchild_dst_init =
         echild_dst_init->get_function<expr_strided_t>();
     expr_strided_t opchild_reduce =
@@ -548,11 +549,11 @@ struct strided_inner_broadcast_kernel_extra : ckernel_reduction_prefix {
                                        const intptr_t *src_stride, size_t count,
                                        ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
+        extra->get_child_ckernel(sizeof(self_type));
     expr_strided_t opchild_ident = echild_ident->get_function<expr_strided_t>();
     expr_strided_t opchild_reduce =
         echild_reduce->get_function<expr_strided_t>();
@@ -592,9 +593,9 @@ struct strided_inner_broadcast_kernel_extra : ckernel_reduction_prefix {
                                const intptr_t *src_stride, size_t count,
                                ckernel_prefix *extra)
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(extra_type));
+        extra->get_child_ckernel(sizeof(self_type));
     // No initialization, all reduction
     expr_strided_t opchild_reduce =
         echild_reduce->get_function<expr_strided_t>();
@@ -611,16 +612,15 @@ struct strided_inner_broadcast_kernel_extra : ckernel_reduction_prefix {
     }
   }
 
-  static void destruct(ckernel_prefix *self)
+  void destruct_children()
   {
-    extra_type *e = reinterpret_cast<extra_type *>(self);
-    if (e->ident_ref != NULL) {
-      memory_block_decref(e->ident_ref);
+    if (ident_ref != NULL) {
+      memory_block_decref(ident_ref);
     }
     // The reduction kernel
-    self->destroy_child_ckernel(sizeof(extra_type));
+    get_child_ckernel()->destroy();
     // The destination initialization kernel
-    self->destroy_child_ckernel(e->dst_init_kernel_offset);
+    destroy_child_ckernel(dst_init_kernel_offset);
   }
 };
 
