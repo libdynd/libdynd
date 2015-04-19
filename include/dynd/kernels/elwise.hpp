@@ -26,9 +26,10 @@ namespace nd {
     template <type_id_t dst_type_id, type_id_t src_type_id, int N>
     struct elwise_ck;
 
-    // elwise_virtual_ck does multidispatch to the templated elwise_ck with the
-    // right number of args
-
+    /**
+     * This defines the type and keyword argument resolution for
+     * an elwise arrfunc.
+     */
     template <int N>
     struct elwise_virtual_ck : base_virtual_kernel<elwise_virtual_ck<N>> {
       static void

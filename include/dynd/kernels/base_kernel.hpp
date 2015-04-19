@@ -19,6 +19,15 @@ namespace nd {
   template <typename T, kernel_request_t kernreq, int N>
   struct base_kernel;
 
+/**
+ * This is a helper macro for this header file. It's the memory kernel requests
+ * (kernel_request_host is the only one without CUDA enabled) to appropriate
+ * function qualifiers in the variadic arguments, which tell e.g. the CUDA
+ * compiler to build the functions for the GPU device.
+ *
+ * The classes it generates are the base classes to use for defining ckernels
+ * with a single and strided kernel function.
+ */
 #define BASE_KERNEL(KERNREQ, ...)                                              \
   template <typename T>                                                        \
   struct base_kernel<T, KERNREQ, -1> {                                         \
@@ -267,13 +276,15 @@ namespace nd {
                                                 intptr_t &inout_ckb_offset,
                                                 A &&... args)
   {
+    // Disallow requests from a different memory space
     switch (kernreq & kernel_request_memory) {
     case kernel_request_host:
       return self_type::make(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
           kernreq, inout_ckb_offset, std::forward<A>(args)...);
     default:
-      throw std::invalid_argument("unrecognized ckernel request");
+      throw std::invalid_argument(
+          "unrecognized ckernel request for the wrong memory space");
     }
   }
 
