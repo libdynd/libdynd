@@ -21,7 +21,7 @@
 using namespace std;
 using namespace dynd;
 
-option_type::option_type(const ndt::type &value_tp)
+ndt::option_type::option_type(const type &value_tp)
     : base_type(option_type_id, option_kind, value_tp.get_data_size(),
                 value_tp.get_data_alignment(),
                 value_tp.get_flags() &
@@ -54,31 +54,29 @@ option_type::option_type(const ndt::type &value_tp)
   }
 }
 
-option_type::~option_type()
-{
-}
+ndt::option_type::~option_type() {}
 
-void option_type::get_vars(std::unordered_set<std::string> &vars) const
+void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const
 {
   m_value_tp.get_vars(vars);
 }
 
-const ndt::type &option_type::make_nafunc_type()
+const ndt::type &ndt::option_type::make_nafunc_type()
 {
-  static ndt::type static_instance = ndt::make_struct(
-      ndt::make_arrfunc(ndt::make_tuple(ndt::make_typevar("T")),
-                        ndt::make_type<dynd_bool>()),
-      "is_avail", ndt::make_arrfunc(0, NULL, ndt::make_typevar("T")),
+  static ndt::type static_instance = make_struct(
+      make_arrfunc(make_tuple(make_typevar("T")),
+                        make_type<dynd_bool>()),
+      "is_avail", make_arrfunc(0, NULL, make_typevar("T")),
       "assign_na");
   return static_instance;
 }
 
-bool option_type::is_avail(const char *arrmeta, const char *data,
-                           const eval::eval_context *ectx) const
+bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
+                                const eval::eval_context *ectx) const
 {
   if (m_nafunc.is_null()) {
     stringstream ss;
-    ss << "cannot instantiate data with type " << ndt::type(this, true);
+    ss << "cannot instantiate data with type " << type(this, true);
     throw type_error(ss.str());
   }
 
@@ -117,10 +115,11 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
   } else {
     ckernel_builder<kernel_request_host> ckb;
     const arrfunc_type_data *af = get_is_avail_arrfunc();
-    ndt::type src_tp[1] = {ndt::type(this, true)};
+    type src_tp[1] = {type(this, true)};
     af->instantiate(af, get_is_avail_arrfunc_type(), NULL, &ckb, 0,
-                    ndt::make_type<dynd_bool>(), NULL, 1, src_tp, &arrmeta,
-                    kernel_request_single, ectx, nd::array(), std::map<nd::string, ndt::type>());
+                    make_type<dynd_bool>(), NULL, 1, src_tp, &arrmeta,
+                    kernel_request_single, ectx, nd::array(),
+                    std::map<nd::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<expr_single_t>()(&result, const_cast<char **>(&data),
@@ -129,12 +128,12 @@ bool option_type::is_avail(const char *arrmeta, const char *data,
   }
 }
 
-void option_type::assign_na(const char *arrmeta, char *data,
-                            const eval::eval_context *ectx) const
+void ndt::option_type::assign_na(const char *arrmeta, char *data,
+                                 const eval::eval_context *ectx) const
 {
   if (m_nafunc.is_null()) {
     stringstream ss;
-    ss << "cannot instantiate data with type " << ndt::type(this, true);
+    ss << "cannot instantiate data with type " << type(this, true);
     throw type_error(ss.str());
   }
 
@@ -176,20 +175,20 @@ void option_type::assign_na(const char *arrmeta, char *data,
     default:
       break;
     }
-  }
-  else {
+  } else {
     ckernel_builder<kernel_request_host> ckb;
     const arrfunc_type_data *af = get_assign_na_arrfunc();
     af->instantiate(af, get_assign_na_arrfunc_type(), NULL, &ckb, 0,
-                    ndt::type(this, true), arrmeta, 0, NULL, NULL,
-                    kernel_request_single, ectx, nd::array(), std::map<nd::string, ndt::type>());
+                    type(this, true), arrmeta, 0, NULL, NULL,
+                    kernel_request_single, ectx, nd::array(),
+                    std::map<nd::string, type>());
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<expr_single_t>()(data, NULL, ckp);
   }
 }
 
-void option_type::print_data(std::ostream &o, const char *arrmeta,
-                             const char *data) const
+void ndt::option_type::print_data(std::ostream &o, const char *arrmeta,
+                                  const char *data) const
 {
   if (is_avail(arrmeta, data, &eval::default_eval_context)) {
     m_value_tp.print_data(o, arrmeta, data);
@@ -198,16 +197,19 @@ void option_type::print_data(std::ostream &o, const char *arrmeta,
   }
 }
 
-void option_type::print_type(std::ostream &o) const { o << "?" << m_value_tp; }
+void ndt::option_type::print_type(std::ostream &o) const
+{
+  o << "?" << m_value_tp;
+}
 
-bool option_type::is_expression() const
+bool ndt::option_type::is_expression() const
 {
   // Even though the pointer is an instance of an base_expr_type,
   // we'll only call it an expression if the target is.
   return m_value_tp.is_expression();
 }
 
-bool option_type::is_unique_data_owner(const char *arrmeta) const
+bool ndt::option_type::is_unique_data_owner(const char *arrmeta) const
 {
   if (m_value_tp.get_flags() & type_flag_blockref) {
     return m_value_tp.extended()->is_unique_data_owner(arrmeta);
@@ -215,31 +217,31 @@ bool option_type::is_unique_data_owner(const char *arrmeta) const
   return true;
 }
 
-void option_type::transform_child_types(type_transform_fn_t transform_fn,
-                                        intptr_t arrmeta_offset, void *extra,
-                                        ndt::type &out_transformed_tp,
-                                        bool &out_was_transformed) const
+void ndt::option_type::transform_child_types(type_transform_fn_t transform_fn,
+                                             intptr_t arrmeta_offset,
+                                             void *extra,
+                                             type &out_transformed_tp,
+                                             bool &out_was_transformed) const
 {
-  ndt::type tmp_tp;
+  type tmp_tp;
   bool was_transformed = false;
   transform_fn(m_value_tp, arrmeta_offset + 0, extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = ndt::make_option(tmp_tp);
+    out_transformed_tp = make_option(tmp_tp);
     out_was_transformed = true;
   } else {
-    out_transformed_tp = ndt::type(this, true);
+    out_transformed_tp = type(this, true);
   }
 }
 
-ndt::type option_type::get_canonical_type() const
+ndt::type ndt::option_type::get_canonical_type() const
 {
-  return ndt::make_option(m_value_tp.get_canonical_type());
+  return make_option(m_value_tp.get_canonical_type());
 }
 
-void option_type::set_from_utf8_string(const char *arrmeta, char *data,
-                                       const char *utf8_begin,
-                                       const char *utf8_end,
-                                       const eval::eval_context *ectx) const
+void ndt::option_type::set_from_utf8_string(
+    const char *arrmeta, char *data, const char *utf8_begin,
+    const char *utf8_end, const eval::eval_context *ectx) const
 {
   if (m_value_tp.get_kind() != string_kind &&
       m_value_tp.get_kind() != dynamic_kind &&
@@ -261,16 +263,19 @@ void option_type::set_from_utf8_string(const char *arrmeta, char *data,
   }
 }
 
-ndt::type option_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim) const {
-    if (i == 0) {
-        return ndt::type(this, true);
-    } else {
-        return m_value_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim);
-    }
+ndt::type ndt::option_type::get_type_at_dimension(char **inout_arrmeta,
+                                                  intptr_t i,
+                                                  intptr_t total_ndim) const
+{
+  if (i == 0) {
+    return type(this, true);
+  } else {
+    return m_value_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim);
+  }
 }
 
-bool option_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                         const ndt::type &src_tp) const
+bool ndt::option_type::is_lossless_assignment(const type &dst_tp,
+                                              const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     return ::is_lossless_assignment(m_value_tp, src_tp);
@@ -279,7 +284,7 @@ bool option_type::is_lossless_assignment(const ndt::type &dst_tp,
   }
 }
 
-bool option_type::operator==(const base_type &rhs) const
+bool ndt::option_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -291,11 +296,12 @@ bool option_type::operator==(const base_type &rhs) const
   }
 }
 
-void option_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
+void ndt::option_type::arrmeta_default_construct(char *arrmeta,
+                                                 bool blockref_alloc) const
 {
   if (m_nafunc.is_null()) {
     stringstream ss;
-    ss << "cannot instantiate data with type " << ndt::type(this, true);
+    ss << "cannot instantiate data with type " << type(this, true);
     throw type_error(ss.str());
   }
 
@@ -304,10 +310,9 @@ void option_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) 
   }
 }
 
-void option_type::arrmeta_copy_construct(char *dst_arrmeta,
-                                         const char *src_arrmeta,
-                                         memory_block_data *embedded_reference)
-    const
+void ndt::option_type::arrmeta_copy_construct(
+    char *dst_arrmeta, const char *src_arrmeta,
+    memory_block_data *embedded_reference) const
 {
   if (!m_value_tp.is_builtin()) {
     m_value_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta,
@@ -315,29 +320,29 @@ void option_type::arrmeta_copy_construct(char *dst_arrmeta,
   }
 }
 
-void option_type::arrmeta_reset_buffers(char *arrmeta) const
+void ndt::option_type::arrmeta_reset_buffers(char *arrmeta) const
 {
   if (!m_value_tp.is_builtin()) {
     m_value_tp.extended()->arrmeta_reset_buffers(arrmeta);
   }
 }
 
-void option_type::arrmeta_finalize_buffers(char *arrmeta) const
+void ndt::option_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
   if (!m_value_tp.is_builtin()) {
     m_value_tp.extended()->arrmeta_finalize_buffers(arrmeta);
   }
 }
 
-void option_type::arrmeta_destruct(char *arrmeta) const
+void ndt::option_type::arrmeta_destruct(char *arrmeta) const
 {
   if (!m_value_tp.is_builtin()) {
     m_value_tp.extended()->arrmeta_destruct(arrmeta);
   }
 }
 
-void option_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                                      const std::string &indent) const
+void ndt::option_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                           const std::string &indent) const
 {
   o << indent << "option arrmeta\n";
   if (!m_value_tp.is_builtin()) {
@@ -345,26 +350,26 @@ void option_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   }
 }
 
-intptr_t option_type::make_assignment_kernel(
+intptr_t ndt::option_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   // Let expression types resolve themselves first
   if (this == dst_tp.extended() && src_tp.get_kind() == expr_kind) {
     return src_tp.extended()->make_assignment_kernel(
-        self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-        ectx, kwds);
+        self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+        kernreq, ectx, kwds);
   }
 
   return kernels::make_option_assignment_kernel(
       ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
 }
 
-bool option_type::match(const char *arrmeta, const ndt::type &candidate_tp,
-                        const char *candidate_arrmeta,
-                        std::map<nd::string, ndt::type> &tp_vars) const
+bool ndt::option_type::match(const char *arrmeta, const type &candidate_tp,
+                             const char *candidate_arrmeta,
+                             std::map<nd::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() != option_type_id) {
     return false;
@@ -377,17 +382,17 @@ bool option_type::match(const char *arrmeta, const ndt::type &candidate_tp,
 
 static ndt::type property_get_value_type(const ndt::type &tp)
 {
-  const option_type *pd = tp.extended<option_type>();
+  const ndt::option_type *pd = tp.extended<ndt::option_type>();
   return pd->get_value_type();
 }
 
 static nd::array property_get_nafunc(const ndt::type &tp)
 {
-  const option_type *pd = tp.extended<option_type>();
+  const ndt::option_type *pd = tp.extended<ndt::option_type>();
   return pd->get_nafunc();
 }
 
-void option_type::get_dynamic_type_properties(
+void ndt::option_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -395,80 +400,72 @@ void option_type::get_dynamic_type_properties(
       pair<string, gfunc::callable>(
           "value_type", gfunc::make_callable(&property_get_value_type, "self")),
       pair<string, gfunc::callable>(
-          "nafunc", gfunc::make_callable(&property_get_nafunc, "self")), };
+          "nafunc", gfunc::make_callable(&property_get_nafunc, "self")),
+  };
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
 namespace {
-  // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now,
-  // would need to be 19
-  struct static_options {
-    option_type bt1;
-    option_type bt2;
-    option_type bt3;
-    option_type bt4;
-    option_type bt5;
-    option_type bt6;
-    option_type bt7;
-    option_type bt8;
-    option_type bt9;
-    option_type bt10;
-    option_type bt11;
-    option_type bt12;
-    option_type bt13;
-    option_type bt14;
-    option_type bt15;
-    option_type bt16;
-    option_type bt17;
-    option_type bt18;
+// TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now,
+// would need to be 19
+struct static_options {
+  ndt::option_type bt1;
+  ndt::option_type bt2;
+  ndt::option_type bt3;
+  ndt::option_type bt4;
+  ndt::option_type bt5;
+  ndt::option_type bt6;
+  ndt::option_type bt7;
+  ndt::option_type bt8;
+  ndt::option_type bt9;
+  ndt::option_type bt10;
+  ndt::option_type bt11;
+  ndt::option_type bt12;
+  ndt::option_type bt13;
+  ndt::option_type bt14;
+  ndt::option_type bt15;
+  ndt::option_type bt16;
+  ndt::option_type bt17;
+  ndt::option_type bt18;
 
-    ndt::type static_builtins_instance[builtin_type_id_count];
+  ndt::type static_builtins_instance[builtin_type_id_count];
 
-    static_options()
-      : bt1(ndt::type((type_id_t)1)),
-        bt2(ndt::type((type_id_t)2)),
-        bt3(ndt::type((type_id_t)3)),
-        bt4(ndt::type((type_id_t)4)),
-        bt5(ndt::type((type_id_t)5)),
-        bt6(ndt::type((type_id_t)6)),
-        bt7(ndt::type((type_id_t)7)),
-        bt8(ndt::type((type_id_t)8)),
-        bt9(ndt::type((type_id_t)9)),
-        bt10(ndt::type((type_id_t)10)),
-        bt11(ndt::type((type_id_t)11)),
-        bt12(ndt::type((type_id_t)12)),
-        bt13(ndt::type((type_id_t)13)),
-        bt14(ndt::type((type_id_t)14)),
-        bt15(ndt::type((type_id_t)15)),
-        bt16(ndt::type((type_id_t)16)),
-        bt17(ndt::type((type_id_t)17)),
-        bt18(ndt::type((type_id_t)18))
-    {
-      static_builtins_instance[1] = ndt::type(&bt1, true);
-      static_builtins_instance[2] = ndt::type(&bt2, true);
-      static_builtins_instance[3] = ndt::type(&bt3, true);
-      static_builtins_instance[4] = ndt::type(&bt4, true);
-      static_builtins_instance[5] = ndt::type(&bt5, true);
-      static_builtins_instance[6] = ndt::type(&bt6, true);
-      static_builtins_instance[7] = ndt::type(&bt7, true);
-      static_builtins_instance[8] = ndt::type(&bt8, true);
-      static_builtins_instance[9] = ndt::type(&bt9, true);
-      static_builtins_instance[10] = ndt::type(&bt10, true);
-      static_builtins_instance[11] = ndt::type(&bt11, true);
-      static_builtins_instance[12] = ndt::type(&bt12, true);
-      static_builtins_instance[13] = ndt::type(&bt13, true);
-      static_builtins_instance[14] = ndt::type(&bt14, true);
-      static_builtins_instance[15] = ndt::type(&bt15, true);
-      static_builtins_instance[16] = ndt::type(&bt16, true);
-      static_builtins_instance[17] = ndt::type(&bt17, true);
-      static_builtins_instance[18] = ndt::type(&bt18, true);
-    }
-  };
+  static_options()
+      : bt1(ndt::type((type_id_t)1)), bt2(ndt::type((type_id_t)2)),
+        bt3(ndt::type((type_id_t)3)), bt4(ndt::type((type_id_t)4)),
+        bt5(ndt::type((type_id_t)5)), bt6(ndt::type((type_id_t)6)),
+        bt7(ndt::type((type_id_t)7)), bt8(ndt::type((type_id_t)8)),
+        bt9(ndt::type((type_id_t)9)), bt10(ndt::type((type_id_t)10)),
+        bt11(ndt::type((type_id_t)11)), bt12(ndt::type((type_id_t)12)),
+        bt13(ndt::type((type_id_t)13)), bt14(ndt::type((type_id_t)14)),
+        bt15(ndt::type((type_id_t)15)), bt16(ndt::type((type_id_t)16)),
+        bt17(ndt::type((type_id_t)17)), bt18(ndt::type((type_id_t)18))
+  {
+    static_builtins_instance[1] = ndt::type(&bt1, true);
+    static_builtins_instance[2] = ndt::type(&bt2, true);
+    static_builtins_instance[3] = ndt::type(&bt3, true);
+    static_builtins_instance[4] = ndt::type(&bt4, true);
+    static_builtins_instance[5] = ndt::type(&bt5, true);
+    static_builtins_instance[6] = ndt::type(&bt6, true);
+    static_builtins_instance[7] = ndt::type(&bt7, true);
+    static_builtins_instance[8] = ndt::type(&bt8, true);
+    static_builtins_instance[9] = ndt::type(&bt9, true);
+    static_builtins_instance[10] = ndt::type(&bt10, true);
+    static_builtins_instance[11] = ndt::type(&bt11, true);
+    static_builtins_instance[12] = ndt::type(&bt12, true);
+    static_builtins_instance[13] = ndt::type(&bt13, true);
+    static_builtins_instance[14] = ndt::type(&bt14, true);
+    static_builtins_instance[15] = ndt::type(&bt15, true);
+    static_builtins_instance[16] = ndt::type(&bt16, true);
+    static_builtins_instance[17] = ndt::type(&bt17, true);
+    static_builtins_instance[18] = ndt::type(&bt18, true);
+  }
+};
 } // anonymous namespace
 
-ndt::type ndt::make_option(const ndt::type &value_tp)
+ndt::type ndt::make_option(const type &value_tp)
 {
   // Static instances of the types, which have a reference
   // count > 0 for the lifetime of the program. This static
@@ -479,6 +476,6 @@ ndt::type ndt::make_option(const ndt::type &value_tp)
   if (value_tp.is_builtin()) {
     return so.static_builtins_instance[value_tp.get_type_id()];
   } else {
-    return ndt::type(new option_type(value_tp), false);
+    return type(new option_type(value_tp), false);
   }
 }

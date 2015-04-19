@@ -10,8 +10,8 @@
 using namespace std;
 using namespace dynd;
 
-adapt_type::adapt_type(const ndt::type &operand_type,
-                       const ndt::type &value_type, const nd::string &op)
+ndt::adapt_type::adapt_type(const type &operand_type, const type &value_type,
+                            const nd::string &op)
     : base_expr_type(
           adapt_type_id, expr_kind, operand_type.get_data_size(),
           operand_type.get_data_alignment(),
@@ -41,17 +41,17 @@ adapt_type::adapt_type(const ndt::type &operand_type,
   }
 }
 
-adapt_type::~adapt_type() {}
+ndt::adapt_type::~adapt_type() {}
 
-void adapt_type::print_data(std::ostream &DYND_UNUSED(o),
-                            const char *DYND_UNUSED(arrmeta),
-                            const char *DYND_UNUSED(data)) const
+void ndt::adapt_type::print_data(std::ostream &DYND_UNUSED(o),
+                                 const char *DYND_UNUSED(arrmeta),
+                                 const char *DYND_UNUSED(data)) const
 {
   throw runtime_error(
       "internal error: adapt_type::print_data isn't supposed to be called");
 }
 
-void adapt_type::print_type(std::ostream &o) const
+void ndt::adapt_type::print_type(std::ostream &o) const
 {
   o << "adapt[(" << m_operand_type << ") -> " << m_value_type << ", ";
   print_escaped_utf8_string(o, m_op, true);
@@ -59,13 +59,13 @@ void adapt_type::print_type(std::ostream &o) const
 }
 
 bool
-adapt_type::is_lossless_assignment(const ndt::type &DYND_UNUSED(dst_tp),
-                                   const ndt::type &DYND_UNUSED(src_tp)) const
+ndt::adapt_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
+                                        const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
 
-bool adapt_type::operator==(const base_type &rhs) const
+bool ndt::adapt_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -79,16 +79,15 @@ bool adapt_type::operator==(const base_type &rhs) const
 }
 
 ndt::type
-adapt_type::with_replaced_storage_type(const ndt::type &replacement_type) const
+ndt::adapt_type::with_replaced_storage_type(const type &replacement_type) const
 {
   if (m_operand_type.get_kind() != expr_kind) {
     // If there's no expression in the operand, just try substituting (the
     // constructor will error-check)
-    return ndt::type(new adapt_type(replacement_type, m_value_type, m_op),
-                     false);
+    return type(new adapt_type(replacement_type, m_value_type, m_op), false);
   } else {
     // With an expression operand, replace it farther down the chain
-    return ndt::type(
+    return type(
         new adapt_type(reinterpret_cast<const base_expr_type *>(
                            replacement_type.extended())
                            ->with_replaced_storage_type(replacement_type),
@@ -97,7 +96,7 @@ adapt_type::with_replaced_storage_type(const ndt::type &replacement_type) const
   }
 }
 
-size_t adapt_type::make_operand_to_value_assignment_kernel(
+size_t ndt::adapt_type::make_operand_to_value_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
@@ -107,7 +106,7 @@ size_t adapt_type::make_operand_to_value_assignment_kernel(
     return af->instantiate(af, m_forward.get_type(), NULL, ckb, ckb_offset,
                            m_value_type, dst_arrmeta, -1, &m_operand_type,
                            &src_arrmeta, kernreq, ectx, nd::array(),
-                           std::map<nd::string, ndt::type>());
+                           std::map<nd::string, type>());
   } else {
     stringstream ss;
     ss << "Cannot apply ";
@@ -117,7 +116,7 @@ size_t adapt_type::make_operand_to_value_assignment_kernel(
   }
 }
 
-size_t adapt_type::make_value_to_operand_assignment_kernel(
+size_t ndt::adapt_type::make_value_to_operand_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
@@ -127,7 +126,7 @@ size_t adapt_type::make_value_to_operand_assignment_kernel(
     return af->instantiate(af, m_reverse.get_type(), NULL, ckb, ckb_offset,
                            m_operand_type, src_arrmeta, -1, &m_value_type,
                            &dst_arrmeta, kernreq, ectx, nd::array(),
-                           std::map<nd::string, ndt::type>());
+                           std::map<nd::string, type>());
   } else {
     stringstream ss;
     ss << "Cannot apply ";

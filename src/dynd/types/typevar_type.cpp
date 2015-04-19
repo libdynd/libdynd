@@ -9,7 +9,7 @@
 using namespace std;
 using namespace dynd;
 
-typevar_type::typevar_type(const nd::string &name)
+ndt::typevar_type::typevar_type(const nd::string &name)
     : base_type(typevar_type_id, pattern_kind, 0, 1, type_flag_symbolic, 0, 0,
                 0),
       m_name(name)
@@ -25,46 +25,46 @@ typevar_type::typevar_type(const nd::string &name)
   }
 }
 
-void typevar_type::get_vars(std::unordered_set<std::string> &vars) const
+void ndt::typevar_type::get_vars(std::unordered_set<std::string> &vars) const
 {
   vars.insert(m_name.str());
 }
 
-void typevar_type::print_data(std::ostream &DYND_UNUSED(o),
-                              const char *DYND_UNUSED(arrmeta),
-                              const char *DYND_UNUSED(data)) const
+void ndt::typevar_type::print_data(std::ostream &DYND_UNUSED(o),
+                                   const char *DYND_UNUSED(arrmeta),
+                                   const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-void typevar_type::print_type(std::ostream &o) const
+void ndt::typevar_type::print_type(std::ostream &o) const
 {
   // Type variables are barewords starting with a capital letter
   o << m_name.str();
 }
 
-ndt::type typevar_type::apply_linear_index(
+ndt::type ndt::typevar_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    size_t DYND_UNUSED(current_i), const ndt::type &DYND_UNUSED(root_tp),
+    size_t DYND_UNUSED(current_i), const type &DYND_UNUSED(root_tp),
     bool DYND_UNUSED(leading_dimension)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-intptr_t typevar_type::apply_linear_index(
+intptr_t ndt::typevar_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    const char *DYND_UNUSED(arrmeta), const ndt::type &DYND_UNUSED(result_tp),
+    const char *DYND_UNUSED(arrmeta), const type &DYND_UNUSED(result_tp),
     char *DYND_UNUSED(out_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference),
-    size_t DYND_UNUSED(current_i), const ndt::type &DYND_UNUSED(root_tp),
+    size_t DYND_UNUSED(current_i), const type &DYND_UNUSED(root_tp),
     bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
     memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                          const ndt::type &src_tp) const
+bool ndt::typevar_type::is_lossless_assignment(const type &dst_tp,
+                                               const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -77,7 +77,7 @@ bool typevar_type::is_lossless_assignment(const ndt::type &dst_tp,
   return false;
 }
 
-bool typevar_type::operator==(const base_type &rhs) const
+bool ndt::typevar_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -89,29 +89,28 @@ bool typevar_type::operator==(const base_type &rhs) const
   }
 }
 
-void
-typevar_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                        bool DYND_UNUSED(blockref_alloc)) const
+void ndt::typevar_type::arrmeta_default_construct(
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-void typevar_type::arrmeta_copy_construct(
+void ndt::typevar_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-void typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+void ndt::typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-bool typevar_type::match(const char *DYND_UNUSED(arrmeta),
-                         const ndt::type &candidate_tp,
-                         const char *DYND_UNUSED(candidate_arrmeta),
-                         std::map<nd::string, ndt::type> &tp_vars) const
+bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta),
+                              const type &candidate_tp,
+                              const char *DYND_UNUSED(candidate_arrmeta),
+                              std::map<nd::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() == typevar_type_id) {
     return *this == *candidate_tp.extended();
@@ -122,7 +121,7 @@ bool typevar_type::match(const char *DYND_UNUSED(arrmeta),
     return false;
   }
 
-  ndt::type &tv_type = tp_vars[m_name];
+  type &tv_type = tp_vars[m_name];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
     tv_type = candidate_tp;
@@ -136,10 +135,10 @@ bool typevar_type::match(const char *DYND_UNUSED(arrmeta),
 
 static nd::array property_get_name(const ndt::type &tp)
 {
-  return tp.extended<typevar_type>()->get_name();
+  return tp.extended<ndt::typevar_type>()->get_name();
 }
 
-void typevar_type::get_dynamic_type_properties(
+void ndt::typevar_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -152,7 +151,7 @@ void typevar_type::get_dynamic_type_properties(
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
-bool dynd::is_valid_typevar_name(const char *begin, const char *end)
+bool ndt::is_valid_typevar_name(const char *begin, const char *end)
 {
   if (begin != end) {
     if (*begin < 'A' || *begin > 'Z') {
@@ -181,11 +180,10 @@ nd::array ndt::make_typevar_range(const char *name, intptr_t count)
   if (count > 10) {
     throw runtime_error("TODO: extend make_typevar_range");
   }
-  result = nd::empty(count, ndt::make_type());
-  auto result_ptr =
-      reinterpret_cast<ndt::type *>(result.get_readwrite_originptr());
+  result = nd::empty(count, make_type());
+  auto result_ptr = reinterpret_cast<type *>(result.get_readwrite_originptr());
   for (int i = 0; i < count; ++i) {
-    result_ptr[i] = ndt::make_typevar(s);
+    result_ptr[i] = make_typevar(s);
     s[s.size() - 1]++;
   }
   return move(result);

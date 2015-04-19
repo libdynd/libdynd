@@ -8,7 +8,7 @@
 using namespace std;
 using namespace dynd;
 
-c_contiguous_type::c_contiguous_type(const ndt::type &child_tp)
+ndt::c_contiguous_type::c_contiguous_type(const type &child_tp)
     : base_type(c_contiguous_type_id, kind_kind, 0, 1,
                 type_flag_symbolic |
                     (child_tp.get_flags() & (type_flags_value_inherited |
@@ -24,46 +24,44 @@ c_contiguous_type::c_contiguous_type(const ndt::type &child_tp)
   }
 }
 
-void c_contiguous_type::print_data(std::ostream &o, const char *arrmeta,
-                                   const char *data) const
+void ndt::c_contiguous_type::print_data(std::ostream &o, const char *arrmeta,
+                                        const char *data) const
 {
   m_child_tp.print_data(o, arrmeta, data);
 }
 
-void c_contiguous_type::print_type(std::ostream &o) const
+void ndt::c_contiguous_type::print_type(std::ostream &o) const
 {
   o << "C[" << m_child_tp << "]";
 }
 
-void c_contiguous_type::get_shape(intptr_t ndim, intptr_t i,
-                                  intptr_t *out_shape, const char *arrmeta,
-                                  const char *data) const
+void ndt::c_contiguous_type::get_shape(intptr_t ndim, intptr_t i,
+                                       intptr_t *out_shape, const char *arrmeta,
+                                       const char *data) const
 {
   m_child_tp.extended()->get_shape(ndim, i, out_shape, arrmeta, data);
 }
 
-ndt::type c_contiguous_type::apply_linear_index(intptr_t nindices,
-                                                const irange *indices,
-                                                size_t current_i,
-                                                const ndt::type &root_tp,
-                                                bool leading_dimension) const
+ndt::type ndt::c_contiguous_type::apply_linear_index(
+    intptr_t nindices, const irange *indices, size_t current_i,
+    const type &root_tp, bool leading_dimension) const
 {
   if (nindices == 0) {
-    return ndt::type(this, true);
+    return type(this, true);
   }
 
-  ndt::type child_tp = m_child_tp.extended()->apply_linear_index(
+  type child_tp = m_child_tp.extended()->apply_linear_index(
       nindices, indices, current_i, root_tp, leading_dimension);
 
   // TODO: We can preserve c_contiguous in some cases
   return child_tp;
 }
 
-intptr_t c_contiguous_type::apply_linear_index(
+intptr_t ndt::c_contiguous_type::apply_linear_index(
     intptr_t nindices, const irange *indices, const char *arrmeta,
-    const ndt::type &result_type, char *out_arrmeta,
+    const type &result_type, char *out_arrmeta,
     memory_block_data *embedded_reference, size_t current_i,
-    const ndt::type &root_tp, bool leading_dimension, char **inout_data,
+    const type &root_tp, bool leading_dimension, char **inout_data,
     memory_block_data **inout_dataref) const
 {
   if (m_child_tp.is_builtin()) {
@@ -77,36 +75,38 @@ intptr_t c_contiguous_type::apply_linear_index(
       inout_dataref);
 }
 
-ndt::type c_contiguous_type::at_single(intptr_t i0, const char **inout_arrmeta,
-                                       const char **inout_data) const
+ndt::type ndt::c_contiguous_type::at_single(intptr_t i0,
+                                            const char **inout_arrmeta,
+                                            const char **inout_data) const
 {
-  return ndt::make_c_contiguous(
+  return make_c_contiguous(
       m_child_tp.extended()->at_single(i0, inout_arrmeta, inout_data));
 }
 
-ndt::type c_contiguous_type::get_type_at_dimension(char **inout_arrmeta,
-                                                   intptr_t i,
-                                                   intptr_t total_ndim) const
+ndt::type
+ndt::c_contiguous_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i,
+                                              intptr_t total_ndim) const
 {
   if (i == 0) {
-    return ndt::type(this, true);
+    return type(this, true);
   }
 
-  ndt::type child_tp = m_child_tp.extended()->get_type_at_dimension(
-      inout_arrmeta, i, total_ndim);
+  type child_tp = m_child_tp.extended()->get_type_at_dimension(inout_arrmeta, i,
+                                                               total_ndim);
   if (child_tp.is_builtin()) {
     return child_tp;
   }
 
-  return ndt::make_c_contiguous(child_tp);
+  return make_c_contiguous(child_tp);
 }
 
-bool c_contiguous_type::is_c_contiguous(const char *DYND_UNUSED(arrmeta)) const
+bool
+ndt::c_contiguous_type::is_c_contiguous(const char *DYND_UNUSED(arrmeta)) const
 {
   return true;
 }
 
-bool c_contiguous_type::operator==(const base_type &rhs) const
+bool ndt::c_contiguous_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -118,31 +118,32 @@ bool c_contiguous_type::operator==(const base_type &rhs) const
   }
 }
 
-void c_contiguous_type::arrmeta_default_construct(
+void ndt::c_contiguous_type::arrmeta_default_construct(
     char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
   stringstream ss;
   ss << "Cannot default construct arrmeta for symbolic type "
-     << ndt::type(this, true);
+     << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void c_contiguous_type::arrmeta_copy_construct(
+void ndt::c_contiguous_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
   stringstream ss;
-  ss << "Cannot copy construct arrmeta for symbolic type "
-     << ndt::type(this, true);
+  ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void c_contiguous_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::c_contiguous_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+{
+}
 
-bool c_contiguous_type::match(const char *arrmeta,
-                              const ndt::type &candidate_tp,
-                              const char *candidate_arrmeta,
-                              std::map<nd::string, ndt::type> &tp_vars) const
+bool ndt::c_contiguous_type::match(const char *arrmeta,
+                                   const type &candidate_tp,
+                                   const char *candidate_arrmeta,
+                                   std::map<nd::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() == c_contiguous_type_id) {
     return m_child_tp.match(

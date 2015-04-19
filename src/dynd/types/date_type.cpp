@@ -33,17 +33,17 @@
 using namespace std;
 using namespace dynd;
 
-date_type::date_type()
+ndt::date_type::date_type()
     : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value,
                 type_flag_scalar, 0, 0, 0)
 {
 }
 
-date_type::~date_type() {}
+ndt::date_type::~date_type() {}
 
-void date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data,
-                        assign_error_mode errmode, int32_t year, int32_t month,
-                        int32_t day) const
+void ndt::date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data,
+                             assign_error_mode errmode, int32_t year,
+                             int32_t month, int32_t day) const
 {
   if (errmode != assign_error_nocheck &&
       !date_ymd::is_valid(year, month, day)) {
@@ -55,10 +55,10 @@ void date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data,
   *reinterpret_cast<int32_t *>(data) = date_ymd::to_days(year, month, day);
 }
 
-void date_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
-                                     char *data, const char *utf8_begin,
-                                     const char *utf8_end,
-                                     const eval::eval_context *ectx) const
+void ndt::date_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
+                                          char *data, const char *utf8_begin,
+                                          const char *utf8_end,
+                                          const eval::eval_context *ectx) const
 {
   date_ymd ymd;
   ymd.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order,
@@ -66,16 +66,17 @@ void date_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
   *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }
 
-date_ymd date_type::get_ymd(const char *DYND_UNUSED(arrmeta),
-                            const char *data) const
+date_ymd ndt::date_type::get_ymd(const char *DYND_UNUSED(arrmeta),
+                                 const char *data) const
 {
   date_ymd ymd;
   ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
   return ymd;
 }
 
-void date_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                           const char *data) const
+void ndt::date_type::print_data(std::ostream &o,
+                                const char *DYND_UNUSED(arrmeta),
+                                const char *data) const
 {
   date_ymd ymd;
   ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
@@ -87,10 +88,10 @@ void date_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
   }
 }
 
-void date_type::print_type(std::ostream &o) const { o << "date"; }
+void ndt::date_type::print_type(std::ostream &o) const { o << "date"; }
 
-bool date_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                       const ndt::type &src_tp) const
+bool ndt::date_type::is_lossless_assignment(const type &dst_tp,
+                                            const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -106,7 +107,7 @@ bool date_type::is_lossless_assignment(const ndt::type &dst_tp,
   }
 }
 
-bool date_type::operator==(const base_type &rhs) const
+bool ndt::date_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -118,10 +119,10 @@ bool date_type::operator==(const base_type &rhs) const
   }
 }
 
-intptr_t date_type::make_assignment_kernel(
+intptr_t ndt::date_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
@@ -135,7 +136,7 @@ intptr_t date_type::make_assignment_kernel(
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, ndt::make_property(dst_tp, "struct"),
+          self, af_tp, ckb, ckb_offset, make_property(dst_tp, "struct"),
           dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx, kwds);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
@@ -149,10 +150,9 @@ intptr_t date_type::make_assignment_kernel(
                                                    dst_arrmeta, kernreq, ectx);
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta,
-                                      ndt::make_property(src_tp, "struct"),
-                                      src_arrmeta, kernreq, ectx, kwds);
+      return ::make_assignment_kernel(
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
+          make_property(src_tp, "struct"), src_arrmeta, kernreq, ectx, kwds);
     }
     // TODO
   }
@@ -162,13 +162,10 @@ intptr_t date_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-size_t date_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                         const ndt::type &src0_tp,
-                                         const char *src0_arrmeta,
-                                         const ndt::type &src1_tp,
-                                         const char *src1_arrmeta,
-                                         comparison_type_t comptype,
-                                         const eval::eval_context *ectx) const
+size_t ndt::date_type::make_comparison_kernel(
+    void *ckb, intptr_t ckb_offset, const type &src0_tp,
+    const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
+    comparison_type_t comptype, const eval::eval_context *ectx) const
 {
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
@@ -189,7 +186,7 @@ size_t date_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
 // static pair<string, gfunc::callable> date_type_properties[] = {
 //};
 
-void date_type::get_dynamic_type_properties(
+void ndt::date_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -242,7 +239,7 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
       .view_scalars(ndt::make_date());
 }
 
-void date_type::get_dynamic_type_functions(
+void ndt::date_type::get_dynamic_type_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {
@@ -274,7 +271,7 @@ static nd::array property_ndo_get_day(const nd::array &n)
   return n.replace_dtype(ndt::make_property(n.get_dtype(), "day"));
 }
 
-void date_type::get_dynamic_array_properties(
+void ndt::date_type::get_dynamic_array_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -329,7 +326,7 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year,
                            make_replace_kernelgen(year, month, day)));
 }
 
-void date_type::get_dynamic_array_functions(
+void ndt::date_type::get_dynamic_array_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {
@@ -430,8 +427,8 @@ enum date_properties_t {
 };
 }
 
-size_t
-date_type::get_elwise_property_index(const std::string &property_name) const
+size_t ndt::date_type::get_elwise_property_index(
+    const std::string &property_name) const
 {
   if (property_name == "year") {
     return dateprop_year;
@@ -452,9 +449,9 @@ date_type::get_elwise_property_index(const std::string &property_name) const
   }
 }
 
-ndt::type date_type::get_elwise_property_type(size_t property_index,
-                                              bool &out_readable,
-                                              bool &out_writable) const
+ndt::type ndt::date_type::get_elwise_property_type(size_t property_index,
+                                                   bool &out_readable,
+                                                   bool &out_writable) const
 {
   switch (property_index) {
   case dateprop_year:
@@ -463,7 +460,7 @@ ndt::type date_type::get_elwise_property_type(size_t property_index,
   case dateprop_weekday:
     out_readable = true;
     out_writable = false;
-    return ndt::make_type<int32_t>();
+    return make_type<int32_t>();
   case dateprop_struct:
     out_readable = true;
     out_writable = true;
@@ -471,11 +468,11 @@ ndt::type date_type::get_elwise_property_type(size_t property_index,
   default:
     out_readable = false;
     out_writable = false;
-    return ndt::make_type<void>();
+    return make_type<void>();
   }
 }
 
-size_t date_type::make_elwise_property_getter_kernel(
+size_t ndt::date_type::make_elwise_property_getter_kernel(
     void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta),
     const char *DYND_UNUSED(src_arrmeta), size_t src_property_index,
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -504,7 +501,7 @@ size_t date_type::make_elwise_property_getter_kernel(
   }
 }
 
-size_t date_type::make_elwise_property_setter_kernel(
+size_t ndt::date_type::make_elwise_property_setter_kernel(
     void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta),
     size_t dst_property_index, const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -561,7 +558,7 @@ struct date_assign_na_ck
 };
 } // anonymous namespace
 
-nd::array date_type::get_option_nafunc() const
+nd::array ndt::date_type::get_option_nafunc() const
 {
   // Use a typevar instead of option[T] to avoid a circular dependency
   nd::array naf = nd::empty(option_type::make_nafunc_type());
@@ -576,17 +573,17 @@ nd::array date_type::get_option_nafunc() const
   return naf;
 }
 
-bool date_type::adapt_type(const ndt::type &operand_tp, const nd::string &op,
-                           nd::arrfunc &out_forward,
-                           nd::arrfunc &out_reverse) const
+bool ndt::date_type::adapt_type(const type &operand_tp, const nd::string &op,
+                                nd::arrfunc &out_forward,
+                                nd::arrfunc &out_reverse) const
 {
   return make_date_adapter_arrfunc(operand_tp, op, out_forward, out_reverse);
 }
 
-bool date_type::reverse_adapt_type(const ndt::type &value_tp,
-                                   const nd::string &op,
-                                   nd::arrfunc &out_forward,
-                                   nd::arrfunc &out_reverse) const
+bool ndt::date_type::reverse_adapt_type(const type &value_tp,
+                                        const nd::string &op,
+                                        nd::arrfunc &out_forward,
+                                        nd::arrfunc &out_reverse) const
 {
   // Note that out_reverse and out_forward are swapped compared with
   // adapt_type

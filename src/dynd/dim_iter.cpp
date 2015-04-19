@@ -191,7 +191,7 @@ void dynd::make_buffered_strided_dim_iter(
     nd::array buf = nd::dtyped_empty(buffer_ndim, buffer_shape.get(), val_tp);
     if (buffer_ndim > 2 && val_tp.get_type_id() == fixed_dim_type_id) {
         // Reorder the strides to preserve F-order if it's a strided array
-        val_tp.extended<fixed_dim_type>()->reorder_default_constructed_strides(
+        val_tp.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(
             buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), mem_tp,
             mem_arrmeta);
     }

@@ -571,7 +571,7 @@ TEST(StringType, Iter) {
     nd::array a = str;
 
     dim_iter it;
-    static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
+    static_cast<const ndt::base_string_type *>(a.get_dtype().extended())->make_string_iter(
         &it, string_encoding_utf_8, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
     // With a short string like this, the entire string will be
     // provided in one go
@@ -580,7 +580,7 @@ TEST(StringType, Iter) {
     EXPECT_EQ(0, memcmp(str, it.data_ptr, it.data_elcount));
     it.destroy();
 
-    static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
+    static_cast<const ndt::base_string_type *>(a.get_dtype().extended())->make_string_iter(
         &it, string_encoding_utf_16, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
     // With a short string like this, the entire string will be
     // provided in one go
@@ -589,7 +589,7 @@ TEST(StringType, Iter) {
     EXPECT_TRUE(ascii_T_compare(str, reinterpret_cast<const uint16_t *>(it.data_ptr), it.data_elcount));
     it.destroy();
 
-    static_cast<const base_string_type *>(a.get_dtype().extended())->make_string_iter(
+    static_cast<const ndt::base_string_type *>(a.get_dtype().extended())->make_string_iter(
         &it, string_encoding_utf_32, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
     // With a short string like this, the entire string will be
     // provided in one go

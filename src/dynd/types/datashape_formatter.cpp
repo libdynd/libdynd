@@ -26,7 +26,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp,
   if (arrmeta == NULL) {
     data = NULL;
   }
-  const base_struct_type *bsd = tp.extended<base_struct_type>();
+  const ndt::base_struct_type *bsd = tp.extended<ndt::base_struct_type>();
   size_t field_count = bsd->get_field_count();
   const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
   const uintptr_t *data_offsets = NULL;
@@ -61,11 +61,11 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
     if (tp.get_kind() == kind_kind) {
       // A symbolic type, so arrmeta/data can't exist
       o << "Fixed * ";
-      format_datashape(o, tp.extended<base_dim_type>()->get_element_type(),
+      format_datashape(o, tp.extended<ndt::base_dim_type>()->get_element_type(),
                        NULL, NULL, indent, multiline);
       break;
     }
-    const fixed_dim_type *fad = tp.extended<fixed_dim_type>();
+    const ndt::fixed_dim_type *fad = tp.extended<ndt::fixed_dim_type>();
     intptr_t dim_size = fad->get_fixed_dim_size();
     o << dim_size << " * ";
     // Allow data to keep going only if the dimension size is 1
@@ -78,7 +78,7 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
     break;
   }
   case var_dim_type_id: {
-    const var_dim_type *vad = tp.extended<var_dim_type>();
+    const ndt::var_dim_type *vad = tp.extended<ndt::var_dim_type>();
     const char *child_data = NULL;
     if (data == NULL || arrmeta == NULL) {
       o << "var * ";

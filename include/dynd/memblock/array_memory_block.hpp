@@ -25,7 +25,7 @@ struct array_preamble {
      * simply contains the type id. If (m_type&~builtin_type_id_mask)
      * is 0, its a builtin type.
      */
-    const base_type *m_type;
+    const ndt::base_type *m_type;
     char *m_data_pointer;
     uint64_t m_flags;
     memory_block_data *m_data_reference;

@@ -21,84 +21,91 @@
 namespace dynd {
 
 struct pointer_type_arrmeta {
-    /**
-     * A reference to the memory block which contains the data.
-     */
-    memory_block_data *blockref;
-    /* Each pointed-to destination is offset by this amount */
-    intptr_t offset;
+  /**
+   * A reference to the memory block which contains the data.
+   */
+  memory_block_data *blockref;
+  /* Each pointed-to destination is offset by this amount */
+  intptr_t offset;
 };
 
-class pointer_type : public base_expr_type {
-    ndt::type m_target_tp;
+namespace ndt {
 
-public:
-    pointer_type(const ndt::type& target_tp);
+  class pointer_type : public base_expr_type {
+    type m_target_tp;
+
+  public:
+    pointer_type(const type &target_tp);
 
     virtual ~pointer_type();
 
-    const ndt::type& get_value_type() const {
-        return m_target_tp.value_type();
-    }
-    const ndt::type& get_operand_type() const;
+    const type &get_value_type() const { return m_target_tp.value_type(); }
+    const type &get_operand_type() const;
 
-    const ndt::type& get_target_type() const {
-        return m_target_tp;
-    }
+    const type &get_target_type() const { return m_target_tp; }
 
-    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta,
+                    const char *data) const;
 
-    void print_type(std::ostream& o) const;
+    void print_type(std::ostream &o) const;
 
-    inline bool is_type_subarray(const ndt::type& subarray_tp) const {
-        // Uniform dimensions can share one implementation
-        return (!subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended())) ||
-                        m_target_tp.is_type_subarray(subarray_tp);
+    inline bool is_type_subarray(const type &subarray_tp) const
+    {
+      // Uniform dimensions can share one implementation
+      return (!subarray_tp.is_builtin() &&
+              (*this) == (*subarray_tp.extended())) ||
+             m_target_tp.is_type_subarray(subarray_tp);
     }
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
     void transform_child_types(type_transform_fn_t transform_fn,
                                intptr_t arrmeta_offset, void *extra,
-                               ndt::type &out_transformed_tp,
+                               type &out_transformed_tp,
                                bool &out_was_transformed) const;
-    ndt::type get_canonical_type() const;
+    type get_canonical_type() const;
 
-    ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
-                size_t current_i, const ndt::type& root_tp, bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
-                    const ndt::type& result_tp, char *out_arrmeta,
-                    memory_block_data *embedded_reference,
-                    size_t current_i, const ndt::type& root_tp,
-                    bool leading_dimension, char **inout_data,
-                    memory_block_data **inout_dataref) const;
-    ndt::type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
+    type apply_linear_index(intptr_t nindices, const irange *indices,
+                            size_t current_i, const type &root_tp,
+                            bool leading_dimension) const;
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
+                                const char *arrmeta, const type &result_tp,
+                                char *out_arrmeta,
+                                memory_block_data *embedded_reference,
+                                size_t current_i, const type &root_tp,
+                                bool leading_dimension, char **inout_data,
+                                memory_block_data **inout_dataref) const;
+    type at_single(intptr_t i0, const char **inout_arrmeta,
+                   const char **inout_data) const;
 
-    ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
+    type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
+                               intptr_t total_ndim = 0) const;
 
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                   const char *arrmeta, const char *data) const;
 
     axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+    bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
-    bool operator==(const base_type& rhs) const;
+    bool operator==(const base_type &rhs) const;
 
-    ndt::type with_replaced_storage_type(const ndt::type& replacement_type) const;
+    type with_replaced_storage_type(const type &replacement_type) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
-    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                             const std::string &indent) const;
 
     intptr_t make_assignment_kernel(
         const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        const ndt::type &src_tp, const char *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *ectx,
-        const nd::array &kwds) const;
+        intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+        const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx, const nd::array &kwds) const;
 
     size_t make_operand_to_value_assignment_kernel(
         void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
@@ -107,25 +114,25 @@ public:
 
     nd::array get_option_nafunc() const;
 
-    bool match(const char *arrmeta, const ndt::type &candidate_tp,
+    bool match(const char *arrmeta, const type &candidate_tp,
                const char *candidate_arrmeta,
-               std::map<nd::string, ndt::type> &tp_vars) const;
+               std::map<nd::string, type> &tp_vars) const;
 
     void get_dynamic_type_properties(
-                    const std::pair<std::string, gfunc::callable> **out_properties,
-                    size_t *out_count) const;
+        const std::pair<std::string, gfunc::callable> **out_properties,
+        size_t *out_count) const;
     void get_dynamic_array_functions(
-                    const std::pair<std::string, gfunc::callable> **out_functions,
-                    size_t *out_count) const;
-};
+        const std::pair<std::string, gfunc::callable> **out_functions,
+        size_t *out_count) const;
+  };
 
-namespace ndt {
-    ndt::type make_pointer(const ndt::type& target_tp);
+  type make_pointer(const type &target_tp);
 
-    template<typename Tnative>
-    inline ndt::type make_pointer() {
-        return make_pointer(ndt::make_type<Tnative>());
-    }
-} // namespace ndt
+  template <typename Tnative>
+  type make_pointer()
+  {
+    return make_pointer(make_type<Tnative>());
+  }
 
+} // namespace dynd::ndt
 } // namespace dynd

@@ -32,7 +32,7 @@ template <> struct dcs_size_of<double> {enum {value = sizeof(double)};};
 template <> struct dcs_size_of<complex<float> > {enum {value = sizeof(complex<float>)};};
 template <> struct dcs_size_of<complex<double> > {enum {value = sizeof(complex<double>)};};
 template <> struct dcs_size_of<array_preamble *> {enum {value = sizeof(array_preamble *)};};
-template <> struct dcs_size_of<const base_type *> {enum {value = sizeof(const base_type *)};};
+template <> struct dcs_size_of<const ndt::base_type *> {enum {value = sizeof(const ndt::base_type *)};};
 template <> struct dcs_size_of<string_type_data> {enum {value = sizeof(string_type_data)};};
 template <typename T, int N> struct dcs_size_of<T[N]> {enum {value = N * sizeof(T)};};
 
@@ -101,7 +101,7 @@ template <> struct parameter_type_of<float> {typedef float type;};
 template <> struct parameter_type_of<double> {typedef double type;};
 template <typename T> struct parameter_type_of<complex<T> > {typedef complex<T> type;};
 template <> struct parameter_type_of<nd::array> {typedef array_preamble *type;};
-template <> struct parameter_type_of<ndt::type> {typedef const base_type *type;};
+template <> struct parameter_type_of<ndt::type> {typedef const ndt::base_type *type;};
 template <> struct parameter_type_of<std::string> {typedef string_type_data type;};
 
 template <typename T> struct make_parameter_type {inline static ndt::type make() {
@@ -174,7 +174,7 @@ template <> struct unbox_param<nd::array> {
 };
 template <> struct unbox_param<ndt::type> {
     inline static ndt::type unbox(char *v) {
-        return ndt::type(*reinterpret_cast<base_type **>(v), true);
+        return ndt::type(*reinterpret_cast<ndt::base_type **>(v), true);
     }
 };
 template <> struct unbox_param<std::string> {

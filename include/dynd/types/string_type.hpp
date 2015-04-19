@@ -16,34 +16,35 @@
 namespace dynd {
 
 struct string_type_arrmeta {
-    /**
-     * A reference to the memory block which contains the string's data.
-     * NOTE: This is identical to bytes_type_arrmeta, by design. Maybe
-     *       both should become a typedef to a common class?
-     */
-    memory_block_data *blockref;
+  /**
+   * A reference to the memory block which contains the string's data.
+   * NOTE: This is identical to bytes_type_arrmeta, by design. Maybe
+   *       both should become a typedef to a common class?
+   */
+  memory_block_data *blockref;
 };
 
 struct string_type_data {
-    char *begin;
-    char *end;
+  char *begin;
+  char *end;
 };
 
-class string_type : public base_string_type {
+namespace ndt {
+
+  class string_type : public base_string_type {
     string_encoding_t m_encoding;
 
-public:
+  public:
     string_type(string_encoding_t encoding);
 
     virtual ~string_type();
 
-    inline string_encoding_t get_encoding() const {
-        return m_encoding;
-    }
+    inline string_encoding_t get_encoding() const { return m_encoding; }
 
     /** Alignment of the string data being pointed to. */
-    inline size_t get_target_alignment() const {
-        return string_encoding_char_size_table[m_encoding];
+    inline size_t get_target_alignment() const
+    {
+      return string_encoding_char_size_table[m_encoding];
     }
 
     void get_string_range(const char **out_begin, const char **out_end,
@@ -52,61 +53,61 @@ public:
                               const char *utf8_begin, const char *utf8_end,
                               const eval::eval_context *ectx) const;
 
-    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta,
+                    const char *data) const;
 
-    void print_type(std::ostream& o) const;
+    void print_type(std::ostream &o) const;
 
     bool is_unique_data_owner(const char *arrmeta) const;
-    ndt::type get_canonical_type() const;
+    type get_canonical_type() const;
 
-        void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                   const char *arrmeta, const char *data) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+    bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
-    bool operator==(const base_type& rhs) const;
+    bool operator==(const base_type &rhs) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
-    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                memory_block_data *embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                             const std::string &indent) const;
 
     intptr_t make_assignment_kernel(
         const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        const ndt::type &src_tp, const char *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *ectx,
-        const nd::array &kwds) const;
+        intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+        const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx, const nd::array &kwds) const;
 
-    size_t make_comparison_kernel(
-                    void *ckb, intptr_t ckb_offset,
-                    const ndt::type& src0_dt, const char *src0_arrmeta,
-                    const ndt::type& src1_dt, const char *src1_arrmeta,
-                    comparison_type_t comptype,
-                    const eval::eval_context *ectx) const;
+    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
+                                  const type &src0_dt, const char *src0_arrmeta,
+                                  const type &src1_dt, const char *src1_arrmeta,
+                                  comparison_type_t comptype,
+                                  const eval::eval_context *ectx) const;
 
     void make_string_iter(dim_iter *out_di, string_encoding_t encoding,
-            const char *arrmeta, const char *data,
-            const memory_block_ptr& ref,
-            intptr_t buffer_max_mem,
-            const eval::eval_context *ectx) const;
+                          const char *arrmeta, const char *data,
+                          const memory_block_ptr &ref, intptr_t buffer_max_mem,
+                          const eval::eval_context *ectx) const;
 
     nd::array get_option_nafunc() const;
-};
+  };
 
-namespace ndt {
   /** Returns type "string" */
-  inline const ndt::type &make_string()
+  inline const type &make_string()
   {
     static const type string_tp(new string_type(string_encoding_utf_8), false);
     return string_tp;
   }
   /** Returns type "string[<encoding>]" */
-  inline ndt::type make_string(string_encoding_t encoding)
+  inline type make_string(string_encoding_t encoding)
   {
-    return ndt::type(new string_type(encoding), false);
+    return type(new string_type(encoding), false);
   }
-} // namespace ndt
 
+} // namespace dynd::ndt
 } // namespace dynd

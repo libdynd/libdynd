@@ -15,8 +15,8 @@ using namespace std;
 using namespace dynd;
 
 TEST(Type, NDTTypeObject) {
-  // The ndt::type just contains one base_type *
-  EXPECT_EQ(sizeof(base_type *), sizeof(ndt::type));
+  // The ndt::type just contains one ndt::base_type *
+  EXPECT_EQ(sizeof(ndt::base_type *), sizeof(ndt::type));
 }
 
 TEST(Type, BasicConstructor) {

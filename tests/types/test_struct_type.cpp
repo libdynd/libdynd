@@ -64,7 +64,7 @@ TEST(StructType, IOStream) {
 
 TEST(StructType, CreateOneField) {
     ndt::type dt;
-    const struct_type *tdt;
+    const ndt::struct_type *tdt;
 
     // Struct with one field
     dt = ndt::make_struct(ndt::make_type<int32_t>(), "x");
@@ -75,7 +75,7 @@ TEST(StructType, CreateOneField) {
     EXPECT_EQ(4u, dt.get_data_alignment());
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
-    tdt = dt.extended<struct_type>();
+    tdt = dt.extended<ndt::struct_type>();
     EXPECT_EQ(1, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(0));
     EXPECT_EQ("x", tdt->get_field_name(0));
@@ -88,7 +88,7 @@ struct two_field_struct {
 
 TEST(StructType, CreateTwoField) {
     ndt::type dt;
-    const struct_type *tdt;
+    const ndt::struct_type *tdt;
 
     // Struct with two fields
     dt = ndt::make_struct(ndt::make_type<int64_t>(), "a", ndt::make_type<int32_t>(), "b");
@@ -99,7 +99,7 @@ TEST(StructType, CreateTwoField) {
     EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_data_alignment());
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
-    tdt = dt.extended<struct_type>();
+    tdt = dt.extended<ndt::struct_type>();
     EXPECT_EQ(2, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
@@ -115,7 +115,7 @@ struct three_field_struct {
 
 TEST(StructType, CreateThreeField) {
     ndt::type dt;
-    const struct_type *tdt;
+    const ndt::struct_type *tdt;
 
     // Struct with three fields
     ndt::type d1 = ndt::make_type<int64_t>();
@@ -129,7 +129,7 @@ TEST(StructType, CreateThreeField) {
     EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_data_alignment());
     EXPECT_FALSE(dt.is_pod());
     EXPECT_EQ(0u, (dt.get_flags()&(type_flag_blockref|type_flag_destructor)));
-    tdt = dt.extended<struct_type>();
+    tdt = dt.extended<ndt::struct_type>();
     EXPECT_EQ(3, tdt->get_field_count());
     EXPECT_EQ(ndt::make_type<int64_t>(), tdt->get_field_type(0));
     EXPECT_EQ(ndt::make_type<int32_t>(), tdt->get_field_type(1));
@@ -359,8 +359,8 @@ TEST(StructType, SingleCompareDifferentArrmeta) {
 
     // Confirm that the arrmeta is different
     EXPECT_EQ(a.get_type(), b.get_type());
-    const struct_type *a_sdt = static_cast<const struct_type *>(a.get_type().extended());
-    const struct_type *b_sdt = static_cast<const struct_type *>(b.get_type().extended());
+    const ndt::struct_type *a_sdt = static_cast<const ndt::struct_type *>(a.get_type().extended());
+    const ndt::struct_type *b_sdt = static_cast<const ndt::struct_type *>(b.get_type().extended());
     EXPECT_NE(a_sdt->get_data_offsets(a.get_arrmeta())[0],
                     b_sdt->get_data_offsets(b.get_arrmeta())[0]);
     EXPECT_NE(a_sdt->get_data_offsets(a.get_arrmeta())[1],

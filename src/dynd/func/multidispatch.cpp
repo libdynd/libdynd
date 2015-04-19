@@ -293,9 +293,9 @@ nd::functional::multidispatch(const ndt::type &self_tp,
 
   ndt::type pattern_tp = ndt::make_arrfunc(
       pos_tp,
-      ndt::make_struct(kwd_tp.extended<base_struct_type>()->get_field_names()(
+      ndt::make_struct(kwd_tp.extended<ndt::base_struct_type>()->get_field_names()(
                            irange() < nkwd),
-                       kwd_tp.extended<base_struct_type>()->get_field_types()(
+                       kwd_tp.extended<ndt::base_struct_type>()->get_field_types()(
                            irange() < nkwd)),
       self_tp.extended<arrfunc_type>()->get_return_type());
 

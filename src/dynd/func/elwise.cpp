@@ -23,15 +23,15 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
 
   for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
     if (param_types[i].get_kind() == memory_kind) {
-      pt[i] = pt[i].extended<base_memory_type>()->with_replaced_storage_type(
+      pt[i] = pt[i].extended<ndt::base_memory_type>()->with_replaced_storage_type(
           ndt::make_ellipsis_dim(dimsname,
                                  param_types[i].without_memory_type()));
     } else if (param_types[i].get_type_id() == typevar_constructed_type_id) {
       pt[i] = ndt::make_typevar_constructed(
-          param_types[i].extended<typevar_constructed_type>()->get_name(),
+          param_types[i].extended<ndt::typevar_constructed_type>()->get_name(),
           ndt::make_ellipsis_dim(
               dimsname,
-              param_types[i].extended<typevar_constructed_type>()->get_arg()));
+              param_types[i].extended<ndt::typevar_constructed_type>()->get_arg()));
     } else {
       pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
     }
@@ -65,13 +65,13 @@ ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
 
   ndt::type ret_tp = child_tp->get_return_type();
   if (ret_tp.get_kind() == memory_kind) {
-    ret_tp = ret_tp.extended<base_memory_type>()->with_replaced_storage_type(
+    ret_tp = ret_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(
         ndt::make_ellipsis_dim(dimsname, ret_tp.without_memory_type()));
   } else if (ret_tp.get_type_id() == typevar_constructed_type_id) {
     ret_tp = ndt::make_typevar_constructed(
-        ret_tp.extended<typevar_constructed_type>()->get_name(),
+        ret_tp.extended<ndt::typevar_constructed_type>()->get_name(),
         ndt::make_ellipsis_dim(
-            dimsname, ret_tp.extended<typevar_constructed_type>()->get_arg()));
+            dimsname, ret_tp.extended<ndt::typevar_constructed_type>()->get_arg()));
   } else {
     ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
   }

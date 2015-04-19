@@ -252,7 +252,7 @@ void free_wrapper(arrfunc_type_data *self)
   free(*self->get_data_as<T *>());
 }
 
-class arrfunc_type : public base_type {
+class arrfunc_type : public ndt::base_type {
   ndt::type m_return_type;
   // Always a tuple type containing the types for positional args
   ndt::type m_pos_tuple;
@@ -274,7 +274,7 @@ public:
 
   const string_type_data &get_kwd_name_raw(intptr_t i) const
   {
-    return m_kwd_struct.extended<struct_type>()->get_field_name_raw(i);
+    return m_kwd_struct.extended<ndt::struct_type>()->get_field_name_raw(i);
   }
 
   const ndt::type &get_return_type() const { return m_return_type; }
@@ -283,29 +283,29 @@ public:
 
   const nd::array &get_pos_types() const
   {
-    return m_pos_tuple.extended<tuple_type>()->get_field_types();
+    return m_pos_tuple.extended<ndt::tuple_type>()->get_field_types();
   }
 
   bool is_pos_variadic() const
   {
-    return m_pos_tuple.extended<tuple_type>()->is_variadic();
+    return m_pos_tuple.extended<ndt::tuple_type>()->is_variadic();
   }
 
   const ndt::type &get_kwd_struct() const { return m_kwd_struct; }
 
   const nd::array &get_kwd_types() const
   {
-    return m_kwd_struct.extended<struct_type>()->get_field_types();
+    return m_kwd_struct.extended<ndt::struct_type>()->get_field_types();
   }
 
   const nd::array &get_kwd_names() const
   {
-    return m_kwd_struct.extended<struct_type>()->get_field_names();
+    return m_kwd_struct.extended<ndt::struct_type>()->get_field_names();
   }
 
   const ndt::type *get_pos_types_raw() const
   {
-    return m_pos_tuple.extended<tuple_type>()->get_field_types_raw();
+    return m_pos_tuple.extended<ndt::tuple_type>()->get_field_types_raw();
   }
 
   const ndt::type &get_pos_type(intptr_t i) const
@@ -314,22 +314,22 @@ public:
       return get_return_type();
     }
 
-    return m_pos_tuple.extended<tuple_type>()->get_field_type(i);
+    return m_pos_tuple.extended<ndt::tuple_type>()->get_field_type(i);
   }
 
   const ndt::type &get_kwd_type(intptr_t i) const
   {
-    return m_kwd_struct.extended<struct_type>()->get_field_type(i);
+    return m_kwd_struct.extended<ndt::struct_type>()->get_field_type(i);
   }
 
   std::string get_kwd_name(intptr_t i) const
   {
-    return m_kwd_struct.extended<struct_type>()->get_field_name(i);
+    return m_kwd_struct.extended<ndt::struct_type>()->get_field_name(i);
   }
 
   intptr_t get_kwd_index(const std::string &arg_name) const
   {
-    return m_kwd_struct.extended<struct_type>()->get_field_index(arg_name);
+    return m_kwd_struct.extended<ndt::struct_type>()->get_field_index(arg_name);
   }
 
   void get_vars(std::unordered_set<std::string> &vars) const;
@@ -350,13 +350,13 @@ public:
   /** Returns the number of positional arguments. */
   intptr_t get_npos() const
   {
-    return m_pos_tuple.extended<tuple_type>()->get_field_count();
+    return m_pos_tuple.extended<ndt::tuple_type>()->get_field_count();
   }
 
   /** Returns the number of keyword arguments. */
   intptr_t get_nkwd() const
   {
-    return m_kwd_struct.extended<tuple_type>()->get_field_count();
+    return m_kwd_struct.extended<ndt::tuple_type>()->get_field_count();
   }
 
   /*

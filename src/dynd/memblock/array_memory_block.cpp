@@ -33,7 +33,7 @@ void free_array_memory_block(memory_block_data *memblock)
                     !preamble->m_type->is_expression()) {
         const ndt::type& dtp = preamble->m_type->get_type_at_dimension(NULL, preamble->m_type->get_ndim());
         if (dtp.get_kind() == memory_kind) {
-            dtp.extended<base_memory_type>()->data_free(preamble->m_data_pointer);
+            dtp.extended<ndt::base_memory_type>()->data_free(preamble->m_data_pointer);
         }
     }
 

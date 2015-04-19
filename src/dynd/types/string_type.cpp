@@ -20,7 +20,7 @@
 using namespace std;
 using namespace dynd;
 
-string_type::string_type(string_encoding_t encoding)
+ndt::string_type::string_type(string_encoding_t encoding)
     : base_string_type(
           string_type_id, sizeof(string_type_data), sizeof(const char *),
           type_flag_scalar | type_flag_zeroinit | type_flag_blockref,
@@ -40,20 +40,20 @@ string_type::string_type(string_encoding_t encoding)
   }
 }
 
-string_type::~string_type() {}
+ndt::string_type::~string_type() {}
 
-void string_type::get_string_range(const char **out_begin, const char **out_end,
-                                   const char *DYND_UNUSED(arrmeta),
-                                   const char *data) const
+void ndt::string_type::get_string_range(const char **out_begin,
+                                        const char **out_end,
+                                        const char *DYND_UNUSED(arrmeta),
+                                        const char *data) const
 {
   *out_begin = reinterpret_cast<const string_type_data *>(data)->begin;
   *out_end = reinterpret_cast<const string_type_data *>(data)->end;
 }
 
-void string_type::set_from_utf8_string(const char *arrmeta, char *dst,
-                                       const char *utf8_begin,
-                                       const char *utf8_end,
-                                       const eval::eval_context *ectx) const
+void ndt::string_type::set_from_utf8_string(
+    const char *arrmeta, char *dst, const char *utf8_begin,
+    const char *utf8_end, const eval::eval_context *ectx) const
 {
   const string_type_arrmeta *data_md =
       reinterpret_cast<const string_type_arrmeta *>(arrmeta);
@@ -102,8 +102,9 @@ void string_type::set_from_utf8_string(const char *arrmeta, char *dst,
   reinterpret_cast<string_type_data *>(dst)->end = dst_end;
 }
 
-void string_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                             const char *data) const
+void ndt::string_type::print_data(std::ostream &o,
+                                  const char *DYND_UNUSED(arrmeta),
+                                  const char *data) const
 {
   uint32_t cp;
   next_unicode_codepoint_t next_fn;
@@ -121,7 +122,7 @@ void string_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
   o << "\"";
 }
 
-void string_type::print_type(std::ostream &o) const
+void ndt::string_type::print_type(std::ostream &o) const
 {
 
   o << "string";
@@ -130,7 +131,7 @@ void string_type::print_type(std::ostream &o) const
   }
 }
 
-bool string_type::is_unique_data_owner(const char *arrmeta) const
+bool ndt::string_type::is_unique_data_owner(const char *arrmeta) const
 {
   const string_type_arrmeta *md =
       reinterpret_cast<const string_type_arrmeta *>(arrmeta);
@@ -141,33 +142,33 @@ bool string_type::is_unique_data_owner(const char *arrmeta) const
   return true;
 }
 
-ndt::type string_type::get_canonical_type() const
+ndt::type ndt::string_type::get_canonical_type() const
 {
-  return ndt::type(this, true);
+  return type(this, true);
 }
 
-void string_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                            const char *DYND_UNUSED(arrmeta),
-                            const char *DYND_UNUSED(data)) const
+void ndt::string_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                                 const char *DYND_UNUSED(arrmeta),
+                                 const char *DYND_UNUSED(data)) const
 {
   out_shape[i] = -1;
   if (i + 1 < ndim) {
     stringstream ss;
-    ss << "requested too many dimensions from type " << ndt::type(this, true);
+    ss << "requested too many dimensions from type " << type(this, true);
     throw runtime_error(ss.str());
   }
 }
 
 bool
-string_type::is_lossless_assignment(const ndt::type &DYND_UNUSED(dst_tp),
-                                    const ndt::type &DYND_UNUSED(src_tp)) const
+ndt::string_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
+                                         const type &DYND_UNUSED(src_tp)) const
 {
   // Don't shortcut anything to 'nocheck' error checking, so that
   // decoding errors get caught appropriately.
   return false;
 }
 
-bool string_type::operator==(const base_type &rhs) const
+bool ndt::string_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -179,8 +180,8 @@ bool string_type::operator==(const base_type &rhs) const
   }
 }
 
-void string_type::arrmeta_default_construct(char *arrmeta,
-                                            bool blockref_alloc) const
+void ndt::string_type::arrmeta_default_construct(char *arrmeta,
+                                                 bool blockref_alloc) const
 {
   // Simply allocate a POD memory block
   if (blockref_alloc) {
@@ -189,9 +190,9 @@ void string_type::arrmeta_default_construct(char *arrmeta,
   }
 }
 
-void
-string_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                    memory_block_data *embedded_reference) const
+void ndt::string_type::arrmeta_copy_construct(
+    char *dst_arrmeta, const char *src_arrmeta,
+    memory_block_data *embedded_reference) const
 {
   // Copy the blockref, switching it to the embedded_reference if necessary
   const string_type_arrmeta *src_md =
@@ -204,7 +205,7 @@ string_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
   }
 }
 
-void string_type::arrmeta_reset_buffers(char *arrmeta) const
+void ndt::string_type::arrmeta_reset_buffers(char *arrmeta) const
 {
   const string_type_arrmeta *md =
       reinterpret_cast<const string_type_arrmeta *>(arrmeta);
@@ -219,7 +220,7 @@ void string_type::arrmeta_reset_buffers(char *arrmeta) const
   }
 }
 
-void string_type::arrmeta_finalize_buffers(char *arrmeta) const
+void ndt::string_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
   string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
   if (md->blockref != NULL) {
@@ -232,7 +233,7 @@ void string_type::arrmeta_finalize_buffers(char *arrmeta) const
   }
 }
 
-void string_type::arrmeta_destruct(char *arrmeta) const
+void ndt::string_type::arrmeta_destruct(char *arrmeta) const
 {
   string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
   if (md->blockref) {
@@ -240,8 +241,8 @@ void string_type::arrmeta_destruct(char *arrmeta) const
   }
 }
 
-void string_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                                      const std::string &indent) const
+void ndt::string_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                           const std::string &indent) const
 {
   const string_type_arrmeta *md =
       reinterpret_cast<const string_type_arrmeta *>(arrmeta);
@@ -249,10 +250,10 @@ void string_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   memory_block_debug_print(md->blockref, o, indent + " ");
 }
 
-intptr_t string_type::make_assignment_kernel(
+intptr_t ndt::string_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
@@ -292,13 +293,10 @@ intptr_t string_type::make_assignment_kernel(
   }
 }
 
-size_t string_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                           const ndt::type &src0_dt,
-                                           const char *src0_arrmeta,
-                                           const ndt::type &src1_dt,
-                                           const char *src1_arrmeta,
-                                           comparison_type_t comptype,
-                                           const eval::eval_context *ectx) const
+size_t ndt::string_type::make_comparison_kernel(
+    void *ckb, intptr_t ckb_offset, const type &src0_dt,
+    const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
+    comparison_type_t comptype, const eval::eval_context *ectx) const
 {
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
@@ -318,11 +316,12 @@ size_t string_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
   throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
-void string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
-                                   const char *arrmeta, const char *data,
-                                   const memory_block_ptr &ref,
-                                   intptr_t buffer_max_mem,
-                                   const eval::eval_context *ectx) const
+void ndt::string_type::make_string_iter(dim_iter *out_di,
+                                        string_encoding_t encoding,
+                                        const char *arrmeta, const char *data,
+                                        const memory_block_ptr &ref,
+                                        intptr_t buffer_max_mem,
+                                        const eval::eval_context *ectx) const
 {
   const string_type_data *d = reinterpret_cast<const string_type_data *>(data);
   memory_block_ptr dataref = ref;
@@ -383,7 +382,7 @@ struct string_assign_na_ck
 };
 } // anonymous namespace
 
-nd::array string_type::get_option_nafunc() const
+nd::array ndt::string_type::get_option_nafunc() const
 {
   nd::array naf = nd::empty(option_type::make_nafunc_type());
   arrfunc_type_data *is_avail =

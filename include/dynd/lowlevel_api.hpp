@@ -27,10 +27,10 @@ struct lowlevel_api_t {
   // you're using it correctly, use the incref/decref instead.
   void (*memory_block_free)(memory_block_data *mbd);
   // Reference counting primitives for dynd types
-  void (*base_type_incref)(const base_type *bd);
-  void (*base_type_decref)(const base_type *bd);
+  void (*base_type_incref)(const ndt::base_type *bd);
+  void (*base_type_decref)(const ndt::base_type *bd);
   // Get the base_type_members struct from a base type
-  const base_type_members *(*get_base_type_members)(const base_type *bd);
+  const ndt::base_type_members *(*get_base_type_members)(const ndt::base_type *bd);
 };
 
 } // namespace dynd

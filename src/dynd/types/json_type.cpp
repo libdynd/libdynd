@@ -18,7 +18,7 @@
 using namespace std;
 using namespace dynd;
 
-json_type::json_type()
+ndt::json_type::json_type()
     : base_string_type(
           json_type_id, sizeof(json_type_data), sizeof(const char *),
           type_flag_scalar | type_flag_zeroinit | type_flag_blockref,
@@ -28,20 +28,21 @@ json_type::json_type()
   m_members.kind = dynamic_kind;
 }
 
-json_type::~json_type() {}
+ndt::json_type::~json_type() {}
 
-void json_type::get_string_range(const char **out_begin, const char **out_end,
-                                 const char *DYND_UNUSED(arrmeta),
-                                 const char *data) const
+void ndt::json_type::get_string_range(const char **out_begin,
+                                      const char **out_end,
+                                      const char *DYND_UNUSED(arrmeta),
+                                      const char *data) const
 {
   *out_begin = reinterpret_cast<const json_type_data *>(data)->begin;
   *out_end = reinterpret_cast<const json_type_data *>(data)->end;
 }
 
-void json_type::set_from_utf8_string(const char *arrmeta, char *dst,
-                                     const char *utf8_begin,
-                                     const char *utf8_end,
-                                     const eval::eval_context *ectx) const
+void ndt::json_type::set_from_utf8_string(const char *arrmeta, char *dst,
+                                          const char *utf8_begin,
+                                          const char *utf8_end,
+                                          const eval::eval_context *ectx) const
 {
   // Validate that the input is JSON
   if (ectx->errmode != assign_error_nocheck) {
@@ -62,8 +63,9 @@ void json_type::set_from_utf8_string(const char *arrmeta, char *dst,
          utf8_end - utf8_begin);
 }
 
-void json_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                           const char *data) const
+void ndt::json_type::print_data(std::ostream &o,
+                                const char *DYND_UNUSED(arrmeta),
+                                const char *data) const
 {
   uint32_t cp;
   next_unicode_codepoint_t next_fn;
@@ -81,9 +83,9 @@ void json_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
   o << "\"";
 }
 
-void json_type::print_type(std::ostream &o) const { o << "json"; }
+void ndt::json_type::print_type(std::ostream &o) const { o << "json"; }
 
-bool json_type::is_unique_data_owner(const char *arrmeta) const
+bool ndt::json_type::is_unique_data_owner(const char *arrmeta) const
 {
   const json_type_arrmeta *md =
       reinterpret_cast<const json_type_arrmeta *>(arrmeta);
@@ -94,13 +96,13 @@ bool json_type::is_unique_data_owner(const char *arrmeta) const
   return true;
 }
 
-ndt::type json_type::get_canonical_type() const
+ndt::type ndt::json_type::get_canonical_type() const
 {
-  return ndt::type(this, true);
+  return type(this, true);
 }
 
-bool json_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                       const ndt::type &src_tp) const
+bool ndt::json_type::is_lossless_assignment(const type &dst_tp,
+                                            const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.get_type_id() == json_type_id) {
@@ -113,7 +115,7 @@ bool json_type::is_lossless_assignment(const ndt::type &dst_tp,
   }
 }
 
-bool json_type::operator==(const base_type &rhs) const
+bool ndt::json_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -122,8 +124,8 @@ bool json_type::operator==(const base_type &rhs) const
   }
 }
 
-void json_type::arrmeta_default_construct(char *arrmeta,
-                                          bool blockref_alloc) const
+void ndt::json_type::arrmeta_default_construct(char *arrmeta,
+                                               bool blockref_alloc) const
 {
   // Simply allocate a POD memory block
   if (blockref_alloc) {
@@ -132,9 +134,9 @@ void json_type::arrmeta_default_construct(char *arrmeta,
   }
 }
 
-void
-json_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                  memory_block_data *embedded_reference) const
+void ndt::json_type::arrmeta_copy_construct(
+    char *dst_arrmeta, const char *src_arrmeta,
+    memory_block_data *embedded_reference) const
 {
   // Copy the blockref, switching it to the embedded_reference if necessary
   const json_type_arrmeta *src_md =
@@ -147,7 +149,7 @@ json_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
   }
 }
 
-void json_type::arrmeta_reset_buffers(char *arrmeta) const
+void ndt::json_type::arrmeta_reset_buffers(char *arrmeta) const
 {
   const json_type_arrmeta *md =
       reinterpret_cast<const json_type_arrmeta *>(arrmeta);
@@ -162,7 +164,7 @@ void json_type::arrmeta_reset_buffers(char *arrmeta) const
   }
 }
 
-void json_type::arrmeta_finalize_buffers(char *arrmeta) const
+void ndt::json_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
   json_type_arrmeta *md = reinterpret_cast<json_type_arrmeta *>(arrmeta);
   if (md->blockref != NULL) {
@@ -175,7 +177,7 @@ void json_type::arrmeta_finalize_buffers(char *arrmeta) const
   }
 }
 
-void json_type::arrmeta_destruct(char *arrmeta) const
+void ndt::json_type::arrmeta_destruct(char *arrmeta) const
 {
   json_type_arrmeta *md = reinterpret_cast<json_type_arrmeta *>(arrmeta);
   if (md->blockref) {
@@ -183,8 +185,8 @@ void json_type::arrmeta_destruct(char *arrmeta) const
   }
 }
 
-void json_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                                    const std::string &indent) const
+void ndt::json_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                         const std::string &indent) const
 {
   const json_type_arrmeta *md =
       reinterpret_cast<const json_type_arrmeta *>(arrmeta);
@@ -232,10 +234,10 @@ struct string_to_json_ck
 };
 } // anonymous namespace
 
-intptr_t json_type::make_assignment_kernel(
+intptr_t ndt::json_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
@@ -300,11 +302,12 @@ intptr_t json_type::make_assignment_kernel(
   }
 }
 
-void json_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding,
-                                 const char *arrmeta, const char *data,
-                                 const memory_block_ptr &ref,
-                                 intptr_t buffer_max_mem,
-                                 const eval::eval_context *ectx) const
+void ndt::json_type::make_string_iter(dim_iter *out_di,
+                                      string_encoding_t encoding,
+                                      const char *arrmeta, const char *data,
+                                      const memory_block_ptr &ref,
+                                      intptr_t buffer_max_mem,
+                                      const eval::eval_context *ectx) const
 {
   const string_type_data *d = reinterpret_cast<const string_type_data *>(data);
   memory_block_ptr dataref = ref;

@@ -577,7 +577,7 @@ axis_order_classification_t dynd::classify_strided_axis_order(intptr_t current_s
 {
     switch (element_tp.get_type_id()) {
         case fixed_dim_type_id: {
-            const fixed_dim_type *edt = element_tp.extended<fixed_dim_type>();
+            const ndt::fixed_dim_type *edt = element_tp.extended<ndt::fixed_dim_type>();
             const fixed_dim_type_arrmeta *emd =
                 reinterpret_cast<const fixed_dim_type_arrmeta *>(
                     element_arrmeta);

@@ -13,8 +13,8 @@
 using namespace std;
 using namespace dynd;
 
-expr_type::expr_type(const ndt::type &value_type, const ndt::type &operand_type,
-                     const expr_kernel_generator *kgen)
+ndt::expr_type::expr_type(const type &value_type, const type &operand_type,
+                          const expr_kernel_generator *kgen)
     : base_expr_type(
           expr_type_id, expr_kind, operand_type.get_data_size(),
           operand_type.get_data_alignment(),
@@ -36,7 +36,7 @@ expr_type::expr_type(const ndt::type &value_type, const ndt::type &operand_type,
                         "unary_expr_type for 1 operand");
   }
   for (size_t i = 0; i != field_count; ++i) {
-    const ndt::type &ft = fsd->get_field_type(i);
+    const type &ft = fsd->get_field_type(i);
     if (ft.get_type_id() != pointer_type_id) {
       stringstream ss;
       ss << "each field of the expr_type's operand must be a pointer, field "
@@ -47,17 +47,17 @@ expr_type::expr_type(const ndt::type &value_type, const ndt::type &operand_type,
   }
 }
 
-expr_type::~expr_type() { expr_kernel_generator_decref(m_kgen); }
+ndt::expr_type::~expr_type() { expr_kernel_generator_decref(m_kgen); }
 
-void expr_type::print_data(std::ostream &DYND_UNUSED(o),
-                           const char *DYND_UNUSED(arrmeta),
-                           const char *DYND_UNUSED(data)) const
+void ndt::expr_type::print_data(std::ostream &DYND_UNUSED(o),
+                                const char *DYND_UNUSED(arrmeta),
+                                const char *DYND_UNUSED(data)) const
 {
   throw runtime_error(
       "internal error: expr_type::print_data isn't supposed to be called");
 }
 
-void expr_type::print_type(std::ostream &o) const
+void ndt::expr_type::print_type(std::ostream &o) const
 {
   const tuple_type *fsd = m_operand_type.extended<tuple_type>();
   size_t field_count = fsd->get_field_count();
@@ -74,21 +74,21 @@ void expr_type::print_type(std::ostream &o) const
 }
 
 ndt::type
-expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
-                              size_t current_i, const ndt::type &root_tp,
-                              bool DYND_UNUSED(leading_dimension)) const
+ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
+                                   size_t current_i, const type &root_tp,
+                                   bool DYND_UNUSED(leading_dimension)) const
 {
   if (m_kgen->is_elwise()) {
     intptr_t undim = get_ndim();
     const tuple_type *fsd = m_operand_type.extended<tuple_type>();
     size_t field_count = fsd->get_field_count();
 
-    ndt::type result_value_dt = m_value_type.apply_linear_index(
+    type result_value_dt = m_value_type.apply_linear_index(
         nindices, indices, current_i, root_tp, true);
-    vector<ndt::type> result_src_dt(field_count);
+    vector<type> result_src_dt(field_count);
     // Apply the portion of the indexing to each of the src operand types
     for (size_t i = 0; i != field_count; ++i) {
-      const ndt::type &dt = fsd->get_field_type(i);
+      const type &dt = fsd->get_field_type(i);
       intptr_t field_undim = dt.get_ndim();
       if (nindices + field_undim <= undim) {
         result_src_dt[i] = dt;
@@ -99,20 +99,20 @@ expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
                                                  current_i, root_tp, false);
       }
     }
-    ndt::type result_operand_type = ndt::make_tuple(result_src_dt);
+    type result_operand_type = ndt::make_tuple(result_src_dt);
     expr_kernel_generator_incref(m_kgen);
-    return ndt::make_expr(result_value_dt, result_operand_type, m_kgen);
+    return make_expr(result_value_dt, result_operand_type, m_kgen);
   } else {
     throw runtime_error("expr_type::apply_linear_index is only implemented for "
                         "elwise kernel generators");
   }
 }
 
-intptr_t expr_type::apply_linear_index(
+intptr_t ndt::expr_type::apply_linear_index(
     intptr_t nindices, const irange *indices, const char *arrmeta,
-    const ndt::type &result_tp, char *out_arrmeta,
+    const type &result_tp, char *out_arrmeta,
     memory_block_data *embedded_reference, size_t current_i,
-    const ndt::type &root_tp, bool DYND_UNUSED(leading_dimension),
+    const type &root_tp, bool DYND_UNUSED(leading_dimension),
     char **DYND_UNUSED(inout_data),
     memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
@@ -154,9 +154,9 @@ intptr_t expr_type::apply_linear_index(
   }
 }
 
-void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                          const char *arrmeta,
-                          const char *DYND_UNUSED(data)) const
+void ndt::expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                               const char *arrmeta,
+                               const char *DYND_UNUSED(data)) const
 {
   intptr_t undim = get_ndim();
   // Initialize the shape to all ones
@@ -171,7 +171,7 @@ void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
   const uintptr_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
   size_t field_count = fsd->get_field_count();
   for (size_t fi = 0; fi != field_count; ++fi) {
-    const ndt::type &dt = fsd->get_field_type(fi);
+    const type &dt = fsd->get_field_type(fi);
     size_t field_undim = dt.get_ndim();
     if (field_undim > 0) {
       dt.extended()->get_shape(field_undim, 0, shape.get(),
@@ -187,25 +187,25 @@ void expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
 
   // If more shape is requested, get it from the value type
   if (ndim - i > undim) {
-    const ndt::type &dt = m_value_type.get_dtype();
+    const type &dt = m_value_type.get_dtype();
     if (!dt.is_builtin()) {
       dt.extended()->get_shape(ndim, i + undim, out_shape, NULL, NULL);
     } else {
       stringstream ss;
-      ss << "requested too many dimensions from type " << ndt::type(this, true);
+      ss << "requested too many dimensions from type " << type(this, true);
       throw runtime_error(ss.str());
     }
   }
 }
 
 bool
-expr_type::is_lossless_assignment(const ndt::type &DYND_UNUSED(dst_tp),
-                                  const ndt::type &DYND_UNUSED(src_tp)) const
+ndt::expr_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
+                                       const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
 
-bool expr_type::operator==(const base_type &rhs) const
+bool ndt::expr_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -331,7 +331,7 @@ static size_t make_src_deref_ckernel(void *ckb, intptr_t ckb_offset)
   return ckb_offset;
 }
 
-size_t expr_type::make_operand_to_value_assignment_kernel(
+size_t ndt::expr_type::make_operand_to_value_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
@@ -345,7 +345,7 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
   dimvector src_data_offsets(input_count);
   bool nonzero_offsets = false;
 
-  vector<ndt::type> src_dt(input_count);
+  vector<type> src_dt(input_count);
   for (size_t i = 0; i != input_count; ++i) {
     const pointer_type *pd =
         static_cast<const pointer_type *>(fsd->get_field_type(i).extended());
@@ -372,7 +372,7 @@ size_t expr_type::make_operand_to_value_assignment_kernel(
       src_arrmeta_array.get(), kernel_request_single, ectx);
 }
 
-size_t expr_type::make_value_to_operand_assignment_kernel(
+size_t ndt::expr_type::make_value_to_operand_assignment_kernel(
     void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t DYND_UNUSED(kernreq),
@@ -381,17 +381,17 @@ size_t expr_type::make_value_to_operand_assignment_kernel(
   throw runtime_error("Cannot assign to a dynd expr object value");
 }
 
-ndt::type expr_type::with_replaced_storage_type(
-    const ndt::type &DYND_UNUSED(replacement_type)) const
+ndt::type ndt::expr_type::with_replaced_storage_type(
+    const type &DYND_UNUSED(replacement_type)) const
 {
   throw runtime_error("TODO: implement expr_type::with_replaced_storage_type");
 }
 
-void expr_type::get_dynamic_array_properties(
+void ndt::expr_type::get_dynamic_array_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
-  const ndt::type &udt = m_value_type.get_dtype();
+  const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {
     udt.extended()->get_dynamic_array_properties(out_properties, out_count);
   } else {
@@ -400,11 +400,11 @@ void expr_type::get_dynamic_array_properties(
   }
 }
 
-void expr_type::get_dynamic_array_functions(
+void ndt::expr_type::get_dynamic_array_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {
-  const ndt::type &udt = m_value_type.get_dtype();
+  const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {
     udt.extended()->get_dynamic_array_functions(out_functions, out_count);
   } else {

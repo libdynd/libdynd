@@ -14,9 +14,9 @@
 using namespace std;
 using namespace dynd;
 
-tuple_type::~tuple_type() {}
+ndt::tuple_type::~tuple_type() {}
 
-void tuple_type::print_type(std::ostream &o) const
+void ndt::tuple_type::print_type(std::ostream &o) const
 {
   // Use the tuple datashape syntax
   o << "(";
@@ -28,20 +28,20 @@ void tuple_type::print_type(std::ostream &o) const
   }
   if (m_variadic) {
     o << ", ...)";
-  }
-  else {
+  } else {
     o << ")";
   }
 }
 
-void tuple_type::transform_child_types(type_transform_fn_t transform_fn,
-                                       intptr_t arrmeta_offset, void *extra,
-                                       ndt::type &out_transformed_tp,
-                                       bool &out_was_transformed) const
+void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn,
+                                            intptr_t arrmeta_offset,
+                                            void *extra,
+                                            type &out_transformed_tp,
+                                            bool &out_was_transformed) const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, ndt::make_type()));
-  ndt::type *tmp_field_types_raw =
-      reinterpret_cast<ndt::type *>(tmp_field_types.get_readwrite_originptr());
+  nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
+  type *tmp_field_types_raw =
+      reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
 
   bool was_transformed = false;
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
@@ -50,36 +50,34 @@ void tuple_type::transform_child_types(type_transform_fn_t transform_fn,
   }
   if (was_transformed) {
     tmp_field_types.flag_as_immutable();
-    out_transformed_tp = ndt::make_tuple(tmp_field_types, m_variadic);
+    out_transformed_tp = make_tuple(tmp_field_types, m_variadic);
     out_was_transformed = true;
-  }
-  else {
-    out_transformed_tp = ndt::type(this, true);
+  } else {
+    out_transformed_tp = type(this, true);
   }
 }
 
-ndt::type tuple_type::get_canonical_type() const
+ndt::type ndt::tuple_type::get_canonical_type() const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, ndt::make_type()));
-  ndt::type *tmp_field_types_raw =
-      reinterpret_cast<ndt::type *>(tmp_field_types.get_readwrite_originptr());
+  nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
+  type *tmp_field_types_raw =
+      reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
     tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
   }
 
   tmp_field_types.flag_as_immutable();
-  return ndt::make_tuple(tmp_field_types, m_variadic);
+  return make_tuple(tmp_field_types, m_variadic);
 }
 
-bool tuple_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                        const ndt::type &src_tp) const
+bool ndt::tuple_type::is_lossless_assignment(const type &dst_tp,
+                                             const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    }
-    else if (src_tp.get_type_id() == tuple_type_id) {
+    } else if (src_tp.get_type_id() == tuple_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -87,28 +85,25 @@ bool tuple_type::is_lossless_assignment(const ndt::type &dst_tp,
   return false;
 }
 
-intptr_t tuple_type::make_assignment_kernel(
+intptr_t ndt::tuple_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
     if (this == src_tp.extended()) {
       return make_tuple_identical_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta, kernreq, ectx);
-    }
-    else if (src_tp.get_kind() == tuple_kind ||
-             src_tp.get_kind() == struct_kind) {
+    } else if (src_tp.get_kind() == tuple_kind ||
+               src_tp.get_kind() == struct_kind) {
       return make_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                           src_tp, src_arrmeta, kernreq, ectx);
-    }
-    else if (src_tp.is_builtin()) {
+    } else if (src_tp.is_builtin()) {
       return make_broadcast_to_tuple_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
           ectx);
-    }
-    else {
+    } else {
       return src_tp.extended()->make_assignment_kernel(
           self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx, kwds);
@@ -120,20 +115,16 @@ intptr_t tuple_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-size_t tuple_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                          const ndt::type &src0_tp,
-                                          const char *src0_arrmeta,
-                                          const ndt::type &src1_tp,
-                                          const char *src1_arrmeta,
-                                          comparison_type_t comptype,
-                                          const eval::eval_context *ectx) const
+size_t ndt::tuple_type::make_comparison_kernel(
+    void *ckb, intptr_t ckb_offset, const type &src0_tp,
+    const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
+    comparison_type_t comptype, const eval::eval_context *ectx) const
 {
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
       return make_tuple_comparison_kernel(
           ckb, ckb_offset, src0_tp, src0_arrmeta, src1_arrmeta, comptype, ectx);
-    }
-    else if (src1_tp.get_kind() == tuple_kind) {
+    } else if (src1_tp.get_kind() == tuple_kind) {
       // TODO
     }
   }
@@ -141,15 +132,13 @@ size_t tuple_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
   throw not_comparable_error(src0_tp, src1_tp, comptype);
 }
 
-bool tuple_type::operator==(const base_type &rhs) const
+bool ndt::tuple_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  }
-  else if (rhs.get_type_id() != tuple_type_id) {
+  } else if (rhs.get_type_id() != tuple_type_id) {
     return false;
-  }
-  else {
+  } else {
     const tuple_type *dt = static_cast<const tuple_type *>(&rhs);
     return get_data_alignment() == dt->get_data_alignment() &&
            m_field_types.equals_exact(dt->m_field_types) &&
@@ -157,8 +146,8 @@ bool tuple_type::operator==(const base_type &rhs) const
   }
 }
 
-void tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                                     const std::string &indent) const
+void ndt::tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                          const std::string &indent) const
 {
   const size_t *data_offsets = reinterpret_cast<const size_t *>(arrmeta);
   o << indent << "tuple arrmeta\n";
@@ -172,7 +161,7 @@ void tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   o << "\n";
   const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
   for (intptr_t i = 0; i < m_field_count; ++i) {
-    const ndt::type &field_dt = get_field_type(i);
+    const type &field_dt = get_field_type(i);
     if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
       o << indent << " field " << i << " arrmeta:\n";
       field_dt.extended()->arrmeta_debug_print(arrmeta + arrmeta_offsets[i], o,
@@ -183,15 +172,15 @@ void tuple_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 
 static nd::array property_get_field_types(const ndt::type &tp)
 {
-  return tp.extended<tuple_type>()->get_field_types();
+  return tp.extended<ndt::tuple_type>()->get_field_types();
 }
 
 static nd::array property_get_arrmeta_offsets(const ndt::type &tp)
 {
-  return tp.extended<tuple_type>()->get_arrmeta_offsets();
+  return tp.extended<ndt::tuple_type>()->get_arrmeta_offsets();
 }
 
-void tuple_type::get_dynamic_type_properties(
+void ndt::tuple_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -207,13 +196,13 @@ void tuple_type::get_dynamic_type_properties(
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
-nd::array dynd::pack(intptr_t field_count, const nd::array *field_vals)
+nd::array ndt::pack(intptr_t field_count, const nd::array *field_vals)
 {
   if (field_count == 0) {
     return nd::array();
   }
 
-  vector<ndt::type> field_types(field_count);
+  vector<type> field_types(field_count);
   for (intptr_t i = 0; i < field_count; ++i) {
     field_types[i] = field_vals[i].get_type();
   }

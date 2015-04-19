@@ -273,9 +273,11 @@ enum {
 };
 
 // Forward declaration so we can make the is_builtin_type function here
-class base_type;
+namespace ndt {
+  class base_type;
+} // namespace dynd::nd
 
-inline bool is_builtin_type(const base_type *dt)
+inline bool is_builtin_type(const ndt::base_type *dt)
 {
   return reinterpret_cast<uintptr_t>(dt) < builtin_type_id_count;
 }

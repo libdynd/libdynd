@@ -78,7 +78,7 @@ TEST(SymbolicTypes, CreateFuncProto)
 TEST(SymbolicTypes, CreateTypeVar)
 {
   ndt::type tp;
-  const typevar_type *tvt;
+  const ndt::typevar_type *tvt;
 
   // Simple TypeVar
   tp = ndt::make_typevar("Blah");
@@ -88,7 +88,7 @@ TEST(SymbolicTypes, CreateTypeVar)
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_variadic());
-  tvt = tp.extended<typevar_type>();
+  tvt = tp.extended<ndt::typevar_type>();
   EXPECT_EQ("Blah", tvt->get_name_str());
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));
@@ -109,7 +109,7 @@ TEST(SymbolicTypes, CreateTypeVar)
 TEST(SymbolicTypes, CreateTypeVarDim)
 {
   ndt::type tp;
-  const typevar_dim_type *tvt;
+  const ndt::typevar_dim_type *tvt;
 
   // Simple Dimension TypeVar
   tp = ndt::make_typevar_dim("Blah", ndt::make_type<int>());
@@ -119,7 +119,7 @@ TEST(SymbolicTypes, CreateTypeVarDim)
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_variadic());
-  tvt = tp.extended<typevar_dim_type>();
+  tvt = tp.extended<ndt::typevar_dim_type>();
   EXPECT_EQ("Blah", tvt->get_name_str());
   EXPECT_EQ(ndt::make_type<int>(), tvt->get_element_type());
   // Roundtripping through a string
@@ -143,7 +143,7 @@ TEST(SymbolicTypes, CreateTypeVarDim)
 TEST(SymbolicTypes, CreateEllipsisDim)
 {
   ndt::type tp;
-  const ellipsis_dim_type *et;
+  const ndt::ellipsis_dim_type *et;
 
   // Named Ellipsis Dimension
   tp = ndt::make_ellipsis_dim("Blah", ndt::make_type<int>());
@@ -153,7 +153,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.is_variadic());
-  et = tp.extended<ellipsis_dim_type>();
+  et = tp.extended<ndt::ellipsis_dim_type>();
   EXPECT_EQ("Blah", et->get_name_str());
   EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
   // Roundtripping through a string
@@ -171,7 +171,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_FALSE(tp.is_pod());
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.is_variadic());
-  et = tp.extended<ellipsis_dim_type>();
+  et = tp.extended<ndt::ellipsis_dim_type>();
   EXPECT_TRUE(et->get_name().is_null());
   EXPECT_EQ(ndt::make_type<int>(), et->get_element_type());
   // Roundtripping through a string
@@ -250,7 +250,7 @@ TEST(SymbolicTypes, TypeTypeWithPattern)
 
   tp = ndt::make_type(ndt::type("N * int32"));
   EXPECT_FALSE(tp.is_symbolic());
-  EXPECT_EQ(ndt::type("N * int32"), tp.extended<type_type>()->get_pattern_type());
+  EXPECT_EQ(ndt::type("N * int32"), tp.extended<ndt::type_type>()->get_pattern_type());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   // The pattern type must be symbolic
@@ -265,7 +265,7 @@ TEST(SymbolicTypes, VariadicTuple)
   EXPECT_EQ(tuple_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.extended<tuple_type>()->is_variadic());
+  EXPECT_TRUE(tp.extended<ndt::tuple_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("(type, int32, T, ...)");
@@ -273,7 +273,7 @@ TEST(SymbolicTypes, VariadicTuple)
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_JSON_EQ_ARR("[\"type\", \"int32\", \"T\"]", tp.p("field_types"));
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.extended<tuple_type>()->is_variadic());
+  EXPECT_TRUE(tp.extended<ndt::tuple_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 
@@ -286,7 +286,7 @@ TEST(SymbolicTypes, VariadicStruct)
   EXPECT_EQ(struct_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.extended<struct_type>()->is_variadic());
+  EXPECT_TRUE(tp.extended<ndt::struct_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("{x: type, y: int32, z: T, ...}");
@@ -295,7 +295,7 @@ TEST(SymbolicTypes, VariadicStruct)
   EXPECT_EQ(struct_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
-  EXPECT_TRUE(tp.extended<struct_type>()->is_variadic());
+  EXPECT_TRUE(tp.extended<ndt::struct_type>()->is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 

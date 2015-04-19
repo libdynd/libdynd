@@ -17,18 +17,19 @@
 using namespace std;
 using namespace dynd;
 
-time_type::time_type(datetime_tz_t timezone)
+ndt::time_type::time_type(datetime_tz_t timezone)
     : base_type(time_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value,
                 type_flag_scalar, 0, 0, 0),
       m_timezone(timezone)
 {
 }
 
-time_type::~time_type() {}
+ndt::time_type::~time_type() {}
 
-void time_type::set_time(const char *DYND_UNUSED(arrmeta), char *data,
-                         assign_error_mode errmode, int32_t hour,
-                         int32_t minute, int32_t second, int32_t tick) const
+void ndt::time_type::set_time(const char *DYND_UNUSED(arrmeta), char *data,
+                              assign_error_mode errmode, int32_t hour,
+                              int32_t minute, int32_t second,
+                              int32_t tick) const
 {
   if (errmode != assign_error_nocheck &&
       !time_hmst::is_valid(hour, minute, second, tick)) {
@@ -42,7 +43,7 @@ void time_type::set_time(const char *DYND_UNUSED(arrmeta), char *data,
       time_hmst::to_ticks(hour, minute, second, tick);
 }
 
-void time_type::set_from_utf8_string(
+void ndt::time_type::set_from_utf8_string(
     const char *DYND_UNUSED(arrmeta), char *data, const char *utf8_begin,
     const char *utf8_end, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
@@ -65,16 +66,17 @@ void time_type::set_from_utf8_string(
   *reinterpret_cast<int64_t *>(data) = hmst.to_ticks();
 }
 
-time_hmst time_type::get_time(const char *DYND_UNUSED(arrmeta),
-                              const char *data) const
+time_hmst ndt::time_type::get_time(const char *DYND_UNUSED(arrmeta),
+                                   const char *data) const
 {
   time_hmst hmst;
   hmst.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
   return hmst;
 }
 
-void time_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                           const char *data) const
+void ndt::time_type::print_data(std::ostream &o,
+                                const char *DYND_UNUSED(arrmeta),
+                                const char *data) const
 {
   time_hmst hmst;
   hmst.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
@@ -84,7 +86,7 @@ void time_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
   }
 }
 
-void time_type::print_type(std::ostream &o) const
+void ndt::time_type::print_type(std::ostream &o) const
 {
   if (m_timezone == tz_abstract) {
     o << "time";
@@ -102,8 +104,8 @@ void time_type::print_type(std::ostream &o) const
   }
 }
 
-bool time_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                       const ndt::type &src_tp) const
+bool ndt::time_type::is_lossless_assignment(const type &dst_tp,
+                                            const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -119,7 +121,7 @@ bool time_type::is_lossless_assignment(const ndt::type &dst_tp,
   }
 }
 
-bool time_type::operator==(const base_type &rhs) const
+bool ndt::time_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -132,10 +134,10 @@ bool time_type::operator==(const base_type &rhs) const
   }
 }
 
-intptr_t time_type::make_assignment_kernel(
+intptr_t ndt::time_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
@@ -149,7 +151,7 @@ intptr_t time_type::make_assignment_kernel(
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, ndt::make_property(dst_tp, "struct"),
+          self, af_tp, ckb, ckb_offset, make_property(dst_tp, "struct"),
           dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx, kwds);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
@@ -163,10 +165,9 @@ intptr_t time_type::make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta,
-                                      ndt::make_property(src_tp, "struct"),
-                                      src_arrmeta, kernreq, ectx, kwds);
+      return ::make_assignment_kernel(
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
+          make_property(src_tp, "struct"), src_arrmeta, kernreq, ectx, kwds);
     }
     // TODO
   }
@@ -176,13 +177,10 @@ intptr_t time_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-size_t time_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                         const ndt::type &src0_tp,
-                                         const char *src0_arrmeta,
-                                         const ndt::type &src1_tp,
-                                         const char *src1_arrmeta,
-                                         comparison_type_t comptype,
-                                         const eval::eval_context *ectx) const
+size_t ndt::time_type::make_comparison_kernel(
+    void *ckb, intptr_t ckb_offset, const type &src0_tp,
+    const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
+    comparison_type_t comptype, const eval::eval_context *ectx) const
 {
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
@@ -200,7 +198,7 @@ size_t time_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
 
 ///////// properties on the type
 
-void time_type::get_dynamic_type_properties(
+void ndt::time_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -210,7 +208,7 @@ void time_type::get_dynamic_type_properties(
 
 ///////// functions on the type
 
-void time_type::get_dynamic_type_functions(
+void ndt::time_type::get_dynamic_type_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {
@@ -245,7 +243,7 @@ static nd::array property_ndo_get_tick(const nd::array &n)
   return n.replace_dtype(ndt::make_property(n.get_dtype(), "tick"));
 }
 
-void time_type::get_dynamic_array_properties(
+void ndt::time_type::get_dynamic_array_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -273,7 +271,7 @@ static nd::array function_ndo_to_struct(const nd::array &n)
   return n.replace_dtype(ndt::make_property(n.get_dtype(), "struct"));
 }
 
-void time_type::get_dynamic_array_functions(
+void ndt::time_type::get_dynamic_array_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {
@@ -370,8 +368,8 @@ enum time_properties_t {
 };
 }
 
-size_t
-time_type::get_elwise_property_index(const std::string &property_name) const
+size_t ndt::time_type::get_elwise_property_index(
+    const std::string &property_name) const
 {
   if (property_name == "hour") {
     return timeprop_hour;
@@ -394,9 +392,9 @@ time_type::get_elwise_property_index(const std::string &property_name) const
   }
 }
 
-ndt::type time_type::get_elwise_property_type(size_t property_index,
-                                              bool &out_readable,
-                                              bool &out_writable) const
+ndt::type ndt::time_type::get_elwise_property_type(size_t property_index,
+                                                   bool &out_readable,
+                                                   bool &out_writable) const
 {
   switch (property_index) {
   case timeprop_hour:
@@ -406,7 +404,7 @@ ndt::type time_type::get_elwise_property_type(size_t property_index,
   case timeprop_tick:
     out_readable = true;
     out_writable = false;
-    return ndt::make_type<int32_t>();
+    return make_type<int32_t>();
   case timeprop_struct:
     out_readable = true;
     out_writable = true;
@@ -414,11 +412,11 @@ ndt::type time_type::get_elwise_property_type(size_t property_index,
   default:
     out_readable = false;
     out_writable = false;
-    return ndt::make_type<void>();
+    return make_type<void>();
   }
 }
 
-size_t time_type::make_elwise_property_getter_kernel(
+size_t ndt::time_type::make_elwise_property_getter_kernel(
     void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta),
     const char *DYND_UNUSED(src_arrmeta), size_t src_property_index,
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -450,7 +448,7 @@ size_t time_type::make_elwise_property_getter_kernel(
   }
 }
 
-size_t time_type::make_elwise_property_setter_kernel(
+size_t ndt::time_type::make_elwise_property_setter_kernel(
     void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta),
     size_t dst_property_index, const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
@@ -507,7 +505,7 @@ struct time_assign_na_ck
 };
 } // anonymous namespace
 
-nd::array time_type::get_option_nafunc() const
+nd::array ndt::time_type::get_option_nafunc() const
 {
   nd::array naf = nd::empty(option_type::make_nafunc_type());
   arrfunc_type_data *is_avail =

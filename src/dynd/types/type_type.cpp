@@ -14,7 +14,7 @@
 using namespace std;
 using namespace dynd;
 
-type_type::type_type()
+ndt::type_type::type_type()
     : base_type(type_type_id, type_kind, sizeof(const base_type *),
                 sizeof(const base_type *),
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
@@ -22,7 +22,7 @@ type_type::type_type()
 {
 }
 
-type_type::type_type(const ndt::type &pattern_tp)
+ndt::type_type::type_type(const type &pattern_tp)
     : base_type(type_type_id, type_kind, sizeof(const base_type *),
                 sizeof(const base_type *),
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
@@ -34,22 +34,23 @@ type_type::type_type(const ndt::type &pattern_tp)
   }
 }
 
-type_type::~type_type() {}
+ndt::type_type::~type_type() {}
 
-void type_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta),
-                           const char *data) const
+void ndt::type_type::print_data(std::ostream &o,
+                                const char *DYND_UNUSED(arrmeta),
+                                const char *data) const
 {
   const type_type_data *ddd = reinterpret_cast<const type_type_data *>(data);
   // This tests avoids the atomic increment/decrement of
   // always constructing a type object
   if (is_builtin_type(ddd->tp)) {
-    o << ndt::type(ddd->tp, true);
+    o << type(ddd->tp, true);
   } else {
     ddd->tp->print_type(o);
   }
 }
 
-void type_type::print_type(std::ostream &o) const
+void ndt::type_type::print_type(std::ostream &o) const
 {
   o << "type";
   if (!m_pattern_tp.is_null()) {
@@ -57,7 +58,7 @@ void type_type::print_type(std::ostream &o) const
   }
 }
 
-bool type_type::operator==(const base_type &rhs) const
+bool ndt::type_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -68,26 +69,27 @@ bool type_type::operator==(const base_type &rhs) const
   }
 }
 
-void
-type_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
-                                     bool DYND_UNUSED(blockref_alloc)) const
+void ndt::type_type::arrmeta_default_construct(
+    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
 }
 
-void type_type::arrmeta_copy_construct(
+void ndt::type_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
 }
 
-void type_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::type_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
 
-void type_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::type_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
+{
+}
 
-void type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
 
-void type_type::data_destruct(const char *DYND_UNUSED(arrmeta),
-                              char *data) const
+void ndt::type_type::data_destruct(const char *DYND_UNUSED(arrmeta),
+                                   char *data) const
 {
   const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
   if (!is_builtin_type(bd)) {
@@ -95,9 +97,9 @@ void type_type::data_destruct(const char *DYND_UNUSED(arrmeta),
   }
 }
 
-void type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
-                                      char *data, intptr_t stride,
-                                      size_t count) const
+void ndt::type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
+                                           char *data, intptr_t stride,
+                                           size_t count) const
 {
   for (size_t i = 0; i != count; ++i, data += stride) {
     const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
@@ -116,7 +118,8 @@ struct typed_data_assignment_kernel
     // Free the destination reference
     base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
     // Copy the pointer and count the reference
-    const base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
+    const ndt::base_type *bd =
+        (*reinterpret_cast<type_type_data *const *>(src))->tp;
     reinterpret_cast<type_type_data *>(dst)->tp = bd;
     base_type_xincref(bd);
   }
@@ -124,7 +127,7 @@ struct typed_data_assignment_kernel
 
 struct string_to_type_kernel
     : nd::base_kernel<string_to_type_kernel, kernel_request_host, 1> {
-  const base_string_type *src_string_dt;
+  const ndt::base_string_type *src_string_dt;
   const char *src_arrmeta;
   assign_error_mode errmode;
 
@@ -140,7 +143,7 @@ struct string_to_type_kernel
 
 struct type_to_string_kernel
     : nd::base_kernel<type_to_string_kernel, kernel_request_host, 1> {
-  const base_string_type *dst_string_dt;
+  const ndt::base_string_type *dst_string_dt;
   const char *dst_arrmeta;
   eval::eval_context ectx;
 
@@ -148,7 +151,8 @@ struct type_to_string_kernel
 
   void single(char *dst, char *const *src)
   {
-    const base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
+    const ndt::base_type *bd =
+        (*reinterpret_cast<type_type_data *const *>(src))->tp;
     stringstream ss;
     if (is_builtin_type(bd)) {
       ss << ndt::type(bd, true);
@@ -161,10 +165,10 @@ struct type_to_string_kernel
 
 } // anonymous namespace
 
-intptr_t type_type::make_assignment_kernel(
+intptr_t ndt::type_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
@@ -177,7 +181,7 @@ intptr_t type_type::make_assignment_kernel(
           string_to_type_kernel::make(ckb, kernreq, ckb_offset);
       // The kernel data owns a reference to this type
       e->src_string_dt =
-          static_cast<const base_string_type *>(ndt::type(src_tp).release());
+          static_cast<const base_string_type *>(type(src_tp).release());
       e->src_arrmeta = src_arrmeta;
       e->errmode = ectx->errmode;
       return ckb_offset;
@@ -193,7 +197,7 @@ intptr_t type_type::make_assignment_kernel(
           type_to_string_kernel::make(ckb, kernreq, ckb_offset);
       // The kernel data owns a reference to this type
       e->dst_string_dt =
-          static_cast<const base_string_type *>(ndt::type(dst_tp).release());
+          static_cast<const base_string_type *>(type(dst_tp).release());
       e->dst_arrmeta = dst_arrmeta;
       e->ectx = *ectx;
       return ckb_offset;
@@ -221,9 +225,9 @@ static int not_equal_comparison(const char *const *src,
   return *da != *db;
 }
 
-size_t type_type::make_comparison_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
-    const char *DYND_UNUSED(src0_arrmeta), const ndt::type &src1_dt,
+size_t ndt::type_type::make_comparison_kernel(
+    void *ckb, intptr_t ckb_offset, const type &src0_dt,
+    const char *DYND_UNUSED(src0_arrmeta), const type &src1_dt,
     const char *DYND_UNUSED(src1_arrmeta), comparison_type_t comptype,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {

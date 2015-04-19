@@ -18,11 +18,11 @@
 using namespace std;
 using namespace dynd;
 
-base_struct_type::base_struct_type(type_id_t type_id,
-                                   const nd::array &field_names,
-                                   const nd::array &field_types,
-                                   flags_type flags, bool layout_in_arrmeta,
-                                   bool variadic)
+ndt::base_struct_type::base_struct_type(type_id_t type_id,
+                                        const nd::array &field_names,
+                                        const nd::array &field_types,
+                                        flags_type flags,
+                                        bool layout_in_arrmeta, bool variadic)
     : base_tuple_type(type_id, field_types, flags, layout_in_arrmeta, variadic),
       m_field_names(field_names)
 {
@@ -46,10 +46,11 @@ base_struct_type::base_struct_type(type_id_t type_id,
   m_members.kind = variadic ? kind_kind : struct_kind;
 }
 
-base_struct_type::~base_struct_type() {}
+ndt::base_struct_type::~base_struct_type() {}
 
-intptr_t base_struct_type::get_field_index(const char *field_name_begin,
-                                           const char *field_name_end) const
+intptr_t
+ndt::base_struct_type::get_field_index(const char *field_name_begin,
+                                       const char *field_name_end) const
 {
   size_t size = field_name_end - field_name_begin;
   if (size > 0) {
@@ -73,14 +74,12 @@ intptr_t base_struct_type::get_field_index(const char *field_name_begin,
   return -1;
 }
 
-ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
-                                               const irange *indices,
-                                               size_t current_i,
-                                               const ndt::type &root_tp,
-                                               bool leading_dimension) const
+ndt::type ndt::base_struct_type::apply_linear_index(
+    intptr_t nindices, const irange *indices, size_t current_i,
+    const type &root_tp, bool leading_dimension) const
 {
   if (nindices == 0) {
-    return ndt::type(this, true);
+    return type(this, true);
   } else {
     bool remove_dimension;
     intptr_t start_index, index_stride, dimension_size;
@@ -93,19 +92,19 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
     } else if (nindices == 1 && start_index == 0 && index_stride == 1 &&
                dimension_size == m_field_count) {
       // This is a do-nothing index, keep the same type
-      return ndt::type(this, true);
+      return type(this, true);
     } else {
       // Take the subset of the fields in-place
-      nd::array tmp_field_types(nd::empty(dimension_size, ndt::make_type()));
-      ndt::type *tmp_field_types_raw = reinterpret_cast<ndt::type *>(
-          tmp_field_types.get_readwrite_originptr());
+      nd::array tmp_field_types(nd::empty(dimension_size, make_type()));
+      type *tmp_field_types_raw =
+          reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
 
       // Make an "N * string" array without copying the actual
       // string text data. TODO: encapsulate this into a function.
       char *data_ptr;
       string_type_data *string_arr_ptr;
-      ndt::type stp = ndt::make_string(string_encoding_utf_8);
-      ndt::type tp = ndt::make_fixed_dim(dimension_size, stp);
+      type stp = make_string(string_encoding_utf_8);
+      type tp = make_fixed_dim(dimension_size, stp);
       nd::array tmp_field_names(
           make_array_memory_block(tp.extended()->get_arrmeta_size(),
                                   dimension_size * stp.get_data_size(),
@@ -139,16 +138,16 @@ ndt::type base_struct_type::apply_linear_index(intptr_t nindices,
       }
 
       tmp_field_types.flag_as_immutable();
-      return ndt::make_struct(tmp_field_names, tmp_field_types);
+      return make_struct(tmp_field_names, tmp_field_types);
     }
   }
 }
 
-intptr_t base_struct_type::apply_linear_index(
+intptr_t ndt::base_struct_type::apply_linear_index(
     intptr_t nindices, const irange *indices, const char *arrmeta,
-    const ndt::type &result_tp, char *out_arrmeta,
+    const type &result_tp, char *out_arrmeta,
     memory_block_data *embedded_reference, size_t current_i,
-    const ndt::type &root_tp, bool leading_dimension, char **inout_data,
+    const type &root_tp, bool leading_dimension, char **inout_data,
     memory_block_data **inout_dataref) const
 {
   if (nindices == 0) {
@@ -164,7 +163,7 @@ intptr_t base_struct_type::apply_linear_index(
                               remove_dimension, start_index, index_stride,
                               dimension_size);
     if (remove_dimension) {
-      const ndt::type &dt = get_field_type(start_index);
+      const type &dt = get_field_type(start_index);
       intptr_t offset = offsets[start_index];
       if (!dt.is_builtin()) {
         if (leading_dimension) {
@@ -190,7 +189,7 @@ intptr_t base_struct_type::apply_linear_index(
       for (intptr_t i = 0; i < dimension_size; ++i) {
         intptr_t idx = start_index + i * index_stride;
         out_offsets[i] = offsets[idx];
-        const ndt::type &dt = result_e_dt->get_field_type(i);
+        const type &dt = result_e_dt->get_field_type(i);
         if (!dt.is_builtin()) {
           out_offsets[i] += dt.extended()->apply_linear_index(
               nindices - 1, indices + 1, arrmeta + arrmeta_offsets[idx], dt,
@@ -203,9 +202,9 @@ intptr_t base_struct_type::apply_linear_index(
   }
 }
 
-bool base_struct_type::match(const char *arrmeta, const ndt::type &candidate_tp,
-                             const char *candidate_arrmeta,
-                             std::map<nd::string, ndt::type> &tp_vars) const
+bool ndt::base_struct_type::match(const char *arrmeta, const type &candidate_tp,
+                                  const char *candidate_arrmeta,
+                                  std::map<nd::string, type> &tp_vars) const
 {
   intptr_t candidate_field_count =
       candidate_tp.extended<base_struct_type>()->get_field_count();
@@ -229,8 +228,8 @@ bool base_struct_type::match(const char *arrmeta, const ndt::type &candidate_tp,
       }
     }
 
-    const ndt::type *fields = get_field_types_raw();
-    const ndt::type *candidate_fields =
+    const type *fields = get_field_types_raw();
+    const type *candidate_fields =
         candidate_tp.extended<base_struct_type>()->get_field_types_raw();
     for (intptr_t i = 0; i < m_field_count; ++i) {
       if (!fields[i].match(arrmeta, candidate_fields[i], candidate_arrmeta,
@@ -244,7 +243,7 @@ bool base_struct_type::match(const char *arrmeta, const ndt::type &candidate_tp,
   return false;
 }
 
-size_t base_struct_type::get_elwise_property_index(
+size_t ndt::base_struct_type::get_elwise_property_index(
     const std::string &property_name) const
 {
   intptr_t i = get_field_index(property_name);
@@ -252,13 +251,13 @@ size_t base_struct_type::get_elwise_property_index(
     return i;
   } else {
     stringstream ss;
-    ss << "dynd type " << ndt::type(this, true)
+    ss << "dynd type " << type(this, true)
        << " does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());
   }
 }
 
-ndt::type base_struct_type::get_elwise_property_type(
+ndt::type ndt::base_struct_type::get_elwise_property_type(
     size_t elwise_property_index, bool &out_readable, bool &out_writable) const
 {
   size_t field_count = get_field_count();
@@ -267,7 +266,7 @@ ndt::type base_struct_type::get_elwise_property_type(
     out_writable = false;
     return get_field_type(elwise_property_index).value_type();
   } else {
-    return ndt::make_type<void>();
+    return make_type<void>();
   }
 }
 
@@ -297,7 +296,7 @@ struct struct_property_getter_ck
 };
 } // anonymous namespace
 
-size_t base_struct_type::make_elwise_property_getter_kernel(
+size_t ndt::base_struct_type::make_elwise_property_getter_kernel(
     void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, size_t src_elwise_property_index,
     kernel_request_t kernreq, const eval::eval_context *ectx) const
@@ -306,7 +305,7 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
   size_t field_count = get_field_count();
   if (src_elwise_property_index < field_count) {
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
-    const ndt::type &field_type = get_field_type(src_elwise_property_index);
+    const type &field_type = get_field_type(src_elwise_property_index);
     self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     self->m_field_offset =
         get_data_offsets(src_arrmeta)[src_elwise_property_index];
@@ -316,13 +315,13 @@ size_t base_struct_type::make_elwise_property_getter_kernel(
         kernreq, ectx, nd::array());
   } else {
     stringstream ss;
-    ss << "dynd type " << ndt::type(this, true);
+    ss << "dynd type " << type(this, true);
     ss << " given an invalid property index" << src_elwise_property_index;
     throw runtime_error(ss.str());
   }
 }
 
-size_t base_struct_type::make_elwise_property_setter_kernel(
+size_t ndt::base_struct_type::make_elwise_property_setter_kernel(
     void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const char *DYND_UNUSED(dst_arrmeta), size_t dst_elwise_property_index,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
@@ -330,7 +329,7 @@ size_t base_struct_type::make_elwise_property_setter_kernel(
 {
   // No writable properties
   stringstream ss;
-  ss << "dynd type " << ndt::type(this, true);
+  ss << "dynd type " << type(this, true);
   ss << " given an invalid property index" << dst_elwise_property_index;
   throw runtime_error(ss.str());
 }

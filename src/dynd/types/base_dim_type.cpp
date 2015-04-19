@@ -5,18 +5,16 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
-
 #include <dynd/types/string_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-base_dim_type::~base_dim_type() {
-}
+ndt::base_dim_type::~base_dim_type() {}
 
-bool base_dim_type::match(const char *arrmeta, const ndt::type &candidate_tp,
-                          const char *candidate_arrmeta,
-                          std::map<nd::string, ndt::type> &tp_vars) const
+bool ndt::base_dim_type::match(const char *arrmeta, const type &candidate_tp,
+                               const char *candidate_arrmeta,
+                               std::map<nd::string, type> &tp_vars) const
 {
   if (get_type_id() != candidate_tp.get_type_id()) {
     return false;

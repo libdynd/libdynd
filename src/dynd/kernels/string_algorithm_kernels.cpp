@@ -103,9 +103,9 @@ void kernels::string_find_kernel::init(const ndt::type* src_tp, const char *cons
         throw runtime_error(ss.str());
     }
     m_base.destructor = &kernels::string_find_kernel::destruct;
-    m_str_type = static_cast<const base_string_type *>(ndt::type(src_tp[0]).release());
+    m_str_type = static_cast<const ndt::base_string_type *>(ndt::type(src_tp[0]).release());
     m_str_arrmeta = src_arrmeta[0];
-    m_sub_type = static_cast<const base_string_type *>(ndt::type(src_tp[1]).release());
+    m_sub_type = static_cast<const ndt::base_string_type *>(ndt::type(src_tp[1]).release());
     m_sub_arrmeta = src_arrmeta[1];
 
 }

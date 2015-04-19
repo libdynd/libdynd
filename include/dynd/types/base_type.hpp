@@ -24,26 +24,26 @@ class arrfunc_type;
 
 // Forward definition from dynd/func/callable.hpp
 namespace gfunc {
-    class callable;
+  class callable;
 };
 
 // Forward definition from dynd/type.hpp
 namespace ndt {
-    class type;
-} // namespace ndt
+  class base_type;
+  class type;
+} // namespace dynd::ndt
 
 // Forward definition from dynd/array.hpp
 namespace nd {
-    class array;
-    class string;
-    class arrfunc;
-} // namsepace nd
-
-class base_type;
+  class array;
+  class string;
+  class arrfunc;
+} // namsepace dynd::nd
 
 struct iterdata_common;
 
-/** This is the callback function type used by the base_type::foreach function */
+/** This is the callback function type used by the base_type::foreach function
+ */
 typedef void (*foreach_fn_t)(const ndt::type &dt, const char *arrmeta,
                              char *data, void *callback_data);
 
@@ -59,7 +59,7 @@ typedef char *(*iterdata_increment_fn_t)(iterdata_common *iterdata,
  * more inner levels to 0.
  */
 typedef char *(*iterdata_advance_fn_t)(iterdata_common *iterdata,
-                                         intptr_t level, intptr_t i);
+                                       intptr_t level, intptr_t i);
 /**
  * This is the reset function which is called when an outer dimension
  * increment resets all the lower dimensions to index 0. It returns
@@ -85,15 +85,17 @@ typedef void (*type_transform_fn_t)(const ndt::type &dt,
 
 // Common preamble of all iterdata instances
 struct iterdata_common {
-    // This increments the iterator at the requested level
-    iterdata_increment_fn_t incr;
-    // This advances the iterator at the requested level by the requested amount
-    iterdata_advance_fn_t adv;
-    // This resets the data pointers of the iterator
-    iterdata_reset_fn_t reset;
+  // This increments the iterator at the requested level
+  iterdata_increment_fn_t incr;
+  // This advances the iterator at the requested level by the requested amount
+  iterdata_advance_fn_t adv;
+  // This resets the data pointers of the iterator
+  iterdata_reset_fn_t reset;
 };
 
-struct base_type_members {
+namespace ndt {
+
+  struct base_type_members {
     typedef uint32_t flags_type;
 
     /** The type id (type_id_t is the enum) */
@@ -104,7 +106,9 @@ struct base_type_members {
     uint8_t data_alignment;
     /** The flags */
     flags_type flags;
-    /** The size of one instance of the type, or 0 if there is not one fixed size. */
+    /** The size of one instance of the type, or 0 if there is not one fixed
+     * size.
+     */
     size_t data_size;
     /** The size of a arrmeta instance for the type. */
     size_t arrmeta_size;
@@ -120,34 +124,39 @@ struct base_type_members {
         : type_id(type_id_), kind(kind_), data_alignment(data_alignment_),
           flags(flags_), data_size(data_size_), arrmeta_size(arrmeta_size_),
           ndim(ndim_), strided_ndim(strided_ndim_)
-    {}
-};
+    {
+    }
+  };
 
-/**
- * This is the virtual base class for defining new types which are not so basic
- * that we want them in the small list of builtin types. This is a reference
- * counted class, and is immutable, so once a base_type instance is constructed,
- * it should never be modified.
- *
- * Typically, the base_type is used by manipulating a type instance, which acts
- * as a smart pointer to base_type, which special handling for the builtin types.
- */
-class base_type {
+  /**
+   * This is the virtual base class for defining new types which are not so
+   *basic
+   * that we want them in the small list of builtin types. This is a reference
+   * counted class, and is immutable, so once a base_type instance is
+   *constructed,
+   * it should never be modified.
+   *
+   * Typically, the base_type is used by manipulating a type instance, which
+   *acts
+   * as a smart pointer to base_type, which special handling for the builtin
+   *types.
+   */
+  class base_type {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
-protected:
+
+  protected:
     /// Standard dynd type data
     base_type_members m_members;
-    
 
-protected:
+  protected:
     // Helper function for array dimension types
-  void get_scalar_properties_and_functions(
-      std::vector<std::pair<std::string, gfunc::callable> > &out_properties,
-      std::vector<std::pair<std::string, gfunc::callable> > &out_functions)
-      const;
+    void get_scalar_properties_and_functions(
+        std::vector<std::pair<std::string, gfunc::callable>> &out_properties,
+        std::vector<std::pair<std::string, gfunc::callable>> &out_functions)
+        const;
 
-public:
+  public:
     typedef base_type_members::flags_type flags_type;
 
     /** Starts off the extended type instance with a use count of 1. */
@@ -159,46 +168,46 @@ public:
                     static_cast<uint8_t>(alignment), flags, data_size,
                     arrmeta_size, static_cast<uint8_t>(ndim),
                     static_cast<uint8_t>(strided_ndim))
-    {}
+    {
+    }
 
     virtual ~base_type();
 
     /** For debugging purposes, the type's use count */
-    inline int32_t get_use_count() const {
-        return m_use_count;
-    }
+    inline int32_t get_use_count() const { return m_use_count; }
 
     /** Returns the struct of data common to all types. */
-    inline const base_type_members& get_base_type_members() const {
-        return m_members;
+    inline const base_type_members &get_base_type_members() const
+    {
+      return m_members;
     }
 
     /** The type's type id */
-    inline type_id_t get_type_id() const {
-        return static_cast<type_id_t>(m_members.type_id);
+    inline type_id_t get_type_id() const
+    {
+      return static_cast<type_id_t>(m_members.type_id);
     }
     /** The type's kind */
-    inline type_kind_t get_kind() const {
-        return static_cast<type_kind_t>(m_members.kind);
+    inline type_kind_t get_kind() const
+    {
+      return static_cast<type_kind_t>(m_members.kind);
     }
-    /** The size of one instance of the type, or 0 if there is not one fixed size. */
-    inline size_t get_data_size() const {
-        return m_members.data_size;
-    }
-    /** The type's data alignment. Every data pointer for this type _must_ be aligned. */
-    inline size_t get_data_alignment() const {
-        return m_members.data_alignment;
+    /** The size of one instance of the type, or 0 if there is not one fixed
+     * size. */
+    inline size_t get_data_size() const { return m_members.data_size; }
+    /** The type's data alignment. Every data pointer for this type _must_ be
+     * aligned. */
+    inline size_t get_data_alignment() const
+    {
+      return m_members.data_alignment;
     }
     /** The number of array dimensions this type has */
-    inline intptr_t get_ndim() const {
-        return m_members.ndim;
-    }
+    inline intptr_t get_ndim() const { return m_members.ndim; }
     /** The number of outer strided dimensions this type has in a row */
-    inline intptr_t get_strided_ndim() const {
-      return m_members.strided_ndim;
-    }
-    inline base_type_members::flags_type get_flags() const {
-        return m_members.flags;
+    inline intptr_t get_strided_ndim() const { return m_members.strided_ndim; }
+    inline base_type_members::flags_type get_flags() const
+    {
+      return m_members.flags;
     }
     virtual size_t get_default_data_size() const;
 
@@ -209,23 +218,26 @@ public:
      * \param arrmeta  Pointer to the type arrmeta of the data element to print.
      * \param data  Pointer to the data element to print.
      */
-    virtual void print_data(std::ostream& o, const char *arrmeta, const char *data) const = 0;
+    virtual void print_data(std::ostream &o, const char *arrmeta,
+                            const char *data) const = 0;
 
     /**
      * Print a representation of the type itself
      *
      * \param o  The std::ostream to print to.
      */
-    virtual void print_type(std::ostream& o) const = 0;
+    virtual void print_type(std::ostream &o) const = 0;
 
     /**
      * Returns true if the type is a scalar.
      *
-     * This precludes a dynamic type from switching between scalar and array behavior,
+     * This precludes a dynamic type from switching between scalar and array
+     *behavior,
      * but the simplicity seems to probably be worth it.
      */
-    inline bool is_scalar() const {
-        return (m_members.flags & type_flag_scalar) != 0;
+    inline bool is_scalar() const
+    {
+      return (m_members.flags & type_flag_scalar) != 0;
     }
 
     /**
@@ -236,7 +248,7 @@ public:
      *
      * \param subarray_tp  Testing if it is a subarray of 'this'.
      */
-    virtual bool is_type_subarray(const ndt::type& subarray_tp) const;
+    virtual bool is_type_subarray(const ndt::type &subarray_tp) const;
 
     /**
      * Returns true if the type contains an expression type anywhere within it.
@@ -286,8 +298,8 @@ public:
                                      const std::string &utf8_str,
                                      const eval::eval_context *ectx) const
     {
-        this->set_from_utf8_string(arrmeta, data, utf8_str.data(),
-                             utf8_str.data() + utf8_str.size(), ectx);
+      this->set_from_utf8_string(arrmeta, data, utf8_str.data(),
+                                 utf8_str.data() + utf8_str.size(), ectx);
     }
 
     /**
@@ -316,26 +328,37 @@ public:
                                          bool leading_dimension) const;
 
     /**
-     * Indexes into an nd::array using the provided linear index, and a type and freshly allocated output
+     * Indexes into an nd::array using the provided linear index, and a type and
+     *freshly allocated output
      * set to point to the same base data reference.
      *
-     * \param nindices     The number of elements in the 'indices' array. This is shrunk by one for each recursive call.
-     * \param indices      The indices to apply. This is incremented by one for each recursive call.
+     * \param nindices     The number of elements in the 'indices' array. This
+     *is shrunk by one for each recursive call.
+     * \param indices      The indices to apply. This is incremented by one for
+     *each recursive call.
      * \param arrmeta     The arrmeta of the input array.
      * \param result_type The result of an apply_linear_index call.
-     * \param out_arrmeta The arrmeta of the output array. The output data should all be references to the data
-     *                     of the input array, so there is no out_data parameter.
-     * \param embedded_reference  For references which are NULL, add this reference in the output.
-     *                            A NULL means the data was embedded in the original nd::array, so
-     *                            when putting it in a new nd::array, need to hold a reference to
+     * \param out_arrmeta The arrmeta of the output array. The output data
+     *should all be references to the data
+     *                     of the input array, so there is no out_data
+     *parameter.
+     * \param embedded_reference  For references which are NULL, add this
+     *reference in the output.
+     *                            A NULL means the data was embedded in the
+     *original nd::array, so
+     *                            when putting it in a new nd::array, need to
+     *hold a reference to
      *                            that memory.
      * \param current_i    The current index position. Used for error messages.
-     * \param root_tp      The data type in the first call, before any recursion.
+     * \param root_tp      The data type in the first call, before any
+     *recursion.
      *                     Used for error messages.
-     * \param leading_dimension  If this is true, the current dimension is one for
+     * \param leading_dimension  If this is true, the current dimension is one
+     *for
      *                           which there is only a single data instance, and
      *                           the type can do operations relying on the data.
-     *                           An example of this is a pointer data throwing away
+     *                           An example of this is a pointer data throwing
+     *away
      *                           the pointer part, so the result doesn't contain
      *                           that indirection.
      * \param inout_data  This may *only* be used/modified if leading_dimension
@@ -344,19 +367,22 @@ public:
      *                    dereference the pointer data, and modify both the data
      *                    pointer and the data reference to reflect that change.
      * \param inout_dataref  This may only be used/modified if leading_dimension
-     *                       is true. If the target of inout_data is modified, then
-     *                       in many cases the data will be pointing into a different
+     *                       is true. If the target of inout_data is modified,
+     *then
+     *                       in many cases the data will be pointing into a
+     *different
      *                       memory block than before. This must be modified to
      *                       be a reference to the updated memory block.
      *
      * @return  An offset to apply to the data pointer(s).
      */
-    virtual intptr_t apply_linear_index(
-        intptr_t nindices, const irange *indices, const char *arrmeta,
-        const ndt::type &result_type, char *out_arrmeta,
-        memory_block_data *embedded_reference, size_t current_i,
-        const ndt::type &root_tp, bool leading_dimension, char **inout_data,
-        memory_block_data **inout_dataref) const;
+    virtual intptr_t
+    apply_linear_index(intptr_t nindices, const irange *indices,
+                       const char *arrmeta, const ndt::type &result_type,
+                       char *out_arrmeta, memory_block_data *embedded_reference,
+                       size_t current_i, const ndt::type &root_tp,
+                       bool leading_dimension, char **inout_data,
+                       memory_block_data **inout_dataref) const;
 
     /**
      * The 'at' function is used for indexing. Indexing one dimension with
@@ -368,7 +394,8 @@ public:
      *                        this type that is modified to point to the
      *                        result's arrmeta.
      * \param inout_data  If non-NULL, points to a data pointer that is modified
-     *                    to point to the result's data. If `inout_data` is non-NULL,
+     *                    to point to the result's data. If `inout_data` is
+     *non-NULL,
      *                    `inout_arrmeta` must also be non-NULL.
      *
      * \returns  The type that results from the indexing operation.
@@ -381,11 +408,14 @@ public:
      * generally equivalent to apply_linear_index with a count of 'dim'
      * scalar indices.
      *
-     * \param inout_arrmeta  NULL to ignore, or point it at some arrmeta for the type,
-     *                        and it will be updated to point to the arrmeta for the returned
+     * \param inout_arrmeta  NULL to ignore, or point it at some arrmeta for the
+     *type,
+     *                        and it will be updated to point to the arrmeta for
+     *the returned
      *                        type.
      * \param i         The dimension number to retrieve.
-     * \param total_ndim  A count of how many dimensions have been traversed from the
+     * \param total_ndim  A count of how many dimensions have been traversed
+     *from the
      *                    type start, for producing error messages.
      */
     virtual ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
@@ -423,19 +453,20 @@ public:
      * Classifies the order the axes occur in the memory
      * layout of the array.
      */
-    virtual axis_order_classification_t classify_axis_order(const char *arrmeta) const;
+    virtual axis_order_classification_t
+    classify_axis_order(const char *arrmeta) const;
 
     /**
-     * Called by ::dynd::is_lossless_assignment, with (this == dst_tp->extended()).
+     * Called by ::dynd::is_lossless_assignment, with (this ==
+     * dst_tp->extended()).
      */
-    virtual bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+    virtual bool is_lossless_assignment(const ndt::type &dst_tp,
+                                        const ndt::type &src_tp) const;
 
-    virtual bool operator==(const base_type& rhs) const = 0;
+    virtual bool operator==(const base_type &rhs) const = 0;
 
     /** The size of the nd::array arrmeta for this type */
-    inline size_t get_arrmeta_size() const {
-        return m_members.arrmeta_size;
-    }
+    inline size_t get_arrmeta_size() const { return m_members.arrmeta_size; }
     /**
      * Constructs the nd::array arrmeta for this type using default settings.
      * The element size of the result must match that from
@@ -449,22 +480,28 @@ public:
      *                        the parent nd::array, and is useful for viewing
      *                        external memory with compatible layout.
      */
-    virtual void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
+    virtual void arrmeta_default_construct(char *arrmeta,
+                                           bool blockref_alloc) const;
     /**
-     * Constructs the nd::array arrmeta for this type, copying everything exactly from
+     * Constructs the nd::array arrmeta for this type, copying everything
+     *exactly from
      * input arrmeta for the same type.
      *
      * \param dst_arrmeta  The new arrmeta memory which is constructed.
      * \param src_arrmeta   Existing arrmeta memory from which to copy.
-     * \param embedded_reference  For references which are NULL, add this reference in the output.
-     *                            A NULL means the data was embedded in the original nd::array, so
-     *                            when putting it in a new nd::array, need to hold a reference to
+     * \param embedded_reference  For references which are NULL, add this
+     *reference in the output.
+     *                            A NULL means the data was embedded in the
+     *original nd::array, so
+     *                            when putting it in a new nd::array, need to
+     *hold a reference to
      *                            that memory.
      */
     virtual void
     arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                            memory_block_data *embedded_reference) const;
-    /** Destructs any references or other state contained in the nd::arrays' arrmeta */
+    /** Destructs any references or other state contained in the nd::arrays'
+     * arrmeta */
     virtual void arrmeta_destruct(char *arrmeta) const;
     /**
      * When arrmeta is used for temporary buffers of a type,
@@ -499,7 +536,8 @@ public:
     /** The size of the data required for uniform iteration */
     virtual size_t get_iterdata_size(intptr_t ndim) const;
     /**
-     * Constructs the iterdata for processing iteration at this level of the datashape
+     * Constructs the iterdata for processing iteration at this level of the
+     * datashape
      */
     virtual size_t iterdata_construct(iterdata_common *iterdata,
                                       const char **inout_arrmeta, intptr_t ndim,
@@ -508,13 +546,6 @@ public:
     /** Destructs any references or other state contained in the iterdata */
     virtual size_t iterdata_destruct(iterdata_common *iterdata,
                                      intptr_t ndim) const;
-
-    virtual intptr_t make_arithmetic_kernel(
-        const arrfunc_type_data *child, const arrfunc_type *child_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        const ndt::type *src_tp, const char *const *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *ectx,
-        const nd::array &kwds) const;
 
     /**
      * Creates an assignment kernel for one data value from the
@@ -549,20 +580,23 @@ public:
      * \returns  The offset at the end of 'ckb' after adding this
      *           kernel.
      */
-    virtual size_t
-    make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                           const ndt::type &src0_dt, const char *src0_arrmeta,
-                           const ndt::type &src1_dt, const char *src1_arrmeta,
-                           comparison_type_t comptype,
-                           const eval::eval_context *ectx) const;
+    virtual size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
+                                          const ndt::type &src0_dt,
+                                          const char *src0_arrmeta,
+                                          const ndt::type &src1_dt,
+                                          const char *src1_arrmeta,
+                                          comparison_type_t comptype,
+                                          const eval::eval_context *ectx) const;
 
     virtual bool match(const char *arrmeta, const ndt::type &candidate_tp,
                        const char *candidate_arrmeta,
                        std::map<nd::string, ndt::type> &tp_vars) const;
 
     /**
-     * Call the callback on each element of the array with given data/arrmeta along the leading
-     * dimension. For array dimensions, the type provided is the same each call, but for
+     * Call the callback on each element of the array with given data/arrmeta
+     *along the leading
+     * dimension. For array dimensions, the type provided is the same each call,
+     *but for
      * heterogeneous dimensions it changes.
      *
      * \param arrmeta  The arrmeta.
@@ -574,8 +608,9 @@ public:
                                  foreach_fn_t callback,
                                  void *callback_data) const;
 
-
-    virtual void get_vars(std::unordered_set<std::string> &DYND_UNUSED(vars)) const {
+    virtual void
+    get_vars(std::unordered_set<std::string> &DYND_UNUSED(vars)) const
+    {
     }
 
     /**
@@ -601,10 +636,13 @@ public:
         size_t *out_count) const;
 
     /**
-     * Additional dynamic properties exposed by any nd::array of this type as gfunc::callable.
+     * Additional dynamic properties exposed by any nd::array of this type as
+     *gfunc::callable.
      *
-     * \note Array types copy these properties from the first non-array data type, so such properties must
-     *       be able to handle the case where they are the first non-array data type in an array type, not
+     * \note Array types copy these properties from the first non-array data
+     *type, so such properties must
+     *       be able to handle the case where they are the first non-array data
+     *type in an array type, not
      *       just strictly of the non-array data type.
      */
     virtual void get_dynamic_array_properties(
@@ -629,7 +667,8 @@ public:
      *
      * \param property_name  The name of the element-wise property.
      *
-     * \returns  The index of the property, to be provided to the other elwise_property
+     * \returns  The index of the property, to be provided to the other
+     *elwise_property
      *           functions.
      */
     virtual size_t
@@ -657,9 +696,11 @@ public:
      *
      * \param ckb  The ckernel_builder being constructed.
      * \param ckb_offset  The offset within 'ckb'.
-     * \param dst_arrmeta  Arrmeta for the destination property being written to.
+     * \param dst_arrmeta  Arrmeta for the destination property being written
+     *to.
      * \param src_arrmeta  Arrmeta for the operand type being read from.
-     * \param src_elwise_property_index  The index of the property, from get_elwise_property_index().
+     * \param src_elwise_property_index  The index of the property, from
+     *get_elwise_property_index().
      * \param ectx  DyND evaluation context.
      */
     virtual size_t make_elwise_property_getter_kernel(
@@ -679,7 +720,8 @@ public:
      * \param ckb  The ckernel_builder being constructed.
      * \param ckb_offset  The offset within 'ckb'.
      * \param dst_arrmeta  Arrmeta for the operand type being written to.
-     * \param dst_elwise_property_index  The index of the property, from get_elwise_property_index().
+     * \param dst_elwise_property_index  The index of the property, from
+     *get_elwise_property_index().
      * \param src_arrmeta  Arrmeta for the source property being read from.
      * \param ectx  DyND evaluation contrext.
      */
@@ -712,7 +754,107 @@ public:
 
     friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);
-};
+  };
+
+  /**
+   * Increments the reference count of the type
+   */
+  inline void base_type_incref(const base_type *bd)
+  {
+    // std::cout << "dynd type " << (void *)ed << " inc: " << ed->m_use_count +
+    // 1
+    //          << "\t";
+    // ed->print_type(std::cout);
+    // std::cout << std::endl;
+    ++bd->m_use_count;
+  }
+
+  /**
+   * Checks if the type is builtin or not, and if not,
+   * increments the reference count of the type.
+   */
+  inline void base_type_xincref(const base_type *bd)
+  {
+    if (!is_builtin_type(bd)) {
+      base_type_incref(bd);
+    }
+  }
+
+  /**
+   * Decrements the reference count of the type,
+   * freeing it if the count reaches zero.
+   */
+  inline void base_type_decref(const base_type *bd)
+  {
+    if (--bd->m_use_count == 0) {
+      delete bd;
+    }
+  }
+
+  /**
+   * Checks if the type is builtin or not, and if not,
+   * decrements the reference count of the type,
+   * freeing it if the count reaches zero.
+   */
+  inline void base_type_xdecref(const base_type *bd)
+  {
+    if (!is_builtin_type(bd)) {
+      base_type_decref(bd);
+    }
+  }
+
+  namespace detail {
+    extern uint8_t builtin_data_sizes[builtin_type_id_count];
+    extern uint8_t builtin_kinds[builtin_type_id_count];
+    extern uint8_t builtin_data_alignments[builtin_type_id_count];
+  } // namespace dynd::ndt::detail
+
+  /**
+   * Returns the data size for the given type.
+   *
+   * \param bt  Pointer to a base_type object, or a builtin type id.
+   */
+  inline intptr_t get_base_type_data_size(const base_type *bt)
+  {
+    if (is_builtin_type(bt)) {
+      return static_cast<intptr_t>(
+          detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(bt)]);
+    } else {
+      return bt->get_data_size();
+    }
+  }
+
+  /**
+   * Returns the kind for the given type.
+   *
+   * \param bt  Pointer to a base_type object, or a builtin type id.
+   */
+  inline type_kind_t get_base_type_kind(const base_type *bt)
+  {
+    if (is_builtin_type(bt)) {
+      return static_cast<type_kind_t>(
+          detail::builtin_kinds[reinterpret_cast<uintptr_t>(bt)]);
+    } else {
+      return bt->get_kind();
+    }
+  }
+
+  /**
+   * Returns the alignment for the given type.
+   *
+   * \param bt  Pointer to a base_type object, or a builtin type id.
+   */
+  inline size_t get_base_type_alignment(const base_type *bt)
+  {
+    if (is_builtin_type(bt)) {
+      return static_cast<size_t>(
+          detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(bt)]);
+    } else {
+      return bt->get_data_alignment();
+    }
+  }
+
+} // namespace dynd::ndt
 
 /**
  * A pair of values describing the parameters of a single
@@ -724,102 +866,5 @@ struct size_stride_t {
   intptr_t dim_size;
   intptr_t stride;
 };
-
-/**
- * Increments the reference count of the type
- */
-inline void base_type_incref(const base_type *bd)
-{
-    //std::cout << "dynd type " << (void *)ed << " inc: " << ed->m_use_count + 1
-    //          << "\t";
-    //ed->print_type(std::cout);
-    //std::cout << std::endl;
-    ++bd->m_use_count;
-}
-
-/**
- * Checks if the type is builtin or not, and if not,
- * increments the reference count of the type.
- */
-inline void base_type_xincref(const base_type *bd)
-{
-    if (!is_builtin_type(bd)) {
-        base_type_incref(bd);
-    }
-}
-
-/**
- * Decrements the reference count of the type,
- * freeing it if the count reaches zero.
- */
-inline void base_type_decref(const base_type *bd)
-{
-    if (--bd->m_use_count == 0) {
-        delete bd;
-    }
-}
-
-/**
- * Checks if the type is builtin or not, and if not,
- * decrements the reference count of the type,
- * freeing it if the count reaches zero.
- */
-inline void base_type_xdecref(const base_type *bd)
-{
-    if (!is_builtin_type(bd)) {
-        base_type_decref(bd);
-    }
-}
-
-namespace detail {
-    extern uint8_t builtin_data_sizes[builtin_type_id_count];
-    extern uint8_t builtin_kinds[builtin_type_id_count];
-    extern uint8_t builtin_data_alignments[builtin_type_id_count];
-} // namespace detail
-
-/**
- * Returns the data size for the given type.
- *
- * \param bt  Pointer to a base_type object, or a builtin type id.
- */
-inline intptr_t get_base_type_data_size(const base_type *bt)
-{
-    if (is_builtin_type(bt)) {
-        return static_cast<intptr_t>(
-            detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(bt)]);
-    } else {
-        return bt->get_data_size();
-    }
-}
-
-/**
- * Returns the kind for the given type.
- *
- * \param bt  Pointer to a base_type object, or a builtin type id.
- */
-inline type_kind_t get_base_type_kind(const base_type *bt)
-{
-    if (is_builtin_type(bt)) {
-        return static_cast<type_kind_t>(
-            detail::builtin_kinds[reinterpret_cast<uintptr_t>(bt)]);
-    } else {
-        return bt->get_kind();
-    }
-}
-
-/**
- * Returns the alignment for the given type.
- *
- * \param bt  Pointer to a base_type object, or a builtin type id.
- */
-inline size_t get_base_type_alignment(const base_type *bt)
-{
-    if (is_builtin_type(bt)) {
-        return static_cast<size_t>(
-            detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(bt)]);
-    } else {
-        return bt->get_data_alignment();
-    }
-}
 
 } // namespace dynd

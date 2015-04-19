@@ -16,15 +16,15 @@
 using namespace std;
 using namespace dynd;
 
-struct_type::struct_type(const nd::array &field_names,
-                         const nd::array &field_types, bool variadic)
+ndt::struct_type::struct_type(const nd::array &field_names,
+                              const nd::array &field_types, bool variadic)
     : base_struct_type(struct_type_id, field_names, field_types, type_flag_none,
                        true, variadic)
 {
-      create_array_properties();
+  create_array_properties();
 }
 
-struct_type::~struct_type() {}
+ndt::struct_type::~struct_type() {}
 
 static bool is_simple_identifier_name(const char *begin, const char *end)
 {
@@ -46,7 +46,7 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
   }
 }
 
-void struct_type::print_type(std::ostream &o) const
+void ndt::struct_type::print_type(std::ostream &o) const
 {
   // Use the record datashape syntax
   o << "{";
@@ -69,14 +69,15 @@ void struct_type::print_type(std::ostream &o) const
   }
 }
 
-void struct_type::transform_child_types(type_transform_fn_t transform_fn,
-                                        intptr_t arrmeta_offset, void *extra,
-                                        ndt::type &out_transformed_tp,
-                                        bool &out_was_transformed) const
+void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn,
+                                             intptr_t arrmeta_offset,
+                                             void *extra,
+                                             type &out_transformed_tp,
+                                             bool &out_was_transformed) const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, ndt::make_type()));
-  ndt::type *tmp_field_types_raw =
-      reinterpret_cast<ndt::type *>(tmp_field_types.get_readwrite_originptr());
+  nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
+  type *tmp_field_types_raw =
+      reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
 
   bool was_transformed = false;
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
@@ -86,29 +87,29 @@ void struct_type::transform_child_types(type_transform_fn_t transform_fn,
   if (was_transformed) {
     tmp_field_types.flag_as_immutable();
     out_transformed_tp =
-        ndt::make_struct(m_field_names, tmp_field_types, m_variadic);
+        make_struct(m_field_names, tmp_field_types, m_variadic);
     out_was_transformed = true;
   } else {
-    out_transformed_tp = ndt::type(this, true);
+    out_transformed_tp = type(this, true);
   }
 }
 
-ndt::type struct_type::get_canonical_type() const
+ndt::type ndt::struct_type::get_canonical_type() const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, ndt::make_type()));
-  ndt::type *tmp_field_types_raw =
-      reinterpret_cast<ndt::type *>(tmp_field_types.get_readwrite_originptr());
+  nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
+  type *tmp_field_types_raw =
+      reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
     tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
   }
 
   tmp_field_types.flag_as_immutable();
-  return ndt::make_struct(m_field_names, tmp_field_types, m_variadic);
+  return make_struct(m_field_names, tmp_field_types, m_variadic);
 }
 
-ndt::type struct_type::at_single(intptr_t i0, const char **inout_arrmeta,
-                                 const char **inout_data) const
+ndt::type ndt::struct_type::at_single(intptr_t i0, const char **inout_arrmeta,
+                                      const char **inout_data) const
 {
   // Bounds-checking of the index
   i0 = apply_single_index(i0, m_field_count, NULL);
@@ -124,8 +125,8 @@ ndt::type struct_type::at_single(intptr_t i0, const char **inout_arrmeta,
   return get_field_type(i0);
 }
 
-bool struct_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                         const ndt::type &src_tp) const
+bool ndt::struct_type::is_lossless_assignment(const type &dst_tp,
+                                              const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -138,10 +139,10 @@ bool struct_type::is_lossless_assignment(const ndt::type &dst_tp,
   return false;
 }
 
-intptr_t struct_type::make_assignment_kernel(
+intptr_t ndt::struct_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
@@ -167,13 +168,10 @@ intptr_t struct_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-size_t struct_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                           const ndt::type &src0_dt,
-                                           const char *src0_arrmeta,
-                                           const ndt::type &src1_dt,
-                                           const char *src1_arrmeta,
-                                           comparison_type_t comptype,
-                                           const eval::eval_context *ectx) const
+size_t ndt::struct_type::make_comparison_kernel(
+    void *ckb, intptr_t ckb_offset, const type &src0_dt,
+    const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
+    comparison_type_t comptype, const eval::eval_context *ectx) const
 {
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
@@ -187,7 +185,7 @@ size_t struct_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
   throw not_comparable_error(src0_dt, src1_dt, comptype);
 }
 
-bool struct_type::operator==(const base_type &rhs) const
+bool ndt::struct_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -202,8 +200,8 @@ bool struct_type::operator==(const base_type &rhs) const
   }
 }
 
-void struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                                      const std::string &indent) const
+void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
+                                           const std::string &indent) const
 {
   const size_t *offsets = reinterpret_cast<const size_t *>(arrmeta);
   o << indent << "struct arrmeta\n";
@@ -217,7 +215,7 @@ void struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   o << "\n";
   const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
   for (intptr_t i = 0; i < m_field_count; ++i) {
-    const ndt::type &field_dt = get_field_type(i);
+    const type &field_dt = get_field_type(i);
     if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
       o << indent << " field " << i << " (name ";
       const string_type_data &fnr = get_field_name_raw(i);
@@ -231,20 +229,20 @@ void struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 
 static nd::array property_get_field_names(const ndt::type &tp)
 {
-  return tp.extended<struct_type>()->get_field_names();
+  return tp.extended<ndt::struct_type>()->get_field_names();
 }
 
 static nd::array property_get_field_types(const ndt::type &tp)
 {
-  return tp.extended<struct_type>()->get_field_types();
+  return tp.extended<ndt::struct_type>()->get_field_types();
 }
 
 static nd::array property_get_arrmeta_offsets(const ndt::type &tp)
 {
-  return tp.extended<struct_type>()->get_arrmeta_offsets();
+  return tp.extended<ndt::struct_type>()->get_arrmeta_offsets();
 }
 
-void struct_type::get_dynamic_type_properties(
+void ndt::struct_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -273,7 +271,7 @@ static array_preamble *property_get_array_field(const array_preamble *params,
   ndt::type udt = n.get_dtype();
   if (udt.get_kind() == expr_kind) {
     string field_name =
-        udt.value_type().extended<struct_type>()->get_field_name(i);
+        udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
     return n.replace_dtype(ndt::make_property(udt, field_name, i)).release();
   } else {
     if (undim == 0) {
@@ -288,40 +286,41 @@ static array_preamble *property_get_array_field(const array_preamble *params,
 
 static nd::array make_self_names()
 {
-    const char *selfname = "self";
-    return nd::make_strided_string_array(&selfname, 1);
+  const char *selfname = "self";
+  return nd::make_strided_string_array(&selfname, 1);
 }
 
 static nd::array make_self_types()
 {
   nd::array result = nd::empty(1, ndt::make_type());
-  unchecked_fixed_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
+  ndt::unchecked_fixed_dim_get_rw<ndt::type>(result, 0) =
+      ndt::make_ndarrayarg();
   result.flag_as_immutable();
   return result;
 }
 
-struct_type::struct_type(int, int)
+ndt::struct_type::struct_type(int, int)
     : base_struct_type(struct_type_id, make_self_names(), make_self_types(),
                        type_flag_none, false, false)
 {
-    // Equivalent to ndt::make_struct(ndt::make_ndarrayarg(), "self");
-    // but hardcoded to break the dependency of struct_type::array_parameters_type
-    uintptr_t metaoff[1] = {0};
-    m_arrmeta_offsets = nd::array(metaoff);
-    // The data offsets also consist of one zero
-//    m_data_offsets = m_arrmeta_offsets;
-    // Inherit any operand flags from the fields
-    m_members.flags |=
-        (ndt::make_ndarrayarg().get_flags() & type_flags_operand_inherited);
-    m_members.data_alignment = sizeof(void *);
-    m_members.arrmeta_size = 0;
-    m_members.data_size = sizeof(void *);
-    // Leave m_array_properties so there is no reference loop
+  // Equivalent to ndt::make_struct(ndt::make_ndarrayarg(), "self");
+  // but hardcoded to break the dependency of struct_type::array_parameters_type
+  uintptr_t metaoff[1] = {0};
+  m_arrmeta_offsets = nd::array(metaoff);
+  // The data offsets also consist of one zero
+  //    m_data_offsets = m_arrmeta_offsets;
+  // Inherit any operand flags from the fields
+  m_members.flags |=
+      (make_ndarrayarg().get_flags() & type_flags_operand_inherited);
+  m_members.data_alignment = sizeof(void *);
+  m_members.arrmeta_size = 0;
+  m_members.data_size = sizeof(void *);
+  // Leave m_array_properties so there is no reference loop
 }
 
-void struct_type::create_array_properties()
+void ndt::struct_type::create_array_properties()
 {
-  ndt::type array_parameters_type(new struct_type(0, 0), false);
+  type array_parameters_type(new struct_type(0, 0), false);
 
   m_array_properties.resize(m_field_count);
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
@@ -332,7 +331,7 @@ void struct_type::create_array_properties()
   }
 }
 
-void struct_type::get_dynamic_array_properties(
+void ndt::struct_type::get_dynamic_array_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -364,35 +363,35 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   }
 
   // Make an empty shell struct by concatenating the fields together
-  intptr_t lhs_n = lhs_tp.extended<base_struct_type>()->get_field_count();
-  intptr_t rhs_n = rhs_tp.extended<base_struct_type>()->get_field_count();
+  intptr_t lhs_n = lhs_tp.extended<ndt::base_struct_type>()->get_field_count();
+  intptr_t rhs_n = rhs_tp.extended<ndt::base_struct_type>()->get_field_count();
   intptr_t res_n = lhs_n + rhs_n;
   nd::array res_field_names = nd::empty(res_n, ndt::make_string());
   nd::array res_field_types = nd::empty(res_n, ndt::make_type());
   res_field_names(irange(0, lhs_n)).vals() =
-      lhs_tp.extended<base_struct_type>()->get_field_names();
+      lhs_tp.extended<ndt::base_struct_type>()->get_field_names();
   res_field_names(irange(lhs_n, res_n)).vals() =
-      rhs_tp.extended<base_struct_type>()->get_field_names();
+      rhs_tp.extended<ndt::base_struct_type>()->get_field_names();
   res_field_types(irange(0, lhs_n)).vals() =
-      lhs_tp.extended<base_struct_type>()->get_field_types();
+      lhs_tp.extended<ndt::base_struct_type>()->get_field_types();
   res_field_types(irange(lhs_n, res_n)).vals() =
-      rhs_tp.extended<base_struct_type>()->get_field_types();
+      rhs_tp.extended<ndt::base_struct_type>()->get_field_types();
   ndt::type res_tp = ndt::make_struct(res_field_names, res_field_types);
   const ndt::type *res_field_tps =
-      res_tp.extended<base_struct_type>()->get_field_types_raw();
+      res_tp.extended<ndt::base_struct_type>()->get_field_types_raw();
   res = nd::empty_shell(res_tp);
 
   // Initialize the default data offsets for the struct arrmeta
-  struct_type::fill_default_data_offsets(
-      res_n, res_tp.extended<base_struct_type>()->get_field_types_raw(),
+  ndt::struct_type::fill_default_data_offsets(
+      res_n, res_tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
       reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
   // Get information about the arrmeta layout of the input and res
   const uintptr_t *lhs_arrmeta_offsets =
-      lhs_tp.extended<base_struct_type>()->get_arrmeta_offsets_raw();
+      lhs_tp.extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
   const uintptr_t *rhs_arrmeta_offsets =
-      rhs_tp.extended<base_struct_type>()->get_arrmeta_offsets_raw();
+      rhs_tp.extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
   const uintptr_t *res_arrmeta_offsets =
-      res_tp.extended<base_struct_type>()->get_arrmeta_offsets_raw();
+      res_tp.extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
   const char *lhs_arrmeta = lhs.get_arrmeta();
   const char *rhs_arrmeta = rhs.get_arrmeta();
   char *res_arrmeta = res.get_arrmeta();
@@ -416,11 +415,14 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
 
   // Get information about the data layout of the input and res
   const uintptr_t *lhs_data_offsets =
-      lhs_tp.extended<base_struct_type>()->get_data_offsets(lhs.get_arrmeta());
+      lhs_tp.extended<ndt::base_struct_type>()->get_data_offsets(
+          lhs.get_arrmeta());
   const uintptr_t *rhs_data_offsets =
-      rhs_tp.extended<base_struct_type>()->get_data_offsets(rhs.get_arrmeta());
+      rhs_tp.extended<ndt::base_struct_type>()->get_data_offsets(
+          rhs.get_arrmeta());
   const uintptr_t *res_data_offsets =
-      res_tp.extended<base_struct_type>()->get_data_offsets(res.get_arrmeta());
+      res_tp.extended<ndt::base_struct_type>()->get_data_offsets(
+          res.get_arrmeta());
   const char *lhs_data = lhs.get_readonly_originptr();
   const char *rhs_data = rhs.get_readonly_originptr();
   char *res_data = res.get_readwrite_originptr();
