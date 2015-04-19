@@ -47,7 +47,7 @@ struct tuple_unary_op_ck
   void destruct_children()
   {
     for (size_t i = 0; i < m_fields.size(); ++i) {
-      base.destroy_child_ckernel(m_fields[i].child_kernel_offset);
+      destroy_child_ckernel(m_fields[i].child_kernel_offset);
     }
   }
 };

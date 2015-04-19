@@ -114,9 +114,9 @@ struct option_to_option_ck
     // src_is_avail
     get_child_ckernel()->destroy();
     // dst_assign_na
-    base.destroy_child_ckernel(m_dst_assign_na_offset);
+    destroy_child_ckernel(m_dst_assign_na_offset);
     // value_assign
-    base.destroy_child_ckernel(m_value_assign_offset);
+    destroy_child_ckernel(m_value_assign_offset);
   }
 };
 
@@ -177,7 +177,7 @@ struct option_to_value_ck
     // src_is_avail
     get_child_ckernel()->destroy();
     // value_assign
-    base.destroy_child_ckernel(m_value_assign_offset);
+    destroy_child_ckernel(m_value_assign_offset);
   }
 };
 
@@ -326,7 +326,7 @@ struct string_to_option_tp_ck
     // value_assign
     get_child_ckernel()->destroy();
     // dst_assign_na
-    base.destroy_child_ckernel(m_dst_assign_na_offset);
+    destroy_child_ckernel(m_dst_assign_na_offset);
   }
 };
 }

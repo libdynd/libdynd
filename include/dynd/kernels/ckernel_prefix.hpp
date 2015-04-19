@@ -81,13 +81,6 @@ struct ckernel_prefix {
   destructor_fn_t destructor;
 
   /**
-   * To help with generic code a bit, structs which
-   * begin with a ckernel_prefix can define this
-   * base() function which returns that ckernel_prefix.
-   */
-  DYND_CUDA_HOST_DEVICE ckernel_prefix &base() { return *this; }
-
-  /**
    * Aligns an offset as required by ckernels.
    */
   DYND_CUDA_HOST_DEVICE static size_t align_offset(size_t offset)
