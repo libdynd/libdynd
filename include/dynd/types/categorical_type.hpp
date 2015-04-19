@@ -18,12 +18,13 @@ struct assign_to_same_category_type;
 } // anonymous namespace
 
 namespace dynd {
+namespace ndt {
 
-class categorical_type : public base_type {
+  class categorical_type : public base_type {
     // The data type of the category
-    ndt::type m_category_tp;
+    type m_category_tp;
     // The integer type used for storage
-    ndt::type m_storage_type;
+    type m_storage_type;
     // list of categories, in sorted order
     nd::array m_categories;
     // mapping from category indices to values
@@ -31,45 +32,42 @@ class categorical_type : public base_type {
     // mapping from values to category indices
     nd::array m_value_to_category_index;
 
-public:
+  public:
     categorical_type(const nd::array &categories, bool presorted = false);
 
-    virtual ~categorical_type() {
-    }
+    virtual ~categorical_type() {}
 
     void print_data(std::ostream &o, const char *arrmeta,
                     const char *data) const;
 
-    void print_type(std::ostream& o) const;
+    void print_type(std::ostream &o) const;
 
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                    const char *arrmeta, const char *data) const;
 
-    size_t get_category_count() const {
-        return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                   m_categories.get_arrmeta())->dim_size;
+    size_t get_category_count() const
+    {
+      return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(
+                 m_categories.get_arrmeta())->dim_size;
     }
 
     /**
      * Returns the type of the category values.
      */
-    const ndt::type& get_category_type() const {
-        return m_category_tp;
-    }
+    const type &get_category_type() const { return m_category_tp; }
 
     /**
      * Return the type of the underlying integer used
      * to index the category list.
      */
-    const ndt::type& get_storage_type() const {
-        return m_storage_type;
-    }
+    const type &get_storage_type() const { return m_storage_type; }
 
     uint32_t get_value_from_category(const char *category_arrmeta,
                                      const char *category_data) const;
     uint32_t get_value_from_category(const nd::array &category) const;
 
-    const char *get_category_data_from_value(uint32_t value) const {
+    const char *get_category_data_from_value(uint32_t value) const
+    {
       if (value >= get_category_count()) {
         throw std::runtime_error("category value is out of bounds");
       }
@@ -79,16 +77,16 @@ public:
                  reinterpret_cast<const fixed_dim_type_arrmeta *>(
                      m_categories.get_arrmeta())->stride;
     }
-    /** Returns the arrmeta corresponding to data from get_category_data_from_value */
+    /** Returns the arrmeta corresponding to data from
+     * get_category_data_from_value */
     const char *get_category_arrmeta() const;
 
     /** Returns the categories as an immutable nd::array */
     nd::array get_categories() const;
 
-    bool is_lossless_assignment(const ndt::type &dst_tp,
-                                const ndt::type &src_tp) const;
+    bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
-    bool operator==(const base_type& rhs) const;
+    bool operator==(const base_type &rhs) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
@@ -99,10 +97,9 @@ public:
 
     intptr_t make_assignment_kernel(
         const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        const ndt::type &src_tp, const char *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *ectx,
-        const nd::array &kwds) const;
+        intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+        const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx, const nd::array &kwds) const;
 
     void get_dynamic_array_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
@@ -114,15 +111,14 @@ public:
     friend struct assign_to_same_category_type;
     friend struct assign_from_same_category_type;
     friend struct assign_from_commensurate_category_type;
-};
+  };
 
-namespace ndt {
-  inline ndt::type make_categorical(const nd::array &values)
+  inline type make_categorical(const nd::array &values)
   {
-    return ndt::type(new categorical_type(values), false);
+    return type(new categorical_type(values), false);
   }
 
-  ndt::type factor_categorical(const nd::array &values);
-} // namespace ndt
+  type factor_categorical(const nd::array &values);
 
+} // namespace dynd::ndt
 } // namespace dynd

@@ -199,15 +199,15 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
     if (tp0_val.get_type_id() == option_type_id) {
         if (tp1_val.get_type_id() == option_type_id) {
             return ndt::make_option(promote_types_arithmetic(
-                tp0_val.extended<option_type>()->get_value_type(),
-                tp1_val.extended<option_type>()->get_value_type()));
+                tp0_val.extended<ndt::option_type>()->get_value_type(),
+                tp1_val.extended<ndt::option_type>()->get_value_type()));
         } else {
             return ndt::make_option(promote_types_arithmetic(
-                tp0_val.extended<option_type>()->get_value_type(), tp1_val));
+                tp0_val.extended<ndt::option_type>()->get_value_type(), tp1_val));
         }
     } else if (tp1_val.get_type_id() == option_type_id) {
         return ndt::make_option(promote_types_arithmetic(
-            tp0_val, tp1_val.extended<option_type>()->get_value_type()));
+            tp0_val, tp1_val.extended<ndt::option_type>()->get_value_type()));
     }
 
     // type, string -> type
@@ -234,8 +234,8 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
         (tp1_val.get_type_id() == var_dim_type_id &&
          tp0_val.get_kind() == dim_kind)) {
       return ndt::make_var_dim(promote_types_arithmetic(
-          tp0_val.extended<base_dim_type>()->get_element_type(),
-          tp1_val.extended<base_dim_type>()->get_element_type()));
+          tp0_val.extended<ndt::base_dim_type>()->get_element_type(),
+          tp1_val.extended<ndt::base_dim_type>()->get_element_type()));
     }
 
     stringstream ss;

@@ -56,7 +56,7 @@ struct dim_iter {
      */
     uint64_t flags;
     /** The type of one element */
-    const base_type *eltype;
+    const ndt::base_type *eltype;
     /** Array arrmeta that each element conforms to. */
     const char *el_arrmeta;
     /**

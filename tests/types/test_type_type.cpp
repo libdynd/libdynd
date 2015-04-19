@@ -24,8 +24,8 @@ TEST(DTypeDType, Create) {
     EXPECT_EQ(type_type_id, d.get_type_id());
     EXPECT_EQ(type_kind, d.get_kind());
     EXPECT_EQ(ndt::type("type"), d);
-    EXPECT_EQ(sizeof(const base_type *), d.get_data_alignment());
-    EXPECT_EQ(sizeof(const base_type *), d.get_data_size());
+    EXPECT_EQ(sizeof(const ndt::base_type *), d.get_data_alignment());
+    EXPECT_EQ(sizeof(const ndt::base_type *), d.get_data_size());
     EXPECT_FALSE(d.is_expression());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));

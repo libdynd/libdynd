@@ -39,8 +39,8 @@ size_t dynd::make_struct_assignment_kernel(
        << dst_struct_tp << " is not of struct kind";
     throw runtime_error(ss.str());
   }
-  const base_struct_type *dst_sd = dst_struct_tp.extended<base_struct_type>();
-  const base_struct_type *src_sd = src_struct_tp.extended<base_struct_type>();
+  const ndt::base_struct_type *dst_sd = dst_struct_tp.extended<ndt::base_struct_type>();
+  const ndt::base_struct_type *src_sd = src_struct_tp.extended<ndt::base_struct_type>();
   intptr_t field_count = dst_sd->get_field_count();
 
   if (field_count != src_sd->get_field_count()) {

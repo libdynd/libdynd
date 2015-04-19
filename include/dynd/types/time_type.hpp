@@ -9,18 +9,17 @@
 #include <dynd/types/datetime_util.hpp>
 
 namespace dynd {
+namespace ndt {
 
-class time_type : public base_type {
+  class time_type : public base_type {
     datetime_tz_t m_timezone;
 
-public:
+  public:
     time_type(datetime_tz_t timezone);
 
     virtual ~time_type();
 
-    inline datetime_tz_t get_timezone() const {
-        return m_timezone;
-    }
+    inline datetime_tz_t get_timezone() const { return m_timezone; }
 
     void set_time(const char *arrmeta, char *data, assign_error_mode errmode,
                   int32_t hour, int32_t minute, int32_t second,
@@ -31,37 +30,40 @@ public:
 
     time_hmst get_time(const char *arrmeta, const char *data) const;
 
-    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta,
+                    const char *data) const;
 
-    void print_type(std::ostream& o) const;
+    void print_type(std::ostream &o) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+    bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
-    bool operator==(const base_type& rhs) const;
+    bool operator==(const base_type &rhs) const;
 
     void arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
                                    bool DYND_UNUSED(blockref_alloc)) const
     {
     }
-    void arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta), memory_block_data *DYND_UNUSED(embedded_reference)) const {
+    void arrmeta_copy_construct(
+        char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+        memory_block_data *DYND_UNUSED(embedded_reference)) const
+    {
     }
-    void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {
-    }
-    void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream& DYND_UNUSED(o), const std::string& DYND_UNUSED(indent)) const {
+    void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+    void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta),
+                             std::ostream &DYND_UNUSED(o),
+                             const std::string &DYND_UNUSED(indent)) const
+    {
     }
 
     intptr_t make_assignment_kernel(
         const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        const ndt::type &src_tp, const char *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *ectx,
-        const nd::array &kwds) const;
+        intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+        const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx, const nd::array &kwds) const;
 
     size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                  const ndt::type &src0_dt,
-                                  const char *src0_arrmeta,
-                                  const ndt::type &src1_dt,
-                                  const char *src1_arrmeta,
+                                  const type &src0_dt, const char *src0_arrmeta,
+                                  const type &src1_dt, const char *src1_arrmeta,
                                   comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
 
@@ -79,9 +81,8 @@ public:
         size_t *out_count) const;
 
     size_t get_elwise_property_index(const std::string &property_name) const;
-    ndt::type get_elwise_property_type(size_t elwise_property_index,
-                                       bool &out_readable,
-                                       bool &out_writable) const;
+    type get_elwise_property_type(size_t elwise_property_index,
+                                  bool &out_readable, bool &out_writable) const;
     size_t make_elwise_property_getter_kernel(
         void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
         const char *src_arrmeta, size_t src_elwise_property_index,
@@ -92,20 +93,20 @@ public:
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     nd::array get_option_nafunc() const;
-};
+  };
 
-namespace ndt {
   /** Returns type "time" (with abstract/naive time zone) */
-  inline const ndt::type &make_time()
+  inline const type &make_time()
   {
     static const type time_tp(new time_type(tz_abstract), false);
     return time_tp;
   }
-  /** Returns type "time[tz=<timezone>]" */
-  inline ndt::type make_time(datetime_tz_t timezone)
-  {
-    return ndt::type(new time_type(timezone), false);
-  }
-} // namespace ndt
 
+  /** Returns type "time[tz=<timezone>]" */
+  inline type make_time(datetime_tz_t timezone)
+  {
+    return type(new time_type(timezone), false);
+  }
+
+} // namespace dynd::ndt
 } // namespace dynd

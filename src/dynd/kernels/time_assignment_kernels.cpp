@@ -21,8 +21,8 @@ struct string_to_time_ck
 
   void single(char *dst, char *const *src)
   {
-    const base_string_type *bst =
-        static_cast<const base_string_type *>(m_src_string_tp.extended());
+    const ndt::base_string_type *bst =
+        static_cast<const ndt::base_string_type *>(m_src_string_tp.extended());
     const string &s = bst->get_utf8_string(m_src_arrmeta, src[0], m_errmode);
     time_hmst hmst;
     // TODO: properly distinguish "time" and "option[time]" with respect to NA
@@ -76,8 +76,8 @@ struct time_to_string_ck
     if (s.empty()) {
       s = "NA";
     }
-    const base_string_type *bst =
-        static_cast<const base_string_type *>(m_dst_string_tp.extended());
+    const ndt::base_string_type *bst =
+        static_cast<const ndt::base_string_type *>(m_dst_string_tp.extended());
     bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
   }
 };

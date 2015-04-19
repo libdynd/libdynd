@@ -9,17 +9,20 @@
 using namespace std;
 using namespace dynd;
 
-void ndarrayarg_type::print_data(std::ostream &o,
-                                 const char *DYND_UNUSED(arrmeta),
-                                 const char *data) const
+void ndt::ndarrayarg_type::print_data(std::ostream &o,
+                                      const char *DYND_UNUSED(arrmeta),
+                                      const char *data) const
 {
   o << *reinterpret_cast<const nd::array *>(data);
 }
 
-void ndarrayarg_type::print_type(std::ostream &o) const { o << "ndarrayarg"; }
+void ndt::ndarrayarg_type::print_type(std::ostream &o) const
+{
+  o << "ndarrayarg";
+}
 
-bool ndarrayarg_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                             const ndt::type &src_tp) const
+bool ndt::ndarrayarg_type::is_lossless_assignment(const type &dst_tp,
+                                                  const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -32,7 +35,7 @@ bool ndarrayarg_type::is_lossless_assignment(const ndt::type &dst_tp,
   }
 }
 
-bool ndarrayarg_type::operator==(const base_type &rhs) const
+bool ndt::ndarrayarg_type::operator==(const base_type &rhs) const
 {
   return rhs.get_type_id() == ndarrayarg_type_id;
 }
@@ -52,11 +55,11 @@ struct ndarrayarg_assign_ck
 };
 } // anonymous namespace
 
-intptr_t ndarrayarg_type::make_assignment_kernel(
+intptr_t ndt::ndarrayarg_type::make_assignment_kernel(
     const arrfunc_type_data *DYND_UNUSED(self),
     const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    const ndt::type &src_tp, const char *DYND_UNUSED(src_arrmeta),
+    const type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    const type &src_tp, const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds)) const
 {
@@ -70,10 +73,10 @@ intptr_t ndarrayarg_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-size_t ndarrayarg_type::make_comparison_kernel(
+size_t ndt::ndarrayarg_type::make_comparison_kernel(
     void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
-    const ndt::type &src0_tp, const char *DYND_UNUSED(src0_arrmeta),
-    const ndt::type &src1_tp, const char *DYND_UNUSED(src1_arrmeta),
+    const type &src0_tp, const char *DYND_UNUSED(src0_arrmeta),
+    const type &src1_tp, const char *DYND_UNUSED(src1_arrmeta),
     comparison_type_t comptype,
     const eval::eval_context *DYND_UNUSED(ectx)) const
 {

@@ -22,9 +22,9 @@ intptr_t nd::copy_ck::instantiate(
     if (src_tp[0].is_builtin()) {
       if (dst_tp.extended() == src_tp[0].extended()) {
         return make_pod_typed_data_assignment_kernel(
-            ckb, ckb_offset, dynd::detail::builtin_data_sizes
+            ckb, ckb_offset, dynd::ndt::detail::builtin_data_sizes
                                  [dst_tp.unchecked_get_builtin_type_id()],
-            dynd::detail::builtin_data_alignments
+            dynd::ndt::detail::builtin_data_alignments
                 [dst_tp.unchecked_get_builtin_type_id()],
             kernreq);
       } else {

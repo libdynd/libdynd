@@ -69,10 +69,10 @@ namespace nd {
 
           if (nsrc == 0) {
             dst_tp = tp_vars.at("Dims")
-                         .extended<dim_fragment_type>()
+                         .extended<ndt::dim_fragment_type>()
                          ->apply_to_dtype(child_dst_tp.without_memory_type());
             if (child_dst_tp.get_kind() == memory_kind) {
-              dst_tp = child_dst_tp.extended<base_memory_type>()
+              dst_tp = child_dst_tp.extended<ndt::base_memory_type>()
                            ->with_replaced_storage_type(dst_tp);
             }
 
@@ -96,7 +96,7 @@ namespace nd {
                   switch (tp.get_type_id()) {
                   case fixed_dim_type_id:
                     shape_at_j =
-                        tp.extended<fixed_dim_type>()->get_fixed_dim_size();
+                        tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
                     if (shape_i[j] < 0 || shape_i[j] == 1) {
                       if (shape_at_j != 1) {
                         shape_i[j] = shape_at_j;
@@ -126,7 +126,7 @@ namespace nd {
               }
             }
             if (child_dst_tp.get_kind() == memory_kind) {
-              child_dst_tp = child_dst_tp.extended<base_memory_type>()
+              child_dst_tp = child_dst_tp.extended<ndt::base_memory_type>()
                                  ->with_replaced_storage_type(tp);
             }
             else {
@@ -650,8 +650,8 @@ namespace nd {
             is_src_var[i] = false;
             finished &= src_ndim == 1;
           } else {
-            const var_dim_type *vdd =
-                static_cast<const var_dim_type *>(src_tp[i].extended());
+            const ndt::var_dim_type *vdd =
+                static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
             const var_dim_type_arrmeta *src_md =
                 reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[i]);
             src_stride[i] = src_md->stride;
@@ -957,7 +957,7 @@ namespace nd {
         ndt::type child_src_tp[N];
 
         // The dst var parameters
-        const var_dim_type *dst_vdd = dst_tp.extended<var_dim_type>();
+        const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
         const var_dim_type_arrmeta *dst_md =
             reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
@@ -988,8 +988,8 @@ namespace nd {
             is_src_var[i] = false;
             finished &= src_ndim == 1;
           } else {
-            const var_dim_type *vdd =
-                static_cast<const var_dim_type *>(src_tp[i].extended());
+            const ndt::var_dim_type *vdd =
+                static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
             const var_dim_type_arrmeta *src_md =
                 reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[i]);
             src_stride[i] = src_md->stride;
@@ -1122,7 +1122,7 @@ namespace nd {
         ndt::type child_dst_tp;
 
         // The dst var parameters
-        const var_dim_type *dst_vdd = dst_tp.extended<var_dim_type>();
+        const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
         const var_dim_type_arrmeta *dst_md =
             reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 

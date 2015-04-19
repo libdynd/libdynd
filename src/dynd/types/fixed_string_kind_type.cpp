@@ -16,70 +16,70 @@
 using namespace std;
 using namespace dynd;
 
-fixed_string_kind_type::fixed_string_kind_type()
+ndt::fixed_string_kind_type::fixed_string_kind_type()
     : base_string_type(fixed_string_type_id, kind_kind, 0, 0,
                        type_flag_scalar | type_flag_symbolic, 0)
 {
 }
 
-fixed_string_kind_type::~fixed_string_kind_type() {}
+ndt::fixed_string_kind_type::~fixed_string_kind_type() {}
 
-size_t fixed_string_kind_type::get_default_data_size() const
+size_t ndt::fixed_string_kind_type::get_default_data_size() const
 {
   stringstream ss;
-  ss << "Cannot get default data size of type " << ndt::type(this, true);
+  ss << "Cannot get default data size of type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void fixed_string_kind_type::print_data(std::ostream &DYND_UNUSED(o),
+void
+ndt::fixed_string_kind_type::print_data(std::ostream &DYND_UNUSED(o),
                                         const char *DYND_UNUSED(arrmeta),
                                         const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of symbolic fixed_string_kind type");
 }
 
-void fixed_string_kind_type::print_type(std::ostream &o) const
+void ndt::fixed_string_kind_type::print_type(std::ostream &o) const
 {
   o << "FixedString";
 }
 
-bool fixed_string_kind_type::is_expression() const { return false; }
+bool ndt::fixed_string_kind_type::is_expression() const { return false; }
 
-bool fixed_string_kind_type::is_unique_data_owner(
+bool ndt::fixed_string_kind_type::is_unique_data_owner(
     const char *DYND_UNUSED(arrmeta)) const
 {
   return false;
 }
 
-ndt::type fixed_string_kind_type::get_canonical_type() const
+ndt::type ndt::fixed_string_kind_type::get_canonical_type() const
 {
-  return ndt::type(this, true);
+  return type(this, true);
 }
 
-bool fixed_string_kind_type::is_lossless_assignment(
-    const ndt::type &DYND_UNUSED(dst_tp),
-    const ndt::type &DYND_UNUSED(src_tp)) const
+bool ndt::fixed_string_kind_type::is_lossless_assignment(
+    const type &DYND_UNUSED(dst_tp), const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
 
-string_encoding_t fixed_string_kind_type::get_encoding() const
+string_encoding_t ndt::fixed_string_kind_type::get_encoding() const
 {
   stringstream ss;
-  ss << "Cannot get encoding for symbolic type " << ndt::type(this, true);
+  ss << "Cannot get encoding for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void fixed_string_kind_type::get_string_range(
+void ndt::fixed_string_kind_type::get_string_range(
     const char **DYND_UNUSED(out_begin), const char **DYND_UNUSED(out_end),
     const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
   stringstream ss;
-  ss << "Cannot get string range for symbolic type " << ndt::type(this, true);
+  ss << "Cannot get string range for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void fixed_string_kind_type::make_string_iter(
+void ndt::fixed_string_kind_type::make_string_iter(
     dim_iter *DYND_UNUSED(out_di), string_encoding_t DYND_UNUSED(encoding),
     const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data),
     const memory_block_ptr &DYND_UNUSED(ref),
@@ -88,7 +88,7 @@ void fixed_string_kind_type::make_string_iter(
 {
 }
 
-bool fixed_string_kind_type::operator==(const base_type &rhs) const
+bool ndt::fixed_string_kind_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -98,74 +98,75 @@ bool fixed_string_kind_type::operator==(const base_type &rhs) const
   }
 }
 
-void fixed_string_kind_type::arrmeta_default_construct(
+void ndt::fixed_string_kind_type::arrmeta_default_construct(
     char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
   stringstream ss;
   ss << "Cannot default construct arrmeta for symbolic type "
-     << ndt::type(this, true);
+     << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void fixed_string_kind_type::arrmeta_copy_construct(
+void ndt::fixed_string_kind_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
   stringstream ss;
-  ss << "Cannot copy construct arrmeta for symbolic type "
-     << ndt::type(this, true);
+  ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void
-fixed_string_kind_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
-{
-}
-
-void fixed_string_kind_type::arrmeta_finalize_buffers(
+void ndt::fixed_string_kind_type::arrmeta_reset_buffers(
     char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void fixed_string_kind_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+void ndt::fixed_string_kind_type::arrmeta_finalize_buffers(
+    char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void fixed_string_kind_type::arrmeta_debug_print(
+void
+ndt::fixed_string_kind_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+{
+}
+
+void ndt::fixed_string_kind_type::arrmeta_debug_print(
     const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
     const std::string &DYND_UNUSED(indent)) const
 {
   stringstream ss;
-  ss << "Cannot have arrmeta for symbolic type " << ndt::type(this, true);
+  ss << "Cannot have arrmeta for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void fixed_string_kind_type::data_destruct(const char *DYND_UNUSED(arrmeta),
+void
+ndt::fixed_string_kind_type::data_destruct(const char *DYND_UNUSED(arrmeta),
                                            char *DYND_UNUSED(data)) const
 {
   stringstream ss;
-  ss << "Cannot have data for symbolic type " << ndt::type(this, true);
+  ss << "Cannot have data for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void fixed_string_kind_type::data_destruct_strided(
+void ndt::fixed_string_kind_type::data_destruct_strided(
     const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data),
     intptr_t DYND_UNUSED(stride), size_t DYND_UNUSED(count)) const
 {
   stringstream ss;
-  ss << "Cannot have data for symbolic type " << ndt::type(this, true);
+  ss << "Cannot have data for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-bool fixed_string_kind_type::match(
-    const char *DYND_UNUSED(arrmeta), const ndt::type &candidate_tp,
+bool ndt::fixed_string_kind_type::match(
+    const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
     const char *DYND_UNUSED(candidate_arrmeta),
-    std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+    std::map<nd::string, type> &DYND_UNUSED(tp_vars)) const
 {
   return candidate_tp.get_type_id() == fixed_string_type_id;
 }
 
-void fixed_string_kind_type::get_dynamic_type_properties(
+void ndt::fixed_string_kind_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -173,7 +174,7 @@ void fixed_string_kind_type::get_dynamic_type_properties(
   *out_count = 0;
 }
 
-void fixed_string_kind_type::get_dynamic_array_properties(
+void ndt::fixed_string_kind_type::get_dynamic_array_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -181,7 +182,7 @@ void fixed_string_kind_type::get_dynamic_array_properties(
   *out_count = 0;
 }
 
-void fixed_string_kind_type::get_dynamic_array_functions(
+void ndt::fixed_string_kind_type::get_dynamic_array_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {

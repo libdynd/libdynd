@@ -176,7 +176,7 @@ void dynd::typed_data_copy(const ndt::type& tp,
                 const char *src_arrmeta, const char *src_data)
 {
     if (tp.get_type_id() == option_type_id) {
-        return typed_data_copy(tp.extended<option_type>()->get_value_type(),
+        return typed_data_copy(tp.extended<ndt::option_type>()->get_value_type(),
             dst_arrmeta, dst_data,
             src_arrmeta, src_data); 
     }

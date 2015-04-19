@@ -268,7 +268,7 @@ struct nafunc {
 
   static nd::array get()
   {
-    nd::array naf = nd::empty(option_type::make_nafunc_type());
+    nd::array naf = nd::empty(ndt::option_type::make_nafunc_type());
     arrfunc_type_data *is_avail =
         reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
     arrfunc_type_data *assign_na = is_avail + 1;

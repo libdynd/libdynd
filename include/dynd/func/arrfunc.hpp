@@ -391,21 +391,22 @@ namespace nd {
                      const std::vector<intptr_t> &missing) const
       {
         array res = empty_shell(tp);
-        struct_type::fill_default_data_offsets(
+        ndt::struct_type::fill_default_data_offsets(
             res.get_dim_size(),
-            tp.extended<base_struct_type>()->get_field_types_raw(),
+            tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
             reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
 
         char *arrmeta = res.get_arrmeta();
-        const uintptr_t *arrmeta_offsets = res.get_type()
-                                               .extended<base_struct_type>()
-                                               ->get_arrmeta_offsets_raw();
+        const uintptr_t *arrmeta_offsets =
+            res.get_type()
+                .extended<ndt::base_struct_type>()
+                ->get_arrmeta_offsets_raw();
         char *data = res.get_readwrite_originptr();
         const uintptr_t *data_offsets =
-            res.get_type().extended<base_struct_type>()->get_data_offsets(
+            res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(
                 res.get_arrmeta());
 
-        fill_values(tp.extended<base_struct_type>()->get_field_types_raw(),
+        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
                     arrmeta, arrmeta_offsets, data, data_offsets, available,
                     missing);
 
@@ -528,18 +529,18 @@ namespace nd {
                      const std::vector<intptr_t> &missing) const
       {
         array res = empty_shell(tp);
-        struct_type::fill_default_data_offsets(
+        ndt::struct_type::fill_default_data_offsets(
             res.get_dim_size(),
-            tp.extended<base_struct_type>()->get_field_types_raw(),
+            tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
             reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
 
         fill_values(
-            tp.extended<base_struct_type>()->get_field_types_raw(),
+            tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
             res.get_arrmeta(), res.get_type()
-                                   .extended<base_struct_type>()
+                                   .extended<ndt::base_struct_type>()
                                    ->get_arrmeta_offsets_raw(),
             res.get_readwrite_originptr(),
-            res.get_type().extended<base_struct_type>()->get_data_offsets(
+            res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(
                 res.get_arrmeta()),
             available, missing);
 
@@ -616,19 +617,21 @@ namespace nd {
                      const std::vector<intptr_t> &missing) const
       {
         array res = empty_shell(tp);
-        auto field_count = tp.extended<base_struct_type>()->get_field_count();
+        auto field_count =
+            tp.extended<ndt::base_struct_type>()->get_field_count();
         auto field_types =
-            tp.extended<base_struct_type>()->get_field_types_raw();
-        struct_type::fill_default_data_offsets(
+            tp.extended<ndt::base_struct_type>()->get_field_types_raw();
+        ndt::struct_type::fill_default_data_offsets(
             field_count, field_types,
             reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
 
         fill_values(
-            field_types, res.get_arrmeta(), res.get_type()
-                                                .extended<base_struct_type>()
-                                                ->get_arrmeta_offsets_raw(),
+            field_types, res.get_arrmeta(),
+            res.get_type()
+                .extended<ndt::base_struct_type>()
+                ->get_arrmeta_offsets_raw(),
             res.get_readwrite_originptr(),
-            res.get_type().extended<base_struct_type>()->get_data_offsets(
+            res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(
                 res.get_arrmeta()),
             available, missing);
 
@@ -1085,8 +1088,10 @@ namespace nd {
     }
 
     /**
-     * T is a kernel type (e.g. a child class of base_kernel or base_virtual_kernel),
-     * and this assembles an arrfunc out of the interface functions defined by it.
+     * T is a kernel type (e.g. a child class of base_kernel or
+     * base_virtual_kernel),
+     * and this assembles an arrfunc out of the interface functions defined by
+     * it.
      */
     template <typename T>
     static arrfunc make(const ndt::type &self_tp, size_t data_size)

@@ -98,7 +98,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
           lifted_dst_type = ndt::make_fixed_dim_kind(lifted_dst_type);
         } else {
           lifted_dst_type = ndt::make_fixed_dim(
-              subtype.extended<fixed_dim_type>()->get_fixed_dim_size(),
+              subtype.extended<ndt::fixed_dim_type>()->get_fixed_dim_size(),
               lifted_dst_type);
         }
         break;

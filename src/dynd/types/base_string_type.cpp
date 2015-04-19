@@ -15,28 +15,29 @@
 using namespace std;
 using namespace dynd;
 
+ndt::base_string_type::~base_string_type() {}
 
-base_string_type::~base_string_type()
+std::string
+ndt::base_string_type::get_utf8_string(const char *arrmeta, const char *data,
+                                       assign_error_mode errmode) const
 {
+  const char *begin, *end;
+  get_string_range(&begin, &end, arrmeta, data);
+  return string_range_as_utf8_string(get_encoding(), begin, end, errmode);
 }
 
-std::string base_string_type::get_utf8_string(const char *arrmeta, const char *data, assign_error_mode errmode) const
+size_t
+ndt::base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 {
-    const char *begin, *end;
-    get_string_range(&begin, &end, arrmeta, data);
-    return string_range_as_utf8_string(get_encoding(), begin, end, errmode);
+  return 0;
 }
 
-size_t base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
+static string get_extended_string_encoding(const ndt::type &dt)
 {
-    return 0;
-}
-
-static string get_extended_string_encoding(const ndt::type& dt) {
-    const base_string_type *d = dt.extended<base_string_type>();
-    stringstream ss;
-    ss << d->get_encoding();
-    return ss.str();
+  const ndt::base_string_type *d = dt.extended<ndt::base_string_type>();
+  stringstream ss;
+  ss << d->get_encoding();
+  return ss.str();
 }
 
 static size_t base_string_type_properties_size() { return 1; }
@@ -51,87 +52,85 @@ static const pair<string, gfunc::callable> *base_string_type_properties()
   return base_string_type_properties;
 }
 
-void base_string_type::get_dynamic_type_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void ndt::base_string_type::get_dynamic_type_properties(
+    const std::pair<std::string, gfunc::callable> **out_properties,
+    size_t *out_count) const
 {
-    *out_properties = base_string_type_properties();
-    *out_count = base_string_type_properties_size();
+  *out_properties = base_string_type_properties();
+  *out_count = base_string_type_properties_size();
 }
 
 namespace {
-    // TODO: The representation of deferred operations needs work,
-    //       this way is too verbose and boilerplatey
-    class string_find_kernel_generator : public expr_kernel_generator {
-        ndt::type m_rdt, m_op1dt, m_op2dt;
-        expr_operation_pair m_op_pair;
-        const char *m_name;
+// TODO: The representation of deferred operations needs work,
+//       this way is too verbose and boilerplatey
+class string_find_kernel_generator : public expr_kernel_generator {
+  ndt::type m_rdt, m_op1dt, m_op2dt;
+  expr_operation_pair m_op_pair;
+  const char *m_name;
 
-        typedef kernels::string_find_kernel extra_type;
-    public:
-        string_find_kernel_generator(const ndt::type& rdt, const ndt::type& op1dt, const ndt::type& op2dt,
-                        const expr_operation_pair& op_pair, const char *name)
-            : expr_kernel_generator(true), m_rdt(rdt), m_op1dt(op1dt), m_op2dt(op2dt),
-                            m_op_pair(op_pair), m_name(name)
-        {
-        }
+  typedef kernels::string_find_kernel extra_type;
 
-        virtual ~string_find_kernel_generator() {
-        }
+public:
+  string_find_kernel_generator(const ndt::type &rdt, const ndt::type &op1dt,
+                               const ndt::type &op2dt,
+                               const expr_operation_pair &op_pair,
+                               const char *name)
+      : expr_kernel_generator(true), m_rdt(rdt), m_op1dt(op1dt), m_op2dt(op2dt),
+        m_op_pair(op_pair), m_name(name)
+  {
+  }
 
-        size_t make_expr_kernel(
-                    void *ckb, intptr_t ckb_offset,
-                    const ndt::type& dst_tp, const char *dst_arrmeta,
-                    size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx) const
-        {
-            if (src_count != 2) {
-                stringstream ss;
-                ss << "The " << m_name << " kernel requires 2 src operands, ";
-                ss << "received " << src_count;
-                throw runtime_error(ss.str());
-            }
-            if (dst_tp != m_rdt || src_tp[0] != m_op1dt ||
-                            src_tp[1] != m_op2dt) {
-                // If the types don't match the ones for this generator,
-                // call the elementwise dimension handler to handle one dimension
-                // or handle input/output buffering, giving 'this' as the next
-                // kernel generator to call
-                return make_elwise_dimension_expr_kernel(ckb, ckb_offset,
-                                dst_tp, dst_arrmeta,
-                                src_count, src_tp, src_arrmeta,
-                                kernreq, ectx,
-                                this);
-            }
-            // This is a leaf kernel, so no additional allocation is needed
-            extra_type *e =
-                reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-                    ->alloc_ck<extra_type>(ckb_offset);
-            switch (kernreq) {
-                case kernel_request_single:
-                    e->base().set_function(m_op_pair.single);
-                    break;
-                case kernel_request_strided:
-                    e->base().set_function(m_op_pair.strided);
-                    break;
-                default: {
-                    stringstream ss;
-                    ss << "generic_kernel_generator: unrecognized request " << (int)kernreq;
-                    throw runtime_error(ss.str());
-                }
-            }
-            e->init(src_tp, src_arrmeta);
-            return ckb_offset;
-        }
+  virtual ~string_find_kernel_generator() {}
 
+  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset,
+                          const ndt::type &dst_tp, const char *dst_arrmeta,
+                          size_t src_count, const ndt::type *src_tp,
+                          const char *const *src_arrmeta,
+                          kernel_request_t kernreq,
+                          const eval::eval_context *ectx) const
+  {
+    if (src_count != 2) {
+      stringstream ss;
+      ss << "The " << m_name << " kernel requires 2 src operands, ";
+      ss << "received " << src_count;
+      throw runtime_error(ss.str());
+    }
+    if (dst_tp != m_rdt || src_tp[0] != m_op1dt || src_tp[1] != m_op2dt) {
+      // If the types don't match the ones for this generator,
+      // call the elementwise dimension handler to handle one dimension
+      // or handle input/output buffering, giving 'this' as the next
+      // kernel generator to call
+      return make_elwise_dimension_expr_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+          kernreq, ectx, this);
+    }
+    // This is a leaf kernel, so no additional allocation is needed
+    extra_type *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
+                        ckb)->alloc_ck<extra_type>(ckb_offset);
+    switch (kernreq) {
+    case kernel_request_single:
+      e->base().set_function(m_op_pair.single);
+      break;
+    case kernel_request_strided:
+      e->base().set_function(m_op_pair.strided);
+      break;
+    default: {
+      stringstream ss;
+      ss << "generic_kernel_generator: unrecognized request " << (int)kernreq;
+      throw runtime_error(ss.str());
+    }
+    }
+    e->init(src_tp, src_arrmeta);
+    return ckb_offset;
+  }
 
-        void print_type(std::ostream& o) const
-        {
-            o << m_name << "(op0, op1)";
-        }
-    };
+  void print_type(std::ostream &o) const { o << m_name << "(op0, op1)"; }
+};
 } // anonymous namespace
 
 /*
-static nd::array array_function_find(const nd::array& self, const nd::array& sub)
+static nd::array array_function_find(const nd::array& self, const nd::array&
+sub)
 {
     nd::array ops[2] = {self, sub};
 
@@ -145,7 +144,8 @@ static nd::array array_function_find(const nd::array& self, const nd::array& sub
         size_t ndim_i = ops[i].get_ndim();
         if (ndim_i > 0) {
             ops[i].get_shape(tmp_shape.get());
-            incremental_broadcast(ndim, result_shape.get(), ndim_i, tmp_shape.get());
+            incremental_broadcast(ndim, result_shape.get(), ndim_i,
+tmp_shape.get());
         }
     }
 
@@ -162,8 +162,10 @@ static nd::array array_function_find(const nd::array& self, const nd::array& sub
     // we can swap it in as the type
     ndt::type edt = ndt::make_expr(result_vdt,
                     result.get_type(),
-                    new string_find_kernel_generator(rdt, ops[0].get_dtype().value_type(),
-                                    ops[1].get_dtype().value_type(), expr_ops, "string.find"));
+                    new string_find_kernel_generator(rdt,
+ops[0].get_dtype().value_type(),
+                                    ops[1].get_dtype().value_type(), expr_ops,
+"string.find"));
     edt.swap(result.get_ndo()->m_type);
     return result;
 }
@@ -181,12 +183,12 @@ static const pair<string, gfunc::callable> *base_string_array_functions()
 }
 */
 
-void base_string_type::get_dynamic_array_functions(
+void ndt::base_string_type::get_dynamic_array_functions(
     const std::pair<std::string, gfunc::callable> **DYND_UNUSED(out_functions),
     size_t *DYND_UNUSED(out_count)) const
 {
-/*
-    *out_functions = base_string_array_functions();
-    *out_count = base_string_array_functions_size();
-*/
+  /*
+      *out_functions = base_string_array_functions();
+      *out_count = base_string_array_functions_size();
+  */
 }

@@ -12,52 +12,55 @@
 namespace dynd {
 
 struct bytes_type_arrmeta {
-    /**
-     * A reference to the memory block which contains the byte's data.
-     * NOTE: This is identical to string_type_arrmeta, by design. Maybe
-     *       both should become a typedef to a common class?
-     */
-    memory_block_data *blockref;
+  /**
+   * A reference to the memory block which contains the byte's data.
+   * NOTE: This is identical to string_type_arrmeta, by design. Maybe
+   *       both should become a typedef to a common class?
+   */
+  memory_block_data *blockref;
 };
 
 struct bytes_type_data {
-    char *begin;
-    char *end;
+  char *begin;
+  char *end;
 };
 
-/**
- * The bytes type uses memory_block references to store
- * arbitrarily sized runs of bytes.
- */
-class bytes_type : public base_bytes_type {
+namespace ndt {
+
+  /**
+   * The bytes type uses memory_block references to store
+   * arbitrarily sized runs of bytes.
+   */
+  class bytes_type : public base_bytes_type {
     size_t m_alignment;
 
-public:
+  public:
     bytes_type(size_t alignment);
 
     virtual ~bytes_type();
 
     /** Alignment of the bytes data being pointed to. */
-    size_t get_target_alignment() const {
-        return m_alignment;
-    }
+    size_t get_target_alignment() const { return m_alignment; }
 
-    void print_data(std::ostream& o, const char *arrmeta, const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta,
+                    const char *data) const;
 
-    void print_type(std::ostream& o) const;
+    void print_type(std::ostream &o) const;
 
-    void get_bytes_range(const char **out_begin, const char**out_end, const char *arrmeta, const char *data) const;
+    void get_bytes_range(const char **out_begin, const char **out_end,
+                         const char *arrmeta, const char *data) const;
     void set_bytes_data(const char *arrmeta, char *data,
-                    const char* bytes_begin, const char *bytes_end) const;
+                        const char *bytes_begin, const char *bytes_end) const;
 
     bool is_unique_data_owner(const char *arrmeta) const;
-    ndt::type get_canonical_type() const;
+    type get_canonical_type() const;
 
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                   const char *arrmeta, const char *data) const;
 
-    bool is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const;
+    bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
-    bool operator==(const base_type& rhs) const;
+    bool operator==(const base_type &rhs) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
@@ -70,27 +73,25 @@ public:
 
     intptr_t make_assignment_kernel(
         const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-        const ndt::type &src_tp, const char *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *ectx,
-        const nd::array &kwds) const;
+        intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+        const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx, const nd::array &kwds) const;
 
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;
-};
+  };
 
-namespace ndt {
-  inline const ndt::type &make_bytes()
+  inline const type &make_bytes()
   {
     static const type bytes_tp(new bytes_type(1), false);
-    return *reinterpret_cast<const ndt::type *>(&bytes_tp);
+    return *reinterpret_cast<const type *>(&bytes_tp);
   }
 
-  inline ndt::type make_bytes(size_t alignment)
+  inline type make_bytes(size_t alignment)
   {
-    return ndt::type(new bytes_type(alignment), false);
+    return type(new bytes_type(alignment), false);
   }
-} // namespace ndt
 
+} // namespace dynd::ndt
 } // namespace dynd

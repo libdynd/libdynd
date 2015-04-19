@@ -43,7 +43,7 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref,
   ndt::type json_type = json.get_type().value_type();
   switch (json_type.get_kind()) {
   case string_kind: {
-    const base_string_type *sdt = json_type.extended<base_string_type>();
+    const ndt::base_string_type *sdt = json_type.extended<ndt::base_string_type>();
     switch (sdt->get_encoding()) {
     case string_encoding_ascii:
     case string_encoding_utf_8:
@@ -56,7 +56,7 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref,
       // The data needs to be converted to UTF-8 before parsing
       ndt::type utf8_tp = ndt::make_string(string_encoding_utf_8);
       out_tmp_ref = json.ucast(utf8_tp).eval();
-      sdt = static_cast<const base_string_type *>(utf8_tp.extended());
+      sdt = static_cast<const ndt::base_string_type *>(utf8_tp.extended());
       sdt->get_string_range(&begin, &end, out_tmp_ref.get_arrmeta(),
                             out_tmp_ref.get_readonly_originptr());
       break;
@@ -66,7 +66,7 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref,
   }
   case bytes_kind: {
     out_tmp_ref = json.eval();
-    const base_bytes_type *bdt = json_type.extended<base_bytes_type>();
+    const ndt::base_bytes_type *bdt = json_type.extended<ndt::base_bytes_type>();
     bdt->get_bytes_range(&begin, &end, out_tmp_ref.get_arrmeta(),
                          out_tmp_ref.get_readonly_originptr());
     break;
@@ -247,7 +247,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta,
                                char *out_data, const char *&begin,
                                const char *end, const eval::eval_context *ectx)
 {
-  const var_dim_type *vad = tp.extended<var_dim_type>();
+  const ndt::var_dim_type *vad = tp.extended<ndt::var_dim_type>();
   const var_dim_type_arrmeta *md =
       reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
   intptr_t stride = md->stride;
@@ -303,7 +303,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp,
     return false;
   }
 
-  const base_struct_type *fsd = tp.extended<base_struct_type>();
+  const ndt::base_struct_type *fsd = tp.extended<ndt::base_struct_type>();
   intptr_t field_count = fsd->get_field_count();
   const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
   const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
@@ -379,7 +379,7 @@ static bool parse_tuple_json_from_list(const ndt::type &tp, const char *arrmeta,
     return false;
   }
 
-  auto fsd = tp.extended<base_tuple_type>();
+  auto fsd = tp.extended<ndt::base_tuple_type>();
   intptr_t field_count = fsd->get_field_count();
   const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
   const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
@@ -508,7 +508,7 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta,
   const char *nbegin, *nend;
   bool escaped = false;
   if (option && parse::parse_token_no_ws(begin, end, "null")) {
-    ndt::make_option(tp).extended<option_type>()->assign_na(arrmeta, out_data,
+    ndt::make_option(tp).extended<ndt::option_type>()->assign_na(arrmeta, out_data,
                                                             ectx);
   }
   else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
@@ -547,7 +547,7 @@ static void parse_jsonstring_json(const ndt::type &tp, const char *arrmeta,
 {
   const char *saved_begin = skip_whitespace(begin, end);
   skip_json_value(begin, end);
-  const base_string_type *bsd = tp.extended<base_string_type>();
+  const ndt::base_string_type *bsd = tp.extended<ndt::base_string_type>();
   // The skipped JSON value gets copied verbatim into the json string
   bsd->set_from_utf8_string(arrmeta, out_data, saved_begin, begin, ectx);
 }
@@ -562,7 +562,7 @@ static void parse_string_json(const ndt::type &tp, const char *arrmeta,
   bool escaped;
   if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend,
                                             escaped)) {
-    const base_string_type *bsd = tp.extended<base_string_type>();
+    const ndt::base_string_type *bsd = tp.extended<ndt::base_string_type>();
     try {
       if (!escaped) {
         bsd->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
@@ -700,11 +700,11 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta,
   const char *saved_begin = begin;
   if (tp.is_scalar()) {
     if (parse_token(begin, end, "null")) {
-      tp.extended<option_type>()->assign_na(arrmeta, out_data, ectx);
+      tp.extended<ndt::option_type>()->assign_na(arrmeta, out_data, ectx);
       return;
     }
     else {
-      const ndt::type &value_tp = tp.extended<option_type>()->get_value_type();
+      const ndt::type &value_tp = tp.extended<ndt::option_type>()->get_value_type();
       const char *strbegin, *strend;
       bool escaped;
       if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend,

@@ -21,7 +21,7 @@ struct buffered_kernel_extra {
   // Offsets, from the start of &base, to the kernels
   // before and after the buffer
   size_t first_kernel_offset, second_kernel_offset;
-  const base_type *buffer_tp;
+  const ndt::base_type *buffer_tp;
   char *buffer_arrmeta;
   size_t buffer_data_offset, buffer_data_size;
   intptr_t buffer_stride;
@@ -76,7 +76,7 @@ struct buffered_kernel_extra {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     ckernel_prefix *echild_first, *echild_second;
     expr_single_t opchild;
-    const base_type *buffer_tp = e->buffer_tp;
+    const ndt::base_type *buffer_tp = e->buffer_tp;
     char *buffer_arrmeta = e->buffer_arrmeta;
     char *buffer_data_ptr = eraw + e->buffer_data_offset;
     echild_first =
@@ -108,7 +108,7 @@ struct buffered_kernel_extra {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     ckernel_prefix *echild_first, *echild_second;
     expr_strided_t opchild_first, opchild_second;
-    const base_type *buffer_tp = e->buffer_tp;
+    const ndt::base_type *buffer_tp = e->buffer_tp;
     char *buffer_arrmeta = e->buffer_arrmeta;
     char *buffer_data_ptr = eraw + e->buffer_data_offset;
     intptr_t buffer_stride = e->buffer_stride;
@@ -168,7 +168,7 @@ size_t dynd::make_expression_assignment_kernel(
 {
   intptr_t root_ckb_offset = ckb_offset;
   if (dst_tp.get_kind() == expr_kind) {
-    const base_expr_type *dst_bed = dst_tp.extended<base_expr_type>();
+    const ndt::base_expr_type *dst_bed = dst_tp.extended<ndt::base_expr_type>();
     if (src_tp == dst_bed->get_value_type()) {
       // In this case, it's just a chain of value -> operand on the dst side
       const ndt::type &opdt = dst_bed->get_operand_type();
@@ -178,7 +178,7 @@ size_t dynd::make_expression_assignment_kernel(
             ckb, ckb_offset, dst_arrmeta, src_arrmeta, kernreq, ectx);
       } else {
         // Chain case, buffer one segment of the chain
-        const ndt::type &buffer_tp = static_cast<const base_expr_type *>(
+        const ndt::type &buffer_tp = static_cast<const ndt::base_expr_type *>(
                                          opdt.extended())->get_value_type();
         buffered_kernel_extra *e =
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -244,7 +244,7 @@ size_t dynd::make_expression_assignment_kernel(
                                       kernreq, ectx, nd::array());
     }
   } else {
-    const base_expr_type *src_bed = src_tp.extended<base_expr_type>();
+    const ndt::base_expr_type *src_bed = src_tp.extended<ndt::base_expr_type>();
     if (dst_tp == src_bed->get_value_type()) {
       // In this case, it's just a chain of operand -> value on the src side
       const ndt::type &opdt = src_bed->get_operand_type();
@@ -254,7 +254,7 @@ size_t dynd::make_expression_assignment_kernel(
             ckb, ckb_offset, dst_arrmeta, src_arrmeta, kernreq, ectx);
       } else {
         // Chain case, buffer one segment of the chain
-        const ndt::type &buffer_tp = static_cast<const base_expr_type *>(
+        const ndt::type &buffer_tp = static_cast<const ndt::base_expr_type *>(
                                          opdt.extended())->get_value_type();
         buffered_kernel_extra *e =
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)

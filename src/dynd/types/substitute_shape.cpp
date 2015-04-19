@@ -48,7 +48,7 @@ static void substitute_shape_visitor(const ndt::type &tp,
   intptr_t ndim = ssd->ndim, i = ssd->i;
   if (tp.is_dim()) {
     intptr_t dim_size = ssd->shape[i];
-    ndt::type subtp = tp.extended<base_dim_type>()->get_element_type();
+    ndt::type subtp = tp.extended<ndt::base_dim_type>()->get_element_type();
     if (i + 1 < ndim) {
       ssd->i = i + 1;
       substitute_shape_visitor(subtp, 0, extra, subtp, out_was_transformed);
@@ -65,13 +65,13 @@ static void substitute_shape_visitor(const ndt::type &tp,
         }
       } else {
         if (dim_size < 0 ||
-            dim_size == tp.extended<fixed_dim_type>()->get_fixed_dim_size()) {
+            dim_size == tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size()) {
           if (!out_was_transformed) {
             out_transformed_tp = tp;
           }
           else {
             out_transformed_tp = ndt::make_fixed_dim(
-                tp.extended<fixed_dim_type>()->get_fixed_dim_size(), subtp);
+                tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size(), subtp);
           }
         }
         else {

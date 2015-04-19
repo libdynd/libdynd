@@ -68,7 +68,7 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
 
 static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
 {
-  base_type_xdecref(*self_af->get_data_as<const base_type *>());
+  base_type_xdecref(*self_af->get_data_as<const ndt::base_type *>());
 }
 
 static intptr_t instantiate_property_ckernel(
@@ -80,7 +80,7 @@ static intptr_t instantiate_property_ckernel(
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
-  ndt::type prop_src_tp(*self->get_data_as<const base_type *>(), true);
+  ndt::type prop_src_tp(*self->get_data_as<const ndt::base_type *>(), true);
 
   if (dst_tp.value_type() == prop_src_tp.value_type()) {
     if (src_tp[0] == prop_src_tp.operand_type()) {
@@ -90,7 +90,7 @@ static intptr_t instantiate_property_ckernel(
     } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
       return make_assignment_kernel(
           NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-          prop_src_tp.extended<base_expr_type>()->with_replaced_storage_type(
+          prop_src_tp.extended<ndt::base_expr_type>()->with_replaced_storage_type(
               src_tp[0]),
           src_arrmeta[0], kernreq, ectx, kwds);
     }
@@ -129,7 +129,7 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   out_af->free = &delete_property_arrfunc_data;
-  *out_af->get_data_as<const base_type *>() = prop_tp.release();
+  *out_af->get_data_as<const ndt::base_type *>() = prop_tp.release();
   out_af->instantiate = &instantiate_property_ckernel;
   af.flag_as_immutable();
   return af;

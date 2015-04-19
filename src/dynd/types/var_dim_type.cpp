@@ -20,11 +20,10 @@
 using namespace std;
 using namespace dynd;
 
-var_dim_type::var_dim_type(const ndt::type &element_tp)
-    : base_dim_type(var_dim_type_id, element_tp,
-                            sizeof(var_dim_type_data), sizeof(const char *),
-                            sizeof(var_dim_type_arrmeta),
-                            type_flag_zeroinit | type_flag_blockref, false)
+ndt::var_dim_type::var_dim_type(const type &element_tp)
+    : base_dim_type(var_dim_type_id, element_tp, sizeof(var_dim_type_data),
+                    sizeof(const char *), sizeof(var_dim_type_arrmeta),
+                    type_flag_zeroinit | type_flag_blockref, false)
 {
   // NOTE: The element type may have type_flag_destructor set. In this case,
   //       the var_dim type does NOT need to also set it, because the lifetime
@@ -39,11 +38,10 @@ var_dim_type::var_dim_type(const ndt::type &element_tp)
   get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
-var_dim_type::~var_dim_type()
-{
-}
+ndt::var_dim_type::~var_dim_type() {}
 
-void var_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *data) const
+void ndt::var_dim_type::print_data(std::ostream &o, const char *arrmeta,
+                                   const char *data) const
 {
   const var_dim_type_arrmeta *md =
       reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
@@ -51,119 +49,113 @@ void var_dim_type::print_data(std::ostream& o, const char *arrmeta, const char *
       reinterpret_cast<const var_dim_type_data *>(data);
   const char *element_data = d->begin + md->offset;
   strided_array_summarized(o, get_element_type(),
-                           arrmeta + sizeof(var_dim_type_arrmeta),
-                           element_data, d->size, md->stride);
+                           arrmeta + sizeof(var_dim_type_arrmeta), element_data,
+                           d->size, md->stride);
 }
 
-void var_dim_type::print_type(std::ostream& o) const
+void ndt::var_dim_type::print_type(std::ostream &o) const
 {
   o << "var * " << m_element_tp;
 }
 
-bool var_dim_type::is_expression() const
+bool ndt::var_dim_type::is_expression() const
 {
-    return m_element_tp.is_expression();
+  return m_element_tp.is_expression();
 }
 
-bool var_dim_type::is_unique_data_owner(const char *arrmeta) const
+bool ndt::var_dim_type::is_unique_data_owner(const char *arrmeta) const
 {
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-    if (md->blockref != NULL &&
-            (md->blockref->m_use_count != 1 ||
-             (md->blockref->m_type != pod_memory_block_type &&
-              md->blockref->m_type != zeroinit_memory_block_type &&
-              md->blockref->m_type != objectarray_memory_block_type))) {
-        return false;
-    }
-    if (m_element_tp.is_builtin()) {
-        return true;
-    } else {
-        return m_element_tp.extended()->is_unique_data_owner(arrmeta + sizeof(var_dim_type_arrmeta));
-    }
+  const var_dim_type_arrmeta *md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  if (md->blockref != NULL &&
+      (md->blockref->m_use_count != 1 ||
+       (md->blockref->m_type != pod_memory_block_type &&
+        md->blockref->m_type != zeroinit_memory_block_type &&
+        md->blockref->m_type != objectarray_memory_block_type))) {
+    return false;
+  }
+  if (m_element_tp.is_builtin()) {
+    return true;
+  } else {
+    return m_element_tp.extended()->is_unique_data_owner(
+        arrmeta + sizeof(var_dim_type_arrmeta));
+  }
 }
 
-void var_dim_type::transform_child_types(type_transform_fn_t transform_fn,
-                                         intptr_t arrmeta_offset, void *extra,
-                                         ndt::type &out_transformed_tp,
-                                         bool &out_was_transformed) const
+void ndt::var_dim_type::transform_child_types(type_transform_fn_t transform_fn,
+                                              intptr_t arrmeta_offset,
+                                              void *extra,
+                                              type &out_transformed_tp,
+                                              bool &out_was_transformed) const
 {
-    ndt::type tmp_tp;
-    bool was_transformed = false;
-    transform_fn(m_element_tp, arrmeta_offset + sizeof(var_dim_type_arrmeta),
-                 extra, tmp_tp, was_transformed);
-    if (was_transformed) {
-        out_transformed_tp = ndt::type(new var_dim_type(tmp_tp), false);
-        out_was_transformed = true;
-    } else {
-        out_transformed_tp = ndt::type(this, true);
-    }
+  type tmp_tp;
+  bool was_transformed = false;
+  transform_fn(m_element_tp, arrmeta_offset + sizeof(var_dim_type_arrmeta),
+               extra, tmp_tp, was_transformed);
+  if (was_transformed) {
+    out_transformed_tp = type(new var_dim_type(tmp_tp), false);
+    out_was_transformed = true;
+  } else {
+    out_transformed_tp = type(this, true);
+  }
 }
 
-ndt::type var_dim_type::get_canonical_type() const
+ndt::type ndt::var_dim_type::get_canonical_type() const
 {
-    return ndt::type(new var_dim_type(m_element_tp.get_canonical_type()), false);
+  return type(new var_dim_type(m_element_tp.get_canonical_type()), false);
 }
 
-ndt::type var_dim_type::apply_linear_index(intptr_t nindices,
-                                           const irange *indices,
-                                           size_t current_i,
-                                           const ndt::type &root_tp,
-                                           bool leading_dimension) const
+ndt::type ndt::var_dim_type::apply_linear_index(intptr_t nindices,
+                                                const irange *indices,
+                                                size_t current_i,
+                                                const type &root_tp,
+                                                bool leading_dimension) const
 {
   if (nindices == 0) {
-    return ndt::type(this, true);
-  }
-  else if (nindices == 1) {
+    return type(this, true);
+  } else if (nindices == 1) {
     if (indices->step() == 0) {
       if (leading_dimension) {
         if (m_element_tp.is_builtin()) {
           return m_element_tp;
-        }
-        else {
+        } else {
           return m_element_tp.apply_linear_index(0, NULL, current_i, root_tp,
                                                  true);
         }
-      }
-      else {
+      } else {
         // TODO: This is incorrect, but is here as a stopgap to be replaced by a
         // sliced<> type
-        return ndt::make_pointer(m_element_tp);
+        return make_pointer(m_element_tp);
       }
-    }
-    else {
+    } else {
       if (indices->is_nop()) {
         // If the indexing operation does nothing, then leave things unchanged
-        return ndt::type(this, true);
-      }
-      else {
+        return type(this, true);
+      } else {
         // TODO: sliced_var_dim_type
         throw runtime_error("TODO: implement "
                             "var_dim_type::apply_linear_index for general "
                             "slices");
       }
     }
-  }
-  else {
+  } else {
     if (indices->step() == 0) {
       if (leading_dimension) {
         return m_element_tp.apply_linear_index(nindices - 1, indices + 1,
                                                current_i + 1, root_tp, true);
-      }
-      else {
+      } else {
         // TODO: This is incorrect, but is here as a stopgap to be replaced by a
         // sliced<> type
-        return ndt::make_pointer(m_element_tp.apply_linear_index(
+        return make_pointer(m_element_tp.apply_linear_index(
             nindices - 1, indices + 1, current_i + 1, root_tp, false));
       }
-    }
-    else {
+    } else {
       if (indices->is_nop()) {
         // If the indexing operation does nothing, then leave things unchanged
-        ndt::type edt = m_element_tp.apply_linear_index(
+        type edt = m_element_tp.apply_linear_index(
             nindices - 1, indices + 1, current_i + 1, root_tp, false);
-        return ndt::type(new var_dim_type(edt), false);
-      }
-      else {
+        return type(new var_dim_type(edt), false);
+      } else {
         // TODO: sliced_var_dim_type
         throw runtime_error("TODO: implement "
                             "var_dim_type::apply_linear_index for general "
@@ -176,232 +168,250 @@ ndt::type var_dim_type::apply_linear_index(intptr_t nindices,
   }
 }
 
-intptr_t var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
-                const ndt::type& result_tp, char *out_arrmeta,
-                memory_block_data *embedded_reference,
-                size_t current_i, const ndt::type& root_tp,
-                bool leading_dimension, char **inout_data,
-                memory_block_data **inout_dataref) const
+intptr_t ndt::var_dim_type::apply_linear_index(
+    intptr_t nindices, const irange *indices, const char *arrmeta,
+    const type &result_tp, char *out_arrmeta,
+    memory_block_data *embedded_reference, size_t current_i,
+    const type &root_tp, bool leading_dimension, char **inout_data,
+    memory_block_data **inout_dataref) const
 {
-    if (nindices == 0) {
-        // If there are no more indices, copy the arrmeta verbatim
-        arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
-        return 0;
-    } else {
-        const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-        if (leading_dimension) {
-            const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(*inout_data);
-            bool remove_dimension;
-            intptr_t start_index, index_stride, dimension_size;
-            apply_single_linear_index(*indices, d->size, current_i, &root_tp,
-                            remove_dimension, start_index, index_stride, dimension_size);
-            if (remove_dimension) {
-                // First dereference to point at the actual element
-                *inout_data = d->begin + md->offset + start_index * md->stride;
-                if (*inout_dataref) {
-                    memory_block_decref(*inout_dataref);
-                }
-                *inout_dataref = md->blockref ? md->blockref : embedded_reference;
-                memory_block_incref(*inout_dataref);
-                // Then apply a 0-sized index to the element type
-                if (!m_element_tp.is_builtin()) {
-                    return m_element_tp.extended()->apply_linear_index(
-                                    nindices - 1, indices + 1,
-                                    arrmeta + sizeof(var_dim_type_arrmeta),
-                                    result_tp, out_arrmeta, embedded_reference,
-                                    current_i, root_tp,
-                                    true, inout_data, inout_dataref);
-                } else {
-                    return 0;
-                }
-            } else if (indices->is_nop()) {
-                // If the indexing operation does nothing, then leave things unchanged
-                var_dim_type_arrmeta *out_md = reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
-                out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-                memory_block_incref(out_md->blockref);
-                out_md->stride = md->stride;
-                out_md->offset = md->offset;
-                if (!m_element_tp.is_builtin()) {
-                    const var_dim_type *vad = result_tp.extended<var_dim_type>();
-                    out_md->offset += m_element_tp.extended()->apply_linear_index(
-                                    nindices - 1, indices + 1,
-                                    arrmeta + sizeof(var_dim_type_arrmeta),
-                                    vad->get_element_type(),
-                                    out_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference,
-                                    current_i, root_tp,
-                                    false, NULL, NULL);
-                }
-                return 0;
-            } else {
-                // TODO: sliced_var_dim_type
-                throw runtime_error("TODO: implement var_dim_type::apply_linear_index for general slices");
-                //return ndt::type(this, true);
-            }
-        } else {
-            if (indices->step() == 0) {
-                // TODO: This is incorrect, but is here as a stopgap to be replaced by a sliced<> type
-                pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
-                out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-                memory_block_incref(out_md->blockref);
-                out_md->offset = indices->start() * md->stride;
-                if (!m_element_tp.is_builtin()) {
-                    const pointer_type *result_etp = result_tp.extended<pointer_type>();
-                    out_md->offset += m_element_tp.extended()->apply_linear_index(
-                                    nindices - 1, indices + 1,
-                                    arrmeta + sizeof(var_dim_type_arrmeta),
-                                    result_etp->get_target_type(), out_arrmeta + sizeof(pointer_type_arrmeta),
-                                    embedded_reference, current_i + 1, root_tp,
-                                    false, NULL, NULL);
-                }
-                return 0;
-            } else if (indices->is_nop()) {
-                // If the indexing operation does nothing, then leave things unchanged
-                var_dim_type_arrmeta *out_md = reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
-                out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-                memory_block_incref(out_md->blockref);
-                out_md->stride = md->stride;
-                out_md->offset = md->offset;
-                if (!m_element_tp.is_builtin()) {
-                    const var_dim_type *vad = result_tp.extended<var_dim_type>();
-                    out_md->offset += m_element_tp.extended()->apply_linear_index(
-                                    nindices - 1, indices + 1,
-                                    arrmeta + sizeof(var_dim_type_arrmeta),
-                                    vad->get_element_type(),
-                                    out_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference,
-                                    current_i, root_tp,
-                                    false, NULL, NULL);
-                }
-                return 0;
-            } else {
-                // TODO: sliced_var_dim_type
-                throw runtime_error("TODO: implement var_dim_type::apply_linear_index for general slices");
-                //return ndt::type(this, true);
-            }
+  if (nindices == 0) {
+    // If there are no more indices, copy the arrmeta verbatim
+    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
+    return 0;
+  } else {
+    const var_dim_type_arrmeta *md =
+        reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+    if (leading_dimension) {
+      const var_dim_type_data *d =
+          reinterpret_cast<const var_dim_type_data *>(*inout_data);
+      bool remove_dimension;
+      intptr_t start_index, index_stride, dimension_size;
+      apply_single_linear_index(*indices, d->size, current_i, &root_tp,
+                                remove_dimension, start_index, index_stride,
+                                dimension_size);
+      if (remove_dimension) {
+        // First dereference to point at the actual element
+        *inout_data = d->begin + md->offset + start_index * md->stride;
+        if (*inout_dataref) {
+          memory_block_decref(*inout_dataref);
         }
-    }
-}
-
-ndt::type var_dim_type::at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const
-{
-    if (inout_arrmeta) {
-        const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(*inout_arrmeta);
-        // Modify the arrmeta
-        *inout_arrmeta += sizeof(var_dim_type_arrmeta);
-        // If requested, modify the data pointer
-        if (inout_data) {
-            const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(*inout_data);
-            // Bounds-checking of the index
-            i0 = apply_single_index(i0, d->size, NULL);
-            *inout_data = d->begin + md->offset + i0 * md->stride;
-        }
-    }
-    return m_element_tp;
-}
-
-ndt::type var_dim_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim) const
-{
-    if (i == 0) {
-        return ndt::type(this, true);
-    } else {
-        if (inout_arrmeta) {
-            *inout_arrmeta += sizeof(var_dim_type_arrmeta);
-        }
-        return m_element_tp.get_type_at_dimension(inout_arrmeta, i - 1, total_ndim + 1);
-    }
-}
-
-intptr_t var_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *data) const
-{
-    if (data != NULL) {
-        return reinterpret_cast<const var_dim_type_data *>(data)->size;
-    } else {
-        return -1;
-    }
-}
-
-void var_dim_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                const char *arrmeta, const char *data) const
-{
-    if (arrmeta == NULL || data == NULL) {
-        out_shape[i] = -1;
-        data = NULL;
-    } else {
-        const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-        const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
-        out_shape[i] = d->size;
-        if (d->size == 1 && d->begin != NULL) {
-            data = d->begin + md->offset;
-        } else {
-            data = NULL;
-        }
-    }
-
-    // Process the later shape values
-    if (i+1 < ndim) {
+        *inout_dataref = md->blockref ? md->blockref : embedded_reference;
+        memory_block_incref(*inout_dataref);
+        // Then apply a 0-sized index to the element type
         if (!m_element_tp.is_builtin()) {
-            m_element_tp.extended()->get_shape(ndim, i+1, out_shape,
-                            arrmeta ? (arrmeta + sizeof(var_dim_type_arrmeta)) : NULL,
-                            data);
+          return m_element_tp.extended()->apply_linear_index(
+              nindices - 1, indices + 1, arrmeta + sizeof(var_dim_type_arrmeta),
+              result_tp, out_arrmeta, embedded_reference, current_i, root_tp,
+              true, inout_data, inout_dataref);
         } else {
-            stringstream ss;
-            ss << "requested too many dimensions from type " << ndt::type(this, true);
-            throw runtime_error(ss.str());
+          return 0;
         }
+      } else if (indices->is_nop()) {
+        // If the indexing operation does nothing, then leave things unchanged
+        var_dim_type_arrmeta *out_md =
+            reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
+        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+        memory_block_incref(out_md->blockref);
+        out_md->stride = md->stride;
+        out_md->offset = md->offset;
+        if (!m_element_tp.is_builtin()) {
+          const var_dim_type *vad = result_tp.extended<var_dim_type>();
+          out_md->offset += m_element_tp.extended()->apply_linear_index(
+              nindices - 1, indices + 1, arrmeta + sizeof(var_dim_type_arrmeta),
+              vad->get_element_type(),
+              out_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference,
+              current_i, root_tp, false, NULL, NULL);
+        }
+        return 0;
+      } else {
+        // TODO: sliced_var_dim_type
+        throw runtime_error("TODO: implement var_dim_type::apply_linear_index "
+                            "for general slices");
+        // return ndt::type(this, true);
+      }
+    } else {
+      if (indices->step() == 0) {
+        // TODO: This is incorrect, but is here as a stopgap to be replaced by a
+        // sliced<> type
+        pointer_type_arrmeta *out_md =
+            reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
+        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+        memory_block_incref(out_md->blockref);
+        out_md->offset = indices->start() * md->stride;
+        if (!m_element_tp.is_builtin()) {
+          const pointer_type *result_etp = result_tp.extended<pointer_type>();
+          out_md->offset += m_element_tp.extended()->apply_linear_index(
+              nindices - 1, indices + 1, arrmeta + sizeof(var_dim_type_arrmeta),
+              result_etp->get_target_type(),
+              out_arrmeta + sizeof(pointer_type_arrmeta), embedded_reference,
+              current_i + 1, root_tp, false, NULL, NULL);
+        }
+        return 0;
+      } else if (indices->is_nop()) {
+        // If the indexing operation does nothing, then leave things unchanged
+        var_dim_type_arrmeta *out_md =
+            reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
+        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+        memory_block_incref(out_md->blockref);
+        out_md->stride = md->stride;
+        out_md->offset = md->offset;
+        if (!m_element_tp.is_builtin()) {
+          const var_dim_type *vad = result_tp.extended<var_dim_type>();
+          out_md->offset += m_element_tp.extended()->apply_linear_index(
+              nindices - 1, indices + 1, arrmeta + sizeof(var_dim_type_arrmeta),
+              vad->get_element_type(),
+              out_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference,
+              current_i, root_tp, false, NULL, NULL);
+        }
+        return 0;
+      } else {
+        // TODO: sliced_var_dim_type
+        throw runtime_error("TODO: implement var_dim_type::apply_linear_index "
+                            "for general slices");
+        // return ndt::type(this, true);
+      }
     }
+  }
 }
 
-void var_dim_type::get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const
+ndt::type ndt::var_dim_type::at_single(intptr_t i0, const char **inout_arrmeta,
+                                       const char **inout_data) const
 {
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  if (inout_arrmeta) {
+    const var_dim_type_arrmeta *md =
+        reinterpret_cast<const var_dim_type_arrmeta *>(*inout_arrmeta);
+    // Modify the arrmeta
+    *inout_arrmeta += sizeof(var_dim_type_arrmeta);
+    // If requested, modify the data pointer
+    if (inout_data) {
+      const var_dim_type_data *d =
+          reinterpret_cast<const var_dim_type_data *>(*inout_data);
+      // Bounds-checking of the index
+      i0 = apply_single_index(i0, d->size, NULL);
+      *inout_data = d->begin + md->offset + i0 * md->stride;
+    }
+  }
+  return m_element_tp;
+}
 
-    out_strides[i] = md->stride;
+ndt::type ndt::var_dim_type::get_type_at_dimension(char **inout_arrmeta,
+                                                   intptr_t i,
+                                                   intptr_t total_ndim) const
+{
+  if (i == 0) {
+    return type(this, true);
+  } else {
+    if (inout_arrmeta) {
+      *inout_arrmeta += sizeof(var_dim_type_arrmeta);
+    }
+    return m_element_tp.get_type_at_dimension(inout_arrmeta, i - 1,
+                                              total_ndim + 1);
+  }
+}
 
-    // Process the later shape values
+intptr_t ndt::var_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
+                                         const char *data) const
+{
+  if (data != NULL) {
+    return reinterpret_cast<const var_dim_type_data *>(data)->size;
+  } else {
+    return -1;
+  }
+}
+
+void ndt::var_dim_type::get_shape(intptr_t ndim, intptr_t i,
+                                  intptr_t *out_shape, const char *arrmeta,
+                                  const char *data) const
+{
+  if (arrmeta == NULL || data == NULL) {
+    out_shape[i] = -1;
+    data = NULL;
+  } else {
+    const var_dim_type_arrmeta *md =
+        reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+    const var_dim_type_data *d =
+        reinterpret_cast<const var_dim_type_data *>(data);
+    out_shape[i] = d->size;
+    if (d->size == 1 && d->begin != NULL) {
+      data = d->begin + md->offset;
+    } else {
+      data = NULL;
+    }
+  }
+
+  // Process the later shape values
+  if (i + 1 < ndim) {
     if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->get_strides(i+1, out_strides, arrmeta + sizeof(var_dim_type_arrmeta));
-    }
-}
-
-axis_order_classification_t var_dim_type::classify_axis_order(const char *arrmeta) const
-{
-    // Treat the var_dim type as C-order
-    if (m_element_tp.get_ndim() > 1) {
-        axis_order_classification_t aoc = m_element_tp.extended()->classify_axis_order(
-                        arrmeta + sizeof(var_dim_type_arrmeta));
-        return (aoc == axis_order_none || aoc == axis_order_c)
-                        ? axis_order_c : axis_order_neither;
+      m_element_tp.extended()->get_shape(
+          ndim, i + 1, out_shape,
+          arrmeta ? (arrmeta + sizeof(var_dim_type_arrmeta)) : NULL, data);
     } else {
-        return axis_order_c;
+      stringstream ss;
+      ss << "requested too many dimensions from type " << type(this, true);
+      throw runtime_error(ss.str());
     }
+  }
 }
 
-bool var_dim_type::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_tp) const
+void ndt::var_dim_type::get_strides(size_t i, intptr_t *out_strides,
+                                    const char *arrmeta) const
 {
-    if (dst_tp.extended() == this) {
-        if (src_tp.extended() == this) {
-            return true;
-        } else if (src_tp.get_type_id() == var_dim_type_id) {
-            return *dst_tp.extended() == *src_tp.extended();
-        }
-    }
+  const var_dim_type_arrmeta *md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
 
+  out_strides[i] = md->stride;
+
+  // Process the later shape values
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->get_strides(
+        i + 1, out_strides, arrmeta + sizeof(var_dim_type_arrmeta));
+  }
+}
+
+axis_order_classification_t
+ndt::var_dim_type::classify_axis_order(const char *arrmeta) const
+{
+  // Treat the var_dim type as C-order
+  if (m_element_tp.get_ndim() > 1) {
+    axis_order_classification_t aoc =
+        m_element_tp.extended()->classify_axis_order(
+            arrmeta + sizeof(var_dim_type_arrmeta));
+    return (aoc == axis_order_none || aoc == axis_order_c) ? axis_order_c
+                                                           : axis_order_neither;
+  } else {
+    return axis_order_c;
+  }
+}
+
+bool ndt::var_dim_type::is_lossless_assignment(const type &dst_tp,
+                                               const type &src_tp) const
+{
+  if (dst_tp.extended() == this) {
+    if (src_tp.extended() == this) {
+      return true;
+    } else if (src_tp.get_type_id() == var_dim_type_id) {
+      return *dst_tp.extended() == *src_tp.extended();
+    }
+  }
+
+  return false;
+}
+
+bool ndt::var_dim_type::operator==(const base_type &rhs) const
+{
+  if (this == &rhs) {
+    return true;
+  } else if (rhs.get_type_id() != var_dim_type_id) {
     return false;
+  } else {
+    const var_dim_type *dt = static_cast<const var_dim_type *>(&rhs);
+    return m_element_tp == dt->m_element_tp;
+  }
 }
 
-bool var_dim_type::operator==(const base_type& rhs) const
-{
-    if (this == &rhs) {
-        return true;
-    } else if (rhs.get_type_id() != var_dim_type_id) {
-        return false;
-    } else {
-        const var_dim_type *dt = static_cast<const var_dim_type*>(&rhs);
-        return m_element_tp == dt->m_element_tp;
-    }
-}
-
-void var_dim_type::arrmeta_default_construct(char *arrmeta,
-                                             bool blockref_alloc) const
+void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta,
+                                                  bool blockref_alloc) const
 {
   size_t element_size = m_element_tp.is_builtin()
                             ? m_element_tp.get_data_size()
@@ -428,145 +438,166 @@ void var_dim_type::arrmeta_default_construct(char *arrmeta,
   }
 }
 
-void var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta, memory_block_data *embedded_reference) const
+void ndt::var_dim_type::arrmeta_copy_construct(
+    char *dst_arrmeta, const char *src_arrmeta,
+    memory_block_data *embedded_reference) const
 {
-    const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
-    var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
-    dst_md->stride = src_md->stride;
-    dst_md->offset = src_md->offset;
-    dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-    if (dst_md->blockref) {
-        memory_block_incref(dst_md->blockref);
-    }
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_copy_construct(dst_arrmeta + sizeof(var_dim_type_arrmeta),
-                        src_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference);
-    }
+  const var_dim_type_arrmeta *src_md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
+  var_dim_type_arrmeta *dst_md =
+      reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
+  dst_md->stride = src_md->stride;
+  dst_md->offset = src_md->offset;
+  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
+  if (dst_md->blockref) {
+    memory_block_incref(dst_md->blockref);
+  }
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_copy_construct(
+        dst_arrmeta + sizeof(var_dim_type_arrmeta),
+        src_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference);
+  }
 }
 
-size_t var_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                memory_block_data *embedded_reference) const
+size_t ndt::var_dim_type::arrmeta_copy_construct_onedim(
+    char *dst_arrmeta, const char *src_arrmeta,
+    memory_block_data *embedded_reference) const
 {
-    const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
-    var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
-    dst_md->stride = src_md->stride;
-    dst_md->offset = src_md->offset;
-    dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-    if (dst_md->blockref) {
-        memory_block_incref(dst_md->blockref);
-    }
-    return sizeof(var_dim_type_arrmeta);
+  const var_dim_type_arrmeta *src_md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
+  var_dim_type_arrmeta *dst_md =
+      reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
+  dst_md->stride = src_md->stride;
+  dst_md->offset = src_md->offset;
+  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
+  if (dst_md->blockref) {
+    memory_block_incref(dst_md->blockref);
+  }
+  return sizeof(var_dim_type_arrmeta);
 }
 
-void var_dim_type::arrmeta_reset_buffers(char *arrmeta) const
+void ndt::var_dim_type::arrmeta_reset_buffers(char *arrmeta) const
 {
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  const var_dim_type_arrmeta *md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
 
-    if (m_element_tp.get_arrmeta_size() > 0) {
-        m_element_tp.extended()->arrmeta_reset_buffers(
-                        arrmeta + sizeof(var_dim_type_arrmeta));
+  if (m_element_tp.get_arrmeta_size() > 0) {
+    m_element_tp.extended()->arrmeta_reset_buffers(
+        arrmeta + sizeof(var_dim_type_arrmeta));
+  }
+
+  if (md->blockref != NULL) {
+    uint32_t br_type = md->blockref->m_type;
+    if (br_type == zeroinit_memory_block_type ||
+        br_type == pod_memory_block_type) {
+      memory_block_pod_allocator_api *allocator =
+          get_memory_block_pod_allocator_api(md->blockref);
+      allocator->reset(md->blockref);
+      return;
+    } else if (br_type == objectarray_memory_block_type) {
+      memory_block_objectarray_allocator_api *allocator =
+          get_memory_block_objectarray_allocator_api(md->blockref);
+      allocator->reset(md->blockref);
+      return;
     }
+  }
 
-    if (md->blockref != NULL) {
-        uint32_t br_type = md->blockref->m_type;
-        if (br_type == zeroinit_memory_block_type || br_type == pod_memory_block_type) {
-            memory_block_pod_allocator_api *allocator =
-                            get_memory_block_pod_allocator_api(md->blockref);
-            allocator->reset(md->blockref);
-            return;
-        } else if (br_type == objectarray_memory_block_type) {
-            memory_block_objectarray_allocator_api *allocator =
-                            get_memory_block_objectarray_allocator_api(md->blockref);
-            allocator->reset(md->blockref);
-            return;
-        }
-    }
+  stringstream ss;
+  ss << "can only reset the buffers of a var_dim type ";
+  ss << "if it was default-constructed. Its blockref is ";
+  if (md->blockref == NULL) {
+    ss << "NULL";
+  } else {
+    ss << "of the wrong type " << (memory_block_type_t)md->blockref->m_type;
+  }
+  throw runtime_error(ss.str());
+}
 
-    stringstream ss;
-    ss << "can only reset the buffers of a var_dim type ";
-    ss << "if it was default-constructed. Its blockref is ";
-    if (md->blockref == NULL) {
-        ss << "NULL";
+void ndt::var_dim_type::arrmeta_finalize_buffers(char *arrmeta) const
+{
+  // Finalize any child arrmeta
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_finalize_buffers(
+        arrmeta + sizeof(var_dim_type_arrmeta));
+  }
+
+  // Finalize the blockref buffer we own
+  var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
+  if (md->blockref != NULL) {
+    // Finalize the memory block
+    if (m_element_tp.get_flags() & type_flag_destructor) {
+      memory_block_objectarray_allocator_api *allocator =
+          get_memory_block_objectarray_allocator_api(md->blockref);
+      if (allocator != NULL) {
+        allocator->finalize(md->blockref);
+      }
     } else {
-        ss << "of the wrong type " << (memory_block_type_t)md->blockref->m_type;
+      memory_block_pod_allocator_api *allocator =
+          get_memory_block_pod_allocator_api(md->blockref);
+      if (allocator != NULL) {
+        allocator->finalize(md->blockref);
+      }
     }
-    throw runtime_error(ss.str());
+  }
 }
 
-void var_dim_type::arrmeta_finalize_buffers(char *arrmeta) const
+void ndt::var_dim_type::arrmeta_destruct(char *arrmeta) const
 {
-    // Finalize any child arrmeta
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_finalize_buffers(arrmeta + sizeof(var_dim_type_arrmeta));
-    }
-
-    // Finalize the blockref buffer we own
-    var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
-    if (md->blockref != NULL) {
-        // Finalize the memory block
-        if (m_element_tp.get_flags()&type_flag_destructor) {
-            memory_block_objectarray_allocator_api *allocator =
-                            get_memory_block_objectarray_allocator_api(md->blockref);
-            if (allocator != NULL) {
-                allocator->finalize(md->blockref);
-            }
-        } else {
-            memory_block_pod_allocator_api *allocator =
-                            get_memory_block_pod_allocator_api(md->blockref);
-            if (allocator != NULL) {
-                allocator->finalize(md->blockref);
-            }
-        }
-    }
+  var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
+  if (md->blockref) {
+    memory_block_decref(md->blockref);
+  }
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_destruct(arrmeta +
+                                              sizeof(var_dim_type_arrmeta));
+  }
 }
 
-void var_dim_type::arrmeta_destruct(char *arrmeta) const
+void ndt::var_dim_type::arrmeta_debug_print(const char *arrmeta,
+                                            std::ostream &o,
+                                            const std::string &indent) const
 {
-    var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
-    if (md->blockref) {
-        memory_block_decref(md->blockref);
-    }
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_destruct(arrmeta + sizeof(var_dim_type_arrmeta));
-    }
+  const var_dim_type_arrmeta *md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  o << indent << "var_dim arrmeta\n";
+  o << indent << " stride: " << md->stride << "\n";
+  o << indent << " offset: " << md->offset << "\n";
+  memory_block_debug_print(md->blockref, o, indent + " ");
+  if (!m_element_tp.is_builtin()) {
+    m_element_tp.extended()->arrmeta_debug_print(
+        arrmeta + sizeof(var_dim_type_arrmeta), o, indent + "  ");
+  }
 }
 
-void var_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream& o, const std::string& indent) const
+size_t ndt::var_dim_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
 {
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-    o << indent << "var_dim arrmeta\n";
-    o << indent << " stride: " << md->stride << "\n";
-    o << indent << " offset: " << md->offset << "\n";
-    memory_block_debug_print(md->blockref, o, indent + " ");
-    if (!m_element_tp.is_builtin()) {
-        m_element_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(var_dim_type_arrmeta), o, indent + "  ");
-    }
+  throw runtime_error("TODO: implement var_dim_type::get_iterdata_size");
 }
 
-size_t var_dim_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
+size_t ndt::var_dim_type::iterdata_construct(
+    iterdata_common *DYND_UNUSED(iterdata),
+    const char **DYND_UNUSED(inout_arrmeta), intptr_t DYND_UNUSED(ndim),
+    const intptr_t *DYND_UNUSED(shape), type &DYND_UNUSED(out_uniform_tp)) const
 {
-    throw runtime_error("TODO: implement var_dim_type::get_iterdata_size");
+  throw runtime_error("TODO: implement var_dim_type::iterdata_construct");
 }
 
-size_t var_dim_type::iterdata_construct(iterdata_common *DYND_UNUSED(iterdata), const char **DYND_UNUSED(inout_arrmeta), intptr_t DYND_UNUSED(ndim), const intptr_t* DYND_UNUSED(shape), ndt::type& DYND_UNUSED(out_uniform_tp)) const
+size_t
+ndt::var_dim_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
+                                     intptr_t DYND_UNUSED(ndim)) const
 {
-    throw runtime_error("TODO: implement var_dim_type::iterdata_construct");
+  throw runtime_error("TODO: implement var_dim_type::iterdata_destruct");
 }
 
-size_t var_dim_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata), intptr_t DYND_UNUSED(ndim)) const
-{
-    throw runtime_error("TODO: implement var_dim_type::iterdata_destruct");
-}
-
-intptr_t var_dim_type::make_assignment_kernel(
+intptr_t ndt::var_dim_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
     intptr_t src_size, src_stride;
-    ndt::type src_el_tp;
+    type src_el_tp;
     const char *src_el_arrmeta;
 
     if (src_tp.get_ndim() < dst_tp.get_ndim()) {
@@ -588,8 +619,8 @@ intptr_t var_dim_type::make_assignment_kernel(
     } else if (!src_tp.is_builtin()) {
       // Give the src type a chance to make a kernel
       return src_tp.extended()->make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx, kwds);
+          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx, kwds);
     } else {
       stringstream ss;
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;
@@ -615,143 +646,154 @@ intptr_t var_dim_type::make_assignment_kernel(
   }
 }
 
-void var_dim_type::foreach_leading(const char *arrmeta, char *data,
-                                   foreach_fn_t callback, void *callback_data)
-    const
+void ndt::var_dim_type::foreach_leading(const char *arrmeta, char *data,
+                                        foreach_fn_t callback,
+                                        void *callback_data) const
 {
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-    const char *child_arrmeta = arrmeta + sizeof(var_dim_type_arrmeta);
-    const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
-    data = d->begin + md->offset;
-    intptr_t stride = md->stride;
-    for (intptr_t i = 0, i_end = d->size; i < i_end; ++i, data += stride) {
-        callback(m_element_tp, child_arrmeta, data, callback_data);
-    }
+  const var_dim_type_arrmeta *md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  const char *child_arrmeta = arrmeta + sizeof(var_dim_type_arrmeta);
+  const var_dim_type_data *d =
+      reinterpret_cast<const var_dim_type_data *>(data);
+  data = d->begin + md->offset;
+  intptr_t stride = md->stride;
+  for (intptr_t i = 0, i_end = d->size; i < i_end; ++i, data += stride) {
+    callback(m_element_tp, child_arrmeta, data, callback_data);
+  }
 }
 
 static ndt::type get_element_type(const ndt::type &dt)
 {
-  return dt.extended<base_dim_type>()->get_element_type();
+  return dt.extended<ndt::base_dim_type>()->get_element_type();
 }
 
-void var_dim_type::get_dynamic_type_properties(
-                const std::pair<std::string, gfunc::callable> **out_properties,
-                size_t *out_count) const
+void ndt::var_dim_type::get_dynamic_type_properties(
+    const std::pair<std::string, gfunc::callable> **out_properties,
+    size_t *out_count) const
 {
-    static pair<string, gfunc::callable> var_dim_type_properties[] = {
-        pair<string, gfunc::callable>(
-            "element_type", gfunc::make_callable(&::get_element_type, "self"))};
+  static pair<string, gfunc::callable> var_dim_type_properties[] = {
+      pair<string, gfunc::callable>(
+          "element_type", gfunc::make_callable(&::get_element_type, "self"))};
 
-    *out_properties = var_dim_type_properties;
-    *out_count = sizeof(var_dim_type_properties) / sizeof(var_dim_type_properties[0]);
+  *out_properties = var_dim_type_properties;
+  *out_count =
+      sizeof(var_dim_type_properties) / sizeof(var_dim_type_properties[0]);
 }
 
-void var_dim_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties, size_t *out_count) const
+void ndt::var_dim_type::get_dynamic_array_properties(
+    const std::pair<std::string, gfunc::callable> **out_properties,
+    size_t *out_count) const
 {
-    *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];
-    *out_count = (int)m_array_properties.size();
+  *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];
+  *out_count = (int)m_array_properties.size();
 }
 
-void var_dim_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions, size_t *out_count) const
+void ndt::var_dim_type::get_dynamic_array_functions(
+    const std::pair<std::string, gfunc::callable> **out_functions,
+    size_t *out_count) const
 {
-    *out_functions = m_array_functions.empty() ? NULL : &m_array_functions[0];
-    *out_count = (int)m_array_functions.size();
+  *out_functions = m_array_functions.empty() ? NULL : &m_array_functions[0];
+  *out_count = (int)m_array_functions.size();
 }
 
-void ndt::var_dim_element_initialize(const type& tp,
-        const char *arrmeta, char *data, intptr_t count)
+void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta,
+                                     char *data, intptr_t count)
 {
-    if (tp.get_type_id() != var_dim_type_id) {
-        stringstream ss;
-        ss << "internal error: expected a var_dim type, not " << tp;
-        throw dynd::type_error(ss.str());
-    }
-    const var_dim_type *vdt = tp.extended<var_dim_type>();
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-    var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
-    if (d->begin != NULL) {
-        throw runtime_error(
-            "internal error: var_dim element data must be NULL to initialize");
-    }
-    if (md->offset != 0) {
-        throw runtime_error("internal error: var_dim arrmeta offset must be "
-                            "zero to initialize");
-    }
-    // Allocate the element
-    memory_block_data *memblock = md->blockref;
-    if (memblock == NULL) {
-        throw runtime_error("internal error: var_dim arrmeta has no memblock");
-    } else if (memblock->m_type == objectarray_memory_block_type) {
-        memory_block_objectarray_allocator_api *allocator =
-                        get_memory_block_objectarray_allocator_api(memblock);
+  if (tp.get_type_id() != var_dim_type_id) {
+    stringstream ss;
+    ss << "internal error: expected a var_dim type, not " << tp;
+    throw dynd::type_error(ss.str());
+  }
+  const var_dim_type *vdt = tp.extended<var_dim_type>();
+  const var_dim_type_arrmeta *md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
+  if (d->begin != NULL) {
+    throw runtime_error(
+        "internal error: var_dim element data must be NULL to initialize");
+  }
+  if (md->offset != 0) {
+    throw runtime_error("internal error: var_dim arrmeta offset must be "
+                        "zero to initialize");
+  }
+  // Allocate the element
+  memory_block_data *memblock = md->blockref;
+  if (memblock == NULL) {
+    throw runtime_error("internal error: var_dim arrmeta has no memblock");
+  } else if (memblock->m_type == objectarray_memory_block_type) {
+    memory_block_objectarray_allocator_api *allocator =
+        get_memory_block_objectarray_allocator_api(memblock);
 
-        // Allocate the output array data
-        d->begin = allocator->allocate(memblock, count);
-        d->size = count;
-    } else if (memblock->m_type == pod_memory_block_type ||
-                memblock->m_type == zeroinit_memory_block_type) {
-        memory_block_pod_allocator_api *allocator =
-                        get_memory_block_pod_allocator_api(memblock);
+    // Allocate the output array data
+    d->begin = allocator->allocate(memblock, count);
+    d->size = count;
+  } else if (memblock->m_type == pod_memory_block_type ||
+             memblock->m_type == zeroinit_memory_block_type) {
+    memory_block_pod_allocator_api *allocator =
+        get_memory_block_pod_allocator_api(memblock);
 
-        // Allocate the output array data
-        char *dst_end = NULL;
-        allocator->allocate(memblock, count * md->stride,
-                    vdt->get_target_alignment(), &d->begin, &dst_end);
-        d->size = count;
-    } else {
-        stringstream ss;
-        ss << "var_dim_element_initialize internal error: ";
-        ss << "var_dim arrmeta has memblock type " << (memory_block_type_t)memblock->m_type;
-        ss << " that is not writable";
-        throw runtime_error(ss.str());
-    }
+    // Allocate the output array data
+    char *dst_end = NULL;
+    allocator->allocate(memblock, count * md->stride,
+                        vdt->get_target_alignment(), &d->begin, &dst_end);
+    d->size = count;
+  } else {
+    stringstream ss;
+    ss << "var_dim_element_initialize internal error: ";
+    ss << "var_dim arrmeta has memblock type "
+       << (memory_block_type_t)memblock->m_type;
+    ss << " that is not writable";
+    throw runtime_error(ss.str());
+  }
 }
 
-void ndt::var_dim_element_resize(const type& tp,
-        const char *arrmeta, char *data, intptr_t count)
+void ndt::var_dim_element_resize(const type &tp, const char *arrmeta,
+                                 char *data, intptr_t count)
 {
-    if (tp.get_type_id() != var_dim_type_id) {
-        stringstream ss;
-        ss << "internal error: expected a var_dim type, not " << tp;
-        throw dynd::type_error(ss.str());
-    }
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-    var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
-    if (d->begin == NULL) {
-        // Allow resize to do the initialization as well
-        var_dim_element_initialize(tp, arrmeta, data, count);
-        return;
-    }
-    // Resize the element
-    memory_block_data *memblock = md->blockref;
-    if (memblock == NULL) {
-        throw runtime_error("internal error: var_dim arrmeta has no memblock");
-    } else if (memblock->m_type == objectarray_memory_block_type) {
-        memory_block_objectarray_allocator_api *allocator =
-                        get_memory_block_objectarray_allocator_api(memblock);
+  if (tp.get_type_id() != var_dim_type_id) {
+    stringstream ss;
+    ss << "internal error: expected a var_dim type, not " << tp;
+    throw dynd::type_error(ss.str());
+  }
+  const var_dim_type_arrmeta *md =
+      reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
+  if (d->begin == NULL) {
+    // Allow resize to do the initialization as well
+    var_dim_element_initialize(tp, arrmeta, data, count);
+    return;
+  }
+  // Resize the element
+  memory_block_data *memblock = md->blockref;
+  if (memblock == NULL) {
+    throw runtime_error("internal error: var_dim arrmeta has no memblock");
+  } else if (memblock->m_type == objectarray_memory_block_type) {
+    memory_block_objectarray_allocator_api *allocator =
+        get_memory_block_objectarray_allocator_api(memblock);
 
-        // Resize the output array data
-        d->begin = allocator->resize(memblock, d->begin, count);
-        d->size = count;
-    } else if (memblock->m_type == pod_memory_block_type ||
-                memblock->m_type == zeroinit_memory_block_type) {
-        memory_block_pod_allocator_api *allocator =
-                        get_memory_block_pod_allocator_api(memblock);
+    // Resize the output array data
+    d->begin = allocator->resize(memblock, d->begin, count);
+    d->size = count;
+  } else if (memblock->m_type == pod_memory_block_type ||
+             memblock->m_type == zeroinit_memory_block_type) {
+    memory_block_pod_allocator_api *allocator =
+        get_memory_block_pod_allocator_api(memblock);
 
-        // Resize the output array data
-        char *dst_end = d->begin + d->size * md->stride;
-        allocator->resize(memblock, count * md->stride, &d->begin, &dst_end);
-        d->size = count;
-    } else {
-        stringstream ss;
-        ss << "var_dim_element_resize internal error: ";
-        ss << "var_dim arrmeta has memblock type " << (memory_block_type_t)memblock->m_type;
-        ss << " that is not writable";
-        throw runtime_error(ss.str());
-    }
+    // Resize the output array data
+    char *dst_end = d->begin + d->size * md->stride;
+    allocator->resize(memblock, count * md->stride, &d->begin, &dst_end);
+    d->size = count;
+  } else {
+    stringstream ss;
+    ss << "var_dim_element_resize internal error: ";
+    ss << "var_dim arrmeta has memblock type "
+       << (memory_block_type_t)memblock->m_type;
+    ss << " that is not writable";
+    throw runtime_error(ss.str());
+  }
 }
 
-ndt::type ndt::make_var_dim(const ndt::type &element_tp)
+ndt::type ndt::make_var_dim(const type &element_tp)
 {
-  return ndt::type(new var_dim_type(element_tp), false);
+  return type(new var_dim_type(element_tp), false);
 }

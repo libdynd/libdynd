@@ -37,12 +37,12 @@ static bool try_view(const ndt::type &tp, const char *arrmeta,
   case fixed_dim_type_id: {
     // All the strided dim types share the same arrmeta, so can be
     // treated uniformly here
-    const base_dim_type *sdt = tp.extended<base_dim_type>();
+    const ndt::base_dim_type *sdt = tp.extended<ndt::base_dim_type>();
     const fixed_dim_type_arrmeta *md =
         reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
     switch (view_tp.get_type_id()) {
     case fixed_dim_type_id: { // strided as fixed
-      const fixed_dim_type *view_fdt = view_tp.extended<fixed_dim_type>();
+      const ndt::fixed_dim_type *view_fdt = view_tp.extended<ndt::fixed_dim_type>();
       // The size must match exactly in this case
       if (md->dim_size != view_fdt->get_fixed_dim_size()) {
         return false;
@@ -171,7 +171,7 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr,
       data_dim_size = d->size;
       data_stride = meta->stride;
     }
-    data_tp = data_tp.extended<var_dim_type>()->get_element_type();
+    data_tp = data_tp.extended<ndt::var_dim_type>()->get_element_type();
     data_meta += sizeof(var_dim_type_arrmeta);
     return;
   }
@@ -188,7 +188,7 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr,
       data_ref = meta->blockref;
     }
     data_ptr = *reinterpret_cast<char **>(data_ptr) + meta->offset;
-    data_tp = data_tp.extended<pointer_type>()->get_target_type();
+    data_tp = data_tp.extended<ndt::pointer_type>()->get_target_type();
     data_meta += sizeof(pointer_type_arrmeta);
     return;
   }
@@ -260,7 +260,7 @@ static nd::array view_as_bytes(const nd::array &arr, const ndt::type &tp)
   // Check that it worked, and that the resulting data pointer is aligned
   if (data_dim_size < 0 ||
       !offset_is_aligned(reinterpret_cast<size_t>(data_ptr),
-                         tp.extended<bytes_type>()->get_target_alignment())) {
+                         tp.extended<ndt::bytes_type>()->get_target_alignment())) {
     // This signals we could not view the data as a
     // contiguous chunk of bytes
     return nd::array();
@@ -329,7 +329,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
   }
   else if (tp.get_type_id() == fixed_dim_type_id) {
     ndt::type arr_tp = tp;
-    ndt::type el_tp = arr_tp.extended<base_dim_type>()->get_element_type();
+    ndt::type el_tp = arr_tp.extended<ndt::base_dim_type>()->get_element_type();
     size_t el_data_size = el_tp.get_data_size();
     // If the element type has a single chunk of POD memory, and
     // it divides into the memory size, it's ok
@@ -338,7 +338,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
                           arr_tp.get_data_alignment())) {
       intptr_t dim_size = data_size / el_data_size;
       if (arr_tp.get_kind() != kind_kind) {
-        if (arr_tp.extended<fixed_dim_type>()->get_fixed_dim_size() != dim_size) {
+        if (arr_tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size() != dim_size) {
           return nd::array();
         }
       } else {
@@ -394,7 +394,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
             arr.get_readonly_originptr());
     fixed_dim_type_arrmeta *out_am =
         reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
-    out_am->dim_size = tp.extended<fixed_dim_type>()->get_fixed_dim_size();
+    out_am->dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
     out_am->stride = in_am->stride;
     if ((intptr_t)in_dat->size == out_am->dim_size) {
       // Use the more specific data reference from the var arrmeta if possible
@@ -405,9 +405,9 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
       }
       result.get_ndo()->m_data_pointer = in_dat->begin + in_am->offset;
       // Try to copy the rest of the arrmeta as a view
-      if (try_view(arr.get_type().extended<base_dim_type>()->get_element_type(),
+      if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
                    arr.get_arrmeta() + sizeof(var_dim_type_arrmeta),
-                   tp.extended<base_dim_type>()->get_element_type(),
+                   tp.extended<ndt::base_dim_type>()->get_element_type(),
                    result.get_arrmeta() + sizeof(fixed_dim_type_arrmeta),
                    arr.get_memblock().get())) {
         return result;

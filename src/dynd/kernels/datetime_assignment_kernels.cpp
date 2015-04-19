@@ -26,8 +26,8 @@ struct string_to_datetime_ck
 
   void single(char *dst, char *const *src)
   {
-    const base_string_type *bst =
-        static_cast<const base_string_type *>(m_src_string_tp.extended());
+    const ndt::base_string_type *bst =
+        static_cast<const ndt::base_string_type *>(m_src_string_tp.extended());
     const string &s = bst->get_utf8_string(m_src_arrmeta, src[0], m_errmode);
     datetime_struct dts;
     // TODO: properly distinguish "date" and "option[date]" with respect to NA
@@ -83,12 +83,12 @@ struct datetime_to_string_ck : nd::base_kernel<datetime_to_string_ck, kernel_req
     string s = dts.to_str();
     if (s.empty()) {
       s = "NA";
-    } else if (m_src_datetime_tp.extended<datetime_type>()->get_timezone() ==
+    } else if (m_src_datetime_tp.extended<ndt::datetime_type>()->get_timezone() ==
                tz_utc) {
       s += "Z";
     }
-    const base_string_type *bst =
-        static_cast<const base_string_type *>(m_dst_string_tp.extended());
+    const ndt::base_string_type *bst =
+        static_cast<const ndt::base_string_type *>(m_dst_string_tp.extended());
     bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
   }
 };

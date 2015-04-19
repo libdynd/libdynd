@@ -78,7 +78,7 @@ intptr_t nd::masked_take_ck::instantiate(
   self->m_dst_tp = dst_tp;
   self->m_dst_meta = dst_arrmeta;
   ndt::type dst_el_tp =
-      self->m_dst_tp.extended<var_dim_type>()->get_element_type();
+      self->m_dst_tp.extended<ndt::var_dim_type>()->get_element_type();
   const char *dst_el_meta = self->m_dst_meta + sizeof(var_dim_type_arrmeta);
 
   intptr_t src0_dim_size, mask_dim_size;

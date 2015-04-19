@@ -57,10 +57,10 @@ struct string_find_kernel {
 
     ckernel_prefix m_base;
     // The string type being searched through
-    const base_string_type *m_str_type;
+    const ndt::base_string_type *m_str_type;
     const char *m_str_arrmeta;
     // The substring type being searched for
-    const base_string_type *m_sub_type;
+    const ndt::base_string_type *m_sub_type;
     const char *m_sub_arrmeta;
 
     ckernel_prefix& base() {

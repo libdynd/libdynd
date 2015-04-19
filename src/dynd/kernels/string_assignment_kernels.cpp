@@ -344,8 +344,8 @@ struct date_to_string_ck : nd::base_kernel<date_to_string_ck, kernel_request_hos
   {
     stringstream ss;
     m_src_tp.extended()->print_data(ss, m_src_arrmeta, src[0]);
-    const base_string_type *bst =
-        static_cast<const base_string_type *>(m_dst_string_tp.extended());
+    const ndt::base_string_type *bst =
+        static_cast<const ndt::base_string_type *>(m_dst_string_tp.extended());
     bst->set_from_utf8_string(m_dst_arrmeta, dst, ss.str(), &m_ectx);
   }
 };

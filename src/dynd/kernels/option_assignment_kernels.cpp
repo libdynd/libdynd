@@ -201,15 +201,15 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
     throw invalid_argument(ss.str());
   }
   const ndt::type &dst_val_tp =
-      dst_tp.extended<option_type>()->get_value_type();
+      dst_tp.extended<ndt::option_type>()->get_value_type();
   const ndt::type &src_val_tp =
-      src_tp[0].extended<option_type>()->get_value_type();
+      src_tp[0].extended<ndt::option_type>()->get_value_type();
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // instantiate src_is_avail
   const arrfunc_type_data *af =
-      src_tp[0].extended<option_type>()->get_is_avail_arrfunc();
+      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
   const arrfunc_type *af_tp =
-      src_tp[0].extended<option_type>()->get_is_avail_arrfunc_type();
+      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc_type();
   ckb_offset = af->instantiate(af, af_tp, NULL, ckb, ckb_offset,
                                ndt::make_type<dynd_bool>(), NULL, nsrc, src_tp,
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
@@ -219,8 +219,8 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-  af = dst_tp.extended<option_type>()->get_assign_na_arrfunc();
-  af_tp = dst_tp.extended<option_type>()->get_assign_na_arrfunc_type();
+  af = dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
+  af_tp = dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc_type();
   ckb_offset =
       af->instantiate(af, af_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
                       nsrc, NULL, NULL, kernreq, ectx, kwds, tp_vars);
@@ -254,13 +254,13 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
     throw invalid_argument(ss.str());
   }
   const ndt::type &src_val_tp =
-      src_tp[0].extended<option_type>()->get_value_type();
+      src_tp[0].extended<ndt::option_type>()->get_value_type();
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // instantiate src_is_avail
   const arrfunc_type_data *af =
-      src_tp[0].extended<option_type>()->get_is_avail_arrfunc();
+      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
   const arrfunc_type *af_tp =
-      src_tp[0].extended<option_type>()->get_is_avail_arrfunc_type();
+      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc_type();
   ckb_offset = af->instantiate(af, af_tp, NULL, ckb, ckb_offset,
                                ndt::make_type<dynd_bool>(), NULL, nsrc, src_tp,
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
@@ -344,7 +344,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   if (dst_tp.get_type_id() != option_type_id ||
       !(src_tp[0].get_kind() == string_kind ||
         (src_tp[0].get_type_id() == option_type_id &&
-         src_tp[0].extended<option_type>()->get_value_type().get_kind() ==
+         src_tp[0].extended<ndt::option_type>()->get_value_type().get_kind() ==
              string_kind))) {
     stringstream ss;
     ss << "string to option kernel needs string/option types, got ("
@@ -353,7 +353,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   }
 
   type_id_t tid =
-      dst_tp.extended<option_type>()->get_value_type().get_type_id();
+      dst_tp.extended<ndt::option_type>()->get_value_type().get_type_id();
   switch (tid) {
   case bool_type_id: {
     string_to_option_bool_ck *self =
@@ -379,7 +379,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
     // Just a string to string assignment
     return ::make_assignment_kernel(
         NULL, NULL, ckb, ckb_offset,
-        dst_tp.extended<option_type>()->get_value_type(), dst_arrmeta,
+        dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
         src_tp[0], src_arrmeta[0], kernreq, ectx, nd::array());
   }
   default:
@@ -394,7 +394,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   // First child ckernel is the value assignment
   ckb_offset = ::make_assignment_kernel(
       NULL, NULL, ckb, ckb_offset,
-      dst_tp.extended<option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
+      dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, src_tp[0],
       src_arrmeta[0], kernreq, ectx, nd::array());
   // Re-acquire self because the address may have changed
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -402,9 +402,9 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   // Second child ckernel is the NA assignment
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
   const arrfunc_type_data *af =
-      dst_tp.extended<option_type>()->get_assign_na_arrfunc();
+      dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
   const arrfunc_type *af_tp =
-      dst_tp.extended<option_type>()->get_assign_na_arrfunc_type();
+      dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc_type();
   ckb_offset =
       af->instantiate(af, af_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
                       nsrc, NULL, NULL, kernreq, ectx, kwds, tp_vars);
@@ -447,11 +447,11 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
   // fairly significant cost, and it seems maybe ok
   // to skip it.
   ndt::type val_dst_tp = dst_tp.get_type_id() == option_type_id
-                             ? dst_tp.extended<option_type>()->get_value_type()
+                             ? dst_tp.extended<ndt::option_type>()->get_value_type()
                              : dst_tp;
   ndt::type val_src_tp =
       src_tp[0].get_type_id() == option_type_id
-          ? src_tp[0].extended<option_type>()->get_value_type()
+          ? src_tp[0].extended<ndt::option_type>()->get_value_type()
           : src_tp[0];
   return ::make_assignment_kernel(NULL, NULL, ckb, ckb_offset, val_dst_tp,
                                   dst_arrmeta, val_src_tp, src_arrmeta[0],

@@ -49,7 +49,7 @@ arrfunc_type::arrfunc_type(const ndt::type &pos_types,
     throw invalid_argument(ss.str());
   }
   m_kwd_struct =
-      ndt::make_empty_struct(m_pos_tuple.extended<tuple_type>()->is_variadic());
+      ndt::make_empty_struct(m_pos_tuple.extended<ndt::tuple_type>()->is_variadic());
 
   // Note that we don't base the flags of this type on that of its arguments
   // and return types, because it is something the can be instantiated, even
@@ -79,7 +79,7 @@ arrfunc_type::arrfunc_type(const ndt::type &pos_types,
   }
 
   for (intptr_t i = 0, i_end = get_nkwd(); i < i_end; ++i) {
-    if (m_kwd_struct.extended<tuple_type>()->get_field_type(i).get_type_id() ==
+    if (m_kwd_struct.extended<ndt::tuple_type>()->get_field_type(i).get_type_id() ==
         option_type_id) {
       m_opt_kwd_indices.push_back(i);
     }
@@ -122,7 +122,7 @@ void arrfunc_type::print_type(std::ostream &o) const
 
     o << get_pos_type(i);
   }
-  if (m_pos_tuple.extended<tuple_type>()->is_variadic()) {
+  if (m_pos_tuple.extended<ndt::tuple_type>()->is_variadic()) {
     if (npos > 0) {
       o << ", ...";
     } else {
@@ -144,7 +144,7 @@ void arrfunc_type::print_type(std::ostream &o) const
     }
     o << ": " << get_kwd_type(i);
   }
-  if (nkwd > 0 && m_kwd_struct.extended<struct_type>()->is_variadic()) {
+  if (nkwd > 0 && m_kwd_struct.extended<ndt::struct_type>()->is_variadic()) {
     o << "...";
   }
 
@@ -289,7 +289,7 @@ struct arrfunc_to_string_ck
         reinterpret_cast<const arrfunc_type_data *>(src[0]);
     stringstream ss;
     print_arrfunc(ss, m_src_tp.extended<arrfunc_type>(), af);
-    m_dst_string_dt.extended<base_string_type>()->set_from_utf8_string(
+    m_dst_string_dt.extended<ndt::base_string_type>()->set_from_utf8_string(
         m_dst_arrmeta, dst, ss.str(), &m_ectx);
   }
 };

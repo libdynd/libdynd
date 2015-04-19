@@ -18,7 +18,7 @@
 using namespace std;
 using namespace dynd;
 
-pointer_type::pointer_type(const ndt::type &target_tp)
+ndt::pointer_type::pointer_type(const type &target_tp)
     : base_expr_type(pointer_type_id, expr_kind, sizeof(void *), sizeof(void *),
                      inherited_flags(target_tp.get_flags(),
                                      type_flag_zeroinit | type_flag_blockref),
@@ -39,10 +39,10 @@ pointer_type::pointer_type(const ndt::type &target_tp)
   }
 }
 
-pointer_type::~pointer_type() {}
+ndt::pointer_type::~pointer_type() {}
 
-void pointer_type::print_data(std::ostream &o, const char *arrmeta,
-                              const char *data) const
+void ndt::pointer_type::print_data(std::ostream &o, const char *arrmeta,
+                                   const char *data) const
 {
   const pointer_type_arrmeta *md =
       reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
@@ -52,19 +52,19 @@ void pointer_type::print_data(std::ostream &o, const char *arrmeta,
                          target_data);
 }
 
-void pointer_type::print_type(std::ostream &o) const
+void ndt::pointer_type::print_type(std::ostream &o) const
 {
   o << "pointer[" << m_target_tp << "]";
 }
 
-bool pointer_type::is_expression() const
+bool ndt::pointer_type::is_expression() const
 {
   // Even though the pointer is an instance of an base_expr_type,
   // we'll only call it an expression if the target is.
   return m_target_tp.is_expression();
 }
 
-bool pointer_type::is_unique_data_owner(const char *arrmeta) const
+bool ndt::pointer_type::is_unique_data_owner(const char *arrmeta) const
 {
   const pointer_type_arrmeta *md =
       reinterpret_cast<const pointer_type_arrmeta *>(*arrmeta);
@@ -77,32 +77,33 @@ bool pointer_type::is_unique_data_owner(const char *arrmeta) const
   return true;
 }
 
-void pointer_type::transform_child_types(type_transform_fn_t transform_fn,
-                                         intptr_t arrmeta_offset, void *extra,
-                                         ndt::type &out_transformed_tp,
-                                         bool &out_was_transformed) const
+void ndt::pointer_type::transform_child_types(type_transform_fn_t transform_fn,
+                                              intptr_t arrmeta_offset,
+                                              void *extra,
+                                              type &out_transformed_tp,
+                                              bool &out_was_transformed) const
 {
-  ndt::type tmp_tp;
+  type tmp_tp;
   bool was_transformed = false;
   transform_fn(m_target_tp, arrmeta_offset + sizeof(pointer_type_arrmeta),
                extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = ndt::make_pointer(tmp_tp);
+    out_transformed_tp = make_pointer(tmp_tp);
     out_was_transformed = true;
   } else {
-    out_transformed_tp = ndt::type(this, true);
+    out_transformed_tp = type(this, true);
   }
 }
 
-ndt::type pointer_type::get_canonical_type() const
+ndt::type ndt::pointer_type::get_canonical_type() const
 {
   // The canonical version doesn't include the pointer
   return m_target_tp;
 }
 
-const ndt::type &pointer_type::get_operand_type() const
+const ndt::type &ndt::pointer_type::get_operand_type() const
 {
-  static ndt::type vpt = ndt::make_pointer<void>();
+  static type vpt = make_pointer<void>();
 
   if (m_target_tp.get_type_id() == pointer_type_id) {
     return m_target_tp;
@@ -111,30 +112,30 @@ const ndt::type &pointer_type::get_operand_type() const
   }
 }
 
-ndt::type pointer_type::apply_linear_index(intptr_t nindices,
-                                           const irange *indices,
-                                           size_t current_i,
-                                           const ndt::type &root_tp,
-                                           bool leading_dimension) const
+ndt::type ndt::pointer_type::apply_linear_index(intptr_t nindices,
+                                                const irange *indices,
+                                                size_t current_i,
+                                                const type &root_tp,
+                                                bool leading_dimension) const
 {
   if (nindices == 0) {
-    return ndt::type(this, true);
+    return type(this, true);
   } else {
-    ndt::type dt = m_target_tp.apply_linear_index(nindices, indices, current_i,
-                                                  root_tp, leading_dimension);
+    type dt = m_target_tp.apply_linear_index(nindices, indices, current_i,
+                                             root_tp, leading_dimension);
     if (dt == m_target_tp) {
-      return ndt::type(this, true);
+      return type(this, true);
     } else {
-      return ndt::make_pointer(dt);
+      return make_pointer(dt);
     }
   }
 }
 
-intptr_t pointer_type::apply_linear_index(
+intptr_t ndt::pointer_type::apply_linear_index(
     intptr_t nindices, const irange *indices, const char *arrmeta,
-    const ndt::type &result_tp, char *out_arrmeta,
+    const type &result_tp, char *out_arrmeta,
     memory_block_data *embedded_reference, size_t current_i,
-    const ndt::type &root_tp, bool DYND_UNUSED(leading_dimension),
+    const type &root_tp, bool DYND_UNUSED(leading_dimension),
     char **DYND_UNUSED(inout_data),
     memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
@@ -157,8 +158,8 @@ intptr_t pointer_type::apply_linear_index(
   return 0;
 }
 
-ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
-                                  const char **inout_data) const
+ndt::type ndt::pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
+                                       const char **inout_data) const
 {
   // If arrmeta/data is provided, follow the pointer and call the target
   // type's at_single
@@ -178,22 +179,24 @@ ndt::type pointer_type::at_single(intptr_t i0, const char **inout_arrmeta,
   return m_target_tp.at_single(i0, inout_arrmeta, inout_data);
 }
 
-ndt::type pointer_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i,
-                                              intptr_t total_ndim) const
+ndt::type ndt::pointer_type::get_type_at_dimension(char **inout_arrmeta,
+                                                   intptr_t i,
+                                                   intptr_t total_ndim) const
 {
   if (i == 0) {
-    return ndt::type(this, true);
+    return type(this, true);
   } else {
     if (inout_arrmeta != NULL) {
       *inout_arrmeta += sizeof(pointer_type_arrmeta);
     }
-    return ndt::make_pointer(
+    return make_pointer(
         m_target_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim));
   }
 }
 
-void pointer_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                             const char *arrmeta, const char *data) const
+void ndt::pointer_type::get_shape(intptr_t ndim, intptr_t i,
+                                  intptr_t *out_shape, const char *arrmeta,
+                                  const char *data) const
 {
   if (!m_target_tp.is_builtin()) {
     const char *target_data = NULL;
@@ -213,7 +216,7 @@ void pointer_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
 }
 
 axis_order_classification_t
-pointer_type::classify_axis_order(const char *arrmeta) const
+ndt::pointer_type::classify_axis_order(const char *arrmeta) const
 {
   // Return the classification of the target type
   if (m_target_tp.get_ndim() > 1) {
@@ -224,8 +227,8 @@ pointer_type::classify_axis_order(const char *arrmeta) const
   }
 }
 
-bool pointer_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                          const ndt::type &src_tp) const
+bool ndt::pointer_type::is_lossless_assignment(const type &dst_tp,
+                                               const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     return ::is_lossless_assignment(m_target_tp, src_tp);
@@ -234,7 +237,7 @@ bool pointer_type::is_lossless_assignment(const ndt::type &dst_tp,
   }
 }
 
-bool pointer_type::operator==(const base_type &rhs) const
+bool ndt::pointer_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -246,15 +249,15 @@ bool pointer_type::operator==(const base_type &rhs) const
   }
 }
 
-ndt::type pointer_type::with_replaced_storage_type(
-    const ndt::type & /*replacement_tp*/) const
+ndt::type ndt::pointer_type::with_replaced_storage_type(
+    const type & /*replacement_tp*/) const
 {
   throw runtime_error(
       "TODO: implement pointer_type::with_replaced_storage_type");
 }
 
-void pointer_type::arrmeta_default_construct(char *arrmeta,
-                                             bool blockref_alloc) const
+void ndt::pointer_type::arrmeta_default_construct(char *arrmeta,
+                                                  bool blockref_alloc) const
 {
   // Simply allocate a POD memory block
   // TODO: Will need a different kind of memory block if the data isn't POD.
@@ -269,7 +272,7 @@ void pointer_type::arrmeta_default_construct(char *arrmeta,
   }
 }
 
-void pointer_type::arrmeta_copy_construct(
+void ndt::pointer_type::arrmeta_copy_construct(
     char *dst_arrmeta, const char *src_arrmeta,
     memory_block_data *embedded_reference) const
 {
@@ -291,12 +294,12 @@ void pointer_type::arrmeta_copy_construct(
   }
 }
 
-void pointer_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
+void ndt::pointer_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
   throw runtime_error("TODO implement pointer_type::arrmeta_reset_buffers");
 }
 
-void pointer_type::arrmeta_finalize_buffers(char *arrmeta) const
+void ndt::pointer_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
   pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
   if (md->blockref != NULL) {
@@ -309,7 +312,7 @@ void pointer_type::arrmeta_finalize_buffers(char *arrmeta) const
   }
 }
 
-void pointer_type::arrmeta_destruct(char *arrmeta) const
+void ndt::pointer_type::arrmeta_destruct(char *arrmeta) const
 {
   pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
   if (md->blockref) {
@@ -321,8 +324,9 @@ void pointer_type::arrmeta_destruct(char *arrmeta) const
   }
 }
 
-void pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                                       const std::string &indent) const
+void ndt::pointer_type::arrmeta_debug_print(const char *arrmeta,
+                                            std::ostream &o,
+                                            const std::string &indent) const
 {
   const pointer_type_arrmeta *md =
       reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
@@ -335,10 +339,10 @@ void pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   }
 }
 
-intptr_t pointer_type::make_assignment_kernel(
+intptr_t ndt::pointer_type::make_assignment_kernel(
     const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (dst_tp.get_type_id() == pointer_type_id) {
@@ -346,8 +350,7 @@ intptr_t pointer_type::make_assignment_kernel(
       return make_pod_typed_data_assignment_kernel(
           ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
     } else {
-      ndt::type dst_target_tp =
-          dst_tp.extended<pointer_type>()->get_target_type();
+      type dst_target_tp = dst_tp.extended<pointer_type>()->get_target_type();
       if (dst_target_tp == src_tp) {
         return make_value_to_pointer_assignment_kernel(ckb, ckb_offset,
                                                        dst_target_tp, kernreq);
@@ -379,7 +382,7 @@ struct operand_to_value_ck
 
 } // anonymous namespace
 
-size_t pointer_type::make_operand_to_value_assignment_kernel(
+size_t ndt::pointer_type::make_operand_to_value_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
@@ -391,15 +394,15 @@ size_t pointer_type::make_operand_to_value_assignment_kernel(
                                   kernel_request_single, ectx, nd::array());
 }
 
-nd::array pointer_type::get_option_nafunc() const
+nd::array ndt::pointer_type::get_option_nafunc() const
 {
   return kernels::get_option_builtin_pointer_nafunc(
       get_value_type().get_type_id());
 }
 
-bool pointer_type::match(const char *arrmeta, const ndt::type &candidate_tp,
-                         const char *candidate_arrmeta,
-                         std::map<nd::string, ndt::type> &tp_vars) const
+bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp,
+                              const char *candidate_arrmeta,
+                              std::map<nd::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() != pointer_type_id) {
     return false;
@@ -416,11 +419,11 @@ bool pointer_type::match(const char *arrmeta, const ndt::type &candidate_tp,
 
 static ndt::type property_get_target_type(const ndt::type &tp)
 {
-  const pointer_type *pd = tp.extended<pointer_type>();
+  const ndt::pointer_type *pd = tp.extended<ndt::pointer_type>();
   return pd->get_target_type();
 }
 
-void pointer_type::get_dynamic_type_properties(
+void ndt::pointer_type::get_dynamic_type_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {
@@ -448,7 +451,7 @@ static nd::array array_function_dereference(const nd::array &self)
   while (dt.get_type_id() == pointer_type_id) {
     const pointer_type_arrmeta *md =
         reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
-    dt = dt.extended<pointer_type>()->get_target_type();
+    dt = dt.extended<ndt::pointer_type>()->get_target_type();
     arrmeta += sizeof(pointer_type_arrmeta);
     data = *reinterpret_cast<char **>(data) + md->offset;
     dataref = md->blockref;
@@ -468,7 +471,7 @@ static nd::array array_function_dereference(const nd::array &self)
   return result;
 }
 
-void pointer_type::get_dynamic_array_functions(
+void ndt::pointer_type::get_dynamic_array_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {
@@ -486,24 +489,24 @@ namespace {
 // TODO: use the PP meta stuff, but DYND_PP_LEN_MAX is set to 8 right now, would
 // need to be 19
 struct static_pointer {
-  pointer_type bt1;
-  pointer_type bt2;
-  pointer_type bt3;
-  pointer_type bt4;
-  pointer_type bt5;
-  pointer_type bt6;
-  pointer_type bt7;
-  pointer_type bt8;
-  pointer_type bt9;
-  pointer_type bt10;
-  pointer_type bt11;
-  pointer_type bt12;
-  pointer_type bt13;
-  pointer_type bt14;
-  pointer_type bt15;
-  pointer_type bt16;
-  pointer_type bt17;
-  void_pointer_type bt18;
+  ndt::pointer_type bt1;
+  ndt::pointer_type bt2;
+  ndt::pointer_type bt3;
+  ndt::pointer_type bt4;
+  ndt::pointer_type bt5;
+  ndt::pointer_type bt6;
+  ndt::pointer_type bt7;
+  ndt::pointer_type bt8;
+  ndt::pointer_type bt9;
+  ndt::pointer_type bt10;
+  ndt::pointer_type bt11;
+  ndt::pointer_type bt12;
+  ndt::pointer_type bt13;
+  ndt::pointer_type bt14;
+  ndt::pointer_type bt15;
+  ndt::pointer_type bt16;
+  ndt::pointer_type bt17;
+  ndt::void_pointer_type bt18;
 
   ndt::type static_builtins_instance[builtin_type_id_count];
 
@@ -540,7 +543,7 @@ struct static_pointer {
 };
 } // anonymous namespace
 
-ndt::type ndt::make_pointer(const ndt::type &target_tp)
+ndt::type ndt::make_pointer(const type &target_tp)
 {
   // Static instances of the type, which have a reference
   // count > 0 for the lifetime of the program. This static
@@ -551,6 +554,6 @@ ndt::type ndt::make_pointer(const ndt::type &target_tp)
   if (target_tp.is_builtin()) {
     return sp.static_builtins_instance[target_tp.get_type_id()];
   } else {
-    return ndt::type(new pointer_type(target_tp), false);
+    return type(new pointer_type(target_tp), false);
   }
 }

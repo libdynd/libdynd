@@ -17,8 +17,8 @@
 using namespace std;
 using namespace dynd;
 
-groupby_type::groupby_type(const ndt::type &data_values_tp,
-                           const ndt::type &by_values_tp)
+ndt::groupby_type::groupby_type(const type &data_values_tp,
+                                const type &by_values_tp)
     : base_expr_type(groupby_type_id, expr_kind, sizeof(groupby_type_data),
                      sizeof(void *), type_flag_none, 0,
                      1 + data_values_tp.get_ndim())
@@ -39,49 +39,49 @@ groupby_type::groupby_type(const ndt::type &data_values_tp,
     throw runtime_error("to construct a groupby type, its values type must "
                         "have at least one array dimension");
   }
-  m_operand_type = ndt::make_struct(ndt::make_pointer(data_values_tp), "data",
-                                    ndt::make_pointer(by_values_tp), "by");
+  m_operand_type = make_struct(make_pointer(data_values_tp), "data",
+                               make_pointer(by_values_tp), "by");
   m_members.arrmeta_size = m_operand_type.get_arrmeta_size();
   const categorical_type *cd = m_groups_type.extended<categorical_type>();
-  m_value_type = ndt::make_fixed_dim(
-      cd->get_category_count(), ndt::make_var_dim(data_values_tp.at_single(0)));
+  m_value_type = make_fixed_dim(cd->get_category_count(),
+                                make_var_dim(data_values_tp.at_single(0)));
   m_members.flags =
       inherited_flags(m_value_type.get_flags(), m_operand_type.get_flags());
 }
 
-groupby_type::~groupby_type() {}
+ndt::groupby_type::~groupby_type() {}
 
-void groupby_type::print_data(std::ostream &DYND_UNUSED(o),
-                              const char *DYND_UNUSED(arrmeta),
-                              const char *DYND_UNUSED(data)) const
+void ndt::groupby_type::print_data(std::ostream &DYND_UNUSED(o),
+                                   const char *DYND_UNUSED(arrmeta),
+                                   const char *DYND_UNUSED(data)) const
 {
   throw runtime_error(
       "internal error: groupby_type::print_data isn't supposed to be called");
 }
 
-ndt::type groupby_type::get_data_values_type() const
+ndt::type ndt::groupby_type::get_data_values_type() const
 {
   const pointer_type *pd =
       static_cast<const pointer_type *>(m_operand_type.at_single(0).extended());
   return pd->get_target_type();
 }
 
-ndt::type groupby_type::get_by_values_type() const
+ndt::type ndt::groupby_type::get_by_values_type() const
 {
   const pointer_type *pd =
       static_cast<const pointer_type *>(m_operand_type.at_single(1).extended());
   return pd->get_target_type();
 }
 
-void groupby_type::print_type(std::ostream &o) const
+void ndt::groupby_type::print_type(std::ostream &o) const
 {
   o << "groupby<values=" << get_data_values_type();
   o << ", by=" << get_by_values_type() << ">";
 }
 
-void groupby_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                             const char *arrmeta,
-                             const char *DYND_UNUSED(data)) const
+void ndt::groupby_type::get_shape(intptr_t ndim, intptr_t i,
+                                  intptr_t *out_shape, const char *arrmeta,
+                                  const char *DYND_UNUSED(data)) const
 {
   // The first dimension is the groups, the second variable-sized
   out_shape[i] = reinterpret_cast<const categorical_type *>(
@@ -94,7 +94,7 @@ void groupby_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
   if (i + 2 < ndim) {
     // Get the type for a single data_value element, and its corresponding
     // arrmeta
-    ndt::type data_values_tp =
+    type data_values_tp =
         m_operand_type.at_single(0, arrmeta ? &arrmeta : NULL);
     data_values_tp = data_values_tp.at_single(0, arrmeta ? &arrmeta : NULL);
     // Use this to get the rest of the shape
@@ -102,8 +102,8 @@ void groupby_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
   }
 }
 
-bool groupby_type::is_lossless_assignment(const ndt::type &dst_tp,
-                                          const ndt::type &src_tp) const
+bool ndt::groupby_type::is_lossless_assignment(const type &dst_tp,
+                                               const type &src_tp) const
 {
   // Treat this type as the value type for whether assignment is always lossless
   if (src_tp.extended() == this) {
@@ -113,7 +113,7 @@ bool groupby_type::is_lossless_assignment(const ndt::type &dst_tp,
   }
 }
 
-bool groupby_type::operator==(const base_type &rhs) const
+bool ndt::groupby_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
@@ -135,12 +135,12 @@ struct groupby_to_value_assign_kernel
   typedef groupby_to_value_assign_kernel extra_type;
 
   // The groupby type
-  const groupby_type *src_groupby_tp;
+  const ndt::groupby_type *src_groupby_tp;
   const char *dst_arrmeta, *src_arrmeta;
 
-  groupby_to_value_assign_kernel(const groupby_type *src_groupby_tp,
-                                const char *dst_arrmeta,
-                                const char *src_arrmeta)
+  groupby_to_value_assign_kernel(const ndt::groupby_type *src_groupby_tp,
+                                 const char *dst_arrmeta,
+                                 const char *src_arrmeta)
       : src_groupby_tp(src_groupby_tp), dst_arrmeta(dst_arrmeta),
         src_arrmeta(src_arrmeta)
   {
@@ -150,7 +150,7 @@ struct groupby_to_value_assign_kernel
 
   void single(char *dst, char *const *src)
   {
-    const groupby_type *gd = src_groupby_tp;
+    const ndt::groupby_type *gd = src_groupby_tp;
 
     // Get the data_values raw nd::array
     ndt::type data_values_tp = gd->get_operand_type();
@@ -158,7 +158,8 @@ struct groupby_to_value_assign_kernel
     char *data_values_data = src[0];
     data_values_tp = data_values_tp.extended()->at_single(
         0, &data_values_arrmeta, const_cast<const char **>(&data_values_data));
-    data_values_tp = data_values_tp.extended<pointer_type>()->get_target_type();
+    data_values_tp =
+        data_values_tp.extended<ndt::pointer_type>()->get_target_type();
     data_values_arrmeta += sizeof(pointer_type_arrmeta);
     data_values_data = *reinterpret_cast<char **>(data_values_data);
 
@@ -168,7 +169,8 @@ struct groupby_to_value_assign_kernel
     char *by_values_data = src[0];
     by_values_tp = by_values_tp.extended()->at_single(
         1, &by_values_arrmeta, const_cast<const char **>(&by_values_data));
-    by_values_tp = by_values_tp.extended<pointer_type>()->get_target_type();
+    by_values_tp =
+        by_values_tp.extended<ndt::pointer_type>()->get_target_type();
     by_values_arrmeta += sizeof(pointer_type_arrmeta);
     by_values_data = *reinterpret_cast<char **>(by_values_data);
 
@@ -194,11 +196,11 @@ struct groupby_to_value_assign_kernel
     }
 
     const ndt::type &result_tp = gd->get_value_type();
-    const fixed_dim_type *fad = result_tp.extended<fixed_dim_type>();
+    const ndt::fixed_dim_type *fad = result_tp.extended<ndt::fixed_dim_type>();
     intptr_t fad_stride =
         reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
-    const var_dim_type *vad =
-        static_cast<const var_dim_type *>(fad->get_element_type().extended());
+    const ndt::var_dim_type *vad =
+        static_cast<const ndt::var_dim_type *>(fad->get_element_type().extended());
     const var_dim_type_arrmeta *vad_md =
         reinterpret_cast<const var_dim_type_arrmeta *>(
             dst_arrmeta + sizeof(fixed_dim_type_arrmeta));
@@ -280,7 +282,7 @@ struct groupby_to_value_assign_kernel
 };
 } // anonymous namespace
 
-size_t groupby_type::make_operand_to_value_assignment_kernel(
+size_t ndt::groupby_type::make_operand_to_value_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
@@ -288,8 +290,8 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
   const categorical_type *cd = m_groups_type.extended<categorical_type>();
   switch (cd->get_storage_type().get_type_id()) {
   case uint8_type_id: {
-    groupby_to_value_assign_kernel<uint8_t>::make(ckb, kernreq, ckb_offset, this,
-                                                 dst_arrmeta, src_arrmeta);
+    groupby_to_value_assign_kernel<uint8_t>::make(
+        ckb, kernreq, ckb_offset, this, dst_arrmeta, src_arrmeta);
   } break;
   case uint16_type_id: {
     groupby_to_value_assign_kernel<uint16_t>::make(
@@ -306,7 +308,7 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
 
   // The following is the setup for copying a single 'data' value to the output
   // The destination element type and arrmeta
-  const ndt::type &dst_element_tp =
+  const type &dst_element_tp =
       static_cast<const var_dim_type *>(m_value_type.extended<fixed_dim_type>()
                                             ->get_element_type()
                                             .extended())->get_element_type();
@@ -314,7 +316,7 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
                                     sizeof(fixed_dim_type_arrmeta) +
                                     sizeof(var_dim_type_arrmeta);
   // Get source element type and arrmeta
-  ndt::type src_element_tp = m_operand_type;
+  type src_element_tp = m_operand_type;
   const char *src_element_arrmeta = src_arrmeta;
   src_element_tp =
       src_element_tp.extended()->at_single(0, &src_element_arrmeta, NULL);
@@ -329,7 +331,7 @@ size_t groupby_type::make_operand_to_value_assignment_kernel(
                                   ectx, nd::array());
 }
 
-size_t groupby_type::make_value_to_operand_assignment_kernel(
+size_t ndt::groupby_type::make_value_to_operand_assignment_kernel(
     void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
     const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t DYND_UNUSED(kernreq),
@@ -338,8 +340,8 @@ size_t groupby_type::make_value_to_operand_assignment_kernel(
   throw runtime_error("Cannot assign to a dynd groupby object value");
 }
 
-ndt::type groupby_type::with_replaced_storage_type(
-    const ndt::type &DYND_UNUSED(replacement_type)) const
+ndt::type ndt::groupby_type::with_replaced_storage_type(
+    const type &DYND_UNUSED(replacement_type)) const
 {
   throw runtime_error(
       "TODO: implement groupby_type::with_replaced_storage_type");
@@ -353,11 +355,11 @@ static nd::array property_ndo_get_groups(const nd::array &n)
   while (d.get_type_id() != groupby_type_id) {
     d = d.at_single(0);
   }
-  const groupby_type *gd = d.extended<groupby_type>();
+  const ndt::groupby_type *gd = d.extended<ndt::groupby_type>();
   return gd->get_groups_type().p("categories");
 }
 
-void groupby_type::get_dynamic_array_properties(
+void ndt::groupby_type::get_dynamic_array_properties(
     const std::pair<std::string, gfunc::callable> **out_properties,
     size_t *out_count) const
 {

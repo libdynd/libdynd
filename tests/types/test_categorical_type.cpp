@@ -170,15 +170,15 @@ TEST(CategoricalType, Values) {
 
     ndt::type dt = ndt::make_categorical(a);
 
-    EXPECT_EQ(0u, static_cast<const categorical_type*>(dt.extended())->get_value_from_category(a(0)));
-    EXPECT_EQ(1u, static_cast<const categorical_type*>(dt.extended())->get_value_from_category(a(1)));
-    EXPECT_EQ(2u, static_cast<const categorical_type*>(dt.extended())->get_value_from_category(a(2)));
-    EXPECT_EQ(0u, static_cast<const categorical_type*>(dt.extended())->get_value_from_category("foo"));
-    EXPECT_EQ(1u, static_cast<const categorical_type*>(dt.extended())->get_value_from_category("bar"));
-    EXPECT_EQ(2u, static_cast<const categorical_type*>(dt.extended())->get_value_from_category("baz"));
-    EXPECT_THROW(static_cast<const categorical_type*>(dt.extended())->get_value_from_category("aaa"), std::runtime_error);
-    EXPECT_THROW(static_cast<const categorical_type*>(dt.extended())->get_value_from_category("ddd"), std::runtime_error);
-    EXPECT_THROW(static_cast<const categorical_type*>(dt.extended())->get_value_from_category("zzz"), std::runtime_error);
+    EXPECT_EQ(0u, static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category(a(0)));
+    EXPECT_EQ(1u, static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category(a(1)));
+    EXPECT_EQ(2u, static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category(a(2)));
+    EXPECT_EQ(0u, static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category("foo"));
+    EXPECT_EQ(1u, static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category("bar"));
+    EXPECT_EQ(2u, static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category("baz"));
+    EXPECT_THROW(static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category("aaa"), std::runtime_error);
+    EXPECT_THROW(static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category("ddd"), std::runtime_error);
+    EXPECT_THROW(static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category("zzz"), std::runtime_error);
 }
 
 TEST(CategoricalType, ValuesLonger) {
@@ -195,7 +195,7 @@ TEST(CategoricalType, ValuesLonger) {
 
     // Check that the categories got the right values
     for (int i = 0; i < cats_count; ++i) {
-        EXPECT_EQ((uint32_t)i, static_cast<const categorical_type*>(dt.extended())->get_value_from_category(cats_vals[i]));
+        EXPECT_EQ((uint32_t)i, static_cast<const ndt::categorical_type*>(dt.extended())->get_value_from_category(cats_vals[i]));
     }
     // Check that everything in 'a' is right
     for (int i = 0; i < a_count; ++i) {

@@ -75,7 +75,7 @@ struct string_to_builtin_kernel {
   typedef string_to_builtin_kernel extra_type;
 
   ckernel_prefix base;
-  const base_string_type *src_string_tp;
+  const ndt::base_string_type *src_string_tp;
   assign_error_mode errmode;
   const char *src_arrmeta;
 
@@ -464,7 +464,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
         static_string_to_builtin_kernels[dst_type_id - bool_type_id]);
     e->base.destructor = &string_to_builtin_kernel::destruct;
     // The kernel data owns this reference
-    e->src_string_tp = static_cast<const base_string_type *>(
+    e->src_string_tp = static_cast<const ndt::base_string_type *>(
         ndt::type(src_string_tp).release());
     e->errmode = ectx->errmode;
     e->src_arrmeta = src_arrmeta;
@@ -485,7 +485,7 @@ struct builtin_to_string_kernel_extra {
   typedef builtin_to_string_kernel_extra extra_type;
 
   ckernel_prefix base;
-  const base_string_type *dst_string_tp;
+  const ndt::base_string_type *dst_string_tp;
   type_id_t src_type_id;
   eval::eval_context ectx;
   const char *dst_arrmeta;
@@ -536,7 +536,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
     e->base.set_function<expr_single_t>(builtin_to_string_kernel_extra::single);
     e->base.destructor = builtin_to_string_kernel_extra::destruct;
     // The kernel data owns this reference
-    e->dst_string_tp = static_cast<const base_string_type *>(
+    e->dst_string_tp = static_cast<const ndt::base_string_type *>(
         ndt::type(dst_string_tp).release());
     e->src_type_id = src_type_id;
     e->ectx = *ectx;
