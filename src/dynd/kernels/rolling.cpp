@@ -33,7 +33,7 @@ void nd::functional::strided_rolling_ck::destruct_children()
   // The NA filler
   get_child_ckernel()->destroy();
   // The window op
-  base.destroy_child_ckernel(m_window_op_offset);
+  destroy_child_ckernel(m_window_op_offset);
 }
 
 void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
@@ -70,9 +70,9 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
 void nd::functional::var_rolling_ck::destruct_children()
 {
   // The window op
-  base.destroy_child_ckernel(m_window_op_offset);
+  destroy_child_ckernel(m_window_op_offset);
   // The NA filler
-  base.destroy_child_ckernel(sizeof(self_type));
+  destroy_child_ckernel(sizeof(self_type));
 }
 
 // TODO This should handle both strided and var cases

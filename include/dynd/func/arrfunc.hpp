@@ -1084,6 +1084,10 @@ namespace nd {
       return (*this)(std::forward<A>(a)..., kwds());
     }
 
+    /**
+     * T is a kernel type (e.g. a child class of base_kernel or base_virtual_kernel),
+     * and this assembles an arrfunc out of the interface functions defined by it.
+     */
     template <typename T>
     static arrfunc make(const ndt::type &self_tp, size_t data_size)
     {

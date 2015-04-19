@@ -268,7 +268,7 @@ struct strided_to_var_assign_ck
 
   inline void destruct_children()
   {
-    base.destroy_child_ckernel(sizeof(self_type));
+    destroy_child_ckernel(sizeof(self_type));
   }
 };
 } // anonymous namespace

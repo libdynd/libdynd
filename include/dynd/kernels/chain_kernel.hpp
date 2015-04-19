@@ -104,7 +104,7 @@ namespace nd {
         // The first child ckernel
         get_child_ckernel()->destroy();
         // The second child ckernel
-        base.destroy_child_ckernel(second_offset);
+        destroy_child_ckernel(second_offset);
       }
 
       static intptr_t

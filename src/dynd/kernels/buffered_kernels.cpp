@@ -95,7 +95,7 @@ struct buffered_ck
     */
   inline void init_kernfunc(kernel_request_t kernreq)
   {
-    base.set_expr_function<self_type>(kernreq);
+    set_expr_function<self_type>(kernreq);
   }
 };
 

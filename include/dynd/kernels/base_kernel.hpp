@@ -19,12 +19,19 @@ namespace nd {
   template <typename T, kernel_request_t kernreq, int N>
   struct base_kernel;
 
+/**
+ * This is a helper macro for this header file. It's the memory kernel requests
+ * (kernel_request_host is the only one without CUDA enabled) to appropriate
+ * function qualifiers in the variadic arguments, which tell e.g. the CUDA
+ * compiler to build the functions for the GPU device.
+ *
+ * The classes it generates are the base classes to use for defining ckernels
+ * with a single and strided kernel function.
+ */
 #define BASE_KERNEL(KERNREQ, ...)                                              \
   template <typename T>                                                        \
-  struct base_kernel<T, KERNREQ, -1> {                                         \
+  struct base_kernel<T, KERNREQ, -1> : ckernel_prefix {                        \
     typedef T self_type;                                                       \
-                                                                               \
-    ckernel_prefix base;                                                       \
                                                                                \
     DYND_CUDA_HOST_DEVICE static self_type *get_self(ckernel_prefix *rawself)  \
     {                                                                          \
@@ -64,9 +71,9 @@ namespace nd {
       }                                                                        \
     }                                                                          \
                                                                                \
-    /** \                                                                      \
-     * Creates the ckernel, and increments ``inckb_offset``  \                 \
-     * to the position after it. \                                             \
+    /**                                                                        \
+     * Creates the ckernel, and increments ``inckb_offset``                    \
+     * to the position after it.                                               \
      */                                                                        \
     template <typename CKBT, typename... A>                                    \
     static self_type *make(CKBT *ckb, kernel_request_t kernreq,                \
@@ -85,16 +92,16 @@ namespace nd {
     static self_type *make(void *ckb, kernel_request_t kernreq,                \
                            intptr_t &inout_ckb_offset, A &&... args);          \
                                                                                \
-    /** Initializes just the base.function member. */                          \
+    /** Initializes just the ckernel_prefix function member. */                \
     __VA_ARGS__ void init_kernfunc(kernel_request_t kernreq)                   \
     {                                                                          \
       switch (kernreq) {                                                       \
       case kernel_request_single:                                              \
-        this->base.template set_function<expr_single_t>(                       \
+        this->template set_function<expr_single_t>(                            \
             &self_type::single_wrapper);                                       \
         break;                                                                 \
       case kernel_request_strided:                                             \
-        this->base.template set_function<expr_strided_t>(                      \
+        this->template set_function<expr_strided_t>(                           \
             &self_type::strided_wrapper);                                      \
         break;                                                                 \
       default:                                                                 \
@@ -104,10 +111,10 @@ namespace nd {
       }                                                                        \
     }                                                                          \
                                                                                \
-    /** \                                                                      \
-     * Initializes an instance of this ckernel in-place according to the \     \
-     * kernel request. This calls the constructor in-place, and initializes \  \
-     * the base function and destructor. \                                     \
+    /**                                                                        \
+     * Initializes an instance of this ckernel in-place according to the       \
+     * kernel request. This calls the constructor in-place, and initializes    \
+     * the base function and destructor.                                       \
      */                                                                        \
     template <typename... A>                                                   \
     __VA_ARGS__ static self_type *init(ckernel_prefix *rawself,                \
@@ -125,7 +132,7 @@ namespace nd {
         DYND_HOST_THROW(std::runtime_error,                                    \
                         "internal ckernel error: struct layout is not valid"); \
       }                                                                        \
-      self->base.destructor = &self_type::destruct;                            \
+      self->destructor = &self_type::destruct;                                 \
       /* A child class must implement this to fill in self->base.function. */  \
       self->init_kernfunc(kernreq);                                            \
       return self;                                                             \
@@ -147,39 +154,32 @@ namespace nd {
           ->strided(dst, dst_stride, src, src_stride, count);                  \
     }                                                                          \
                                                                                \
-    /** \                                                                      \
-     * The ckernel destructor function, which is placed in \                   \
-     * base.destructor. \                                                      \
+    /**                                                                        \
+     * The ckernel destructor function, which is placed in                     \
+     * the ckernel_prefix destructor.                                          \
      */                                                                        \
     __VA_ARGS__ static void destruct(ckernel_prefix *rawself)                  \
     {                                                                          \
       self_type *self = get_self(rawself);                                     \
-      /* If there are any child kernels, a child class must implement this to  \
-       * \                                                                     \
-       * destroy them. */                                                      \
+      /* If there are any child kernels, a child class must implement */       \
+      /* this to destroy them. */                                              \
       self->destruct_children();                                               \
       self->~self_type();                                                      \
     }                                                                          \
                                                                                \
-    /** \                                                                      \
-     * Default implementation of destruct_children does nothing. \             \
-     */                                                                        \
+    /**  Default implementation of destruct_children does nothing.  */         \
     __VA_ARGS__ void destruct_children() {}                                    \
                                                                                \
-    /** \                                                                      \
-     * Returns the child ckernel immediately following this one. \             \
-     */                                                                        \
+    /**  Returns the child ckernel immediately following this one. */          \
     __VA_ARGS__ ckernel_prefix *get_child_ckernel()                            \
     {                                                                          \
-      return get_child_ckernel(sizeof(self_type));                             \
+      return ckernel_prefix::get_child_ckernel(sizeof(self_type));             \
     }                                                                          \
                                                                                \
-    /** \                                                                      \
-     * Returns the child ckernel at the specified offset. \                    \
-     */                                                                        \
-    __VA_ARGS__ ckernel_prefix *get_child_ckernel(intptr_t offset)             \
+    /** Returns the pointer to a child ckernel at the provided offset.  */     \
+    DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child_ckernel(intptr_t offset)   \
     {                                                                          \
-      return base.get_child_ckernel(ckernel_prefix::align_offset(offset));     \
+      return ckernel_prefix::get_child_ckernel(offset);                        \
     }                                                                          \
                                                                                \
     static intptr_t instantiate(                                               \
@@ -228,7 +228,7 @@ namespace nd {
                              const intptr_t *DYND_UNUSED(src_stride),          \
                              size_t count)                                     \
     {                                                                          \
-      self_type *self = parent_type::get_self(&this->base);                    \
+      self_type *self = parent_type::get_self(this);                           \
       for (size_t i = 0; i != count; ++i) {                                    \
         self->single(dst, NULL);                                               \
         dst += dst_stride;                                                     \
@@ -244,7 +244,7 @@ namespace nd {
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *src, \
                              const intptr_t *src_stride, size_t count)         \
     {                                                                          \
-      self_type *self = parent_type::get_self(&this->base);                    \
+      self_type *self = parent_type::get_self(this);                           \
       char *src_copy[N];                                                       \
       memcpy(src_copy, src, sizeof(src_copy));                                 \
       for (size_t i = 0; i != count; ++i) {                                    \
@@ -267,13 +267,15 @@ namespace nd {
                                                 intptr_t &inout_ckb_offset,
                                                 A &&... args)
   {
+    // Disallow requests from a different memory space
     switch (kernreq & kernel_request_memory) {
     case kernel_request_host:
       return self_type::make(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
           kernreq, inout_ckb_offset, std::forward<A>(args)...);
     default:
-      throw std::invalid_argument("unrecognized ckernel request");
+      throw std::invalid_argument(
+          "unrecognized ckernel request for the wrong memory space");
     }
   }
 
