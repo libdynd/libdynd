@@ -34,7 +34,7 @@ namespace nd {
     struct elwise_virtual_ck : base_virtual_kernel<elwise_virtual_ck<N>> {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
-                       const arrfunc_type *DYND_UNUSED(self_tp),
+                       const ndt::arrfunc_type *DYND_UNUSED(self_tp),
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
                        intptr_t nsrc, const ndt::type *src_tp,
                        const dynd::nd::array &kwds,
@@ -42,7 +42,7 @@ namespace nd {
       {
         const arrfunc_type_data *child_af =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_af_tp =
+        const ndt::arrfunc_type *child_af_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         intptr_t ndim = 0;
@@ -147,14 +147,14 @@ namespace nd {
 
       static void
       resolve_option_values(const arrfunc_type_data *self,
-                            const arrfunc_type *DYND_UNUSED(self_tp),
+                            const ndt::arrfunc_type *DYND_UNUSED(self_tp),
                             char *DYND_UNUSED(data), intptr_t nsrc,
                             const ndt::type *src_tp, nd::array &kwds,
                             const std::map<nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         return child->resolve_option_values(child, child_tp, NULL, nsrc, src_tp,
@@ -162,7 +162,7 @@ namespace nd {
       }
 
       static intptr_t instantiate(
-          const arrfunc_type_data *self, const arrfunc_type *self_tp,
+          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
           char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
           const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
           const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
@@ -172,7 +172,7 @@ namespace nd {
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         //        ndt::type &child_dst_tp = *reinterpret_cast<ndt::type
@@ -336,7 +336,7 @@ namespace nd {
       }
 
       static size_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                   char *data, void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
@@ -346,7 +346,7 @@ namespace nd {
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -460,7 +460,7 @@ namespace nd {
       }
 
       static size_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                   char *data, void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
@@ -471,7 +471,7 @@ namespace nd {
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -590,7 +590,7 @@ namespace nd {
       }
 
       static size_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                   char *data, void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
@@ -600,7 +600,7 @@ namespace nd {
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -722,7 +722,7 @@ namespace nd {
       }
 
       static size_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                   char *data, void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
@@ -733,7 +733,7 @@ namespace nd {
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -933,7 +933,7 @@ namespace nd {
       }
 
       static size_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                   char *data, void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
@@ -943,7 +943,7 @@ namespace nd {
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -1099,7 +1099,7 @@ namespace nd {
       }
 
       static size_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                   char *data, void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
@@ -1110,7 +1110,7 @@ namespace nd {
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();

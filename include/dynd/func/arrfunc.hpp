@@ -99,7 +99,7 @@ namespace nd {
      * output array.
      */
     template <typename T>
-    bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
+    bool is_special_kwd(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
                         const std::string &DYND_UNUSED(name),
                         const T &DYND_UNUSED(value),
                         std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -107,7 +107,7 @@ namespace nd {
       return false;
     }
 
-    inline bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
+    inline bool is_special_kwd(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
                                array &dst, const std::string &name,
                                const ndt::type &value)
     {
@@ -119,7 +119,7 @@ namespace nd {
       return false;
     }
 
-    inline bool is_special_kwd(const arrfunc_type *DYND_UNUSED(self_tp),
+    inline bool is_special_kwd(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
                                array &dst, const std::string &name,
                                const nd::array &value)
     {
@@ -135,7 +135,7 @@ namespace nd {
     }
 
     template <typename T>
-    void check_name(const arrfunc_type *af_tp, array &dst,
+    void check_name(const ndt::arrfunc_type *af_tp, array &dst,
                     const std::string &name, const T &value, bool &has_dst_tp,
                     ndt::type *kwd_tp, std::vector<intptr_t> &available)
     {
@@ -166,17 +166,17 @@ namespace nd {
                              const uintptr_t *data_offsets,
                              const std::vector<intptr_t> &missing);
 
-    void check_narg(const arrfunc_type *af_tp, intptr_t npos);
+    void check_narg(const ndt::arrfunc_type *af_tp, intptr_t npos);
 
-    void check_arg(const arrfunc_type *af_tp, intptr_t i,
+    void check_arg(const ndt::arrfunc_type *af_tp, intptr_t i,
                    const ndt::type &actual_tp, const char *actual_arrmeta,
                    std::map<nd::string, ndt::type> &tp_vars);
 
-    void check_nkwd(const arrfunc_type *af_tp,
+    void check_nkwd(const ndt::arrfunc_type *af_tp,
                     const std::vector<intptr_t> &available,
                     const std::vector<intptr_t> &missing);
 
-    void validate_kwd_types(const arrfunc_type *af_tp,
+    void validate_kwd_types(const ndt::arrfunc_type *af_tp,
                             std::vector<ndt::type> &kwd_tp,
                             const std::vector<intptr_t> &available,
                             const std::vector<intptr_t> &missing,
@@ -213,7 +213,8 @@ namespace nd {
         args *self;
 
         template <size_t I>
-        void on_each(const arrfunc_type *af_tp, std::vector<ndt::type> &src_tp,
+        void on_each(const ndt::arrfunc_type *af_tp,
+                     std::vector<ndt::type> &src_tp,
                      std::vector<const char *> &src_arrmeta,
                      std::vector<char *> &src_data,
                      std::map<nd::string, ndt::type> &tp_vars) const
@@ -229,7 +230,7 @@ namespace nd {
           src_data[I] = data_of(value);
         }
 
-        void operator()(const arrfunc_type *af_tp,
+        void operator()(const ndt::arrfunc_type *af_tp,
                         std::vector<ndt::type> &src_tp,
                         std::vector<const char *> &src_arrmeta,
                         std::vector<char *> &src_data,
@@ -248,7 +249,7 @@ namespace nd {
     class args<> {
     public:
       void validate_types(
-          const arrfunc_type *af_tp,
+          const ndt::arrfunc_type *af_tp,
           std::vector<ndt::type> &DYND_UNUSED(src_tp),
           std::vector<const char *> &DYND_UNUSED(src_arrmeta),
           std::vector<char *> &DYND_UNUSED(src_data),
@@ -267,7 +268,7 @@ namespace nd {
     public:
       args(intptr_t size, nd::array *values) : m_size(size), m_values(values) {}
 
-      void validate_types(const arrfunc_type *af_tp,
+      void validate_types(const ndt::arrfunc_type *af_tp,
                           std::vector<ndt::type> &src_tp,
                           std::vector<const char *> &src_arrmeta,
                           std::vector<char *> &src_data,
@@ -308,7 +309,7 @@ namespace nd {
       {
       }
 
-      void validate_types(const arrfunc_type *af_tp,
+      void validate_types(const ndt::arrfunc_type *af_tp,
                           std::vector<ndt::type> &src_tp,
                           std::vector<const char *> &src_arrmeta,
                           std::vector<char *> &src_data,
@@ -372,7 +373,8 @@ namespace nd {
       }
 
     public:
-      void validate_names(const arrfunc_type *af_tp, array &DYND_UNUSED(dst),
+      void validate_names(const ndt::arrfunc_type *af_tp,
+                          array &DYND_UNUSED(dst),
                           std::vector<ndt::type> &DYND_UNUSED(tp),
                           std::vector<intptr_t> &available,
                           std::vector<intptr_t> &missing) const
@@ -490,15 +492,15 @@ namespace nd {
         kwds *self;
 
         template <size_t I>
-        void on_each(const arrfunc_type *af_tp, array &dst, bool &has_dst_tp,
-                     std::vector<ndt::type> &kwd_tp,
+        void on_each(const ndt::arrfunc_type *af_tp, array &dst,
+                     bool &has_dst_tp, std::vector<ndt::type> &kwd_tp,
                      std::vector<intptr_t> &available)
         {
           check_name(af_tp, dst, self->m_names[I], std::get<I>(self->m_values),
                      has_dst_tp, kwd_tp.data(), available);
         }
 
-        void operator()(const arrfunc_type *af_tp, array &dst,
+        void operator()(const ndt::arrfunc_type *af_tp, array &dst,
                         std::vector<ndt::type> &tp,
                         std::vector<intptr_t> &available,
                         std::vector<intptr_t> &missing) const
@@ -586,7 +588,7 @@ namespace nd {
       {
       }
 
-      void validate_names(const arrfunc_type *af_tp, array &dst,
+      void validate_names(const ndt::arrfunc_type *af_tp, array &dst,
                           std::vector<ndt::type> &kwd_tp,
                           std::vector<intptr_t> &available,
                           std::vector<intptr_t> &missing) const
@@ -839,10 +841,11 @@ namespace nd {
                                 : NULL;
     }
 
-    const arrfunc_type *get_type() const
+    const ndt::arrfunc_type *get_type() const
     {
-      return !m_value.is_null() ? m_value.get_type().extended<arrfunc_type>()
-                                : NULL;
+      return !m_value.is_null()
+                 ? m_value.get_type().extended<ndt::arrfunc_type>()
+                 : NULL;
     }
 
     const ndt::type &get_array_type() const { return m_value.get_type(); }
@@ -900,7 +903,7 @@ namespace nd {
     array call(const A &args, const K &kwds) const
     {
       const arrfunc_type_data *self = get();
-      const arrfunc_type *self_tp = get_type();
+      const ndt::arrfunc_type *self_tp = get_type();
 
       array dst;
 
@@ -1133,7 +1136,7 @@ namespace nd {
     template <template <int> class CKT, typename T>
     static arrfunc make(const ndt::type &self_tp, T &&data, size_t data_size)
     {
-      switch (self_tp.extended<arrfunc_type>()->get_npos()) {
+      switch (self_tp.extended<ndt::arrfunc_type>()->get_npos()) {
       case 0:
         return make<CKT<0>>(self_tp, std::forward<T>(data), data_size);
       case 1:
@@ -1353,7 +1356,7 @@ namespace nd {
 
     const arrfunc_type_data *get() const { return get_self().get(); }
 
-    const arrfunc_type *get_type() const { return get_self().get_type(); }
+    const ndt::arrfunc_type *get_type() const { return get_self().get_type(); }
 
     const ndt::type &get_array_type() const
     {

@@ -85,7 +85,7 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(void *ckb,
 
 static intptr_t instantiate_builtin_sum_reduction_arrfunc(
     const arrfunc_type_data *DYND_UNUSED(self_data_ptr),
-    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -169,7 +169,7 @@ struct mean1d_arrfunc_data {
 
   static intptr_t
   instantiate(const arrfunc_type_data *af_self,
-              const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+              const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
               void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
               const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
               const ndt::type *src_tp, const char *const *src_arrmeta,

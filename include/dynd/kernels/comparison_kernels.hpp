@@ -30,37 +30,6 @@ enum comparison_type_t {
     comparison_type_greater
 };
 
-
-
-/**
- * See the ckernel_builder class documentation
- * for details about how kernels can be built and
- * used.
- *
- * This kernel type is for kernels which perform
- * a comparison between one type/arrmeta value
- * and a different type/arrmeta value.
- */
-class comparison_ckernel_builder : public ckernel_builder<kernel_request_host> {
-public:
-    comparison_ckernel_builder()
-        : ckernel_builder<kernel_request_host>()
-    {
-    }
-
-    inline expr_predicate_t get_function() const {
-        return get()->get_function<expr_predicate_t>();
-    }
-
-    /** Calls the function to do the comparison */
-    inline bool operator()(const char *src0, const char *src1) {
-        ckernel_prefix *kdp = get();
-        expr_predicate_t fn = kdp->get_function<expr_predicate_t>();
-        const char *const src[2] = {src0, src1};
-        return fn(src, kdp) != 0;
-    }
-};
-
 /**
  * Creates a comparison kernel for two type/arrmeta
  * pairs. This adds the kernel at the 'ckb_offset' position

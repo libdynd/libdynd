@@ -11,7 +11,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::type nd::functional::elwise_make_type(const arrfunc_type *child_tp)
+ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
 {
   const ndt::type *param_types = child_tp->get_pos_types_raw();
   intptr_t param_count = child_tp->get_npos();

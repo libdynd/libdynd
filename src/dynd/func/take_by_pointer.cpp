@@ -63,7 +63,7 @@ struct take_by_pointer_virtual_ck
     : nd::base_virtual_kernel<take_by_pointer_virtual_ck> {
   static intptr_t
   instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-              const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+              const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
               void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
               const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
               const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -116,7 +116,7 @@ struct take_by_pointer_virtual_ck
 
   static void
   resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(af_self),
-                   const arrfunc_type *af_tp, char *DYND_UNUSED(data),
+                   const ndt::arrfunc_type *af_tp, char *DYND_UNUSED(data),
                    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                    const nd::array &DYND_UNUSED(kwds),
                    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))

@@ -14,20 +14,21 @@ using namespace dynd;
  * arrfunc.
  */
 intptr_t nd::functional::chain_kernel::instantiate(
-    const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
-    char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    const arrfunc_type_data *af_self,
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *data, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars)
 {
   const static_data *static_data = af_self->get_data_as<struct static_data>();
 
   const arrfunc_type_data *first = static_data->first.get();
-  const arrfunc_type *first_tp = static_data->first.get_type();
+  const ndt::arrfunc_type *first_tp = static_data->first.get_type();
 
   const arrfunc_type_data *second = static_data->second.get();
-  const arrfunc_type *second_tp = static_data->second.get_type();
+  const ndt::arrfunc_type *second_tp = static_data->second.get_type();
 
   const ndt::type &buffer_tp = static_data->buffer_tp;
 
@@ -47,8 +48,9 @@ intptr_t nd::functional::chain_kernel::instantiate(
 }
 
 void nd::functional::chain_kernel::resolve_dst_type(
-    const arrfunc_type_data *DYND_UNUSED(self), const arrfunc_type *self_tp,
-    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
+    ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
     const ndt::type *DYND_UNUSED(src_tp), const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &tp_vars)
 {

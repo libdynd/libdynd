@@ -18,7 +18,7 @@ using namespace dynd;
 nd::arrfunc nd::functional::permute(const arrfunc &child,
                                     const std::vector<intptr_t> &perm)
 {
-  const arrfunc_type *child_tp = child.get_type();
+  const ndt::arrfunc_type *child_tp = child.get_type();
 
   ndt::type ret_tp;
   intptr_t npos = perm.size();

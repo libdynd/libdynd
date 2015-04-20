@@ -697,7 +697,7 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
   return ckb_offset;
 }
 
-static void check_dst_initialization(const arrfunc_type *dst_initialization_tp,
+static void check_dst_initialization(const ndt::arrfunc_type *dst_initialization_tp,
                                      const ndt::type &dst_tp,
                                      const ndt::type &src_tp)
 {
@@ -726,9 +726,9 @@ static void check_dst_initialization(const arrfunc_type *dst_initialization_tp,
  */
 static size_t make_strided_inner_reduction_dimension_kernel(
     const arrfunc_type_data *elwise_reduction,
-    const arrfunc_type *elwise_reduction_tp,
+    const ndt::arrfunc_type *elwise_reduction_tp,
     const arrfunc_type_data *dst_initialization,
-    const arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
+    const ndt::arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
     intptr_t src_stride, intptr_t src_size, const ndt::type &dst_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     bool right_associative, const nd::array &reduction_identity,
@@ -868,9 +868,9 @@ static size_t make_strided_inner_reduction_dimension_kernel(
  */
 static size_t make_strided_inner_broadcast_dimension_kernel(
     const arrfunc_type_data *elwise_reduction,
-    const arrfunc_type *elwise_reduction_tp,
+    const ndt::arrfunc_type *elwise_reduction_tp,
     const arrfunc_type_data *dst_initialization,
-    const arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
+    const ndt::arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
     intptr_t dst_stride, intptr_t src_stride, intptr_t src_size,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
     const char *src_arrmeta, bool right_associative,
@@ -1007,9 +1007,9 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
 
 size_t dynd::make_lifted_reduction_ckernel(
     const arrfunc_type_data *elwise_reduction,
-    const arrfunc_type *elwise_reduction_tp,
+    const ndt::arrfunc_type *elwise_reduction_tp,
     const arrfunc_type_data *dst_initialization,
-    const arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
+    const ndt::arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
     const char *src_arrmeta, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,

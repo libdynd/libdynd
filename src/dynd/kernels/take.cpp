@@ -58,7 +58,7 @@ void nd::masked_take_ck::destruct_children()
 
 intptr_t nd::masked_take_ck::instantiate(
     const arrfunc_type_data *DYND_UNUSED(af_self),
-    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -149,7 +149,7 @@ void nd::indexed_take_ck::destruct_children()
 
 intptr_t nd::indexed_take_ck::instantiate(
     const arrfunc_type_data *DYND_UNUSED(af_self),
-    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -209,7 +209,7 @@ intptr_t nd::indexed_take_ck::instantiate(
 }
 
 intptr_t nd::take_ck::instantiate(
-    const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
+    const arrfunc_type_data *af_self, const ndt::arrfunc_type *af_tp,
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -235,7 +235,7 @@ intptr_t nd::take_ck::instantiate(
 }
 
 void nd::take_ck::resolve_dst_type(
-    const arrfunc_type_data *DYND_UNUSED(af_self), const arrfunc_type *af_tp,
+    const arrfunc_type_data *DYND_UNUSED(af_self), const ndt::arrfunc_type *af_tp,
     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
     const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))

@@ -15,7 +15,7 @@ nd::arrfunc nd::functional::outer(const arrfunc &child)
   return arrfunc::make<outer_ck>(outer_make_type(child.get_type()), child, 0);
 }
 
-ndt::type nd::functional::outer_make_type(const arrfunc_type *child_tp)
+ndt::type nd::functional::outer_make_type(const ndt::arrfunc_type *child_tp)
 {
   const ndt::type *param_types = child_tp->get_pos_types_raw();
   intptr_t param_count = child_tp->get_npos();

@@ -17,7 +17,8 @@ namespace kernels {
 
   template <int N>
   struct permute_ck<N, true>
-      : nd::base_kernel<permute_ck<N, true>, kernel_request_cuda_host_device, N> {
+      : nd::base_kernel<permute_ck<N, true>, kernel_request_cuda_host_device,
+                        N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];
@@ -37,8 +38,9 @@ namespace kernels {
       single(NULL, src_inv_perm, child);
     }
 
-    DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *src,
-                 const intptr_t *src_stride, size_t count)
+    DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
+                                       char *const *src,
+                                       const intptr_t *src_stride, size_t count)
     {
       char *src_inv_perm[N];
       inv(src_inv_perm, dst, src);
@@ -53,18 +55,19 @@ namespace kernels {
 
     static intptr_t
     instantiate(const arrfunc_type_data *self,
-                const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-                intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                const char *const *src_arrmeta, kernel_request_t kernreq,
-                const eval::eval_context *ectx, const nd::array &kwds,
+                const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
     {
       const std::pair<nd::arrfunc, std::vector<intptr_t>> *data =
           self->get_data_as<std::pair<nd::arrfunc, std::vector<intptr_t>>>();
 
       const arrfunc_type_data *child = data->first.get();
-      const arrfunc_type *child_tp = data->first.get_type();
+      const ndt::arrfunc_type *child_tp = data->first.get_type();
 
       const intptr_t *perm = data->second.data();
 
@@ -75,15 +78,15 @@ namespace kernels {
       inv(src_arrmeta_inv, dst_arrmeta, src_arrmeta, perm);
 
       self_type::make(ckb, kernreq, ckb_offset,
-                        detail::make_array_wrapper<N>(perm));
+                      detail::make_array_wrapper<N>(perm));
       return child->instantiate(child, child_tp, NULL, ckb, ckb_offset,
                                 ndt::make_type<void>(), NULL, nsrc, src_tp_inv,
                                 src_arrmeta_inv, kernreq, ectx, kwds, tp_vars);
     }
 
   private:
-    static void inv(ndt::type *src_inv, const ndt::type &dst, const ndt::type *src,
-                            const intptr_t *perm)
+    static void inv(ndt::type *src_inv, const ndt::type &dst,
+                    const ndt::type *src, const intptr_t *perm)
     {
       for (intptr_t i = 0; i < N; ++i) {
         intptr_t j = perm[i];
@@ -96,8 +99,8 @@ namespace kernels {
     }
 
     template <typename T>
-    DYND_CUDA_HOST_DEVICE static void inv(T *src_inv, const T &dst, const T *src,
-                            const intptr_t *perm)
+    DYND_CUDA_HOST_DEVICE static void inv(T *src_inv, const T &dst,
+                                          const T *src, const intptr_t *perm)
     {
       for (intptr_t i = 0; i < N; ++i) {
         intptr_t j = perm[i];
@@ -109,12 +112,15 @@ namespace kernels {
       }
     }
 
-    DYND_CUDA_HOST_DEVICE void inv(ndt::type *src_inv, const ndt::type &dst, const ndt::type *src) {
+    DYND_CUDA_HOST_DEVICE void inv(ndt::type *src_inv, const ndt::type &dst,
+                                   const ndt::type *src)
+    {
       return inv(src_inv, dst, src, perm);
     }
 
     template <typename T>
-    DYND_CUDA_HOST_DEVICE void inv(T *src_inv, const T &dst, const T *src) {
+    DYND_CUDA_HOST_DEVICE void inv(T *src_inv, const T &dst, const T *src)
+    {
       return inv(src_inv, dst, src, perm);
     }
   };
@@ -143,18 +149,19 @@ namespace kernels {
 
     static intptr_t
     instantiate(const arrfunc_type_data *self,
-                const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data), void *ckb,
-                intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                const char *const *src_arrmeta, kernel_request_t kernreq,
-                const eval::eval_context *ectx, const nd::array &kwds,
+                const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
     {
       const std::pair<nd::arrfunc, std::vector<intptr_t>> *data =
           self->get_data_as<std::pair<nd::arrfunc, std::vector<intptr_t>>>();
 
       const arrfunc_type_data *child = data->first.get();
-      const arrfunc_type *child_tp = data->first.get_type();
+      const ndt::arrfunc_type *child_tp = data->first.get_type();
 
       const intptr_t *perm = data->second.data();
 
@@ -165,7 +172,7 @@ namespace kernels {
       inv_permute(src_arrmeta_inv, src_arrmeta, perm);
 
       self_type::make(ckb, kernreq, ckb_offset,
-                        detail::make_array_wrapper<N>(perm));
+                      detail::make_array_wrapper<N>(perm));
       return child->instantiate(child, child_tp, NULL, ckb, ckb_offset, dst_tp,
                                 dst_arrmeta, nsrc, src_tp_inv, src_arrmeta_inv,
                                 kernreq, ectx, kwds, tp_vars);

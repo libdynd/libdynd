@@ -48,9 +48,9 @@ namespace dynd {
  */
 size_t make_lifted_reduction_ckernel(
     const arrfunc_type_data *elwise_reduction,
-    const arrfunc_type *elwise_reduction_tp,
+    const ndt::arrfunc_type *elwise_reduction_tp,
     const arrfunc_type_data *dst_initialization,
-    const arrfunc_type *dst_initialization_tp, void *ckb,
+    const ndt::arrfunc_type *dst_initialization_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type &src_tp, const char *src_arrmeta, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,

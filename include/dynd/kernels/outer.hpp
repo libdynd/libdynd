@@ -16,7 +16,7 @@ namespace nd {
     template <int N>
     struct outer_ck : base_virtual_kernel<outer_ck<N>> {
       static intptr_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                   char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
@@ -89,7 +89,7 @@ namespace nd {
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
-                       const arrfunc_type *DYND_UNUSED(self_tp),
+                       const ndt::arrfunc_type *DYND_UNUSED(self_tp),
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
                        intptr_t nsrc, const ndt::type *src_tp,
                        const dynd::nd::array &kwds,
@@ -97,7 +97,7 @@ namespace nd {
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
-        const arrfunc_type *child_tp =
+        const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         if (child->resolve_dst_type != NULL) {

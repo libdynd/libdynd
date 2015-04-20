@@ -34,7 +34,7 @@ static void delete_lifted_reduction_arrfunc_data(arrfunc_type_data *self_af)
 }
 
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
-    const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
+    const arrfunc_type_data *af_self, const ndt::arrfunc_type *DYND_UNUSED(af_tp),
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -69,7 +69,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
     throw runtime_error(
         "lift_reduction_arrfunc: 'elwise_reduction' may not be empty");
   }
-  const arrfunc_type *elwise_reduction_tp = elwise_reduction_arr.get_type();
+  const ndt::arrfunc_type *elwise_reduction_tp = elwise_reduction_arr.get_type();
   if (elwise_reduction_tp->get_npos() != 1 &&
       !(elwise_reduction_tp->get_npos() == 2 &&
         elwise_reduction_tp->get_pos_type(0) ==
