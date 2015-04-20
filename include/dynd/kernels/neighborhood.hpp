@@ -85,7 +85,7 @@ namespace nd {
 
       static intptr_t
       instantiate(const arrfunc_type_data *af_self,
-                  const arrfunc_type *DYND_UNUSED(af_tp),
+                  const ndt::arrfunc_type *DYND_UNUSED(af_tp),
                   char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
@@ -198,7 +198,7 @@ namespace nd {
 
       static void resolve_dst_type(
           const arrfunc_type_data *DYND_UNUSED(self),
-          const arrfunc_type *self_tp, char *DYND_UNUSED(data),
+          const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
           ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
           const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
           const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))

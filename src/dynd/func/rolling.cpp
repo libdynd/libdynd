@@ -17,7 +17,7 @@ nd::arrfunc nd::functional::rolling(const nd::arrfunc &window_op,
   if (window_op.is_null()) {
     throw invalid_argument("make_rolling_arrfunc() 'window_op' cannot be null");
   }
-  const arrfunc_type *window_af_tp = window_op.get_type();
+  const ndt::arrfunc_type *window_af_tp = window_op.get_type();
   if (window_af_tp->get_npos() != 1) {
     stringstream ss;
     ss << "To make a rolling window arrfunc, an operation with one "

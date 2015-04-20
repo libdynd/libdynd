@@ -288,8 +288,8 @@ nd::functional::multidispatch(const ndt::type &self_tp,
 {
   intptr_t nkwd = children[0].get_type()->get_nkwd();
 
-  ndt::type pos_tp = self_tp.extended<arrfunc_type>()->get_pos_tuple();
-  ndt::type kwd_tp = self_tp.extended<arrfunc_type>()->get_kwd_struct();
+  ndt::type pos_tp = self_tp.extended<ndt::arrfunc_type>()->get_pos_tuple();
+  ndt::type kwd_tp = self_tp.extended<ndt::arrfunc_type>()->get_kwd_struct();
 
   ndt::type pattern_tp = ndt::make_arrfunc(
       pos_tp,
@@ -297,7 +297,7 @@ nd::functional::multidispatch(const ndt::type &self_tp,
                            irange() < nkwd),
                        kwd_tp.extended<ndt::base_struct_type>()->get_field_types()(
                            irange() < nkwd)),
-      self_tp.extended<arrfunc_type>()->get_return_type());
+      self_tp.extended<ndt::arrfunc_type>()->get_return_type());
 
   std::shared_ptr<std::vector<string>> vars(new std::vector<string>);
   /*
@@ -408,7 +408,7 @@ nd::arrfunc
 nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
                                          const std::vector<arrfunc> &children)
 {
-  switch (pattern_tp.extended<arrfunc_type>()->get_npos()) {
+  switch (pattern_tp.extended<ndt::arrfunc_type>()->get_npos()) {
   case 2:
     return multidispatch_by_type_id<2>(pattern_tp, children);
   default:

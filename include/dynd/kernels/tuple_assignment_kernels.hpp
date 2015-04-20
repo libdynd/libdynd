@@ -31,7 +31,7 @@ namespace dynd {
  * \param ectx  The evaluation context.
  */
 intptr_t make_tuple_unary_op_ckernel(
-    const arrfunc_type_data *af, const arrfunc_type *af_tp, void *ckb,
+    const arrfunc_type_data *af, const ndt::arrfunc_type *af_tp, void *ckb,
     intptr_t ckb_offset, intptr_t field_count, const uintptr_t *dst_offsets,
     const ndt::type *dst_tp, const char *const *dst_arrmeta,
     const uintptr_t *src_offsets, const ndt::type *src_tp,
@@ -59,7 +59,7 @@ intptr_t make_tuple_unary_op_ckernel(
  * \param ectx  The evaluation context.
  */
 intptr_t make_tuple_unary_op_ckernel(
-    const arrfunc_type_data *const *af, const arrfunc_type *const *af_tp,
+    const arrfunc_type_data *const *af, const ndt::arrfunc_type *const *af_tp,
     void *ckb, intptr_t ckb_offset, intptr_t field_count,
     const uintptr_t *dst_offsets, const ndt::type *dst_tp,
     const char *const *dst_arrmeta, const uintptr_t *src_offsets,

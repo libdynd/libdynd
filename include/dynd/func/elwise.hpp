@@ -26,7 +26,7 @@ namespace nd {
 
     arrfunc elwise(const ndt::type &self_tp, const arrfunc &child);
 
-    ndt::type elwise_make_type(const arrfunc_type *child_tp);
+    ndt::type elwise_make_type(const ndt::arrfunc_type *child_tp);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

@@ -10,7 +10,7 @@ using namespace std;
 using namespace dynd;
 
 intptr_t nd::copy_ck::instantiate(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp,
+    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -46,7 +46,7 @@ intptr_t nd::copy_ck::instantiate(
 
 void nd::copy_ck::resolve_dst_type(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))

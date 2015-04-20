@@ -54,7 +54,7 @@ class arrfunc_type_data;
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*arrfunc_instantiate_t)(
-    const arrfunc_type_data *self, const arrfunc_type *self_tp, char *data,
+    const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, char *data,
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -72,7 +72,7 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * \param src_tp  An array of the source types.
  */
 typedef void (*arrfunc_resolve_dst_type_t)(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, char *data,
+    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
@@ -87,7 +87,7 @@ typedef void (*arrfunc_resolve_dst_type_t)(
  * \param kwds    An array of the.
  */
 typedef void (*arrfunc_resolve_option_values_t)(
-    const arrfunc_type_data *self, const arrfunc_type *self_tp, char *data,
+    const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, char *data,
     intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars);
 
@@ -252,201 +252,202 @@ void free_wrapper(arrfunc_type_data *self)
   free(*self->get_data_as<T *>());
 }
 
-class arrfunc_type : public ndt::base_type {
-  ndt::type m_return_type;
-  // Always a tuple type containing the types for positional args
-  ndt::type m_pos_tuple;
-  // Always a struct type containing the names and types for keyword args
-  ndt::type m_kwd_struct;
-
-  // Indices of the optional args
-  std::vector<intptr_t> m_opt_kwd_indices;
-
-public:
-  arrfunc_type(const ndt::type &ret_type);
-
-  arrfunc_type(const ndt::type &pos_types, const ndt::type &ret_type);
-
-  arrfunc_type(const ndt::type &pos_types, const ndt::type &kwd_types,
-               const ndt::type &ret_type);
-
-  virtual ~arrfunc_type() {}
-
-  const string_type_data &get_kwd_name_raw(intptr_t i) const
-  {
-    return m_kwd_struct.extended<ndt::struct_type>()->get_field_name_raw(i);
-  }
-
-  const ndt::type &get_return_type() const { return m_return_type; }
-
-  const ndt::type &get_pos_tuple() const { return m_pos_tuple; }
-
-  const nd::array &get_pos_types() const
-  {
-    return m_pos_tuple.extended<ndt::tuple_type>()->get_field_types();
-  }
-
-  bool is_pos_variadic() const
-  {
-    return m_pos_tuple.extended<ndt::tuple_type>()->is_variadic();
-  }
-
-  const ndt::type &get_kwd_struct() const { return m_kwd_struct; }
-
-  const nd::array &get_kwd_types() const
-  {
-    return m_kwd_struct.extended<ndt::struct_type>()->get_field_types();
-  }
-
-  const nd::array &get_kwd_names() const
-  {
-    return m_kwd_struct.extended<ndt::struct_type>()->get_field_names();
-  }
-
-  const ndt::type *get_pos_types_raw() const
-  {
-    return m_pos_tuple.extended<ndt::tuple_type>()->get_field_types_raw();
-  }
-
-  const ndt::type &get_pos_type(intptr_t i) const
-  {
-    if (i == -1) {
-      return get_return_type();
-    }
-
-    return m_pos_tuple.extended<ndt::tuple_type>()->get_field_type(i);
-  }
-
-  const ndt::type &get_kwd_type(intptr_t i) const
-  {
-    return m_kwd_struct.extended<ndt::struct_type>()->get_field_type(i);
-  }
-
-  std::string get_kwd_name(intptr_t i) const
-  {
-    return m_kwd_struct.extended<ndt::struct_type>()->get_field_name(i);
-  }
-
-  intptr_t get_kwd_index(const std::string &arg_name) const
-  {
-    return m_kwd_struct.extended<ndt::struct_type>()->get_field_index(arg_name);
-  }
-
-  void get_vars(std::unordered_set<std::string> &vars) const;
-
-  bool has_kwd(const std::string &name) const
-  {
-    return get_kwd_index(name) != -1;
-  }
-
-  const std::vector<intptr_t> &get_option_kwd_indices() const
-  {
-    return m_opt_kwd_indices;
-  }
-
-  /** Returns the number of arguments, both positional and keyword. */
-  intptr_t get_narg() const { return get_npos() + get_nkwd(); }
-
-  /** Returns the number of positional arguments. */
-  intptr_t get_npos() const
-  {
-    return m_pos_tuple.extended<ndt::tuple_type>()->get_field_count();
-  }
-
-  /** Returns the number of keyword arguments. */
-  intptr_t get_nkwd() const
-  {
-    return m_kwd_struct.extended<ndt::tuple_type>()->get_field_count();
-  }
-
-  /*
-    bool matches(intptr_t j, const ndt::type &actual_tp,
-                 std::map<nd::string, ndt::type> &typevars) const
-    {
-      ndt::type expected_tp = get_kwd_type(j);
-      if (expected_tp.get_type_id() == option_type_id) {
-        expected_tp = expected_tp.p("value_type").as<ndt::type>();
-      }
-      if (!actual_tp.value_type().matches(expected_tp, typevars)) {
-        std::stringstream ss;
-        ss << "keyword \"" << get_kwd_name(j) << "\" does not match, ";
-        ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp;
-        throw std::invalid_argument(ss.str());
-      }
-      return true;
-    }
-  */
-
-  /** Returns the number of optional arguments. */
-  intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
-
-  void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
-
-  void print_type(std::ostream &o) const;
-
-  void transform_child_types(type_transform_fn_t transform_fn,
-                             intptr_t arrmeta_offset, void *extra,
-                             ndt::type &out_transformed_tp,
-                             bool &out_was_transformed) const;
-  ndt::type get_canonical_type() const;
-
-  ndt::type apply_linear_index(intptr_t nindices, const irange *indices,
-                               size_t current_i, const ndt::type &root_tp,
-                               bool leading_dimension) const;
-  intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
-                              const char *arrmeta, const ndt::type &result_tp,
-                              char *out_arrmeta,
-                              memory_block_data *embedded_reference,
-                              size_t current_i, const ndt::type &root_tp,
-                              bool leading_dimension, char **inout_data,
-                              memory_block_data **inout_dataref) const;
-
-  bool is_lossless_assignment(const ndt::type &dst_tp,
-                              const ndt::type &src_tp) const;
-
-  bool operator==(const base_type &rhs) const;
-
-  void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
-  void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                              memory_block_data *embedded_reference) const;
-  void arrmeta_reset_buffers(char *arrmeta) const;
-  void arrmeta_finalize_buffers(char *arrmeta) const;
-  void arrmeta_destruct(char *arrmeta) const;
-
-  void data_destruct(const char *arrmeta, char *data) const;
-  void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
-                             size_t count) const;
-
-  intptr_t make_assignment_kernel(
-      const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-      intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-      const ndt::type &src_tp, const char *src_arrmeta,
-      kernel_request_t kernreq, const eval::eval_context *ectx,
-      const nd::array &kwds) const;
-
-  bool match(const char *arrmeta, const ndt::type &candidate_tp,
-             const char *candidate_arrmeta,
-             std::map<nd::string, ndt::type> &tp_vars) const;
-
-  void get_dynamic_type_properties(
-      const std::pair<std::string, gfunc::callable> **out_properties,
-      size_t *out_count) const;
-  void get_dynamic_array_functions(
-      const std::pair<std::string, gfunc::callable> **out_functions,
-      size_t *out_count) const;
-}; // class arrfunc_type
-
 namespace ndt {
+
+  class arrfunc_type : public base_type {
+    type m_return_type;
+    // Always a tuple type containing the types for positional args
+    type m_pos_tuple;
+    // Always a struct type containing the names and types for keyword args
+    type m_kwd_struct;
+
+    // Indices of the optional args
+    std::vector<intptr_t> m_opt_kwd_indices;
+
+  public:
+    arrfunc_type(const type &ret_type);
+
+    arrfunc_type(const type &pos_types, const type &ret_type);
+
+    arrfunc_type(const type &pos_types, const type &kwd_types,
+                 const type &ret_type);
+
+    virtual ~arrfunc_type() {}
+
+    const string_type_data &get_kwd_name_raw(intptr_t i) const
+    {
+      return m_kwd_struct.extended<struct_type>()->get_field_name_raw(i);
+    }
+
+    const type &get_return_type() const { return m_return_type; }
+
+    const type &get_pos_tuple() const { return m_pos_tuple; }
+
+    const nd::array &get_pos_types() const
+    {
+      return m_pos_tuple.extended<tuple_type>()->get_field_types();
+    }
+
+    bool is_pos_variadic() const
+    {
+      return m_pos_tuple.extended<tuple_type>()->is_variadic();
+    }
+
+    const type &get_kwd_struct() const { return m_kwd_struct; }
+
+    const nd::array &get_kwd_types() const
+    {
+      return m_kwd_struct.extended<struct_type>()->get_field_types();
+    }
+
+    const nd::array &get_kwd_names() const
+    {
+      return m_kwd_struct.extended<struct_type>()->get_field_names();
+    }
+
+    const type *get_pos_types_raw() const
+    {
+      return m_pos_tuple.extended<tuple_type>()->get_field_types_raw();
+    }
+
+    const type &get_pos_type(intptr_t i) const
+    {
+      if (i == -1) {
+        return get_return_type();
+      }
+
+      return m_pos_tuple.extended<tuple_type>()->get_field_type(i);
+    }
+
+    const type &get_kwd_type(intptr_t i) const
+    {
+      return m_kwd_struct.extended<struct_type>()->get_field_type(i);
+    }
+
+    std::string get_kwd_name(intptr_t i) const
+    {
+      return m_kwd_struct.extended<struct_type>()->get_field_name(i);
+    }
+
+    intptr_t get_kwd_index(const std::string &arg_name) const
+    {
+      return m_kwd_struct.extended<struct_type>()->get_field_index(arg_name);
+    }
+
+    void get_vars(std::unordered_set<std::string> &vars) const;
+
+    bool has_kwd(const std::string &name) const
+    {
+      return get_kwd_index(name) != -1;
+    }
+
+    const std::vector<intptr_t> &get_option_kwd_indices() const
+    {
+      return m_opt_kwd_indices;
+    }
+
+    /** Returns the number of arguments, both positional and keyword. */
+    intptr_t get_narg() const { return get_npos() + get_nkwd(); }
+
+    /** Returns the number of positional arguments. */
+    intptr_t get_npos() const
+    {
+      return m_pos_tuple.extended<tuple_type>()->get_field_count();
+    }
+
+    /** Returns the number of keyword arguments. */
+    intptr_t get_nkwd() const
+    {
+      return m_kwd_struct.extended<tuple_type>()->get_field_count();
+    }
+
+    /*
+      bool matches(intptr_t j, const type &actual_tp,
+                   std::map<nd::string, type> &typevars) const
+      {
+        type expected_tp = get_kwd_type(j);
+        if (expected_tp.get_type_id() == option_type_id) {
+          expected_tp = expected_tp.p("value_type").as<type>();
+        }
+        if (!actual_tp.value_type().matches(expected_tp, typevars)) {
+          std::stringstream ss;
+          ss << "keyword \"" << get_kwd_name(j) << "\" does not match, ";
+          ss << "arrfunc expected " << expected_tp << " but passed " <<
+      actual_tp;
+          throw std::invalid_argument(ss.str());
+        }
+        return true;
+      }
+    */
+
+    /** Returns the number of optional arguments. */
+    intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
+
+    void print_data(std::ostream &o, const char *arrmeta,
+                    const char *data) const;
+
+    void print_type(std::ostream &o) const;
+
+    void transform_child_types(type_transform_fn_t transform_fn,
+                               intptr_t arrmeta_offset, void *extra,
+                               type &out_transformed_tp,
+                               bool &out_was_transformed) const;
+    type get_canonical_type() const;
+
+    type apply_linear_index(intptr_t nindices, const irange *indices,
+                            size_t current_i, const type &root_tp,
+                            bool leading_dimension) const;
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
+                                const char *arrmeta, const type &result_tp,
+                                char *out_arrmeta,
+                                memory_block_data *embedded_reference,
+                                size_t current_i, const type &root_tp,
+                                bool leading_dimension, char **inout_data,
+                                memory_block_data **inout_dataref) const;
+
+    bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
+
+    bool operator==(const base_type &rhs) const;
+
+    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
+    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                memory_block_data *embedded_reference) const;
+    void arrmeta_reset_buffers(char *arrmeta) const;
+    void arrmeta_finalize_buffers(char *arrmeta) const;
+    void arrmeta_destruct(char *arrmeta) const;
+
+    void data_destruct(const char *arrmeta, char *data) const;
+    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
+                               size_t count) const;
+
+    intptr_t make_assignment_kernel(
+        const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+        intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+        const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *ectx, const nd::array &kwds) const;
+
+    bool match(const char *arrmeta, const type &candidate_tp,
+               const char *candidate_arrmeta,
+               std::map<nd::string, type> &tp_vars) const;
+
+    void get_dynamic_type_properties(
+        const std::pair<std::string, gfunc::callable> **out_properties,
+        size_t *out_count) const;
+    void get_dynamic_array_functions(
+        const std::pair<std::string, gfunc::callable> **out_functions,
+        size_t *out_count) const;
+  };
+
   template <kernel_request_t kernreq, typename funcproto_type>
   struct as_arrfunc_type;
 
   template <typename R>
   struct as_arrfunc_type<kernel_request_host, R()> {
-    static ndt::type make()
+    static type make()
     {
-      nd::array arg_tp = nd::empty(0, ndt::make_type());
+      nd::array arg_tp = nd::empty(0, make_type());
       arg_tp.flag_as_immutable();
-      return make_arrfunc(ndt::make_tuple(arg_tp), make_type<R>());
+      return make_arrfunc(make_tuple(arg_tp), make_type<R>());
     }
   };
 
@@ -456,7 +457,7 @@ namespace ndt {
     {
       type tp[sizeof...(A)] = {make_type<typename std::remove_cv<
           typename std::remove_reference<A>::type>::type>()...};
-      return make_arrfunc(ndt::make_tuple(tp), make_type<R>());
+      return make_arrfunc(make_tuple(tp), make_type<R>());
     }
 
     template <typename... T>
@@ -477,33 +478,33 @@ namespace ndt {
 
   template <typename R, typename... A>
   struct as_arrfunc_type<kernel_request_cuda_device, R(A...)> {
-    static ndt::type make()
+    static type make()
     {
-      ndt::type ret_tp = make_type<R>();
+      type ret_tp = make_type<R>();
       if (ret_tp.get_kind() != void_kind) {
         ret_tp = make_cuda_device(ret_tp);
       }
 
-      ndt::type arg_tp[sizeof...(A)] = {
+      type arg_tp[sizeof...(A)] = {
           make_cuda_device(make_type<typename std::remove_cv<
               typename std::remove_reference<A>::type>::type>())...};
-      return make_arrfunc(ndt::make_tuple(arg_tp), ret_tp);
+      return make_arrfunc(make_tuple(arg_tp), ret_tp);
     }
 
     template <typename... T>
-    static ndt::type make(T &&... names)
+    static type make(T &&... names)
     {
-      ndt::type ret_tp = make_type<R>();
+      type ret_tp = make_type<R>();
       if (ret_tp.get_kind() != void_kind) {
         ret_tp = make_cuda_device(ret_tp);
       }
 
-      ndt::type arg_tp[sizeof...(A)] = {
+      type arg_tp[sizeof...(A)] = {
           make_cuda_device(make_type<typename std::remove_cv<
               typename std::remove_reference<A>::type>::type>())...};
       return make_arrfunc(
-          ndt::make_tuple(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
-          ndt::make_struct(
+          make_tuple(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
+          make_struct(
               {names...},
               nd::array(arg_tp + (sizeof...(A) - sizeof...(T)), sizeof...(T))),
           ret_tp);
@@ -512,57 +513,51 @@ namespace ndt {
 
   template <typename R>
   struct as_arrfunc_type<kernel_request_cuda_device, R()> {
-    static ndt::type make()
+    static type make()
     {
-      nd::array arg_tp = nd::empty(0, ndt::make_type());
+      nd::array arg_tp = nd::empty(0, make_type());
       arg_tp.flag_as_immutable();
-      return make_arrfunc(ndt::make_tuple(arg_tp),
-                          make_cuda_device(make_type<R>()));
+      return make_arrfunc(make_tuple(arg_tp), make_cuda_device(make_type<R>()));
     }
   };
 
 #endif
 
   /** Makes an arrfunc type with both positional and keyword arguments */
-  inline ndt::type make_arrfunc(const ndt::type &pos_tuple,
-                                const ndt::type &kwd_struct,
-                                const ndt::type &return_type)
+  inline type make_arrfunc(const type &pos_tuple, const type &kwd_struct,
+                           const type &return_type)
   {
-    return ndt::type(new arrfunc_type(pos_tuple, kwd_struct, return_type),
-                     false);
+    return type(new arrfunc_type(pos_tuple, kwd_struct, return_type), false);
   }
 
   /** Makes an arrfunc type with both positional and keyword arguments */
-  inline ndt::type make_arrfunc(const nd::array &pos_types,
-                                const nd::array &kwd_names,
-                                const nd::array &kwd_types,
-                                const ndt::type &return_type)
+  inline type make_arrfunc(const nd::array &pos_types,
+                           const nd::array &kwd_names,
+                           const nd::array &kwd_types, const type &return_type)
   {
-    return ndt::type(new arrfunc_type(ndt::make_tuple(pos_types),
-                                      ndt::make_struct(kwd_names, kwd_types),
-                                      return_type),
-                     false);
+    return type(new arrfunc_type(make_tuple(pos_types),
+                                 make_struct(kwd_names, kwd_types),
+                                 return_type),
+                false);
   }
 
   /** Makes an arrfunc type with just positional arguments */
-  inline ndt::type make_arrfunc(const ndt::type &pos_tuple,
-                                const ndt::type &return_type)
+  inline type make_arrfunc(const type &pos_tuple, const type &return_type)
   {
-    return ndt::type(new arrfunc_type(pos_tuple, return_type), false);
+    return type(new arrfunc_type(pos_tuple, return_type), false);
   }
 
   /** Makes a funcproto type with the specified types */
-  inline ndt::type make_arrfunc(intptr_t narg, const ndt::type *arg_types,
-                                const ndt::type &return_type)
+  inline type make_arrfunc(intptr_t narg, const type *arg_types,
+                           const type &return_type)
   {
-    nd::array tmp = nd::empty(narg, ndt::make_type());
-    ndt::type *tmp_vals =
-        reinterpret_cast<ndt::type *>(tmp.get_readwrite_originptr());
+    nd::array tmp = nd::empty(narg, make_type());
+    type *tmp_vals = reinterpret_cast<type *>(tmp.get_readwrite_originptr());
     for (intptr_t i = 0; i != narg; ++i) {
       tmp_vals[i] = arg_types[i];
     }
     tmp.flag_as_immutable();
-    return make_arrfunc(ndt::make_tuple(tmp), return_type);
+    return make_arrfunc(make_tuple(tmp), return_type);
   }
 
   /** Makes a funcproto type from the C++ function type */
@@ -580,8 +575,7 @@ namespace ndt {
         std::forward<T>(names)...);
   }
 
-  ndt::type make_generic_funcproto(intptr_t nargs);
+  type make_generic_funcproto(intptr_t nargs);
 
-} // namespace ndt
-
+} // namespace dynd::ndt
 } // namespace dynd

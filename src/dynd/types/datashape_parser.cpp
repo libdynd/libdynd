@@ -314,8 +314,8 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   const char *saved_begin = begin;
   ndt::type proto_tp = parse_datashape(begin, end, symtable);
   if (proto_tp.is_null() || proto_tp.get_type_id() != arrfunc_type_id ||
-      proto_tp.extended<arrfunc_type>()->get_npos() != 1 ||
-      proto_tp.extended<arrfunc_type>()->get_nkwd() != 0) {
+      proto_tp.extended<ndt::arrfunc_type>()->get_npos() != 1 ||
+      proto_tp.extended<ndt::arrfunc_type>()->get_nkwd() != 0) {
     throw datashape_parse_error(saved_begin,
                                 "expected a unary function signature");
   }
@@ -333,8 +333,8 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(proto_tp.extended<arrfunc_type>()->get_pos_type(0),
-                         proto_tp.extended<arrfunc_type>()->get_return_type(),
+  return ndt::make_adapt(proto_tp.extended<ndt::arrfunc_type>()->get_pos_type(0),
+                         proto_tp.extended<ndt::arrfunc_type>()->get_return_type(),
                          adapt_op);
 }
 

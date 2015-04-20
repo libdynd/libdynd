@@ -135,7 +135,7 @@ namespace nd {
 
   template <typename fftw_dst_type, typename fftw_src_type, int sign = 0>
   struct fftw_ck : base_kernel<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
-                           kernel_request_host, 1> {
+                               kernel_request_host, 1> {
     typedef typename std::conditional<
         std::is_same<fftw_dst_type, fftw_complex>::value, complex<double>,
         typename std::conditional<
@@ -173,7 +173,7 @@ namespace nd {
 
     static void resolve_option_values(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
         intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
         nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -185,7 +185,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
         const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -254,7 +254,7 @@ namespace nd {
     static typename std::enable_if<real_to_complex, void>::type
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
         const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -281,7 +281,7 @@ namespace nd {
     static typename std::enable_if<!real_to_complex, void>::type
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
         const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -301,9 +301,10 @@ namespace nd {
     }
 
     static void
-    resolve_dst_type(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-                     const ndt::type *src_tp, const nd::array &kwds,
+    resolve_dst_type(const arrfunc_type_data *self,
+                     const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
+                     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                     const nd::array &kwds,
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       resolve_dst_type<std::is_same<fftw_src_type, double>::value>(

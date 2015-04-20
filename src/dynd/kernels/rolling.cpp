@@ -77,7 +77,7 @@ void nd::functional::var_rolling_ck::destruct_children()
 
 // TODO This should handle both strided and var cases
 intptr_t nd::functional::rolling_ck::instantiate(
-    const arrfunc_type_data *af_self, const arrfunc_type *DYND_UNUSED(af_tp),
+    const arrfunc_type_data *af_self, const ndt::arrfunc_type *DYND_UNUSED(af_tp),
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -90,7 +90,7 @@ intptr_t nd::functional::rolling_ck::instantiate(
   intptr_t root_ckb_offset = ckb_offset;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   const arrfunc_type_data *window_af = data->window_op.get();
-  const arrfunc_type *window_af_tp = data->window_op.get_type();
+  const ndt::arrfunc_type *window_af_tp = data->window_op.get_type();
   ndt::type dst_el_tp, src_el_tp;
   const char *dst_el_arrmeta, *src_el_arrmeta;
   if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dim_size,
@@ -150,7 +150,7 @@ intptr_t nd::functional::rolling_ck::instantiate(
 }
 
 void nd::functional::rolling_ck::resolve_dst_type(
-    const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
+    const arrfunc_type_data *af_self, const ndt::arrfunc_type *af_tp,
     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
     const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars)

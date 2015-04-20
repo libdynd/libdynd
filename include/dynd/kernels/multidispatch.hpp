@@ -96,20 +96,19 @@ namespace nd {
     }
 
     struct old_multidispatch_ck : base_virtual_kernel<old_multidispatch_ck> {
-      static intptr_t
-      instantiate(const arrfunc_type_data *af_self, const arrfunc_type *af_tp,
-                  char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars);
+      static intptr_t instantiate(
+          const arrfunc_type_data *af_self, const ndt::arrfunc_type *af_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+          const char *const *src_arrmeta, kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars);
 
       static void
       resolve_dst_type(const arrfunc_type_data *af_self,
-                       const arrfunc_type *af_tp, char *data, ndt::type &dst_tp,
-                       intptr_t nsrc, const ndt::type *src_tp,
-                       const nd::array &kwds,
+                       const ndt::arrfunc_type *af_tp, char *data,
+                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const nd::array &kwds,
                        const std::map<nd::string, ndt::type> &tp_vars);
     };
 
@@ -147,7 +146,7 @@ namespace nd {
       }
 
       static void resolve_option_values(
-          const arrfunc_type_data *self, const arrfunc_type *af_tp,
+          const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
           char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
           nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
       {
@@ -159,7 +158,7 @@ namespace nd {
       }
 
       static void resolve_dst_type(const arrfunc_type_data *self,
-                                   const arrfunc_type *af_tp,
+                                   const ndt::arrfunc_type *af_tp,
                                    char *DYND_UNUSED(data), ndt::type &dst_tp,
                                    intptr_t nsrc, const ndt::type *src_tp,
                                    const nd::array &kwds,
@@ -177,13 +176,13 @@ namespace nd {
       }
 
       static intptr_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const array &kwds,
-                  const std::map<string, ndt::type> &tp_vars)
+      instantiate(const arrfunc_type_data *self,
+                  const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const array &kwds, const std::map<string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child = find(self, tp_vars);
         return child->instantiate(child, self_tp, NULL, ckb, ckb_offset, dst_tp,
@@ -243,13 +242,13 @@ namespace nd {
       typedef detail::multidispatch_by_type_id_kernel_static_data<
           own_children, 1> static_data;
 
-      static void
-      resolve_dst_type(const arrfunc_type_data *self,
-                       const arrfunc_type *DYND_UNUSED(self_tp),
-                       char *DYND_UNUSED(data), ndt::type &dst_tp,
-                       intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                       const dynd::nd::array &DYND_UNUSED(kwds),
-                       const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      static void resolve_dst_type(
+          const arrfunc_type_data *self,
+          const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+          char *DYND_UNUSED(data), ndt::type &dst_tp,
+          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+          const dynd::nd::array &DYND_UNUSED(kwds),
+          const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         const std::shared_ptr<static_data> &data =
             *self->get_data_as<std::shared_ptr<static_data>>();
@@ -259,23 +258,23 @@ namespace nd {
           child = data->default_child;
         }
 
-/*
-        Uncomment this for the unary arithmetic operators
+        /*
+                Uncomment this for the unary arithmetic operators
 
-        child.get()->resolve_dst_type(child.get(), child.get_type(), NULL, dst_tp, nsrc, src_tp,
-                                      kwds, tp_vars);
-*/
-
-
+                child.get()->resolve_dst_type(child.get(), child.get_type(),
+           NULL, dst_tp, nsrc, src_tp,
+                                              kwds, tp_vars);
+        */
       }
 
       static intptr_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const dynd::nd::array &kwds,
+      instantiate(const arrfunc_type_data *self,
+                  const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const std::shared_ptr<static_data> &data =
@@ -287,13 +286,14 @@ namespace nd {
           child = data->default_child;
         }
 
-/*
-        Uncomment this for the unary arithmetic operators
+        /*
+                Uncomment this for the unary arithmetic operators
 
-        return child.get()->instantiate(
-            child.get(), child.get_type(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-*/
+                return child.get()->instantiate(
+                    child.get(), child.get_type(), NULL, ckb, ckb_offset,
+           dst_tp, dst_arrmeta, nsrc,
+                    src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        */
 
         return child.get()->instantiate(
             self, self_tp, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
@@ -305,12 +305,11 @@ namespace nd {
     struct multidispatch_by_type_id_kernel<own_children, 2>
         : base_virtual_kernel<
               multidispatch_by_type_id_kernel<own_children, 2>> {
-      static void
-      resolve_dst_type(const arrfunc_type_data *self,
-                       const arrfunc_type *self_tp, char *DYND_UNUSED(data),
-                       ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, const dynd::nd::array &kwds,
-                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static void resolve_dst_type(
+          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+          char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+          const ndt::type *src_tp, const dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc(*data)[builtin_type_id_count] =
             (*self->get_data_as<
@@ -324,12 +323,13 @@ namespace nd {
       }
 
       static intptr_t
-      instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
-                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const dynd::nd::array &kwds,
+      instantiate(const arrfunc_type_data *self,
+                  const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc(*data)[builtin_type_id_count] =

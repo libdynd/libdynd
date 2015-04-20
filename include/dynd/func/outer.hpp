@@ -14,7 +14,7 @@ namespace nd {
 
     arrfunc outer(const arrfunc &child);
 
-    ndt::type outer_make_type(const arrfunc_type *child_tp);
+    ndt::type outer_make_type(const ndt::arrfunc_type *child_tp);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

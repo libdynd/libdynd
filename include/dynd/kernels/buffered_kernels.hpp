@@ -16,7 +16,7 @@ namespace dynd {
  * don't match.
  */
 size_t make_buffered_ckernel(
-    const arrfunc_type_data *af, const arrfunc_type *af_tp,
+    const arrfunc_type_data *af, const ndt::arrfunc_type *af_tp,
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
     const ndt::type *src_tp_for_af, const char *const *src_arrmeta,

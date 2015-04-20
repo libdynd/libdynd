@@ -14,8 +14,8 @@ using namespace dynd;
 nd::arrfunc nd::functional::neighborhood(const nd::arrfunc &neighborhood_op,
                                          intptr_t nh_ndim)
 {
-  const arrfunc_type *funcproto_tp =
-      neighborhood_op.get_array_type().extended<arrfunc_type>();
+  const ndt::arrfunc_type *funcproto_tp =
+      neighborhood_op.get_array_type().extended<ndt::arrfunc_type>();
 
   nd::array arg_tp = nd::empty(3, ndt::make_type());
   arg_tp(0).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");

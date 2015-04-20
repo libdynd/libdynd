@@ -24,7 +24,7 @@ namespace {
 
 struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
   static intptr_t
-  instantiate(const arrfunc_type_data *self, const arrfunc_type *af_tp,
+  instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
               char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
               const ndt::type &dst_tp, const char *dst_arrmeta,
               intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -72,7 +72,7 @@ static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
 }
 
 static intptr_t instantiate_property_ckernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp,
+    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -88,11 +88,11 @@ static intptr_t instantiate_property_ckernel(
                                     dst_arrmeta, prop_src_tp, src_arrmeta[0],
                                     kernreq, ectx, kwds);
     } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
-      return make_assignment_kernel(
-          NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-          prop_src_tp.extended<ndt::base_expr_type>()->with_replaced_storage_type(
-              src_tp[0]),
-          src_arrmeta[0], kernreq, ectx, kwds);
+      return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp,
+                                    dst_arrmeta,
+                                    prop_src_tp.extended<ndt::base_expr_type>()
+                                        ->with_replaced_storage_type(src_tp[0]),
+                                    src_arrmeta[0], kernreq, ectx, kwds);
     }
   }
 
@@ -135,7 +135,7 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
   return af;
 }
 
-void nd::detail::validate_kwd_types(const arrfunc_type *af_tp,
+void nd::detail::validate_kwd_types(const ndt::arrfunc_type *af_tp,
                                     std::vector<ndt::type> &kwd_tp,
                                     const std::vector<intptr_t> &available,
                                     const std::vector<intptr_t> &missing,
@@ -188,7 +188,7 @@ void nd::detail::fill_missing_values(const ndt::type *tp, char *arrmeta,
   }
 }
 
-void nd::detail::check_narg(const arrfunc_type *af_tp, intptr_t npos)
+void nd::detail::check_narg(const ndt::arrfunc_type *af_tp, intptr_t npos)
 {
   if (!af_tp->is_pos_variadic() && npos != af_tp->get_npos()) {
     std::stringstream ss;
@@ -198,7 +198,7 @@ void nd::detail::check_narg(const arrfunc_type *af_tp, intptr_t npos)
   }
 }
 
-void nd::detail::check_arg(const arrfunc_type *af_tp, intptr_t i,
+void nd::detail::check_arg(const ndt::arrfunc_type *af_tp, intptr_t i,
                            const ndt::type &actual_tp,
                            const char *actual_arrmeta,
                            std::map<nd::string, ndt::type> &tp_vars)
@@ -213,7 +213,7 @@ void nd::detail::check_arg(const arrfunc_type *af_tp, intptr_t i,
   }
 }
 
-void nd::detail::check_nkwd(const arrfunc_type *af_tp,
+void nd::detail::check_nkwd(const ndt::arrfunc_type *af_tp,
                             const std::vector<intptr_t> &available,
                             const std::vector<intptr_t> &missing)
 {

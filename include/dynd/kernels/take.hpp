@@ -21,7 +21,7 @@ namespace nd {
     void destruct_children();
 
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                 char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -43,7 +43,7 @@ namespace nd {
     void destruct_children();
 
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                 char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -54,7 +54,7 @@ namespace nd {
 
   struct take_ck : base_virtual_kernel<take_ck> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                 char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -63,7 +63,7 @@ namespace nd {
                 const std::map<nd::string, ndt::type> &tp_vars);
 
     static void
-    resolve_dst_type(const arrfunc_type_data *self, const arrfunc_type *self_tp,
+    resolve_dst_type(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
                      char *data, ndt::type &dst_tp, intptr_t nsrc,
                      const ndt::type *src_tp, const nd::array &kwds,
                      const std::map<nd::string, ndt::type> &tp_vars);
