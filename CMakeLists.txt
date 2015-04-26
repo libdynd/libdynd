@@ -192,6 +192,7 @@ set(libdynd_SRC
     src/dynd/types/arrfunc_type.cpp
     src/dynd/types/groupby_type.cpp
     src/dynd/types/json_type.cpp
+    src/dynd/types/kind_sym_type.cpp
     src/dynd/types/ndarrayarg_type.cpp
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
@@ -217,6 +218,7 @@ set(libdynd_SRC
     src/dynd/types/void_pointer_type.cpp
     include/dynd/types/adapt_type.hpp
     include/dynd/types/any_sym_type.hpp
+    include/dynd/types/arrfunc_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
     include/dynd/types/base_memory_type.hpp
@@ -233,6 +235,7 @@ set(libdynd_SRC
     include/dynd/types/categorical_type.hpp
     include/dynd/types/categorical_kind_type.hpp
     include/dynd/types/char_type.hpp
+    include/dynd/types/complex.hpp
     include/dynd/types/convert_type.hpp
     include/dynd/types/cuda_host_type.hpp
     include/dynd/types/cuda_device_type.hpp
@@ -245,14 +248,11 @@ set(libdynd_SRC
     include/dynd/types/datetime_type.hpp
     include/dynd/types/datetime_util.hpp
     include/dynd/types/dim_fragment_type.hpp
-    include/dynd/types/ellipsis_dim_type.hpp
-    include/dynd/types/arrfunc_type.hpp
-    include/dynd/types/type_type.hpp
-    include/dynd/types/complex.hpp
     include/dynd/types/dynd_float16.hpp
     include/dynd/types/dynd_float128.hpp
     include/dynd/types/dynd_int128.hpp
     include/dynd/types/dynd_uint128.hpp
+    include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
@@ -260,13 +260,14 @@ set(libdynd_SRC
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_string_kind_type.hpp
     include/dynd/types/fixed_string_type.hpp
-    include/dynd/types/property_type.hpp
-    include/dynd/types/type_alignment.hpp
     include/dynd/types/groupby_type.hpp
     include/dynd/types/json_type.hpp
+    include/dynd/types/kind_sym_type.hpp
     include/dynd/types/ndarrayarg_type.hpp
     include/dynd/types/option_type.hpp
     include/dynd/types/pointer_type.hpp
+    include/dynd/types/pow_dimsym_type.hpp
+    include/dynd/types/property_type.hpp
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
     include/dynd/types/substitute_shape.hpp
@@ -275,10 +276,11 @@ set(libdynd_SRC
     include/dynd/types/time_type.hpp
     include/dynd/types/time_util.hpp
     include/dynd/types/tuple_type.hpp
+    include/dynd/types/type_alignment.hpp
     include/dynd/types/type_id.hpp
+    include/dynd/types/type_type.hpp
     include/dynd/types/typevar_constructed_type.hpp
     include/dynd/types/typevar_dim_type.hpp
-    include/dynd/types/pow_dimsym_type.hpp
     include/dynd/types/typevar_type.hpp
     include/dynd/types/unary_expr_type.hpp
     include/dynd/types/var_dim_type.hpp

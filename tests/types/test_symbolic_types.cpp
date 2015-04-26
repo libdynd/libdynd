@@ -17,6 +17,7 @@
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/any_sym_type.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/kind_sym_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -242,6 +243,33 @@ TEST(SymbolicTypes, AnySym)
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_variadic());
   EXPECT_EQ(tp, ndt::type(tp.str()));
+}
+
+TEST(SymbolicTypes, KindSym)
+{
+  ndt::type tp;
+
+  // Check type_kind_t enum vs the names
+  vector<pair<type_kind_t, const char *>> cases = {{bool_kind, "Bool"},
+                                                   {uint_kind, "UInt"},
+                                                   {int_kind, "SInt"},
+                                                   {real_kind, "Real"},
+                                                   {complex_kind, "Complex"}};
+  for (auto &p : cases) {
+    tp = ndt::make_kind_sym(p.first);
+    EXPECT_EQ(kind_sym_type_id, tp.get_type_id());
+    EXPECT_EQ(p.second, tp.str());
+    EXPECT_TRUE(tp.is_symbolic());
+    EXPECT_FALSE(tp.is_variadic());
+    EXPECT_EQ(tp, ndt::type(tp.str()));
+  }
+
+  EXPECT_TYPE_MATCH("Bool", "bool");
+  EXPECT_TYPE_MATCH("SInt", "int32");
+  EXPECT_TYPE_MATCH("UInt", "uint32");
+  EXPECT_TYPE_MATCH("Real", "float16");
+  EXPECT_TYPE_MATCH("Complex", "complex");
+  EXPECT_TYPE_MATCH("Complex", "complex[float32]");
 }
 
 TEST(SymbolicTypes, TypeTypeWithPattern)

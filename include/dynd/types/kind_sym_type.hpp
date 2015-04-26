@@ -16,11 +16,13 @@
 namespace dynd {
 namespace ndt {
 
-  class any_sym_type : public base_type {
-  public:
-    any_sym_type();
+  class kind_sym_type : public base_type {
+    type_kind_t m_kind;
 
-    virtual ~any_sym_type();
+  public:
+    kind_sym_type(type_kind_t kind);
+
+    virtual ~kind_sym_type();
 
     size_t get_default_data_size() const;
 
@@ -36,16 +38,6 @@ namespace ndt {
                                type &out_transformed_tp,
                                bool &out_was_transformed) const;
     type get_canonical_type() const;
-
-    type at_single(intptr_t i0, const char **inout_arrmeta,
-                        const char **inout_data) const;
-
-    type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
-                                    intptr_t total_ndim = 0) const;
-
-    intptr_t get_dim_size(const char *arrmeta, const char *data) const;
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                   const char *arrmeta, const char *data) const;
 
     bool is_lossless_assignment(const type &dst_tp,
                                 const type &src_tp) const;
@@ -83,9 +75,9 @@ namespace ndt {
         size_t *out_count) const;
   };
 
-  inline type make_any_sym()
+  inline type make_kind_sym(type_kind_t kind)
   {
-    return type(new any_sym_type(), false);
+    return type(new kind_sym_type(kind), false);
   }
 
 } // namespace dynd::ndt

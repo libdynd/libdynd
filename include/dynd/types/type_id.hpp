@@ -148,6 +148,8 @@ enum type_id_t {
   ndarrayarg_type_id,
 
   // Named symbolic types
+  // Types matching a single type_kind_t, like Bool, SInt, UInt, Real, etc.
+  kind_sym_type_id,
   // "Any", matching any type (dimensions and dtype)
   any_sym_type_id,
 
