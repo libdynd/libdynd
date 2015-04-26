@@ -165,6 +165,9 @@ namespace nd {
     /** Constructs an array from a 1D ndt::type initializer list */
     array(const std::initializer_list<ndt::type> &il);
 
+    /** Constructs an array from a 1D bool initializer list */
+    array(const std::initializer_list<bool> &il);
+
     /** Assigns an array from a 1D initializer list */
     template <class T>
     inline array operator=(const std::initializer_list<T> &il)
@@ -1581,6 +1584,19 @@ namespace nd {
     make_strided_array(ndt::make_type(), 1, &dim0, nd::default_access_flags,
                        NULL).swap(*this);
     auto data_ptr = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
+    for (intptr_t i = 0; i < dim0; ++i) {
+      data_ptr[i] = *(il.begin() + i);
+    }
+  }
+
+  inline dynd::nd::array::array(const std::initializer_list<bool> &il)
+      : m_memblock()
+  {
+    intptr_t dim0 = il.size();
+    make_strided_array(ndt::make_type<bool>(), 1, &dim0,
+                       nd::default_access_flags, NULL)
+        .swap(*this);
+    auto data_ptr = reinterpret_cast<dynd_bool *>(get_ndo()->m_data_pointer);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
     }

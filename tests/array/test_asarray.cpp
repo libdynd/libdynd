@@ -1,0 +1,45 @@
+//
+// Copyright (C) 2011-15 DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
+#include <iostream>
+#include <stdexcept>
+#include <algorithm>
+#include <cmath>
+
+#include "inc_gtest.hpp"
+
+#include <dynd/asarray.hpp>
+
+using namespace std;
+using namespace dynd;
+
+TEST(AsArray, PassThrough) {
+  // When the array type matches the requested pattern, nd::asarray passes the
+  // input through. These tests all compare the raw reference pointer of the
+  // nd::array to confirm this is the case.
+  nd::array a;
+
+  a = 100;
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("int32")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("SInt")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Int")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("... * Int")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Any")).get_ndo());
+
+  a = {3.15, 2.2, 7.7};
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("3 * float64")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("3 * Real")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Fixed * float64")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Fixed * Real")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("... * float64")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("... * Real")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Any")).get_ndo());
+
+  a = {true, false, false, true};
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("4 * bool")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("4 * Bool")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Fixed * bool")).get_ndo());
+  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Fixed * Bool")).get_ndo());
+}
