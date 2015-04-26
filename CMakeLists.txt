@@ -465,6 +465,7 @@ set(libdynd_SRC
     # Main
     src/dynd/array.cpp
     src/dynd/array_range.cpp
+    src/dynd/asarray.cpp
     src/dynd/config.cpp
     src/dynd/dim_iter.cpp
     src/dynd/type.cpp
@@ -486,6 +487,7 @@ set(libdynd_SRC
     include/dynd/array_range.hpp
     include/dynd/array_iter.hpp
     include/dynd/arrmeta_holder.hpp
+    include/dynd/asarray.hpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
     include/dynd/buffer_storage.hpp
