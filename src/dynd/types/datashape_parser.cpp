@@ -44,6 +44,7 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/types/any_sym_type.hpp>
 #include <dynd/types/kind_sym_type.hpp>
+#include <dynd/types/int_kind_sym_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
@@ -1206,6 +1207,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = ndt::make_fixed_string_kind();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Bool")) {
       result = ndt::make_kind_sym(bool_kind);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "Int")) {
+      result = ndt::make_int_kind_sym();
     } else if (parse::compare_range_to_literal(nbegin, nend, "UInt")) {
       result = ndt::make_kind_sym(uint_kind);
     } else if (parse::compare_range_to_literal(nbegin, nend, "SInt")) {

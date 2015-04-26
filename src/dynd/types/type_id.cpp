@@ -137,6 +137,10 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "option");
   case ndarrayarg_type_id:
     return (o << "ndarrayarg");
+  case kind_sym_type_id:
+    return (o << "kind_sym");
+  case int_sym_type_id:
+    return (o << "int_sym");
   case convert_type_id:
     return (o << "convert");
   case byteswap_type_id:

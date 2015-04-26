@@ -18,6 +18,7 @@
 #include <dynd/types/any_sym_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/kind_sym_type.hpp>
+#include <dynd/types/int_kind_sym_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -264,12 +265,27 @@ TEST(SymbolicTypes, KindSym)
     EXPECT_EQ(tp, ndt::type(tp.str()));
   }
 
+  // "Int" matches both signed and unsigned int types
+  tp = ndt::make_int_kind_sym();
+  EXPECT_EQ(int_sym_type_id, tp.get_type_id());
+  EXPECT_EQ("Int", tp.str());
+  EXPECT_TRUE(tp.is_symbolic());
+  EXPECT_FALSE(tp.is_variadic());
+  EXPECT_EQ(tp, ndt::type(tp.str()));
+
   EXPECT_TYPE_MATCH("Bool", "bool");
-  EXPECT_TYPE_MATCH("SInt", "int32");
+  EXPECT_TYPE_MATCH("Int", "int32");
+  EXPECT_TYPE_MATCH("Int", "uint64");
   EXPECT_TYPE_MATCH("UInt", "uint32");
+  EXPECT_TYPE_MATCH("SInt", "int32");
   EXPECT_TYPE_MATCH("Real", "float16");
   EXPECT_TYPE_MATCH("Complex", "complex");
   EXPECT_TYPE_MATCH("Complex", "complex[float32]");
+
+  EXPECT_FALSE(ndt::type("Bool").match(ndt::type("int8")));
+  EXPECT_FALSE(ndt::type("Bool").match(ndt::type("float32")));
+  EXPECT_FALSE(ndt::type("UInt").match(ndt::type("int32")));
+  EXPECT_FALSE(ndt::type("SInt").match(ndt::type("uint32")));
 }
 
 TEST(SymbolicTypes, TypeTypeWithPattern)
