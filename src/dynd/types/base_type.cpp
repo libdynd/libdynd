@@ -458,8 +458,8 @@ uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
     0};
 
 uint8_t ndt::detail::builtin_kinds[builtin_type_id_count] = {
-    void_kind, bool_kind,    int_kind,     int_kind,  int_kind,
-    int_kind,  int_kind,     uint_kind,    uint_kind, uint_kind,
+    void_kind, bool_kind,    sint_kind,     sint_kind,  sint_kind,
+    sint_kind,  sint_kind,     uint_kind,    uint_kind, uint_kind,
     uint_kind, uint_kind,    real_kind,    real_kind, real_kind,
     real_kind, complex_kind, complex_kind, void_kind};
 

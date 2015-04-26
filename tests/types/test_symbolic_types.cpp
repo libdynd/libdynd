@@ -252,7 +252,7 @@ TEST(SymbolicTypes, KindSym)
   // Check type_kind_t enum vs the names
   vector<pair<type_kind_t, const char *>> cases = {{bool_kind, "Bool"},
                                                    {uint_kind, "UInt"},
-                                                   {int_kind, "SInt"},
+                                                   {sint_kind, "SInt"},
                                                    {real_kind, "Real"},
                                                    {complex_kind, "Complex"}};
   for (auto &p : cases) {

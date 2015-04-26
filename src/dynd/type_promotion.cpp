@@ -20,7 +20,7 @@ static intptr_t min_strlen_for_builtin_kind(type_kind_t kind)
     switch (kind) {
         case bool_kind:
             return 1;
-        case int_kind:
+        case sint_kind:
         case uint_kind:
             return 24;
         case real_kind:
@@ -48,7 +48,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
                 switch (tp1_val.get_kind()) {
                     case bool_kind:
                         return ndt::make_type<int>();
-                    case int_kind:
+                    case sint_kind:
                     case uint_kind:
                         return (tp1_val.get_data_size() >= int_size) ? tp1_val
                                                                : ndt::make_type<int>();
@@ -62,12 +62,12 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
                     default:
                         return tp1_val;
                 }
-            case int_kind:
+            case sint_kind:
                 switch (tp1_val.get_kind()) {
                     case bool_kind:
                         return (tp0_val.get_data_size() >= int_size) ? tp0_val
                                                                : ndt::make_type<int>();
-                    case int_kind:
+                    case sint_kind:
                         if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
                             return ndt::make_type<int>();
                         } else {
@@ -101,7 +101,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
                     case bool_kind:
                         return (tp0_val.get_data_size() >= int_size) ? tp0_val
                                                                : ndt::make_type<int>();
-                    case int_kind:
+                    case sint_kind:
                         if (tp0_val.get_data_size() < int_size && tp1_val.get_data_size() < int_size) {
                             return ndt::make_type<int>();
                         } else {
@@ -134,7 +134,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
                 switch (tp1_val.get_kind()) {
                     // Integer type sizes don't affect float type sizes
                     case bool_kind:
-                    case int_kind:
+                    case sint_kind:
                     case uint_kind:
                         return tp0_val;
                     case real_kind:
@@ -156,7 +156,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
                 switch (tp1_val.get_kind()) {
                     // Integer and float type sizes don't affect complex type sizes
                     case bool_kind:
-                    case int_kind:
+                    case sint_kind:
                     case uint_kind:
                     case real_kind:
                         if (tp0_val.unchecked_get_builtin_type_id() == complex_float32_type_id &&

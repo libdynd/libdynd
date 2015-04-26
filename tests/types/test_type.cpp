@@ -52,7 +52,7 @@ TEST(Type, BasicConstructor) {
     // int8 type
     d = ndt::type(int8_type_id);
     EXPECT_EQ(int8_type_id, d.get_type_id());
-    EXPECT_EQ(int_kind, d.get_kind());
+    EXPECT_EQ(sint_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_data_alignment());
     EXPECT_EQ(1u, d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
@@ -61,7 +61,7 @@ TEST(Type, BasicConstructor) {
 
     // int16 type
     d = ndt::type(int16_type_id);
-    EXPECT_EQ(int_kind, d.get_kind());
+    EXPECT_EQ(sint_kind, d.get_kind());
     EXPECT_EQ(2u, d.get_data_alignment());
     EXPECT_EQ(2u, d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
@@ -71,7 +71,7 @@ TEST(Type, BasicConstructor) {
     // int32 type
     d = ndt::type(int32_type_id);
     EXPECT_EQ(int32_type_id, d.get_type_id());
-    EXPECT_EQ(int_kind, d.get_kind());
+    EXPECT_EQ(sint_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_alignment());
     EXPECT_EQ(4u, d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
@@ -81,7 +81,7 @@ TEST(Type, BasicConstructor) {
     // int
     d = ndt::make_type<int>();
     EXPECT_EQ(int32_type_id, d.get_type_id());
-    EXPECT_EQ(int_kind, d.get_kind());
+    EXPECT_EQ(sint_kind, d.get_kind());
     EXPECT_EQ(sizeof(int), d.get_data_alignment());
     EXPECT_EQ(sizeof(int), d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
@@ -90,7 +90,7 @@ TEST(Type, BasicConstructor) {
 
     // long
     d = ndt::make_type<long>();
-    EXPECT_EQ(int_kind, d.get_kind());
+    EXPECT_EQ(sint_kind, d.get_kind());
     EXPECT_EQ(sizeof(long), d.get_data_alignment());
     EXPECT_EQ(sizeof(long), d.get_data_size());
     EXPECT_TRUE(d.is_builtin());
@@ -100,7 +100,7 @@ TEST(Type, BasicConstructor) {
     // long long
     d = ndt::make_type<long long>();
     EXPECT_EQ(int64_type_id, d.get_type_id());
-    EXPECT_EQ(int_kind, d.get_kind());
+    EXPECT_EQ(sint_kind, d.get_kind());
     EXPECT_EQ((size_t)scalar_align_of<long long>::value, d.get_data_alignment());
     EXPECT_EQ(sizeof(long long), d.get_data_size());
     EXPECT_TRUE(d.is_builtin());

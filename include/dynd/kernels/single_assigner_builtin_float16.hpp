@@ -107,7 +107,7 @@ struct single_assigner_builtin_base<dynd_float16, src_type, real_kind, src_kind,
 };
 
 DYND_MAKE_WITH_KIND(bool_kind);
-DYND_MAKE_WITH_KIND(int_kind);
+DYND_MAKE_WITH_KIND(sint_kind);
 DYND_MAKE_WITH_KIND(uint_kind);
 DYND_MAKE_WITH_KIND(real_kind);
 DYND_MAKE_WITH_KIND(complex_kind);
@@ -150,7 +150,7 @@ struct single_assigner_builtin_base<dst_type, dynd_float16, dst_kind, real_kind,
 };
 
 DYND_MAKE_WITH_KIND(bool_kind);
-DYND_MAKE_WITH_KIND(int_kind);
+DYND_MAKE_WITH_KIND(sint_kind);
 DYND_MAKE_WITH_KIND(uint_kind);
 DYND_MAKE_WITH_KIND(real_kind);
 DYND_MAKE_WITH_KIND(complex_kind);

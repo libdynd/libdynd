@@ -44,11 +44,8 @@ void ndt::kind_sym_type::print_data(std::ostream &DYND_UNUSED(o),
   throw type_error("Cannot store data of symbolic kind_sym type");
 }
 
-static const char *kind_strings[] = {
-    "Bool",  "UInt",     "SInt", "Real", "Complex", "Void",  "Char",   "String",
-    "Bytes", "Datetime", "Type", "Dim",  "Struct",  "Tuple", "Dynamic"};
 void ndt::kind_sym_type::print_type(std::ostream &o) const {
-  o << kind_strings[m_kind];
+  o << m_kind;
 }
 
 bool ndt::kind_sym_type::is_expression() const { return false; }

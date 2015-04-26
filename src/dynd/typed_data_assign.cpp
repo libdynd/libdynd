@@ -62,7 +62,7 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_
             case bool_kind:
                 switch (dst_tp.get_kind()) {
                     case bool_kind:
-                    case int_kind:
+                    case sint_kind:
                     case uint_kind:
                     case real_kind:
                     case complex_kind:
@@ -73,11 +73,11 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_
                         break;
                 }
                 break;
-            case int_kind:
+            case sint_kind:
                 switch (dst_tp.get_kind()) {
                     case bool_kind:
                         return false;
-                    case int_kind:
+                    case sint_kind:
                         return dst_tp.get_data_size() >= src_tp.get_data_size();
                     case uint_kind:
                         return false;
@@ -95,7 +95,7 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_
                 switch (dst_tp.get_kind()) {
                     case bool_kind:
                         return false;
-                    case int_kind:
+                    case sint_kind:
                         return dst_tp.get_data_size() > src_tp.get_data_size();
                     case uint_kind:
                         return dst_tp.get_data_size() >= src_tp.get_data_size();
@@ -112,7 +112,7 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_
             case real_kind:
                 switch (dst_tp.get_kind()) {
                     case bool_kind:
-                    case int_kind:
+                    case sint_kind:
                     case uint_kind:
                         return false;
                     case real_kind:
@@ -127,7 +127,7 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_
             case complex_kind:
                 switch (dst_tp.get_kind()) {
                     case bool_kind:
-                    case int_kind:
+                    case sint_kind:
                     case uint_kind:
                     case real_kind:
                         return false;
@@ -141,7 +141,7 @@ bool dynd::is_lossless_assignment(const ndt::type& dst_tp, const ndt::type& src_
             case string_kind:
                 switch (dst_tp.get_kind()) {
                     case bool_kind:
-                    case int_kind:
+                    case sint_kind:
                     case uint_kind:
                     case real_kind:
                     case complex_kind:

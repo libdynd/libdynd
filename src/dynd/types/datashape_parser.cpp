@@ -1209,7 +1209,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     } else if (parse::compare_range_to_literal(nbegin, nend, "UInt")) {
       result = ndt::make_kind_sym(uint_kind);
     } else if (parse::compare_range_to_literal(nbegin, nend, "SInt")) {
-      result = ndt::make_kind_sym(int_kind);
+      result = ndt::make_kind_sym(sint_kind);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Real")) {
       result = ndt::make_kind_sym(real_kind);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Complex")) {
