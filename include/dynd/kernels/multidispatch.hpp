@@ -77,12 +77,12 @@ namespace nd {
       }
 
       if (src.get_kind() == uint_kind &&
-          (dst.get_kind() == uint_kind || dst.get_kind() == int_kind ||
+          (dst.get_kind() == uint_kind || dst.get_kind() == sint_kind ||
            dst.get_kind() == real_kind)) {
         return src.get_data_size() < dst.get_data_size();
       }
-      if (src.get_kind() == int_kind &&
-          (dst.get_kind() == int_kind || dst.get_kind() == real_kind)) {
+      if (src.get_kind() == sint_kind &&
+          (dst.get_kind() == sint_kind || dst.get_kind() == real_kind)) {
         return src.get_data_size() < dst.get_data_size();
       }
       if (src.get_kind() == real_kind) {

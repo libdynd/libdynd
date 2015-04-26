@@ -81,7 +81,7 @@ inline nd::array linspace(double start, double stop, intptr_t count = 50) {
 }
 
 template <class T>
-typename std::enable_if<dynd_kind_of<T>::value == int_kind ||
+typename std::enable_if<dynd_kind_of<T>::value == sint_kind ||
                 dynd_kind_of<T>::value == uint_kind, nd::array>::type linspace(
                                                     T start, T stop, intptr_t count = 50) {
     return linspace((double)start, (double)stop, count);

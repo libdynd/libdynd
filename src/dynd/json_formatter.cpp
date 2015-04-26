@@ -342,7 +342,7 @@ static void format_json(output_data& out, const ndt::type& dt, const char *arrme
   case bool_kind:
     format_json_bool(out, dt, arrmeta, data);
     break;
-  case int_kind:
+  case sint_kind:
   case uint_kind:
   case real_kind:
   case complex_kind:

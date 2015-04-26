@@ -43,6 +43,8 @@
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/types/any_sym_type.hpp>
+#include <dynd/types/kind_sym_type.hpp>
+#include <dynd/types/int_kind_sym_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
 
 using namespace std;
@@ -1203,6 +1205,18 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = ndt::make_fixed_bytes_kind();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedString")) {
       result = ndt::make_fixed_string_kind();
+    } else if (parse::compare_range_to_literal(nbegin, nend, "Bool")) {
+      result = ndt::make_kind_sym(bool_kind);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "Int")) {
+      result = ndt::make_int_kind_sym();
+    } else if (parse::compare_range_to_literal(nbegin, nend, "UInt")) {
+      result = ndt::make_kind_sym(uint_kind);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "SInt")) {
+      result = ndt::make_kind_sym(sint_kind);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "Real")) {
+      result = ndt::make_kind_sym(real_kind);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "Complex")) {
+      result = ndt::make_kind_sym(complex_kind);
     } else if (isupper(*nbegin)) {
       if (!parse_token_ds(begin, end, '[')) {
         result = ndt::make_typevar(nd::string(nbegin, nend));

@@ -12,47 +12,47 @@ std::ostream &dynd::operator<<(std::ostream &o, type_kind_t kind)
 {
   switch (kind) {
   case bool_kind:
-    return (o << "bool");
-  case int_kind:
-    return (o << "int");
+    return (o << "Bool");
+  case sint_kind:
+    return (o << "SInt");
   case uint_kind:
-    return (o << "uint");
+    return (o << "UInt");
   case real_kind:
-    return (o << "real");
+    return (o << "Real");
   case complex_kind:
-    return (o << "complex");
+    return (o << "Complex");
   case string_kind:
-    return (o << "string");
+    return (o << "String");
   case bytes_kind:
-    return (o << "bytes");
+    return (o << "Bytes");
   case void_kind:
-    return (o << "void");
+    return (o << "Void");
   case datetime_kind:
-    return (o << "datetime");
+    return (o << "Datetime");
   case type_kind:
-    return (o << "type");
+    return (o << "Type");
   case dim_kind:
-    return (o << "dim");
+    return (o << "Dim");
   case struct_kind:
-    return (o << "struct");
+    return (o << "Struct");
   case tuple_kind:
-    return (o << "tuple");
+    return (o << "Tuple");
   case dynamic_kind:
-    return (o << "dynamic");
+    return (o << "Dynamic");
   case expr_kind:
-    return (o << "expr");
+    return (o << "Expr");
   case option_kind:
-    return (o << "option");
+    return (o << "Option");
   case memory_kind:
-    return (o << "memory");
+    return (o << "Memory");
   case function_kind:
-    return (o << "function");
+    return (o << "Function");
   case kind_kind:
-    return (o << "kind");
+    return (o << "Kind");
   case pattern_kind:
-    return (o << "pattern");
+    return (o << "Pattern");
   case custom_kind:
-    return (o << "custom");
+    return (o << "Custom");
   default:
     return (o << "(unknown kind " << (int)kind << ")");
   }
@@ -137,6 +137,10 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "option");
   case ndarrayarg_type_id:
     return (o << "ndarrayarg");
+  case kind_sym_type_id:
+    return (o << "kind_sym");
+  case int_sym_type_id:
+    return (o << "int_sym");
   case convert_type_id:
     return (o << "convert");
   case byteswap_type_id:

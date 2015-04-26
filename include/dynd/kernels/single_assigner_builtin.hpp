@@ -66,7 +66,7 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind, assi
 
 // Complex floating point -> non-complex with no error checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, complex<src_real_type>, int_kind, complex_kind, assign_error_nocheck>
+struct single_assigner_builtin_base<dst_type, complex<src_real_type>, sint_kind, complex_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(dst_type *dst, const complex<src_real_type> *src) {
         DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(src->real()), dst_type, *src, complex<src_real_type>);
@@ -169,7 +169,7 @@ struct single_assigner_builtin_base<dynd_bool, dynd_bool, bool_kind, bool_kind, 
 // Signed int -> signed int with overflow checking just when sizeof(dst) < sizeof(src)
 template<class dst_type, class src_type, bool dst_lt>
 struct single_assigner_builtin_signed_to_signed_overflow_base
-    : public single_assigner_builtin_base<dst_type, src_type, int_kind, int_kind, assign_error_nocheck> {};
+    : public single_assigner_builtin_base<dst_type, src_type, sint_kind, sint_kind, assign_error_nocheck> {};
 
 // Signed int -> signed int with overflow checking
 template<class dst_type, class src_type>
@@ -191,21 +191,21 @@ struct single_assigner_builtin_signed_to_signed_overflow_base<dst_type, src_type
 
 // Signed int -> signed int with overflow checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, int_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, sint_kind, assign_error_overflow>
     : public single_assigner_builtin_signed_to_signed_overflow_base<dst_type, src_type, sizeof(dst_type) < sizeof(src_type)> {};
 
 // Signed int -> signed int with other error checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, int_kind, assign_error_fractional>
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, sint_kind, assign_error_fractional>
     : public single_assigner_builtin_signed_to_signed_overflow_base<dst_type, src_type, sizeof(dst_type) < sizeof(src_type)> {};
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, int_kind, assign_error_inexact>
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, sint_kind, assign_error_inexact>
     : public single_assigner_builtin_signed_to_signed_overflow_base<dst_type, src_type, sizeof(dst_type) < sizeof(src_type)> {};
 
 // Unsigned int -> signed int with overflow checking just when sizeof(dst) <= sizeof(src)
 template<class dst_type, class src_type, bool dst_le>
 struct single_assigner_builtin_unsigned_to_signed_overflow_base
-    : public single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, assign_error_nocheck> {};
+    : public single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind, assign_error_nocheck> {};
 template<class dst_type, class src_type>
 struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_type, true>
 {
@@ -224,17 +224,17 @@ struct single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type, src_ty
     }
 };
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind, assign_error_overflow>
     : public single_assigner_builtin_unsigned_to_signed_overflow_base<dst_type,
                                                     src_type, sizeof(dst_type) <= sizeof(src_type)> {};
 
 // Unsigned int -> signed int with other error checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind, assign_error_overflow> {};
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, src_type, int_kind, uint_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind, assign_error_overflow> {};
 
 // Signed int -> unsigned int with positive overflow checking just when sizeof(dst) < sizeof(src)
 template<class dst_type, class src_type, bool dst_lt>
@@ -272,17 +272,17 @@ struct single_assigner_builtin_signed_to_unsigned_overflow_base<dst_type, src_ty
     }
 };
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, int_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, src_type, uint_kind, sint_kind, assign_error_overflow>
     : public single_assigner_builtin_signed_to_unsigned_overflow_base<dst_type,
                                                     src_type, sizeof(dst_type) < sizeof(src_type)> {};
 
 // Signed int -> unsigned int with other error checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, int_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, uint_kind, int_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<dst_type, src_type, uint_kind, sint_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dst_type, src_type, uint_kind, sint_kind, assign_error_overflow> {};
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, int_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, src_type, uint_kind, int_kind, assign_error_overflow> {};
+struct single_assigner_builtin_base<dst_type, src_type, uint_kind, sint_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, src_type, uint_kind, sint_kind, assign_error_overflow> {};
 
 // Unsigned int -> unsigned int with overflow checking just when sizeof(dst) < sizeof(src)
 template<class dst_type, class src_type, bool dst_lt>
@@ -322,7 +322,7 @@ struct single_assigner_builtin_base<dst_type, src_type, uint_kind, uint_kind, as
 
 // Signed int -> floating point with inexact checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_inexact>
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, sint_kind, assign_error_inexact>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -342,15 +342,15 @@ struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, ass
 
 // Signed int -> floating point with other checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_nocheck> {};
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, sint_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, sint_kind, assign_error_nocheck> {};
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, real_kind, int_kind, assign_error_nocheck> {};
+struct single_assigner_builtin_base<dst_type, src_type, real_kind, sint_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<dst_type, src_type, real_kind, sint_kind, assign_error_nocheck> {};
 
 // Signed int -> complex floating point with no checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_nocheck>
+struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, sint_kind, assign_error_nocheck>
 {
     DYND_CUDA_HOST_DEVICE static void assign(complex<dst_real_type> *dst, const src_type *src) {
         DYND_TRACE_ASSIGNMENT(d, complex<dst_real_type>, *src, src_type);
@@ -361,7 +361,7 @@ struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_ki
 
 // Signed int -> complex floating point with inexact checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_inexact>
+struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, sint_kind, assign_error_inexact>
 {
     static void assign(complex<dst_real_type> *dst, const src_type *src) {
         src_type s = *src;
@@ -381,11 +381,11 @@ struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_ki
 
 // Signed int -> complex floating point with other checking
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_overflow>
-    : public single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_nocheck> {};
+struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, sint_kind, assign_error_overflow>
+    : public single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, sint_kind, assign_error_nocheck> {};
 template<class dst_real_type, class src_type>
-struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_fractional>
-    : public single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, int_kind, assign_error_nocheck> {};
+struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, sint_kind, assign_error_fractional>
+    : public single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_kind, sint_kind, assign_error_nocheck> {};
 
 // Unsigned int -> floating point with inexact checking
 template<class dst_type, class src_type>
@@ -456,7 +456,7 @@ struct single_assigner_builtin_base<complex<dst_real_type>, src_type, complex_ki
 
 // Floating point -> signed int with overflow checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, real_kind, assign_error_overflow>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -475,7 +475,7 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
 
 // Floating point -> signed int with fractional checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_fractional>
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, real_kind, assign_error_fractional>
 {
     static void assign(dst_type *dst, const src_type *src) {
         src_type s = *src;
@@ -501,12 +501,12 @@ struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, ass
 
 // Floating point -> signed int with other checking
 template<class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, src_type, int_kind, real_kind, assign_error_fractional> {};
+struct single_assigner_builtin_base<dst_type, src_type, sint_kind, real_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, src_type, sint_kind, real_kind, assign_error_fractional> {};
 
 // Complex floating point -> signed int with overflow checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, complex<src_real_type>, int_kind, complex_kind, assign_error_overflow>
+struct single_assigner_builtin_base<dst_type, complex<src_real_type>, sint_kind, complex_kind, assign_error_overflow>
 {
     static void assign(dst_type *dst, const complex<src_real_type> *src) {
         complex<src_real_type> s = *src;
@@ -532,7 +532,7 @@ struct single_assigner_builtin_base<dst_type, complex<src_real_type>, int_kind, 
 
 // Complex floating point -> signed int with fractional checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, complex<src_real_type>, int_kind, complex_kind, assign_error_fractional>
+struct single_assigner_builtin_base<dst_type, complex<src_real_type>, sint_kind, complex_kind, assign_error_fractional>
 {
     static void assign(dst_type *dst, const complex<src_real_type> *src) {
         complex<src_real_type> s = *src;
@@ -565,8 +565,8 @@ struct single_assigner_builtin_base<dst_type, complex<src_real_type>, int_kind, 
 
 // Complex floating point -> signed int with other checking
 template<class dst_type, class src_real_type>
-struct single_assigner_builtin_base<dst_type, complex<src_real_type>, int_kind, complex_kind, assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, complex<src_real_type>, int_kind, complex_kind, assign_error_fractional> {};
+struct single_assigner_builtin_base<dst_type, complex<src_real_type>, sint_kind, complex_kind, assign_error_inexact>
+    : public single_assigner_builtin_base<dst_type, complex<src_real_type>, sint_kind, complex_kind, assign_error_fractional> {};
 
 // Floating point -> unsigned int with overflow checking
 template<class dst_type, class src_type>

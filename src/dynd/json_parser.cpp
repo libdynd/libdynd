@@ -748,7 +748,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta,
         }
         return;
       }
-      else if (value_tp.get_kind() == int_kind ||
+      else if (value_tp.get_kind() == sint_kind ||
                value_tp.get_kind() == uint_kind ||
                value_tp.get_kind() == real_kind ||
                value_tp.get_kind() == complex_kind) {
@@ -790,7 +790,7 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
   case bool_kind:
     parse_bool_json(tp, arrmeta, out_data, begin, end, false, ectx);
     return;
-  case int_kind:
+  case sint_kind:
   case uint_kind:
   case real_kind:
   case complex_kind:

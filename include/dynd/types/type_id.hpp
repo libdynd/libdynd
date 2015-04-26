@@ -20,7 +20,7 @@ namespace dynd {
 enum type_kind_t {
   bool_kind,
   uint_kind,
-  int_kind,
+  sint_kind,
   real_kind,
   complex_kind,
   void_kind,
@@ -148,6 +148,10 @@ enum type_id_t {
   ndarrayarg_type_id,
 
   // Named symbolic types
+  // Types matching a single type_kind_t, like Bool, UInt, SInt, Real, etc.
+  kind_sym_type_id,
+  // "Int", matching both UInt and SInt
+  int_sym_type_id,
   // "Any", matching any type (dimensions and dtype)
   any_sym_type_id,
 
@@ -511,31 +515,31 @@ struct dynd_kind_of<dynd_bool> {
 };
 template <>
 struct dynd_kind_of<char> {
-  static const type_kind_t value = ((char)-1) < 0 ? int_kind : uint_kind;
+  static const type_kind_t value = ((char)-1) < 0 ? sint_kind : uint_kind;
 };
 template <>
 struct dynd_kind_of<signed char> {
-  static const type_kind_t value = int_kind;
+  static const type_kind_t value = sint_kind;
 };
 template <>
 struct dynd_kind_of<short> {
-  static const type_kind_t value = int_kind;
+  static const type_kind_t value = sint_kind;
 };
 template <>
 struct dynd_kind_of<int> {
-  static const type_kind_t value = int_kind;
+  static const type_kind_t value = sint_kind;
 };
 template <>
 struct dynd_kind_of<long> {
-  static const type_kind_t value = int_kind;
+  static const type_kind_t value = sint_kind;
 };
 template <>
 struct dynd_kind_of<long long> {
-  static const type_kind_t value = int_kind;
+  static const type_kind_t value = sint_kind;
 };
 template <>
 struct dynd_kind_of<dynd_int128> {
-  static const type_kind_t value = int_kind;
+  static const type_kind_t value = sint_kind;
 };
 template <>
 struct dynd_kind_of<uint8_t> {
