@@ -517,6 +517,7 @@ set(libdynd_SRC
     include/dynd/string.hpp
     include/dynd/string_encodings.hpp
     include/dynd/view.hpp
+    include/dynd/with.hpp
     )
 
 include_directories(

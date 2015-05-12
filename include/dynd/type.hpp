@@ -94,6 +94,7 @@ namespace ndt {
 
   type make_var_dim(const type &element_tp);
   type make_fixed_dim(size_t dim_size, const type &element_tp);
+  type make_fixed_dim_kind(const type &element_tp);
   ndt::type make_c_contiguous(const ndt::type &child_tp);
 
   /**
@@ -916,6 +917,7 @@ namespace ndt {
       static type make() { return type(bool_type_id); }
     };
 
+    // Produces type "Fixed ** <N> * <T>"
     template <typename T, int N>
     struct type_from<nd::strided_vals<T, N>> {
       static type make()
@@ -924,13 +926,20 @@ namespace ndt {
       }
     };
 
-/*
+    // Produces type "Fixed * <T>"
+    template <typename T>
+    struct type_from<T[]> {
+      static type make()
+      {
+        return ndt::make_fixed_dim_kind(type_from<T>::make());
+      }
+    };
+
+    // Produces type "<N> * <T>"
     template <typename T, int N>
     struct type_from<T[N]> {
-      static type make() { return make_cfixed_dim(N, type_from<T>::make()); }
+      static type make() { return make_fixed_dim(N, type_from<T>::make()); }
     };
-*/
-
   } // namespace detail
 
   /**
@@ -945,6 +954,10 @@ namespace ndt {
     return detail::type_from<T>::make();
   }
 
+  /**
+   * Convenience function which makes an ndt::type object whose memory layout
+   * matches that of C++.
+   */
   template <class T>
   type make_exact_type()
   {
