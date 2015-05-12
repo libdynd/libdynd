@@ -97,6 +97,7 @@ set(tests_SRC
     array/test_json_parser.cpp
     array/test_memmap.cpp
     array/test_view.cpp
+    array/test_with.cpp
     vm/test_elwise_program.cpp
     test_shape_tools.cpp
     test_platform.cpp
