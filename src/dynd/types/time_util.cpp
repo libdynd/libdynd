@@ -90,7 +90,7 @@ time_hmst time_hmst::get_current_local_time()
 {
     // TODO: Could use C++11 chrono library
     struct tm tm_;
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     __time64_t rawtime;
     _time64(&rawtime);
     if (_localtime64_s(&tm_, &rawtime) != 0) {

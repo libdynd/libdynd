@@ -137,8 +137,6 @@ void dynd::resize_executable_memory(memory_block_data *self, intptr_t size_bytes
         emb->m_memory_current = end;
         *inout_end = end;
     } else {
-        // If it doesn't fit, need to copy to a new memory chunk (note: assuming position independent code)
-        char *old_begin = emb->m_memory_begin, *old_current = *inout_begin;
         // Allocate another chunk of memory
         emb->append_memory();
         memcpy(emb->m_memory_begin, *inout_begin, *inout_end - *inout_begin);

@@ -223,7 +223,7 @@ int date_ymd::resolve_2digit_year(int year, int century_window)
 date_ymd date_ymd::get_current_local_date()
 {
     struct tm tm_;
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     __time64_t rawtime;
     _time64(&rawtime);
     if (_localtime64_s(&tm_, &rawtime) != 0) {

@@ -337,7 +337,7 @@ TEST(TypeAssign, FixedSizeTests_Float64) {
     tmp_ectx.errmode = assign_error_nocheck;
     typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt,
                       NULL, s_ptr, &tmp_ectx);
-#ifdef _WIN32
+#ifdef _MSC_VER
     EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
 #else
     EXPECT_TRUE(std::isinf(v_f32));
@@ -819,7 +819,7 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
     typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32,
                       ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64,
                       &tmp_ectx);
-#ifdef _WIN32
+#ifdef _MSC_VER
     EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
 #else
     EXPECT_TRUE(std::isinf(v_f32));
