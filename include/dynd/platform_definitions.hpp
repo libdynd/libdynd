@@ -29,11 +29,11 @@
 
 // Architecture
 #if defined(DYND_OS_WINDOWS)
-#   if defined(_M_X64)
+#   if defined(_M_X64) || defined(__x86_64__)
 #       define DYND_ISA_X64
-#   elif defined(_M_IX86)
+#   elif defined(_M_IX86) || defined(__i386__)
 #       define DYND_ISA_X86
-#   elif
+#   else
 #       error Unsupported ISA in windows
 #   endif
 #elif defined(DYND_OS_DARWIN) || defined (DYND_OS_LINUX)

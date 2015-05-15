@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.6)
 project(test_libdynd)
 
 # Disable optimizations so the tests build quicker
-if(WIN32)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # _VARIADIC_MAX=10 is for VS2012
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_VARIADIC_MAX=10 /Od")
 else()

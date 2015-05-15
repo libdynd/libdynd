@@ -21,7 +21,7 @@
 namespace dynd {
     typedef std::atomic<int32_t> atomic_refcount;
 } // namespace dynd
-#elif defined(_WIN32)
+#elif defined(_MSC_VER)
 
 #if defined( __CLRCALL_PURE_OR_CDECL )
 extern "C" long __CLRCALL_PURE_OR_CDECL _InterlockedIncrement( long volatile * );

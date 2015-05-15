@@ -29,7 +29,7 @@ typedef time_t os_time_t;
  */
 void get_localtime(os_time_t *ts, struct tm *tms)
 {
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     if (_localtime64_s(tms, ts) != 0) {
         throw std::runtime_error("Failed to use '_localtime64_s' to convert "
                                 "to a local time");
