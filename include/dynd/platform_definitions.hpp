@@ -23,7 +23,12 @@
 // platform is mac os x (darwin)
 #   define DYND_OS_DARWIN
 #else
-#   error Unknown platform
+#   include <sys/param.h>
+#   if defined(BSD)
+#       define DYND_OS_BSD
+#   else
+#       error Unknown platform
+#   endif
 #endif
 
 
@@ -36,13 +41,13 @@
 #   else
 #       error Unsupported ISA in windows
 #   endif
-#elif defined(DYND_OS_DARWIN) || defined (DYND_OS_LINUX)
+#else
 #   if defined(__x86_64__)
 #       define DYND_ISA_X64
 #   elif defined(__i386__)
 #       define DYND_ISA_X86
 #   else
-#       error Unsupported ISA in darwin/linux
+#       error Unsupported ISA configuration
 #   endif
 #endif
 
@@ -60,6 +65,10 @@
 #   define DYND_PLATFORM_DARWIN_ON_X64
 #elif defined(DYND_OS_DARWIN) && defined(DYND_ISA_X86)
 #   define DYND_PLATFORM_DARWIN_ON_X86
+#elif defined(DYND_OS_BSD) && defined(DYND_ISA_X64)
+#   define DYND_PLATFORM_BSD_ON_X64
+#elif defined(DYND_OS_BSD) && defined(DYND_ISA_X86)
+#   define DYND_PLATFORM_BSD_ON_X86
 #else
 #   error Unsupported ISA-OS configuration
 #endif
@@ -70,11 +79,11 @@
 #   define DYND_CALL_MSFT_X64
 #elif defined(DYND_PLATFORM_WINDOWS_ON_X32)
 #   define DYND_CALL_MSFT_X32
-#elif defined(DYND_PLATFORM_LINUX_ON_X64) || defined(DYND_PLATFORM_DARWIN_ON_X64)
+#elif defined(DYND_PLATFORM_LINUX_ON_X64) || defined(DYND_PLATFORM_DARWIN_ON_X64) || defined(DYND_PLATFORM_BSD_ON_X64)
 // http://www.x86-64.org/documentation/abi.pdf
 #   define DYND_CALL_SYSV_X64
-#elif defined(DYND_PLATFORM_LINUX_ON_X86)
-#define DYND_CALL_LINUX_X32
+#elif defined(DYND_PLATFORM_LINUX_ON_X86) || defined(DYND_PLATFORM_BSD_ON_X86)
+#   define DYND_CALL_LINUX_X32
 #else
 #   error unknown calling convention
 #endif

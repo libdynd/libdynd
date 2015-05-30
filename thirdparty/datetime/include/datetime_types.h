@@ -18,7 +18,11 @@ typedef __int64 int64_t;
 #define INT32_MIN INT_MIN
 #endif
 #ifndef INT64_MIN
+#ifdef LONG_LONG_MIN
 #define INT64_MIN LONG_LONG_MIN
+#else
+#define INT64_MIN (-__LONG_LONG_MAX__-1)
+#endif
 #endif
 
 namespace datetime {
