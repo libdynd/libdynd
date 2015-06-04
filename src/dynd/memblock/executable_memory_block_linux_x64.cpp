@@ -11,7 +11,7 @@
 
 
 #include <dynd/platform_definitions.hpp>
-#if defined(DYND_OS_LINUX)
+#if defined(DYND_OS_LINUX) || defined(DYND_OS_BSD)
 
 #include <dynd/memblock/executable_memory_block.hpp>
 
@@ -27,6 +27,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <unistd.h>
 
 using namespace std;
 
