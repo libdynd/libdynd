@@ -358,7 +358,7 @@ namespace nd {
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc(&children)[N0][N1] =
-            self->get_data_as<std::reference_wrapper<arrfunc[N0][N1]>>()->get();
+            **self->get_data_as<arrfunc(*)[N0][N1]>();
 
         const arrfunc &child =
             children[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
@@ -384,7 +384,7 @@ namespace nd {
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc(&children)[N0][N1] =
-            self->get_data_as<std::reference_wrapper<arrfunc[N0][N1]>>()->get();
+            **self->get_data_as<arrfunc(*)[N0][N1]>();
 
         const arrfunc &child =
             children[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
