@@ -27,7 +27,14 @@ namespace nd {
     static arrfunc make();
   } minus;
 
-  extern struct add : declfunc<add> {
+  template <typename self_type>
+  struct binary_operator : declfunc<self_type> {
+    static arrfunc make() {
+      return arrfunc();
+    }
+  };
+
+  extern struct add : binary_operator<add> {
     static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
     static arrfunc default_child;
 

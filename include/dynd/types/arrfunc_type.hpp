@@ -436,6 +436,11 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
+
+    //    ndt::arrfunc_type::make({ndt::type(i0), ndt::type(i1)},
+    //    ndt::type("Any"))
+
+    static type make(const nd::array &DYND_UNUSED(pos_tp), const type &DYND_UNUSED(ret_tp));
   };
 
   template <kernel_request_t kernreq, typename funcproto_type>

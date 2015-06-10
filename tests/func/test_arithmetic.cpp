@@ -9,6 +9,7 @@
 #include <inc_gtest.hpp>
 
 #include "../test_memory_new.hpp"
+#include "../dynd_assertions.hpp"
 
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/func/elwise.hpp>
@@ -257,20 +258,11 @@ TYPED_TEST_P(Arithmetic, ComplexScalar)
   EXPECT_EQ(dynd::complex<double>(0, -3), c(2).as<dynd::complex<double>>());
 }
 
-/*
-TEST(Arithmetic, Plus)
+TEST(Arithmetic, Minus)
 {
-  nd::array a = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.5, 9.0};
-
-  //  std::cout << nd::plus << std::endl;
-  //  std::cout << nd::plus(a) << std::endl;
-
-  std::cout << nd::minus << std::endl;
-  std::cout << nd::minus(a) << std::endl;
-
-  std::exit(-1);
+  nd::array a = {0.0, 1.0, 2.0, 3.0, 4.0};
+  EXPECT_ARR_EQ(nd::array({-0.0, -1.0, -2.0, -3.0, -4.0}), -a);
 }
-*/
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,
                            ScalarOnTheRight, ScalarOnTheLeft, ComplexScalar);

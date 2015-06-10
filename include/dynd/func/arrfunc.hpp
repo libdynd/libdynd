@@ -766,6 +766,9 @@ namespace nd {
     template <template <type_id_t...> class T, typename... I>
     struct make_all;
 
+    template <template <type_id_t...> class T, typename... I>
+    struct old_make_all;
+
   } // namespace dynd::nd::detail
 
   template <typename T>
@@ -1174,10 +1177,19 @@ namespace nd {
     }
 
     template <template <type_id_t, type_id_t> class T, typename I0, typename I1>
-    static std::vector<arrfunc> make_all()
+    static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_all()
+    {
+      std::map<std::pair<type_id_t, type_id_t>, arrfunc> arrfuncs;
+      index_proxy<I0>::for_each(detail::old_make_all<T, I1>(), arrfuncs);
+
+      return arrfuncs;
+    }  
+
+    template <template <type_id_t, type_id_t> class T, typename I0, typename I1>
+    static std::vector<arrfunc> old_make_all()
     {
       std::vector<arrfunc> arrfuncs;
-      index_proxy<I0>::for_each(detail::make_all<T, I1>(), arrfuncs);
+      index_proxy<I0>::for_each(detail::old_make_all<T, I1>(), arrfuncs);
 
       return arrfuncs;
     }
@@ -1246,9 +1258,15 @@ namespace nd {
     };
 
     template <template <type_id_t, type_id_t> class T, typename I1>
-    struct make_all<T, I1> {
+    struct old_make_all<T, I1> {
       template <type_id_t J0>
       struct make {
+        template <type_id_t J1>
+        void on_each(std::map<std::pair<type_id_t, type_id_t>, nd::arrfunc> &children)
+        {
+          children[std::make_pair(J0, J1)] = nd::arrfunc::make<T<J0, J1>>(0);
+        }
+
         template <type_id_t J1>
         void on_each(std::vector<nd::arrfunc> &children)
         {
@@ -1261,6 +1279,13 @@ namespace nd {
       {
         index_proxy<I1>::for_each(make<I0>(), children);
       }
+
+      template <type_id_t I0>
+      void on_each(std::map<std::pair<type_id_t, type_id_t>, nd::arrfunc> &children) const
+      {
+        index_proxy<I1>::for_each(make<I0>(), children);
+      }
+
     };
 
   } // namespace dynd::nd::detail
