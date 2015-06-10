@@ -60,7 +60,7 @@ namespace nd {
       }
 
       return arrfunc::make<new_multidispatch_by_type_id_kernel<N0, N1>>(
-          ndt::type("(Any, Any) -> Any"), std::ref(children), 0);
+          ndt::type("(Any, Any) -> Any"), std::reference_wrapper<const arrfunc[N0][N1]>(children), 0);
     }
 
     arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
