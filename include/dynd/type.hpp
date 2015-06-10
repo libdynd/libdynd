@@ -125,9 +125,10 @@ namespace ndt {
       // 0 <= type_id < builtin_type_id_count
       if ((unsigned int)type_id < builtin_type_id_count) {
         return reinterpret_cast<const base_type *>(type_id);
-      } else {
-        throw invalid_type_id((int)type_id);
       }
+
+      return NULL;
+//      throw invalid_type_id((int)type_id);
     }
 
   public:
@@ -187,6 +188,16 @@ namespace ndt {
     explicit type(type_id_t type_id)
         : m_extended(type::validate_builtin_type_id(type_id))
     {
+      switch (type_id) {
+        case fixed_dim_type_id:
+          *this = ndt::type("Fixed * Any");
+          break;
+        case var_dim_type_id:
+          *this = ndt::type("var * Any");
+          break;
+        default:
+          break;
+      }
     }
 
     /** Construct from a string representation */

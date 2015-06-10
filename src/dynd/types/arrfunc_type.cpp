@@ -514,3 +514,9 @@ void ndt::arrfunc_type::get_dynamic_array_functions(
   *out_count =
       sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
 }
+
+ndt::type ndt::arrfunc_type::make(const nd::array &pos_tp,
+                                  const ndt::type &ret_tp)
+{
+  return type(new arrfunc_type(make_tuple(pos_tp), ret_tp), false);
+}
