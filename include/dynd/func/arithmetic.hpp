@@ -30,8 +30,8 @@ namespace nd {
       }
 
       for (type_id_t i0 : dim_type_ids::vals()) {
-        const ndt::type child_tp =
-            ndt::arrfunc_type::make({ndt::type(i0)}, ndt::type("Any"));
+        const ndt::type child_tp = ndt::arrfunc_type::make(
+            {ndt::type(i0)}, self.get_type()->get_return_type());
         children[i0] = functional::elwise(child_tp, self);
       }
 
@@ -53,14 +53,14 @@ namespace nd {
   extern struct minus : arithmetic_operator<minus, minus_kernel, 1> {
   } minus;
 
-  template <typename T, template <type_id_t, type_id_t> class K>
-  struct arithmetic_operator<T, K, 2> : declfunc<T> {
+  template <typename F, template <type_id_t, type_id_t> class K>
+  struct arithmetic_operator<F, K, 2> : declfunc<F> {
     static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
     static arrfunc default_child;
 
     static arrfunc make()
     {
-      arrfunc self = functional::call<T>(ndt::type("(Any, Any) -> Any"));
+      arrfunc self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
       for (const std::pair<std::pair<type_id_t, type_id_t>, arrfunc> &pair :
            arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>()) {
@@ -69,27 +69,20 @@ namespace nd {
 
       for (type_id_t i0 : numeric_type_ids::vals()) {
         for (type_id_t i1 : dim_type_ids::vals()) {
-          ndt::type child_tp = ndt::arrfunc_type::make(
-              {ndt::type(i0), ndt::type(i1)}, ndt::type("Any"));
+          const ndt::type child_tp =
+              ndt::arrfunc_type::make({ndt::type(i0), ndt::type(i1)},
+                                      self.get_type()->get_return_type());
           children[i0][i1] = functional::elwise(child_tp, self);
         }
       }
 
       for (type_id_t i0 : dim_type_ids::vals()) {
-        for (type_id_t i1 : numeric_type_ids::vals()) {
-          ndt::type pos[2] = {ndt::type(i0), ndt::type(i1)};
-
-          children[i0][i1] =
-              functional::elwise(make_arrfunc(2, pos, ndt::type("Any")), self);
-        }
-      }
-
-      for (type_id_t i0 : dim_type_ids::vals()) {
-        for (type_id_t i1 : dim_type_ids::vals()) {
-          ndt::type pos[2] = {ndt::type(i0), ndt::type(i1)};
-
-          children[i0][i1] =
-              functional::elwise(make_arrfunc(2, pos, ndt::type("Any")), self);
+        typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
+        for (type_id_t i1 : type_ids::vals()) {
+          const ndt::type child_tp =
+              ndt::arrfunc_type::make({ndt::type(i0), ndt::type(i1)},
+                                      self.get_type()->get_return_type());
+          children[i0][i1] = functional::elwise(child_tp, self);
         }
       }
 
