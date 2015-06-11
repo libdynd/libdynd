@@ -440,6 +440,8 @@ namespace ndt {
     //    ndt::arrfunc_type::make({ndt::type(i0), ndt::type(i1)},
     //    ndt::type("Any"))
 
+    static type make(const std::initializer_list<type_id_t> &DYND_UNUSED(pos_tp), const type &DYND_UNUSED(ret_tp));
+
     static type make(const nd::array &DYND_UNUSED(pos_tp), const type &DYND_UNUSED(ret_tp));
   };
 

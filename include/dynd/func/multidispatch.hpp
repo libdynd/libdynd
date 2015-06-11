@@ -43,8 +43,6 @@ namespace nd {
                                      const arrfunc (&children)[N0][N1],
                                      const arrfunc &DYND_UNUSED(default_child))
     {
-      std::cout << self_tp << std::endl;
-
       for (int i0 = 0; i0 < N0; ++i0) {
         for (int i1 = 0; i1 < N1; ++i1) {
           const arrfunc &child = children[i0][i1];

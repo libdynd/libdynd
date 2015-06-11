@@ -1373,7 +1373,7 @@ namespace nd {
 
   template <typename T>
   struct declfunc {
-    const arrfunc &get_self() const
+    static const arrfunc &get_self()
     {
       static arrfunc self = T::make();
       return self;

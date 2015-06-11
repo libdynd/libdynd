@@ -71,9 +71,9 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct add_ck
-      : base_kernel<add_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
-    typedef add_ck self_type;
+  struct add_kernel
+      : base_kernel<add_kernel<I0, I1>, kernel_request_cuda_host_device, 2> {
+    typedef add_kernel self_type;
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef decltype(std::declval<A0>() + std::declval<A1>()) R;
@@ -107,9 +107,9 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct subtract_ck
-      : base_kernel<subtract_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
-    typedef subtract_ck self_type;
+  struct subtract_kernel : base_kernel<subtract_kernel<I0, I1>,
+                                       kernel_request_cuda_host_device, 2> {
+    typedef subtract_kernel self_type;
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef decltype(std::declval<A0>() - std::declval<A1>()) R;
@@ -143,9 +143,9 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct multiply_ck
-      : base_kernel<multiply_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
-    typedef multiply_ck self_type;
+  struct multiply_kernel : base_kernel<multiply_kernel<I0, I1>,
+                                       kernel_request_cuda_host_device, 2> {
+    typedef multiply_kernel self_type;
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef decltype(std::declval<A0>() * std::declval<A1>()) R;
@@ -179,9 +179,9 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct divide_ck
-      : base_kernel<divide_ck<I0, I1>, kernel_request_cuda_host_device, 2> {
-    typedef divide_ck self_type;
+  struct divide_kernel
+      : base_kernel<divide_kernel<I0, I1>, kernel_request_cuda_host_device, 2> {
+    typedef divide_kernel self_type;
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef decltype(std::declval<A0>() / std::declval<A1>()) R;
