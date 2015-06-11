@@ -520,3 +520,9 @@ ndt::type ndt::arrfunc_type::make(const nd::array &pos_tp,
 {
   return type(new arrfunc_type(make_tuple(pos_tp), ret_tp), false);
 }
+
+ndt::type ndt::arrfunc_type::make(const initializer_list<type_id_t> &,
+                                  const ndt::type &)
+{
+  return type();
+}

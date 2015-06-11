@@ -4,63 +4,118 @@
 //
 
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/call.hpp>
+#include <dynd/func/elwise.hpp>
+#include <dynd/func/multidispatch.hpp>
+#include <dynd/kernels/arithmetic.hpp>
 
 namespace dynd {
 namespace nd {
 
-  typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
-                           int64_type_id, float32_type_id, float64_type_id,
-                           complex_float32_type_id,
-                           complex_float64_type_id> arithmetic_type_ids;
+  template <typename F, template <type_id_t...> class K, int N>
+  struct arithmetic_operator;
 
-  extern struct plus : declfunc<plus> {
+  template <typename F, template <type_id_t> class K>
+  struct arithmetic_operator<F, K, 1> : declfunc<F> {
     static arrfunc children[DYND_TYPE_ID_MAX + 1];
     static arrfunc default_child;
 
-    static arrfunc make();
-  } plus;
+    static arrfunc make()
+    {
+      const arrfunc self = functional::call<F>(ndt::type("(Any) -> Any"));
 
-  extern struct minus : declfunc<minus> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
+      for (const std::pair<const type_id_t, arrfunc> &pair :
+           arrfunc::make_all<K, numeric_type_ids>()) {
+        children[pair.first] = pair.second;
+      }
 
-    static arrfunc make();
-  } minus;
+      for (type_id_t i0 : dim_type_ids::vals()) {
+        const ndt::type child_tp =
+            ndt::arrfunc_type::make({ndt::type(i0)}, ndt::type("Any"));
+        children[i0] = functional::elwise(child_tp, self);
+      }
 
-  template <typename self_type>
-  struct binary_operator : declfunc<self_type> {
-    static arrfunc make() {
-      return arrfunc();
+      return functional::multidispatch_by_type_id(
+          self.get_array_type(), DYND_TYPE_ID_MAX + 1, children, default_child,
+          false);
     }
   };
 
-  extern struct add : binary_operator<add> {
+  template <typename F, template <type_id_t> class K>
+  arrfunc arithmetic_operator<F, K, 1>::children[DYND_TYPE_ID_MAX + 1];
+
+  template <typename F, template <type_id_t> class K>
+  arrfunc arithmetic_operator<F, K, 1>::default_child;
+
+  extern struct plus : arithmetic_operator<plus, plus_kernel, 1> {
+  } plus;
+
+  extern struct minus : arithmetic_operator<minus, minus_kernel, 1> {
+  } minus;
+
+  template <typename T, template <type_id_t, type_id_t> class K>
+  struct arithmetic_operator<T, K, 2> : declfunc<T> {
     static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
     static arrfunc default_child;
 
-    static arrfunc make();
+    static arrfunc make()
+    {
+      arrfunc self = functional::call<T>(ndt::type("(Any, Any) -> Any"));
+
+      for (const std::pair<std::pair<type_id_t, type_id_t>, arrfunc> &pair :
+           arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>()) {
+        children[pair.first.first][pair.first.second] = pair.second;
+      }
+
+      for (type_id_t i0 : numeric_type_ids::vals()) {
+        for (type_id_t i1 : dim_type_ids::vals()) {
+          ndt::type child_tp = ndt::arrfunc_type::make(
+              {ndt::type(i0), ndt::type(i1)}, ndt::type("Any"));
+          children[i0][i1] = functional::elwise(child_tp, self);
+        }
+      }
+
+      for (type_id_t i0 : dim_type_ids::vals()) {
+        for (type_id_t i1 : numeric_type_ids::vals()) {
+          ndt::type pos[2] = {ndt::type(i0), ndt::type(i1)};
+
+          children[i0][i1] =
+              functional::elwise(make_arrfunc(2, pos, ndt::type("Any")), self);
+        }
+      }
+
+      for (type_id_t i0 : dim_type_ids::vals()) {
+        for (type_id_t i1 : dim_type_ids::vals()) {
+          ndt::type pos[2] = {ndt::type(i0), ndt::type(i1)};
+
+          children[i0][i1] =
+              functional::elwise(make_arrfunc(2, pos, ndt::type("Any")), self);
+        }
+      }
+
+      return functional::multidispatch_by_type_id(self.get_array_type(),
+                                                  children, default_child);
+    }
+  };
+
+  template <typename T, template <type_id_t, type_id_t> class K>
+  arrfunc arithmetic_operator<T, K, 2>::children[DYND_TYPE_ID_MAX +
+                                                 1][DYND_TYPE_ID_MAX + 1];
+
+  template <typename T, template <type_id_t, type_id_t> class K>
+  arrfunc arithmetic_operator<T, K, 2>::default_child;
+
+  extern struct add : arithmetic_operator<add, add_kernel, 2> {
   } add;
 
-  extern struct subtract : declfunc<subtract> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
-
-    static arrfunc make();
+  extern struct subtract : arithmetic_operator<subtract, subtract_kernel, 2> {
   } subtract;
 
-  extern struct multiply : declfunc<multiply> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
-
-    static arrfunc make();
+  extern struct multiply : arithmetic_operator<multiply, multiply_kernel, 2> {
   } multiply;
 
-  extern struct divide : declfunc<divide> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
-
-    static arrfunc make();
+  extern struct divide : arithmetic_operator<divide, divide_kernel, 2> {
   } divide;
 
-} // namespace nd
+} // namespace dynd::nd
 } // namespace dynd
