@@ -47,8 +47,6 @@ namespace nd {
         for (int i1 = 0; i1 < N1; ++i1) {
           const arrfunc &child = children[i0][i1];
           if (!child.is_null()) {
-            std::cout << child << std::endl;
-
             std::map<string, ndt::type> tp_vars;
             if (!self_tp.match(child.get_array_type(), tp_vars)) {
               throw std::invalid_argument("could not match arrfuncs");
