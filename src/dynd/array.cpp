@@ -1087,6 +1087,7 @@ bool nd::array::op_sorting_less(const array &rhs) const
   return fn(src, k.get()) != 0;
 }
 
+/*
 bool nd::array::operator<(const array &rhs) const
 {
   ckernel_builder<kernel_request_host> k;
@@ -1152,6 +1153,7 @@ bool nd::array::operator>(const array &rhs) const
   const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
   return fn(src, k.get()) != 0;
 }
+*/
 
 bool nd::array::equals_exact(const array &rhs) const
 {

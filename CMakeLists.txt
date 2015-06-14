@@ -309,6 +309,7 @@ set(libdynd_SRC
     src/dynd/func/arrfunc.cpp
     src/dynd/func/arrfunc_registry.cpp
     src/dynd/func/callable.cpp
+    src/dynd/func/comparison.cpp
     src/dynd/func/copy.cpp
     src/dynd/func/chain.cpp
     src/dynd/func/elwise.cpp
@@ -331,6 +332,7 @@ set(libdynd_SRC
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
     include/dynd/func/copy.hpp
+    include/dynd/func/comparison.hpp
     include/dynd/func/chain.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/elwise_gfunc.hpp

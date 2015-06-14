@@ -248,6 +248,7 @@ TEST(StructType, DifferentTypeAssign) {
     EXPECT_EQ(8,    b(1,1).as<short>());
 }
 
+/*
 TEST(StructType, SingleCompare) {
     nd::array a, b;
     ndt::type sdt = ndt::make_struct(ndt::make_type<int32_t>(), "a",
@@ -459,6 +460,7 @@ TEST(StructType, SingleCompareDifferentArrmeta) {
     EXPECT_THROW((b >= a), not_comparable_error);
     EXPECT_THROW((b > a), not_comparable_error);
 }
+*/
 
 TEST(StructType, Pack)
 {

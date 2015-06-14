@@ -74,6 +74,7 @@ set(tests_SRC
     func/test_arrfunc.cpp
     func/test_callable.cpp
     func/test_chain_arrfunc.cpp
+    func/test_comparison.cpp
     func/test_elwise.cpp
     func/test_fft.cpp
     func/test_functor_arrfunc.cpp

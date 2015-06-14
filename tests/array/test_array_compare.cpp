@@ -18,6 +18,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(ArrayCompare, Bool) {
     // Equality
     EXPECT_TRUE(nd::array(true) == nd::array(true));
@@ -875,3 +876,4 @@ TEST(ArrayCompare, ExpressionDType) {
     b = nd::array(4.0);
     EXPECT_THROW((a < b), not_comparable_error);
 }
+*/
