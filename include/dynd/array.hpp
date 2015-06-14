@@ -795,7 +795,7 @@ namespace nd {
 
     /** Sorting comparison between two arrays. (Returns a bool, does not
      * broadcast) */
-    bool op_sorting_less(const array &rhs) const;
+ //   bool op_sorting_less(const array &rhs) const;
 
     bool equals_exact(const array &rhs) const;
 

@@ -195,6 +195,9 @@ namespace ndt {
         case var_dim_type_id:
           *this = ndt::type("var * Any");
           break;
+        case tuple_type_id:
+          *this = ndt::type("(...)");
+          break;
         default:
           break;
       }

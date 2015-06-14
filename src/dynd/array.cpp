@@ -1076,6 +1076,7 @@ void nd::array::assign_na()
   }
 }
 
+/*
 bool nd::array::op_sorting_less(const array &rhs) const
 {
   ckernel_builder<kernel_request_host> k;
@@ -1087,7 +1088,6 @@ bool nd::array::op_sorting_less(const array &rhs) const
   return fn(src, k.get()) != 0;
 }
 
-/*
 bool nd::array::operator<(const array &rhs) const
 {
   ckernel_builder<kernel_request_host> k;
@@ -1162,6 +1162,12 @@ bool nd::array::equals_exact(const array &rhs) const
   } else if (get_type() != rhs.get_type()) {
     return false;
   } else if (get_ndim() == 0) {
+/*
+    std::cout << this->get_type() << std::endl;
+    std::cout << rhs.get_type() << std::endl;
+    return (*this == rhs).as<bool>();
+*/
+
     ckernel_builder<kernel_request_host> k;
     make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                            rhs.get_arrmeta(), comparison_type_equal,
