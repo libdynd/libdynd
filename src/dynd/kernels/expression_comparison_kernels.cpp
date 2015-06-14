@@ -55,7 +55,7 @@ struct buffered_kernel_extra {
     }
   }
 
-  inline const char *buffer_operand(const single_buffer &b, const char *src)
+  inline char *buffer_operand(const single_buffer &b, const char *src)
   {
     char *eraw = reinterpret_cast<char *>(this);
     char *dst = eraw + b.data_offset;
@@ -77,9 +77,9 @@ struct buffered_kernel_extra {
     return dst;
   }
 
-  static int kernel(const char *const *src, ckernel_prefix *extra)
+  static void kernel(char *dst, char *const *src, ckernel_prefix *extra)
   {
-    const char *src_buffered[2];
+    char *src_buffered[2];
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     // Buffer the first operand if necessary
@@ -96,10 +96,11 @@ struct buffered_kernel_extra {
     }
     // Call the comparison kernel
     ckernel_prefix *echild;
-    expr_predicate_t opchild;
+    expr_single_t opchild;
     echild = reinterpret_cast<ckernel_prefix *>(eraw + e->cmp_kernel_offset);
-    opchild = echild->get_function<expr_predicate_t>();
-    int result = opchild(src_buffered, echild);
+    opchild = echild->get_function<expr_single_t>();
+    int result;
+    opchild(reinterpret_cast<char *>(&result), src_buffered, echild);
 
     // Clear the buffer data if necessary
     if (e->buf[0].arrmeta != NULL) {
@@ -109,7 +110,7 @@ struct buffered_kernel_extra {
       e->buf[1].tp->arrmeta_reset_buffers(e->buf[1].arrmeta);
     }
 
-    return result;
+    *reinterpret_cast<int *>(dst) = result;
   }
 
   static void destruct(ckernel_prefix *self)
@@ -149,7 +150,7 @@ size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset,
   buffered_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->alloc_ck<buffered_kernel_extra>(ckb_offset);
-  e->base.set_function<expr_predicate_t>(&buffered_kernel_extra::kernel);
+  e->base.set_function<expr_single_t>(&buffered_kernel_extra::kernel);
   e->base.destructor = &buffered_kernel_extra::destruct;
   // Initialize the information for buffering the operands
   if (src0_dt.get_kind() == expr_kind) {

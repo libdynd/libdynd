@@ -26,34 +26,39 @@ struct tuple_compare_sorting_less_matching_arrmeta_kernel {
   // After this are field_count sorting_less kernel offsets, for
   // src#.field_i < src#.field_i with each 0 <= i < field_count
 
-  static int sorting_less(const char *const *src, ckernel_prefix *extra)
+  static void sorting_less(char *dst, char *const *src, ckernel_prefix *extra)
   {
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     size_t field_count = e->field_count;
     const size_t *src_data_offsets = e->src_data_offsets;
     const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-    const char *child_src[2];
+    char *child_src[2];
     for (size_t i = 0; i != field_count; ++i) {
       ckernel_prefix *sorting_less_kdp =
           reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-      expr_predicate_t opchild =
-          sorting_less_kdp->get_function<expr_predicate_t>();
+      expr_single_t opchild =
+          sorting_less_kdp->get_function<expr_single_t>();
       size_t data_offset = src_data_offsets[i];
       // if (src0.field_i < src1.field_i) return true
       child_src[0] = src[0] + data_offset;
       child_src[1] = src[1] + data_offset;
-      if (opchild(child_src, sorting_less_kdp)) {
-        return true;
+      int child_dst;
+      opchild(reinterpret_cast<char *>(&child_dst), child_src, sorting_less_kdp);
+      if (child_dst) {
+        *reinterpret_cast<int *>(dst) = true;
+        return;
       }
       // if (src1.field_i < src0.field_i) return false
       child_src[0] = src[1] + data_offset;
       child_src[1] = src[0] + data_offset;
-      if (opchild(child_src, sorting_less_kdp)) {
-        return false;
+      opchild(reinterpret_cast<char *>(&child_dst), child_src, sorting_less_kdp);
+      if (child_dst) {
+        *reinterpret_cast<int *>(dst) = false;
+        return;
       }
     }
-    return false;
+    *reinterpret_cast<int *>(dst) = false;
   }
 
   static void destruct(ckernel_prefix *self)
@@ -78,7 +83,7 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
   // src0.field_i < src1.field_i and src1.field_i < src0.field_i
   // with each 0 <= i < field_count
 
-  static int sorting_less(const char *const *src, ckernel_prefix *extra)
+  static void sorting_less(char *dst, char *const *src, ckernel_prefix *extra)
   {
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -86,29 +91,34 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
     const size_t *src0_data_offsets = e->src0_data_offsets;
     const size_t *src1_data_offsets = e->src1_data_offsets;
     const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-    const char *child_src[2];
+    char *child_src[2];
     for (size_t i = 0; i != field_count; ++i) {
       ckernel_prefix *src0_sorting_less_src1 =
           reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2 * i]);
-      expr_predicate_t opchild =
-          src0_sorting_less_src1->get_function<expr_predicate_t>();
+      expr_single_t opchild =
+          src0_sorting_less_src1->get_function<expr_single_t>();
       // if (src0.field_i < src1.field_i) return true
       child_src[0] = src[0] + src0_data_offsets[i];
       child_src[1] = src[1] + src1_data_offsets[i];
-      if (opchild(child_src, src0_sorting_less_src1)) {
-        return true;
+      int child_dst;
+      opchild(reinterpret_cast<char *>(&child_dst), child_src, src0_sorting_less_src1);
+      if (child_dst) {
+        *reinterpret_cast<char *>(dst) = true;
+        return;
       }
       ckernel_prefix *src1_sorting_less_src0 =
           reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2 * i + 1]);
-      opchild = src1_sorting_less_src0->get_function<expr_predicate_t>();
+      opchild = src1_sorting_less_src0->get_function<expr_single_t>();
       // if (src1.field_i < src0.field_i) return false
       child_src[0] = src[1] + src1_data_offsets[i];
       child_src[1] = src[0] + src0_data_offsets[i];
-      if (opchild(child_src, src1_sorting_less_src0)) {
-        return false;
+      opchild(reinterpret_cast<char *>(&child_dst), child_src, src1_sorting_less_src0);
+      if (child_dst) {
+        *reinterpret_cast<char *>(dst) = false;
+        return;
       }
     }
-    return false;
+    *reinterpret_cast<char *>(dst) = false;
   }
 
   static void destruct(ckernel_prefix *self)
@@ -149,7 +159,7 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(
                   root_ckb_offset);
-      e->base.set_function<expr_predicate_t>(
+      e->base.set_function<expr_single_t>(
           &tuple_compare_sorting_less_matching_arrmeta_kernel::sorting_less);
       e->base.destructor =
           &tuple_compare_sorting_less_matching_arrmeta_kernel::destruct;
@@ -189,7 +199,7 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(
                   root_ckb_offset);
-      e->base.set_function<expr_predicate_t>(
+      e->base.set_function<expr_single_t>(
           &tuple_compare_sorting_less_diff_arrmeta_kernel::sorting_less);
       e->base.destructor =
           &tuple_compare_sorting_less_diff_arrmeta_kernel::destruct;
@@ -241,11 +251,11 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->get_at<nd::tuple_compare_equality_kernel>(root_ckb_offset);
     if (comptype == comparison_type_equal) {
-      e->base.set_function<expr_predicate_t>(
+      e->base.set_function<expr_single_t>(
           &nd::tuple_compare_equality_kernel::equal);
     }
     else {
-      e->base.set_function<expr_predicate_t>(
+      e->base.set_function<expr_single_t>(
           &nd::tuple_compare_equality_kernel::not_equal);
     }
     e->base.destructor = &nd::tuple_compare_equality_kernel::destruct;

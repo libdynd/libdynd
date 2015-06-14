@@ -36,10 +36,10 @@ TEST(Array, FromValueConstructor) {
     nd::array a;
     // Bool
     a = nd::array(true);
-    EXPECT_EQ(ndt::make_type<dynd_bool>(), a.get_type());
+    EXPECT_EQ(ndt::make_type<bool1>(), a.get_type());
     EXPECT_EQ((uint32_t) nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
-    a = nd::array(dynd_bool(true));
-    EXPECT_EQ(ndt::make_type<dynd_bool>(), a.get_type());
+    a = nd::array(bool1(true));
+    EXPECT_EQ(ndt::make_type<bool1>(), a.get_type());
     EXPECT_EQ((uint32_t) nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
     // Signed int
     a = nd::array((int8_t)1);
@@ -87,10 +87,10 @@ TEST(Array, FromValueConstructorRW) {
     nd::array a;
     // Bool
     a = nd::array_rw(true);
-    EXPECT_EQ(ndt::make_type<dynd_bool>(), a.get_type());
+    EXPECT_EQ(ndt::make_type<bool1>(), a.get_type());
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-    a = nd::array_rw(dynd_bool(true));
-    EXPECT_EQ(ndt::make_type<dynd_bool>(), a.get_type());
+    a = nd::array_rw(bool1(true));
+    EXPECT_EQ(ndt::make_type<bool1>(), a.get_type());
     EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
     // Signed int
     a = nd::array_rw((int8_t)1);
@@ -460,10 +460,10 @@ TYPED_TEST_P(Array, AsScalar) {
     }
     EXPECT_EQ(3, a.as<int64_t>(assign_error_overflow));
     if (!TestFixture::IsTypeID(cuda_device_type_id)) {
-        EXPECT_THROW(a.as<dynd_bool>(), runtime_error);
-        EXPECT_THROW(a.as<dynd_bool>(assign_error_overflow), runtime_error);
+        EXPECT_THROW(a.as<bool1>(), runtime_error);
+        EXPECT_THROW(a.as<bool1>(assign_error_overflow), runtime_error);
     }
-    EXPECT_EQ(true, a.as<dynd_bool>(assign_error_nocheck));
+    EXPECT_EQ(true, a.as<bool1>(assign_error_nocheck));
     if (!TestFixture::IsTypeID(cuda_device_type_id)) {
         EXPECT_THROW(a.as<bool>(), runtime_error);
         EXPECT_THROW(a.as<bool>(assign_error_overflow), runtime_error);

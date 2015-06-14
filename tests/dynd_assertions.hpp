@@ -75,7 +75,8 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1,
              << "DYND ASSERTION INTERNAL ERROR: One of the struct fields "
                 "should have compared unequal";
     } else if (val1.get_type().get_kind() == tuple_kind) {
-      const ndt::base_tuple_type *bsd = val1.get_type().extended<ndt::base_tuple_type>();
+      const ndt::base_tuple_type *bsd =
+          val1.get_type().extended<ndt::base_tuple_type>();
       intptr_t field_count = bsd->get_field_count();
       for (intptr_t i = 0; i < field_count; ++i) {
         nd::array field1 = val1(i), field2 = val2(i);
@@ -185,6 +186,26 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
                        dynd::ndt::type(candidate));
 }
 
+inline ::testing::AssertionResult ExpectAllTrue(const char *DYND_UNUSED(expr1),
+                                                const dynd::nd::array actual)
+{
+  if (actual.as<bool>()) {
+    return ::testing::AssertionSuccess();
+  }
+
+  return ::testing::AssertionFailure();
+}
+
+inline ::testing::AssertionResult ExpectAllFalse(const char *DYND_UNUSED(expr1),
+                                                const dynd::nd::array actual)
+{
+  if (!actual.as<bool>()) {
+    return ::testing::AssertionSuccess();
+  }
+
+  return ::testing::AssertionFailure();
+}
+
 /**
  * Macro to compare two arrays which should
  * be exactly equal
@@ -199,6 +220,9 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
 
 #define EXPECT_ARR_VALS_EQ(expected, actual)                                   \
   EXPECT_PRED_FORMAT2(CompareDyNDArrayValues, expected, actual)
+
+#define EXPECT_ALL_TRUE(ACTUAL) EXPECT_PRED_FORMAT1(ExpectAllTrue, ACTUAL)
+#define EXPECT_ALL_FALSE(ACTUAL) EXPECT_PRED_FORMAT1(ExpectAllFalse, ACTUAL)
 
 /**
  * Macro to compare an array's values to those
@@ -217,7 +241,7 @@ inline ::testing::AssertionResult MatchNdtTypes(const char *expr1,
  *
  * EXPECT_TYPE_MATCH("Fixed * T", "10 * int32");
  */
-#define EXPECT_TYPE_MATCH(pattern, candidate)                                \
+#define EXPECT_TYPE_MATCH(pattern, candidate)                                  \
   EXPECT_PRED_FORMAT2(MatchNdtTypes, pattern, candidate)
 
 inline float rel_error(float expected, float actual)
@@ -358,7 +382,8 @@ AssertArrayNear(const char *expected_expr, const char *actual_expr,
                            expected.to_host(), actual.to_host(), rel_error_max);
   }
 
-  std::unique_ptr<test_class<dynd::complex<double>>> c(new test_class<dynd::complex<double>>(rel_error_max));
+  std::unique_ptr<test_class<dynd::complex<double>>> c(
+      new test_class<dynd::complex<double>>(rel_error_max));
 
   dynd::nd::arrfunc af =
       dynd::nd::functional::elwise(dynd::nd::functional::apply(c.get()));

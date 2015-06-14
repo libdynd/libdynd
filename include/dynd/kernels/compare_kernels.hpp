@@ -20,7 +20,7 @@ namespace nd {
     static ndt::type make_type()
     {
       return ndt::arrfunc_type::make({ndt::type(I0), ndt::type(I1)},
-                                     ndt::make_type<dynd_bool>());
+                                     ndt::make_type<bool1>());
     }
   };
 
@@ -32,7 +32,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dynd_bool *>(dst) =
+      *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) <
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -46,7 +46,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dynd_bool *>(dst) =
+      *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) <=
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -60,7 +60,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dynd_bool *>(dst) =
+      *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) ==
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -86,7 +86,7 @@ namespace nd {
     // src0.field_i <op> src1.field_i
     // with each 0 <= i < field_count
 
-    static int equal(const char *const *src, ckernel_prefix *extra)
+    static void equal(char *dst, char *const *src, ckernel_prefix *extra)
     {
       char *eraw = reinterpret_cast<char *>(extra);
       extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -94,22 +94,25 @@ namespace nd {
       const size_t *src0_data_offsets = e->src0_data_offsets;
       const size_t *src1_data_offsets = e->src1_data_offsets;
       const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-      const char *child_src[2];
+      char *child_src[2];
       for (size_t i = 0; i != field_count; ++i) {
         ckernel_prefix *echild =
             reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-        expr_predicate_t opchild = echild->get_function<expr_predicate_t>();
+        expr_single_t opchild = echild->get_function<expr_single_t>();
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];
         child_src[1] = src[1] + src1_data_offsets[i];
-        if (!opchild(child_src, echild)) {
-          return false;
+        int child_dst;
+        opchild(reinterpret_cast<char *>(&child_dst), child_src, echild);
+        if (!child_dst) {
+          *reinterpret_cast<int *>(dst) = false;
+          return;
         }
       }
-      return true;
+      *reinterpret_cast<int *>(dst) = true;
     }
 
-    static int not_equal(const char *const *src, ckernel_prefix *extra)
+    static void not_equal(char *dst, char *const *src, ckernel_prefix *extra)
     {
       char *eraw = reinterpret_cast<char *>(extra);
       extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -117,19 +120,22 @@ namespace nd {
       const size_t *src0_data_offsets = e->src0_data_offsets;
       const size_t *src1_data_offsets = e->src1_data_offsets;
       const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-      const char *child_src[2];
+      char *child_src[2];
       for (size_t i = 0; i != field_count; ++i) {
         ckernel_prefix *echild =
             reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-        expr_predicate_t opchild = echild->get_function<expr_predicate_t>();
+        expr_single_t opchild = echild->get_function<expr_single_t>();
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];
         child_src[1] = src[1] + src1_data_offsets[i];
-        if (opchild(child_src, echild)) {
-          return true;
+        int child_dst;
+        opchild(reinterpret_cast<char *>(&child_dst), child_src, echild);
+        if (child_dst) {
+          *reinterpret_cast<int *>(dst) = true;
+          return;
         }
       }
-      return false;
+      *reinterpret_cast<int *>(dst) = false;
     }
 
     static void destruct(ckernel_prefix *self)
@@ -152,22 +158,25 @@ namespace nd {
                 << std::endl;
     }
 
-/*
-    static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-        const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp, const char *const *src_arrmeta,
-        kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *ectx,
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      return make_tuple_comparison_kernel(ckb, ckb_offset, src_tp,
-                                          src_arrmeta[0], src_arrmeta[1],
-                                          comparison_type_equal, ectx);
-    }
-*/
+    /*
+        static intptr_t instantiate(
+            const arrfunc_type_data *DYND_UNUSED(self),
+            const ndt::arrfunc_type *DYND_UNUSED(af_tp), char
+       *DYND_UNUSED(data),
+            void *ckb, intptr_t ckb_offset, const ndt::type
+       &DYND_UNUSED(dst_tp),
+            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+            const ndt::type *src_tp, const char *const *src_arrmeta,
+            kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context
+       *ectx,
+            const nd::array &DYND_UNUSED(kwds),
+            const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        {
+          return make_tuple_comparison_kernel(ckb, ckb_offset, src_tp,
+                                              src_arrmeta[0], src_arrmeta[1],
+                                              comparison_type_equal, ectx);
+        }
+    */
 
     /*
         static intptr_t instantiate(
@@ -230,7 +239,7 @@ namespace nd {
       : base_comparison_kernel<equal_kernel<type_type_id, type_type_id>> {
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dynd_bool *>(dst) =
+      *reinterpret_cast<bool1 *>(dst) =
           *reinterpret_cast<ndt::type *>(src[0]) ==
           *reinterpret_cast<ndt::type *>(src[1]);
     }
@@ -244,7 +253,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dynd_bool *>(dst) =
+      *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) !=
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -255,7 +264,7 @@ namespace nd {
       : base_comparison_kernel<not_equal_kernel<type_type_id, type_type_id>> {
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dynd_bool *>(dst) =
+      *reinterpret_cast<bool1 *>(dst) =
           *reinterpret_cast<ndt::type *>(src[0]) !=
           *reinterpret_cast<ndt::type *>(src[1]);
     }
@@ -270,7 +279,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dynd_bool *>(dst) =
+      *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) >=
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -284,7 +293,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dynd_bool *>(dst) =
+      *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) >
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }

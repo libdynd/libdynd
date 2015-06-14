@@ -12,13 +12,13 @@
 using namespace std;
 using namespace dynd;
 
-void nd::is_avail_ck<dynd_bool>::single(char *dst, char *const *src)
+void nd::is_avail_ck<bool1>::single(char *dst, char *const *src)
 {
   // Available if the value is 0 or 1
   *dst = **reinterpret_cast<unsigned char *const *>(src) <= 1;
 }
 
-void nd::is_avail_ck<dynd_bool>::strided(char *dst, intptr_t dst_stride,
+void nd::is_avail_ck<bool1>::strided(char *dst, intptr_t dst_stride,
                                          char *const *src,
                                          const intptr_t *src_stride,
                                          size_t count)
@@ -135,13 +135,13 @@ void nd::is_avail_ck<void>::strided(char *dst, intptr_t dst_stride,
   }
 }
 
-void nd::assign_na_ck<dynd_bool>::single(char *dst,
+void nd::assign_na_ck<bool1>::single(char *dst,
                                          char *const *DYND_UNUSED(src))
 {
   *dst = 2;
 }
 
-void nd::assign_na_ck<dynd_bool>::strided(
+void nd::assign_na_ck<bool1>::strided(
     char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
     const intptr_t *DYND_UNUSED(src_stride), size_t count)
 {
@@ -293,7 +293,7 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
 {
   switch (src_tp->get_dtype().get_type_id()) {
   case bool_type_id:
-    nd::is_avail_ck<dynd_bool>::make(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<bool1>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int8_type_id:
     nd::is_avail_ck<int8_t>::make(ckb, kernreq, ckb_offset);
@@ -340,7 +340,7 @@ intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
 {
   switch (dst_tp.get_dtype().get_type_id()) {
   case bool_type_id:
-    nd::assign_na_ck<dynd_bool>::make(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<bool1>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int8_type_id:
     nd::assign_na_ck<int8_t>::make(ckb, kernreq, ckb_offset);
@@ -376,7 +376,7 @@ intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
 
 const nd::array &kernels::get_option_builtin_nafunc(type_id_t tid)
 {
-  static nd::array bna = nafunc<dynd_bool>::get();
+  static nd::array bna = nafunc<bool1>::get();
   static nd::array i8na = nafunc<int8_t>::get();
   static nd::array i16na = nafunc<int16_t>::get();
   static nd::array i32na = nafunc<int32_t>::get();
@@ -418,7 +418,7 @@ const nd::array &kernels::get_option_builtin_nafunc(type_id_t tid)
 
 const nd::array &kernels::get_option_builtin_pointer_nafunc(type_id_t tid)
 {
-  static nd::array bna = nafunc<dynd_bool *>::get();
+  static nd::array bna = nafunc<bool1 *>::get();
   static nd::array i8na = nafunc<int8_t *>::get();
   static nd::array i16na = nafunc<int16_t *>::get();
   static nd::array i32na = nafunc<int32_t *>::get();

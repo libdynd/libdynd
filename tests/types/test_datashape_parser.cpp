@@ -33,7 +33,7 @@ using namespace dynd;
 TEST(DataShapeParser, Basic)
 {
   EXPECT_EQ(ndt::make_type<void>(), ndt::type("void"));
-  EXPECT_EQ(ndt::make_type<dynd_bool>(), ndt::type("bool"));
+  EXPECT_EQ(ndt::make_type<bool1>(), ndt::type("bool"));
   EXPECT_EQ(ndt::make_type<int8_t>(), ndt::type("int8"));
   EXPECT_EQ(ndt::make_type<int16_t>(), ndt::type("int16"));
   EXPECT_EQ(ndt::make_type<int32_t>(), ndt::type("int32"));
@@ -117,7 +117,7 @@ TEST(DataShapeParser, StringAtoms)
 
 TEST(DataShapeParser, Unaligned)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<dynd_bool>()),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<bool1>()),
             ndt::type("Fixed * unaligned[bool]"));
   EXPECT_EQ(
       ndt::make_fixed_dim_kind(ndt::make_unaligned(ndt::make_type<float>()), 2),
@@ -130,9 +130,9 @@ TEST(DataShapeParser, Unaligned)
 
 TEST(DataShapeParser, Option)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_option<dynd_bool>()),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_option<bool1>()),
             ndt::type("Fixed * option[bool]"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_option<dynd_bool>()),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_option<bool1>()),
             ndt::type("Fixed * ?bool"));
   EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_option(
                 ndt::make_fixed_dim_kind(ndt::make_type<float>()))),
@@ -147,7 +147,7 @@ TEST(DataShapeParser, Option)
 
 TEST(DataShapeParser, StridedDim)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<dynd_bool>()),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<bool1>()),
             ndt::type("Fixed * bool"));
   EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<float>(), 2),
             ndt::type("Fixed * Fixed * float32"));
@@ -157,9 +157,9 @@ TEST(DataShapeParser, StridedDim)
 
 TEST(DataShapeParser, FixedDim)
 {
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()),
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<bool1>()),
             ndt::type("3 * bool"));
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()),
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<bool1>()),
             ndt::type("fixed[3] * bool"));
   EXPECT_EQ(
       ndt::make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_type<float>())),
@@ -169,7 +169,7 @@ TEST(DataShapeParser, FixedDim)
 
 TEST(DataShapeParser, CContiguous)
 {
-  EXPECT_EQ(ndt::make_c_contiguous(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>())),
+  EXPECT_EQ(ndt::make_c_contiguous(ndt::make_fixed_dim(3, ndt::make_type<bool1>())),
             ndt::type("C[3 * bool]"));
   EXPECT_EQ(
       ndt::make_c_contiguous(make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_type<float>()))),
@@ -178,7 +178,7 @@ TEST(DataShapeParser, CContiguous)
 
 TEST(DataShapeParser, VarDim)
 {
-  EXPECT_EQ(ndt::make_var_dim(ndt::make_type<dynd_bool>()),
+  EXPECT_EQ(ndt::make_var_dim(ndt::make_type<bool1>()),
             ndt::type("var * bool"));
   EXPECT_EQ(ndt::make_var_dim(ndt::make_var_dim(ndt::make_type<float>())),
             ndt::type("var * var * float32"));

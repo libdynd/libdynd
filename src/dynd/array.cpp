@@ -74,7 +74,8 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
   char *data_ptr = NULL;
   if (array_tp.get_kind() == memory_kind) {
     result = make_array_memory_block(array_tp.get_arrmeta_size());
-    array_tp.extended<ndt::base_memory_type>()->data_alloc(&data_ptr, data_size);
+    array_tp.extended<ndt::base_memory_type>()->data_alloc(&data_ptr,
+                                                           data_size);
   } else {
     // Allocate the array arrmeta and data in one memory block
     result = make_array_memory_block(array_tp.get_arrmeta_size(), data_size,
@@ -83,7 +84,8 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim,
 
   if (array_tp.get_flags() & type_flag_zeroinit) {
     if (array_tp.get_kind() == memory_kind) {
-      array_tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr, data_size);
+      array_tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr,
+                                                                data_size);
     } else {
       memset(data_ptr, 0, data_size);
     }
@@ -206,7 +208,8 @@ nd::array nd::make_pod_array(const ndt::type &pod_dt, const void *data)
   // Fill in the preamble arrmeta
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
   if (pod_dt.is_builtin()) {
-    ndo->m_type = reinterpret_cast<const ndt::base_type *>(pod_dt.get_type_id());
+    ndo->m_type =
+        reinterpret_cast<const ndt::base_type *>(pod_dt.get_type_id());
   } else {
     ndo->m_type = pod_dt.extended();
     base_type_incref(ndo->m_type);
@@ -379,14 +382,14 @@ static nd::array make_array_clone_with_new_type(const nd::array &n,
 }
 
 // Constructors from C++ scalars
-nd::array::array(dynd_bool value)
+nd::array::array(bool1 value)
     : m_memblock(make_builtin_scalar_array(
           value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(bool value)
     : m_memblock(make_builtin_scalar_array(
-          dynd_bool(value), nd::read_access_flag | nd::immutable_access_flag))
+          bool1(value), nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(signed char value)
@@ -519,7 +522,7 @@ nd::array::array(const ndt::type &tp)
   get_ndo()->m_flags = nd::read_access_flag | nd::immutable_access_flag;
 }
 
-nd::array nd::array_rw(dynd_bool value)
+nd::array nd::array_rw(bool1 value)
 {
   return nd::array(
       make_builtin_scalar_array(value, nd::readwrite_access_flags));
@@ -527,7 +530,7 @@ nd::array nd::array_rw(dynd_bool value)
 nd::array nd::array_rw(bool value)
 {
   return nd::array(
-      make_builtin_scalar_array(dynd_bool(value), nd::readwrite_access_flags));
+      make_builtin_scalar_array(bool1(value), nd::readwrite_access_flags));
 }
 nd::array nd::array_rw(signed char value)
 {
@@ -1076,85 +1079,6 @@ void nd::array::assign_na()
   }
 }
 
-/*
-bool nd::array::op_sorting_less(const array &rhs) const
-{
-  ckernel_builder<kernel_request_host> k;
-  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
-                         rhs.get_arrmeta(), comparison_type_sorting_less,
-                         &eval::default_eval_context);
-  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
-  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get()) != 0;
-}
-
-bool nd::array::operator<(const array &rhs) const
-{
-  ckernel_builder<kernel_request_host> k;
-  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
-                         rhs.get_arrmeta(), comparison_type_less,
-                         &eval::default_eval_context);
-  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
-  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get()) != 0;
-}
-
-bool nd::array::operator<=(const array &rhs) const
-{
-  ckernel_builder<kernel_request_host> k;
-  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
-                         rhs.get_arrmeta(), comparison_type_less_equal,
-                         &eval::default_eval_context);
-  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
-  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get()) != 0;
-}
-
-bool nd::array::operator==(const array &rhs) const
-{
-  ckernel_builder<kernel_request_host> k;
-  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
-                         rhs.get_arrmeta(), comparison_type_equal,
-                         &eval::default_eval_context);
-  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
-  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get()) != 0;
-}
-
-bool nd::array::operator!=(const array &rhs) const
-{
-  ckernel_builder<kernel_request_host> k;
-  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
-                         rhs.get_arrmeta(), comparison_type_not_equal,
-                         &eval::default_eval_context);
-  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
-  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get()) != 0;
-}
-
-bool nd::array::operator>=(const array &rhs) const
-{
-  ckernel_builder<kernel_request_host> k;
-  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
-                         rhs.get_arrmeta(), comparison_type_greater_equal,
-                         &eval::default_eval_context);
-  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
-  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get()) != 0;
-}
-
-bool nd::array::operator>(const array &rhs) const
-{
-  ckernel_builder<kernel_request_host> k;
-  make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
-                         rhs.get_arrmeta(), comparison_type_greater,
-                         &eval::default_eval_context);
-  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
-  const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-  return fn(src, k.get()) != 0;
-}
-*/
-
 bool nd::array::equals_exact(const array &rhs) const
 {
   if (get_ndo() == rhs.get_ndo()) {
@@ -1162,19 +1086,22 @@ bool nd::array::equals_exact(const array &rhs) const
   } else if (get_type() != rhs.get_type()) {
     return false;
   } else if (get_ndim() == 0) {
-/*
-    std::cout << this->get_type() << std::endl;
-    std::cout << rhs.get_type() << std::endl;
-    return (*this == rhs).as<bool>();
-*/
+    /*
+        std::cout << this->get_type() << std::endl;
+        std::cout << rhs.get_type() << std::endl;
+        return (*this == rhs).as<bool>();
+    */
 
     ckernel_builder<kernel_request_host> k;
     make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                            rhs.get_arrmeta(), comparison_type_equal,
                            &eval::default_eval_context);
-    expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
-    const char *const src[2] = {get_readonly_originptr(), rhs.get_readonly_originptr()};
-    return fn(src, k.get()) != 0;
+    expr_single_t fn = k.get()->get_function<expr_single_t>();
+    int dst;
+    const char *const src[2] = {get_readonly_originptr(),
+                                rhs.get_readonly_originptr()};
+    fn(reinterpret_cast<char *>(&dst), const_cast<char *const *>(src), k.get());
+    return dst != 0;
   } else if (get_type().get_type_id() == var_dim_type_id) {
     // If there's a leading var dimension, convert it to strided and compare
     // (Note: this is an inefficient hack)
@@ -1199,10 +1126,13 @@ bool nd::array::equals_exact(const array &rhs) const
                                iter.arrmeta<0>(), iter.get_uniform_dtype<1>(),
                                iter.arrmeta<1>(), comparison_type_not_equal,
                                &eval::default_eval_context);
-        expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+        expr_single_t fn = k.get()->get_function<expr_single_t>();
         do {
           const char *const src[2] = {iter.data<0>(), iter.data<1>()};
-          if (fn(src, k.get())) {
+          int dst;
+          fn(reinterpret_cast<char *>(&dst), const_cast<char *const *>(src),
+             k.get());
+          if (dst) {
             return false;
           }
         } while (iter.next());
@@ -1250,23 +1180,27 @@ static void cast_dtype(const ndt::type &dt,
         bool can_keep_dim = false;
         ndt::type child_dt, child_replacement_tp;
         switch (dt.get_type_id()) {
-/*
-        case cfixed_dim_type_id: {
-          const cfixed_dim_type *dt_fdd = dt.extended<cfixed_dim_type>();
-          const cfixed_dim_type *r_fdd = static_cast<const cfixed_dim_type *>(
-              e->replacement_tp.extended());
-          if (dt_fdd->get_fixed_dim_size() == r_fdd->get_fixed_dim_size() &&
-              dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
-            can_keep_dim = true;
-            child_dt = dt_fdd->get_element_type();
-            child_replacement_tp = r_fdd->get_element_type();
-          }
-        }
-*/
+        /*
+                case cfixed_dim_type_id: {
+                  const cfixed_dim_type *dt_fdd =
+           dt.extended<cfixed_dim_type>();
+                  const cfixed_dim_type *r_fdd = static_cast<const
+           cfixed_dim_type *>(
+                      e->replacement_tp.extended());
+                  if (dt_fdd->get_fixed_dim_size() ==
+           r_fdd->get_fixed_dim_size() &&
+                      dt_fdd->get_fixed_stride() == r_fdd->get_fixed_stride()) {
+                    can_keep_dim = true;
+                    child_dt = dt_fdd->get_element_type();
+                    child_replacement_tp = r_fdd->get_element_type();
+                  }
+                }
+        */
         case var_dim_type_id: {
           const ndt::base_dim_type *dt_budd = dt.extended<ndt::base_dim_type>();
           const ndt::base_dim_type *r_budd =
-              static_cast<const ndt::base_dim_type *>(e->replacement_tp.extended());
+              static_cast<const ndt::base_dim_type *>(
+                  e->replacement_tp.extended());
           can_keep_dim = true;
           child_dt = dt_budd->get_element_type();
           child_replacement_tp = r_budd->get_element_type();
@@ -1854,7 +1788,8 @@ nd::array nd::empty_shell(const ndt::type &tp)
       result = make_array_memory_block(arrmeta_size);
       tp.extended<ndt::base_memory_type>()->data_alloc(&data_ptr, data_size);
       if (tp.get_flags() & type_flag_zeroinit) {
-        tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr, data_size);
+        tp.extended<ndt::base_memory_type>()->data_zeroinit(data_ptr,
+                                                            data_size);
       }
     }
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
@@ -2041,7 +1976,7 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
     make_comparison_kernel(&k_n_less_d, 0, element_tp, n_arrmeta, element_tp,
                            n_arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
-    expr_predicate_t fn_n_less_d = k_n_less_d.get()->get_function<expr_predicate_t>();
+    expr_single_t fn_n_less_d = k_n_less_d.get()->get_function<expr_single_t>();
 
     // TODO: support any type of array dimension
     if (n.get_type().get_type_id() != fixed_dim_type_id) {
@@ -2063,14 +1998,22 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
       // trial_data first and data second in the comparison operations.
       const char *const src_try0[2] = {data, trial_data};
       const char *const src_try1[2] = {trial_data, data};
-      if (fn_n_less_d(src_try0, k_n_less_d.get())) {
+      int dst;
+      fn_n_less_d(reinterpret_cast<char *>(&dst),
+                  const_cast<char *const *>(src_try0), k_n_less_d.get());
+      if (dst) {
         // value < arr[trial]
         last = trial;
-      } else if (fn_n_less_d(src_try1, k_n_less_d.get())) {
-        // value > arr[trial]
-        first = trial + 1;
       } else {
-        return trial;
+        int dst;
+        fn_n_less_d(reinterpret_cast<char *>(&dst),
+                    const_cast<char *const *>(src_try1), k_n_less_d.get());
+        if (dst) {
+          // value > arr[trial]
+          first = trial + 1;
+        } else {
+          return trial;
+        }
       }
     }
     return -1;
@@ -2081,13 +2024,13 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
     make_comparison_kernel(&k_n_less_d, 0, element_tp, n_arrmeta, element_tp,
                            arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
-    expr_predicate_t f_n_less_d = k_n_less_d.get()->get_function<expr_predicate_t>();
+    expr_single_t f_n_less_d = k_n_less_d.get()->get_function<expr_single_t>();
 
     ckernel_builder<kernel_request_host> k_d_less_n;
     make_comparison_kernel(&k_d_less_n, 0, element_tp, arrmeta, element_tp,
                            n_arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
-    expr_predicate_t f_d_less_n = k_d_less_n.get()->get_function<expr_predicate_t>();
+    expr_single_t f_d_less_n = k_d_less_n.get()->get_function<expr_single_t>();
 
     // TODO: support any type of array dimension
     if (n.get_type().get_type_id() != fixed_dim_type_id) {
@@ -2109,14 +2052,22 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
       // trial_data first and data second in the comparison operations.
       const char *const src_try0[2] = {data, trial_data};
       const char *const src_try1[2] = {trial_data, data};
-      if (f_d_less_n(src_try0, k_d_less_n.get())) {
+      int dst;
+      f_d_less_n(reinterpret_cast<char *>(&dst),
+                 const_cast<char *const *>(src_try0), k_d_less_n.get());
+      if (dst) {
         // value < arr[trial]
         last = trial;
-      } else if (f_n_less_d(src_try1, k_n_less_d.get())) {
-        // value > arr[trial]
-        first = trial + 1;
       } else {
-        return trial;
+        int dst;
+        f_n_less_d(reinterpret_cast<char *>(&dst),
+                   const_cast<char *const *>(src_try1), k_n_less_d.get());
+        if (dst) {
+          // value > arr[trial]
+          first = trial + 1;
+        } else {
+          return trial;
+        }
       }
     }
     return -1;
@@ -2228,8 +2179,8 @@ bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta,
                tp.value_type().get_type_id() == option_type_id) {
       nd::array tmp = nd::empty(tp.value_type());
       tmp.val_assign(tp, arrmeta, data, ectx);
-      return tmp.get_type().extended<ndt::option_type>()->is_avail(arrmeta, data,
-                                                              ectx);
+      return tmp.get_type().extended<ndt::option_type>()->is_avail(arrmeta,
+                                                                   data, ectx);
     } else {
       return true;
     }

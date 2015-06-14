@@ -91,7 +91,7 @@ namespace nd {
      * Constructs a zero-dimensional scalar from a C++ scalar.
      *
      */
-    array(dynd_bool value);
+    array(bool1 value);
     array(bool value);
     array(signed char value);
     array(short value);
@@ -821,7 +821,7 @@ namespace nd {
   array operator>=(const array &a0, const array &a1);
   array operator>(const array &a0, const array &a1);
 
-  nd::array array_rw(dynd_bool value);
+  nd::array array_rw(bool1 value);
   nd::array array_rw(bool value);
   nd::array array_rw(signed char value);
   nd::array array_rw(short value);
@@ -909,8 +909,8 @@ namespace nd {
     typename std::enable_if<is_type_bool<T>::value, array_vals &>::type
     operator=(const T &rhs)
     {
-      dynd_bool v = rhs;
-      m_arr.val_assign(ndt::make_exact_type<dynd_bool>(), NULL,
+      bool1 v = rhs;
+      m_arr.val_assign(ndt::make_exact_type<bool1>(), NULL,
                        (const char *)&v);
       return *this;
     }
@@ -968,8 +968,8 @@ namespace nd {
     typename std::enable_if<is_type_bool<T>::value, array_vals_at &>::type
     operator=(const T &rhs)
     {
-      dynd_bool v = rhs;
-      m_arr.val_assign(ndt::make_exact_type<dynd_bool>(), NULL,
+      bool1 v = rhs;
+      m_arr.val_assign(ndt::make_exact_type<bool1>(), NULL,
                        (const char *)&v);
       return *this;
     }
@@ -1587,7 +1587,7 @@ namespace nd {
     intptr_t dim0 = il.size();
     make_strided_array(ndt::make_type<bool>(), 1, &dim0,
                        nd::default_access_flags, NULL).swap(*this);
-    auto data_ptr = reinterpret_cast<dynd_bool *>(get_ndo()->m_data_pointer);
+    auto data_ptr = reinterpret_cast<bool1 *>(get_ndo()->m_data_pointer);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
     }
@@ -1733,7 +1733,7 @@ namespace nd {
     struct array_as_helper<bool> {
       inline static bool as(const array &lhs, const eval::eval_context *ectx)
       {
-        return array_as_helper<dynd_bool>::as(lhs, ectx);
+        return array_as_helper<bool1>::as(lhs, ectx);
       }
     };
 

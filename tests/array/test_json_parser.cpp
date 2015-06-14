@@ -29,11 +29,11 @@ using namespace dynd;
 TEST(JSONParser, BuiltinsFromBool) {
     nd::array a;
 
-    a = parse_json(ndt::make_type<dynd_bool>(), "true");
-    EXPECT_EQ(ndt::make_type<dynd_bool>(), a.get_type());
+    a = parse_json(ndt::make_type<bool1>(), "true");
+    EXPECT_EQ(ndt::make_type<bool1>(), a.get_type());
     EXPECT_TRUE(a.as<bool>());
-    a = parse_json(ndt::make_type<dynd_bool>(), "false");
-    EXPECT_EQ(ndt::make_type<dynd_bool>(), a.get_type());
+    a = parse_json(ndt::make_type<bool1>(), "false");
+    EXPECT_EQ(ndt::make_type<bool1>(), a.get_type());
     EXPECT_FALSE(a.as<bool>());
     a = parse_json("var * bool", "[true, \"true\", 1, \"T\", \"y\", \"On\", \"yes\"]");
     EXPECT_EQ(7, a.get_dim_size());
@@ -47,31 +47,31 @@ TEST(JSONParser, BuiltinsFromBool) {
     }
 
     // Handling of NULL with option[bool]
-    a = parse_json(ndt::make_option<dynd_bool>(), "null");
-    EXPECT_EQ(ndt::make_option<dynd_bool>(), a.get_type());
+    a = parse_json(ndt::make_option<bool1>(), "null");
+    EXPECT_EQ(ndt::make_option<bool1>(), a.get_type());
     EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
-    a = parse_json(ndt::make_option<dynd_bool>(), "\"NULL\"");
-    EXPECT_EQ(ndt::make_option<dynd_bool>(), a.get_type());
+    a = parse_json(ndt::make_option<bool1>(), "\"NULL\"");
+    EXPECT_EQ(ndt::make_option<bool1>(), a.get_type());
     EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
-    a = parse_json(ndt::make_option<dynd_bool>(), "\"NA\"");
-    EXPECT_EQ(ndt::make_option<dynd_bool>(), a.get_type());
+    a = parse_json(ndt::make_option<bool1>(), "\"NA\"");
+    EXPECT_EQ(ndt::make_option<bool1>(), a.get_type());
     EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
-    a = parse_json(ndt::make_option<dynd_bool>(), "\"\"");
-    EXPECT_EQ(ndt::make_option<dynd_bool>(), a.get_type());
+    a = parse_json(ndt::make_option<bool1>(), "\"\"");
+    EXPECT_EQ(ndt::make_option<bool1>(), a.get_type());
     EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
 
     // Handling of an NULL, invalid token, string with junk in it, empty string
-    EXPECT_THROW(parse_json(ndt::make_type<dynd_bool>(), "null"), invalid_argument);
-    EXPECT_THROW(parse_json(ndt::make_type<dynd_bool>(), "flase"), invalid_argument);
-    EXPECT_THROW(parse_json(ndt::make_type<dynd_bool>(), "\"flase\""), invalid_argument);
-    EXPECT_THROW(parse_json(ndt::make_type<dynd_bool>(), "\"\""), invalid_argument);
+    EXPECT_THROW(parse_json(ndt::make_type<bool1>(), "null"), invalid_argument);
+    EXPECT_THROW(parse_json(ndt::make_type<bool1>(), "flase"), invalid_argument);
+    EXPECT_THROW(parse_json(ndt::make_type<bool1>(), "\"flase\""), invalid_argument);
+    EXPECT_THROW(parse_json(ndt::make_type<bool1>(), "\"\""), invalid_argument);
     eval::eval_context ectx;
     ectx.errmode = assign_error_nocheck;
-    a = parse_json(ndt::make_type<dynd_bool>(), "null", &ectx);
+    a = parse_json(ndt::make_type<bool1>(), "null", &ectx);
     EXPECT_FALSE(a.as<bool>());
-    a = parse_json(ndt::make_type<dynd_bool>(), "\"flase\"", &ectx);
+    a = parse_json(ndt::make_type<bool1>(), "\"flase\"", &ectx);
     EXPECT_TRUE(a.as<bool>());
-    a = parse_json(ndt::make_type<dynd_bool>(), "\"\"", &ectx);
+    a = parse_json(ndt::make_type<bool1>(), "\"\"", &ectx);
     EXPECT_FALSE(a.as<bool>());
 }
 
@@ -314,32 +314,32 @@ TEST(JSONParser, String) {
 TEST(JSONParser, ListBools) {
     nd::array n;
 
-    n = parse_json(ndt::make_var_dim(ndt::make_type<dynd_bool>()),
+    n = parse_json(ndt::make_var_dim(ndt::make_type<bool1>()),
                     "  [true, true, false, false]  ");
-    EXPECT_EQ(ndt::make_var_dim(ndt::make_type<dynd_bool>()), n.get_type());
+    EXPECT_EQ(ndt::make_var_dim(ndt::make_type<bool1>()), n.get_type());
     EXPECT_TRUE(n(0).as<bool>());
     EXPECT_TRUE(n(1).as<bool>());
     EXPECT_FALSE(n(2).as<bool>());
     EXPECT_FALSE(n(3).as<bool>());
 
-    n = parse_json(ndt::make_fixed_dim(4, ndt::make_type<dynd_bool>()),
+    n = parse_json(ndt::make_fixed_dim(4, ndt::make_type<bool1>()),
                     "  [true, true, false, false]  ");
-    EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_type<dynd_bool>()), n.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_type<bool1>()), n.get_type());
     EXPECT_TRUE(n(0).as<bool>());
     EXPECT_TRUE(n(1).as<bool>());
     EXPECT_FALSE(n(2).as<bool>());
     EXPECT_FALSE(n(3).as<bool>());
 
-    EXPECT_THROW(parse_json(ndt::make_var_dim(ndt::make_type<dynd_bool>()),
+    EXPECT_THROW(parse_json(ndt::make_var_dim(ndt::make_type<bool1>()),
                     "[true, true, false, false] 3.5"),
                     invalid_argument);
-    EXPECT_THROW(parse_json(ndt::make_fixed_dim(4, ndt::make_type<dynd_bool>()),
+    EXPECT_THROW(parse_json(ndt::make_fixed_dim(4, ndt::make_type<bool1>()),
                     "[true, true, false, false] 3.5"),
                     invalid_argument);
-    EXPECT_THROW(parse_json(ndt::make_fixed_dim(3, ndt::make_type<dynd_bool>()),
+    EXPECT_THROW(parse_json(ndt::make_fixed_dim(3, ndt::make_type<bool1>()),
                     "[true, true, false, false]"),
                     invalid_argument);
-    EXPECT_THROW(parse_json(ndt::make_fixed_dim(5, ndt::make_type<dynd_bool>()),
+    EXPECT_THROW(parse_json(ndt::make_fixed_dim(5, ndt::make_type<bool1>()),
                     "[true, true, false, false]"),
                     invalid_argument);
 }

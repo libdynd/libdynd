@@ -23,7 +23,7 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
 {
     switch (tp_id) {
     case bool_type_id:
-        value_to_pointer_ck<dynd_bool>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<bool1>::make(ckb, kernreq, ckb_offset);
         break;
     case int8_type_id:
         value_to_pointer_ck<int8_t>::make(ckb, kernreq, ckb_offset);

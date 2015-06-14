@@ -15,7 +15,7 @@ namespace dynd { namespace gfunc {
 
 // Metaprogram for determining size
 template<typename T> struct dcs_size_of;
-template <> struct dcs_size_of<dynd_bool> {enum {value = 1};};
+template <> struct dcs_size_of<bool1> {enum {value = 1};};
 template <> struct dcs_size_of<char> {enum {value = 1};};
 template <> struct dcs_size_of<signed char> {enum {value = 1};};
 template <> struct dcs_size_of<short> {enum {value = sizeof(short)};};
@@ -86,7 +86,7 @@ template <typename T> struct parameter_type_of;
 template <typename T> struct parameter_type_of<T &> : public parameter_type_of<T> {};
 template <typename T> struct parameter_type_of<const T> : public parameter_type_of<T> {};
 template <typename T, int N> struct parameter_type_of<T[N]> {typedef typename parameter_type_of<T>::type type[N];};
-template <> struct parameter_type_of<bool> {typedef dynd_bool type;};
+template <> struct parameter_type_of<bool> {typedef bool1 type;};
 template <> struct parameter_type_of<signed char> {typedef signed char type;};
 template <> struct parameter_type_of<short> {typedef short type;};
 template <> struct parameter_type_of<int> {typedef int type;};

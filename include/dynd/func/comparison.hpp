@@ -23,7 +23,8 @@ namespace nd {
     static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_children()
     {
       typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
-                               int64_type_id, uint32_type_id, float32_type_id,
+                               int64_type_id, uint8_type_id, uint16_type_id,
+                               uint32_type_id, uint64_type_id, float32_type_id,
                                float64_type_id> numeric_type_ids;
 
       std::map<std::pair<type_id_t, type_id_t>, arrfunc> children =
@@ -82,6 +83,9 @@ namespace nd {
     {
       std::map<std::pair<type_id_t, type_id_t>, arrfunc> children =
           comparison_operator::make_children();
+      children[std::make_pair(bool_type_id, bool_type_id)] =
+          arrfunc::make<equal_kernel<bool_type_id, bool_type_id>>(
+              ndt::type("(bool, bool) -> bool"));
       children[std::make_pair(tuple_type_id, tuple_type_id)] =
           arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("((...), (...)) -> bool"));
@@ -105,6 +109,9 @@ namespace nd {
       children[std::make_pair(type_type_id, type_type_id)] =
           arrfunc::make<not_equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> bool"));
+      children[std::make_pair(bool_type_id, bool_type_id)] =
+          arrfunc::make<not_equal_kernel<bool_type_id, bool_type_id>>(
+              ndt::type("(bool, bool) -> bool"));
 
       return children;
     }

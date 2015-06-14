@@ -446,7 +446,7 @@ ndt::base_type::reverse_adapt_type(const type &DYND_UNUSED(value_tp),
 // Some information about the builtin types
 
 uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
-    0,                            sizeof(dynd_bool),
+    0,                            sizeof(bool1),
     sizeof(int8_t),               sizeof(int16_t),
     sizeof(int32_t),              sizeof(int64_t),
     sizeof(dynd_int128),          sizeof(uint8_t),

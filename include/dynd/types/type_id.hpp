@@ -9,6 +9,7 @@
 #include <complex>
 
 #include <dynd/config.hpp>
+#include <dynd/bool1.hpp>
 #include <dynd/types/dynd_int128.hpp>
 #include <dynd/types/dynd_uint128.hpp>
 #include <dynd/types/dynd_float16.hpp>
@@ -290,25 +291,6 @@ inline bool is_builtin_type(const ndt::base_type *dt)
   return reinterpret_cast<uintptr_t>(dt) < builtin_type_id_count;
 }
 
-// A boolean class for dynamicndarray which is one-byte big
-class dynd_bool {
-  char m_value;
-
-public:
-  DYND_CUDA_HOST_DEVICE dynd_bool() : m_value(0) {}
-
-  DYND_CUDA_HOST_DEVICE dynd_bool(bool value) : m_value(value) {}
-
-  // Special case complex conversion to avoid ambiguous overload
-  template <class T>
-  DYND_CUDA_HOST_DEVICE dynd_bool(complex<T> value)
-      : m_value(value != complex<T>(0))
-  {
-  }
-
-  DYND_CUDA_HOST_DEVICE operator bool() const { return m_value != 0; }
-};
-
 namespace detail {
   // Simple metaprogram taking log base 2 of 1, 2, 4, and 8
   template <int I>
@@ -342,7 +324,7 @@ struct type_id_of<const T> {
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <>
-struct type_id_of<dynd_bool> {
+struct type_id_of<bool1> {
   enum { value = bool_type_id };
 };
 template <>
@@ -440,6 +422,10 @@ template <type_id_t type_id>
 struct type_of;
 
 template <>
+struct type_of<bool_type_id> {
+  typedef bool1 type;
+};
+template <>
 struct type_of<int8_type_id> {
   typedef int8_t type;
 };
@@ -514,7 +500,7 @@ struct dynd_kind_of<void> {
 };
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <>
-struct dynd_kind_of<dynd_bool> {
+struct dynd_kind_of<bool1> {
   static const type_kind_t value = bool_kind;
 };
 template <>
@@ -597,7 +583,7 @@ struct is_dynd_scalar {
   enum { value = false };
 };
 template <>
-struct is_dynd_scalar<dynd_bool> {
+struct is_dynd_scalar<bool1> {
   enum { value = true };
 };
 template <>

@@ -26,7 +26,7 @@ TEST(ArrFunc, Take) {
     a = avals;
 
     // Masked take
-    dynd_bool bvals[5] = {false, true, false, true, true};
+    bool1 bvals[5] = {false, true, false, true, true};
     b = bvals;
     c = nd::take(a, b);
     EXPECT_EQ(ndt::type("var * int"), c.get_type());
@@ -54,7 +54,7 @@ TEST(ArrFunc, TakeOfArray) {
     a = avals;
 
     // Masked take
-    dynd_bool bvals[3] = {true, false, true};
+    bool1 bvals[3] = {true, false, true};
     b = bvals;
     c = nd::take(a, b);
     EXPECT_EQ(ndt::type("var * 2 * int"), c.get_type());

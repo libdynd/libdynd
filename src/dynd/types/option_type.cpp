@@ -64,10 +64,8 @@ void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const
 const ndt::type &ndt::option_type::make_nafunc_type()
 {
   static ndt::type static_instance = make_struct(
-      make_arrfunc(make_tuple(make_typevar("T")),
-                        make_type<dynd_bool>()),
-      "is_avail", make_arrfunc(0, NULL, make_typevar("T")),
-      "assign_na");
+      make_arrfunc(make_tuple(make_typevar("T")), make_type<bool1>()),
+      "is_avail", make_arrfunc(0, NULL, make_typevar("T")), "assign_na");
   return static_instance;
 }
 
@@ -117,7 +115,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
     const arrfunc_type_data *af = get_is_avail_arrfunc();
     type src_tp[1] = {type(this, true)};
     af->instantiate(af, get_is_avail_arrfunc_type(), NULL, &ckb, 0,
-                    make_type<dynd_bool>(), NULL, 1, src_tp, &arrmeta,
+                    make_type<bool1>(), NULL, 1, src_tp, &arrmeta,
                     kernel_request_single, ectx, nd::array(),
                     std::map<nd::string, type>());
     ckernel_prefix *ckp = ckb.get();

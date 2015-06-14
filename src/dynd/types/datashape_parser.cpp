@@ -77,7 +77,7 @@ static const map<string, ndt::type> &builtin_types()
   static map<string, ndt::type> bit;
   if (bit.empty()) {
     bit["void"] = ndt::make_type<void>();
-    bit["bool"] = ndt::make_type<dynd_bool>();
+    bit["bool"] = ndt::make_type<bool1>();
     bit["int8"] = ndt::make_type<int8_t>();
     bit["int16"] = ndt::make_type<int16_t>();
     bit["int32"] = ndt::make_type<int32_t>();

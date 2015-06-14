@@ -19,6 +19,7 @@
 
 using namespace dynd;
 
+/*
 TEST(Comparison, Simple)
 {
     nd::array a = {1, -1, 3};
@@ -27,3 +28,4 @@ TEST(Comparison, Simple)
     std::cout << a << std::endl;
     std::cout << (a > b) << std::endl;
 }
+*/

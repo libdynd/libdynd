@@ -32,8 +32,8 @@ namespace detail {
             if (paramtype.get_type_id() == bool_type_id) {
                *data = (value ? 1 : 0);
             } else {
-                dynd_bool tmp = value;
-                typed_data_assign(paramtype, arrmeta, data, ndt::make_type<dynd_bool>(), NULL, reinterpret_cast<const char *>(&tmp));
+                bool1 tmp = value;
+                typed_data_assign(paramtype, arrmeta, data, ndt::make_type<bool1>(), NULL, reinterpret_cast<const char *>(&tmp));
             }
         }
     };

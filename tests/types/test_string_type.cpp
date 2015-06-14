@@ -307,39 +307,39 @@ TEST(StringType, EncodingSizes) {
 }
 
 TEST(StringType, StringToBool) {
-    EXPECT_TRUE(nd::array("true").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array(" True").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array("TRUE ").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array("T").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array("yes  ").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array("Yes").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array("Y").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array(" on").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array("On").ucast<dynd_bool>().as<bool>());
-    EXPECT_TRUE(nd::array("1").ucast<dynd_bool>().as<bool>());
+    EXPECT_TRUE(nd::array("true").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array(" True").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array("TRUE ").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array("T").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array("yes  ").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array("Yes").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array("Y").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array(" on").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array("On").ucast<bool1>().as<bool>());
+    EXPECT_TRUE(nd::array("1").ucast<bool1>().as<bool>());
 
-    EXPECT_FALSE(nd::array("false").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array("False").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array("FALSE ").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array("F ").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array(" no").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array("No").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array("N").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array("off ").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array("Off").ucast<dynd_bool>().as<bool>());
-    EXPECT_FALSE(nd::array("0 ").ucast<dynd_bool>().as<bool>());
+    EXPECT_FALSE(nd::array("false").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array("False").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array("FALSE ").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array("F ").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array(" no").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array("No").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array("N").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array("off ").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array("Off").ucast<bool1>().as<bool>());
+    EXPECT_FALSE(nd::array("0 ").ucast<bool1>().as<bool>());
 
     // By default, conversion to bool is not permissive
-    EXPECT_THROW(nd::array(nd::array("").ucast<dynd_bool>().eval()), invalid_argument);
-    EXPECT_THROW(nd::array(nd::array("2").ucast<dynd_bool>().eval()), invalid_argument);
-    EXPECT_THROW(nd::array(nd::array("flase").ucast<dynd_bool>().eval()), invalid_argument);
+    EXPECT_THROW(nd::array(nd::array("").ucast<bool1>().eval()), invalid_argument);
+    EXPECT_THROW(nd::array(nd::array("2").ucast<bool1>().eval()), invalid_argument);
+    EXPECT_THROW(nd::array(nd::array("flase").ucast<bool1>().eval()), invalid_argument);
 
     // In "nocheck" mode, it's a bit more permissive
     eval::eval_context tmp_ectx;
     tmp_ectx.errmode = assign_error_nocheck;
-    EXPECT_FALSE(nd::array(nd::array("").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
-    EXPECT_TRUE(nd::array(nd::array("2").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
-    EXPECT_TRUE(nd::array(nd::array("flase").ucast<dynd_bool>().eval(&tmp_ectx)).as<bool>());
+    EXPECT_FALSE(nd::array(nd::array("").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
+    EXPECT_TRUE(nd::array(nd::array("2").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
+    EXPECT_TRUE(nd::array(nd::array("flase").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
 }
 
 TEST(StringType, StringToInteger) {

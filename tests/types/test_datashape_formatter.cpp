@@ -43,7 +43,7 @@ TEST(DataShapeFormatter, ArrayBuiltinAtoms) {
 }
 
 TEST(DataShapeFormatter, DTypeBuiltinAtoms) {
-    EXPECT_EQ("bool", format_datashape(ndt::make_type<dynd_bool>(), "", false));
+    EXPECT_EQ("bool", format_datashape(ndt::make_type<bool1>(), "", false));
     EXPECT_EQ("int8", format_datashape(ndt::make_type<int8_t>(), "", false));
     EXPECT_EQ("int16", format_datashape(ndt::make_type<int16_t>(), "", false));
     EXPECT_EQ("int32", format_datashape(ndt::make_type<int32_t>(), "", false));

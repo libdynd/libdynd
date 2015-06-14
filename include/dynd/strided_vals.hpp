@@ -131,7 +131,7 @@ public:
 
     bool is_masked(const intptr_t *index) const {
         return m_mask.pointer == NULL
-            || *reinterpret_cast<const dynd_bool *>(detail::strided_utils<N>::get(m_mask.pointer, index, m_mask.strides));
+            || *reinterpret_cast<const bool1 *>(detail::strided_utils<N>::get(m_mask.pointer, index, m_mask.strides));
     }
 
     bool is_valid(const intptr_t *index) const {

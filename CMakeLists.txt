@@ -497,6 +497,7 @@ set(libdynd_SRC
     include/dynd/asarray.hpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
+    include/dynd/bool1.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
