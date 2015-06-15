@@ -585,7 +585,7 @@ typedef double float64;
 #include <dynd/bool1.hpp>
 #include <dynd/types/complex.hpp>
 #include <dynd/float16.hpp>
-#include <dynd/types/dynd_float128.hpp>
+#include <dynd/float128.hpp>
 #include <dynd/int128.hpp>
 #include <dynd/uint128.hpp>
 
@@ -805,17 +805,17 @@ struct is_arithmetic<float16> {
 };
 
 template <>
-struct is_arithmetic<float> {
+struct is_arithmetic<float32> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<double> {
+struct is_arithmetic<float64> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<dynd_float128> {
+struct is_arithmetic<float128> {
   static const bool value = true;
 };
 

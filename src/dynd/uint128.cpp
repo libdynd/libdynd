@@ -63,7 +63,7 @@ dynd::uint128::uint128(const float16& value)
 {
 }
 
-dynd::uint128::uint128(const dynd_float128& DYND_UNUSED(value))
+dynd::uint128::uint128(const float128& DYND_UNUSED(value))
 {
 #ifndef __CUDA_ARCH__
     throw runtime_error("dynd float128 to uint128 conversion is not implemented");

@@ -47,14 +47,14 @@ namespace dynd {
         typedef orig type; \
     }
 DYND_FORCE_BIG_TYPE(float16, double);
-DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
+DYND_FORCE_BIG_TYPE(float128, float128);
     template<>
-    struct big_type_helper<float16, dynd_float128, false> {
-        typedef dynd_float128 type;
+    struct big_type_helper<float16, float128, false> {
+        typedef float128 type;
     };
     template<>
-    struct big_type_helper<dynd_float128, float16, true> {
-        typedef dynd_float128 type;
+    struct big_type_helper<float128, float16, true> {
+        typedef float128 type;
     };
     template<class S, class T>
     struct big_type {

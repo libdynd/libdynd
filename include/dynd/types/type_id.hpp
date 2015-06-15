@@ -9,7 +9,6 @@
 #include <complex>
 
 #include <dynd/config.hpp>
-#include <dynd/types/dynd_float128.hpp>
 #include <dynd/types/complex.hpp>
 
 namespace dynd {
@@ -380,15 +379,15 @@ struct type_id_of<float16> {
   enum { value = float16_type_id };
 };
 template <>
-struct type_id_of<float> {
+struct type_id_of<float32> {
   enum { value = float32_type_id };
 };
 template <>
-struct type_id_of<double> {
+struct type_id_of<float64> {
   enum { value = float64_type_id };
 };
 template <>
-struct type_id_of<dynd_float128> {
+struct type_id_of<float128> {
   enum { value = float128_type_id };
 };
 template <>
@@ -475,7 +474,7 @@ struct type_of<float64_type_id> {
 };
 template <>
 struct type_of<float128_type_id> {
-  typedef dynd_float128 type;
+  typedef float128 type;
 };
 template <>
 struct type_of<complex_float32_type_id> {
@@ -556,15 +555,15 @@ struct dynd_kind_of<float16> {
   static const type_kind_t value = real_kind;
 };
 template <>
-struct dynd_kind_of<float> {
+struct dynd_kind_of<float32> {
   static const type_kind_t value = real_kind;
 };
 template <>
-struct dynd_kind_of<double> {
+struct dynd_kind_of<float64> {
   static const type_kind_t value = real_kind;
 };
 template <>
-struct dynd_kind_of<dynd_float128> {
+struct dynd_kind_of<float128> {
   static const type_kind_t value = real_kind;
 };
 template <typename T>
@@ -639,15 +638,15 @@ struct is_dynd_scalar<float16> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<float> {
+struct is_dynd_scalar<float32> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<double> {
+struct is_dynd_scalar<float64> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<dynd_float128> {
+struct is_dynd_scalar<float128> {
   enum { value = true };
 };
 template <>

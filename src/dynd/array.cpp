@@ -467,7 +467,7 @@ nd::array::array(double value)
           value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
-nd::array::array(const dynd_float128 &value)
+nd::array::array(const float128 &value)
     : m_memblock(make_builtin_scalar_array(
           value, nd::read_access_flag | nd::immutable_access_flag))
 {
@@ -607,7 +607,7 @@ nd::array nd::array_rw(double value)
   return nd::array(
       make_builtin_scalar_array(value, nd::readwrite_access_flags));
 }
-nd::array nd::array_rw(const dynd_float128 &value)
+nd::array nd::array_rw(const float128 &value)
 {
   return nd::array(
       make_builtin_scalar_array(value, nd::readwrite_access_flags));

@@ -67,7 +67,7 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
     value_to_pointer_ck<float64>::make(ckb, kernreq, ckb_offset);
     break;
   case float128_type_id:
-    value_to_pointer_ck<dynd_float128>::make(ckb, kernreq, ckb_offset);
+    value_to_pointer_ck<float128>::make(ckb, kernreq, ckb_offset);
     break;
   case complex_float32_type_id:
     value_to_pointer_ck<complex<float>>::make(ckb, kernreq, ckb_offset);

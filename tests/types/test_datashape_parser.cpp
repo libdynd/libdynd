@@ -49,7 +49,7 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::make_type<float16>(), ndt::type("float16"));
   EXPECT_EQ(ndt::make_type<float32>(), ndt::type("float32"));
   EXPECT_EQ(ndt::make_type<float64>(), ndt::type("float64"));
-  EXPECT_EQ(ndt::make_type<dynd_float128>(), ndt::type("float128"));
+  EXPECT_EQ(ndt::make_type<float128>(), ndt::type("float128"));
   EXPECT_EQ(ndt::make_type<dynd::complex<float>>(), ndt::type("complex64"));
   EXPECT_EQ(ndt::make_type<dynd::complex<double>>(), ndt::type("complex128"));
   EXPECT_EQ(ndt::make_type<dynd::complex<float>>(),
@@ -141,7 +141,7 @@ TEST(DataShapeParser, Option)
                 ndt::make_fixed_dim_kind(ndt::make_type<float>()))),
             ndt::type("Fixed * ?Fixed * float32"));
   EXPECT_EQ(ndt::make_struct(ndt::make_option(ndt::make_type<int32_t>()), "x",
-                              ndt::make_option(ndt::make_type<int64_t>()), "y"),
+                             ndt::make_option(ndt::make_type<int64_t>()), "y"),
             ndt::type("{x : ?int32, y : ?int64}"));
 }
 
@@ -169,11 +169,12 @@ TEST(DataShapeParser, FixedDim)
 
 TEST(DataShapeParser, CContiguous)
 {
-  EXPECT_EQ(ndt::make_c_contiguous(ndt::make_fixed_dim(3, ndt::make_type<bool1>())),
-            ndt::type("C[3 * bool]"));
   EXPECT_EQ(
-      ndt::make_c_contiguous(make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::make_type<float>()))),
-      ndt::type("C[4 * 3 * float32]"));
+      ndt::make_c_contiguous(ndt::make_fixed_dim(3, ndt::make_type<bool1>())),
+      ndt::type("C[3 * bool]"));
+  EXPECT_EQ(ndt::make_c_contiguous(make_fixed_dim(
+                4, ndt::make_fixed_dim(3, ndt::make_type<float>()))),
+            ndt::type("C[4 * 3 * float32]"));
 }
 
 TEST(DataShapeParser, VarDim)
@@ -206,11 +207,11 @@ TEST(DataShapeParser, StridedVarFixedDim)
 TEST(DataShapeParser, TypeVarConstructed)
 {
   EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("int32")),
-                ndt::type("T[int32]"));
+            ndt::type("T[int32]"));
   EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("10 * A")),
-                ndt::type("T[10 * A]"));
+            ndt::type("T[10 * A]"));
   EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("Dims... * int32")),
-                ndt::type("T[Dims... * int32]"));
+            ndt::type("T[Dims... * int32]"));
 }
 
 TEST(DataShapeParser, RecordOneField)
@@ -241,8 +242,7 @@ TEST(DataShapeParser, ArrFunc)
 {
   ndt::type tp;
 
-  EXPECT_EQ(ndt::make_arrfunc<int(int, int)>(),
-            ndt::type("(int, int) -> int"));
+  EXPECT_EQ(ndt::make_arrfunc<int(int, int)>(), ndt::type("(int, int) -> int"));
   EXPECT_EQ(ndt::make_arrfunc<int(int, int)>("x"),
             ndt::type("(int, x: int) -> int"));
   EXPECT_EQ(ndt::make_arrfunc<int(int, int)>("x", "y"),
@@ -295,8 +295,7 @@ TEST(DataShapeParser, ErrorString)
   catch (const runtime_error &e) {
     string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 14") != string::npos);
-    EXPECT_TRUE(msg.find("expected a size integer") !=
-                string::npos);
+    EXPECT_TRUE(msg.find("expected a size integer") != string::npos);
   }
   try {
     ndt::type("fixed_string[0]");
@@ -411,7 +410,8 @@ TEST(DataShapeParser, ErrorRecord)
     string msg = e.what();
     // The name field works as a funcproto until it hits the '}' token
     EXPECT_TRUE(msg.find("line 4, column 20") != string::npos);
-    EXPECT_TRUE(msg.find("expected a kwd arg in arrfunc prototype") != string::npos);
+    EXPECT_TRUE(msg.find("expected a kwd arg in arrfunc prototype") !=
+                string::npos);
   }
 }
 

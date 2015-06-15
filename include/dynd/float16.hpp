@@ -25,7 +25,7 @@
 namespace dynd {
 
 #if !defined(DYND_HAS_FLOAT128)
-class dynd_float128;
+class float128;
 #endif
 #if !defined(DYND_HAS_INT128)
 class int128;
@@ -100,7 +100,7 @@ public:
   }
   DYND_CUDA_HOST_DEVICE float16(const int128 &value);
   DYND_CUDA_HOST_DEVICE float16(const uint128 &value);
-  DYND_CUDA_HOST_DEVICE float16(const dynd_float128 &value);
+  DYND_CUDA_HOST_DEVICE float16(const float128 &value);
 
   DYND_CUDA_HOST_DEVICE inline operator float() const
   {
@@ -144,7 +144,7 @@ public:
   }
   DYND_CUDA_HOST_DEVICE operator int128() const;
   DYND_CUDA_HOST_DEVICE operator uint128() const;
-  DYND_CUDA_HOST_DEVICE operator dynd_float128() const;
+  DYND_CUDA_HOST_DEVICE operator float128() const;
 
   DYND_CUDA_HOST_DEVICE inline uint16_t bits() const { return m_bits; }
 

@@ -4,7 +4,7 @@
 //
 
 #include <dynd/float16.hpp>
-#include <dynd/types/dynd_float128.hpp>
+#include <dynd/float128.hpp>
 #include <dynd/int128.hpp>
 #include <dynd/uint128.hpp>
 
@@ -337,7 +337,7 @@ dynd::float16::float16(const uint128& value)
     m_bits = double_to_halfbits((double)value, assign_error_nocheck);
 }
 
-dynd::float16::float16(const dynd_float128& value)
+dynd::float16::float16(const float128& value)
 {
     m_bits = double_to_halfbits(double(value), assign_error_nocheck);
 }
@@ -350,7 +350,7 @@ dynd::float16::operator uint128() const
 {
     return uint128(uint32_t(*this));
 }
-dynd::float16::operator dynd_float128() const
+dynd::float16::operator float128() const
 {
-    return dynd_float128(double(*this));
+    return float128(double(*this));
 }

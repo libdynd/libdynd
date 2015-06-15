@@ -825,16 +825,16 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream &o,
     print_as<uint128, uint128>(o, data);
     break;
   case float16_type_id:
-    print_as<float16, float>(o, data);
+    print_as<float16, float32>(o, data);
     break;
   case float32_type_id:
-    print_as<float, float>(o, data);
+    print_as<float32, float32>(o, data);
     break;
   case float64_type_id:
-    print_as<double, double>(o, data);
+    print_as<float64, float64>(o, data);
     break;
   case float128_type_id:
-    print_as<dynd_float128, dynd_float128>(o, data);
+    print_as<float128, float128>(o, data);
     break;
   case complex_float32_type_id:
     print_as<complex<float>, complex<float>>(o, data);

@@ -15,7 +15,7 @@
 namespace dynd {
 
 #if !defined(DYND_HAS_FLOAT128)
-class dynd_float128;
+class float128;
 #endif
 #if !defined(DYND_HAS_UINT128)
 class uint128;
@@ -89,7 +89,7 @@ public:
   DYND_CUDA_HOST_DEVICE int128(double value);
   DYND_CUDA_HOST_DEVICE int128(const uint128 &value);
   DYND_CUDA_HOST_DEVICE int128(const float16 &value);
-  DYND_CUDA_HOST_DEVICE int128(const dynd_float128 &value);
+  DYND_CUDA_HOST_DEVICE int128(const float128 &value);
 
   DYND_CUDA_HOST_DEVICE inline bool operator==(const int128 &rhs) const
   {
@@ -357,13 +357,13 @@ template <>
 class numeric_limits<dynd::int128> {
 public:
   static const bool is_specialized = true;
-  static ::dynd::int128 min() throw()
+  static dynd::int128 min() throw()
   {
-    return ::dynd::int128(0x8000000000000000ULL, 0ULL);
+    return dynd::int128(0x8000000000000000ULL, 0ULL);
   }
-  static ::dynd::int128 max() throw()
+  static dynd::int128 max() throw()
   {
-    return ::dynd::int128(0x7fffffffffffffffULL, 0xffffffffffffffffULL);
+    return dynd::int128(0x7fffffffffffffffULL, 0xffffffffffffffffULL);
   }
   static const int digits = 0;
   static const int digits10 = 0;
@@ -371,13 +371,13 @@ public:
   static const bool is_integer = true;
   static const bool is_exact = true;
   static const int radix = 2;
-  static ::dynd::int128 epsilon() throw()
+  static dynd::int128 epsilon() throw()
   {
-    return ::dynd::int128(0ULL, 1ULL);
+    return dynd::int128(0ULL, 1ULL);
   }
-  static ::dynd::int128 round_error() throw()
+  static dynd::int128 round_error() throw()
   {
-    return ::dynd::int128(0ULL, 1ULL);
+    return dynd::int128(0ULL, 1ULL);
   }
 
   static const int min_exponent = 0;
@@ -390,10 +390,10 @@ public:
   static const bool has_signaling_NaN = false;
   static const float_denorm_style has_denorm = denorm_absent;
   static const bool has_denorm_loss = false;
-  static ::dynd::int128 infinity() throw();
-  static ::dynd::int128 quiet_NaN() throw();
-  static ::dynd::int128 signaling_NaN() throw();
-  static ::dynd::int128 denorm_min() throw();
+  static dynd::int128 infinity() throw();
+  static dynd::int128 quiet_NaN() throw();
+  static dynd::int128 signaling_NaN() throw();
+  static dynd::int128 denorm_min() throw();
 
   static const bool is_iec559 = false;
   static const bool is_bounded = false;

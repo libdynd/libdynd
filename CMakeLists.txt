@@ -181,7 +181,6 @@ set(libdynd_SRC
     src/dynd/types/datetime_parser.cpp
     src/dynd/types/datetime_type.cpp
     src/dynd/types/datetime_util.cpp
-    src/dynd/types/dynd_float128.cpp
     src/dynd/types/dim_fragment_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/expr_type.cpp
@@ -251,7 +250,6 @@ set(libdynd_SRC
     include/dynd/types/datetime_type.hpp
     include/dynd/types/datetime_util.hpp
     include/dynd/types/dim_fragment_type.hpp
-    include/dynd/types/dynd_float128.hpp
     include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
@@ -470,6 +468,7 @@ set(libdynd_SRC
     src/dynd/config.cpp
     src/dynd/dim_iter.cpp
     src/dynd/float16.cpp
+    src/dynd/float128.cpp
     src/dynd/int128.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
@@ -504,6 +503,7 @@ set(libdynd_SRC
     include/dynd/dim_iter.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/float16.hpp
+    include/dynd/float128.hpp
     include/dynd/int128.hpp
     include/dynd/math.hpp
     include/dynd/type.hpp
@@ -557,9 +557,8 @@ source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 if (DYND_CUDA)
     # Replace some source files with their CUDA versions
     foreach(filename_CPP
-            # Types
             src/dynd/float16.cpp
-            src/dynd/types/dynd_float128.cpp
+            src/dynd/float128.cpp
             src/dynd/int128.cpp
             src/dynd/uint128.cpp
             # Func
