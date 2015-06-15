@@ -120,18 +120,13 @@ namespace nd {
     // src0.field_i <op> src1.field_i
     // with each 0 <= i < field_count
 
-    static void equal(char *dst, char *const *src, ckernel_prefix *extra)
+    void single(char *dst, char *const *src)
     {
-      char *eraw = reinterpret_cast<char *>(extra);
-      extra_type *e = reinterpret_cast<extra_type *>(extra);
-      size_t field_count = e->field_count;
-      const size_t *src0_data_offsets = e->src0_data_offsets;
-      const size_t *src1_data_offsets = e->src1_data_offsets;
-      const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
+      const size_t *kernel_offsets = reinterpret_cast<const size_t *>(this + 1);
       char *child_src[2];
       for (size_t i = 0; i != field_count; ++i) {
-        ckernel_prefix *echild =
-            reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
+        ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(
+            reinterpret_cast<char *>(this) + kernel_offsets[i]);
         expr_single_t opchild = echild->get_function<expr_single_t>();
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];
@@ -146,18 +141,34 @@ namespace nd {
       *reinterpret_cast<int *>(dst) = true;
     }
 
-    static void not_equal(char *dst, char *const *src, ckernel_prefix *extra)
+    static void destruct(ckernel_prefix *self)
     {
-      char *eraw = reinterpret_cast<char *>(extra);
-      extra_type *e = reinterpret_cast<extra_type *>(extra);
-      size_t field_count = e->field_count;
-      const size_t *src0_data_offsets = e->src0_data_offsets;
-      const size_t *src1_data_offsets = e->src1_data_offsets;
+      extra_type *e = reinterpret_cast<extra_type *>(self);
       const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
+      size_t field_count = e->field_count;
+      for (size_t i = 0; i != field_count; ++i) {
+        self->destroy_child_ckernel(kernel_offsets[i]);
+      }
+    }
+  };
+
+  struct tuple_compare_inequality_kernel
+      : base_kernel<tuple_compare_equality_kernel, kernel_request_host, 2> {
+    typedef tuple_compare_equality_kernel extra_type;
+
+    size_t field_count;
+    const size_t *src0_data_offsets, *src1_data_offsets;
+    // After this are field_count sorting_less kernel offsets, for
+    // src0.field_i <op> src1.field_i
+    // with each 0 <= i < field_count
+
+    void single(char *dst, char *const *src)
+    {
+      const size_t *kernel_offsets = reinterpret_cast<const size_t *>(this + 1);
       char *child_src[2];
       for (size_t i = 0; i != field_count; ++i) {
-        ckernel_prefix *echild =
-            reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
+        ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(
+            reinterpret_cast<char *>(this) + kernel_offsets[i]);
         expr_single_t opchild = echild->get_function<expr_single_t>();
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];
