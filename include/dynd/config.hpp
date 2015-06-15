@@ -7,13 +7,12 @@
 
 #include <dynd/cmake_config.hpp>
 
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 #include <cstdlib>
-#include <stdlib.h>
+#include <cctype>
 #include <initializer_list>
 #include <limits>
-#include <stdint.h>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -38,9 +37,6 @@
 #else
 #define DYND_CONSTEXPR
 #endif
-
-#include <cmath>
-#include <cctype>
 
 // Workaround for a clang issue
 #define DYND_ISSPACE std::isspace

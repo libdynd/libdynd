@@ -54,8 +54,7 @@ public:
   }
 
   DYND_CUDA_HOST_DEVICE inline float16() {}
-  DYND_CUDA_HOST_DEVICE inline float16(const float16 &rhs)
-      : m_bits(rhs.m_bits)
+  DYND_CUDA_HOST_DEVICE inline float16(const float16 &rhs) : m_bits(rhs.m_bits)
   {
   }
   DYND_CUDA_HOST_DEVICE inline float16(float f, assign_error_mode errmode)
@@ -67,7 +66,7 @@ public:
   {
   }
 
-  float16(bool1) {}
+  DYND_CUDA_HOST_DEVICE float16(bool1 rhs) : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO) {}
 
   DYND_CUDA_HOST_DEVICE inline explicit float16(bool rhs)
       : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
