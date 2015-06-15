@@ -1086,12 +1086,11 @@ bool nd::array::equals_exact(const array &rhs) const
   } else if (get_type() != rhs.get_type()) {
     return false;
   } else if (get_ndim() == 0) {
-    /*
-        std::cout << this->get_type() << std::endl;
-        std::cout << rhs.get_type() << std::endl;
-        return (*this == rhs).as<bool>();
-    */
+    std::cout << this->get_type() << std::endl;
+    std::cout << rhs.get_type() << std::endl;
+    return (*this == rhs).as<bool>();
 
+/*
     ckernel_builder<kernel_request_host> k;
     make_comparison_kernel(&k, 0, get_type(), get_arrmeta(), rhs.get_type(),
                            rhs.get_arrmeta(), comparison_type_equal,
@@ -1102,6 +1101,7 @@ bool nd::array::equals_exact(const array &rhs) const
                                 rhs.get_readonly_originptr()};
     fn(reinterpret_cast<char *>(&dst), const_cast<char *const *>(src), k.get());
     return dst != 0;
+*/
   } else if (get_type().get_type_id() == var_dim_type_id) {
     // If there's a leading var dimension, convert it to strided and compare
     // (Note: this is an inefficient hack)
