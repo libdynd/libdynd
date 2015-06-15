@@ -110,10 +110,10 @@ namespace nd {
     }
   };
 
-  struct tuple_compare_equality_kernel {
+  struct tuple_compare_equality_kernel
+      : base_kernel<tuple_compare_equality_kernel, kernel_request_host, 2> {
     typedef tuple_compare_equality_kernel extra_type;
 
-    ckernel_prefix base;
     size_t field_count;
     const size_t *src0_data_offsets, *src1_data_offsets;
     // After this are field_count sorting_less kernel offsets, for

@@ -251,14 +251,14 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->get_at<nd::tuple_compare_equality_kernel>(root_ckb_offset);
     if (comptype == comparison_type_equal) {
-      e->base.set_function<expr_single_t>(
+      e->set_function<expr_single_t>(
           &nd::tuple_compare_equality_kernel::equal);
     }
     else {
-      e->base.set_function<expr_single_t>(
+      e->set_function<expr_single_t>(
           &nd::tuple_compare_equality_kernel::not_equal);
     }
-    e->base.destructor = &nd::tuple_compare_equality_kernel::destruct;
+    e->destructor = &nd::tuple_compare_equality_kernel::destruct;
     e->field_count = field_count;
     e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
     e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
