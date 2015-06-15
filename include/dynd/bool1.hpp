@@ -61,7 +61,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator<(bool1 lhs, T rhs)
 {
-  return static_cast<bool>(lhs) < rhs;
+  return static_cast<typename std::common_type<bool1, T>::type>(lhs) < rhs;
 }
 
 template <typename T>
