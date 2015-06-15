@@ -357,11 +357,11 @@ template <>
 class numeric_limits<dynd::int128> {
 public:
   static const bool is_specialized = true;
-  static dynd::int128 min() throw()
+  static dynd::int128 (min)() throw()
   {
     return dynd::int128(0x8000000000000000ULL, 0ULL);
   }
-  static dynd::int128 max() throw()
+  static dynd::int128 (max)() throw()
   {
     return dynd::int128(0x7fffffffffffffffULL, 0xffffffffffffffffULL);
   }
