@@ -191,11 +191,13 @@ namespace nd {
     size_t field_count;
     const size_t *src0_data_offsets, *src1_data_offsets;
 
-    ~equal_kernel()
+    static void destruct(ckernel_prefix *self)
     {
-      const size_t *kernel_offsets = reinterpret_cast<const size_t *>(this + 1);
+      extra_type *e = reinterpret_cast<extra_type *>(self);
+      const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
+      size_t field_count = e->field_count;
       for (size_t i = 0; i != field_count; ++i) {
-        this->destroy_child_ckernel(kernel_offsets[i]);
+        self->destroy_child_ckernel(kernel_offsets[i]);
       }
     }
 
