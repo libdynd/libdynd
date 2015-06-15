@@ -31,8 +31,11 @@ namespace nd {
 
 #elif defined(_MSC_VER)
 
-#pragma warning( disable : 4068 )
-#pragma warning( push )
+#pragma warning(disable : 4068)
+#pragma warning(push)
+
+#pragma warning(disable : 4018)
+#pragma warning(push)
 
 #endif
 
@@ -54,7 +57,8 @@ namespace nd {
 
 #elif defined(_MSC_VER)
 
-#pragma warning( pop)
+#pragma warning(pop)
+#pragma warning(pop)
 
 #endif
 
