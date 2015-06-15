@@ -244,41 +244,68 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
     }
   } else if (comptype == comparison_type_equal ||
              comptype == comparison_type_not_equal) {
-    inc_ckb_offset(ckb_offset, sizeof(nd::tuple_compare_equality_kernel) +
-                                   field_count * sizeof(size_t));
+//    inc_ckb_offset(ckb_offset, sizeof(nd::tuple_compare_equality_kernel) +
+  //                                 field_count * sizeof(size_t));
     reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
         ->reserve(ckb_offset + sizeof(ckernel_prefix));
-    nd::tuple_compare_equality_kernel *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->get_at<nd::tuple_compare_equality_kernel>(root_ckb_offset);
     if (comptype == comparison_type_equal) {
-      e->set_function<expr_single_t>(&nd::tuple_compare_equality_kernel::single_wrapper);
-      e->destructor = &nd::tuple_compare_equality_kernel::destruct;
+      nd::tuple_compare_equality_kernel *e =
+          nd::tuple_compare_equality_kernel::make(
+              ckb, kernel_request_host | kernel_request_single, ckb_offset);
+      inc_ckb_offset(ckb_offset, field_count * sizeof(size_t));
+      //      e->set_function<expr_single_t>(
+      //        &nd::tuple_compare_equality_kernel::single_wrapper);
+      //  e->destructor = &nd::tuple_compare_equality_kernel::destruct;
+      e->field_count = field_count;
+      e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
+      e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
+      size_t *field_kernel_offsets;
+      const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
+      for (size_t i = 0; i != field_count; ++i) {
+        const ndt::type &ft = bsd->get_field_type(i);
+        // Reserve space for the child, and save the offset to this
+        // field comparison kernel. Have to re-get
+        // the pointer because creating the field comparison kernel may
+        // move the memory.
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+            ->reserve(ckb_offset + sizeof(ckernel_prefix));
+        e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                ->get_at<nd::tuple_compare_equality_kernel>(root_ckb_offset);
+        field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
+        field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
+        const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
+        ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, field_arrmeta,
+                                            ft, field_arrmeta, comptype, ectx);
+      }
     } else {
-      e->set_function<expr_single_t>(
-          &nd::tuple_compare_inequality_kernel::single_wrapper);
-      e->destructor = &nd::tuple_compare_inequality_kernel::destruct;
-    }
-    e->field_count = field_count;
-    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
-    e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
-    size_t *field_kernel_offsets;
-    const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
-    for (size_t i = 0; i != field_count; ++i) {
-      const ndt::type &ft = bsd->get_field_type(i);
-      // Reserve space for the child, and save the offset to this
-      // field comparison kernel. Have to re-get
-      // the pointer because creating the field comparison kernel may
-      // move the memory.
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->reserve(ckb_offset + sizeof(ckernel_prefix));
-      e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-              ->get_at<nd::tuple_compare_equality_kernel>(root_ckb_offset);
-      field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
-      field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
-      const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
-      ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, field_arrmeta,
-                                          ft, field_arrmeta, comptype, ectx);
+      nd::tuple_compare_inequality_kernel *e =
+          nd::tuple_compare_inequality_kernel::make(
+              ckb, kernel_request_host | kernel_request_single, ckb_offset);
+      inc_ckb_offset(ckb_offset, field_count * sizeof(size_t));
+//      e->set_function<expr_single_t>(
+  //        &nd::tuple_compare_inequality_kernel::single_wrapper);
+    //  e->destructor = &nd::tuple_compare_inequality_kernel::destruct;
+      e->field_count = field_count;
+      e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
+      e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
+      size_t *field_kernel_offsets;
+      const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
+      for (size_t i = 0; i != field_count; ++i) {
+        const ndt::type &ft = bsd->get_field_type(i);
+        // Reserve space for the child, and save the offset to this
+        // field comparison kernel. Have to re-get
+        // the pointer because creating the field comparison kernel may
+        // move the memory.
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+            ->reserve(ckb_offset + sizeof(ckernel_prefix));
+        e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+                ->get_at<nd::tuple_compare_inequality_kernel>(root_ckb_offset);
+        field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
+        field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
+        const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
+        ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, field_arrmeta,
+                                            ft, field_arrmeta, comptype, ectx);
+      }
     }
     return ckb_offset;
   } else {

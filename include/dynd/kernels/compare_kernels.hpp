@@ -153,8 +153,8 @@ namespace nd {
   };
 
   struct tuple_compare_inequality_kernel
-      : base_kernel<tuple_compare_equality_kernel, kernel_request_host, 2> {
-    typedef tuple_compare_equality_kernel extra_type;
+      : base_kernel<tuple_compare_inequality_kernel, kernel_request_host, 2> {
+    typedef tuple_compare_inequality_kernel extra_type;
 
     size_t field_count;
     const size_t *src0_data_offsets, *src1_data_offsets;
