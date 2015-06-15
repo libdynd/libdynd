@@ -112,8 +112,8 @@ struct sign<int128> {
   }
 };
 template <>
-struct sign<dynd_uint128> {
-  inline dynd_uint128 operator()(const dynd_uint128 &x) const
+struct sign<uint128> {
+  inline uint128 operator()(const uint128 &x) const
   {
     return x == 0 ? 0 : 1;
   }

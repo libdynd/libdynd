@@ -460,7 +460,7 @@ uint64_t checked_string_to_uint64(const char *begin, const char *end,
  * trailing space, etc) into a uint128, setting the output over flow or
  * bad parse flags if there are problems.
  */
-dynd_uint128 checked_string_to_uint128(const char *begin, const char *end,
+uint128 checked_string_to_uint128(const char *begin, const char *end,
                                          bool &out_overflow, bool &out_badparse);
 
 /**
@@ -480,7 +480,7 @@ uint64_t unchecked_string_to_uint64(const char *begin, const char *end);
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc) into a uint128, ignoring any problems.
  */
-dynd_uint128 unchecked_string_to_uint128(const char *begin, const char *end);
+uint128 unchecked_string_to_uint128(const char *begin, const char *end);
 
 /**
  * Converts a string containing only a floating point number into
@@ -688,7 +688,7 @@ struct overflow_check<long long> {
 };
 template <>
 struct overflow_check<int128> {
-  inline static bool is_overflow(const dynd_uint128 &value, bool negative)
+  inline static bool is_overflow(const uint128 &value, bool negative)
   {
     return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
            !(negative && value.m_hi == 0x8000000000000000ULL &&

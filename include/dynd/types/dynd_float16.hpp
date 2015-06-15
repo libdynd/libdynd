@@ -31,7 +31,7 @@ class dynd_float128;
 class int128;
 #endif
 #if !defined(DYND_HAS_UINT128)
-class dynd_uint128;
+class uint128;
 #endif
 
 // Bit-level conversions
@@ -99,7 +99,7 @@ public:
   {
   }
   DYND_CUDA_HOST_DEVICE dynd_float16(const int128 &value);
-  DYND_CUDA_HOST_DEVICE dynd_float16(const dynd_uint128 &value);
+  DYND_CUDA_HOST_DEVICE dynd_float16(const uint128 &value);
   DYND_CUDA_HOST_DEVICE dynd_float16(const dynd_float128 &value);
 
   DYND_CUDA_HOST_DEVICE inline operator float() const
@@ -143,7 +143,7 @@ public:
     return (uint64_t)halfbits_to_float(m_bits);
   }
   DYND_CUDA_HOST_DEVICE operator int128() const;
-  DYND_CUDA_HOST_DEVICE operator dynd_uint128() const;
+  DYND_CUDA_HOST_DEVICE operator uint128() const;
   DYND_CUDA_HOST_DEVICE operator dynd_float128() const;
 
   DYND_CUDA_HOST_DEVICE inline uint16_t bits() const { return m_bits; }

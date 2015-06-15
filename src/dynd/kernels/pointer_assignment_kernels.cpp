@@ -26,34 +26,34 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
         value_to_pointer_ck<bool1>::make(ckb, kernreq, ckb_offset);
         break;
     case int8_type_id:
-        value_to_pointer_ck<int8_t>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<int8>::make(ckb, kernreq, ckb_offset);
         break;
     case int16_type_id:
-        value_to_pointer_ck<int16_t>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<int16>::make(ckb, kernreq, ckb_offset);
         break;
     case int32_type_id:
-        value_to_pointer_ck<int32_t>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<int32>::make(ckb, kernreq, ckb_offset);
         break;
     case int64_type_id:
-        value_to_pointer_ck<int64_t>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<int64>::make(ckb, kernreq, ckb_offset);
         break;
     case int128_type_id:
         value_to_pointer_ck<int128>::make(ckb, kernreq, ckb_offset);
         break;
     case uint8_type_id:
-        value_to_pointer_ck<uint8_t>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<uint8>::make(ckb, kernreq, ckb_offset);
         break;
     case uint16_type_id:
-        value_to_pointer_ck<uint16_t>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<uint16>::make(ckb, kernreq, ckb_offset);
         break;
     case uint32_type_id:
-        value_to_pointer_ck<uint32_t>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<uint32>::make(ckb, kernreq, ckb_offset);
         break;
     case uint64_type_id:
-        value_to_pointer_ck<uint64_t>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<uint64>::make(ckb, kernreq, ckb_offset);
         break;
     case uint128_type_id:
-        value_to_pointer_ck<dynd_uint128>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<uint128>::make(ckb, kernreq, ckb_offset);
         break;
     case float16_type_id:
         value_to_pointer_ck<dynd_float16>::make(ckb, kernreq, ckb_offset);

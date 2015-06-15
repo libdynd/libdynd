@@ -569,6 +569,15 @@ struct is_arithmetic {
   static const bool value = false;
 };
 
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+
 } // namespace dynd
 
 #include <dynd/bool1.hpp>
@@ -576,7 +585,7 @@ struct is_arithmetic {
 #include <dynd/types/dynd_float16.hpp>
 #include <dynd/types/dynd_float128.hpp>
 #include <dynd/int128.hpp>
-#include <dynd/types/dynd_uint128.hpp>
+#include <dynd/uint128.hpp>
 
 #ifdef DYND_CUDA
 
@@ -739,22 +748,22 @@ struct is_arithmetic<bool1> {
 };
 
 template <>
-struct is_arithmetic<int8_t> {
+struct is_arithmetic<int8> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<int16_t> {
+struct is_arithmetic<int16> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<int32_t> {
+struct is_arithmetic<int32> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<int64_t> {
+struct is_arithmetic<int64> {
   static const bool value = true;
 };
 
@@ -764,27 +773,27 @@ struct is_arithmetic<int128> {
 };
 
 template <>
-struct is_arithmetic<uint8_t> {
+struct is_arithmetic<uint8> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<uint16_t> {
+struct is_arithmetic<uint16> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<uint32_t> {
+struct is_arithmetic<uint32> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<uint64_t> {
+struct is_arithmetic<uint64> {
   static const bool value = true;
 };
 
 template <>
-struct is_arithmetic<dynd_uint128> {
+struct is_arithmetic<uint128> {
   static const bool value = true;
 };
 

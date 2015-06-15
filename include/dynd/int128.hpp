@@ -18,7 +18,7 @@ namespace dynd {
 class dynd_float128;
 #endif
 #if !defined(DYND_HAS_UINT128)
-class dynd_uint128;
+class uint128;
 #endif
 
 class dynd_float16;
@@ -87,7 +87,7 @@ public:
   }
   DYND_CUDA_HOST_DEVICE int128(float value);
   DYND_CUDA_HOST_DEVICE int128(double value);
-  DYND_CUDA_HOST_DEVICE int128(const dynd_uint128 &value);
+  DYND_CUDA_HOST_DEVICE int128(const uint128 &value);
   DYND_CUDA_HOST_DEVICE int128(const dynd_float16 &value);
   DYND_CUDA_HOST_DEVICE int128(const dynd_float128 &value);
 

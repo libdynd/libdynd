@@ -493,12 +493,12 @@ uint64_t parse::checked_string_to_uint64(const char *begin, const char *end,
                                           out_badparse);
 }
 
-dynd_uint128 parse::checked_string_to_uint128(const char *begin,
+uint128 parse::checked_string_to_uint128(const char *begin,
                                               const char *end,
                                               bool &out_overflow,
                                               bool &out_badparse)
 {
-  return checked_string_to_uint<dynd_uint128>(begin, end, out_overflow,
+  return checked_string_to_uint<uint128>(begin, end, out_overflow,
                                               out_badparse);
 }
 
@@ -533,10 +533,10 @@ uint64_t parse::unchecked_string_to_uint64(const char *begin, const char *end)
   return unchecked_string_to_uint<uint64_t>(begin, end);
 }
 
-dynd_uint128 parse::unchecked_string_to_uint128(const char *begin,
+uint128 parse::unchecked_string_to_uint128(const char *begin,
                                                 const char *end)
 {
-  return unchecked_string_to_uint<dynd_uint128>(begin, end);
+  return unchecked_string_to_uint<uint128>(begin, end);
 }
 
 inline static double make_double_nan(bool negative)
@@ -635,7 +635,7 @@ static inline void assign_signed_int_value(char *out_int, uint64_t uvalue,
   }
 }
 
-static inline void assign_signed_int128_value(char *out_int, dynd_uint128 uvalue,
+static inline void assign_signed_int128_value(char *out_int, uint128 uvalue,
                                     bool &negative, bool &overflow,
                                     bool &badparse)
 {
@@ -769,7 +769,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
                                        badparse);
       break;
     case int128_type_id: {
-      dynd_uint128 buvalue =
+      uint128 buvalue =
           parse::checked_string_to_uint128(begin, end, overflow, badparse);
       assign_signed_int128_value(out, buvalue, negative, overflow, badparse);
       break;
@@ -801,12 +801,12 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
       }
       break;
     case uint128_type_id: {
-      dynd_uint128 buvalue =
+      uint128 buvalue =
           parse::checked_string_to_uint128(begin, end, overflow, badparse);
       negative = negative && (buvalue != 0);
       overflow = overflow || negative;
       if (!overflow && !badparse) {
-        *reinterpret_cast<dynd_uint128 *>(out) = buvalue;
+        *reinterpret_cast<uint128 *>(out) = buvalue;
       }
       break;
     }
@@ -881,7 +881,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
                                               : static_cast<int64_t>(uvalue);
       break;
     case int128_type_id: {
-      dynd_uint128 buvalue = parse::unchecked_string_to_uint128(begin, end);
+      uint128 buvalue = parse::unchecked_string_to_uint128(begin, end);
       *reinterpret_cast<int128 *>(out) =
           negative ? -static_cast<int128>(buvalue)
                    : static_cast<int128>(buvalue);
@@ -907,9 +907,9 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
       *reinterpret_cast<uint64_t *>(out) = negative ? 0 : uvalue;
       break;
     case uint128_type_id: {
-      dynd_uint128 buvalue = parse::unchecked_string_to_uint128(begin, end);
-      *reinterpret_cast<dynd_uint128 *>(out) =
-          negative ? static_cast<dynd_uint128>(0) : buvalue;
+      uint128 buvalue = parse::unchecked_string_to_uint128(begin, end);
+      *reinterpret_cast<uint128 *>(out) =
+          negative ? static_cast<uint128>(0) : buvalue;
       break;
     }
     case float16_type_id: {

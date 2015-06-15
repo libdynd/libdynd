@@ -107,10 +107,10 @@ TEST(JSONParser, BuiltinsFromInteger) {
     n = parse_json(ndt::make_type<uint64_t>(), "3000000000");
     EXPECT_EQ(ndt::make_type<uint64_t>(), n.get_type());
     EXPECT_EQ(3000000000ULL, n.as<uint64_t>());
-    n = parse_json(ndt::make_type<dynd_uint128>(), "1234567890123456789012345678");
-    EXPECT_EQ(ndt::make_type<dynd_uint128>(), n.get_type());
-    EXPECT_EQ(0x3fd35ebULL, n.as<dynd_uint128>().m_hi);
-    EXPECT_EQ(0x6d797a91be38f34eULL, n.as<dynd_uint128>().m_lo);
+    n = parse_json(ndt::make_type<uint128>(), "1234567890123456789012345678");
+    EXPECT_EQ(ndt::make_type<uint128>(), n.get_type());
+    EXPECT_EQ(0x3fd35ebULL, n.as<uint128>().m_hi);
+    EXPECT_EQ(0x6d797a91be38f34eULL, n.as<uint128>().m_lo);
 }
 
 TEST(JSONParser, OptionInt) {
@@ -233,13 +233,13 @@ TEST(JSONParser, UnsignedIntegerLimits) {
     EXPECT_EQ(0u, n.as<uint64_t>());
     n = parse_json(ndt::make_type<uint64_t>(), "18446744073709551615");
     EXPECT_EQ(18446744073709551615ULL, n.as<uint64_t>());
-    n = parse_json(ndt::make_type<dynd_uint128>(), "0");
-    EXPECT_EQ(0u, n.as<dynd_uint128>());
-    n = parse_json(ndt::make_type<dynd_uint128>(), "-0");
-    EXPECT_EQ(0u, n.as<dynd_uint128>());
-    n = parse_json(ndt::make_type<dynd_uint128>(), "340282366920938463463374607431768211455");
-    EXPECT_EQ(0xffffffffffffffffULL, n.as<dynd_uint128>().m_lo);
-    EXPECT_EQ(0xffffffffffffffffULL, n.as<dynd_uint128>().m_hi);
+    n = parse_json(ndt::make_type<uint128>(), "0");
+    EXPECT_EQ(0u, n.as<uint128>());
+    n = parse_json(ndt::make_type<uint128>(), "-0");
+    EXPECT_EQ(0u, n.as<uint128>());
+    n = parse_json(ndt::make_type<uint128>(), "340282366920938463463374607431768211455");
+    EXPECT_EQ(0xffffffffffffffffULL, n.as<uint128>().m_lo);
+    EXPECT_EQ(0xffffffffffffffffULL, n.as<uint128>().m_hi);
     EXPECT_THROW(parse_json(ndt::make_type<uint8_t>(), "-1"), exception);
     EXPECT_THROW(parse_json(ndt::make_type<uint8_t>(), "256"), exception);
     EXPECT_THROW(parse_json(ndt::make_type<uint16_t>(), "-1"), exception);
@@ -248,8 +248,8 @@ TEST(JSONParser, UnsignedIntegerLimits) {
     EXPECT_THROW(parse_json(ndt::make_type<uint32_t>(), "4294967296"), exception);
     EXPECT_THROW(parse_json(ndt::make_type<uint64_t>(), "-1"), exception);
     EXPECT_THROW(parse_json(ndt::make_type<uint64_t>(), "18446744073709551616"), exception);
-    EXPECT_THROW(parse_json(ndt::make_type<dynd_uint128>(), "-1"), exception);
-    EXPECT_THROW(parse_json(ndt::make_type<dynd_uint128>(), "340282366920938463463374607431768211456"), exception);
+    EXPECT_THROW(parse_json(ndt::make_type<uint128>(), "-1"), exception);
+    EXPECT_THROW(parse_json(ndt::make_type<uint128>(), "340282366920938463463374607431768211456"), exception);
 }
 
 TEST(JSONParser, IntFromString) {

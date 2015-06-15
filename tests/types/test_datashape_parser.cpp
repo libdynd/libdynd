@@ -34,17 +34,17 @@ TEST(DataShapeParser, Basic)
 {
   EXPECT_EQ(ndt::make_type<void>(), ndt::type("void"));
   EXPECT_EQ(ndt::make_type<bool1>(), ndt::type("bool"));
-  EXPECT_EQ(ndt::make_type<int8_t>(), ndt::type("int8"));
-  EXPECT_EQ(ndt::make_type<int16_t>(), ndt::type("int16"));
-  EXPECT_EQ(ndt::make_type<int32_t>(), ndt::type("int32"));
-  EXPECT_EQ(ndt::make_type<int64_t>(), ndt::type("int64"));
+  EXPECT_EQ(ndt::make_type<int8>(), ndt::type("int8"));
+  EXPECT_EQ(ndt::make_type<int16>(), ndt::type("int16"));
+  EXPECT_EQ(ndt::make_type<int32>(), ndt::type("int32"));
+  EXPECT_EQ(ndt::make_type<int64>(), ndt::type("int64"));
   EXPECT_EQ(ndt::make_type<int128>(), ndt::type("int128"));
   EXPECT_EQ(ndt::make_type<intptr_t>(), ndt::type("intptr"));
-  EXPECT_EQ(ndt::make_type<uint8_t>(), ndt::type("uint8"));
-  EXPECT_EQ(ndt::make_type<uint16_t>(), ndt::type("uint16"));
-  EXPECT_EQ(ndt::make_type<uint32_t>(), ndt::type("uint32"));
-  EXPECT_EQ(ndt::make_type<uint64_t>(), ndt::type("uint64"));
-  EXPECT_EQ(ndt::make_type<dynd_uint128>(), ndt::type("uint128"));
+  EXPECT_EQ(ndt::make_type<uint8>(), ndt::type("uint8"));
+  EXPECT_EQ(ndt::make_type<uint16>(), ndt::type("uint16"));
+  EXPECT_EQ(ndt::make_type<uint32>(), ndt::type("uint32"));
+  EXPECT_EQ(ndt::make_type<uint64>(), ndt::type("uint64"));
+  EXPECT_EQ(ndt::make_type<uint128>(), ndt::type("uint128"));
   EXPECT_EQ(ndt::make_type<uintptr_t>(), ndt::type("uintptr"));
   EXPECT_EQ(ndt::make_type<dynd_float16>(), ndt::type("float16"));
   EXPECT_EQ(ndt::make_type<float>(), ndt::type("float32"));

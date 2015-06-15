@@ -25,7 +25,7 @@ public:
     }
   */
 
-  operator bool() const { return static_cast<bool>(m_value); }
+  operator bool() const { return m_value; }
 
   /*
     template <typename T,
