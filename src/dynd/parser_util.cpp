@@ -640,11 +640,11 @@ static inline void assign_signed_int128_value(char *out_int, dynd_uint128 uvalue
                                     bool &badparse)
 {
   overflow = overflow ||
-             parse::overflow_check<dynd_int128>::is_overflow(uvalue, negative);
+             parse::overflow_check<int128>::is_overflow(uvalue, negative);
   if (!overflow && !badparse) {
-    *reinterpret_cast<dynd_int128 *>(out_int) =
-        negative ? -static_cast<dynd_int128>(uvalue)
-                 : static_cast<dynd_int128>(uvalue);
+    *reinterpret_cast<int128 *>(out_int) =
+        negative ? -static_cast<int128>(uvalue)
+                 : static_cast<int128>(uvalue);
   }
 }
 
@@ -714,7 +714,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
       *reinterpret_cast<int64_t *>(out) = DYND_INT64_NA;
       return;
     case int128_type_id:
-      *reinterpret_cast<dynd_int128 *>(out) = DYND_INT128_NA;
+      *reinterpret_cast<int128 *>(out) = DYND_INT128_NA;
       return;
     case float16_type_id:
       *reinterpret_cast<uint16_t *>(out) = DYND_FLOAT16_NA_AS_UINT;
@@ -882,9 +882,9 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
       break;
     case int128_type_id: {
       dynd_uint128 buvalue = parse::unchecked_string_to_uint128(begin, end);
-      *reinterpret_cast<dynd_int128 *>(out) =
-          negative ? -static_cast<dynd_int128>(buvalue)
-                   : static_cast<dynd_int128>(buvalue);
+      *reinterpret_cast<int128 *>(out) =
+          negative ? -static_cast<int128>(buvalue)
+                   : static_cast<int128>(buvalue);
       break;
     }
     case uint8_type_id:

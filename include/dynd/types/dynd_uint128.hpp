@@ -19,7 +19,7 @@ namespace dynd {
 class dynd_float128;
 #endif
 #if !defined(DYND_HAS_INT128)
-class dynd_int128;
+class int128;
 #endif
 class dynd_float16;
 
@@ -34,6 +34,8 @@ public:
     DYND_CUDA_HOST_DEVICE inline dynd_uint128(uint64_t hi, uint64_t lo)
         : m_lo(lo), m_hi(hi) {}
 
+    DYND_CUDA_HOST_DEVICE dynd_uint128(bool1) {
+    }
     DYND_CUDA_HOST_DEVICE inline dynd_uint128(char value)
         : m_lo(value), m_hi(0ULL) {}
     DYND_CUDA_HOST_DEVICE inline dynd_uint128(signed char value)
@@ -58,7 +60,7 @@ public:
         : m_lo(value), m_hi(0ULL) {}
     DYND_CUDA_HOST_DEVICE dynd_uint128(float value);
     DYND_CUDA_HOST_DEVICE dynd_uint128(double value);
-    DYND_CUDA_HOST_DEVICE dynd_uint128(const dynd_int128& value);
+    DYND_CUDA_HOST_DEVICE dynd_uint128(const int128& value);
     DYND_CUDA_HOST_DEVICE dynd_uint128(const dynd_float16& value);
     DYND_CUDA_HOST_DEVICE dynd_uint128(const dynd_float128& value);
 

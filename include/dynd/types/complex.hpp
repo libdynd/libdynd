@@ -21,6 +21,10 @@ public:
   T m_real, m_imag;
   typedef T value_type;
 
+  complex(const bool1 &re) 
+    : m_real(re) {
+  }
+
   DYND_CUDA_HOST_DEVICE complex(const T &re = 0.0, const T &im = 0.0)
       : m_real(re), m_imag(im)
   {

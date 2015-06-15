@@ -449,7 +449,7 @@ uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
     0,                            sizeof(bool1),
     sizeof(int8_t),               sizeof(int16_t),
     sizeof(int32_t),              sizeof(int64_t),
-    sizeof(dynd_int128),          sizeof(uint8_t),
+    sizeof(int128),               sizeof(uint8_t),
     sizeof(uint16_t),             sizeof(uint32_t),
     sizeof(uint64_t),             sizeof(dynd_uint128),
     sizeof(dynd_float16),         sizeof(float),
@@ -458,8 +458,8 @@ uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
     0};
 
 uint8_t ndt::detail::builtin_kinds[builtin_type_id_count] = {
-    void_kind, bool_kind,    sint_kind,     sint_kind,  sint_kind,
-    sint_kind,  sint_kind,     uint_kind,    uint_kind, uint_kind,
+    void_kind, bool_kind,    sint_kind,    sint_kind, sint_kind,
+    sint_kind, sint_kind,    uint_kind,    uint_kind, uint_kind,
     uint_kind, uint_kind,    real_kind,    real_kind, real_kind,
     real_kind, complex_kind, complex_kind, void_kind};
 
@@ -470,7 +470,7 @@ uint8_t ndt::detail::builtin_data_alignments[builtin_type_id_count] = {
     scalar_align_of<int16_t>::value,
     scalar_align_of<int32_t>::value,
     scalar_align_of<int64_t>::value,
-    scalar_align_of<dynd_int128>::value,
+    scalar_align_of<int128>::value,
     1,
     scalar_align_of<uint16_t>::value,
     scalar_align_of<uint32_t>::value,

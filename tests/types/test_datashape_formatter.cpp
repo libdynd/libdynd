@@ -29,7 +29,7 @@ TEST(DataShapeFormatter, ArrayBuiltinAtoms) {
   EXPECT_EQ("int16", format_datashape(nd::array((int16_t)0), "", false));
   EXPECT_EQ("int32", format_datashape(nd::array((int32_t)0), "", false));
   EXPECT_EQ("int64", format_datashape(nd::array((int64_t)0), "", false));
-  EXPECT_EQ("int128", format_datashape(nd::array(dynd_int128(0)), "", false));
+  EXPECT_EQ("int128", format_datashape(nd::array(int128(0)), "", false));
   EXPECT_EQ("uint8", format_datashape(nd::array((uint8_t)0), "", false));
   EXPECT_EQ("uint16", format_datashape(nd::array((uint16_t)0), "", false));
   EXPECT_EQ("uint32", format_datashape(nd::array((uint32_t)0), "", false));

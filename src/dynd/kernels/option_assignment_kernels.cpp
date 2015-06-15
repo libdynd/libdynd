@@ -31,7 +31,7 @@ struct option_to_option_ck
     //       instead of having to go through a dst pointer
     ckernel_prefix *src_is_avail = get_child_ckernel();
     expr_single_t src_is_avail_fn = src_is_avail->get_function<expr_single_t>();
-    bool1 avail = false;
+    bool1 avail = bool1(false);
     src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
     if (avail) {
       // It's available, copy using value assignment
@@ -135,7 +135,7 @@ struct option_to_value_ck
     ckernel_prefix *value_assign = get_child_ckernel(m_value_assign_offset);
     expr_single_t value_assign_fn = value_assign->get_function<expr_single_t>();
     // Make sure it's not an NA
-    bool1 avail = false;
+    bool1 avail = bool1(false);
     src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
     if (!avail) {
       throw overflow_error("cannot assign an NA value to a non-option type");

@@ -19,6 +19,20 @@
 using namespace std;
 using namespace dynd;
 
+/*
+namespace std {
+template <>
+struct common_type<dynd::bool1, int> {
+  typedef int type;
+};
+
+template <>
+struct common_type<int, dynd::bool1> {
+  typedef int type;
+};
+}
+*/
+
 TEST(ArrayCompare, Bool)
 {
   // Equality
@@ -45,24 +59,24 @@ TEST(ArrayCompare, Bool)
       EXPECT_THROW((nd::array(false) > nd::array(true)), not_comparable_error);
 */
   // Compare Bool with other types
-/*
-  EXPECT_TRUE(nd::array(true) == nd::array(1));
-  EXPECT_TRUE(nd::array(true) == nd::array(1.f));
-  EXPECT_TRUE(nd::array(true) == nd::array(1.0));
-  EXPECT_TRUE(nd::array(true) == nd::array(dynd::complex<double>(1.0)));
-  EXPECT_TRUE(nd::array(false) == nd::array(0));
-  EXPECT_TRUE(nd::array(false) == nd::array(0.f));
-  EXPECT_TRUE(nd::array(false) == nd::array(0.0));
-  EXPECT_TRUE(nd::array(false) == nd::array(dynd::complex<double>()));
-  EXPECT_TRUE(nd::array(true) != nd::array(2));
-  EXPECT_TRUE(nd::array(true) != nd::array(2.f));
-  EXPECT_TRUE(nd::array(true) != nd::array(2.0));
-  EXPECT_TRUE(nd::array(true) != nd::array(dynd::complex<double>(1, 1)));
-  EXPECT_TRUE(nd::array(false) != nd::array(-1));
-  EXPECT_TRUE(nd::array(false) != nd::array(-1.f));
-  EXPECT_TRUE(nd::array(false) != nd::array(-1.0));
-  EXPECT_TRUE(nd::array(false) != nd::array(dynd::complex<double>(0, 1)));
-*/
+  /*
+    EXPECT_TRUE(nd::array(true) == nd::array(1));
+    EXPECT_TRUE(nd::array(true) == nd::array(1.f));
+    EXPECT_TRUE(nd::array(true) == nd::array(1.0));
+    EXPECT_TRUE(nd::array(true) == nd::array(dynd::complex<double>(1.0)));
+    EXPECT_TRUE(nd::array(false) == nd::array(0));
+    EXPECT_TRUE(nd::array(false) == nd::array(0.f));
+    EXPECT_TRUE(nd::array(false) == nd::array(0.0));
+    EXPECT_TRUE(nd::array(false) == nd::array(dynd::complex<double>()));
+    EXPECT_TRUE(nd::array(true) != nd::array(2));
+    EXPECT_TRUE(nd::array(true) != nd::array(2.f));
+    EXPECT_TRUE(nd::array(true) != nd::array(2.0));
+    EXPECT_TRUE(nd::array(true) != nd::array(dynd::complex<double>(1, 1)));
+    EXPECT_TRUE(nd::array(false) != nd::array(-1));
+    EXPECT_TRUE(nd::array(false) != nd::array(-1.f));
+    EXPECT_TRUE(nd::array(false) != nd::array(-1.0));
+    EXPECT_TRUE(nd::array(false) != nd::array(dynd::complex<double>(0, 1)));
+  */
 }
 
 TEST(ArrayCompare, EqualityIntUInt)

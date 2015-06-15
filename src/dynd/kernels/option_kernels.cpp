@@ -308,7 +308,7 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
     nd::is_avail_ck<int64_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int128_type_id:
-    nd::is_avail_ck<dynd_int128>::make(ckb, kernreq, ckb_offset);
+    nd::is_avail_ck<int128>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case float32_type_id:
     nd::is_avail_ck<float>::make(ckb, kernreq, ckb_offset);
@@ -355,7 +355,7 @@ intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
     nd::assign_na_ck<int64_t>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case int128_type_id:
-    nd::assign_na_ck<dynd_int128>::make(ckb, kernreq, ckb_offset);
+    nd::assign_na_ck<int128>::make(ckb, kernreq, ckb_offset);
     return ckb_offset;
   case float32_type_id:
     nd::assign_na_ck<float>::make(ckb, kernreq, ckb_offset);
@@ -381,7 +381,7 @@ const nd::array &kernels::get_option_builtin_nafunc(type_id_t tid)
   static nd::array i16na = nafunc<int16_t>::get();
   static nd::array i32na = nafunc<int32_t>::get();
   static nd::array i64na = nafunc<int64_t>::get();
-  static nd::array i128na = nafunc<dynd_int128>::get();
+  static nd::array i128na = nafunc<int128>::get();
   static nd::array f32na = nafunc<float>::get();
   static nd::array f64na = nafunc<double>::get();
   static nd::array cf32na = nafunc<dynd::complex<float>>::get();
@@ -423,7 +423,7 @@ const nd::array &kernels::get_option_builtin_pointer_nafunc(type_id_t tid)
   static nd::array i16na = nafunc<int16_t *>::get();
   static nd::array i32na = nafunc<int32_t *>::get();
   static nd::array i64na = nafunc<int64_t *>::get();
-  static nd::array i128na = nafunc<dynd_int128 *>::get();
+  static nd::array i128na = nafunc<int128 *>::get();
   static nd::array f32na = nafunc<float *>::get();
   static nd::array f64na = nafunc<double *>::get();
   static nd::array cf32na = nafunc<dynd::complex<float> *>::get();

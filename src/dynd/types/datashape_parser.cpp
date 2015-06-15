@@ -83,7 +83,7 @@ static const map<string, ndt::type> &builtin_types()
     bit["int32"] = ndt::make_type<int32_t>();
     bit["int"] = ndt::make_type<int32_t>();
     bit["int64"] = ndt::make_type<int64_t>();
-    bit["int128"] = ndt::make_type<dynd_int128>();
+    bit["int128"] = ndt::make_type<int128>();
     bit["intptr"] = ndt::make_type<intptr_t>();
     bit["uint8"] = ndt::make_type<uint8_t>();
     bit["uint16"] = ndt::make_type<uint16_t>();

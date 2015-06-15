@@ -807,7 +807,7 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream &o,
     print_as<int64_t, int64_t>(o, data);
     break;
   case int128_type_id:
-    print_as<dynd_int128, dynd_int128>(o, data);
+    print_as<int128, int128>(o, data);
     break;
   case uint8_type_id:
     print_as<uint8_t, uint32_t>(o, data);

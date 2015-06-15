@@ -38,7 +38,7 @@ size_t dynd::make_builtin_value_to_pointer_assignment_kernel(
         value_to_pointer_ck<int64_t>::make(ckb, kernreq, ckb_offset);
         break;
     case int128_type_id:
-        value_to_pointer_ck<dynd_int128>::make(ckb, kernreq, ckb_offset);
+        value_to_pointer_ck<int128>::make(ckb, kernreq, ckb_offset);
         break;
     case uint8_type_id:
         value_to_pointer_ck<uint8_t>::make(ckb, kernreq, ckb_offset);

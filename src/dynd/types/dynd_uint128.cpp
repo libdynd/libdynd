@@ -4,7 +4,7 @@
 //
 
 #include <dynd/types/dynd_uint128.hpp>
-#include <dynd/types/dynd_int128.hpp>
+#include <dynd/int128.hpp>
 #include <dynd/types/dynd_float16.hpp>
 
 #include <stdexcept>
@@ -47,12 +47,12 @@ dynd::dynd_uint128::dynd_uint128(double value)
 }
 
 #if defined(DYND_HAS_INT128)
-dynd::dynd_uint128::dynd_uint128(const dynd_int128& value)
+dynd::dynd_uint128::dynd_uint128(const int128& value)
     : m_lo((uint64_t)value), m_hi((uint64_t)(value >> 64))
 {
 }
 #else
-dynd::dynd_uint128::dynd_uint128(const dynd_int128& value)
+dynd::dynd_uint128::dynd_uint128(const int128& value)
     : m_lo(value.m_lo), m_hi(value.m_hi)
 {
 }

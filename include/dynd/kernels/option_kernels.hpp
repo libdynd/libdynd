@@ -135,7 +135,7 @@ namespace nd {
   };
 
   template <>
-  struct is_avail_ck<dynd_int128> : detail::is_avail_int_ck<dynd_int128> {
+  struct is_avail_ck<int128> : detail::is_avail_int_ck<int128> {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
@@ -304,7 +304,7 @@ namespace nd {
   };
 
   template <>
-  struct assign_na_ck<dynd_int128> : detail::assign_na_int_ck<dynd_int128> {
+  struct assign_na_ck<int128> : detail::assign_na_int_ck<int128> {
   };
 
   template <>

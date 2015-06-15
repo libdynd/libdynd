@@ -5,7 +5,7 @@
 
 #include <dynd/types/dynd_float16.hpp>
 #include <dynd/types/dynd_float128.hpp>
-#include <dynd/types/dynd_int128.hpp>
+#include <dynd/int128.hpp>
 #include <dynd/types/dynd_uint128.hpp>
 
 #include <sstream>
@@ -327,7 +327,7 @@ double dynd::halfbits_to_double(uint16_t h)
     }
 }
 
-dynd::dynd_float16::dynd_float16(const dynd_int128& value)
+dynd::dynd_float16::dynd_float16(const int128& value)
 {
     m_bits = double_to_halfbits((double)value, assign_error_nocheck);
 }
@@ -342,9 +342,9 @@ dynd::dynd_float16::dynd_float16(const dynd_float128& value)
     m_bits = double_to_halfbits(double(value), assign_error_nocheck);
 }
 
-dynd::dynd_float16::operator dynd_int128() const
+dynd::dynd_float16::operator int128() const
 {
-    return dynd_int128(int32_t(*this));
+    return int128(int32_t(*this));
 }
 dynd::dynd_float16::operator dynd_uint128() const
 {

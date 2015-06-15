@@ -98,7 +98,7 @@ namespace nd {
     array(int value);
     array(long value);
     array(long long value);
-    array(const dynd_int128 &value);
+    array(const int128 &value);
     array(unsigned char value);
     array(unsigned short value);
     array(unsigned int value);
@@ -828,7 +828,7 @@ namespace nd {
   nd::array array_rw(int value);
   nd::array array_rw(long value);
   nd::array array_rw(long long value);
-  nd::array array_rw(const dynd_int128 &value);
+  nd::array array_rw(const int128 &value);
   nd::array array_rw(unsigned char value);
   nd::array array_rw(unsigned short value);
   nd::array array_rw(unsigned int value);
@@ -909,7 +909,7 @@ namespace nd {
     typename std::enable_if<is_type_bool<T>::value, array_vals &>::type
     operator=(const T &rhs)
     {
-      bool1 v = rhs;
+      bool1 v(rhs);
       m_arr.val_assign(ndt::make_exact_type<bool1>(), NULL,
                        (const char *)&v);
       return *this;
@@ -968,7 +968,7 @@ namespace nd {
     typename std::enable_if<is_type_bool<T>::value, array_vals_at &>::type
     operator=(const T &rhs)
     {
-      bool1 v = rhs;
+      bool1 v(rhs);
       m_arr.val_assign(ndt::make_exact_type<bool1>(), NULL,
                        (const char *)&v);
       return *this;
@@ -1733,7 +1733,7 @@ namespace nd {
     struct array_as_helper<bool> {
       inline static bool as(const array &lhs, const eval::eval_context *ectx)
       {
-        return array_as_helper<bool1>::as(lhs, ectx);
+        return static_cast<bool>(array_as_helper<bool1>::as(lhs, ectx));
       }
     };
 

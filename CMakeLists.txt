@@ -183,7 +183,6 @@ set(libdynd_SRC
     src/dynd/types/datetime_util.cpp
     src/dynd/types/dynd_float16.cpp
     src/dynd/types/dynd_float128.cpp
-    src/dynd/types/dynd_int128.cpp
     src/dynd/types/dynd_uint128.cpp
     src/dynd/types/dim_fragment_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
@@ -256,7 +255,6 @@ set(libdynd_SRC
     include/dynd/types/dim_fragment_type.hpp
     include/dynd/types/dynd_float16.hpp
     include/dynd/types/dynd_float128.hpp
-    include/dynd/types/dynd_int128.hpp
     include/dynd/types/dynd_uint128.hpp
     include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/expr_type.hpp
@@ -475,6 +473,7 @@ set(libdynd_SRC
     src/dynd/asarray.cpp
     src/dynd/config.cpp
     src/dynd/dim_iter.cpp
+    src/dynd/int128.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
@@ -506,6 +505,7 @@ set(libdynd_SRC
     include/dynd/diagnostics.hpp
     include/dynd/dim_iter.hpp
     include/dynd/ensure_immutable_contig.hpp
+    include/dynd/int128.hpp
     include/dynd/math.hpp
     include/dynd/type.hpp
     include/dynd/type_sequence.hpp
@@ -560,7 +560,7 @@ if (DYND_CUDA)
             # Types
             src/dynd/types/dynd_float16.cpp
             src/dynd/types/dynd_float128.cpp
-            src/dynd/types/dynd_int128.cpp
+            src/dynd/int128.cpp
             src/dynd/types/dynd_uint128.cpp
             # Func
             src/dynd/func/arithmetic.cpp

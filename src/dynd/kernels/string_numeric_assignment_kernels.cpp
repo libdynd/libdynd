@@ -160,7 +160,7 @@ struct overflow_check<int64_t> {
   }
 };
 template <>
-struct overflow_check<dynd_int128> {
+struct overflow_check<int128> {
   inline static bool is_overflow(dynd_uint128 value, bool negative)
   {
     return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
@@ -290,30 +290,30 @@ static void string_to_int128_single(char *dst, char *const *src,
     s.erase(0, 1);
     negative = true;
   }
-  dynd_int128 result;
+  int128 result;
   if (e->errmode == assign_error_nocheck) {
     dynd_uint128 value =
         parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
-    result = negative ? static_cast<dynd_int128>(0)
-                      : static_cast<dynd_int128>(value);
+    result = negative ? static_cast<int128>(0)
+                      : static_cast<int128>(value);
   } else {
     bool overflow = false, badparse = false;
     dynd_uint128 value = parse::checked_string_to_uint128(
         s.data(), s.data() + s.size(), overflow, badparse);
     if (badparse) {
-      raise_string_cast_error(ndt::make_type<dynd_int128>(),
+      raise_string_cast_error(ndt::make_type<int128>(),
                               ndt::type(e->src_string_tp, true), e->src_arrmeta,
                               src[0]);
     } else if (overflow ||
-               overflow_check<dynd_int128>::is_overflow(value, negative)) {
-      raise_string_cast_overflow_error(ndt::make_type<dynd_int128>(),
+               overflow_check<int128>::is_overflow(value, negative)) {
+      raise_string_cast_overflow_error(ndt::make_type<int128>(),
                                        ndt::type(e->src_string_tp, true),
                                        e->src_arrmeta, src[0]);
     }
-    result = negative ? -static_cast<dynd_int128>(value)
-                      : static_cast<dynd_int128>(value);
+    result = negative ? -static_cast<int128>(value)
+                      : static_cast<int128>(value);
   }
-  *reinterpret_cast<dynd_int128 *>(dst) = result;
+  *reinterpret_cast<int128 *>(dst) = result;
 }
 
 static void string_to_uint128_single(char *dst, char *const *src,
@@ -329,7 +329,7 @@ static void string_to_uint128_single(char *dst, char *const *src,
     s.erase(0, 1);
     negative = true;
   }
-  dynd_int128 result;
+  int128 result;
   if (e->errmode == assign_error_nocheck) {
     result = parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
   } else {
@@ -337,7 +337,7 @@ static void string_to_uint128_single(char *dst, char *const *src,
     result = parse::checked_string_to_uint128(s.data(), s.data() + s.size(),
                                               overflow, badparse);
     if (badparse) {
-      raise_string_cast_error(ndt::make_type<dynd_int128>(),
+      raise_string_cast_error(ndt::make_type<int128>(),
                               ndt::type(e->src_string_tp, true), e->src_arrmeta,
                               src[0]);
     } else if (overflow || (negative && result != 0)) {

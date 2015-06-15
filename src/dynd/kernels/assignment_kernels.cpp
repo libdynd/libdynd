@@ -212,7 +212,7 @@ static nd::make_t assign_make[builtin_type_id_count - 2][builtin_type_id_count -
         ERROR_MODE_LEVEL(dst_type, int16_t),                                   \
         ERROR_MODE_LEVEL(dst_type, int32_t),                                   \
         ERROR_MODE_LEVEL(dst_type, int64_t),                                   \
-        ERROR_MODE_LEVEL(dst_type, dynd_int128),                               \
+        ERROR_MODE_LEVEL(dst_type, int128),                                    \
         ERROR_MODE_LEVEL(dst_type, uint8_t),                                   \
         ERROR_MODE_LEVEL(dst_type, uint16_t),                                  \
         ERROR_MODE_LEVEL(dst_type, uint32_t),                                  \
@@ -227,7 +227,7 @@ static nd::make_t assign_make[builtin_type_id_count - 2][builtin_type_id_count -
 
     SRC_TYPE_LEVEL(bool1),                SRC_TYPE_LEVEL(int8_t),
     SRC_TYPE_LEVEL(int16_t),              SRC_TYPE_LEVEL(int32_t),
-    SRC_TYPE_LEVEL(int64_t),              SRC_TYPE_LEVEL(dynd_int128),
+    SRC_TYPE_LEVEL(int64_t),              SRC_TYPE_LEVEL(int128),
     SRC_TYPE_LEVEL(uint8_t),              SRC_TYPE_LEVEL(uint16_t),
     SRC_TYPE_LEVEL(uint32_t),             SRC_TYPE_LEVEL(uint64_t),
     SRC_TYPE_LEVEL(dynd_uint128),         SRC_TYPE_LEVEL(dynd_float16),

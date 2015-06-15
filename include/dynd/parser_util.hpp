@@ -687,7 +687,7 @@ struct overflow_check<long long> {
   }
 };
 template <>
-struct overflow_check<dynd_int128> {
+struct overflow_check<int128> {
   inline static bool is_overflow(const dynd_uint128 &value, bool negative)
   {
     return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&

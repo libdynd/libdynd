@@ -38,7 +38,7 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::make_type<int16_t>(), ndt::type("int16"));
   EXPECT_EQ(ndt::make_type<int32_t>(), ndt::type("int32"));
   EXPECT_EQ(ndt::make_type<int64_t>(), ndt::type("int64"));
-  EXPECT_EQ(ndt::make_type<dynd_int128>(), ndt::type("int128"));
+  EXPECT_EQ(ndt::make_type<int128>(), ndt::type("int128"));
   EXPECT_EQ(ndt::make_type<intptr_t>(), ndt::type("intptr"));
   EXPECT_EQ(ndt::make_type<uint8_t>(), ndt::type("uint8"));
   EXPECT_EQ(ndt::make_type<uint16_t>(), ndt::type("uint16"));
