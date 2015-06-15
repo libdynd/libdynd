@@ -24,8 +24,17 @@ namespace nd {
     }
   };
 
+#if defined(__GNUC__)
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
+
+#elif defined(_MSC_VER)
+
+#pragma warning( disable : 4068 )
+#pragma warning( push )
+
+#endif
 
   template <type_id_t I0, type_id_t I1>
   struct less_kernel : base_comparison_kernel<less_kernel<I0, I1>> {
@@ -39,7 +48,15 @@ namespace nd {
     }
   };
 
+#if defined(__GNUC__)
+
 #pragma GCC diagnostic pop
+
+#elif defined(_MSC_VER)
+
+#pragma warning( pop)
+
+#endif
 
   template <type_id_t I0, type_id_t I1>
   struct less_equal_kernel : base_comparison_kernel<less_equal_kernel<I0, I1>> {
