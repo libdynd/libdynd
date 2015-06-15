@@ -119,6 +119,9 @@ public:
   operator std::complex<T>() const { return std::complex<T>(m_real, m_imag); }
 };
 
+typedef complex<float32> complex64;
+typedef complex<float64> complex128;
+
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE bool operator==(complex<T> lhs, complex<U> rhs)
 {

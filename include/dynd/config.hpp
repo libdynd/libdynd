@@ -583,7 +583,7 @@ typedef double float64;
 } // namespace dynd
 
 #include <dynd/bool1.hpp>
-#include <dynd/types/complex.hpp>
+#include <dynd/complex.hpp>
 #include <dynd/float16.hpp>
 #include <dynd/float128.hpp>
 #include <dynd/int128.hpp>

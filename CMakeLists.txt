@@ -237,7 +237,6 @@ set(libdynd_SRC
     include/dynd/types/categorical_type.hpp
     include/dynd/types/categorical_kind_type.hpp
     include/dynd/types/char_type.hpp
-    include/dynd/types/complex.hpp
     include/dynd/types/convert_type.hpp
     include/dynd/types/cuda_host_type.hpp
     include/dynd/types/cuda_device_type.hpp
@@ -499,6 +498,7 @@ set(libdynd_SRC
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/cling_all.hpp
+    include/dynd/complex.hpp
     include/dynd/diagnostics.hpp
     include/dynd/dim_iter.hpp
     include/dynd/ensure_immutable_contig.hpp

@@ -9,7 +9,6 @@
 #include <complex>
 
 #include <dynd/config.hpp>
-#include <dynd/types/complex.hpp>
 
 namespace dynd {
 
@@ -391,11 +390,11 @@ struct type_id_of<float128> {
   enum { value = float128_type_id };
 };
 template <>
-struct type_id_of<complex<float>> {
+struct type_id_of<complex64> {
   enum { value = complex_float32_type_id };
 };
 template <>
-struct type_id_of<complex<double>> {
+struct type_id_of<complex128> {
   enum { value = complex_float64_type_id };
 };
 template <>
@@ -478,11 +477,11 @@ struct type_of<float128_type_id> {
 };
 template <>
 struct type_of<complex_float32_type_id> {
-  typedef complex<float> type;
+  typedef complex64 type;
 };
 template <>
 struct type_of<complex_float64_type_id> {
-  typedef complex<double> type;
+  typedef complex128 type;
 };
 
 // Type trait for the kind
@@ -650,11 +649,11 @@ struct is_dynd_scalar<float128> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<complex<float>> {
+struct is_dynd_scalar<complex64> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<complex<double>> {
+struct is_dynd_scalar<complex128> {
   enum { value = true };
 };
 // Allow std::complex as scalars equivalent to dynd_complex
