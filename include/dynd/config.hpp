@@ -577,12 +577,14 @@ typedef uint8_t uint8;
 typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
+typedef float float32;
+typedef double float64;
 
 } // namespace dynd
 
 #include <dynd/bool1.hpp>
 #include <dynd/types/complex.hpp>
-#include <dynd/types/dynd_float16.hpp>
+#include <dynd/float16.hpp>
 #include <dynd/types/dynd_float128.hpp>
 #include <dynd/int128.hpp>
 #include <dynd/uint128.hpp>
@@ -798,7 +800,7 @@ struct is_arithmetic<uint128> {
 };
 
 template <>
-struct is_arithmetic<dynd_float16> {
+struct is_arithmetic<float16> {
   static const bool value = true;
 };
 

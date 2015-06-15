@@ -105,7 +105,7 @@ namespace nd {
     array(unsigned long value);
     array(unsigned long long value);
     array(const uint128 &value);
-    array(dynd_float16 value);
+    array(float16 value);
     array(float value);
     array(double value);
     array(const dynd_float128 &value);
@@ -835,7 +835,7 @@ namespace nd {
   nd::array array_rw(unsigned long value);
   nd::array array_rw(unsigned long long value);
   nd::array array_rw(const uint128 &value);
-  nd::array array_rw(dynd_float16 value);
+  nd::array array_rw(float16 value);
   nd::array array_rw(float value);
   nd::array array_rw(double value);
   nd::array array_rw(const dynd_float128 &value);

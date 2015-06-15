@@ -91,9 +91,9 @@ static const map<string, ndt::type> &builtin_types()
     bit["uint64"] = ndt::make_type<uint64>();
     bit["uint128"] = ndt::make_type<uint128>();
     bit["uintptr"] = ndt::make_type<uintptr_t>();
-    bit["float16"] = ndt::make_type<dynd_float16>();
-    bit["float32"] = ndt::make_type<float>();
-    bit["float64"] = ndt::make_type<double>();
+    bit["float16"] = ndt::make_type<float16>();
+    bit["float32"] = ndt::make_type<float32>();
+    bit["float64"] = ndt::make_type<float64>();
     bit["real"] = ndt::make_type<double>();
     bit["float128"] = ndt::make_type<dynd_float128>();
     bit["complex64"] = ndt::make_type<dynd::complex<float>>();
@@ -335,9 +335,9 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(proto_tp.extended<ndt::arrfunc_type>()->get_pos_type(0),
-                         proto_tp.extended<ndt::arrfunc_type>()->get_return_type(),
-                         adapt_op);
+  return ndt::make_adapt(
+      proto_tp.extended<ndt::arrfunc_type>()->get_pos_type(0),
+      proto_tp.extended<ndt::arrfunc_type>()->get_return_type(), adapt_op);
 }
 
 static string_encoding_t string_to_encoding(const char *error_begin,
@@ -372,8 +372,7 @@ static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
     string encoding_str;
     string_encoding_t encoding = string_encoding_utf_8;
     if (!parse_quoted_string(begin, end, encoding_str)) {
-      throw datashape_parse_error(saved_begin,
-                                  "expected a string encoding");
+      throw datashape_parse_error(saved_begin, "expected a string encoding");
     }
     encoding = string_to_encoding(saved_begin, encoding_str);
     if (!parse_token_ds(begin, end, ']')) {
@@ -534,7 +533,8 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
   }
 }
 
-// fixed_bytes_type : fixed_bytes[<size>] | fixed_bytes[<size>, align=<alignment>]
+// fixed_bytes_type : fixed_bytes[<size>] | fixed_bytes[<size>,
+// align=<alignment>]
 // This is called after 'fixed_bytes' is already matched
 static ndt::type parse_fixed_bytes_parameters(const char *&rbegin,
                                               const char *end)

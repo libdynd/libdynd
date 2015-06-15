@@ -21,7 +21,7 @@ class dynd_float128;
 #if !defined(DYND_HAS_INT128)
 class int128;
 #endif
-class dynd_float16;
+class float16;
 
 class uint128 {
 public:
@@ -83,7 +83,7 @@ public:
   DYND_CUDA_HOST_DEVICE uint128(float value);
   DYND_CUDA_HOST_DEVICE uint128(double value);
   DYND_CUDA_HOST_DEVICE uint128(const int128 &value);
-  DYND_CUDA_HOST_DEVICE uint128(const dynd_float16 &value);
+  DYND_CUDA_HOST_DEVICE uint128(const float16 &value);
   DYND_CUDA_HOST_DEVICE uint128(const dynd_float128 &value);
 
   DYND_CUDA_HOST_DEVICE inline bool operator==(const uint128 &rhs) const

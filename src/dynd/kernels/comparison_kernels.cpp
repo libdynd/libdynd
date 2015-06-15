@@ -55,8 +55,8 @@ static expr_single_t compare_kernel_table[builtin_type_id_count -
         INNER_LEVEL(src0_type, int64), INNER_LEVEL(src0_type, int128),         \
         INNER_LEVEL(src0_type, uint8), INNER_LEVEL(src0_type, uint16),         \
         INNER_LEVEL(src0_type, uint32), INNER_LEVEL(src0_type, uint64),        \
-        INNER_LEVEL(src0_type, uint128), INNER_LEVEL(src0_type, dynd_float16), \
-        INNER_LEVEL(src0_type, float), INNER_LEVEL(src0_type, double),         \
+        INNER_LEVEL(src0_type, uint128), INNER_LEVEL(src0_type, float16),      \
+        INNER_LEVEL(src0_type, float32), INNER_LEVEL(src0_type, float64),      \
         INNER_LEVEL(src0_type, dynd_float128),                                 \
         INNER_LEVEL(src0_type, dynd::complex<float>),                          \
         INNER_LEVEL(src0_type, dynd::complex<double>)                          \
@@ -65,10 +65,9 @@ static expr_single_t compare_kernel_table[builtin_type_id_count -
     SRC0_TYPE_LEVEL(bool1), SRC0_TYPE_LEVEL(int8), SRC0_TYPE_LEVEL(int16),
     SRC0_TYPE_LEVEL(int32), SRC0_TYPE_LEVEL(int64), SRC0_TYPE_LEVEL(int128),
     SRC0_TYPE_LEVEL(uint8), SRC0_TYPE_LEVEL(uint16), SRC0_TYPE_LEVEL(uint32),
-    SRC0_TYPE_LEVEL(uint64), SRC0_TYPE_LEVEL(uint128),
-    SRC0_TYPE_LEVEL(dynd_float16), SRC0_TYPE_LEVEL(float),
-    SRC0_TYPE_LEVEL(double), SRC0_TYPE_LEVEL(dynd_float128),
-    SRC0_TYPE_LEVEL(dynd::complex<float>),
+    SRC0_TYPE_LEVEL(uint64), SRC0_TYPE_LEVEL(uint128), SRC0_TYPE_LEVEL(float16),
+    SRC0_TYPE_LEVEL(float32), SRC0_TYPE_LEVEL(float64),
+    SRC0_TYPE_LEVEL(dynd_float128), SRC0_TYPE_LEVEL(dynd::complex<float>),
     SRC0_TYPE_LEVEL(dynd::complex<double>)
 #undef SRC0_TYPE_LEVEL
 #undef INNER_LEVEL

@@ -9,7 +9,6 @@
 #include <complex>
 
 #include <dynd/config.hpp>
-#include <dynd/types/dynd_float16.hpp>
 #include <dynd/types/dynd_float128.hpp>
 #include <dynd/types/complex.hpp>
 
@@ -377,7 +376,7 @@ struct type_id_of<uint128> {
   enum { value = uint128_type_id };
 };
 template <>
-struct type_id_of<dynd_float16> {
+struct type_id_of<float16> {
   enum { value = float16_type_id };
 };
 template <>
@@ -464,7 +463,7 @@ struct type_of<uint128_type_id> {
 };
 template <>
 struct type_of<float16_type_id> {
-  typedef dynd_float16 type;
+  typedef float16 type;
 };
 template <>
 struct type_of<float32_type_id> {
@@ -553,7 +552,7 @@ struct dynd_kind_of<uint128> {
   static const type_kind_t value = uint_kind;
 };
 template <>
-struct dynd_kind_of<dynd_float16> {
+struct dynd_kind_of<float16> {
   static const type_kind_t value = real_kind;
 };
 template <>
@@ -636,7 +635,7 @@ struct is_dynd_scalar<uint128> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<dynd_float16> {
+struct is_dynd_scalar<float16> {
   enum { value = true };
 };
 template <>

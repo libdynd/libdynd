@@ -35,7 +35,7 @@ TEST(DataShapeFormatter, ArrayBuiltinAtoms) {
   EXPECT_EQ("uint32", format_datashape(nd::array((uint32)0), "", false));
   EXPECT_EQ("uint64", format_datashape(nd::array((uint64)0), "", false));
   EXPECT_EQ("uint128", format_datashape(nd::array(uint128(0)), "", false));
-  EXPECT_EQ("float16", format_datashape(nd::array(dynd_float16(0.f, assign_error_nocheck)), "", false));
+  EXPECT_EQ("float16", format_datashape(nd::array(float16(0.f, assign_error_nocheck)), "", false));
   EXPECT_EQ("float32", format_datashape(nd::array(0.f), "", false));
   EXPECT_EQ("float64", format_datashape(nd::array(0.), "", false));
   EXPECT_EQ("complex[float32]", format_datashape(nd::array(dynd::complex<float>(0.f)), "", false));

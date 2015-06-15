@@ -452,8 +452,8 @@ uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
     sizeof(int128),               sizeof(uint8),
     sizeof(uint16),               sizeof(uint32),
     sizeof(uint64),               sizeof(uint128),
-    sizeof(dynd_float16),         sizeof(float),
-    sizeof(double),               sizeof(dynd_float128),
+    sizeof(float16),              sizeof(float32),
+    sizeof(float64),              sizeof(dynd_float128),
     sizeof(dynd::complex<float>), sizeof(dynd::complex<double>),
     0};
 
@@ -476,9 +476,9 @@ uint8_t ndt::detail::builtin_data_alignments[builtin_type_id_count] = {
     scalar_align_of<uint32>::value,
     scalar_align_of<uint64>::value,
     scalar_align_of<uint128>::value,
-    scalar_align_of<dynd_float16>::value,
-    scalar_align_of<float>::value,
-    scalar_align_of<double>::value,
+    scalar_align_of<float16>::value,
+    scalar_align_of<float32>::value,
+    scalar_align_of<float64>::value,
     scalar_align_of<dynd_float128>::value,
     scalar_align_of<dynd::complex<float>>::value,
     scalar_align_of<dynd::complex<double>>::value,

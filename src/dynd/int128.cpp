@@ -3,9 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/float16.hpp>
 #include <dynd/int128.hpp>
 #include <dynd/uint128.hpp>
-#include <dynd/types/dynd_float16.hpp>
 
 #include <stdexcept>
 #include <sstream>
@@ -64,7 +64,7 @@ dynd::int128::int128(const uint128& value)
 }
 #endif
 
-dynd::int128::int128(const dynd_float16& value)
+dynd::int128::int128(const float16& value)
     : m_lo((int64_t)value), m_hi(value.signbit_() ? 0xffffffffffffffffULL : 0UL)
 {
 }

@@ -406,7 +406,7 @@ static void string_to_float16_single(char *dst, char *const *src,
       reinterpret_cast<string_to_builtin_kernel *>(extra);
   double tmp;
   string_to_float64_single(reinterpret_cast<char *>(&tmp), src, extra);
-  *reinterpret_cast<dynd_float16 *>(dst) = dynd_float16(tmp, e->errmode);
+  *reinterpret_cast<float16 *>(dst) = float16(tmp, e->errmode);
 }
 
 static void string_to_float128_single(char *DYND_UNUSED(dst),

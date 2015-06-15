@@ -215,8 +215,9 @@ static nd::make_t assign_make[builtin_type_id_count - 2][builtin_type_id_count -
         ERROR_MODE_LEVEL(dst_type, uint32),                                    \
         ERROR_MODE_LEVEL(dst_type, uint64),                                    \
         ERROR_MODE_LEVEL(dst_type, uint128),                                   \
-        ERROR_MODE_LEVEL(dst_type, dynd_float16),                              \
-        ERROR_MODE_LEVEL(dst_type, float), ERROR_MODE_LEVEL(dst_type, double), \
+        ERROR_MODE_LEVEL(dst_type, float16),                                   \
+        ERROR_MODE_LEVEL(dst_type, float32),                                   \
+        ERROR_MODE_LEVEL(dst_type, float64),                                   \
         ERROR_MODE_LEVEL(dst_type, dynd_float128),                             \
         ERROR_MODE_LEVEL(dst_type, dynd::complex<float>),                      \
         ERROR_MODE_LEVEL(dst_type, dynd::complex<double>)                      \
@@ -227,8 +228,8 @@ static nd::make_t assign_make[builtin_type_id_count - 2][builtin_type_id_count -
     SRC_TYPE_LEVEL(int64),                SRC_TYPE_LEVEL(int128),
     SRC_TYPE_LEVEL(uint8),                SRC_TYPE_LEVEL(uint16),
     SRC_TYPE_LEVEL(uint32),               SRC_TYPE_LEVEL(uint64),
-    SRC_TYPE_LEVEL(uint128),              SRC_TYPE_LEVEL(dynd_float16),
-    SRC_TYPE_LEVEL(float),                SRC_TYPE_LEVEL(double),
+    SRC_TYPE_LEVEL(uint128),              SRC_TYPE_LEVEL(float16),
+    SRC_TYPE_LEVEL(float32),              SRC_TYPE_LEVEL(float64),
     SRC_TYPE_LEVEL(dynd_float128),        SRC_TYPE_LEVEL(dynd::complex<float>),
     SRC_TYPE_LEVEL(dynd::complex<double>)
 #undef SRC_TYPE_LEVEL

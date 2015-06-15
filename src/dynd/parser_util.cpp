@@ -812,7 +812,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
     }
     case float16_type_id: {
       double value = checked_string_to_float64(saved_begin, end, errmode);
-      *reinterpret_cast<uint16_t *>(out) = dynd_float16(value, errmode).bits();
+      *reinterpret_cast<uint16_t *>(out) = float16(value, errmode).bits();
       break;
     }
     case float32_type_id: {
@@ -914,7 +914,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin,
     }
     case float16_type_id: {
       double value = checked_string_to_float64(saved_begin, end, errmode);
-      *reinterpret_cast<uint16_t *>(out) = dynd_float16(value, errmode).bits();
+      *reinterpret_cast<uint16_t *>(out) = float16(value, errmode).bits();
       break;
     }
     case float32_type_id: {

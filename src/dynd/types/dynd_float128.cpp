@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/float16.hpp>
 #include <dynd/types/dynd_float128.hpp>
-#include <dynd/types/dynd_float16.hpp>
 
 #include <sstream>
 
@@ -180,7 +180,7 @@ dynd::dynd_float128::dynd_float128(const uint128& DYND_UNUSED(value))
 #endif
 }
 
-dynd::dynd_float128::dynd_float128(const dynd_float16& value)
+dynd::dynd_float128::dynd_float128(const float16& value)
 {
     *this = dynd_float128(double(value));
 }

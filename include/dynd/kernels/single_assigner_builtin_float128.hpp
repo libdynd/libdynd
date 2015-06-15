@@ -118,31 +118,31 @@ DYND_MAKE_WITH_KIND(complex_kind);
 
 // float16 -> float128
 template<>
-struct single_assigner_builtin_base<dynd_float128, dynd_float16, real_kind, real_kind, assign_error_nocheck>
-    : public single_assigner_builtin_base_error<dynd_float128, dynd_float16, assign_error_nocheck> {};
+struct single_assigner_builtin_base<dynd_float128, float16, real_kind, real_kind, assign_error_nocheck>
+    : public single_assigner_builtin_base_error<dynd_float128, float16, assign_error_nocheck> {};
 template<>
-struct single_assigner_builtin_base<dynd_float128, dynd_float16, real_kind, real_kind, assign_error_overflow>
-    : public single_assigner_builtin_base_error<dynd_float128, dynd_float16, assign_error_overflow> {};
+struct single_assigner_builtin_base<dynd_float128, float16, real_kind, real_kind, assign_error_overflow>
+    : public single_assigner_builtin_base_error<dynd_float128, float16, assign_error_overflow> {};
 template<>
-struct single_assigner_builtin_base<dynd_float128, dynd_float16, real_kind, real_kind, assign_error_fractional>
-    : public single_assigner_builtin_base_error<dynd_float128, dynd_float16, assign_error_fractional> {};
+struct single_assigner_builtin_base<dynd_float128, float16, real_kind, real_kind, assign_error_fractional>
+    : public single_assigner_builtin_base_error<dynd_float128, float16, assign_error_fractional> {};
 template<>
-struct single_assigner_builtin_base<dynd_float128, dynd_float16, real_kind, real_kind, assign_error_inexact>
-    : public single_assigner_builtin_base_error<dynd_float128, dynd_float16, assign_error_inexact> {};
+struct single_assigner_builtin_base<dynd_float128, float16, real_kind, real_kind, assign_error_inexact>
+    : public single_assigner_builtin_base_error<dynd_float128, float16, assign_error_inexact> {};
 
 
 // float128 -> float16
 template<>
-struct single_assigner_builtin_base<dynd_float16, dynd_float128, real_kind, real_kind, assign_error_nocheck>
-    : public single_assigner_builtin_base_error<dynd_float16, dynd_float128, assign_error_nocheck> {};
+struct single_assigner_builtin_base<float16, dynd_float128, real_kind, real_kind, assign_error_nocheck>
+    : public single_assigner_builtin_base_error<float16, dynd_float128, assign_error_nocheck> {};
 template<>
-struct single_assigner_builtin_base<dynd_float16, dynd_float128, real_kind, real_kind, assign_error_overflow>
-    : public single_assigner_builtin_base_error<dynd_float16, dynd_float128, assign_error_overflow> {};
+struct single_assigner_builtin_base<float16, dynd_float128, real_kind, real_kind, assign_error_overflow>
+    : public single_assigner_builtin_base_error<float16, dynd_float128, assign_error_overflow> {};
 template<>
-struct single_assigner_builtin_base<dynd_float16, dynd_float128, real_kind, real_kind, assign_error_fractional>
-    : public single_assigner_builtin_base_error<dynd_float16, dynd_float128, assign_error_fractional> {};
+struct single_assigner_builtin_base<float16, dynd_float128, real_kind, real_kind, assign_error_fractional>
+    : public single_assigner_builtin_base_error<float16, dynd_float128, assign_error_fractional> {};
 template<>
-struct single_assigner_builtin_base<dynd_float16, dynd_float128, real_kind, real_kind, assign_error_inexact>
-    : public single_assigner_builtin_base_error<dynd_float16, dynd_float128, assign_error_inexact> {};
+struct single_assigner_builtin_base<float16, dynd_float128, real_kind, real_kind, assign_error_inexact>
+    : public single_assigner_builtin_base_error<float16, dynd_float128, assign_error_inexact> {};
 
 #endif // !defined(DYND_HAS_FLOAT128)

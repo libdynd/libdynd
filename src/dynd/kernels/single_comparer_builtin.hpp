@@ -46,14 +46,14 @@ namespace dynd {
     struct big_type_helper<orig, orig, false> { \
         typedef orig type; \
     }
-DYND_FORCE_BIG_TYPE(dynd_float16, double);
+DYND_FORCE_BIG_TYPE(float16, double);
 DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     template<>
-    struct big_type_helper<dynd_float16, dynd_float128, false> {
+    struct big_type_helper<float16, dynd_float128, false> {
         typedef dynd_float128 type;
     };
     template<>
-    struct big_type_helper<dynd_float128, dynd_float16, true> {
+    struct big_type_helper<dynd_float128, float16, true> {
         typedef dynd_float128 type;
     };
     template<class S, class T>
@@ -319,8 +319,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<src0_type, dynd_float16, sint_kind, real_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const dynd_float16& v1)
+    struct op_eq<src0_type, float16, sint_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const float16& v1)
         {
             // Slower, but more rigorous test
             return v0 == static_cast<src0_type>(double(v1)) &&
@@ -339,8 +339,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<src0_type, dynd_float16, sint_kind, real_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const dynd_float16& v1)
+    struct op_ne<src0_type, float16, sint_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const float16& v1)
         {
             // Slower, but more rigorous test
             return v0 != static_cast<src0_type>(double(v1)) ||

@@ -46,9 +46,9 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::make_type<uint64>(), ndt::type("uint64"));
   EXPECT_EQ(ndt::make_type<uint128>(), ndt::type("uint128"));
   EXPECT_EQ(ndt::make_type<uintptr_t>(), ndt::type("uintptr"));
-  EXPECT_EQ(ndt::make_type<dynd_float16>(), ndt::type("float16"));
-  EXPECT_EQ(ndt::make_type<float>(), ndt::type("float32"));
-  EXPECT_EQ(ndt::make_type<double>(), ndt::type("float64"));
+  EXPECT_EQ(ndt::make_type<float16>(), ndt::type("float16"));
+  EXPECT_EQ(ndt::make_type<float32>(), ndt::type("float32"));
+  EXPECT_EQ(ndt::make_type<float64>(), ndt::type("float64"));
   EXPECT_EQ(ndt::make_type<dynd_float128>(), ndt::type("float128"));
   EXPECT_EQ(ndt::make_type<dynd::complex<float>>(), ndt::type("complex64"));
   EXPECT_EQ(ndt::make_type<dynd::complex<double>>(), ndt::type("complex128"));
