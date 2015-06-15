@@ -61,8 +61,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator<(bool1 lhs, T rhs)
 {
-  typedef typename std::common_type<bool1, T>::type U;
-  return static_cast<U>(lhs) < static_cast<U>(rhs);
+  return static_cast<T>(lhs) < rhs;
 }
 
 template <typename T>
@@ -70,8 +69,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator<(T lhs, bool1 rhs)
 {
-  typedef typename std::common_type<T, bool1>::type U;
-  return static_cast<U>(lhs) < static_cast<U>(rhs);
+  return lhs < static_cast<T>(rhs);
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator<=(bool1 lhs, bool1 rhs)
@@ -84,8 +82,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator<=(bool1 lhs, T rhs)
 {
-  typedef typename std::common_type<bool1, T>::type U;
-  return static_cast<U>(lhs) <= static_cast<U>(rhs);
+  return static_cast<T>(lhs) <= rhs;
 }
 
 template <typename T>
@@ -93,8 +90,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator<=(T lhs, bool1 rhs)
 {
-  typedef typename std::common_type<T, bool1>::type U;
-  return static_cast<U>(lhs) <= static_cast<U>(rhs);
+  return lhs <= static_cast<T>(rhs);
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator==(bool1 lhs, bool1 rhs)
@@ -107,8 +103,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator==(bool1 lhs, T rhs)
 {
-  typedef typename std::common_type<bool1, T>::type U;
-  return static_cast<U>(lhs) == static_cast<U>(rhs);
+  return static_cast<T>(lhs) == rhs;
 }
 
 template <typename T>
@@ -116,8 +111,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator==(T lhs, bool1 rhs)
 {
-  typedef typename std::common_type<T, bool1>::type U;
-  return static_cast<U>(lhs) == static_cast<U>(rhs);
+  return lhs == static_cast<T>(rhs);
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator!=(bool1 lhs, bool1 rhs)
@@ -130,8 +124,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator!=(bool1 lhs, T rhs)
 {
-  typedef typename std::common_type<bool1, T>::type U;
-  return static_cast<U>(lhs) != static_cast<U>(rhs);
+  return static_cast<T>(lhs) != rhs;
 }
 
 template <typename T>
@@ -139,8 +132,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator!=(T lhs, bool1 rhs)
 {
-  typedef typename std::common_type<T, bool1>::type U;
-  return static_cast<U>(lhs) != static_cast<bool>(rhs);
+  return lhs != static_cast<T>(rhs);
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator>=(bool1 lhs, bool1 rhs)
@@ -153,8 +145,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator>=(bool1 lhs, T rhs)
 {
-  typedef typename std::common_type<bool1, T>::type U;
-  return static_cast<U>(lhs) >= static_cast<U>(rhs);
+  return static_cast<T>(lhs) >= rhs;
 }
 
 template <typename T>
@@ -162,8 +153,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator>=(T lhs, bool1 rhs)
 {
-  typedef typename std::common_type<T, bool1>::type U;
-  return static_cast<U>(lhs) >= static_cast<U>(rhs);
+  return lhs >= static_cast<T>(rhs);
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator>(bool1 lhs, bool1 rhs)
@@ -176,8 +166,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator>(bool1 lhs, T rhs)
 {
-  typedef typename std::common_type<bool1, T>::type U;
-  return static_cast<U>(lhs) > static_cast<U>(rhs);
+  return static_cast<T>(lhs) > rhs;
 }
 
 template <typename T>
@@ -185,8 +174,7 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
                                               bool>::type
 operator>(T lhs, bool1 rhs)
 {
-  typedef typename std::common_type<T, bool1>::type U;
-  return static_cast<U>(lhs) > static_cast<U>(rhs);
+  return lhs > static_cast<T>(rhs);
 }
 
 } // namespace dynd
