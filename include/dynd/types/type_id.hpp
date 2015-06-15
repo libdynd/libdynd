@@ -483,6 +483,10 @@ template <>
 struct type_of<complex_float64_type_id> {
   typedef complex128 type;
 };
+template <>
+struct type_of<type_type_id> {
+  typedef ndt::type type;
+};
 
 // Type trait for the kind
 template <typename T>

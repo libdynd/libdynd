@@ -24,43 +24,30 @@ namespace nd {
     }
   };
 
-#if defined(__GNUC__)
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
-
-#elif defined(_MSC_VER)
-
-#pragma warning(disable : 4068)
-#pragma warning(push)
-
-#pragma warning(disable : 4018)
-#pragma warning(push)
-
-#endif
-
   template <type_id_t I0, type_id_t I1>
   struct less_kernel : base_comparison_kernel<less_kernel<I0, I1>> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
+    typedef typename std::common_type<A0, A1>::type T;
 
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<bool1 *>(dst) =
-          *reinterpret_cast<A0 *>(src[0]) < *reinterpret_cast<A1 *>(src[1]);
+          static_cast<T>(*reinterpret_cast<A0 *>(src[0])) <
+          static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
   };
 
-#if defined(__GNUC__)
+  template <type_id_t I0>
+  struct less_kernel<I0, I0> : base_comparison_kernel<less_kernel<I0, I0>> {
+    typedef typename type_of<I0>::type A0;
 
-#pragma GCC diagnostic pop
-
-#elif defined(_MSC_VER)
-
-#pragma warning(pop)
-#pragma warning(pop)
-
-#endif
+    void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<bool1 *>(dst) =
+          *reinterpret_cast<A0 *>(src[0]) < *reinterpret_cast<A0 *>(src[1]);
+    }
+  };
 
   template <type_id_t I0, type_id_t I1>
   struct less_equal_kernel : base_comparison_kernel<less_equal_kernel<I0, I1>> {
@@ -76,6 +63,18 @@ namespace nd {
     }
   };
 
+  template <type_id_t I0>
+  struct less_equal_kernel<I0, I0>
+      : base_comparison_kernel<less_equal_kernel<I0, I0>> {
+    typedef typename type_of<I0>::type A0;
+
+    void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<bool1 *>(dst) =
+          *reinterpret_cast<A0 *>(src[0]) <= *reinterpret_cast<A0 *>(src[1]);
+    }
+  };
+
   template <type_id_t I0, type_id_t I1>
   struct equal_kernel : base_comparison_kernel<equal_kernel<I0, I1>> {
     typedef typename type_of<I0>::type A0;
@@ -87,6 +86,17 @@ namespace nd {
       *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) ==
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
+    }
+  };
+
+  template <type_id_t I0>
+  struct equal_kernel<I0, I0> : base_comparison_kernel<equal_kernel<I0, I0>> {
+    typedef typename type_of<I0>::type A0;
+
+    void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<bool1 *>(dst) =
+          *reinterpret_cast<A0 *>(src[0]) == *reinterpret_cast<A0 *>(src[1]);
     }
   };
 
@@ -258,17 +268,6 @@ namespace nd {
     */
   };
 
-  template <>
-  struct equal_kernel<type_type_id, type_type_id>
-      : base_comparison_kernel<equal_kernel<type_type_id, type_type_id>> {
-    void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<bool1 *>(dst) =
-          *reinterpret_cast<ndt::type *>(src[0]) ==
-          *reinterpret_cast<ndt::type *>(src[1]);
-    }
-  };
-
   template <type_id_t I0, type_id_t I1>
   struct not_equal_kernel : base_comparison_kernel<not_equal_kernel<I0, I1>> {
     typedef typename type_of<I0>::type A0;
@@ -283,14 +282,15 @@ namespace nd {
     }
   };
 
-  template <>
-  struct not_equal_kernel<type_type_id, type_type_id>
-      : base_comparison_kernel<not_equal_kernel<type_type_id, type_type_id>> {
+  template <type_id_t I0>
+  struct not_equal_kernel<I0, I0>
+      : base_comparison_kernel<not_equal_kernel<I0, I0>> {
+    typedef typename type_of<I0>::type A0;
+
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<bool1 *>(dst) =
-          *reinterpret_cast<ndt::type *>(src[0]) !=
-          *reinterpret_cast<ndt::type *>(src[1]);
+          *reinterpret_cast<A0 *>(src[0]) != *reinterpret_cast<A0 *>(src[1]);
     }
   };
 
@@ -309,6 +309,18 @@ namespace nd {
     }
   };
 
+  template <type_id_t I0>
+  struct greater_equal_kernel<I0, I0>
+      : base_comparison_kernel<greater_equal_kernel<I0, I0>> {
+    typedef typename type_of<I0>::type A0;
+
+    void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<bool1 *>(dst) =
+          *reinterpret_cast<A0 *>(src[0]) >= *reinterpret_cast<A0 *>(src[1]);
+    }
+  };
+
   template <type_id_t I0, type_id_t I1>
   struct greater_kernel : base_comparison_kernel<greater_kernel<I0, I1>> {
     typedef typename type_of<I0>::type A0;
@@ -320,6 +332,18 @@ namespace nd {
       *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) >
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
+    }
+  };
+
+  template <type_id_t I0>
+  struct greater_kernel<I0, I0>
+      : base_comparison_kernel<greater_kernel<I0, I0>> {
+    typedef typename type_of<I0>::type A0;
+
+    void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<bool1 *>(dst) =
+          *reinterpret_cast<A0 *>(src[0]) > *reinterpret_cast<A0 *>(src[1]);
     }
   };
 
