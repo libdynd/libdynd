@@ -24,19 +24,22 @@ namespace nd {
     }
   };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
   template <type_id_t I0, type_id_t I1>
   struct less_kernel : base_comparison_kernel<less_kernel<I0, I1>> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
-    typedef typename std::common_type<A0, A1>::type T;
 
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<bool1 *>(dst) =
-          static_cast<T>(*reinterpret_cast<A0 *>(src[0])) <
-          static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
+          *reinterpret_cast<A0 *>(src[0]) < *reinterpret_cast<A1 *>(src[1]);
     }
   };
+
+#pragma GCC diagnostic pop
 
   template <type_id_t I0, type_id_t I1>
   struct less_equal_kernel : base_comparison_kernel<less_equal_kernel<I0, I1>> {

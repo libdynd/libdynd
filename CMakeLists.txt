@@ -554,6 +554,9 @@ source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
+#set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
+#set_source_files_properties(src/dynd/func/comparison.cpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
+
 if (DYND_CUDA)
     # Replace some source files with their CUDA versions
     foreach(filename_CPP
