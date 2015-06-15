@@ -25,7 +25,7 @@ public:
     }
   */
 
-  operator bool() const { return m_value; }
+  operator bool() const { return m_value != 0; }
 
   /*
     template <typename T,
