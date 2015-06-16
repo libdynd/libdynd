@@ -202,10 +202,57 @@ namespace nd {
     }
   };
 
+  template <typename T>
+  struct string_less_kernel : base_kernel<string_less_kernel<T>, kernel_request_host, 2> {
+    void single(char *dst, char *const *src) {
+      const string_type_data *da =
+        reinterpret_cast<const string_type_data *>(src[0]);
+      const string_type_data *db =
+        reinterpret_cast<const string_type_data *>(src[1]);
+      *reinterpret_cast<int *>(dst) =
+        std::lexicographical_compare(reinterpret_cast<const T *>(da->begin),
+                                reinterpret_cast<const T *>(da->end),
+                                reinterpret_cast<const T *>(db->begin),
+                                reinterpret_cast<const T *>(db->end));
+    }
+  };
+
   template <>
   struct less_kernel<string_type_id, string_type_id>
-      : base_comparison_kernel<less_kernel<string_type_id, string_type_id>> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
+      : base_virtual_kernel<
+            less_kernel<string_type_id, string_type_id>> {
+    static intptr_t
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+                char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
+                const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
+      case string_encoding_ascii:
+      case string_encoding_utf_8:
+        return string_less_kernel<uint8_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_16:
+        return string_less_kernel<uint16_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_32:
+        return string_less_kernel<uint32_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      default:
+        throw std::runtime_error("unidentified string encoding");
+      }
+    }
+
+    static ndt::type make_type()
+    {
+      return ndt::type("(string, string) -> int32");
+    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -395,11 +442,57 @@ namespace nd {
     }
   };
 
+  template <typename T>
+  struct string_less_equal_kernel : base_kernel<string_less_equal_kernel<T>, kernel_request_host, 2> {
+    void single(char *dst, char *const *src) {
+      const string_type_data *da =
+        reinterpret_cast<const string_type_data *>(src[0]);
+      const string_type_data *db =
+        reinterpret_cast<const string_type_data *>(src[1]);
+      *reinterpret_cast<int *>(dst) =
+        !std::lexicographical_compare(reinterpret_cast<const T *>(db->begin),
+                                 reinterpret_cast<const T *>(db->end),
+                                 reinterpret_cast<const T *>(da->begin),
+                                 reinterpret_cast<const T *>(da->end));
+    }
+  };
+
   template <>
   struct less_equal_kernel<string_type_id, string_type_id>
-      : base_comparison_kernel<
+      : base_virtual_kernel<
             less_equal_kernel<string_type_id, string_type_id>> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
+    static intptr_t
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+                char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
+                const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
+      case string_encoding_ascii:
+      case string_encoding_utf_8:
+        return string_less_equal_kernel<uint8_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_16:
+        return string_less_equal_kernel<uint16_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_32:
+        return string_less_equal_kernel<uint32_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      default:
+        throw std::runtime_error("unidentified string encoding");
+      }
+    }
+
+    static ndt::type make_type()
+    {
+      return ndt::type("(string, string) -> int32");
+    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -427,10 +520,56 @@ namespace nd {
     }
   };
 
+  template <typename T>
+  struct string_equal_kernel : base_kernel<string_equal_kernel<T>, kernel_request_host, 2> {
+    void single(char *dst, char *const *src) {
+      const string_type_data *da =
+        reinterpret_cast<const string_type_data *>(src[0]);
+      const string_type_data *db =
+        reinterpret_cast<const string_type_data *>(src[1]);
+      *reinterpret_cast<int *>(dst) =
+        (da->end - da->begin == db->end - db->begin) &&
+        memcmp(da->begin, db->begin, da->end - da->begin) == 0;
+
+    }
+  };
+
   template <>
   struct equal_kernel<string_type_id, string_type_id>
-      : base_comparison_kernel<equal_kernel<string_type_id, string_type_id>> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
+      : base_virtual_kernel<
+            equal_kernel<string_type_id, string_type_id>> {
+    static intptr_t
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+                char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
+                const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
+      case string_encoding_ascii:
+      case string_encoding_utf_8:
+        return string_equal_kernel<uint8_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_16:
+        return string_equal_kernel<uint16_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_32:
+        return string_equal_kernel<uint32_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      default:
+        throw std::runtime_error("unidentified string encoding");
+      }
+    }
+
+    static ndt::type make_type()
+    {
+      return ndt::type("(string, string) -> int32");
+    }
   };
 
   template <string_encoding_t E>
@@ -721,13 +860,6 @@ namespace nd {
     }
   };
 
-  template <>
-  struct not_equal_kernel<string_type_id, string_type_id>
-      : base_comparison_kernel<
-            not_equal_kernel<string_type_id, string_type_id>> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
-  };
-
   template <string_encoding_t E>
   struct fixed_string_not_equal_kernel;
 
@@ -895,6 +1027,57 @@ namespace nd {
     }
   };
 
+  template <typename T>
+  struct string_not_equal_kernel : base_kernel<string_not_equal_kernel<T>, kernel_request_host, 2> {
+    void single(char *dst, char *const *src) {
+      const string_type_data *da =
+        reinterpret_cast<const string_type_data *>(src[0]);
+      const string_type_data *db =
+        reinterpret_cast<const string_type_data *>(src[1]);
+      *reinterpret_cast<int *>(dst) =
+        (da->end - da->begin != db->end - db->begin) ||
+        memcmp(da->begin, db->begin, da->end - da->begin) != 0;
+    }
+  };
+
+  template <>
+  struct not_equal_kernel<string_type_id, string_type_id>
+      : base_virtual_kernel<
+            not_equal_kernel<string_type_id, string_type_id>> {
+    static intptr_t
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+                char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
+                const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
+      case string_encoding_ascii:
+      case string_encoding_utf_8:
+        return string_not_equal_kernel<uint8_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_16:
+        return string_not_equal_kernel<uint16_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_32:
+        return string_not_equal_kernel<uint32_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      default:
+        throw std::runtime_error("unidentified string encoding");
+      }
+    }
+
+    static ndt::type make_type()
+    {
+      return ndt::type("(string, string) -> int32");
+    }
+  };
+
   template <>
   struct not_equal_kernel<tuple_type_id, tuple_type_id>
       : base_comparison_kernel<not_equal_kernel<tuple_type_id, tuple_type_id>> {
@@ -1017,11 +1200,57 @@ namespace nd {
     }
   };
 
+  template <typename T>
+  struct string_greater_equal_kernel : base_kernel<string_greater_equal_kernel<T>, kernel_request_host, 2> {
+    void single(char *dst, char *const *src) {
+      const string_type_data *da =
+        reinterpret_cast<const string_type_data *>(src[0]);
+      const string_type_data *db =
+        reinterpret_cast<const string_type_data *>(src[1]);
+      *reinterpret_cast<int *>(dst) =
+        !std::lexicographical_compare(reinterpret_cast<const T *>(da->begin),
+                                 reinterpret_cast<const T *>(da->end),
+                                 reinterpret_cast<const T *>(db->begin),
+                                 reinterpret_cast<const T *>(db->end));
+    }
+  };
+
   template <>
   struct greater_equal_kernel<string_type_id, string_type_id>
-      : base_comparison_kernel<
+      : base_virtual_kernel<
             greater_equal_kernel<string_type_id, string_type_id>> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
+    static intptr_t
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+                char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
+                const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
+      case string_encoding_ascii:
+      case string_encoding_utf_8:
+        return string_greater_equal_kernel<uint8_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_16:
+        return string_greater_equal_kernel<uint16_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_32:
+        return string_greater_equal_kernel<uint32_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      default:
+        throw std::runtime_error("unidentified string encoding");
+      }
+    }
+
+    static ndt::type make_type()
+    {
+      return ndt::type("(string, string) -> int32");
+    }
   };
 
   template <string_encoding_t E>
@@ -1211,10 +1440,57 @@ namespace nd {
     }
   };
 
+  template <typename T>
+  struct string_greater_kernel : base_kernel<string_greater_kernel<T>, kernel_request_host, 2> {
+    void single(char *dst, char *const *src) {
+      const string_type_data *da =
+        reinterpret_cast<const string_type_data *>(src[0]);
+      const string_type_data *db =
+        reinterpret_cast<const string_type_data *>(src[1]);
+      *reinterpret_cast<int *>(dst) =
+        std::lexicographical_compare(reinterpret_cast<const T *>(db->begin),
+                                reinterpret_cast<const T *>(db->end),
+                                reinterpret_cast<const T *>(da->begin),
+                                reinterpret_cast<const T *>(da->end));
+    }
+  };
+
   template <>
   struct greater_kernel<string_type_id, string_type_id>
-      : base_comparison_kernel<greater_kernel<string_type_id, string_type_id>> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
+      : base_virtual_kernel<
+            greater_kernel<string_type_id, string_type_id>> {
+    static intptr_t
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+                char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
+                const std::map<nd::string, ndt::type> &tp_vars)
+    {
+      switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
+      case string_encoding_ascii:
+      case string_encoding_utf_8:
+        return string_greater_kernel<uint8_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_16:
+        return string_greater_kernel<uint16_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      case string_encoding_utf_32:
+        return string_greater_kernel<uint32_t>::instantiate(
+            self, self_tp, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      default:
+        throw std::runtime_error("unidentified string encoding");
+      }
+    }
+
+    static ndt::type make_type()
+    {
+      return ndt::type("(string, string) -> int32");
+    }
   };
 
   template <string_encoding_t E>
