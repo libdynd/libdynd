@@ -244,22 +244,23 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
     }
   } else if (comptype == comparison_type_equal ||
              comptype == comparison_type_not_equal) {
-//    inc_ckb_offset(ckb_offset, sizeof(nd::tuple_compare_equality_kernel) +
-  //                                 field_count * sizeof(size_t));
-//    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-  //      ->reserve(ckb_offset + sizeof(ckernel_prefix));
+    //    inc_ckb_offset(ckb_offset, sizeof(nd::tuple_compare_equality_kernel) +
+    //                                 field_count * sizeof(size_t));
+    //    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+    //      ->reserve(ckb_offset + sizeof(ckernel_prefix));
     if (comptype == comparison_type_equal) {
       nd::tuple_compare_equality_kernel *e =
           nd::tuple_compare_equality_kernel::make(
-              ckb, kernel_request_host | kernel_request_single, ckb_offset);
-      e = nd::tuple_compare_equality_kernel::reserve(ckb, kernel_request_host | kernel_request_single, ckb_offset, field_count * sizeof(size_t));
+              ckb, kernel_request_host | kernel_request_single, ckb_offset,
+              field_count, bsd->get_data_offsets(src0_arrmeta),
+              bsd->get_data_offsets(src1_arrmeta));
+      e = nd::tuple_compare_equality_kernel::reserve(
+          ckb, kernel_request_host | kernel_request_single, ckb_offset,
+          field_count * sizeof(size_t));
       inc_ckb_offset(ckb_offset, field_count * sizeof(size_t));
-      //      e->set_function<expr_single_t>(
-      //        &nd::tuple_compare_equality_kernel::single_wrapper);
-      //  e->destructor = &nd::tuple_compare_equality_kernel::destruct;
-      e->field_count = field_count;
-      e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
-      e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
+      //      e->field_count = field_count;
+      //    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
+      //  e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
       size_t *field_kernel_offsets;
       const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
       for (size_t i = 0; i != field_count; ++i) {
@@ -281,15 +282,16 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
     } else {
       nd::tuple_compare_inequality_kernel *e =
           nd::tuple_compare_inequality_kernel::make(
-              ckb, kernel_request_host | kernel_request_single, ckb_offset);
-      e = nd::tuple_compare_inequality_kernel::reserve(ckb, kernel_request_host | kernel_request_single, ckb_offset, field_count * sizeof(size_t));
+              ckb, kernel_request_host | kernel_request_single, ckb_offset,
+              field_count, bsd->get_data_offsets(src0_arrmeta),
+              bsd->get_data_offsets(src1_arrmeta));
+      e = nd::tuple_compare_inequality_kernel::reserve(
+          ckb, kernel_request_host | kernel_request_single, ckb_offset,
+          field_count * sizeof(size_t));
       inc_ckb_offset(ckb_offset, field_count * sizeof(size_t));
-//      e->set_function<expr_single_t>(
-  //        &nd::tuple_compare_inequality_kernel::single_wrapper);
-    //  e->destructor = &nd::tuple_compare_inequality_kernel::destruct;
-      e->field_count = field_count;
-      e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
-      e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
+      //      e->field_count = field_count;
+      //    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
+      //  e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
       size_t *field_kernel_offsets;
       const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
       for (size_t i = 0; i != field_count; ++i) {

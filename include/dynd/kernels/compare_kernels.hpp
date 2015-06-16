@@ -120,6 +120,14 @@ namespace nd {
     // src0.field_i <op> src1.field_i
     // with each 0 <= i < field_count
 
+    tuple_compare_equality_kernel(size_t field_count,
+                                  const size_t *src0_data_offsets,
+                                  const size_t *src1_data_offsets)
+        : field_count(field_count), src0_data_offsets(src0_data_offsets),
+          src1_data_offsets(src1_data_offsets)
+    {
+    }
+
     void single(char *dst, char *const *src)
     {
       const size_t *kernel_offsets = reinterpret_cast<const size_t *>(this + 1);
@@ -161,6 +169,14 @@ namespace nd {
     // After this are field_count sorting_less kernel offsets, for
     // src0.field_i <op> src1.field_i
     // with each 0 <= i < field_count
+
+    tuple_compare_inequality_kernel(size_t field_count,
+                                  const size_t *src0_data_offsets,
+                                  const size_t *src1_data_offsets)
+        : field_count(field_count), src0_data_offsets(src0_data_offsets),
+          src1_data_offsets(src1_data_offsets)
+    {
+    }
 
     void single(char *dst, char *const *src)
     {
