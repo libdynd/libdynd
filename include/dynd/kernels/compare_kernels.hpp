@@ -20,7 +20,7 @@ namespace nd {
     static ndt::type make_type()
     {
       return ndt::arrfunc_type::make({ndt::type(I0), ndt::type(I1)},
-                                     ndt::make_type<bool1>());
+                                     ndt::make_type<int>());
     }
   };
 
@@ -32,7 +32,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) <
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -44,7 +44,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) < *reinterpret_cast<A0 *>(src[1]);
     }
   };
@@ -57,7 +57,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) <=
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -70,7 +70,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) <= *reinterpret_cast<A0 *>(src[1]);
     }
   };
@@ -83,7 +83,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) ==
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -95,7 +95,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) == *reinterpret_cast<A0 *>(src[1]);
     }
   };
@@ -344,7 +344,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) !=
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -357,7 +357,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) != *reinterpret_cast<A0 *>(src[1]);
     }
   };
@@ -371,7 +371,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) >=
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -384,7 +384,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) >= *reinterpret_cast<A0 *>(src[1]);
     }
   };
@@ -397,7 +397,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) >
           static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -410,7 +410,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<bool1 *>(dst) =
+      *reinterpret_cast<int *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) > *reinterpret_cast<A0 *>(src[1]);
     }
   };

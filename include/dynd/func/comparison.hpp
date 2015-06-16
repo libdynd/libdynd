@@ -85,13 +85,13 @@ namespace nd {
           comparison_operator::make_children();
       children[std::make_pair(tuple_type_id, tuple_type_id)] =
           arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("((...), (...)) -> bool"));
+              ndt::type("((...), (...)) -> int32"));
       children[std::make_pair(string_type_id, string_type_id)] =
           arrfunc::make<equal_kernel<string_type_id, string_type_id>>(
-              ndt::type("(string, string) -> bool"));
+              ndt::type("(string, string) -> int32"));
       children[std::make_pair(type_type_id, type_type_id)] =
           arrfunc::make<equal_kernel<type_type_id, type_type_id>>(
-              ndt::type("(type, type) -> bool"));
+              ndt::type("(type, type) -> int32"));
 
       return children;
     }
@@ -105,7 +105,7 @@ namespace nd {
           comparison_operator::make_children();
       children[std::make_pair(type_type_id, type_type_id)] =
           arrfunc::make<not_equal_kernel<type_type_id, type_type_id>>(
-              ndt::type("(type, type) -> bool"));
+              ndt::type("(type, type) -> int32"));
 
       return children;
     }
