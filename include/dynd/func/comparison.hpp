@@ -49,6 +49,13 @@ namespace nd {
         }
       }
 
+      children[std::make_pair(string_type_id, string_type_id)] =
+          arrfunc::make<K<string_type_id, string_type_id>>(
+              ndt::type("(string, string) -> int32"));
+      children[std::make_pair(fixed_string_type_id, fixed_string_type_id)] =
+          arrfunc::make<K<fixed_string_type_id, fixed_string_type_id>>(
+              ndt::type("(FixedString, FixedString) -> int32"));
+
       return children;
     }
 
@@ -86,9 +93,6 @@ namespace nd {
       children[std::make_pair(tuple_type_id, tuple_type_id)] =
           arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("((...), (...)) -> int32"));
-      children[std::make_pair(string_type_id, string_type_id)] =
-          arrfunc::make<equal_kernel<string_type_id, string_type_id>>(
-              ndt::type("(string, string) -> int32"));
       children[std::make_pair(type_type_id, type_type_id)] =
           arrfunc::make<equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"));

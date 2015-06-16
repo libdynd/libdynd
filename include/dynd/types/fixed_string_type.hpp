@@ -26,6 +26,7 @@ namespace ndt {
 
     virtual ~fixed_string_type();
 
+    intptr_t get_size() const { return m_stringsize; }
     string_encoding_t get_encoding() const { return m_encoding; }
 
     void get_string_range(const char **out_begin, const char **out_end,
