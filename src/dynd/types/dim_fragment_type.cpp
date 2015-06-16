@@ -71,7 +71,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
         dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         if (tagged_dim < 0 || tagged_dim == 1) {
           out_tagged_dims[i] = dim_size;
-        } else if (tagged_dim != dim_size) {
+        } else if (tagged_dim != dim_size && dim_size != 1) {
           return false;
         }
       }
