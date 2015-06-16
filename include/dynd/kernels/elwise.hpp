@@ -102,7 +102,7 @@ namespace nd {
                         shape_i[j] = shape_at_j;
                       }
                     }
-                    else if (shape_i[j] != shape_at_j) {
+                    else if (shape_i[j] != shape_at_j && shape_at_j != 1) {
                       throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
                     }
                     break;

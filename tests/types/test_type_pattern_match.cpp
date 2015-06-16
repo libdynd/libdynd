@@ -266,3 +266,14 @@ TEST(TypePatternMatch, TypeVarConstructed)
 // EXPECT_TYPE_MATCH("M[Dims... * T]", "cuda_device[7 * int32]");
 #endif
 }
+
+TEST(TypePatternMatch, Broadcast) {
+  // Confirm that "T..." type variables broadcast together as they match
+  std::map<nd::string, ndt::type> tp_vars;
+  EXPECT_TRUE(
+      ndt::type("Dims... * int32").match(ndt::type("3 * 1 * int32"), tp_vars));
+  EXPECT_TRUE(ndt::type("Dims... * float32")
+                  .match(ndt::type("1 * 2 * float32"), tp_vars));
+  EXPECT_EQ(ndt::type("3 * 2 * bool"),
+            ndt::substitute(ndt::type("Dims... * bool"), tp_vars, true));
+}
