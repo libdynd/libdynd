@@ -103,6 +103,9 @@ namespace nd {
     {
       std::map<std::pair<type_id_t, type_id_t>, arrfunc> children =
           comparison_operator::make_children();
+      children[std::make_pair(tuple_type_id, tuple_type_id)] =
+          arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
+              ndt::type("((...), (...)) -> int32"));
       children[std::make_pair(type_type_id, type_type_id)] =
           arrfunc::make<not_equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"));

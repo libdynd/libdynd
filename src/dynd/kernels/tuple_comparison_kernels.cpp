@@ -251,14 +251,14 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
     if (comptype == comparison_type_equal) {
       std::map<nd::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
-      return nd::tuple_compare_equality_kernel::instantiate(
+      return nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
           NULL, NULL, NULL, ckb, ckb_offset, ndt::make_type<int>(), NULL, 2,
           &src_tp, src_arrmeta, kernel_request_host | kernel_request_single,
           ectx, nd::array(), tp_vars);
     } else {
       std::map<nd::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
-      return nd::tuple_compare_inequality_kernel::instantiate(
+      return nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
           NULL, NULL, NULL, ckb, ckb_offset, ndt::make_type<int>(), NULL, 2,
           &src_tp, src_arrmeta, kernel_request_host | kernel_request_single,
           ectx, nd::array(), tp_vars);
