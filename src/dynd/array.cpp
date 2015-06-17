@@ -6,6 +6,7 @@
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/comparison.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -1106,22 +1107,16 @@ bool nd::array::equals_exact(const array &rhs) const
     if (memcmp(shape0.get(), shape1.get(), ndim * sizeof(intptr_t)) != 0) {
       return false;
     }
-//    std::cout << (*this == rhs) << std::endl;
     try {
       array_iter<0, 2> iter(*this, rhs);
       if (!iter.empty()) {
-        ckernel_builder<kernel_request_host> k;
-        make_comparison_kernel(&k, 0, iter.get_uniform_dtype<0>(),
-                               iter.arrmeta<0>(), iter.get_uniform_dtype<1>(),
-                               iter.arrmeta<1>(), comparison_type_not_equal,
-                               &eval::default_eval_context);
-        expr_single_t fn = k.get()->get_function<expr_single_t>();
         do {
           const char *const src[2] = {iter.data<0>(), iter.data<1>()};
-          int dst;
-          fn(reinterpret_cast<char *>(&dst), const_cast<char *const *>(src),
-             k.get());
-          if (dst) {
+          ndt::type tp[2] = {iter.get_uniform_dtype<0>(),
+                             iter.get_uniform_dtype<1>()};
+          const char *arrmeta[2] = {iter.arrmeta<0>(), iter.arrmeta<1>()};
+          if (nd::not_equal(2, tp, arrmeta, const_cast<char *const *>(src))
+                  .as<bool>()) {
             return false;
           }
         } while (iter.next());
