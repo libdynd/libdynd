@@ -66,8 +66,10 @@ namespace nd {
         children[pair.first.first][pair.first.second] = pair.second;
       }
 
-      return functional::multidispatch_by_type_id(
+      arrfunc child = functional::multidispatch_by_type_id(
           ndt::type("(Any, Any) -> Any"), children, default_child);
+
+      return child;
     }
   };
 
@@ -88,6 +90,8 @@ namespace nd {
   extern struct equal : comparison_operator<equal, equal_kernel, 2> {
     static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_children()
     {
+      std::cout << "equal::make_children (start)" << std::endl;
+
       std::map<std::pair<type_id_t, type_id_t>, arrfunc> children =
           comparison_operator::make_children();
       children[std::make_pair(tuple_type_id, tuple_type_id)] =
@@ -99,6 +103,8 @@ namespace nd {
       children[std::make_pair(type_type_id, type_type_id)] =
           arrfunc::make<equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"));
+
+      std::cout << "equal::make_children (stop)" << std::endl;
 
       return children;
     }

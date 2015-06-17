@@ -1097,12 +1097,16 @@ bool nd::array::equals_exact(const array &rhs) const
   } else {
     // First compare the shape, to avoid triggering an exception in common cases
     size_t ndim = get_ndim();
+    if (ndim == 1 && get_dim_size() == 0 && rhs.get_dim_size() == 0) {
+      return true;
+    }
     dimvector shape0(ndim), shape1(ndim);
     get_shape(shape0.get());
     rhs.get_shape(shape1.get());
     if (memcmp(shape0.get(), shape1.get(), ndim * sizeof(intptr_t)) != 0) {
       return false;
     }
+//    std::cout << (*this == rhs) << std::endl;
     try {
       array_iter<0, 2> iter(*this, rhs);
       if (!iter.empty()) {
