@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/dynd_float128.hpp>
-#include <dynd/types/dynd_float16.hpp>
+#include <dynd/float16.hpp>
+#include <dynd/float128.hpp>
 
 #include <sstream>
 
@@ -40,7 +40,7 @@ namespace {
     }
 } // anonymous namespace
 
-dynd::dynd_float128::dynd_float128(signed char value)
+dynd::float128::float128(signed char value)
 {
     if (value == 0) {
         m_hi = 0LL;
@@ -58,7 +58,7 @@ dynd::dynd_float128::dynd_float128(signed char value)
     m_lo = 0LL;
 }
 
-dynd::dynd_float128::dynd_float128(unsigned char value)
+dynd::float128::float128(unsigned char value)
 {
     if (value == 0) {
         m_hi = 0LL;
@@ -70,7 +70,7 @@ dynd::dynd_float128::dynd_float128(unsigned char value)
     m_lo = 0LL;
 }
 
-dynd::dynd_float128::dynd_float128(short value)
+dynd::float128::float128(short value)
 {
     if (value == 0) {
         m_hi = 0LL;
@@ -88,7 +88,7 @@ dynd::dynd_float128::dynd_float128(short value)
     m_lo = 0LL;
 }
 
-dynd::dynd_float128::dynd_float128(unsigned short value)
+dynd::float128::float128(unsigned short value)
 {
     if (value == 0) {
         m_hi = 0LL;
@@ -100,7 +100,7 @@ dynd::dynd_float128::dynd_float128(unsigned short value)
     m_lo = 0LL;
 }
 
-dynd::dynd_float128::dynd_float128(int value)
+dynd::float128::float128(int value)
 {
     if (value == 0) {
         m_hi = 0LL;
@@ -118,7 +118,7 @@ dynd::dynd_float128::dynd_float128(int value)
     m_lo = 0LL;
 }
 
-dynd::dynd_float128::dynd_float128(unsigned int value)
+dynd::float128::float128(unsigned int value)
 {
     if (value == 0) {
         m_hi = 0LL;
@@ -130,7 +130,7 @@ dynd::dynd_float128::dynd_float128(unsigned int value)
     m_lo = 0LL;
 }
 
-dynd::dynd_float128::dynd_float128(long long value)
+dynd::float128::float128(long long value)
 {
     if (value == 0) {
         m_hi = 0LL;
@@ -149,7 +149,7 @@ dynd::dynd_float128::dynd_float128(long long value)
     }
 }
 
-dynd::dynd_float128::dynd_float128(unsigned long long value)
+dynd::float128::float128(unsigned long long value)
 {
     if (value == 0) {
         m_hi = 0LL;
@@ -162,7 +162,7 @@ dynd::dynd_float128::dynd_float128(unsigned long long value)
     }
 }
 
-dynd::dynd_float128::dynd_float128(const dynd_int128& DYND_UNUSED(value))
+dynd::float128::float128(const int128& DYND_UNUSED(value))
 {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT("dynd int128 to float128 conversion isn't implemented");
@@ -171,7 +171,7 @@ dynd::dynd_float128::dynd_float128(const dynd_int128& DYND_UNUSED(value))
 #endif
 }
 
-dynd::dynd_float128::dynd_float128(const dynd_uint128& DYND_UNUSED(value))
+dynd::float128::float128(const uint128& DYND_UNUSED(value))
 {
 #ifdef __CUDA_ARCH__
     DYND_TRIGGER_ASSERT("dynd int128 to float128 conversion isn't implemented");
@@ -180,12 +180,12 @@ dynd::dynd_float128::dynd_float128(const dynd_uint128& DYND_UNUSED(value))
 #endif
 }
 
-dynd::dynd_float128::dynd_float128(const dynd_float16& value)
+dynd::float128::float128(const float16& value)
 {
-    *this = dynd_float128(double(value));
+    *this = float128(double(value));
 }
 
-dynd::dynd_float128::dynd_float128(double value)
+dynd::float128::float128(double value)
 {
     union { double d; uint64_t dbits; } conv;
     conv.d = value;

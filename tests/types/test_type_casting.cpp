@@ -225,17 +225,17 @@ TEST(TypeCasting, StringToInt64) {
 }
 
 TEST(TypeCasting, StringToInt128) {
-    nd::array a = nd::empty<dynd_int128>();
+    nd::array a = nd::empty<int128>();
 
     // Test the limits of string to int conversion
     a.vals() = "-0";
     EXPECT_EQ(0LL, a.as<int64_t>());
     a.vals() = "-170141183460469231731687303715884105728";
-    EXPECT_EQ(0x8000000000000000ULL, a.as<dynd_int128>().m_hi);
-    EXPECT_EQ(0ULL, a.as<dynd_int128>().m_lo);
+    EXPECT_EQ(0x8000000000000000ULL, a.as<int128>().m_hi);
+    EXPECT_EQ(0ULL, a.as<int128>().m_lo);
     a.vals() = "170141183460469231731687303715884105727";
-    EXPECT_EQ(0x7fffffffffffffffULL, a.as<dynd_int128>().m_hi);
-    EXPECT_EQ(0xffffffffffffffffULL, a.as<dynd_int128>().m_lo);
+    EXPECT_EQ(0x7fffffffffffffffULL, a.as<int128>().m_hi);
+    EXPECT_EQ(0xffffffffffffffffULL, a.as<int128>().m_lo);
     EXPECT_THROW(a.vals() = "170141183460469231731687303715884105728",
                  overflow_error);
     EXPECT_THROW(a.vals() = "-170141183460469231731687303715884105729",
@@ -245,8 +245,8 @@ TEST(TypeCasting, StringToInt128) {
     a.vals() = "1e18";
     EXPECT_EQ(1000000000000000000LL, a.as<int64_t>());
     a.vals() = "922e26";
-    EXPECT_EQ(0x129ea0d6fULL, a.as<dynd_int128>().m_hi);
-    EXPECT_EQ(0x287e2f8928000000ULL, a.as<dynd_int128>().m_lo);
+    EXPECT_EQ(0x129ea0d6fULL, a.as<int128>().m_hi);
+    EXPECT_EQ(0x287e2f8928000000ULL, a.as<int128>().m_lo);
     EXPECT_THROW(a.vals() = "1e40", overflow_error);
 }
 

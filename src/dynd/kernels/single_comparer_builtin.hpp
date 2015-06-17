@@ -46,15 +46,15 @@ namespace dynd {
     struct big_type_helper<orig, orig, false> { \
         typedef orig type; \
     }
-DYND_FORCE_BIG_TYPE(dynd_float16, double);
-DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
+DYND_FORCE_BIG_TYPE(float16, double);
+DYND_FORCE_BIG_TYPE(float128, float128);
     template<>
-    struct big_type_helper<dynd_float16, dynd_float128, false> {
-        typedef dynd_float128 type;
+    struct big_type_helper<float16, float128, false> {
+        typedef float128 type;
     };
     template<>
-    struct big_type_helper<dynd_float128, dynd_float16, true> {
-        typedef dynd_float128 type;
+    struct big_type_helper<float128, float16, true> {
+        typedef float128 type;
     };
     template<class S, class T>
     struct big_type {
@@ -319,8 +319,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_eq<src0_type, dynd_float16, sint_kind, real_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const dynd_float16& v1)
+    struct op_eq<src0_type, float16, sint_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const float16& v1)
         {
             // Slower, but more rigorous test
             return v0 == static_cast<src0_type>(double(v1)) &&
@@ -339,8 +339,8 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     };
     template<class src0_type,
                     bool src0_bigger, bool src1_bigger>
-    struct op_ne<src0_type, dynd_float16, sint_kind, real_kind, src0_bigger, src1_bigger> {
-        inline static bool f(const src0_type& v0, const dynd_float16& v1)
+    struct op_ne<src0_type, float16, sint_kind, real_kind, src0_bigger, src1_bigger> {
+        inline static bool f(const src0_type& v0, const float16& v1)
         {
             // Slower, but more rigorous test
             return v0 != static_cast<src0_type>(double(v1)) ||
@@ -692,78 +692,78 @@ DYND_FORCE_BIG_TYPE(dynd_float128, dynd_float128);
     // Comparison operations
     template<class src0_type, class src1_type>
     struct single_comparison_builtin {
-        inline static int sorting_less(const char *const *src,
+        inline static void sorting_less(char *dst, char *const *src,
                                        ckernel_prefix *DYND_UNUSED(self))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
-            return op_sort_lt<src0_type, src1_type,
+            *reinterpret_cast<int *>(dst) = op_sort_lt<src0_type, src1_type,
                             dynd_kind_of<src0_type>::value,
                             dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
-        inline static int less(const char *const *src,
+        inline static void less(char *dst, char *const *src,
                         ckernel_prefix *DYND_UNUSED(self))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
-            return op_lt<src0_type, src1_type,
+            *reinterpret_cast<int *>(dst) = op_lt<src0_type, src1_type,
                             dynd_kind_of<src0_type>::value,
                             dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
-        inline static int less_equal(const char *const *src,
+        inline static void less_equal(char *dst, char *const *src,
                         ckernel_prefix *DYND_UNUSED(self))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
-            return op_le<src0_type, src1_type,
+            *reinterpret_cast<int *>(dst) = op_le<src0_type, src1_type,
                             dynd_kind_of<src0_type>::value,
                             dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
-        inline static int equal(const char *const *src,
+        inline static void equal(char *dst, char *const *src,
                         ckernel_prefix *DYND_UNUSED(self))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
-            return op_eq<src0_type, src1_type,
+            *reinterpret_cast<int *>(dst) = op_eq<src0_type, src1_type,
                             dynd_kind_of<src0_type>::value,
                             dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
-        inline static int not_equal(const char *const *src,
+        inline static void not_equal(char *dst, char *const *src,
                         ckernel_prefix *DYND_UNUSED(self))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
-            return op_ne<src0_type, src1_type,
+            *reinterpret_cast<int *>(dst) = op_ne<src0_type, src1_type,
                             dynd_kind_of<src0_type>::value,
                             dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
-        inline static int greater_equal(const char *const *src,
+        inline static void greater_equal(char *dst, char *const *src,
                         ckernel_prefix *DYND_UNUSED(self))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
-            return op_ge<src0_type, src1_type,
+            *reinterpret_cast<int *>(dst) = op_ge<src0_type, src1_type,
                             dynd_kind_of<src0_type>::value,
                             dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),
                             (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
         }
-        inline static int greater(const char *const *src,
+        inline static void greater(char *dst, char *const *src,
                         ckernel_prefix *DYND_UNUSED(self))
         {
             src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
             src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
-            return op_gt<src0_type, src1_type,
+            *reinterpret_cast<int *>(dst) = op_gt<src0_type, src1_type,
                             dynd_kind_of<src0_type>::value,
                             dynd_kind_of<src1_type>::value,
                             (sizeof(src0_type) > sizeof(src1_type)),

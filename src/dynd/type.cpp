@@ -795,46 +795,46 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream &o,
     o << (*data ? "True" : "False");
     break;
   case int8_type_id:
-    print_as<int8_t, int32_t>(o, data);
+    print_as<int8, int32>(o, data);
     break;
   case int16_type_id:
-    print_as<int16_t, int32_t>(o, data);
+    print_as<int16, int32>(o, data);
     break;
   case int32_type_id:
-    print_as<int32_t, int32_t>(o, data);
+    print_as<int32, int32>(o, data);
     break;
   case int64_type_id:
-    print_as<int64_t, int64_t>(o, data);
+    print_as<int64, int64>(o, data);
     break;
   case int128_type_id:
-    print_as<dynd_int128, dynd_int128>(o, data);
+    print_as<int128, int128>(o, data);
     break;
   case uint8_type_id:
-    print_as<uint8_t, uint32_t>(o, data);
+    print_as<uint8, uint32>(o, data);
     break;
   case uint16_type_id:
-    print_as<uint16_t, uint32_t>(o, data);
+    print_as<uint16, uint32>(o, data);
     break;
   case uint32_type_id:
-    print_as<uint32_t, uint32_t>(o, data);
+    print_as<uint32, uint32>(o, data);
     break;
   case uint64_type_id:
-    print_as<uint64_t, uint64_t>(o, data);
+    print_as<uint64, uint64>(o, data);
     break;
   case uint128_type_id:
-    print_as<dynd_uint128, dynd_uint128>(o, data);
+    print_as<uint128, uint128>(o, data);
     break;
   case float16_type_id:
-    print_as<dynd_float16, float>(o, data);
+    print_as<float16, float32>(o, data);
     break;
   case float32_type_id:
-    print_as<float, float>(o, data);
+    print_as<float32, float32>(o, data);
     break;
   case float64_type_id:
-    print_as<double, double>(o, data);
+    print_as<float64, float64>(o, data);
     break;
   case float128_type_id:
-    print_as<dynd_float128, dynd_float128>(o, data);
+    print_as<float128, float128>(o, data);
     break;
   case complex_float32_type_id:
     print_as<complex<float>, complex<float>>(o, data);

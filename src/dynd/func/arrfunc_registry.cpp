@@ -105,15 +105,15 @@ struct sign {
   inline T operator()(T x) const { return x > T(0) ? 1 : (x < T(0) ? -1 : x); }
 };
 template <>
-struct sign<dynd_int128> {
-  inline dynd_int128 operator()(const dynd_int128 &x) const
+struct sign<int128> {
+  inline int128 operator()(const int128 &x) const
   {
     return x.is_negative() ? -1 : (x == 0 ? 0 : 1);
   }
 };
 template <>
-struct sign<dynd_uint128> {
-  inline dynd_uint128 operator()(const dynd_uint128 &x) const
+struct sign<uint128> {
+  inline uint128 operator()(const uint128 &x) const
   {
     return x == 0 ? 0 : 1;
   }
@@ -166,7 +166,7 @@ std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
     // Arithmetic
     /*
       func::set_regfunction(
-          "add", make_ufunc(add<int32_t>(), add<int64_t>(), add<dynd_int128>(),
+          "add", make_ufunc(add<int32_t>(), add<int64_t>(), add<int128>(),
                             add<uint32_t>(), add<uint64_t>(),
       add<dynd_uint128>(),
                             add<float>(), add<double>(), add<complex<float>>(),
@@ -174,26 +174,26 @@ std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
     */
     registry["add"] = nd::add;
     registry["subtract"] = make_ufunc(
-        subtract<int32_t>(), subtract<int64_t>(), subtract<dynd_int128>(),
+        subtract<int32_t>(), subtract<int64_t>(), subtract<int128>(),
         subtract<float>(), subtract<double>(), subtract<complex<float>>(),
         subtract<complex<double>>());
     registry["multiply"] =
         make_ufunc(multiply<int32_t>(), multiply<int64_t>(),
-                   /*multiply<dynd_int128>(),*/ multiply<uint32_t>(),
+                   /*multiply<int128>(),*/ multiply<uint32_t>(),
                    multiply<uint64_t>(), /*multiply<dynd_uint128>(),*/
                    multiply<float>(), multiply<double>(),
                    multiply<complex<float>>(), multiply<complex<double>>());
     registry["divide"] = make_ufunc(
-        divide<int32_t>(), divide<int64_t>(),   /*divide<dynd_int128>(),*/
+        divide<int32_t>(), divide<int64_t>(),   /*divide<int128>(),*/
         divide<uint32_t>(), divide<uint64_t>(), /*divide<dynd_uint128>(),*/
         divide<float>(), divide<double>(), divide<complex<float>>(),
         divide<complex<double>>());
     registry["negative"] = make_ufunc(
-        negative<int32_t>(), negative<int64_t>(), negative<dynd_int128>(),
+        negative<int32_t>(), negative<int64_t>(), negative<int128>(),
         negative<float>(), negative<double>(), negative<complex<float>>(),
         negative<complex<double>>());
     registry["sign"] =
-        make_ufunc(sign<int32_t>(), sign<int64_t>(), sign<dynd_int128>(),
+        make_ufunc(sign<int32_t>(), sign<int64_t>(), sign<int128>(),
                    sign<float>(), sign<double>());
     registry["conj"] = make_ufunc(conj_fn<std::complex<float>>(),
                                   conj_fn<std::complex<double>>());

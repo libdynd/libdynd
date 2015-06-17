@@ -22,39 +22,46 @@ using namespace std;
 namespace {
 
 class sorter {
-  const char *m_originptr;
+  char *m_originptr;
   intptr_t m_stride;
-  const expr_predicate_t m_less;
+  const expr_single_t m_less;
   ckernel_prefix *m_less_self;
 
 public:
-  sorter(const char *originptr, intptr_t stride, const expr_predicate_t less,
+  sorter(const char *originptr, intptr_t stride, const expr_single_t less,
          ckernel_prefix *less_self)
-      : m_originptr(originptr), m_stride(stride), m_less(less),
+      : m_originptr(const_cast<char *>(originptr)), m_stride(stride), m_less(less),
         m_less_self(less_self)
   {
   }
+
   bool operator()(intptr_t i, intptr_t j) const
   {
-    const char *s[2] = {m_originptr + i * m_stride, m_originptr + j * m_stride};
-    return m_less(s, m_less_self) != 0;
+    int dst;
+    char *s[2] = {m_originptr + i * m_stride, m_originptr + j * m_stride};
+    m_less(reinterpret_cast<char *>(&dst), s, m_less_self);
+
+    return dst != 0;
   }
 };
 
 class cmp {
-  const expr_predicate_t m_less;
+  const expr_single_t m_less;
   ckernel_prefix *m_less_self;
 
 public:
-  cmp(const expr_predicate_t less, ckernel_prefix *less_self)
+  cmp(const expr_single_t less, ckernel_prefix *less_self)
       : m_less(less), m_less_self(less_self)
   {
   }
+
   bool operator()(const char *a, const char *b) const
   {
-    const char *s[2] = {a, b};
-    bool result = m_less(s, m_less_self) != 0;
-    return result;
+    int dst;
+    char *s[2] = {const_cast<char *>(a), const_cast<char *>(b)};
+
+    m_less(reinterpret_cast<char *>(&dst), s, m_less_self);
+    return dst != 0;
   }
 };
 
@@ -235,7 +242,7 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
                              m_category_tp, categories_element_arrmeta,
                              comparison_type_sorting_less,
                              &eval::default_eval_context);
-    expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+    expr_single_t fn = k.get()->get_function<expr_single_t>();
 
     cmp less(fn, k.get());
     set<const char *, cmp> uniques(less);
@@ -603,7 +610,7 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   ::make_comparison_kernel(&k, 0, el_tp, el_arrmeta, el_tp, el_arrmeta,
                            comparison_type_sorting_less,
                            &eval::default_eval_context);
-  expr_predicate_t fn = k.get()->get_function<expr_predicate_t>();
+  expr_single_t fn = k.get()->get_function<expr_single_t>();
 
   cmp less(fn, k.get());
   set<const char *, cmp> uniques(less);

@@ -77,9 +77,9 @@ TEST(MultiDispatchArrfunc, PromoteToSignature)
 
   nd::arrfunc af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
 
-  EXPECT_EQ(0, af(1, dynd_float16(1.f), 1.0).as<int>());
+  EXPECT_EQ(0, af(1, float16(1.f), 1.0).as<int>());
   EXPECT_EQ(1, af(1, 1.0, 1.f).as<int>());
-  EXPECT_EQ(2, af(1, 1.f, dynd_float16(1.f)).as<int>());
+  EXPECT_EQ(2, af(1, 1.f, float16(1.f)).as<int>());
   EXPECT_EQ(3, af(1.f, 1, (int16_t)1).as<int>());
   EXPECT_EQ(4, af((int8_t)1, 1.f, 1.0).as<int>());
   EXPECT_EQ(5, af((int8_t)1, 1.f, 1.f).as<int>());

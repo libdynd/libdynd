@@ -9,11 +9,6 @@
 #include <complex>
 
 #include <dynd/config.hpp>
-#include <dynd/types/dynd_int128.hpp>
-#include <dynd/types/dynd_uint128.hpp>
-#include <dynd/types/dynd_float16.hpp>
-#include <dynd/types/dynd_float128.hpp>
-#include <dynd/types/complex.hpp>
 
 namespace dynd {
 
@@ -290,25 +285,6 @@ inline bool is_builtin_type(const ndt::base_type *dt)
   return reinterpret_cast<uintptr_t>(dt) < builtin_type_id_count;
 }
 
-// A boolean class for dynamicndarray which is one-byte big
-class dynd_bool {
-  char m_value;
-
-public:
-  DYND_CUDA_HOST_DEVICE dynd_bool() : m_value(0) {}
-
-  DYND_CUDA_HOST_DEVICE dynd_bool(bool value) : m_value(value) {}
-
-  // Special case complex conversion to avoid ambiguous overload
-  template <class T>
-  DYND_CUDA_HOST_DEVICE dynd_bool(complex<T> value)
-      : m_value(value != complex<T>(0))
-  {
-  }
-
-  DYND_CUDA_HOST_DEVICE operator bool() const { return m_value != 0; }
-};
-
 namespace detail {
   // Simple metaprogram taking log base 2 of 1, 2, 4, and 8
   template <int I>
@@ -342,7 +318,7 @@ struct type_id_of<const T> {
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <>
-struct type_id_of<dynd_bool> {
+struct type_id_of<bool1> {
   enum { value = bool_type_id };
 };
 template <>
@@ -370,7 +346,7 @@ struct type_id_of<long long> {
   enum { value = int64_type_id };
 };
 template <>
-struct type_id_of<dynd_int128> {
+struct type_id_of<int128> {
   enum { value = int128_type_id };
 };
 template <>
@@ -394,31 +370,31 @@ struct type_id_of<unsigned long long> {
   enum { value = uint64_type_id };
 };
 template <>
-struct type_id_of<dynd_uint128> {
+struct type_id_of<uint128> {
   enum { value = uint128_type_id };
 };
 template <>
-struct type_id_of<dynd_float16> {
+struct type_id_of<float16> {
   enum { value = float16_type_id };
 };
 template <>
-struct type_id_of<float> {
+struct type_id_of<float32> {
   enum { value = float32_type_id };
 };
 template <>
-struct type_id_of<double> {
+struct type_id_of<float64> {
   enum { value = float64_type_id };
 };
 template <>
-struct type_id_of<dynd_float128> {
+struct type_id_of<float128> {
   enum { value = float128_type_id };
 };
 template <>
-struct type_id_of<complex<float>> {
+struct type_id_of<complex64> {
   enum { value = complex_float32_type_id };
 };
 template <>
-struct type_id_of<complex<double>> {
+struct type_id_of<complex128> {
   enum { value = complex_float64_type_id };
 };
 template <>
@@ -440,6 +416,10 @@ template <type_id_t type_id>
 struct type_of;
 
 template <>
+struct type_of<bool_type_id> {
+  typedef bool1 type;
+};
+template <>
 struct type_of<int8_type_id> {
   typedef int8_t type;
 };
@@ -457,7 +437,7 @@ struct type_of<int64_type_id> {
 };
 template <>
 struct type_of<int128_type_id> {
-  typedef dynd_int128 type;
+  typedef int128 type;
 };
 template <>
 struct type_of<uint8_type_id> {
@@ -477,11 +457,11 @@ struct type_of<uint64_type_id> {
 };
 template <>
 struct type_of<uint128_type_id> {
-  typedef dynd_uint128 type;
+  typedef uint128 type;
 };
 template <>
 struct type_of<float16_type_id> {
-  typedef dynd_float16 type;
+  typedef float16 type;
 };
 template <>
 struct type_of<float32_type_id> {
@@ -493,15 +473,19 @@ struct type_of<float64_type_id> {
 };
 template <>
 struct type_of<float128_type_id> {
-  typedef dynd_float128 type;
+  typedef float128 type;
 };
 template <>
 struct type_of<complex_float32_type_id> {
-  typedef complex<float> type;
+  typedef complex64 type;
 };
 template <>
 struct type_of<complex_float64_type_id> {
-  typedef complex<double> type;
+  typedef complex128 type;
+};
+template <>
+struct type_of<type_type_id> {
+  typedef ndt::type type;
 };
 
 // Type trait for the kind
@@ -514,7 +498,7 @@ struct dynd_kind_of<void> {
 };
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <>
-struct dynd_kind_of<dynd_bool> {
+struct dynd_kind_of<bool1> {
   static const type_kind_t value = bool_kind;
 };
 template <>
@@ -542,7 +526,7 @@ struct dynd_kind_of<long long> {
   static const type_kind_t value = sint_kind;
 };
 template <>
-struct dynd_kind_of<dynd_int128> {
+struct dynd_kind_of<int128> {
   static const type_kind_t value = sint_kind;
 };
 template <>
@@ -566,23 +550,23 @@ struct dynd_kind_of<unsigned long long> {
   static const type_kind_t value = uint_kind;
 };
 template <>
-struct dynd_kind_of<dynd_uint128> {
+struct dynd_kind_of<uint128> {
   static const type_kind_t value = uint_kind;
 };
 template <>
-struct dynd_kind_of<dynd_float16> {
+struct dynd_kind_of<float16> {
   static const type_kind_t value = real_kind;
 };
 template <>
-struct dynd_kind_of<float> {
+struct dynd_kind_of<float32> {
   static const type_kind_t value = real_kind;
 };
 template <>
-struct dynd_kind_of<double> {
+struct dynd_kind_of<float64> {
   static const type_kind_t value = real_kind;
 };
 template <>
-struct dynd_kind_of<dynd_float128> {
+struct dynd_kind_of<float128> {
   static const type_kind_t value = real_kind;
 };
 template <typename T>
@@ -597,7 +581,7 @@ struct is_dynd_scalar {
   enum { value = false };
 };
 template <>
-struct is_dynd_scalar<dynd_bool> {
+struct is_dynd_scalar<bool1> {
   enum { value = true };
 };
 template <>
@@ -625,7 +609,7 @@ struct is_dynd_scalar<long long> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<dynd_int128> {
+struct is_dynd_scalar<int128> {
   enum { value = true };
 };
 template <>
@@ -649,31 +633,31 @@ struct is_dynd_scalar<unsigned long long> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<dynd_uint128> {
+struct is_dynd_scalar<uint128> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<dynd_float16> {
+struct is_dynd_scalar<float16> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<float> {
+struct is_dynd_scalar<float32> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<double> {
+struct is_dynd_scalar<float64> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<dynd_float128> {
+struct is_dynd_scalar<float128> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<complex<float>> {
+struct is_dynd_scalar<complex64> {
   enum { value = true };
 };
 template <>
-struct is_dynd_scalar<complex<double>> {
+struct is_dynd_scalar<complex128> {
   enum { value = true };
 };
 // Allow std::complex as scalars equivalent to dynd_complex

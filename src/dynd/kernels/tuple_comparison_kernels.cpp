@@ -9,6 +9,7 @@
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
+#include <dynd/kernels/compare_kernels.hpp>
 #include <dynd/types/base_tuple_type.hpp>
 
 using namespace std;
@@ -25,34 +26,40 @@ struct tuple_compare_sorting_less_matching_arrmeta_kernel {
   // After this are field_count sorting_less kernel offsets, for
   // src#.field_i < src#.field_i with each 0 <= i < field_count
 
-  static int sorting_less(const char *const *src, ckernel_prefix *extra)
+  static void sorting_less(char *dst, char *const *src, ckernel_prefix *extra)
   {
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     size_t field_count = e->field_count;
     const size_t *src_data_offsets = e->src_data_offsets;
     const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-    const char *child_src[2];
+    char *child_src[2];
     for (size_t i = 0; i != field_count; ++i) {
       ckernel_prefix *sorting_less_kdp =
           reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-      expr_predicate_t opchild =
-          sorting_less_kdp->get_function<expr_predicate_t>();
+      expr_single_t opchild = sorting_less_kdp->get_function<expr_single_t>();
       size_t data_offset = src_data_offsets[i];
       // if (src0.field_i < src1.field_i) return true
       child_src[0] = src[0] + data_offset;
       child_src[1] = src[1] + data_offset;
-      if (opchild(child_src, sorting_less_kdp)) {
-        return true;
+      int child_dst;
+      opchild(reinterpret_cast<char *>(&child_dst), child_src,
+              sorting_less_kdp);
+      if (child_dst) {
+        *reinterpret_cast<int *>(dst) = true;
+        return;
       }
       // if (src1.field_i < src0.field_i) return false
       child_src[0] = src[1] + data_offset;
       child_src[1] = src[0] + data_offset;
-      if (opchild(child_src, sorting_less_kdp)) {
-        return false;
+      opchild(reinterpret_cast<char *>(&child_dst), child_src,
+              sorting_less_kdp);
+      if (child_dst) {
+        *reinterpret_cast<int *>(dst) = false;
+        return;
       }
     }
-    return false;
+    *reinterpret_cast<int *>(dst) = false;
   }
 
   static void destruct(ckernel_prefix *self)
@@ -77,7 +84,7 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
   // src0.field_i < src1.field_i and src1.field_i < src0.field_i
   // with each 0 <= i < field_count
 
-  static int sorting_less(const char *const *src, ckernel_prefix *extra)
+  static void sorting_less(char *dst, char *const *src, ckernel_prefix *extra)
   {
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -85,29 +92,36 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
     const size_t *src0_data_offsets = e->src0_data_offsets;
     const size_t *src1_data_offsets = e->src1_data_offsets;
     const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-    const char *child_src[2];
+    char *child_src[2];
     for (size_t i = 0; i != field_count; ++i) {
       ckernel_prefix *src0_sorting_less_src1 =
           reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2 * i]);
-      expr_predicate_t opchild =
-          src0_sorting_less_src1->get_function<expr_predicate_t>();
+      expr_single_t opchild =
+          src0_sorting_less_src1->get_function<expr_single_t>();
       // if (src0.field_i < src1.field_i) return true
       child_src[0] = src[0] + src0_data_offsets[i];
       child_src[1] = src[1] + src1_data_offsets[i];
-      if (opchild(child_src, src0_sorting_less_src1)) {
-        return true;
+      int child_dst;
+      opchild(reinterpret_cast<char *>(&child_dst), child_src,
+              src0_sorting_less_src1);
+      if (child_dst) {
+        *reinterpret_cast<char *>(dst) = true;
+        return;
       }
       ckernel_prefix *src1_sorting_less_src0 =
           reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2 * i + 1]);
-      opchild = src1_sorting_less_src0->get_function<expr_predicate_t>();
+      opchild = src1_sorting_less_src0->get_function<expr_single_t>();
       // if (src1.field_i < src0.field_i) return false
       child_src[0] = src[1] + src1_data_offsets[i];
       child_src[1] = src[0] + src0_data_offsets[i];
-      if (opchild(child_src, src1_sorting_less_src0)) {
-        return false;
+      opchild(reinterpret_cast<char *>(&child_dst), child_src,
+              src1_sorting_less_src0);
+      if (child_dst) {
+        *reinterpret_cast<char *>(dst) = false;
+        return;
       }
     }
-    return false;
+    *reinterpret_cast<char *>(dst) = false;
   }
 
   static void destruct(ckernel_prefix *self)
@@ -121,73 +135,6 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
   }
 };
 
-// Equality comparison kernels
-struct tuple_compare_equality_kernel {
-  typedef tuple_compare_equality_kernel extra_type;
-
-  ckernel_prefix base;
-  size_t field_count;
-  const size_t *src0_data_offsets, *src1_data_offsets;
-  // After this are field_count sorting_less kernel offsets, for
-  // src0.field_i <op> src1.field_i
-  // with each 0 <= i < field_count
-
-  static int equal(const char *const *src, ckernel_prefix *extra)
-  {
-    char *eraw = reinterpret_cast<char *>(extra);
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    size_t field_count = e->field_count;
-    const size_t *src0_data_offsets = e->src0_data_offsets;
-    const size_t *src1_data_offsets = e->src1_data_offsets;
-    const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-    const char *child_src[2];
-    for (size_t i = 0; i != field_count; ++i) {
-      ckernel_prefix *echild =
-          reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-      expr_predicate_t opchild = echild->get_function<expr_predicate_t>();
-      // if (src0.field_i < src1.field_i) return true
-      child_src[0] = src[0] + src0_data_offsets[i];
-      child_src[1] = src[1] + src1_data_offsets[i];
-      if (!opchild(child_src, echild)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  static int not_equal(const char *const *src, ckernel_prefix *extra)
-  {
-    char *eraw = reinterpret_cast<char *>(extra);
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    size_t field_count = e->field_count;
-    const size_t *src0_data_offsets = e->src0_data_offsets;
-    const size_t *src1_data_offsets = e->src1_data_offsets;
-    const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-    const char *child_src[2];
-    for (size_t i = 0; i != field_count; ++i) {
-      ckernel_prefix *echild =
-          reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-      expr_predicate_t opchild = echild->get_function<expr_predicate_t>();
-      // if (src0.field_i < src1.field_i) return true
-      child_src[0] = src[0] + src0_data_offsets[i];
-      child_src[1] = src[1] + src1_data_offsets[i];
-      if (opchild(child_src, echild)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  static void destruct(ckernel_prefix *self)
-  {
-    extra_type *e = reinterpret_cast<extra_type *>(self);
-    const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
-    size_t field_count = e->field_count;
-    for (size_t i = 0; i != field_count; ++i) {
-      self->destroy_child_ckernel(kernel_offsets[i]);
-    }
-  }
-};
 } // anonymous namespace
 
 size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
@@ -215,7 +162,7 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(
                   root_ckb_offset);
-      e->base.set_function<expr_predicate_t>(
+      e->base.set_function<expr_single_t>(
           &tuple_compare_sorting_less_matching_arrmeta_kernel::sorting_less);
       e->base.destructor =
           &tuple_compare_sorting_less_matching_arrmeta_kernel::destruct;
@@ -242,20 +189,19 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
                                             comparison_type_sorting_less, ectx);
       }
       return ckb_offset;
-    }
-    else {
+    } else {
       // The arrmeta is different, so have to get the kernels both ways for the
       // fields
-      inc_ckb_offset(
-          ckb_offset, sizeof(tuple_compare_sorting_less_diff_arrmeta_kernel) +
-                          2 * field_count * sizeof(size_t));
+      inc_ckb_offset(ckb_offset,
+                     sizeof(tuple_compare_sorting_less_diff_arrmeta_kernel) +
+                         2 * field_count * sizeof(size_t));
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->reserve(ckb_offset + sizeof(ckernel_prefix));
       tuple_compare_sorting_less_diff_arrmeta_kernel *e =
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(
                   root_ckb_offset);
-      e->base.set_function<expr_predicate_t>(
+      e->base.set_function<expr_single_t>(
           &tuple_compare_sorting_less_diff_arrmeta_kernel::sorting_less);
       e->base.destructor =
           &tuple_compare_sorting_less_diff_arrmeta_kernel::destruct;
@@ -296,49 +242,29 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
       }
       return ckb_offset;
     }
-  }
-  else if (comptype == comparison_type_equal ||
-           comptype == comparison_type_not_equal) {
-    inc_ckb_offset(ckb_offset, sizeof(tuple_compare_equality_kernel) +
-                                            field_count * sizeof(size_t));
-    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-        ->reserve(ckb_offset + sizeof(ckernel_prefix));
-    tuple_compare_equality_kernel *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->get_at<tuple_compare_equality_kernel>(root_ckb_offset);
+  } else if (comptype == comparison_type_equal ||
+             comptype == comparison_type_not_equal) {
+    //    inc_ckb_offset(ckb_offset, sizeof(nd::tuple_compare_equality_kernel) +
+    //                                 field_count * sizeof(size_t));
+    //    reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
+    //      ->reserve(ckb_offset + sizeof(ckernel_prefix));
     if (comptype == comparison_type_equal) {
-      e->base.set_function<expr_predicate_t>(
-          &tuple_compare_equality_kernel::equal);
-    }
-    else {
-      e->base.set_function<expr_predicate_t>(
-          &tuple_compare_equality_kernel::not_equal);
-    }
-    e->base.destructor = &tuple_compare_equality_kernel::destruct;
-    e->field_count = field_count;
-    e->src0_data_offsets = bsd->get_data_offsets(src0_arrmeta);
-    e->src1_data_offsets = bsd->get_data_offsets(src1_arrmeta);
-    size_t *field_kernel_offsets;
-    const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
-    for (size_t i = 0; i != field_count; ++i) {
-      const ndt::type &ft = bsd->get_field_type(i);
-      // Reserve space for the child, and save the offset to this
-      // field comparison kernel. Have to re-get
-      // the pointer because creating the field comparison kernel may
-      // move the memory.
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->reserve(ckb_offset + sizeof(ckernel_prefix));
-      e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-              ->get_at<tuple_compare_equality_kernel>(root_ckb_offset);
-      field_kernel_offsets = reinterpret_cast<size_t *>(e + 1);
-      field_kernel_offsets[i] = ckb_offset - root_ckb_offset;
-      const char *field_arrmeta = src0_arrmeta + arrmeta_offsets[i];
-      ckb_offset = make_comparison_kernel(ckb, ckb_offset, ft, field_arrmeta,
-                                          ft, field_arrmeta, comptype, ectx);
+      std::map<nd::string, ndt::type> tp_vars;
+      const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
+      return nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
+          NULL, NULL, NULL, ckb, ckb_offset, ndt::make_type<int>(), NULL, 2,
+          &src_tp, src_arrmeta, kernel_request_host | kernel_request_single,
+          ectx, nd::array(), tp_vars);
+    } else {
+      std::map<nd::string, ndt::type> tp_vars;
+      const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
+      return nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
+          NULL, NULL, NULL, ckb, ckb_offset, ndt::make_type<int>(), NULL, 2,
+          &src_tp, src_arrmeta, kernel_request_host | kernel_request_single,
+          ectx, nd::array(), tp_vars);
     }
     return ckb_offset;
-  }
-  else {
+  } else {
     throw not_comparable_error(src_tp, src_tp, comptype);
   }
 }

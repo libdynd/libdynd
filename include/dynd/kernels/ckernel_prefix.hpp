@@ -21,7 +21,6 @@ typedef void (*expr_single_t)(char *dst, char *const *src,
 typedef void (*expr_strided_t)(char *dst, intptr_t dst_stride, char *const *src,
                                const intptr_t *src_stride, size_t count,
                                ckernel_prefix *self);
-typedef int (*expr_predicate_t)(const char *const *src, ckernel_prefix *self);
 
 /**
  * Definition for kernel request parameters.
@@ -42,8 +41,6 @@ enum {
   kernel_request_single = 0x00000008,
   /** Kernel function expr_strided_t, "(T1, T2, ...) -> R" */
   kernel_request_strided = 0x00000010,
-  /** Kernel function expr_predicate_t, "(T1, T2, ...) -> bool" */
-  kernel_request_predicate = 0x00000020,
 
   /** ... */
   kernel_request_memory = 0x00000007,

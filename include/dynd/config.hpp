@@ -7,13 +7,13 @@
 
 #include <dynd/cmake_config.hpp>
 
-#include <assert.h>
+#include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
-#include <stdlib.h>
+#include <cctype>
 #include <initializer_list>
 #include <limits>
-#include <stdint.h>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -38,9 +38,6 @@
 #else
 #define DYND_CONSTEXPR
 #endif
-
-#include <cmath>
-#include <cctype>
 
 // Workaround for a clang issue
 #define DYND_ISSPACE std::isspace
@@ -258,7 +255,6 @@ struct integer_proxy<integer_sequence<T, I0>> {
   }
 };
 
-
 template <typename T, T I0, T... I>
 struct integer_proxy<integer_sequence<T, I0, I...>> {
   enum { size = dynd::integer_sequence<T, I0, I...>::size };
@@ -344,7 +340,8 @@ struct integer_proxy<integer_sequence<T, I0, I...>> {
   static void for_each(F f, A &&... a)
   {
     f.template on_each<I0, U...>(std::forward<A>(a)...);
-    integer_proxy<integer_sequence<T, I...>>::template for_each<U...>(f, std::forward<A>(a)...);
+    integer_proxy<integer_sequence<T, I...>>::template for_each<U...>(
+        f, std::forward<A>(a)...);
   }
 };
 
@@ -400,7 +397,8 @@ struct index_proxy<index_sequence<I0, I...>> {
   }
 #else
   // Workaround for MSVC 2013 compiler bug reported here:
-  // https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-std-forward-a-a-fails-when-nested-with-another-unpacking
+  //
+https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-std-forward-a-a-fails-when-nested-with-another-unpacking
   template <typename R>
   static R make()
   {
@@ -561,6 +559,33 @@ bool built_with_cuda();
 
 } // namespace dynd
 
+namespace dynd {
+
+template <typename T>
+struct is_arithmetic {
+  static const bool value = false;
+};
+
+typedef std::int8_t int8;
+typedef std::int16_t int16;
+typedef std::int32_t int32;
+typedef std::int64_t int64;
+typedef std::uint8_t uint8;
+typedef std::uint16_t uint16;
+typedef std::uint32_t uint32;
+typedef std::uint64_t uint64;
+typedef float float32;
+typedef double float64;
+
+} // namespace dynd
+
+#include <dynd/bool1.hpp>
+#include <dynd/complex.hpp>
+#include <dynd/float16.hpp>
+#include <dynd/float128.hpp>
+#include <dynd/int128.hpp>
+#include <dynd/uint128.hpp>
+
 #ifdef DYND_CUDA
 
 #define DYND_GET_CUDA_DEVICE_FUNC(NAME, FUNC)                                  \
@@ -715,6 +740,92 @@ namespace detail {
 #endif
 
 } // namespace dynd::detail
+
+template <>
+struct is_arithmetic<bool1> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int8> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int16> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int32> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int64> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int128> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint8> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint16> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint32> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint64> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint128> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<float16> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<float32> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<float64> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<float128> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<complex<float>> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<complex<double>> {
+  static const bool value = true;
+};
+
 } // namespace dynd
 
 #ifdef __CUDA_ARCH__

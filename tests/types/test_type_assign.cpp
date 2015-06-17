@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 TEST(TypeAssign, FixedSizeTestsNoExcept) {
-    dynd_bool v_b;
+    bool1 v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -129,7 +129,7 @@ TEST(TypeAssign, FixedSizeTestsNoExcept) {
 }
 
 TEST(TypeAssign, FixedSizeTests_Bool) {
-    dynd_bool v_b;
+    bool1 v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -169,7 +169,7 @@ TEST(TypeAssign, FixedSizeTests_Bool) {
 }
 
 TEST(TypeAssign, FixedSizeTests_Int8) {
-    dynd_bool v_b;
+    bool1 v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -224,7 +224,7 @@ TEST(TypeAssign, FixedSizeTests_Int8) {
 }
 
 TEST(TypeAssign, FixedSizeTests_Float64) {
-    dynd_bool v_b;
+    bool1 v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -346,7 +346,7 @@ TEST(TypeAssign, FixedSizeTests_Float64) {
 }
 
 TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
-    dynd_bool v_b;
+    bool1 v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;
@@ -541,7 +541,7 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float32) {
 }
 
 TEST(TypeAssign, FixedSizeTests_Complex_Float64) {
-    dynd_bool v_b;
+    bool1 v_b;
     int8_t v_i8;
     int16_t v_i16;
     int32_t v_i32;

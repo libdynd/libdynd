@@ -59,8 +59,8 @@ namespace nd {
   struct is_avail_ck;
 
   template <>
-  struct is_avail_ck<dynd_bool>
-      : base_kernel<is_avail_ck<dynd_bool>, kernel_request_host, 1> {
+  struct is_avail_ck<bool1>
+      : base_kernel<is_avail_ck<bool1>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -74,7 +74,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -88,7 +88,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -102,7 +102,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -116,7 +116,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -130,12 +130,12 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
   template <>
-  struct is_avail_ck<dynd_int128> : detail::is_avail_int_ck<dynd_int128> {
+  struct is_avail_ck<int128> : detail::is_avail_int_ck<int128> {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
@@ -144,7 +144,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -164,7 +164,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -184,7 +184,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -204,7 +204,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -224,7 +224,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -244,7 +244,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -271,7 +271,7 @@ namespace nd {
         const nd::array &DYND_UNUSED(kwds),
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = ndt::make_type<dynd_bool>();
+      dst_tp = ndt::make_type<bool1>();
     }
   };
 
@@ -279,8 +279,8 @@ namespace nd {
   struct assign_na_ck;
 
   template <>
-  struct assign_na_ck<dynd_bool>
-      : base_kernel<assign_na_ck<dynd_bool>, kernel_request_host, 1> {
+  struct assign_na_ck<bool1>
+      : base_kernel<assign_na_ck<bool1>, kernel_request_host, 1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -304,7 +304,7 @@ namespace nd {
   };
 
   template <>
-  struct assign_na_ck<dynd_int128> : detail::assign_na_int_ck<dynd_int128> {
+  struct assign_na_ck<int128> : detail::assign_na_int_ck<int128> {
   };
 
   template <>

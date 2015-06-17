@@ -37,7 +37,7 @@ TEST(Permute, ReturnType)
 
   nd::array res = nd::empty(ndt::make_type<double>());
   af(res, 15);
-  EXPECT_EQ(res, paf(15));
+  EXPECT_TRUE((res == paf(15)).as<bool>());
 
 /*
   af = nd::functional::apply(&func1);

@@ -115,6 +115,9 @@ public:
   operator std::complex<T>() const { return std::complex<T>(m_real, m_imag); }
 };
 
+typedef complex<float32> complex64;
+typedef complex<float64> complex128;
+
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE bool operator==(complex<T> lhs, complex<U> rhs)
 {
@@ -459,7 +462,7 @@ DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
   using namespace std;
   // We risk spurious overflow for components >= DBL_MAX / (1 + sqrt(2))
   const T thresh =
-      std::numeric_limits<T>::max() / (1 + ::sqrt(static_cast<T>(2)));
+      (std::numeric_limits<T>::max)() / (1 + ::sqrt(static_cast<T>(2)));
 
   complex<T> result;
   T a = z.real(), b = z.imag();

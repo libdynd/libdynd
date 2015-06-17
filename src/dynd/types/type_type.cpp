@@ -209,20 +209,22 @@ intptr_t ndt::type_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-static int equal_comparison(const char *const *src,
-                            ckernel_prefix *DYND_UNUSED(self))
+static void equal_comparison(char *dst, char *const *src,
+                             ckernel_prefix *DYND_UNUSED(self))
 {
   const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
   const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
-  return *da == *db;
+
+  *reinterpret_cast<int *>(dst) = *da == *db;
 }
 
-static int not_equal_comparison(const char *const *src,
-                                ckernel_prefix *DYND_UNUSED(self))
+static void not_equal_comparison(char *dst, char *const *src,
+                                 ckernel_prefix *DYND_UNUSED(self))
 {
   const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
   const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
-  return *da != *db;
+
+  *reinterpret_cast<int *>(dst) = *da != *db;
 }
 
 size_t ndt::type_type::make_comparison_kernel(
@@ -237,9 +239,9 @@ size_t ndt::type_type::make_comparison_kernel(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->alloc_ck<ckernel_prefix>(ckb_offset);
       if (comptype == comparison_type_equal) {
-        e->set_function<expr_predicate_t>(equal_comparison);
+        e->set_function<expr_single_t>(equal_comparison);
       } else if (comptype == comparison_type_not_equal) {
-        e->set_function<expr_predicate_t>(not_equal_comparison);
+        e->set_function<expr_single_t>(not_equal_comparison);
       } else {
         throw not_comparable_error(src0_dt, src1_dt, comptype);
       }

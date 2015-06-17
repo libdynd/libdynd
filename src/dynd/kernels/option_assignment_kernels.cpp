@@ -31,7 +31,7 @@ struct option_to_option_ck
     //       instead of having to go through a dst pointer
     ckernel_prefix *src_is_avail = get_child_ckernel();
     expr_single_t src_is_avail_fn = src_is_avail->get_function<expr_single_t>();
-    dynd_bool avail = false;
+    bool1 avail = bool1(false);
     src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
     if (avail) {
       // It's available, copy using value assignment
@@ -62,7 +62,7 @@ struct option_to_option_ck
     expr_strided_t dst_assign_na_fn =
         dst_assign_na->get_function<expr_strided_t>();
     // Process in chunks using the dynd default buffer size
-    dynd_bool avail[DYND_BUFFER_CHUNK_SIZE];
+    bool1 avail[DYND_BUFFER_CHUNK_SIZE];
     while (count > 0) {
       size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
       count -= chunk_size;
@@ -135,7 +135,7 @@ struct option_to_value_ck
     ckernel_prefix *value_assign = get_child_ckernel(m_value_assign_offset);
     expr_single_t value_assign_fn = value_assign->get_function<expr_single_t>();
     // Make sure it's not an NA
-    dynd_bool avail = false;
+    bool1 avail = bool1(false);
     src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
     if (!avail) {
       throw overflow_error("cannot assign an NA value to a non-option type");
@@ -155,7 +155,7 @@ struct option_to_value_ck
     expr_strided_t value_assign_fn =
         value_assign->get_function<expr_strided_t>();
     // Process in chunks using the dynd default buffer size
-    dynd_bool avail[DYND_BUFFER_CHUNK_SIZE];
+    bool1 avail[DYND_BUFFER_CHUNK_SIZE];
     char *src_copy = src[0];
     while (count > 0) {
       size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
@@ -212,7 +212,7 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
   const ndt::arrfunc_type *af_tp =
       src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc_type();
   ckb_offset = af->instantiate(af, af_tp, NULL, ckb, ckb_offset,
-                               ndt::make_type<dynd_bool>(), NULL, nsrc, src_tp,
+                               ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate dst_assign_na
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -264,7 +264,7 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
   const ndt::arrfunc_type *af_tp =
       src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc_type();
   ckb_offset = af->instantiate(af, af_tp, NULL, ckb, ckb_offset,
-                               ndt::make_type<dynd_bool>(), NULL, nsrc, src_tp,
+                               ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate value_assign
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)

@@ -3,9 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/dynd_uint128.hpp>
-#include <dynd/types/dynd_int128.hpp>
-#include <dynd/types/dynd_float16.hpp>
+#include <dynd/float16.hpp>
+#include <dynd/int128.hpp>
+#include <dynd/uint128.hpp>
 
 #include <stdexcept>
 #include <sstream>
@@ -16,7 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-dynd::dynd_uint128::dynd_uint128(float value)
+dynd::uint128::uint128(float value)
 {
     if (value < 0) {
         m_hi = m_lo = 0;
@@ -31,7 +31,7 @@ dynd::dynd_uint128::dynd_uint128(float value)
     }
 }
 
-dynd::dynd_uint128::dynd_uint128(double value)
+dynd::uint128::uint128(double value)
 {
     if (value < 0) {
         m_hi = m_lo = 0;
@@ -47,30 +47,30 @@ dynd::dynd_uint128::dynd_uint128(double value)
 }
 
 #if defined(DYND_HAS_INT128)
-dynd::dynd_uint128::dynd_uint128(const dynd_int128& value)
+dynd::uint128::uint128(const int128& value)
     : m_lo((uint64_t)value), m_hi((uint64_t)(value >> 64))
 {
 }
 #else
-dynd::dynd_uint128::dynd_uint128(const dynd_int128& value)
+dynd::uint128::uint128(const int128& value)
     : m_lo(value.m_lo), m_hi(value.m_hi)
 {
 }
 #endif
 
-dynd::dynd_uint128::dynd_uint128(const dynd_float16& value)
+dynd::uint128::uint128(const float16& value)
     : m_lo(int(float(value))), m_hi(0LL)
 {
 }
 
-dynd::dynd_uint128::dynd_uint128(const dynd_float128& DYND_UNUSED(value))
+dynd::uint128::uint128(const float128& DYND_UNUSED(value))
 {
 #ifndef __CUDA_ARCH__
     throw runtime_error("dynd float128 to uint128 conversion is not implemented");
 #endif
 }
 
-dynd_uint128 dynd::dynd_uint128::operator*(uint32_t rhs) const
+uint128 dynd::uint128::operator*(uint32_t rhs) const
 {
     // Split the multiplication into three
     // First product
@@ -81,11 +81,11 @@ dynd_uint128 dynd::dynd_uint128::operator*(uint32_t rhs) const
     uint64_t hi = (tmp >> 32) + (lo < lo_partial);
     // Third product
     hi += m_hi * rhs;
-    return dynd_uint128(hi, lo);
+    return uint128(hi, lo);
 }
 
 
-dynd_uint128 dynd::dynd_uint128::operator/(uint32_t rhs) const
+uint128 dynd::uint128::operator/(uint32_t rhs) const
 {
     // Split the division into three
     // First division (bits 127..64)
@@ -98,10 +98,10 @@ dynd_uint128 dynd::dynd_uint128::operator/(uint32_t rhs) const
     // Third division (bits 31..0)
     uint64_t low_val = (mid_rem << 32) | (m_lo&0x00000000ffffffffULL);
     uint64_t low_div = low_val / rhs;
-    return dynd_uint128(hi_div, (mid_div << 32) | low_div);
+    return uint128(hi_div, (mid_div << 32) | low_div);
 }
 
-void dynd::dynd_uint128::divrem(uint32_t rhs, uint32_t& out_rem)
+void dynd::uint128::divrem(uint32_t rhs, uint32_t& out_rem)
 {
     // Split the division into three
     // First division (bits 127..64)
@@ -119,20 +119,20 @@ void dynd::dynd_uint128::divrem(uint32_t rhs, uint32_t& out_rem)
     m_lo = (mid_div << 32) | low_div;
 }
 
-std::ostream& dynd::operator<<(ostream& out, const dynd_uint128& val)
+std::ostream& dynd::operator<<(ostream& out, const uint128& val)
 {
-    if (val == dynd_uint128(0ULL)) {
+    if (val == uint128(0ULL)) {
         return (out << '0');
     }
 
     string buffer(40, '\0');
     size_t idx = 39;
-    dynd_uint128 tmp = val;
+    uint128 tmp = val;
     uint32_t digit = 0;
     do {
         tmp.divrem(10u, digit);
         buffer[idx--] = digit + '0';
-    } while (tmp != dynd_uint128(0ULL));
+    } while (tmp != uint128(0ULL));
     return (out << &buffer[idx+1]);
 }
 

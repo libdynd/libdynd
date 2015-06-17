@@ -181,10 +181,6 @@ set(libdynd_SRC
     src/dynd/types/datetime_parser.cpp
     src/dynd/types/datetime_type.cpp
     src/dynd/types/datetime_util.cpp
-    src/dynd/types/dynd_float16.cpp
-    src/dynd/types/dynd_float128.cpp
-    src/dynd/types/dynd_int128.cpp
-    src/dynd/types/dynd_uint128.cpp
     src/dynd/types/dim_fragment_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
     src/dynd/types/expr_type.cpp
@@ -241,7 +237,6 @@ set(libdynd_SRC
     include/dynd/types/categorical_type.hpp
     include/dynd/types/categorical_kind_type.hpp
     include/dynd/types/char_type.hpp
-    include/dynd/types/complex.hpp
     include/dynd/types/convert_type.hpp
     include/dynd/types/cuda_host_type.hpp
     include/dynd/types/cuda_device_type.hpp
@@ -254,10 +249,6 @@ set(libdynd_SRC
     include/dynd/types/datetime_type.hpp
     include/dynd/types/datetime_util.hpp
     include/dynd/types/dim_fragment_type.hpp
-    include/dynd/types/dynd_float16.hpp
-    include/dynd/types/dynd_float128.hpp
-    include/dynd/types/dynd_int128.hpp
-    include/dynd/types/dynd_uint128.hpp
     include/dynd/types/ellipsis_dim_type.hpp
     include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
@@ -309,6 +300,7 @@ set(libdynd_SRC
     src/dynd/func/arrfunc.cpp
     src/dynd/func/arrfunc_registry.cpp
     src/dynd/func/callable.cpp
+    src/dynd/func/comparison.cpp
     src/dynd/func/copy.cpp
     src/dynd/func/chain.cpp
     src/dynd/func/elwise.cpp
@@ -331,6 +323,7 @@ set(libdynd_SRC
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
     include/dynd/func/copy.hpp
+    include/dynd/func/comparison.hpp
     include/dynd/func/chain.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/elwise_gfunc.hpp
@@ -362,6 +355,7 @@ set(libdynd_SRC
     src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
+    src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy.cpp
     src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/date_adapter_kernels.cpp
@@ -473,6 +467,9 @@ set(libdynd_SRC
     src/dynd/asarray.cpp
     src/dynd/config.cpp
     src/dynd/dim_iter.cpp
+    src/dynd/float16.cpp
+    src/dynd/float128.cpp
+    src/dynd/int128.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
@@ -487,6 +484,7 @@ set(libdynd_SRC
     src/dynd/special.cpp
     src/dynd/string.cpp
     src/dynd/string_encodings.cpp
+    src/dynd/uint128.cpp
     src/dynd/view.cpp
     include/dynd/array.hpp
     include/dynd/array_range.hpp
@@ -495,14 +493,19 @@ set(libdynd_SRC
     include/dynd/asarray.hpp
     include/dynd/atomic_refcount.hpp
     include/dynd/auxiliary_data.hpp
+    include/dynd/bool1.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/cling_all.hpp
+    include/dynd/complex.hpp
     include/dynd/diagnostics.hpp
     include/dynd/dim_iter.hpp
     include/dynd/ensure_immutable_contig.hpp
+    include/dynd/float16.hpp
+    include/dynd/float128.hpp
+    include/dynd/int128.hpp
     include/dynd/math.hpp
     include/dynd/type.hpp
     include/dynd/type_sequence.hpp
@@ -521,6 +524,7 @@ set(libdynd_SRC
     include/dynd/special.hpp
     include/dynd/string.hpp
     include/dynd/string_encodings.hpp
+    include/dynd/uint128.hpp
     include/dynd/view.hpp
     include/dynd/with.hpp
     )
@@ -551,14 +555,16 @@ source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
 source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
+#set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
+#set_source_files_properties(src/dynd/func/comparison.cpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
+
 if (DYND_CUDA)
     # Replace some source files with their CUDA versions
     foreach(filename_CPP
-            # Types
-            src/dynd/types/dynd_float16.cpp
-            src/dynd/types/dynd_float128.cpp
-            src/dynd/types/dynd_int128.cpp
-            src/dynd/types/dynd_uint128.cpp
+            src/dynd/float16.cpp
+            src/dynd/float128.cpp
+            src/dynd/int128.cpp
+            src/dynd/uint128.cpp
             # Func
             src/dynd/func/arithmetic.cpp
             src/dynd/func/elwise.cpp

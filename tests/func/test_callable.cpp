@@ -132,7 +132,7 @@ static dynd::complex<float> three_parameters(bool x, int a, int b) {
 TEST(GFuncCallable, ThreeParameters) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable(&three_parameters, "s", "a", "b");
-    EXPECT_EQ(ndt::make_struct(ndt::make_type<dynd_bool>(), "s", ndt::make_type<int>(), "a", ndt::make_type<int>(), "b"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<bool1>(), "s", ndt::make_type<int>(), "a", ndt::make_type<int>(), "b"),
             c.get_parameters_type());
 
     // Call it and see that it gave what we want
@@ -157,7 +157,7 @@ TEST(GFuncCallable, ThreeParameters) {
 TEST(GFuncCallable, ThreeParametersWithOneDefault) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", 12);
-    EXPECT_EQ(ndt::make_struct(ndt::make_type<dynd_bool>(), "s", ndt::make_type<int>(), "a", ndt::make_type<int>(), "b"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<bool1>(), "s", ndt::make_type<int>(), "a", ndt::make_type<int>(), "b"),
             c.get_parameters_type());
 
     // Call it through the C++ interface with various numbers of parameters
@@ -174,7 +174,7 @@ TEST(GFuncCallable, ThreeParametersWithOneDefault) {
 TEST(GFuncCallable, ThreeParametersWithTwoDefaults) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", 6, 12);
-    EXPECT_EQ(ndt::make_struct(ndt::make_type<dynd_bool>(), "s", ndt::make_type<int>(), "a", ndt::make_type<int>(), "b"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<bool1>(), "s", ndt::make_type<int>(), "a", ndt::make_type<int>(), "b"),
             c.get_parameters_type());
 
     // Call it through the C++ interface with various numbers of parameters
@@ -192,7 +192,7 @@ TEST(GFuncCallable, ThreeParametersWithTwoDefaults) {
 TEST(GFuncCallable, ThreeParametersWithThreeDefaults) {
     // Create the callable
     gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", false, 6, 12);
-    EXPECT_EQ(ndt::make_struct(ndt::make_type<dynd_bool>(), "s", ndt::make_type<int>(), "a", ndt::make_type<int>(), "b"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_type<bool1>(), "s", ndt::make_type<int>(), "a", ndt::make_type<int>(), "b"),
             c.get_parameters_type());
 
     // Call it through the C++ interface with various numbers of parameters

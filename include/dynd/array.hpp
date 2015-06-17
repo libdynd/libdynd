@@ -35,7 +35,8 @@ namespace nd {
     enum { size = index_sequence<I...>::size };
 
     template <typename... T>
-    static void get_arrmeta(const char **arrmeta, const std::tuple<T...> &values);
+    static void get_arrmeta(const char **arrmeta,
+                            const std::tuple<T...> &values);
   };
 
   class array;
@@ -84,30 +85,30 @@ namespace nd {
      * Move constructs an array (should be "= default", but MSVC 2013 does not
      * support that)
      */
-    array(array &&rhs) : m_memblock(std::move(rhs.m_memblock)) {};
+    array(array &&rhs) : m_memblock(std::move(rhs.m_memblock)){};
 
     /**
      * Constructs a zero-dimensional scalar from a C++ scalar.
      *
      */
-    array(dynd_bool value);
+    array(bool1 value);
     array(bool value);
     array(signed char value);
     array(short value);
     array(int value);
     array(long value);
     array(long long value);
-    array(const dynd_int128 &value);
+    array(const int128 &value);
     array(unsigned char value);
     array(unsigned short value);
     array(unsigned int value);
     array(unsigned long value);
     array(unsigned long long value);
-    array(const dynd_uint128 &value);
-    array(dynd_float16 value);
+    array(const uint128 &value);
+    array(float16 value);
     array(float value);
     array(double value);
-    array(const dynd_float128 &value);
+    array(const float128 &value);
     array(complex<float> value);
     array(complex<double> value);
     array(std::complex<float> value);
@@ -625,6 +626,8 @@ namespace nd {
 
     array at(const irange &i0) const { return at_array(1, &i0); }
 
+    explicit operator bool() const { return as<bool>(); }
+
     /** Does a value-assignment from the rhs array. */
     void val_assign(const array &rhs, const eval::eval_context *ectx =
                                           &eval::default_eval_context) const;
@@ -794,25 +797,7 @@ namespace nd {
 
     /** Sorting comparison between two arrays. (Returns a bool, does not
      * broadcast) */
-    bool op_sorting_less(const array &rhs) const;
-    /** Less than comparison between two arrays. (Returns a bool, does not
-     * broadcast) */
-    bool operator<(const array &rhs) const;
-    /** Less equal comparison between two arrays. (Returns a bool, does not
-     * broadcast) */
-    bool operator<=(const array &rhs) const;
-    /** Equality comparison between two arrays. (Returns a bool, does not
-     * broadcast) */
-    bool operator==(const array &rhs) const;
-    /** Inequality comparison between two arrays. (Returns a bool, does not
-     * broadcast) */
-    bool operator!=(const array &rhs) const;
-    /** Greator equal comparison between two arrays. (Returns a bool, does not
-     * broadcast) */
-    bool operator>=(const array &rhs) const;
-    /** Greater than comparison between two arrays. (Returns a bool, does not
-     * broadcast) */
-    bool operator>(const array &rhs) const;
+ //   bool op_sorting_less(const array &rhs) const;
 
     bool equals_exact(const array &rhs) const;
 
@@ -831,24 +816,31 @@ namespace nd {
   array operator/(const array &op0, const array &op1);
   array operator*(const array &op0, const array &op1);
 
-  nd::array array_rw(dynd_bool value);
+  array operator<(const array &a0, const array &a1);
+  array operator<=(const array &a0, const array &a1);
+  array operator==(const array &a0, const array &a1);
+  array operator!=(const array &a0, const array &a1);
+  array operator>=(const array &a0, const array &a1);
+  array operator>(const array &a0, const array &a1);
+
+  nd::array array_rw(bool1 value);
   nd::array array_rw(bool value);
   nd::array array_rw(signed char value);
   nd::array array_rw(short value);
   nd::array array_rw(int value);
   nd::array array_rw(long value);
   nd::array array_rw(long long value);
-  nd::array array_rw(const dynd_int128 &value);
+  nd::array array_rw(const int128 &value);
   nd::array array_rw(unsigned char value);
   nd::array array_rw(unsigned short value);
   nd::array array_rw(unsigned int value);
   nd::array array_rw(unsigned long value);
   nd::array array_rw(unsigned long long value);
-  nd::array array_rw(const dynd_uint128 &value);
-  nd::array array_rw(dynd_float16 value);
+  nd::array array_rw(const uint128 &value);
+  nd::array array_rw(float16 value);
   nd::array array_rw(float value);
   nd::array array_rw(double value);
-  nd::array array_rw(const dynd_float128 &value);
+  nd::array array_rw(const float128 &value);
   nd::array array_rw(complex<float> value);
   nd::array array_rw(complex<double> value);
   nd::array array_rw(std::complex<float> value);
@@ -919,8 +911,8 @@ namespace nd {
     typename std::enable_if<is_type_bool<T>::value, array_vals &>::type
     operator=(const T &rhs)
     {
-      dynd_bool v = rhs;
-      m_arr.val_assign(ndt::make_exact_type<dynd_bool>(), NULL,
+      bool1 v(rhs);
+      m_arr.val_assign(ndt::make_exact_type<bool1>(), NULL,
                        (const char *)&v);
       return *this;
     }
@@ -978,8 +970,8 @@ namespace nd {
     typename std::enable_if<is_type_bool<T>::value, array_vals_at &>::type
     operator=(const T &rhs)
     {
-      dynd_bool v = rhs;
-      m_arr.val_assign(ndt::make_exact_type<dynd_bool>(), NULL,
+      bool1 v(rhs);
+      m_arr.val_assign(ndt::make_exact_type<bool1>(), NULL,
                        (const char *)&v);
       return *this;
     }
@@ -1097,7 +1089,8 @@ namespace nd {
    *
    * \returns  An array of type "N * string".
    */
-  array make_strided_string_array(const char *const*cstr_array, size_t array_size);
+  array make_strided_string_array(const char *const *cstr_array,
+                                  size_t array_size);
   array make_strided_string_array(const std::string **str_array,
                                   size_t array_size);
 
@@ -1541,7 +1534,8 @@ namespace nd {
     DYND_MEMCPY(get_ndo()->m_data_pointer, il.begin(), sizeof(T) * dim0);
   }
   template <class T>
-  dynd::nd::array::array(const std::initializer_list<std::initializer_list<T>> &il)
+  dynd::nd::array::array(
+      const std::initializer_list<std::initializer_list<T>> &il)
       : m_memblock()
   {
     typedef std::initializer_list<std::initializer_list<T>> S;
@@ -1555,8 +1549,8 @@ namespace nd {
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
   template <class T>
-  dynd::nd::array::array(
-      const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il)
+  dynd::nd::array::array(const std::initializer_list<
+      std::initializer_list<std::initializer_list<T>>> &il)
       : m_memblock()
   {
     typedef std::initializer_list<
@@ -1594,9 +1588,8 @@ namespace nd {
   {
     intptr_t dim0 = il.size();
     make_strided_array(ndt::make_type<bool>(), 1, &dim0,
-                       nd::default_access_flags, NULL)
-        .swap(*this);
-    auto data_ptr = reinterpret_cast<dynd_bool *>(get_ndo()->m_data_pointer);
+                       nd::default_access_flags, NULL).swap(*this);
+    auto data_ptr = reinterpret_cast<bool1 *>(get_ndo()->m_data_pointer);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
     }
@@ -1687,7 +1680,8 @@ namespace nd {
   namespace detail {
     template <class T>
     struct make_from_vec {
-      inline static typename std::enable_if<is_dynd_scalar<T>::value, array>::type
+      inline static typename std::enable_if<is_dynd_scalar<T>::value,
+                                            array>::type
       make(const std::vector<T> &vec)
       {
         array result = nd::empty(vec.size(), ndt::make_exact_type<T>());
@@ -1741,7 +1735,7 @@ namespace nd {
     struct array_as_helper<bool> {
       inline static bool as(const array &lhs, const eval::eval_context *ectx)
       {
-        return array_as_helper<dynd_bool>::as(lhs, ectx);
+        return static_cast<bool>(array_as_helper<bool1>::as(lhs, ectx));
       }
     };
 
@@ -1860,11 +1854,11 @@ namespace nd {
     *reinterpret_cast<T *>(data) = val;
   }
 
-  void forward_as_array(const ndt::type &tp, char *arrmeta,
-                        char *out_data, const nd::array &val);
+  void forward_as_array(const ndt::type &tp, char *arrmeta, char *out_data,
+                        const nd::array &val);
 
-  void forward_as_array(const ndt::type &tp, char *arrmeta,
-                        char *out_data, const nd::arrfunc &val);
+  void forward_as_array(const ndt::type &tp, char *arrmeta, char *out_data,
+                        const nd::arrfunc &val);
 
   template <typename T>
   void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
@@ -1882,23 +1876,27 @@ namespace nd {
     }
   }
 
-  inline void get_arrmeta(const char **arrmeta, nd::array &a) {
+  inline void get_arrmeta(const char **arrmeta, nd::array &a)
+  {
     *arrmeta = a.get_arrmeta();
   }
 
-  inline void get_arrmeta(const char ** arrmeta, const nd::array &a) {
+  inline void get_arrmeta(const char **arrmeta, const nd::array &a)
+  {
     *arrmeta = a.get_arrmeta();
   }
 
   template <typename A0, typename... A>
-  void get_arrmeta(const char **arrmeta, A0 &&a0, A &&... a) {
+  void get_arrmeta(const char **arrmeta, A0 &&a0, A &&... a)
+  {
     get_arrmeta(arrmeta, a0);
     get_arrmeta(arrmeta + 1, std::forward<A>(a)...);
   }
 
   template <size_t... I>
   template <typename... T>
-  void old_index_proxy<index_sequence<I...>>::get_arrmeta(const char **arrmeta, const std::tuple<T...> &values)
+  void old_index_proxy<index_sequence<I...>>::get_arrmeta(
+      const char **arrmeta, const std::tuple<T...> &values)
   {
     nd::get_arrmeta(arrmeta, std::get<I>(values)...);
   }

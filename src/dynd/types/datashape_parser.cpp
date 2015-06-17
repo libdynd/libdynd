@@ -77,25 +77,25 @@ static const map<string, ndt::type> &builtin_types()
   static map<string, ndt::type> bit;
   if (bit.empty()) {
     bit["void"] = ndt::make_type<void>();
-    bit["bool"] = ndt::make_type<dynd_bool>();
-    bit["int8"] = ndt::make_type<int8_t>();
-    bit["int16"] = ndt::make_type<int16_t>();
-    bit["int32"] = ndt::make_type<int32_t>();
-    bit["int"] = ndt::make_type<int32_t>();
-    bit["int64"] = ndt::make_type<int64_t>();
-    bit["int128"] = ndt::make_type<dynd_int128>();
+    bit["bool"] = ndt::make_type<bool1>();
+    bit["int8"] = ndt::make_type<int8>();
+    bit["int16"] = ndt::make_type<int16>();
+    bit["int32"] = ndt::make_type<int32>();
+    bit["int"] = ndt::make_type<int32>();
+    bit["int64"] = ndt::make_type<int64>();
+    bit["int128"] = ndt::make_type<int128>();
     bit["intptr"] = ndt::make_type<intptr_t>();
-    bit["uint8"] = ndt::make_type<uint8_t>();
-    bit["uint16"] = ndt::make_type<uint16_t>();
-    bit["uint32"] = ndt::make_type<uint32_t>();
-    bit["uint64"] = ndt::make_type<uint64_t>();
-    bit["uint128"] = ndt::make_type<dynd_uint128>();
+    bit["uint8"] = ndt::make_type<uint8>();
+    bit["uint16"] = ndt::make_type<uint16>();
+    bit["uint32"] = ndt::make_type<uint32>();
+    bit["uint64"] = ndt::make_type<uint64>();
+    bit["uint128"] = ndt::make_type<uint128>();
     bit["uintptr"] = ndt::make_type<uintptr_t>();
-    bit["float16"] = ndt::make_type<dynd_float16>();
-    bit["float32"] = ndt::make_type<float>();
-    bit["float64"] = ndt::make_type<double>();
+    bit["float16"] = ndt::make_type<float16>();
+    bit["float32"] = ndt::make_type<float32>();
+    bit["float64"] = ndt::make_type<float64>();
     bit["real"] = ndt::make_type<double>();
-    bit["float128"] = ndt::make_type<dynd_float128>();
+    bit["float128"] = ndt::make_type<float128>();
     bit["complex64"] = ndt::make_type<dynd::complex<float>>();
     bit["complex128"] = ndt::make_type<dynd::complex<double>>();
     bit["complex"] = ndt::make_type<dynd::complex<double>>();
@@ -335,9 +335,9 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(proto_tp.extended<ndt::arrfunc_type>()->get_pos_type(0),
-                         proto_tp.extended<ndt::arrfunc_type>()->get_return_type(),
-                         adapt_op);
+  return ndt::make_adapt(
+      proto_tp.extended<ndt::arrfunc_type>()->get_pos_type(0),
+      proto_tp.extended<ndt::arrfunc_type>()->get_return_type(), adapt_op);
 }
 
 static string_encoding_t string_to_encoding(const char *error_begin,
@@ -372,8 +372,7 @@ static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
     string encoding_str;
     string_encoding_t encoding = string_encoding_utf_8;
     if (!parse_quoted_string(begin, end, encoding_str)) {
-      throw datashape_parse_error(saved_begin,
-                                  "expected a string encoding");
+      throw datashape_parse_error(saved_begin, "expected a string encoding");
     }
     encoding = string_to_encoding(saved_begin, encoding_str);
     if (!parse_token_ds(begin, end, ']')) {
@@ -534,7 +533,8 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
   }
 }
 
-// fixed_bytes_type : fixed_bytes[<size>] | fixed_bytes[<size>, align=<alignment>]
+// fixed_bytes_type : fixed_bytes[<size>] | fixed_bytes[<size>,
+// align=<alignment>]
 // This is called after 'fixed_bytes' is already matched
 static ndt::type parse_fixed_bytes_parameters(const char *&rbegin,
                                               const char *end)

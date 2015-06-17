@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/dynd_float16.hpp>
-#include <dynd/types/dynd_float128.hpp>
-#include <dynd/types/dynd_int128.hpp>
-#include <dynd/types/dynd_uint128.hpp>
+#include <dynd/float16.hpp>
+#include <dynd/float128.hpp>
+#include <dynd/int128.hpp>
+#include <dynd/uint128.hpp>
 
 #include <sstream>
 #include <stdexcept>
@@ -86,11 +86,11 @@ uint16_t dynd::float_to_halfbits(float value, assign_error_mode errmode)
 #endif
         }
         f_sig >>= (113 - f_exp);
-        // Handle rounding by adding 1 to the bit beyond dynd_float16 precision
+        // Handle rounding by adding 1 to the bit beyond float16 precision
 #if DYND_FLOAT16_ROUND_TIES_TO_EVEN
         // If the last bit in the float16 significand is 0 (already even), and
         // the remaining bit pattern is 1000...0, then we do not add one
-        // to the bit after the dynd_float16 significand.  In all other cases, we do.
+        // to the bit after the float16 significand.  In all other cases, we do.
         if ((f_sig&0x00003fffu) != 0x00001000u) {
             f_sig += 0x00001000u;
         }
@@ -106,12 +106,12 @@ uint16_t dynd::float_to_halfbits(float value, assign_error_mode errmode)
 
     // Regular case with no overflow or underflow
     h_exp = (uint16_t) ((f_exp - 0x38000000u) >> 13);
-    // Handle rounding by adding 1 to the bit beyond dynd_float16 precision
+    // Handle rounding by adding 1 to the bit beyond float16 precision
     f_sig = (f&0x007fffffu);
 #if DYND_FLOAT16_ROUND_TIES_TO_EVEN
-    // If the last bit in the dynd_float16 significand is 0 (already even), and
+    // If the last bit in the float16 significand is 0 (already even), and
     // the remaining bit pattern is 1000...0, then we do not add one
-    // to the bit after the dynd_float16 significand.  In all other cases, we do.
+    // to the bit after the float16 significand.  In all other cases, we do.
     if ((f_sig&0x00003fffu) != 0x00001000u) {
         f_sig += 0x00001000u;
     }
@@ -176,7 +176,7 @@ uint16_t dynd::double_to_halfbits(double value, assign_error_mode errmode)
         }
     }
 
-    // Exponent underflow converts to subnormal dynd_float16 or signed zero
+    // Exponent underflow converts to subnormal float16 or signed zero
     if (d_exp <= 0x3f00000000000000ULL) {
         // Signed zeros, subnormal floats, and floats with small
         // exponents all convert to signed zero halfs.
@@ -203,11 +203,11 @@ uint16_t dynd::double_to_halfbits(double value, assign_error_mode errmode)
 #endif
         }
         d_sig >>= (1009 - d_exp);
-        // Handle rounding by adding 1 to the bit beyond dynd_float16 precision
+        // Handle rounding by adding 1 to the bit beyond float16 precision
 #if DYND_FLOAT16_ROUND_TIES_TO_EVEN
-        // If the last bit in the dynd_float16 significand is 0 (already even), and
+        // If the last bit in the float16 significand is 0 (already even), and
         // the remaining bit pattern is 1000...0, then we do not add one
-        // to the bit after the dynd_float16 significand.  In all other cases, we do.
+        // to the bit after the float16 significand.  In all other cases, we do.
         if ((d_sig&0x000007ffffffffffULL) != 0x0000020000000000ULL) {
             d_sig += 0x0000020000000000ULL;
         }
@@ -223,12 +223,12 @@ uint16_t dynd::double_to_halfbits(double value, assign_error_mode errmode)
 
     // Regular case with no overflow or underflow
     h_exp = (uint16_t) ((d_exp - 0x3f00000000000000ULL) >> 42);
-    // Handle rounding by adding 1 to the bit beyond dynd_float16 precision
+    // Handle rounding by adding 1 to the bit beyond float16 precision
     d_sig = (d&0x000fffffffffffffULL);
 #if DYND_FLOAT16_ROUND_TIES_TO_EVEN
-    // If the last bit in the dynd_float16 significand is 0 (already even), and
+    // If the last bit in the float16 significand is 0 (already even), and
     // the remaining bit pattern is 1000...0, then we do not add one
-    // to the bit after the dynd_float16 significand.  In all other cases, we do.
+    // to the bit after the float16 significand.  In all other cases, we do.
     if ((d_sig&0x000007ffffffffffULL) != 0x0000020000000000ULL) {
         d_sig += 0x0000020000000000ULL;
     }
@@ -327,30 +327,30 @@ double dynd::halfbits_to_double(uint16_t h)
     }
 }
 
-dynd::dynd_float16::dynd_float16(const dynd_int128& value)
+dynd::float16::float16(const int128& value)
 {
     m_bits = double_to_halfbits((double)value, assign_error_nocheck);
 }
 
-dynd::dynd_float16::dynd_float16(const dynd_uint128& value)
+dynd::float16::float16(const uint128& value)
 {
     m_bits = double_to_halfbits((double)value, assign_error_nocheck);
 }
 
-dynd::dynd_float16::dynd_float16(const dynd_float128& value)
+dynd::float16::float16(const float128& value)
 {
     m_bits = double_to_halfbits(double(value), assign_error_nocheck);
 }
 
-dynd::dynd_float16::operator dynd_int128() const
+dynd::float16::operator int128() const
 {
-    return dynd_int128(int32_t(*this));
+    return int128(int32_t(*this));
 }
-dynd::dynd_float16::operator dynd_uint128() const
+dynd::float16::operator uint128() const
 {
-    return dynd_uint128(uint32_t(*this));
+    return uint128(uint32_t(*this));
 }
-dynd::dynd_float16::operator dynd_float128() const
+dynd::float16::operator float128() const
 {
-    return dynd_float128(double(*this));
+    return float128(double(*this));
 }
