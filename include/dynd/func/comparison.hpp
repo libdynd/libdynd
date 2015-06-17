@@ -93,6 +93,9 @@ namespace nd {
       children[std::make_pair(tuple_type_id, tuple_type_id)] =
           arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("((...), (...)) -> int32"));
+      children[std::make_pair(struct_type_id, struct_type_id)] =
+          arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
+              ndt::type("({...}, {...}) -> int32"));
       children[std::make_pair(type_type_id, type_type_id)] =
           arrfunc::make<equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"));
@@ -110,6 +113,9 @@ namespace nd {
       children[std::make_pair(tuple_type_id, tuple_type_id)] =
           arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("((...), (...)) -> int32"));
+      children[std::make_pair(struct_type_id, struct_type_id)] =
+          arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
+              ndt::type("({...}, {...}) -> int32"));
       children[std::make_pair(type_type_id, type_type_id)] =
           arrfunc::make<not_equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"));
