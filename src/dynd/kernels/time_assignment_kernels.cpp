@@ -4,7 +4,8 @@
 //
 
 #include <dynd/kernels/time_assignment_kernels.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/base_kernel.hpp>
+
 
 using namespace std;
 using namespace dynd;

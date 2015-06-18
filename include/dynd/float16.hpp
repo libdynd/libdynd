@@ -66,7 +66,10 @@ public:
   {
   }
 
-  DYND_CUDA_HOST_DEVICE float16(bool1 rhs) : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO) {}
+  DYND_CUDA_HOST_DEVICE float16(bool1 rhs)
+      : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
+  {
+  }
 
   DYND_CUDA_HOST_DEVICE inline explicit float16(bool rhs)
       : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
@@ -349,6 +352,12 @@ operator!=(const T &lhs, const float16 &rhs)
 DYND_CUDA_HOST_DEVICE inline float16 float16_from_bits(uint16_t bits)
 {
   return float16(bits, float16::raw_bits_tag());
+}
+
+inline std::ostream &operator<<(std::ostream &o,
+                                const float16 &DYND_UNUSED(rhs))
+{
+  return (o << "<float16 printing unimplemented>");
 }
 
 } // namespace dynd

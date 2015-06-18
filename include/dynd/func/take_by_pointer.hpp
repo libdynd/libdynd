@@ -7,7 +7,6 @@
 
 #include <dynd/shape_tools.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/pointer_type.hpp>
 
 namespace dynd {

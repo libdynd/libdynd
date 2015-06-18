@@ -8,6 +8,7 @@
 #include <dynd/type.hpp>
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 using namespace std;

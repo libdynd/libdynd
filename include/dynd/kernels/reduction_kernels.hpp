@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/kernels/ckernel_builder.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 namespace dynd { namespace kernels {

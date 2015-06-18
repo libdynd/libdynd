@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/datetime_assignment_kernels.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <datetime_strings.h>
 

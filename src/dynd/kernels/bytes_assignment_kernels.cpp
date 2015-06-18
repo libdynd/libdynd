@@ -8,6 +8,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/diagnostics.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/types/bytes_type.hpp>
 

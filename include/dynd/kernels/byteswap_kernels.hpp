@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <dynd/kernels/assignment_kernels.hpp>
-
 namespace dynd {
 
 /**

@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <iostream>
+
 namespace dynd {
 
 // A boolean class that is just one byte
@@ -175,6 +177,11 @@ DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_arithmetic<T>::value,
 operator>(T lhs, bool1 rhs)
 {
   return lhs > static_cast<T>(rhs);
+}
+
+inline std::ostream &operator<<(std::ostream &o, const bool1 &DYND_UNUSED(rhs))
+{
+  return (o << "<bool1 printing unimplemented>");
 }
 
 } // namespace dynd

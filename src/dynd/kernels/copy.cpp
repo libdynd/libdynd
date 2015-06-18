@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/kernels/copy.hpp>
 
 using namespace std;

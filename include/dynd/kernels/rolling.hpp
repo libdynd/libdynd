@@ -7,7 +7,6 @@
 
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 

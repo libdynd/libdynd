@@ -11,6 +11,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/parser_util.hpp>
 
 using namespace std;
