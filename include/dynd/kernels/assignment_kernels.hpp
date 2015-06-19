@@ -35,6 +35,7 @@ struct r2c<float64_type_id> {
 }
 
 namespace dynd {
+
 namespace nd {
 
   template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t Src0TypeID,
@@ -190,6 +191,175 @@ namespace nd {
                            assign_error_inexact>
       : assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind,
                           assign_error_nocheck> {
+  };
+
+  // Signed int -> signed int with overflow checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID,
+                                      sint_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      if (is_overflow<dst_type>(s)) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+    }
+  };
+
+  // Signed int -> signed int with other error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                          assign_error_overflow> {
+  };
+
+  // Unsigned int -> signed int with overflow checking just when sizeof(dst) <=
+  // sizeof(src)
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID,
+                                      uint_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src0_type);
+
+      if (is_overflow<dst_type>(s)) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+    }
+  };
+
+  // Unsigned int -> signed int with other error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                          assign_error_overflow> {
+  };
+
+  // Signed int -> unsigned int with positive overflow checking just when
+  // sizeof(dst) < sizeof(src)
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID,
+                                      sint_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
+      if (is_overflow<dst_type>(s)) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+    }
+  };
+
+  // Signed int -> unsigned int with other error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                          assign_error_overflow> {
+  };
+
+  // Unsigned int -> unsigned int with overflow checking just when sizeof(dst) <
+  // sizeof(src)
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID,
+                                      uint_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
+      if (is_overflow<dst_type>(s)) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+    }
+  };
+
+  // Unsigned int -> unsigned int with other error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                          assign_error_overflow> {
   };
 
   // double -> complex<float>

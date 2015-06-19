@@ -20,7 +20,112 @@
 #pragma fenv_access(on)
 #endif
 
+namespace std {
+
+template <>
+struct is_signed<dynd::int128> {
+  static const bool value = true;
+};
+
+template <>
+struct is_signed<dynd::uint128> {
+  static const bool value = false;
+};
+
+template <>
+struct is_unsigned<dynd::int128> {
+  static const bool value = false;
+};
+
+template <>
+struct is_unsigned<dynd::uint128> {
+  static const bool value = true;
+};
+}
+
 namespace dynd {
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) &&
+                            std::is_signed<DstType>::value &&
+                            std::is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(std::numeric_limits<DstType>::min()) ||
+         src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) &&
+                            std::is_signed<DstType>::value &&
+                            std::is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) &&
+                            std::is_signed<DstType>::value &&
+                            std::is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) &&
+                            std::is_signed<DstType>::value &&
+                            std::is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) &&
+                            std::is_unsigned<DstType>::value &&
+                            std::is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(0) ||
+         static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) &&
+                            std::is_unsigned<DstType>::value &&
+                            std::is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(0);
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) &&
+                            std::is_unsigned<DstType>::value &&
+                            std::is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) &&
+                            std::is_unsigned<DstType>::value &&
+                            std::is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
 
 template <class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_builtin_base_error {
@@ -105,218 +210,6 @@ struct single_assigner_builtin_base<double, complex<src_real_type>, real_kind,
 
     *dst = static_cast<double>(src->real());
   }
-};
-
-// Signed int -> signed int with overflow checking just when sizeof(dst) <
-// sizeof(src)
-template <class dst_type, class src_type, bool dst_lt>
-struct single_assigner_builtin_signed_to_signed_overflow_base
-    : public single_assigner_builtin_base<dst_type, src_type, sint_kind,
-                                          sint_kind, assign_error_nocheck> {
-};
-
-// Signed int -> signed int with overflow checking
-template <class dst_type, class src_type>
-struct single_assigner_builtin_signed_to_signed_overflow_base<dst_type,
-                                                              src_type, true> {
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    src_type s = *src;
-
-    if (s < static_cast<src_type>(std::numeric_limits<dst_type>::min()) ||
-        s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::overflow_error(ss.str());
-    }
-    *dst = static_cast<dst_type>(s);
-  }
-};
-
-// Signed int -> signed int with overflow checking
-template <class dst_type, class src_type>
-    struct single_assigner_builtin_base<dst_type, src_type, sint_kind,
-                                        sint_kind, assign_error_overflow>
-    : public single_assigner_builtin_signed_to_signed_overflow_base < dst_type,
-    src_type, sizeof(dst_type)<sizeof(src_type)> {
-};
-
-// Signed int -> signed int with other error checking
-template <class dst_type, class src_type>
-    struct single_assigner_builtin_base<dst_type, src_type, sint_kind,
-                                        sint_kind, assign_error_fractional>
-    : public single_assigner_builtin_signed_to_signed_overflow_base < dst_type,
-    src_type, sizeof(dst_type)<sizeof(src_type)> {
-};
-template <class dst_type, class src_type>
-    struct single_assigner_builtin_base<dst_type, src_type, sint_kind,
-                                        sint_kind, assign_error_inexact>
-    : public single_assigner_builtin_signed_to_signed_overflow_base < dst_type,
-    src_type, sizeof(dst_type)<sizeof(src_type)> {
-};
-
-// Unsigned int -> signed int with overflow checking just when sizeof(dst) <=
-// sizeof(src)
-template <class dst_type, class src_type, bool dst_le>
-struct single_assigner_builtin_unsigned_to_signed_overflow_base
-    : public single_assigner_builtin_base<dst_type, src_type, sint_kind,
-                                          uint_kind, assign_error_nocheck> {
-};
-template <class dst_type, class src_type>
-struct single_assigner_builtin_unsigned_to_signed_overflow_base<
-    dst_type, src_type, true> {
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    src_type s = *src;
-
-    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
-
-    if (s > static_cast<src_type>(std::numeric_limits<dst_type>::max())) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::overflow_error(ss.str());
-    }
-    *dst = static_cast<dst_type>(s);
-  }
-};
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind,
-                                    assign_error_overflow>
-    : public single_assigner_builtin_unsigned_to_signed_overflow_base<
-          dst_type, src_type, sizeof(dst_type) <= sizeof(src_type)> {
-};
-
-// Unsigned int -> signed int with other error checking
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind,
-                                    assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, sint_kind,
-                                          uint_kind, assign_error_overflow> {
-};
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, sint_kind, uint_kind,
-                                    assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, src_type, sint_kind,
-                                          uint_kind, assign_error_overflow> {
-};
-
-// Signed int -> unsigned int with positive overflow checking just when
-// sizeof(dst) < sizeof(src)
-template <class dst_type, class src_type, bool dst_lt>
-struct single_assigner_builtin_signed_to_unsigned_overflow_base {
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    src_type s = *src;
-
-    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
-
-    if (s < src_type(0)) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::overflow_error(ss.str());
-    }
-    *dst = static_cast<dst_type>(s);
-  }
-};
-template <class dst_type, class src_type>
-struct single_assigner_builtin_signed_to_unsigned_overflow_base<
-    dst_type, src_type, true> {
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    src_type s = *src;
-
-    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
-
-    if ((s < src_type(0)) ||
-        (static_cast<src_type>(std::numeric_limits<dst_type>::max()) < s)) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::overflow_error(ss.str());
-    }
-    *dst = static_cast<dst_type>(s);
-  }
-};
-template <class dst_type, class src_type>
-    struct single_assigner_builtin_base<dst_type, src_type, uint_kind,
-                                        sint_kind, assign_error_overflow>
-    : public single_assigner_builtin_signed_to_unsigned_overflow_base <
-      dst_type,
-    src_type, sizeof(dst_type)<sizeof(src_type)> {
-};
-
-// Signed int -> unsigned int with other error checking
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, sint_kind,
-                                    assign_error_fractional>
-    : public single_assigner_builtin_base<dst_type, src_type, uint_kind,
-                                          sint_kind, assign_error_overflow> {
-};
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, sint_kind,
-                                    assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, src_type, uint_kind,
-                                          sint_kind, assign_error_overflow> {
-};
-
-// Unsigned int -> unsigned int with overflow checking just when sizeof(dst) <
-// sizeof(src)
-template <class dst_type, class src_type, bool dst_lt>
-struct single_assigner_builtin_unsigned_to_unsigned_overflow_base
-    : public single_assigner_builtin_base<dst_type, src_type, uint_kind,
-                                          uint_kind, assign_error_nocheck> {
-};
-
-// Unsigned int -> unsigned int with overflow checking
-template <class dst_type, class src_type>
-struct single_assigner_builtin_unsigned_to_unsigned_overflow_base<
-    dst_type, src_type, true> {
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    src_type s = *src;
-
-    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
-
-    if (std::numeric_limits<dst_type>::max() < s) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::overflow_error(ss.str());
-    }
-    *dst = static_cast<dst_type>(s);
-  }
-};
-
-template <class dst_type, class src_type>
-    struct single_assigner_builtin_base<dst_type, src_type, uint_kind,
-                                        uint_kind, assign_error_overflow>
-    : public single_assigner_builtin_unsigned_to_unsigned_overflow_base <
-      dst_type,
-    src_type, sizeof(dst_type)<sizeof(src_type)> {
-};
-
-// Unsigned int -> unsigned int with other error checking
-template <class dst_type, class src_type>
-    struct single_assigner_builtin_base<dst_type, src_type, uint_kind,
-                                        uint_kind, assign_error_fractional>
-    : public single_assigner_builtin_unsigned_to_unsigned_overflow_base <
-      dst_type,
-    src_type, sizeof(dst_type)<sizeof(src_type)> {
-};
-template <class dst_type, class src_type>
-    struct single_assigner_builtin_base<dst_type, src_type, uint_kind,
-                                        uint_kind, assign_error_inexact>
-    : public single_assigner_builtin_unsigned_to_unsigned_overflow_base <
-      dst_type,
-    src_type, sizeof(dst_type)<sizeof(src_type)> {
 };
 
 // Signed int -> floating point with inexact checking
