@@ -19,26 +19,6 @@
 using namespace std;
 using namespace dynd;
 
-template <type_id_t type_id>
-struct r2c;
-
-template <>
-struct r2c<float32_type_id> {
-  static const type_id_t value = complex_float32_type_id;
-};
-
-template <>
-struct r2c<float64_type_id> {
-  static const type_id_t value = complex_float64_type_id;
-};
-
-template <type_id_t TypeID0, type_id_t TypeID1>
-struct S;
-
-template <type_id_t TypeID>
-struct S<TypeID, r2c<TypeID>::value> {
-};
-
 TEST(With1DStrided, ViewData)
 {
   nd::array a = {1, 3, 5, 7};
