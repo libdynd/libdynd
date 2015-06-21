@@ -48,105 +48,115 @@ class float16 {
 public:
   class raw_bits_tag {
   };
-  DYND_CUDA_HOST_DEVICE inline float16(uint16_t bits, raw_bits_tag)
-      : m_bits(bits)
-  {
-  }
+  DYND_CUDA_HOST_DEVICE float16(uint16_t bits, raw_bits_tag) : m_bits(bits) {}
 
-  DYND_CUDA_HOST_DEVICE inline float16() {}
-  DYND_CUDA_HOST_DEVICE inline float16(const float16 &rhs) : m_bits(rhs.m_bits)
-  {
-  }
-  DYND_CUDA_HOST_DEVICE inline float16(float f, assign_error_mode errmode)
-      : m_bits(float_to_halfbits(f, errmode))
-  {
-  }
-  DYND_CUDA_HOST_DEVICE inline float16(double d, assign_error_mode errmode)
-      : m_bits(double_to_halfbits(d, errmode))
-  {
-  }
+  DYND_CUDA_HOST_DEVICE float16() {}
 
   DYND_CUDA_HOST_DEVICE float16(bool1 rhs)
       : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
   {
   }
 
-  DYND_CUDA_HOST_DEVICE inline explicit float16(bool rhs)
+  DYND_CUDA_HOST_DEVICE explicit float16(bool rhs)
       : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
   {
   }
 
-  DYND_CUDA_HOST_DEVICE inline float16(float f)
-      : m_bits(float_to_halfbits(f, assign_error_nocheck))
+  DYND_CUDA_HOST_DEVICE explicit float16(int32 value)
+      : float16(static_cast<float32>(value))
   {
   }
-  DYND_CUDA_HOST_DEVICE inline float16(double d)
-      : m_bits(double_to_halfbits(d, assign_error_nocheck))
-  {
-  }
-  DYND_CUDA_HOST_DEVICE inline float16(int32_t value)
-      : m_bits(float_to_halfbits((float)value, assign_error_nocheck))
-  {
-  }
-  DYND_CUDA_HOST_DEVICE inline float16(uint32_t value)
-      : m_bits(float_to_halfbits((float)value, assign_error_nocheck))
-  {
-  }
-  DYND_CUDA_HOST_DEVICE inline float16(int64_t value)
-      : m_bits(float_to_halfbits((float)value, assign_error_nocheck))
-  {
-  }
-  DYND_CUDA_HOST_DEVICE inline float16(uint64_t value)
-      : m_bits(float_to_halfbits((float)value, assign_error_nocheck))
-  {
-  }
-  DYND_CUDA_HOST_DEVICE float16(const int128 &value);
-  DYND_CUDA_HOST_DEVICE float16(const uint128 &value);
-  DYND_CUDA_HOST_DEVICE float16(const float128 &value);
 
-  DYND_CUDA_HOST_DEVICE inline operator float() const
+  DYND_CUDA_HOST_DEVICE explicit float16(int64 value)
+      : float16(static_cast<float32>(value))
+  {
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit float16(uint32 value)
+      : float16(static_cast<float32>(value))
+  {
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit float16(uint64 value)
+      : float16(static_cast<float32>(value))
+  {
+  }
+
+  DYND_CUDA_HOST_DEVICE
+  explicit float16(float f, assign_error_mode errmode = assign_error_nocheck)
+      : m_bits(float_to_halfbits(f, errmode))
+  {
+  }
+
+  DYND_CUDA_HOST_DEVICE
+  explicit float16(double d, assign_error_mode errmode = assign_error_nocheck)
+      : m_bits(double_to_halfbits(d, errmode))
+  {
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit float16(const int128 &value);
+
+  DYND_CUDA_HOST_DEVICE explicit float16(const uint128 &value);
+
+  DYND_CUDA_HOST_DEVICE explicit float16(const float128 &value);
+
+  DYND_CUDA_HOST_DEVICE float16(const float16 &rhs) : m_bits(rhs.m_bits) {}
+
+  DYND_CUDA_HOST_DEVICE explicit operator int8() const
+  {
+    return static_cast<int8>(halfbits_to_float(m_bits));
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator int16() const
+  {
+    return static_cast<int16>(halfbits_to_float(m_bits));
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator int32() const
+  {
+    return static_cast<int32>(halfbits_to_float(m_bits));
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator int64() const
+  {
+    return static_cast<int64>(halfbits_to_float(m_bits));
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator int128() const;
+
+  DYND_CUDA_HOST_DEVICE explicit operator uint8() const
+  {
+    return static_cast<uint8>(halfbits_to_float(m_bits));
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator uint16() const
+  {
+    return static_cast<uint16>(halfbits_to_float(m_bits));
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator uint32() const
+  {
+    return static_cast<uint32>(halfbits_to_float(m_bits));
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator uint64() const
+  {
+    return static_cast<uint64>(halfbits_to_float(m_bits));
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator uint128() const;
+
+  DYND_CUDA_HOST_DEVICE operator float32() const
   {
     return halfbits_to_float(m_bits);
   }
-  DYND_CUDA_HOST_DEVICE inline operator double() const
+
+  DYND_CUDA_HOST_DEVICE explicit operator float64() const
   {
     return halfbits_to_double(m_bits);
   }
-  DYND_CUDA_HOST_DEVICE inline operator int8_t() const
-  {
-    return (int8_t)halfbits_to_float(m_bits);
-  }
-  DYND_CUDA_HOST_DEVICE inline operator uint8_t() const
-  {
-    return (uint8_t)halfbits_to_float(m_bits);
-  }
-  DYND_CUDA_HOST_DEVICE inline operator int16_t() const
-  {
-    return (int16_t)halfbits_to_float(m_bits);
-  }
-  DYND_CUDA_HOST_DEVICE inline operator uint16_t() const
-  {
-    return (uint16_t)halfbits_to_float(m_bits);
-  }
-  DYND_CUDA_HOST_DEVICE inline operator int32_t() const
-  {
-    return (int32_t)halfbits_to_float(m_bits);
-  }
-  DYND_CUDA_HOST_DEVICE inline operator uint32_t() const
-  {
-    return (uint32_t)halfbits_to_float(m_bits);
-  }
-  DYND_CUDA_HOST_DEVICE inline operator int64_t() const
-  {
-    return (int64_t)halfbits_to_float(m_bits);
-  }
-  DYND_CUDA_HOST_DEVICE inline operator uint64_t() const
-  {
-    return (uint64_t)halfbits_to_float(m_bits);
-  }
-  DYND_CUDA_HOST_DEVICE operator int128() const;
-  DYND_CUDA_HOST_DEVICE operator uint128() const;
-  DYND_CUDA_HOST_DEVICE operator float128() const;
+
+  DYND_CUDA_HOST_DEVICE explicit operator float128() const;
 
   DYND_CUDA_HOST_DEVICE inline uint16_t bits() const { return m_bits; }
 
