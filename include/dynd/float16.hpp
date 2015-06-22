@@ -87,18 +87,18 @@ public:
   DYND_CUDA_HOST_DEVICE explicit float16(uint128 value);
 
   DYND_CUDA_HOST_DEVICE
-  explicit float16(float f, assign_error_mode errmode = assign_error_nocheck)
+  float16(float f, assign_error_mode errmode = assign_error_nocheck)
       : m_bits(float_to_halfbits(f, errmode))
   {
   }
 
   DYND_CUDA_HOST_DEVICE
-  explicit float16(double d, assign_error_mode errmode = assign_error_nocheck)
+  float16(double d, assign_error_mode errmode = assign_error_nocheck)
       : m_bits(double_to_halfbits(d, errmode))
   {
   }
 
-  DYND_CUDA_HOST_DEVICE explicit float16(const float128 &value);
+  DYND_CUDA_HOST_DEVICE float16(const float128 &value);
 
   DYND_CUDA_HOST_DEVICE float16(const float16 &rhs) : m_bits(rhs.m_bits) {}
 

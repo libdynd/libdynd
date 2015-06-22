@@ -16,6 +16,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(Float16, CommonType)
 {
   EXPECT_TRUE((std::is_same<typename std::common_type<float16, float32>::type,
@@ -23,3 +24,4 @@ TEST(Float16, CommonType)
   EXPECT_TRUE((std::is_same<typename std::common_type<float16, float64>::type,
                             float64>::value));
 }
+*/
