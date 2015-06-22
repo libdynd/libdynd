@@ -458,7 +458,7 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       src0_type s = *reinterpret_cast<src0_type *>(src[0]);
-      dst_type d = static_cast<dst_type>(s);
+      dst_type d(static_cast<dst_type>(s));
 
       DYND_TRACE_ASSIGNMENT(d, dst_type, s, src0_type);
 
