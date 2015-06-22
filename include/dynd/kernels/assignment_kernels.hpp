@@ -165,7 +165,7 @@ namespace nd {
 
       DYND_TRACE_ASSIGNMENT(d, dst_type, s, src0_type);
 
-      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+      *reinterpret_cast<dst_type *>(dst) = static_cast<float>(s);
     }
   };
 
@@ -484,6 +484,7 @@ namespace nd {
 
     void single(char *, char *const *)
     {
+      throw std::runtime_error("float16 assignment kernel is temporarily disabled");
     }
   };
 
