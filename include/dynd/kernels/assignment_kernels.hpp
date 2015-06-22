@@ -18,6 +18,14 @@
 #include <dynd/kernels/single_assigner_builtin.hpp>
 #include <map>
 
+template <typename T>
+struct get_real_type;
+
+template <typename T>
+struct get_real_type<dynd::complex<T>> {
+  typedef T type;
+};
+
 namespace dynd {
 
 namespace nd {
@@ -158,6 +166,7 @@ namespace nd {
                     kernel_request_host, 1> {
     typedef typename type_of<DstTypeID>::type dst_type;
     typedef typename type_of<Src0TypeID>::type src0_type;
+    typedef typename get_real_type<dst_type>::type real_type;
 
     void single(char *dst, char *const *src)
     {
@@ -165,7 +174,8 @@ namespace nd {
 
       DYND_TRACE_ASSIGNMENT(d, dst_type, s, src0_type);
 
-      *reinterpret_cast<dst_type *>(dst) = static_cast<double>(s);
+      // TODO: Check this
+      *reinterpret_cast<dst_type *>(dst) = static_cast<real_type>(s);
     }
   };
 
