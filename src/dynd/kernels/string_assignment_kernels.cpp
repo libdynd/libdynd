@@ -10,6 +10,7 @@
 #include <dynd/diagnostics.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 
 using namespace std;
 using namespace dynd;

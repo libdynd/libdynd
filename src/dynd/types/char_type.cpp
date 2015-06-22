@@ -5,6 +5,7 @@
 
 #include <dynd/types/char_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>

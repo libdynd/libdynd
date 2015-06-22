@@ -320,6 +320,7 @@ set(libdynd_SRC
     include/dynd/func/arithmetic.hpp
     include/dynd/func/arrfunc.hpp
     include/dynd/func/arrfunc_registry.hpp
+    include/dynd/func/assignment.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/call_callable.hpp
     include/dynd/func/copy.hpp

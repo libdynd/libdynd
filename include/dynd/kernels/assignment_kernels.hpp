@@ -9,6 +9,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/eval/eval_context.hpp>
@@ -18,20 +19,1042 @@
 #include <map>
 
 namespace dynd {
+
 namespace nd {
 
-  template <class dst_type, class src_type, assign_error_mode errmode>
-  struct assign_ck : base_kernel<assign_ck<dst_type, src_type, errmode>,
-                                 kernel_request_host, 1> {
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t Src0TypeID,
+            type_kind_t Src0TypeKind, assign_error_mode ErrorMode>
+  struct assignment_kernel
+      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID,
+                                      Src0TypeKind, ErrorMode>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src_type;
+
     void single(char *dst, char *const *src)
     {
-      single_assigner_builtin<dst_type, src_type, errmode>::assign(
+      single_assigner_builtin<dst_type, src_type, ErrorMode>::assign(
           reinterpret_cast<dst_type *>(dst),
           reinterpret_cast<src_type *>(*src));
     }
   };
 
-  template <class dst_type, class src_type>
+  /*
+    template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t
+  Src0TypeID,
+              type_kind_t Src0TypeKind>
+    struct assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
+                             assign_error_nocheck>
+        : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID,
+                                        Src0TypeKind, assign_error_nocheck>,
+                      kernel_request_host, 1> {
+      typedef typename type_of<DstTypeID>::type dst_type;
+      typedef typename type_of<Src0TypeID>::type src0_type;
+
+      void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
+      {
+  // DYND_TRACE_ASSIGNMENT(static_cast<float>(*src), float, *src, double);
+
+  #ifdef __CUDA_ARCH__
+        DYND_TRIGGER_ASSERT(
+            "assignment is not implemented for CUDA global memory");
+  #else
+        std::stringstream ss;
+        ss << "assignment from " << ndt::make_type<src0_type>() << " to "
+           << ndt::make_type<dst_type>();
+        ss << "with error mode " << assign_error_nocheck << " is not
+  implemented";
+        throw std::runtime_error(ss.str());
+  #endif
+      }
+    };
+  */
+
+  // Complex floating point -> non-complex with no error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID,
+                                      complex_kind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s,
+                            src0_type);
+
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
+    }
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, complex_kind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID,
+                                      complex_kind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s,
+                            complex<src_real_type>);
+
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
+    }
+  };
+
+  template <type_id_t Src0TypeID>
+  struct assignment_kernel<float32_type_id, real_kind, Src0TypeID, complex_kind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<float32_type_id, real_kind, Src0TypeID,
+                                      complex_kind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), dst_type, s,
+                            src0_type);
+
+      *reinterpret_cast<float32 *>(dst) = static_cast<float>(s.real());
+    }
+  };
+
+  template <type_id_t Src0TypeID>
+  struct assignment_kernel<float64_type_id, real_kind, Src0TypeID, complex_kind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<float64_type_id, real_kind, Src0TypeID,
+                                      complex_kind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<double>(s.real()), dst_type, s,
+                            src0_type);
+
+      *reinterpret_cast<float64 *>(dst) = static_cast<double>(s.real());
+    }
+  };
+
+  // Signed int -> complex floating point with no checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID,
+                                      sint_kind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+    typedef typename get_real_type<dst_type>::type real_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(d, dst_type, s, src0_type);
+
+      // TODO: Check this
+      *reinterpret_cast<dst_type *>(dst) = static_cast<real_type>(s);
+    }
+  };
+
+  // Anything -> boolean with no checking
+  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+  struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<bool_type_id, bool_kind, Src0TypeID,
+                                      Src0TypeKind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT((bool)(s != src0_type(0)), bool1, s, src0_type);
+
+      *reinterpret_cast<bool1 *>(dst) = (s != src0_type(0));
+    }
+  };
+
+  // Anything -> boolean with overflow checking
+  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+  struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<bool_type_id, bool_kind, Src0TypeID,
+                                      Src0TypeKind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT((bool)(s != src0_type(0)), bool1, s, src0_type);
+
+      if (s == src0_type(0)) {
+        *dst = false;
+      } else if (s == src0_type(1)) {
+        *dst = true;
+      } else {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<bool1>();
+        throw std::overflow_error(ss.str());
+      }
+    }
+  };
+
+  // Anything -> boolean with other error checking
+  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+  struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind,
+                           assign_error_fractional>
+      : assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+  struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind,
+                           assign_error_inexact>
+      : assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind,
+                          assign_error_overflow> {
+  };
+
+  // Boolean -> boolean with other error checking
+  template <>
+  struct assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind,
+                           assign_error_overflow>
+      : assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind,
+                           assign_error_fractional>
+      : assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind,
+                           assign_error_inexact>
+      : assignment_kernel<bool_type_id, bool_kind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  // Boolean -> anything with other error checking
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+  struct assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind,
+                           assign_error_overflow>
+      : assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+  struct assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+  struct assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, DstTypeKind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  // Signed int -> signed int with overflow checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID,
+                                      sint_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      if (is_overflow<dst_type>(s)) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+    }
+  };
+
+  // Signed int -> signed int with other error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, sint_kind,
+                          assign_error_overflow> {
+  };
+
+  // Unsigned int -> signed int with overflow checking just when sizeof(dst) <=
+  // sizeof(src)
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID,
+                                      uint_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src0_type);
+
+      if (is_overflow<dst_type>(s)) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+    }
+  };
+
+  // Unsigned int -> signed int with other error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, uint_kind,
+                          assign_error_overflow> {
+  };
+
+  // Signed int -> unsigned int with positive overflow checking just when
+  // sizeof(dst) < sizeof(src)
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID,
+                                      sint_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
+      if (is_overflow<dst_type>(s)) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+    }
+  };
+
+  // Signed int -> unsigned int with other error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, sint_kind,
+                          assign_error_overflow> {
+  };
+
+  // Unsigned int -> unsigned int with overflow checking just when sizeof(dst) <
+  // sizeof(src)
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, uint_kind, Src0TypeID,
+                                      uint_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
+
+      if (is_overflow<dst_type>(s)) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+    }
+  };
+
+  // Unsigned int -> unsigned int with other error checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                          assign_error_overflow> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, uint_kind, Src0TypeID, uint_kind,
+                          assign_error_overflow> {
+  };
+
+  // Signed int -> floating point with inexact checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID,
+                                      sint_kind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+      dst_type d = static_cast<dst_type>(s);
+
+      DYND_TRACE_ASSIGNMENT(d, dst_type, s, src0_type);
+
+      if (static_cast<src0_type>(d) != s) {
+        std::stringstream ss;
+        ss << "inexact value while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>() << " value " << d;
+        throw std::runtime_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = d;
+    }
+  };
+
+  template <type_id_t Src0TypeID>
+  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, sint_kind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                      sint_kind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    typedef float16 dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *, char *const *)
+    {
+      throw std::runtime_error("float16 assignment kernel is temporarily disabled");
+    }
+  };
+
+  // Signed int -> floating point with other checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind,
+                           assign_error_overflow>
+      : assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind,
+                          assign_error_nocheck> {
+  };
+
+  // double -> complex<float>
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           float64_type_id, real_kind, assign_error_nocheck>
+      : base_kernel<
+            assignment_kernel<complex_float32_type_id, complex_kind,
+                              float64_type_id, real_kind, assign_error_nocheck>,
+            kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      double s = *reinterpret_cast<double *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<complex<float>>(s), complex<float>, s,
+                            double);
+
+      *reinterpret_cast<complex<float> *>(dst) = static_cast<float>(s);
+    }
+  };
+
+  // float -> complex<double>
+  template <>
+  struct assignment_kernel<complex_float64_type_id, complex_kind,
+                           float32_type_id, real_kind, assign_error_nocheck>
+      : base_kernel<
+            assignment_kernel<complex_float64_type_id, complex_kind,
+                              float32_type_id, real_kind, assign_error_nocheck>,
+            kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      float s = *reinterpret_cast<float *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<complex<double>>(*src), complex<double>,
+                            s, float);
+
+      *reinterpret_cast<complex<double> *>(dst) = s;
+    }
+  };
+
+  template <assign_error_mode ErrorMode>
+  struct assignment_kernel<complex_float64_type_id, complex_kind,
+                           float32_type_id, real_kind, ErrorMode>
+      : assignment_kernel<complex_float64_type_id, complex_kind,
+                          float32_type_id, real_kind, assign_error_nocheck> {
+  };
+
+  // complex<float> -> double with overflow checking
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
+                           complex_kind, assign_error_overflow>
+      : base_kernel<assignment_kernel<float64_type_id, real_kind,
+                                      complex_float32_type_id, complex_kind,
+                                      assign_error_overflow>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      complex<float> s = *reinterpret_cast<complex<float> *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<double>(s.real()), double, s,
+                            complex<float>);
+
+      if (s.imag() != 0) {
+        std::stringstream ss;
+        ss << "loss of imaginary component while assigning "
+           << ndt::make_type<complex<float>>() << " value ";
+        ss << *src << " to " << ndt::make_type<double>();
+        throw std::runtime_error(ss.str());
+      }
+
+      *reinterpret_cast<double *>(dst) = s.real();
+    }
+  };
+
+  // complex<float> -> double with fractional checking
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
+                           complex_kind, assign_error_fractional>
+      : assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
+                          complex_kind, assign_error_overflow> {
+  };
+
+  // complex<float> -> double with inexact checking
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
+                           complex_kind, assign_error_inexact>
+      : assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
+                          complex_kind, assign_error_overflow> {
+  };
+
+  // complex<double> -> float with overflow checking
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, complex_float64_type_id,
+                           complex_kind, assign_error_overflow>
+      : base_kernel<assignment_kernel<float32_type_id, real_kind,
+                                      complex_float64_type_id, complex_kind,
+                                      assign_error_overflow>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      complex<double> s = *reinterpret_cast<complex<double> *>(src[0]);
+      float d;
+
+      DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s,
+                            complex<double>);
+
+      if (s.imag() != 0) {
+        std::stringstream ss;
+        ss << "loss of imaginary component while assigning "
+           << ndt::make_type<complex<double>>() << " value ";
+        ss << *src << " to " << ndt::make_type<float>();
+        throw std::runtime_error(ss.str());
+      }
+
+#if defined(DYND_USE_FPSTATUS)
+      clear_fp_status();
+      d = static_cast<float>(s.real());
+      if (is_overflow_fp_status()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<complex<double>>()
+           << " value ";
+        ss << *src << " to " << ndt::make_type<float>();
+        throw std::overflow_error(ss.str());
+      }
+#else
+      if (s.real() < -std::numeric_limits<float>::max() ||
+          s.real() > std::numeric_limits<float>::max()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<complex<double>>()
+           << " value ";
+        ss << *src << " to " << ndt::make_type<float>();
+        throw std::overflow_error(ss.str());
+      }
+      d = static_cast<float>(s.real());
+#endif // DYND_USE_FPSTATUS
+
+      *reinterpret_cast<float *>(dst) = d;
+    }
+  };
+
+  // complex<double> -> float with fractional checking
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, complex_float64_type_id,
+                           complex_kind, assign_error_fractional>
+      : assignment_kernel<float32_type_id, real_kind, complex_float64_type_id,
+                          complex_kind, assign_error_overflow> {
+  };
+
+  // complex<double> -> float with inexact checking
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, complex_float64_type_id,
+                           complex_kind, assign_error_inexact>
+      : base_kernel<assignment_kernel<float32_type_id, real_kind,
+                                      complex_float64_type_id, complex_kind,
+                                      assign_error_inexact>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      complex<double> s = *reinterpret_cast<complex<double> *>(src[0]);
+      float d;
+
+      DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s,
+                            complex<double>);
+
+      if (s.imag() != 0) {
+        std::stringstream ss;
+        ss << "loss of imaginary component while assigning "
+           << ndt::make_type<complex<double>>() << " value ";
+        ss << *src << " to " << ndt::make_type<float>();
+        throw std::runtime_error(ss.str());
+      }
+
+#if defined(DYND_USE_FPSTATUS)
+      clear_fp_status();
+      d = static_cast<float>(s.real());
+      if (is_overflow_fp_status()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<complex<double>>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<float>();
+        throw std::overflow_error(ss.str());
+      }
+#else
+      if (s.real() < -std::numeric_limits<float>::max() ||
+          s.real() > std::numeric_limits<float>::max()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<complex<double>>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<float>();
+        throw std::overflow_error(ss.str());
+      }
+      d = static_cast<float>(s.real());
+#endif // DYND_USE_FPSTATUS
+
+      if (d != s.real()) {
+        std::stringstream ss;
+        ss << "inexact precision loss while assigning "
+           << ndt::make_type<complex<double>>() << " value ";
+        ss << *src << " to " << ndt::make_type<float>();
+        throw std::runtime_error(ss.str());
+      }
+
+      *reinterpret_cast<float *>(dst) = d;
+    }
+  };
+
+  // double -> complex<float> with overflow checking
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           float64_type_id, real_kind, assign_error_overflow>
+      : base_kernel<assignment_kernel<complex_float32_type_id, complex_kind,
+                                      float64_type_id, real_kind,
+                                      assign_error_overflow>,
+                    kernel_request_host, 1> {
+
+    void single(char *dst, char *const *src)
+    {
+      double s = *reinterpret_cast<double *>(src[0]);
+      float d;
+
+      DYND_TRACE_ASSIGNMENT(static_cast<complex<float>>(s), complex<float>, s,
+                            double);
+
+#if defined(DYND_USE_FPSTATUS)
+      clear_fp_status();
+      d = static_cast<float>(s);
+      if (is_overflow_fp_status()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<double>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<complex<float>>();
+        throw std::overflow_error(ss.str());
+      }
+#else
+      if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+                          s > std::numeric_limits<float>::max())) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<double>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<complex<float>>();
+        throw std::overflow_error(ss.str());
+      }
+      d = static_cast<float>(s);
+#endif // DYND_USE_FPSTATUS
+
+      *reinterpret_cast<complex<float> *>(dst) = d;
+    }
+  };
+
+  // double -> complex<float> with fractional checking
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           float64_type_id, real_kind, assign_error_fractional>
+      : assignment_kernel<complex_float32_type_id, complex_kind,
+                          float64_type_id, real_kind, assign_error_overflow> {
+  };
+
+  // double -> complex<float> with inexact checking
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           float64_type_id, real_kind, assign_error_inexact>
+      : base_kernel<
+            assignment_kernel<complex_float32_type_id, complex_kind,
+                              float64_type_id, real_kind, assign_error_inexact>,
+            kernel_request_host, 1> {
+
+    void single(char *dst, char *const *src)
+    {
+      double s = *reinterpret_cast<double *>(src[0]);
+      float d;
+
+      DYND_TRACE_ASSIGNMENT(static_cast<complex<float>>(s), complex<float>, s,
+                            double);
+
+#if defined(DYND_USE_FPSTATUS)
+      clear_fp_status();
+      d = static_cast<float>(s);
+      if (is_overflow_fp_status()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<double>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<complex<float>>();
+        throw std::overflow_error(ss.str());
+      }
+#else
+      if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+                          s > std::numeric_limits<float>::max())) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<double>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<complex<float>>();
+        throw std::overflow_error(ss.str());
+      }
+      d = static_cast<float>(s);
+#endif // DYND_USE_FPSTATUS
+
+      if (d != s) {
+        std::stringstream ss;
+        ss << "inexact precision loss while assigning "
+           << ndt::make_type<double>() << " value ";
+        ss << s << " to " << ndt::make_type<complex<float>>();
+        throw std::runtime_error(ss.str());
+      }
+
+      *reinterpret_cast<complex<float> *>(dst) = d;
+    }
+  };
+
+/*
+  // Float16 -> bool
+  template <>
+  struct assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<bool_type_id, bool_kind, float16_type_id,
+                                      real_kind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      // DYND_TRACE_ASSIGNMENT((bool)(!s.iszero()), bool1, s, float16);
+
+      *reinterpret_cast<bool1 *>(dst) =
+          !reinterpret_cast<float16 *>(src[0])->iszero();
+    }
+  };
+
+  template <>
+  struct assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<bool_type_id, bool_kind, float16_type_id,
+                                      real_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      float tmp = float(*reinterpret_cast<float16 *>(src[0]));
+      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+      assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                        assign_error_overflow>::single_wrapper(dst, src_child,
+                                                               NULL);
+    }
+  };
+
+  template <>
+  struct assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                           assign_error_fractional>
+      : base_kernel<assignment_kernel<bool_type_id, bool_kind, float16_type_id,
+                                      real_kind, assign_error_fractional>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      float tmp = float(*reinterpret_cast<float16 *>(src[0]));
+      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+      assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                        assign_error_fractional>::single_wrapper(dst, src_child,
+                                                                 NULL);
+    }
+  };
+
+  template <>
+  struct assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<bool_type_id, bool_kind, float16_type_id,
+                                      real_kind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      float tmp = float(*reinterpret_cast<float16 *>(src[0]));
+      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+      assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                        assign_error_inexact>::single_wrapper(dst, src_child,
+                                                              NULL);
+    }
+  };
+
+  // Bool -> float16
+  template <>
+  struct assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<float16_type_id, real_kind, bool_type_id,
+                                      bool_kind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      // DYND_TRACE_ASSIGNMENT((bool)(!s.iszero()), bool1, s, float16);
+
+      *reinterpret_cast<float16 *>(dst) = float16_from_bits(
+          *reinterpret_cast<bool1 *>(src[0]) ? DYND_FLOAT16_ONE : 0);
+    }
+  };
+
+  template <>
+  struct assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                           assign_error_overflow>
+      : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                           assign_error_fractional>
+      : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                           assign_error_inexact>
+      : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, Src0TypeKind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                      Src0TypeKind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      float tmp;
+      assignment_kernel<
+          float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
+          assign_error_nocheck>::single_wrapper(reinterpret_cast<char *>(&tmp),
+                                                src, NULL);
+      *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_nocheck);
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, Src0TypeKind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                      Src0TypeKind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      float tmp;
+      assignment_kernel<
+          float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
+          assign_error_overflow>::single_wrapper(reinterpret_cast<char *>(&tmp),
+                                                 src, NULL);
+      *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_overflow);
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, Src0TypeKind,
+                           assign_error_fractional>
+      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                      Src0TypeKind, assign_error_fractional>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      float tmp;
+      assignment_kernel<float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
+                        assign_error_fractional>::
+          single_wrapper(reinterpret_cast<char *>(&tmp), src, NULL);
+      *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_fractional);
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, Src0TypeKind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                      Src0TypeKind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      float tmp;
+      assignment_kernel<
+          float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
+          assign_error_inexact>::single_wrapper(reinterpret_cast<char *>(&tmp),
+                                                src, NULL);
+      *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_inexact);
+    }
+  };
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+  struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
+                           assign_error_nocheck>
+      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
+                                      real_kind, assign_error_nocheck>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
+      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+      assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
+                        assign_error_nocheck>::single_wrapper(dst, src_child,
+                                                              NULL);
+    }
+  };
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+  struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
+                                      real_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
+      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+      assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
+                        assign_error_overflow>::single_wrapper(dst, src_child,
+                                                              NULL);
+    }
+  };
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+  struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
+                           assign_error_fractional>
+      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
+                                      real_kind, assign_error_fractional>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
+      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+      assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
+                        assign_error_fractional>::single_wrapper(dst, src_child,
+                                                              NULL);
+    }
+  };
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+  struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
+                                      real_kind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    void single(char *dst, char *const *src)
+    {
+      float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
+      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+      assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
+                        assign_error_inexact>::single_wrapper(dst, src_child,
+                                                              NULL);
+    }
+  };
+*/
+
+/*
+  template <type_class dst_type, class src_type>
   struct assign_ck<dst_type, src_type, assign_error_nocheck>
       : base_kernel<assign_ck<dst_type, src_type, assign_error_nocheck>,
                     kernel_request_cuda_host_device, 1> {
@@ -42,6 +1065,7 @@ namespace nd {
           reinterpret_cast<src_type *>(*src));
     }
   };
+*/
 
 #ifdef DYND_CUDA
 
@@ -133,137 +1157,4 @@ namespace nd {
 #endif
 
 } // namespace dynd::nd
-
-/**
- * Creates an assignment kernel for one data value from the
- * src type/arrmeta to the dst type/arrmeta. This adds the
- * kernel at the 'ckb_offset' position in 'ckb's data, as part
- * of a hierarchy matching the dynd type's hierarchy.
- *
- * This function should always be called with this == dst_tp first,
- * and types which don't support the particular assignment should
- * then call the corresponding function with this == src_dt.
- *
- * \param ckb  The ckernel_builder being constructed.
- * \param ckb_offset  The offset within 'ckb'.
- * \param dst_tp  The destination dynd type.
- * \param dst_arrmeta  Arrmeta for the destination data.
- * \param src_tp  The source dynd type.
- * \param src_arrmeta  Arrmeta for the source data
- * \param kernreq  What kind of kernel must be placed in 'ckb'.
- * \param ectx  DyND evaluation context.
- *
- * \returns  The offset within 'ckb' immediately after the
- *           created kernel.
- */
-intptr_t make_assignment_kernel(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds);
-
-inline intptr_t
-make_assignment_kernel(const arrfunc_type_data *self,
-                       const ndt::arrfunc_type *af_tp, void *ckb,
-                       intptr_t ckb_offset, const ndt::type &dst_tp,
-                       const char *dst_arrmeta, const ndt::type *src_tp,
-                       const char *const *src_arrmeta, kernel_request_t kernreq,
-                       const eval::eval_context *ectx, const nd::array &kwds)
-{
-  return make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
-                                dst_arrmeta, *src_tp, *src_arrmeta, kernreq,
-                                ectx, kwds);
-}
-
-/**
- * Creates an assignment kernel when the src and the dst are the same,
- * and are POD (plain old data).
- *
- * \param ckb  The hierarchical assignment kernel being constructed.
- * \param ckb_offset  The offset within 'ckb'.
- * \param data_size  The size of the data being assigned.
- * \param data_alignment  The alignment of the data being assigned.
- * \param kernreq  What kind of kernel must be placed in 'ckb'.
- */
-size_t make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                             size_t data_size,
-                                             size_t data_alignment,
-                                             kernel_request_t kernreq);
-
-/**
- * Creates an assignment kernel from the src to the dst built in
- * type ids.
- *
- * \param ckb  The hierarchical assignment kernel being constructed.
- * \param ckb_offset  The offset within 'ckb'.
- * \param dst_type_id  The destination dynd type id.
- * \param src_type_id  The source dynd type id.
- * \param kernreq  What kind of kernel must be placed in 'ckb'.
- * \param errmode  The error mode to use for assignments.
- */
-size_t make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                           type_id_t dst_type_id,
-                                           type_id_t src_type_id,
-                                           kernel_request_t kernreq,
-                                           assign_error_mode errmode);
-
-/**
- * When kernreq != kernel_request_single, adds an adapter to
- * the kernel which provides the requested kernel, and uses
- * a single kernel to fulfill the assignments. The
- * caller can use it like:
- *
- *  {
- *      ckb_offset = make_kernreq_to_single_kernel_adapter(
- *                      ckb, ckb_offset, kernreq);
- *      // Proceed to create 'single' kernel...
- */
-size_t make_kernreq_to_single_kernel_adapter(void *ckb, intptr_t ckb_offset,
-                                             int nsrc,
-                                             kernel_request_t kernreq);
-
-#ifdef DYND_CUDA
-/**
- * Creates an assignment kernel when the src and the dst are the same, but
- * can be in a CUDA memory space, and are POD (plain old data).
- *
- * \param ckb  The hierarchical assignment kernel being constructed.
- * \param ckb_offset  The offset within 'ckb'.
- * \param dst_device  If the destination data is on the CUDA device, true.
- *                    Otherwise false.
- * \param src_device  If the source data is on the CUDA device, true. Otherwise
- *                    false.
- * \param data_size  The size of the data being assigned.
- * \param data_alignment  The alignment of the data being assigned.
- * \param kernreq  What kind of kernel must be placed in 'ckb'.
- */
-size_t make_cuda_pod_typed_data_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, bool dst_device, bool src_device,
-    size_t data_size, size_t data_alignment, kernel_request_t kernreq);
-
-intptr_t make_cuda_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
-
-intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
-
-intptr_t make_cuda_from_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
-
-#endif // DYND_CUDA
 } // namespace dynd

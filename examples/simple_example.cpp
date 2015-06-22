@@ -12,7 +12,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/array_range.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>

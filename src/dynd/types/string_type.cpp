@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>

@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/datetime_adapter_kernels.hpp>
 #include <dynd/parser_util.hpp>
 #include <dynd/types/datetime_parser.hpp>

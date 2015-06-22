@@ -7,7 +7,6 @@
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/typed_data_assign.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
