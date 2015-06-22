@@ -72,6 +72,8 @@ public:
   {
   }
 
+  DYND_CUDA_HOST_DEVICE explicit float16(int128 value);
+
   DYND_CUDA_HOST_DEVICE explicit float16(uint32 value)
       : float16(static_cast<float32>(value))
   {
@@ -81,6 +83,8 @@ public:
       : float16(static_cast<float32>(value))
   {
   }
+
+  DYND_CUDA_HOST_DEVICE explicit float16(uint128 value);
 
   DYND_CUDA_HOST_DEVICE
   explicit float16(float f, assign_error_mode errmode = assign_error_nocheck)
@@ -93,10 +97,6 @@ public:
       : m_bits(double_to_halfbits(d, errmode))
   {
   }
-
-  DYND_CUDA_HOST_DEVICE explicit float16(const int128 &value);
-
-  DYND_CUDA_HOST_DEVICE explicit float16(const uint128 &value);
 
   DYND_CUDA_HOST_DEVICE explicit float16(const float128 &value);
 
