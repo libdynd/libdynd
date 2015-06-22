@@ -62,6 +62,16 @@ public:
   {
   }
 
+  DYND_CUDA_HOST_DEVICE float16(int8 value)
+      : float16(static_cast<float32>(value))
+  {
+  }
+
+  DYND_CUDA_HOST_DEVICE float16(int16 value)
+      : float16(static_cast<float32>(value))
+  {
+  }
+
   DYND_CUDA_HOST_DEVICE float16(int32 value)
       : float16(static_cast<float32>(value))
   {

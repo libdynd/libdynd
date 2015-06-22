@@ -473,6 +473,20 @@ namespace nd {
     }
   };
 
+  template <type_id_t Src0TypeID>
+  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, sint_kind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                      sint_kind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    typedef float16 dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *, char *const *)
+    {
+    }
+  };
+
   // Signed int -> floating point with other checking
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
   struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, sint_kind,
