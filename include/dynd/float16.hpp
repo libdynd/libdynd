@@ -57,34 +57,34 @@ public:
   {
   }
 
-  DYND_CUDA_HOST_DEVICE explicit float16(bool rhs)
+  DYND_CUDA_HOST_DEVICE float16(bool rhs)
       : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
   {
   }
 
-  DYND_CUDA_HOST_DEVICE explicit float16(int32 value)
+  DYND_CUDA_HOST_DEVICE float16(int32 value)
       : float16(static_cast<float32>(value))
   {
   }
 
-  DYND_CUDA_HOST_DEVICE explicit float16(int64 value)
+  DYND_CUDA_HOST_DEVICE float16(int64 value)
       : float16(static_cast<float32>(value))
   {
   }
 
-  DYND_CUDA_HOST_DEVICE explicit float16(int128 value);
+  DYND_CUDA_HOST_DEVICE float16(int128 value);
 
-  DYND_CUDA_HOST_DEVICE explicit float16(uint32 value)
+  DYND_CUDA_HOST_DEVICE float16(uint32 value)
       : float16(static_cast<float32>(value))
   {
   }
 
-  DYND_CUDA_HOST_DEVICE explicit float16(uint64 value)
+  DYND_CUDA_HOST_DEVICE float16(uint64 value)
       : float16(static_cast<float32>(value))
   {
   }
 
-  DYND_CUDA_HOST_DEVICE explicit float16(uint128 value);
+  DYND_CUDA_HOST_DEVICE float16(uint128 value);
 
   DYND_CUDA_HOST_DEVICE
   float16(float f, assign_error_mode errmode = assign_error_nocheck)
