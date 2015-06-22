@@ -184,7 +184,7 @@ struct single_assigner_builtin_base<complex<dst_real_type>, src_type,
     DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(*src), dst_type, *src,
                           src_type);
 
-    *dst = static_cast<dst_type>(*src);
+    *dst = static_cast<dst_real_type>(*src);
   }
 };
 
