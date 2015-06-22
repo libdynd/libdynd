@@ -20,6 +20,14 @@
 #pragma fenv_access(on)
 #endif
 
+template <typename T>
+struct get_real_type;
+
+template <typename T>
+struct get_real_type<dynd::complex<T>> {
+  typedef T type;
+};
+
 namespace std {
 
 template <>
@@ -153,6 +161,8 @@ template <class dst_type, class src_type, type_kind_t dst_kind,
           type_kind_t src_kind>
 struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind,
                                     assign_error_nocheck> {
+  
+
   DYND_CUDA_HOST_DEVICE static void assign(dst_type *dst, const src_type *src)
   {
     DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(*src), dst_type, *src,
@@ -162,6 +172,21 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind,
   }
 };
 
+// Signed int -> complex floating point with no checking
+template <class dst_real_type, class src_type>
+struct single_assigner_builtin_base<complex<dst_real_type>, src_type,
+                                    complex_kind, sint_kind,
+                                    assign_error_nocheck> {
+ typedef complex<dst_real_type> dst_type;
+
+  static void assign(dst_type *dst, const src_type *src)
+  {
+    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(*src), dst_type, *src,
+                          src_type);
+
+    *dst = static_cast<dst_type>(*src);
+  }
+};
 
 // Signed int -> complex floating point with inexact checking
 template <class dst_real_type, class src_type>

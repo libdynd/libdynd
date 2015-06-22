@@ -18,14 +18,6 @@
 #include <dynd/kernels/single_assigner_builtin.hpp>
 #include <map>
 
-template <typename T>
-struct get_real_type;
-
-template <typename T>
-struct get_real_type<dynd::complex<T>> {
-  typedef T type;
-};
-
 namespace dynd {
 
 namespace nd {
