@@ -295,8 +295,7 @@ static void string_to_int128_single(char *dst, char *const *src,
   if (e->errmode == assign_error_nocheck) {
     uint128 value =
         parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
-    result = negative ? static_cast<int128>(0)
-                      : static_cast<int128>(value);
+    result = negative ? static_cast<int128>(0) : static_cast<int128>(value);
   } else {
     bool overflow = false, badparse = false;
     uint128 value = parse::checked_string_to_uint128(
@@ -311,8 +310,8 @@ static void string_to_int128_single(char *dst, char *const *src,
                                        ndt::type(e->src_string_tp, true),
                                        e->src_arrmeta, src[0]);
     }
-    result = negative ? -static_cast<int128>(value)
-                      : static_cast<int128>(value);
+    result =
+        negative ? -static_cast<int128>(value) : static_cast<int128>(value);
   }
   *reinterpret_cast<int128 *>(dst) = result;
 }
@@ -362,26 +361,32 @@ static void string_to_float32_single(char *dst, char *const *src,
   double value = parse::checked_string_to_float64(s.data(), s.data() + s.size(),
                                                   e->errmode);
   // Assign double -> float according to the error mode
+  char *child_src[1] = {reinterpret_cast<char *>(&value)};
   switch (e->errmode) {
   case assign_error_nocheck:
-    single_assigner_builtin<float, double, assign_error_nocheck>::assign(
-        reinterpret_cast<float *>(dst), &value);
+    dynd::nd::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_nocheck>::single_wrapper(dst, child_src, NULL);
     break;
   case assign_error_overflow:
-    single_assigner_builtin<float, double, assign_error_overflow>::assign(
-        reinterpret_cast<float *>(dst), &value);
+    dynd::nd::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_overflow>::single_wrapper(dst, child_src, NULL);
     break;
   case assign_error_fractional:
-    single_assigner_builtin<float, double, assign_error_fractional>::assign(
-        reinterpret_cast<float *>(dst), &value);
+    dynd::nd::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_fractional>::single_wrapper(dst, child_src, NULL);
     break;
   case assign_error_inexact:
-    single_assigner_builtin<float, double, assign_error_inexact>::assign(
-        reinterpret_cast<float *>(dst), &value);
+    dynd::nd::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_inexact>::single_wrapper(dst, child_src, NULL);
     break;
   default:
-    single_assigner_builtin<float, double, assign_error_fractional>::assign(
-        reinterpret_cast<float *>(dst), &value);
+    dynd::nd::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_fractional>::single_wrapper(dst, child_src, NULL);
     break;
   }
 }

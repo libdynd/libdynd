@@ -777,6 +777,265 @@ namespace nd {
                           assign_error_fractional> {
   };
 
+  // float -> float with no checking
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, float32_type_id,
+                           real_kind, assign_error_overflow>
+      : assignment_kernel<float32_type_id, real_kind, float32_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, float32_type_id,
+                           real_kind, assign_error_fractional>
+      : assignment_kernel<float32_type_id, real_kind, float32_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, float32_type_id,
+                           real_kind, assign_error_inexact>
+      : assignment_kernel<float32_type_id, real_kind, float32_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  // complex<float> -> complex<float> with no checking
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           complex_float32_type_id, complex_kind,
+                           assign_error_overflow>
+      : assignment_kernel<complex_float32_type_id, complex_kind,
+                          complex_float32_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           complex_float32_type_id, complex_kind,
+                           assign_error_fractional>
+      : assignment_kernel<complex_float32_type_id, complex_kind,
+                          complex_float32_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           complex_float32_type_id, complex_kind,
+                           assign_error_inexact>
+      : assignment_kernel<complex_float32_type_id, complex_kind,
+                          complex_float32_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  // float -> double with no checking
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, float32_type_id,
+                           real_kind, assign_error_overflow>
+      : assignment_kernel<float64_type_id, real_kind, float32_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, float32_type_id,
+                           real_kind, assign_error_fractional>
+      : assignment_kernel<float64_type_id, real_kind, float32_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, float32_type_id,
+                           real_kind, assign_error_inexact>
+      : assignment_kernel<float64_type_id, real_kind, float32_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  // complex<float> -> complex<double> with no checking
+  template <>
+  struct assignment_kernel<complex_float64_type_id, complex_kind,
+                           complex_float32_type_id, complex_kind,
+                           assign_error_overflow>
+      : assignment_kernel<complex_float64_type_id, complex_kind,
+                          complex_float32_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<complex_float64_type_id, complex_kind,
+                           complex_float32_type_id, complex_kind,
+                           assign_error_fractional>
+      : assignment_kernel<complex_float64_type_id, complex_kind,
+                          complex_float32_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<complex_float64_type_id, complex_kind,
+                           complex_float32_type_id, complex_kind,
+                           assign_error_inexact>
+      : assignment_kernel<complex_float64_type_id, complex_kind,
+                          complex_float32_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  // double -> double with no checking
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, float64_type_id,
+                           real_kind, assign_error_overflow>
+      : assignment_kernel<float64_type_id, real_kind, float64_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, float64_type_id,
+                           real_kind, assign_error_fractional>
+      : assignment_kernel<float64_type_id, real_kind, float64_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<float64_type_id, real_kind, float64_type_id,
+                           real_kind, assign_error_inexact>
+      : assignment_kernel<float64_type_id, real_kind, float64_type_id,
+                          real_kind, assign_error_nocheck> {
+  };
+
+  // complex<double> -> complex<double> with no checking
+  template <>
+  struct assignment_kernel<complex_float64_type_id, complex_kind,
+                           complex_float64_type_id, complex_kind,
+                           assign_error_overflow>
+      : assignment_kernel<complex_float64_type_id, complex_kind,
+                          complex_float64_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<complex_float64_type_id, complex_kind,
+                           complex_float64_type_id, complex_kind,
+                           assign_error_fractional>
+      : assignment_kernel<complex_float64_type_id, complex_kind,
+                          complex_float64_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <>
+  struct assignment_kernel<complex_float64_type_id, complex_kind,
+                           complex_float64_type_id, complex_kind,
+                           assign_error_inexact>
+      : assignment_kernel<complex_float64_type_id, complex_kind,
+                          complex_float64_type_id, complex_kind,
+                          assign_error_nocheck> {
+  };
+
+  // double -> float with overflow checking
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, float64_type_id,
+                           real_kind, assign_error_overflow>
+      : base_kernel<
+            assignment_kernel<float32_type_id, real_kind, float64_type_id,
+                              real_kind, assign_error_overflow>,
+            kernel_request_host, 1> {
+    typedef float dst_type;
+    typedef double src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<float>(s), float, s, double);
+
+#if defined(DYND_USE_FPSTATUS)
+      clear_fp_status();
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
+      if (is_overflow_fp_status()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<double>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<float>();
+        throw std::overflow_error(ss.str());
+      }
+#else
+      double sd = s;
+      if (isfinite(sd) && (sd < -std::numeric_limits<float>::max() ||
+                           sd > std::numeric_limits<float>::max())) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<double>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<float>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<float>(sd);
+#endif // DYND_USE_FPSTATUS
+    }
+  };
+
+  // double -> float with fractional checking
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, float64_type_id,
+                           real_kind, assign_error_fractional>
+      : assignment_kernel<float32_type_id, real_kind, float64_type_id,
+                          real_kind, assign_error_overflow> {
+  };
+
+  // double -> float with inexact checking
+  template <>
+  struct assignment_kernel<float32_type_id, real_kind, float64_type_id,
+                           real_kind, assign_error_inexact>
+      : base_kernel<
+            assignment_kernel<float32_type_id, real_kind, float64_type_id,
+                              real_kind, assign_error_inexact>,
+            kernel_request_host, 1> {
+
+
+    typedef float dst_type;
+    typedef double src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      double s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<float>(s), float, s, double);
+
+      float d;
+#if defined(DYND_USE_FPSTATUS)
+      clear_fp_status();
+      d = static_cast<float>(s);
+      if (is_overflow_fp_status()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<double>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<float>();
+        throw std::overflow_error(ss.str());
+      }
+#else
+      if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
+                          s > std::numeric_limits<float>::max())) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<double>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<float>();
+        throw std::runtime_error(ss.str());
+      }
+      d = static_cast<float>(s);
+#endif // DYND_USE_FPSTATUS
+
+      // The inexact status didn't work as it should have, so converting back to
+      // double and comparing
+      // if (is_inexact_fp_status()) {
+      //    throw std::runtime_error("inexact precision loss while assigning
+      //    double to float");
+      //}
+      if (d != s) {
+        std::stringstream ss;
+        ss << "inexact precision loss while assigning "
+           << ndt::make_type<double>() << " value ";
+        ss << s << " to " << ndt::make_type<float>();
+        throw std::runtime_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = d;
+    }
+  };
+
   // Anything -> boolean with overflow checking
   template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
   struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind,
