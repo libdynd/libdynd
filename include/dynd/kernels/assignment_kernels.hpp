@@ -1656,6 +1656,63 @@ namespace nd {
     }
   };
 
+  // complex<double> -> complex<float> with overflow checking
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           complex_float64_type_id, complex_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<complex_float32_type_id, complex_kind,
+                                      complex_float64_type_id, complex_kind,
+                                      assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef complex<float> dst_type;
+    typedef complex<double> src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      DYND_TRACE_ASSIGNMENT(
+          static_cast<complex<float>>(*reinterpret_cast<src0_type *>(src[0])),
+          complex<float>, *reinterpret_cast<src0_type *>(src[0]),
+          complex<double>);
+
+#if defined(DYND_USE_FPSTATUS)
+      clear_fp_status();
+      *reinterpret_cast<dst_type *>(dst) =
+          static_cast<complex<float>>(*reinterpret_cast<src0_type *>(src[0]));
+      if (is_overflow_fp_status()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<complex<double>>()
+           << " value ";
+        ss << *src << " to " << ndt::make_type<complex<float>>();
+        throw std::overflow_error(ss.str());
+      }
+#else
+      complex<double>(s) = *reinterpret_cast<src0_type *>(src[0]);
+      if (s.real() < -std::numeric_limits<float>::max() ||
+          s.real() > std::numeric_limits<float>::max() ||
+          s.imag() < -std::numeric_limits<float>::max() ||
+          s.imag() > std::numeric_limits<float>::max()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<complex<double>>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<complex<float>>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<complex<float>>(s);
+#endif // DYND_USE_FPSTATUS
+    }
+  };
+
+  // complex<double> -> complex<float> with fractional checking
+  template <>
+  struct assignment_kernel<complex_float32_type_id, complex_kind,
+                           complex_float64_type_id, complex_kind,
+                           assign_error_fractional>
+      : assignment_kernel<complex_float32_type_id, complex_kind,
+                          complex_float64_type_id, complex_kind,
+                          assign_error_overflow> {
+  };
+
 /*
   // Float16 -> bool
   template <>
