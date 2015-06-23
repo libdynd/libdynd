@@ -164,63 +164,6 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind,
   }
 };
 
-// Floating point -> unsigned int with overflow checking
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind,
-                                    assign_error_overflow> {
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    src_type s = *src;
-
-    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
-
-    if (s < 0 || std::numeric_limits<dst_type>::max() < s) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::overflow_error(ss.str());
-    }
-    *dst = static_cast<dst_type>(s);
-  }
-};
-
-// Floating point -> unsigned int with fractional checking
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind,
-                                    assign_error_fractional> {
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    src_type s = *src;
-
-    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
-
-    if (s < 0 || std::numeric_limits<dst_type>::max() < s) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::overflow_error(ss.str());
-    }
-
-    if (std::floor(s) != s) {
-      std::stringstream ss;
-      ss << "fractional part lost while assigning "
-         << ndt::make_type<src_type>() << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::runtime_error(ss.str());
-    }
-    *dst = static_cast<dst_type>(s);
-  }
-};
-
-// Floating point -> unsigned int with other checking
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, uint_kind, real_kind,
-                                    assign_error_inexact>
-    : public single_assigner_builtin_base<dst_type, src_type, uint_kind,
-                                          real_kind, assign_error_fractional> {
-};
 
 // Complex floating point -> unsigned int with overflow checking
 template <class dst_type, class src_real_type>
