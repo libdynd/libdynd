@@ -20,14 +20,6 @@
 #pragma fenv_access(on)
 #endif
 
-template <typename T>
-struct get_real_type;
-
-template <typename T>
-struct get_real_type<dynd::complex<T>> {
-  typedef T type;
-};
-
 namespace std {
 
 template <>
@@ -170,64 +162,6 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind,
 
     *dst = static_cast<dst_type>(*src);
   }
-};
-
-// Signed int -> complex floating point with no checking
-template <class dst_real_type, class src_type>
-struct single_assigner_builtin_base<complex<dst_real_type>, src_type,
-                                    complex_kind, sint_kind,
-                                    assign_error_nocheck> {
- typedef complex<dst_real_type> dst_type;
-
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(*src), dst_type, *src,
-                          src_type);
-
-    *dst = static_cast<dst_real_type>(*src);
-  }
-};
-
-// Signed int -> complex floating point with inexact checking
-template <class dst_real_type, class src_type>
-struct single_assigner_builtin_base<complex<dst_real_type>, src_type,
-                                    complex_kind, sint_kind,
-                                    assign_error_inexact> {
-  static void assign(complex<dst_real_type> *dst, const src_type *src)
-  {
-    src_type s = *src;
-    dst_real_type d = static_cast<dst_real_type>(s);
-
-    DYND_TRACE_ASSIGNMENT(d, complex<dst_real_type>, s, src_type);
-
-    if (static_cast<src_type>(d) != s) {
-      std::stringstream ss;
-      ss << "inexact value while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<complex<dst_real_type>>() << " value "
-         << d;
-      throw std::runtime_error(ss.str());
-    }
-    *dst = d;
-  }
-};
-
-// Signed int -> complex floating point with other checking
-template <class dst_real_type, class src_type>
-struct single_assigner_builtin_base<complex<dst_real_type>, src_type,
-                                    complex_kind, sint_kind,
-                                    assign_error_overflow>
-    : public single_assigner_builtin_base<complex<dst_real_type>, src_type,
-                                          complex_kind, sint_kind,
-                                          assign_error_nocheck> {
-};
-template <class dst_real_type, class src_type>
-struct single_assigner_builtin_base<complex<dst_real_type>, src_type,
-                                    complex_kind, sint_kind,
-                                    assign_error_fractional>
-    : public single_assigner_builtin_base<complex<dst_real_type>, src_type,
-                                          complex_kind, sint_kind,
-                                          assign_error_nocheck> {
 };
 
 // Unsigned int -> floating point with inexact checking

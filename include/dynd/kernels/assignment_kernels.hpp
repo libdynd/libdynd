@@ -158,7 +158,6 @@ namespace nd {
                     kernel_request_host, 1> {
     typedef typename type_of<DstTypeID>::type dst_type;
     typedef typename type_of<Src0TypeID>::type src0_type;
-    typedef typename get_real_type<dst_type>::type real_type;
 
     void single(char *dst, char *const *src)
     {
@@ -166,9 +165,53 @@ namespace nd {
 
       DYND_TRACE_ASSIGNMENT(d, dst_type, s, src0_type);
 
-      // TODO: Check this
-      *reinterpret_cast<dst_type *>(dst) = static_cast<real_type>(s);
+      *reinterpret_cast<dst_type *>(dst) =
+          static_cast<typename dst_type::value_type>(s);
     }
+  };
+
+  // Signed int -> complex floating point with inexact checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID,
+                                      sint_kind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+      typename dst_type::value_type d =
+          static_cast<typename dst_type::value_type>(s);
+
+      DYND_TRACE_ASSIGNMENT(d, dst_type, s, src0_type);
+
+      if (static_cast<src0_type>(d) != s) {
+        std::stringstream ss;
+        ss << "inexact value while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>() << " value " << d;
+        throw std::runtime_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = d;
+    }
+  };
+
+  // Signed int -> complex floating point with other checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind,
+                           assign_error_overflow>
+      : assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind,
+                          assign_error_nocheck> {
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, complex_kind, Src0TypeID, sint_kind,
+                          assign_error_nocheck> {
   };
 
   // Anything -> boolean with no checking
@@ -486,7 +529,8 @@ namespace nd {
 
     void single(char *, char *const *)
     {
-      throw std::runtime_error("float16 assignment kernel is temporarily disabled");
+      throw std::runtime_error(
+          "float16 assignment kernel is temporarily disabled");
     }
   };
 
