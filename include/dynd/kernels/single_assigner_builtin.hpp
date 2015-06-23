@@ -164,27 +164,7 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind,
   }
 };
 
-// Floating point -> signed int with overflow checking
-template <class dst_type, class src_type>
-struct single_assigner_builtin_base<dst_type, src_type, sint_kind, real_kind,
-                                    assign_error_overflow> {
-  static void assign(dst_type *dst, const src_type *src)
-  {
-    src_type s = *src;
 
-    DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src_type);
-
-    if (s < std::numeric_limits<dst_type>::min() ||
-        std::numeric_limits<dst_type>::max() < s) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<src_type>()
-         << " value ";
-      ss << s << " to " << ndt::make_type<dst_type>();
-      throw std::overflow_error(ss.str());
-    }
-    *dst = static_cast<dst_type>(s);
-  }
-};
 
 // Floating point -> signed int with fractional checking
 template <class dst_type, class src_type>
