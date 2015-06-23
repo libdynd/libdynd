@@ -477,6 +477,96 @@ namespace nd {
                           assign_error_fractional> {
   };
 
+  // Complex floating point -> signed int with overflow checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID,
+                                      complex_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s,
+                            src0_type);
+
+      if (s.imag() != 0) {
+        std::stringstream ss;
+        ss << "loss of imaginary component while assigning "
+           << ndt::make_type<src0_type>() << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::runtime_error(ss.str());
+      }
+
+      if (s.real() < std::numeric_limits<dst_type>::min() ||
+          std::numeric_limits<dst_type>::max() < s.real()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
+    }
+  };
+
+  // Complex floating point -> signed int with fractional checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind,
+                           assign_error_fractional>
+      : base_kernel<assignment_kernel<DstTypeID, sint_kind, Src0TypeID,
+                                      complex_kind, assign_error_fractional>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s,
+                            src0_type);
+
+      if (s.imag() != 0) {
+        std::stringstream ss;
+        ss << "loss of imaginary component while assigning "
+           << ndt::make_type<src0_type>() << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::runtime_error(ss.str());
+      }
+
+      if (s.real() < std::numeric_limits<dst_type>::min() ||
+          std::numeric_limits<dst_type>::max() < s.real()) {
+        std::stringstream ss;
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
+           << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::overflow_error(ss.str());
+      }
+
+      if (std::floor(s.real()) != s.real()) {
+        std::stringstream ss;
+        ss << "fractional part lost while assigning "
+           << ndt::make_type<src0_type>() << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
+        throw std::runtime_error(ss.str());
+      }
+      *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
+    }
+  };
+
+  // Complex floating point -> signed int with other checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, sint_kind, Src0TypeID, complex_kind,
+                          assign_error_fractional> {
+  };
+
   // Anything -> boolean with overflow checking
   template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
   struct assignment_kernel<bool_type_id, bool_kind, Src0TypeID, Src0TypeKind,
