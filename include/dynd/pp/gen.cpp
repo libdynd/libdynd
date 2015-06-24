@@ -191,9 +191,12 @@ std::string join(std::string const& sep, Iter begin, Iter end) {
     return oss.str();
 }
 
+#include <cstdint>
+
 int main(int argc, char **argv) {
     std::cout << "sizeof(long long) = " << sizeof(long long) << std::endl;
     std::cout << "sizeof(unsigned long long) = " << sizeof(unsigned long long) << std::endl;
+    std::cout << "is_same = " << std::is_same<std::uint64_t, unsigned long long>::value << std::endl;
 
     const int pp_len_max = atoi(argv[1]);
     const int pp__len_max = 2 * pp_len_max;
