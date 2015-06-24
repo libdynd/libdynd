@@ -261,6 +261,7 @@ namespace nd {
     }
   };
 
+/*
   template <type_id_t Src0TypeID>
   struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, uint_kind,
                            assign_error_inexact>
@@ -272,6 +273,7 @@ namespace nd {
       throw std::runtime_error("float16 assignment is temporarily disabled");
     }
   };
+*/
 
   // Unsigned int -> floating point with other checking
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
