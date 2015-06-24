@@ -574,6 +574,9 @@ typedef std::uint8_t uint8;
 typedef std::uint16_t uint16;
 typedef std::uint32_t uint32;
 typedef std::uint64_t uint64;
+#ifdef DYND_HAS_UINT128
+typedef std::uint128_t uint128;
+#endif
 typedef float float32;
 typedef double float64;
 

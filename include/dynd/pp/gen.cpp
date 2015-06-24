@@ -192,6 +192,9 @@ std::string join(std::string const& sep, Iter begin, Iter end) {
 }
 
 int main(int argc, char **argv) {
+    std::cout << "sizeof(long long) = " << sizeof(long long) << std::endl;
+    std::cout << "sizeof(unsigned long long) = " << sizeof(unsigned long long) << std::endl;
+
     const int pp_len_max = atoi(argv[1]);
     const int pp__len_max = 2 * pp_len_max;
     if (pp_len_max < 8) {
