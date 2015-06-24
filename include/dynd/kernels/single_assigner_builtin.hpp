@@ -165,60 +165,6 @@ struct single_assigner_builtin_base<dst_type, src_type, dst_kind, src_kind,
 };
 
 
-// complex<double> -> complex<float> with inexact checking
-template <>
-struct single_assigner_builtin_base<complex<float>, complex<double>,
-                                    complex_kind, complex_kind,
-                                    assign_error_inexact> {
-  static void assign(complex<float> *dst, const complex<double> *src)
-  {
-    DYND_TRACE_ASSIGNMENT(static_cast<complex<float>>(*src), complex<float>,
-                          *src, complex<double>);
-
-    complex<double> s = *src;
-    complex<float> d;
-
-#if defined(DYND_USE_FPSTATUS)
-    clear_fp_status();
-    d = static_cast<complex<float>>(s);
-    if (is_overflow_fp_status()) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<complex<double>>()
-         << " value ";
-      ss << *src << " to " << ndt::make_type<complex<float>>();
-      throw std::overflow_error(ss.str());
-    }
-#else
-    if (s.real() < -std::numeric_limits<float>::max() ||
-        s.real() > std::numeric_limits<float>::max() ||
-        s.imag() < -std::numeric_limits<float>::max() ||
-        s.imag() > std::numeric_limits<float>::max()) {
-      std::stringstream ss;
-      ss << "overflow while assigning " << ndt::make_type<complex<double>>()
-         << " value ";
-      ss << *src << " to " << ndt::make_type<complex<float>>();
-      throw std::overflow_error(ss.str());
-    }
-    d = static_cast<complex<float>>(s);
-#endif // DYND_USE_FPSTATUS
-
-    // The inexact status didn't work as it should have, so converting back to
-    // double and comparing
-    // if (is_inexact_fp_status()) {
-    //    throw std::runtime_error("inexact precision loss while assigning
-    //    double to float");
-    //}
-    if (d.real() != s.real() || d.imag() != s.imag()) {
-      std::stringstream ss;
-      ss << "inexact precision loss while assigning "
-         << ndt::make_type<complex<double>>() << " value ";
-      ss << *src << " to " << ndt::make_type<complex<float>>();
-      throw std::runtime_error(ss.str());
-    }
-    *dst = d;
-  }
-};
-
 // complex<T> -> T with overflow checking
 template <typename real_type>
 struct single_assigner_builtin_base<real_type, complex<real_type>, real_kind,
