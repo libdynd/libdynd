@@ -261,19 +261,6 @@ namespace nd {
     }
   };
 
-/*
-  template <type_id_t Src0TypeID>
-  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, uint_kind,
-                           assign_error_inexact>
-      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
-                                      uint_kind, assign_error_inexact>,
-                    kernel_request_host, 1> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-    {
-      throw std::runtime_error("float16 assignment is temporarily disabled");
-    }
-  };
-*/
 
   // Unsigned int -> floating point with other checking
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
@@ -380,19 +367,6 @@ namespace nd {
         throw std::overflow_error(ss.str());
       }
       *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
-    }
-  };
-
-  template <type_id_t DstTypeID>
-  struct assignment_kernel<DstTypeID, sint_kind, float16_type_id, real_kind,
-                           assign_error_overflow>
-      : base_kernel<assignment_kernel<DstTypeID, sint_kind, float16_type_id,
-                                      real_kind, assign_error_overflow>,
-                    kernel_request_host, 1> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-    {
-      throw std::runtime_error(
-          "assignment is temporarily disabled for float16");
     }
   };
 
