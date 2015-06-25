@@ -561,21 +561,113 @@ bool built_with_cuda();
 
 namespace dynd {
 
+class bool1;
+typedef std::int8_t int8;
+typedef std::int16_t int16;
+typedef std::int32_t int32;
+typedef std::int64_t int64;
+#ifndef DYND_HAS_INT128
+class int128;
+#endif
+typedef std::uint8_t uint8;
+typedef std::uint16_t uint16;
+typedef std::uint32_t uint32;
+typedef std::uint64_t uint64;
+#ifndef DYND_HAS_UINT128
+class uint128;
+#endif
+class float16;
+typedef float float32;
+typedef double float64;
+#ifndef DYND_HAS_FLOAT128
+class float128;
+#endif
+
 template <typename T>
 struct is_arithmetic {
   static const bool value = false;
 };
 
-typedef std::int8_t int8;
-typedef std::int16_t int16;
-typedef std::int32_t int32;
-typedef std::int64_t int64;
-typedef std::uint8_t uint8;
-typedef std::uint16_t uint16;
-typedef std::uint32_t uint32;
-typedef std::uint64_t uint64;
-typedef float float32;
-typedef double float64;
+template <>
+struct is_arithmetic<bool1> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int8> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int16> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int32> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int64> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<int128> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint8> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint16> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint32> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint64> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<uint128> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<float16> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<float32> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<float64> {
+  static const bool value = true;
+};
+
+template <>
+struct is_arithmetic<float128> {
+  static const bool value = true;
+};
+
+template <typename T>
+T floor(T value)
+{
+  return std::floor(value);
+}
 
 } // namespace dynd
 
@@ -740,81 +832,6 @@ namespace detail {
 #endif
 
 } // namespace dynd::detail
-
-template <>
-struct is_arithmetic<bool1> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<int8> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<int16> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<int32> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<int64> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<int128> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint8> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint16> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint32> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint64> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint128> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<float16> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<float32> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<float64> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<float128> {
-  static const bool value = true;
-};
 
 template <>
 struct is_arithmetic<complex<float>> {

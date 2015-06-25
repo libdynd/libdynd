@@ -421,19 +421,19 @@ struct type_of<bool_type_id> {
 };
 template <>
 struct type_of<int8_type_id> {
-  typedef int8_t type;
+  typedef int8 type;
 };
 template <>
 struct type_of<int16_type_id> {
-  typedef int16_t type;
+  typedef int16 type;
 };
 template <>
 struct type_of<int32_type_id> {
-  typedef int type;
+  typedef int32 type;
 };
 template <>
 struct type_of<int64_type_id> {
-  typedef long long type;
+  typedef int64 type;
 };
 template <>
 struct type_of<int128_type_id> {
@@ -441,19 +441,19 @@ struct type_of<int128_type_id> {
 };
 template <>
 struct type_of<uint8_type_id> {
-  typedef uint8_t type;
+  typedef uint8 type;
 };
 template <>
 struct type_of<uint16_type_id> {
-  typedef uint16_t type;
+  typedef uint16 type;
 };
 template <>
 struct type_of<uint32_type_id> {
-  typedef unsigned type;
+  typedef uint32 type;
 };
 template <>
 struct type_of<uint64_type_id> {
-  typedef unsigned long long type;
+  typedef uint64 type;
 };
 template <>
 struct type_of<uint128_type_id> {
@@ -465,11 +465,11 @@ struct type_of<float16_type_id> {
 };
 template <>
 struct type_of<float32_type_id> {
-  typedef float type;
+  typedef float32 type;
 };
 template <>
 struct type_of<float64_type_id> {
-  typedef double type;
+  typedef float64 type;
 };
 template <>
 struct type_of<float128_type_id> {

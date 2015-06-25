@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/config.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 #include <limits>
 #include <iostream>
@@ -15,13 +14,9 @@
 
 namespace dynd {
 
-#if !defined(DYND_HAS_FLOAT128)
-class float128;
-#endif
 #if !defined(DYND_HAS_INT128)
 class int128;
 #endif
-class float16;
 
 class uint128 {
 public:
