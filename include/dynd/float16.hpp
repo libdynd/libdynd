@@ -266,9 +266,7 @@ public:
 
   DYND_CUDA_HOST_DEVICE friend float16 float16_from_bits(uint16_t bits);
 
-  float16 operator-() const {
-    return float16(-static_cast<float>(*this));
-  }
+  float16 operator-() const { return float16(-static_cast<float>(*this)); }
 };
 
 DYND_CUDA_HOST_DEVICE inline bool isfinite(float16 value)
@@ -397,6 +395,11 @@ operator>(const T &lhs, const float16 &rhs)
 DYND_CUDA_HOST_DEVICE inline float16 float16_from_bits(uint16_t bits)
 {
   return float16(bits, float16::raw_bits_tag());
+}
+
+inline float16 floor(float16 value)
+{
+  return float16(std::floor(static_cast<float>(value)));
 }
 
 inline std::ostream &operator<<(std::ostream &o,

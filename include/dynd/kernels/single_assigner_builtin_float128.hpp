@@ -86,8 +86,6 @@ template<class src_type> \
 struct single_assigner_builtin_base<float128, src_type, real_kind, src_kind, assign_error_inexact> \
     : public single_assigner_builtin_base_error<float128, src_type, assign_error_inexact> {};
 
-DYND_MAKE_WITH_KIND(sint_kind);
-DYND_MAKE_WITH_KIND(uint_kind);
 DYND_MAKE_WITH_KIND(real_kind);
 DYND_MAKE_WITH_KIND(complex_kind);
 
@@ -109,8 +107,6 @@ struct single_assigner_builtin_base<dst_type, float128, dst_kind, real_kind, ass
     : public single_assigner_builtin_base_error<dst_type, float128, assign_error_inexact> {};
 
 DYND_MAKE_WITH_KIND(bool_kind);
-DYND_MAKE_WITH_KIND(sint_kind);
-DYND_MAKE_WITH_KIND(uint_kind);
 DYND_MAKE_WITH_KIND(real_kind);
 DYND_MAKE_WITH_KIND(complex_kind);
 

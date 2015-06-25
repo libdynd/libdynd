@@ -172,6 +172,8 @@ public:
     return (m_hi & 0x7fff000000000000ULL) != 0x7fff000000000000ULL;
   }
 
+/*
+
   DYND_CUDA_HOST_DEVICE inline bool operator==(const float128 &rhs) const
   {
     // The equality cases are as follows:
@@ -188,6 +190,8 @@ public:
   {
     return !operator==(rhs);
   }
+
+*/
 
   DYND_CUDA_HOST_DEVICE bool less_nonan(const float128 &rhs) const
   {
@@ -227,6 +231,8 @@ public:
     }
   }
 
+/*
+
   DYND_CUDA_HOST_DEVICE inline bool operator<(const float128 &rhs) const
   {
     return !isnan_() && !rhs.isnan_() && less_nonan(rhs);
@@ -246,12 +252,133 @@ public:
   {
     return rhs.operator<=(*this);
   }
+
+*/
 };
+
+inline bool operator<(const float128 &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) < static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator<(const float128 &lhs, const T &rhs)
+{
+  return static_cast<double>(lhs) < static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator<(const T &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) < static_cast<double>(rhs);
+}
+
+inline bool operator<=(const float128 &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) <= static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator<=(const float128 &lhs, const T &rhs)
+{
+  return static_cast<double>(lhs) <= static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator<=(const T &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) <= static_cast<double>(rhs);
+}
+
+inline bool operator==(const float128 &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) == static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator==(const float128 &lhs, const T &rhs)
+{
+  return static_cast<double>(lhs) == static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator==(const T &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) == static_cast<double>(rhs);
+}
+
+inline bool operator!=(const float128 &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) != static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator!=(const float128 &lhs, const T &rhs)
+{
+  return static_cast<double>(lhs) != static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator!=(const T &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) != static_cast<double>(rhs);
+}
+
+inline bool operator>=(const float128 &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) >= static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator>=(const float128 &lhs, const T &rhs)
+{
+  return static_cast<double>(lhs) >= static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator>=(const T &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) >= static_cast<double>(rhs);
+}
+
+inline bool operator>(const float128 &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) > static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator>(const float128 &lhs, const T &rhs)
+{
+  return static_cast<double>(lhs) > static_cast<double>(rhs);
+}
+
+template <typename T>
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
+operator>(const T &lhs, const float128 &rhs)
+{
+  return static_cast<double>(lhs) > static_cast<double>(rhs);
+}
 
 inline std::ostream &operator<<(std::ostream &o,
                                 const float128 &DYND_UNUSED(rhs))
 {
   return (o << "<float128 printing unimplemented>");
+}
+
+inline float128 floor(float128 value)
+{
+  return static_cast<double>(value);
 }
 
 } // namespace dynd

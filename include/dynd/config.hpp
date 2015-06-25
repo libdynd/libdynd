@@ -663,6 +663,12 @@ struct is_arithmetic<float128> {
   static const bool value = true;
 };
 
+template <typename T>
+T floor(T value)
+{
+  return std::floor(value);
+}
+
 } // namespace dynd
 
 #include <dynd/bool1.hpp>
