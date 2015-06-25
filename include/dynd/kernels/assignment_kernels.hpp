@@ -420,19 +420,6 @@ namespace nd {
   };
 
   template <type_id_t DstTypeID>
-  struct assignment_kernel<DstTypeID, sint_kind, float16_type_id, real_kind,
-                           assign_error_fractional>
-      : base_kernel<assignment_kernel<DstTypeID, sint_kind, float16_type_id,
-                                      real_kind, assign_error_fractional>,
-                    kernel_request_host, 1> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-    {
-      throw std::runtime_error(
-          "assignment is temporarily disabled for float16");
-    }
-  };
-
-  template <type_id_t DstTypeID>
   struct assignment_kernel<DstTypeID, sint_kind, float128_type_id, real_kind,
                            assign_error_fractional>
       : base_kernel<assignment_kernel<DstTypeID, sint_kind, float128_type_id,
@@ -571,19 +558,6 @@ namespace nd {
   };
 
   template <type_id_t DstTypeID>
-  struct assignment_kernel<DstTypeID, uint_kind, float16_type_id, real_kind,
-                           assign_error_overflow>
-      : base_kernel<assignment_kernel<DstTypeID, uint_kind, float16_type_id,
-                                      real_kind, assign_error_overflow>,
-                    kernel_request_host, 1> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-    {
-      throw std::runtime_error(
-          "assignment is temporarily disabled for float16");
-    }
-  };
-
-  template <type_id_t DstTypeID>
   struct assignment_kernel<DstTypeID, uint_kind, float128_type_id, real_kind,
                            assign_error_overflow>
       : base_kernel<assignment_kernel<DstTypeID, uint_kind, float128_type_id,
@@ -628,19 +602,6 @@ namespace nd {
         throw std::runtime_error(ss.str());
       }
       *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
-    }
-  };
-
-  template <type_id_t DstTypeID>
-  struct assignment_kernel<DstTypeID, uint_kind, float16_type_id, real_kind,
-                           assign_error_fractional>
-      : base_kernel<assignment_kernel<DstTypeID, uint_kind, float16_type_id,
-                                      real_kind, assign_error_fractional>,
-                    kernel_request_host, 1> {
-    void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-    {
-      throw std::runtime_error(
-          "assignment is temporarily disabled for float16");
     }
   };
 
