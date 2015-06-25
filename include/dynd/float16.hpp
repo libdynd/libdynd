@@ -5,11 +5,7 @@
 
 #pragma once
 
-#include <stdexcept>
-
 #include <dynd/config.hpp>
-#include <dynd/diagnostics.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 // Half-precision constants, in bits form
 #define DYND_FLOAT16_ZERO (0x0000u)
@@ -23,16 +19,6 @@
 #define DYND_FLOAT16_MAX (0x7bffu)
 
 namespace dynd {
-
-#if !defined(DYND_HAS_FLOAT128)
-class float128;
-#endif
-#if !defined(DYND_HAS_INT128)
-class int128;
-#endif
-#if !defined(DYND_HAS_UINT128)
-class uint128;
-#endif
 
 // Bit-level conversions
 DYND_CUDA_HOST_DEVICE uint16_t
@@ -203,22 +189,22 @@ public:
     return ((m_bits & 0x7c00u) != 0x7c00u);
   }
 
-/*
-  DYND_CUDA_HOST_DEVICE inline bool operator==(const float16 &rhs) const
-  {
-    // The equality cases are as follows:
-    //   - If either value is NaN, never equal.
-    //   - If the values are equal, equal.
-    //   - If the values are both signed zeros, equal.
-    return (!isnan_() && !rhs.isnan_()) &&
-           (m_bits == rhs.m_bits || ((m_bits | rhs.m_bits) & 0x7fff) == 0);
-  }
+  /*
+    DYND_CUDA_HOST_DEVICE inline bool operator==(const float16 &rhs) const
+    {
+      // The equality cases are as follows:
+      //   - If either value is NaN, never equal.
+      //   - If the values are equal, equal.
+      //   - If the values are both signed zeros, equal.
+      return (!isnan_() && !rhs.isnan_()) &&
+             (m_bits == rhs.m_bits || ((m_bits | rhs.m_bits) & 0x7fff) == 0);
+    }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator!=(const float16 &rhs) const
-  {
-    return !operator==(rhs);
-  }
-*/
+    DYND_CUDA_HOST_DEVICE inline bool operator!=(const float16 &rhs) const
+    {
+      return !operator==(rhs);
+    }
+  */
 
   DYND_CUDA_HOST_DEVICE bool less_nonan(const float16 &rhs) const
   {
@@ -279,97 +265,16 @@ public:
   */
 
   DYND_CUDA_HOST_DEVICE friend float16 float16_from_bits(uint16_t bits);
+
+  float16 operator-() const {
+    return float16(-static_cast<float>(*this));
+  }
 };
 
-template <typename T>
-struct is_arithmetic2 {
-static const bool value = false;
-};
-
-template <>
-struct is_arithmetic2<bool1> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<int8> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<int16> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<int32> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<int64> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<int128> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<uint8> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<uint16> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<uint32> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<uint64> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<uint128> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<float16> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<float32> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<float64> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<float128> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<complex<float>> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic2<complex<double>> {
-  static const bool value = true;
-};
+DYND_CUDA_HOST_DEVICE inline bool isfinite(float16 value)
+{
+  return value.isfinite_();
+}
 
 inline bool operator<(const float16 &lhs, const float16 &rhs)
 {
@@ -377,14 +282,14 @@ inline bool operator<(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator<(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) < static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator<(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) < static_cast<double>(rhs);
@@ -396,14 +301,14 @@ inline bool operator<=(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator<=(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) <= static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator<=(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) <= static_cast<double>(rhs);
@@ -415,14 +320,14 @@ inline bool operator==(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator==(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) == static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator==(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) == static_cast<double>(rhs);
@@ -434,14 +339,14 @@ inline bool operator!=(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator!=(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) != static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator!=(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) != static_cast<double>(rhs);
@@ -453,14 +358,14 @@ inline bool operator>=(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator>=(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) >= static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator>=(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) >= static_cast<double>(rhs);
@@ -472,14 +377,14 @@ inline bool operator>(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator>(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) > static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic2<T>::value, bool>::type
+typename std::enable_if<is_arithmetic<T>::value, bool>::type
 operator>(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) > static_cast<double>(rhs);

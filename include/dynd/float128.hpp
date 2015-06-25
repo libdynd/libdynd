@@ -16,15 +16,6 @@
 
 namespace dynd {
 
-#if !defined(DYND_HAS_INT128)
-class int128;
-#endif
-#if !defined(DYND_HAS_UINT128)
-class uint128;
-#endif
-
-class float16;
-
 class float128 {
 public:
 #if defined(DYND_BIG_ENDIAN)
