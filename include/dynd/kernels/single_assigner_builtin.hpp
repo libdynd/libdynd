@@ -214,9 +214,6 @@ struct single_assigner_builtin_base<complex<real_type>, real_type, complex_kind,
                                           assign_error_nocheck> {
 };
 
-#include "single_assigner_builtin_float128.hpp"
-#include "single_assigner_builtin_float16.hpp"
-
 // This is the interface exposed for use outside of this file
 template <class dst_type, class src_type, assign_error_mode errmode>
 struct single_assigner_builtin
