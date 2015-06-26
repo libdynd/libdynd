@@ -206,20 +206,6 @@ struct single_assigner_builtin_base<real_type, complex<real_type>, real_kind,
                                           assign_error_overflow> {
 };
 
-// T -> complex<T>
-template <typename real_type>
-struct single_assigner_builtin_base<complex<real_type>, real_type, complex_kind,
-                                    real_kind, assign_error_nocheck> {
-  DYND_CUDA_HOST_DEVICE static void assign(complex<real_type> *dst,
-                                           const real_type *src)
-  {
-    DYND_TRACE_ASSIGNMENT(static_cast<complex<real_type>>(*src),
-                          complex<real_type>, *src, real_type);
-
-    *dst = *src;
-  }
-};
-
 template <typename real_type, assign_error_mode errmode>
 struct single_assigner_builtin_base<complex<real_type>, real_type, complex_kind,
                                     real_kind, errmode>

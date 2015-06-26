@@ -280,14 +280,16 @@ inline bool operator<(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
+typename std::enable_if<
+    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator<(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) < static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
+typename std::enable_if<
+    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator<(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) < static_cast<double>(rhs);
@@ -318,14 +320,16 @@ inline bool operator==(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
+typename std::enable_if<
+    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator==(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) == static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
+typename std::enable_if<
+    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator==(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) == static_cast<double>(rhs);
@@ -337,14 +341,16 @@ inline bool operator!=(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
+typename std::enable_if<
+    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator!=(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) != static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
+typename std::enable_if<
+    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator!=(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) != static_cast<double>(rhs);
@@ -375,14 +381,16 @@ inline bool operator>(const float16 &lhs, const float16 &rhs)
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
+typename std::enable_if<
+    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator>(const float16 &lhs, const T &rhs)
 {
   return static_cast<double>(lhs) > static_cast<double>(rhs);
 }
 
 template <typename T>
-typename std::enable_if<is_arithmetic<T>::value, bool>::type
+typename std::enable_if<
+    is_arithmetic<T>::value && !std::is_same<T, float128>::value, bool>::type
 operator>(const T &lhs, const float16 &rhs)
 {
   return static_cast<double>(lhs) > static_cast<double>(rhs);
