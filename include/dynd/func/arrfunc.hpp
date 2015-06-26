@@ -1183,7 +1183,17 @@ namespace nd {
       index_proxy<I0>::for_each(detail::old_make_all<T, I1>(), arrfuncs);
 
       return arrfuncs;
-    }  
+    }
+
+    template <template <type_id_t, type_kind_t, type_id_t, type_kind_t> class T, typename I0, typename I1>
+    static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_all()
+    {
+      std::map<std::pair<type_id_t, type_id_t>, arrfunc> arrfuncs;
+//      index_proxy<I0>::for_each(detail::old_make_all<T, I1>(), arrfuncs);
+
+      return arrfuncs;
+    }
+
 
     template <template <type_id_t, type_id_t> class T, typename I0, typename I1>
     static std::vector<arrfunc> old_make_all()
