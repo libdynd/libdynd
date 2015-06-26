@@ -131,6 +131,17 @@ public:
     throw std::runtime_error("float128 conversions are not completed");
 #endif
   }
+
+  DYND_CUDA_HOST_DEVICE operator float() const
+  {
+#ifdef __CUDA_ARCH__
+    DYND_TRIGGER_ASSERT_RETURN_ZERO("float128 conversions are not completed");
+#else
+    throw std::runtime_error("float128 conversions are not completed");
+#endif
+  }
+
+
   DYND_CUDA_HOST_DEVICE operator double() const
   {
 #ifdef __CUDA_ARCH__
@@ -254,6 +265,8 @@ public:
   }
 
 */
+
+  float128 operator-() const { return float128(-static_cast<double>(*this)); }
 };
 
 inline bool operator<(const float128 &lhs, const float128 &rhs)
@@ -379,6 +392,11 @@ inline std::ostream &operator<<(std::ostream &o,
 inline float128 floor(float128 value)
 {
   return static_cast<double>(value);
+}
+
+inline bool isfinite(float128 DYND_UNUSED(value))
+{
+  throw std::runtime_error("isfinite is not implemented for float128");
 }
 
 } // namespace dynd

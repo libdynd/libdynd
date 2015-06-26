@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 
+#include <dynd/fpstatus.hpp>
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/func/assignment.hpp>
@@ -15,10 +16,96 @@
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
-#include <dynd/kernels/single_assigner_builtin.hpp>
 #include <map>
 
+#if defined(_MSC_VER)
+// Tell the visual studio compiler we're accessing the FPU flags
+#pragma fenv_access(on)
+#endif
+
 namespace dynd {
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) &&
+                            is_signed<DstType>::value &&
+                            is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(std::numeric_limits<DstType>::min()) ||
+         src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) &&
+                            is_signed<DstType>::value &&
+                            is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) &&
+                            is_signed<DstType>::value &&
+                            is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) &&
+                            is_signed<DstType>::value &&
+                            is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) &&
+                            is_unsigned<DstType>::value &&
+                            is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(0) ||
+         static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) &&
+                            is_unsigned<DstType>::value &&
+                            is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(0);
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) &&
+                            is_unsigned<DstType>::value &&
+                            is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) &&
+                            is_unsigned<DstType>::value &&
+                            is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
 
 namespace nd {
 
@@ -33,9 +120,12 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      single_assigner_builtin<dst_type, src_type, ErrorMode>::assign(
-          reinterpret_cast<dst_type *>(dst),
-          reinterpret_cast<src_type *>(*src));
+      DYND_TRACE_ASSIGNMENT(
+          static_cast<dst_type>(*reinterpret_cast<src_type *>(src[0])),
+          dst_type, *reinterpret_cast<src_type *>(src[0]), src_type);
+
+      *reinterpret_cast<dst_type *>(dst) =
+          static_cast<dst_type>(*reinterpret_cast<src_type *>(src[0]));
     }
   };
 
@@ -837,16 +927,15 @@ namespace nd {
     };
   */
 
-  // double -> float with overflow checking
-  template <>
-  struct assignment_kernel<float32_type_id, real_kind, float64_type_id,
-                           real_kind, assign_error_overflow>
-      : base_kernel<
-            assignment_kernel<float32_type_id, real_kind, float64_type_id,
-                              real_kind, assign_error_overflow>,
-            kernel_request_host, 1> {
-    typedef float dst_type;
-    typedef double src0_type;
+  // real -> real with overflow checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, real_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID,
+                                      real_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
 
     void single(char *dst, char *const *src)
     {
@@ -879,52 +968,51 @@ namespace nd {
     }
   };
 
-  // double -> float with fractional checking
-  template <>
-  struct assignment_kernel<float32_type_id, real_kind, float64_type_id,
-                           real_kind, assign_error_fractional>
-      : assignment_kernel<float32_type_id, real_kind, float64_type_id,
-                          real_kind, assign_error_overflow> {
+  // real -> real with fractional checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, real_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, real_kind, Src0TypeID, real_kind,
+                          assign_error_overflow> {
   };
 
-  // double -> float with inexact checking
-  template <>
-  struct assignment_kernel<float32_type_id, real_kind, float64_type_id,
-                           real_kind, assign_error_inexact>
-      : base_kernel<
-            assignment_kernel<float32_type_id, real_kind, float64_type_id,
-                              real_kind, assign_error_inexact>,
-            kernel_request_host, 1> {
-    typedef float dst_type;
-    typedef double src0_type;
+  // real -> real with inexact checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, real_kind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID,
+                                      real_kind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
 
     void single(char *dst, char *const *src)
     {
-      double s = *reinterpret_cast<src0_type *>(src[0]);
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
 
-      DYND_TRACE_ASSIGNMENT(static_cast<float>(s), float, s, double);
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src0_type);
 
-      float d;
+      dst_type d;
 #if defined(DYND_USE_FPSTATUS)
       clear_fp_status();
-      d = static_cast<float>(s);
+      d = static_cast<dst_type>(s);
       if (is_overflow_fp_status()) {
         std::stringstream ss;
-        ss << "overflow while assigning " << ndt::make_type<double>()
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
            << " value ";
-        ss << s << " to " << ndt::make_type<float>();
+        ss << s << " to " << ndt::make_type<dst_type>();
         throw std::overflow_error(ss.str());
       }
 #else
-      if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
-                          s > std::numeric_limits<float>::max())) {
+      if (isfinite(s) && (s < -std::numeric_limits<dst_type>::max() ||
+                          s > std::numeric_limits<dst_type>::max())) {
         std::stringstream ss;
-        ss << "overflow while assigning " << ndt::make_type<double>()
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
            << " value ";
-        ss << s << " to " << ndt::make_type<float>();
+        ss << s << " to " << ndt::make_type<dst_type>();
         throw std::runtime_error(ss.str());
       }
-      d = static_cast<float>(s);
+      d = static_cast<dst_type>(s);
 #endif // DYND_USE_FPSTATUS
 
       // The inexact status didn't work as it should have, so converting back to
@@ -936,8 +1024,8 @@ namespace nd {
       if (d != s) {
         std::stringstream ss;
         ss << "inexact precision loss while assigning "
-           << ndt::make_type<double>() << " value ";
-        ss << s << " to " << ndt::make_type<float>();
+           << ndt::make_type<src0_type>() << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
         throw std::runtime_error(ss.str());
       }
       *reinterpret_cast<dst_type *>(dst) = d;
@@ -1244,150 +1332,93 @@ namespace nd {
                           assign_error_nocheck> {
   };
 
-  // double -> complex<float>
-  template <>
-  struct assignment_kernel<complex_float32_type_id, complex_kind,
-                           float64_type_id, real_kind, assign_error_nocheck>
-      : base_kernel<
-            assignment_kernel<complex_float32_type_id, complex_kind,
-                              float64_type_id, real_kind, assign_error_nocheck>,
-            kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      double s = *reinterpret_cast<double *>(src[0]);
-
-      DYND_TRACE_ASSIGNMENT(static_cast<complex<float>>(s), complex<float>, s,
-                            double);
-
-      *reinterpret_cast<complex<float> *>(dst) = static_cast<float>(s);
-    }
-  };
-
-  // float -> complex<double>
-  template <>
-  struct assignment_kernel<complex_float64_type_id, complex_kind,
-                           float32_type_id, real_kind, assign_error_nocheck>
-      : base_kernel<
-            assignment_kernel<complex_float64_type_id, complex_kind,
-                              float32_type_id, real_kind, assign_error_nocheck>,
-            kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      float s = *reinterpret_cast<float *>(src[0]);
-
-      DYND_TRACE_ASSIGNMENT(static_cast<complex<double>>(*src), complex<double>,
-                            s, float);
-
-      *reinterpret_cast<complex<double> *>(dst) = s;
-    }
-  };
-
-  template <assign_error_mode ErrorMode>
-  struct assignment_kernel<complex_float64_type_id, complex_kind,
-                           float32_type_id, real_kind, ErrorMode>
-      : assignment_kernel<complex_float64_type_id, complex_kind,
-                          float32_type_id, real_kind, assign_error_nocheck> {
-  };
-
-  // complex<float> -> double with overflow checking
-  template <>
-  struct assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
-                           complex_kind, assign_error_overflow>
-      : base_kernel<assignment_kernel<float64_type_id, real_kind,
-                                      complex_float32_type_id, complex_kind,
-                                      assign_error_overflow>,
+  template <type_id_t DstTypeID, type_id_t Src0TypeID,
+            assign_error_mode ErrorMode>
+  struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind,
+                           ErrorMode>
+      : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID,
+                                      real_kind, ErrorMode>,
                     kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
     void single(char *dst, char *const *src)
     {
-      complex<float> s = *reinterpret_cast<complex<float> *>(src[0]);
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
 
-      DYND_TRACE_ASSIGNMENT(static_cast<double>(s.real()), double, s,
-                            complex<float>);
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src0_type);
+
+      *reinterpret_cast<dst_type *>(dst) =
+          static_cast<typename dst_type::value_type>(s);
+    }
+  };
+
+  // complex -> real with overflow checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, complex_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, real_kind, Src0TypeID,
+                                      complex_kind, assign_error_overflow>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
+
+    void single(char *dst, char *const *src)
+    {
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+      dst_type d;
+
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s.real()), dst_type, s,
+                            src0_type);
 
       if (s.imag() != 0) {
         std::stringstream ss;
         ss << "loss of imaginary component while assigning "
-           << ndt::make_type<complex<float>>() << " value ";
-        ss << *src << " to " << ndt::make_type<double>();
-        throw std::runtime_error(ss.str());
-      }
-
-      *reinterpret_cast<double *>(dst) = s.real();
-    }
-  };
-
-  // complex<float> -> double with fractional checking
-  template <>
-  struct assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
-                           complex_kind, assign_error_fractional>
-      : assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
-                          complex_kind, assign_error_overflow> {
-  };
-
-  // complex<float> -> double with inexact checking
-  template <>
-  struct assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
-                           complex_kind, assign_error_inexact>
-      : assignment_kernel<float64_type_id, real_kind, complex_float32_type_id,
-                          complex_kind, assign_error_overflow> {
-  };
-
-  // complex<double> -> float with overflow checking
-  template <>
-  struct assignment_kernel<float32_type_id, real_kind, complex_float64_type_id,
-                           complex_kind, assign_error_overflow>
-      : base_kernel<assignment_kernel<float32_type_id, real_kind,
-                                      complex_float64_type_id, complex_kind,
-                                      assign_error_overflow>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      complex<double> s = *reinterpret_cast<complex<double> *>(src[0]);
-      float d;
-
-      DYND_TRACE_ASSIGNMENT(static_cast<float>(s.real()), float, s,
-                            complex<double>);
-
-      if (s.imag() != 0) {
-        std::stringstream ss;
-        ss << "loss of imaginary component while assigning "
-           << ndt::make_type<complex<double>>() << " value ";
-        ss << *src << " to " << ndt::make_type<float>();
+           << ndt::make_type<src0_type>() << " value ";
+        ss << *src << " to " << ndt::make_type<dst_type>();
         throw std::runtime_error(ss.str());
       }
 
 #if defined(DYND_USE_FPSTATUS)
       clear_fp_status();
-      d = static_cast<float>(s.real());
+      d = static_cast<dst_type>(s.real());
       if (is_overflow_fp_status()) {
         std::stringstream ss;
-        ss << "overflow while assigning " << ndt::make_type<complex<double>>()
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
            << " value ";
-        ss << *src << " to " << ndt::make_type<float>();
+        ss << *src << " to " << ndt::make_type<dst_type>();
         throw std::overflow_error(ss.str());
       }
 #else
-      if (s.real() < -std::numeric_limits<float>::max() ||
-          s.real() > std::numeric_limits<float>::max()) {
+      if (s.real() < -std::numeric_limits<dst_type>::max() ||
+          s.real() > std::numeric_limits<dst_type>::max()) {
         std::stringstream ss;
-        ss << "overflow while assigning " << ndt::make_type<complex<double>>()
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
            << " value ";
-        ss << *src << " to " << ndt::make_type<float>();
+        ss << *src << " to " << ndt::make_type<dst_type>();
         throw std::overflow_error(ss.str());
       }
-      d = static_cast<float>(s.real());
+      d = static_cast<dst_type>(s.real());
 #endif // DYND_USE_FPSTATUS
 
-      *reinterpret_cast<float *>(dst) = d;
+      *reinterpret_cast<dst_type *>(dst) = d;
     }
   };
 
-  // complex<double> -> float with fractional checking
-  template <>
-  struct assignment_kernel<float32_type_id, real_kind, complex_float64_type_id,
-                           complex_kind, assign_error_fractional>
-      : assignment_kernel<float32_type_id, real_kind, complex_float64_type_id,
-                          complex_kind, assign_error_overflow> {
+  // complex -> real with inexact checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, real_kind, Src0TypeID, complex_kind,
+                           assign_error_inexact>
+      : assignment_kernel<DstTypeID, real_kind, Src0TypeID, complex_kind,
+                          assign_error_overflow> {
+  };
+
+  // complex -> real with fractional checking
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct assignment_kernel<DstTypeID, real_kind, SrcTypeID, complex_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, real_kind, SrcTypeID, complex_kind,
+                          assign_error_overflow> {
   };
 
   // complex<double> -> float with inexact checking
@@ -1448,105 +1479,107 @@ namespace nd {
     }
   };
 
-  // double -> complex<float> with overflow checking
-  template <>
-  struct assignment_kernel<complex_float32_type_id, complex_kind,
-                           float64_type_id, real_kind, assign_error_overflow>
-      : base_kernel<assignment_kernel<complex_float32_type_id, complex_kind,
-                                      float64_type_id, real_kind,
-                                      assign_error_overflow>,
+  // real -> complex with overflow checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind,
+                           assign_error_overflow>
+      : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID,
+                                      real_kind, assign_error_overflow>,
                     kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
 
     void single(char *dst, char *const *src)
     {
-      double s = *reinterpret_cast<double *>(src[0]);
-      float d;
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+      typename dst_type::value_type d;
 
-      DYND_TRACE_ASSIGNMENT(static_cast<complex<float>>(s), complex<float>, s,
-                            double);
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src0_type);
 
 #if defined(DYND_USE_FPSTATUS)
       clear_fp_status();
-      d = static_cast<float>(s);
+      d = static_cast<typename dst_type::value_type>(s);
       if (is_overflow_fp_status()) {
         std::stringstream ss;
-        ss << "overflow while assigning " << ndt::make_type<double>()
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
            << " value ";
-        ss << s << " to " << ndt::make_type<complex<float>>();
+        ss << s << " to " << ndt::make_type<dst_type>();
         throw std::overflow_error(ss.str());
       }
 #else
-      if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
-                          s > std::numeric_limits<float>::max())) {
+      if (isfinite(s) &&
+          (s < -std::numeric_limits<typename dst_type::value_type>::max() ||
+           s > std::numeric_limits<typename dst_type::value_type>::max())) {
         std::stringstream ss;
-        ss << "overflow while assigning " << ndt::make_type<double>()
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
            << " value ";
-        ss << s << " to " << ndt::make_type<complex<float>>();
+        ss << s << " to " << ndt::make_type<dst_type>();
         throw std::overflow_error(ss.str());
       }
-      d = static_cast<float>(s);
+      d = static_cast<typename dst_type::value_type>(s);
 #endif // DYND_USE_FPSTATUS
 
-      *reinterpret_cast<complex<float> *>(dst) = d;
+      *reinterpret_cast<dst_type *>(dst) = d;
     }
   };
 
-  // double -> complex<float> with fractional checking
-  template <>
-  struct assignment_kernel<complex_float32_type_id, complex_kind,
-                           float64_type_id, real_kind, assign_error_fractional>
-      : assignment_kernel<complex_float32_type_id, complex_kind,
-                          float64_type_id, real_kind, assign_error_overflow> {
+  // real -> complex with fractional checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind,
+                           assign_error_fractional>
+      : assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind,
+                          assign_error_overflow> {
   };
 
-  // double -> complex<float> with inexact checking
-  template <>
-  struct assignment_kernel<complex_float32_type_id, complex_kind,
-                           float64_type_id, real_kind, assign_error_inexact>
-      : base_kernel<
-            assignment_kernel<complex_float32_type_id, complex_kind,
-                              float64_type_id, real_kind, assign_error_inexact>,
-            kernel_request_host, 1> {
+  // real -> complex with inexact checking
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct assignment_kernel<DstTypeID, complex_kind, Src0TypeID, real_kind,
+                           assign_error_inexact>
+      : base_kernel<assignment_kernel<DstTypeID, complex_kind, Src0TypeID,
+                                      real_kind, assign_error_inexact>,
+                    kernel_request_host, 1> {
+    typedef typename type_of<DstTypeID>::type dst_type;
+    typedef typename type_of<Src0TypeID>::type src0_type;
 
     void single(char *dst, char *const *src)
     {
-      double s = *reinterpret_cast<double *>(src[0]);
-      float d;
+      src0_type s = *reinterpret_cast<src0_type *>(src[0]);
+      typename dst_type::value_type d;
 
-      DYND_TRACE_ASSIGNMENT(static_cast<complex<float>>(s), complex<float>, s,
-                            double);
+      DYND_TRACE_ASSIGNMENT(static_cast<dst_type>(s), dst_type, s, src0_type);
 
 #if defined(DYND_USE_FPSTATUS)
       clear_fp_status();
-      d = static_cast<float>(s);
+      d = static_cast<typename dst_type::value_type>(s);
       if (is_overflow_fp_status()) {
         std::stringstream ss;
-        ss << "overflow while assigning " << ndt::make_type<double>()
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
            << " value ";
-        ss << s << " to " << ndt::make_type<complex<float>>();
+        ss << s << " to " << ndt::make_type<dst_type>();
         throw std::overflow_error(ss.str());
       }
 #else
-      if (isfinite(s) && (s < -std::numeric_limits<float>::max() ||
-                          s > std::numeric_limits<float>::max())) {
+      if (isfinite(s) &&
+          (s < -std::numeric_limits<typename dst_type::value_type>::max() ||
+           s > std::numeric_limits<typename dst_type::value_type>::max())) {
         std::stringstream ss;
-        ss << "overflow while assigning " << ndt::make_type<double>()
+        ss << "overflow while assigning " << ndt::make_type<src0_type>()
            << " value ";
-        ss << s << " to " << ndt::make_type<complex<float>>();
+        ss << s << " to " << ndt::make_type<dst_type>();
         throw std::overflow_error(ss.str());
       }
-      d = static_cast<float>(s);
+      d = static_cast<typename dst_type::value_type>(s);
 #endif // DYND_USE_FPSTATUS
 
       if (d != s) {
         std::stringstream ss;
         ss << "inexact precision loss while assigning "
-           << ndt::make_type<double>() << " value ";
-        ss << s << " to " << ndt::make_type<complex<float>>();
+           << ndt::make_type<src0_type>() << " value ";
+        ss << s << " to " << ndt::make_type<dst_type>();
         throw std::runtime_error(ss.str());
       }
 
-      *reinterpret_cast<complex<float> *>(dst) = d;
+      *reinterpret_cast<dst_type *>(dst) = d;
     }
   };
 
