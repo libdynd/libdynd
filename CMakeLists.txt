@@ -421,7 +421,6 @@ set(libdynd_SRC
     include/dynd/kernels/pointer_assignment_kernels.hpp
     include/dynd/kernels/reduction_kernels.hpp
     include/dynd/kernels/rolling.hpp
-    include/dynd/kernels/single_assigner_builtin.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp

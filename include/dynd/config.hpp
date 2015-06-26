@@ -664,6 +664,18 @@ struct is_arithmetic<float128> {
 };
 
 template <typename T>
+struct is_signed {
+  static const bool value =
+      std::is_signed<T>::value || std::is_same<T, int128>::value;
+};
+
+template <typename T>
+struct is_unsigned {
+  static const bool value =
+      std::is_unsigned<T>::value || std::is_same<T, uint128>::value;
+};
+
+template <typename T>
 T floor(T value)
 {
   return std::floor(value);
