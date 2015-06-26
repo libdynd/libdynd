@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 
+#include <dynd/fpstatus.hpp>
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/func/assignment.hpp>
