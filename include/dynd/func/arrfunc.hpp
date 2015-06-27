@@ -1274,62 +1274,53 @@ namespace nd {
     template <typename IDType0, typename IDType1>
     template <template <IDType0, IDType1> class T, typename I1>
     struct new_make_all<IDType0, IDType1>::type {
-      template <type_id_t J0>
+      template <IDType0 J0>
       struct type2 {
-        template <type_id_t J1>
-        void on_each(
-            std::map<std::pair<type_id_t, type_id_t>, nd::arrfunc> &children)
+        template <IDType1 J1>
+        void on_each(std::map<std::pair<IDType0, IDType1>, arrfunc> &children)
         {
-          children[std::make_pair(J0, J1)] = nd::arrfunc::make<T<J0, J1>>(0);
+          children[std::make_pair(J0, J1)] = arrfunc::make<T<J0, J1>>(0);
         }
       };
 
-      template <type_id_t I0>
+      template <IDType0 I0>
       void
-      on_each(std::map<std::pair<type_id_t, type_id_t>, nd::arrfunc> &children)
-          const
+      on_each(std::map<std::pair<IDType0, IDType1>, arrfunc> &children) const
       {
         index_proxy<I1>::for_each(type2<I0>(), children);
       }
     };
 
-    template <typename... ValueTypes>
-    template <template <ValueTypes...> class T, typename I1, typename... I>
-    struct new_make_all<ValueTypes...>::type {
+    /*
+        template <typename... ValueTypes>
+        template <template <ValueTypes...> class T, typename I1, typename... I>
+        struct new_make_all<ValueTypes...>::type {
 
-      /*
-            template <type_id_t J0, type_id_t... J>
-            struct type {
-              template <type_id_t K>
-              void on_each() {
-                index_proxy::for_each(
-              }
-            };
-      */
+          template <typename... J>
+          struct Y;
 
-      template <typename... J>
-      struct Y;
+          template <ValueTypes... J, typename... K>
+          struct Y<type_id_sequence<J>..., K...> {
+          };
 
-      template <ValueTypes... J, typename... K>
-      struct Y<type_id_sequence<J>..., K...> {
-      };
+          template <ValueTypes... J>
+          struct Y<type_id_sequence<J>...> {
+            template <type_id_t K>
+            void on_each(
+                std::map<std::pair<ValueTypes...>, arrfunc>
+       &DYND_UNUSED(arrfuncs))
+            {
+              std::make_tuple(J..., K);
+            }
+          };
 
-      template <ValueTypes... J>
-      struct Y<type_id_sequence<J>...> {
-        template <type_id_t K>
-        void on_each(
-            std::map<std::pair<ValueTypes...>, arrfunc> &DYND_UNUSED(arrfuncs))
-        {
-          std::make_tuple(J..., K);
-        }
-      };
-
-      template <type_id_t I0>
-      void on_each(std::map<std::pair<ValueTypes...>, arrfunc> &arrfuncs)
-      {
-        index_proxy<I1>::for_each(Y<type_id_sequence<I0>>(), arrfuncs);
-      }
-    };
+          template <type_id_t I0>
+          void on_each(std::map<std::pair<ValueTypes...>, arrfunc> &arrfuncs)
+          {
+            index_proxy<I1>::for_each(Y<type_id_sequence<I0>>(), arrfuncs);
+          }
+        };
+    */
 
   } // namespace dynd::nd::detail
 
