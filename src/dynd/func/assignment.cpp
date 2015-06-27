@@ -11,7 +11,6 @@ using namespace dynd;
 
 nd::arrfunc nd::assign::make()
 {
-
   // ...
   return arrfunc();
 }
