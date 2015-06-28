@@ -39,9 +39,10 @@ namespace nd {
                                      bool own_children, intptr_t i0 = 0);
 
     template <int N0, int N1>
-    arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
-                                     const arrfunc (&children)[N0][N1],
-                                     const arrfunc &DYND_UNUSED(default_child))
+    arrfunc multidispatch_by_type_id(
+        const ndt::type &self_tp, const arrfunc (&children)[N0][N1],
+        const arrfunc &DYND_UNUSED(default_child),
+        const std::initializer_list<intptr_t> &i = {0, 1})
     {
       for (int i0 = 0; i0 < N0; ++i0) {
         for (int i1 = 0; i1 < N1; ++i1) {
@@ -55,8 +56,11 @@ namespace nd {
         }
       }
 
+      typedef typename new_multidispatch_by_type_id_kernel<N0, N1>::data
+          data_type;
+
       return arrfunc::make<new_multidispatch_by_type_id_kernel<N0, N1>>(
-          self_tp, &children, 0);
+          self_tp, data_type(&children, i.begin()), 0);
     }
 
     arrfunc multidispatch_by_type_id(const ndt::type &self_tp,

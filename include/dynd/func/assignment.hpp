@@ -5,13 +5,70 @@
 
 #pragma once
 
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/multidispatch.hpp>
 
 namespace dynd {
 namespace nd {
 
-  extern struct assign : declfunc<assign> {
-    static arrfunc make();
+  template <typename T, int N>
+  struct declop;
+
+  template <typename T>
+  struct declop<T, 2> : declfunc<T> {
+    static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+    static arrfunc default_child;
+
+    static arrfunc make()
+    {
+      for (const auto &pair : T::make_children()) {
+        children[pair.first.first][pair.first.second] = pair.second;
+      }
+
+      return functional::multidispatch_by_type_id(
+          dynd::ndt::type("(Any) -> Any"), children, default_child, {-1, 0});
+    }
+  };
+
+  template <typename T>
+  arrfunc declop<T, 2>::children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+
+  template <typename T>
+  arrfunc declop<T, 2>::default_child;
+
+  /*
+    template <typename F, template <type_id_t> class K>
+    struct arithmetic_operator<F, K, 1> : declfunc<F> {
+      static arrfunc children[DYND_TYPE_ID_MAX + 1];
+      static arrfunc default_child;
+
+      static arrfunc make()
+      {
+        const arrfunc self = functional::call<F>(ndt::type("(Any) -> Any"));
+
+        for (const std::pair<const type_id_t, arrfunc> &pair :
+             arrfunc::make_all<K, numeric_type_ids>()) {
+          children[pair.first] = pair.second;
+        }
+
+        for (type_id_t i0 : dim_type_ids::vals()) {
+          const ndt::type child_tp = ndt::arrfunc_type::make(
+              {ndt::type(i0)}, self.get_type()->get_return_type());
+          children[i0] = functional::elwise(child_tp, self);
+        }
+
+        return functional::multidispatch_by_type_id(
+            self.get_array_type(), DYND_TYPE_ID_MAX + 1, children,
+    default_child,
+            false);
+      }
+    };
+
+    template <typename F, template <type_id_t> class K>
+    arrfunc arithmetic_operator<F, K, 1>::children[DYND_TYPE_ID_MAX + 1];
+  */
+
+  extern struct assign : declop<assign, 2> {
+    static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_children();
   } assign;
 
 } // namespace dynd::nd
