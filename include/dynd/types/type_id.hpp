@@ -313,106 +313,130 @@ struct type_id_of;
 
 template <typename T>
 struct type_id_of<const T> {
-  enum { value = type_id_of<T>::value };
+  static const type_id_t value = type_id_of<T>::value;
 };
 
 // Can't use bool, because it doesn't have a guaranteed sizeof
 template <>
 struct type_id_of<bool1> {
-  enum { value = bool_type_id };
+  static const type_id_t value = bool_type_id;
 };
+
 template <>
 struct type_id_of<char> {
-  enum { value = ((char)-1) < 0 ? int8_type_id : uint8_type_id };
+  static const type_id_t value = ((char)-1) < 0 ? int8_type_id : uint8_type_id;
 };
+
 template <>
 struct type_id_of<signed char> {
-  enum { value = int8_type_id };
+  static const type_id_t value = int8_type_id;
 };
+
 template <>
 struct type_id_of<short> {
-  enum { value = int16_type_id };
+  static const type_id_t value = int16_type_id;
 };
+
 template <>
 struct type_id_of<int> {
-  enum { value = int32_type_id };
+  static const type_id_t value = int32_type_id;
 };
+
 template <>
 struct type_id_of<long> {
-  enum { value = int8_type_id + detail::log2_x<sizeof(long)>::value };
+  static const type_id_t value = static_cast<type_id_t>(
+      int8_type_id + detail::log2_x<sizeof(long)>::value);
 };
+
 template <>
 struct type_id_of<long long> {
-  enum { value = int64_type_id };
+  static const type_id_t value = int64_type_id;
 };
+
 template <>
 struct type_id_of<int128> {
-  enum { value = int128_type_id };
+  static const type_id_t value = int128_type_id;
 };
+
 template <>
 struct type_id_of<uint8_t> {
-  enum { value = uint8_type_id };
+  static const type_id_t value = uint8_type_id;
 };
+
 template <>
 struct type_id_of<uint16_t> {
-  enum { value = uint16_type_id };
+  static const type_id_t value = uint16_type_id;
 };
+
 template <>
 struct type_id_of<unsigned int> {
-  enum { value = uint32_type_id };
+  static const type_id_t value = uint32_type_id;
 };
+
 template <>
 struct type_id_of<unsigned long> {
-  enum { value = uint8_type_id + detail::log2_x<sizeof(unsigned long)>::value };
+  static const type_id_t value = static_cast<type_id_t>(
+      uint8_type_id + detail::log2_x<sizeof(unsigned long)>::value);
 };
+
 template <>
 struct type_id_of<unsigned long long> {
-  enum { value = uint64_type_id };
+  static const type_id_t value = uint64_type_id;
 };
+
 template <>
 struct type_id_of<uint128> {
-  enum { value = uint128_type_id };
+  static const type_id_t value = uint128_type_id;
 };
+
 template <>
 struct type_id_of<float16> {
-  enum { value = float16_type_id };
+  static const type_id_t value = float16_type_id;
 };
+
 template <>
 struct type_id_of<float32> {
-  enum { value = float32_type_id };
+  static const type_id_t value = float32_type_id;
 };
+
 template <>
 struct type_id_of<float64> {
-  enum { value = float64_type_id };
+  static const type_id_t value = float64_type_id;
 };
+
 template <>
 struct type_id_of<float128> {
-  enum { value = float128_type_id };
+  static const type_id_t value = float128_type_id;
 };
+
 template <>
 struct type_id_of<complex64> {
-  enum { value = complex_float32_type_id };
+  static const type_id_t value = complex_float32_type_id;
 };
+
 template <>
 struct type_id_of<complex128> {
-  enum { value = complex_float64_type_id };
+  static const type_id_t value = complex_float64_type_id;
 };
+
 template <>
 struct type_id_of<void> {
-  enum { value = void_type_id };
+  static const type_id_t value = void_type_id;
 };
+
 // Also allow type_id_of<std::complex<>> as synonyms for
 // type_id_of<dynd_complex<>>
 template <>
 struct type_id_of<std::complex<float>> {
-  enum { value = complex_float32_type_id };
-};
-template <>
-struct type_id_of<std::complex<double>> {
-  enum { value = complex_float64_type_id };
+  static const type_id_t value = complex_float32_type_id;
 };
 
-template <type_id_t type_id>
+template <>
+struct type_id_of<std::complex<double>> {
+  static const type_id_t value = complex_float64_type_id;
+};
+
+template <type_id_t TypeID>
 struct type_of;
 
 template <>
@@ -489,88 +513,96 @@ struct type_of<type_type_id> {
 };
 
 // Type trait for the kind
-template <typename T>
-struct dynd_kind_of;
+template <type_id_t TypeID>
+struct type_kind_of;
 
 template <>
-struct dynd_kind_of<void> {
+struct type_kind_of<void_type_id> {
   static const type_kind_t value = void_kind;
 };
-// Can't use bool, because it doesn't have a guaranteed sizeof
+
 template <>
-struct dynd_kind_of<bool1> {
+struct type_kind_of<bool_type_id> {
   static const type_kind_t value = bool_kind;
 };
+
 template <>
-struct dynd_kind_of<char> {
-  static const type_kind_t value = ((char)-1) < 0 ? sint_kind : uint_kind;
-};
-template <>
-struct dynd_kind_of<signed char> {
+struct type_kind_of<int8_type_id> {
   static const type_kind_t value = sint_kind;
 };
+
 template <>
-struct dynd_kind_of<short> {
+struct type_kind_of<int16_type_id> {
   static const type_kind_t value = sint_kind;
 };
+
 template <>
-struct dynd_kind_of<int> {
+struct type_kind_of<int32_type_id> {
   static const type_kind_t value = sint_kind;
 };
+
 template <>
-struct dynd_kind_of<long> {
+struct type_kind_of<int64_type_id> {
   static const type_kind_t value = sint_kind;
 };
+
 template <>
-struct dynd_kind_of<long long> {
+struct type_kind_of<int128_type_id> {
   static const type_kind_t value = sint_kind;
 };
+
 template <>
-struct dynd_kind_of<int128> {
-  static const type_kind_t value = sint_kind;
-};
-template <>
-struct dynd_kind_of<uint8_t> {
+struct type_kind_of<uint8_type_id> {
   static const type_kind_t value = uint_kind;
 };
+
 template <>
-struct dynd_kind_of<uint16_t> {
+struct type_kind_of<uint16_type_id> {
   static const type_kind_t value = uint_kind;
 };
+
 template <>
-struct dynd_kind_of<unsigned int> {
+struct type_kind_of<uint32_type_id> {
   static const type_kind_t value = uint_kind;
 };
+
 template <>
-struct dynd_kind_of<unsigned long> {
+struct type_kind_of<uint64_type_id> {
   static const type_kind_t value = uint_kind;
 };
+
 template <>
-struct dynd_kind_of<unsigned long long> {
+struct type_kind_of<uint128_type_id> {
   static const type_kind_t value = uint_kind;
 };
+
 template <>
-struct dynd_kind_of<uint128> {
-  static const type_kind_t value = uint_kind;
-};
-template <>
-struct dynd_kind_of<float16> {
+struct type_kind_of<float16_type_id> {
   static const type_kind_t value = real_kind;
 };
+
 template <>
-struct dynd_kind_of<float32> {
+struct type_kind_of<float32_type_id> {
   static const type_kind_t value = real_kind;
 };
+
 template <>
-struct dynd_kind_of<float64> {
+struct type_kind_of<float64_type_id> {
   static const type_kind_t value = real_kind;
 };
+
 template <>
-struct dynd_kind_of<float128> {
+struct type_kind_of<float128_type_id> {
   static const type_kind_t value = real_kind;
 };
-template <typename T>
-struct dynd_kind_of<complex<T>> {
+
+template <>
+struct type_kind_of<complex_float32_type_id> {
+  static const type_kind_t value = complex_kind;
+};
+
+template <>
+struct type_kind_of<complex_float64_type_id> {
   static const type_kind_t value = complex_kind;
 };
 
