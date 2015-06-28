@@ -10,9 +10,9 @@
 namespace dynd {
 namespace nd {
 
-  struct assign : declfunc<assign> {
+  extern struct assign : declfunc<assign> {
     static arrfunc make();
-  };
+  } assign;
 
 } // namespace dynd::nd
 

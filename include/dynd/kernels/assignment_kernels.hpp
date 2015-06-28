@@ -13,6 +13,7 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
@@ -1706,247 +1707,321 @@ namespace nd {
     }
   };
 
-/*
-  // Float16 -> bool
-  template <>
-  struct assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
-                           assign_error_nocheck>
-      : base_kernel<assignment_kernel<bool_type_id, bool_kind, float16_type_id,
-                                      real_kind, assign_error_nocheck>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      // DYND_TRACE_ASSIGNMENT((bool)(!s.iszero()), bool1, s, float16);
+  /*
+    // Float16 -> bool
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, float16_type_id,
+    real_kind,
+                             assign_error_nocheck>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind,
+    float16_type_id,
+                                        real_kind, assign_error_nocheck>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        // DYND_TRACE_ASSIGNMENT((bool)(!s.iszero()), bool1, s, float16);
 
-      *reinterpret_cast<bool1 *>(dst) =
-          !reinterpret_cast<float16 *>(src[0])->iszero();
-    }
-  };
+        *reinterpret_cast<bool1 *>(dst) =
+            !reinterpret_cast<float16 *>(src[0])->iszero();
+      }
+    };
 
-  template <>
-  struct assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
-                           assign_error_overflow>
-      : base_kernel<assignment_kernel<bool_type_id, bool_kind, float16_type_id,
-                                      real_kind, assign_error_overflow>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      float tmp = float(*reinterpret_cast<float16 *>(src[0]));
-      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
-      assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
-                        assign_error_overflow>::single_wrapper(dst, src_child,
-                                                               NULL);
-    }
-  };
-
-  template <>
-  struct assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
-                           assign_error_fractional>
-      : base_kernel<assignment_kernel<bool_type_id, bool_kind, float16_type_id,
-                                      real_kind, assign_error_fractional>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      float tmp = float(*reinterpret_cast<float16 *>(src[0]));
-      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
-      assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
-                        assign_error_fractional>::single_wrapper(dst, src_child,
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, float16_type_id,
+    real_kind,
+                             assign_error_overflow>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind,
+    float16_type_id,
+                                        real_kind, assign_error_overflow>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        float tmp = float(*reinterpret_cast<float16 *>(src[0]));
+        char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+        assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                          assign_error_overflow>::single_wrapper(dst, src_child,
                                                                  NULL);
-    }
-  };
+      }
+    };
 
-  template <>
-  struct assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
-                           assign_error_inexact>
-      : base_kernel<assignment_kernel<bool_type_id, bool_kind, float16_type_id,
-                                      real_kind, assign_error_inexact>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, float16_type_id,
+    real_kind,
+                             assign_error_fractional>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind,
+    float16_type_id,
+                                        real_kind, assign_error_fractional>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        float tmp = float(*reinterpret_cast<float16 *>(src[0]));
+        char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+        assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                          assign_error_fractional>::single_wrapper(dst,
+    src_child,
+                                                                   NULL);
+      }
+    };
+
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, float16_type_id,
+    real_kind,
+                             assign_error_inexact>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind,
+    float16_type_id,
+                                        real_kind, assign_error_inexact>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        float tmp = float(*reinterpret_cast<float16 *>(src[0]));
+        char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+        assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
+                          assign_error_inexact>::single_wrapper(dst, src_child,
+                                                                NULL);
+      }
+    };
+
+    // Bool -> float16
+    template <>
+    struct assignment_kernel<float16_type_id, real_kind, bool_type_id,
+    bool_kind,
+                             assign_error_nocheck>
+        : base_kernel<assignment_kernel<float16_type_id, real_kind,
+    bool_type_id,
+                                        bool_kind, assign_error_nocheck>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        // DYND_TRACE_ASSIGNMENT((bool)(!s.iszero()), bool1, s, float16);
+
+        *reinterpret_cast<float16 *>(dst) = float16_from_bits(
+            *reinterpret_cast<bool1 *>(src[0]) ? DYND_FLOAT16_ONE : 0);
+      }
+    };
+
+    template <>
+    struct assignment_kernel<float16_type_id, real_kind, bool_type_id,
+    bool_kind,
+                             assign_error_overflow>
+        : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                            assign_error_nocheck> {
+    };
+
+    template <>
+    struct assignment_kernel<float16_type_id, real_kind, bool_type_id,
+    bool_kind,
+                             assign_error_fractional>
+        : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                            assign_error_nocheck> {
+    };
+
+    template <>
+    struct assignment_kernel<float16_type_id, real_kind, bool_type_id,
+    bool_kind,
+                             assign_error_inexact>
+        : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
+                            assign_error_nocheck> {
+    };
+
+    template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+    struct assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+    Src0TypeKind,
+                             assign_error_nocheck>
+        : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                        Src0TypeKind, assign_error_nocheck>,
+                      kernel_request_host, 1> {
+      typedef typename type_of<Src0TypeID>::type src0_type;
+
+      void single(char *dst, char *const *src)
+      {
+        float tmp;
+        assignment_kernel<
+            float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
+            assign_error_nocheck>::single_wrapper(reinterpret_cast<char
+    *>(&tmp),
+                                                  src, NULL);
+        *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_nocheck);
+      }
+    };
+
+    template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+    struct assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+    Src0TypeKind,
+                             assign_error_overflow>
+        : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                        Src0TypeKind, assign_error_overflow>,
+                      kernel_request_host, 1> {
+      typedef typename type_of<Src0TypeID>::type src0_type;
+
+      void single(char *dst, char *const *src)
+      {
+        float tmp;
+        assignment_kernel<
+            float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
+            assign_error_overflow>::single_wrapper(reinterpret_cast<char
+    *>(&tmp),
+                                                   src, NULL);
+        *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_overflow);
+      }
+    };
+
+    template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+    struct assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+    Src0TypeKind,
+                             assign_error_fractional>
+        : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                        Src0TypeKind, assign_error_fractional>,
+                      kernel_request_host, 1> {
+      typedef typename type_of<Src0TypeID>::type src0_type;
+
+      void single(char *dst, char *const *src)
+      {
+        float tmp;
+        assignment_kernel<float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
+                          assign_error_fractional>::
+            single_wrapper(reinterpret_cast<char *>(&tmp), src, NULL);
+        *reinterpret_cast<float16 *>(dst) = float16(tmp,
+    assign_error_fractional);
+      }
+    };
+
+    template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+    struct assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+    Src0TypeKind,
+                             assign_error_inexact>
+        : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
+                                        Src0TypeKind, assign_error_inexact>,
+                      kernel_request_host, 1> {
+      typedef typename type_of<Src0TypeID>::type src0_type;
+
+      void single(char *dst, char *const *src)
+      {
+        float tmp;
+        assignment_kernel<
+            float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
+            assign_error_inexact>::single_wrapper(reinterpret_cast<char
+    *>(&tmp),
+                                                  src, NULL);
+        *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_inexact);
+      }
+    };
+
+    template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+    struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
+                             assign_error_nocheck>
+        : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
+                                        real_kind, assign_error_nocheck>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
+        char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+        assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
+                          assign_error_nocheck>::single_wrapper(dst, src_child,
+                                                                NULL);
+      }
+    };
+
+    template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+    struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
+                             assign_error_overflow>
+        : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
+                                        real_kind, assign_error_overflow>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
+        char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+        assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
+                          assign_error_overflow>::single_wrapper(dst, src_child,
+                                                                NULL);
+      }
+    };
+
+    template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+    struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
+                             assign_error_fractional>
+        : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
+                                        real_kind, assign_error_fractional>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
+        char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+        assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
+                          assign_error_fractional>::single_wrapper(dst,
+    src_child,
+                                                                NULL);
+      }
+    };
+
+    template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+    struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
+                             assign_error_inexact>
+        : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
+                                        real_kind, assign_error_inexact>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
+        char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
+        assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
+                          assign_error_inexact>::single_wrapper(dst, src_child,
+                                                                NULL);
+      }
+    };
+  */
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t Src0TypeID,
+            type_kind_t Src0TypeKind>
+  struct assignment_virtual_kernel
+      : base_virtual_kernel<assignment_virtual_kernel<
+            DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind>> {
+
+    static intptr_t
+    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+                char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
+                const std::map<nd::string, ndt::type> &tp_vars)
     {
-      float tmp = float(*reinterpret_cast<float16 *>(src[0]));
-      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
-      assignment_kernel<bool_type_id, bool_kind, float16_type_id, real_kind,
-                        assign_error_inexact>::single_wrapper(dst, src_child,
-                                                              NULL);
+      switch (ectx->errmode) {
+      case assign_error_nocheck:
+        return assignment_kernel<
+            DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
+            assign_error_nocheck>::instantiate(self, self_tp, data, ckb,
+                                               ckb_offset, dst_tp, dst_arrmeta,
+                                               nsrc, src_tp, src_arrmeta,
+                                               kernreq, ectx, kwds, tp_vars);
+      case assign_error_overflow:
+        return assignment_kernel<
+            DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
+            assign_error_overflow>::instantiate(self, self_tp, data, ckb,
+                                                ckb_offset, dst_tp, dst_arrmeta,
+                                                nsrc, src_tp, src_arrmeta,
+                                                kernreq, ectx, kwds, tp_vars);
+      case assign_error_fractional:
+        return assignment_kernel<
+            DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
+            assign_error_fractional>::instantiate(self, self_tp, data, ckb,
+                                                  ckb_offset, dst_tp,
+                                                  dst_arrmeta, nsrc, src_tp,
+                                                  src_arrmeta, kernreq, ectx,
+                                                  kwds, tp_vars);
+      case assign_error_inexact:
+        return assignment_kernel<
+            DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
+            assign_error_inexact>::instantiate(self, self_tp, data, ckb,
+                                               ckb_offset, dst_tp, dst_arrmeta,
+                                               nsrc, src_tp, src_arrmeta,
+                                               kernreq, ectx, kwds, tp_vars);
+      default:
+        throw std::runtime_error("error");
+      }
     }
   };
-
-  // Bool -> float16
-  template <>
-  struct assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
-                           assign_error_nocheck>
-      : base_kernel<assignment_kernel<float16_type_id, real_kind, bool_type_id,
-                                      bool_kind, assign_error_nocheck>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      // DYND_TRACE_ASSIGNMENT((bool)(!s.iszero()), bool1, s, float16);
-
-      *reinterpret_cast<float16 *>(dst) = float16_from_bits(
-          *reinterpret_cast<bool1 *>(src[0]) ? DYND_FLOAT16_ONE : 0);
-    }
-  };
-
-  template <>
-  struct assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
-                           assign_error_overflow>
-      : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
-                          assign_error_nocheck> {
-  };
-
-  template <>
-  struct assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
-                           assign_error_fractional>
-      : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
-                          assign_error_nocheck> {
-  };
-
-  template <>
-  struct assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
-                           assign_error_inexact>
-      : assignment_kernel<float16_type_id, real_kind, bool_type_id, bool_kind,
-                          assign_error_nocheck> {
-  };
-
-  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, Src0TypeKind,
-                           assign_error_nocheck>
-      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
-                                      Src0TypeKind, assign_error_nocheck>,
-                    kernel_request_host, 1> {
-    typedef typename type_of<Src0TypeID>::type src0_type;
-
-    void single(char *dst, char *const *src)
-    {
-      float tmp;
-      assignment_kernel<
-          float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
-          assign_error_nocheck>::single_wrapper(reinterpret_cast<char *>(&tmp),
-                                                src, NULL);
-      *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_nocheck);
-    }
-  };
-
-  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, Src0TypeKind,
-                           assign_error_overflow>
-      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
-                                      Src0TypeKind, assign_error_overflow>,
-                    kernel_request_host, 1> {
-    typedef typename type_of<Src0TypeID>::type src0_type;
-
-    void single(char *dst, char *const *src)
-    {
-      float tmp;
-      assignment_kernel<
-          float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
-          assign_error_overflow>::single_wrapper(reinterpret_cast<char *>(&tmp),
-                                                 src, NULL);
-      *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_overflow);
-    }
-  };
-
-  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, Src0TypeKind,
-                           assign_error_fractional>
-      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
-                                      Src0TypeKind, assign_error_fractional>,
-                    kernel_request_host, 1> {
-    typedef typename type_of<Src0TypeID>::type src0_type;
-
-    void single(char *dst, char *const *src)
-    {
-      float tmp;
-      assignment_kernel<float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
-                        assign_error_fractional>::
-          single_wrapper(reinterpret_cast<char *>(&tmp), src, NULL);
-      *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_fractional);
-    }
-  };
-
-  template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-  struct assignment_kernel<float16_type_id, real_kind, Src0TypeID, Src0TypeKind,
-                           assign_error_inexact>
-      : base_kernel<assignment_kernel<float16_type_id, real_kind, Src0TypeID,
-                                      Src0TypeKind, assign_error_inexact>,
-                    kernel_request_host, 1> {
-    typedef typename type_of<Src0TypeID>::type src0_type;
-
-    void single(char *dst, char *const *src)
-    {
-      float tmp;
-      assignment_kernel<
-          float32_type_id, real_kind, Src0TypeID, Src0TypeKind,
-          assign_error_inexact>::single_wrapper(reinterpret_cast<char *>(&tmp),
-                                                src, NULL);
-      *reinterpret_cast<float16 *>(dst) = float16(tmp, assign_error_inexact);
-    }
-  };
-
-  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
-  struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
-                           assign_error_nocheck>
-      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
-                                      real_kind, assign_error_nocheck>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
-      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
-      assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
-                        assign_error_nocheck>::single_wrapper(dst, src_child,
-                                                              NULL);
-    }
-  };
-
-  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
-  struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
-                           assign_error_overflow>
-      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
-                                      real_kind, assign_error_overflow>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
-      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
-      assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
-                        assign_error_overflow>::single_wrapper(dst, src_child,
-                                                              NULL);
-    }
-  };
-
-  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
-  struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
-                           assign_error_fractional>
-      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
-                                      real_kind, assign_error_fractional>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
-      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
-      assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
-                        assign_error_fractional>::single_wrapper(dst, src_child,
-                                                              NULL);
-    }
-  };
-
-  template <type_id_t DstTypeID, type_kind_t DstTypeKind>
-  struct assignment_kernel<DstTypeID, DstTypeKind, float16_type_id, real_kind,
-                           assign_error_inexact>
-      : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, float16_type_id,
-                                      real_kind, assign_error_inexact>,
-                    kernel_request_host, 1> {
-    void single(char *dst, char *const *src)
-    {
-      float tmp = static_cast<float>(*reinterpret_cast<float16 *>(src[0]));
-      char *src_child[1] = {reinterpret_cast<char *>(&tmp)};
-      assignment_kernel<DstTypeID, DstTypeKind, float32_type_id, real_kind,
-                        assign_error_inexact>::single_wrapper(dst, src_child,
-                                                              NULL);
-    }
-  };
-*/
 
 /*
   template <type_class dst_type, class src_type>
@@ -2050,6 +2125,170 @@ namespace nd {
   };
 
 #endif
+
+  template <class T>
+  struct aligned_fixed_size_copy_assign_type
+      : base_kernel<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
+                    1> {
+    void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<T *>(dst) = **reinterpret_cast<T *const *>(src);
+    }
+
+    void strided(char *dst, intptr_t dst_stride, char *const *src,
+                 const intptr_t *src_stride, size_t count)
+    {
+      char *src0 = *src;
+      intptr_t src0_stride = *src_stride;
+      for (size_t i = 0; i != count; ++i) {
+        *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(src0);
+        dst += dst_stride;
+        src0 += src0_stride;
+      }
+    }
+  };
+
+  template <int N>
+  struct aligned_fixed_size_copy_assign;
+
+  template <>
+  struct aligned_fixed_size_copy_assign<1>
+      : base_kernel<aligned_fixed_size_copy_assign<1>, kernel_request_host, 1> {
+    void single(char *dst, char *const *src) { *dst = **src; }
+
+    void strided(char *dst, intptr_t dst_stride, char *const *src,
+                 const intptr_t *src_stride, size_t count)
+    {
+      char *src0 = *src;
+      intptr_t src0_stride = *src_stride;
+      for (size_t i = 0; i != count; ++i) {
+        *dst = *src0;
+        dst += dst_stride;
+        src0 += src0_stride;
+      }
+    }
+  };
+
+  template <>
+  struct aligned_fixed_size_copy_assign<2>
+      : aligned_fixed_size_copy_assign_type<int16_t> {
+  };
+
+  template <>
+  struct aligned_fixed_size_copy_assign<4>
+      : aligned_fixed_size_copy_assign_type<int32_t> {
+  };
+
+  template <>
+  struct aligned_fixed_size_copy_assign<8>
+      : aligned_fixed_size_copy_assign_type<int64_t> {
+  };
+
+  template <int N>
+  struct unaligned_fixed_size_copy_assign
+      : base_kernel<unaligned_fixed_size_copy_assign<N>, kernel_request_host,
+                    1> {
+    static void single(char *dst, char *const *src) { memcpy(dst, *src, N); }
+
+    static void strided(char *dst, intptr_t dst_stride, char *const *src,
+                        const intptr_t *src_stride, size_t count)
+    {
+      char *src0 = *src;
+      intptr_t src0_stride = *src_stride;
+      for (size_t i = 0; i != count; ++i) {
+        memcpy(dst, src0, N);
+        dst += dst_stride;
+        src0 += src0_stride;
+      }
+    }
+  };
+
+  struct unaligned_copy_ck
+      : base_kernel<unaligned_copy_ck, kernel_request_host, 1> {
+    size_t data_size;
+
+    unaligned_copy_ck(size_t data_size) : data_size(data_size) {}
+
+    void single(char *dst, char *const *src) { memcpy(dst, *src, data_size); }
+
+    void strided(char *dst, intptr_t dst_stride, char *const *src,
+                 const intptr_t *src_stride, size_t count)
+    {
+      char *src0 = *src;
+      intptr_t src0_stride = *src_stride;
+      for (size_t i = 0; i != count; ++i) {
+        memcpy(dst, src0, data_size);
+        dst += dst_stride;
+        src0 += src0_stride;
+      }
+    }
+  };
+
+  template <int N>
+  struct wrap_single_as_strided_fixedcount_ck {
+    static void strided(char *dst, intptr_t dst_stride, char *const *src,
+                        const intptr_t *src_stride, size_t count,
+                        ckernel_prefix *self)
+    {
+      ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
+      expr_single_t opchild = echild->get_function<expr_single_t>();
+      char *src_copy[N];
+      for (int j = 0; j < N; ++j) {
+        src_copy[j] = src[j];
+      }
+      for (size_t i = 0; i != count; ++i) {
+        opchild(dst, src_copy, echild);
+        dst += dst_stride;
+        for (int j = 0; j < N; ++j) {
+          src_copy[j] += src_stride[j];
+        }
+      }
+    }
+  };
+
+  template <>
+  struct wrap_single_as_strided_fixedcount_ck<0> {
+    static void strided(char *dst, intptr_t dst_stride,
+                        char *const *DYND_UNUSED(src),
+                        const intptr_t *DYND_UNUSED(src_stride), size_t count,
+                        ckernel_prefix *self)
+    {
+      ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
+      expr_single_t opchild = echild->get_function<expr_single_t>();
+      for (size_t i = 0; i != count; ++i) {
+        opchild(dst, NULL, echild);
+        dst += dst_stride;
+      }
+    }
+  };
+
+  struct wrap_single_as_strided_ck {
+    typedef wrap_single_as_strided_ck self_type;
+    ckernel_prefix base;
+    intptr_t nsrc;
+
+    static inline void strided(char *dst, intptr_t dst_stride, char *const *src,
+                               const intptr_t *src_stride, size_t count,
+                               ckernel_prefix *self)
+    {
+      intptr_t nsrc = reinterpret_cast<self_type *>(self)->nsrc;
+      shortvector<char *> src_copy(nsrc, src);
+      ckernel_prefix *child = self->get_child_ckernel(sizeof(self_type));
+      expr_single_t child_fn = child->get_function<expr_single_t>();
+      for (size_t i = 0; i != count; ++i) {
+        child_fn(dst, src_copy.get(), child);
+        dst += dst_stride;
+        for (intptr_t j = 0; j < nsrc; ++j) {
+          src_copy[j] += src_stride[j];
+        }
+      }
+    }
+
+    static void destruct(ckernel_prefix *self)
+    {
+      self->destroy_child_ckernel(sizeof(self_type));
+    }
+  };
 
 } // namespace dynd::nd
 } // namespace dynd
