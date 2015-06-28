@@ -349,6 +349,29 @@ namespace nd {
     template <int N0, int N1>
     struct new_multidispatch_by_type_id_kernel
         : base_virtual_kernel<new_multidispatch_by_type_id_kernel<N0, N1>> {
+      struct data {
+        const arrfunc (*children)[N0][N1];
+        intptr_t i[2];
+
+        data(const arrfunc (*children)[N0][N1], const intptr_t *i)
+            : children(children)
+        {
+          std::memcpy(this->i, i, 2 * sizeof(intptr_t));
+        }
+
+        arrfunc operator()(const ndt::type &dst_tp,
+                           const ndt::type *src_tp) const
+        {
+          if (i[0] == -1) {
+            return (
+                *children)[dst_tp.get_type_id()][src_tp[i[1]].get_type_id()];
+          }
+
+          return (*children)[src_tp[i[0]].get_type_id()][src_tp[i[1]]
+                                                             .get_type_id()];
+        }
+      };
+
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
@@ -357,11 +380,9 @@ namespace nd {
                        const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const arrfunc(&children)[N0][N1] =
-            **self->get_data_as<arrfunc(*)[N0][N1]>();
+        const data &data = *self->get_data_as<struct data>();
 
-        const arrfunc &child =
-            children[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
+        const arrfunc &child = data(dst_tp, src_tp);
         if (dst_tp.is_null()) {
           const ndt::type &child_dst_tp = child.get_type()->get_return_type();
           if (child_dst_tp.is_symbolic()) {
@@ -383,11 +404,9 @@ namespace nd {
                   const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const arrfunc(&children)[N0][N1] =
-            **self->get_data_as<arrfunc(*)[N0][N1]>();
+        const struct data &static_data = *self->get_data_as<struct data>();
 
-        const arrfunc &child =
-            children[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
+        const arrfunc &child = static_data(dst_tp, src_tp);
         return child.get()->instantiate(child.get(), child.get_type(), data,
                                         ckb, ckb_offset, dst_tp, dst_arrmeta,
                                         nsrc, src_tp, src_arrmeta, kernreq,

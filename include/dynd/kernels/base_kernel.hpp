@@ -351,6 +351,13 @@ namespace nd {
 
 } // namespace dynd::nd
 
+template <typename VariadicType,
+          template <type_id_t, type_id_t, VariadicType...> class T>
+struct bind {
+  template <type_id_t TypeID0, type_id_t TypeID1>
+  using type = T<TypeID0, TypeID1>;
+};
+
 class expr_kernel_generator;
 
 /**

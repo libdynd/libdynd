@@ -9,10 +9,18 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::assign::make()
+map<pair<type_id_t, type_id_t>, nd::arrfunc> nd::assign::make_children()
 {
-  // ...
-  return arrfunc();
+  typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id,
+                           int32_type_id, int64_type_id, uint8_type_id,
+                           uint16_type_id, uint32_type_id, uint64_type_id,
+                           float32_type_id, float64_type_id> numeric_type_ids;
+
+  map<pair<type_id_t, type_id_t>, arrfunc> children =
+      arrfunc::make_all<bind<assign_error_mode, assignment_kernel>::type,
+                        numeric_type_ids, numeric_type_ids>();
+
+  return children;
 }
 
 struct nd::assign nd::assign;
@@ -20,10 +28,7 @@ struct nd::assign nd::assign;
 static nd::make_t assign_make[builtin_type_id_count - 2][builtin_type_id_count -
                                                          2][4] = {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type_id, src_type_id, errmode)         \
-  &nd::make<nd::assignment_kernel<                                             \
-      dst_type_id, dynd_kind_of<typename type_of<dst_type_id>::type>::value,   \
-      src_type_id, dynd_kind_of<typename type_of<src_type_id>::type>::value,   \
-      errmode>>
+  &nd::make<nd::assignment_kernel<dst_type_id, src_type_id, errmode>>
 
 #define ERROR_MODE_LEVEL(dst_type, src_type)                                   \
   {                                                                            \
@@ -76,6 +81,9 @@ size_t dynd::make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
                                                  kernel_request_t kernreq,
                                                  assign_error_mode errmode)
 {
+//  std::cout << nd::assign << std::endl;
+  //std::exit(-1);
+  
   // Do a table lookup for the built-in range of dynd types
   if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
       src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
@@ -210,7 +218,8 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
       nd::wrap_single_as_strided_ck *e =
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->alloc_ck<nd::wrap_single_as_strided_ck>(ckb_offset);
-      e->base.set_function<expr_strided_t>(&nd::wrap_single_as_strided_ck::strided);
+      e->base.set_function<expr_strided_t>(
+          &nd::wrap_single_as_strided_ck::strided);
       e->base.destructor = &nd::wrap_single_as_strided_ck::destruct;
       e->nsrc = nsrc;
       return ckb_offset;
