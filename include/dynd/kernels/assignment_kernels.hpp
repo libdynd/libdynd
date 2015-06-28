@@ -166,6 +166,10 @@ namespace nd {
           throw std::runtime_error("error");
         }
       }
+
+      static ndt::type make_type() {
+        return ndt::type("(Any) -> Any");
+      }
     };
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind,
@@ -1781,6 +1785,17 @@ namespace nd {
       detail::assignment_kernel<DstTypeID, type_kind_of<DstTypeID>::value,
                                 Src0TypeID, type_kind_of<Src0TypeID>::value,
                                 ErrorMode...>;
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  using assignment_virtual_kernel =
+      detail::assignment_kernel<DstTypeID, type_kind_of<DstTypeID>::value,
+                                Src0TypeID, type_kind_of<Src0TypeID>::value>;
+
+  template <template <type_id_t, type_id_t, assign_error_mode...> class T>
+  struct freeze_kernel {
+    template <type_id_t TypeID0, type_id_t TypeID1>
+    using type = T<TypeID0, TypeID1>;
+  };
 
 /*
   // Float16 -> bool

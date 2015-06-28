@@ -11,6 +11,13 @@ using namespace dynd;
 
 nd::arrfunc nd::assign::make()
 {
+  typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id,
+                           int32_type_id, int64_type_id, uint8_type_id,
+                           uint16_type_id, uint32_type_id, uint64_type_id,
+                           float32_type_id, float64_type_id> numeric_type_ids;
+
+  arrfunc::make_all<freeze_kernel<assignment_kernel>::type, numeric_type_ids, numeric_type_ids>();
+
   // ...
   return arrfunc();
 }
