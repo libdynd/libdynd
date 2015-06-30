@@ -145,15 +145,15 @@ namespace nd {
         return (*map)[tp_vals].get();
       }
 
-      static void resolve_option_values(
-          const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-          char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
-          nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+      static void prepare(const arrfunc_type_data *self,
+                          const ndt::arrfunc_type *af_tp,
+                          char *DYND_UNUSED(data), intptr_t nsrc,
+                          const ndt::type *src_tp, nd::array &kwds,
+                          const std::map<nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child = find(self, tp_vars);
-        if (child->resolve_option_values != NULL) {
-          child->resolve_option_values(child, af_tp, NULL, nsrc, src_tp, kwds,
-                                       tp_vars);
+        if (child->prepare != NULL) {
+          child->prepare(child, af_tp, NULL, nsrc, src_tp, kwds, tp_vars);
         }
       }
 

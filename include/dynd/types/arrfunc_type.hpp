@@ -86,7 +86,7 @@ typedef void (*arrfunc_resolve_dst_type_t)(
  * \param src_tp  An array of the source types.
  * \param kwds    An array of the.
  */
-typedef void (*arrfunc_resolve_option_values_t)(
+typedef void (*arrfunc_prepare_t)(
     const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, char *data,
     intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars);
@@ -136,33 +136,31 @@ public:
 
   const size_t data_size;
   arrfunc_instantiate_t instantiate;
-  const arrfunc_resolve_option_values_t resolve_option_values;
+  const arrfunc_prepare_t prepare;
   const arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_free_t free;
 
   arrfunc_type_data()
-      : data_size(0), instantiate(NULL), resolve_option_values(NULL),
-        resolve_dst_type(NULL), free(NULL)
+      : data_size(0), instantiate(NULL), prepare(NULL), resolve_dst_type(NULL),
+        free(NULL)
   {
     static_assert((sizeof(arrfunc_type_data) & 7) == 0,
                   "arrfunc_type_data must have size divisible by 8");
   }
 
   arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
-                    arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_prepare_t prepare,
                     arrfunc_resolve_dst_type_t resolve_dst_type)
-      : data_size(data_size), instantiate(instantiate),
-        resolve_option_values(resolve_option_values),
+      : data_size(data_size), instantiate(instantiate), prepare(prepare),
         resolve_dst_type(resolve_dst_type)
   {
   }
 
   arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
-                    arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_prepare_t prepare,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free)
-      : data_size(data_size), instantiate(instantiate),
-        resolve_option_values(resolve_option_values),
+      : data_size(data_size), instantiate(instantiate), prepare(prepare),
         resolve_dst_type(resolve_dst_type), free(free)
   {
   }
@@ -170,11 +168,10 @@ public:
   template <typename T>
   arrfunc_type_data(T &&static_data, size_t data_size,
                     arrfunc_instantiate_t instantiate,
-                    arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_prepare_t prepare,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free = NULL)
-      : data_size(data_size), instantiate(instantiate),
-        resolve_option_values(resolve_option_values),
+      : data_size(data_size), instantiate(instantiate), prepare(prepare),
         resolve_dst_type(resolve_dst_type),
         free(free == NULL
                  ? &destroy_wrapper<typename std::remove_reference<T>::type>
@@ -187,11 +184,10 @@ public:
   template <typename T>
   arrfunc_type_data(T *static_data, size_t data_size,
                     arrfunc_instantiate_t instantiate,
-                    arrfunc_resolve_option_values_t resolve_option_values,
+                    arrfunc_prepare_t prepare,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free = NULL)
-      : data_size(data_size), instantiate(instantiate),
-        resolve_option_values(resolve_option_values),
+      : data_size(data_size), instantiate(instantiate), prepare(prepare),
         resolve_dst_type(resolve_dst_type), free(free)
   {
     new (this->static_data)(T *)(static_data);
@@ -440,9 +436,12 @@ namespace ndt {
     //    ndt::arrfunc_type::make({ndt::type(i0), ndt::type(i1)},
     //    ndt::type("Any"))
 
-    static type make(const std::initializer_list<type_id_t> &DYND_UNUSED(pos_tp), const type &DYND_UNUSED(ret_tp));
+    static type
+    make(const std::initializer_list<type_id_t> &DYND_UNUSED(pos_tp),
+         const type &DYND_UNUSED(ret_tp));
 
-    static type make(const nd::array &DYND_UNUSED(pos_tp), const type &DYND_UNUSED(ret_tp));
+    static type make(const nd::array &DYND_UNUSED(pos_tp),
+                     const type &DYND_UNUSED(ret_tp));
   };
 
   template <kernel_request_t kernreq, typename funcproto_type>

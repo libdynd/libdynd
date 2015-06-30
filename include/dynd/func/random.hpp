@@ -50,12 +50,12 @@ namespace nd {
       return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars, true);
     }
 
-    static void resolve_option_values(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static void
+    prepare(const arrfunc_type_data *DYND_UNUSED(self),
+            const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+            char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
+            const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+            const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array a = kwds.p("a");
       if (a.is_missing()) {
@@ -114,12 +114,12 @@ namespace nd {
       return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars, true);
     }
 
-    static void resolve_option_values(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static void
+    prepare(const arrfunc_type_data *DYND_UNUSED(self),
+            const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+            char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
+            const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+            const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array a = kwds.p("a");
       if (a.is_missing()) {
@@ -249,12 +249,12 @@ namespace nd {
       return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars, true);
     }
 
-    static void resolve_option_values(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static void
+    prepare(const arrfunc_type_data *DYND_UNUSED(self),
+            const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+            char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
+            const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+            const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array a = kwds.p("a");
       if (a.is_missing()) {

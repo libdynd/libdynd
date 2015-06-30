@@ -28,6 +28,15 @@ namespace nd {
   template <typename T>
   struct base_virtual_kernel {
     static void
+    prepare(const arrfunc_type_data *DYND_UNUSED(self),
+            const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+            char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
+            const ndt::type *DYND_UNUSED(src_tp), nd::array &DYND_UNUSED(kwds),
+            const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+    }
+
+    static void
     resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
                      const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
                      ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -38,15 +47,6 @@ namespace nd {
       if (dst_tp.is_null()) {
         dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
       }
-    }
-
-    static void resolve_option_values(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-        nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
     }
   };
 
