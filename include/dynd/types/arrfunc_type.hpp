@@ -135,13 +135,13 @@ public:
   char static_data[static_data_size];
 
   const size_t data_size;
-  arrfunc_instantiate_t instantiate;
   const arrfunc_prepare_t prepare;
   const arrfunc_resolve_dst_type_t resolve_dst_type;
+  arrfunc_instantiate_t instantiate;
   arrfunc_free_t free;
 
   arrfunc_type_data()
-      : data_size(0), instantiate(NULL), prepare(NULL), resolve_dst_type(NULL),
+      : data_size(0), prepare(NULL), resolve_dst_type(NULL), instantiate(NULL),
         free(NULL)
   {
     static_assert((sizeof(arrfunc_type_data) & 7) == 0,
@@ -151,8 +151,8 @@ public:
   arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
                     arrfunc_prepare_t prepare,
                     arrfunc_resolve_dst_type_t resolve_dst_type)
-      : data_size(data_size), instantiate(instantiate), prepare(prepare),
-        resolve_dst_type(resolve_dst_type)
+      : data_size(data_size), prepare(prepare),
+        resolve_dst_type(resolve_dst_type), instantiate(instantiate)
   {
   }
 
@@ -160,8 +160,8 @@ public:
                     arrfunc_prepare_t prepare,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free)
-      : data_size(data_size), instantiate(instantiate), prepare(prepare),
-        resolve_dst_type(resolve_dst_type), free(free)
+      : data_size(data_size), prepare(prepare),
+        resolve_dst_type(resolve_dst_type), instantiate(instantiate), free(free)
   {
   }
 
@@ -171,8 +171,8 @@ public:
                     arrfunc_prepare_t prepare,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free = NULL)
-      : data_size(data_size), instantiate(instantiate), prepare(prepare),
-        resolve_dst_type(resolve_dst_type),
+      : data_size(data_size), prepare(prepare),
+        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
         free(free == NULL
                  ? &destroy_wrapper<typename std::remove_reference<T>::type>
                  : free)
@@ -187,8 +187,8 @@ public:
                     arrfunc_prepare_t prepare,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free = NULL)
-      : data_size(data_size), instantiate(instantiate), prepare(prepare),
-        resolve_dst_type(resolve_dst_type), free(free)
+      : data_size(data_size), prepare(prepare),
+        resolve_dst_type(resolve_dst_type), instantiate(instantiate), free(free)
   {
     new (this->static_data)(T *)(static_data);
   }
