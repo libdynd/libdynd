@@ -86,10 +86,11 @@ typedef void (*arrfunc_resolve_dst_type_t)(
  * \param src_tp  An array of the source types.
  * \param kwds    An array of the.
  */
+
 typedef void (*arrfunc_prepare_t)(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, char *data,
-    intptr_t nsrc, const ndt::type *src_tp, nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
+    const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+    size_t data_size, char *data, intptr_t nsrc, const ndt::type *src_tp,
+    nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * A function which deallocates the memory behind data_ptr after

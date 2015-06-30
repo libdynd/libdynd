@@ -144,6 +144,7 @@ namespace nd {
 
       static void prepare(const arrfunc_type_data *self,
                           const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                          size_t DYND_UNUSED(data_size),
                           char *DYND_UNUSED(data), intptr_t nsrc,
                           const ndt::type *src_tp, nd::array &kwds,
                           const std::map<nd::string, ndt::type> &tp_vars)
@@ -153,7 +154,7 @@ namespace nd {
         const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-        return child->prepare(child, child_tp, NULL, nsrc, src_tp, kwds,
+        return child->prepare(child, child_tp, 0, NULL, nsrc, src_tp, kwds,
                               tp_vars);
       }
 

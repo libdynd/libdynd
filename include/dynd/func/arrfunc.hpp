@@ -955,9 +955,9 @@ namespace nd {
 
       // Resolve the optional keyword arguments
       if (self->prepare != NULL) {
-        self->prepare(self, self_tp, data.get(), arg_tp.size(),
-                      arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array,
-                      tp_vars);
+        self->prepare(self, self_tp, get()->data_size, data.get(),
+                      arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+                      kwds_as_array, tp_vars);
       }
 
       // Construct the destination array, if it was not provided

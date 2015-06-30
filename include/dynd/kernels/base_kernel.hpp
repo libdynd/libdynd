@@ -217,8 +217,8 @@ namespace nd {
     static void                                                                \
     prepare(const arrfunc_type_data *DYND_UNUSED(self),                        \
             const ndt::arrfunc_type *DYND_UNUSED(self_tp),                     \
-            char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),               \
-            const ndt::type *DYND_UNUSED(src_tp),                              \
+            size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),            \
+            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),  \
             nd::array &DYND_UNUSED(kwds),                                      \
             const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))       \
     {                                                                          \
