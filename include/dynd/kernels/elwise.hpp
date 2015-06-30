@@ -95,14 +95,13 @@ namespace nd {
                 for (intptr_t j = 0; j < ndim_i; ++j) {
                   switch (tp.get_type_id()) {
                   case fixed_dim_type_id:
-                    shape_at_j =
-                        tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+                    shape_at_j = tp.extended<ndt::fixed_dim_type>()
+                                     ->get_fixed_dim_size();
                     if (shape_i[j] < 0 || shape_i[j] == 1) {
                       if (shape_at_j != 1) {
                         shape_i[j] = shape_at_j;
                       }
-                    }
-                    else if (shape_i[j] != shape_at_j && shape_at_j != 1) {
+                    } else if (shape_i[j] != shape_at_j && shape_at_j != 1) {
                       throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
                     }
                     break;
@@ -120,23 +119,21 @@ namespace nd {
             for (intptr_t i = ndim - 1; i >= 0; --i) {
               if (shape[i] == -1) {
                 tp = ndt::make_var_dim(tp);
-              }
-              else {
+              } else {
                 tp = ndt::make_fixed_dim(shape[i], tp);
               }
             }
             if (child_dst_tp.get_kind() == memory_kind) {
               child_dst_tp = child_dst_tp.extended<ndt::base_memory_type>()
                                  ->with_replaced_storage_type(tp);
-            }
-            else {
+            } else {
               child_dst_tp = tp;
             }
           }
           dst_tp = child_dst_tp;
-        }
-        else {
-          // dst_tp was not NULL, so it already matched against the type signature.
+        } else {
+          // dst_tp was not NULL, so it already matched against the type
+          // signature.
           child_dst_tp =
               dst_tp.get_dtype(child_af_tp->get_return_type().get_ndim());
           child_af->resolve_dst_type(
@@ -145,20 +142,19 @@ namespace nd {
         }
       }
 
-      static void
-      resolve_option_values(const arrfunc_type_data *self,
-                            const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                            char *DYND_UNUSED(data), intptr_t nsrc,
-                            const ndt::type *src_tp, nd::array &kwds,
-                            const std::map<nd::string, ndt::type> &tp_vars)
+      static void prepare(const arrfunc_type_data *self,
+                          const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                          char *DYND_UNUSED(data), intptr_t nsrc,
+                          const ndt::type *src_tp, nd::array &kwds,
+                          const std::map<nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
         const ndt::arrfunc_type *child_tp =
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
-        return child->resolve_option_values(child, child_tp, NULL, nsrc, src_tp,
-                                            kwds, tp_vars);
+        return child->prepare(child, child_tp, NULL, nsrc, src_tp, kwds,
+                              tp_vars);
       }
 
       static intptr_t instantiate(
@@ -335,14 +331,13 @@ namespace nd {
         self->destroy_child_ckernel(sizeof(self_type));
       }
 
-      static size_t
-      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                  char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static size_t instantiate(
+          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+          const char *const *src_arrmeta, kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
@@ -459,15 +454,14 @@ namespace nd {
         self->destroy_child_ckernel(sizeof(self_type));
       }
 
-      static size_t
-      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                  char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                  const char *const *DYND_UNUSED(src_arrmeta),
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static size_t instantiate(
+          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc,
+          const ndt::type *DYND_UNUSED(src_tp),
+          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
@@ -589,14 +583,13 @@ namespace nd {
         self->destroy_child_ckernel(sizeof(self_type));
       }
 
-      static size_t
-      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                  char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static size_t instantiate(
+          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+          const char *const *src_arrmeta, kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
@@ -721,15 +714,14 @@ namespace nd {
         self->destroy_child_ckernel(sizeof(self_type));
       }
 
-      static size_t
-      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                  char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                  const char *const *DYND_UNUSED(src_arrmeta),
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static size_t instantiate(
+          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc,
+          const ndt::type *DYND_UNUSED(src_tp),
+          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
@@ -932,14 +924,13 @@ namespace nd {
         self->destroy_child_ckernel(sizeof(self_type));
       }
 
-      static size_t
-      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                  char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static size_t instantiate(
+          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+          const char *const *src_arrmeta, kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
@@ -1098,15 +1089,14 @@ namespace nd {
         self->destroy_child_ckernel(sizeof(self_type));
       }
 
-      static size_t
-      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                  char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *DYND_UNUSED(src_tp),
-                  const char *const *DYND_UNUSED(src_arrmeta),
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static size_t instantiate(
+          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc,
+          const ndt::type *DYND_UNUSED(src_tp),
+          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
             self->get_data_as<dynd::nd::arrfunc>()->get();
