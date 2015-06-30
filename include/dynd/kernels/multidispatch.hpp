@@ -106,8 +106,8 @@ namespace nd {
 
       static void
       resolve_dst_type(const arrfunc_type_data *af_self,
-                       const ndt::arrfunc_type *af_tp, char *data,
-                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::arrfunc_type *af_tp, size_t data_size,
+                       char *data, ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const nd::array &kwds,
                        const std::map<nd::string, ndt::type> &tp_vars);
     };
@@ -160,6 +160,7 @@ namespace nd {
 
       static void resolve_dst_type(const arrfunc_type_data *self,
                                    const ndt::arrfunc_type *af_tp,
+                                   size_t DYND_UNUSED(data_size),
                                    char *DYND_UNUSED(data), ndt::type &dst_tp,
                                    intptr_t nsrc, const ndt::type *src_tp,
                                    const nd::array &kwds,
@@ -167,7 +168,7 @@ namespace nd {
       {
         const arrfunc_type_data *child = find(self, tp_vars);
         if (child->resolve_dst_type != NULL) {
-          child->resolve_dst_type(child, af_tp, NULL, dst_tp, nsrc, src_tp,
+          child->resolve_dst_type(child, af_tp, 0, NULL, dst_tp, nsrc, src_tp,
                                   kwds, tp_vars);
         } else {
           dst_tp = af_tp->get_return_type();
@@ -246,9 +247,9 @@ namespace nd {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       char *DYND_UNUSED(data), ndt::type &dst_tp,
-                       intptr_t nsrc, const ndt::type *src_tp,
-                       const dynd::nd::array &kwds,
+                       size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const std::shared_ptr<static_data> &data =
@@ -262,8 +263,9 @@ namespace nd {
         if (dst_tp.is_null()) {
           const ndt::type &child_dst_tp = child.get_type()->get_return_type();
           if (child_dst_tp.is_symbolic()) {
-            child.get()->resolve_dst_type(child.get(), child.get_type(), NULL,
-                                          dst_tp, nsrc, src_tp, kwds, tp_vars);
+            child.get()->resolve_dst_type(child.get(), child.get_type(),
+                                          0, NULL, dst_tp, nsrc, src_tp,
+                                          kwds, tp_vars);
           } else {
             dst_tp = child_dst_tp;
           }
@@ -307,11 +309,13 @@ namespace nd {
     struct multidispatch_by_type_id_kernel<own_children, 2>
         : base_virtual_kernel<
               multidispatch_by_type_id_kernel<own_children, 2>> {
-      static void resolve_dst_type(
-          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-          char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-          const ndt::type *src_tp, const dynd::nd::array &kwds,
-          const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static void
+      resolve_dst_type(const arrfunc_type_data *self,
+                       const ndt::arrfunc_type *self_tp,
+                       size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const dynd::nd::array &kwds,
+                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc(*data)[builtin_type_id_count] =
             (*self->get_data_as<
@@ -320,8 +324,8 @@ namespace nd {
 
         const arrfunc &child =
             data[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
-        child.get()->resolve_dst_type(self, self_tp, NULL, dst_tp, nsrc, src_tp,
-                                      kwds, tp_vars);
+        child.get()->resolve_dst_type(self, self_tp, 0, NULL, dst_tp, nsrc,
+                                      src_tp, kwds, tp_vars);
       }
 
       static intptr_t
@@ -376,9 +380,9 @@ namespace nd {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       char *DYND_UNUSED(data), ndt::type &dst_tp,
-                       intptr_t nsrc, const ndt::type *src_tp,
-                       const dynd::nd::array &kwds,
+                       size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const data &data = *self->get_data_as<struct data>();
@@ -387,7 +391,7 @@ namespace nd {
         if (dst_tp.is_null()) {
           const ndt::type &child_dst_tp = child.get_type()->get_return_type();
           if (child_dst_tp.is_symbolic()) {
-            child.get()->resolve_dst_type(child.get(), child.get_type(), NULL,
+            child.get()->resolve_dst_type(child.get(), child.get_type(), 0, NULL,
                                           dst_tp, nsrc, src_tp, kwds, tp_vars);
           } else {
             dst_tp = child_dst_tp;

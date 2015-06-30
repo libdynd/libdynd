@@ -77,12 +77,13 @@ void nd::functional::var_rolling_ck::destruct_children()
 
 // TODO This should handle both strided and var cases
 intptr_t nd::functional::rolling_ck::instantiate(
-    const arrfunc_type_data *af_self, const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    const arrfunc_type_data *af_self,
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars)
 {
   typedef dynd::nd::functional::strided_rolling_ck self_type;
   rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
@@ -151,8 +152,8 @@ intptr_t nd::functional::rolling_ck::instantiate(
 
 void nd::functional::rolling_ck::resolve_dst_type(
     const arrfunc_type_data *af_self, const ndt::arrfunc_type *af_tp,
-    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &kwds,
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), ndt::type &dst_tp,
+    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars)
 
 {
@@ -170,7 +171,7 @@ void nd::functional::rolling_ck::resolve_dst_type(
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    child_af->resolve_dst_type(child_af, af_tp, NULL, child_dst_tp, 1,
+    child_af->resolve_dst_type(child_af, af_tp, 0, NULL, child_dst_tp, 1,
                                &child_src_tp, kwds, tp_vars);
   } else {
     child_dst_tp = data->window_op.get_type()->get_return_type();

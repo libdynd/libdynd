@@ -965,9 +965,10 @@ namespace nd {
       if (dst.is_null()) {
         // Resolve the destination type
         if (self->resolve_dst_type != NULL) {
-          self->resolve_dst_type(
-              self, self_tp, data.get(), dst_tp, arg_tp.size(),
-              arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array, tp_vars);
+          self->resolve_dst_type(self, self_tp, get()->data_size, data.get(),
+                                 dst_tp, arg_tp.size(),
+                                 arg_tp.empty() ? NULL : arg_tp.data(),
+                                 kwds_as_array, tp_vars);
         } else {
           dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
         }
@@ -977,9 +978,9 @@ namespace nd {
         // In this case, with dst_tp already populated, resolve_dst_type
         // must not overwrite it
         dst_tp = dst.get_type();
-        self->resolve_dst_type(self, self_tp, data.get(), dst_tp, arg_tp.size(),
-                               arg_tp.empty() ? NULL : arg_tp.data(),
-                               kwds_as_array, tp_vars);
+        self->resolve_dst_type(
+            self, self_tp, get()->data_size, data.get(), dst_tp, arg_tp.size(),
+            arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array, tp_vars);
         // Sanity error check against rogue resolve_test_type
         if (dst_tp.extended() != dst.get_type().extended()) {
           std::stringstream ss;

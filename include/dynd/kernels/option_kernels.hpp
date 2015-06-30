@@ -68,7 +68,8 @@ namespace nd {
 
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -82,7 +83,8 @@ namespace nd {
   struct is_avail_ck<int8_t> : detail::is_avail_int_ck<int8_t> {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -96,7 +98,8 @@ namespace nd {
   struct is_avail_ck<int16_t> : detail::is_avail_int_ck<int16_t> {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -110,7 +113,8 @@ namespace nd {
   struct is_avail_ck<int32_t> : detail::is_avail_int_ck<int32_t> {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -124,7 +128,8 @@ namespace nd {
   struct is_avail_ck<int64_t> : detail::is_avail_int_ck<int64_t> {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -138,7 +143,8 @@ namespace nd {
   struct is_avail_ck<int128> : detail::is_avail_int_ck<int128> {
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -158,7 +164,8 @@ namespace nd {
 
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -178,7 +185,8 @@ namespace nd {
 
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -198,7 +206,8 @@ namespace nd {
 
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -218,7 +227,8 @@ namespace nd {
 
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -238,7 +248,8 @@ namespace nd {
 
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -249,7 +260,8 @@ namespace nd {
   };
 
   template <typename T>
-  struct is_avail_ck<T *> : base_kernel<is_avail_ck<T *>, kernel_request_host, 1> {
+  struct is_avail_ck<T *>
+      : base_kernel<is_avail_ck<T *>, kernel_request_host, 1> {
     void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
     {
       throw std::runtime_error("is_avail for pointers is not yet implemented");
@@ -265,7 +277,8 @@ namespace nd {
 
     static void resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -327,7 +340,8 @@ namespace nd {
 
   template <>
   struct assign_na_ck<dynd::complex<float>>
-      : base_kernel<assign_na_ck<dynd::complex<float>>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<dynd::complex<float>>, kernel_request_host,
+                    1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -336,7 +350,8 @@ namespace nd {
 
   template <>
   struct assign_na_ck<dynd::complex<double>>
-      : base_kernel<assign_na_ck<dynd::complex<double>>, kernel_request_host, 1> {
+      : base_kernel<assign_na_ck<dynd::complex<double>>, kernel_request_host,
+                    1> {
     void single(char *dst, char *const *src);
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
