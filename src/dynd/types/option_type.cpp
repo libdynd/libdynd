@@ -114,7 +114,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
     ckernel_builder<kernel_request_host> ckb;
     const arrfunc_type_data *af = get_is_avail_arrfunc();
     type src_tp[1] = {type(this, true)};
-    af->instantiate(af, get_is_avail_arrfunc_type(), NULL, &ckb, 0,
+    af->instantiate(af, get_is_avail_arrfunc_type(), 0, NULL, &ckb, 0,
                     make_type<bool1>(), NULL, 1, src_tp, &arrmeta,
                     kernel_request_single, ectx, nd::array(),
                     std::map<nd::string, type>());
@@ -176,7 +176,7 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data,
   } else {
     ckernel_builder<kernel_request_host> ckb;
     const arrfunc_type_data *af = get_assign_na_arrfunc();
-    af->instantiate(af, get_assign_na_arrfunc_type(), NULL, &ckb, 0,
+    af->instantiate(af, get_assign_na_arrfunc_type(), 0, NULL, &ckb, 0,
                     type(this, true), arrmeta, 0, NULL, NULL,
                     kernel_request_single, ectx, nd::array(),
                     std::map<nd::string, type>());

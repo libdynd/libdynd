@@ -15,12 +15,12 @@ using namespace dynd;
  */
 intptr_t nd::functional::chain_kernel::instantiate(
     const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *data, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars)
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), size_t data_size, char *data,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {
   const static_data *static_data = af_self->get_data_as<struct static_data>();
 
@@ -35,16 +35,17 @@ intptr_t nd::functional::chain_kernel::instantiate(
   intptr_t root_ckb_offset = ckb_offset;
   chain_kernel *self = make(ckb, kernreq, ckb_offset, static_data->buffer_tp);
   ckb_offset =
-      first->instantiate(first, first_tp, data, ckb, ckb_offset, buffer_tp,
-                         self->buffer_arrmeta.get(), 1, src_tp, src_arrmeta,
-                         kernreq, ectx, kwds, tp_vars);
+      first->instantiate(first, first_tp, data_size, data, ckb, ckb_offset,
+                         buffer_tp, self->buffer_arrmeta.get(), 1, src_tp,
+                         src_arrmeta, kernreq, ectx, kwds, tp_vars);
   self = get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                   root_ckb_offset);
   self->second_offset = ckb_offset - root_ckb_offset;
   const char *buffer_arrmeta = self->buffer_arrmeta.get();
-  return second->instantiate(second, second_tp, data + first->data_size, ckb,
-                             ckb_offset, dst_tp, dst_arrmeta, 1, &buffer_tp,
-                             &buffer_arrmeta, kernreq, ectx, kwds, tp_vars);
+  return second->instantiate(second, second_tp, data_size - first->data_size,
+                             data + first->data_size, ckb, ckb_offset, dst_tp,
+                             dst_arrmeta, 1, &buffer_tp, &buffer_arrmeta,
+                             kernreq, ectx, kwds, tp_vars);
 }
 
 void nd::functional::chain_kernel::resolve_dst_type(

@@ -22,6 +22,37 @@ namespace dynd {
 class arrfunc_type_data;
 
 /**
+ * Resolves any missing keyword arguments for this arrfunc based on
+ * the types of the positional arguments and the available keywords arguments.
+ *
+ * \param self    The arrfunc.
+ * \param self_tp The function prototype of the arrfunc.
+ * \param nsrc    The number of positional arguments.
+ * \param src_tp  An array of the source types.
+ * \param kwds    An array of the.
+ */
+typedef void (*arrfunc_data_init_t)(
+    const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+    size_t data_size, char *data, intptr_t nsrc, const ndt::type *src_tp,
+    nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+
+/**
+ * Resolves the destination type for this arrfunc based on the types
+ * of the source parameters.
+ *
+ * \param self  The arrfunc.
+ * \param af_tp  The function prototype of the arrfunc.
+ * \param dst_tp  To be filled with the destination type.
+ * \param nsrc  The number of source parameters.
+ * \param src_tp  An array of the source types.
+ */
+typedef void (*arrfunc_resolve_dst_type_t)(
+    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
+    size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
+
+/**
  * Function prototype for instantiating a ckernel from an
  * arrfunc. To use this function, the
  * caller should first allocate a `ckernel_builder` instance,
@@ -54,44 +85,12 @@ class arrfunc_type_data;
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
 typedef intptr_t (*arrfunc_instantiate_t)(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, char *data,
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
-
-/**
- * Resolves the destination type for this arrfunc based on the types
- * of the source parameters.
- *
- * \param self  The arrfunc.
- * \param af_tp  The function prototype of the arrfunc.
- * \param dst_tp  To be filled with the destination type.
- * \param nsrc  The number of source parameters.
- * \param src_tp  An array of the source types.
- */
-typedef void (*arrfunc_resolve_dst_type_t)(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-    size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
-
-/**
- * Resolves any missing keyword arguments for this arrfunc based on
- * the types of the positional arguments and the available keywords arguments.
- *
- * \param self    The arrfunc.
- * \param self_tp The function prototype of the arrfunc.
- * \param nsrc    The number of positional arguments.
- * \param src_tp  An array of the source types.
- * \param kwds    An array of the.
- */
-
-typedef void (*arrfunc_prepare_t)(
     const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-    size_t data_size, char *data, intptr_t nsrc, const ndt::type *src_tp,
-    nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * A function which deallocates the memory behind data_ptr after
@@ -137,32 +136,32 @@ public:
   char static_data[static_data_size];
 
   const size_t data_size;
-  const arrfunc_prepare_t prepare;
+  const arrfunc_data_init_t data_init;
   const arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_instantiate_t instantiate;
   arrfunc_free_t free;
 
   arrfunc_type_data()
-      : data_size(0), prepare(NULL), resolve_dst_type(NULL), instantiate(NULL),
-        free(NULL)
+      : data_size(0), data_init(NULL), resolve_dst_type(NULL),
+        instantiate(NULL), free(NULL)
   {
     static_assert((sizeof(arrfunc_type_data) & 7) == 0,
                   "arrfunc_type_data must have size divisible by 8");
   }
 
   arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
-                    arrfunc_prepare_t prepare,
+                    arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type)
-      : data_size(data_size), prepare(prepare),
+      : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate)
   {
   }
 
   arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
-                    arrfunc_prepare_t prepare,
+                    arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free)
-      : data_size(data_size), prepare(prepare),
+      : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate), free(free)
   {
   }
@@ -170,10 +169,10 @@ public:
   template <typename T>
   arrfunc_type_data(T &&static_data, size_t data_size,
                     arrfunc_instantiate_t instantiate,
-                    arrfunc_prepare_t prepare,
+                    arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free = NULL)
-      : data_size(data_size), prepare(prepare),
+      : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
         free(free == NULL
                  ? &destroy_wrapper<typename std::remove_reference<T>::type>
@@ -186,10 +185,10 @@ public:
   template <typename T>
   arrfunc_type_data(T *static_data, size_t data_size,
                     arrfunc_instantiate_t instantiate,
-                    arrfunc_prepare_t prepare,
+                    arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
                     arrfunc_free_t free = NULL)
-      : data_size(data_size), prepare(prepare),
+      : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate), free(free)
   {
     new (this->static_data)(T *)(static_data);

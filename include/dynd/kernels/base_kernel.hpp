@@ -188,10 +188,22 @@ namespace nd {
       return ckernel_prefix::get_child_ckernel(offset);                        \
     }                                                                          \
                                                                                \
+    static void                                                                \
+    data_init(const arrfunc_type_data *DYND_UNUSED(self),                      \
+              const ndt::arrfunc_type *DYND_UNUSED(self_tp),                   \
+              size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),          \
+              intptr_t DYND_UNUSED(nsrc),                                      \
+              const ndt::type *DYND_UNUSED(src_tp),                            \
+              nd::array &DYND_UNUSED(kwds),                                    \
+              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))     \
+    {                                                                          \
+    }                                                                          \
+                                                                               \
     static intptr_t instantiate(                                               \
         const arrfunc_type_data *DYND_UNUSED(self),                            \
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),  \
-        void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),  \
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp),                           \
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,     \
+        intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
         const ndt::type *DYND_UNUSED(src_tp),                                  \
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, \
@@ -212,16 +224,6 @@ namespace nd {
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))     \
     {                                                                          \
       dst_tp = self_tp->get_return_type();                                     \
-    }                                                                          \
-                                                                               \
-    static void                                                                \
-    prepare(const arrfunc_type_data *DYND_UNUSED(self),                        \
-            const ndt::arrfunc_type *DYND_UNUSED(self_tp),                     \
-            size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),            \
-            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),  \
-            nd::array &DYND_UNUSED(kwds),                                      \
-            const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))       \
-    {                                                                          \
     }                                                                          \
   };                                                                           \
                                                                                \
