@@ -19,6 +19,20 @@ namespace nd {
                           src_tp, kwds, tp_vars);
     }
 
+    static void
+    resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
+                     const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                     size_t data_size, char *data, ndt::type &dst_tp,
+                     intptr_t nsrc, const ndt::type *src_tp,
+                     const dynd::nd::array &kwds,
+                     const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    {
+      const arrfunc &func = T::get_self();
+
+      func.get()->resolve_dst_type(func.get(), func.get_type(), data_size, data,
+                                   dst_tp, nsrc, src_tp, kwds, tp_vars);
+    }
+
     static intptr_t
     instantiate(const arrfunc_type_data *DYND_UNUSED(self),
                 const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *data,
@@ -33,19 +47,6 @@ namespace nd {
       return func.get()->instantiate(
           func.get(), func.get_type(), data, ckb, ckb_offset, dst_tp,
           dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-    }
-
-    static void
-    resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
-                     const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *data,
-                     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                     const dynd::nd::array &kwds,
-                     const std::map<dynd::nd::string, ndt::type> &tp_vars)
-    {
-      const arrfunc &func = T::get_self();
-
-      func.get()->resolve_dst_type(func.get(), func.get_type(), data, dst_tp,
-                                   nsrc, src_tp, kwds, tp_vars);
     }
   };
 

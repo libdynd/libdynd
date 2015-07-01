@@ -34,7 +34,8 @@ namespace nd {
    * CKernel which does an indexed take operation. The child ckernel
    * should be a single unary operation.
    */
-  struct indexed_take_ck : base_kernel<indexed_take_ck, kernel_request_host, 2> {
+  struct indexed_take_ck
+      : base_kernel<indexed_take_ck, kernel_request_host, 2> {
     intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
     intptr_t m_src0_dim_size, m_src0_stride;
 
@@ -63,7 +64,8 @@ namespace nd {
                 const std::map<nd::string, ndt::type> &tp_vars);
 
     static void
-    resolve_dst_type(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+    resolve_dst_type(const arrfunc_type_data *self,
+                     const ndt::arrfunc_type *self_tp, size_t data_size,
                      char *data, ndt::type &dst_tp, intptr_t nsrc,
                      const ndt::type *src_tp, const nd::array &kwds,
                      const std::map<nd::string, ndt::type> &tp_vars);

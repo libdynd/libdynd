@@ -16,11 +16,11 @@ namespace nd {
     template <int N>
     struct outer_ck : base_virtual_kernel<outer_ck<N>> {
       static intptr_t
-      instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta,
+      instantiate(const arrfunc_type_data *self,
+                  const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
                   dynd::kernel_request_t kernreq,
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
@@ -61,8 +61,9 @@ namespace nd {
                   ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i],
                                                   NULL);
             } else {
-              new_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(
-                  new_arrmeta, src_arrmeta[i], NULL);
+              new_tp.extended<ndt::base_dim_type>()
+                  ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i],
+                                                  NULL);
             }
             old_tp = old_tp.get_type_at_dimension(
                 const_cast<char **>(src_arrmeta + i), 1);
@@ -90,9 +91,9 @@ namespace nd {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       char *DYND_UNUSED(data), ndt::type &dst_tp,
-                       intptr_t nsrc, const ndt::type *src_tp,
-                       const dynd::nd::array &kwds,
+                       size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         const arrfunc_type_data *child =
@@ -101,8 +102,8 @@ namespace nd {
             self->get_data_as<dynd::nd::arrfunc>()->get_type();
 
         if (child->resolve_dst_type != NULL) {
-          child->resolve_dst_type(child, child_tp, NULL, dst_tp, nsrc, src_tp,
-                                  kwds, tp_vars);
+          child->resolve_dst_type(child, child_tp, 0, NULL, dst_tp, nsrc,
+                                  src_tp, kwds, tp_vars);
         } else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
         }
@@ -114,9 +115,8 @@ namespace nd {
           }
         }
         if (dst_tp.get_kind() == memory_kind) {
-          dst_tp =
-              dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(
-                  tp);
+          dst_tp = dst_tp.extended<ndt::base_memory_type>()
+                       ->with_replaced_storage_type(tp);
         } else {
           dst_tp = tp;
         }

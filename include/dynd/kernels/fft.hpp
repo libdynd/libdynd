@@ -174,9 +174,9 @@ namespace nd {
     static void
     prepare(const arrfunc_type_data *DYND_UNUSED(self),
             const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-size_t DYND_UNUSED(data_size), 
-            char *DYND_UNUSED(data), intptr_t DYND_UNUSED(nsrc),
-            const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+            size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+            nd::array &kwds,
             const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       if (kwds.p("flags").is_missing()) {
@@ -255,7 +255,8 @@ size_t DYND_UNUSED(data_size),
     static typename std::enable_if<real_to_complex, void>::type
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
         const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -282,7 +283,8 @@ size_t DYND_UNUSED(data_size),
     static typename std::enable_if<!real_to_complex, void>::type
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
         const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
@@ -303,13 +305,14 @@ size_t DYND_UNUSED(data_size),
 
     static void
     resolve_dst_type(const arrfunc_type_data *self,
-                     const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(data),
+                     const ndt::arrfunc_type *self_tp,
+                     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                      ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                      const nd::array &kwds,
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
-          self, self_tp, NULL, dst_tp, nsrc, src_tp, kwds, tp_vars);
+          self, self_tp, 0, NULL, dst_tp, nsrc, src_tp, kwds, tp_vars);
     }
   };
 
