@@ -109,7 +109,7 @@ namespace nd {
 
       static intptr_t instantiate(
           const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          size_t data_size, char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
           const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
           const char *const *src_arrmeta, kernel_request_t kernreq,
           const eval::eval_context *ectx, const nd::array &kwds,

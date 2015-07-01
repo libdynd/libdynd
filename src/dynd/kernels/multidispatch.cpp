@@ -11,12 +11,13 @@ using namespace dynd;
 
 intptr_t nd::functional::old_multidispatch_ck::instantiate(
     const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
   const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
@@ -38,9 +39,10 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
         }
       }
       if (j == nsrc) {
-        return af.get()->instantiate(
-            af.get(), af.get_type(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-            nsrc, src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        return af.get()->instantiate(af.get(), af.get_type(), 0, NULL, ckb,
+                                     ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                     src_tp, src_arrmeta, kernreq, ectx, kwds,
+                                     tp_vars);
       } else {
         return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
                                      dst_tp, dst_arrmeta, nsrc, src_tp,

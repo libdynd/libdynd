@@ -25,11 +25,12 @@ namespace {
 struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
   static intptr_t
   instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-              char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-              const ndt::type &dst_tp, const char *dst_arrmeta,
-              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-              const char *const *src_arrmeta, kernel_request_t kernreq,
-              const eval::eval_context *ectx, const nd::array &kwds,
+              size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+              intptr_t ckb_offset, const ndt::type &dst_tp,
+              const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+              const ndt::type *src_tp, const char *const *src_arrmeta,
+              kernel_request_t kernreq, const eval::eval_context *ectx,
+              const nd::array &kwds,
               const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     try {
@@ -73,8 +74,8 @@ static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
 
 static intptr_t instantiate_property_ckernel(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,

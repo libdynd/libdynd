@@ -19,9 +19,8 @@ void nd::is_avail_ck<bool1>::single(char *dst, char *const *src)
 }
 
 void nd::is_avail_ck<bool1>::strided(char *dst, intptr_t dst_stride,
-                                         char *const *src,
-                                         const intptr_t *src_stride,
-                                         size_t count)
+                                     char *const *src,
+                                     const intptr_t *src_stride, size_t count)
 {
   // Available if the value is 0 or 1
   char *src0 = src[0];
@@ -135,15 +134,15 @@ void nd::is_avail_ck<void>::strided(char *dst, intptr_t dst_stride,
   }
 }
 
-void nd::assign_na_ck<bool1>::single(char *dst,
-                                         char *const *DYND_UNUSED(src))
+void nd::assign_na_ck<bool1>::single(char *dst, char *const *DYND_UNUSED(src))
 {
   *dst = 2;
 }
 
-void nd::assign_na_ck<bool1>::strided(
-    char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-    const intptr_t *DYND_UNUSED(src_stride), size_t count)
+void nd::assign_na_ck<bool1>::strided(char *dst, intptr_t dst_stride,
+                                      char *const *DYND_UNUSED(src),
+                                      const intptr_t *DYND_UNUSED(src_stride),
+                                      size_t count)
 {
   if (dst_stride == 1) {
     memset(dst, 2, count);
@@ -283,11 +282,12 @@ struct nafunc {
 
 intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
@@ -329,10 +329,10 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
 
 intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
     const arrfunc_type_data *DYND_UNUSED(self),
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *DYND_UNUSED(src_tp),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds),

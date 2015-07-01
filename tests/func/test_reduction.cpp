@@ -150,7 +150,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -185,7 +185,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -220,7 +220,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -238,7 +238,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   a = vals1;
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -274,7 +274,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -310,7 +310,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -326,7 +326,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   a = parse_json("1 * 2 * float32", "[[1.5, -2]]");
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -361,7 +361,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -396,7 +396,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -415,7 +415,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   b = nd::empty(1, "float32");
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -451,7 +451,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -488,7 +488,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -508,7 +508,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   b = nd::empty(2, "float32");
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -545,7 +545,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -585,7 +585,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -624,7 +624,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -664,7 +664,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, &ckb, 0, b.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, b.get_type(),
                         b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());

@@ -86,11 +86,11 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
 nd::arrfunc nd::functional::elwise(const ndt::type &self_tp,
                                    const arrfunc &child)
 {
+  if (child.get()->data_init == NULL) {
+    throw std::runtime_error("elwise child has NULL data_init");
+  }
   if (child.get()->resolve_dst_type == NULL) {
     throw std::runtime_error("elwise child has NULL resolve_dst_type");
-  }
-  if (child.get()->prepare == NULL) {
-    throw std::runtime_error("elwise child has NULL prepare");
   }
 
   return arrfunc::make<elwise_virtual_ck>(

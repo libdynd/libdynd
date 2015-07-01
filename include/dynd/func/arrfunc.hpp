@@ -78,14 +78,14 @@ namespace ndt {
 namespace detail {
   // Each of these creates the has_NAME metapredicate
   DYND_HAS_MEM_FUNC(make_type);
+  DYND_HAS_MEM_FUNC(data_init);
   DYND_HAS_MEM_FUNC(instantiate);
-  DYND_HAS_MEM_FUNC(prepare);
   DYND_HAS_MEM_FUNC(resolve_dst_type);
   DYND_HAS_MEM_FUNC(free);
   // Each of these creates the get_NAME metafunction
   DYND_GET_MEM_FUNC(arrfunc_make_type_t, make_type);
+  DYND_GET_MEM_FUNC(arrfunc_data_init_t, data_init);
   DYND_GET_MEM_FUNC(arrfunc_instantiate_t, instantiate);
-  DYND_GET_MEM_FUNC(arrfunc_prepare_t, prepare);
   DYND_GET_MEM_FUNC(arrfunc_resolve_dst_type_t, resolve_dst_type);
   DYND_GET_MEM_FUNC(arrfunc_free_t, free);
 } // namespace dynd::detail
@@ -794,7 +794,7 @@ namespace nd {
     arrfunc() {}
 
     arrfunc(const ndt::type &self_tp, size_t data_size,
-            arrfunc_instantiate_t instantiate, arrfunc_prepare_t prepare,
+            arrfunc_instantiate_t instantiate, arrfunc_data_init_t data_init,
             arrfunc_resolve_dst_type_t resolve_dst_type)
         : m_value(empty(self_tp))
     {
@@ -806,12 +806,12 @@ namespace nd {
       */
 
       new (m_value.get_readwrite_originptr())
-          arrfunc_type_data(data_size, instantiate, prepare, resolve_dst_type);
+          arrfunc_type_data(data_size, instantiate, data_init, resolve_dst_type);
     }
 
     template <typename T>
     arrfunc(const ndt::type &self_tp, T &&static_data, size_t data_size,
-            arrfunc_instantiate_t instantiate, arrfunc_prepare_t prepare,
+            arrfunc_instantiate_t instantiate, arrfunc_data_init_t data_init,
             arrfunc_resolve_dst_type_t resolve_dst_type,
             arrfunc_free_t free = NULL)
         : m_value(empty(self_tp))
@@ -825,7 +825,7 @@ namespace nd {
 
       new (m_value.get_readwrite_originptr())
           arrfunc_type_data(std::forward<T>(static_data), data_size,
-                            instantiate, prepare, resolve_dst_type, free);
+                            instantiate, data_init, resolve_dst_type, free);
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -954,10 +954,10 @@ namespace nd {
       std::unique_ptr<char[]> data(new char[get()->data_size]);
 
       // Resolve the optional keyword arguments
-      if (self->prepare != NULL) {
-        self->prepare(self, self_tp, get()->data_size, data.get(),
-                      arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
-                      kwds_as_array, tp_vars);
+      if (self->data_init != NULL) {
+        self->data_init(self, self_tp, get()->data_size, data.get(),
+                        arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+                        kwds_as_array, tp_vars);
       }
 
       // Construct the destination array, if it was not provided
@@ -993,8 +993,8 @@ namespace nd {
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self, self_tp, data.get(), &ckb, 0, dst_tp,
-                        dst.get_arrmeta(), arg_tp.size(),
+      self->instantiate(self, self_tp, get()->data_size, data.get(), &ckb, 0,
+                        dst_tp, dst.get_arrmeta(), arg_tp.size(),
                         arg_tp.empty() ? NULL : arg_tp.data(),
                         arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
                         kernel_request_single, &eval::default_eval_context,
@@ -1111,7 +1111,7 @@ namespace nd {
     static arrfunc make(const ndt::type &self_tp, size_t data_size)
     {
       return arrfunc(self_tp, data_size, dynd::detail::get_instantiate<T>(),
-                     dynd::detail::get_prepare<T>(),
+                     dynd::detail::get_data_init<T>(),
                      dynd::detail::get_resolve_dst_type<T>());
     }
 
@@ -1133,7 +1133,7 @@ namespace nd {
     {
       return arrfunc(self_tp, std::forward<static_data_type>(static_data),
                      data_size, dynd::detail::get_instantiate<T>(),
-                     dynd::detail::get_prepare<T>(),
+                     dynd::detail::get_data_init<T>(),
                      dynd::detail::get_resolve_dst_type<T>());
     }
 

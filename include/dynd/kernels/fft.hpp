@@ -172,12 +172,12 @@ namespace nd {
     }
 
     static void
-    prepare(const arrfunc_type_data *DYND_UNUSED(self),
-            const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-            size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-            nd::array &kwds,
-            const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    data_init(const arrfunc_type_data *DYND_UNUSED(self),
+              const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+              size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+              nd::array &kwds,
+              const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       if (kwds.p("flags").is_missing()) {
         kwds.p("flags").vals() = FFTW_ESTIMATE;
@@ -186,12 +186,12 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(data),
-        void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-        const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp, const char *const *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-        const nd::array &kwds,
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+        intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+        const char *const *src_arrmeta, kernel_request_t kernreq,
+        const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds.p("shape");
