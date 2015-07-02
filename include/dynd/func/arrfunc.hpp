@@ -81,13 +81,13 @@ namespace detail {
   DYND_HAS_MEM_FUNC(data_init);
   DYND_HAS_MEM_FUNC(instantiate);
   DYND_HAS_MEM_FUNC(resolve_dst_type);
-  DYND_HAS_MEM_FUNC(free);
+  DYND_HAS_MEM_FUNC(static_data_free);
   // Each of these creates the get_NAME metafunction
   DYND_GET_MEM_FUNC(arrfunc_make_type_t, make_type);
   DYND_GET_MEM_FUNC(arrfunc_data_init_t, data_init);
   DYND_GET_MEM_FUNC(arrfunc_instantiate_t, instantiate);
   DYND_GET_MEM_FUNC(arrfunc_resolve_dst_type_t, resolve_dst_type);
-  DYND_GET_MEM_FUNC(arrfunc_free_t, free);
+  DYND_GET_MEM_FUNC(arrfunc_static_data_free_t, static_data_free);
 } // namespace dynd::detail
 
 namespace nd {
@@ -813,7 +813,7 @@ namespace nd {
     arrfunc(const ndt::type &self_tp, T &&static_data, size_t data_size,
             arrfunc_instantiate_t instantiate, arrfunc_data_init_t data_init,
             arrfunc_resolve_dst_type_t resolve_dst_type,
-            arrfunc_free_t free = NULL)
+            arrfunc_static_data_free_t static_data_free = NULL)
         : m_value(empty(self_tp))
     {
       /*
@@ -823,9 +823,9 @@ namespace nd {
             }
       */
 
-      new (m_value.get_readwrite_originptr())
-          arrfunc_type_data(std::forward<T>(static_data), data_size,
-                            instantiate, data_init, resolve_dst_type, free);
+      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
+          std::forward<T>(static_data), data_size, instantiate, data_init,
+          resolve_dst_type, static_data_free);
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -965,10 +965,10 @@ namespace nd {
       if (dst.is_null()) {
         // Resolve the destination type
         if (self->resolve_dst_type != NULL) {
-          self->resolve_dst_type(self, self_tp, get()->data_size, data.get(),
-                                 dst_tp, arg_tp.size(),
-                                 arg_tp.empty() ? NULL : arg_tp.data(),
-                                 kwds_as_array, tp_vars);
+          self->resolve_dst_type(
+              self, self_tp, get()->static_data, get()->data_size, data.get(),
+              dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+              kwds_as_array, tp_vars);
         } else {
           dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
         }
@@ -979,8 +979,9 @@ namespace nd {
         // must not overwrite it
         dst_tp = dst.get_type();
         self->resolve_dst_type(
-            self, self_tp, get()->data_size, data.get(), dst_tp, arg_tp.size(),
-            arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array, tp_vars);
+            self, self_tp, get()->static_data, get()->data_size, data.get(),
+            dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+            kwds_as_array, tp_vars);
         // Sanity error check against rogue resolve_test_type
         if (dst_tp.extended() != dst.get_type().extended()) {
           std::stringstream ss;

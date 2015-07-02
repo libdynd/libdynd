@@ -257,9 +257,9 @@ namespace nd {
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-        const nd::array &kwds,
+        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *src_tp, const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape;
@@ -285,9 +285,9 @@ namespace nd {
     resolve_dst_type(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-        const nd::array &kwds,
+        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *src_tp, const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds.p("shape");
@@ -304,16 +304,15 @@ namespace nd {
       }
     }
 
-    static void
-    resolve_dst_type(const arrfunc_type_data *self,
-                     const ndt::arrfunc_type *self_tp,
-                     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                     const nd::array &kwds,
-                     const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    static void resolve_dst_type(
+        const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
+        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
+        const ndt::type *src_tp, const nd::array &kwds,
+        const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
-          self, self_tp, 0, NULL, dst_tp, nsrc, src_tp, kwds, tp_vars);
+          self, self_tp, NULL, 0, NULL, dst_tp, nsrc, src_tp, kwds, tp_vars);
     }
   };
 

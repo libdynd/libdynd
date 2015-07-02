@@ -58,9 +58,10 @@ namespace nd {
 
       static void
       resolve_dst_type(const arrfunc_type_data *af_self,
-                       const ndt::arrfunc_type *af_tp, size_t data_size,
-                       char *data, ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, const nd::array &kwds,
+                       const ndt::arrfunc_type *af_tp, const char *static_data,
+                       size_t data_size, char *data, ndt::type &dst_tp,
+                       intptr_t nsrc, const ndt::type *src_tp,
+                       const nd::array &kwds,
                        const std::map<nd::string, ndt::type> &tp_vars);
     };
 

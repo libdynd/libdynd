@@ -238,9 +238,9 @@ intptr_t nd::take_ck::instantiate(
 
 void nd::take_ck::resolve_dst_type(
     const arrfunc_type_data *DYND_UNUSED(af_self),
-    const ndt::arrfunc_type *af_tp, size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
+    const ndt::arrfunc_type *af_tp, const char *DYND_UNUSED(static_data),
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), ndt::type &dst_tp,
+    intptr_t nsrc, const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (nsrc != 2) {
