@@ -68,9 +68,9 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
 ////////////////////////////////////////////////////////////////
 // Functions for property access as an arrfunc
 
-static void delete_property_arrfunc_data(arrfunc_type_data *self_af)
+static void delete_property_arrfunc_data(char *static_data)
 {
-  base_type_xdecref(*self_af->get_data_as<const ndt::base_type *>());
+  base_type_xdecref(*reinterpret_cast<ndt::base_type **>(static_data));
 }
 
 static intptr_t instantiate_property_ckernel(
