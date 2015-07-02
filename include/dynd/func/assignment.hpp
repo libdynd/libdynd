@@ -24,8 +24,8 @@ namespace nd {
         children[pair.first.first][pair.first.second] = pair.second;
       }
 
-      return functional::multidispatch_by_type_id(
-          dynd::ndt::type("(Any) -> Any"), children, default_child, {-1, 0});
+      return functional::multidispatch(dynd::ndt::type("(Any) -> Any"),
+                                       children, default_child, {-1, 0});
     }
   };
 

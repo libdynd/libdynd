@@ -66,10 +66,8 @@ namespace nd {
         children[pair.first.first][pair.first.second] = pair.second;
       }
 
-      arrfunc child = functional::multidispatch_by_type_id(
-          ndt::type("(Any, Any) -> Any"), children, default_child);
-
-      return child;
+      return functional::multidispatch(ndt::type("(Any, Any) -> Any"), children,
+                                       default_child);
     }
   };
 

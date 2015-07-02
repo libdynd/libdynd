@@ -86,8 +86,8 @@ namespace nd {
         }
       }
 
-      return functional::multidispatch_by_type_id(self.get_array_type(),
-                                                  children, default_child);
+      return functional::multidispatch(self.get_array_type(), children,
+                                       default_child);
     }
   };
 
