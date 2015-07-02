@@ -19,12 +19,13 @@ namespace nd {
       : base_virtual_kernel<multidispatch_by_type_id_ck<CKT, 1>> {
     static void resolve_dst_type(
         const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), intptr_t nsrc,
-        const ndt::type *src_tp, ndt::type &dst_tp, const dynd::nd::array &kwds,
+        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
+        ndt::type &dst_tp, const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       const arrfunc &child = CKT::children(src_tp[0].get_type_id());
-      child.get()->resolve_dst_type(self, self_tp, 0, NULL, dst_tp, nsrc,
+      child.get()->resolve_dst_type(self, self_tp, NULL, 0, NULL, dst_tp, nsrc,
                                     src_tp, kwds, tp_vars);
     }
 
@@ -49,13 +50,14 @@ namespace nd {
       : base_virtual_kernel<multidispatch_by_type_id_ck<CKT, 2>> {
     static void resolve_dst_type(
         const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), intptr_t nsrc,
-        const ndt::type *src_tp, ndt::type &dst_tp, const dynd::nd::array &kwds,
+        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(data), intptr_t nsrc, const ndt::type *src_tp,
+        ndt::type &dst_tp, const dynd::nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       const arrfunc &child =
           CKT::children(src_tp[0].get_type_id(), src_tp[1].get_type_id());
-      child.get()->resolve_dst_type(self, self_tp, 0, NULL, dst_tp, nsrc,
+      child.get()->resolve_dst_type(self, self_tp, NULL, 0, NULL, dst_tp, nsrc,
                                     src_tp, kwds, tp_vars);
     }
 

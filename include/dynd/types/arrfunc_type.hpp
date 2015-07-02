@@ -49,8 +49,8 @@ typedef void (*arrfunc_data_init_t)(
  */
 typedef void (*arrfunc_resolve_dst_type_t)(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-    size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &kwds,
+    const char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
+    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
@@ -97,7 +97,7 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * A function which deallocates the memory behind data_ptr after
  * freeing any additional resources it might contain.
  */
-typedef void (*arrfunc_free_t)(arrfunc_type_data *self);
+typedef void (*arrfunc_static_data_free_t)(arrfunc_type_data *self);
 
 typedef ndt::type (*arrfunc_make_type_t)();
 
@@ -140,11 +140,11 @@ public:
   const arrfunc_data_init_t data_init;
   const arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_instantiate_t instantiate;
-  arrfunc_free_t free;
+  arrfunc_static_data_free_t static_data_free;
 
   arrfunc_type_data()
       : data_size(0), data_init(NULL), resolve_dst_type(NULL),
-        instantiate(NULL), free(NULL)
+        instantiate(NULL), static_data_free(NULL)
   {
     static_assert((sizeof(arrfunc_type_data) & 7) == 0,
                   "arrfunc_type_data must have size divisible by 8");
@@ -161,9 +161,10 @@ public:
   arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
                     arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free)
+                    arrfunc_static_data_free_t static_data_free)
       : data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate), free(free)
+        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
+        static_data_free(static_data_free)
   {
   }
 
@@ -172,12 +173,13 @@ public:
                     arrfunc_instantiate_t instantiate,
                     arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free = NULL)
+                    arrfunc_static_data_free_t static_data_free = NULL)
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        free(free == NULL
-                 ? &destroy_wrapper<typename std::remove_reference<T>::type>
-                 : free)
+        static_data_free(
+            static_data_free == NULL
+                ? &destroy_wrapper<typename std::remove_reference<T>::type>
+                : static_data_free)
   {
     new (this->static_data)(typename std::remove_reference<T>::type)(
         std::forward<T>(static_data));
@@ -188,9 +190,10 @@ public:
                     arrfunc_instantiate_t instantiate,
                     arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_free_t free = NULL)
+                    arrfunc_static_data_free_t static_data_free = NULL)
       : data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate), free(free)
+        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
+        static_data_free(static_data_free)
   {
     new (this->static_data)(T *)(static_data);
   }
@@ -198,8 +201,8 @@ public:
   ~arrfunc_type_data()
   {
     // Call the free function, if it exists
-    if (free != NULL) {
-      free(this);
+    if (static_data_free != NULL) {
+      static_data_free(this);
     }
   }
 

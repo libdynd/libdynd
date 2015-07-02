@@ -198,6 +198,18 @@ namespace nd {
     {                                                                          \
     }                                                                          \
                                                                                \
+    static void resolve_dst_type(                                              \
+        const arrfunc_type_data *DYND_UNUSED(self),                            \
+        const ndt::arrfunc_type *self_tp,                                      \
+        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),   \
+        char *DYND_UNUSED(data), ndt::type &dst_tp,                            \
+        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),      \
+        const dynd::nd::array &DYND_UNUSED(kwds),                              \
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))     \
+    {                                                                          \
+      dst_tp = self_tp->get_return_type();                                     \
+    }                                                                          \
+                                                                               \
     static intptr_t instantiate(                                               \
         const arrfunc_type_data *DYND_UNUSED(self),                            \
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),                           \
@@ -212,17 +224,6 @@ namespace nd {
     {                                                                          \
       self_type::make(ckb, kernreq, ckb_offset);                               \
       return ckb_offset;                                                       \
-    }                                                                          \
-                                                                               \
-    static void resolve_dst_type(                                              \
-        const arrfunc_type_data *DYND_UNUSED(self),                            \
-        const ndt::arrfunc_type *self_tp, size_t DYND_UNUSED(data_size),       \
-        char *DYND_UNUSED(data), ndt::type &dst_tp,                            \
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),      \
-        const dynd::nd::array &DYND_UNUSED(kwds),                              \
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))     \
-    {                                                                          \
-      dst_tp = self_tp->get_return_type();                                     \
     }                                                                          \
   };                                                                           \
                                                                                \
