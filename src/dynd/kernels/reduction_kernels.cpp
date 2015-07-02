@@ -166,9 +166,9 @@ struct double_mean1d_ck
 struct mean1d_arrfunc_data {
   intptr_t minp;
 
-  static void free(arrfunc_type_data *self_af)
+  static void free(char *static_data)
   {
-    delete *self_af->get_data_as<mean1d_arrfunc_data *>();
+    delete *reinterpret_cast<mean1d_arrfunc_data **>(static_data);
   }
 
   static intptr_t

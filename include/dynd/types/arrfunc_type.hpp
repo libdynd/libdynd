@@ -97,12 +97,12 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * A function which deallocates the memory behind data_ptr after
  * freeing any additional resources it might contain.
  */
-typedef void (*arrfunc_static_data_free_t)(arrfunc_type_data *self);
+typedef void (*arrfunc_static_data_free_t)(char *static_data);
 
 typedef ndt::type (*arrfunc_make_type_t)();
 
 template <typename T>
-void destroy_wrapper(arrfunc_type_data *self);
+void destroy_wrapper(char *static_data);
 
 /**
  * This is a struct designed for interoperability at
@@ -202,7 +202,7 @@ public:
   {
     // Call the free function, if it exists
     if (static_data_free != NULL) {
-      static_data_free(this);
+      static_data_free(static_data);
     }
   }
 
@@ -236,21 +236,21 @@ public:
 };
 
 template <typename T>
-void destroy_wrapper(arrfunc_type_data *self)
+void destroy_wrapper(char *static_data)
 {
-  self->get_data_as<T>()->~T();
+  reinterpret_cast<T *>(static_data)->~T();
 }
 
 template <typename T>
-void delete_wrapper(arrfunc_type_data *self)
+void delete_wrapper(char *static_data)
 {
-  delete *self->get_data_as<T *>();
+  delete reinterpret_cast<T *>(static_data);
 }
 
 template <typename T, void (*free)(void *) = &std::free>
-void free_wrapper(arrfunc_type_data *self)
+void free_wrapper(char *static_data)
 {
-  free(*self->get_data_as<T *>());
+  free(reinterpret_cast<T *>(static_data));
 }
 
 namespace ndt {
