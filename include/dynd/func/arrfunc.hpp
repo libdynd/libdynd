@@ -805,8 +805,8 @@ namespace nd {
             }
       */
 
-      new (m_value.get_readwrite_originptr())
-          arrfunc_type_data(data_size, instantiate, data_init, resolve_dst_type);
+      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
+          data_size, instantiate, data_init, resolve_dst_type);
     }
 
     template <typename T>
@@ -951,13 +951,13 @@ namespace nd {
                         available, missing);
 
       // ...
-      std::unique_ptr<char[]> data(new char[get()->data_size]);
-
       // Resolve the optional keyword arguments
+      std::unique_ptr<char[]> data(new char[get()->data_size]);
       if (self->data_init != NULL) {
-        self->data_init(self, self_tp, get()->data_size, data.get(),
-                        arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
-                        kwds_as_array, tp_vars);
+        self->data_init(self, self_tp, get()->static_data, get()->data_size,
+                        data.get(), arg_tp.size(),
+                        arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array,
+                        tp_vars);
       }
 
       // Construct the destination array, if it was not provided

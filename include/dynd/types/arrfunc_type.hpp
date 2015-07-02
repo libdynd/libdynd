@@ -33,8 +33,9 @@ class arrfunc_type_data;
  */
 typedef void (*arrfunc_data_init_t)(
     const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-    size_t data_size, char *data, intptr_t nsrc, const ndt::type *src_tp,
-    nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    const char *static_data, size_t data_size, char *data, intptr_t nsrc,
+    const ndt::type *src_tp, nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Resolves the destination type for this arrfunc based on the types

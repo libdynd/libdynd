@@ -149,6 +149,7 @@ namespace nd {
 
       static void data_init(const arrfunc_type_data *self,
                             const ndt::arrfunc_type *af_tp,
+                            const char *DYND_UNUSED(static_data),
                             size_t DYND_UNUSED(data_size),
                             char *DYND_UNUSED(data), intptr_t nsrc,
                             const ndt::type *src_tp, nd::array &kwds,
@@ -156,7 +157,8 @@ namespace nd {
       {
         const arrfunc_type_data *child = find(self, tp_vars);
         if (child->data_init != NULL) {
-          child->data_init(child, af_tp, 0, NULL, nsrc, src_tp, kwds, tp_vars);
+          child->data_init(child, af_tp, NULL, 0, NULL, nsrc, src_tp, kwds,
+                           tp_vars);
         }
       }
 
