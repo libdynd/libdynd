@@ -113,7 +113,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
   in(4).vals() = "284";
   const char *in_ptr = in.get_readonly_originptr();
   const char *src_arrmeta[1] = {in.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, dst_tp,
+  af.get()->instantiate(af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, dst_tp,
                         out.get_arrmeta(), af.get_type()->get_npos(), &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
@@ -144,7 +144,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
   in.vals() = in_vals;
   const char *in_ptr = in.get_readonly_originptr();
   const char *src_arrmeta[1] = {in.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), 0, NULL, &ckb, 0, out.get_type(),
+  af.get()->instantiate(af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, out.get_type(),
                         out.get_arrmeta(), af.get_type()->get_npos(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());

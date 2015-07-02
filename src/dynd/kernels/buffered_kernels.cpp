@@ -126,7 +126,7 @@ size_t dynd::make_buffered_ckernel(
   }
   // Instantiate the arrfunc being buffered
   ckb_offset =
-      af->instantiate(af, af_tp, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+      af->instantiate(af, af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
                       nsrc, src_tp_for_af, &buffered_arrmeta[0], kernreq, ectx,
                       nd::array(), std::map<nd::string, ndt::type>());
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)

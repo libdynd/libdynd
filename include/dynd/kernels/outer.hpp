@@ -17,11 +17,12 @@ namespace nd {
     struct outer_ck : base_virtual_kernel<outer_ck<N>> {
       static intptr_t instantiate(
           const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-          size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-          intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-          intptr_t nsrc, const ndt::type *src_tp,
-          const char *const *src_arrmeta, dynd::kernel_request_t kernreq,
-          const eval::eval_context *ectx, const dynd::nd::array &kwds,
+          const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+          char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+          const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+          const ndt::type *src_tp, const char *const *src_arrmeta,
+          dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
+          const dynd::nd::array &kwds,
           const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         intptr_t ndim = 0;
@@ -79,9 +80,9 @@ namespace nd {
         }
 
         ckb_offset = elwise_virtual_ck<N>::instantiate(
-            self, self_tp, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-            new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx, kwds,
-            tp_vars);
+            self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+            nsrc, new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx,
+            kwds, tp_vars);
         delete[] new_src_arrmeta_holder;
 
         return ckb_offset;

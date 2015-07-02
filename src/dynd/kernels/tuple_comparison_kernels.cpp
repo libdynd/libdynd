@@ -252,16 +252,18 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
       std::map<nd::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
       return nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
-          NULL, NULL, 0, NULL, ckb, ckb_offset, ndt::make_type<int>(), NULL, 2,
-          &src_tp, src_arrmeta, kernel_request_host | kernel_request_single,
-          ectx, nd::array(), tp_vars);
+          NULL, NULL, NULL, 0, NULL, ckb, ckb_offset, ndt::make_type<int>(),
+          NULL, 2, &src_tp, src_arrmeta,
+          kernel_request_host | kernel_request_single, ectx, nd::array(),
+          tp_vars);
     } else {
       std::map<nd::string, ndt::type> tp_vars;
       const char *src_arrmeta[2] = {src0_arrmeta, src1_arrmeta};
       return nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
-          NULL, NULL, 0, NULL, ckb, ckb_offset, ndt::make_type<int>(), NULL, 2,
-          &src_tp, src_arrmeta, kernel_request_host | kernel_request_single,
-          ectx, nd::array(), tp_vars);
+          NULL, NULL, NULL, 0, NULL, ckb, ckb_offset, ndt::make_type<int>(),
+          NULL, 2, &src_tp, src_arrmeta,
+          kernel_request_host | kernel_request_single, ectx, nd::array(),
+          tp_vars);
     }
     return ckb_offset;
   } else {
