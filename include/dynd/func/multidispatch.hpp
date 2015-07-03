@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/multidispatch.hpp>
+#include <dynd/kernels/multidispatch_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -36,6 +36,9 @@ namespace nd {
     arrfunc multidispatch(const ndt::type &self_tp, intptr_t size,
                           const arrfunc *children, const arrfunc &default_child,
                           bool own_children, intptr_t i0 = 0);
+
+    arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
+                                     const std::vector<arrfunc> &children);
 
     inline arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
                                             intptr_t size,
@@ -73,10 +76,10 @@ namespace nd {
         }
       }
 
-      typedef typename new_multidispatch_by_type_id_kernel<arrfunc[N0][N1]>::data
+      typedef typename multidispatch_kernel<arrfunc[N0][N1]>::static_data
           data_type;
 
-      return arrfunc::make<new_multidispatch_by_type_id_kernel<arrfunc[N0][N1]>>(
+      return arrfunc::make<multidispatch_kernel<arrfunc[N0][N1]>>(
           self_tp, data_type(children, i.begin()), 0);
     }
 

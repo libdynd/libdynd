@@ -360,28 +360,27 @@ namespace nd {
     };
 
     template <typename T>
-    struct new_multidispatch_by_type_id_kernel
-        : base_virtual_kernel<new_multidispatch_by_type_id_kernel<T>> {
-      struct data {
+    struct multidispatch_kernel : base_virtual_kernel<multidispatch_kernel<T>> {
+      struct static_data {
         const T &children;
         intptr_t i[2];
 
-        data(const T &children, const intptr_t *i)
-            : children(children)
+        static_data(const T &children, const intptr_t *i) : children(children)
         {
           std::memcpy(this->i, i, 2 * sizeof(intptr_t));
         }
 
-        arrfunc operator()(const ndt::type &dst_tp,
+        arrfunc operator()(const ndt::type &dst_tp, intptr_t nsrc,
                            const ndt::type *src_tp) const
         {
-          if (i[0] == -1) {
-            return (
-                children)[dst_tp.get_type_id()][src_tp[i[1]].get_type_id()];
+          std::vector<ndt::type> tp;
+          tp.push_back(dst_tp);
+          for (int i = 0; i < nsrc; ++i) {
+            tp.push_back(src_tp[i]);
           }
+          ndt::type *new_src_tp = tp.data() + 1;
 
-          return (children)[src_tp[i[0]].get_type_id()][src_tp[i[1]]
-                                                             .get_type_id()];
+          return children[new_src_tp[i[0]].get_type_id()][new_src_tp[i[1]].get_type_id()];
         }
       };
 
@@ -394,9 +393,10 @@ namespace nd {
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const data &data = *self->get_data_as<struct data>();
+        const static_data &static_data =
+            *self->get_data_as<struct static_data>();
 
-        const arrfunc &child = data(dst_tp, src_tp);
+        const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
         if (dst_tp.is_null()) {
           const ndt::type &child_dst_tp = child.get_type()->get_return_type();
           if (child_dst_tp.is_symbolic()) {
@@ -420,9 +420,10 @@ namespace nd {
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const struct data &static_data = *self->get_data_as<struct data>();
+        const struct static_data &static_data =
+            *self->get_data_as<struct static_data>();
 
-        const arrfunc &child = static_data(dst_tp, src_tp);
+        const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
         return child.get()->instantiate(
             child.get(), child.get_type(), NULL, data_size, data, ckb,
             ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,

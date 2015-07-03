@@ -10,7 +10,6 @@
 
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/kernels/buffered_kernels.hpp>
-#include <dynd/kernels/multidispatch.hpp>
 
 using namespace std;
 using namespace dynd;
