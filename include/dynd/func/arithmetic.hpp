@@ -35,9 +35,8 @@ namespace nd {
         children[i0] = functional::elwise(child_tp, self);
       }
 
-      return functional::multidispatch_by_type_id(
-          self.get_array_type(), DYND_TYPE_ID_MAX + 1, children, default_child,
-          false);
+      return functional::multidispatch(self.get_array_type(), children,
+                                       default_child);
     }
   };
 

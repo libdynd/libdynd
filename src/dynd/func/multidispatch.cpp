@@ -372,7 +372,7 @@ namespace nd {
                              const std::vector<arrfunc> &children,
                              const arrfunc &default_child, intptr_t index)
     {
-      return multidispatch_by_type_id(pattern_tp, children.size(),
+      return multidispatch(pattern_tp, children.size(),
                                       children.data(), default_child, index);
     }
 
@@ -416,7 +416,7 @@ nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
   }
 }
 
-nd::arrfunc nd::functional::multidispatch_by_type_id(
+nd::arrfunc nd::functional::multidispatch(
     const ndt::type &pattern_tp, intptr_t size, const arrfunc *children,
     const arrfunc &default_child, bool own_children, intptr_t index)
 {

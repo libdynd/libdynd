@@ -33,10 +33,27 @@ namespace nd {
     arrfunc multidispatch(const ndt::type &self_tp,
                           const std::vector<arrfunc> &children);
 
-    arrfunc multidispatch_by_type_id(const ndt::type &self_tp, intptr_t size,
-                                     const arrfunc *children,
-                                     const arrfunc &default_child,
-                                     bool own_children, intptr_t i0 = 0);
+    arrfunc multidispatch(const ndt::type &self_tp, intptr_t size,
+                          const arrfunc *children, const arrfunc &default_child,
+                          bool own_children, intptr_t i0 = 0);
+
+    inline arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
+                                            intptr_t size,
+                                            const arrfunc *children,
+                                            const arrfunc &default_child,
+                                            bool own_children, intptr_t i0 = 0)
+    {
+      return multidispatch(self_tp, size, children, default_child, own_children,
+                           i0);
+    }
+
+    template <int N0>
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const arrfunc (&children)[N0],
+                          const arrfunc &default_child, intptr_t i0 = 0)
+    {
+      return multidispatch(self_tp, N0, children, default_child, false, i0);
+    }
 
     template <int N0, int N1>
     arrfunc multidispatch(const ndt::type &self_tp,
