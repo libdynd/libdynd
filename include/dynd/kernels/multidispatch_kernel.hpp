@@ -375,8 +375,8 @@ namespace nd {
         {
           std::vector<ndt::type> tp;
           tp.push_back(dst_tp);
-          for (int i = 0; i < nsrc; ++i) {
-            tp.push_back(src_tp[i]);
+          for (int j = 0; j < nsrc; ++j) {
+            tp.push_back(src_tp[j]);
           }
           ndt::type *new_src_tp = tp.data() + 1;
 
