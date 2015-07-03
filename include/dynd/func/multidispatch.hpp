@@ -103,7 +103,7 @@ namespace nd {
           ndt::type *new_src_tp = tp.data() + 1;
 
           intptr_t index[ndim<T>::value];
-          for (size_t j = 0; j < ndim<T>::value; ++j) {
+          for (intptr_t j = 0; j < ndim<T>::value; ++j) {
             index[j] = new_src_tp[permutation[j]].get_type_id();
           }
 
