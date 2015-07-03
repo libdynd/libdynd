@@ -359,30 +359,30 @@ namespace nd {
       }
     };
 
-    template <typename T>
-    struct multidispatch_kernel : base_virtual_kernel<multidispatch_kernel<T>> {
-      struct static_data {
-        const T &children;
-        intptr_t i[2];
+    template <int N, typename T>
+    typename std::enable_if<N == 1, const arrfunc &>::type at(const T &children,
+                                                              const intptr_t *i)
+    {
+      return children[*i];
+    }
 
-        static_data(const T &children, const intptr_t *i) : children(children)
-        {
-          std::memcpy(this->i, i, 2 * sizeof(intptr_t));
-        }
+    template <int N, typename T>
+    typename std::enable_if<(N > 1), const arrfunc &>::type
+    at(const T &children, const intptr_t *i)
+    {
+      return at<N - 1>(children[*i], i + 1);
+    }
 
-        arrfunc operator()(const ndt::type &dst_tp, intptr_t nsrc,
-                           const ndt::type *src_tp) const
-        {
-          std::vector<ndt::type> tp;
-          tp.push_back(dst_tp);
-          for (int j = 0; j < nsrc; ++j) {
-            tp.push_back(src_tp[j]);
-          }
-          ndt::type *new_src_tp = tp.data() + 1;
+    template <typename T, int N>
+    const arrfunc &at(const T &children, const intptr_t (&i)[N])
+    {
+      return at<N>(children, i);
+    }
 
-          return children[new_src_tp[i[0]].get_type_id()][new_src_tp[i[1]].get_type_id()];
-        }
-      };
+    template <typename StaticDataType>
+    struct multidispatch_kernel
+        : base_virtual_kernel<multidispatch_kernel<StaticDataType>> {
+      typedef StaticDataType static_data;
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
@@ -393,8 +393,7 @@ namespace nd {
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const static_data &static_data =
-            *self->get_data_as<struct static_data>();
+        const static_data &static_data = *self->get_data_as<StaticDataType>();
 
         const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
         if (dst_tp.is_null()) {
@@ -420,8 +419,7 @@ namespace nd {
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const struct static_data &static_data =
-            *self->get_data_as<struct static_data>();
+        const static_data &static_data = *self->get_data_as<StaticDataType>();
 
         const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
         return child.get()->instantiate(

@@ -64,9 +64,22 @@ namespace nd {
                           const arrfunc &DYND_UNUSED(default_child),
                           const std::initializer_list<intptr_t> &i = {0, 1})
     {
-      for (int i0 = 0; i0 < N0; ++i0) {
-        for (int i1 = 0; i1 < N1; ++i1) {
-          const arrfunc &child = children[i0][i1];
+      /*
+            for (int i0 = 0; i0 < N0; ++i0) {
+              for (int i1 = 0; i1 < N1; ++i1) {
+                const arrfunc &child = children[i0][i1];
+                if (!child.is_null()) {
+                  std::map<string, ndt::type> tp_vars;
+                  if (!self_tp.match(child.get_array_type(), tp_vars)) {
+                    throw std::invalid_argument("could not match arrfuncs");
+                  }
+                }
+              }
+            }
+      */
+
+      for (auto &row : children) {
+        for (auto &child : row) {
           if (!child.is_null()) {
             std::map<string, ndt::type> tp_vars;
             if (!self_tp.match(child.get_array_type(), tp_vars)) {
@@ -76,11 +89,43 @@ namespace nd {
         }
       }
 
-      typedef typename multidispatch_kernel<arrfunc[N0][N1]>::static_data
-          data_type;
+      typedef arrfunc T[N0][N1];
+      struct static_data {
+        const T &children;
+        intptr_t i[2];
 
-      return arrfunc::make<multidispatch_kernel<arrfunc[N0][N1]>>(
-          self_tp, data_type(children, i.begin()), 0);
+        static_data(const T &children, const intptr_t *i) : children(children)
+        {
+          std::memcpy(this->i, i, 2 * sizeof(intptr_t));
+        }
+
+        arrfunc operator()(const ndt::type &dst_tp, intptr_t nsrc,
+                           const ndt::type *src_tp) const
+        {
+          std::vector<ndt::type> tp;
+          tp.push_back(dst_tp);
+          for (int j = 0; j < nsrc; ++j) {
+            tp.push_back(src_tp[j]);
+          }
+          ndt::type *new_src_tp = tp.data() + 1;
+
+          //         intptr_t ind[
+
+          intptr_t key[2];
+          for (intptr_t j = 0; j < 2; ++j) {
+            key[j] = new_src_tp[i[j]].get_type_id();
+          }
+
+          //          return *(children + 101 * key[0] + key[1]);
+
+          //          return at<0, 1>(children);
+          return at(children, key);
+          //          return children[key[0]][key[1]];
+        }
+      };
+
+      return arrfunc::make<multidispatch_kernel<static_data>>(
+          self_tp, static_data(children, i.begin()), 0);
     }
 
   } // namespace dynd::nd::functional
