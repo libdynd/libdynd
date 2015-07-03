@@ -1,7 +1,6 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/multidispatch_by_type_id.hpp>
 
 namespace dynd {
 namespace nd {

@@ -1223,46 +1223,12 @@ namespace nd {
       }
     };
 
-    /*
-        template <typename... ValueTypes>
-        template <template <ValueTypes...> class T, typename I1, typename... I>
-        struct new_make_all<ValueTypes...>::type {
-
-          template <typename... J>
-          struct Y;
-
-          template <ValueTypes... J, typename... K>
-          struct Y<type_id_sequence<J>..., K...> {
-          };
-
-          template <ValueTypes... J>
-          struct Y<type_id_sequence<J>...> {
-            template <type_id_t K>
-            void on_each(
-                std::map<std::pair<ValueTypes...>, arrfunc>
-       &DYND_UNUSED(arrfuncs))
-            {
-              std::make_tuple(J..., K);
-            }
-          };
-
-          template <type_id_t I0>
-          void on_each(std::map<std::pair<ValueTypes...>, arrfunc> &arrfuncs)
-          {
-            index_proxy<I1>::for_each(Y<type_id_sequence<I0>>(), arrfuncs);
-          }
-        };
-    */
-
   } // namespace dynd::nd::detail
 
   namespace functional {
 
     arrfunc multidispatch(const ndt::type &self_tp,
                           const std::vector<arrfunc> &children);
-
-    arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
-                                     const std::vector<arrfunc> &children);
 
   } // namespace dynd::nd::functional
 
@@ -1317,24 +1283,6 @@ namespace nd {
     typedef typename ex_for_each<TCK, kernreq, typename outer<A...>::type,
                                  sizeof...(A) >= 2>::type CKT;
     return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
-  }
-
-  template <template <type_id_t> class CKT>
-  struct insert_child0 {
-    template <type_id_t I>
-    void on_each(std::vector<nd::arrfunc> &children)
-    {
-      children.push_back(nd::arrfunc::make<CKT<I>>(0));
-    }
-  };
-
-  template <template <type_id_t> class CKT, typename I0>
-  std::vector<arrfunc> as_arrfuncs()
-  {
-    std::vector<arrfunc> arrfuncs;
-    index_proxy<I0>::for_each(insert_child0<CKT>(), arrfuncs);
-
-    return arrfuncs;
   }
 
   template <typename T>

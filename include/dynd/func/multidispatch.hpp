@@ -5,8 +5,10 @@
 
 #pragma once
 
+#include <numeric>
+
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/kernels/multidispatch.hpp>
+#include <dynd/kernels/multidispatch_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -33,20 +35,43 @@ namespace nd {
     arrfunc multidispatch(const ndt::type &self_tp,
                           const std::vector<arrfunc> &children);
 
-    arrfunc multidispatch_by_type_id(const ndt::type &self_tp, intptr_t size,
-                                     const arrfunc *children,
-                                     const arrfunc &default_child,
-                                     bool own_children, intptr_t i0 = 0);
+    arrfunc multidispatch(const ndt::type &self_tp, intptr_t size,
+                          const arrfunc *children, const arrfunc &default_child,
+                          bool own_children, intptr_t i0 = 0);
 
-    template <int N0, int N1>
-    arrfunc multidispatch_by_type_id(
-        const ndt::type &self_tp, const arrfunc (&children)[N0][N1],
-        const arrfunc &DYND_UNUSED(default_child),
-        const std::initializer_list<intptr_t> &i = {0, 1})
+    arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
+                                     const std::vector<arrfunc> &children);
+
+    inline arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
+                                            intptr_t size,
+                                            const arrfunc *children,
+                                            const arrfunc &default_child,
+                                            bool own_children, intptr_t i0 = 0)
     {
-      for (int i0 = 0; i0 < N0; ++i0) {
-        for (int i1 = 0; i1 < N1; ++i1) {
-          const arrfunc &child = children[i0][i1];
+      return multidispatch(self_tp, size, children, default_child, own_children,
+                           i0);
+    }
+
+    template <int N0>
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const arrfunc (&children)[N0],
+                          const arrfunc &default_child, intptr_t i0 = 0)
+    {
+      return multidispatch(self_tp, N0, children, default_child, false, i0);
+    }
+
+    template <typename T>
+    struct ndim {
+      static const int value = nd::detail::ndim_from_array<T>::value;
+    };
+
+    template <typename T>
+    arrfunc multidispatch(const ndt::type &self_tp, const T &children,
+                          const arrfunc &DYND_UNUSED(default_child),
+                          const std::vector<intptr_t> &permutation)
+    {
+      for (auto &row : children) {
+        for (auto &child : row) {
           if (!child.is_null()) {
             std::map<string, ndt::type> tp_vars;
             if (!self_tp.match(child.get_array_type(), tp_vars)) {
@@ -56,15 +81,49 @@ namespace nd {
         }
       }
 
-      typedef typename new_multidispatch_by_type_id_kernel<N0, N1>::data
-          data_type;
+      struct static_data {
+        const T &children;
+        intptr_t permutation[ndim<T>::value];
 
-      return arrfunc::make<new_multidispatch_by_type_id_kernel<N0, N1>>(
-          self_tp, data_type(&children, i.begin()), 0);
+        static_data(const T &children, const intptr_t *permutation)
+            : children(children)
+        {
+          std::memcpy(this->permutation, permutation,
+                      sizeof(this->permutation));
+        }
+
+        arrfunc operator()(const ndt::type &dst_tp, intptr_t nsrc,
+                           const ndt::type *src_tp) const
+        {
+          std::vector<ndt::type> tp;
+          tp.push_back(dst_tp);
+          for (int j = 0; j < nsrc; ++j) {
+            tp.push_back(src_tp[j]);
+          }
+          ndt::type *new_src_tp = tp.data() + 1;
+
+          intptr_t index[ndim<T>::value];
+          for (intptr_t j = 0; j < ndim<T>::value; ++j) {
+            index[j] = new_src_tp[permutation[j]].get_type_id();
+          }
+
+          return at(children, index);
+        }
+      };
+
+      return arrfunc::make<multidispatch_kernel<static_data>>(
+          self_tp, static_data(children, permutation.data()), 0);
     }
 
-    arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
-                                     const std::vector<arrfunc> &children);
+    template <typename T>
+    arrfunc multidispatch(const ndt::type &self_tp, const T &children,
+                          const arrfunc &default_child)
+    {
+      std::vector<intptr_t> permutation(ndim<T>::value);
+      std::iota(permutation.begin(), permutation.end(), 0);
+
+      return multidispatch(self_tp, children, default_child, permutation);
+    }
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
