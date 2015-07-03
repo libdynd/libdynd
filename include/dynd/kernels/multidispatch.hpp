@@ -359,14 +359,14 @@ namespace nd {
       }
     };
 
-    template <int N0, int N1>
+    template <typename T>
     struct new_multidispatch_by_type_id_kernel
-        : base_virtual_kernel<new_multidispatch_by_type_id_kernel<N0, N1>> {
+        : base_virtual_kernel<new_multidispatch_by_type_id_kernel<T>> {
       struct data {
-        const arrfunc (*children)[N0][N1];
+        const T &children;
         intptr_t i[2];
 
-        data(const arrfunc (*children)[N0][N1], const intptr_t *i)
+        data(const T &children, const intptr_t *i)
             : children(children)
         {
           std::memcpy(this->i, i, 2 * sizeof(intptr_t));
@@ -377,10 +377,10 @@ namespace nd {
         {
           if (i[0] == -1) {
             return (
-                *children)[dst_tp.get_type_id()][src_tp[i[1]].get_type_id()];
+                children)[dst_tp.get_type_id()][src_tp[i[1]].get_type_id()];
           }
 
-          return (*children)[src_tp[i[0]].get_type_id()][src_tp[i[1]]
+          return (children)[src_tp[i[0]].get_type_id()][src_tp[i[1]]
                                                              .get_type_id()];
         }
       };

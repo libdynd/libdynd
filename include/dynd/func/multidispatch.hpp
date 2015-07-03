@@ -73,11 +73,11 @@ namespace nd {
         }
       }
 
-      typedef typename new_multidispatch_by_type_id_kernel<N0, N1>::data
+      typedef typename new_multidispatch_by_type_id_kernel<arrfunc[N0][N1]>::data
           data_type;
 
-      return arrfunc::make<new_multidispatch_by_type_id_kernel<N0, N1>>(
-          self_tp, data_type(&children, i.begin()), 0);
+      return arrfunc::make<new_multidispatch_by_type_id_kernel<arrfunc[N0][N1]>>(
+          self_tp, data_type(children, i.begin()), 0);
     }
 
   } // namespace dynd::nd::functional
