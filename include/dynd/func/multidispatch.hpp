@@ -11,6 +11,99 @@
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
 namespace dynd {
+
+template <typename T>
+struct ndim {
+  static const int value = nd::detail::ndim_from_array<T>::value;
+};
+
+template <typename ContainerType, int N = ndim<ContainerType>::value>
+class flat_iterator;
+
+template <typename T>
+class flat_iterator<T, 1> {
+public:
+  T m_current;
+  T m_end;
+
+  typedef decltype(*m_current) value_type;
+
+  flat_iterator(T current, T end) : m_current(current), m_end(end) {}
+
+  flat_iterator &operator++()
+  {
+    ++m_current;
+
+    return *this;
+  }
+
+  flat_iterator operator++(int)
+  {
+    flat_iterator tmp(*this);
+    operator++();
+    return tmp;
+  }
+
+  value_type operator*() const { return *m_current; }
+};
+
+template <typename T, int N>
+class flat_iterator {
+  // typedef typename std::remove_reference<
+  //  decltype(std::declval<ContainerType>()[0])>::type value_type;
+
+  //  flat_iterator<value_type, N - 1> m_current;
+  //  const ContainerType &m_data;
+public:
+  //  typedef std::is_array<std::remove_pointer<T>
+
+  T m_current;
+  T m_end;
+  flat_iterator<decltype(std::begin(*std::declval<T>())), N - 1> m_child;
+ 
+  typedef typename decltype(m_child)::value_type value_type;
+
+  flat_iterator(T begin, T end)
+      : m_current(begin), m_end(end),
+        m_child(std::begin(*m_current), std::end(*m_current))
+  {
+  }
+
+  flat_iterator &operator++()
+  {
+    ++m_child;
+    if (m_child.m_current == m_child.m_end) {
+      ++m_current;
+      m_child.m_current = std::begin(*m_current);
+      m_child.m_end = std::end(*m_current);
+    }
+
+    return *this;
+  }
+
+  flat_iterator operator++(int)
+  {
+    flat_iterator tmp(*this);
+    operator++();
+    return tmp;
+  }
+
+  value_type operator*() const { return *m_child; }
+
+  bool operator==(const T &other) const { return m_current == other; }
+
+  bool operator!=(const T &other) const { return m_current != other; }
+
+  void test() {}
+};
+
+/*
+template <typename T, int N = ndim<T>::value>
+flat_iterator<T, N> make_flat_iterator(T &data) {
+  return flat_iterator<T, N>(std::begin(data), std::end(data));
+}
+*/
+
 namespace nd {
   namespace functional {
 
@@ -60,16 +153,22 @@ namespace nd {
       return multidispatch(self_tp, N0, children, default_child, false, i0);
     }
 
-    template <typename T>
-    struct ndim {
-      static const int value = nd::detail::ndim_from_array<T>::value;
-    };
-
-    template <typename T>
-    arrfunc multidispatch(const ndt::type &self_tp, const T &children,
+    template <typename ContainerType, int N = ndim<ContainerType>::value>
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const ContainerType &children,
                           const arrfunc &DYND_UNUSED(default_child),
                           const std::vector<intptr_t> &permutation)
     {
+      flat_iterator<decltype(std::begin(children)), N> it(std::begin(children),
+                                                          std::end(children));
+
+      for (; it != std::end(children); ++it) {
+        const arrfunc &child = *it;
+        if (!child.is_null()) {
+          std::cout << child << std::endl;
+        }
+      }
+
       for (auto &row : children) {
         for (auto &child : row) {
           if (!child.is_null()) {
@@ -82,10 +181,10 @@ namespace nd {
       }
 
       struct static_data {
-        const T &children;
-        intptr_t permutation[ndim<T>::value];
+        const ContainerType &children;
+        intptr_t permutation[N];
 
-        static_data(const T &children, const intptr_t *permutation)
+        static_data(const ContainerType &children, const intptr_t *permutation)
             : children(children)
         {
           std::memcpy(this->permutation, permutation,
@@ -102,8 +201,8 @@ namespace nd {
           }
           ndt::type *new_src_tp = tp.data() + 1;
 
-          intptr_t index[ndim<T>::value];
-          for (intptr_t j = 0; j < ndim<T>::value; ++j) {
+          intptr_t index[N];
+          for (intptr_t j = 0; j < N; ++j) {
             index[j] = new_src_tp[permutation[j]].get_type_id();
           }
 
@@ -115,11 +214,12 @@ namespace nd {
           self_tp, static_data(children, permutation.data()), 0);
     }
 
-    template <typename T>
-    arrfunc multidispatch(const ndt::type &self_tp, const T &children,
+    template <typename ContainerType, int N = ndim<ContainerType>::value>
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const ContainerType &children,
                           const arrfunc &default_child)
     {
-      std::vector<intptr_t> permutation(ndim<T>::value);
+      std::vector<intptr_t> permutation(N);
       std::iota(permutation.begin(), permutation.end(), 0);
 
       return multidispatch(self_tp, children, default_child, permutation);
