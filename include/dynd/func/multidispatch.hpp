@@ -108,12 +108,13 @@ public:
   }
 };
 
-template <typename C, int N, typename ParentIteratorType>
-class flat_iterator<C, N, ParentIteratorType> : public flat_iterator<C, N> {
+template <typename ContainerType, int N, typename ParentIteratorType>
+class flat_iterator<ContainerType, N, ParentIteratorType>
+    : public flat_iterator<ContainerType, N> {
   friend ParentIteratorType;
 
 public:
-  using flat_iterator<C, N>::flat_iterator;
+  flat_iterator(ContainerType &c) : flat_iterator<ContainerType, N>(c) {}
 };
 
 /*
