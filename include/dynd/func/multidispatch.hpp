@@ -17,18 +17,26 @@ struct ndim {
   static const int value = nd::detail::ndim_from_array<T>::value;
 };
 
-template <typename ContainerType, int N = ndim<ContainerType>::value>
+template <typename ContainerType, int N = ndim<ContainerType>::value,
+          typename... ParentIteratorType>
 class flat_iterator;
 
-template <typename T>
-class flat_iterator<T, 1> {
+template <typename ContainerType>
+class flat_iterator<ContainerType, 1> {
+  typedef decltype(std::begin(std::declval<ContainerType>())) iterator_type;
+
+protected:
+  iterator_type m_current;
+  iterator_type m_end;
+
 public:
-  T m_current;
-  T m_end;
+  typedef decltype(*std::declval<iterator_type>()) value_type;
 
-  typedef decltype(*m_current) value_type;
+  flat_iterator(ContainerType &c) : m_current(std::begin(c)), m_end(std::end(c))
+  {
+  }
 
-  flat_iterator(T current, T end) : m_current(current), m_end(end) {}
+  const iterator_type &end() const { return m_end; }
 
   flat_iterator &operator++()
   {
@@ -47,27 +55,26 @@ public:
   value_type operator*() const { return *m_current; }
 };
 
-template <typename T, int N>
-class flat_iterator {
-  // typedef typename std::remove_reference<
-  //  decltype(std::declval<ContainerType>()[0])>::type value_type;
+template <typename ContainerType, int N>
+class flat_iterator<ContainerType, N> {
+  typedef decltype(std::begin(std::declval<ContainerType>())) iterator_type;
+  typedef flat_iterator<decltype(*std::declval<iterator_type>()), N - 1,
+                        flat_iterator> child_iterator_type;
 
-  //  flat_iterator<value_type, N - 1> m_current;
-  //  const ContainerType &m_data;
+protected:
+  iterator_type m_current;
+  iterator_type m_end;
+  child_iterator_type m_child;
+
 public:
-  //  typedef std::is_array<std::remove_pointer<T>
+  typedef typename child_iterator_type::value_type value_type;
 
-  T m_current;
-  T m_end;
-  flat_iterator<decltype(std::begin(*std::declval<T>())), N - 1> m_child;
- 
-  typedef typename decltype(m_child)::value_type value_type;
-
-  flat_iterator(T begin, T end)
-      : m_current(begin), m_end(end),
-        m_child(std::begin(*m_current), std::end(*m_current))
+  flat_iterator(ContainerType &c)
+      : m_current(std::begin(c)), m_end(std::end(c)), m_child(*m_current)
   {
   }
+
+  const iterator_type &end() const { return m_end; }
 
   flat_iterator &operator++()
   {
@@ -90,11 +97,23 @@ public:
 
   value_type operator*() const { return *m_child; }
 
-  bool operator==(const T &other) const { return m_current == other; }
+  bool operator==(const iterator_type &other) const
+  {
+    return m_current == other;
+  }
 
-  bool operator!=(const T &other) const { return m_current != other; }
+  bool operator!=(const iterator_type &other) const
+  {
+    return m_current != other;
+  }
+};
 
-  void test() {}
+template <typename C, int N, typename ParentIteratorType>
+class flat_iterator<C, N, ParentIteratorType> : public flat_iterator<C, N> {
+  friend ParentIteratorType;
+
+public:
+  using flat_iterator<C, N>::flat_iterator;
 };
 
 /*
@@ -159,23 +178,13 @@ namespace nd {
                           const arrfunc &DYND_UNUSED(default_child),
                           const std::vector<intptr_t> &permutation)
     {
-      flat_iterator<decltype(std::begin(children)), N> it(std::begin(children),
-                                                          std::end(children));
-
-      for (; it != std::end(children); ++it) {
+      for (flat_iterator<const ContainerType, N> it(children); it != it.end();
+           ++it) {
         const arrfunc &child = *it;
         if (!child.is_null()) {
-          std::cout << child << std::endl;
-        }
-      }
-
-      for (auto &row : children) {
-        for (auto &child : row) {
-          if (!child.is_null()) {
-            std::map<string, ndt::type> tp_vars;
-            if (!self_tp.match(child.get_array_type(), tp_vars)) {
-              throw std::invalid_argument("could not match arrfuncs");
-            }
+          std::map<string, ndt::type> tp_vars;
+          if (!self_tp.match(child.get_array_type(), tp_vars)) {
+            throw std::invalid_argument("could not match arrfuncs");
           }
         }
       }
