@@ -7,123 +7,11 @@
 
 #include <numeric>
 
+#include <dynd/flat_iterator.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
 namespace dynd {
-
-template <typename T>
-struct ndim {
-  static const int value = nd::detail::ndim_from_array<T>::value;
-};
-
-template <typename ContainerType, int N = ndim<ContainerType>::value,
-          typename... ParentIteratorType>
-class flat_iterator;
-
-template <typename ContainerType>
-class flat_iterator<ContainerType, 1> {
-  typedef decltype(std::begin(std::declval<ContainerType>())) iterator_type;
-
-protected:
-  iterator_type m_current;
-  iterator_type m_end;
-
-public:
-  typedef decltype(*std::declval<iterator_type>()) value_type;
-
-  flat_iterator(ContainerType &c) : m_current(std::begin(c)), m_end(std::end(c))
-  {
-  }
-
-  const iterator_type &end() const { return m_end; }
-
-  flat_iterator &operator++()
-  {
-    ++m_current;
-
-    return *this;
-  }
-
-  flat_iterator operator++(int)
-  {
-    flat_iterator tmp(*this);
-    operator++();
-    return tmp;
-  }
-
-  value_type operator*() const { return *m_current; }
-};
-
-template <typename ContainerType, int N>
-class flat_iterator<ContainerType, N> {
-  typedef decltype(std::begin(std::declval<ContainerType>())) iterator_type;
-  typedef flat_iterator<decltype(*std::declval<iterator_type>()), N - 1,
-                        flat_iterator> child_iterator_type;
-
-protected:
-  iterator_type m_current;
-  iterator_type m_end;
-  child_iterator_type m_child;
-
-public:
-  typedef typename child_iterator_type::value_type value_type;
-
-  flat_iterator(ContainerType &c)
-      : m_current(std::begin(c)), m_end(std::end(c)), m_child(*m_current)
-  {
-  }
-
-  const iterator_type &end() const { return m_end; }
-
-  flat_iterator &operator++()
-  {
-    ++m_child;
-    if (m_child.m_current == m_child.m_end) {
-      ++m_current;
-      m_child.m_current = std::begin(*m_current);
-      m_child.m_end = std::end(*m_current);
-    }
-
-    return *this;
-  }
-
-  flat_iterator operator++(int)
-  {
-    flat_iterator tmp(*this);
-    operator++();
-    return tmp;
-  }
-
-  value_type operator*() const { return *m_child; }
-
-  bool operator==(const iterator_type &other) const
-  {
-    return m_current == other;
-  }
-
-  bool operator!=(const iterator_type &other) const
-  {
-    return m_current != other;
-  }
-};
-
-template <typename ContainerType, int N, typename ParentIteratorType>
-class flat_iterator<ContainerType, N, ParentIteratorType>
-    : public flat_iterator<ContainerType, N> {
-  friend ParentIteratorType;
-
-public:
-  flat_iterator(ContainerType &c) : flat_iterator<ContainerType, N>(c) {}
-};
-
-/*
-template <typename T, int N = ndim<T>::value>
-flat_iterator<T, N> make_flat_iterator(T &data) {
-  return flat_iterator<T, N>(std::begin(data), std::end(data));
-}
-*/
-
 namespace nd {
   namespace functional {
 
@@ -179,8 +67,7 @@ namespace nd {
                           const arrfunc &DYND_UNUSED(default_child),
                           const std::vector<intptr_t> &permutation)
     {
-      for (flat_iterator<const ContainerType, N> it(children); it != it.end();
-           ++it) {
+      for (auto it = dynd::begin<N>(children); it != it.end(); ++it) {
         const arrfunc &child = *it;
         if (!child.is_null()) {
           std::map<string, ndt::type> tp_vars;
