@@ -40,7 +40,6 @@ TEST(Iterator, CArray2D)
   EXPECT_TRUE(it == dynd::end<2>(vals));
 }
 
-/*
 TEST(Iterator, CArray3D)
 {
   int vals[4][3][2] = {
@@ -60,4 +59,3 @@ TEST(Iterator, CArray3D)
   }
   EXPECT_TRUE(it == dynd::end<3>(vals));
 }
-*/
