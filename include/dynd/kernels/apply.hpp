@@ -37,7 +37,7 @@ namespace detail {
   struct funcproto<R (T::*)(A...) const, B...> {
     typedef typename funcproto<R(A...), B...>::type type;
   };
-}
+} // naemspace dynd::detail
 
 template <typename func_type, typename... B>
 struct funcproto_of {

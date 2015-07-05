@@ -9,6 +9,21 @@
 
 namespace dynd {
 
+template <class T>
+struct iterator_for {
+  typedef typename T::iterator type;
+};
+
+template <class T>
+struct iterator_for<T *> {
+  typedef T *type;
+};
+
+template <class T, std::size_t N>
+struct iterator_for<T (&)[N]> {
+  typedef T *type;
+};
+
 template <typename ContainerType, int N>
 class iterator;
 
@@ -21,7 +36,10 @@ iterator<ContainerType, N> end(ContainerType &c);
 template <typename ContainerType>
 class iterator<ContainerType, 1> {
 public:
-  typedef decltype(std::begin(std::declval<ContainerType &>())) iterator_type;
+//  typedef typename std::remove_reference<
+  //    decltype(std::begin(std::declval<ContainerType>()))>::type iterator_type;
+
+  typedef typename iterator_for<ContainerType &>::type iterator_type;
 
   friend iterator<ContainerType, 1> begin<1, ContainerType>(ContainerType &c);
   friend iterator<ContainerType, 1> end<1, ContainerType>(ContainerType &c);
@@ -75,7 +93,8 @@ class iterator
 public:
   typedef iterator<typename iterator<ContainerType, 1>::value_type, N - 1>
       parent_type;
-  typedef decltype(std::begin(std::declval<ContainerType &>())) iterator_type;
+//  typedef decltype(std::begin(std::declval<ContainerType &>())) iterator_type;
+  typedef typename iterator_for<ContainerType &>::type iterator_type;
 
   friend iterator<ContainerType, N> begin<N, ContainerType>(ContainerType &c);
   friend iterator<ContainerType, N> end<N, ContainerType>(ContainerType &c);
