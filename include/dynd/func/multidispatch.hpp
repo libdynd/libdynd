@@ -7,11 +7,17 @@
 
 #include <numeric>
 
-#include <dynd/flat_iterator.hpp>
+#include <dynd/iterator.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
 namespace dynd {
+
+template <typename T>
+struct ndim {
+  static const int value = nd::detail::ndim_from_array<T>::value;
+};
+
 namespace nd {
   namespace functional {
 
@@ -67,7 +73,8 @@ namespace nd {
                           const arrfunc &DYND_UNUSED(default_child),
                           const std::vector<intptr_t> &permutation)
     {
-      for (auto it = dynd::begin<N>(children); it != it.end(); ++it) {
+      for (auto it = dynd::begin<N>(children), end = dynd::end<N>(children);
+           it != end; ++it) {
         const arrfunc &child = *it;
         if (!child.is_null()) {
           std::map<string, ndt::type> tp_vars;

@@ -11,12 +11,12 @@
 #include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
 
-#include <dynd/flat_iterator.hpp>
+#include <dynd/iterator.hpp>
 
 using namespace std;
 using namespace dynd;
 
-TEST(FlatIterator, CArray1D)
+TEST(Iterator, CArray1D)
 {
   int vals[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
@@ -27,7 +27,7 @@ TEST(FlatIterator, CArray1D)
   EXPECT_TRUE(it == dynd::end(vals));
 }
 
-TEST(FlatIterator, CArray2D)
+TEST(Iterator, CArray2D)
 {
   int vals[3][2] = {{0, 1}, {2, 3}, {4, 5}};
 
@@ -40,7 +40,7 @@ TEST(FlatIterator, CArray2D)
   EXPECT_TRUE(it == dynd::end<2>(vals));
 }
 
-TEST(FlatIterator, CArray3D)
+TEST(Iterator, CArray3D)
 {
   int vals[4][3][2] = {
       {{0, 1}, {2, 3}, {4, 5}},
