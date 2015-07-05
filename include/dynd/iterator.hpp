@@ -9,21 +9,6 @@
 
 namespace dynd {
 
-template <class T>
-struct iterator_for {
-  typedef typename T::iterator type;
-};
-
-template <class T>
-struct iterator_for<T *> {
-  typedef T *type;
-};
-
-template <class T, std::size_t N>
-struct iterator_for<T (&)[N]> {
-  typedef T *type;
-};
-
 template <typename ContainerType, int N>
 class iterator;
 
@@ -36,10 +21,7 @@ iterator<ContainerType, N> end(ContainerType &c);
 template <typename ContainerType>
 class iterator<ContainerType, 1> {
 public:
-//  typedef typename std::remove_reference<
-  //    decltype(std::begin(std::declval<ContainerType>()))>::type iterator_type;
-
-  typedef typename iterator_for<ContainerType &>::type iterator_type;
+  typedef decltype(std::begin(std::declval<ContainerType &>())) iterator_type;
 
   friend iterator<ContainerType, 1> begin<1, ContainerType>(ContainerType &c);
   friend iterator<ContainerType, 1> end<1, ContainerType>(ContainerType &c);
@@ -56,7 +38,7 @@ protected:
   iterator(const iterator_type &end) : m_current(end), m_end(end) {}
 
 public:
-  typedef decltype(*std::declval<iterator_type>()) value_type;
+  typedef typename std::iterator_traits<iterator_type>::value_type value_type;
 
   iterator() = default;
 
@@ -74,7 +56,7 @@ public:
     return tmp;
   }
 
-  value_type operator*() const { return *m_current; }
+  value_type &operator*() const { return *m_current; }
 
   bool operator==(const iterator &other) const
   {
@@ -93,8 +75,9 @@ class iterator
 public:
   typedef iterator<typename iterator<ContainerType, 1>::value_type, N - 1>
       parent_type;
-//  typedef decltype(std::begin(std::declval<ContainerType &>())) iterator_type;
-  typedef typename iterator_for<ContainerType &>::type iterator_type;
+  //  typedef decltype(std::begin(std::declval<ContainerType &>()))
+  //  iterator_type;
+  typedef decltype(std::begin(std::declval<ContainerType &>())) iterator_type;
 
   friend iterator<ContainerType, N> begin<N, ContainerType>(ContainerType &c);
   friend iterator<ContainerType, N> end<N, ContainerType>(ContainerType &c);
@@ -103,25 +86,33 @@ protected:
   iterator_type m_current;
   iterator_type m_end;
 
-  iterator(const iterator_type &begin, const iterator_type &end,
-           const typename iterator<ContainerType, 1>::value_type &front)
-      : parent_type(std::begin(front), std::end(front)), m_current(begin),
+  /*
+    iterator(const iterator_type &begin, const iterator_type &end,
+             const typename iterator<ContainerType, 1>::value_type &front)
+        : parent_type(std::begin(front), std::end(front)), m_current(begin),
+          m_end(end)
+    {
+    }
+  */
+
+  iterator(const iterator_type &begin, const iterator_type &end)
+      : parent_type(std::begin(*begin), std::end(*begin)), m_current(begin),
         m_end(end)
   {
   }
 
-  iterator(const iterator_type &begin, const iterator_type &end)
-      : iterator(begin, end, *begin)
+  /*
+    iterator(const iterator_type &end,
+             const typename iterator<ContainerType, 1>::value_type &back)
+        : parent_type(std::end(back)), m_current(end), m_end(end)
+    {
+    }
+  */
+
+  iterator(const iterator_type &end)
+      : parent_type(std::end(*std::prev(end))), m_current(end), m_end(end)
   {
   }
-
-  iterator(const iterator_type &end,
-           const typename iterator<ContainerType, 1>::value_type &back)
-      : parent_type(std::end(back)), m_current(end), m_end(end)
-  {
-  }
-
-  iterator(const iterator_type &end) : iterator(end, *std::prev(end)) {}
 
 public:
   typedef typename parent_type::value_type value_type;
