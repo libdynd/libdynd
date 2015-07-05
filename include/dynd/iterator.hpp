@@ -20,25 +20,24 @@ iterator<ContainerType, N> end(ContainerType &c);
 
 template <typename ContainerType>
 class iterator<ContainerType, 1> {
-public:
-  typedef decltype(std::begin(std::declval<ContainerType &>())) iterator_type;
-
   friend iterator<ContainerType, 1> begin<1, ContainerType>(ContainerType &c);
   friend iterator<ContainerType, 1> end<1, ContainerType>(ContainerType &c);
 
 protected:
-  iterator_type m_current;
-  iterator_type m_end;
+  typedef decltype(std::begin(std::declval<ContainerType &>())) std_iterator_type;
 
-  iterator(const iterator_type &begin, const iterator_type &end)
+  std_iterator_type m_current;
+  std_iterator_type m_end;
+
+  iterator(const std_iterator_type &begin, const std_iterator_type &end)
       : m_current(begin), m_end(end)
   {
   }
 
-  iterator(const iterator_type &end) : m_current(end), m_end(end) {}
+  iterator(const std_iterator_type &end) : m_current(end), m_end(end) {}
 
 public:
-  typedef typename std::iterator_traits<iterator_type>::value_type value_type;
+  typedef typename std::iterator_traits<std_iterator_type>::value_type value_type;
 
   iterator() = default;
 
@@ -72,60 +71,50 @@ public:
 template <typename ContainerType, int N>
 class iterator
     : public iterator<typename iterator<ContainerType, 1>::value_type, N - 1> {
-public:
   typedef iterator<typename iterator<ContainerType, 1>::value_type, N - 1>
-      parent_type;
-  //  typedef decltype(std::begin(std::declval<ContainerType &>()))
-  //  iterator_type;
-  typedef decltype(std::begin(std::declval<ContainerType &>())) iterator_type;
+      base_type;
 
   friend iterator<ContainerType, N> begin<N, ContainerType>(ContainerType &c);
   friend iterator<ContainerType, N> end<N, ContainerType>(ContainerType &c);
 
 protected:
-  iterator_type m_current;
-  iterator_type m_end;
+  typedef decltype(std::begin(std::declval<ContainerType &>())) std_iterator_type;
 
-  /*
-    iterator(const iterator_type &begin, const iterator_type &end,
-             const typename iterator<ContainerType, 1>::value_type &front)
-        : parent_type(std::begin(front), std::end(front)), m_current(begin),
-          m_end(end)
-    {
-    }
-  */
+  std_iterator_type m_current;
+  std_iterator_type m_end;
 
-  iterator(const iterator_type &begin, const iterator_type &end)
-      : parent_type(std::begin(*begin), std::end(*begin)), m_current(begin),
+  iterator(const std_iterator_type &begin, const std_iterator_type &end,
+           typename std::iterator_traits<std_iterator_type>::value_type &front)
+      : base_type(std::begin(front), std::end(front)), m_current(begin),
         m_end(end)
   {
   }
 
-  /*
-    iterator(const iterator_type &end,
-             const typename iterator<ContainerType, 1>::value_type &back)
-        : parent_type(std::end(back)), m_current(end), m_end(end)
-    {
-    }
-  */
-
-  iterator(const iterator_type &end)
-      : parent_type(std::end(*std::prev(end))), m_current(end), m_end(end)
+  iterator(const std_iterator_type &begin, const std_iterator_type &end)
+      : iterator(begin, end, *begin)
   {
   }
 
+  iterator(const std_iterator_type &end,
+           typename std::iterator_traits<std_iterator_type>::value_type &back)
+      : base_type(std::end(back)), m_current(end), m_end(end)
+  {
+  }
+
+  iterator(const std_iterator_type &end) : iterator(end, *std::prev(end)) {}
+
 public:
-  typedef typename parent_type::value_type value_type;
+  typedef typename base_type::value_type value_type;
 
   iterator() = default;
 
   iterator &operator++()
   {
-    parent_type::operator++();
-    if (parent_type::m_current == parent_type::m_end) {
+    base_type::operator++();
+    if (base_type::m_current == base_type::m_end) {
       ++m_current;
-      parent_type::m_current = std::begin(*m_current);
-      parent_type::m_end = std::end(*m_current);
+      base_type::m_current = std::begin(*m_current);
+      base_type::m_end = std::end(*m_current);
     }
 
     return *this;
@@ -140,12 +129,12 @@ public:
 
   bool operator==(const iterator &other) const
   {
-    return m_current == other.m_current && parent_type::operator==(other);
+    return m_current == other.m_current && base_type::operator==(other);
   }
 
   bool operator!=(const iterator &other) const
   {
-    return m_current != other.m_current || parent_type::operator!=(other);
+    return m_current != other.m_current || base_type::operator!=(other);
   }
 };
 
