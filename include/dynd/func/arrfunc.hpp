@@ -951,18 +951,15 @@ namespace nd {
                         available, missing);
 
       // Allocate, then initialize, the data
-//      std::cout << "arrfunc::call (start, data_init)" << std::endl;
       std::unique_ptr<char[]> data(new char[get()->data_size]);
-      if (self->data_size != 0) {
+      if (self->data_size != 0 || self->data_init != NULL) {
         self->data_init(self, self_tp, get()->static_data, get()->data_size,
                         data.get(), arg_tp.size(),
                         arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array,
                         tp_vars);
       }
-//      std::cout << "arrfunc::call (stop, data_init)" << std::endl;
 
       // Construct the destination array, if it was not provided
-  //    std::cout << "arrfunc::call (start, resolve_dst_type)" << std::endl;
       ndt::type dst_tp;
       if (dst.is_null()) {
         // Resolve the destination type
@@ -993,7 +990,6 @@ namespace nd {
           throw std::runtime_error(ss.str());
         }
       }
-//      std::cout << "arrfunc::call (stop, resolve_dst_type)" << std::endl;
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
