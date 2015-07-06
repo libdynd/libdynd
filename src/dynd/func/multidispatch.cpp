@@ -360,26 +360,3 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
 {
   return multidispatch(self_tp, children, {});
 }
-
-nd::arrfunc nd::functional::multidispatch(const ndt::type &pattern_tp,
-                                          intptr_t size,
-                                          const arrfunc *children,
-                                          const arrfunc &default_child,
-                                          intptr_t index)
-{
-  for (intptr_t j = 0; j < size; ++j) {
-    const arrfunc &child = children[j];
-    if (!child.is_null()) {
-      std::map<string, ndt::type> tp_vars;
-      if (!pattern_tp.match(child.get_array_type(), tp_vars)) {
-        //        throw std::invalid_argument("could not match arrfuncs");
-      }
-    }
-  }
-
-  typedef multidispatch_by_type_id_kernel<1> kernel_type;
-  return arrfunc::make<kernel_type>(
-      pattern_tp, make_shared<typename kernel_type::static_data>(
-                      size, children, default_child, index),
-      0);
-}
