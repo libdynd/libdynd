@@ -950,10 +950,9 @@ namespace nd {
           kwds.as_array(ndt::make_struct(self_tp->get_kwd_names(), kwd_tp),
                         available, missing);
 
-      // ...
-      // Resolve the optional keyword arguments
+      // Allocate, then initialize, the data
       std::unique_ptr<char[]> data(new char[get()->data_size]);
-      if (self->data_init != NULL) {
+      if (self->data_size != 0 || self->data_init != NULL) {
         self->data_init(self, self_tp, get()->static_data, get()->data_size,
                         data.get(), arg_tp.size(),
                         arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array,
