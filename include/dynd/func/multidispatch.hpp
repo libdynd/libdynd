@@ -7,7 +7,7 @@
 
 #include <numeric>
 
-//#include <dynd/iterator.hpp>
+#include <dynd/iterator.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
@@ -73,7 +73,6 @@ namespace nd {
                           const arrfunc &DYND_UNUSED(default_child),
                           const std::vector<intptr_t> &permutation)
     {
-/*
       for (auto it = dynd::begin<N>(children), end = dynd::end<N>(children);
            it != end; ++it) {
         const arrfunc &child = *it;
@@ -84,7 +83,6 @@ namespace nd {
           }
         }
       }
-*/
 
       struct static_data {
         const ContainerType &children;
