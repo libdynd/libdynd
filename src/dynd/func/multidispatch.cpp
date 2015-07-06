@@ -291,11 +291,11 @@ nd::functional::multidispatch(const ndt::type &self_tp,
   ndt::type kwd_tp = self_tp.extended<ndt::arrfunc_type>()->get_kwd_struct();
 
   ndt::type pattern_tp = ndt::make_arrfunc(
-      pos_tp,
-      ndt::make_struct(kwd_tp.extended<ndt::base_struct_type>()->get_field_names()(
-                           irange() < nkwd),
-                       kwd_tp.extended<ndt::base_struct_type>()->get_field_types()(
-                           irange() < nkwd)),
+      pos_tp, ndt::make_struct(
+                  kwd_tp.extended<ndt::base_struct_type>()->get_field_names()(
+                      irange() < nkwd),
+                  kwd_tp.extended<ndt::base_struct_type>()->get_field_types()(
+                      irange() < nkwd)),
       self_tp.extended<ndt::arrfunc_type>()->get_return_type());
 
   std::shared_ptr<std::vector<string>> vars(new std::vector<string>);
@@ -361,63 +361,11 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
   return multidispatch(self_tp, children, {});
 }
 
-namespace dynd {
-namespace nd {
-  namespace functional {
-
-    template <int N>
-    static typename std::enable_if<N == 1, arrfunc>::type
-    multidispatch_by_type_id(const ndt::type &pattern_tp,
-                             const std::vector<arrfunc> &children,
-                             const arrfunc &default_child, intptr_t index)
-    {
-      return multidispatch(pattern_tp, children.size(),
-                                      children.data(), default_child, index);
-    }
-
-    template <int N>
-    static typename std::enable_if<N == 2, arrfunc>::type
-    multidispatch_by_type_id(const ndt::type &pattern_tp,
-                             const std::vector<arrfunc> &children)
-    {
-      unique_ptr<arrfunc[][builtin_type_id_count]> data(
-          new arrfunc[builtin_type_id_count][builtin_type_id_count]);
-
-      for (const arrfunc &child : children) {
-        std::map<string, ndt::type> tp_vars;
-        if (!pattern_tp.match(child.get_array_type(), tp_vars)) {
-          throw std::invalid_argument("could not match arrfuncs");
-        }
-
-        const ndt::type &src_tp0 = child.get_type()->get_pos_type(0);
-        const ndt::type &src_tp1 = child.get_type()->get_pos_type(1);
-
-        data[src_tp0.get_type_id()][src_tp1.get_type_id()] = child;
-      }
-
-      return arrfunc::make<multidispatch_by_type_id_kernel<false, 2>>(
-          pattern_tp, move(data), 0);
-    }
-
-  } // namespace dynd::nd::functional
-} // namespace dynd::nd
-} // namespace dynd
-
-nd::arrfunc
-nd::functional::multidispatch_by_type_id(const ndt::type &pattern_tp,
-                                         const std::vector<arrfunc> &children)
-{
-  switch (pattern_tp.extended<ndt::arrfunc_type>()->get_npos()) {
-  case 2:
-    return multidispatch_by_type_id<2>(pattern_tp, children);
-  default:
-    throw std::runtime_error("unsupported");
-  }
-}
-
-nd::arrfunc nd::functional::multidispatch(
-    const ndt::type &pattern_tp, intptr_t size, const arrfunc *children,
-    const arrfunc &default_child, bool own_children, intptr_t index)
+nd::arrfunc nd::functional::multidispatch(const ndt::type &pattern_tp,
+                                          intptr_t size,
+                                          const arrfunc *children,
+                                          const arrfunc &default_child,
+                                          intptr_t index)
 {
   for (intptr_t j = 0; j < size; ++j) {
     const arrfunc &child = children[j];
@@ -429,15 +377,7 @@ nd::arrfunc nd::functional::multidispatch(
     }
   }
 
-  if (own_children) {
-    typedef multidispatch_by_type_id_kernel<true, 1> kernel_type;
-    return arrfunc::make<kernel_type>(
-        pattern_tp, make_shared<typename kernel_type::static_data>(
-                        size, children, default_child, index),
-        0);
-  }
-
-  typedef multidispatch_by_type_id_kernel<false, 1> kernel_type;
+  typedef multidispatch_by_type_id_kernel<1> kernel_type;
   return arrfunc::make<kernel_type>(
       pattern_tp, make_shared<typename kernel_type::static_data>(
                       size, children, default_child, index),

@@ -199,56 +199,24 @@ namespace nd {
       }
     };
 
-    namespace detail {
-      template <bool own_children, int N>
-      struct multidispatch_by_type_id_kernel_static_data;
+    template <int N>
+    struct multidispatch_by_type_id_kernel;
 
-      template <>
-      struct multidispatch_by_type_id_kernel_static_data<true, 1> {
-        arrfunc children[DYND_TYPE_ID_MAX + 1];
-        arrfunc default_child;
-        intptr_t i0;
+    template <>
+    struct multidispatch_by_type_id_kernel<1>
+        : base_virtual_kernel<multidispatch_by_type_id_kernel<1>> {
 
-        multidispatch_by_type_id_kernel_static_data(
-            intptr_t size, const arrfunc *children,
-            const arrfunc &default_child, intptr_t i0)
-            : default_child(default_child), i0(i0)
-        {
-          for (intptr_t j = 0; j < size; ++j) {
-            const arrfunc &child = children[j];
-            if (!child.is_null()) {
-              const ndt::type &tp = child.get_type()->get_pos_type(i0);
-              this->children[tp.get_type_id()] = child;
-            }
-          }
-        }
-      };
-
-      template <>
-      struct multidispatch_by_type_id_kernel_static_data<false, 1> {
+      struct static_data {
         const arrfunc *children;
         const arrfunc &default_child;
         intptr_t i0;
 
-        multidispatch_by_type_id_kernel_static_data(
-            intptr_t DYND_UNUSED(size), const arrfunc *children,
-            const arrfunc &default_child, intptr_t i0)
+        static_data(intptr_t DYND_UNUSED(size), const arrfunc *children,
+                    const arrfunc &default_child, intptr_t i0)
             : children(children), default_child(default_child), i0(i0)
         {
         }
       };
-    }
-
-    template <bool own_children, int N>
-    struct multidispatch_by_type_id_kernel;
-
-    template <bool own_children>
-    struct multidispatch_by_type_id_kernel<own_children, 1>
-        : base_virtual_kernel<
-              multidispatch_by_type_id_kernel<own_children, 1>> {
-
-      typedef detail::multidispatch_by_type_id_kernel_static_data<
-          own_children, 1> static_data;
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
@@ -277,13 +245,6 @@ namespace nd {
             dst_tp = child_dst_tp;
           }
         }
-
-        //                Uncomment this for the unary arithmetic operators
-
-        //            child.get()->resolve_dst_type(child.get(),
-        //            child.get_type(),
-        //         NULL, dst_tp, nsrc, src_tp,
-        //                                              kwds, tp_vars);
       }
 
       static intptr_t
@@ -314,51 +275,6 @@ namespace nd {
       }
     };
 
-    template <bool own_children>
-    struct multidispatch_by_type_id_kernel<own_children, 2>
-        : base_virtual_kernel<
-              multidispatch_by_type_id_kernel<own_children, 2>> {
-      static void resolve_dst_type(
-          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-          const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-          char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-          const ndt::type *src_tp, const dynd::nd::array &kwds,
-          const std::map<dynd::nd::string, ndt::type> &tp_vars)
-      {
-        const arrfunc(*data)[builtin_type_id_count] =
-            (*self->get_data_as<
-                 const std::unique_ptr<nd::arrfunc[][builtin_type_id_count]>>())
-                .get();
-
-        const arrfunc &child =
-            data[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
-        child.get()->resolve_dst_type(self, self_tp, NULL, 0, NULL, dst_tp,
-                                      nsrc, src_tp, kwds, tp_vars);
-      }
-
-      static intptr_t instantiate(
-          const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-          const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-          char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-          const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-          const ndt::type *src_tp, const char *const *src_arrmeta,
-          kernel_request_t kernreq, const eval::eval_context *ectx,
-          const dynd::nd::array &kwds,
-          const std::map<dynd::nd::string, ndt::type> &tp_vars)
-      {
-        const arrfunc(*data)[builtin_type_id_count] =
-            (*self->get_data_as<
-                 const std::unique_ptr<nd::arrfunc[][builtin_type_id_count]>>())
-                .get();
-
-        const arrfunc &child =
-            data[src_tp[0].get_type_id()][src_tp[1].get_type_id()];
-        return child.get()->instantiate(
-            self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-            nsrc, src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
-      }
-    };
-
     template <int N, typename T>
     typename std::enable_if<N == 1, const arrfunc &>::type at(const T &children,
                                                               const intptr_t *i)
@@ -384,48 +300,67 @@ namespace nd {
         : base_virtual_kernel<multidispatch_kernel<StaticDataType>> {
       typedef StaticDataType static_data;
 
+      struct data {
+        const arrfunc &child;
+
+        data(const arrfunc &child) : child(child) {}
+      };
+
+      static void
+      data_init(const arrfunc_type_data *DYND_UNUSED(self),
+                const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                const char *DYND_UNUSED(static_data),
+                size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                intptr_t DYND_UNUSED(nsrc),
+                const ndt::type *DYND_UNUSED(src_tp), array &DYND_UNUSED(kwds),
+                const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+      }
+
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
                        const char *DYND_UNUSED(static_data),
-                       size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                       size_t DYND_UNUSED(data_size), char *data,
                        ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const static_data &static_data = *self->get_data_as<StaticDataType>();
+        const static_data &static_data =
+            *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
 
         const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
         if (dst_tp.is_null()) {
           const ndt::type &child_dst_tp = child.get_type()->get_return_type();
           if (child_dst_tp.is_symbolic()) {
-            child.get()->resolve_dst_type(child.get(), child.get_type(), NULL,
-                                          0, NULL, dst_tp, nsrc, src_tp, kwds,
-                                          tp_vars);
+            child.get()->resolve_dst_type(child.get(), child.get_type(),
+                                          child.get()->static_data,
+                                          child.get()->data_size, data, dst_tp,
+                                          nsrc, src_tp, kwds, tp_vars);
           } else {
             dst_tp = child_dst_tp;
           }
         }
       }
 
-      static intptr_t
-      instantiate(const arrfunc_type_data *self,
-                  const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                  const char *DYND_UNUSED(static_data), size_t data_size,
-                  char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const dynd::nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      static intptr_t instantiate(
+          const arrfunc_type_data *self,
+          const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+          const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+          char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+          const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+          const char *const *src_arrmeta, kernel_request_t kernreq,
+          const eval::eval_context *ectx, const dynd::nd::array &kwds,
+          const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const static_data &static_data = *self->get_data_as<StaticDataType>();
+        const static_data &static_data =
+            *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
 
         const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
         return child.get()->instantiate(
-            child.get(), child.get_type(), NULL, data_size, data, ckb,
-            ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-            ectx, kwds, tp_vars);
+            child.get(), child.get_type(), child.get()->static_data,
+            child.get()->data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+            nsrc, src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       }
     };
 

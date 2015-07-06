@@ -44,35 +44,26 @@ namespace nd {
 
     arrfunc multidispatch(const ndt::type &self_tp, intptr_t size,
                           const arrfunc *children, const arrfunc &default_child,
-                          bool own_children, intptr_t i0 = 0);
-
-    arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
-                                     const std::vector<arrfunc> &children);
+                          intptr_t i0 = 0);
 
     inline arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
                                             intptr_t size,
                                             const arrfunc *children,
                                             const arrfunc &default_child,
-                                            bool own_children, intptr_t i0 = 0)
+                                            intptr_t i0 = 0)
     {
-      return multidispatch(self_tp, size, children, default_child, own_children,
-                           i0);
-    }
-
-    template <int N0>
-    arrfunc multidispatch(const ndt::type &self_tp,
-                          const arrfunc (&children)[N0],
-                          const arrfunc &default_child, intptr_t i0 = 0)
-    {
-      return multidispatch(self_tp, N0, children, default_child, false, i0);
+      return multidispatch(self_tp, size, children, default_child, i0);
     }
 
     template <typename ContainerType, int N = ndim<ContainerType>::value>
     arrfunc multidispatch(const ndt::type &self_tp,
                           const ContainerType &children,
-                          const arrfunc &DYND_UNUSED(default_child),
+                          const arrfunc &default_child,
                           const std::vector<intptr_t> &permutation)
     {
+      //      std::cout << "multidispatch" << std::endl;
+
+      size_t data_size_max = 0;
       for (auto it = dynd::begin<N>(children), end = dynd::end<N>(children);
            it != end; ++it) {
         const arrfunc &child = *it;
@@ -81,22 +72,31 @@ namespace nd {
           if (!self_tp.match(child.get_array_type(), tp_vars)) {
             throw std::invalid_argument("could not match arrfuncs");
           }
+
+          size_t data_size = child.get()->data_size;
+          if (data_size > data_size_max) {
+            data_size_max = data_size;
+          }
         }
       }
 
       struct static_data {
         const ContainerType &children;
+        const arrfunc &default_child;
+        size_t data_size_max;
         intptr_t permutation[N];
 
-        static_data(const ContainerType &children, const intptr_t *permutation)
-            : children(children)
+        static_data(const ContainerType &children, const arrfunc &default_child,
+                    size_t data_size_max, const intptr_t *permutation)
+            : children(children), default_child(default_child),
+              data_size_max(data_size_max)
         {
           std::memcpy(this->permutation, permutation,
                       sizeof(this->permutation));
         }
 
-        arrfunc operator()(const ndt::type &dst_tp, intptr_t nsrc,
-                           const ndt::type *src_tp) const
+        const arrfunc &operator()(const ndt::type &dst_tp, intptr_t nsrc,
+                                  const ndt::type *src_tp) const
         {
           std::vector<ndt::type> tp;
           tp.push_back(dst_tp);
@@ -110,12 +110,20 @@ namespace nd {
             index[j] = new_src_tp[permutation[j]].get_type_id();
           }
 
-          return at(children, index);
+          const arrfunc &child = at(children, index);
+          if (child.is_null()) {
+            return default_child;
+          }
+
+          return child;
         }
       };
 
       return arrfunc::make<multidispatch_kernel<static_data>>(
-          self_tp, static_data(children, permutation.data()), 0);
+          self_tp,
+          std::make_shared<static_data>(children, default_child, data_size_max,
+                                        permutation.data()),
+          data_size_max);
     }
 
     template <typename ContainerType, int N = ndim<ContainerType>::value>
