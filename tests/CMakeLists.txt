@@ -107,6 +107,7 @@ set(tests_SRC
     vm/test_elwise_program.cpp
     test_bool1.cpp
     test_float16.cpp
+    test_iterator.cpp
     test_shape_tools.cpp
     test_platform.cpp
     ../thirdparty/gtest/gtest-all.cc

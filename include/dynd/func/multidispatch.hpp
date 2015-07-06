@@ -7,10 +7,17 @@
 
 #include <numeric>
 
+#include <dynd/iterator.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
 namespace dynd {
+
+template <typename T>
+struct ndim {
+  static const int value = nd::detail::ndim_from_array<T>::value;
+};
+
 namespace nd {
   namespace functional {
 
@@ -60,32 +67,28 @@ namespace nd {
       return multidispatch(self_tp, N0, children, default_child, false, i0);
     }
 
-    template <typename T>
-    struct ndim {
-      static const int value = nd::detail::ndim_from_array<T>::value;
-    };
-
-    template <typename T>
-    arrfunc multidispatch(const ndt::type &self_tp, const T &children,
+    template <typename ContainerType, int N = ndim<ContainerType>::value>
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const ContainerType &children,
                           const arrfunc &DYND_UNUSED(default_child),
                           const std::vector<intptr_t> &permutation)
     {
-      for (auto &row : children) {
-        for (auto &child : row) {
-          if (!child.is_null()) {
-            std::map<string, ndt::type> tp_vars;
-            if (!self_tp.match(child.get_array_type(), tp_vars)) {
-              throw std::invalid_argument("could not match arrfuncs");
-            }
+      for (auto it = dynd::begin<N>(children), end = dynd::end<N>(children);
+           it != end; ++it) {
+        const arrfunc &child = *it;
+        if (!child.is_null()) {
+          std::map<string, ndt::type> tp_vars;
+          if (!self_tp.match(child.get_array_type(), tp_vars)) {
+            throw std::invalid_argument("could not match arrfuncs");
           }
         }
       }
 
       struct static_data {
-        const T &children;
-        intptr_t permutation[ndim<T>::value];
+        const ContainerType &children;
+        intptr_t permutation[N];
 
-        static_data(const T &children, const intptr_t *permutation)
+        static_data(const ContainerType &children, const intptr_t *permutation)
             : children(children)
         {
           std::memcpy(this->permutation, permutation,
@@ -102,8 +105,8 @@ namespace nd {
           }
           ndt::type *new_src_tp = tp.data() + 1;
 
-          intptr_t index[ndim<T>::value];
-          for (intptr_t j = 0; j < ndim<T>::value; ++j) {
+          intptr_t index[N];
+          for (intptr_t j = 0; j < N; ++j) {
             index[j] = new_src_tp[permutation[j]].get_type_id();
           }
 
@@ -115,11 +118,12 @@ namespace nd {
           self_tp, static_data(children, permutation.data()), 0);
     }
 
-    template <typename T>
-    arrfunc multidispatch(const ndt::type &self_tp, const T &children,
+    template <typename ContainerType, int N = ndim<ContainerType>::value>
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const ContainerType &children,
                           const arrfunc &default_child)
     {
-      std::vector<intptr_t> permutation(ndim<T>::value);
+      std::vector<intptr_t> permutation(N);
       std::iota(permutation.begin(), permutation.end(), 0);
 
       return multidispatch(self_tp, children, default_child, permutation);

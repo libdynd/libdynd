@@ -502,6 +502,7 @@ set(libdynd_SRC
     include/dynd/float16.hpp
     include/dynd/float128.hpp
     include/dynd/int128.hpp
+    include/dynd/iterator.hpp
     include/dynd/math.hpp
     include/dynd/type.hpp
     include/dynd/type_sequence.hpp
