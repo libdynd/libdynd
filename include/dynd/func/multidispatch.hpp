@@ -42,19 +42,6 @@ namespace nd {
     arrfunc multidispatch(const ndt::type &self_tp,
                           const std::vector<arrfunc> &children);
 
-    arrfunc multidispatch(const ndt::type &self_tp, intptr_t size,
-                          const arrfunc *children, const arrfunc &default_child,
-                          intptr_t i0 = 0);
-
-    inline arrfunc multidispatch_by_type_id(const ndt::type &self_tp,
-                                            intptr_t size,
-                                            const arrfunc *children,
-                                            const arrfunc &default_child,
-                                            intptr_t i0 = 0)
-    {
-      return multidispatch(self_tp, size, children, default_child, i0);
-    }
-
     template <typename ContainerType, int N = ndim<ContainerType>::value>
     arrfunc multidispatch(const ndt::type &self_tp,
                           const ContainerType &children,
@@ -70,7 +57,8 @@ namespace nd {
         if (!child.is_null()) {
           std::map<string, ndt::type> tp_vars;
           if (!self_tp.match(child.get_array_type(), tp_vars)) {
-            throw std::invalid_argument("could not match arrfuncs");
+//            This needs to be reenabled, but it needs to handle appended keywords properly
+//            throw std::invalid_argument("could not match arrfuncs");
           }
 
           size_t data_size = child.get()->data_size;
