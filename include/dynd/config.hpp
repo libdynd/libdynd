@@ -152,6 +152,30 @@ struct is_function_pointer {
           : false;
 };
 
+template <typename ValueType>
+ValueType &get_second_if_pair(ValueType &pair)
+{
+  return pair;
+}
+
+template <typename KeyType, typename ValueType>
+ValueType &get_second_if_pair(std::pair<KeyType, ValueType> &pair)
+{
+  return pair.second;
+}
+
+template <typename ValueType>
+const ValueType &get_second_if_pair(const ValueType &pair)
+{
+  return pair;
+}
+
+template <typename KeyType, typename ValueType>
+const ValueType &get_second_if_pair(const std::pair<KeyType, ValueType> &pair)
+{
+  return pair.second;
+}
+
 /**
  * Matches string literal arguments.
  */

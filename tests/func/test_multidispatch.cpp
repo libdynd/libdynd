@@ -79,9 +79,9 @@ TEST(MultiDispatchArrfunc, PromoteToSignature)
 
   nd::arrfunc af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
 
-//  EXPECT_EQ(0, af(1, float16(1.f), 1.0).as<int>());
+  //  EXPECT_EQ(0, af(1, float16(1.f), 1.0).as<int>());
   EXPECT_EQ(1, af(1, 1.0, 1.f).as<int>());
-//  EXPECT_EQ(2, af(1, 1.f, float16(1.f)).as<int>());
+  //  EXPECT_EQ(2, af(1, 1.f, float16(1.f)).as<int>());
   EXPECT_EQ(3, af(1.f, 1, (int16_t)1).as<int>());
   EXPECT_EQ(4, af((int8_t)1, 1.f, 1.0).as<int>());
   EXPECT_EQ(5, af((int8_t)1, 1.f, 1.f).as<int>());
@@ -118,13 +118,13 @@ TEST(MultiDispatchArrfunc, Values)
   EXPECT_JSON_EQ_ARR("[3, 8, 6]", c);
 
   // Promote to (real, real) -> real
-/*
-  a = parse_json("3 * int16", "[1, 3, 5]");
-  b = parse_json("3 * float16", "[2, 5, 1]");
-  c = af(a, b);
-  EXPECT_EQ(ndt::type("3 * float64"), c.get_type());
-  EXPECT_JSON_EQ_ARR("[-1, -2, 4]", c);
-*/
+  /*
+    a = parse_json("3 * int16", "[1, 3, 5]");
+    b = parse_json("3 * float16", "[2, 5, 1]");
+    c = af(a, b);
+    EXPECT_EQ(ndt::type("3 * float64"), c.get_type());
+    EXPECT_JSON_EQ_ARR("[-1, -2, 4]", c);
+  */
 }
 
 /**
@@ -176,6 +176,72 @@ TEST(MultidispatchArrfunc, Untitled)
                               nd::functional::apply(&tester<double>),
                               nd::functional::apply(&tester<unsigned>)});
 }
+
+/*
+
+TEST(Multidispatch, CArray)
+{
+  nd::arrfunc children[DYND_TYPE_ID_MAX];
+  children[float64_type_id] = nd::functional::apply(&func<double>);
+
+  nd::arrfunc func = nd::functional::multidispatch(ndt::type("(Any) -> Any"),
+                                                   children, nd::arrfunc());
+  func(3.0);
+}
+
+TEST(Multidispatch, Vector)
+{
+  vector<nd::arrfunc> children(DYND_TYPE_ID_MAX);
+  children[float64_type_id] = nd::functional::apply(&func<double>);
+
+  nd::arrfunc func = nd::functional::multidispatch<1>(ndt::type("(Any) -> Any"),
+                                                      std::move(children),
+nd::arrfunc());
+  children.clear();
+
+  std::cout << func(3.0) << std::endl;
+  std::cout << func << std::endl;
+
+  std::exit(-1);
+}
+*/
+
+template <typename A0, typename A1>
+typename std::common_type<A0, A1>::type func(A0 x, A1 y)
+{
+  return x + y;
+}
+
+TEST(Multidispatch, Map)
+{
+  //  std::array<type_id_t, 2> key;
+
+  map<array<type_id_t, 2>, nd::arrfunc> children;
+  children[{{float64_type_id, float32_type_id}}] =
+      nd::functional::apply(&func<double, float>);
+  children[{{int32_type_id, int32_type_id}}] =
+      nd::functional::apply(&func<int32, int32>);
+
+  nd::arrfunc func = nd::functional::multidispatch<2>(
+      ndt::type("(Any, Any) -> Any"), children, nd::arrfunc());
+
+  std::cout << "made" << std::endl;
+
+  std::cout << func(2.0, 3.5f) << std::endl;
+  std::cout << func(1, 2) << std::endl;
+  // std::cout << func << std::endl;
+
+//  std::exit(-1);
+}
+
+/*
+TEST(Multidispatch, Map)
+{
+  std::cout << has_key_type<std::map<int, int>>::value << std::endl;
+  std::cout << has_key_type<std::vector<int>>::value << std::endl;
+  std::exit(-1);
+}
+*/
 
 #ifdef DYND_CUDA
 
