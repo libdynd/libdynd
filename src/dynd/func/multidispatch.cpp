@@ -360,3 +360,16 @@ nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
 {
   return multidispatch(self_tp, children, {});
 }
+
+nd::arrfunc
+nd::functional::multidispatch(const ndt::type &self_tp,
+                              const std::initializer_list<arrfunc> &children,
+                              const arrfunc &default_child)
+{
+  switch (self_tp.extended<ndt::arrfunc_type>()->get_npos()) {
+  case 2:
+    return multidispatch<2>(self_tp, children, default_child);
+  default:
+    throw std::runtime_error("error");
+  }
+}

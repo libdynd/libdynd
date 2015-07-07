@@ -164,18 +164,27 @@ TEST(MultiDispatchArrfunc, Dims)
 // DYND_AS_ARRFUNC(DYND_,
 
 template <typename T>
-T tester(T x)
+T tester(T x, T y)
 {
-  return x;
+  return x + y;
 }
 
+/*
 TEST(MultidispatchArrfunc, Untitled)
 {
-  nd::arrfunc af = nd::functional::multidispatch(
-      ndt::type("(R) -> R"), {nd::functional::apply(&tester<int>),
-                              nd::functional::apply(&tester<double>),
-                              nd::functional::apply(&tester<unsigned>)});
+  nd::arrfunc af = nd::functional::multidispatch<2>(
+      ndt::type("(Any, Any) -> Any"),
+      {nd::functional::apply(&tester<int>),
+       nd::functional::apply(&tester<double>),
+       nd::functional::apply(&tester<int>)});
+
+  std::cout << af << std::endl;
+  std::cout << af(2.0, 3.5) << std::endl;
+  std::cout << af(1, 2) << std::endl;
+
+  std::exit(-1);
 }
+*/
 
 /*
 
@@ -231,7 +240,7 @@ TEST(Multidispatch, Map)
   std::cout << func(1, 2) << std::endl;
   // std::cout << func << std::endl;
 
-//  std::exit(-1);
+  //  std::exit(-1);
 }
 
 /*

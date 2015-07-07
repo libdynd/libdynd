@@ -104,7 +104,7 @@ namespace nd {
         {
         }
 
-        const arrfunc &operator()(const std::array<type_id_t, N> &key) const
+        const arrfunc &operator()(const std::array<type_id_t, N> &key)
         {
           const arrfunc &child =
               multidispatch_subscript<N>(children, key.data());
@@ -127,7 +127,7 @@ namespace nd {
         {
         }
 
-        const arrfunc &operator()(const std::array<type_id_t, N> &key) const
+        const arrfunc &operator()(const std::array<type_id_t, N> &key)
         {
           const arrfunc &child = children[key];
           if (child.is_null()) {
@@ -191,7 +191,7 @@ namespace nd {
         }
 
         const arrfunc &operator()(const ndt::type &dst_tp, intptr_t nsrc,
-                                  const ndt::type *src_tp) const
+                                  const ndt::type *src_tp)
         {
           std::vector<ndt::type> tp;
           tp.push_back(dst_tp);
@@ -250,6 +250,55 @@ namespace nd {
       return multidispatch<ndim<ContainerType>::value>(
           self_tp, std::forward<T>(children), default_child);
     }
+
+    template <int N, typename IteratorType>
+    typename std::enable_if<N == 1, arrfunc>::type
+    multidispatch(const ndt::type &self_tp, const IteratorType &begin,
+                  const IteratorType &end, const arrfunc &default_child)
+    {
+      std::map<type_id_t, arrfunc> children;
+      for (IteratorType it = begin; it != end; ++it) {
+        const arrfunc &child = *it;
+
+        type_id_t key = child.get_type()->get_pos_type(0).get_type_id();
+        children[key] = child;
+      }
+
+      return multidispatch<1>(self_tp, std::move(children), default_child);
+    }
+
+    template <int N, typename IteratorType>
+    typename std::enable_if<N != 1, arrfunc>::type
+    multidispatch(const ndt::type &self_tp, const IteratorType &begin,
+                  const IteratorType &end, const arrfunc &default_child)
+    {
+      std::map<std::array<type_id_t, N>, arrfunc> children;
+      for (IteratorType it = begin; it != end; ++it) {
+        const arrfunc &child = *it;
+
+        std::array<type_id_t, N> key;
+        for (int i = 0; i < N; ++i) {
+          key[i] = child.get_type()->get_pos_type(i).get_type_id();
+        }
+
+        children[key] = child;
+      }
+
+      return multidispatch<N>(self_tp, std::move(children), default_child);
+    }
+
+    template <int N>
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const std::initializer_list<arrfunc> &children,
+                          const arrfunc &default_child = arrfunc())
+    {
+      return multidispatch<N>(self_tp, children.begin(), children.end(),
+                              default_child);
+    }
+
+    arrfunc multidispatch(const ndt::type &self_tp,
+                          const std::initializer_list<arrfunc> &children,
+                          const arrfunc &default_child = arrfunc());
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

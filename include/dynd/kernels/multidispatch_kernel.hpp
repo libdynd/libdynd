@@ -230,7 +230,7 @@ namespace nd {
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const static_data &static_data =
+        static_data &static_data =
             *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
 
         const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
@@ -257,7 +257,7 @@ namespace nd {
           const eval::eval_context *ectx, const dynd::nd::array &kwds,
           const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const static_data &static_data =
+        static_data &static_data =
             *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
 
         const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
