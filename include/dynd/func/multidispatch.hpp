@@ -11,6 +11,8 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
+#include <typeinfo>
+
 namespace dynd {
 
 template <typename T>
@@ -42,14 +44,12 @@ namespace nd {
     arrfunc multidispatch(const ndt::type &self_tp,
                           const std::vector<arrfunc> &children);
 
-    template <typename ContainerType, int N = ndim<ContainerType>::value>
-    arrfunc multidispatch(const ndt::type &self_tp,
-                          const ContainerType &children,
+    template <typename T,
+              int N = ndim<typename std::remove_reference<T>::type>::value>
+    arrfunc multidispatch(const ndt::type &self_tp, T &&children,
                           const arrfunc &default_child,
                           const std::vector<intptr_t> &permutation)
     {
-      //      std::cout << "multidispatch" << std::endl;
-
       size_t data_size_max = 0;
       for (auto it = dynd::begin<N>(children), end = dynd::end<N>(children);
            it != end; ++it) {
@@ -57,8 +57,10 @@ namespace nd {
         if (!child.is_null()) {
           std::map<string, ndt::type> tp_vars;
           if (!self_tp.match(child.get_array_type(), tp_vars)) {
-//            This needs to be reenabled, but it needs to handle appended keywords properly
-//            throw std::invalid_argument("could not match arrfuncs");
+            //            This needs to be reenabled, but it needs to handle
+            //            appended keywords properly
+            //            throw std::invalid_argument("could not match
+            //            arrfuncs");
           }
 
           size_t data_size = child.get()->data_size;
@@ -69,12 +71,12 @@ namespace nd {
       }
 
       struct static_data {
-        const ContainerType &children;
+        T children;
         const arrfunc &default_child;
         size_t data_size_max;
         intptr_t permutation[N];
 
-        static_data(const ContainerType &children, const arrfunc &default_child,
+        static_data(T &&children, const arrfunc &default_child,
                     size_t data_size_max, const intptr_t *permutation)
             : children(children), default_child(default_child),
               data_size_max(data_size_max)
@@ -108,21 +110,22 @@ namespace nd {
       };
 
       return arrfunc::make<multidispatch_kernel<static_data>>(
-          self_tp,
-          std::make_shared<static_data>(children, default_child, data_size_max,
-                                        permutation.data()),
+          self_tp, std::make_shared<static_data>(std::forward<T>(children),
+                                                 default_child, data_size_max,
+                                                 permutation.data()),
           data_size_max);
     }
 
-    template <typename ContainerType, int N = ndim<ContainerType>::value>
-    arrfunc multidispatch(const ndt::type &self_tp,
-                          const ContainerType &children,
+    template <typename T,
+              int N = ndim<typename std::remove_reference<T>::type>::value>
+    arrfunc multidispatch(const ndt::type &self_tp, T &&children,
                           const arrfunc &default_child)
     {
       std::vector<intptr_t> permutation(N);
       std::iota(permutation.begin(), permutation.end(), 0);
 
-      return multidispatch(self_tp, children, default_child, permutation);
+      return multidispatch(self_tp, std::forward<T>(children), default_child,
+                           permutation);
     }
 
   } // namespace dynd::nd::functional
