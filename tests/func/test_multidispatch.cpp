@@ -234,13 +234,10 @@ TEST(Multidispatch, Map)
   nd::arrfunc func = nd::functional::multidispatch<2>(
       ndt::type("(Any, Any) -> Any"), children, nd::arrfunc());
 
-  std::cout << "made" << std::endl;
+//  std::cout << "made" << std::endl;
 
-  std::cout << func(2.0, 3.5f) << std::endl;
-  std::cout << func(1, 2) << std::endl;
-  // std::cout << func << std::endl;
-
-  //  std::exit(-1);
+  EXPECT_EQ(5.5, func(2.0, 3.5f));
+  EXPECT_EQ(3, func(1, 2));
 }
 
 /*

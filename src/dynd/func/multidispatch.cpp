@@ -367,6 +367,8 @@ nd::functional::multidispatch(const ndt::type &self_tp,
                               const arrfunc &default_child)
 {
   switch (self_tp.extended<ndt::arrfunc_type>()->get_npos()) {
+  case 1:
+    return multidispatch<1>(self_tp, children, default_child);    
   case 2:
     return multidispatch<2>(self_tp, children, default_child);
   default:

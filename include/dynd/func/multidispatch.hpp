@@ -78,14 +78,14 @@ namespace nd {
 
       template <int N, typename T>
       typename std::enable_if<N == 1, const nd::arrfunc &>::type
-      multidispatch_subscript(const T &children, const type_id_t *i)
+      multidispatch_subscript(T &children, const type_id_t *i)
       {
         return children[*i];
       }
 
       template <int N, typename T>
       typename std::enable_if<(N > 1), const nd::arrfunc &>::type
-      multidispatch_subscript(const T &children, const type_id_t *i)
+      multidispatch_subscript(T &children, const type_id_t *i)
       {
         return multidispatch_subscript<N - 1>(children[*i], i + 1);
       }
@@ -285,6 +285,21 @@ namespace nd {
       }
 
       return multidispatch<N>(self_tp, std::move(children), default_child);
+    }
+
+    template <typename IteratorType>
+    arrfunc multidispatch(const ndt::type &self_tp, const IteratorType &begin,
+                          const IteratorType &end,
+                          const arrfunc &default_child = arrfunc())
+    {
+      switch (self_tp.extended<ndt::arrfunc_type>()->get_npos()) {
+      case 1:
+        return multidispatch<1>(self_tp, begin, end, default_child);
+      case 2:
+        return multidispatch<2>(self_tp, begin, end, default_child);
+      default:
+        throw std::runtime_error("error");
+      }
     }
 
     template <int N>
