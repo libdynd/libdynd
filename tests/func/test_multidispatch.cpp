@@ -41,7 +41,7 @@ TEST(MultiDispatchArrfunc, Ambiguous)
   funcs.push_back(nd::functional::apply(&func3));
   funcs.push_back(nd::functional::apply(&func4));
 
-  EXPECT_THROW(nd::functional::multidispatch(funcs.size(), &funcs[0]),
+  EXPECT_THROW(nd::functional::old_multidispatch(funcs.size(), &funcs[0]),
                invalid_argument);
 
   funcs.push_back(nd::functional::apply(&func5));
@@ -57,7 +57,7 @@ TEST(MultiDispatchArrfunc, ExactSignatures)
   funcs.push_back(nd::functional::apply(&func4));
   funcs.push_back(nd::functional::apply(&func5));
 
-  nd::arrfunc af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
+  nd::arrfunc af = nd::functional::old_multidispatch(funcs.size(), &funcs[0]);
 
   EXPECT_EQ(0, af(1, 1.f, 1.0).as<int>());
   EXPECT_EQ(1, af(1, 1.0, 1.0).as<int>());
@@ -77,7 +77,7 @@ TEST(MultiDispatchArrfunc, PromoteToSignature)
   funcs.push_back(nd::functional::apply(&func4));
   funcs.push_back(nd::functional::apply(&func5));
 
-  nd::arrfunc af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
+  nd::arrfunc af = nd::functional::old_multidispatch(funcs.size(), &funcs[0]);
 
   //  EXPECT_EQ(0, af(1, float16(1.f), 1.0).as<int>());
   EXPECT_EQ(1, af(1, 1.0, 1.f).as<int>());
@@ -93,7 +93,7 @@ TEST(MultiDispatchArrfunc, Values)
   funcs.push_back(nd::functional::apply(&manip0));
   funcs.push_back(nd::functional::apply(&manip1));
   nd::arrfunc af = nd::functional::elwise(
-      nd::functional::multidispatch(funcs.size(), &funcs[0]));
+      nd::functional::old_multidispatch(funcs.size(), &funcs[0]));
   nd::array a, b, c;
 
   // Exactly match (int, int) -> real
@@ -150,18 +150,6 @@ TEST(MultiDispatchArrfunc, Dims)
   EXPECT_JSON_EQ_ARR("[3, 8, 6]", c);
 }
 */
-
-// DYND_AS_ARRFUNC
-
-// &NAME<T>
-// NAME<T>()
-// NAME<T>
-// *NAME<T>
-
-// DYND_AS_ARRFUNC("(R) -> R",
-// DYND_AS_ARRFUNC(TYPE, DYND_AS_FUNCTION_POINTER, sin, (...))
-// DYND_AS_CUDA_HOST_DEVICE_ARRFUNC(
-// DYND_AS_ARRFUNC(DYND_,
 
 template <typename T>
 T tester(T x, T y)
@@ -234,7 +222,7 @@ TEST(Multidispatch, Map)
   nd::arrfunc func = nd::functional::multidispatch<2>(
       ndt::type("(Any, Any) -> Any"), children, nd::arrfunc());
 
-//  std::cout << "made" << std::endl;
+  //  std::cout << "made" << std::endl;
 
   EXPECT_EQ(5.5, func(2.0, 3.5f));
   EXPECT_EQ(3, func(1, 2));

@@ -1224,66 +1224,6 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
-  namespace functional {
-
-    arrfunc multidispatch(const ndt::type &self_tp,
-                          const std::vector<arrfunc> &children);
-
-  } // namespace dynd::nd::functional
-
-  template <typename CKT0, typename CKT1, typename... CKT, typename T>
-  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
-  {
-    return functional::multidispatch(self_tp, {arrfunc::make<CKT0>(data),
-                                               arrfunc::make<CKT1>(data),
-                                               arrfunc::make<CKT>(data)...});
-  }
-
-  namespace detail {
-    struct as_arrfunc_wrapper {
-      template <typename... CKT>
-      arrfunc operator()(const ndt::type &self_tp) const
-      {
-        return as_arrfunc<CKT...>(self_tp);
-      }
-
-      template <typename... CKT, typename T>
-      arrfunc operator()(const ndt::type &self_tp, const T &data) const
-      {
-        return as_arrfunc<CKT...>(self_tp, data);
-      }
-
-      template <typename... CKT>
-      arrfunc apply(const ndt::type &self_tp) const
-      {
-        return as_arrfunc<CKT...>(self_tp);
-      }
-
-      template <typename... CKT, typename T>
-      arrfunc apply(const ndt::type &self_tp, const T &data) const
-      {
-        return as_arrfunc<CKT...>(self_tp, data);
-      }
-    };
-  }
-
-  template <template <typename...> class TCK, typename... A, typename T>
-  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
-  {
-    typedef typename for_each<TCK, typename outer<A...>::type,
-                              sizeof...(A) >= 2>::type CKT;
-    return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
-  }
-
-  template <template <kernel_request_t, typename...> class TCK,
-            kernel_request_t kernreq, typename... A, typename T>
-  arrfunc as_arrfunc(const ndt::type &self_tp, const T &data)
-  {
-    typedef typename ex_for_each<TCK, kernreq, typename outer<A...>::type,
-                                 sizeof...(A) >= 2>::type CKT;
-    return type_proxy<CKT>::apply(detail::as_arrfunc_wrapper(), self_tp, data);
-  }
-
   template <typename T>
   struct declfunc {
     static const arrfunc &get_self()

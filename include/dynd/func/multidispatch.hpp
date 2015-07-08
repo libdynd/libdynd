@@ -45,19 +45,13 @@ namespace nd {
      * \param naf  The number of arrfuncs provided.
      * \param af  The array of input arrfuncs, sized ``naf``.
      */
-    arrfunc multidispatch(intptr_t naf, const arrfunc *af);
+    arrfunc old_multidispatch(intptr_t naf, const arrfunc *af);
 
-    inline arrfunc multidispatch(const std::initializer_list<arrfunc> &children)
+    inline arrfunc
+    old_multidispatch(const std::initializer_list<arrfunc> &children)
     {
-      return multidispatch(children.size(), children.begin());
+      return old_multidispatch(children.size(), children.begin());
     }
-
-    arrfunc multidispatch(const ndt::type &self_tp,
-                          const std::vector<arrfunc> &children,
-                          const std::vector<std::string> &ignore_vars);
-
-    arrfunc multidispatch(const ndt::type &self_tp,
-                          const std::vector<arrfunc> &children);
 
     namespace detail {
 

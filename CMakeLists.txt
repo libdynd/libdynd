@@ -430,6 +430,7 @@ set(libdynd_SRC
     include/dynd/kernels/time_assignment_kernels.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
     include/dynd/kernels/tuple_comparison_kernels.hpp
+    include/dynd/kernels/uniform_kernel.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
@@ -510,6 +511,7 @@ set(libdynd_SRC
     include/dynd/type_promotion.hpp
     include/dynd/exceptions.hpp
     include/dynd/fpstatus.hpp
+    include/dynd/functional.hpp
     include/dynd/json_formatter.hpp
     include/dynd/json_parser.hpp
     include/dynd/irange.hpp
