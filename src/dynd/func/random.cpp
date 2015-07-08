@@ -3,19 +3,18 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/random.hpp>
 #include <dynd/func/multidispatch.hpp>
+#include <dynd/kernels/uniform_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
 
-template <template <typename, type_id_t> class KernelType, typename G>
-struct bind2 {
-  template <type_id_t DstTypeID>
-  using type = KernelType<G, DstTypeID>;
+template <template <type_id_t, typename...> class KernelType, typename... T>
+struct bind_types {
+  template <type_id_t TypeID0>
+  using type = KernelType<TypeID0, T...>;
 };
 
-template <kernel_request_t kernreq>
-typename std::enable_if<kernreq == kernel_request_host, nd::arrfunc>::type
-nd::random::uniform::make()
+nd::arrfunc nd::random::uniform::make()
 {
   typedef type_id_sequence<int32_type_id, int64_type_id, uint32_type_id,
                            uint64_type_id, float32_type_id, float64_type_id,
@@ -25,10 +24,11 @@ nd::random::uniform::make()
   std::random_device random_device;
 
   auto children = arrfunc::make_all<
-      bind2<uniform_ck, std::default_random_engine>::type, numeric_type_ids>();
+      bind_types<uniform_kernel, std::default_random_engine>::type,
+      numeric_type_ids>();
 
-  return functional::multidispatch<1>(ndt::type("(a: ?R, b: ?R) -> R"),
-                                      std::move(children), arrfunc(), {-1});
+  return functional::elwise(functional::multidispatch<1>(
+      ndt::type("(a: ?R, b: ?R) -> R"), std::move(children), arrfunc(), {-1}));
 
   /*
     arrfunc self =
@@ -38,11 +38,6 @@ nd::random::uniform::make()
             std::shared_ptr<std::default_random_engine>(
                 new std::default_random_engine(random_device())));
   */
-}
-
-nd::arrfunc nd::random::uniform::make()
-{
-  return nd::functional::elwise(make<kernel_request_host>());
 }
 
 struct nd::random::uniform nd::random::uniform;

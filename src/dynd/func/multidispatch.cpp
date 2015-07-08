@@ -226,7 +226,8 @@ get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
   }
 }
 
-nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
+nd::arrfunc nd::functional::old_multidispatch(intptr_t naf,
+                                              const arrfunc *child_af)
 {
   if (naf <= 0) {
     throw invalid_argument(

@@ -20,14 +20,14 @@ using namespace dynd;
 template <typename T0, typename T1>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1)
 {
-  return nd::functional::elwise(nd::functional::multidispatch(
+  return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1)}));
 }
 
 template <typename T0, typename T1, typename T2>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
 {
-  return nd::functional::elwise(nd::functional::multidispatch(
+  return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
        nd::functional::apply(f2)}));
 }
@@ -35,7 +35,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
 template <typename T0, typename T1, typename T2, typename T3, typename T4>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
 {
-  return nd::functional::elwise(nd::functional::multidispatch(
+  return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
        nd::functional::apply(f2), nd::functional::apply(f3),
        nd::functional::apply(f4)}));
@@ -45,7 +45,7 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
           typename T5, typename T6>
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
 {
-  return nd::functional::elwise(nd::functional::multidispatch(
+  return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
        nd::functional::apply(f2), nd::functional::apply(f3),
        nd::functional::apply(f4), nd::functional::apply(f5),
@@ -57,7 +57,7 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
                               T7 f7)
 {
-  return nd::functional::elwise(nd::functional::multidispatch(
+  return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
        nd::functional::apply(f2), nd::functional::apply(f3),
        nd::functional::apply(f4), nd::functional::apply(f5),
@@ -69,7 +69,7 @@ template <typename T0, typename T1, typename T2, typename T3, typename T4,
 static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
                               T7 f7, T8 f8, T9 f9)
 {
-  return nd::functional::elwise(nd::functional::multidispatch(
+  return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
        nd::functional::apply(f2), nd::functional::apply(f3),
        nd::functional::apply(f4), nd::functional::apply(f5),
@@ -113,10 +113,7 @@ struct sign<int128> {
 };
 template <>
 struct sign<uint128> {
-  inline uint128 operator()(const uint128 &x) const
-  {
-    return x == 0 ? 0 : 1;
-  }
+  inline uint128 operator()(const uint128 &x) const { return x == 0 ? 0 : 1; }
 };
 template <typename T>
 struct conj_fn {
@@ -173,10 +170,10 @@ std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
                             add<complex<double>>()));
     */
     registry["add"] = nd::add;
-    registry["subtract"] = make_ufunc(
-        subtract<int32_t>(), subtract<int64_t>(), subtract<int128>(),
-        subtract<float>(), subtract<double>(), subtract<complex<float>>(),
-        subtract<complex<double>>());
+    registry["subtract"] =
+        make_ufunc(subtract<int32_t>(), subtract<int64_t>(), subtract<int128>(),
+                   subtract<float>(), subtract<double>(),
+                   subtract<complex<float>>(), subtract<complex<double>>());
     registry["multiply"] =
         make_ufunc(multiply<int32_t>(), multiply<int64_t>(),
                    /*multiply<int128>(),*/ multiply<uint32_t>(),
@@ -188,10 +185,10 @@ std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
         divide<uint32_t>(), divide<uint64_t>(), /*divide<dynd_uint128>(),*/
         divide<float>(), divide<double>(), divide<complex<float>>(),
         divide<complex<double>>());
-    registry["negative"] = make_ufunc(
-        negative<int32_t>(), negative<int64_t>(), negative<int128>(),
-        negative<float>(), negative<double>(), negative<complex<float>>(),
-        negative<complex<double>>());
+    registry["negative"] =
+        make_ufunc(negative<int32_t>(), negative<int64_t>(), negative<int128>(),
+                   negative<float>(), negative<double>(),
+                   negative<complex<float>>(), negative<complex<double>>());
     registry["sign"] =
         make_ufunc(sign<int32_t>(), sign<int64_t>(), sign<int128>(),
                    sign<float>(), sign<double>());
