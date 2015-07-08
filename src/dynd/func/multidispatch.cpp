@@ -282,93 +282,12 @@ nd::arrfunc nd::functional::multidispatch(intptr_t naf, const arrfunc *child_af)
 
 nd::arrfunc
 nd::functional::multidispatch(const ndt::type &self_tp,
-                              const std::vector<arrfunc> &children,
-                              const std::vector<std::string> &ignore_vars)
-{
-  intptr_t nkwd = children[0].get_type()->get_nkwd();
-
-  ndt::type pos_tp = self_tp.extended<ndt::arrfunc_type>()->get_pos_tuple();
-  ndt::type kwd_tp = self_tp.extended<ndt::arrfunc_type>()->get_kwd_struct();
-
-  ndt::type pattern_tp = ndt::make_arrfunc(
-      pos_tp, ndt::make_struct(
-                  kwd_tp.extended<ndt::base_struct_type>()->get_field_names()(
-                      irange() < nkwd),
-                  kwd_tp.extended<ndt::base_struct_type>()->get_field_types()(
-                      irange() < nkwd)),
-      self_tp.extended<ndt::arrfunc_type>()->get_return_type());
-
-  std::shared_ptr<std::vector<string>> vars(new std::vector<string>);
-  /*
-    for (auto &var : self_tp.get_vars()) {
-      if (std::find(ignore_vars.begin(), ignore_vars.end(), var) ==
-          ignore_vars.end()) {
-        std::cout << var << std::endl;
-        vars->push_back(var);
-      }
-    }
-  */
-
-  bool vars_init = false;
-
-  std::shared_ptr<multidispatch_ck::map_type> map(
-      new multidispatch_ck::map_type);
-  for (const arrfunc &child : children) {
-    std::map<string, ndt::type> tp_vars;
-    if (!pattern_tp.match(child.get_array_type(), tp_vars)) {
-      throw std::invalid_argument("could not match arrfuncs");
-    }
-
-    if (vars_init) {
-      std::vector<string> tmp;
-      for (const auto &pair : tp_vars) {
-        if (std::find(ignore_vars.begin(), ignore_vars.end(),
-                      pair.first.str()) == ignore_vars.end()) {
-          tmp.push_back(pair.first);
-        }
-      }
-
-      if (vars->size() != tmp.size() ||
-          !std::is_permutation(vars->begin(), vars->end(), tmp.begin())) {
-        throw std::runtime_error(
-            "multidispatch arrfuncs have different type variables");
-      }
-    } else {
-      for (const auto &pair : tp_vars) {
-        if (std::find(ignore_vars.begin(), ignore_vars.end(),
-                      pair.first.str()) == ignore_vars.end()) {
-          vars->push_back(pair.first);
-        }
-      }
-      vars_init = true;
-    }
-
-    std::vector<ndt::type> tp_vals;
-    for (const auto &var : *vars) {
-      tp_vals.push_back(tp_vars[var]);
-    }
-
-    (*map)[tp_vals] = child;
-  }
-
-  return arrfunc::make<multidispatch_ck>(
-      self_tp, multidispatch_ck::data_type(map, vars), 0);
-}
-
-nd::arrfunc nd::functional::multidispatch(const ndt::type &self_tp,
-                                          const std::vector<arrfunc> &children)
-{
-  return multidispatch(self_tp, children, {});
-}
-
-nd::arrfunc
-nd::functional::multidispatch(const ndt::type &self_tp,
                               const std::initializer_list<arrfunc> &children,
                               const arrfunc &default_child)
 {
   switch (self_tp.extended<ndt::arrfunc_type>()->get_npos()) {
   case 1:
-    return multidispatch<1>(self_tp, children, default_child);    
+    return multidispatch<1>(self_tp, children, default_child);
   case 2:
     return multidispatch<2>(self_tp, children, default_child);
   default:

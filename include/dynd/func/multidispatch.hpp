@@ -52,13 +52,6 @@ namespace nd {
       return multidispatch(children.size(), children.begin());
     }
 
-    arrfunc multidispatch(const ndt::type &self_tp,
-                          const std::vector<arrfunc> &children,
-                          const std::vector<std::string> &ignore_vars);
-
-    arrfunc multidispatch(const ndt::type &self_tp,
-                          const std::vector<arrfunc> &children);
-
     namespace detail {
 
       template <typename ContainerType,
