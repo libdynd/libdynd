@@ -28,11 +28,14 @@ nd::arrfunc nd::fft::make()
     throw std::runtime_error("no fft enabled");
   }
 
+  return children[0];
+/*
   return functional::multidispatch(
       ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, axes: "
                 "?Fixed * int64, "
                 "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
       children, {"N"});
+*/
 }
 
 nd::arrfunc nd::ifft::make()
@@ -53,11 +56,14 @@ nd::arrfunc nd::ifft::make()
     throw std::runtime_error("no fft enabled");
   }
 
+  return children[0];
+/*
   return functional::multidispatch(
       ndt::type("(M[Fixed**N * complex[float64]], shape: ?N * int64, "
                 "axes: ?Fixed * int64, "
                 "flags: ?int32) -> M[Fixed**N * complex[float64]]"),
       children, {"N"});
+*/
 }
 
 nd::arrfunc nd::rfft::make()
