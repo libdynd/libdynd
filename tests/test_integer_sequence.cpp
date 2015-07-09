@@ -41,6 +41,7 @@ struct outer<index_sequence<I0, I...>, J> {
       type;
 };
 
+/*
 template <typename I, size_t... J>
 struct outer<type_sequence<I>, index_sequence<J...>> {
   typedef type_sequence<typename append<I, J>::type...> type;
@@ -57,6 +58,7 @@ template <typename I0, typename I1, typename... I>
 struct outer<I0, I1, I...> {
   typedef typename outer<typename outer<I0, I1>::type, I...>::type type;
 };
+*/
 
 } // namespace dynd
 
@@ -101,6 +103,7 @@ TEST(IndexSequence, Outer)
           index_sequence<4, 6>, index_sequence<4, 7>, index_sequence<4, 8>,
           index_sequence<4, 9>>>::value));
 
+/*
   EXPECT_TRUE((std::is_same<
       typename outer<index_sequence<0>, index_sequence<1, 2>,
                      index_sequence<3, 4>>::type,
@@ -192,4 +195,5 @@ TEST(IndexSequence, Outer)
           index_sequence<1, 3, 5, 6, 8>, index_sequence<1, 3, 5, 6, 9>,
           index_sequence<1, 3, 5, 7, 8>,
           index_sequence<1, 3, 5, 7, 9>>>::value));
+*/
 }
