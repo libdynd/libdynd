@@ -9,18 +9,18 @@
 using namespace std;
 using namespace dynd;
 
-map<pair<type_id_t, type_id_t>, nd::arrfunc> nd::assign::make_children()
+map<array<type_id_t, 2>, nd::arrfunc> nd::assign::make_children()
 {
   typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id,
                            int32_type_id, int64_type_id, uint8_type_id,
                            uint16_type_id, uint32_type_id, uint64_type_id,
                            float32_type_id, float64_type_id> numeric_type_ids;
 
-  map<pair<type_id_t, type_id_t>, arrfunc> children =
+  map<std::array<type_id_t, 2>, arrfunc> children2 =
       arrfunc::make_all<bind<assign_error_mode, assignment_kernel>::type,
                         numeric_type_ids, numeric_type_ids>();
 
-  return children;
+  return children2;
 }
 
 struct nd::assign nd::assign;
@@ -81,9 +81,9 @@ size_t dynd::make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
                                                  kernel_request_t kernreq,
                                                  assign_error_mode errmode)
 {
-//  std::cout << nd::assign << std::endl;
-  //std::exit(-1);
-  
+  //  std::cout << nd::assign << std::endl;
+  // std::exit(-1);
+
   // Do a table lookup for the built-in range of dynd types
   if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
       src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
