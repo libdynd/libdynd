@@ -314,30 +314,6 @@ struct for_each<F, type_sequence<type_sequence<T0...>, T...>, true> {
       typename for_each<F, type_sequence<T...>, true>::type>::type type;
 };
 
-template <typename...>
-struct outer;
-
-template <typename T0, typename... T>
-struct outer<T0, type_sequence<T...>> {
-  typedef type_sequence<type_sequence<T0, T>...> type;
-};
-
-template <typename T0, typename... T>
-struct outer<type_sequence<T0>, type_sequence<T...>> {
-  typedef type_sequence<type_sequence<T0, T>...> type;
-};
-
-template <typename... T0, typename T>
-struct outer<type_sequence<T0...>, type_sequence<T>> {
-  typedef type_sequence<type_sequence<T0, T>...> type;
-};
-
-template <typename... T0, typename... T>
-struct outer<type_sequence<T0...>, type_sequence<T...>> {
-  typedef type_sequence<
-      typename outer<type_sequence<T0...>, type_sequence<T>>::type...> type;
-};
-
 template <typename T>
 struct type_proxy;
 
