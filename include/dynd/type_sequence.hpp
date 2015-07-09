@@ -130,14 +130,9 @@ template <size_t... I>
 using make_index_sequence =
     typename detail::make_integer_sequence<-1, size_t, I...>::type;
 
-template <typename T, T I0>
-struct front<integer_sequence<T, I0>> {
-  enum { value = I0 };
-};
-
 template <typename T, T I0, T... I>
 struct front<integer_sequence<T, I0, I...>> {
-  enum { value = front<integer_sequence<T, I...>>::value };
+  static const T value = I0;
 };
 
 template <typename T, T I0, T... I>
@@ -158,6 +153,28 @@ struct from<integer_sequence<T, I0, I...>, 1> {
 template <typename T, T I0, T... I, size_t J>
 struct from<integer_sequence<T, I0, I...>, J> {
   typedef typename from<integer_sequence<T, I...>, J - 1>::type type;
+};
+
+template <typename T, T I0, T... I>
+struct to<integer_sequence<T, I0, I...>, 0> {
+  typedef integer_sequence<T> type;
+};
+
+template <typename T>
+struct to<integer_sequence<T>, 0> {
+  typedef integer_sequence<T> type;
+};
+
+template <typename T, T I0, T... I>
+struct to<integer_sequence<T, I0, I...>, 1> {
+  typedef integer_sequence<T, I0> type;
+};
+
+template <typename T, T I0, T... I, size_t J>
+struct to<integer_sequence<T, I0, I...>, J> {
+  typedef typename join<
+      integer_sequence<T, I0>,
+      typename to<integer_sequence<T, I...>, J - 1>::type>::type type;
 };
 
 template <typename... T>
@@ -289,6 +306,49 @@ struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
                          integer_sequence<T, L...>>::type>::type type;
 };
 
+template <typename T>
+struct pop_front {
+  typedef typename from<T, 1>::type type;
+};
+
+template <typename... S>
+struct outer;
+
+template <typename T0, T0 I0, typename T1, T1... I1>
+struct outer<integer_sequence<T0, I0>, integer_sequence<T1, I1...>> {
+  typedef type_sequence<integer_sequence<
+      typename std::common_type<T0, T1>::type, I0, I1>...> type;
+};
+
+template <typename T0, T0... I0, typename T1, T1... I1>
+struct outer<type_sequence<integer_sequence<T0, I0...>>,
+             integer_sequence<T1, I1...>> {
+  typedef type_sequence<integer_sequence<
+      typename std::common_type<T0, T1>::type, I0..., I1>...> type;
+};
+
+template <typename T0, typename... T1>
+struct outer<type_sequence<T0>, type_sequence<T1...>> {
+  typedef type_sequence<type_sequence<T0, T1>...> type;
+};
+
+template <typename... T0, typename... T1>
+struct outer<type_sequence<type_sequence<T0...>>, type_sequence<T1...>> {
+  typedef type_sequence<type_sequence<T0..., T1>...> type;
+};
+
+template <typename S0, typename S1>
+struct outer<S0, S1> {
+  typedef typename join<
+      typename outer<typename to<S0, 1>::type, S1>::type,
+      typename outer<typename pop_front<S0>::type, S1>::type>::type type;
+};
+
+template <typename S0, typename S1, typename... S>
+struct outer<S0, S1, S...> {
+  typedef typename outer<typename outer<S0, S1>::type, S...>::type type;
+};
+
 template <template <typename...> class F, typename T, bool flatten = false>
 struct for_each;
 
@@ -312,30 +372,6 @@ struct for_each<F, type_sequence<type_sequence<T0...>, T...>, true> {
   typedef typename join<
       type_sequence<F<T0...>>,
       typename for_each<F, type_sequence<T...>, true>::type>::type type;
-};
-
-template <typename...>
-struct outer;
-
-template <typename T0, typename... T>
-struct outer<T0, type_sequence<T...>> {
-  typedef type_sequence<type_sequence<T0, T>...> type;
-};
-
-template <typename T0, typename... T>
-struct outer<type_sequence<T0>, type_sequence<T...>> {
-  typedef type_sequence<type_sequence<T0, T>...> type;
-};
-
-template <typename... T0, typename T>
-struct outer<type_sequence<T0...>, type_sequence<T>> {
-  typedef type_sequence<type_sequence<T0, T>...> type;
-};
-
-template <typename... T0, typename... T>
-struct outer<type_sequence<T0...>, type_sequence<T...>> {
-  typedef type_sequence<
-      typename outer<type_sequence<T0...>, type_sequence<T>>::type...> type;
 };
 
 template <typename T>
