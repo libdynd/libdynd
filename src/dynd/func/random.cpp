@@ -10,13 +10,19 @@ using namespace dynd;
 
 // bind<1>::make<KernelType, T...>::type
 
-template <template <type_id_t, typename...> class KernelType>
-using test_kernel = int;
+//template <template <type_id_t, typename...> class KernelType>
+//using uniform_alias_kernel = int;
 
 template <template <type_id_t, typename...> class KernelType, typename... T>
 struct bind_types {
   template <type_id_t TypeID0>
   using type = KernelType<TypeID0, T...>;
+};
+
+template <typename... T>
+struct make_uniform_kernel_alias {
+  template <type_id_t DstTypeID>
+  using type = uniform_kernel<DstTypeID, T...>;
 };
 
 nd::arrfunc nd::random::uniform::make()

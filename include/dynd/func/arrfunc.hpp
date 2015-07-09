@@ -16,8 +16,6 @@
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/type_type.hpp>
 
-#pragma warning(disable:4503)
-
 /**
  * This macro creates a C++ metafunction which can tell you whether a class
  * has a member function called NAME. For example,
