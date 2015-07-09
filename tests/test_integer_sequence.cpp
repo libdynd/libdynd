@@ -36,10 +36,10 @@ struct outer<index_sequence<I0>, index_sequence<J...>> {
   typedef type_sequence<index_sequence<I0, J>...> type;
 };
 
-template <size_t I0, size_t... I, typename J>
-struct outer<index_sequence<I0, I...>, J> {
-  typedef typename join<typename outer<index_sequence<I0>, J>::type,
-                        typename outer<index_sequence<I...>, J>::type>::type
+template <size_t I0, size_t... I, typename... J>
+struct outer<index_sequence<I0, I...>, J...> {
+  typedef typename join<typename outer<index_sequence<I0>, J...>::type,
+                        typename outer<index_sequence<I...>, J...>::type>::type
       type;
 };
 
@@ -70,9 +70,9 @@ TEST(IndexSequence, Outer)
       typename outer<index_sequence<0>, index_sequence<1, 2>>::type,
       type_sequence<index_sequence<0, 1>, index_sequence<0, 2>>>::value));
 
-    EXPECT_TRUE((std::is_same<
-        typename outer<index_sequence<0, 1>, index_sequence<2>>::type,
-        type_sequence<index_sequence<0, 2>, index_sequence<1, 2>>>::value));
+  EXPECT_TRUE((std::is_same<
+      typename outer<index_sequence<0, 1>, index_sequence<2>>::type,
+      type_sequence<index_sequence<0, 2>, index_sequence<1, 2>>>::value));
 
   /*
     EXPECT_TRUE((std::is_same<
