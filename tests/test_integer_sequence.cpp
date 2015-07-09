@@ -18,6 +18,14 @@ using namespace dynd;
 
 namespace dynd {
 
+template <typename I, size_t J>
+struct append;
+
+template <size_t... I, size_t J>
+struct append<index_sequence<I...>, J> {
+  typedef index_sequence<I..., J> type;
+};
+
 template <typename... I>
 struct outer;
 
@@ -35,7 +43,7 @@ struct outer<index_sequence<I0, I...>, J> {
 
 template <typename I, size_t... J>
 struct outer<type_sequence<I>, index_sequence<J...>> {
-  typedef type_sequence<typename join<I, index_sequence<J>>::type...> type;
+  typedef type_sequence<typename append<I, J>::type...> type;
 };
 
 template <typename I0, typename... I, typename J>
