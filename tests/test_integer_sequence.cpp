@@ -88,38 +88,36 @@ TEST(IndexSequence, Outer)
       typename outer<index_sequence<0, 1>, index_sequence<2>>::type,
       type_sequence<index_sequence<0, 2>, index_sequence<1, 2>>>::value));
 
-  /*
-    EXPECT_TRUE((std::is_same<
-        typename outer<index_sequence<0, 1>, index_sequence<2, 3>>::type,
-        type_sequence<index_sequence<0, 2>, index_sequence<0, 3>,
-                      index_sequence<1, 2>, index_sequence<1, 3>>>::value));
+  EXPECT_TRUE((std::is_same<
+      typename outer<index_sequence<0, 1>, index_sequence<2, 3>>::type,
+      type_sequence<index_sequence<0, 2>, index_sequence<0, 3>,
+                    index_sequence<1, 2>, index_sequence<1, 3>>>::value));
 
-    EXPECT_TRUE((std::is_same<
-        typename outer<index_sequence<0, 1>, index_sequence<2, 3, 4>>::type,
-        type_sequence<index_sequence<0, 2>, index_sequence<0, 3>,
-                      index_sequence<0, 4>, index_sequence<1, 2>,
-                      index_sequence<1, 3>, index_sequence<1, 4>>>::value));
+  EXPECT_TRUE((std::is_same<
+      typename outer<index_sequence<0, 1>, index_sequence<2, 3, 4>>::type,
+      type_sequence<index_sequence<0, 2>, index_sequence<0, 3>,
+                    index_sequence<0, 4>, index_sequence<1, 2>,
+                    index_sequence<1, 3>, index_sequence<1, 4>>>::value));
 
-    EXPECT_TRUE((std::is_same<
-        typename outer<index_sequence<0, 1, 2>, index_sequence<3, 4>>::type,
-        type_sequence<index_sequence<0, 3>, index_sequence<0, 4>,
-                      index_sequence<1, 3>, index_sequence<1, 4>,
-                      index_sequence<2, 3>, index_sequence<2, 4>>>::value));
+  EXPECT_TRUE((std::is_same<
+      typename outer<index_sequence<0, 1, 2>, index_sequence<3, 4>>::type,
+      type_sequence<index_sequence<0, 3>, index_sequence<0, 4>,
+                    index_sequence<1, 3>, index_sequence<1, 4>,
+                    index_sequence<2, 3>, index_sequence<2, 4>>>::value));
 
-    EXPECT_TRUE((std::is_same<
-        typename outer<index_sequence<0, 1, 2, 3, 4>,
-                       index_sequence<5, 6, 7, 8, 9>>::type,
-        type_sequence<
-            index_sequence<0, 5>, index_sequence<0, 6>, index_sequence<0, 7>,
-            index_sequence<0, 8>, index_sequence<0, 9>, index_sequence<1, 5>,
-            index_sequence<1, 6>, index_sequence<1, 7>, index_sequence<1, 8>,
-            index_sequence<1, 9>, index_sequence<2, 5>, index_sequence<2, 6>,
-            index_sequence<2, 7>, index_sequence<2, 8>, index_sequence<2, 9>,
-            index_sequence<3, 5>, index_sequence<3, 6>, index_sequence<3, 7>,
-            index_sequence<3, 8>, index_sequence<3, 9>, index_sequence<4, 5>,
-            index_sequence<4, 6>, index_sequence<4, 7>, index_sequence<4, 8>,
-            index_sequence<4, 9>>>::value));
-  */
+  EXPECT_TRUE((std::is_same<
+      typename outer<index_sequence<0, 1, 2, 3, 4>,
+                     index_sequence<5, 6, 7, 8, 9>>::type,
+      type_sequence<
+          index_sequence<0, 5>, index_sequence<0, 6>, index_sequence<0, 7>,
+          index_sequence<0, 8>, index_sequence<0, 9>, index_sequence<1, 5>,
+          index_sequence<1, 6>, index_sequence<1, 7>, index_sequence<1, 8>,
+          index_sequence<1, 9>, index_sequence<2, 5>, index_sequence<2, 6>,
+          index_sequence<2, 7>, index_sequence<2, 8>, index_sequence<2, 9>,
+          index_sequence<3, 5>, index_sequence<3, 6>, index_sequence<3, 7>,
+          index_sequence<3, 8>, index_sequence<3, 9>, index_sequence<4, 5>,
+          index_sequence<4, 6>, index_sequence<4, 7>, index_sequence<4, 8>,
+          index_sequence<4, 9>>>::value));
 
   /*
     EXPECT_TRUE((std::is_same<
