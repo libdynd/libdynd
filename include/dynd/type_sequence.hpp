@@ -130,14 +130,9 @@ template <size_t... I>
 using make_index_sequence =
     typename detail::make_integer_sequence<-1, size_t, I...>::type;
 
-template <typename T, T I0>
-struct front<integer_sequence<T, I0>> {
-  enum { value = I0 };
-};
-
 template <typename T, T I0, T... I>
 struct front<integer_sequence<T, I0, I...>> {
-  enum { value = front<integer_sequence<T, I...>>::value };
+  static const T value = I0;
 };
 
 template <typename T, T I0, T... I>
@@ -158,6 +153,28 @@ struct from<integer_sequence<T, I0, I...>, 1> {
 template <typename T, T I0, T... I, size_t J>
 struct from<integer_sequence<T, I0, I...>, J> {
   typedef typename from<integer_sequence<T, I...>, J - 1>::type type;
+};
+
+template <typename T, T I0, T... I>
+struct to<integer_sequence<T, I0, I...>, 0> {
+  typedef integer_sequence<T> type;
+};
+
+template <typename T>
+struct to<integer_sequence<T>, 0> {
+  typedef integer_sequence<T> type;
+};
+
+template <typename T, T I0, T... I>
+struct to<integer_sequence<T, I0, I...>, 1> {
+  typedef integer_sequence<T, I0> type;
+};
+
+template <typename T, T I0, T... I, size_t J>
+struct to<integer_sequence<T, I0, I...>, J> {
+  typedef typename join<
+      integer_sequence<T, I0>,
+      typename to<integer_sequence<T, I...>, J - 1>::type>::type type;
 };
 
 template <typename... T>

@@ -28,6 +28,11 @@ struct append<index_sequence<I...>, J> {
 };
 */
 
+template <typename T>
+struct pop_front {
+  typedef typename from<T, 1>::type type;
+};
+
 template <typename... I>
 struct outer;
 
@@ -36,11 +41,11 @@ struct outer<index_sequence<I0>, index_sequence<J...>> {
   typedef type_sequence<index_sequence<I0, J>...> type;
 };
 
-template <typename I, typename... J>
-struct outer<I, J...> {
+template <typename I0, typename I1>
+struct outer<I0, I1> {
   typedef typename join<
-      typename outer<index_sequence<at<I, 0>::value>, J...>::type,
-      typename outer<typename from<I, 1>::type, J...>::type>::type type;
+      typename outer<typename to<I0, 1>::type, I1>::type,
+      typename outer<typename pop_front<I0>::type, I1>::type>::type type;
 };
 
 /*
