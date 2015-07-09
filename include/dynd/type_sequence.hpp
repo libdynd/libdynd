@@ -306,6 +306,49 @@ struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>,
                          integer_sequence<T, L...>>::type>::type type;
 };
 
+template <typename T>
+struct pop_front {
+  typedef typename from<T, 1>::type type;
+};
+
+template <typename... S>
+struct outer;
+
+template <typename T0, T0 I0, typename T1, T1... I1>
+struct outer<integer_sequence<T0, I0>, integer_sequence<T1, I1...>> {
+  typedef type_sequence<integer_sequence<
+      typename std::common_type<T0, T1>::type, I0, I1>...> type;
+};
+
+template <typename T0, T0... I0, typename T1, T1... I1>
+struct outer<type_sequence<integer_sequence<T0, I0...>>,
+             integer_sequence<T1, I1...>> {
+  typedef type_sequence<integer_sequence<
+      typename std::common_type<T0, T1>::type, I0..., I1>...> type;
+};
+
+template <typename T0, typename... T1>
+struct outer<type_sequence<T0>, type_sequence<T1...>> {
+  typedef type_sequence<type_sequence<T0, T1>...> type;
+};
+
+template <typename... T0, typename... T1>
+struct outer<type_sequence<type_sequence<T0...>>, type_sequence<T1...>> {
+  typedef type_sequence<type_sequence<T0..., T1>...> type;
+};
+
+template <typename S0, typename S1>
+struct outer<S0, S1> {
+  typedef typename join<
+      typename outer<typename to<S0, 1>::type, S1>::type,
+      typename outer<typename pop_front<S0>::type, S1>::type>::type type;
+};
+
+template <typename S0, typename S1, typename... S>
+struct outer<S0, S1, S...> {
+  typedef typename outer<typename outer<S0, S1>::type, S...>::type type;
+};
+
 template <template <typename...> class F, typename T, bool flatten = false>
 struct for_each;
 
