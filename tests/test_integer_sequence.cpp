@@ -36,12 +36,21 @@ struct outer<index_sequence<I0>, index_sequence<J...>> {
   typedef type_sequence<index_sequence<I0, J>...> type;
 };
 
+template <typename I, typename... J>
+struct outer<I, J...> {
+  typedef typename join<
+      typename outer<index_sequence<at<I, 0>::value>, J...>::type,
+      typename outer<typename from<I, 1>::type, J...>::type>::type type;
+};
+
+/*
 template <size_t I0, size_t... I, typename... J>
 struct outer<index_sequence<I0, I...>, J...> {
   typedef typename join<typename outer<index_sequence<I0>, J...>::type,
                         typename outer<index_sequence<I...>, J...>::type>::type
       type;
 };
+*/
 
 /*
 template <typename I, size_t... J>
