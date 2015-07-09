@@ -8,21 +8,10 @@
 using namespace std;
 using namespace dynd;
 
-// bind<1>::make<KernelType, T...>::type
-
-//template <template <type_id_t, typename...> class KernelType>
-//using uniform_alias_kernel = int;
-
-template <template <type_id_t, typename...> class KernelType, typename... T>
-struct bind_types {
-  template <type_id_t TypeID0>
-  using type = KernelType<TypeID0, T...>;
-};
-
-template <typename... T>
-struct make_uniform_kernel_alias {
+template <typename GeneratorType>
+struct uniform_kernel_alias {
   template <type_id_t DstTypeID>
-  using type = uniform_kernel<DstTypeID, T...>;
+  using type = nd::random::uniform_kernel<DstTypeID, GeneratorType>;
 };
 
 nd::arrfunc nd::random::uniform::make()
@@ -34,11 +23,9 @@ nd::arrfunc nd::random::uniform::make()
 
   std::random_device random_device;
 
-  typedef test_kernel<uniform_kernel> X;
-
-  auto children = arrfunc::make_all<
-      bind_types<uniform_kernel, std::default_random_engine>::type,
-      numeric_type_ids>();
+  auto children =
+      arrfunc::make_all<uniform_kernel_alias<std::default_random_engine>::type,
+                        numeric_type_ids>();
 
   return functional::elwise(functional::multidispatch<1>(
       ndt::type("(a: ?R, b: ?R) -> R"), std::move(children), arrfunc(), {-1}));
