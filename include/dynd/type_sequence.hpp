@@ -56,6 +56,8 @@ struct integer_sequence {
   enum { size = sizeof...(I) };
   typedef T type;
 
+  operator std::array<T, size>() const { return {{I...}}; }
+
   static const std::array<T, size> &vals()
   {
     static const std::array<T, size> vals = {{I...}};
@@ -63,8 +65,28 @@ struct integer_sequence {
   }
 };
 
-template <size_t... I>
+template <typename T>
+struct is_integer_sequence {
+  static const bool value = false;
+};
+
+template <typename T, T... I>
+struct is_integer_sequence<integer_sequence<T, I...>> {
+  static const bool value = true;
+};
+
+template <std::size_t... I>
 using index_sequence = integer_sequence<size_t, I...>;
+
+template <typename T>
+struct is_index_sequence {
+  static const bool value = false;
+};
+
+template <std::size_t... I>
+struct is_index_sequence<index_sequence<I...>> {
+  static const bool value = true;
+};
 
 template <typename T, T I0, T... I>
 struct at<integer_sequence<T, I0, I...>, 0> {
@@ -183,6 +205,16 @@ struct type_sequence {
 };
 
 template <typename T>
+struct is_type_sequence {
+  static const bool value = false;
+};
+
+template <typename... T>
+struct is_type_sequence<type_sequence<T...>> {
+  static const bool value = true;
+};
+
+template <typename T>
 struct back<type_sequence<T>> {
   typedef T type;
 };
@@ -200,6 +232,11 @@ struct second_back<type_sequence<S, T>> {
 template <typename T0, typename T1, typename... T>
 struct second_back<type_sequence<T0, T1, T...>> {
   typedef typename second_back<type_sequence<T1, T...>>::type type;
+};
+
+template <typename T0, typename... T>
+struct front<type_sequence<T0, T...>> {
+  typedef T0 type;
 };
 
 template <typename T0, typename... T>
@@ -349,30 +386,27 @@ struct outer<S0, S1, S...> {
   typedef typename outer<typename outer<S0, S1>::type, S...>::type type;
 };
 
-template <template <typename...> class F, typename T, bool flatten = false>
-struct for_each;
+template <typename S, typename A0, typename... A>
+typename std::enable_if<S::size == 1 && is_integer_sequence<S>::value,
+                        void>::type
+for_each(A0 &&a0, A &&... a)
+{
+  a0.template on_each<front<S>::value>(std::forward<A>(a)...);
+}
 
-template <template <typename...> class F, typename T0>
-struct for_each<F, type_sequence<T0>, false> {
-  typedef type_sequence<F<T0>> type;
-};
+template <typename S, typename A0, typename... A>
+typename std::enable_if<S::size == 1 && is_type_sequence<S>::value, void>::type
+for_each(A0 &&a0, A &&... a)
+{
+  a0.template on_each<typename front<S>::type>(std::forward<A>(a)...);
+}
 
-template <template <typename...> class F, typename T0, typename... T>
-struct for_each<F, type_sequence<T0, T...>, false> {
-  typedef type_sequence<F<T0>, F<T>...> type;
-};
-
-template <template <typename...> class F, typename... T0>
-struct for_each<F, type_sequence<type_sequence<T0...>>, true> {
-  typedef type_sequence<F<T0...>> type;
-};
-
-template <template <typename...> class F, typename... T0, typename... T>
-struct for_each<F, type_sequence<type_sequence<T0...>, T...>, true> {
-  typedef typename join<
-      type_sequence<F<T0...>>,
-      typename for_each<F, type_sequence<T...>, true>::type>::type type;
-};
+template <typename S, typename... A>
+typename std::enable_if<(S::size > 1), void>::type for_each(A &&... a)
+{
+  for_each<typename to<S, 1>::type>(std::forward<A>(a)...);
+  for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
+}
 
 template <typename T>
 struct type_proxy;

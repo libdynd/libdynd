@@ -22,6 +22,24 @@ class IntegerSequence : public ::testing::Test {
 
 TYPED_TEST_CASE_P(IntegerSequence);
 
+template <typename T>
+struct accumulator {
+  template <T I>
+  void on_each(T &res) const
+  {
+    res += I;
+  }
+};
+
+TYPED_TEST_P(IntegerSequence, ForEach)
+{
+  typedef integer_sequence<TypeParam, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9> S;
+
+  TypeParam res = 0;
+  for_each<S>(accumulator<TypeParam>(), res);
+  EXPECT_EQ(static_cast<TypeParam>(45), res);
+}
+
 TYPED_TEST_P(IntegerSequence, Outer)
 {
   EXPECT_TRUE(
@@ -232,5 +250,5 @@ TYPED_TEST_P(IntegerSequence, Outer)
                     integer_sequence<TypeParam, 1, 3, 5, 7, 9>>>::value));
 }
 
-REGISTER_TYPED_TEST_CASE_P(IntegerSequence, Outer);
-INSTANTIATE_TYPED_TEST_CASE_P(SizeType, IntegerSequence, std::size_t);
+REGISTER_TYPED_TEST_CASE_P(IntegerSequence, ForEach, Outer);
+INSTANTIATE_TYPED_TEST_CASE_P(SizeType, IntegerSequence, size_t);
