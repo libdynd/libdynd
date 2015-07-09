@@ -8,6 +8,8 @@
 using namespace std;
 using namespace dynd;
 
+// bind<1>::make<KernelType, T...>::type
+
 template <template <type_id_t, typename...> class KernelType, typename... T>
 struct bind_types {
   template <type_id_t TypeID0>
