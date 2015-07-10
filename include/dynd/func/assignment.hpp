@@ -21,7 +21,7 @@ namespace nd {
     static arrfunc make()
     {
       for (const auto &pair : T::make_children()) {
-        children[pair.first.first][pair.first.second] = pair.second;
+        children[pair.first[0]][pair.first[1]] = pair.second;
       }
 
       return functional::multidispatch(dynd::ndt::type("(Any) -> Any"),
@@ -68,7 +68,7 @@ namespace nd {
   */
 
   extern struct assign : declop<assign, 2> {
-    static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_children();
+    static std::map<std::array<type_id_t, 2>, arrfunc> make_children();
   } assign;
 
 } // namespace dynd::nd

@@ -20,14 +20,14 @@ namespace nd {
     static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
     static arrfunc default_child;
 
-    static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_children()
+    static std::map<std::array<type_id_t, 2>, arrfunc> make_children()
     {
       typedef type_id_sequence<
           bool_type_id, int8_type_id, int16_type_id, int32_type_id,
           int64_type_id, uint8_type_id, uint16_type_id, uint32_type_id,
           uint64_type_id, float32_type_id, float64_type_id> numeric_type_ids;
 
-      std::map<std::pair<type_id_t, type_id_t>, arrfunc> children =
+      std::map<std::array<type_id_t, 2>, arrfunc> children =
           arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>();
 
       arrfunc self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
@@ -36,7 +36,7 @@ namespace nd {
         for (type_id_t i1 : dim_type_ids::vals()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
               {ndt::type(i0), ndt::type(i1)}, ndt::type("Any"));
-          children[std::make_pair(i0, i1)] = functional::elwise(child_tp, self);
+          children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
 
@@ -45,14 +45,14 @@ namespace nd {
         for (type_id_t i1 : type_ids::vals()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
               {ndt::type(i0), ndt::type(i1)}, ndt::type("Any"));
-          children[std::make_pair(i0, i1)] = functional::elwise(child_tp, self);
+          children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
 
-      children[std::make_pair(string_type_id, string_type_id)] =
+      children[{{string_type_id, string_type_id}}] =
           arrfunc::make<K<string_type_id, string_type_id>>(
               ndt::type("(string, string) -> int32"));
-      children[std::make_pair(fixed_string_type_id, fixed_string_type_id)] =
+      children[{{fixed_string_type_id, fixed_string_type_id}}] =
           arrfunc::make<K<fixed_string_type_id, fixed_string_type_id>>(
               ndt::type("(FixedString, FixedString) -> int32"));
 
@@ -61,9 +61,9 @@ namespace nd {
 
     static arrfunc make()
     {
-      for (const std::pair<std::pair<type_id_t, type_id_t>, arrfunc> &pair :
+      for (const std::pair<std::array<type_id_t, 2>, arrfunc> &pair :
            F::make_children()) {
-        children[pair.first.first][pair.first.second] = pair.second;
+        children[pair.first[0]][pair.first[1]] = pair.second;
       }
 
       return functional::multidispatch(ndt::type("(Any, Any) -> Any"), children,
@@ -86,19 +86,19 @@ namespace nd {
   } less_equal;
 
   extern struct equal : comparison_operator<equal, equal_kernel, 2> {
-    static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_children()
+    static std::map<std::array<type_id_t, 2>, arrfunc> make_children()
     {
       std::cout << "equal::make_children (start)" << std::endl;
 
-      std::map<std::pair<type_id_t, type_id_t>, arrfunc> children =
+      std::map<std::array<type_id_t, 2>, arrfunc> children =
           comparison_operator::make_children();
-      children[std::make_pair(tuple_type_id, tuple_type_id)] =
+      children[{{tuple_type_id, tuple_type_id}}] =
           arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("((...), (...)) -> int32"));
-      children[std::make_pair(struct_type_id, struct_type_id)] =
+      children[{{struct_type_id, struct_type_id}}] =
           arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("({...}, {...}) -> int32"));
-      children[std::make_pair(type_type_id, type_type_id)] =
+      children[{{type_type_id, type_type_id}}] =
           arrfunc::make<equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"));
 
@@ -110,17 +110,17 @@ namespace nd {
 
   extern struct not_equal
       : comparison_operator<not_equal, not_equal_kernel, 2> {
-    static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_children()
+    static std::map<std::array<type_id_t, 2>, arrfunc> make_children()
     {
-      std::map<std::pair<type_id_t, type_id_t>, arrfunc> children =
+      std::map<std::array<type_id_t, 2>, arrfunc> children =
           comparison_operator::make_children();
-      children[std::make_pair(tuple_type_id, tuple_type_id)] =
+      children[{{tuple_type_id, tuple_type_id}}] =
           arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("((...), (...)) -> int32"));
-      children[std::make_pair(struct_type_id, struct_type_id)] =
+      children[{{struct_type_id, struct_type_id}}] =
           arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("({...}, {...}) -> int32"));
-      children[std::make_pair(type_type_id, type_type_id)] =
+      children[{{type_type_id, type_type_id}}] =
           arrfunc::make<not_equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"));
 

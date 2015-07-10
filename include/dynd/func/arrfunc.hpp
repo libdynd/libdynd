@@ -763,20 +763,8 @@ struct as_array<nd::array &> {
 namespace nd {
   namespace detail {
 
-    template <typename... IDTypes>
+    template <template <type_id_t...> class KernelType>
     struct make_all;
-
-    template <typename IDType0>
-    struct make_all<IDType0> {
-      template <template <IDType0> class T>
-      struct type;
-    };
-
-    template <typename IDType0, typename IDType1>
-    struct make_all<IDType0, IDType1> {
-      template <template <IDType0, IDType1> class T, typename IDSequence0>
-      struct type;
-    };
 
   } // namespace dynd::nd::detail
 
@@ -1169,22 +1157,22 @@ namespace nd {
       }
     }
 
-    template <template <type_id_t> class T, typename I0>
+    template <template <type_id_t> class KernelType, typename I0>
     static std::map<type_id_t, arrfunc> make_all()
     {
       std::map<type_id_t, arrfunc> arrfuncs;
-      index_proxy<I0>::for_each(detail::make_all<type_id_t>::type<T>(),
-                                arrfuncs);
+      for_each<I0>(detail::make_all<KernelType>(), arrfuncs);
 
       return arrfuncs;
     }
 
-    template <template <type_id_t, type_id_t> class T, typename I0, typename I1>
-    static std::map<std::pair<type_id_t, type_id_t>, arrfunc> make_all()
+    template <template <type_id_t, type_id_t, type_id_t...> class KernelType,
+              typename I0, typename I1, typename... I>
+    static std::map<std::array<type_id_t, 2 + sizeof...(I)>, arrfunc> make_all()
     {
-      std::map<std::pair<type_id_t, type_id_t>, arrfunc> arrfuncs;
-      index_proxy<I0>::for_each(
-          detail::make_all<type_id_t, type_id_t>::type<T, I1>(), arrfuncs);
+      std::map<std::array<type_id_t, 2 + sizeof...(I)>, arrfunc> arrfuncs;
+      for_each<typename outer<I0, I1, I...>::type>(
+          detail::make_all<KernelType>(), arrfuncs);
 
       return arrfuncs;
     }
@@ -1192,33 +1180,28 @@ namespace nd {
 
   namespace detail {
 
-    template <typename IDType>
-    template <template <IDType> class T>
-    struct make_all<IDType>::type {
-      template <IDType TypeID0>
-      void on_each(std::map<IDType, arrfunc> &arrfuncs)
-      {
-        arrfuncs[TypeID0] = arrfunc::make<T<TypeID0>>(0);
-      }
-    };
+    template <template <type_id_t...> class KernelType>
+    struct make_all {
+      template <typename TypeIDSequence>
+      struct apply;
 
-    template <typename IDType0, typename IDType1>
-    template <template <IDType0, IDType1> class T, typename I1>
-    struct make_all<IDType0, IDType1>::type {
-      template <IDType0 J0>
-      struct type2 {
-        template <IDType1 J1>
-        void on_each(std::map<std::pair<IDType0, IDType1>, arrfunc> &children)
-        {
-          children[std::make_pair(J0, J1)] = arrfunc::make<T<J0, J1>>(0);
-        }
+      template <type_id_t... I>
+      struct apply<type_id_sequence<I...>> {
+        typedef KernelType<I...> type;
       };
 
-      template <IDType0 I0>
-      void
-      on_each(std::map<std::pair<IDType0, IDType1>, arrfunc> &children) const
+      template <type_id_t TypeID>
+      void on_each(std::map<type_id_t, arrfunc> &arrfuncs) const
       {
-        index_proxy<I1>::for_each(type2<I0>(), children);
+        arrfuncs[TypeID] = arrfunc::make<KernelType<TypeID>>(0);
+      }
+
+      template <typename TypeIDSequence>
+      void on_each(std::map<std::array<type_id_t, TypeIDSequence::size>,
+                            arrfunc> &arrfuncs) const
+      {
+        arrfuncs[TypeIDSequence()] =
+            arrfunc::make<typename apply<TypeIDSequence>::type>(0);
       }
     };
 
