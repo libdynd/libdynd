@@ -98,25 +98,28 @@ namespace nd {
         data(const arrfunc &child) : child(child) {}
       };
 
-/*
-      static void
-      data_init(const arrfunc_type_data *self,
-                const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                const char *DYND_UNUSED(static_data),
-                size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                intptr_t nsrc, const ndt::type *src_tp, array &DYND_UNUSED(kwds),
-                const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        static_data &static_data =
-            *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
+      /*
+            static void
+            data_init(const arrfunc_type_data *self,
+                      const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                      const char *DYND_UNUSED(static_data),
+                      size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                      intptr_t nsrc, const ndt::type *src_tp, array
+         &DYND_UNUSED(kwds),
+                      const std::map<nd::string, ndt::type>
+         &DYND_UNUSED(tp_vars))
+            {
+              static_data &static_data =
+                  *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
 
-        const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
-        if (child->data_init != NULL) {
-          child->data_init(child, self_tp, NULL, 0, NULL, nsrc, src_tp, kwds,
-                           tp_vars);
-        }
-      }
-*/
+              const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
+              if (child->data_init != NULL) {
+                child->data_init(child, self_tp, NULL, 0, NULL, nsrc, src_tp,
+         kwds,
+                                 tp_vars);
+              }
+            }
+      */
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
@@ -131,16 +134,15 @@ namespace nd {
             *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
 
         const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
-        if (dst_tp.is_null()) {
-          const ndt::type &child_dst_tp = child.get_type()->get_return_type();
-          if (child_dst_tp.is_symbolic()) {
-            child.get()->resolve_dst_type(child.get(), child.get_type(),
-                                          child.get()->static_data,
-                                          child.get()->data_size, data, dst_tp,
-                                          nsrc, src_tp, kwds, tp_vars);
-          } else {
-            dst_tp = child_dst_tp;
-          }
+
+        const ndt::type &child_dst_tp = child.get_type()->get_return_type();
+        if (child_dst_tp.is_symbolic()) {
+          child.get()->resolve_dst_type(child.get(), child.get_type(),
+                                        child.get()->static_data,
+                                        child.get()->data_size, data, dst_tp,
+                                        nsrc, src_tp, kwds, tp_vars);
+        } else {
+          dst_tp = child_dst_tp;
         }
       }
 

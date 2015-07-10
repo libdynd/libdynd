@@ -77,87 +77,77 @@ namespace nd {
           }
         }
 
-        if (dst_tp.is_null()) {
-          child_af->resolve_dst_type(
-              child_af, child_af_tp, NULL, 0, NULL, child_dst_tp, nsrc,
-              child_src_tp.empty() ? NULL : child_src_tp.data(), kwds, tp_vars);
+        child_af->resolve_dst_type(
+            child_af, child_af_tp, NULL, 0, NULL, child_dst_tp, nsrc,
+            child_src_tp.empty() ? NULL : child_src_tp.data(), kwds, tp_vars);
 
-          // ...
-          //        new (data) ndt::type(child_dst_tp);
+        // ...
+        //        new (data) ndt::type(child_dst_tp);
 
-          if (nsrc == 0) {
-            dst_tp = tp_vars.at("Dims")
-                         .extended<ndt::dim_fragment_type>()
-                         ->apply_to_dtype(child_dst_tp.without_memory_type());
-            if (child_dst_tp.get_kind() == memory_kind) {
-              dst_tp = child_dst_tp.extended<ndt::base_memory_type>()
-                           ->with_replaced_storage_type(dst_tp);
-            }
-
-            return;
+        if (nsrc == 0) {
+          dst_tp = tp_vars.at("Dims")
+                       .extended<ndt::dim_fragment_type>()
+                       ->apply_to_dtype(child_dst_tp.without_memory_type());
+          if (child_dst_tp.get_kind() == memory_kind) {
+            dst_tp = child_dst_tp.extended<ndt::base_memory_type>()
+                         ->with_replaced_storage_type(dst_tp);
           }
 
-          // Then build the type for the rest of the dimensions
-          if (ndim > 0) {
-            dimvector shape(ndim), tmp_shape(ndim);
-            for (intptr_t i = 0; i < ndim; ++i) {
-              shape[i] = -1;
-            }
-            for (intptr_t i = 0; i < nsrc; ++i) {
-              intptr_t ndim_i = src_tp[i].get_ndim() -
-                                child_af_tp->get_pos_type(i).get_ndim();
-              if (ndim_i > 0) {
-                ndt::type tp = src_tp[i].without_memory_type();
-                intptr_t *shape_i = shape.get() + (ndim - ndim_i);
-                intptr_t shape_at_j;
-                for (intptr_t j = 0; j < ndim_i; ++j) {
-                  switch (tp.get_type_id()) {
-                  case fixed_dim_type_id:
-                    shape_at_j = tp.extended<ndt::fixed_dim_type>()
-                                     ->get_fixed_dim_size();
-                    if (shape_i[j] < 0 || shape_i[j] == 1) {
-                      if (shape_at_j != 1) {
-                        shape_i[j] = shape_at_j;
-                      }
-                    } else if (shape_i[j] != shape_at_j && shape_at_j != 1) {
-                      throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
+          return;
+        }
+
+        // Then build the type for the rest of the dimensions
+        if (ndim > 0) {
+          dimvector shape(ndim), tmp_shape(ndim);
+          for (intptr_t i = 0; i < ndim; ++i) {
+            shape[i] = -1;
+          }
+          for (intptr_t i = 0; i < nsrc; ++i) {
+            intptr_t ndim_i =
+                src_tp[i].get_ndim() - child_af_tp->get_pos_type(i).get_ndim();
+            if (ndim_i > 0) {
+              ndt::type tp = src_tp[i].without_memory_type();
+              intptr_t *shape_i = shape.get() + (ndim - ndim_i);
+              intptr_t shape_at_j;
+              for (intptr_t j = 0; j < ndim_i; ++j) {
+                switch (tp.get_type_id()) {
+                case fixed_dim_type_id:
+                  shape_at_j =
+                      tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+                  if (shape_i[j] < 0 || shape_i[j] == 1) {
+                    if (shape_at_j != 1) {
+                      shape_i[j] = shape_at_j;
                     }
-                    break;
-                  case var_dim_type_id:
-                    break;
-                  default:
+                  } else if (shape_i[j] != shape_at_j && shape_at_j != 1) {
                     throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
                   }
-                  tp = tp.get_dtype(tp.get_ndim() - 1);
+                  break;
+                case var_dim_type_id:
+                  break;
+                default:
+                  throw broadcast_error(ndim, shape.get(), ndim_i, shape_i);
                 }
+                tp = tp.get_dtype(tp.get_ndim() - 1);
               }
-            }
-
-            ndt::type tp = child_dst_tp.without_memory_type();
-            for (intptr_t i = ndim - 1; i >= 0; --i) {
-              if (shape[i] == -1) {
-                tp = ndt::make_var_dim(tp);
-              } else {
-                tp = ndt::make_fixed_dim(shape[i], tp);
-              }
-            }
-            if (child_dst_tp.get_kind() == memory_kind) {
-              child_dst_tp = child_dst_tp.extended<ndt::base_memory_type>()
-                                 ->with_replaced_storage_type(tp);
-            } else {
-              child_dst_tp = tp;
             }
           }
-          dst_tp = child_dst_tp;
-        } else {
-          // dst_tp was not NULL, so it already matched against the type
-          // signature.
-          child_dst_tp =
-              dst_tp.get_dtype(child_af_tp->get_return_type().get_ndim());
-          child_af->resolve_dst_type(
-              child_af, child_af_tp, NULL, 0, NULL, child_dst_tp, nsrc,
-              child_src_tp.empty() ? NULL : child_src_tp.data(), kwds, tp_vars);
+
+          ndt::type tp = child_dst_tp.without_memory_type();
+          for (intptr_t i = ndim - 1; i >= 0; --i) {
+            if (shape[i] == -1) {
+              tp = ndt::make_var_dim(tp);
+            } else {
+              tp = ndt::make_fixed_dim(shape[i], tp);
+            }
+          }
+          if (child_dst_tp.get_kind() == memory_kind) {
+            child_dst_tp = child_dst_tp.extended<ndt::base_memory_type>()
+                               ->with_replaced_storage_type(tp);
+          } else {
+            child_dst_tp = tp;
+          }
         }
+        dst_tp = child_dst_tp;
       }
 
       static intptr_t instantiate(

@@ -896,18 +896,23 @@ namespace nd {
       // Construct the destination array, if it was not provided
       ndt::type dst_tp;
       if (dst.is_null()) {
+        dst_tp = self_tp->get_return_type();
+
         // Resolve the destination type
-        if (self->resolve_dst_type != NULL) {
+        if (dst_tp.is_symbolic()) {
+          if (self->resolve_dst_type == NULL) {
+            throw std::runtime_error(
+                "dst_tp is symbolic, but resolve_dst_type is NULL");
+          }
+
           self->resolve_dst_type(
               self, self_tp, get()->static_data, get()->data_size, data.get(),
               dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
               kwds_as_array, tp_vars);
-        } else {
-          dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
         }
 
         dst = empty(dst_tp);
-      } else if (self->resolve_dst_type != NULL) {
+      } else {
         dst_tp = dst.get_type();
       }
 
