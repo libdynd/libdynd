@@ -16,82 +16,15 @@
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/type_type.hpp>
 
-/**
- * This macro creates a C++ metafunction which can tell you whether a class
- * has a member function called NAME. For example,
- *
- *   DYND_HAS_MEM_FUNC(add);
- *
- * will create a metafunction called `has_add`. The metafunction can be used
- * as `has_add<MyClass>::value`.
- */
-#define DYND_HAS_MEM_FUNC(NAME)                                                \
-  template <typename T, typename S>                                            \
-  class DYND_PP_PASTE(has_, NAME) {                                            \
-    template <typename U, U>                                                   \
-    struct test_type;                                                          \
-    typedef char true_type[1];                                                 \
-    typedef char false_type[2];                                                \
-                                                                               \
-    template <typename U>                                                      \
-    static true_type &test(test_type<S, &U::NAME> *);                          \
-    template <typename>                                                        \
-    static false_type &test(...);                                              \
-                                                                               \
-  public:                                                                      \
-    static bool const value = sizeof(test<T>(0)) == sizeof(true_type);         \
-  }
-
-/**
- * This macro creates a C++ metafunction which can give you a member function
- * or NULL if there is no member function. This is generally intended for
- * extracting static member functions.
- */
-#define DYND_GET_MEM_FUNC(TYPE, NAME)                                          \
-  template <typename T, bool DYND_PP_PASTE(has_, NAME)>                        \
-  typename std::enable_if<DYND_PP_PASTE(has_, NAME), TYPE>::type               \
-      DYND_PP_PASTE(get_, NAME)()                                              \
-  {                                                                            \
-    return DYND_PP_META_SCOPE(T, NAME);                                        \
-  }                                                                            \
-                                                                               \
-  template <typename T, bool DYND_PP_PASTE(has_, NAME)>                        \
-  typename std::enable_if<!DYND_PP_PASTE(has_, NAME), TYPE>::type              \
-      DYND_PP_PASTE(get_, NAME)()                                              \
-  {                                                                            \
-    return NULL;                                                               \
-  }                                                                            \
-                                                                               \
-  template <typename T>                                                        \
-  TYPE DYND_PP_PASTE(get_, NAME)()                                             \
-  {                                                                            \
-    return DYND_PP_PASTE(                                                      \
-        get_, NAME)<T, DYND_PP_PASTE(has_, NAME)<T, TYPE>::value>();           \
-  }
-
 namespace dynd {
 
 namespace ndt {
   ndt::type make_option(const ndt::type &value_tp);
 }
 
-namespace detail {
-  // Each of these creates the has_NAME metapredicate
-  DYND_HAS_MEM_FUNC(make_type);
-  DYND_HAS_MEM_FUNC(data_init);
-  DYND_HAS_MEM_FUNC(instantiate);
-  DYND_HAS_MEM_FUNC(resolve_dst_type);
-  DYND_HAS_MEM_FUNC(static_data_free);
-  // Each of these creates the get_NAME metafunction
-  DYND_GET_MEM_FUNC(arrfunc_make_type_t, make_type);
-  DYND_GET_MEM_FUNC(arrfunc_data_init_t, data_init);
-  DYND_GET_MEM_FUNC(arrfunc_instantiate_t, instantiate);
-  DYND_GET_MEM_FUNC(arrfunc_resolve_dst_type_t, resolve_dst_type);
-  DYND_GET_MEM_FUNC(arrfunc_static_data_free_t, static_data_free);
-} // namespace dynd::detail
-
 namespace nd {
   namespace detail {
+
     /**
      * Presently, there are some specially treated keyword arguments in
      * arrfuncs. The "dst_tp" keyword argument always tells the desired
@@ -763,6 +696,18 @@ struct as_array<nd::array &> {
 namespace nd {
   namespace detail {
 
+    DYND_HAS(data_size);
+    DYND_HAS(make_type);
+    DYND_HAS(data_init);
+    DYND_HAS(resolve_dst_type);
+    DYND_HAS(instantiate);
+    DYND_HAS(static_data_free);
+
+    DYND_GET(data_init, arrfunc_data_init_t, NULL);
+    DYND_GET(resolve_dst_type, arrfunc_resolve_dst_type_t, NULL);
+    DYND_GET(instantiate, arrfunc_instantiate_t, NULL);
+    DYND_GET(static_data_free, arrfunc_static_data_free_t, NULL);
+
     template <template <type_id_t...> class KernelType>
     struct make_all;
 
@@ -781,7 +726,7 @@ namespace nd {
   public:
     arrfunc() {}
 
-    arrfunc(const ndt::type &self_tp, size_t data_size,
+    arrfunc(const ndt::type &self_tp, std::size_t data_size,
             arrfunc_instantiate_t instantiate, arrfunc_data_init_t data_init,
             arrfunc_resolve_dst_type_t resolve_dst_type)
         : m_value(empty(self_tp))
@@ -797,9 +742,10 @@ namespace nd {
           data_size, instantiate, data_init, resolve_dst_type);
     }
 
-    template <typename T>
-    arrfunc(const ndt::type &self_tp, T &&static_data, size_t data_size,
-            arrfunc_instantiate_t instantiate, arrfunc_data_init_t data_init,
+    template <typename StaticDataType>
+    arrfunc(const ndt::type &self_tp, StaticDataType &&static_data,
+            std::size_t data_size, arrfunc_instantiate_t instantiate,
+            arrfunc_data_init_t data_init,
             arrfunc_resolve_dst_type_t resolve_dst_type,
             arrfunc_static_data_free_t static_data_free = NULL)
         : m_value(empty(self_tp))
@@ -812,8 +758,8 @@ namespace nd {
       */
 
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
-          std::forward<T>(static_data), data_size, instantiate, data_init,
-          resolve_dst_type, static_data_free);
+          std::forward<StaticDataType>(static_data), data_size, instantiate,
+          data_init, resolve_dst_type, static_data_free);
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -1089,47 +1035,107 @@ namespace nd {
       return (*this)(std::forward<A>(a)..., kwds());
     }
 
-    /**
-     * T is a kernel type (e.g. a child class of base_kernel or
-     * base_virtual_kernel),
-     * and this assembles an arrfunc out of the interface functions defined by
-     * it.
-     */
-    template <typename T>
-    static arrfunc make(const ndt::type &self_tp, size_t data_size)
+    template <typename KernelType>
+    static typename std::enable_if<detail::has_make_type<KernelType>::value &&
+                                       detail::has_data_size<KernelType>::value,
+                                   arrfunc>::type
+    make()
     {
-      return arrfunc(self_tp, data_size, dynd::detail::get_instantiate<T>(),
-                     dynd::detail::get_data_init<T>(),
-                     dynd::detail::get_resolve_dst_type<T>());
+      return arrfunc(KernelType::make_type(), KernelType::data_size,
+                     detail::get_instantiate<KernelType>(),
+                     detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>());
     }
 
-    template <typename T>
-    static arrfunc make(size_t data_size)
+    template <typename KernelType, typename StaticDataType>
+    static typename std::enable_if<detail::has_make_type<KernelType>::value &&
+                                       detail::has_data_size<KernelType>::value,
+                                   arrfunc>::type
+    make(StaticDataType &&static_data)
     {
-      return make<T>(T::make_type(), data_size);
+      return arrfunc(
+          KernelType::make_type(), std::forward<StaticDataType>(static_data),
+          KernelType::data_size, detail::get_instantiate<KernelType>(),
+          detail::get_data_init<KernelType>(),
+          detail::get_resolve_dst_type<KernelType>());
     }
 
-    template <typename T>
-    static void make(arrfunc &res, size_t data_size)
+    template <typename KernelType>
+    static typename std::enable_if<
+        detail::has_make_type<KernelType>::value &&
+            !detail::has_data_size<KernelType>::value,
+        arrfunc>::type
+    make(std::size_t data_size)
     {
-      res = make<T>(T::make_type(), data_size);
+      return arrfunc(KernelType::make_type(), data_size,
+                     detail::get_instantiate<KernelType>(),
+                     detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>());
     }
 
-    template <typename T, typename static_data_type>
-    static arrfunc make(const ndt::type &self_tp,
-                        static_data_type &&static_data, size_t data_size)
+    template <typename KernelType, typename StaticDataType>
+    static typename std::enable_if<
+        detail::has_make_type<KernelType>::value &&
+            !detail::has_data_size<KernelType>::value,
+        arrfunc>::type
+    make(StaticDataType &&static_data, std::size_t data_size)
     {
-      return arrfunc(self_tp, std::forward<static_data_type>(static_data),
-                     data_size, dynd::detail::get_instantiate<T>(),
-                     dynd::detail::get_data_init<T>(),
-                     dynd::detail::get_resolve_dst_type<T>());
+      return arrfunc(KernelType::make_type(),
+                     std::forward<StaticDataType>(static_data), data_size,
+                     detail::get_instantiate<KernelType>(),
+                     detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>());
     }
 
-    template <typename T, typename static_data_type>
-    static arrfunc make(static_data_type &&static_data)
+    template <typename KernelType>
+    static typename std::enable_if<!detail::has_make_type<KernelType>::value &&
+                                       detail::has_data_size<KernelType>::value,
+                                   arrfunc>::type
+    make(const ndt::type &self_tp)
     {
-      return arrfunc::make<T>(T::make_type(),
-                              std::forward<static_data_type>(static_data), 0);
+      return arrfunc(self_tp, KernelType::data_size,
+                     detail::get_instantiate<KernelType>(),
+                     detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>());
+    }
+
+    template <typename KernelType, typename StaticDataType>
+    static typename std::enable_if<!detail::has_make_type<KernelType>::value &&
+                                       detail::has_data_size<KernelType>::value,
+                                   arrfunc>::type
+    make(const ndt::type &self_tp, StaticDataType &&static_data)
+    {
+      return arrfunc(self_tp, std::forward<StaticDataType>(static_data),
+                     KernelType::data_size,
+                     detail::get_instantiate<KernelType>(),
+                     detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>());
+    }
+
+    template <typename KernelType>
+    static typename std::enable_if<
+        !detail::has_make_type<KernelType>::value &&
+            !detail::has_data_size<KernelType>::value,
+        arrfunc>::type
+    make(const ndt::type &self_tp, std::size_t data_size)
+    {
+      return arrfunc(self_tp, data_size, detail::get_instantiate<KernelType>(),
+                     detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>());
+    }
+
+    template <typename KernelType, typename StaticDataType>
+    static typename std::enable_if<
+        !detail::has_make_type<KernelType>::value &&
+            !detail::has_data_size<KernelType>::value,
+        arrfunc>::type
+    make(const ndt::type &self_tp, StaticDataType &&static_data,
+         std::size_t data_size)
+    {
+      return arrfunc(self_tp, std::forward<StaticDataType>(static_data),
+                     data_size, detail::get_instantiate<KernelType>(),
+                     detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>());
     }
 
     template <template <int> class CKT, typename T>
@@ -1157,22 +1163,24 @@ namespace nd {
       }
     }
 
-    template <template <type_id_t> class KernelType, typename I0>
-    static std::map<type_id_t, arrfunc> make_all()
+    template <template <type_id_t> class KernelType, typename I0, typename... A>
+    static std::map<type_id_t, arrfunc> make_all(A &&... a)
     {
       std::map<type_id_t, arrfunc> arrfuncs;
-      for_each<I0>(detail::make_all<KernelType>(), arrfuncs);
+      for_each<I0>(detail::make_all<KernelType>(), arrfuncs,
+                   std::forward<A>(a)...);
 
       return arrfuncs;
     }
 
     template <template <type_id_t, type_id_t, type_id_t...> class KernelType,
-              typename I0, typename I1, typename... I>
-    static std::map<std::array<type_id_t, 2 + sizeof...(I)>, arrfunc> make_all()
+              typename I0, typename I1, typename... I, typename... A>
+    static std::map<std::array<type_id_t, 2 + sizeof...(I)>, arrfunc>
+    make_all(A &&... a)
     {
       std::map<std::array<type_id_t, 2 + sizeof...(I)>, arrfunc> arrfuncs;
       for_each<typename outer<I0, I1, I...>::type>(
-          detail::make_all<KernelType>(), arrfuncs);
+          detail::make_all<KernelType>(), arrfuncs, std::forward<A>(a)...);
 
       return arrfuncs;
     }
@@ -1180,28 +1188,31 @@ namespace nd {
 
   namespace detail {
 
+    template <template <type_id_t...> class KernelType, typename S>
+    struct apply;
+
+    template <template <type_id_t...> class KernelType, type_id_t... I>
+    struct apply<KernelType, type_id_sequence<I...>> {
+      typedef KernelType<I...> type;
+    };
+
     template <template <type_id_t...> class KernelType>
     struct make_all {
-      template <typename TypeIDSequence>
-      struct apply;
-
-      template <type_id_t... I>
-      struct apply<type_id_sequence<I...>> {
-        typedef KernelType<I...> type;
-      };
-
-      template <type_id_t TypeID>
-      void on_each(std::map<type_id_t, arrfunc> &arrfuncs) const
+      template <type_id_t TypeID, typename... A>
+      void on_each(std::map<type_id_t, arrfunc> &arrfuncs, A &&... a) const
       {
-        arrfuncs[TypeID] = arrfunc::make<KernelType<TypeID>>(0);
+        arrfuncs[TypeID] =
+            arrfunc::make<KernelType<TypeID>>(std::forward<A>(a)...);
       }
 
-      template <typename TypeIDSequence>
+      template <typename TypeIDSequence, typename... A>
       void on_each(std::map<std::array<type_id_t, TypeIDSequence::size>,
-                            arrfunc> &arrfuncs) const
+                            arrfunc> &arrfuncs,
+                   A &&... a) const
       {
         arrfuncs[TypeIDSequence()] =
-            arrfunc::make<typename apply<TypeIDSequence>::type>(0);
+            arrfunc::make<typename apply<KernelType, TypeIDSequence>::type>(
+                std::forward<A>(a)...);
       }
     };
 

@@ -18,7 +18,7 @@ map<array<type_id_t, 2>, nd::arrfunc> nd::assign::make_children()
 
   map<std::array<type_id_t, 2>, arrfunc> children2 =
       arrfunc::make_all<bind<assign_error_mode, assignment_kernel>::type,
-                        numeric_type_ids, numeric_type_ids>();
+                        numeric_type_ids, numeric_type_ids>(0);
 
   return children2;
 }

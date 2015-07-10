@@ -25,7 +25,7 @@ namespace nd {
       const arrfunc self = functional::call<F>(ndt::type("(Any) -> Any"));
 
       for (const std::pair<const type_id_t, arrfunc> &pair :
-           arrfunc::make_all<K, numeric_type_ids>()) {
+           arrfunc::make_all<K, numeric_type_ids>(0)) {
         children[pair.first] = pair.second;
       }
 
@@ -62,7 +62,7 @@ namespace nd {
       arrfunc self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
       for (const std::pair<std::array<type_id_t, 2>, arrfunc> &pair :
-           arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>()) {
+           arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>(0)) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
 

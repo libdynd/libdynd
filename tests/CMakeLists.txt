@@ -106,6 +106,7 @@ set(tests_SRC
     array/test_with.cpp
     vm/test_elwise_program.cpp
     test_bool1.cpp
+    test_config.cpp
     test_float16.cpp
     test_integer_sequence.cpp
     test_iterator.cpp
