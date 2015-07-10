@@ -560,6 +560,40 @@ extern const char dynd_version_string[];
 #endif
 #endif
 
+#define DYND_HAS_STATIC_MEMBER(NAME)                                           \
+  template <typename...>                                                       \
+  class has_static_##NAME;                                                     \
+                                                                               \
+  template <typename T>                                                        \
+  class has_static_##NAME<T> {                                                 \
+    template <typename U,                                                      \
+              typename = typename std::enable_if<                              \
+                  !std::is_member_pointer<decltype(&U::NAME)>::value>::type>   \
+    static std::true_type test(int);                                           \
+                                                                               \
+    template <typename>                                                        \
+    static std::false_type test(...);                                          \
+                                                                               \
+  public:                                                                      \
+    static const bool value = decltype(test<T>(0))::value;                     \
+  };                                                                           \
+                                                                               \
+  template <typename T, typename StaticMemberType>                             \
+  class has_static_##NAME<T, StaticMemberType> {                               \
+    template <                                                                 \
+        typename U,                                                            \
+        typename = typename std::enable_if<                                    \
+            !std::is_member_pointer<decltype(&U::NAME)>::value &&              \
+            std::is_same<decltype(U::NAME), StaticMemberType>::value>::type>   \
+    static std::true_type test(int);                                           \
+                                                                               \
+    template <typename>                                                        \
+    static std::false_type test(...);                                          \
+                                                                               \
+  public:                                                                      \
+    static const bool value = decltype(test<T>(0))::value;                     \
+  }
+
 namespace dynd {
 
 /**

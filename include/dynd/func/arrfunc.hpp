@@ -1109,12 +1109,6 @@ namespace nd {
       return make<T>(T::make_type(), data_size);
     }
 
-    template <typename T>
-    static void make(arrfunc &res, size_t data_size)
-    {
-      res = make<T>(T::make_type(), data_size);
-    }
-
     template <typename T, typename static_data_type>
     static arrfunc make(const ndt::type &self_tp,
                         static_data_type &&static_data, size_t data_size)
