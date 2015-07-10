@@ -908,21 +908,7 @@ namespace nd {
 
         dst = empty(dst_tp);
       } else if (self->resolve_dst_type != NULL) {
-        // In this case, with dst_tp already populated, resolve_dst_type
-        // must not overwrite it
         dst_tp = dst.get_type();
-        self->resolve_dst_type(
-            self, self_tp, get()->static_data, get()->data_size, data.get(),
-            dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
-            kwds_as_array, tp_vars);
-        // Sanity error check against rogue resolve_test_type
-        if (dst_tp.extended() != dst.get_type().extended()) {
-          std::stringstream ss;
-          ss << "Arrfunc internal error: resolve_dst_type modified a dst_tp "
-                "provided for output, transforming " << dst.get_type()
-             << " into " << dst_tp;
-          throw std::runtime_error(ss.str());
-        }
       }
 
       // Generate and evaluate the ckernel

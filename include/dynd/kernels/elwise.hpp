@@ -23,7 +23,7 @@ namespace nd {
      * This requires that the child kernel be created with the
      * kernel_request_strided type of kernel.
      */
-    template <type_id_t dst_type_id, type_id_t src_type_id, int N>
+    template <type_id_t DstTypeID, type_id_t SrcTypeID, int N>
     struct elwise_ck;
 
     /**
