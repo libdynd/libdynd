@@ -203,14 +203,13 @@ namespace nd {
         }
       };
 
-      std::size_t data_size_max =
-          detail::multidispatch_match<N, (ArraySubscript ? 1 : N)>(
-              self_tp, children, default_child);
+      detail::multidispatch_match<N, (ArraySubscript ? 1 : N)>(
+          self_tp, children, default_child);
       return arrfunc::make<multidispatch_kernel<static_data>>(
-          self_tp, std::make_shared<static_data>(std::forward<T>(children),
-                                                 default_child, data_size_max,
-                                                 permutation.data()),
-          data_size_max);
+          self_tp,
+          std::make_shared<static_data>(std::forward<T>(children),
+                                        default_child, 0, permutation.data()),
+          0);
     }
 
     template <typename T>

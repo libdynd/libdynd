@@ -171,6 +171,7 @@ namespace nd {
                        "complex[float64]");
     }
 
+/*
     static void
     data_init(const arrfunc_type_data *DYND_UNUSED(self),
               const ndt::arrfunc_type *DYND_UNUSED(self_tp),
@@ -180,10 +181,8 @@ namespace nd {
               nd::array &kwds,
               const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      if (kwds.p("flags").is_missing()) {
-        kwds.p("flags").vals() = FFTW_ESTIMATE;
-      }
     }
+*/
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
@@ -196,6 +195,13 @@ namespace nd {
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
+      int flags;
+      if (kwds.p("flags").is_missing()) {
+        flags = FFTW_ESTIMATE;
+      } else {
+        flags = kwds.p("flags").as<int>();
+      }
+
       nd::array shape = kwds.p("shape");
       if (!shape.is_missing()) {
         if (shape.get_type().get_type_id() == pointer_type_id) {
@@ -248,7 +254,7 @@ namespace nd {
               rank, dims.get(), howmany_rank, howmany_dims.get(),
               reinterpret_cast<fftw_src_type *>(src.get_readwrite_originptr()),
               reinterpret_cast<fftw_dst_type *>(dst.get_readwrite_originptr()),
-              sign, kwds.p("flags").as<int>()));
+              sign, flags));
 
       return ckb_offset;
     }

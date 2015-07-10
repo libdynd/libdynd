@@ -32,6 +32,7 @@ namespace nd {
      */
     template <int N>
     struct elwise_virtual_ck : base_virtual_kernel<elwise_virtual_ck<N>> {
+/*
       static void data_init(const arrfunc_type_data *self,
                             const ndt::arrfunc_type *DYND_UNUSED(self_tp),
                             const char *DYND_UNUSED(static_data),
@@ -48,6 +49,7 @@ namespace nd {
         return child->data_init(child, child_tp, NULL, 0, NULL, nsrc, src_tp,
                                 kwds, tp_vars);
       }
+*/
 
       static void
       resolve_dst_type(const arrfunc_type_data *self,
