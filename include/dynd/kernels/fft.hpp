@@ -255,7 +255,7 @@ namespace nd {
 
     template <bool real_to_complex>
     static typename std::enable_if<real_to_complex, void>::type
-    resolve_dst_type(
+    resolve_dst_type_(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
         const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
@@ -283,7 +283,7 @@ namespace nd {
 
     template <bool real_to_complex>
     static typename std::enable_if<!real_to_complex, void>::type
-    resolve_dst_type(
+    resolve_dst_type_(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
         const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
@@ -312,7 +312,7 @@ namespace nd {
         const ndt::type *src_tp, const nd::array &kwds,
         const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
-      resolve_dst_type<std::is_same<fftw_src_type, double>::value>(
+      resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(
           self, self_tp, NULL, 0, NULL, dst_tp, nsrc, src_tp, kwds, tp_vars);
     }
   };

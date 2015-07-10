@@ -25,7 +25,7 @@ nd::arrfunc nd::random::uniform::make()
 
   auto children =
       arrfunc::make_all<uniform_kernel_alias<std::default_random_engine>::type,
-                        numeric_type_ids>();
+                        numeric_type_ids>(0);
 
   return functional::elwise(functional::multidispatch<1>(
       ndt::type("(a: ?R, b: ?R) -> R"), std::move(children), arrfunc(), {-1}));

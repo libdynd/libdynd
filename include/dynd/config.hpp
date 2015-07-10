@@ -560,12 +560,14 @@ extern const char dynd_version_string[];
 #endif
 #endif
 
-#define DYND_HAS_STATIC_MEMBER(NAME)                                           \
+// This doesn't work if there are multiple methods enabled via a template
+// parameter, need to fix that
+#define DYND_HAS(NAME)                                                         \
   template <typename...>                                                       \
-  class has_static_##NAME;                                                     \
+  class has_##NAME;                                                            \
                                                                                \
   template <typename T>                                                        \
-  class has_static_##NAME<T> {                                                 \
+  class has_##NAME<T> {                                                        \
     template <typename U,                                                      \
               typename = typename std::enable_if<                              \
                   !std::is_member_pointer<decltype(&U::NAME)>::value>::type>   \
@@ -579,7 +581,7 @@ extern const char dynd_version_string[];
   };                                                                           \
                                                                                \
   template <typename T, typename StaticMemberType>                             \
-  class has_static_##NAME<T, StaticMemberType> {                               \
+  class has_##NAME<T, StaticMemberType> {                                      \
     template <                                                                 \
         typename U,                                                            \
         typename = typename std::enable_if<                                    \
@@ -592,6 +594,25 @@ extern const char dynd_version_string[];
                                                                                \
   public:                                                                      \
     static const bool value = decltype(test<T>(0))::value;                     \
+  }
+
+#define DYND_GET(NAME, TYPE, DEFAULT_VALUE)                                    \
+  template <typename T, bool ReturnDefaultValue>                               \
+  typename std::enable_if<ReturnDefaultValue, TYPE>::type get_##NAME()         \
+  {                                                                            \
+    return DEFAULT_VALUE;                                                      \
+  }                                                                            \
+                                                                               \
+  template <typename T, bool ReturnDefaultValue>                               \
+  typename std::enable_if<!ReturnDefaultValue, TYPE>::type get_##NAME()        \
+  {                                                                            \
+    return T::NAME;                                                            \
+  }                                                                            \
+                                                                               \
+  template <typename T>                                                        \
+  TYPE get_##NAME()                                                            \
+  {                                                                            \
+    return get_##NAME<T, !has_##NAME<T>::value>();                             \
   }
 
 namespace dynd {

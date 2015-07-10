@@ -28,7 +28,7 @@ namespace nd {
           uint64_type_id, float32_type_id, float64_type_id> numeric_type_ids;
 
       std::map<std::array<type_id_t, 2>, arrfunc> children =
-          arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>();
+          arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>(0);
 
       arrfunc self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
@@ -51,10 +51,10 @@ namespace nd {
 
       children[{{string_type_id, string_type_id}}] =
           arrfunc::make<K<string_type_id, string_type_id>>(
-              ndt::type("(string, string) -> int32"));
+              ndt::type("(string, string) -> int32"), 0);
       children[{{fixed_string_type_id, fixed_string_type_id}}] =
           arrfunc::make<K<fixed_string_type_id, fixed_string_type_id>>(
-              ndt::type("(FixedString, FixedString) -> int32"));
+              ndt::type("(FixedString, FixedString) -> int32"), 0);
 
       return children;
     }
@@ -94,13 +94,13 @@ namespace nd {
           comparison_operator::make_children();
       children[{{tuple_type_id, tuple_type_id}}] =
           arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("((...), (...)) -> int32"));
+              ndt::type("((...), (...)) -> int32"), 0);
       children[{{struct_type_id, struct_type_id}}] =
           arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("({...}, {...}) -> int32"));
+              ndt::type("({...}, {...}) -> int32"), 0);
       children[{{type_type_id, type_type_id}}] =
           arrfunc::make<equal_kernel<type_type_id, type_type_id>>(
-              ndt::type("(type, type) -> int32"));
+              ndt::type("(type, type) -> int32"), 0);
 
       std::cout << "equal::make_children (stop)" << std::endl;
 
@@ -116,13 +116,13 @@ namespace nd {
           comparison_operator::make_children();
       children[{{tuple_type_id, tuple_type_id}}] =
           arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("((...), (...)) -> int32"));
+              ndt::type("((...), (...)) -> int32"), 0);
       children[{{struct_type_id, struct_type_id}}] =
           arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("({...}, {...}) -> int32"));
+              ndt::type("({...}, {...}) -> int32"), 0);
       children[{{type_type_id, type_type_id}}] =
           arrfunc::make<not_equal_kernel<type_type_id, type_type_id>>(
-              ndt::type("(type, type) -> int32"));
+              ndt::type("(type, type) -> int32"), 0);
 
       return children;
     }
