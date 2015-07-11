@@ -11,10 +11,9 @@ using namespace dynd;
 
 intptr_t nd::functional::old_multidispatch_ck::instantiate(
     const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
@@ -78,9 +77,9 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(
         }
       }
       if (isrc == nsrc) {
-        child.get()->resolve_dst_type(child.get_type(),
-                                      const_cast<char *>(child.get()->static_data), data_size, data,
-                                      dst_tp, nsrc, src_tp, kwds, tp_vars);
+        child.get()->resolve_dst_type(
+            child.get_type(), const_cast<char *>(child.get()->static_data),
+            data_size, data, dst_tp, nsrc, src_tp, kwds, tp_vars);
         return;
       }
     }

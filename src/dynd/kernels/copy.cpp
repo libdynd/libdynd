@@ -11,7 +11,7 @@ using namespace dynd;
 
 intptr_t nd::copy_ck::instantiate(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,

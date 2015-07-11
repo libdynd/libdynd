@@ -108,7 +108,7 @@ struct int_multiply_and_offset_ck
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_multiply_and_offset_arrfunc(
     const arrfunc_type_data *self_af, const ndt::arrfunc_type *af_tp,
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -161,7 +161,7 @@ struct int_offset_and_divide_ck
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_offset_and_divide_arrfunc(
     const arrfunc_type_data *self_af, const ndt::arrfunc_type *af_tp,
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,

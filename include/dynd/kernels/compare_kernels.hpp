@@ -69,7 +69,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -108,7 +108,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -147,7 +147,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -173,7 +173,7 @@ namespace nd {
             less_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -227,7 +227,7 @@ namespace nd {
             less_kernel<string_type_id, string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -304,7 +304,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -345,7 +345,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -386,7 +386,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -412,7 +412,7 @@ namespace nd {
             less_equal_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -474,7 +474,7 @@ namespace nd {
             less_equal_kernel<string_type_id, string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -552,7 +552,7 @@ namespace nd {
             equal_kernel<string_type_id, string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+                char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -603,7 +603,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -691,7 +691,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -717,7 +717,7 @@ namespace nd {
             equal_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -810,7 +810,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -865,7 +865,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -909,7 +909,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -953,7 +953,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -979,7 +979,7 @@ namespace nd {
             not_equal_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -1039,7 +1039,7 @@ namespace nd {
             not_equal_kernel<string_type_id, string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -1123,7 +1123,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), const char *static_data,
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
         size_t data_size, char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1181,7 +1181,7 @@ namespace nd {
             greater_equal_kernel<string_type_id, string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -1232,7 +1232,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1272,7 +1272,7 @@ namespace nd {
 
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1313,7 +1313,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1339,7 +1339,7 @@ namespace nd {
             greater_equal_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+                char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -1426,7 +1426,7 @@ namespace nd {
             greater_kernel<string_type_id, string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -1478,7 +1478,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1518,7 +1518,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1558,7 +1558,7 @@ namespace nd {
     static intptr_t instantiate(
         const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1584,7 +1584,7 @@ namespace nd {
             greater_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+                char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,

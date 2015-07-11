@@ -65,13 +65,12 @@ struct take_by_pointer_virtual_ck
   static intptr_t
   instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
               const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-              const char *DYND_UNUSED(static_data),
-              size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-              intptr_t ckb_offset, const ndt::type &dst_tp,
-              const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-              const ndt::type *src_tp, const char *const *src_arrmeta,
-              kernel_request_t kernreq, const eval::eval_context *ectx,
-              const nd::array &kwds,
+              char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+              char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+              const ndt::type &dst_tp, const char *dst_arrmeta,
+              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+              const char *const *src_arrmeta, kernel_request_t kernreq,
+              const eval::eval_context *ectx, const nd::array &kwds,
               const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     intptr_t ndim = src_tp[0].get_ndim();
