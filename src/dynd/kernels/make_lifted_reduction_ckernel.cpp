@@ -149,10 +149,7 @@ struct strided_initial_reduction_kernel_extra
     }
   }
 
-  void destruct_children()
-  {
-    get_child_ckernel()->destroy();
-  }
+  void destruct_children() { get_child_ckernel()->destroy(); }
 };
 
 /**
@@ -249,10 +246,7 @@ struct strided_initial_broadcast_kernel_extra
     }
   }
 
-  void destruct_children()
-  {
-    get_child_ckernel()->destroy();
-  }
+  void destruct_children() { get_child_ckernel()->destroy(); }
 };
 
 /**
@@ -305,8 +299,7 @@ struct strided_inner_reduction_kernel_extra
                                       ckernel_prefix *extra)
   {
     self_type *e = reinterpret_cast<self_type *>(extra);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(self_type));
+    ckernel_prefix *echild_reduce = extra->get_child_ckernel(sizeof(self_type));
     ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     // The first call to initialize the "dst" value
@@ -315,8 +308,7 @@ struct strided_inner_reduction_kernel_extra
         echild_reduce->get_function<expr_strided_t>();
     opchild_ident(dst, const_cast<char *const *>(&e->ident_data), echild_ident);
     // All the followup calls to accumulate at the "dst" address
-    opchild_reduce(dst, 0, src, &e->src_stride, e->size,
-                   echild_reduce);
+    opchild_reduce(dst, 0, src, &e->src_stride, e->size, echild_reduce);
   }
 
   static void strided_first(char *dst, intptr_t dst_stride, char *const *src,
@@ -324,8 +316,7 @@ struct strided_inner_reduction_kernel_extra
                             ckernel_prefix *extra)
   {
     self_type *e = reinterpret_cast<self_type *>(extra);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(self_type));
+    ckernel_prefix *echild_reduce = extra->get_child_ckernel(sizeof(self_type));
     ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     expr_single_t opchild_dst_init =
@@ -374,8 +365,7 @@ struct strided_inner_reduction_kernel_extra
                                        ckernel_prefix *extra)
   {
     self_type *e = reinterpret_cast<self_type *>(extra);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(self_type));
+    ckernel_prefix *echild_reduce = extra->get_child_ckernel(sizeof(self_type));
     ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
     expr_single_t opchild_ident = echild_ident->get_function<expr_single_t>();
@@ -415,8 +405,7 @@ struct strided_inner_reduction_kernel_extra
                                ckernel_prefix *extra)
   {
     self_type *e = reinterpret_cast<self_type *>(extra);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(self_type));
+    ckernel_prefix *echild_reduce = extra->get_child_ckernel(sizeof(self_type));
     // No initialization, all reduction
     expr_strided_t opchild_reduce =
         echild_reduce->get_function<expr_strided_t>();
@@ -488,8 +477,7 @@ struct strided_inner_broadcast_kernel_extra
     self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(self_type));
+    ckernel_prefix *echild_reduce = extra->get_child_ckernel(sizeof(self_type));
     expr_strided_t opchild_ident = echild_ident->get_function<expr_strided_t>();
     expr_strided_t opchild_reduce =
         echild_reduce->get_function<expr_strided_t>();
@@ -511,8 +499,7 @@ struct strided_inner_broadcast_kernel_extra
     self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(self_type));
+    ckernel_prefix *echild_reduce = extra->get_child_ckernel(sizeof(self_type));
     expr_strided_t opchild_dst_init =
         echild_dst_init->get_function<expr_strided_t>();
     expr_strided_t opchild_reduce =
@@ -553,8 +540,7 @@ struct strided_inner_broadcast_kernel_extra
     self_type *e = reinterpret_cast<self_type *>(extra);
     ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(self_type));
+    ckernel_prefix *echild_reduce = extra->get_child_ckernel(sizeof(self_type));
     expr_strided_t opchild_ident = echild_ident->get_function<expr_strided_t>();
     expr_strided_t opchild_reduce =
         echild_reduce->get_function<expr_strided_t>();
@@ -595,8 +581,7 @@ struct strided_inner_broadcast_kernel_extra
                                ckernel_prefix *extra)
   {
     self_type *e = reinterpret_cast<self_type *>(extra);
-    ckernel_prefix *echild_reduce =
-        extra->get_child_ckernel(sizeof(self_type));
+    ckernel_prefix *echild_reduce = extra->get_child_ckernel(sizeof(self_type));
     // No initialization, all reduction
     expr_strided_t opchild_reduce =
         echild_reduce->get_function<expr_strided_t>();
@@ -698,9 +683,9 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
   return ckb_offset;
 }
 
-static void check_dst_initialization(const ndt::arrfunc_type *dst_initialization_tp,
-                                     const ndt::type &dst_tp,
-                                     const ndt::type &src_tp)
+static void
+check_dst_initialization(const ndt::arrfunc_type *dst_initialization_tp,
+                         const ndt::type &dst_tp, const ndt::type &src_tp)
 {
   if (dst_initialization_tp->get_return_type() != dst_tp) {
     stringstream ss;
@@ -726,15 +711,21 @@ static void check_dst_initialization(const ndt::arrfunc_type *dst_initialization
  * If dst_initialization is NULL, an assignment kernel is used.
  */
 static size_t make_strided_inner_reduction_dimension_kernel(
-    const arrfunc_type_data *elwise_reduction,
+    const arrfunc_type_data *elwise_reduction_const,
     const ndt::arrfunc_type *elwise_reduction_tp,
-    const arrfunc_type_data *dst_initialization,
-    const ndt::arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
-    intptr_t src_stride, intptr_t src_size, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    bool right_associative, const nd::array &reduction_identity,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    const arrfunc_type_data *dst_initialization_const,
+    const ndt::arrfunc_type *dst_initialization_tp, void *ckb,
+    intptr_t ckb_offset, intptr_t src_stride, intptr_t src_size,
+    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
+    const char *src_arrmeta, bool right_associative,
+    const nd::array &reduction_identity, kernel_request_t kernreq,
+    const eval::eval_context *ectx)
 {
+  arrfunc_type_data *elwise_reduction =
+      const_cast<arrfunc_type_data *>(elwise_reduction_const);
+  arrfunc_type_data *dst_initialization =
+      const_cast<arrfunc_type_data *>(dst_initialization_const);
+
   intptr_t root_ckb_offset = ckb_offset;
   strided_inner_reduction_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -824,15 +815,15 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     ndt::type src_tp_doubled[2] = {src_tp, src_tp};
     const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
     ckb_offset = elwise_reduction->instantiate(
-        elwise_reduction, elwise_reduction_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, elwise_reduction_tp->get_npos(), src_tp_doubled,
-        src_arrmeta_doubled, kernel_request_strided, ectx, nd::array(),
-        std::map<nd::string, ndt::type>());
+        elwise_reduction_tp, elwise_reduction->static_data, 0, NULL, ckb,
+        ckb_offset, dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(),
+        src_tp_doubled, src_arrmeta_doubled, kernel_request_strided, ectx,
+        nd::array(), std::map<nd::string, ndt::type>());
   } else {
     ckb_offset = elwise_reduction->instantiate(
-        elwise_reduction, elwise_reduction_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta,
-        kernel_request_strided, ectx, nd::array(),
+        elwise_reduction_tp, elwise_reduction->static_data, 0, NULL, ckb,
+        ckb_offset, dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(),
+        &src_tp, &src_arrmeta, kernel_request_strided, ectx, nd::array(),
         std::map<nd::string, ndt::type>());
   }
   // Make sure there's capacity for the next ckernel
@@ -844,17 +835,17 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   e->dst_init_kernel_offset = ckb_offset - root_ckb_offset;
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
-        dst_initialization, dst_initialization_tp, NULL, 0, NULL, ckb, ckb_offset,
-        dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp,
-        &src_arrmeta, kernel_request_single, ectx, nd::array(),
+        dst_initialization_tp, dst_initialization->static_data, 0, NULL, ckb,
+        ckb_offset, dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(),
+        &src_tp, &src_arrmeta, kernel_request_single, ectx, nd::array(),
         std::map<nd::string, ndt::type>());
   } else if (reduction_identity.is_null()) {
     ckb_offset = make_assignment_kernel(
-        NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+        NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
         kernel_request_single, ectx, nd::array());
   } else {
     ckb_offset = make_assignment_kernel(
-        NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+        NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
         reduction_identity.get_type(), reduction_identity.get_arrmeta(),
         kernel_request_single, ectx, nd::array());
   }
@@ -868,16 +859,21 @@ static size_t make_strided_inner_reduction_dimension_kernel(
  * the final dimension before the accumulation operation.
  */
 static size_t make_strided_inner_broadcast_dimension_kernel(
-    const arrfunc_type_data *elwise_reduction,
+    const arrfunc_type_data *elwise_reduction_const,
     const ndt::arrfunc_type *elwise_reduction_tp,
-    const arrfunc_type_data *dst_initialization,
-    const ndt::arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
-    intptr_t dst_stride, intptr_t src_stride, intptr_t src_size,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
-    const char *src_arrmeta, bool right_associative,
+    const arrfunc_type_data *dst_initialization_const,
+    const ndt::arrfunc_type *dst_initialization_tp, void *ckb,
+    intptr_t ckb_offset, intptr_t dst_stride, intptr_t src_stride,
+    intptr_t src_size, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, bool right_associative,
     const nd::array &reduction_identity, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
+  arrfunc_type_data *elwise_reduction =
+      const_cast<arrfunc_type_data *>(elwise_reduction_const);
+  arrfunc_type_data *dst_initialization =
+      const_cast<arrfunc_type_data *>(dst_initialization_const);
+
   intptr_t root_ckb_offset = ckb_offset;
   strided_inner_broadcast_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -968,15 +964,15 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     ndt::type src_tp_doubled[2] = {src_tp, src_tp};
     const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
     ckb_offset = elwise_reduction->instantiate(
-        elwise_reduction, elwise_reduction_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, elwise_reduction_tp->get_npos(), src_tp_doubled,
-        src_arrmeta_doubled, kernel_request_strided, ectx, nd::array(),
-        std::map<nd::string, ndt::type>());
+        elwise_reduction_tp, elwise_reduction->static_data, 0, NULL, ckb,
+        ckb_offset, dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(),
+        src_tp_doubled, src_arrmeta_doubled, kernel_request_strided, ectx,
+        nd::array(), std::map<nd::string, ndt::type>());
   } else {
     ckb_offset = elwise_reduction->instantiate(
-        elwise_reduction, elwise_reduction_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp,
-        dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta,
-        kernel_request_strided, ectx, nd::array(),
+        elwise_reduction_tp, elwise_reduction->static_data, 0, NULL, ckb,
+        ckb_offset, dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(),
+        &src_tp, &src_arrmeta, kernel_request_strided, ectx, nd::array(),
         std::map<nd::string, ndt::type>());
   }
   // Make sure there's capacity for the next ckernel
@@ -988,17 +984,17 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   e->dst_init_kernel_offset = ckb_offset - root_ckb_offset;
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
-        dst_initialization, dst_initialization_tp, NULL, 0, NULL, ckb, ckb_offset,
-        dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp,
-        &src_arrmeta, kernel_request_strided, ectx, nd::array(),
+        dst_initialization_tp, dst_initialization->static_data, 0, NULL, ckb,
+        ckb_offset, dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(),
+        &src_tp, &src_arrmeta, kernel_request_strided, ectx, nd::array(),
         std::map<nd::string, ndt::type>());
   } else if (reduction_identity.is_null()) {
     ckb_offset = make_assignment_kernel(
-        NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+        NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
         kernel_request_strided, ectx, nd::array());
   } else {
     ckb_offset = make_assignment_kernel(
-        NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+        NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
         reduction_identity.get_type(), reduction_identity.get_arrmeta(),
         kernel_request_strided, ectx, nd::array());
   }
@@ -1007,16 +1003,21 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
 }
 
 size_t dynd::make_lifted_reduction_ckernel(
-    const arrfunc_type_data *elwise_reduction,
+    const arrfunc_type_data *elwise_reduction_const,
     const ndt::arrfunc_type *elwise_reduction_tp,
-    const arrfunc_type_data *dst_initialization,
-    const ndt::arrfunc_type *dst_initialization_tp, void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
-    const char *src_arrmeta, intptr_t reduction_ndim,
+    const arrfunc_type_data *dst_initialization_const,
+    const ndt::arrfunc_type *dst_initialization_tp, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::type &src_tp, const char *src_arrmeta, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,
     bool right_associative, const nd::array &reduction_identity,
     dynd::kernel_request_t kernreq, const eval::eval_context *ectx)
 {
+  arrfunc_type_data *elwise_reduction =
+      const_cast<arrfunc_type_data *>(elwise_reduction_const);
+  arrfunc_type_data *dst_initialization =
+      const_cast<arrfunc_type_data *>(dst_initialization_const);
+
   // Count the number of dimensions being reduced
   intptr_t reducedim_count = 0;
   for (intptr_t i = 0; i < reduction_ndim; ++i) {
@@ -1029,12 +1030,12 @@ size_t dynd::make_lifted_reduction_ckernel(
       // that ckernel directly
       if (dst_initialization != NULL) {
         return dst_initialization->instantiate(
-            dst_initialization, dst_initialization_tp, NULL, 0, NULL, ckb, ckb_offset,
-            dst_tp, dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp,
-            &src_arrmeta, kernreq, ectx, nd::array(),
-            std::map<nd::string, ndt::type>());
+            dst_initialization_tp, dst_initialization->static_data, 0, NULL,
+            ckb, ckb_offset, dst_tp, dst_arrmeta,
+            elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta, kernreq,
+            ectx, nd::array(), std::map<nd::string, ndt::type>());
       } else if (reduction_identity.is_null()) {
-        return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp,
+        return make_assignment_kernel(NULL, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, src_tp, src_arrmeta, kernreq,
                                       ectx, nd::array());
       } else {

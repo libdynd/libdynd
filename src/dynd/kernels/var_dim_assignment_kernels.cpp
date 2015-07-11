@@ -80,7 +80,8 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
           "destination type " << dst_var_dim_tp << " is not a var_dim";
     throw runtime_error(ss.str());
   }
-  const ndt::var_dim_type *dst_vad = dst_var_dim_tp.extended<ndt::var_dim_type>();
+  const ndt::var_dim_type *dst_vad =
+      dst_var_dim_tp.extended<ndt::var_dim_type>();
   const var_dim_type_arrmeta *dst_md =
       reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
@@ -88,7 +89,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
   self->m_dst_target_alignment = dst_vad->get_target_alignment();
   self->m_dst_md = dst_md;
   return ::make_assignment_kernel(
-      NULL, NULL, ckb, ckb_offset, dst_vad->get_element_type(),
+      NULL, ckb, ckb_offset, dst_vad->get_element_type(),
       dst_arrmeta + sizeof(var_dim_type_arrmeta), src_tp, src_arrmeta,
       kernel_request_strided, ectx, nd::array());
 }
@@ -188,8 +189,10 @@ size_t dynd::make_var_dim_assignment_kernel(void *ckb, intptr_t ckb_offset,
           "source type " << src_var_dim_tp << " is not a var_dim";
     throw runtime_error(ss.str());
   }
-  const ndt::var_dim_type *dst_vad = dst_var_dim_tp.extended<ndt::var_dim_type>();
-  const ndt::var_dim_type *src_vad = src_var_dim_tp.extended<ndt::var_dim_type>();
+  const ndt::var_dim_type *dst_vad =
+      dst_var_dim_tp.extended<ndt::var_dim_type>();
+  const ndt::var_dim_type *src_vad =
+      src_var_dim_tp.extended<ndt::var_dim_type>();
   const var_dim_type_arrmeta *dst_md =
       reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
   const var_dim_type_arrmeta *src_md =
@@ -200,7 +203,7 @@ size_t dynd::make_var_dim_assignment_kernel(void *ckb, intptr_t ckb_offset,
   self->m_dst_md = dst_md;
   self->m_src_md = src_md;
   return ::make_assignment_kernel(
-      NULL, NULL, ckb, ckb_offset, dst_vad->get_element_type(),
+      NULL, ckb, ckb_offset, dst_vad->get_element_type(),
       dst_arrmeta + sizeof(var_dim_type_arrmeta), src_vad->get_element_type(),
       src_arrmeta + sizeof(var_dim_type_arrmeta), kernel_request_strided, ectx,
       nd::array());
@@ -266,10 +269,7 @@ struct strided_to_var_assign_ck
     }
   }
 
-  inline void destruct_children()
-  {
-    destroy_child_ckernel(sizeof(self_type));
-  }
+  inline void destruct_children() { destroy_child_ckernel(sizeof(self_type)); }
 };
 } // anonymous namespace
 
@@ -286,7 +286,8 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
           "type " << dst_var_dim_tp << " is not a var_dim";
     throw runtime_error(ss.str());
   }
-  const ndt::var_dim_type *dst_vad = dst_var_dim_tp.extended<ndt::var_dim_type>();
+  const ndt::var_dim_type *dst_vad =
+      dst_var_dim_tp.extended<ndt::var_dim_type>();
   const var_dim_type_arrmeta *dst_md =
       reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
@@ -297,7 +298,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
   self->m_src_dim_size = src_dim_size;
 
   return ::make_assignment_kernel(
-      NULL, NULL, ckb, ckb_offset, dst_vad->get_element_type(),
+      NULL, ckb, ckb_offset, dst_vad->get_element_type(),
       dst_arrmeta + sizeof(var_dim_type_arrmeta), src_el_tp, src_el_arrmeta,
       kernel_request_strided, ectx, nd::array());
 }
@@ -311,7 +312,7 @@ struct var_to_strided_assign_ck
   intptr_t m_dst_stride, m_dst_dim_size;
   const var_dim_type_arrmeta *m_src_md;
 
-  void single(char *dst,char *const *src)
+  void single(char *dst, char *const *src)
   {
     var_dim_type_data *src_d = reinterpret_cast<var_dim_type_data *>(src[0]);
     ckernel_prefix *child = get_child_ckernel();
@@ -353,7 +354,8 @@ size_t dynd::make_var_to_fixed_dim_assignment_kernel(
        << src_var_dim_tp << " is not a var_dim";
     throw runtime_error(ss.str());
   }
-  const ndt::var_dim_type *src_vad = src_var_dim_tp.extended<ndt::var_dim_type>();
+  const ndt::var_dim_type *src_vad =
+      src_var_dim_tp.extended<ndt::var_dim_type>();
   const var_dim_type_arrmeta *src_md =
       reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
 
@@ -372,7 +374,7 @@ size_t dynd::make_var_to_fixed_dim_assignment_kernel(
 
   self->m_src_md = src_md;
   return ::make_assignment_kernel(
-      NULL, NULL, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta,
+      NULL, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta,
       src_vad->get_element_type(), src_arrmeta + sizeof(var_dim_type_arrmeta),
       kernel_request_strided, ectx, nd::array());
 }

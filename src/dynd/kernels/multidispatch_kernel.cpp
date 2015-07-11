@@ -10,8 +10,7 @@ using namespace std;
 using namespace dynd;
 
 intptr_t nd::functional::old_multidispatch_ck::instantiate(
-    const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -19,7 +18,8 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
-  const vector<nd::arrfunc> *icd = af_self->get_data_as<vector<nd::arrfunc>>();
+  const vector<nd::arrfunc> *icd =
+      reinterpret_cast<vector<nd::arrfunc> *>(static_data);
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &af = (*icd)[i];
     intptr_t isrc, nsrc = af.get_type()->get_npos();
@@ -40,7 +40,7 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
       }
       if (j == nsrc) {
         return af.get()->instantiate(
-            af.get(), af.get_type(), const_cast<char *>(af.get()->static_data),
+            af.get_type(), const_cast<char *>(af.get()->static_data),
             0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
             src_arrmeta, kernreq, ectx, kwds, tp_vars);
       } else {

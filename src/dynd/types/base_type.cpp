@@ -242,7 +242,6 @@ size_t ndt::base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
 }
 
 intptr_t ndt::base_type::make_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const arrfunc_type *DYND_UNUSED(af_tp), void *DYND_UNUSED(ckb),
     intptr_t DYND_UNUSED(ckb_offset), const type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), const type &src_tp,

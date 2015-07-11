@@ -186,7 +186,6 @@ struct option_to_value_ck
 } // anonymous namespace
 
 static intptr_t instantiate_option_to_option_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -213,7 +212,7 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
       src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
   const ndt::arrfunc_type *af_tp =
       src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc_type();
-  ckb_offset = af->instantiate(af, af_tp, NULL, 0, NULL, ckb, ckb_offset,
+  ckb_offset = af->instantiate(af_tp, NULL, 0, NULL, ckb, ckb_offset,
                                ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate dst_assign_na
@@ -224,23 +223,22 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
   af = dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
   af_tp = dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc_type();
-  ckb_offset = af->instantiate(af, af_tp, NULL, 0, NULL, ckb, ckb_offset,
-                               dst_tp, dst_arrmeta, nsrc, NULL, NULL, kernreq,
-                               ectx, kwds, tp_vars);
+  ckb_offset = af->instantiate(af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+                               dst_arrmeta, nsrc, NULL, NULL, kernreq, ectx,
+                               kwds, tp_vars);
   // instantiate value_assign
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-  ckb_offset = make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_val_tp,
+  ckb_offset = make_assignment_kernel(NULL, ckb, ckb_offset, dst_val_tp,
                                       dst_arrmeta, src_val_tp, src_arrmeta[0],
                                       kernreq, ectx, nd::array());
   return ckb_offset;
 }
 
 static intptr_t instantiate_option_to_value_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -265,7 +263,7 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
       src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
   const ndt::arrfunc_type *af_tp =
       src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc_type();
-  ckb_offset = af->instantiate(af, af_tp, NULL, 0, NULL, ckb, ckb_offset,
+  ckb_offset = af->instantiate(af_tp, NULL, 0, NULL, ckb, ckb_offset,
                                ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate value_assign
@@ -274,9 +272,9 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-  return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp,
-                                dst_arrmeta, src_val_tp, src_arrmeta[0],
-                                kernreq, ectx, nd::array());
+  return make_assignment_kernel(NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                src_val_tp, src_arrmeta[0], kernreq, ectx,
+                                nd::array());
 }
 
 namespace {
@@ -336,7 +334,6 @@ struct string_to_option_tp_ck
 }
 
 static intptr_t instantiate_string_to_option_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -383,7 +380,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   case string_type_id: {
     // Just a string to string assignment
     return ::make_assignment_kernel(
-        NULL, NULL, ckb, ckb_offset,
+        NULL, ckb, ckb_offset,
         dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
         src_tp[0], src_arrmeta[0], kernreq, ectx, nd::array());
   }
@@ -398,7 +395,7 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
       string_to_option_tp_ck::make(ckb, kernreq, ckb_offset);
   // First child ckernel is the value assignment
   ckb_offset = ::make_assignment_kernel(
-      NULL, NULL, ckb, ckb_offset,
+      NULL, ckb, ckb_offset,
       dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
       src_tp[0], src_arrmeta[0], kernreq, ectx, nd::array());
   // Re-acquire self because the address may have changed
@@ -410,18 +407,17 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
       dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
   const ndt::arrfunc_type *af_tp =
       dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc_type();
-  ckb_offset = af->instantiate(af, af_tp, NULL, 0, NULL, ckb, ckb_offset,
-                               dst_tp, dst_arrmeta, nsrc, NULL, NULL, kernreq,
-                               ectx, kwds, tp_vars);
+  ckb_offset = af->instantiate(af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+                               dst_arrmeta, nsrc, NULL, NULL, kernreq, ectx,
+                               kwds, tp_vars);
   return ckb_offset;
 }
 
 static intptr_t instantiate_float_to_option_assignment_kernel(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-    const ndt::type *src_tp, const char *const *src_arrmeta,
+    const ndt::arrfunc_type *af_tp, char *DYND_UNUSED(static_data),
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {
@@ -430,12 +426,11 @@ static intptr_t instantiate_float_to_option_assignment_kernel(
   // as NA.
   ndt::type src_tp_as_option = ndt::make_option(src_tp[0]);
   return instantiate_option_to_option_assignment_kernel(
-      self, af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+      af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
       &src_tp_as_option, src_arrmeta, kernreq, ectx, kwds, tp_vars);
 }
 
 static intptr_t instantiate_option_as_value_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -461,7 +456,7 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
       src_tp[0].get_type_id() == option_type_id
           ? src_tp[0].extended<ndt::option_type>()->get_value_type()
           : src_tp[0];
-  return ::make_assignment_kernel(NULL, NULL, ckb, ckb_offset, val_dst_tp,
+  return ::make_assignment_kernel(NULL, ckb, ckb_offset, val_dst_tp,
                                   dst_arrmeta, val_src_tp, src_arrmeta[0],
                                   kernreq, ectx, nd::array());
 }
@@ -519,7 +514,7 @@ size_t kernels::make_option_assignment_kernel(
     typevars.clear();
     if ((*af_tp)->get_pos_type(0).match(src_tp, typevars) &&
         (*af_tp)->get_return_type().match(dst_tp, typevars)) {
-      return af->instantiate(af, *af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+      return af->instantiate(*af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                              dst_arrmeta, size, &src_tp, &src_arrmeta, kernreq,
                              ectx, nd::array(),
                              std::map<nd::string, ndt::type>());

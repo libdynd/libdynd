@@ -281,7 +281,6 @@ struct nafunc {
 };
 
 intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
@@ -328,7 +327,6 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
 }
 
 intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp,

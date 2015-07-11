@@ -113,11 +113,11 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
   in(4).vals() = "284";
   const char *in_ptr = in.get_readonly_originptr();
   const char *src_arrmeta[1] = {in.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), af.get()->static_data, 0, NULL,
-                        &ckb, 0, dst_tp, out.get_arrmeta(),
-                        af.get_type()->get_npos(), &src_tp, src_arrmeta,
-                        kernel_request_single, &eval::default_eval_context,
-                        nd::array(), std::map<nd::string, ndt::type>());
+  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
+                        dst_tp, out.get_arrmeta(), af.get_type()->get_npos(),
+                        &src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context, nd::array(),
+                        std::map<nd::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   usngo(out.get_readwrite_originptr(), const_cast<char **>(&in_ptr), ckb.get());
   EXPECT_EQ(5, out.get_shape()[0]);
@@ -145,8 +145,8 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
   in.vals() = in_vals;
   const char *in_ptr = in.get_readonly_originptr();
   const char *src_arrmeta[1] = {in.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), af.get()->static_data, 0, NULL,
-                        &ckb, 0, out.get_type(), out.get_arrmeta(),
+  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
+                        out.get_type(), out.get_arrmeta(),
                         af.get_type()->get_npos(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());

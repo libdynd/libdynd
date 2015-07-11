@@ -54,7 +54,6 @@ namespace kernels {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *static_data,
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -80,7 +79,7 @@ namespace kernels {
       self_type::make(ckb, kernreq, ckb_offset,
                       detail::make_array_wrapper<N>(perm));
       return child->instantiate(
-          child, child_tp, const_cast<char *>(child->static_data), 0, NULL, ckb,
+          child_tp, const_cast<char *>(child->static_data), 0, NULL, ckb,
           ckb_offset, ndt::make_type<void>(), NULL, nsrc, src_tp_inv,
           src_arrmeta_inv, kernreq, ectx, kwds, tp_vars);
     }
@@ -149,7 +148,6 @@ namespace kernels {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *static_data,
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -175,7 +173,7 @@ namespace kernels {
       self_type::make(ckb, kernreq, ckb_offset,
                       detail::make_array_wrapper<N>(perm));
       return child->instantiate(
-          child, child_tp, const_cast<char *>(child->static_data), 0, NULL, ckb,
+          child_tp, const_cast<char *>(child->static_data), 0, NULL, ckb,
           ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp_inv, src_arrmeta_inv,
           kernreq, ectx, kwds, tp_vars);
     }

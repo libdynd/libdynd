@@ -10,7 +10,6 @@ using namespace std;
 using namespace dynd;
 
 intptr_t nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -49,15 +48,14 @@ intptr_t nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     ndt::type child_src_tp[2] = {ft, ft};
     const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
     ckb_offset = equal.get()->instantiate(
-        equal::get(), equal::get_type(), equal::get()->static_data, 0, NULL,
-        ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, child_src_tp,
-        child_src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        equal::get_type(), equal::get()->static_data, 0, NULL, ckb, ckb_offset,
+        dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta, kernreq,
+        ectx, kwds, tp_vars);
   }
   return ckb_offset;
 }
 
 intptr_t nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -96,9 +94,9 @@ intptr_t nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     ndt::type child_src_tp[2] = {ft, ft};
     const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
     ckb_offset = not_equal.get()->instantiate(
-        not_equal::get(), not_equal::get_type(), not_equal::get()->static_data,
-        0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, child_src_tp,
-        child_src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        not_equal::get_type(), not_equal::get()->static_data, 0, NULL, ckb,
+        ckb_offset, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
+        kernreq, ectx, kwds, tp_vars);
   }
   return ckb_offset;
 }

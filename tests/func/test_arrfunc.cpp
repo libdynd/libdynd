@@ -39,7 +39,7 @@ TEST(ArrFunc, Assignment)
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
-      af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
       &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
@@ -53,7 +53,7 @@ TEST(ArrFunc, Assignment)
   // Instantiate a strided ckernel
   ckb.reset();
   af.get()->instantiate(
-      af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_strided,
       &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
@@ -258,7 +258,7 @@ TEST(ArrFunc, Property)
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
-      af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
       &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
@@ -285,7 +285,7 @@ TEST(ArrFunc, AssignmentAsExpr)
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
-      af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
       &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
@@ -298,7 +298,7 @@ TEST(ArrFunc, AssignmentAsExpr)
   // Instantiate a strided ckernel
   ckb.reset();
   af.get()->instantiate(
-      af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
       af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_strided,
       &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};

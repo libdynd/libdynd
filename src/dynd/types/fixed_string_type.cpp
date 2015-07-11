@@ -149,8 +149,7 @@ ndt::type ndt::fixed_string_type::get_canonical_type() const
 }
 
 bool ndt::fixed_string_type::is_lossless_assignment(
-    const type &DYND_UNUSED(dst_tp),
-    const type &DYND_UNUSED(src_tp)) const
+    const type &DYND_UNUSED(dst_tp), const type &DYND_UNUSED(src_tp)) const
 {
   // Don't shortcut anything to 'nocheck' error checking, so that
   // decoding errors get caught appropriately.
@@ -170,9 +169,9 @@ bool ndt::fixed_string_type::operator==(const base_type &rhs) const
 }
 
 intptr_t ndt::fixed_string_type::make_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const arrfunc_type *af_tp, void *ckb, intptr_t ckb_offset,
+    const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
+    const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (this == dst_tp.extended()) {
@@ -192,8 +191,8 @@ intptr_t ndt::fixed_string_type::make_assignment_kernel(
     default: {
       if (!src_tp.is_builtin()) {
         return src_tp.extended()->make_assignment_kernel(
-            self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-            src_arrmeta, kernreq, ectx, kwds);
+            af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+            kernreq, ectx, kwds);
       } else {
         return make_builtin_to_string_assignment_kernel(
             ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp.get_type_id(), kernreq,
@@ -216,9 +215,8 @@ intptr_t ndt::fixed_string_type::make_assignment_kernel(
 
 size_t ndt::fixed_string_type::make_comparison_kernel(
     void *ckb, intptr_t ckb_offset, const type &src0_dt,
-    const char *src0_arrmeta, const type &src1_dt,
-    const char *src1_arrmeta, comparison_type_t comptype,
-    const eval::eval_context *ectx) const
+    const char *src0_arrmeta, const type &src1_dt, const char *src1_arrmeta,
+    comparison_type_t comptype, const eval::eval_context *ectx) const
 {
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {

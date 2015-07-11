@@ -34,8 +34,7 @@ static void delete_lifted_reduction_arrfunc_data(char *static_data)
 }
 
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
-    const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -44,7 +43,7 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   lifted_reduction_arrfunc_data *data =
-      *af_self->get_data_as<lifted_reduction_arrfunc_data *>();
+      *reinterpret_cast<lifted_reduction_arrfunc_data **>(static_data);
   return make_lifted_reduction_ckernel(
       data->child_elwise_reduction.get(),
       data->child_elwise_reduction.get_type(),

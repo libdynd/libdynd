@@ -77,7 +77,6 @@ void nd::functional::var_rolling_ck::destruct_children()
 
 // TODO This should handle both strided and var cases
 intptr_t nd::functional::rolling_ck::instantiate(
-    const arrfunc_type_data *DYND_UNUSED(af_self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -146,8 +145,8 @@ intptr_t nd::functional::rolling_ck::instantiate(
 
   const char *src_winop_meta = self->m_src_winop_meta.get();
   return window_af->instantiate(
-      window_af, window_af_tp, const_cast<char *>(window_af->static_data), 0,
-      NULL, ckb, ckb_offset, dst_el_tp, dst_el_arrmeta, nsrc,
+      window_af_tp, const_cast<char *>(window_af->static_data), 0, NULL, ckb,
+      ckb_offset, dst_el_tp, dst_el_arrmeta, nsrc,
       &self->m_src_winop_meta.get_type(), &src_winop_meta,
       kernel_request_strided, ectx, kwds, tp_vars);
 }

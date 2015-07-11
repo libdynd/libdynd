@@ -111,7 +111,7 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed) {
     a.vals() = 0;
     b = 9.0;
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
+    make_assignment_kernel(NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
     expr_single_t fn = k.get()->get_function<expr_single_t>();
@@ -132,7 +132,7 @@ TEST(FixedDimType, AssignKernel_FixedToFixed) {
     b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
+    make_assignment_kernel(NULL, &k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
                            b.get_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
     expr_single_t fn = k.get()->get_function<expr_single_t>();
@@ -151,7 +151,7 @@ TEST(FixedDimType, AssignKernel_FixedToScalarError) {
     a = 9.0;
     b = parse_json("3 * int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-    EXPECT_THROW(make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get_arrmeta(),
+    EXPECT_THROW(make_assignment_kernel(NULL, &k, 0, a.get_type(), a.get_arrmeta(),
                                         b.get_type(), b.get_arrmeta(),
                                         kernel_request_single,
                                         &eval::default_eval_context, nd::array()),

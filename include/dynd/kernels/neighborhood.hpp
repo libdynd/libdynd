@@ -84,8 +84,7 @@ namespace nd {
       }
 
       static intptr_t
-      instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
-                  const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+      instantiate(const ndt::arrfunc_type *DYND_UNUSED(af_tp),
                   char *static_data, size_t DYND_UNUSED(data_size),
                   char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -188,9 +187,9 @@ namespace nd {
         }
 
         ckb_offset = nh_op.get()->instantiate(
-            nh_op.get(), nh_op.get_type(), NULL, 0, NULL, ckb, ckb_offset,
-            nh_dst_tp, nh_dst_arrmeta, nsrc, nh_src_tp, nh_src_arrmeta,
-            kernel_request_single, ectx,
+            nh_op.get_type(), nh_op.get()->static_data, 0, NULL, ckb,
+            ckb_offset, nh_dst_tp, nh_dst_arrmeta, nsrc, nh_src_tp,
+            nh_src_arrmeta, kernel_request_single, ectx,
             struct_concat(kwds, pack("start_stop", reinterpret_cast<intptr_t>(
                                                        nh->start_stop))),
             tp_vars);

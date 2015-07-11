@@ -101,12 +101,12 @@ size_t ndt::adapt_type::make_operand_to_value_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  const arrfunc_type_data *af = m_forward.get();
+  arrfunc_type_data *af = const_cast<arrfunc_type_data *>(m_forward.get());
   if (af != NULL) {
-    return af->instantiate(af, m_forward.get_type(), NULL, 0, NULL, ckb, ckb_offset,
-                           m_value_type, dst_arrmeta, -1, &m_operand_type,
-                           &src_arrmeta, kernreq, ectx, nd::array(),
-                           std::map<nd::string, type>());
+    return af->instantiate(m_forward.get_type(), af->static_data, 0, NULL, ckb,
+                           ckb_offset, m_value_type, dst_arrmeta, -1,
+                           &m_operand_type, &src_arrmeta, kernreq, ectx,
+                           nd::array(), std::map<nd::string, type>());
   } else {
     stringstream ss;
     ss << "Cannot apply ";
@@ -121,12 +121,12 @@ size_t ndt::adapt_type::make_value_to_operand_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  const arrfunc_type_data *af = m_reverse.get();
+  arrfunc_type_data *af = const_cast<arrfunc_type_data *>(m_reverse.get());
   if (af != NULL) {
-    return af->instantiate(af, m_reverse.get_type(), NULL, 0, NULL, ckb, ckb_offset,
-                           m_operand_type, src_arrmeta, -1, &m_value_type,
-                           &dst_arrmeta, kernreq, ectx, nd::array(),
-                           std::map<nd::string, type>());
+    return af->instantiate(m_reverse.get_type(), af->static_data, 0, NULL, ckb,
+                           ckb_offset, m_operand_type, src_arrmeta, -1,
+                           &m_value_type, &dst_arrmeta, kernreq, ectx,
+                           nd::array(), std::map<nd::string, type>());
   } else {
     stringstream ss;
     ss << "Cannot apply ";

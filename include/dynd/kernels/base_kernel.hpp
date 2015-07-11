@@ -200,7 +200,6 @@ namespace nd {
     }                                                                          \
                                                                                \
     static intptr_t instantiate(                                               \
-        const arrfunc_type_data *DYND_UNUSED(self),                            \
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),                           \
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),         \
         char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,               \

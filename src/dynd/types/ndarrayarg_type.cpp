@@ -56,7 +56,6 @@ struct ndarrayarg_assign_ck
 } // anonymous namespace
 
 intptr_t ndt::ndarrayarg_type::make_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
     const type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
     const type &src_tp, const char *DYND_UNUSED(src_arrmeta),

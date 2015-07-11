@@ -199,8 +199,8 @@ struct groupby_to_value_assign_kernel
     const ndt::fixed_dim_type *fad = result_tp.extended<ndt::fixed_dim_type>();
     intptr_t fad_stride =
         reinterpret_cast<const size_stride_t *>(dst_arrmeta)->stride;
-    const ndt::var_dim_type *vad =
-        static_cast<const ndt::var_dim_type *>(fad->get_element_type().extended());
+    const ndt::var_dim_type *vad = static_cast<const ndt::var_dim_type *>(
+        fad->get_element_type().extended());
     const var_dim_type_arrmeta *vad_md =
         reinterpret_cast<const var_dim_type_arrmeta *>(
             dst_arrmeta + sizeof(fixed_dim_type_arrmeta));
@@ -325,7 +325,7 @@ size_t ndt::groupby_type::make_operand_to_value_assignment_kernel(
   src_element_tp =
       src_element_tp.extended()->at_single(0, &src_element_arrmeta, NULL);
 
-  return ::make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_element_tp,
+  return ::make_assignment_kernel(NULL, ckb, ckb_offset, dst_element_tp,
                                   dst_element_arrmeta, src_element_tp,
                                   src_element_arrmeta, kernel_request_single,
                                   ectx, nd::array());

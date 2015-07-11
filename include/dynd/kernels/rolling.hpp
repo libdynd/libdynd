@@ -47,8 +47,7 @@ namespace nd {
 
     struct rolling_ck : base_virtual_kernel<rolling_ck> {
       static intptr_t
-      instantiate(const arrfunc_type_data *self,
-                  const ndt::arrfunc_type *self_tp, char *static_data,
+      instantiate(const ndt::arrfunc_type *self_tp, char *static_data,
                   size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
