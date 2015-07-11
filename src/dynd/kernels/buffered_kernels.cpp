@@ -137,10 +137,9 @@ size_t dynd::make_buffered_ckernel(
   for (intptr_t i = 0; i < nsrc; ++i) {
     if (!self->m_bufs[i].is_null()) {
       self->m_src_buf_ck_offsets[i] = ckb_offset - root_ckb_offset;
-      ckb_offset =
-          make_assignment_kernel(NULL, ckb, ckb_offset, src_tp_for_af[i],
-                                 self->m_bufs[i].get_arrmeta(), src_tp[i],
-                                 src_arrmeta[i], kernreq, ectx, nd::array());
+      ckb_offset = make_assignment_kernel(
+          ckb, ckb_offset, src_tp_for_af[i], self->m_bufs[i].get_arrmeta(),
+          src_tp[i], src_arrmeta[i], kernreq, ectx);
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->reserve(ckb_offset + sizeof(ckernel_prefix));
       if (i < nsrc - 1) {

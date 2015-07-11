@@ -110,9 +110,9 @@ size_t ndt::convert_type::make_operand_to_value_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  return ::make_assignment_kernel(NULL, ckb, ckb_offset, m_value_type,
-                                  dst_arrmeta, m_operand_type.value_type(),
-                                  src_arrmeta, kernreq, ectx, nd::array());
+  return ::make_assignment_kernel(ckb, ckb_offset, m_value_type, dst_arrmeta,
+                                  m_operand_type.value_type(), src_arrmeta,
+                                  kernreq, ectx);
 }
 
 size_t ndt::convert_type::make_value_to_operand_assignment_kernel(
@@ -120,7 +120,7 @@ size_t ndt::convert_type::make_value_to_operand_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  return ::make_assignment_kernel(
-      NULL, ckb, ckb_offset, m_operand_type.value_type(), dst_arrmeta,
-      m_value_type, src_arrmeta, kernreq, ectx, nd::array());
+  return ::make_assignment_kernel(ckb, ckb_offset, m_operand_type.value_type(),
+                                  dst_arrmeta, m_value_type, src_arrmeta,
+                                  kernreq, ectx);
 }

@@ -95,13 +95,11 @@ namespace ndt {
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
                              const std::string &indent) const;
 
-    intptr_t make_assignment_kernel(const arrfunc_type *af_tp, void *ckb,
-                                    intptr_t ckb_offset, const type &dst_tp,
-                                    const char *dst_arrmeta, const type &src_tp,
-                                    const char *src_arrmeta,
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
+                                    const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta,
                                     kernel_request_t kernreq,
-                                    const eval::eval_context *ectx,
-                                    const nd::array &kwds) const;
+                                    const eval::eval_context *ectx) const;
 
     void get_dynamic_array_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,

@@ -242,12 +242,11 @@ size_t ndt::base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
 }
 
 intptr_t ndt::base_type::make_assignment_kernel(
-    const arrfunc_type *DYND_UNUSED(af_tp), void *DYND_UNUSED(ckb),
-    intptr_t DYND_UNUSED(ckb_offset), const type &dst_tp,
-    const char *DYND_UNUSED(dst_arrmeta), const type &src_tp,
-    const char *DYND_UNUSED(src_arrmeta), kernel_request_t DYND_UNUSED(kernreq),
-    const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds)) const
+    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+    const type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    const type &src_tp, const char *DYND_UNUSED(src_arrmeta),
+    kernel_request_t DYND_UNUSED(kernreq),
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   stringstream ss;
   ss << "make_assignment_kernel has not been implemented for type '";

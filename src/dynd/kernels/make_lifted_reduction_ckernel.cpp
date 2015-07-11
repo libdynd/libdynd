@@ -840,14 +840,13 @@ static size_t make_strided_inner_reduction_dimension_kernel(
         &src_tp, &src_arrmeta, kernel_request_single, ectx, nd::array(),
         std::map<nd::string, ndt::type>());
   } else if (reduction_identity.is_null()) {
-    ckb_offset = make_assignment_kernel(
-        NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-        kernel_request_single, ectx, nd::array());
+    ckb_offset =
+        make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+                               src_arrmeta, kernel_request_single, ectx);
   } else {
     ckb_offset = make_assignment_kernel(
-        NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-        reduction_identity.get_type(), reduction_identity.get_arrmeta(),
-        kernel_request_single, ectx, nd::array());
+        ckb, ckb_offset, dst_tp, dst_arrmeta, reduction_identity.get_type(),
+        reduction_identity.get_arrmeta(), kernel_request_single, ectx);
   }
 
   return ckb_offset;
@@ -989,14 +988,13 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
         &src_tp, &src_arrmeta, kernel_request_strided, ectx, nd::array(),
         std::map<nd::string, ndt::type>());
   } else if (reduction_identity.is_null()) {
-    ckb_offset = make_assignment_kernel(
-        NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-        kernel_request_strided, ectx, nd::array());
+    ckb_offset =
+        make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+                               src_arrmeta, kernel_request_strided, ectx);
   } else {
     ckb_offset = make_assignment_kernel(
-        NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-        reduction_identity.get_type(), reduction_identity.get_arrmeta(),
-        kernel_request_strided, ectx, nd::array());
+        ckb, ckb_offset, dst_tp, dst_arrmeta, reduction_identity.get_type(),
+        reduction_identity.get_arrmeta(), kernel_request_strided, ectx);
   }
 
   return ckb_offset;
@@ -1035,9 +1033,8 @@ size_t dynd::make_lifted_reduction_ckernel(
             elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta, kernreq,
             ectx, nd::array(), std::map<nd::string, ndt::type>());
       } else if (reduction_identity.is_null()) {
-        return make_assignment_kernel(NULL, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                      ectx, nd::array());
+        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      src_tp, src_arrmeta, kernreq, ectx);
       } else {
         // Create the kernel which copies the identity and then
         // does one reduction

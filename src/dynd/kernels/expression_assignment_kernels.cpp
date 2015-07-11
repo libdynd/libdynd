@@ -202,9 +202,9 @@ size_t dynd::make_expression_assignment_kernel(
         e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
         // Construct the second kernel (buffer -> dst)
         e->second_kernel_offset = ckb_offset - root_ckb_offset;
-        return ::make_assignment_kernel(
-            NULL, ckb, ckb_offset, opdt, dst_arrmeta, buffer_tp,
-            e->buffer_arrmeta, kernreq, ectx, nd::array());
+        return ::make_assignment_kernel(ckb, ckb_offset, opdt, dst_arrmeta,
+                                        buffer_tp, e->buffer_arrmeta, kernreq,
+                                        ectx);
       }
     } else {
       ndt::type buffer_tp;
@@ -225,9 +225,9 @@ size_t dynd::make_expression_assignment_kernel(
       e->init(buffer_tp, kernreq);
       // Construct the first kernel (src -> buffer)
       e->first_kernel_offset = ckb_offset - root_ckb_offset;
-      ckb_offset = ::make_assignment_kernel(
-          NULL, ckb, ckb_offset, buffer_tp, e->buffer_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, nd::array());
+      ckb_offset = ::make_assignment_kernel(ckb, ckb_offset, buffer_tp,
+                                            e->buffer_arrmeta, src_tp,
+                                            src_arrmeta, kernreq, ectx);
       ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
       // Allocate the buffer data
       intptr_t buffer_data_offset = ckb_offset;
@@ -240,9 +240,9 @@ size_t dynd::make_expression_assignment_kernel(
       e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
       // Construct the second kernel (buffer -> dst)
       e->second_kernel_offset = ckb_offset - root_ckb_offset;
-      return ::make_assignment_kernel(NULL, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta, buffer_tp, e->buffer_arrmeta,
-                                      kernreq, ectx, nd::array());
+      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      buffer_tp, e->buffer_arrmeta, kernreq,
+                                      ectx);
     }
   } else {
     const ndt::base_expr_type *src_bed = src_tp.extended<ndt::base_expr_type>();
@@ -264,9 +264,9 @@ size_t dynd::make_expression_assignment_kernel(
         size_t buffer_data_size = e->buffer_data_size;
         // Construct the first kernel (src -> buffer)
         e->first_kernel_offset = ckb_offset - root_ckb_offset;
-        ckb_offset = ::make_assignment_kernel(
-            NULL, ckb, ckb_offset, buffer_tp, e->buffer_arrmeta, opdt,
-            src_arrmeta, kernreq, ectx, nd::array());
+        ckb_offset = ::make_assignment_kernel(ckb, ckb_offset, buffer_tp,
+                                              e->buffer_arrmeta, opdt,
+                                              src_arrmeta, kernreq, ectx);
         // Allocate the buffer data
         ckb_offset =
             inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
@@ -294,9 +294,9 @@ size_t dynd::make_expression_assignment_kernel(
       size_t buffer_data_size = e->buffer_data_size;
       // Construct the first kernel (src -> buffer)
       e->first_kernel_offset = ckb_offset - root_ckb_offset;
-      ckb_offset = ::make_assignment_kernel(
-          NULL, ckb, ckb_offset, buffer_tp, e->buffer_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, nd::array());
+      ckb_offset = ::make_assignment_kernel(ckb, ckb_offset, buffer_tp,
+                                            e->buffer_arrmeta, src_tp,
+                                            src_arrmeta, kernreq, ectx);
       // Allocate the buffer data
       ckb_offset = inc_to_alignment(ckb_offset, buffer_tp.get_data_alignment());
       size_t buffer_data_offset = ckb_offset;
@@ -309,9 +309,9 @@ size_t dynd::make_expression_assignment_kernel(
       e->buffer_data_offset = buffer_data_offset - root_ckb_offset;
       // Construct the second kernel (buffer -> dst)
       e->second_kernel_offset = ckb_offset - root_ckb_offset;
-      return ::make_assignment_kernel(NULL, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta, buffer_tp, e->buffer_arrmeta,
-                                      kernreq, ectx, nd::array());
+      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      buffer_tp, e->buffer_arrmeta, kernreq,
+                                      ectx);
     }
   }
 }

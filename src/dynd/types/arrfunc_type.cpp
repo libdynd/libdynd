@@ -315,10 +315,9 @@ static intptr_t make_arrfunc_to_string_assignment_kernel(
 }
 
 intptr_t ndt::arrfunc_type::make_assignment_kernel(
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
-    const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
-    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds)) const
+    void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *DYND_UNUSED(src_arrmeta),
+    kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
   } else {

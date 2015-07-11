@@ -107,13 +107,11 @@ namespace ndt {
                               type &out_uniform_tp) const;
     size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
-    intptr_t make_assignment_kernel(const arrfunc_type *af_tp, void *ckb,
-                                    intptr_t ckb_offset, const type &dst_tp,
-                                    const char *dst_arrmeta, const type &src_tp,
-                                    const char *src_arrmeta,
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
+                                    const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta,
                                     kernel_request_t kernreq,
-                                    const eval::eval_context *ectx,
-                                    const nd::array &kwds) const;
+                                    const eval::eval_context *ectx) const;
 
     void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback,
                          void *callback_data) const;
