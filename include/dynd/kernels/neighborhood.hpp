@@ -84,9 +84,9 @@ namespace nd {
       }
 
       static intptr_t
-      instantiate(const arrfunc_type_data *af_self,
+      instantiate(const arrfunc_type_data *DYND_UNUSED(af_self),
                   const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-                  char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+                  char *static_data, size_t DYND_UNUSED(data_size),
                   char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
@@ -95,7 +95,8 @@ namespace nd {
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         std::shared_ptr<neighborhood_data> nh =
-            *af_self->get_data_as<std::shared_ptr<neighborhood_data>>();
+            *reinterpret_cast<std::shared_ptr<neighborhood_data> *>(
+                static_data);
         nd::arrfunc nh_op = nh->op;
 
         nd::array shape;
