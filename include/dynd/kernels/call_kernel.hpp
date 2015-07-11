@@ -7,17 +7,16 @@ namespace nd {
 
   template <typename T>
   struct call_kernel : base_virtual_kernel<call_kernel<T>> {
-    static void data_init(const arrfunc_type_data *DYND_UNUSED(self),
-                          const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                          const char *static_data, size_t data_size, char *data,
-                          intptr_t nsrc, const ndt::type *src_tp,
-                          dynd::nd::array &kwds,
+    static void data_init(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                          char *static_data, size_t data_size, char *data,
+                          const ndt::type &dst_tp, intptr_t nsrc,
+                          const ndt::type *src_tp, const nd::array &kwds,
                           const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
       const arrfunc &func = T::get_self();
 
-      func.get()->data_init(func.get(), func.get_type(), static_data, data_size,
-                            data, nsrc, src_tp, kwds, tp_vars);
+      func.get()->data_init(func.get_type(), static_data, data_size, data,
+                            dst_tp, nsrc, src_tp, kwds, tp_vars);
     }
 
     static void

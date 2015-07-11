@@ -846,7 +846,7 @@ namespace nd {
     template <typename A, typename K>
     array call(const A &args, const K &kwds) const
     {
-      const arrfunc_type_data *self = get();
+      arrfunc_type_data *self = const_cast<arrfunc_type_data *>(get());
       const ndt::arrfunc_type *self_tp = get_type();
 
       array dst;
@@ -885,10 +885,10 @@ namespace nd {
                         available, missing);
 
       // Allocate, then initialize, the data
-      std::unique_ptr<char[]> data(new char[get()->data_size]);
+      std::unique_ptr<char[]> data(new char[self->data_size]);
       if (self->data_size > 0) {
-        self->data_init(self, self_tp, get()->static_data, get()->data_size,
-                        data.get(), arg_tp.size(),
+        self->data_init(self_tp, self->static_data, self->data_size, data.get(),
+                        ndt::type(), arg_tp.size(),
                         arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array,
                         tp_vars);
       }
@@ -906,7 +906,7 @@ namespace nd {
           }
 
           self->resolve_dst_type(
-              self, self_tp, get()->static_data, get()->data_size, data.get(),
+              self, self_tp, self->static_data, self->data_size, data.get(),
               dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
               kwds_as_array, tp_vars);
         }
@@ -918,7 +918,7 @@ namespace nd {
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self, self_tp, get()->static_data, get()->data_size,
+      self->instantiate(self, self_tp, self->static_data, self->data_size,
                         data.get(), &ckb, 0, dst_tp, dst.get_arrmeta(),
                         arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
                         arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
