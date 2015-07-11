@@ -9,6 +9,51 @@
 using namespace std;
 using namespace dynd;
 
+void nd::functional::old_multidispatch_ck::resolve_dst_type(
+    const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *static_data,
+    size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars)
+{
+  const vector<nd::arrfunc> *icd =
+      reinterpret_cast<const vector<nd::arrfunc> *>(static_data);
+  for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
+    const nd::arrfunc &child = (*icd)[i];
+    if (nsrc == child.get_type()->get_npos()) {
+      intptr_t isrc;
+      std::map<nd::string, ndt::type> typevars;
+      for (isrc = 0; isrc < nsrc; ++isrc) {
+        if (!can_implicitly_convert(
+                src_tp[isrc], child.get_type()->get_pos_type(isrc), typevars)) {
+          break;
+        }
+      }
+      if (isrc == nsrc) {
+        dst_tp = child.get_type()->get_return_type();
+        if (dst_tp.is_symbolic()) {
+          child.get()->resolve_dst_type(
+              child.get_type(), const_cast<char *>(child.get()->static_data),
+              data_size, data, dst_tp, nsrc, src_tp, kwds, tp_vars);
+        }
+        return;
+      }
+    }
+  }
+
+  stringstream ss;
+  ss << "Failed to find suitable signature in multidispatch resolution "
+        "with "
+        "input types (";
+  for (intptr_t isrc = 0; isrc < nsrc; ++isrc) {
+    ss << src_tp[isrc];
+    if (isrc != nsrc - 1) {
+      ss << ", ";
+    }
+  }
+  ss << ")";
+  throw type_error(ss.str());
+}
+
 intptr_t nd::functional::old_multidispatch_ck::instantiate(
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
@@ -40,9 +85,9 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
       }
       if (j == nsrc) {
         return af.get()->instantiate(
-            af.get_type(), const_cast<char *>(af.get()->static_data),
-            0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-            src_arrmeta, kernreq, ectx, kwds, tp_vars);
+            af.get_type(), const_cast<char *>(af.get()->static_data), 0, NULL,
+            ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+            kernreq, ectx, kwds, tp_vars);
       } else {
         return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
                                      dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -55,46 +100,4 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
   stringstream ss;
   ss << "No matching signature found in multidispatch arrfunc";
   throw invalid_argument(ss.str());
-}
-
-void nd::functional::old_multidispatch_ck::resolve_dst_type(
-    const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *static_data,
-    size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars)
-{
-  const vector<nd::arrfunc> *icd =
-      reinterpret_cast<const vector<nd::arrfunc> *>(static_data);
-  for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
-    const nd::arrfunc &child = (*icd)[i];
-    if (nsrc == child.get_type()->get_npos()) {
-      intptr_t isrc;
-      std::map<nd::string, ndt::type> typevars;
-      for (isrc = 0; isrc < nsrc; ++isrc) {
-        if (!can_implicitly_convert(
-                src_tp[isrc], child.get_type()->get_pos_type(isrc), typevars)) {
-          break;
-        }
-      }
-      if (isrc == nsrc) {
-        child.get()->resolve_dst_type(
-            child.get_type(), const_cast<char *>(child.get()->static_data),
-            data_size, data, dst_tp, nsrc, src_tp, kwds, tp_vars);
-        return;
-      }
-    }
-  }
-
-  stringstream ss;
-  ss << "Failed to find suitable signature in multidispatch resolution "
-        "with "
-        "input types (";
-  for (intptr_t isrc = 0; isrc < nsrc; ++isrc) {
-    ss << src_tp[isrc];
-    if (isrc != nsrc - 1) {
-      ss << ", ";
-    }
-  }
-  ss << ")";
-  throw type_error(ss.str());
 }

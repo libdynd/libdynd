@@ -272,8 +272,8 @@ struct nafunc {
         reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
     arrfunc_type_data *assign_na = is_avail + 1;
 
-    new (is_avail) arrfunc_type_data(0, nd::is_avail_ck<T>::instantiate, NULL,
-                                     nd::is_avail_ck<T>::resolve_dst_type);
+    new (is_avail)
+        arrfunc_type_data(0, nd::is_avail_ck<T>::instantiate, NULL, NULL);
     new (assign_na)
         arrfunc_type_data(0, nd::assign_na_ck<T>::instantiate, NULL, NULL);
     return naf;
