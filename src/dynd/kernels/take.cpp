@@ -235,17 +235,20 @@ intptr_t nd::take_ck::instantiate(
 }
 
 void nd::take_ck::resolve_dst_type(
-    const ndt::arrfunc_type *af_tp, char *DYND_UNUSED(static_data),
-    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), ndt::type &dst_tp,
-    intptr_t nsrc, const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
+    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
-  if (nsrc != 2) {
-    stringstream ss;
-    ss << "Wrong number of arguments to take arrfunc with prototype " << af_tp
-       << ", got " << nsrc << " arguments";
-    throw invalid_argument(ss.str());
-  }
+  /*
+    if (nsrc != 2) {
+      stringstream ss;
+      ss << "Wrong number of arguments to take arrfunc with prototype " << af_tp
+         << ", got " << nsrc << " arguments";
+      throw invalid_argument(ss.str());
+    }
+  */
+
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
     dst_tp = ndt::make_var_dim(

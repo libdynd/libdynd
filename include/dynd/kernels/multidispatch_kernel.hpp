@@ -69,10 +69,9 @@ namespace nd {
 
     struct old_multidispatch_ck : base_virtual_kernel<old_multidispatch_ck> {
       static void
-      resolve_dst_type(const ndt::arrfunc_type *af_tp, char *static_data,
-                       size_t data_size, char *data, ndt::type &dst_tp,
-                       intptr_t nsrc, const ndt::type *src_tp,
-                       const nd::array &kwds,
+      resolve_dst_type(char *static_data, size_t data_size, char *data,
+                       ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const nd::array &kwds,
                        const std::map<nd::string, ndt::type> &tp_vars);
 
       static intptr_t
@@ -120,8 +119,7 @@ namespace nd {
       */
 
       static void
-      resolve_dst_type(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       char *static_data, size_t DYND_UNUSED(data_size),
+      resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
                        char *data, ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
@@ -135,8 +133,7 @@ namespace nd {
 
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
-          child.get()->resolve_dst_type(child.get_type(),
-                                        child.get()->static_data,
+          child.get()->resolve_dst_type(child.get()->static_data,
                                         child.get()->data_size, data, dst_tp,
                                         nsrc, src_tp, kwds, tp_vars);
         } else {

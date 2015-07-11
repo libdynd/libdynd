@@ -263,7 +263,6 @@ namespace nd {
     template <bool real_to_complex>
     static typename std::enable_if<real_to_complex, void>::type
     resolve_dst_type_(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, const nd::array &kwds,
@@ -290,7 +289,6 @@ namespace nd {
     template <bool real_to_complex>
     static typename std::enable_if<!real_to_complex, void>::type
     resolve_dst_type_(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, const nd::array &kwds,
@@ -310,16 +308,13 @@ namespace nd {
       }
     }
 
-    static void
-    resolve_dst_type(const ndt::arrfunc_type *self_tp, char *static_data,
-                     size_t data_size, char *data, ndt::type &dst_tp,
-                     intptr_t nsrc, const ndt::type *src_tp,
-                     const nd::array &kwds,
-                     const std::map<dynd::nd::string, ndt::type> &tp_vars)
+    static void resolve_dst_type(char *static_data, size_t data_size,
+                                 char *data, ndt::type &dst_tp, intptr_t nsrc,
+                                 const ndt::type *src_tp, const nd::array &kwds,
+                                 const std::map<nd::string, ndt::type> &tp_vars)
     {
       resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(
-          self_tp, static_data, data_size, data, dst_tp, nsrc, src_tp, kwds,
-          tp_vars);
+          static_data, data_size, data, dst_tp, nsrc, src_tp, kwds, tp_vars);
     }
   };
 

@@ -28,8 +28,7 @@ namespace nd {
   template <typename T>
   struct base_virtual_kernel {
     static void
-    resolve_dst_type(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                     char *DYND_UNUSED(static_data),
+    resolve_dst_type(char *DYND_UNUSED(static_data),
                      size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                      ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp),

@@ -10,9 +10,8 @@ using namespace std;
 using namespace dynd;
 
 void nd::functional::old_multidispatch_ck::resolve_dst_type(
-    const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *static_data,
-    size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &kwds,
+    char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
+    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars)
 {
   const vector<nd::arrfunc> *icd =
@@ -32,8 +31,8 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(
         dst_tp = child.get_type()->get_return_type();
         if (dst_tp.is_symbolic()) {
           child.get()->resolve_dst_type(
-              child.get_type(), const_cast<char *>(child.get()->static_data),
-              data_size, data, dst_tp, nsrc, src_tp, kwds, tp_vars);
+              const_cast<char *>(child.get()->static_data), data_size, data,
+              dst_tp, nsrc, src_tp, kwds, tp_vars);
         }
         return;
       }

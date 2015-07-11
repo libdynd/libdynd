@@ -54,8 +54,7 @@ namespace nd {
       */
 
       static void
-      resolve_dst_type(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       char *static_data, size_t DYND_UNUSED(data_size),
+      resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
                        intptr_t nsrc, const ndt::type *src_tp,
                        const dynd::nd::array &kwds,
@@ -83,9 +82,9 @@ namespace nd {
         child_dst_tp = child_af_tp->get_return_type();
         if (child_dst_tp.is_symbolic()) {
           child_af->resolve_dst_type(
-              child_af_tp, const_cast<char *>(child_af->static_data), 0, NULL,
-              child_dst_tp, nsrc,
-              child_src_tp.empty() ? NULL : child_src_tp.data(), kwds, tp_vars);
+              const_cast<char *>(child_af->static_data), 0, NULL, child_dst_tp,
+              nsrc, child_src_tp.empty() ? NULL : child_src_tp.data(), kwds,
+              tp_vars);
         }
 
         // ...

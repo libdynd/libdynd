@@ -198,10 +198,10 @@ namespace nd {
       }
 
       static void resolve_dst_type(
-          const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(static_data),
-          size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-          ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-          const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
+          char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+          char *DYND_UNUSED(data), ndt::type &dst_tp,
+          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+          const nd::array &DYND_UNUSED(kwds),
           const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         // TODO: Should be able to express the match/subsitution without special
@@ -230,8 +230,6 @@ namespace nd {
         */
         //  out_dst_tp = ndt::substitute(af_tp->get_return_type(), typevars,
         //  false);
-
-        dst_tp = self_tp->get_return_type();
 
         // swap in the input dimension values for the Fixed**N
         intptr_t ndim = src_tp[0].get_ndim();

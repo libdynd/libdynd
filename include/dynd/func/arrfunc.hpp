@@ -896,7 +896,7 @@ namespace nd {
       // Allocate, then initialize, the data
       std::unique_ptr<char[]> data(new char[self->data_size]);
       if (self->data_size > 0) {
-        self->data_init(self_tp, self->static_data, self->data_size, data.get(),
+        self->data_init(self->static_data, self->data_size, data.get(),
                         ndt::type(), arg_tp.size(),
                         arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array,
                         tp_vars);
@@ -914,8 +914,8 @@ namespace nd {
                 "dst_tp is symbolic, but resolve_dst_type is NULL");
           }
 
-          self->resolve_dst_type(self_tp, self->static_data, self->data_size,
-                                 data.get(), dst_tp, arg_tp.size(),
+          self->resolve_dst_type(self->static_data, self->data_size, data.get(),
+                                 dst_tp, arg_tp.size(),
                                  arg_tp.empty() ? NULL : arg_tp.data(),
                                  kwds_as_array, tp_vars);
         }
