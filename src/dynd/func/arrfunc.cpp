@@ -24,8 +24,7 @@ namespace {
 
 struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
   static intptr_t
-  instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-              const char *DYND_UNUSED(static_data),
+  instantiate(const ndt::arrfunc_type *af_tp, char *static_data,
               size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
               intptr_t ckb_offset, const ndt::type &dst_tp,
               const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
@@ -35,17 +34,18 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
               const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     try {
-      assign_error_mode errmode = *self->get_data_as<assign_error_mode>();
+      assign_error_mode errmode =
+          *reinterpret_cast<assign_error_mode *>(static_data);
       if (dst_tp == af_tp->get_return_type() &&
           src_tp[0] == af_tp->get_pos_type(0)) {
         if (errmode == ectx->errmode) {
-          return make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
+          return make_assignment_kernel(af_tp, ckb, ckb_offset, dst_tp,
                                         dst_arrmeta, src_tp[0], src_arrmeta[0],
                                         kernreq, ectx, kwds);
         } else {
           eval::eval_context ectx_tmp(*ectx);
           ectx_tmp.errmode = errmode;
-          return make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
+          return make_assignment_kernel(af_tp, ckb, ckb_offset, dst_tp,
                                         dst_arrmeta, src_tp[0], src_arrmeta[0],
                                         kernreq, &ectx_tmp, kwds);
         }
@@ -74,25 +74,24 @@ static void delete_property_arrfunc_data(char *static_data)
 }
 
 static intptr_t instantiate_property_ckernel(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::arrfunc_type *af_tp, char *static_data,
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
-  ndt::type prop_src_tp(*self->get_data_as<const ndt::base_type *>(), true);
+  ndt::type prop_src_tp(*reinterpret_cast<const ndt::base_type **>(static_data),
+                        true);
 
   if (dst_tp.value_type() == prop_src_tp.value_type()) {
     if (src_tp[0] == prop_src_tp.operand_type()) {
-      return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp,
-                                    dst_arrmeta, prop_src_tp, src_arrmeta[0],
-                                    kernreq, ectx, kwds);
+      return make_assignment_kernel(NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                    prop_src_tp, src_arrmeta[0], kernreq, ectx,
+                                    kwds);
     } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
-      return make_assignment_kernel(NULL, NULL, ckb, ckb_offset, dst_tp,
-                                    dst_arrmeta,
+      return make_assignment_kernel(NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                     prop_src_tp.extended<ndt::base_expr_type>()
                                         ->with_replaced_storage_type(src_tp[0]),
                                     src_arrmeta[0], kernreq, ectx, kwds);

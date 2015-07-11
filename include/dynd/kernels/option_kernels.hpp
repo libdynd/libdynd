@@ -67,9 +67,8 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -82,9 +81,8 @@ namespace nd {
   template <>
   struct is_avail_ck<int8_t> : detail::is_avail_int_ck<int8_t> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -97,9 +95,8 @@ namespace nd {
   template <>
   struct is_avail_ck<int16_t> : detail::is_avail_int_ck<int16_t> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -112,9 +109,8 @@ namespace nd {
   template <>
   struct is_avail_ck<int32_t> : detail::is_avail_int_ck<int32_t> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -127,9 +123,8 @@ namespace nd {
   template <>
   struct is_avail_ck<int64_t> : detail::is_avail_int_ck<int64_t> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -142,9 +137,8 @@ namespace nd {
   template <>
   struct is_avail_ck<int128> : detail::is_avail_int_ck<int128> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -163,9 +157,8 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -184,9 +177,8 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -205,9 +197,8 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -226,9 +217,8 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -247,9 +237,8 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -276,9 +265,8 @@ namespace nd {
     }
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const nd::array &DYND_UNUSED(kwds),
@@ -390,23 +378,23 @@ namespace kernels {
 
   struct fixed_dim_is_avail_ck {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-                const char *static_data, size_t data_size, char *data,
-                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                const char *const *src_arrmeta, kernel_request_t kernreq,
-                const eval::eval_context *ectx, const nd::array &kwds,
+    instantiate(const ndt::arrfunc_type *af_tp, char *static_data,
+                size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars);
   };
 
   struct fixed_dim_assign_na_ck {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-                const char *static_data, size_t data_size, char *data,
-                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                const char *const *src_arrmeta, kernel_request_t kernreq,
-                const eval::eval_context *ectx, const nd::array &kwds,
+    instantiate(const ndt::arrfunc_type *af_tp, char *static_data,
+                size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                const ndt::type *src_tp, const char *const *src_arrmeta,
+                kernel_request_t kernreq, const eval::eval_context *ectx,
+                const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars);
   };
 

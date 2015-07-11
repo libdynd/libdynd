@@ -778,6 +778,15 @@ namespace nd {
 
     bool is_null() const { return m_value.is_null(); }
 
+    arrfunc_type_data *get()
+    {
+      return !m_value.is_null()
+                 ? const_cast<arrfunc_type_data *>(
+                       reinterpret_cast<const arrfunc_type_data *>(
+                           m_value.get_readonly_originptr()))
+                 : NULL;
+    }
+
     const arrfunc_type_data *get() const
     {
       return !m_value.is_null() ? reinterpret_cast<const arrfunc_type_data *>(
@@ -905,10 +914,10 @@ namespace nd {
                 "dst_tp is symbolic, but resolve_dst_type is NULL");
           }
 
-          self->resolve_dst_type(
-              self, self_tp, self->static_data, self->data_size, data.get(),
-              dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
-              kwds_as_array, tp_vars);
+          self->resolve_dst_type(self_tp, self->static_data, self->data_size,
+                                 data.get(), dst_tp, arg_tp.size(),
+                                 arg_tp.empty() ? NULL : arg_tp.data(),
+                                 kwds_as_array, tp_vars);
         }
 
         dst = empty(dst_tp);
@@ -918,9 +927,9 @@ namespace nd {
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self, self_tp, self->static_data, self->data_size,
-                        data.get(), &ckb, 0, dst_tp, dst.get_arrmeta(),
-                        arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+      self->instantiate(self_tp, self->static_data, self->data_size, data.get(),
+                        &ckb, 0, dst_tp, dst.get_arrmeta(), arg_tp.size(),
+                        arg_tp.empty() ? NULL : arg_tp.data(),
                         arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
                         kernel_request_single, &eval::default_eval_context,
                         kwds_as_array, tp_vars);
@@ -1217,9 +1226,12 @@ namespace nd {
       return self;
     }
 
-    const arrfunc_type_data *get() const { return get_self().get(); }
+    static arrfunc_type_data *get()
+    {
+      return const_cast<arrfunc_type_data *>(get_self().get());
+    }
 
-    const ndt::arrfunc_type *get_type() const { return get_self().get_type(); }
+    static const ndt::arrfunc_type *get_type() { return get_self().get_type(); }
 
     const ndt::type &get_array_type() const
     {

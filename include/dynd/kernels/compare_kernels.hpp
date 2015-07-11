@@ -68,8 +68,7 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -107,8 +106,7 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -146,8 +144,7 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -172,8 +169,8 @@ namespace nd {
       : base_virtual_kernel<
             less_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -185,15 +182,15 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return fixed_string_less_kernel<string_encoding_utf_8>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return fixed_string_less_kernel<string_encoding_utf_16>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_32:
         return fixed_string_less_kernel<string_encoding_utf_32>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       default:
         throw std::runtime_error("unidentified string encoding");
@@ -226,8 +223,8 @@ namespace nd {
       : base_virtual_kernel<
             less_kernel<string_type_id, string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -239,15 +236,15 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return string_less_kernel<uint8_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return string_less_kernel<uint16_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_32:
         return string_less_kernel<uint32_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       default:
         throw std::runtime_error("unidentified string encoding");
@@ -303,8 +300,7 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -343,9 +339,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -384,9 +379,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -411,8 +405,8 @@ namespace nd {
       : base_virtual_kernel<
             less_equal_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -424,20 +418,20 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return fixed_string_less_equal_kernel<
-            string_encoding_utf_8>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_8>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                 ckb_offset, dst_tp, dst_arrmeta,
                                                 nsrc, src_tp, src_arrmeta,
                                                 kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return fixed_string_less_equal_kernel<
-            string_encoding_utf_16>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_16>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
                                                  kwds, tp_vars);
       case string_encoding_utf_32:
         return fixed_string_less_equal_kernel<
-            string_encoding_utf_32>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_32>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
@@ -473,8 +467,8 @@ namespace nd {
       : base_virtual_kernel<
             less_equal_kernel<string_type_id, string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -486,15 +480,15 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return string_less_equal_kernel<uint8_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return string_less_equal_kernel<uint16_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_32:
         return string_less_equal_kernel<uint32_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       default:
         throw std::runtime_error("unidentified string encoding");
@@ -551,8 +545,8 @@ namespace nd {
       : base_virtual_kernel<
             equal_kernel<string_type_id, string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -563,15 +557,15 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return string_equal_kernel<uint8_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return string_equal_kernel<uint16_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_32:
         return string_equal_kernel<uint32_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       default:
         throw std::runtime_error("unidentified string encoding");
@@ -601,9 +595,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -645,7 +638,6 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
         const char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
@@ -689,9 +681,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -716,8 +707,8 @@ namespace nd {
       : base_virtual_kernel<
             equal_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -729,20 +720,20 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return fixed_string_equal_kernel<
-            string_encoding_utf_8>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_8>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                 ckb_offset, dst_tp, dst_arrmeta,
                                                 nsrc, src_tp, src_arrmeta,
                                                 kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return fixed_string_equal_kernel<
-            string_encoding_utf_16>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_16>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
                                                  kwds, tp_vars);
       case string_encoding_utf_32:
         return fixed_string_equal_kernel<
-            string_encoding_utf_32>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_32>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
@@ -808,9 +799,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -863,9 +853,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -907,9 +896,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -951,9 +939,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -978,8 +965,8 @@ namespace nd {
       : base_virtual_kernel<
             not_equal_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -991,20 +978,20 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return fixed_string_not_equal_kernel<
-            string_encoding_utf_8>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_8>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                 ckb_offset, dst_tp, dst_arrmeta,
                                                 nsrc, src_tp, src_arrmeta,
                                                 kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return fixed_string_not_equal_kernel<
-            string_encoding_utf_16>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_16>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
                                                  kwds, tp_vars);
       case string_encoding_utf_32:
         return fixed_string_not_equal_kernel<
-            string_encoding_utf_32>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_32>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
@@ -1038,8 +1025,8 @@ namespace nd {
       : base_virtual_kernel<
             not_equal_kernel<string_type_id, string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -1051,15 +1038,15 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return string_not_equal_kernel<uint8_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return string_not_equal_kernel<uint16_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_32:
         return string_not_equal_kernel<uint32_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       default:
         throw std::runtime_error("unidentified string encoding");
@@ -1122,8 +1109,7 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp), const char *static_data,
+        const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
         size_t data_size, char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1180,8 +1166,8 @@ namespace nd {
       : base_virtual_kernel<
             greater_equal_kernel<string_type_id, string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -1193,15 +1179,15 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return string_greater_equal_kernel<uint8_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return string_greater_equal_kernel<uint16_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_32:
         return string_greater_equal_kernel<uint32_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       default:
         throw std::runtime_error("unidentified string encoding");
@@ -1231,8 +1217,7 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1271,8 +1256,7 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp), const char *DYND_UNUSED(static_data),
+        const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1311,9 +1295,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1338,8 +1321,8 @@ namespace nd {
       : base_virtual_kernel<
             greater_equal_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -1350,20 +1333,20 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return fixed_string_greater_equal_kernel<
-            string_encoding_utf_8>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_8>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                 ckb_offset, dst_tp, dst_arrmeta,
                                                 nsrc, src_tp, src_arrmeta,
                                                 kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return fixed_string_greater_equal_kernel<
-            string_encoding_utf_16>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_16>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
                                                  kwds, tp_vars);
       case string_encoding_utf_32:
         return fixed_string_greater_equal_kernel<
-            string_encoding_utf_32>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_32>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
@@ -1425,8 +1408,8 @@ namespace nd {
       : base_virtual_kernel<
             greater_kernel<string_type_id, string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data,
                 size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -1438,15 +1421,15 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return string_greater_kernel<uint8_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return string_greater_kernel<uint16_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_32:
         return string_greater_kernel<uint32_t>::instantiate(
-            self, self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            self_tp, static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
             src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
       default:
         throw std::runtime_error("unidentified string encoding");
@@ -1476,9 +1459,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1516,9 +1498,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1556,9 +1537,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data),
+        char *DYND_UNUSED(static_data),
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
         void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -1583,8 +1563,8 @@ namespace nd {
       : base_virtual_kernel<
             greater_kernel<fixed_string_type_id, fixed_string_type_id>> {
     static intptr_t
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-                const char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+    instantiate(const ndt::arrfunc_type *self_tp,
+                char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
@@ -1595,20 +1575,20 @@ namespace nd {
       case string_encoding_ascii:
       case string_encoding_utf_8:
         return fixed_string_greater_kernel<
-            string_encoding_utf_8>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_8>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                 ckb_offset, dst_tp, dst_arrmeta,
                                                 nsrc, src_tp, src_arrmeta,
                                                 kernreq, ectx, kwds, tp_vars);
       case string_encoding_utf_16:
         return fixed_string_greater_kernel<
-            string_encoding_utf_16>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_16>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
                                                  kwds, tp_vars);
       case string_encoding_utf_32:
         return fixed_string_greater_kernel<
-            string_encoding_utf_32>::instantiate(self, self_tp, static_data, data_size, data, ckb,
+            string_encoding_utf_32>::instantiate(self_tp, static_data, data_size, data, ckb,
                                                  ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,

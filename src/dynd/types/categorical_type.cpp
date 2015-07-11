@@ -179,7 +179,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
   nd::array categories = nd::empty(uniques.size(), element_tp);
   ckernel_builder<kernel_request_host> k;
   make_assignment_kernel(
-      NULL, NULL, &k, 0, element_tp,
+      NULL, &k, 0, element_tp,
       categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), element_tp,
       arrmeta, kernel_request_single, &eval::default_eval_context, nd::array());
   expr_single_t fn = k.get()->get_function<expr_single_t>();
@@ -412,7 +412,7 @@ nd::array ndt::categorical_type::get_categories() const
   categories.get_type().get_as_strided(categories.get_arrmeta(), &dim_size,
                                        &stride, &el_tp, &el_arrmeta);
   ckernel_builder<kernel_request_host> k;
-  ::make_assignment_kernel(NULL, NULL, &k, 0, m_category_tp, el_arrmeta, el_tp,
+  ::make_assignment_kernel(NULL, &k, 0, m_category_tp, el_arrmeta, el_tp,
                            get_category_arrmeta(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
   expr_single_t fn = k.get()->get_function<expr_single_t>();
@@ -440,7 +440,7 @@ bool ndt::categorical_type::is_lossless_assignment(const type &dst_tp,
 }
 
 intptr_t ndt::categorical_type::make_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
+    const arrfunc_type *af_tp, void *ckb,
     intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
     const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
@@ -497,12 +497,12 @@ intptr_t ndt::categorical_type::make_assignment_kernel(
       // Make a convert type to the category type, and have it do the chaining
       type src_cvt_tp = make_convert(m_category_tp, src_tp);
       return src_cvt_tp.extended()->make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp,
+          af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp,
           src_arrmeta, kernreq, ectx, kwds);
     } else {
       // Let the src_tp handle it
       return src_tp.extended()->make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
+          af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx, kwds);
     }
   } else {
@@ -538,7 +538,7 @@ intptr_t ndt::categorical_type::make_assignment_kernel(
         throw runtime_error(
             "internal error in categorical_type::make_assignment_kernel");
       }
-      return ::make_assignment_kernel(self, af_tp, ckb, ckb_offset, dst_tp,
+      return ::make_assignment_kernel(af_tp, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, get_category_type(),
                                       get_category_arrmeta(),
                                       kernel_request_single, ectx, kwds);

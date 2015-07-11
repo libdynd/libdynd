@@ -125,10 +125,10 @@ size_t dynd::make_buffered_ckernel(
     }
   }
   // Instantiate the arrfunc being buffered
-  ckb_offset =
-      af->instantiate(af, af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                      nsrc, src_tp_for_af, &buffered_arrmeta[0], kernreq, ectx,
-                      nd::array(), std::map<nd::string, ndt::type>());
+  ckb_offset = af->instantiate(
+      af_tp, const_cast<char *>(af->static_data), 0, NULL, ckb, ckb_offset,
+      dst_tp, dst_arrmeta, nsrc, src_tp_for_af, &buffered_arrmeta[0], kernreq,
+      ectx, nd::array(), std::map<nd::string, ndt::type>());
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -138,7 +138,7 @@ size_t dynd::make_buffered_ckernel(
     if (!self->m_bufs[i].is_null()) {
       self->m_src_buf_ck_offsets[i] = ckb_offset - root_ckb_offset;
       ckb_offset =
-          make_assignment_kernel(NULL, NULL, ckb, ckb_offset, src_tp_for_af[i],
+          make_assignment_kernel(NULL, ckb, ckb_offset, src_tp_for_af[i],
                                  self->m_bufs[i].get_arrmeta(), src_tp[i],
                                  src_arrmeta[i], kernreq, ectx, nd::array());
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)

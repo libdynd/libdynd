@@ -156,8 +156,8 @@ size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset,
   if (src0_dt.get_kind() == expr_kind) {
     e->init_buffer(0, src0_dt.value_type());
     e->buf[0].kernel_offset = ckb_offset - root_ckb_offset;
-    ckb_offset = make_assignment_kernel(NULL, NULL,
-        ckb, ckb_offset, src0_dt.value_type(), e->buf[0].arrmeta, src0_dt,
+    ckb_offset = make_assignment_kernel(
+        NULL, ckb, ckb_offset, src0_dt.value_type(), e->buf[0].arrmeta, src0_dt,
         src0_arrmeta, kernel_request_single, ectx, nd::array());
     // Have to re-retrieve 'e', because creating another kernel may invalidate
     // it
@@ -167,8 +167,8 @@ size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset,
   if (src1_dt.get_kind() == expr_kind) {
     e->init_buffer(1, src1_dt.value_type());
     e->buf[1].kernel_offset = ckb_offset - root_ckb_offset;
-    ckb_offset = make_assignment_kernel(NULL, NULL,
-        ckb, ckb_offset, src1_dt.value_type(), e->buf[1].arrmeta, src1_dt,
+    ckb_offset = make_assignment_kernel(
+        NULL, ckb, ckb_offset, src1_dt.value_type(), e->buf[1].arrmeta, src1_dt,
         src1_arrmeta, kernel_request_single, ectx, nd::array());
     // Have to re-retrieve 'e', because creating another kernel may invalidate
     // it

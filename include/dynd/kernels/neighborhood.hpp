@@ -84,19 +84,18 @@ namespace nd {
       }
 
       static intptr_t
-      instantiate(const arrfunc_type_data *af_self,
-                  const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-                  const char *DYND_UNUSED(static_data),
-                  size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
+      instantiate(const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+                  char *static_data, size_t DYND_UNUSED(data_size),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         std::shared_ptr<neighborhood_data> nh =
-            *af_self->get_data_as<std::shared_ptr<neighborhood_data>>();
+            *reinterpret_cast<std::shared_ptr<neighborhood_data> *>(
+                static_data);
         nd::arrfunc nh_op = nh->op;
 
         nd::array shape;
@@ -188,9 +187,9 @@ namespace nd {
         }
 
         ckb_offset = nh_op.get()->instantiate(
-            nh_op.get(), nh_op.get_type(), NULL, 0, NULL, ckb, ckb_offset, nh_dst_tp,
-            nh_dst_arrmeta, nsrc, nh_src_tp, nh_src_arrmeta,
-            kernel_request_single, ectx,
+            nh_op.get_type(), nh_op.get()->static_data, 0, NULL, ckb,
+            ckb_offset, nh_dst_tp, nh_dst_arrmeta, nsrc, nh_src_tp,
+            nh_src_arrmeta, kernel_request_single, ectx,
             struct_concat(kwds, pack("start_stop", reinterpret_cast<intptr_t>(
                                                        nh->start_stop))),
             tp_vars);
@@ -199,12 +198,10 @@ namespace nd {
       }
 
       static void resolve_dst_type(
-          const arrfunc_type_data *DYND_UNUSED(self),
-          const ndt::arrfunc_type *self_tp,
-          const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-          char *DYND_UNUSED(data), ndt::type &dst_tp,
-          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-          const nd::array &DYND_UNUSED(kwds),
+          const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(static_data),
+          size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+          ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+          const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
           const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         // TODO: Should be able to express the match/subsitution without special

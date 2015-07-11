@@ -10,10 +10,9 @@ using namespace std;
 using namespace dynd;
 
 intptr_t nd::copy_ck::instantiate(
-    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta,
+    const ndt::arrfunc_type *af_tp, char *DYND_UNUSED(static_data),
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
@@ -35,22 +34,20 @@ intptr_t nd::copy_ck::instantiate(
       }
     } else {
       return src_tp[0].extended()->make_assignment_kernel(
-          self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
+          af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
           src_arrmeta[0], kernreq, ectx, kwds);
     }
   } else {
     return dst_tp.extended()->make_assignment_kernel(
-        self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
-        src_arrmeta[0], kernreq, ectx, kwds);
+        af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+        kernreq, ectx, kwds);
   }
 }
 
 void nd::copy_ck::resolve_dst_type(
-    const arrfunc_type_data *DYND_UNUSED(self),
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), ndt::type &dst_tp,
+    intptr_t nsrc, const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (nsrc != 1) {

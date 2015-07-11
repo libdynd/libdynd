@@ -315,7 +315,6 @@ static intptr_t make_arrfunc_to_string_assignment_kernel(
 }
 
 intptr_t ndt::arrfunc_type::make_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
     const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
     const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -479,7 +478,7 @@ static array_preamble *function___call__(const array_preamble *params,
     dynd_arrmeta[i] = args[i + 1].get_arrmeta();
   }
   ckernel_builder<kernel_request_host> ckb;
-  af->instantiate(af, af_tp, NULL, 0, NULL, &ckb, 0, args[0].get_type(),
+  af->instantiate(af_tp, NULL, 0, NULL, &ckb, 0, args[0].get_type(),
                   args[0].get_arrmeta(), nargs, src_tp, dynd_arrmeta,
                   kernel_request_single, &eval::default_eval_context,
                   nd::array(), std::map<nd::string, ndt::type>());

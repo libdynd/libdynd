@@ -246,9 +246,8 @@ namespace nd {
     }                                                                          \
                                                                                \
     static intptr_t instantiate(                                               \
-        const arrfunc_type_data *DYND_UNUSED(self),                            \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),                         \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *DYND_UNUSED(static_data),                                  \
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,     \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -312,9 +311,8 @@ namespace nd {
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *DYND_UNUSED(self),                    \
-                const ndt::arrfunc_type *DYND_UNUSED(self_tp),                 \
-                const char *DYND_UNUSED(static_data),                                  \
+    instantiate(const ndt::arrfunc_type *DYND_UNUSED(self_tp),                 \
+                char *DYND_UNUSED(static_data),                                  \
                 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,       \
                 const ndt::type &DYND_UNUSED(dst_tp),                          \
                 const char *DYND_UNUSED(dst_arrmeta),                          \
@@ -403,9 +401,8 @@ namespace nd {
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
-        const arrfunc_type_data *self,                                         \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *static_data,                                  \
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -415,16 +412,16 @@ namespace nd {
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(                                                       \
-          ckb, kernreq, ckb_offset, self->get_data_as<data_type>()->first,     \
+          ckb, kernreq, ckb_offset, reinterpret_cast<data_type *>(static_data)->first,     \
           dynd::detail::make_value_wrapper(                                    \
-              self->get_data_as<data_type>()->second),                         \
+              reinterpret_cast<data_type *>(static_data)->second),                         \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, \
-                const char *DYND_UNUSED(static_data), \
+    instantiate(const ndt::arrfunc_type *self_tp, \
+                char *DYND_UNUSED(static_data), \
                 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),    \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, intptr_t nsrc,                        \
@@ -490,9 +487,8 @@ namespace nd {
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
-        const arrfunc_type_data *self,                                         \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *static_data,                                  \
  size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -502,16 +498,16 @@ namespace nd {
         const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(                                                       \
-          ckb, kernreq, ckb_offset, self->get_data_as<data_type>()->first,     \
+          ckb, kernreq, ckb_offset, reinterpret_cast<data_type *>(static_data)->first,     \
           dynd::detail::make_value_wrapper(                                    \
-              self->get_data_as<data_type>()->second),                         \
+              reinterpret_cast<data_type *>(static_data)->second),                         \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, \
-        const char *DYND_UNUSED(static_data),                                  \
+    instantiate(const ndt::arrfunc_type *self_tp, \
+        char *DYND_UNUSED(static_data),                                  \
               size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),    \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, intptr_t nsrc,                        \
@@ -529,8 +525,8 @@ namespace nd {
     apply_member_function_ck<kernel_request_host, T *, mem_func_type, R,
                              type_sequence<A...>, index_sequence<I...>,
                              type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
+        instantiate(const ndt::arrfunc_type *self_tp,
+        char *static_data,                                  
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -540,7 +536,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self_tp, static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -550,8 +546,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     apply_member_function_ck<kernel_request_host, T *, mem_func_type, void,
                              type_sequence<A...>, index_sequence<I...>,
                              type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
+        instantiate(const ndt::arrfunc_type *self_tp,
+        char *static_data,                                  
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -561,59 +557,9 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self_tp, static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
-
-#ifdef __CUDACC__
-
-    APPLY_MEMBER_FUNCTION_CK(kernel_request_cuda_device, __device__);
-
-    template <typename T, typename mem_func_type, typename R, typename... A,
-              size_t... I, typename... K, size_t... J>
-    intptr_t
-    apply_member_function_ck<kernel_request_cuda_device, T *, mem_func_type, R,
-                             type_sequence<A...>, index_sequence<I...>,
-                             type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
-size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *dst_arrmeta, intptr_t nsrc,
-                    const ndt::type *src_tp, const char *const *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx,
-                    const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
-    {
-      return cuda_launch_ck<sizeof...(A)>::template instantiate<
-          &instantiate_without_cuda_launch>(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-          src_arrmeta, kernreq, ectx, kwds, tp_vars);
-    }
-
-    template <typename T, typename mem_func_type, typename... A, size_t... I,
-              typename... K, size_t... J>
-    intptr_t
-    apply_member_function_ck<kernel_request_cuda_device, T *, mem_func_type,
-                             void, type_sequence<A...>, index_sequence<I...>,
-                             type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
-size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *dst_arrmeta, intptr_t nsrc,
-                    const ndt::type *src_tp, const char *const *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx,
-                    const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
-    {
-      return cuda_launch_ck<sizeof...(A)>::template instantiate<
-          &instantiate_without_cuda_launch>(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-          src_arrmeta, kernreq, ectx, kwds, tp_vars);
-    }
-
-#endif
 
 #undef APPLY_MEMBER_FUNCTION_CK
 
@@ -683,9 +629,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
-        const arrfunc_type_data *self,                                         \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *static_data,                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -696,14 +641,14 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
     {                                                                          \
       self_type::make(                                                       \
           ckb, kernreq, ckb_offset,                                            \
-          dynd::detail::make_value_wrapper(*self->get_data_as<func_type>()),   \
+          dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),   \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, \
-        const char *DYND_UNUSED(static_data),                                  \
+    instantiate(const ndt::arrfunc_type *self_tp, \
+        char *DYND_UNUSED(static_data),                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, intptr_t nsrc,                        \
@@ -764,9 +709,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
-        const arrfunc_type_data *self,                                         \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *static_data,                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -777,14 +721,14 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
     {                                                                          \
       self_type::make(                                                       \
           ckb, kernreq, ckb_offset,                                            \
-          dynd::detail::make_value_wrapper(*self->get_data_as<func_type>()),   \
+          dynd::detail::make_value_wrapper(*reinterpret_cast<func_type *>(static_data)),   \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, \
-        const char *DYND_UNUSED(static_data),                                  \
+    instantiate(const ndt::arrfunc_type *self_tp, \
+        char *static_data,                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),    \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, intptr_t nsrc,                        \
@@ -801,8 +745,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),    \
     intptr_t apply_callable_ck<kernel_request_host, func_type, R,
                                type_sequence<A...>, index_sequence<I...>,
                                type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
+        instantiate(const ndt::arrfunc_type *self_tp,
+        char *static_data,                                  
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -812,57 +756,9 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self_tp, static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
-
-#ifdef __CUDACC__
-
-    APPLY_CALLABLE_CK(kernel_request_cuda_device, __device__);
-
-    template <typename func_type, typename R, typename... A, size_t... I,
-              typename... K, size_t... J>
-    intptr_t apply_callable_ck<kernel_request_cuda_device, func_type, R,
-                               type_sequence<A...>, index_sequence<I...>,
-                               type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
-size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *dst_arrmeta, intptr_t nsrc,
-                    const ndt::type *src_tp, const char *const *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx,
-                    const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
-    {
-      return cuda_launch_ck<sizeof...(A)>::template instantiate<
-          &instantiate_without_cuda_launch>(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-          src_arrmeta, kernreq, ectx, kwds, tp_vars);
-    }
-
-    template <typename func_type, typename... A, size_t... I, typename... K,
-              size_t... J>
-    intptr_t apply_callable_ck<kernel_request_cuda_device, func_type, void,
-                               type_sequence<A...>, index_sequence<I...>,
-                               type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
-size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *dst_arrmeta, intptr_t nsrc,
-                    const ndt::type *src_tp, const char *const *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx,
-                    const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
-    {
-      return cuda_launch_ck<sizeof...(A)>::template instantiate<
-          &instantiate_without_cuda_launch>(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-          src_arrmeta, kernreq, ectx, kwds, tp_vars);
-    }
-
-#endif
 
 #undef APPLY_CALLABLE_CK
 
@@ -920,9 +816,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
-        const arrfunc_type_data *self,                                         \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *static_data,                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -933,14 +828,14 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
     {                                                                          \
                                                                                \
       self_type::make(                                                       \
-          ckb, kernreq, ckb_offset, *self->get_data_as<func_type *>(),         \
+          ckb, kernreq, ckb_offset, *reinterpret_cast<func_type **>(static_data),         \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, \
-        const char *DYND_UNUSED(static_data),                                  \
+    instantiate(const ndt::arrfunc_type *self_tp, \
+        char *DYND_UNUSED(static_data),                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, intptr_t nsrc,                        \
@@ -1001,9 +896,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
-        const arrfunc_type_data *self,                                         \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *static_data,                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -1014,14 +908,14 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
     {                                                                          \
                                                                                \
       self_type::make(                                                       \
-          ckb, kernreq, ckb_offset, *self->get_data_as<func_type *>(),         \
+          ckb, kernreq, ckb_offset, *reinterpret_cast<func_type **>(static_data),         \
           args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));              \
       return ckb_offset;                                                       \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, \
-        const char *DYND_UNUSED(static_data),                                  \
+    instantiate(const ndt::arrfunc_type *self_tp, \
+        char *DYND_UNUSED(static_data),                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, intptr_t nsrc,                        \
@@ -1038,8 +932,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
     intptr_t apply_callable_ck<kernel_request_host, func_type *, R,
                                type_sequence<A...>, index_sequence<I...>,
                                type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
+        instantiate(const ndt::arrfunc_type *self_tp,
+        char *static_data,                                  
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -1049,7 +943,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self_tp, static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -1058,8 +952,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     intptr_t apply_callable_ck<kernel_request_host, func_type *, void,
                                type_sequence<A...>, index_sequence<I...>,
                                type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
+        instantiate(const ndt::arrfunc_type *self_tp,
+        char *static_data,                                  
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -1069,7 +963,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self_tp, static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
 
@@ -1139,9 +1033,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
-        const arrfunc_type_data *DYND_UNUSED(self),                            \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *DYND_UNUSED(static_data),                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -1157,8 +1050,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, \
-        const char *DYND_UNUSED(static_data),                                  \
+    instantiate(const ndt::arrfunc_type *self_tp, \
+        char *DYND_UNUSED(static_data),                                  \
 size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, intptr_t nsrc,                        \
@@ -1220,9 +1113,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
     }                                                                          \
                                                                                \
     static intptr_t instantiate_without_cuda_launch(                           \
-        const arrfunc_type_data *DYND_UNUSED(self),                            \
         const ndt::arrfunc_type *DYND_UNUSED(self_tp), \
-        const char *DYND_UNUSED(static_data),                                  \
+        char *DYND_UNUSED(static_data),                                  \
  size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,                   \
         intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),             \
         const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),      \
@@ -1238,8 +1130,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
     }                                                                          \
                                                                                \
     static intptr_t                                                            \
-    instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp, \
-        const char *DYND_UNUSED(static_data),                                  \
+    instantiate( const ndt::arrfunc_type *self_tp, \
+        char *DYND_UNUSED(static_data),                                  \
  size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),    \
                 void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,       \
                 const char *dst_arrmeta, intptr_t nsrc,                        \
@@ -1256,8 +1148,8 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
     intptr_t construct_then_apply_callable_ck<
         kernel_request_host, func_type, R, type_sequence<A...>,
         index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
+        instantiate( const ndt::arrfunc_type *self_tp,
+        char *static_data,                                  
  size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                     const char *dst_arrmeta, intptr_t nsrc,
@@ -1267,36 +1159,9 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                     const std::map<nd::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+          self_tp, static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
           src_arrmeta, kernreq, ectx, kwds, tp_vars);
     }
-
-#ifdef __CUDACC__
-
-    CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_cuda_device, __device__);
-
-    template <typename func_type, typename R, typename... A, size_t... I,
-              typename... K, size_t... J>
-    intptr_t construct_then_apply_callable_ck<
-        kernel_request_cuda_device, func_type, R, type_sequence<A...>,
-        index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
-        instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        const char *DYND_UNUSED(static_data),                                  
-size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                    const char *dst_arrmeta, intptr_t nsrc,
-                    const ndt::type *src_tp, const char *const *src_arrmeta,
-                    kernel_request_t kernreq, const eval::eval_context *ectx,
-                    const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
-    {
-      return cuda_launch_ck<arity_of<func_type>::value>::template instantiate<
-          &instantiate_without_cuda_launch>(
-          self, self_tp, NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-          src_arrmeta, kernreq, ectx, kwds, tp_vars);
-    }
-
-#endif
 
 #undef CONSTRUCT_THEN_APPLY_CALLABLE_CK
 

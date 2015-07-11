@@ -77,17 +77,16 @@ void nd::functional::var_rolling_ck::destruct_children()
 
 // TODO This should handle both strided and var cases
 intptr_t nd::functional::rolling_ck::instantiate(
-    const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), const char *DYND_UNUSED(static_data),
-    size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-    const ndt::type *src_tp, const char *const *src_arrmeta,
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {
   typedef dynd::nd::functional::strided_rolling_ck self_type;
-  rolling_arrfunc_data *data = *af_self->get_data_as<rolling_arrfunc_data *>();
+  rolling_arrfunc_data *data =
+      *reinterpret_cast<rolling_arrfunc_data **>(static_data);
 
   intptr_t root_ckb_offset = ckb_offset;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
@@ -146,16 +145,16 @@ intptr_t nd::functional::rolling_ck::instantiate(
 
   const char *src_winop_meta = self->m_src_winop_meta.get();
   return window_af->instantiate(
-      window_af, window_af_tp, NULL, 0, NULL, ckb, ckb_offset, dst_el_tp,
-      dst_el_arrmeta, nsrc, &self->m_src_winop_meta.get_type(), &src_winop_meta,
+      window_af_tp, const_cast<char *>(window_af->static_data), 0, NULL, ckb,
+      ckb_offset, dst_el_tp, dst_el_arrmeta, nsrc,
+      &self->m_src_winop_meta.get_type(), &src_winop_meta,
       kernel_request_strided, ectx, kwds, tp_vars);
 }
 
 void nd::functional::rolling_ck::resolve_dst_type(
-    const arrfunc_type_data *af_self, const ndt::arrfunc_type *af_tp,
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &kwds,
+    const ndt::arrfunc_type *af_tp, char *static_data,
+    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), ndt::type &dst_tp,
+    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars)
 
 {
@@ -166,15 +165,16 @@ void nd::functional::rolling_ck::resolve_dst_type(
     throw invalid_argument(ss.str());
   }
   nd::functional::rolling_arrfunc_data *data =
-      *af_self->get_data_as<nd::functional::rolling_arrfunc_data *>();
+      *reinterpret_cast<nd::functional::rolling_arrfunc_data **>(static_data);
   const arrfunc_type_data *child_af = data->window_op.get();
   // First get the type for the child arrfunc
   ndt::type child_dst_tp;
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    child_af->resolve_dst_type(child_af, af_tp, NULL, 0, NULL, child_dst_tp, 1,
-                               &child_src_tp, kwds, tp_vars);
+    child_af->resolve_dst_type(af_tp, const_cast<char *>(child_af->static_data),
+                               0, NULL, child_dst_tp, 1, &child_src_tp, kwds,
+                               tp_vars);
   } else {
     child_dst_tp = data->window_op.get_type()->get_return_type();
   }

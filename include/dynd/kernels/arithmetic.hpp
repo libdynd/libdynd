@@ -17,9 +17,8 @@ namespace nd {
     }
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
@@ -59,9 +58,8 @@ namespace nd {
     }
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
@@ -86,9 +84,8 @@ namespace nd {
     }
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
@@ -133,9 +130,8 @@ namespace nd {
     }
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
@@ -170,9 +166,8 @@ namespace nd {
     }
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
@@ -207,9 +202,8 @@ namespace nd {
     }
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),

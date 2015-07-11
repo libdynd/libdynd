@@ -340,9 +340,9 @@ void ndt::pointer_type::arrmeta_debug_print(const char *arrmeta,
 }
 
 intptr_t ndt::pointer_type::make_assignment_kernel(
-    const arrfunc_type_data *self, const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const arrfunc_type *af_tp, void *ckb, intptr_t ckb_offset,
+    const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
+    const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds) const
 {
   if (dst_tp.get_type_id() == pointer_type_id) {
@@ -359,8 +359,8 @@ intptr_t ndt::pointer_type::make_assignment_kernel(
   }
 
   return base_expr_type::make_assignment_kernel(
-      self, af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-      kernreq, ectx, kwds);
+      af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+      ectx, kwds);
 }
 
 namespace {
@@ -388,7 +388,7 @@ size_t ndt::pointer_type::make_operand_to_value_assignment_kernel(
     const eval::eval_context *ectx) const
 {
   operand_to_value_ck::make(ckb, kernreq, ckb_offset);
-  return ::make_assignment_kernel(NULL, NULL, ckb, ckb_offset, m_target_tp,
+  return ::make_assignment_kernel(NULL, ckb, ckb_offset, m_target_tp,
                                   dst_arrmeta, m_target_tp,
                                   src_arrmeta + sizeof(pointer_type_arrmeta),
                                   kernel_request_single, ectx, nd::array());
