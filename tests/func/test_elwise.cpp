@@ -113,8 +113,9 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
   in(4).vals() = "284";
   const char *in_ptr = in.get_readonly_originptr();
   const char *src_arrmeta[1] = {in.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, dst_tp,
-                        out.get_arrmeta(), af.get_type()->get_npos(), &src_tp, src_arrmeta,
+  af.get()->instantiate(af.get(), af.get_type(), af.get()->static_data, 0, NULL,
+                        &ckb, 0, dst_tp, out.get_arrmeta(),
+                        af.get_type()->get_npos(), &src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
@@ -144,8 +145,9 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
   in.vals() = in_vals;
   const char *in_ptr = in.get_readonly_originptr();
   const char *src_arrmeta[1] = {in.get_arrmeta()};
-  af.get()->instantiate(af.get(), af.get_type(), NULL, 0, NULL, &ckb, 0, out.get_type(),
-                        out.get_arrmeta(), af.get_type()->get_npos(), &in.get_type(), src_arrmeta,
+  af.get()->instantiate(af.get(), af.get_type(), af.get()->static_data, 0, NULL,
+                        &ckb, 0, out.get_type(), out.get_arrmeta(),
+                        af.get_type()->get_npos(), &in.get_type(), src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
@@ -196,7 +198,8 @@ TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
 // TODO Reenable once there's a convenient way to make the binary arrfunc
 TEST(LiftArrFunc, Expr_MultiDimVarToVarDim) {
     // Create an arrfunc for adding two ints
-    ndt::type add_ints_type = (nd::array((int32_t)0) + nd::array((int32_t)0)).get_type();
+    ndt::type add_ints_type = (nd::array((int32_t)0) +
+nd::array((int32_t)0)).get_type();
     nd::arrfunc af_base = make_arrfunc_from_assignment(
         ndt::make_type<int32_t>(), add_ints_type,
         assign_error_default);
@@ -252,7 +255,8 @@ TEST(Elwise, Simple)
 
 //  af = nd::functional::apply<kernel_request_cuda_device, xcallable0>();
 //  std::cout << af << std::endl;
-  //EXPECT_ARR_EQ(nd::array({3, 5, 7}).to_cuda_device(), nd::elwise(a, b, kwds("func", af)));
+// EXPECT_ARR_EQ(nd::array({3, 5, 7}).to_cuda_device(), nd::elwise(a, b,
+// kwds("func", af)));
 
 //  baf = nd::functional::elwise(af);
 //  EXPECT_ARR_EQ(nd::array({3, 5, 7}).to_cuda_device(), baf(a, b));

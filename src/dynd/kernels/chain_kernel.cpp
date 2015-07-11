@@ -14,8 +14,8 @@ using namespace dynd;
  * arrfunc.
  */
 intptr_t nd::functional::chain_kernel::instantiate(
-    const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
+    const arrfunc_type_data *DYND_UNUSED(self),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
     size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -23,28 +23,31 @@ intptr_t nd::functional::chain_kernel::instantiate(
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars)
 {
-  const static_data *static_data = af_self->get_data_as<struct static_data>();
+  const struct static_data *static_data_x =
+      reinterpret_cast<struct static_data *>(static_data);
 
-  const arrfunc_type_data *first = static_data->first.get();
-  const ndt::arrfunc_type *first_tp = static_data->first.get_type();
+  arrfunc_type_data *first =
+      const_cast<arrfunc_type_data *>(static_data_x->first.get());
+  const ndt::arrfunc_type *first_tp = static_data_x->first.get_type();
 
-  const arrfunc_type_data *second = static_data->second.get();
-  const ndt::arrfunc_type *second_tp = static_data->second.get_type();
+  arrfunc_type_data *second =
+      const_cast<arrfunc_type_data *>(static_data_x->second.get());
+  const ndt::arrfunc_type *second_tp = static_data_x->second.get_type();
 
-  const ndt::type &buffer_tp = static_data->buffer_tp;
+  const ndt::type &buffer_tp = static_data_x->buffer_tp;
 
   intptr_t root_ckb_offset = ckb_offset;
-  chain_kernel *self = make(ckb, kernreq, ckb_offset, static_data->buffer_tp);
+  chain_kernel *self = make(ckb, kernreq, ckb_offset, static_data_x->buffer_tp);
   ckb_offset =
-      first->instantiate(first, first_tp, NULL, data_size, data, ckb,
-                         ckb_offset, buffer_tp, self->buffer_arrmeta.get(), 1,
-                         src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
+      first->instantiate(first, first_tp, first->static_data, data_size, data,
+                         ckb, ckb_offset, buffer_tp, self->buffer_arrmeta.get(),
+                         1, src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
   self = get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                   root_ckb_offset);
   self->second_offset = ckb_offset - root_ckb_offset;
   const char *buffer_arrmeta = self->buffer_arrmeta.get();
   return second->instantiate(
-      second, second_tp, NULL, data_size - first->data_size,
+      second, second_tp, second->static_data, data_size - first->data_size,
       data + first->data_size, ckb, ckb_offset, dst_tp, dst_arrmeta, 1,
       &buffer_tp, &buffer_arrmeta, kernreq, ectx, kwds, tp_vars);
 }

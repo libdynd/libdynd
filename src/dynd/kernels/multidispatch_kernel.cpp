@@ -39,10 +39,10 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
         }
       }
       if (j == nsrc) {
-        return af.get()->instantiate(af.get(), af.get_type(), NULL, 0, NULL,
-                                     ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                                     src_tp, src_arrmeta, kernreq, ectx, kwds,
-                                     tp_vars);
+        return af.get()->instantiate(
+            af.get(), af.get_type(), const_cast<char *>(af.get()->static_data),
+            0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+            src_arrmeta, kernreq, ectx, kwds, tp_vars);
       } else {
         return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
                                      dst_tp, dst_arrmeta, nsrc, src_tp,
