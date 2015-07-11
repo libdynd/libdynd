@@ -67,7 +67,6 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -82,7 +81,6 @@ namespace nd {
   template <>
   struct is_avail_ck<int8_t> : detail::is_avail_int_ck<int8_t> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -97,7 +95,6 @@ namespace nd {
   template <>
   struct is_avail_ck<int16_t> : detail::is_avail_int_ck<int16_t> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -112,7 +109,6 @@ namespace nd {
   template <>
   struct is_avail_ck<int32_t> : detail::is_avail_int_ck<int32_t> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -127,7 +123,6 @@ namespace nd {
   template <>
   struct is_avail_ck<int64_t> : detail::is_avail_int_ck<int64_t> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -142,7 +137,6 @@ namespace nd {
   template <>
   struct is_avail_ck<int128> : detail::is_avail_int_ck<int128> {
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -163,7 +157,6 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -184,7 +177,6 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -205,7 +197,6 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -226,7 +217,6 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -247,7 +237,6 @@ namespace nd {
                  const intptr_t *src_stride, size_t count);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
@@ -276,7 +265,6 @@ namespace nd {
     }
 
     static void resolve_dst_type(
-        const arrfunc_type_data *DYND_UNUSED(self),
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),

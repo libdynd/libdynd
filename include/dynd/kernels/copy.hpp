@@ -21,10 +21,9 @@ namespace nd {
                 const std::map<nd::string, ndt::type> &tp_vars);
 
     static void resolve_dst_type(
-        const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
-        intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
-        const std::map<nd::string, ndt::type> &tp_vars);
+        const ndt::arrfunc_type *self_tp, char *static_data, size_t data_size,
+        char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+        const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
   };
 
 } // namespace dynd::nd

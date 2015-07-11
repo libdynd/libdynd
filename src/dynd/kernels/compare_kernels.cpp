@@ -49,10 +49,10 @@ intptr_t nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
     ndt::type child_src_tp[2] = {ft, ft};
     const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
-    ckb_offset = nd::equal.get()->instantiate(
-        nd::equal.get(), nd::equal.get_type(), NULL, 0, NULL, ckb, ckb_offset,
-        dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta, kernreq,
-        ectx, kwds, tp_vars);
+    ckb_offset = equal.get()->instantiate(
+        equal::get(), equal::get_type(), equal::get()->static_data, 0, NULL,
+        ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, child_src_tp,
+        child_src_arrmeta, kernreq, ectx, kwds, tp_vars);
   }
   return ckb_offset;
 }
@@ -97,10 +97,10 @@ intptr_t nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     const char *field_arrmeta = src_arrmeta[0] + arrmeta_offsets[i];
     ndt::type child_src_tp[2] = {ft, ft};
     const char *child_src_arrmeta[2] = {field_arrmeta, field_arrmeta};
-    ckb_offset = nd::not_equal.get()->instantiate(
-        nd::not_equal.get(), nd::not_equal.get_type(), NULL, 0, NULL, ckb,
-        ckb_offset, dst_tp, dst_arrmeta, nsrc, child_src_tp, child_src_arrmeta,
-        kernreq, ectx, kwds, tp_vars);
+    ckb_offset = not_equal.get()->instantiate(
+        not_equal::get(), not_equal::get_type(), not_equal::get()->static_data,
+        0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, child_src_tp,
+        child_src_arrmeta, kernreq, ectx, kwds, tp_vars);
   }
   return ckb_offset;
 }

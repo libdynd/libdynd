@@ -89,22 +89,21 @@ namespace nd {
       }
 
       static void
-      resolve_dst_type(const arrfunc_type_data *self,
-                       const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       char *DYND_UNUSED(static_data),
-                       size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                       ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, const dynd::nd::array &kwds,
+      resolve_dst_type(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+                       char *static_data, size_t DYND_UNUSED(data_size),
+                       char *DYND_UNUSED(data), ndt::type &dst_tp,
+                       intptr_t nsrc, const ndt::type *src_tp,
+                       const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const arrfunc_type_data *child =
-            self->get_data_as<dynd::nd::arrfunc>()->get();
+        arrfunc_type_data *child =
+            reinterpret_cast<arrfunc *>(static_data)->get();
         const ndt::arrfunc_type *child_tp =
-            self->get_data_as<dynd::nd::arrfunc>()->get_type();
+            reinterpret_cast<arrfunc *>(static_data)->get_type();
 
         if (child->resolve_dst_type != NULL) {
-          child->resolve_dst_type(child, child_tp, NULL, 0, NULL, dst_tp, nsrc,
-                                  src_tp, kwds, tp_vars);
+          child->resolve_dst_type(child_tp, child->static_data, 0, NULL, dst_tp,
+                                  nsrc, src_tp, kwds, tp_vars);
         } else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
         }

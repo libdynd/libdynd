@@ -189,7 +189,6 @@ namespace nd {
     }                                                                          \
                                                                                \
     static void resolve_dst_type(                                              \
-        const arrfunc_type_data *DYND_UNUSED(self),                            \
         const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(static_data),      \
         size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),                \
         ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),                         \

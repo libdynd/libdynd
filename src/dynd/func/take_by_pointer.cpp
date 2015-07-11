@@ -118,8 +118,7 @@ struct take_by_pointer_virtual_ck
   }
 
   static void
-  resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(af_self),
-                   const ndt::arrfunc_type *af_tp,
+  resolve_dst_type(const ndt::arrfunc_type *af_tp,
                    char *DYND_UNUSED(static_data),
                    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,

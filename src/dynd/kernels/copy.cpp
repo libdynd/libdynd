@@ -46,7 +46,6 @@ intptr_t nd::copy_ck::instantiate(
 }
 
 void nd::copy_ck::resolve_dst_type(
-    const arrfunc_type_data *DYND_UNUSED(self),
     const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
     size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), ndt::type &dst_tp,
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),

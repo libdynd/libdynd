@@ -55,10 +55,9 @@ namespace nd {
 
   struct take_ck : base_virtual_kernel<take_ck> {
     static void resolve_dst_type(
-        const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
-        char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
-        intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
-        const std::map<nd::string, ndt::type> &tp_vars);
+        const ndt::arrfunc_type *self_tp, char *static_data, size_t data_size,
+        char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+        const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
 
     static intptr_t
     instantiate(const arrfunc_type_data *self, const ndt::arrfunc_type *self_tp,
@@ -68,7 +67,6 @@ namespace nd {
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *ectx, const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars);
-
   };
 
 } // namespace dynd::nd

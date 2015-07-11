@@ -59,13 +59,13 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
 }
 
 void nd::functional::old_multidispatch_ck::resolve_dst_type(
-    const arrfunc_type_data *self,
-    const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-    char *DYND_UNUSED(static_data), size_t data_size, char *data,
-    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    const ndt::arrfunc_type *DYND_UNUSED(self_tp), char *static_data,
+    size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
+    const ndt::type *src_tp, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars)
 {
-  const vector<nd::arrfunc> *icd = self->get_data_as<vector<nd::arrfunc>>();
+  const vector<nd::arrfunc> *icd =
+      reinterpret_cast<const vector<nd::arrfunc> *>(static_data);
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::arrfunc &child = (*icd)[i];
     if (nsrc == child.get_type()->get_npos()) {
@@ -78,9 +78,9 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(
         }
       }
       if (isrc == nsrc) {
-        child.get()->resolve_dst_type(child.get(), child.get_type(), NULL,
-                                      data_size, data, dst_tp, nsrc, src_tp,
-                                      kwds, tp_vars);
+        child.get()->resolve_dst_type(child.get_type(),
+                                      const_cast<char *>(child.get()->static_data), data_size, data,
+                                      dst_tp, nsrc, src_tp, kwds, tp_vars);
         return;
       }
     }
