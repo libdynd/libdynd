@@ -91,7 +91,7 @@ namespace nd {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       const char *DYND_UNUSED(static_data),
+                       char *DYND_UNUSED(static_data),
                        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                        ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const dynd::nd::array &kwds,

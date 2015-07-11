@@ -22,7 +22,7 @@ namespace nd {
     static void
     resolve_dst_type(const arrfunc_type_data *DYND_UNUSED(self),
                      const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                     const char *static_data, size_t data_size, char *data,
+                     char *static_data, size_t data_size, char *data,
                      ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
                      const dynd::nd::array &kwds,
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)

@@ -78,8 +78,8 @@ void nd::functional::var_rolling_ck::destruct_children()
 // TODO This should handle both strided and var cases
 intptr_t nd::functional::rolling_ck::instantiate(
     const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), const char *DYND_UNUSED(static_data),
-    size_t DYND_UNUSED(data_size),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -153,7 +153,7 @@ intptr_t nd::functional::rolling_ck::instantiate(
 
 void nd::functional::rolling_ck::resolve_dst_type(
     const arrfunc_type_data *af_self, const ndt::arrfunc_type *af_tp,
-    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
     const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars)

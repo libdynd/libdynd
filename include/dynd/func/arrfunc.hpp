@@ -778,6 +778,15 @@ namespace nd {
 
     bool is_null() const { return m_value.is_null(); }
 
+    arrfunc_type_data *get()
+    {
+      return !m_value.is_null()
+                 ? const_cast<arrfunc_type_data *>(
+                       reinterpret_cast<const arrfunc_type_data *>(
+                           m_value.get_readonly_originptr()))
+                 : NULL;
+    }
+
     const arrfunc_type_data *get() const
     {
       return !m_value.is_null() ? reinterpret_cast<const arrfunc_type_data *>(

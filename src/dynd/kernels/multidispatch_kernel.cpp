@@ -11,8 +11,8 @@ using namespace dynd;
 
 intptr_t nd::functional::old_multidispatch_ck::instantiate(
     const arrfunc_type_data *af_self,
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), const char *DYND_UNUSED(static_data),
-    size_t DYND_UNUSED(data_size),
+    const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+    const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -40,8 +40,8 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
         }
       }
       if (j == nsrc) {
-        return af.get()->instantiate(af.get(), af.get_type(), NULL, 0, NULL, ckb,
-                                     ckb_offset, dst_tp, dst_arrmeta, nsrc,
+        return af.get()->instantiate(af.get(), af.get_type(), NULL, 0, NULL,
+                                     ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                      src_tp, src_arrmeta, kernreq, ectx, kwds,
                                      tp_vars);
       } else {
@@ -61,7 +61,7 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
 void nd::functional::old_multidispatch_ck::resolve_dst_type(
     const arrfunc_type_data *self,
     const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-    const char *DYND_UNUSED(static_data), size_t data_size, char *data,
+    char *DYND_UNUSED(static_data), size_t data_size, char *data,
     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
     const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 {

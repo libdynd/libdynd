@@ -188,8 +188,8 @@ namespace nd {
         }
 
         ckb_offset = nh_op.get()->instantiate(
-            nh_op.get(), nh_op.get_type(), NULL, 0, NULL, ckb, ckb_offset, nh_dst_tp,
-            nh_dst_arrmeta, nsrc, nh_src_tp, nh_src_arrmeta,
+            nh_op.get(), nh_op.get_type(), NULL, 0, NULL, ckb, ckb_offset,
+            nh_dst_tp, nh_dst_arrmeta, nsrc, nh_src_tp, nh_src_arrmeta,
             kernel_request_single, ectx,
             struct_concat(kwds, pack("start_stop", reinterpret_cast<intptr_t>(
                                                        nh->start_stop))),
@@ -200,11 +200,10 @@ namespace nd {
 
       static void resolve_dst_type(
           const arrfunc_type_data *DYND_UNUSED(self),
-          const ndt::arrfunc_type *self_tp,
-          const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-          char *DYND_UNUSED(data), ndt::type &dst_tp,
-          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-          const nd::array &DYND_UNUSED(kwds),
+          const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(static_data),
+          size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+          ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+          const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
           const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         // TODO: Should be able to express the match/subsitution without special

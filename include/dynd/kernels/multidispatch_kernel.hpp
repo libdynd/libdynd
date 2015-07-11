@@ -68,6 +68,12 @@ namespace nd {
     }
 
     struct old_multidispatch_ck : base_virtual_kernel<old_multidispatch_ck> {
+      static void resolve_dst_type(
+          const arrfunc_type_data *af_self, const ndt::arrfunc_type *af_tp,
+          char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
+          intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
+          const std::map<nd::string, ndt::type> &tp_vars);
+
       static intptr_t
       instantiate(const arrfunc_type_data *af_self,
                   const ndt::arrfunc_type *af_tp, const char *static_data,
@@ -77,14 +83,6 @@ namespace nd {
                   const char *const *src_arrmeta, kernel_request_t kernreq,
                   const eval::eval_context *ectx, const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars);
-
-      static void
-      resolve_dst_type(const arrfunc_type_data *af_self,
-                       const ndt::arrfunc_type *af_tp, const char *static_data,
-                       size_t data_size, char *data, ndt::type &dst_tp,
-                       intptr_t nsrc, const ndt::type *src_tp,
-                       const nd::array &kwds,
-                       const std::map<nd::string, ndt::type> &tp_vars);
     };
 
     template <typename StaticDataType>
@@ -124,7 +122,7 @@ namespace nd {
       static void
       resolve_dst_type(const arrfunc_type_data *self,
                        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       const char *DYND_UNUSED(static_data),
+                       char *DYND_UNUSED(static_data),
                        size_t DYND_UNUSED(data_size), char *data,
                        ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
@@ -133,7 +131,7 @@ namespace nd {
         static_data &static_data =
             *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
 
-        const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
+        arrfunc &child = const_cast<arrfunc &>(static_data(dst_tp, nsrc, src_tp));
 
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
