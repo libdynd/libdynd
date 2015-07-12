@@ -8,7 +8,6 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/option_kernels.hpp>
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/pp/list.hpp>
@@ -393,8 +392,7 @@ size_t ndt::pointer_type::make_operand_to_value_assignment_kernel(
 
 nd::array ndt::pointer_type::get_option_nafunc() const
 {
-  return kernels::get_option_builtin_pointer_nafunc(
-      get_value_type().get_type_id());
+  throw std::runtime_error("option types for pointers are not implemented");
 }
 
 bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp,

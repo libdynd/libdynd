@@ -37,7 +37,7 @@ ndt::option_type::option_type(const type &value_tp)
   }
 
   if (value_tp.is_builtin()) {
-    m_nafunc = kernels::get_option_builtin_nafunc(value_tp.get_type_id());
+    m_nafunc = get_option_builtin_nafunc(value_tp.get_type_id());
     if (!m_nafunc.is_null()) {
       return;
     }

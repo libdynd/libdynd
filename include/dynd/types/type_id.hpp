@@ -606,6 +606,21 @@ struct type_kind_of<complex_float64_type_id> {
   static const type_kind_t value = complex_kind;
 };
 
+template <>
+struct type_kind_of<fixed_dim_type_id> {
+  static const type_kind_t value = dim_kind;
+};
+
+template <>
+struct type_kind_of<var_dim_type_id> {
+  static const type_kind_t value = dim_kind;
+};
+
+template <>
+struct type_kind_of<pointer_type_id> {
+  static const type_kind_t value = expr_kind;
+};
+
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular type.
 template <typename T>
