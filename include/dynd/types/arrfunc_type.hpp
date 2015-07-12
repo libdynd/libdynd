@@ -140,8 +140,6 @@ public:
       : data_size(0), data_init(NULL), resolve_dst_type(NULL),
         instantiate(NULL), static_data_free(NULL)
   {
-    static_assert((sizeof(arrfunc_type_data) & 7) == 0,
-                  "arrfunc_type_data must have size divisible by 8");
   }
 
   arrfunc_type_data(std::size_t data_size, arrfunc_data_init_t data_init,
@@ -160,15 +158,8 @@ public:
                     arrfunc_instantiate_t instantiate)
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        static_data_free([](char *static_data) {
-#ifdef _MSC_VER
-          typedef std::remove_reference<T>::type static_data_type;
-#else
-          typedef typename std::remove_reference<T>::type static_data_type;
-#endif
-          reinterpret_cast<static_data_type *>(static_data)
-              ->~static_data_type();
-        })
+        static_data_free(
+            &static_data_destroy<typename std::remove_reference<T>::type>)
   {
     typedef typename std::remove_reference<T>::type static_data_type;
     static_assert(sizeof(static_data_type) <= static_data_size,
@@ -225,7 +216,16 @@ public:
                   const char *const *src_arrmeta, char *const *src_data,
                   const nd::array &kwds,
                   const std::map<nd::string, ndt::type> &tp_vars);
+
+  template <typename StaticDataType>
+  static void static_data_destroy(char *static_data)
+  {
+    reinterpret_cast<StaticDataType *>(static_data)->~StaticDataType();
+  }
 };
+
+static_assert((sizeof(arrfunc_type_data) & 7) == 0,
+              "arrfunc_type_data must have size divisible by 8");
 
 namespace ndt {
 
