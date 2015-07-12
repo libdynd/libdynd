@@ -57,41 +57,40 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
 ////////////////////////////////////////////////////////////////
 // Functions for property access as an arrfunc
 
-static void delete_property_arrfunc_data(char *static_data)
-{
-  base_type_xdecref(*reinterpret_cast<ndt::base_type **>(static_data));
-}
+struct property_kernel : nd::base_virtual_kernel<property_kernel> {
+  static intptr_t
+  instantiate(char *static_data, size_t DYND_UNUSED(data_size),
+              char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+              const ndt::type &dst_tp, const char *dst_arrmeta,
+              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+              const char *const *src_arrmeta, kernel_request_t kernreq,
+              const eval::eval_context *ectx,
+              const nd::array &DYND_UNUSED(kwds),
+              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    ndt::type prop_src_tp = *reinterpret_cast<ndt::type *>(static_data);
 
-static intptr_t instantiate_property_ckernel(
-    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-{
-  ndt::type prop_src_tp(*reinterpret_cast<const ndt::base_type **>(static_data),
-                        true);
-
-  if (dst_tp.value_type() == prop_src_tp.value_type()) {
-    if (src_tp[0] == prop_src_tp.operand_type()) {
-      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                    prop_src_tp, src_arrmeta[0], kernreq, ectx);
-    } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
-      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                    prop_src_tp.extended<ndt::base_expr_type>()
-                                        ->with_replaced_storage_type(src_tp[0]),
-                                    src_arrmeta[0], kernreq, ectx);
+    if (dst_tp.value_type() == prop_src_tp.value_type()) {
+      if (src_tp[0] == prop_src_tp.operand_type()) {
+        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      prop_src_tp, src_arrmeta[0], kernreq,
+                                      ectx);
+      } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
+        return make_assignment_kernel(
+            ckb, ckb_offset, dst_tp, dst_arrmeta,
+            prop_src_tp.extended<ndt::base_expr_type>()
+                ->with_replaced_storage_type(src_tp[0]),
+            src_arrmeta[0], kernreq, ectx);
+      }
     }
-  }
 
-  stringstream ss;
-  ss << "Cannot instantiate arrfunc for assigning from ";
-  ss << " using input type " << src_tp[0];
-  ss << " and output type " << dst_tp;
-  throw type_error(ss.str());
-}
+    stringstream ss;
+    ss << "Cannot instantiate arrfunc for assigning from ";
+    ss << " using input type " << src_tp[0];
+    ss << " and output type " << dst_tp;
+    throw type_error(ss.str());
+  }
+};
 
 } // anonymous namespace
 
@@ -113,15 +112,8 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
     throw type_error(ss.str());
   }
   ndt::type prop_tp = ndt::make_property(tp, propname);
-  nd::array af =
-      nd::empty(ndt::make_arrfunc(ndt::make_tuple(tp), prop_tp.value_type()));
-  arrfunc_type_data *out_af =
-      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  out_af->static_data_free = &delete_property_arrfunc_data;
-  *out_af->get_data_as<const ndt::base_type *>() = prop_tp.release();
-  out_af->instantiate = &instantiate_property_ckernel;
-  af.flag_as_immutable();
-  return af;
+  return nd::arrfunc::make<property_kernel>(
+      ndt::make_arrfunc(ndt::make_tuple(tp), prop_tp.value_type()), prop_tp, 0);
 }
 
 void nd::detail::validate_kwd_types(const ndt::arrfunc_type *af_tp,

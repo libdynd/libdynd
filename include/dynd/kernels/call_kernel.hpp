@@ -12,9 +12,9 @@ namespace nd {
                           const ndt::type *src_tp, const nd::array &kwds,
                           const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
-      CallableType::get()->data_init(CallableType::get()->static_data,
-                                     data_size, data, dst_tp, nsrc, src_tp,
-                                     kwds, tp_vars);
+      CallableType::get().get()->data_init(
+          CallableType::get().get()->static_data, data_size, data, dst_tp, nsrc,
+          src_tp, kwds, tp_vars);
     }
 
     static void
@@ -23,9 +23,9 @@ namespace nd {
                      const ndt::type *src_tp, const dynd::nd::array &kwds,
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
-      CallableType::get()->resolve_dst_type(CallableType::get()->static_data,
-                                            data_size, data, dst_tp, nsrc,
-                                            src_tp, kwds, tp_vars);
+      CallableType::get().get()->resolve_dst_type(
+          CallableType::get().get()->static_data, data_size, data, dst_tp, nsrc,
+          src_tp, kwds, tp_vars);
     }
 
     static intptr_t
@@ -36,10 +36,10 @@ namespace nd {
                 const eval::eval_context *ectx, const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
     {
-      return CallableType::get()->instantiate(
-          CallableType::get()->static_data, data_size, data, ckb, ckb_offset,
-          dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, kwds,
-          tp_vars);
+      return CallableType::get().get()->instantiate(
+          CallableType::get().get()->static_data, data_size, data, ckb,
+          ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
+          ectx, kwds, tp_vars);
     }
   };
 

@@ -524,3 +524,64 @@ ndt::type ndt::arrfunc_type::make(const initializer_list<type_id_t> &,
 {
   return type();
 }
+
+nd::array arrfunc_type_data::
+operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+           const char *const *src_arrmeta, char *const *src_data,
+           const nd::array &kwds,
+           const std::map<nd::string, ndt::type> &tp_vars)
+{
+  // Allocate, then initialize, the data
+  std::unique_ptr<char[]> data(new char[data_size]);
+  if (data_size > 0) {
+    data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, kwds,
+              tp_vars);
+  }
+
+  // Resolve the destination type
+  if (dst_tp.is_symbolic()) {
+    if (resolve_dst_type == NULL) {
+      throw std::runtime_error(
+          "dst_tp is symbolic, but resolve_dst_type is NULL");
+    }
+
+    resolve_dst_type(static_data, data_size, data.get(), dst_tp, nsrc, src_tp,
+                     kwds, tp_vars);
+  }
+
+  // Allocate the destination array
+  nd::array dst = nd::empty(dst_tp);
+
+  // Generate and evaluate the ckernel
+  ckernel_builder<kernel_request_host> ckb;
+  instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp,
+              dst.get_arrmeta(), nsrc, src_tp, src_arrmeta,
+              kernel_request_single, &eval::default_eval_context, kwds,
+              tp_vars);
+  expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+  fn(dst.get_readwrite_originptr(), src_data, ckb.get());
+
+  return dst;
+}
+
+void arrfunc_type_data::
+operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data,
+           intptr_t nsrc, const ndt::type *src_tp,
+           const char *const *src_arrmeta, char *const *src_data,
+           const nd::array &kwds,
+           const std::map<nd::string, ndt::type> &tp_vars)
+{
+  std::unique_ptr<char[]> data(new char[data_size]);
+  if (data_size > 0) {
+    data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, kwds,
+              tp_vars);
+  }
+
+  // Generate and evaluate the ckernel
+  ckernel_builder<kernel_request_host> ckb;
+  instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst_arrmeta,
+              nsrc, src_tp, src_arrmeta, kernel_request_single,
+              &eval::default_eval_context, kwds, tp_vars);
+  expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+  fn(dst_data, src_data, ckb.get());
+}

@@ -590,9 +590,9 @@ nd::array ndt::fixed_dim_type::get_option_nafunc() const
   arrfunc_type_data *assign_na = is_avail + 1;
 
   new (is_avail) arrfunc_type_data(
-      0, &kernels::fixed_dim_is_avail_ck::instantiate, NULL, NULL);
+      0, NULL, NULL, &kernels::fixed_dim_is_avail_ck::instantiate);
   new (assign_na) arrfunc_type_data(
-      0, &kernels::fixed_dim_assign_na_ck::instantiate, NULL, NULL);
+      0, NULL, NULL, &kernels::fixed_dim_assign_na_ck::instantiate);
   return naf;
 }
 

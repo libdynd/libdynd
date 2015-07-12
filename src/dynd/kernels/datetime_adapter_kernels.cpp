@@ -126,9 +126,8 @@ template <class Tsrc, class Tdst>
 nd::arrfunc make_int_multiply_and_offset_arrfunc(Tdst factor, Tdst offset,
                                                  const ndt::type &func_proto)
 {
-  return nd::arrfunc(func_proto, make_pair(factor, offset), 0,
-                     &instantiate_int_multiply_and_offset_arrfunc<Tsrc, Tdst>,
-                     NULL, NULL);
+  return nd::arrfunc(func_proto, make_pair(factor, offset), 0, NULL, NULL,
+                     &instantiate_int_multiply_and_offset_arrfunc<Tsrc, Tdst>);
 }
 
 template <class Tsrc, class Tdst>
@@ -170,9 +169,8 @@ template <class Tsrc, class Tdst>
 nd::arrfunc make_int_offset_and_divide_arrfunc(Tdst offset, Tdst divisor,
                                                const ndt::type &func_proto)
 {
-  return nd::arrfunc(func_proto, make_pair(offset, divisor), 0,
-                     &instantiate_int_offset_and_divide_arrfunc<Tsrc, Tdst>,
-                     NULL, NULL);
+  return nd::arrfunc(func_proto, make_pair(offset, divisor), 0, NULL, NULL,
+                     &instantiate_int_offset_and_divide_arrfunc<Tsrc, Tdst>);
 }
 
 } // anonymous namespace

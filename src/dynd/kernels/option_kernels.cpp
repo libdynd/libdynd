@@ -273,9 +273,9 @@ struct nafunc {
     arrfunc_type_data *assign_na = is_avail + 1;
 
     new (is_avail)
-        arrfunc_type_data(0, nd::is_avail_ck<T>::instantiate, NULL, NULL);
+        arrfunc_type_data(0, NULL, NULL, nd::is_avail_ck<T>::instantiate);
     new (assign_na)
-        arrfunc_type_data(0, nd::assign_na_ck<T>::instantiate, NULL, NULL);
+        arrfunc_type_data(0, NULL, NULL, nd::assign_na_ck<T>::instantiate);
     return naf;
   }
 };

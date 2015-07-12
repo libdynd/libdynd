@@ -720,7 +720,7 @@ struct scalar_align_of {
     char x;
     T t;
   };
-  enum { value = sizeof(align_helper) - sizeof(T) };
+  static const int value = sizeof(align_helper) - sizeof(T);
 };
 
 // Metaprogram for determining if a type is the C++ "bool" or not

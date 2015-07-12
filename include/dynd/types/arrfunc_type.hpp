@@ -19,8 +19,6 @@
 
 namespace dynd {
 
-class arrfunc_type_data;
-
 /**
  * Resolves any missing keyword arguments for this arrfunc based on
  * the types of the positional arguments and the available keywords arguments.
@@ -98,9 +96,6 @@ typedef void (*arrfunc_static_data_free_t)(char *static_data);
 
 typedef ndt::type (*arrfunc_make_type_t)();
 
-template <typename T>
-void destroy_wrapper(char *static_data);
-
 /**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
@@ -112,30 +107,20 @@ void destroy_wrapper(char *static_data);
  * operation and a strided operation, or constructing
  * with different array arrmeta.
  */
-class arrfunc_type_data {
-  // non-copyable
-  arrfunc_type_data(const arrfunc_type_data &) = delete;
-
-public:
+struct arrfunc_type_data {
   /**
    * On 32-bit platforms, if the size changes, it may be
    * necessary to use
    * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
    * to ensure the total struct size is divisible by 64 bits.
    */
-  static const size_t static_data_size =
+  static const std::size_t static_data_size =
       4 * 8 + ((sizeof(void *) == 4) ? 4 : 0);
 
-  /**
-   * Some memory for the arrfunc to use. If this is not
-   * enough space to hold all the data by value, should allocate
-   * space on the heap, and free it when free is called.
-   */
   char static_data[static_data_size];
-
-  const size_t data_size;
-  const arrfunc_data_init_t data_init;
-  const arrfunc_resolve_dst_type_t resolve_dst_type;
+  std::size_t data_size;
+  arrfunc_data_init_t data_init;
+  arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_instantiate_t instantiate;
   arrfunc_static_data_free_t static_data_free;
 
@@ -143,112 +128,67 @@ public:
       : data_size(0), data_init(NULL), resolve_dst_type(NULL),
         instantiate(NULL), static_data_free(NULL)
   {
-    static_assert((sizeof(arrfunc_type_data) & 7) == 0,
-                  "arrfunc_type_data must have size divisible by 8");
   }
 
-  arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
-                    arrfunc_data_init_t data_init,
-                    arrfunc_resolve_dst_type_t resolve_dst_type)
-      : data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate)
-  {
-  }
-
-  arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
-                    arrfunc_data_init_t data_init,
+  arrfunc_type_data(std::size_t data_size, arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_static_data_free_t static_data_free)
+                    arrfunc_instantiate_t instantiate)
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        static_data_free(static_data_free)
+        static_data_free(NULL)
   {
   }
 
   template <typename T>
-  arrfunc_type_data(T &&static_data, size_t data_size,
-                    arrfunc_instantiate_t instantiate,
+  arrfunc_type_data(T &&static_data, std::size_t data_size,
                     arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_static_data_free_t static_data_free = NULL)
+                    arrfunc_instantiate_t instantiate)
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
         static_data_free(
-            static_data_free == NULL
-                ? &destroy_wrapper<typename std::remove_reference<T>::type>
-                : static_data_free)
+            &static_data_destroy<typename std::remove_reference<T>::type>)
   {
-    new (this->static_data)(typename std::remove_reference<T>::type)(
-        std::forward<T>(static_data));
+    typedef typename std::remove_reference<T>::type static_data_type;
+    static_assert(sizeof(static_data_type) <= static_data_size,
+                  "static data does not fit");
+    static_assert(scalar_align_of<static_data_type>::value <=
+                      scalar_align_of<std::uint64_t>::value,
+                  "static data requires stronger alignment");
+    new (this->static_data)(static_data_type)(std::forward<T>(static_data));
   }
 
-  template <typename T>
-  arrfunc_type_data(T *static_data, size_t data_size,
-                    arrfunc_instantiate_t instantiate,
-                    arrfunc_data_init_t data_init,
-                    arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_static_data_free_t static_data_free = NULL)
-      : data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        static_data_free(static_data_free)
-  {
-    new (this->static_data)(T *)(static_data);
-  }
+  // non-copyable
+  arrfunc_type_data(const arrfunc_type_data &) = delete;
 
   ~arrfunc_type_data()
   {
-    // Call the free function, if it exists
+    // Call the static_data_free function, if it exists
     if (static_data_free != NULL) {
       static_data_free(static_data);
     }
   }
 
-  /**
-   * Helper function to reinterpret the data as the specified type.
-   */
-  template <typename T>
-  T *get_data_as()
+  nd::array operator()(ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const char *const *src_arrmeta,
+                       char *const *src_data, const nd::array &kwds,
+                       const std::map<nd::string, ndt::type> &tp_vars);
+
+  void operator()(const ndt::type &dst_tp, const char *dst_arrmeta,
+                  char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, char *const *src_data,
+                  const nd::array &kwds,
+                  const std::map<nd::string, ndt::type> &tp_vars);
+
+  template <typename StaticDataType>
+  static void static_data_destroy(char *static_data)
   {
-    if (sizeof(T) > sizeof(static_data)) {
-      throw std::runtime_error("data does not fit");
-    }
-    if ((int)scalar_align_of<T>::value >
-        (int)scalar_align_of<uint64_t>::value) {
-      throw std::runtime_error("data requires stronger alignment");
-    }
-    return reinterpret_cast<T *>(static_data);
-  }
-  template <typename T>
-  const T *get_data_as() const
-  {
-    if (sizeof(T) > sizeof(static_data)) {
-      throw std::runtime_error("data does not fit");
-    }
-    if ((int)scalar_align_of<T>::value >
-        (int)scalar_align_of<uint64_t>::value) {
-      throw std::runtime_error("data requires stronger alignment");
-    }
-    return reinterpret_cast<const T *>(static_data);
+    reinterpret_cast<StaticDataType *>(static_data)->~StaticDataType();
   }
 };
 
-template <typename T>
-void destroy_wrapper(char *static_data)
-{
-  reinterpret_cast<T *>(static_data)->~T();
-}
-
-template <typename T>
-void delete_wrapper(char *static_data)
-{
-  delete reinterpret_cast<T *>(static_data);
-}
-
-template <typename T, void (*free)(void *) = &std::free>
-void free_wrapper(char *static_data)
-{
-  free(reinterpret_cast<T *>(static_data));
-}
+static_assert((sizeof(arrfunc_type_data) & 7) == 0,
+              "arrfunc_type_data must have size divisible by 8");
 
 namespace ndt {
 

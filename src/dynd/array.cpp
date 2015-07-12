@@ -831,13 +831,13 @@ void nd::array::val_assign(const array &rhs,
     throw runtime_error("tried to read from a dynd array that is not readable");
   }
 
-/*
-  const ndt::type &dst_tp = get_type();
-  const ndt::type &src_tp = rhs.get_type();
-  if (dst_tp.is_builtin() && src_tp.is_builtin()) {
-    nd::assign(rhs, kwds("dst", *this));
-  }
-*/
+  /*
+    const ndt::type &dst_tp = get_type();
+    const ndt::type &src_tp = rhs.get_type();
+    if (dst_tp.is_builtin() && src_tp.is_builtin()) {
+      nd::assign(rhs, kwds("dst", *this));
+    }
+  */
 
   typed_data_assign(get_type(), get_arrmeta(), get_readwrite_originptr(),
                     rhs.get_type(), rhs.get_arrmeta(),
@@ -1124,8 +1124,10 @@ bool nd::array::equals_exact(const array &rhs) const
           ndt::type tp[2] = {iter.get_uniform_dtype<0>(),
                              iter.get_uniform_dtype<1>()};
           const char *arrmeta[2] = {iter.arrmeta<0>(), iter.arrmeta<1>()};
-          if (nd::not_equal(2, tp, arrmeta, const_cast<char *const *>(src))
-                  .as<bool>()) {
+          ndt::type dst_tp = ndt::make_type<int>();
+          if ((*not_equal::get().get())(
+                  dst_tp, 2, tp, arrmeta, const_cast<char *const *>(src),
+                  array(), std::map<nd::string, ndt::type>()).as<bool>()) {
             return false;
           }
         } while (iter.next());

@@ -390,8 +390,8 @@ nd::array ndt::string_type::get_option_nafunc() const
   arrfunc_type_data *assign_na = is_avail + 1;
 
   new (is_avail)
-      arrfunc_type_data(0, &string_is_avail_ck::instantiate, NULL, NULL);
+      arrfunc_type_data(0, NULL, NULL, &string_is_avail_ck::instantiate);
   new (assign_na)
-      arrfunc_type_data(0, &string_assign_na_ck::instantiate, NULL, NULL);
+      arrfunc_type_data(0, NULL, NULL, &string_assign_na_ck::instantiate);
   return naf;
 }

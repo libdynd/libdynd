@@ -18,9 +18,6 @@
 
 namespace dynd {
 
-// Forward definition from dynd/func/arrfunc.hpp and dynd/types/arrfunc_type.hpp
-class arrfunc_type_data;
-
 // Forward definition from dynd/func/callable.hpp
 namespace gfunc {
   class callable;
