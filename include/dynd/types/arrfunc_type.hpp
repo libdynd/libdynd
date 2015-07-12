@@ -161,7 +161,11 @@ public:
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
         static_data_free([](char *static_data) {
+#ifdef _MSC_VER
+          typedef std::remove_reference<T>::type static_data_type;
+#else
           typedef typename std::remove_reference<T>::type static_data_type;
+#endif
           reinterpret_cast<static_data_type *>(static_data)
               ->~static_data_type();
         })
