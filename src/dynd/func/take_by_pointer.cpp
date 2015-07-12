@@ -63,8 +63,7 @@ struct take_by_pointer_ck
 struct take_by_pointer_virtual_ck
     : nd::base_virtual_kernel<take_by_pointer_virtual_ck> {
   static intptr_t
-  instantiate(const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-              char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+  instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
               char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
               const ndt::type &dst_tp, const char *dst_arrmeta,
               intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,

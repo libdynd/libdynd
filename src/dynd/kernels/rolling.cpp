@@ -77,12 +77,12 @@ void nd::functional::var_rolling_ck::destruct_children()
 
 // TODO This should handle both strided and var cases
 intptr_t nd::functional::rolling_ck::instantiate(
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
-    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars)
 {
   typedef dynd::nd::functional::strided_rolling_ck self_type;
   rolling_arrfunc_data *data =
@@ -91,7 +91,6 @@ intptr_t nd::functional::rolling_ck::instantiate(
   intptr_t root_ckb_offset = ckb_offset;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   const arrfunc_type_data *window_af = data->window_op.get();
-  const ndt::arrfunc_type *window_af_tp = data->window_op.get_type();
   ndt::type dst_el_tp, src_el_tp;
   const char *dst_el_arrmeta, *src_el_arrmeta;
   if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dim_size,
@@ -145,10 +144,9 @@ intptr_t nd::functional::rolling_ck::instantiate(
 
   const char *src_winop_meta = self->m_src_winop_meta.get();
   return window_af->instantiate(
-      window_af_tp, const_cast<char *>(window_af->static_data), 0, NULL, ckb,
-      ckb_offset, dst_el_tp, dst_el_arrmeta, nsrc,
-      &self->m_src_winop_meta.get_type(), &src_winop_meta,
-      kernel_request_strided, ectx, kwds, tp_vars);
+      const_cast<char *>(window_af->static_data), 0, NULL, ckb, ckb_offset,
+      dst_el_tp, dst_el_arrmeta, nsrc, &self->m_src_winop_meta.get_type(),
+      &src_winop_meta, kernel_request_strided, ectx, kwds, tp_vars);
 }
 
 void nd::functional::rolling_ck::resolve_dst_type(

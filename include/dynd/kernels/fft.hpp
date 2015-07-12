@@ -187,7 +187,6 @@ namespace nd {
     */
 
     static intptr_t instantiate(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
         const ndt::type &dst_tp, const char *dst_arrmeta,

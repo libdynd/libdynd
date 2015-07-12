@@ -34,12 +34,12 @@ static void delete_lifted_reduction_arrfunc_data(char *static_data)
 }
 
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *static_data,
-    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &DYND_UNUSED(kwds),
     const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   lifted_reduction_arrfunc_data *data =

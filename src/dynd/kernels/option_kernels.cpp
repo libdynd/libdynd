@@ -281,12 +281,12 @@ struct nafunc {
 };
 
 intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
-    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
@@ -327,11 +327,10 @@ intptr_t kernels::fixed_dim_is_avail_ck::instantiate(
 }
 
 intptr_t kernels::fixed_dim_assign_na_ck::instantiate(
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(static_data),
-    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *DYND_UNUSED(src_tp),
+    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds),

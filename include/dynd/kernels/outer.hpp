@@ -16,26 +16,26 @@ namespace nd {
     template <int N>
     struct outer_ck : base_virtual_kernel<outer_ck<N>> {
       static intptr_t
-      instantiate(const ndt::arrfunc_type *self_tp, char *static_data,
-                  size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
+      instantiate(char *static_data, size_t DYND_UNUSED(data_size),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t nsrc, const ndt::type *src_tp,
+                  const char *const *src_arrmeta,
                   dynd::kernel_request_t kernreq,
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
         intptr_t ndim = 0;
-        for (intptr_t i = 0; i < self_tp->get_npos(); ++i) {
+        for (intptr_t i = 0; i < nsrc; ++i) {
           ndim += src_tp[i].get_ndim();
         }
 
-        std::vector<ndt::type> new_src_tp(self_tp->get_npos());
+        std::vector<ndt::type> new_src_tp(nsrc);
         std::vector<const char *> new_src_arrmeta;
 
         arrmeta_holder *new_src_arrmeta_holder =
-            new arrmeta_holder[self_tp->get_npos()];
-        for (intptr_t i = 0, j = 0; i < self_tp->get_npos(); ++i) {
+            new arrmeta_holder[nsrc];
+        for (intptr_t i = 0, j = 0; i < nsrc; ++i) {
           ndt::type old_tp = src_tp[i];
           new_src_tp[i] = old_tp.with_new_axis(0, j);
           new_src_tp[i] = new_src_tp[i].with_new_axis(
@@ -80,9 +80,9 @@ namespace nd {
         }
 
         ckb_offset = elwise_virtual_ck<N>::instantiate(
-            self_tp, static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-            nsrc, new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx,
-            kwds, tp_vars);
+            static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+            new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx, kwds,
+            tp_vars);
         delete[] new_src_arrmeta_holder;
 
         return ckb_offset;
@@ -101,8 +101,8 @@ namespace nd {
             reinterpret_cast<arrfunc *>(static_data)->get_type();
 
         if (child->resolve_dst_type != NULL) {
-          child->resolve_dst_type(child->static_data, 0, NULL, dst_tp,
-                                  nsrc, src_tp, kwds, tp_vars);
+          child->resolve_dst_type(child->static_data, 0, NULL, dst_tp, nsrc,
+                                  src_tp, kwds, tp_vars);
         } else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
         }

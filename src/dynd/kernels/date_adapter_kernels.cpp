@@ -71,24 +71,15 @@ struct int_offset_ck
 
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_offset_arrfunc(
-    const ndt::arrfunc_type *af_tp, char *static_data,
-    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp,
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+    void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef int_offset_ck<Tsrc, Tdst> self_type;
-  if (dst_tp != af_tp->get_return_type() ||
-      src_tp[0] != af_tp->get_pos_type(0)) {
-    stringstream ss;
-    ss << "Cannot instantiate arrfunc with signature ";
-    ss << af_tp << " with types (";
-    ss << src_tp[0] << ") -> " << dst_tp;
-    throw type_error(ss.str());
-  }
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_offset = *reinterpret_cast<Tdst *>(static_data);
   return ckb_offset;
