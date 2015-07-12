@@ -8,6 +8,7 @@
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/func/lift_reduction_arrfunc.hpp>
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -160,14 +161,7 @@ struct double_mean1d_ck
   }
 };
 
-struct mean1d_arrfunc_data {
-  intptr_t minp;
-
-  static void free(char *static_data)
-  {
-    delete *reinterpret_cast<mean1d_arrfunc_data **>(static_data);
-  }
-
+struct mean1d_kernel {
   static intptr_t
   instantiate(char *static_data, size_t DYND_UNUSED(data_size),
               char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
@@ -179,8 +173,6 @@ struct mean1d_arrfunc_data {
               const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     typedef double_mean1d_ck self_type;
-    mean1d_arrfunc_data *data =
-        *reinterpret_cast<mean1d_arrfunc_data **>(static_data);
     self_type *self = self_type::make(ckb, kernreq, ckb_offset);
     intptr_t src_dim_size, src_stride;
     ndt::type src_el_tp;
@@ -199,7 +191,7 @@ struct mean1d_arrfunc_data {
             "float64, got " << src_el_tp << " and " << dst_tp;
       throw invalid_argument(ss.str());
     }
-    self->m_minp = data->minp;
+    self->m_minp = *reinterpret_cast<intptr_t *>(static_data);
     if (self->m_minp <= 0) {
       if (self->m_minp <= -src_dim_size) {
         throw invalid_argument(
@@ -222,16 +214,9 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     ss << ndt::type(tid) << " is not supported";
     throw type_error(ss.str());
   }
-  nd::array mean1d = nd::empty(ndt::make_arrfunc(
-      ndt::make_tuple(ndt::make_fixed_dim_kind(ndt::make_type<double>())),
-      ndt::make_type<double>()));
-  arrfunc_type_data *out_af =
-      reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
-  mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
-  data->minp = minp;
-  *reinterpret_cast<mean1d_arrfunc_data **>(out_af->static_data) = data;
-  out_af->instantiate = &mean1d_arrfunc_data::instantiate;
-  out_af->static_data_free = &mean1d_arrfunc_data::free;
-  mean1d.flag_as_immutable();
-  return mean1d;
+  return nd::arrfunc::make<mean1d_kernel>(
+      ndt::make_arrfunc(
+          ndt::make_tuple(ndt::make_fixed_dim_kind(ndt::make_type<double>())),
+          ndt::make_type<double>()),
+      minp, 0);
 }
