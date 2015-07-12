@@ -26,13 +26,6 @@ struct lifted_reduction_arrfunc_data {
   shortvector<bool> reduction_dimflags;
 };
 
-static void delete_lifted_reduction_arrfunc_data(char *static_data)
-{
-  lifted_reduction_arrfunc_data *self =
-      *reinterpret_cast<lifted_reduction_arrfunc_data **>(static_data);
-  delete self;
-}
-
 static intptr_t instantiate_lifted_reduction_arrfunc_data(
     char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -42,8 +35,8 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const nd::array &DYND_UNUSED(kwds),
     const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
-  lifted_reduction_arrfunc_data *data =
-      *reinterpret_cast<lifted_reduction_arrfunc_data **>(static_data);
+  std::shared_ptr<lifted_reduction_arrfunc_data> data =
+      *reinterpret_cast<std::shared_ptr<lifted_reduction_arrfunc_data> *>(static_data);
   return make_lifted_reduction_ckernel(
       data->child_elwise_reduction.get(),
       data->child_elwise_reduction.get_type(),
@@ -116,7 +109,8 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
     }
   }
 
-  lifted_reduction_arrfunc_data *self = new lifted_reduction_arrfunc_data;
+  std::shared_ptr<lifted_reduction_arrfunc_data> self =
+      make_shared<lifted_reduction_arrfunc_data>();
   self->child_elwise_reduction = elwise_reduction_arr;
   self->child_dst_initialization = dst_initialization_arr;
   if (!reduction_identity.is_null()) {
@@ -143,6 +137,5 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
 
   return nd::arrfunc(
       ndt::make_arrfunc(ndt::make_tuple(lifted_arr_type), lifted_dst_type),
-      self, 0, &instantiate_lifted_reduction_arrfunc_data, NULL, NULL,
-      &delete_lifted_reduction_arrfunc_data);
+      self, 0, NULL, NULL, &instantiate_lifted_reduction_arrfunc_data);
 }

@@ -724,42 +724,28 @@ namespace nd {
     nd::array m_value;
 
   public:
-    arrfunc() {}
+    arrfunc() = default;
 
     arrfunc(const ndt::type &self_tp, std::size_t data_size,
-            arrfunc_instantiate_t instantiate, arrfunc_data_init_t data_init,
-            arrfunc_resolve_dst_type_t resolve_dst_type)
-        : m_value(empty(self_tp))
-    {
-      /*
-            if (resolve_option_values == NULL) {
-              throw std::invalid_argument("resolve_option_values cannot be
-         NULL");
-            }
-      */
-
-      new (m_value.get_readwrite_originptr()) arrfunc_type_data(
-          data_size, instantiate, data_init, resolve_dst_type);
-    }
-
-    template <typename StaticDataType>
-    arrfunc(const ndt::type &self_tp, StaticDataType &&static_data,
-            std::size_t data_size, arrfunc_instantiate_t instantiate,
             arrfunc_data_init_t data_init,
             arrfunc_resolve_dst_type_t resolve_dst_type,
-            arrfunc_static_data_free_t static_data_free = NULL)
+            arrfunc_instantiate_t instantiate)
         : m_value(empty(self_tp))
     {
-      /*
-            if (resolve_option_values == NULL) {
-              throw std::invalid_argument("resolve_option_values cannot be
-         NULL");
-            }
-      */
-
       new (m_value.get_readwrite_originptr()) arrfunc_type_data(
-          std::forward<StaticDataType>(static_data), data_size, instantiate,
-          data_init, resolve_dst_type, static_data_free);
+          data_size, data_init, resolve_dst_type, instantiate);
+    }
+
+    template <typename T>
+    arrfunc(const ndt::type &self_tp, T &&static_data, std::size_t data_size,
+            arrfunc_data_init_t data_init,
+            arrfunc_resolve_dst_type_t resolve_dst_type,
+            arrfunc_instantiate_t instantiate)
+        : m_value(empty(self_tp))
+    {
+      new (m_value.get_readwrite_originptr())
+          arrfunc_type_data(std::forward<T>(static_data), data_size, data_init,
+                            resolve_dst_type, instantiate);
     }
 
     arrfunc(const arrfunc &rhs) : m_value(rhs.m_value) {}
@@ -893,50 +879,21 @@ namespace nd {
           kwds.as_array(ndt::make_struct(self_tp->get_kwd_names(), kwd_tp),
                         available, missing);
 
-      // Allocate, then initialize, the data
-      std::unique_ptr<char[]> data(new char[self->data_size]);
-      if (self->data_size > 0) {
-        self->data_init(self->static_data, self->data_size, data.get(),
-                        ndt::type(), arg_tp.size(),
-                        arg_tp.empty() ? NULL : arg_tp.data(), kwds_as_array,
-                        tp_vars);
-      }
-
-      // Construct the destination array, if it was not provided
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-
-        // Resolve the destination type
-        if (dst_tp.is_symbolic()) {
-          if (self->resolve_dst_type == NULL) {
-            throw std::runtime_error(
-                "dst_tp is symbolic, but resolve_dst_type is NULL");
-          }
-
-          self->resolve_dst_type(self->static_data, self->data_size, data.get(),
-                                 dst_tp, arg_tp.size(),
-                                 arg_tp.empty() ? NULL : arg_tp.data(),
-                                 kwds_as_array, tp_vars);
-        }
-
-        dst = empty(dst_tp);
-      } else {
-        dst_tp = dst.get_type();
+        return (*self)(
+            dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+            arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
+            arg_data.empty() ? NULL : arg_data.data(), kwds_as_array, tp_vars);
       }
 
-      // Generate and evaluate the ckernel
-      ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self->static_data, self->data_size, data.get(), &ckb, 0,
-                        dst_tp, dst.get_arrmeta(), arg_tp.size(),
-                        arg_tp.empty() ? NULL : arg_tp.data(),
-                        arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
-                        kernel_request_single, &eval::default_eval_context,
-                        kwds_as_array, tp_vars);
-      expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-      fn(dst.get_readwrite_originptr(),
-         arg_data.empty() ? NULL : arg_data.data(), ckb.get());
-
+      dst_tp = dst.get_type();
+      (*self)(dst_tp, dst.get_arrmeta(), dst.get_readwrite_originptr(),
+              arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+              arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
+              arg_data.empty() ? NULL : arg_data.data(), kwds_as_array,
+              tp_vars);
       return dst;
     }
 
@@ -1042,9 +999,9 @@ namespace nd {
     make()
     {
       return arrfunc(KernelType::make_type(), KernelType::data_size,
-                     detail::get_instantiate<KernelType>(),
                      detail::get_data_init<KernelType>(),
-                     detail::get_resolve_dst_type<KernelType>());
+                     detail::get_resolve_dst_type<KernelType>(),
+                     detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -1053,11 +1010,11 @@ namespace nd {
                                    arrfunc>::type
     make(StaticDataType &&static_data)
     {
-      return arrfunc(
-          KernelType::make_type(), std::forward<StaticDataType>(static_data),
-          KernelType::data_size, detail::get_instantiate<KernelType>(),
-          detail::get_data_init<KernelType>(),
-          detail::get_resolve_dst_type<KernelType>());
+      return arrfunc(KernelType::make_type(),
+                     std::forward<StaticDataType>(static_data),
+                     KernelType::data_size, detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>(),
+                     detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>
@@ -1068,9 +1025,9 @@ namespace nd {
     make(std::size_t data_size)
     {
       return arrfunc(KernelType::make_type(), data_size,
-                     detail::get_instantiate<KernelType>(),
                      detail::get_data_init<KernelType>(),
-                     detail::get_resolve_dst_type<KernelType>());
+                     detail::get_resolve_dst_type<KernelType>(),
+                     detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -1082,9 +1039,9 @@ namespace nd {
     {
       return arrfunc(KernelType::make_type(),
                      std::forward<StaticDataType>(static_data), data_size,
-                     detail::get_instantiate<KernelType>(),
                      detail::get_data_init<KernelType>(),
-                     detail::get_resolve_dst_type<KernelType>());
+                     detail::get_resolve_dst_type<KernelType>(),
+                     detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>
@@ -1094,9 +1051,9 @@ namespace nd {
     make(const ndt::type &self_tp)
     {
       return arrfunc(self_tp, KernelType::data_size,
-                     detail::get_instantiate<KernelType>(),
                      detail::get_data_init<KernelType>(),
-                     detail::get_resolve_dst_type<KernelType>());
+                     detail::get_resolve_dst_type<KernelType>(),
+                     detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -1106,10 +1063,9 @@ namespace nd {
     make(const ndt::type &self_tp, StaticDataType &&static_data)
     {
       return arrfunc(self_tp, std::forward<StaticDataType>(static_data),
-                     KernelType::data_size,
-                     detail::get_instantiate<KernelType>(),
-                     detail::get_data_init<KernelType>(),
-                     detail::get_resolve_dst_type<KernelType>());
+                     KernelType::data_size, detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>(),
+                     detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>
@@ -1119,9 +1075,9 @@ namespace nd {
         arrfunc>::type
     make(const ndt::type &self_tp, std::size_t data_size)
     {
-      return arrfunc(self_tp, data_size, detail::get_instantiate<KernelType>(),
-                     detail::get_data_init<KernelType>(),
-                     detail::get_resolve_dst_type<KernelType>());
+      return arrfunc(self_tp, data_size, detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>(),
+                     detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -1133,9 +1089,9 @@ namespace nd {
          std::size_t data_size)
     {
       return arrfunc(self_tp, std::forward<StaticDataType>(static_data),
-                     data_size, detail::get_instantiate<KernelType>(),
-                     detail::get_data_init<KernelType>(),
-                     detail::get_resolve_dst_type<KernelType>());
+                     data_size, detail::get_data_init<KernelType>(),
+                     detail::get_resolve_dst_type<KernelType>(),
+                     detail::get_instantiate<KernelType>());
     }
 
     template <template <int> class CKT, typename T>

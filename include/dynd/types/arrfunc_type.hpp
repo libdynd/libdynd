@@ -98,9 +98,6 @@ typedef void (*arrfunc_static_data_free_t)(char *static_data);
 
 typedef ndt::type (*arrfunc_make_type_t)();
 
-template <typename T>
-void destroy_wrapper(char *static_data);
-
 /**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
@@ -147,52 +144,35 @@ public:
                   "arrfunc_type_data must have size divisible by 8");
   }
 
-  arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
-                    arrfunc_data_init_t data_init,
-                    arrfunc_resolve_dst_type_t resolve_dst_type)
-      : data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate)
-  {
-  }
-
-  arrfunc_type_data(size_t data_size, arrfunc_instantiate_t instantiate,
-                    arrfunc_data_init_t data_init,
+  arrfunc_type_data(std::size_t data_size, arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_static_data_free_t static_data_free)
+                    arrfunc_instantiate_t instantiate)
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        static_data_free(static_data_free)
+        static_data_free(NULL)
   {
   }
 
   template <typename T>
-  arrfunc_type_data(T &&static_data, size_t data_size,
-                    arrfunc_instantiate_t instantiate,
+  arrfunc_type_data(T &&static_data, std::size_t data_size,
                     arrfunc_data_init_t data_init,
                     arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_static_data_free_t static_data_free = NULL)
+                    arrfunc_instantiate_t instantiate)
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        static_data_free(
-            static_data_free == NULL
-                ? &destroy_wrapper<typename std::remove_reference<T>::type>
-                : static_data_free)
+        static_data_free([](char *static_data) {
+          typedef typename std::remove_reference<T>::type static_data_type;
+          reinterpret_cast<static_data_type *>(static_data)
+              ->~static_data_type();
+        })
   {
-    new (this->static_data)(typename std::remove_reference<T>::type)(
-        std::forward<T>(static_data));
-  }
-
-  template <typename T>
-  arrfunc_type_data(T *static_data, size_t data_size,
-                    arrfunc_instantiate_t instantiate,
-                    arrfunc_data_init_t data_init,
-                    arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_static_data_free_t static_data_free = NULL)
-      : data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        static_data_free(static_data_free)
-  {
-    new (this->static_data)(T *)(static_data);
+    typedef typename std::remove_reference<T>::type static_data_type;
+    static_assert(sizeof(static_data_type) <= static_data_size,
+                  "static data does not fit");
+    static_assert(scalar_align_of<static_data_type>::value <=
+                      scalar_align_of<std::uint64_t>::value,
+                  "static data requires stronger alignment");
+    new (this->static_data)(static_data_type)(std::forward<T>(static_data));
   }
 
   ~arrfunc_type_data()
@@ -230,25 +210,18 @@ public:
     }
     return reinterpret_cast<const T *>(static_data);
   }
+
+  nd::array operator()(ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const char *const *src_arrmeta,
+                       char *const *src_data, const nd::array &kwds,
+                       const std::map<nd::string, ndt::type> &tp_vars);
+
+  void operator()(const ndt::type &dst_tp, const char *dst_arrmeta,
+                  char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
+                  const char *const *src_arrmeta, char *const *src_data,
+                  const nd::array &kwds,
+                  const std::map<nd::string, ndt::type> &tp_vars);
 };
-
-template <typename T>
-void destroy_wrapper(char *static_data)
-{
-  reinterpret_cast<T *>(static_data)->~T();
-}
-
-template <typename T>
-void delete_wrapper(char *static_data)
-{
-  delete reinterpret_cast<T *>(static_data);
-}
-
-template <typename T, void (*free)(void *) = &std::free>
-void free_wrapper(char *static_data)
-{
-  free(reinterpret_cast<T *>(static_data));
-}
 
 namespace ndt {
 

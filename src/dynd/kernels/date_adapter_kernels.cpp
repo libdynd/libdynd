@@ -74,8 +74,9 @@ static intptr_t instantiate_int_offset_arrfunc(
     char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+    const ndt::type *DYND_UNUSED(src_tp),
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds),
     const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
@@ -88,8 +89,8 @@ static intptr_t instantiate_int_offset_arrfunc(
 template <class Tsrc, class Tdst>
 nd::arrfunc make_int_offset_arrfunc(Tdst offset, const ndt::type &func_proto)
 {
-  return nd::arrfunc(func_proto, offset, 0,
-                     &instantiate_int_offset_arrfunc<Tsrc, Tdst>, NULL, NULL);
+  return nd::arrfunc(func_proto, offset, 0, NULL, NULL,
+                     &instantiate_int_offset_arrfunc<Tsrc, Tdst>);
 }
 } // anonymous namespace
 
