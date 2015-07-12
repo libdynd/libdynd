@@ -118,7 +118,7 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
   out_af->static_data_free = &delete_property_arrfunc_data;
-  *out_af->get_data_as<const ndt::base_type *>() = prop_tp.release();
+  *reinterpret_cast<const ndt::base_type **>(out_af->static_data) = prop_tp.release();
   out_af->instantiate = &instantiate_property_ckernel;
   af.flag_as_immutable();
   return af;

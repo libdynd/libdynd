@@ -19,8 +19,6 @@
 
 namespace dynd {
 
-class arrfunc_type_data;
-
 /**
  * Resolves any missing keyword arguments for this arrfunc based on
  * the types of the positional arguments and the available keywords arguments.
@@ -109,30 +107,20 @@ typedef ndt::type (*arrfunc_make_type_t)();
  * operation and a strided operation, or constructing
  * with different array arrmeta.
  */
-class arrfunc_type_data {
-  // non-copyable
-  arrfunc_type_data(const arrfunc_type_data &) = delete;
-
-public:
+struct arrfunc_type_data {
   /**
    * On 32-bit platforms, if the size changes, it may be
    * necessary to use
    * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
    * to ensure the total struct size is divisible by 64 bits.
    */
-  static const size_t static_data_size =
+  static const std::size_t static_data_size =
       4 * 8 + ((sizeof(void *) == 4) ? 4 : 0);
 
-  /**
-   * Some memory for the arrfunc to use. If this is not
-   * enough space to hold all the data by value, should allocate
-   * space on the heap, and free it when free is called.
-   */
   char static_data[static_data_size];
-
-  const size_t data_size;
-  const arrfunc_data_init_t data_init;
-  const arrfunc_resolve_dst_type_t resolve_dst_type;
+  std::size_t data_size;
+  arrfunc_data_init_t data_init;
+  arrfunc_resolve_dst_type_t resolve_dst_type;
   arrfunc_instantiate_t instantiate;
   arrfunc_static_data_free_t static_data_free;
 
@@ -170,40 +158,15 @@ public:
     new (this->static_data)(static_data_type)(std::forward<T>(static_data));
   }
 
+  // non-copyable
+  arrfunc_type_data(const arrfunc_type_data &) = delete;
+
   ~arrfunc_type_data()
   {
-    // Call the free function, if it exists
+    // Call the static_data_free function, if it exists
     if (static_data_free != NULL) {
       static_data_free(static_data);
     }
-  }
-
-  /**
-   * Helper function to reinterpret the data as the specified type.
-   */
-  template <typename T>
-  T *get_data_as()
-  {
-    if (sizeof(T) > sizeof(static_data)) {
-      throw std::runtime_error("data does not fit");
-    }
-    if ((int)scalar_align_of<T>::value >
-        (int)scalar_align_of<uint64_t>::value) {
-      throw std::runtime_error("data requires stronger alignment");
-    }
-    return reinterpret_cast<T *>(static_data);
-  }
-  template <typename T>
-  const T *get_data_as() const
-  {
-    if (sizeof(T) > sizeof(static_data)) {
-      throw std::runtime_error("data does not fit");
-    }
-    if ((int)scalar_align_of<T>::value >
-        (int)scalar_align_of<uint64_t>::value) {
-      throw std::runtime_error("data requires stronger alignment");
-    }
-    return reinterpret_cast<const T *>(static_data);
   }
 
   nd::array operator()(ndt::type &dst_tp, intptr_t nsrc,

@@ -116,7 +116,7 @@ nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
       ndt::make_arrfunc(ndt::make_tuple(ndt::type(tid)), ndt::type(tid)));
   arrfunc_type_data *out_af =
       reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  *out_af->get_data_as<type_id_t>() = tid;
+  *reinterpret_cast<type_id_t *>(out_af->static_data) = tid;
   out_af->instantiate = &instantiate_builtin_sum_reduction_arrfunc;
   out_af->static_data_free = NULL;
   af.flag_as_immutable();
@@ -229,7 +229,7 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
       reinterpret_cast<arrfunc_type_data *>(mean1d.get_readwrite_originptr());
   mean1d_arrfunc_data *data = new mean1d_arrfunc_data;
   data->minp = minp;
-  *out_af->get_data_as<mean1d_arrfunc_data *>() = data;
+  *reinterpret_cast<mean1d_arrfunc_data **>(out_af->static_data) = data;
   out_af->instantiate = &mean1d_arrfunc_data::instantiate;
   out_af->static_data_free = &mean1d_arrfunc_data::free;
   mean1d.flag_as_immutable();
