@@ -85,25 +85,28 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(void *ckb,
   return ckb_offset;
 }
 
-static intptr_t instantiate_builtin_sum_reduction_arrfunc(
-    char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-    char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-    const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-{
-  if (dst_tp != src_tp[0]) {
-    stringstream ss;
-    ss << "dynd sum reduction: the source type, " << src_tp[0]
-       << ", does not match the destination type, " << dst_tp;
-    throw type_error(ss.str());
+struct builtin_sum_reduction_kernel {
+  static intptr_t
+  instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+              char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+              const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+              const char *const *DYND_UNUSED(src_arrmeta),
+              kernel_request_t kernreq,
+              const eval::eval_context *DYND_UNUSED(ectx),
+              const nd::array &DYND_UNUSED(kwds),
+              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    if (dst_tp != src_tp[0]) {
+      stringstream ss;
+      ss << "dynd sum reduction: the source type, " << src_tp[0]
+         << ", does not match the destination type, " << dst_tp;
+      throw type_error(ss.str());
+    }
+    return kernels::make_builtin_sum_reduction_ckernel(
+        ckb, ckb_offset, dst_tp.get_type_id(), kernreq);
   }
-  return kernels::make_builtin_sum_reduction_ckernel(
-      ckb, ckb_offset, dst_tp.get_type_id(), kernreq);
-}
+};
 
 nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
 {
@@ -113,15 +116,9 @@ nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
     ss << ndt::type(tid) << " is not supported";
     throw type_error(ss.str());
   }
-  nd::array af = nd::empty(
-      ndt::make_arrfunc(ndt::make_tuple(ndt::type(tid)), ndt::type(tid)));
-  arrfunc_type_data *out_af =
-      reinterpret_cast<arrfunc_type_data *>(af.get_readwrite_originptr());
-  *reinterpret_cast<type_id_t *>(out_af->static_data) = tid;
-  out_af->instantiate = &instantiate_builtin_sum_reduction_arrfunc;
-  out_af->static_data_free = NULL;
-  af.flag_as_immutable();
-  return af;
+  return nd::arrfunc::make<builtin_sum_reduction_kernel>(
+      ndt::make_arrfunc(ndt::make_tuple(ndt::type(tid)), ndt::type(tid)), tid,
+      0);
 }
 
 nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
