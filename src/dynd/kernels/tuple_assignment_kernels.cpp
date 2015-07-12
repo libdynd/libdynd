@@ -145,8 +145,8 @@ size_t dynd::make_tuple_identical_assignment_kernel(
   }
 
   return make_tuple_unary_op_ckernel(
-      nd::copy.get(), nd::copy.get_type(), ckb, ckb_offset, field_count,
-      sd->get_data_offsets(dst_arrmeta), sd->get_field_types_raw(),
+      nd::copy::get().get(), nd::copy::get().get_type(), ckb, ckb_offset,
+      field_count, sd->get_data_offsets(dst_arrmeta), sd->get_field_types_raw(),
       dst_fields_arrmeta.get(), sd->get_data_offsets(src_arrmeta),
       sd->get_field_types_raw(), src_fields_arrmeta.get(), kernreq, ectx);
 }
@@ -201,10 +201,11 @@ size_t dynd::make_tuple_assignment_kernel(void *ckb, intptr_t ckb_offset,
   }
 
   return make_tuple_unary_op_ckernel(
-      nd::copy.get(), nd::copy.get_type(), ckb, ckb_offset, field_count,
-      dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
-      dst_fields_arrmeta.get(), src_sd->get_data_offsets(src_arrmeta),
-      src_sd->get_field_types_raw(), src_fields_arrmeta.get(), kernreq, ectx);
+      nd::copy::get().get(), nd::copy::get().get_type(), ckb, ckb_offset,
+      field_count, dst_sd->get_data_offsets(dst_arrmeta),
+      dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
+      src_sd->get_data_offsets(src_arrmeta), src_sd->get_field_types_raw(),
+      src_fields_arrmeta.get(), kernreq, ectx);
 }
 
 /////////////////////////////////////////
@@ -239,8 +240,9 @@ size_t dynd::make_broadcast_to_tuple_assignment_kernel(
   vector<uintptr_t> src_data_offsets(field_count, 0);
 
   return make_tuple_unary_op_ckernel(
-      nd::copy.get(), nd::copy.get_type(), ckb, ckb_offset, field_count,
-      dst_sd->get_data_offsets(dst_arrmeta), dst_sd->get_field_types_raw(),
-      dst_fields_arrmeta.get(), &src_data_offsets[0], &src_fields_tp[0],
-      &src_fields_arrmeta[0], kernreq, ectx);
+      nd::copy::get().get(), nd::copy::get().get_type(), ckb, ckb_offset,
+      field_count, dst_sd->get_data_offsets(dst_arrmeta),
+      dst_sd->get_field_types_raw(), dst_fields_arrmeta.get(),
+      &src_data_offsets[0], &src_fields_tp[0], &src_fields_arrmeta[0], kernreq,
+      ectx);
 }

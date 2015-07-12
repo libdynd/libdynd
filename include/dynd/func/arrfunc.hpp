@@ -793,53 +793,9 @@ namespace nd {
 
     void swap(nd::arrfunc &rhs) { m_value.swap(rhs.m_value); }
 
-    /*
-        template <typename... T>
-        void set_as_option(arrfunc_resolve_option_values_t
-       resolve_option_values,
-                           T &&... names)
-        {
-          // TODO: This function makes some assumptions about types not being
-          //       option already, etc. We need this functionality, but probably
-          //       can find a better way later.
-
-          intptr_t missing[sizeof...(T)] =
-       {get_type()->get_kwd_index(names)...};
-
-          nd::array new_kwd_types = get_type()->get_kwd_types().eval_copy();
-          auto new_kwd_types_ptr = reinterpret_cast<ndt::type *>(
-              new_kwd_types.get_readwrite_originptr());
-          for (size_t i = 0; i < sizeof...(T); ++i) {
-            new_kwd_types_ptr[missing[i]] =
-                ndt::make_option(new_kwd_types_ptr[missing[i]]);
-          }
-          new_kwd_types.flag_as_immutable();
-
-          arrfunc_type_data self(get()->instantiate, resolve_option_values,
-                                 get()->resolve_dst_type, get()->free);
-          std::memcpy(self.data, get()->data, sizeof(get()->data));
-          ndt::type self_tp = ndt::make_arrfunc(
-              get_type()->get_pos_tuple(),
-              ndt::make_struct(get_type()->get_kwd_names(), new_kwd_types),
-              get_type()->get_return_type());
-
-          arrfunc(&self, self_tp).swap(*this);
-        }
-    */
-
-    /*
-     else if (nkwd != 0) {
-            stringstream ss;
-            ss << "arrfunc does not accept keyword arguments, but was provided "
-                  "keyword arguments. arrfunc signature is "
-               << ndt::type(self_tp, true);
-            throw std::invalid_argument(ss.str());
-          }
-    */
-
     /** Implements the general call operator which returns an array */
     template <typename A, typename K>
-    array call(const A &args, const K &kwds) const
+    array call(const A &args, const K &kwds)
     {
       arrfunc_type_data *self = const_cast<arrfunc_type_data *>(get());
       const ndt::arrfunc_type *self_tp = get_type();
@@ -900,16 +856,13 @@ namespace nd {
     /**
      * operator()()
      */
-    nd::array operator()() const
-    {
-      return call(detail::args<>(), detail::kwds<>());
-    }
+    nd::array operator()() { return call(detail::args<>(), detail::kwds<>()); }
 
     /**
     * operator()(kwds<...>(...))
     */
     template <typename... K>
-    array operator()(detail::kwds<K...> &&k) const
+    array operator()(detail::kwds<K...> &&k)
     {
       return call(detail::args<>(), std::forward<detail::kwds<K...>>(k));
     }
@@ -922,7 +875,7 @@ namespace nd {
         sizeof...(T) != 3 && sizeof...(T) != 5 &&
             detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
         array>::type
-    operator()(T &&... a) const
+    operator()(T &&... a)
     {
       typedef make_index_sequence<sizeof...(T)-1> I;
       typedef typename instantiate<
@@ -938,7 +891,7 @@ namespace nd {
     template <typename A0, typename A1, typename... K>
     typename std::enable_if<detail::is_variadic_args<A0, A1>::value,
                             array>::type
-    operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds) const
+    operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       return call(detail::args<array, array>(array(std::forward<A0>(a0)),
                                              array(std::forward<A1>(a1))),
@@ -948,7 +901,7 @@ namespace nd {
     template <typename A0, typename A1, typename... K>
     typename std::enable_if<!detail::is_variadic_args<A0, A1>::value,
                             array>::type
-    operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds) const
+    operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       return call(detail::args<intptr_t, array *>(std::forward<A0>(a0),
                                                   std::forward<A1>(a1)),
@@ -959,7 +912,7 @@ namespace nd {
     typename std::enable_if<detail::is_variadic_args<A0, A1, A2, A3>::value,
                             array>::type
     operator()(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3,
-               const detail::kwds<K...> &kwds) const
+               const detail::kwds<K...> &kwds)
     {
       return call(detail::args<array, array, array, array, array>(
                       std::forward<A0>(a0), std::forward<A1>(a1),
@@ -971,7 +924,7 @@ namespace nd {
     typename std::enable_if<!detail::is_variadic_args<A0, A1, A2, A3>::value,
                             array>::type
     operator()(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3,
-               const detail::kwds<K...> &kwds) const
+               const detail::kwds<K...> &kwds)
     {
       return call(detail::args<intptr_t, const ndt::type *, const char *const *,
                                char *const *>(
@@ -987,7 +940,7 @@ namespace nd {
     typename std::enable_if<
         !detail::is_kwds<typename back<type_sequence<A...>>::type>::value,
         array>::type
-    operator()(A &&... a) const
+    operator()(A &&... a)
     {
       return (*this)(std::forward<A>(a)..., kwds());
     }
@@ -1174,39 +1127,29 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
-  template <typename T>
+  template <typename FuncType>
   struct declfunc {
-    static const arrfunc &get_self()
-    {
-      static arrfunc self = T::make();
-      return self;
-    }
+    operator arrfunc &() { return get(); }
 
-    static arrfunc_type_data *get()
-    {
-      return const_cast<arrfunc_type_data *>(get_self().get());
-    }
-
-    static const ndt::arrfunc_type *get_type() { return get_self().get_type(); }
-
-    const ndt::type &get_array_type() const
-    {
-      return get_self().get_array_type();
-    }
-
-    operator const arrfunc &() const { return get_self(); }
+    operator const arrfunc &() const { return get(); }
 
     template <typename... A>
-    array operator()(A &&... a) const
+    array operator()(A &&... a)
     {
-      return get_self()(std::forward<A>(a)...);
+      return get()(std::forward<A>(a)...);
+    }
+
+    static arrfunc &get()
+    {
+      static arrfunc self = FuncType::make();
+      return self;
     }
   };
 
-  template <typename T>
-  std::ostream &operator<<(std::ostream &o, const declfunc<T> &rhs)
+  template <typename FuncType>
+  std::ostream &operator<<(std::ostream &o, const declfunc<FuncType> &rhs)
   {
-    o << static_cast<arrfunc>(rhs);
+    o << static_cast<const arrfunc &>(rhs);
 
     return o;
   }
