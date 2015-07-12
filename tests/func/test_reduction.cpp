@@ -150,8 +150,8 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -185,8 +185,8 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -220,8 +220,8 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -238,8 +238,8 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   a = vals1;
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   fn = ckb.get()->get_function<expr_single_t>();
@@ -274,8 +274,8 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -310,8 +310,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -326,8 +326,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   a = parse_json("1 * 2 * float32", "[[1.5, -2]]");
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   fn = ckb.get()->get_function<expr_single_t>();
@@ -361,8 +361,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -396,8 +396,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -415,8 +415,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   b = nd::empty(1, "float32");
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   fn = ckb.get()->get_function<expr_single_t>();
@@ -451,8 +451,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -488,8 +488,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   ckernel_builder<kernel_request_host> ckb;
   ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -508,8 +508,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   b = nd::empty(2, "float32");
   src_tp[0] = a.get_type();
   src_arrmeta[0] = a.get_arrmeta();
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   fn = ckb.get()->get_function<expr_single_t>();
@@ -545,8 +545,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -585,8 +585,8 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -624,8 +624,8 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
@@ -664,8 +664,8 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
   ckernel_builder<kernel_request_host> ckb;
   const ndt::type src_tp[1] = {a.get_type()};
   const char *src_arrmeta[1] = {a.get_arrmeta()};
-  af.get()->instantiate(af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0,
-                        b.get_type(), b.get_arrmeta(), 1, src_tp, src_arrmeta,
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, b.get_type(),
+                        b.get_arrmeta(), 1, src_tp, src_arrmeta,
                         kernel_request_single, &eval::default_eval_context,
                         nd::array(), std::map<nd::string, ndt::type>());
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();

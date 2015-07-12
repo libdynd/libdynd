@@ -39,9 +39,10 @@ TEST(ArrFunc, Assignment)
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
-      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
-      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_single, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
   const char *str_in_ptr = str_in;
@@ -53,9 +54,10 @@ TEST(ArrFunc, Assignment)
   // Instantiate a strided ckernel
   ckb.reset();
   af.get()->instantiate(
-      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_strided,
-      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_strided, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   const char *strs_in_ptr = strs_in[0];
@@ -128,16 +130,20 @@ TEST(Arrfunc, DynamicCall)
   nd::array values[3] = {7, 2.5, 5};
   const char *names[3] = {"x", "y", "z"};
 
-  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; });
   EXPECT_EQ(26.5, af(3, values).as<double>());
 
-  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
   EXPECT_EQ(26.5, af(2, values, kwds(1, names + 2, values + 2)).as<double>());
 
-  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
   EXPECT_EQ(26.5, af(1, values, kwds(2, names + 1, values + 1)).as<double>());
 
-  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
   EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
 }
 
@@ -197,7 +203,8 @@ TEST(ArrFunc, Option)
                         const arrfunc_type *DYND_UNUSED(self_tp),
                         intptr_t DYND_UNUSED(nsrc),
                         const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
-                        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                        const std::map<nd::string, ndt::type>
+&DYND_UNUSED(tp_vars))
     {
       nd::array x = kwds.p("x");
       if (x.is_missing()) {
@@ -258,9 +265,10 @@ TEST(ArrFunc, Property)
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
-      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
-      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_single, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
   int date_in = date_ymd::to_days(2013, 12, 30);
   const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
@@ -285,9 +293,10 @@ TEST(ArrFunc, AssignmentAsExpr)
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
   af.get()->instantiate(
-      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_single,
-      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_single, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
   char *str_in_ptr = str_in;
@@ -298,9 +307,10 @@ TEST(ArrFunc, AssignmentAsExpr)
   // Instantiate a strided ckernel
   ckb.reset();
   af.get()->instantiate(
-      af.get_type(), af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
-      af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta, kernel_request_strided,
-      &eval::default_eval_context, nd::array(), std::map<nd::string, ndt::type>());
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_strided, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   char *strs_in_ptr = strs_in[0];

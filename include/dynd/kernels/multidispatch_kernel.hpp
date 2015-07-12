@@ -75,12 +75,12 @@ namespace nd {
                        const std::map<nd::string, ndt::type> &tp_vars);
 
       static intptr_t
-      instantiate(const ndt::arrfunc_type *af_tp, char *static_data,
-                  size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const nd::array &kwds,
+      instantiate(char *static_data, size_t data_size, char *data, void *ckb,
+                  intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars);
     };
 
@@ -142,8 +142,7 @@ namespace nd {
       }
 
       static intptr_t
-      instantiate(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                  char *static_data, size_t DYND_UNUSED(data_size), char *data,
+      instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *data,
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -158,9 +157,9 @@ namespace nd {
         arrfunc &child =
             const_cast<arrfunc &>(static_data_x(dst_tp, nsrc, src_tp));
         return child.get()->instantiate(
-            child.get_type(), child.get()->static_data, child.get()->data_size,
-            data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-            src_arrmeta, kernreq, ectx, kwds, tp_vars);
+            child.get()->static_data, child.get()->data_size, data, ckb,
+            ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
+            ectx, kwds, tp_vars);
       }
     };
 

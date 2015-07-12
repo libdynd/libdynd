@@ -927,8 +927,8 @@ namespace nd {
 
       // Generate and evaluate the ckernel
       ckernel_builder<kernel_request_host> ckb;
-      self->instantiate(self_tp, self->static_data, self->data_size, data.get(),
-                        &ckb, 0, dst_tp, dst.get_arrmeta(), arg_tp.size(),
+      self->instantiate(self->static_data, self->data_size, data.get(), &ckb, 0,
+                        dst_tp, dst.get_arrmeta(), arg_tp.size(),
                         arg_tp.empty() ? NULL : arg_tp.data(),
                         arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
                         kernel_request_single, &eval::default_eval_context,

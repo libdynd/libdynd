@@ -102,11 +102,11 @@ struct buffered_ck
 } // anonymous namespace
 
 size_t dynd::make_buffered_ckernel(
-    const arrfunc_type_data *af, const ndt::arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const ndt::type *src_tp_for_af,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    const arrfunc_type_data *af, const ndt::arrfunc_type *DYND_UNUSED(af_tp),
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const ndt::type *src_tp_for_af, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   typedef buffered_ck self_type;
   intptr_t root_ckb_offset = ckb_offset;
@@ -126,9 +126,9 @@ size_t dynd::make_buffered_ckernel(
   }
   // Instantiate the arrfunc being buffered
   ckb_offset = af->instantiate(
-      af_tp, const_cast<char *>(af->static_data), 0, NULL, ckb, ckb_offset,
-      dst_tp, dst_arrmeta, nsrc, src_tp_for_af, &buffered_arrmeta[0], kernreq,
-      ectx, nd::array(), std::map<nd::string, ndt::type>());
+      const_cast<char *>(af->static_data), 0, NULL, ckb, ckb_offset, dst_tp,
+      dst_arrmeta, nsrc, src_tp_for_af, &buffered_arrmeta[0], kernreq, ectx,
+      nd::array(), std::map<nd::string, ndt::type>());
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)

@@ -122,48 +122,45 @@ namespace nd {
         : base_virtual_kernel<assignment_kernel<DstTypeID, DstTypeKind,
                                                 Src0TypeID, Src0TypeKind>> {
       static intptr_t
-      instantiate(const ndt::arrfunc_type *self_tp, char *static_data,
-                  size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const nd::array &kwds,
+      instantiate(char *static_data, size_t data_size, char *data, void *ckb,
+                  intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const nd::array &kwds,
                   const std::map<nd::string, ndt::type> &tp_vars)
       {
         switch (ectx->errmode) {
         case assign_error_nocheck:
           return assignment_kernel<
               DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
-              assign_error_nocheck>::instantiate(self_tp, static_data,
-                                                 data_size, data, ckb,
-                                                 ckb_offset, dst_tp,
+              assign_error_nocheck>::instantiate(static_data, data_size, data,
+                                                 ckb, ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
                                                  kwds, tp_vars);
         case assign_error_overflow:
           return assignment_kernel<
               DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
-              assign_error_overflow>::instantiate(self_tp, static_data,
-                                                  data_size, data, ckb,
-                                                  ckb_offset, dst_tp,
+              assign_error_overflow>::instantiate(static_data, data_size, data,
+                                                  ckb, ckb_offset, dst_tp,
                                                   dst_arrmeta, nsrc, src_tp,
                                                   src_arrmeta, kernreq, ectx,
                                                   kwds, tp_vars);
         case assign_error_fractional:
           return assignment_kernel<
               DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
-              assign_error_fractional>::instantiate(self_tp, static_data,
-                                                    data_size, data, ckb,
-                                                    ckb_offset, dst_tp,
-                                                    dst_arrmeta, nsrc, src_tp,
-                                                    src_arrmeta, kernreq, ectx,
-                                                    kwds, tp_vars);
+              assign_error_fractional>::instantiate(static_data, data_size,
+                                                    data, ckb, ckb_offset,
+                                                    dst_tp, dst_arrmeta, nsrc,
+                                                    src_tp, src_arrmeta,
+                                                    kernreq, ectx, kwds,
+                                                    tp_vars);
         case assign_error_inexact:
           return assignment_kernel<
               DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
-              assign_error_inexact>::instantiate(self_tp, static_data,
-                                                 data_size, data, ckb,
-                                                 ckb_offset, dst_tp,
+              assign_error_inexact>::instantiate(static_data, data_size, data,
+                                                 ckb, ckb_offset, dst_tp,
                                                  dst_arrmeta, nsrc, src_tp,
                                                  src_arrmeta, kernreq, ectx,
                                                  kwds, tp_vars);
