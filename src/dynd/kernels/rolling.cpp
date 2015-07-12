@@ -152,18 +152,20 @@ intptr_t nd::functional::rolling_ck::instantiate(
 }
 
 void nd::functional::rolling_ck::resolve_dst_type(
-    const ndt::arrfunc_type *af_tp, char *static_data,
-    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), ndt::type &dst_tp,
-    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars)
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+    ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
 
 {
-  if (nsrc != 1) {
-    stringstream ss;
-    ss << "Wrong number of arguments to rolling arrfunc with prototype ";
-    ss << af_tp << ", got " << nsrc << " arguments";
-    throw invalid_argument(ss.str());
-  }
+  /*
+    if (nsrc != 1) {
+      stringstream ss;
+      ss << "Wrong number of arguments to rolling arrfunc with prototype ";
+      ss << af_tp << ", got " << nsrc << " arguments";
+      throw invalid_argument(ss.str());
+    }
+  */
+
   nd::functional::rolling_arrfunc_data *data =
       *reinterpret_cast<nd::functional::rolling_arrfunc_data **>(static_data);
   const arrfunc_type_data *child_af = data->window_op.get();
@@ -172,8 +174,8 @@ void nd::functional::rolling_ck::resolve_dst_type(
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(
         data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    child_af->resolve_dst_type(af_tp, const_cast<char *>(child_af->static_data),
-                               0, NULL, child_dst_tp, 1, &child_src_tp, kwds,
+    child_af->resolve_dst_type(const_cast<char *>(child_af->static_data), 0,
+                               NULL, child_dst_tp, 1, &child_src_tp, kwds,
                                tp_vars);
   } else {
     child_dst_tp = data->window_op.get_type()->get_return_type();

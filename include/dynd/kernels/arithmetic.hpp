@@ -16,17 +16,6 @@ namespace nd {
       *reinterpret_cast<R *>(dst) = +*reinterpret_cast<A0 *>(src[0]);
     }
 
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<R>();
-    }
-
     static ndt::type make_type()
     {
       std::map<string, ndt::type> tp_vars;
@@ -56,17 +45,6 @@ namespace nd {
 
       return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
     }
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<R>();
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -81,17 +59,6 @@ namespace nd {
     {
       *reinterpret_cast<R *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) + *reinterpret_cast<A1 *>(src[1]);
-    }
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<R>();
     }
 
     static ndt::type make_type()
@@ -128,17 +95,6 @@ namespace nd {
 
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<R>();
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -164,17 +120,6 @@ namespace nd {
 
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<R>();
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -199,17 +144,6 @@ namespace nd {
       tp_vars["R"] = ndt::make_type<R>();
 
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
-    }
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<R>();
     }
   };
 

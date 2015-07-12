@@ -32,9 +32,9 @@ class arrfunc_type_data;
  * \param kwds    An array of the.
  */
 typedef void (*arrfunc_data_init_t)(
-    const ndt::arrfunc_type *self_tp, char *static_data, size_t data_size,
-    char *data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    char *static_data, size_t data_size, char *data, const ndt::type &dst_tp,
+    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Resolves the destination type for this arrfunc based on the types
@@ -47,9 +47,9 @@ typedef void (*arrfunc_data_init_t)(
  * \param src_tp  An array of the source types.
  */
 typedef void (*arrfunc_resolve_dst_type_t)(
-    const ndt::arrfunc_type *self_tp, char *static_data, size_t data_size,
-    char *data, ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
+    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
+    const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
  * Function prototype for instantiating a ckernel from an
@@ -419,13 +419,11 @@ namespace ndt {
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
                                size_t count) const;
 
-    intptr_t make_assignment_kernel(const arrfunc_type *af_tp, void *ckb,
-                                    intptr_t ckb_offset, const type &dst_tp,
-                                    const char *dst_arrmeta, const type &src_tp,
-                                    const char *src_arrmeta,
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
+                                    const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta,
                                     kernel_request_t kernreq,
-                                    const eval::eval_context *ectx,
-                                    const nd::array &kwds) const;
+                                    const eval::eval_context *ectx) const;
 
     bool match(const char *arrmeta, const type &candidate_tp,
                const char *candidate_arrmeta,

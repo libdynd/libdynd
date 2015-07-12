@@ -39,19 +39,18 @@ bool ndt::void_pointer_type::operator==(const base_type &rhs) const
 }
 
 intptr_t ndt::void_pointer_type::make_assignment_kernel(
-    const arrfunc_type *af_tp, void *ckb, intptr_t ckb_offset,
-    const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
-    const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds) const
+    void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
     if (src_tp.get_type_id() == void_pointer_type_id) {
       return ::make_pod_typed_data_assignment_kernel(
           ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
     } else if (!src_tp.is_builtin()) {
-      src_tp.extended()->make_assignment_kernel(
-          af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-          kernreq, ectx, kwds);
+      src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp,
+                                                dst_arrmeta, src_tp,
+                                                src_arrmeta, kernreq, ectx);
     }
   }
 

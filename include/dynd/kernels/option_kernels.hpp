@@ -65,87 +65,26 @@ namespace nd {
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count);
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
   struct is_avail_ck<int8_t> : detail::is_avail_int_ck<int8_t> {
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
   struct is_avail_ck<int16_t> : detail::is_avail_int_ck<int16_t> {
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
   struct is_avail_ck<int32_t> : detail::is_avail_int_ck<int32_t> {
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
   struct is_avail_ck<int64_t> : detail::is_avail_int_ck<int64_t> {
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
   struct is_avail_ck<int128> : detail::is_avail_int_ck<int128> {
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
@@ -155,17 +94,6 @@ namespace nd {
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count);
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
@@ -175,17 +103,6 @@ namespace nd {
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count);
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
@@ -195,17 +112,6 @@ namespace nd {
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count);
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
@@ -215,17 +121,6 @@ namespace nd {
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count);
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <>
@@ -235,17 +130,6 @@ namespace nd {
 
     void strided(char *dst, intptr_t dst_stride, char *const *src,
                  const intptr_t *src_stride, size_t count);
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
-    }
   };
 
   template <typename T>
@@ -262,17 +146,6 @@ namespace nd {
                  size_t DYND_UNUSED(count))
     {
       throw std::runtime_error("is_avail for pointers is not yet implemented");
-    }
-
-    static void resolve_dst_type(
-        const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = ndt::make_type<bool1>();
     }
   };
 

@@ -56,11 +56,10 @@ struct ndarrayarg_assign_ck
 } // anonymous namespace
 
 intptr_t ndt::ndarrayarg_type::make_assignment_kernel(
-    const arrfunc_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
-    const type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-    const type &src_tp, const char *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds)) const
+    void *ckb, intptr_t ckb_offset, const type &dst_tp,
+    const char *DYND_UNUSED(dst_arrmeta), const type &src_tp,
+    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   if (this == dst_tp.extended() && src_tp.get_type_id() == ndarrayarg_type_id) {
     ndarrayarg_assign_ck::make(ckb, kernreq, ckb_offset);

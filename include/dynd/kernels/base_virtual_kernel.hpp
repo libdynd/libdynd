@@ -28,15 +28,14 @@ namespace nd {
   template <typename T>
   struct base_virtual_kernel {
     static void
-    resolve_dst_type(const ndt::arrfunc_type *self_tp,
-                     char *DYND_UNUSED(static_data),
+    resolve_dst_type(char *DYND_UNUSED(static_data),
                      size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                      ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp),
                      const dynd::nd::array &DYND_UNUSED(kwds),
                      const std::map<dynd::nd::string, ndt::type> &tp_vars)
     {
-      dst_tp = ndt::substitute(self_tp->get_return_type(), tp_vars, true);
+      dst_tp = ndt::substitute(dst_tp, tp_vars, true);
     }
   };
 

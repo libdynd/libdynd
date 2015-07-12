@@ -135,10 +135,9 @@ bool ndt::time_type::operator==(const base_type &rhs) const
 }
 
 intptr_t ndt::time_type::make_assignment_kernel(
-    const arrfunc_type *af_tp, void *ckb, intptr_t ckb_offset,
-    const type &dst_tp, const char *dst_arrmeta, const type &src_tp,
-    const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds) const
+    void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
     if (src_tp.get_type_id() == time_type_id) {
@@ -151,12 +150,12 @@ intptr_t ndt::time_type::make_assignment_kernel(
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          af_tp, ckb, ckb_offset, make_property(dst_tp, "struct"), dst_arrmeta,
-          src_tp, src_arrmeta, kernreq, ectx, kwds);
+          ckb, ckb_offset, make_property(dst_tp, "struct"), dst_arrmeta, src_tp,
+          src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
-          af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-          kernreq, ectx, kwds);
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx);
     }
   } else {
     if (dst_tp.get_kind() == string_kind) {
@@ -165,9 +164,9 @@ intptr_t ndt::time_type::make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(
-          af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta,
-          make_property(src_tp, "struct"), src_arrmeta, kernreq, ectx, kwds);
+      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      make_property(src_tp, "struct"),
+                                      src_arrmeta, kernreq, ectx);
     }
     // TODO
   }

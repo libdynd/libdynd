@@ -188,17 +188,6 @@ namespace nd {
       return ckernel_prefix::get_child_ckernel(offset);                        \
     }                                                                          \
                                                                                \
-    static void resolve_dst_type(                                              \
-        const ndt::arrfunc_type *self_tp, char *DYND_UNUSED(static_data),      \
-        size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),                \
-        ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),                         \
-        const ndt::type *DYND_UNUSED(src_tp),                                  \
-        const dynd::nd::array &DYND_UNUSED(kwds),                              \
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))     \
-    {                                                                          \
-      dst_tp = self_tp->get_return_type();                                     \
-    }                                                                          \
-                                                                               \
     static intptr_t instantiate(                                               \
         const ndt::arrfunc_type *DYND_UNUSED(af_tp),                           \
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),         \

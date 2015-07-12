@@ -30,8 +30,8 @@ class sorter {
 public:
   sorter(const char *originptr, intptr_t stride, const expr_single_t less,
          ckernel_prefix *less_self)
-      : m_originptr(const_cast<char *>(originptr)), m_stride(stride), m_less(less),
-        m_less_self(less_self)
+      : m_originptr(const_cast<char *>(originptr)), m_stride(stride),
+        m_less(less), m_less_self(less_self)
   {
   }
 
@@ -178,10 +178,10 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
 {
   nd::array categories = nd::empty(uniques.size(), element_tp);
   ckernel_builder<kernel_request_host> k;
-  make_assignment_kernel(
-      NULL, &k, 0, element_tp,
-      categories.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), element_tp,
-      arrmeta, kernel_request_single, &eval::default_eval_context, nd::array());
+  make_assignment_kernel(&k, 0, element_tp, categories.get_arrmeta() +
+                                                sizeof(fixed_dim_type_arrmeta),
+                         element_tp, arrmeta, kernel_request_single,
+                         &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
 
   intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
@@ -200,7 +200,8 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
   return categories;
 }
 
-ndt::categorical_type::categorical_type(const nd::array &categories, bool presorted)
+ndt::categorical_type::categorical_type(const nd::array &categories,
+                                        bool presorted)
     : base_type(categorical_type_id, custom_kind, 4, 4, type_flag_scalar, 0, 0,
                 0)
 {
@@ -277,8 +278,8 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
         &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, 0),
         &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value,
                                               category_count),
-        sorter(categories.get_readonly_originptr(), categories_stride,
-               fn, k.get()));
+        sorter(categories.get_readonly_originptr(), categories_stride, fn,
+               k.get()));
 
     // invert the m_category_index_to_value permutation
     for (intptr_t i = 0; i < category_count; ++i) {
@@ -304,8 +305,8 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
 }
 
 void ndt::categorical_type::print_data(std::ostream &o,
-                                  const char *DYND_UNUSED(arrmeta),
-                                  const char *data) const
+                                       const char *DYND_UNUSED(arrmeta),
+                                       const char *data) const
 {
   intptr_t category_count = m_categories.get_dim_size();
   uint32_t value;
@@ -348,9 +349,9 @@ void ndt::categorical_type::print_type(std::ostream &o) const
 }
 
 void ndt::categorical_type::get_shape(intptr_t ndim, intptr_t i,
-                                       intptr_t *out_shape,
-                                       const char *DYND_UNUSED(arrmeta),
-                                       const char *DYND_UNUSED(data)) const
+                                      intptr_t *out_shape,
+                                      const char *DYND_UNUSED(arrmeta),
+                                      const char *DYND_UNUSED(data)) const
 {
   const type &cd = get_category_type();
   if (!cd.is_builtin()) {
@@ -364,7 +365,7 @@ void ndt::categorical_type::get_shape(intptr_t ndim, intptr_t i,
 
 uint32_t
 ndt::categorical_type::get_value_from_category(const char *category_arrmeta,
-                                          const char *category_data) const
+                                               const char *category_data) const
 {
   intptr_t i = nd::binary_search(m_categories, category_arrmeta, category_data);
   if (i < 0) {
@@ -412,9 +413,9 @@ nd::array ndt::categorical_type::get_categories() const
   categories.get_type().get_as_strided(categories.get_arrmeta(), &dim_size,
                                        &stride, &el_tp, &el_arrmeta);
   ckernel_builder<kernel_request_host> k;
-  ::make_assignment_kernel(NULL, &k, 0, m_category_tp, el_arrmeta, el_tp,
+  ::make_assignment_kernel(&k, 0, m_category_tp, el_arrmeta, el_tp,
                            get_category_arrmeta(), kernel_request_single,
-                           &eval::default_eval_context, nd::array());
+                           &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   for (intptr_t i = 0; i < dim_size; ++i) {
     char *src = const_cast<char *>(get_category_data_from_value((uint32_t)i));
@@ -424,7 +425,7 @@ nd::array ndt::categorical_type::get_categories() const
 }
 
 bool ndt::categorical_type::is_lossless_assignment(const type &dst_tp,
-                                              const type &src_tp) const
+                                                   const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -440,10 +441,9 @@ bool ndt::categorical_type::is_lossless_assignment(const type &dst_tp,
 }
 
 intptr_t ndt::categorical_type::make_assignment_kernel(
-    const arrfunc_type *af_tp, void *ckb,
-    intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+    void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
     const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &kwds) const
+    const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
     if (this == src_tp.extended()) {
@@ -497,13 +497,13 @@ intptr_t ndt::categorical_type::make_assignment_kernel(
       // Make a convert type to the category type, and have it do the chaining
       type src_cvt_tp = make_convert(m_category_tp, src_tp);
       return src_cvt_tp.extended()->make_assignment_kernel(
-          af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp,
-          src_arrmeta, kernreq, ectx, kwds);
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp, src_arrmeta,
+          kernreq, ectx);
     } else {
       // Let the src_tp handle it
       return src_tp.extended()->make_assignment_kernel(
-          af_tp, ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx, kwds);
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+          ectx);
     }
   } else {
     if (dst_tp.value_type().get_type_id() != categorical_type_id) {
@@ -538,10 +538,9 @@ intptr_t ndt::categorical_type::make_assignment_kernel(
         throw runtime_error(
             "internal error in categorical_type::make_assignment_kernel");
       }
-      return ::make_assignment_kernel(af_tp, ckb, ckb_offset, dst_tp,
-                                      dst_arrmeta, get_category_type(),
-                                      get_category_arrmeta(),
-                                      kernel_request_single, ectx, kwds);
+      return ::make_assignment_kernel(
+          ckb, ckb_offset, dst_tp, dst_arrmeta, get_category_type(),
+          get_category_arrmeta(), kernel_request_single, ectx);
     } else {
       stringstream ss;
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;

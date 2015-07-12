@@ -89,8 +89,7 @@ namespace nd {
       }
 
       static void
-      resolve_dst_type(const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                       char *static_data, size_t DYND_UNUSED(data_size),
+      resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
                        intptr_t nsrc, const ndt::type *src_tp,
                        const dynd::nd::array &kwds,
@@ -102,7 +101,7 @@ namespace nd {
             reinterpret_cast<arrfunc *>(static_data)->get_type();
 
         if (child->resolve_dst_type != NULL) {
-          child->resolve_dst_type(child_tp, child->static_data, 0, NULL, dst_tp,
+          child->resolve_dst_type(child->static_data, 0, NULL, dst_tp,
                                   nsrc, src_tp, kwds, tp_vars);
         } else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);

@@ -310,9 +310,9 @@ size_t ndt::base_struct_type::make_elwise_property_getter_kernel(
     self->m_field_offset =
         get_data_offsets(src_arrmeta)[src_elwise_property_index];
     return ::make_assignment_kernel(
-        NULL, ckb, ckb_offset, field_type.value_type(), dst_arrmeta,
-        field_type, src_arrmeta + arrmeta_offsets[src_elwise_property_index],
-        kernreq, ectx, nd::array());
+        ckb, ckb_offset, field_type.value_type(), dst_arrmeta, field_type,
+        src_arrmeta + arrmeta_offsets[src_elwise_property_index], kernreq,
+        ectx);
   } else {
     stringstream ss;
     ss << "dynd type " << type(this, true);

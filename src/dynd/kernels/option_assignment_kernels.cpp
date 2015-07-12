@@ -232,9 +232,9 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-  ckb_offset = make_assignment_kernel(NULL, ckb, ckb_offset, dst_val_tp,
-                                      dst_arrmeta, src_val_tp, src_arrmeta[0],
-                                      kernreq, ectx, nd::array());
+  ckb_offset =
+      make_assignment_kernel(ckb, ckb_offset, dst_val_tp, dst_arrmeta,
+                             src_val_tp, src_arrmeta[0], kernreq, ectx);
   return ckb_offset;
 }
 
@@ -272,9 +272,8 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_value_assign_offset = ckb_offset - root_ckb_offset;
-  return make_assignment_kernel(NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                src_val_tp, src_arrmeta[0], kernreq, ectx,
-                                nd::array());
+  return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                src_val_tp, src_arrmeta[0], kernreq, ectx);
 }
 
 namespace {
@@ -380,9 +379,8 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
   case string_type_id: {
     // Just a string to string assignment
     return ::make_assignment_kernel(
-        NULL, ckb, ckb_offset,
-        dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
-        src_tp[0], src_arrmeta[0], kernreq, ectx, nd::array());
+        ckb, ckb_offset, dst_tp.extended<ndt::option_type>()->get_value_type(),
+        dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, ectx);
   }
   default:
     break;
@@ -395,9 +393,8 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
       string_to_option_tp_ck::make(ckb, kernreq, ckb_offset);
   // First child ckernel is the value assignment
   ckb_offset = ::make_assignment_kernel(
-      NULL, ckb, ckb_offset,
-      dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta,
-      src_tp[0], src_arrmeta[0], kernreq, ectx, nd::array());
+      ckb, ckb_offset, dst_tp.extended<ndt::option_type>()->get_value_type(),
+      dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, ectx);
   // Re-acquire self because the address may have changed
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<string_to_option_tp_ck>(root_ckb_offset);
@@ -456,9 +453,8 @@ static intptr_t instantiate_option_as_value_assignment_kernel(
       src_tp[0].get_type_id() == option_type_id
           ? src_tp[0].extended<ndt::option_type>()->get_value_type()
           : src_tp[0];
-  return ::make_assignment_kernel(NULL, ckb, ckb_offset, val_dst_tp,
-                                  dst_arrmeta, val_src_tp, src_arrmeta[0],
-                                  kernreq, ectx, nd::array());
+  return ::make_assignment_kernel(ckb, ckb_offset, val_dst_tp, dst_arrmeta,
+                                  val_src_tp, src_arrmeta[0], kernreq, ectx);
 }
 
 namespace {
