@@ -210,8 +210,6 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
   // instantiate src_is_avail
   const arrfunc_type_data *af =
       src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
-  const ndt::arrfunc_type *af_tp =
-      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc_type();
   ckb_offset = af->instantiate(NULL, 0, NULL, ckb, ckb_offset,
                                ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                src_arrmeta, kernreq, ectx, kwds, tp_vars);
@@ -222,7 +220,6 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
              ->get_at<self_type>(root_ckb_offset);
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
   af = dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
-  af_tp = dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc_type();
   ckb_offset =
       af->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                       NULL, NULL, kernreq, ectx, kwds, tp_vars);
