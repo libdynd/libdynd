@@ -413,16 +413,15 @@ namespace nd {
 
 namespace ndt {
 
-/*
   template <type_id_t Src0ValueTypeID>
-  struct equivalent<nd::is_avail_kernel<Src0ValueTypeID>> {
+  struct type::equivalent<nd::is_avail_kernel<Src0ValueTypeID>> {
     static type make()
     {
-      return arrfunc_type::make(make_type<bool1>(),
-                                {option_type::make(type(Src0ValueTypeID))});
+      return type("(T) -> bool");
+      //      return arrfunc_type::make({make_option(type(Src0ValueTypeID))},
+      //                                make_type<bool1>());
     }
   };
-*/
 
 } // namespace dynd::ndt
 } // namespace dynd
