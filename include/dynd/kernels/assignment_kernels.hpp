@@ -2321,11 +2321,12 @@ namespace nd {
 
 } // namespace dynd::nd
 
-/*
 namespace ndt {
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
-  struct type::equivalent<nd::assignment_kernel<DstTypeID, Src0TypeID>> {
+  struct type::equivalent<nd::detail::assignment_virtual_kernel<
+      DstTypeID, dynd::type_kind_of<DstTypeID>::value, Src0TypeID,
+      dynd::type_kind_of<Src0TypeID>::value>> {
     static type make()
     {
       return ndt::arrfunc_type::make({ndt::type(Src0TypeID)},
@@ -2334,11 +2335,12 @@ namespace ndt {
   };
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
-  struct type::has_equivalent<nd::assignment_kernel<DstTypeID, Src0TypeID>> {
+  struct type::has_equivalent<nd::detail::assignment_virtual_kernel<
+      DstTypeID, dynd::type_kind_of<DstTypeID>::value, Src0TypeID,
+      dynd::type_kind_of<Src0TypeID>::value>> {
     static const bool value = true;
   };
 
 } // namespace dynd::ndt
-*/
 
 } // namespace dynd
