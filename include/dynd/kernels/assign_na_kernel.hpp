@@ -7,6 +7,7 @@
 
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/types/option_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -33,6 +34,8 @@ namespace nd {
           }
         }
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <type_id_t DstTypeID>
@@ -56,6 +59,8 @@ namespace nd {
               std::numeric_limits<dst_type>::min();
         }
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -75,6 +80,8 @@ namespace nd {
           *reinterpret_cast<uint32_t *>(dst) = DYND_FLOAT32_NA_AS_UINT;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -94,6 +101,8 @@ namespace nd {
           *reinterpret_cast<uint64_t *>(dst) = DYND_FLOAT64_NA_AS_UINT;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -115,6 +124,8 @@ namespace nd {
           reinterpret_cast<uint32_t *>(dst)[1] = DYND_FLOAT32_NA_AS_UINT;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -136,6 +147,8 @@ namespace nd {
           reinterpret_cast<uint64_t *>(dst)[1] = DYND_FLOAT64_NA_AS_UINT;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -150,6 +163,8 @@ namespace nd {
                    size_t DYND_UNUSED(count))
       {
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -210,6 +225,8 @@ namespace nd {
           throw type_error("fixed_dim_assign_na: expected built-in type");
         }
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -230,6 +247,100 @@ namespace nd {
         throw std::runtime_error(
             "assign_na for pointers is not yet implemented");
       }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
+    };
+
+    template <>
+    struct assign_na_kernel<string_type_id, string_kind>
+        : base_kernel<assign_na_kernel<string_type_id, string_kind>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *DYND_UNUSED(src))
+      {
+        string_type_data *std = reinterpret_cast<string_type_data *>(dst);
+        if (std->begin != NULL) {
+          throw std::invalid_argument(
+              "Cannot assign an NA to a dynd string after "
+              "it has been allocated");
+        }
+      }
+
+      void strided(char *dst, intptr_t dst_stride,
+                   char *const *DYND_UNUSED(src),
+                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
+      {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+          string_type_data *std = reinterpret_cast<string_type_data *>(dst);
+          if (std->begin != NULL) {
+            throw std::invalid_argument(
+                "Cannot assign an NA to a dynd string after "
+                "it has been allocated");
+          }
+        }
+      }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
+    };
+
+    template <>
+    struct assign_na_kernel<date_type_id, datetime_kind>
+        : base_kernel<assign_na_kernel<date_type_id, datetime_kind>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *DYND_UNUSED(src))
+      {
+        *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
+      }
+
+      void strided(char *dst, intptr_t dst_stride,
+                   char *const *DYND_UNUSED(src),
+                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
+      {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+          *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
+        }
+      }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
+    };
+
+    template <>
+    struct assign_na_kernel<time_type_id, datetime_kind>
+        : base_kernel<assign_na_kernel<time_type_id, datetime_kind>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *DYND_UNUSED(src))
+      {
+        *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA;
+      }
+
+      void strided(char *dst, intptr_t dst_stride,
+                   char *const *DYND_UNUSED(src),
+                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
+      {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+          *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA;
+        }
+      }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
+    };
+
+    template <>
+    struct assign_na_kernel<datetime_type_id, datetime_kind>
+        : base_kernel<assign_na_kernel<datetime_type_id, datetime_kind>, kernel_request_host, 1> {
+      void single(char *dst, char *const *DYND_UNUSED(src))
+      {
+        *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
+      }
+
+      void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
+      {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+          *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
+        }
+      }
+
+      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
   } // namespace dynd::nd::detail

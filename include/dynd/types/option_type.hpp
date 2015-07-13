@@ -28,17 +28,11 @@ namespace ndt {
 
   class option_type : public base_type {
     type m_value_tp;
-    /**
-     * An array with type
-     *  c{
-     *      is_avail: arrfunc,  # (option[T]) -> bool
-     *      assign_na: arrfunc, # () -> option[T]
-     *  }
-     * with functions which can classify whether values
-     * are available, and assign the NA (not available)
-     * value.
-     */
-    nd::array m_nafunc;
+
+    // A function that classifies whether values are available # (option[T]) -> bool
+    nd::arrfunc m_is_avail;
+    // A function that assigns the NA # () -> option[T]
+    nd::arrfunc m_assign_na;
 
   public:
     option_type(const type &value_tp);
@@ -52,12 +46,13 @@ namespace ndt {
 
     void get_vars(std::unordered_set<std::string> &vars) const;
 
-    /** Returns the type that m_nafunc has */
-    static const type &make_nafunc_type();
+    /** Returns the type that m_is_avail has */
+    static const type &make_is_avail_type();
+
+    /** Returns the type that m_assign_na has */
+    static const type &make_assign_na_type();
 
     const type &get_value_type() const { return m_value_tp.value_type(); }
-
-    const nd::array &get_nafunc() const { return m_nafunc; }
 
     /** Assigns NA to one value */
     void assign_na(const char *arrmeta, char *data,
@@ -69,31 +64,22 @@ namespace ndt {
 
     const arrfunc_type_data *get_is_avail_arrfunc() const
     {
-      return reinterpret_cast<const arrfunc_type_data *>(
-          m_nafunc.get_readonly_originptr());
+      return m_is_avail.get();
     }
 
     const arrfunc_type *get_is_avail_arrfunc_type() const
     {
-      return m_nafunc.get_type()
-          .extended<base_tuple_type>()
-          ->get_field_type(0)
-          .extended<arrfunc_type>();
+      return m_is_avail.get_type();
     }
 
     const arrfunc_type_data *get_assign_na_arrfunc() const
     {
-      return reinterpret_cast<const arrfunc_type_data *>(
-                 m_nafunc.get_readonly_originptr()) +
-             1;
+      return m_assign_na.get();
     }
 
     const arrfunc_type *get_assign_na_arrfunc_type() const
     {
-      return m_nafunc.get_type()
-          .extended<base_tuple_type>()
-          ->get_field_type(1)
-          .extended<arrfunc_type>();
+      return m_assign_na.get_type();
     }
 
     void print_data(std::ostream &o, const char *arrmeta,

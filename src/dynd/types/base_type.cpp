@@ -6,6 +6,7 @@
 #include <dynd/type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -338,11 +339,18 @@ void ndt::base_type::get_scalar_properties_and_functions(
   }
 }
 
-nd::array ndt::base_type::get_option_nafunc() const
+nd::arrfunc ndt::base_type::get_is_avail() const
 {
-  // Default to return a NULL nd::array, signalling no
+  // Default to return a NULL nd::arrfunc, signalling no
   // option_type support.
-  return nd::array();
+  return nd::arrfunc();
+}
+
+nd::arrfunc ndt::base_type::get_assign_na() const
+{
+  // Default to return a NULL nd::arrfunc, signalling no
+  // option_type support.
+  return nd::arrfunc();
 }
 
 void ndt::base_type::get_dynamic_type_properties(

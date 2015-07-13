@@ -6,6 +6,9 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/types/option_type.hpp>
+#include <dynd/types/time_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -35,6 +38,8 @@ namespace nd {
           src0 += src0_stride;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
     };
 
     // option[T] for signed integer T
@@ -63,6 +68,8 @@ namespace nd {
           src0 += src0_stride;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
     };
 
     // option[float]
@@ -88,6 +95,8 @@ namespace nd {
           src0 += src0_stride;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
     };
 
     // option[double]
@@ -113,6 +122,8 @@ namespace nd {
           src0 += src0_stride;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
     };
 
     // option[complex[float]]
@@ -143,6 +154,8 @@ namespace nd {
           src0 += src0_stride;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
     };
 
     // option[complex[double]]
@@ -174,6 +187,8 @@ namespace nd {
           src0 += src0_stride;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
     };
 
     template <>
@@ -192,6 +207,113 @@ namespace nd {
           dst += dst_stride;
         }
       }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
+    };
+
+    template <>
+    struct is_avail_kernel<string_type_id, string_kind>
+        : base_kernel<is_avail_kernel<string_type_id, string_kind>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        string_type_data *std =
+            *reinterpret_cast<string_type_data *const *>(src);
+        *dst = std->begin != NULL;
+      }
+
+      void strided(char *dst, intptr_t dst_stride, char *const *src,
+                   const intptr_t *src_stride, size_t count)
+      {
+        char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
+          string_type_data *std = reinterpret_cast<string_type_data *>(src0);
+          *dst = std->begin != NULL;
+          dst += dst_stride;
+          src0 += src0_stride;
+        }
+      }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
+    };
+
+    template <>
+    struct is_avail_kernel<date_type_id, datetime_kind>
+        : base_kernel<is_avail_kernel<date_type_id, datetime_kind>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        int32_t date = **reinterpret_cast<int32_t *const *>(src);
+        *dst = date != DYND_DATE_NA;
+      }
+
+      void strided(char *dst, intptr_t dst_stride, char *const *src,
+                   const intptr_t *src_stride, size_t count)
+      {
+        const char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
+          int32_t date = *reinterpret_cast<const int32_t *>(src);
+          *dst = date != DYND_DATE_NA;
+          dst += dst_stride;
+          src0 += src0_stride;
+        }
+      }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
+    };
+
+    template <>
+    struct is_avail_kernel<time_type_id, datetime_kind>
+        : base_kernel<is_avail_kernel<time_type_id, datetime_kind>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        int64_t v = **reinterpret_cast<int64_t *const *>(src);
+        *dst = v != DYND_TIME_NA;
+      }
+
+      void strided(char *dst, intptr_t dst_stride, char *const *src,
+                   const intptr_t *src_stride, size_t count)
+      {
+        char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
+          int64_t v = *reinterpret_cast<int64_t *>(src0);
+          *dst = v != DYND_TIME_NA;
+          dst += dst_stride;
+          src0 += src0_stride;
+        }
+      }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
+    };
+
+    template <>
+    struct is_avail_kernel<datetime_type_id, datetime_kind>
+        : base_kernel<is_avail_kernel<datetime_type_id, datetime_kind>,
+                      kernel_request_host, 1> {
+      void single(char *dst, char *const *src)
+      {
+        int64_t v = **reinterpret_cast<int64_t *const *>(src);
+        *dst = v != DYND_DATETIME_NA;
+      }
+
+      void strided(char *dst, intptr_t dst_stride, char *const *src,
+                   const intptr_t *src_stride, size_t count)
+      {
+        const char *src0 = src[0];
+        intptr_t src0_stride = src_stride[0];
+        for (size_t i = 0; i != count; ++i) {
+          int64_t v = **reinterpret_cast<int64_t *const *>(src);
+          *dst = v != DYND_DATETIME_NA;
+          dst += dst_stride;
+          src0 += src0_stride;
+        }
+      }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
     };
 
     template <>
@@ -252,6 +374,8 @@ namespace nd {
           throw type_error("fixed_dim_is_avail: expected built-in type");
         }
       }
+
+      static ndt::type make_type() { return ndt::type("(Fixed * Any) -> bool"); }
     };
 
     template <>
@@ -272,6 +396,8 @@ namespace nd {
         throw std::runtime_error(
             "is_avail for pointers is not yet implemented");
       }
+
+      static ndt::type make_type() { return ndt::type("(T) -> bool"); }
     };
 
   } // namespace dynd::nd::detail

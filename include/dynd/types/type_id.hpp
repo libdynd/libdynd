@@ -621,6 +621,26 @@ struct type_kind_of<pointer_type_id> {
   static const type_kind_t value = expr_kind;
 };
 
+template <>
+struct type_kind_of<string_type_id> {
+  static const type_kind_t value = string_kind;
+};
+
+template <>
+struct type_kind_of<date_type_id> {
+  static const type_kind_t value = datetime_kind;
+};
+
+template <>
+struct type_kind_of<time_type_id> {
+  static const type_kind_t value = datetime_kind;
+};
+
+template <>
+struct type_kind_of<datetime_type_id> {
+  static const type_kind_t value = datetime_kind;
+};
+
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular type.
 template <typename T>
