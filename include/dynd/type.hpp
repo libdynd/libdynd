@@ -891,16 +891,16 @@ namespace ndt {
     }
 
     template <typename T>
+    struct equivalent {
+      static type make() { return T::make_type(); }
+    };
+
+    template <typename T>
     struct has_equivalent {
       static const bool value = nd::detail::has_make_type<T>::value;
     };
 
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
-  };
-
-  template <typename T>
-  struct equivalent {
-    static type make() { return T::make_type(); }
   };
 
   // Forward declarations
