@@ -34,8 +34,6 @@ namespace nd {
           }
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <type_id_t DstTypeID>
@@ -59,8 +57,6 @@ namespace nd {
               std::numeric_limits<dst_type>::min();
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -80,8 +76,6 @@ namespace nd {
           *reinterpret_cast<uint32_t *>(dst) = DYND_FLOAT32_NA_AS_UINT;
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -101,8 +95,6 @@ namespace nd {
           *reinterpret_cast<uint64_t *>(dst) = DYND_FLOAT64_NA_AS_UINT;
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -124,8 +116,6 @@ namespace nd {
           reinterpret_cast<uint32_t *>(dst)[1] = DYND_FLOAT32_NA_AS_UINT;
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -147,8 +137,6 @@ namespace nd {
           reinterpret_cast<uint64_t *>(dst)[1] = DYND_FLOAT64_NA_AS_UINT;
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -163,8 +151,6 @@ namespace nd {
                    size_t DYND_UNUSED(count))
       {
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -225,8 +211,6 @@ namespace nd {
           throw type_error("fixed_dim_assign_na: expected built-in type");
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -247,8 +231,6 @@ namespace nd {
         throw std::runtime_error(
             "assign_na for pointers is not yet implemented");
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -278,8 +260,6 @@ namespace nd {
           }
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -299,8 +279,6 @@ namespace nd {
           *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -320,8 +298,6 @@ namespace nd {
           *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA;
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
     template <>
@@ -339,8 +315,6 @@ namespace nd {
           *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
         }
       }
-
-      static ndt::type make_type() { return ndt::type("() -> T"); }
     };
 
   } // namespace dynd::nd::detail
@@ -350,4 +324,21 @@ namespace nd {
       detail::assign_na_kernel<DstTypeID, type_kind_of<DstTypeID>::value>;
 
 } // namespace dynd::nd
+
+namespace ndt {
+
+  template <type_id_t Src0ValueTypeID>
+  struct type::equivalent<nd::assign_na_kernel<Src0ValueTypeID>> {
+    static type make()
+    {
+      return ndt::type("() -> T");
+    }
+  };
+
+  template <type_id_t Src0ValueTypeID>
+  struct type::has_equivalent<nd::assign_na_kernel<Src0ValueTypeID>> {
+    static const bool value = true;
+  };
+
+} // namespace dynd::ndt
 } // namespace dynd
