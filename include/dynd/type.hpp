@@ -898,6 +898,11 @@ namespace ndt {
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
+  template <typename T>
+  struct equivalent {
+    static type make() { return T::make_type(); }
+  };
+
   // Forward declarations
   type make_pointer(const type &target_tp);
 

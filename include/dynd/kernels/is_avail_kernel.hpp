@@ -375,7 +375,10 @@ namespace nd {
         }
       }
 
-      static ndt::type make_type() { return ndt::type("(Fixed * Any) -> bool"); }
+      static ndt::type make_type()
+      {
+        return ndt::type("(Fixed * Any) -> bool");
+      }
     };
 
     template <>
@@ -407,4 +410,19 @@ namespace nd {
       detail::is_avail_kernel<Src0TypeID, type_kind_of<Src0TypeID>::value>;
 
 } // namespace dynd::nd
+
+namespace ndt {
+
+/*
+  template <type_id_t Src0ValueTypeID>
+  struct equivalent<nd::is_avail_kernel<Src0ValueTypeID>> {
+    static type make()
+    {
+      return arrfunc_type::make(make_type<bool1>(),
+                                {option_type::make(type(Src0ValueTypeID))});
+    }
+  };
+*/
+
+} // namespace dynd::ndt
 } // namespace dynd
