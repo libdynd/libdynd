@@ -15,15 +15,6 @@ namespace nd {
     {
       *reinterpret_cast<R *>(dst) = +*reinterpret_cast<A0 *>(src[0]);
     }
-
-    static ndt::type make_type()
-    {
-      std::map<string, ndt::type> tp_vars;
-      tp_vars["A0"] = ndt::make_type<A0>();
-      tp_vars["R"] = ndt::make_type<R>();
-
-      return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
-    }
   };
 
   template <type_id_t I0>
@@ -35,15 +26,6 @@ namespace nd {
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
       *reinterpret_cast<R *>(dst) = -*reinterpret_cast<A0 *>(src[0]);
-    }
-
-    static ndt::type make_type()
-    {
-      std::map<string, ndt::type> tp_vars;
-      tp_vars["A0"] = ndt::make_type<A0>();
-      tp_vars["R"] = ndt::make_type<R>();
-
-      return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
     }
   };
 
@@ -60,16 +42,6 @@ namespace nd {
       *reinterpret_cast<R *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) + *reinterpret_cast<A1 *>(src[1]);
     }
-
-    static ndt::type make_type()
-    {
-      std::map<string, ndt::type> tp_vars;
-      tp_vars["A0"] = ndt::make_type<A0>();
-      tp_vars["A1"] = ndt::make_type<A1>();
-      tp_vars["R"] = ndt::make_type<R>();
-
-      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -84,16 +56,6 @@ namespace nd {
     {
       *reinterpret_cast<R *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) - *reinterpret_cast<A1 *>(src[1]);
-    }
-
-    static ndt::type make_type()
-    {
-      std::map<string, ndt::type> tp_vars;
-      tp_vars["A0"] = ndt::make_type<A0>();
-      tp_vars["A1"] = ndt::make_type<A1>();
-      tp_vars["R"] = ndt::make_type<R>();
-
-      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
   };
 
@@ -110,16 +72,6 @@ namespace nd {
       *reinterpret_cast<R *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) * *reinterpret_cast<A1 *>(src[1]);
     }
-
-    static ndt::type make_type()
-    {
-      std::map<string, ndt::type> tp_vars;
-      tp_vars["A0"] = ndt::make_type<A0>();
-      tp_vars["A1"] = ndt::make_type<A1>();
-      tp_vars["R"] = ndt::make_type<R>();
-
-      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -135,32 +87,61 @@ namespace nd {
       *reinterpret_cast<R *>(dst) =
           *reinterpret_cast<A0 *>(src[0]) / *reinterpret_cast<A1 *>(src[1]);
     }
-
-    static ndt::type make_type()
-    {
-      std::map<string, ndt::type> tp_vars;
-      tp_vars["A0"] = ndt::make_type<A0>();
-      tp_vars["A1"] = ndt::make_type<A1>();
-      tp_vars["R"] = ndt::make_type<R>();
-
-      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
-    }
   };
 
 } // namespace dynd::nd
 
-/*
 namespace ndt {
 
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::divide_kernel<Src0TypeID, Src1TypeID>> {
-    typedef typename type_of<Src0TypeID>::type A0;
-    typedef typename type_of<Src1TypeID>::type A1;
-    typedef decltype(std::declval<A0>() / std::declval<A1>()) R;
+  template <type_id_t Src0TypeID>
+  struct type::equivalent<nd::plus_kernel<Src0TypeID>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef decltype(+std::declval<A0>()) R;
 
     static type make()
     {
-      std::map<string, ndt::type> tp_vars;
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::make_type<A0>();
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
+    }
+  };
+
+  template <type_id_t Src0TypeID>
+  struct type::has_equivalent<nd::plus_kernel<Src0TypeID>> {
+    static const bool value = true;
+  };
+
+  template <type_id_t Src0TypeID>
+  struct type::equivalent<nd::minus_kernel<Src0TypeID>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef decltype(-std::declval<A0>()) R;
+
+    static type make()
+    {
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::make_type<A0>();
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
+    }
+  };
+
+  template <type_id_t Src0TypeID>
+  struct type::has_equivalent<nd::minus_kernel<Src0TypeID>> {
+    static const bool value = true;
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::add_kernel<Src0TypeID, Src1TypeID>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef typename dynd::type_of<Src1TypeID>::type A1;
+    typedef decltype(std::declval<A0>() + std::declval<A1>()) R;
+
+    static type make()
+    {
+      std::map<nd::string, ndt::type> tp_vars;
       tp_vars["A0"] = ndt::make_type<A0>();
       tp_vars["A1"] = ndt::make_type<A1>();
       tp_vars["R"] = ndt::make_type<R>();
@@ -169,7 +150,76 @@ namespace ndt {
     }
   };
 
-} // namespace dynd::ndt
-*/
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::has_equivalent<nd::add_kernel<Src0TypeID, Src1TypeID>> {
+    static const bool value = true;
+  };
 
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::subtract_kernel<Src0TypeID, Src1TypeID>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef typename dynd::type_of<Src1TypeID>::type A1;
+    typedef decltype(std::declval<A0>() - std::declval<A1>()) R;
+
+    static type make()
+    {
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::make_type<A0>();
+      tp_vars["A1"] = ndt::make_type<A1>();
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::has_equivalent<nd::subtract_kernel<Src0TypeID, Src1TypeID>> {
+    static const bool value = true;
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::multiply_kernel<Src0TypeID, Src1TypeID>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef typename dynd::type_of<Src1TypeID>::type A1;
+    typedef decltype(std::declval<A0>() * std::declval<A1>()) R;
+
+    static type make()
+    {
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::make_type<A0>();
+      tp_vars["A1"] = ndt::make_type<A1>();
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::has_equivalent<nd::multiply_kernel<Src0TypeID, Src1TypeID>> {
+    static const bool value = true;
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::divide_kernel<Src0TypeID, Src1TypeID>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef typename dynd::type_of<Src1TypeID>::type A1;
+    typedef decltype(std::declval<A0>() / std::declval<A1>()) R;
+
+    static type make()
+    {
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::make_type<A0>();
+      tp_vars["A1"] = ndt::make_type<A1>();
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::has_equivalent<nd::divide_kernel<Src0TypeID, Src1TypeID>> {
+    static const bool value = true;
+  };
+
+} // namespace dynd::ndt
 } // namespace dynd
