@@ -1435,22 +1435,12 @@ namespace ndt {
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::less_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::less_equal_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
                                 ndt::make_type<int>());
     }
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::less_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -1463,22 +1453,12 @@ namespace ndt {
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::equal_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::not_equal_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
                                 ndt::make_type<int>());
     }
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::not_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -1491,22 +1471,12 @@ namespace ndt {
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::greater_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::greater_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
                                 ndt::make_type<int>());
     }
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::greater_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
   };
 
 } // namespace dynd::ndt

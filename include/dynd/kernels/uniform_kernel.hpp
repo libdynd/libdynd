@@ -276,11 +276,5 @@ namespace ndt {
     }
   };
 
-  template <type_id_t DstTypeID, typename GeneratorType>
-  struct type::has_equivalent<
-      nd::random::uniform_kernel<DstTypeID, GeneratorType>> {
-    static const bool value = true;
-  };
-
 } // namespace dynd::ndt
 } // namespace dynd

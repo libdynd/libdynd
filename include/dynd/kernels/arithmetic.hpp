@@ -109,11 +109,6 @@ namespace ndt {
   };
 
   template <type_id_t Src0TypeID>
-  struct type::has_equivalent<nd::plus_kernel<Src0TypeID>> {
-    static const bool value = true;
-  };
-
-  template <type_id_t Src0TypeID>
   struct type::equivalent<nd::minus_kernel<Src0TypeID>> {
     typedef typename dynd::type_of<Src0TypeID>::type A0;
     typedef decltype(-std::declval<A0>()) R;
@@ -126,11 +121,6 @@ namespace ndt {
 
       return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);
     }
-  };
-
-  template <type_id_t Src0TypeID>
-  struct type::has_equivalent<nd::minus_kernel<Src0TypeID>> {
-    static const bool value = true;
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -151,11 +141,6 @@ namespace ndt {
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::add_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::subtract_kernel<Src0TypeID, Src1TypeID>> {
     typedef typename dynd::type_of<Src0TypeID>::type A0;
     typedef typename dynd::type_of<Src1TypeID>::type A1;
@@ -170,11 +155,6 @@ namespace ndt {
 
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::subtract_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
@@ -195,11 +175,6 @@ namespace ndt {
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::multiply_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::divide_kernel<Src0TypeID, Src1TypeID>> {
     typedef typename dynd::type_of<Src0TypeID>::type A0;
     typedef typename dynd::type_of<Src1TypeID>::type A1;
@@ -214,11 +189,6 @@ namespace ndt {
 
       return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
     }
-  };
-
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::has_equivalent<nd::divide_kernel<Src0TypeID, Src1TypeID>> {
-    static const bool value = true;
   };
 
 } // namespace dynd::ndt

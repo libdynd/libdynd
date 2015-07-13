@@ -335,10 +335,5 @@ namespace ndt {
     }
   };
 
-  template <type_id_t Src0ValueTypeID>
-  struct type::has_equivalent<nd::assign_na_kernel<Src0ValueTypeID>> {
-    static const bool value = true;
-  };
-
 } // namespace dynd::ndt
 } // namespace dynd

@@ -324,11 +324,6 @@ namespace ndt {
     }
   };
 
-  template <typename fftw_dst_type, typename fftw_src_type, int sign>
-  struct type::has_equivalent<nd::fftw_ck<fftw_dst_type, fftw_src_type, sign>> {
-    static const bool value = true;
-  };
-
 } // namespace dynd::ndt
 } // namespace dynd
 
