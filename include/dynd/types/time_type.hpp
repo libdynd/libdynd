@@ -92,7 +92,9 @@ namespace ndt {
         size_t dst_elwise_property_index, const char *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
-    nd::array get_option_nafunc() const;
+    nd::arrfunc get_is_avail() const;
+
+    nd::arrfunc get_assign_na() const;
   };
 
   /** Returns type "time" (with abstract/naive time zone) */

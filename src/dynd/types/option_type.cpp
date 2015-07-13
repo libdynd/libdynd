@@ -37,18 +37,20 @@ ndt::option_type::option_type(const type &value_tp)
   }
 
   if (value_tp.is_builtin()) {
-    m_nafunc = kernels::get_option_builtin_nafunc(value_tp.get_type_id());
-    if (!m_nafunc.is_null()) {
+    m_is_avail = get_option_builtin_is_avail(value_tp.get_type_id());
+    m_assign_na = get_option_builtin_assign_na(value_tp.get_type_id());
+    if (!m_is_avail.is_null() && !m_assign_na.is_null()) {
       return;
     }
   } else {
-    m_nafunc = value_tp.extended()->get_option_nafunc();
-    if (!m_nafunc.is_null() &&
-        m_nafunc.get_type() != option_type::make_nafunc_type()) {
+    m_is_avail = value_tp.extended()->get_is_avail();
+    m_assign_na = value_tp.extended()->get_assign_na();
+    if (!m_is_avail.is_null() &&
+        m_is_avail.get_array_type() != option_type::make_is_avail_type() &&
+        !m_assign_na.is_null() &&
+        m_assign_na.get_array_type() != option_type::make_assign_na_type()) {
       stringstream ss;
-      ss << "Type " << m_value_tp
-         << " returned invalid nafunc object, had type " << m_nafunc.get_type()
-         << " instead of " << option_type::make_nafunc_type();
+      ss << "Type " << m_value_tp << " returned invalid is_avail or assign_na";
       throw invalid_argument(ss.str());
     }
   }
@@ -61,18 +63,23 @@ void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const
   m_value_tp.get_vars(vars);
 }
 
-const ndt::type &ndt::option_type::make_nafunc_type()
+const ndt::type &ndt::option_type::make_is_avail_type()
 {
-  static ndt::type static_instance = make_struct(
-      make_arrfunc(make_tuple(make_typevar("T")), make_type<bool1>()),
-      "is_avail", make_arrfunc(0, NULL, make_typevar("T")), "assign_na");
+  static ndt::type static_instance =
+      make_arrfunc(make_tuple(make_typevar("T")), make_type<bool1>());
+  return static_instance;
+}
+
+const ndt::type &ndt::option_type::make_assign_na_type()
+{
+  static ndt::type static_instance = make_arrfunc(0, NULL, make_typevar("T"));
   return static_instance;
 }
 
 bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
                                 const eval::eval_context *ectx) const
 {
-  if (m_nafunc.is_null()) {
+  if (m_is_avail.is_null()) {
     stringstream ss;
     ss << "cannot instantiate data with type " << type(this, true);
     throw type_error(ss.str());
@@ -128,7 +135,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
 void ndt::option_type::assign_na(const char *arrmeta, char *data,
                                  const eval::eval_context *ectx) const
 {
-  if (m_nafunc.is_null()) {
+  if (m_assign_na.is_null()) {
     stringstream ss;
     ss << "cannot instantiate data with type " << type(this, true);
     throw type_error(ss.str());
@@ -295,7 +302,7 @@ bool ndt::option_type::operator==(const base_type &rhs) const
 void ndt::option_type::arrmeta_default_construct(char *arrmeta,
                                                  bool blockref_alloc) const
 {
-  if (m_nafunc.is_null()) {
+  if (m_is_avail.is_null() || m_assign_na.is_null()) {
     stringstream ss;
     ss << "cannot instantiate data with type " << type(this, true);
     throw type_error(ss.str());
@@ -381,10 +388,16 @@ static ndt::type property_get_value_type(const ndt::type &tp)
   return pd->get_value_type();
 }
 
-static nd::array property_get_nafunc(const ndt::type &tp)
+static nd::array property_get_is_avail(const ndt::type &tp)
 {
   const ndt::option_type *pd = tp.extended<ndt::option_type>();
-  return pd->get_nafunc();
+  return pd->get_is_avail();
+}
+
+static nd::array property_get_assign_na(const ndt::type &tp)
+{
+  const ndt::option_type *pd = tp.extended<ndt::option_type>();
+  return pd->get_assign_na();
 }
 
 void ndt::option_type::get_dynamic_type_properties(
@@ -395,7 +408,9 @@ void ndt::option_type::get_dynamic_type_properties(
       pair<string, gfunc::callable>(
           "value_type", gfunc::make_callable(&property_get_value_type, "self")),
       pair<string, gfunc::callable>(
-          "nafunc", gfunc::make_callable(&property_get_nafunc, "self")),
+          "is_avail", gfunc::make_callable(&property_get_is_avail, "self")),
+      pair<string, gfunc::callable>(
+          "assign_na", gfunc::make_callable(&property_get_assign_na, "self")),
   };
 
   *out_properties = type_properties;

@@ -616,7 +616,9 @@ namespace ndt {
      * basic arrfuncs for is_avail and assign_na. These allow option[T]
      * to work for the subclass type.
      */
-    virtual nd::array get_option_nafunc() const;
+    virtual nd::arrfunc get_is_avail() const;
+
+    virtual nd::arrfunc get_assign_na() const;
 
     /**
      * Additional dynamic properties exposed by the type as gfunc::callable.

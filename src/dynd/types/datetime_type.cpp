@@ -22,6 +22,8 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/datetime_adapter_kernels.hpp>
+#include <dynd/kernels/is_avail_kernel.hpp>
+#include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>
@@ -863,58 +865,14 @@ size_t ndt::datetime_type::make_elwise_property_setter_kernel(
   return ckb_offset;
 }
 
-namespace {
-struct datetime_is_avail_ck
-    : nd::base_kernel<datetime_is_avail_ck, kernel_request_host, 1> {
-  void single(char *dst, char *const *src)
-  {
-    int64_t v = **reinterpret_cast<int64_t *const *>(src);
-    *dst = v != DYND_DATETIME_NA;
-  }
-
-  void strided(char *dst, intptr_t dst_stride, char *const *src,
-               const intptr_t *src_stride, size_t count)
-  {
-    const char *src0 = src[0];
-    intptr_t src0_stride = src_stride[0];
-    for (size_t i = 0; i != count; ++i) {
-      int64_t v = **reinterpret_cast<int64_t *const *>(src);
-      *dst = v != DYND_DATETIME_NA;
-      dst += dst_stride;
-      src0 += src0_stride;
-    }
-  }
-};
-
-struct datetime_assign_na_ck
-    : nd::base_kernel<datetime_assign_na_ck, kernel_request_host, 1> {
-  void single(char *dst, char *const *DYND_UNUSED(src))
-  {
-    *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
-  }
-
-  void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-               const intptr_t *DYND_UNUSED(src_stride), size_t count)
-  {
-    for (size_t i = 0; i != count; ++i, dst += dst_stride) {
-      *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
-    }
-  }
-};
-} // anonymous namespace
-
-nd::array ndt::datetime_type::get_option_nafunc() const
+nd::arrfunc ndt::datetime_type::get_is_avail() const
 {
-  nd::array naf = nd::empty(option_type::make_nafunc_type());
-  arrfunc_type_data *is_avail =
-      reinterpret_cast<arrfunc_type_data *>(naf.get_ndo()->m_data_pointer);
-  arrfunc_type_data *assign_na = is_avail + 1;
+  return nd::arrfunc::make<nd::is_avail_kernel<datetime_type_id>>(0);
+}
 
-  new (is_avail)
-      arrfunc_type_data(0, NULL, NULL, &datetime_is_avail_ck::instantiate);
-  new (assign_na)
-      arrfunc_type_data(0, NULL, NULL, &datetime_assign_na_ck::instantiate);
-  return naf;
+nd::arrfunc ndt::datetime_type::get_assign_na() const
+{
+  return nd::arrfunc::make<nd::assign_na_kernel<datetime_type_id>>(0);
 }
 
 bool ndt::datetime_type::adapt_type(const type &operand_tp,
