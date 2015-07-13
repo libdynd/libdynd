@@ -168,6 +168,12 @@ namespace nd {
           throw std::runtime_error("error");
         }
       }
+
+      static ndt::type make_type()
+      {
+        return ndt::arrfunc_type::make({ndt::type(Src0TypeID)},
+                                       ndt::type(DstTypeID));
+      }
     };
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind,
@@ -2315,6 +2321,7 @@ namespace nd {
 
 } // namespace dynd::nd
 
+/*
 namespace ndt {
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
@@ -2332,4 +2339,6 @@ namespace ndt {
   };
 
 } // namespace dynd::ndt
+*/
+
 } // namespace dynd
