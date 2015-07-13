@@ -168,6 +168,12 @@ namespace nd {
           throw std::runtime_error("error");
         }
       }
+
+      static ndt::type make_type()
+      {
+        return ndt::arrfunc_type::make({ndt::type(Src0TypeID)},
+                                       ndt::type(DstTypeID));
+      }
     };
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind,
@@ -2317,22 +2323,4 @@ namespace nd {
   };
 
 } // namespace dynd::nd
-
-namespace ndt {
-
-  template <type_id_t DstTypeID, type_id_t Src0TypeID>
-  struct type::equivalent<nd::assignment_kernel<DstTypeID, Src0TypeID>> {
-    static type make()
-    {
-      return ndt::arrfunc_type::make({ndt::type(Src0TypeID)},
-                                     ndt::type(DstTypeID));
-    }
-  };
-
-  template <type_id_t DstTypeID, type_id_t Src0TypeID>
-  struct type::has_equivalent<nd::assignment_kernel<DstTypeID, Src0TypeID>> {
-    static const bool value = true;
-  };
-
-} // namespace dynd::ndt
 } // namespace dynd
