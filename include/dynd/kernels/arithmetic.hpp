@@ -148,4 +148,28 @@ namespace nd {
   };
 
 } // namespace dynd::nd
+
+/*
+namespace ndt {
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::divide_kernel<Src0TypeID, Src1TypeID>> {
+    typedef typename type_of<Src0TypeID>::type A0;
+    typedef typename type_of<Src1TypeID>::type A1;
+    typedef decltype(std::declval<A0>() / std::declval<A1>()) R;
+
+    static type make()
+    {
+      std::map<string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::make_type<A0>();
+      tp_vars["A1"] = ndt::make_type<A1>();
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+    }
+  };
+
+} // namespace dynd::ndt
+*/
+
 } // namespace dynd
