@@ -1111,6 +1111,8 @@ namespace ndt {
    */
   extern const type static_builtin_types[builtin_type_id_count];
 
+  extern type type_kinds[DYND_TYPE_ID_MAX + 1];
+
   std::ostream &operator<<(std::ostream &o, const type &rhs);
 
 } // namespace ndt

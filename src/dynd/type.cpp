@@ -73,6 +73,8 @@ const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {
     ndt::type(complex_float32_type_id), ndt::type(complex_float64_type_id),
     ndt::type(void_type_id)};
 
+ndt::type ndt::type_kinds[DYND_TYPE_ID_MAX + 1];
+
 ndt::type::type(const std::string &rep) : m_extended(NULL)
 {
   type_from_datashape(rep).swap(*this);
