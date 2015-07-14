@@ -36,8 +36,27 @@ ndt::option_type::option_type(const type &value_tp)
     throw type_error(ss.str());
   }
 
-  m_is_avail = nd::is_avail::get_child(value_tp);
-  m_assign_na = nd::assign_na_decl::get_child(value_tp);
+  //
+  // m_assign_na = nd::is_avail::get_child(value_tp.get_type_id());
+
+  if (value_tp.is_builtin()) {
+    m_is_avail = nd::is_avail::get_child(value_tp);
+    m_assign_na = get_option_builtin_assign_na(value_tp.get_type_id());
+    if (!m_is_avail.is_null() && !m_assign_na.is_null()) {
+      return;
+    }
+  } else {
+    m_is_avail = nd::is_avail::get_child(value_tp);
+    m_assign_na = value_tp.extended()->get_assign_na();
+    if (!m_is_avail.is_null() &&
+        m_is_avail.get_array_type() != option_type::make_is_avail_type() &&
+        !m_assign_na.is_null() &&
+        m_assign_na.get_array_type() != option_type::make_assign_na_type()) {
+      stringstream ss;
+      ss << "Type " << m_value_tp << " returned invalid is_avail or assign_na";
+      throw invalid_argument(ss.str());
+    }
+  }
 }
 
 ndt::option_type::~option_type() {}
