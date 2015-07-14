@@ -164,13 +164,6 @@ namespace nd {
                                reinterpret_cast<fftw_dst_type *>(dst));
     }
 
-    static ndt::type make_type()
-    {
-      return ndt::type("(Fixed**N * complex[float64], shape: ?N * int64, axes: "
-                       "?Fixed * int64, flags: ?int32) -> Fixed**N * "
-                       "complex[float64]");
-    }
-
     /*
         static void
         data_init(const arrfunc_type_data *DYND_UNUSED(self),
@@ -318,6 +311,20 @@ namespace nd {
   };
 
 } // namespace dynd::nd
+
+namespace ndt {
+
+  template <typename fftw_dst_type, typename fftw_src_type, int sign>
+  struct type::equivalent<nd::fftw_ck<fftw_dst_type, fftw_src_type, sign>> {
+    static type make()
+    {
+      return ndt::type("(Fixed**N * complex[float64], shape: ?N * int64, axes: "
+                       "?Fixed * int64, flags: ?int32) -> Fixed**N * "
+                       "complex[float64]");
+    }
+  };
+
+} // namespace dynd::ndt
 } // namespace dynd
 
 #endif

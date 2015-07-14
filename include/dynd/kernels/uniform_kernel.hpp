@@ -42,15 +42,6 @@ namespace nd {
           *reinterpret_cast<R *>(dst) = d(g);
         }
 
-        static ndt::type make_type()
-        {
-          std::map<nd::string, ndt::type> tp_vars;
-          tp_vars["R"] = ndt::make_type<R>();
-
-          return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars,
-                                 true);
-        }
-
         /*
             static void
             data_init(const arrfunc_type_data *DYND_UNUSED(self),
@@ -126,15 +117,6 @@ namespace nd {
         void single(char *dst, char *const *DYND_UNUSED(src))
         {
           *reinterpret_cast<R *>(dst) = d(g);
-        }
-
-        static ndt::type make_type()
-        {
-          std::map<nd::string, ndt::type> tp_vars;
-          tp_vars["R"] = ndt::make_type<R>();
-
-          return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars,
-                                 true);
         }
 
         /*
@@ -213,15 +195,6 @@ namespace nd {
           *reinterpret_cast<R *>(dst) = R(d_real(g), d_imag(g));
         }
 
-        static ndt::type make_type()
-        {
-          std::map<nd::string, ndt::type> tp_vars;
-          tp_vars["R"] = ndt::make_type<R>();
-
-          return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars,
-                                 true);
-        }
-
         /*
             static void
             data_init(const arrfunc_type_data *DYND_UNUSED(self),
@@ -286,4 +259,22 @@ namespace nd {
 
   } // namespace dynd::nd::random
 } // namespace dynd::nd
+
+namespace ndt {
+
+  template <type_id_t DstTypeID, typename GeneratorType>
+  struct type::equivalent<
+      nd::random::uniform_kernel<DstTypeID, GeneratorType>> {
+    typedef typename dynd::type_of<DstTypeID>::type R;
+
+    static type make()
+    {
+      std::map<nd::string, ndt::type> tp_vars;
+      tp_vars["R"] = ndt::make_type<R>();
+
+      return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars, true);
+    }
+  };
+
+} // namespace dynd::ndt
 } // namespace dynd

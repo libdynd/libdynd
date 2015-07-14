@@ -19,11 +19,6 @@ namespace nd {
   template <template <type_id_t, type_id_t> class K, type_id_t I0, type_id_t I1>
   struct base_comparison_kernel<K<I0, I1>>
       : base_kernel<K<I0, I1>, kernel_request_host, 2> {
-    static ndt::type make_type()
-    {
-      return ndt::arrfunc_type::make({ndt::type(I0), ndt::type(I1)},
-                                     ndt::make_type<int>());
-    }
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -81,11 +76,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -118,11 +108,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -157,11 +142,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -194,11 +174,6 @@ namespace nd {
       default:
         throw std::runtime_error("unidentified string encoding");
       }
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -247,11 +222,6 @@ namespace nd {
       default:
         throw std::runtime_error("unidentified string encoding");
       }
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(string, string) -> int32");
     }
   };
 
@@ -311,11 +281,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -350,11 +315,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -388,11 +348,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -434,11 +389,6 @@ namespace nd {
       default:
         throw std::runtime_error("unidentified string encoding");
       }
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -487,11 +437,6 @@ namespace nd {
       default:
         throw std::runtime_error("unidentified string encoding");
       }
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(string, string) -> int32");
     }
   };
 
@@ -564,11 +509,6 @@ namespace nd {
         throw std::runtime_error("unidentified string encoding");
       }
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(string, string) -> int32");
-    }
   };
 
   template <string_encoding_t E>
@@ -600,11 +540,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -643,11 +578,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -684,11 +614,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -730,11 +655,6 @@ namespace nd {
       default:
         throw std::runtime_error("unidentified string encoding");
       }
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -854,11 +774,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -896,11 +811,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -937,11 +847,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -983,11 +888,6 @@ namespace nd {
       default:
         throw std::runtime_error("unidentified string encoding");
       }
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -1034,11 +934,6 @@ namespace nd {
       default:
         throw std::runtime_error("unidentified string encoding");
       }
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(string, string) -> int32");
     }
   };
 
@@ -1174,11 +1069,6 @@ namespace nd {
         throw std::runtime_error("unidentified string encoding");
       }
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(string, string) -> int32");
-    }
   };
 
   template <string_encoding_t E>
@@ -1209,11 +1099,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -1248,11 +1133,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -1286,11 +1166,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -1331,11 +1206,6 @@ namespace nd {
       default:
         throw std::runtime_error("unidentified string encoding");
       }
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -1411,11 +1281,6 @@ namespace nd {
         throw std::runtime_error("unidentified string encoding");
       }
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(string, string) -> int32");
-    }
   };
 
   template <string_encoding_t E>
@@ -1447,11 +1312,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -1486,11 +1346,6 @@ namespace nd {
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
   template <>
@@ -1523,11 +1378,6 @@ namespace nd {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
       return ckb_offset;
-    }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
     }
   };
 
@@ -1569,12 +1419,66 @@ namespace nd {
         throw std::runtime_error("unidentified string encoding");
       }
     }
-
-    static ndt::type make_type()
-    {
-      return ndt::type("(FixedString, FixedString) -> int32");
-    }
   };
 
 } // namespace dynd::nd
+
+namespace ndt {
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::less_kernel<Src0TypeID, Src1TypeID>> {
+    static type make()
+    {
+      return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
+                                ndt::make_type<int>());
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::less_equal_kernel<Src0TypeID, Src1TypeID>> {
+    static type make()
+    {
+      return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
+                                ndt::make_type<int>());
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::equal_kernel<Src0TypeID, Src1TypeID>> {
+    static type make()
+    {
+      return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
+                                ndt::make_type<int>());
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::not_equal_kernel<Src0TypeID, Src1TypeID>> {
+    static type make()
+    {
+      return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
+                                ndt::make_type<int>());
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::greater_equal_kernel<Src0TypeID, Src1TypeID>> {
+    static type make()
+    {
+      return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
+                                ndt::make_type<int>());
+    }
+  };
+
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct type::equivalent<nd::greater_kernel<Src0TypeID, Src1TypeID>> {
+    static type make()
+    {
+      return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
+                                ndt::make_type<int>());
+    }
+  };
+
+} // namespace dynd::ndt
+
 } // namespace dynd

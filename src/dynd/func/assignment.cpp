@@ -28,7 +28,9 @@ struct nd::assign nd::assign;
 static nd::make_t assign_make[builtin_type_id_count - 2][builtin_type_id_count -
                                                          2][4] = {
 #define SINGLE_OPERATION_PAIR_LEVEL(dst_type_id, src_type_id, errmode)         \
-  &nd::make<nd::assignment_kernel<dst_type_id, src_type_id, errmode>>
+  &nd::make<nd::detail::assignment_kernel<                                     \
+      dst_type_id, dynd::type_kind_of<dst_type_id>::value, src_type_id,        \
+      dynd::type_kind_of<src_type_id>::value, errmode>>
 
 #define ERROR_MODE_LEVEL(dst_type, src_type)                                   \
   {                                                                            \

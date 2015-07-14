@@ -84,9 +84,21 @@ namespace nd {
 
   template <typename T, int N>
   class strided_vals;
-} // namespace nd
+
+  namespace detail {
+
+    template <typename... T>
+    class has_make_type;
+
+  } // namespace dynd::nd::detail
+} // namespace dynd::nd
 
 namespace ndt {
+  namespace detail {
+
+    DYND_HAS(make);
+
+  } // namespace ndt::detail
 
   template <class T>
   struct fixed_dim_from_array;
@@ -127,7 +139,7 @@ namespace ndt {
       }
 
       return NULL;
-//      throw invalid_type_id((int)type_id);
+      //      throw invalid_type_id((int)type_id);
     }
 
   public:
@@ -188,17 +200,17 @@ namespace ndt {
         : m_extended(type::validate_builtin_type_id(type_id))
     {
       switch (type_id) {
-        case fixed_dim_type_id:
-          *this = ndt::type("Fixed * Any");
-          break;
-        case var_dim_type_id:
-          *this = ndt::type("var * Any");
-          break;
-        case tuple_type_id:
-          *this = ndt::type("(...)");
-          break;
-        default:
-          break;
+      case fixed_dim_type_id:
+        *this = ndt::type("Fixed * Any");
+        break;
+      case var_dim_type_id:
+        *this = ndt::type("var * Any");
+        break;
+      case tuple_type_id:
+        *this = ndt::type("(...)");
+        break;
+      default:
+        break;
       }
     }
 
@@ -882,6 +894,15 @@ namespace ndt {
       ss << *this;
       return ss.str();
     }
+
+    template <typename T>
+    struct equivalent {
+    };
+
+    template <typename T>
+    struct has_equivalent {
+      static const bool value = detail::has_make<equivalent<T>>::value;
+    };
 
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
   };

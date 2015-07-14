@@ -113,14 +113,14 @@ namespace nd {
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind,
               type_id_t Src0TypeID, type_kind_t Src0TypeKind,
-              assign_error_mode... ErrorMode>
+              assign_error_mode ErrorMode>
     struct assignment_kernel;
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind,
               type_id_t Src0TypeID, type_kind_t Src0TypeKind>
-    struct assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind>
-        : base_virtual_kernel<assignment_kernel<DstTypeID, DstTypeKind,
-                                                Src0TypeID, Src0TypeKind>> {
+    struct assignment_virtual_kernel
+        : base_virtual_kernel<assignment_virtual_kernel<
+              DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind>> {
       static intptr_t
       instantiate(char *static_data, size_t data_size, char *data, void *ckb,
                   intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -179,8 +179,7 @@ namespace nd {
     template <type_id_t DstTypeID, type_kind_t DstTypeKind,
               type_id_t Src0TypeID, type_kind_t Src0TypeKind,
               assign_error_mode ErrorMode>
-    struct assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
-                             ErrorMode>
+    struct assignment_kernel
         : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID,
                                         Src0TypeKind, ErrorMode>,
                       kernel_request_host, 1> {
@@ -1783,12 +1782,10 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
-  template <type_id_t DstTypeID, type_id_t Src0TypeID,
-            assign_error_mode... ErrorMode>
-  using assignment_kernel =
-      detail::assignment_kernel<DstTypeID, type_kind_of<DstTypeID>::value,
-                                Src0TypeID, type_kind_of<Src0TypeID>::value,
-                                ErrorMode...>;
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  using assignment_kernel = detail::assignment_virtual_kernel<
+      DstTypeID, type_kind_of<DstTypeID>::value, Src0TypeID,
+      type_kind_of<Src0TypeID>::value>;
 
 /*
   // Float16 -> bool
@@ -2323,4 +2320,20 @@ namespace nd {
   };
 
 } // namespace dynd::nd
+
+namespace ndt {
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct type::equivalent<nd::detail::assignment_virtual_kernel<
+      DstTypeID, dynd::type_kind_of<DstTypeID>::value, Src0TypeID,
+      dynd::type_kind_of<Src0TypeID>::value>> {
+    static type make()
+    {
+      return ndt::arrfunc_type::make({ndt::type(Src0TypeID)},
+                                     ndt::type(DstTypeID));
+    }
+  };
+
+} // namespace dynd::ndt
+
 } // namespace dynd
