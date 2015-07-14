@@ -73,7 +73,34 @@ const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {
     ndt::type(complex_float32_type_id), ndt::type(complex_float64_type_id),
     ndt::type(void_type_id)};
 
-ndt::type ndt::type_kinds[DYND_TYPE_ID_MAX + 1];
+ndt::type ndt::type_kinds[DYND_TYPE_ID_MAX + 1] = {
+    type(reinterpret_cast<const base_type *>(uninitialized_type_id), false),
+    type(reinterpret_cast<const base_type *>(bool_type_id), false),
+    type(reinterpret_cast<const base_type *>(int8_type_id), false),
+    type(reinterpret_cast<const base_type *>(int16_type_id), false),
+    type(reinterpret_cast<const base_type *>(int32_type_id), false),
+    type(reinterpret_cast<const base_type *>(int64_type_id), false),
+    type(reinterpret_cast<const base_type *>(int128_type_id), false),
+    type(reinterpret_cast<const base_type *>(uint8_type_id), false),
+    type(reinterpret_cast<const base_type *>(uint16_type_id), false),
+    type(reinterpret_cast<const base_type *>(uint32_type_id), false),
+    type(reinterpret_cast<const base_type *>(uint64_type_id), false),
+    type(reinterpret_cast<const base_type *>(uint128_type_id), false),
+    type(reinterpret_cast<const base_type *>(float16_type_id), false),
+    type(reinterpret_cast<const base_type *>(float32_type_id), false),
+    type(reinterpret_cast<const base_type *>(float64_type_id), false),
+    type(reinterpret_cast<const base_type *>(float128_type_id), false),
+    type(reinterpret_cast<const base_type *>(complex_float32_type_id), false),
+    type(reinterpret_cast<const base_type *>(complex_float64_type_id), false),
+    type(reinterpret_cast<const base_type *>(void_type_id), false),
+    type(), // void_pointer_type_id
+    type(), // pointer_type_id
+    type(), //   bytes_type_id,
+    type(), //   fixed_bytes_type_id,
+    type(), //   char_type_id,
+    type(), //   string_type_id,
+    type()  //   fixed_string_type_id,
+};
 
 ndt::type::type(const std::string &rep) : m_extended(NULL)
 {

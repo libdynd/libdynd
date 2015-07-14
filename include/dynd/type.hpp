@@ -904,6 +904,15 @@ namespace ndt {
       static const bool value = detail::has_make<equivalent<T>>::value;
     };
 
+/*
+    static type make_builtin(type_id_t tp_id)
+    {
+      // validate the builtin
+
+      return type(reinterpret_cast<const base_type *>(tp_id), false);
+    }
+*/
+
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
