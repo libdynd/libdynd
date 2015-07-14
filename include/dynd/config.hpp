@@ -52,6 +52,13 @@
 
 #define DYND_IGNORE_UNUSED(NAME) NAME __attribute__((unused))
 
+// Ignore erroneous maybe-uninitizlized
+// warnings on a given line or code block.
+#define DYND_IGNORE_MAYBE_UNINITIALIZED                                        \
+  _Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+#define DYND_END_IGNORE_MAYBE_UNINITIALIZED                                    \
+  _Pragma("GCC diagnostic pop")  
+
 #define DYND_CONSTEXPR constexpr
 
 #define DYND_ISSPACE isspace
@@ -538,6 +545,11 @@ https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-st
 
 #ifndef DYND_IGNORE_UNUSED
 #define DYND_IGNORE_UNUSED(NAME) NAME
+#endif
+
+#ifndef DYND_IGNORE_MAYBE_UNINITIALIZED
+#define DYND_IGNORE_MAYBE_UNINITIALIZED
+#define DYND_END_IGNORE_MAYBE_UNINITIALIZED
 #endif
 
 #define DYND_INC_IF_NOT_NULL(POINTER, OFFSET)                                  \
