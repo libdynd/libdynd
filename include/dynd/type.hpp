@@ -94,6 +94,11 @@ namespace nd {
 } // namespace dynd::nd
 
 namespace ndt {
+  namespace detail {
+
+    DYND_HAS(make);
+
+  } // namespace ndt::detail
 
   template <class T>
   struct fixed_dim_from_array;
@@ -891,11 +896,12 @@ namespace ndt {
     }
 
     template <typename T>
-    struct equivalent;
+    struct equivalent {
+    };
 
     template <typename T>
     struct has_equivalent {
-      static const bool value = is_destructible<equivalent<T>>::value;
+      static const bool value = detail::has_make<equivalent<T>>::value;
     };
 
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
