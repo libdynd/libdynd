@@ -21,7 +21,7 @@ ndt::type make_unaligned(const ndt::type& value_type);
 template<typename T>
 ndt::type make_unaligned()
 {
-    return make_unaligned(ndt::make_type<T>());
+    return make_unaligned(type::make<T>());
 }
 
 }} // namespace dynd::ndt

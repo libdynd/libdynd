@@ -33,7 +33,7 @@ TEST(Elwise, UnaryExpr_FixedDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_string(), assign_error_default);
+      ndt::type::make<int>(), ndt::make_string(), assign_error_default);
   // Lift the arrfunc
   nd::arrfunc af = nd::functional::elwise(af_base);
 
@@ -52,7 +52,7 @@ TEST(Elwise, UnaryExpr_StridedDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
+      ndt::type::make<int>(), ndt::make_fixed_string(16), assign_error_default);
   // Lift the arrfunc
   nd::arrfunc af = nd::functional::elwise(af_base);
 
@@ -73,7 +73,7 @@ TEST(Elwise, UnaryExpr_VarDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
+      ndt::type::make<int>(), ndt::make_fixed_string(16), assign_error_default);
   // Lift the arrfunc
   nd::arrfunc af = nd::functional::elwise(af_base);
 
@@ -95,7 +95,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
+      ndt::type::make<int>(), ndt::make_fixed_string(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
   nd::arrfunc af = nd::functional::elwise(af_base);
@@ -132,7 +132,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
+      ndt::type::make<int>(), ndt::make_fixed_string(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
   nd::arrfunc af = nd::functional::elwise(af_base);
@@ -164,7 +164,7 @@ TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::make_type<int>(), ndt::make_fixed_string(16), assign_error_default);
+      ndt::type::make<int>(), ndt::make_fixed_string(16), assign_error_default);
   // Lift the arrfunc
   nd::arrfunc af = nd::functional::elwise(af_base);
 
@@ -201,7 +201,7 @@ TEST(LiftArrFunc, Expr_MultiDimVarToVarDim) {
     ndt::type add_ints_type = (nd::array((int32_t)0) +
 nd::array((int32_t)0)).get_type();
     nd::arrfunc af_base = make_arrfunc_from_assignment(
-        ndt::make_type<int32_t>(), add_ints_type,
+        ndt::type::make<int32_t>(), add_ints_type,
         assign_error_default);
     // Lift the arrfunc
     nd::arrfunc af = lift_arrfunc(af_base);

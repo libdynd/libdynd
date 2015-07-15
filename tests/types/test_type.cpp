@@ -84,7 +84,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // int
-  d = ndt::make_type<int>();
+  d = ndt::type::make<int>();
   EXPECT_EQ(int32_type_id, d.get_type_id());
   EXPECT_EQ(sint_kind, d.get_kind());
   EXPECT_EQ(sizeof(int), d.get_data_alignment());
@@ -94,7 +94,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // long
-  d = ndt::make_type<long>();
+  d = ndt::type::make<long>();
   EXPECT_EQ(sint_kind, d.get_kind());
   EXPECT_EQ(sizeof(long), d.get_data_alignment());
   EXPECT_EQ(sizeof(long), d.get_data_size());
@@ -103,7 +103,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // long long
-  d = ndt::make_type<long long>();
+  d = ndt::type::make<long long>();
   EXPECT_EQ(int64_type_id, d.get_type_id());
   EXPECT_EQ(sint_kind, d.get_kind());
   EXPECT_EQ((size_t)scalar_align_of<long long>::value, d.get_data_alignment());
@@ -113,7 +113,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // unsigned int
-  d = ndt::make_type<unsigned int>();
+  d = ndt::type::make<unsigned int>();
   EXPECT_EQ(uint32_type_id, d.get_type_id());
   EXPECT_EQ(uint_kind, d.get_kind());
   EXPECT_EQ(sizeof(unsigned int), d.get_data_alignment());
@@ -123,7 +123,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // unsigned long
-  d = ndt::make_type<unsigned long>();
+  d = ndt::type::make<unsigned long>();
   EXPECT_EQ(uint_kind, d.get_kind());
   EXPECT_EQ(sizeof(unsigned long), d.get_data_alignment());
   EXPECT_EQ(sizeof(unsigned long), d.get_data_size());
@@ -132,7 +132,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // unsigned long long
-  d = ndt::make_type<unsigned long long>();
+  d = ndt::type::make<unsigned long long>();
   EXPECT_EQ(uint64_type_id, d.get_type_id());
   EXPECT_EQ(uint_kind, d.get_kind());
   EXPECT_EQ((size_t)scalar_align_of<unsigned long long>::value,
@@ -143,7 +143,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // float
-  d = ndt::make_type<float>();
+  d = ndt::type::make<float>();
   EXPECT_EQ(float32_type_id, d.get_type_id());
   EXPECT_EQ(real_kind, d.get_kind());
   EXPECT_EQ(sizeof(float), d.get_data_alignment());
@@ -153,7 +153,7 @@ TEST(Type, BasicConstructor)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // double
-  d = ndt::make_type<double>();
+  d = ndt::type::make<double>();
   EXPECT_EQ(float64_type_id, d.get_type_id());
   EXPECT_EQ(real_kind, d.get_kind());
   EXPECT_EQ((size_t)scalar_align_of<double>::value, d.get_data_alignment());

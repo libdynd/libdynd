@@ -145,7 +145,7 @@ TEST(View, FromBytes) {
     double x = 3.25;
     a = nd::make_bytes_array(reinterpret_cast<const char *>(&x), sizeof(x), 8);
     ASSERT_EQ(ndt::make_bytes(8), a.get_type());
-    b = nd::view(a, ndt::make_type<double>());
+    b = nd::view(a, ndt::type::make<double>());
     EXPECT_EQ(3.25, b.as<double>());
     btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
     btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());

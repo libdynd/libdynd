@@ -31,23 +31,23 @@ TEST(BinaryKernelAdapter, BasicOperations) {
     kernel_instance<binary_operation_t> op_int_float_double, op_float_float_float, op_float_double_int;
     // NOTE: Cannot cast directly to <void*>, because of a compile error on MSVC:
     //         "Context does not allow for disambiguation of overloaded function"
-    cgcache.codegen_binary_function_adapter(ndt::make_type<int>(),
-                                            ndt::make_type<float>(),
-                                            ndt::make_type<double>(),
+    cgcache.codegen_binary_function_adapter(ndt::type::make<int>(),
+                                            ndt::type::make<float>(),
+                                            ndt::type::make<double>(),
                                             cdecl_callconv,
                                             (void*)static_cast<int (*)(float, double)>(&multiply_values<int, float, double>),
                                             NULL,
                                             op_int_float_double);
-    cgcache.codegen_binary_function_adapter(ndt::make_type<float>(),
-                                            ndt::make_type<float>(),
-                                            ndt::make_type<float>(),
+    cgcache.codegen_binary_function_adapter(ndt::type::make<float>(),
+                                            ndt::type::make<float>(),
+                                            ndt::type::make<float>(),
                                             cdecl_callconv,
                                             (void*)static_cast<float (*)(float, float)>(&multiply_values<float, float, float>),
                                             NULL,
                                             op_float_float_float);
-    cgcache.codegen_binary_function_adapter(ndt::make_type<float>(),
-                                            ndt::make_type<double>(),
-                                            ndt::make_type<int>(),
+    cgcache.codegen_binary_function_adapter(ndt::type::make<float>(),
+                                            ndt::type::make<double>(),
+                                            ndt::type::make<int>(),
                                             cdecl_callconv,
                                             (void*)static_cast<float (*)(double, int)>(&multiply_values<float, double, int>),
                                             NULL,
@@ -114,9 +114,9 @@ static int raise_if_greater(int value1, int value2) {
 TEST(BinaryKernelAdapter, UnwindException) {
     codegen_cache cgcache;
     kernel_instance<binary_operation_t> rig;
-    cgcache.codegen_binary_function_adapter(ndt::make_type<int>(),
-                                            ndt::make_type<int>(),
-                                            ndt::make_type<int>(),
+    cgcache.codegen_binary_function_adapter(ndt::type::make<int>(),
+                                            ndt::type::make<int>(),
+                                            ndt::type::make<int>(),
                                             cdecl_callconv,
                                             reinterpret_cast<void*>(&raise_if_greater),
                                             NULL,

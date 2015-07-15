@@ -144,7 +144,7 @@ bool ndt::typevar_constructed_type::match(
     if (m_arg.match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars)) {
       type &tv_type = tp_vars[m_name];
       if (tv_type.is_null()) {
-        tv_type = make_type<void>();
+        tv_type = type::make<void>();
       }
       return true;
     }
@@ -156,7 +156,7 @@ bool ndt::typevar_constructed_type::match(
     // This typevar hasn't been seen yet
     tv_type =
         candidate_tp.extended<base_memory_type>()->with_replaced_storage_type(
-            make_type<void>());
+            type::make<void>());
   }
 
   return m_arg.match(

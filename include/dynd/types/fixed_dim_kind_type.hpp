@@ -14,6 +14,13 @@
 #include <dynd/array.hpp>
 
 namespace dynd {
+namespace nd {
+
+  template <typename T, int N>
+  class strided_vals;
+
+} // namespace dynd::nd
+
 namespace ndt {
 
   class fixed_dim_kind_type : public base_dim_type {
@@ -85,22 +92,38 @@ namespace ndt {
     {
       return type(new fixed_dim_kind_type(element_tp), false);
     }
+
+    static type make(const type &element_tp, intptr_t ndim)
+    {
+      if (ndim > 0) {
+        type result = make(element_tp);
+        for (intptr_t i = 1; i < ndim; ++i) {
+          result = make(result);
+        }
+        return result;
+      } else {
+        return element_tp;
+      }
+    }
   };
 
   type make_fixed_dim_kind(const type &element_tp);
 
   inline type make_fixed_dim_kind(const type &uniform_tp, intptr_t ndim)
   {
-    if (ndim > 0) {
-      type result = make_fixed_dim_kind(uniform_tp);
-      for (intptr_t i = 1; i < ndim; ++i) {
-        result = make_fixed_dim_kind(result);
-      }
-      return result;
-    } else {
-      return uniform_tp;
-    }
+    return fixed_dim_kind_type::make(uniform_tp, ndim);
   }
+
+  template <typename T>
+  struct type::equivalent<T[]> {
+    static type make() { return fixed_dim_kind_type::make(type::make<T>()); }
+  };
+
+  // Produces type "Fixed ** <N> * <T>"
+  template <typename T, int N>
+  struct type::equivalent<nd::strided_vals<T, N>> {
+    static type make() { return fixed_dim_kind_type::make(type::make<T>(), N); }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

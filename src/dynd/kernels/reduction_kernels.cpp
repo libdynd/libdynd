@@ -213,7 +213,7 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
   }
   return nd::arrfunc::make<mean1d_kernel>(
       ndt::make_arrfunc(
-          ndt::make_tuple(ndt::make_fixed_dim_kind(ndt::make_type<double>())),
-          ndt::make_type<double>()),
+          ndt::make_tuple(ndt::make_fixed_dim_kind(ndt::type::make<double>())),
+          ndt::type::make<double>()),
       minp, 0);
 }

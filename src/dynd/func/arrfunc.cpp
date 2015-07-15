@@ -151,7 +151,7 @@ void nd::detail::validate_kwd_types(const ndt::arrfunc_type *af_tp,
     ndt::type &actual_tp = kwd_tp[j];
     actual_tp = ndt::substitute(af_tp->get_kwd_type(j), tp_vars, false);
     if (actual_tp.is_symbolic()) {
-      actual_tp = ndt::make_option(ndt::make_type<void>());
+      actual_tp = ndt::make_option(ndt::type::make<void>());
     }
   }
 }

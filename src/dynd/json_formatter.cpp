@@ -80,7 +80,7 @@ static void format_json_bool(output_data &out, const ndt::type &dt,
   if (dt.get_type_id() == bool_type_id) {
     value = (*data != 0);
   } else {
-    typed_data_assign(ndt::make_type<bool1>(), NULL,
+    typed_data_assign(ndt::type::make<bool1>(), NULL,
                       reinterpret_cast<char *>(&value), dt, arrmeta, data);
   }
   if (value) {

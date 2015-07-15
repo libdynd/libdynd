@@ -30,7 +30,7 @@ TEST(TakeByPointer, Simple) {
     idx = parse_json("4 * intptr", "[2, 1, 0, 3]");
     res = af(a, idx);
     EXPECT_EQ(4, res.get_dim_size());
-    EXPECT_EQ(ndt::make_type<int *>(), res.get_dtype());
+    EXPECT_EQ(ndt::type::make<int *>(), res.get_dtype());
     EXPECT_EQ(2, *res(0).as<int *>());
     EXPECT_EQ(1, *res(1).as<int *>());
     EXPECT_EQ(0, *res(2).as<int *>());
@@ -42,7 +42,7 @@ TEST(TakeByPointer, Simple) {
         "[[0, 2], [1, 0], [1, 1]]");
     res = af(a, idx);
     EXPECT_EQ(3, res.get_dim_size());
-    EXPECT_EQ(ndt::make_type<double *>(), res.get_dtype());
+    EXPECT_EQ(ndt::type::make<double *>(), res.get_dtype());
     EXPECT_EQ(2.1, *res(0).as<double *>());
     EXPECT_EQ(-32.7, *res(1).as<double *>());
     EXPECT_EQ(15.3, *res(2).as<double *>());
@@ -56,7 +56,7 @@ TEST(TakeByPointer, Simple) {
         "[[3, 2, 1], [1, 0, 1], [2, 1, 2], [3, 3, 3], [0, 2, 1]]");
     res = af(a, idx);
     EXPECT_EQ(5, res.get_dim_size());
-    EXPECT_EQ(ndt::make_type<int *>(), res.get_dtype());
+    EXPECT_EQ(ndt::type::make<int *>(), res.get_dtype());
     EXPECT_EQ(57, *res(0).as<int *>());
     EXPECT_EQ(17, *res(1).as<int *>());
     EXPECT_EQ(38, *res(2).as<int *>());

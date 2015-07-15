@@ -759,7 +759,7 @@ ndt::type ndt::datetime_type::get_elwise_property_type(size_t property_index,
   default:
     out_readable = true;
     out_writable = false;
-    return make_type<int32_t>();
+    return type::make<int32_t>();
   }
 }
 

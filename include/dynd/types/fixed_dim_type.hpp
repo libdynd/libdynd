@@ -197,5 +197,10 @@ namespace ndt {
     return result;
   }
 
+  template <typename T, int N>
+  struct type::equivalent<T[N]> {
+    static type make() { return make_fixed_dim(N, type::make<T>()); }
+  };
+
 } // namespace dynd::ndt
 } // namespace dynd

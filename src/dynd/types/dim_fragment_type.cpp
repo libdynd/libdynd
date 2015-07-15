@@ -15,7 +15,7 @@ using namespace dynd;
 
 ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim,
                                           const intptr_t *tagged_dims)
-    : base_dim_type(dim_fragment_type_id, pattern_kind, make_type<void>(), 0, 1,
+    : base_dim_type(dim_fragment_type_id, pattern_kind, type::make<void>(), 0, 1,
                     0, type_flag_symbolic, false),
       m_tagged_dims(ndim, tagged_dims)
 {
@@ -96,7 +96,7 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
 }
 
 ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim, const type &tp)
-    : base_dim_type(dim_fragment_type_id, make_type<void>(), 0, 1, 0,
+    : base_dim_type(dim_fragment_type_id, type::make<void>(), 0, 1, 0,
                     type_flag_symbolic, false),
       m_tagged_dims(ndim)
 {

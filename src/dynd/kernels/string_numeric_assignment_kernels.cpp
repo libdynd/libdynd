@@ -221,11 +221,11 @@ struct string_to_int {
       uint64_t value = parse::checked_string_to_uint64(
           s.data(), s.data() + s.size(), overflow, badparse);
       if (badparse) {
-        raise_string_cast_error(ndt::make_type<T>(),
+        raise_string_cast_error(ndt::type::make<T>(),
                                 ndt::type(e->src_string_tp, true),
                                 e->src_arrmeta, src[0]);
       } else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
-        raise_string_cast_overflow_error(ndt::make_type<T>(),
+        raise_string_cast_overflow_error(ndt::type::make<T>(),
                                          ndt::type(e->src_string_tp, true),
                                          e->src_arrmeta, src[0]);
       }
@@ -262,12 +262,12 @@ struct string_to_uint {
       uint64_t value = parse::checked_string_to_uint64(
           s.data(), s.data() + s.size(), overflow, badparse);
       if (badparse) {
-        raise_string_cast_error(ndt::make_type<T>(),
+        raise_string_cast_error(ndt::type::make<T>(),
                                 ndt::type(e->src_string_tp, true),
                                 e->src_arrmeta, src[0]);
       } else if (overflow || (negative && value != 0) ||
                  overflow_check<T>::is_overflow(value)) {
-        raise_string_cast_overflow_error(ndt::make_type<T>(),
+        raise_string_cast_overflow_error(ndt::type::make<T>(),
                                          ndt::type(e->src_string_tp, true),
                                          e->src_arrmeta, src[0]);
       }
@@ -301,12 +301,12 @@ static void string_to_int128_single(char *dst, char *const *src,
     uint128 value = parse::checked_string_to_uint128(
         s.data(), s.data() + s.size(), overflow, badparse);
     if (badparse) {
-      raise_string_cast_error(ndt::make_type<int128>(),
+      raise_string_cast_error(ndt::type::make<int128>(),
                               ndt::type(e->src_string_tp, true), e->src_arrmeta,
                               src[0]);
     } else if (overflow ||
                overflow_check<int128>::is_overflow(value, negative)) {
-      raise_string_cast_overflow_error(ndt::make_type<int128>(),
+      raise_string_cast_overflow_error(ndt::type::make<int128>(),
                                        ndt::type(e->src_string_tp, true),
                                        e->src_arrmeta, src[0]);
     }
@@ -337,11 +337,11 @@ static void string_to_uint128_single(char *dst, char *const *src,
     result = parse::checked_string_to_uint128(s.data(), s.data() + s.size(),
                                               overflow, badparse);
     if (badparse) {
-      raise_string_cast_error(ndt::make_type<int128>(),
+      raise_string_cast_error(ndt::type::make<int128>(),
                               ndt::type(e->src_string_tp, true), e->src_arrmeta,
                               src[0]);
     } else if (overflow || (negative && result != 0)) {
-      raise_string_cast_overflow_error(ndt::make_type<uint128>(),
+      raise_string_cast_overflow_error(ndt::type::make<uint128>(),
                                        ndt::type(e->src_string_tp, true),
                                        e->src_arrmeta, src[0]);
     }

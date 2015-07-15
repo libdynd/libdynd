@@ -266,7 +266,7 @@ ndt::type ndt::base_struct_type::get_elwise_property_type(
     out_writable = false;
     return get_field_type(elwise_property_index).value_type();
   } else {
-    return make_type<void>();
+    return type::make<void>();
   }
 }
 

@@ -79,7 +79,7 @@ namespace kernels {
       self_type::make(ckb, kernreq, ckb_offset,
                       detail::make_array_wrapper<N>(perm));
       return child->instantiate(const_cast<char *>(child->static_data), 0, NULL,
-                                ckb, ckb_offset, ndt::make_type<void>(), NULL,
+                                ckb, ckb_offset, ndt::type::make<void>(), NULL,
                                 nsrc, src_tp_inv, src_arrmeta_inv, kernreq,
                                 ectx, kwds, tp_vars);
     }

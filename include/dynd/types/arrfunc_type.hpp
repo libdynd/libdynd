@@ -395,7 +395,7 @@ namespace ndt {
     {
       nd::array arg_tp = nd::empty(0, make_type());
       arg_tp.flag_as_immutable();
-      return make_arrfunc(make_tuple(arg_tp), make_type<R>());
+      return make_arrfunc(make_tuple(arg_tp), type::make<R>());
     }
   };
 
@@ -403,22 +403,22 @@ namespace ndt {
   struct as_arrfunc_type<kernel_request_host, R(A...)> {
     static type make()
     {
-      type tp[sizeof...(A)] = {make_type<typename std::remove_cv<
+      type tp[sizeof...(A)] = {type::make<typename std::remove_cv<
           typename std::remove_reference<A>::type>::type>()...};
-      return make_arrfunc(make_tuple(tp), make_type<R>());
+      return make_arrfunc(make_tuple(tp), type::make<R>());
     }
 
     template <typename... T>
     static type make(T &&... names)
     {
-      type tp[sizeof...(A)] = {make_type<typename std::remove_cv<
+      type tp[sizeof...(A)] = {type::make<typename std::remove_cv<
           typename std::remove_reference<A>::type>::type>()...};
 
       return make_arrfunc(
           make_tuple(nd::array(tp, sizeof...(A) - sizeof...(T))),
           make_struct({names...}, nd::array(tp + (sizeof...(A) - sizeof...(T)),
                                             sizeof...(T))),
-          make_type<R>());
+          type::make<R>());
     }
   };
 
@@ -428,13 +428,13 @@ namespace ndt {
   struct as_arrfunc_type<kernel_request_cuda_device, R(A...)> {
     static type make()
     {
-      type ret_tp = make_type<R>();
+      type ret_tp = type::make<R>();
       if (ret_tp.get_kind() != void_kind) {
         ret_tp = make_cuda_device(ret_tp);
       }
 
       type arg_tp[sizeof...(A)] = {
-          make_cuda_device(make_type<typename std::remove_cv<
+          make_cuda_device(type::make<typename std::remove_cv<
               typename std::remove_reference<A>::type>::type>())...};
       return make_arrfunc(make_tuple(arg_tp), ret_tp);
     }
@@ -442,13 +442,13 @@ namespace ndt {
     template <typename... T>
     static type make(T &&... names)
     {
-      type ret_tp = make_type<R>();
+      type ret_tp = type::make<R>();
       if (ret_tp.get_kind() != void_kind) {
         ret_tp = make_cuda_device(ret_tp);
       }
 
       type arg_tp[sizeof...(A)] = {
-          make_cuda_device(make_type<typename std::remove_cv<
+          make_cuda_device(type::make<typename std::remove_cv<
               typename std::remove_reference<A>::type>::type>())...};
       return make_arrfunc(
           make_tuple(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
@@ -465,7 +465,7 @@ namespace ndt {
     {
       nd::array arg_tp = nd::empty(0, make_type());
       arg_tp.flag_as_immutable();
-      return make_arrfunc(make_tuple(arg_tp), make_cuda_device(make_type<R>()));
+      return make_arrfunc(make_tuple(arg_tp), make_cuda_device(type::make<R>()));
     }
   };
 

@@ -15,9 +15,9 @@ using namespace dynd;
 
 template<class S, class T, class U>
 void type_promotion_matches_cxx_test(S, T, U) {
-    EXPECT_EQ(ndt::make_type<U>(), promote_types_arithmetic(ndt::make_type<S>(), ndt::make_type<T>()));
-    if (ndt::make_type<U>() != promote_types_arithmetic(ndt::make_type<S>(), ndt::make_type<T>()))
-        cout << "S: " << ndt::make_type<S>() << ", T: " << ndt::make_type<T>() << ", U: " << ndt::make_type<U>() << "\n";
+    EXPECT_EQ(ndt::type::make<U>(), promote_types_arithmetic(ndt::type::make<S>(), ndt::type::make<T>()));
+    if (ndt::type::make<U>() != promote_types_arithmetic(ndt::type::make<S>(), ndt::type::make<T>()))
+        cout << "S: " << ndt::type::make<S>() << ", T: " << ndt::type::make<T>() << ", U: " << ndt::type::make<U>() << "\n";
 }
 
 template<class S, class T>
@@ -61,39 +61,39 @@ TEST(DTypePromotion, MatchesCxx) {
 #undef TEST_ALL_SECOND
 
 TEST(DTypePromotion, IntWithComplex) {
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<int8_t>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<int16_t>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<int32_t>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<int64_t>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<uint8_t>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<uint16_t>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<uint32_t>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<uint64_t>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<int8_t>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<int16_t>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<int32_t>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<int64_t>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<uint8_t>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<uint16_t>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<uint32_t>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<uint64_t>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
 
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<int8_t>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<int16_t>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<int32_t>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<int64_t>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<uint8_t>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<uint16_t>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<uint32_t>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<uint64_t>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<int8_t>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<int16_t>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<int32_t>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<int64_t>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<uint8_t>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<uint16_t>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<uint32_t>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<uint64_t>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
 }
 
 TEST(DTypePromotion, FloatWithComplex) {
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<float>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<float>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<double>(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<double>(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<dynd::complex<float> >(), ndt::make_type<float>()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<dynd::complex<double> >(), ndt::make_type<float>()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<dynd::complex<float> >(), ndt::make_type<double>()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<dynd::complex<double> >(), ndt::make_type<double>()), ndt::make_type<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<float>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<float>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<double>(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<double>(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<dynd::complex<float> >(), ndt::type::make<float>()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<dynd::complex<double> >(), ndt::type::make<float>()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<dynd::complex<float> >(), ndt::type::make<double>()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<dynd::complex<double> >(), ndt::type::make<double>()), ndt::type::make<dynd::complex<double> >());
 }
 
 TEST(DTypePromotion, ComplexWithComplex) {
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<dynd::complex<float> >(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<float> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<dynd::complex<float> >(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<dynd::complex<double> >(), ndt::make_type<dynd::complex<float> >()), ndt::make_type<dynd::complex<double> >());
-    EXPECT_EQ(promote_types_arithmetic(ndt::make_type<dynd::complex<double> >(), ndt::make_type<dynd::complex<double> >()), ndt::make_type<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<dynd::complex<float> >(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<float> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<dynd::complex<float> >(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<dynd::complex<double> >(), ndt::type::make<dynd::complex<float> >()), ndt::type::make<dynd::complex<double> >());
+    EXPECT_EQ(promote_types_arithmetic(ndt::type::make<dynd::complex<double> >(), ndt::type::make<dynd::complex<double> >()), ndt::type::make<dynd::complex<double> >());
 }

@@ -36,7 +36,7 @@ TEST(DTypeDType, BasicNDArray) {
 
     a = ndt::type("int32");
     EXPECT_EQ(type_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(ndt::make_type<int32_t>(), a.as<ndt::type>());
+    EXPECT_EQ(ndt::type::make<int32_t>(), a.as<ndt::type>());
 }
 
 TEST(DTypeDType, StringCasting) {
@@ -45,7 +45,7 @@ TEST(DTypeDType, StringCasting) {
     a = nd::array("int32").ucast(ndt::make_type());
     a = a.eval();
     EXPECT_EQ(type_type_id, a.get_type().get_type_id());
-    EXPECT_EQ(ndt::make_type<int32_t>(), a.as<ndt::type>());
+    EXPECT_EQ(ndt::type::make<int32_t>(), a.as<ndt::type>());
     EXPECT_EQ("int32", a.as<string>());
 }
 
@@ -84,10 +84,10 @@ TEST(DTypeDType, StridedArrayRefCount) {
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
     // Assigning one value should free one reference count
-    a.vals_at(0) = ndt::make_type<float>();
+    a.vals_at(0) = ndt::type::make<float>();
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning all values should free all the reference counts
-    a.vals() = ndt::make_type<int>();
+    a.vals() = ndt::type::make<int>();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -103,15 +103,15 @@ TEST(DTypeDType, StridedArrayRefCount) {
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning one value should free one reference count
-    a.vals_at(0,1) = ndt::make_type<float>();
+    a.vals_at(0,1) = ndt::type::make<float>();
     EXPECT_EQ(9, d.extended()->get_use_count());
     // Assigning all values should free all the reference counts
-    a.vals() = ndt::make_type<int>();
+    a.vals() = ndt::type::make<int>();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning one slice should free several reference counts
-    a.vals_at(1) = ndt::make_type<double>();
+    a.vals_at(1) = ndt::type::make<double>();
     EXPECT_EQ(7, d.extended()->get_use_count());
     // Assigning a new reference to 'a' should free the references when
     // destructing the existing 'a'
@@ -131,10 +131,10 @@ TEST(DTypeDType, FixedArrayRefCount) {
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
     // Assigning one value should free one reference count
-    a.vals_at(0) = ndt::make_type<float>();
+    a.vals_at(0) = ndt::type::make<float>();
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning all values should free all the reference counts
-    a.vals() = ndt::make_type<int>();
+    a.vals() = ndt::type::make<int>();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -150,15 +150,15 @@ TEST(DTypeDType, FixedArrayRefCount) {
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning one value should free one reference count
-    a.vals_at(0,1) = ndt::make_type<float>();
+    a.vals_at(0,1) = ndt::type::make<float>();
     EXPECT_EQ(9, d.extended()->get_use_count());
     // Assigning all values should free all the reference counts
-    a.vals() = ndt::make_type<int>();
+    a.vals() = ndt::type::make<int>();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning one slice should free several reference counts
-    a.vals_at(1) = ndt::make_type<double>();
+    a.vals_at(1) = ndt::type::make<double>();
     EXPECT_EQ(7, d.extended()->get_use_count());
     // Assigning a new reference to 'a' should free the references when
     // destructing the existing 'a'
@@ -182,10 +182,10 @@ TEST(DTypeDType, VarArrayRefCount) {
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
     // Assigning one value should free one reference count
-    a(0).vals() = ndt::make_type<float>();
+    a(0).vals() = ndt::type::make<float>();
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning all values should free all the reference counts
-    a.vals() = ndt::make_type<int>();
+    a.vals() = ndt::type::make<int>();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(11, d.extended()->get_use_count());
@@ -203,15 +203,15 @@ TEST(DTypeDType, VarArrayRefCount) {
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning one value should free one reference count
-    a(0,1).vals() = ndt::make_type<float>();
+    a(0,1).vals() = ndt::type::make<float>();
     EXPECT_EQ(9, d.extended()->get_use_count());
     // Assigning all values should free all the reference counts
-    a.vals() = ndt::make_type<int>();
+    a.vals() = ndt::type::make<int>();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals() = d;
     EXPECT_EQ(10, d.extended()->get_use_count());
     // Assigning one slice should free several reference counts
-    a.vals_at(2) = ndt::make_type<double>();
+    a.vals_at(2) = ndt::type::make<double>();
     EXPECT_EQ(6, d.extended()->get_use_count());
     // Assigning a new reference to 'a' should free the references when
     // destructing the existing 'a'
@@ -235,7 +235,7 @@ TEST(DTypeDType, CStructRefCount) {
     // Assigning one value should free one reference count
     a.vals_at(0) = ndt::type();
     EXPECT_EQ(2, d.extended()->get_use_count());
-    a.vals_at(1,1) = ndt::make_type<int>();
+    a.vals_at(1,1) = ndt::type::make<int>();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals_at(0) = d;
     EXPECT_EQ(2, d.extended()->get_use_count());
@@ -257,7 +257,7 @@ TEST(DTypeDType, CStructRefCount) {
     // Assigning one value should free one reference count
     a.vals_at(0,0) = ndt::type();
     EXPECT_EQ(20, d.extended()->get_use_count());
-    a.vals_at(-1,1,1) = ndt::make_type<int>();
+    a.vals_at(-1,1,1) = ndt::type::make<int>();
     EXPECT_EQ(19, d.extended()->get_use_count());
     // Assigning one slice should free several reference counts
     a(3 <= irange() < 6).p("dt").vals() = ndt::type();
@@ -285,7 +285,7 @@ TEST(DTypeDType, StructRefCount) {
     // Assigning one value should free one reference count
     a.vals_at(0) = ndt::type();
     EXPECT_EQ(2, d.extended()->get_use_count());
-    a.vals_at(1,1) = ndt::make_type<int>();
+    a.vals_at(1,1) = ndt::type::make<int>();
     EXPECT_EQ(1, d.extended()->get_use_count());
     a.vals_at(0) = d;
     EXPECT_EQ(2, d.extended()->get_use_count());
@@ -307,7 +307,7 @@ TEST(DTypeDType, StructRefCount) {
     // Assigning one value should free one reference count
     a.vals_at(0,0) = ndt::type();
     EXPECT_EQ(20, d.extended()->get_use_count());
-    a.vals_at(-1,1,1) = ndt::make_type<int>();
+    a.vals_at(-1,1,1) = ndt::type::make<int>();
     EXPECT_EQ(19, d.extended()->get_use_count());
     // Assigning one slice should free several reference counts
     a(3 <= irange() < 6).p("dt").vals() = ndt::type();

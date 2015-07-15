@@ -143,7 +143,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
   // Set up some data for the test reduction
   nd::array a = 1.25f;
   ASSERT_EQ(af.get_type()->get_pos_type(0), a.get_type());
-  nd::array b = nd::empty(ndt::make_type<float>());
+  nd::array b = nd::empty(ndt::type::make<float>());
   ASSERT_EQ(af.get_type()->get_return_type(), b.get_type());
 
   // Instantiate the lifted ckernel
@@ -178,7 +178,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
   // Set up some data for the test reduction
   nd::array a = 1.25f;
   ASSERT_EQ(af.get_type()->get_pos_type(0), a.get_type());
-  nd::array b = nd::empty(ndt::make_type<float>());
+  nd::array b = nd::empty(ndt::type::make<float>());
   ASSERT_EQ(af.get_type()->get_return_type(), b.get_type());
 
   // Instantiate the lifted ckernel
@@ -213,7 +213,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
   nd::array a = vals0;
   EXPECT_TYPE_MATCH(af.get_type()->get_pos_type(0), a.get_type());
-  nd::array b = nd::empty(ndt::make_type<float>());
+  nd::array b = nd::empty(ndt::type::make<float>());
   EXPECT_TYPE_MATCH(af.get_type()->get_return_type(), b.get_type());
 
   // Instantiate the lifted ckernel
@@ -267,7 +267,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
   nd::array a = vals0;
   EXPECT_TYPE_MATCH(af.get_type()->get_pos_type(0), a.get_type());
-  nd::array b = nd::empty(ndt::make_type<float>());
+  nd::array b = nd::empty(ndt::type::make<float>());
   EXPECT_TYPE_MATCH(af.get_type()->get_return_type(), b.get_type());
 
   // Instantiate the lifted ckernel
@@ -303,7 +303,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   nd::array a =
       parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
   EXPECT_TYPE_MATCH(af.get_type()->get_pos_type(0), a.get_type());
-  nd::array b = nd::empty(ndt::make_type<float>());
+  nd::array b = nd::empty(ndt::type::make<float>());
   EXPECT_TYPE_MATCH(af.get_type()->get_return_type(), b.get_type());
 
   // Instantiate the lifted ckernel

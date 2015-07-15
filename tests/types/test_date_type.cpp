@@ -36,7 +36,7 @@ TEST(DateType, Create) {
 }
 
 TEST(DateType, ValueCreation) {
-    ndt::type d = ndt::make_date(), di = ndt::make_type<int32_t>();
+    ndt::type d = ndt::make_date(), di = ndt::type::make<int32_t>();
 
     EXPECT_EQ((1600-1970)*365 - (1972-1600)/4 + 3 - 365,
                     nd::array("1599-01-01").ucast(d).view_scalars(di).as<int32_t>());
@@ -176,7 +176,7 @@ TEST(DateType, DatePropertyConvertOfString) {
     c = b.p("year");
     EXPECT_EQ(property_type_id, c.get_dtype().get_type_id());
     c = c.eval();
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), c.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<int>()), c.get_type());
     EXPECT_EQ(1931, c(0).as<int>());
     EXPECT_EQ(2013, c(1).as<int>());
     EXPECT_EQ(2012, c(2).as<int>());
@@ -185,7 +185,7 @@ TEST(DateType, DatePropertyConvertOfString) {
     c = b.f("weekday");
     EXPECT_EQ(property_type_id, c.get_dtype().get_type_id());
     c = c.eval();
-    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), c.get_type());
+    EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<int>()), c.get_type());
     EXPECT_EQ(5, c(0).as<int>());
     EXPECT_EQ(1, c(1).as<int>());
     EXPECT_EQ(1, c(2).as<int>());
@@ -200,9 +200,9 @@ TEST(DateType, ToStructFunction) {
     EXPECT_EQ(ndt::make_property(d, "struct"),
                     b.get_type());
     b = b.eval();
-    EXPECT_EQ(ndt::make_struct(ndt::make_type<int16_t>(), "year",
-                        ndt::make_type<int8_t>(), "month",
-                        ndt::make_type<int8_t>(), "day"),
+    EXPECT_EQ(ndt::make_struct(ndt::type::make<int16_t>(), "year",
+                        ndt::type::make<int8_t>(), "month",
+                        ndt::type::make<int8_t>(), "day"),
                     b.get_type());
     EXPECT_EQ(1955, b.p("year").as<int32_t>());
     EXPECT_EQ(3, b.p("month").as<int32_t>());
@@ -222,7 +222,7 @@ TEST(DateType, ToStruct) {
     a = nd::array("1955-03-13").ucast(d).eval();
 
     // This is the default struct produced
-    ds = ndt::make_struct(ndt::make_type<int32_t>(), "year", ndt::make_type<int8_t>(), "month", ndt::make_type<int8_t>(), "day");
+    ds = ndt::make_struct(ndt::type::make<int32_t>(), "year", ndt::type::make<int8_t>(), "month", ndt::type::make<int8_t>(), "day");
     b = nd::empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b(0).as<int32_t>());
@@ -230,7 +230,7 @@ TEST(DateType, ToStruct) {
     EXPECT_EQ(13, b(2).as<int8_t>());
 
     // This should work too
-    ds = ndt::make_struct(ndt::make_type<int16_t>(), "month", ndt::make_type<int16_t>(), "year", ndt::make_type<float>(), "day");
+    ds = ndt::make_struct(ndt::type::make<int16_t>(), "month", ndt::type::make<int16_t>(), "year", ndt::type::make<float>(), "day");
     b = nd::empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b(1).as<int16_t>());
@@ -243,7 +243,7 @@ TEST(DateType, FromStruct) {
     nd::array a, b;
 
     // This is the default struct accepted
-    ds = ndt::make_struct(ndt::make_type<int32_t>(), "year", ndt::make_type<int8_t>(), "month", ndt::make_type<int8_t>(), "day");
+    ds = ndt::make_struct(ndt::type::make<int32_t>(), "year", ndt::type::make<int8_t>(), "month", ndt::type::make<int8_t>(), "day");
     a = nd::empty(ds);
     a(0).vals() = 1955;
     a(1).vals() = 3;
@@ -255,7 +255,7 @@ TEST(DateType, FromStruct) {
     EXPECT_EQ(13,   b.p("day").as<int32_t>());
 
     // This should work too
-    ds = ndt::make_struct(ndt::make_type<int16_t>(), "month", ndt::make_type<int16_t>(), "year", ndt::make_type<float>(), "day");
+    ds = ndt::make_struct(ndt::type::make<int16_t>(), "month", ndt::type::make<int16_t>(), "year", ndt::type::make<float>(), "day");
     a = nd::empty(ds);
     a.p("year").vals() = 1955;
     a.p("month").vals() = 3;
@@ -440,7 +440,7 @@ TEST(DateType, AdaptAsInt) {
     nd::array a, b;
 
     a = parse_json("3 * date", "[\"2001-01-05\", \"1999-12-20\", \"2000-01-01\"]");
-    b = a.adapt(ndt::make_type<int>(), "days since 2000-01-01");
+    b = a.adapt(ndt::type::make<int>(), "days since 2000-01-01");
     EXPECT_EQ(370, b(0).as<int>());
     EXPECT_EQ(-12, b(1).as<int>());
     EXPECT_EQ(0, b(2).as<int>());

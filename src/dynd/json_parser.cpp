@@ -479,7 +479,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta,
       *out_data = value;
     }
     else {
-      typed_data_assign(tp, arrmeta, out_data, ndt::make_type<bool1>(),
+      typed_data_assign(tp, arrmeta, out_data, ndt::type::make<bool1>(),
                         NULL, &value);
     }
     rbegin = begin;

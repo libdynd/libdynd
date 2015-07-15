@@ -405,7 +405,7 @@ ndt::type ndt::time_type::get_elwise_property_type(size_t property_index,
   case timeprop_tick:
     out_readable = true;
     out_writable = false;
-    return make_type<int32_t>();
+    return type::make<int32_t>();
   case timeprop_struct:
     out_readable = true;
     out_writable = true;
@@ -413,7 +413,7 @@ ndt::type ndt::time_type::get_elwise_property_type(size_t property_index,
   default:
     out_readable = false;
     out_writable = false;
-    return make_type<void>();
+    return type::make<void>();
   }
 }
 

@@ -67,7 +67,7 @@ void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const
 const ndt::type &ndt::option_type::make_is_avail_type()
 {
   static ndt::type static_instance =
-      make_arrfunc(make_tuple(make_typevar("T")), make_type<bool1>());
+      make_arrfunc(make_tuple(make_typevar("T")), type::make<bool1>());
   return static_instance;
 }
 
@@ -122,7 +122,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
     ckernel_builder<kernel_request_host> ckb;
     const arrfunc_type_data *af = get_is_avail_arrfunc();
     type src_tp[1] = {type(this, true)};
-    af->instantiate(NULL, 0, NULL, &ckb, 0, make_type<bool1>(), NULL, 1, src_tp,
+    af->instantiate(NULL, 0, NULL, &ckb, 0, type::make<bool1>(), NULL, 1, src_tp,
                     &arrmeta, kernel_request_single, ectx, nd::array(),
                     std::map<nd::string, type>());
     ckernel_prefix *ckp = ckb.get();

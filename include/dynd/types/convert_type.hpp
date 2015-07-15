@@ -109,7 +109,7 @@ namespace ndt {
   template <typename Tvalue, typename Tstorage>
   type make_convert()
   {
-    return type(new convert_type(make_type<Tvalue>(), make_type<Tstorage>()),
+    return type(new convert_type(type::make<Tvalue>(), type::make<Tstorage>()),
                 false);
   }
 

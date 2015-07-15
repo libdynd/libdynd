@@ -68,7 +68,7 @@ namespace ndt {
   template <typename Tnative>
   type make_byteswap()
   {
-    return type(new byteswap_type(make_type<Tnative>()), false);
+    return type(new byteswap_type(type::make<Tnative>()), false);
   }
 
 } // namespace dynd::ndt

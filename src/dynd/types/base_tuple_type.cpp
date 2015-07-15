@@ -24,7 +24,7 @@ ndt::base_tuple_type::base_tuple_type(type_id_t type_id,
     : base_type(type_id, variadic ? kind_kind : tuple_kind, 0, 1,
                 flags | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
       m_field_count(field_types.get_dim_size()), m_field_types(field_types),
-      m_arrmeta_offsets(nd::empty(m_field_count, make_type<uintptr_t>())),
+      m_arrmeta_offsets(nd::empty(m_field_count, type::make<uintptr_t>())),
       m_variadic(variadic)
 {
   if (!nd::ensure_immutable_contig<type>(m_field_types)) {

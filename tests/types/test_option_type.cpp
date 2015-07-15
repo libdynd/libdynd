@@ -27,7 +27,7 @@ TEST(OptionType, Create) {
   EXPECT_EQ(option_kind, d.get_kind());
   EXPECT_EQ(2u, d.get_data_alignment());
   EXPECT_EQ(2u, d.get_data_size());
-  EXPECT_EQ(ndt::make_type<int16_t>(),
+  EXPECT_EQ(ndt::type::make<int16_t>(),
             d.extended<ndt::option_type>()->get_value_type());
   EXPECT_TRUE(d.is_scalar());
   EXPECT_FALSE(d.is_expression());
@@ -49,7 +49,7 @@ TEST(OptionType, Create) {
   EXPECT_EQ("?string", d.str());
 
   // No option of option allowed
-  EXPECT_THROW(ndt::make_option(ndt::make_option(ndt::make_type<int>())),
+  EXPECT_THROW(ndt::make_option(ndt::make_option(ndt::type::make<int>())),
                type_error);
   EXPECT_THROW(ndt::type("option[option[bool]]"), type_error);
 }

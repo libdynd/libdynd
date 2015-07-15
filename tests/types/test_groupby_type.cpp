@@ -29,10 +29,10 @@ TEST(GroupByDType, Basic) {
     int groups[] = {15,16};
     nd::array g = nd::groupby(data, by, ndt::make_categorical(groups));
     EXPECT_EQ(ndt::make_groupby(
-                  ndt::make_fixed_dim(3, ndt::make_type<int>()),
+                  ndt::make_fixed_dim(3, ndt::type::make<int>()),
                   ndt::make_fixed_dim(
                       3, ndt::make_convert(ndt::make_categorical(groups),
-                                           ndt::make_type<int>()))),
+                                           ndt::type::make<int>()))),
               g.get_type());
     g = g.eval();
     EXPECT_EQ(1, g(0, irange()).get_shape()[0]);
@@ -77,9 +77,9 @@ TEST(GroupByDType, MediumDeduceGroups) {
     by(80 <= irange() < 95).vals() = nd::range(15);
     by(95 <= irange() < 100).vals() = nd::range(5);
     nd::array g = nd::groupby(data, by);
-    EXPECT_EQ(ndt::make_groupby(ndt::make_fixed_dim(100, ndt::make_type<int>()),
+    EXPECT_EQ(ndt::make_groupby(ndt::make_fixed_dim(100, ndt::type::make<int>()),
                         ndt::make_fixed_dim(100, ndt::make_convert(
-                            ndt::make_categorical(nd::range(20)), ndt::make_type<int>()))),
+                            ndt::make_categorical(nd::range(20)), ndt::type::make<int>()))),
                     g.get_type());
     EXPECT_EQ(g.get_shape()[0], 20);
     int group_0[] =  { 0, 10, 25, 35, 55, 60, 80, 95};
@@ -103,7 +103,7 @@ TEST(GroupByDType, Struct) {
                     ndt::make_fixed_string(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array
-    ndt::type d = ndt::make_struct(ndt::make_string(), "name", ndt::make_type<float>(), "height",
+    ndt::type d = ndt::make_struct(ndt::make_string(), "name", ndt::type::make<float>(), "height",
                     ndt::make_fixed_string(1, string_encoding_ascii), "gender");
     nd::array a = nd::empty(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
@@ -222,7 +222,7 @@ TEST(GroupByDType, StructUnsortedCats) {
     nd::array gender_cats = nd::array(gender_cats_vals);
 
     // Create a simple structured array
-    ndt::type d = ndt::make_struct(ndt::make_string(), "name", ndt::make_type<float>(), "height",
+    ndt::type d = ndt::make_struct(ndt::make_string(), "name", ndt::type::make<float>(), "height",
                     ndt::make_fixed_string(1, string_encoding_ascii), "gender");
     nd::array a = nd::empty(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};

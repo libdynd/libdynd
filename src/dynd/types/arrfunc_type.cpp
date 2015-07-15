@@ -489,7 +489,7 @@ static array_preamble *function___call__(const array_preamble *params,
   }
   usngo(args[0].get_readwrite_originptr(), in_ptrs, ckb.get());
   // Return void
-  return nd::empty(ndt::make_type<void>()).release();
+  return nd::empty(ndt::type::make<void>()).release();
 }
 
 void ndt::arrfunc_type::get_dynamic_array_functions(

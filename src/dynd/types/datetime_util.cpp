@@ -40,13 +40,13 @@ void datetime_struct::set_from_str(const char *begin, const char *end,
 const ndt::type& datetime_struct::type()
 {
     static ndt::type tp = ndt::make_struct(
-            ndt::make_type<int16_t>(), "year",
-            ndt::make_type<int8_t>(), "month",
-            ndt::make_type<int8_t>(), "day",
-            ndt::make_type<int8_t>(), "hour",
-            ndt::make_type<int8_t>(), "minute",
-            ndt::make_type<int8_t>(), "second",
-            ndt::make_type<int32_t>(), "tick");
+            ndt::type::make<int16_t>(), "year",
+            ndt::type::make<int8_t>(), "month",
+            ndt::type::make<int8_t>(), "day",
+            ndt::type::make<int8_t>(), "hour",
+            ndt::type::make<int8_t>(), "minute",
+            ndt::type::make<int8_t>(), "second",
+            ndt::type::make<int32_t>(), "tick");
     return tp;
 }
  

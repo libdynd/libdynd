@@ -34,7 +34,7 @@ TYPED_TEST_P(Random, Uniform)
   intptr_t size = 10000;
 
   ndt::type dst_tp =
-      ndt::make_fixed_dim(size, ndt::make_type<typename TestFixture::DType>());
+      ndt::make_fixed_dim(size, ndt::type::make<typename TestFixture::DType>());
   nd::array res = nd::random::uniform(kwds("a", a, "b", b, "dst_tp", dst_tp));
 
   double mean = 0;

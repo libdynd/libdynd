@@ -156,7 +156,7 @@ TEST(ComplexDType, Create)
   ndt::type d;
 
   // complex[float32]
-  d = ndt::make_type<dynd::complex<float>>();
+  d = ndt::type::make<dynd::complex<float>>();
   EXPECT_EQ(complex_float32_type_id, d.get_type_id());
   EXPECT_EQ(complex_kind, d.get_kind());
   EXPECT_EQ(8u, d.get_data_size());
@@ -167,7 +167,7 @@ TEST(ComplexDType, Create)
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // complex[float64]
-  d = ndt::make_type<dynd::complex<double>>();
+  d = ndt::type::make<dynd::complex<double>>();
   EXPECT_EQ(complex_float64_type_id, d.get_type_id());
   EXPECT_EQ(complex_kind, d.get_kind());
   EXPECT_EQ(16u, d.get_data_size());
@@ -183,11 +183,11 @@ TEST(ComplexType, CreateFromValue)
   nd::array n;
 
   n = dynd::complex<float>(1.5f, 2.0f);
-  EXPECT_EQ(n.get_type(), ndt::make_type<dynd::complex<float>>());
+  EXPECT_EQ(n.get_type(), ndt::type::make<dynd::complex<float>>());
   EXPECT_EQ(dynd::complex<float>(1.5f, 2.0f), n.as<dynd::complex<float>>());
 
   n = dynd::complex<double>(2.5, 3.0);
-  EXPECT_EQ(n.get_type(), ndt::make_type<dynd::complex<double>>());
+  EXPECT_EQ(n.get_type(), ndt::type::make<dynd::complex<double>>());
   EXPECT_EQ(dynd::complex<double>(2.5, 3.0), n.as<dynd::complex<double>>());
 }
 

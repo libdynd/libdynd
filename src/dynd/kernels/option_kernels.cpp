@@ -14,7 +14,7 @@
 using namespace std;
 using namespace dynd;
 
-// ndt::type 
+// ndt::type type_id
 // ndt::type_id<int>::value
 // ndt::type_kind<type_id>::value
 // ndt::type<id>

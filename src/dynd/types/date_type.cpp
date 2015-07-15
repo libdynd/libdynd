@@ -230,9 +230,9 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
                                    const nd::array &month, const nd::array &day)
 {
   // TODO proper buffering
-  nd::array year_as_int = year.ucast(ndt::make_type<int32_t>()).eval();
-  nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
-  nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
+  nd::array year_as_int = year.ucast(ndt::type::make<int32_t>()).eval();
+  nd::array month_as_int = month.ucast(ndt::type::make<int32_t>()).eval();
+  nd::array day_as_int = day.ucast(ndt::type::make<int32_t>()).eval();
 
   nd::arrfunc af = nd::functional::elwise(nd::functional::apply(date_from_ymd));
 
@@ -461,7 +461,7 @@ ndt::type ndt::date_type::get_elwise_property_type(size_t property_index,
   case dateprop_weekday:
     out_readable = true;
     out_writable = false;
-    return make_type<int32_t>();
+    return type::make<int32_t>();
   case dateprop_struct:
     out_readable = true;
     out_writable = true;
@@ -469,7 +469,7 @@ ndt::type ndt::date_type::get_elwise_property_type(size_t property_index,
   default:
     out_readable = false;
     out_writable = false;
-    return make_type<void>();
+    return type::make<void>();
   }
 }
 

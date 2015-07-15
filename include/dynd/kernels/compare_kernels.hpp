@@ -1430,7 +1430,7 @@ namespace ndt {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
-                                ndt::make_type<int>());
+                                ndt::type::make<int>());
     }
   };
 
@@ -1439,7 +1439,7 @@ namespace ndt {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
-                                ndt::make_type<int>());
+                                ndt::type::make<int>());
     }
   };
 
@@ -1448,7 +1448,7 @@ namespace ndt {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
-                                ndt::make_type<int>());
+                                ndt::type::make<int>());
     }
   };
 
@@ -1457,7 +1457,7 @@ namespace ndt {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
-                                ndt::make_type<int>());
+                                ndt::type::make<int>());
     }
   };
 
@@ -1466,7 +1466,7 @@ namespace ndt {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
-                                ndt::make_type<int>());
+                                ndt::type::make<int>());
     }
   };
 
@@ -1475,7 +1475,7 @@ namespace ndt {
     static type make()
     {
       return arrfunc_type::make({ndt::type(Src0TypeID), ndt::type(Src1TypeID)},
-                                ndt::make_type<int>());
+                                ndt::type::make<int>());
     }
   };
 

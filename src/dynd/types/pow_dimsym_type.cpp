@@ -162,7 +162,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
         // This typevar hasn't been seen yet
         tv_type = make_typevar_dim(
             candidate_tp.extended<pow_dimsym_type>()->get_exponent(),
-            make_type<void>());
+            type::make<void>());
         return true;
       } else {
         // Make sure the type matches previous
@@ -178,7 +178,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
       type &tv_type = tp_vars[get_exponent()];
       if (tv_type.is_null()) {
         // Fill in the exponent by the number of dimensions left
-        tv_type = make_fixed_dim(0, make_type<void>());
+        tv_type = make_fixed_dim(0, type::make<void>());
       } else if (tv_type.get_type_id() == fixed_dim_type_id) {
         // Make sure the exponent already seen matches the number of
         // dimensions left in the concrete type
@@ -201,7 +201,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   if (tv_type.is_null()) {
     // Fill in the exponent by the number of dimensions left
     exponent = candidate_tp.get_ndim() - get_element_type().get_ndim();
-    tv_type = make_fixed_dim(exponent, make_type<void>());
+    tv_type = make_fixed_dim(exponent, type::make<void>());
   } else if (tv_type.get_type_id() == fixed_dim_type_id) {
     // Make sure the exponent already seen matches the number of
     // dimensions left in the concrete type

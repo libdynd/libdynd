@@ -21,7 +21,7 @@ namespace detail {
             if (paramtype.get_type_id() == static_cast<type_id_t>(type_id_of<T>::value)) {
                 *reinterpret_cast<T *>(data) = value;
             } else {
-                typed_data_assign(paramtype, arrmeta, data, ndt::make_type<T>(), NULL, reinterpret_cast<const char *>(&value));
+                typed_data_assign(paramtype, arrmeta, data, ndt::type::make<T>(), NULL, reinterpret_cast<const char *>(&value));
             }
         }
     };
@@ -33,7 +33,7 @@ namespace detail {
                *data = (value ? 1 : 0);
             } else {
                 bool1 tmp(value);
-                typed_data_assign(paramtype, arrmeta, data, ndt::make_type<bool1>(), NULL, reinterpret_cast<const char *>(&tmp));
+                typed_data_assign(paramtype, arrmeta, data, ndt::type::make<bool1>(), NULL, reinterpret_cast<const char *>(&tmp));
             }
         }
     };

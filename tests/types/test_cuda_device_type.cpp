@@ -25,10 +25,10 @@ using namespace dynd;
 
 TEST(CUDADeviceType, Simple)
 {
-  ndt::type d = ndt::make_cuda_device(ndt::make_type<int32_t>());
+  ndt::type d = ndt::make_cuda_device(ndt::type::make<int32_t>());
   EXPECT_EQ(cuda_device_type_id, d.get_type_id());
   EXPECT_EQ(memory_kind, d.get_kind());
-  EXPECT_EQ(ndt::make_type<int32_t>(), d.p("storage_type").as<ndt::type>());
+  EXPECT_EQ(ndt::type::make<int32_t>(), d.p("storage_type").as<ndt::type>());
   EXPECT_FALSE(d.is_expression());
   EXPECT_EQ(d, ndt::type("cuda_device[int32]"));
   // Roundtripping through a string
@@ -36,7 +36,7 @@ TEST(CUDADeviceType, Simple)
 
   // A memory type cannot be the element of an array dimension
   EXPECT_THROW(
-      ndt::make_fixed_dimsym(ndt::make_cuda_device(ndt::make_type<int32_t>())),
+      ndt::make_fixed_dimsym(ndt::make_cuda_device(ndt::type::make<int32_t>())),
       invalid_argument);
 
   // Only built-in types can be allocated in CUDA global memory
@@ -46,12 +46,12 @@ TEST(CUDADeviceType, Simple)
 
 TEST(CUDADeviceType, BuiltIn)
 {
-  ndt::type d = ndt::make_cuda_device(ndt::make_type<float>());
+  ndt::type d = ndt::make_cuda_device(ndt::type::make<float>());
   EXPECT_EQ(cuda_device_type_id, d.get_type_id());
   EXPECT_EQ(memory_kind, d.get_kind());
   EXPECT_EQ(sizeof(float), d.get_data_size());
   // CUDA host type and CUDA device type have the same data alignment
-  EXPECT_EQ(ndt::make_cuda_host(ndt::make_type<float>()).get_data_alignment(),
+  EXPECT_EQ(ndt::make_cuda_host(ndt::type::make<float>()).get_data_alignment(),
             d.get_data_alignment());
   EXPECT_EQ(d, ndt::type("cuda_device[float32]"));
 }
@@ -59,7 +59,7 @@ TEST(CUDADeviceType, BuiltIn)
 TEST(CUDADeviceType, FixedDim)
 {
   ndt::type d =
-      ndt::make_cuda_device(ndt::make_fixed_dimsym(ndt::make_type<float>()));
+      ndt::make_cuda_device(ndt::make_fixed_dimsym(ndt::type::make<float>()));
   EXPECT_EQ(cuda_device_type_id, d.get_type_id());
   EXPECT_EQ(memory_kind, d.get_kind());
   EXPECT_EQ(d.extended<base_memory_type>()->get_element_type().get_data_size(),
@@ -69,15 +69,15 @@ TEST(CUDADeviceType, FixedDim)
 
 TEST(CUDADeviceType, IsTypeSubarray)
 {
-  EXPECT_TRUE(ndt::make_cuda_device(ndt::make_type<int32_t>()).is_type_subarray(
-      ndt::make_cuda_device(ndt::make_type<int32_t>())));
-  EXPECT_TRUE(ndt::make_cuda_device(ndt::make_type<int32_t>())
-                  .is_type_subarray(ndt::make_type<int32_t>()));
+  EXPECT_TRUE(ndt::make_cuda_device(ndt::type::make<int32_t>()).is_type_subarray(
+      ndt::make_cuda_device(ndt::type::make<int32_t>())));
+  EXPECT_TRUE(ndt::make_cuda_device(ndt::type::make<int32_t>())
+                  .is_type_subarray(ndt::type::make<int32_t>()));
   EXPECT_TRUE(
-      ndt::make_cuda_device(ndt::make_fixed_dimsym(ndt::make_type<int32_t>()))
-          .is_type_subarray(ndt::make_type<int32_t>()));
-  EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(
-      ndt::make_cuda_device(ndt::make_type<int32_t>())));
+      ndt::make_cuda_device(ndt::make_fixed_dimsym(ndt::type::make<int32_t>()))
+          .is_type_subarray(ndt::type::make<int32_t>()));
+  EXPECT_FALSE(ndt::type::make<int32_t>().is_type_subarray(
+      ndt::make_cuda_device(ndt::type::make<int32_t>())));
 }
 
 #endif
