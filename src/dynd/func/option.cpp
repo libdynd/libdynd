@@ -44,6 +44,10 @@ nd::arrfunc nd::is_avail::make()
   return arrfunc();
 }
 
+// underlying_type<type_id>::type
+// type_kind<type_id>::value
+// type_id<type>::value
+
 struct nd::is_avail nd::is_avail;
 
 nd::arrfunc nd::assign_na_decl::children[DYND_TYPE_ID_MAX + 1];

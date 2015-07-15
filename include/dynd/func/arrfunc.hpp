@@ -20,7 +20,7 @@ namespace dynd {
 
 namespace ndt {
   ndt::type make_option(const ndt::type &value_tp);
-}
+} // namespace dynd::ndt
 
 namespace nd {
   namespace detail {

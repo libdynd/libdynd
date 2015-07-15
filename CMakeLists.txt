@@ -154,7 +154,7 @@ set(libdynd_SRC
     include/dynd/codegen/codegen_cache.hpp
     # Types
     src/dynd/types/adapt_type.cpp
-    src/dynd/types/any_sym_type.cpp
+    src/dynd/types/any_kind_type.cpp
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_expr_type.cpp
@@ -220,7 +220,7 @@ set(libdynd_SRC
     src/dynd/types/view_type.cpp
     src/dynd/types/void_pointer_type.cpp
     include/dynd/types/adapt_type.hpp
-    include/dynd/types/any_sym_type.hpp
+    include/dynd/types/any_kind_type.hpp
     include/dynd/types/arrfunc_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp

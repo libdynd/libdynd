@@ -16,11 +16,11 @@
 namespace dynd {
 namespace ndt {
 
-  class any_sym_type : public base_type {
+  class any_kind_type : public base_type {
   public:
-    any_sym_type();
+    any_kind_type();
 
-    virtual ~any_sym_type();
+    virtual ~any_kind_type();
 
     size_t get_default_data_size() const;
 
@@ -38,17 +38,16 @@ namespace ndt {
     type get_canonical_type() const;
 
     type at_single(intptr_t i0, const char **inout_arrmeta,
-                        const char **inout_data) const;
+                   const char **inout_data) const;
 
     type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
-                                    intptr_t total_ndim = 0) const;
+                               intptr_t total_ndim = 0) const;
 
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
     void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
                    const char *arrmeta, const char *data) const;
 
-    bool is_lossless_assignment(const type &dst_tp,
-                                const type &src_tp) const;
+    bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
     bool operator==(const base_type &rhs) const;
 
@@ -81,12 +80,11 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
+
+    static type make() { return type(new any_kind_type(), false); }
   };
 
-  inline type make_any_sym()
-  {
-    return type(new any_sym_type(), false);
-  }
+  inline type make_any_kind() { return type(new any_kind_type(), false); }
 
 } // namespace dynd::ndt
 } // namespace dynd

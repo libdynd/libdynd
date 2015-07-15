@@ -117,7 +117,7 @@ bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta),
   }
 
   if (candidate_tp.get_ndim() > 0 ||
-      candidate_tp.get_type_id() == any_sym_type_id) {
+      candidate_tp.get_type_id() == any_kind_type_id) {
     return false;
   }
 

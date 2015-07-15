@@ -18,7 +18,7 @@ using namespace dynd;
 TEST(PointerType, VoidPointer) {
     ndt::type d;
 
-    d = ndt::make_pointer<void>();
+    d = ndt::pointer_type::make<void>();
     EXPECT_EQ(void_pointer_type_id, d.get_type_id());
     EXPECT_EQ(void_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_size());
@@ -32,7 +32,7 @@ TEST(PointerType, VoidPointer) {
 TEST(PointerType, PointerToBuiltIn) {
     ndt::type d;
 
-    d = ndt::make_pointer<char>();
+    d = ndt::pointer_type::make<char>();
     EXPECT_EQ(pointer_type_id, d.get_type_id());
     EXPECT_EQ(expr_kind, d.get_kind());
     EXPECT_EQ(sizeof(void *), d.get_data_size());
@@ -40,8 +40,8 @@ TEST(PointerType, PointerToBuiltIn) {
     EXPECT_NE(0u, d.get_flags()&type_flag_blockref);
     EXPECT_EQ(ndt::make_type<char>(), d.value_type());
     EXPECT_EQ(ndt::make_type<char>(), d.p("target_type").as<ndt::type>());
-    EXPECT_EQ(ndt::make_pointer<void>(), d.operand_type());
-    EXPECT_EQ(ndt::make_pointer<void>(), d.storage_type());
+    EXPECT_EQ(ndt::pointer_type::make<void>(), d.operand_type());
+    EXPECT_EQ(ndt::pointer_type::make<void>(), d.storage_type());
     // As a special case, the pointer_type says it isn't an expression type,
     // even though it is derived from base_expr_type
     EXPECT_FALSE(d.is_expression());
@@ -66,7 +66,7 @@ TEST(PointerType, Dereference)
   a = a(0);
 
   nd::array b = a.f("dereference");
-  EXPECT_EQ(a.get_type(), ndt::make_pointer(b.get_type()));
+  EXPECT_EQ(a.get_type(), ndt::pointer_type::make(b.get_type()));
   EXPECT_EQ(b(0).as<int>(), 5);
   EXPECT_EQ(b(1).as<int>(), -1);
   EXPECT_EQ(b(2).as<int>(), 7);

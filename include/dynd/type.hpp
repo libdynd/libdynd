@@ -103,10 +103,13 @@ namespace ndt {
   template <class T>
   struct fixed_dim_from_array;
 
+  type make_pointer_type(const type &target_tp);
   type make_var_dim(const type &element_tp);
   type make_fixed_dim(size_t dim_size, const type &element_tp);
   type make_fixed_dim_kind(const type &element_tp);
   ndt::type make_c_contiguous(const ndt::type &child_tp);
+
+  class type;
 
   /**
    * This class represents a data type.
@@ -122,6 +125,8 @@ namespace ndt {
    *
    */
   class type {
+    static type instances[DYND_TYPE_ID_MAX + 1];
+
     const base_type *m_extended;
 
     /**
@@ -195,23 +200,10 @@ namespace ndt {
       return *this;
     }
 
-    /** Construct from a builtin type ID */
-    explicit type(type_id_t type_id)
-        : m_extended(type::validate_builtin_type_id(type_id))
+    /** Construct from a type ID */
+    explicit type(type_id_t tp_id)
+        : type((validate_type_id(tp_id), instances[tp_id]))
     {
-      switch (type_id) {
-      case fixed_dim_type_id:
-        *this = ndt::type("Fixed * Any");
-        break;
-      case var_dim_type_id:
-        *this = ndt::type("var * Any");
-        break;
-      case tuple_type_id:
-        *this = ndt::type("(...)");
-        break;
-      default:
-        break;
-      }
     }
 
     /** Construct from a string representation */
@@ -904,20 +896,79 @@ namespace ndt {
       static const bool value = detail::has_make<equivalent<T>>::value;
     };
 
-/*
-    static type make_builtin(type_id_t tp_id)
+    template <typename T>
+    static type make()
     {
-      // validate the builtin
-
-      return type(reinterpret_cast<const base_type *>(tp_id), false);
+      return equivalent<T>::make();
     }
-*/
 
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
-  // Forward declarations
-  type make_pointer(const type &target_tp);
+  template <>
+  struct type::equivalent<int8> {
+    static type make() { return type(int8_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<int16> {
+    static type make() { return type(int16_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<int32> {
+    static type make() { return type(int32_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<int64> {
+    static type make() { return type(int64_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<int128> {
+    static type make() { return type(int128_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<uint8> {
+    static type make() { return type(uint8_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<uint16> {
+    static type make() { return type(uint16_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<uint32> {
+    static type make() { return type(uint32_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<uint64> {
+    static type make() { return type(uint64_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<uint128> {
+    static type make() { return type(uint128_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<char> {
+    static type make() { return type(type_id_of<char>::value); }
+  };
+
+  template <>
+  struct type::equivalent<void> {
+    static type make() { return type(void_type_id); }
+  };
+
+  template <>
+  struct type::equivalent<type> {
+    static type make() { return type(type_type_id); }
+  };
 
   namespace detail {
     template <typename T>
@@ -931,14 +982,17 @@ namespace ndt {
       }
     };
 
+    template <typename T>
+    struct exact_type_from<T *> {
+      static type make()
+      {
+        return make_pointer_type(exact_type_from<T>::make());
+      }
+    };
+
     template <>
     struct exact_type_from<ndt::type> {
       static type make() { return ndt::type("type"); }
-    };
-
-    template <typename T>
-    struct exact_type_from<T *> {
-      static type make() { return make_pointer(exact_type_from<T>::make()); }
     };
 
     template <typename T, int N>
@@ -1102,7 +1156,8 @@ namespace ndt {
     // Depending on the data size, store the data by value or as a pointer
     // to an nd::array
     if (sizeof(T) * val.size() > 32) {
-      return make_pointer(make_fixed_dim(val.size(), make_exact_type<T>()));
+      return make_pointer_type(
+          make_fixed_dim(val.size(), make_exact_type<T>()));
     } else {
       return make_fixed_dim(val.size(), make_exact_type<T>());
     }
@@ -1119,8 +1174,6 @@ namespace ndt {
    * way to get a const reference to its type.
    */
   extern const type static_builtin_types[builtin_type_id_count];
-
-  extern type type_kinds[DYND_TYPE_ID_MAX + 1];
 
   std::ostream &operator<<(std::ostream &o, const type &rhs);
 

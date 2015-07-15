@@ -80,6 +80,11 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
+
+    static type make(const type &element_tp)
+    {
+      return type(new fixed_dim_kind_type(element_tp), false);
+    }
   };
 
   type make_fixed_dim_kind(const type &element_tp);

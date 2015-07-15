@@ -29,7 +29,7 @@ namespace nd {
         children[pair.first] = pair.second;
       }
 
-      for (type_id_t i0 : dim_type_ids::vals()) {
+      for (type_id_t i0 : dim_type_ids()) {
         const ndt::type child_tp = ndt::arrfunc_type::make(
             {ndt::type(i0)}, self.get_type()->get_return_type());
         children[i0] = functional::elwise(child_tp, self);
@@ -66,8 +66,8 @@ namespace nd {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
 
-      for (type_id_t i0 : numeric_type_ids::vals()) {
-        for (type_id_t i1 : dim_type_ids::vals()) {
+      for (type_id_t i0 : numeric_type_ids()) {
+        for (type_id_t i1 : dim_type_ids()) {
           const ndt::type child_tp =
               ndt::arrfunc_type::make({ndt::type(i0), ndt::type(i1)},
                                       self.get_type()->get_return_type());
@@ -75,9 +75,9 @@ namespace nd {
         }
       }
 
-      for (type_id_t i0 : dim_type_ids::vals()) {
+      for (type_id_t i0 : dim_type_ids()) {
         typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
-        for (type_id_t i1 : type_ids::vals()) {
+        for (type_id_t i1 : type_ids()) {
           const ndt::type child_tp =
               ndt::arrfunc_type::make({ndt::type(i0), ndt::type(i1)},
                                       self.get_type()->get_return_type());

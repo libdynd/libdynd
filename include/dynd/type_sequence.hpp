@@ -56,14 +56,19 @@ struct integer_sequence {
   enum { size = sizeof...(I) };
   typedef T type;
 
-  operator std::array<T, size>() const { return {{I...}}; }
+  static const std::array<T, sizeof...(I)> value;
 
-  static const std::array<T, size> &vals()
-  {
-    static const std::array<T, size> vals = {{I...}};
-    return vals;
-  }
+  //{{I...}};
+
+  operator const std::array<T, size> &() const { return value; }
+
+  decltype(value.begin()) begin() const { return value.begin(); }
+
+  decltype(value.end()) end() const { return value.end(); }
 };
+
+template <typename T, T... I>
+const std::array<T, sizeof...(I)> integer_sequence<T, I...>::value = {{I...}};
 
 template <typename T>
 struct is_integer_sequence {

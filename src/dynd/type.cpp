@@ -19,6 +19,12 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
 
+#include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/bytes_type.hpp>
+#include <dynd/types/fixed_bytes_kind_type.hpp>
+#include <dynd/types/fixed_string_kind_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
+
 #include <sstream>
 #include <cstring>
 #include <vector>
@@ -73,7 +79,7 @@ const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {
     ndt::type(complex_float32_type_id), ndt::type(complex_float64_type_id),
     ndt::type(void_type_id)};
 
-ndt::type ndt::type_kinds[DYND_TYPE_ID_MAX + 1] = {
+ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(reinterpret_cast<const base_type *>(uninitialized_type_id), false),
     type(reinterpret_cast<const base_type *>(bool_type_id), false),
     type(reinterpret_cast<const base_type *>(int8_type_id), false),
@@ -93,13 +99,24 @@ ndt::type ndt::type_kinds[DYND_TYPE_ID_MAX + 1] = {
     type(reinterpret_cast<const base_type *>(complex_float32_type_id), false),
     type(reinterpret_cast<const base_type *>(complex_float64_type_id), false),
     type(reinterpret_cast<const base_type *>(void_type_id), false),
-    type(), // void_pointer_type_id
-    type(), // pointer_type_id
-    type(), //   bytes_type_id,
-    type(), //   fixed_bytes_type_id,
-    type(), //   char_type_id,
-    type(), //   string_type_id,
-    type()  //   fixed_string_type_id,
+    type(),                                    // void_pointer_type_id
+    pointer_type::make(any_kind_type::make()), // pointer_type_id
+    make_bytes(),                              //   bytes_type_id,
+    make_fixed_bytes_kind(),                   //   fixed_bytes_type_id,
+    type(),                                    //   char_type_id,
+    make_string(),                             //   string_type_id,
+    make_fixed_string_kind(),                  //   fixed_string_type_id,
+    type(),                                    // categorical_type_id
+    type(),                                    // date_type_id
+    type(),                                    // time_type_id
+    type(),                                    // datetime_type_id
+    type(),                                    // busdate_type_id
+    type(),                                    // json_type_id
+    fixed_dim_kind_type::make(any_kind_type::make()),
+    type(),                                      // offset_dim_type_id
+    var_dim_type::make(any_kind_type::make()),   // var_dim_type_id
+    type(),                                      // struct_type_id
+    make_tuple(nd::empty(0, make_type()), true), // tuple_type_id
 };
 
 ndt::type::type(const std::string &rep) : m_extended(NULL)
@@ -562,7 +579,9 @@ ndt::type ndt::get_forward_type(const nd::array &val)
     }
   */
 
-  return make_pointer(val.get_type());
+  // cpp_type<float32_type_id>::type
+
+  return pointer_type::make(val.get_type());
 }
 
 template <class T, class Tas>

@@ -32,17 +32,17 @@ namespace nd {
 
       arrfunc self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
-      for (type_id_t i0 : numeric_type_ids::vals()) {
-        for (type_id_t i1 : dim_type_ids::vals()) {
+      for (type_id_t i0 : numeric_type_ids()) {
+        for (type_id_t i1 : dim_type_ids()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
               {ndt::type(i0), ndt::type(i1)}, ndt::type("Any"));
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
 
-      for (type_id_t i0 : dim_type_ids::vals()) {
+      for (type_id_t i0 : dim_type_ids()) {
         typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
-        for (type_id_t i1 : type_ids::vals()) {
+        for (type_id_t i1 : type_ids()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
               {ndt::type(i0), ndt::type(i1)}, ndt::type("Any"));
           children[{{i0, i1}}] = functional::elwise(child_tp, self);

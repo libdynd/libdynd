@@ -30,6 +30,8 @@ struct var_dim_type_data {
 
 namespace ndt {
 
+  type make_var_dim(const type &element_tp);
+
   class var_dim_type : public base_dim_type {
     std::vector<std::pair<std::string, gfunc::callable>> m_array_properties,
         m_array_functions;
@@ -125,9 +127,12 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
-  };
 
-  type make_var_dim(const type &element_tp);
+    static type make(const type &element_tp)
+    {
+      return make_var_dim(element_tp);
+    }
+  };
 
   inline type make_var_dim(const type &element_tp, intptr_t ndim)
   {

@@ -124,14 +124,24 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
+
+    static type make(const type &target_tp);
+
+    template <typename T>
+    static type make()
+    {
+      return make(type::make<T>());
+    }
   };
 
-  type make_pointer(const type &target_tp);
+  template <typename T>
+  struct type::equivalent<T *> {
+    static type make() { return pointer_type::make(type::make<T>()); }
+  };
 
-  template <typename Tnative>
-  type make_pointer()
+  inline type make_pointer_type(const type &target_tp)
   {
-    return make_pointer(make_type<Tnative>());
+    return pointer_type::make(target_tp);
   }
 
 } // namespace dynd::ndt

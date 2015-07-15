@@ -42,7 +42,7 @@
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/types/any_sym_type.hpp>
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/kind_sym_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
@@ -769,7 +769,7 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_pointer(tp);
+  return ndt::pointer_type::make(tp);
 }
 
 // record_item_bare : BARENAME COLON rhs_expression
@@ -1198,7 +1198,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     } else if (parse::compare_range_to_literal(nbegin, nend, "adapt")) {
       result = parse_adapt_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
-      result = ndt::make_any_sym();
+      result = ndt::make_any_kind();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Categorical")) {
       result = ndt::make_categorical_kind();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedBytes")) {

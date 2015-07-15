@@ -37,7 +37,7 @@ ndt::option_type::option_type(const type &value_tp)
   }
 
   if (value_tp.is_builtin()) {
-    nd::is_avail::make();
+//    nd::is_avail::make();
     m_is_avail = get_option_builtin_is_avail(value_tp.get_type_id());
     m_assign_na = get_option_builtin_assign_na(value_tp.get_type_id());
     if (!m_is_avail.is_null() && !m_assign_na.is_null()) {

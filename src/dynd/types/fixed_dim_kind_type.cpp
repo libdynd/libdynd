@@ -235,7 +235,7 @@ bool ndt::fixed_dim_kind_type::match(const char *arrmeta,
                                sizeof(fixed_dim_type_arrmeta)),
           tp_vars);
     }
-  case any_sym_type_id:
+  case any_kind_type_id:
     return true;
   default:
     return false;

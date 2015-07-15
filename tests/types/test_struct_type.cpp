@@ -11,6 +11,7 @@
 #include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/func/arrfunc.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -19,6 +20,8 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/call_callable.hpp>
+#include <dynd/types/pointer_type.hpp>
+#include <dynd/type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -524,7 +527,7 @@ TEST(StructType, Pack)
   a = pack("val0", 5, "val1", b);
   EXPECT_EQ(a.get_type(),
             ndt::make_struct(ndt::make_type<int>(), "val0",
-                             ndt::make_pointer(b.get_type()), "val1"));
+                             ndt::pointer_type::make(b.get_type()), "val1"));
   EXPECT_EQ(5, a.p("val0").as<int>());
   EXPECT_EQ(*reinterpret_cast<const char *const *>(
                 a.p("val1").get_readonly_originptr()),

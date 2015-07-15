@@ -139,8 +139,9 @@ struct take_by_pointer_virtual_ck
       throw invalid_argument(ss.str());
     }
 
-    dst_tp = ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL),
-                                 ndt::make_pointer(src_tp[0].get_dtype()));
+    dst_tp =
+        ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL),
+                            ndt::pointer_type::make(src_tp[0].get_dtype()));
   }
 };
 
