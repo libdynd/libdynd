@@ -50,7 +50,7 @@ void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn,
   }
   if (was_transformed) {
     tmp_field_types.flag_as_immutable();
-    out_transformed_tp = make_tuple(tmp_field_types, m_variadic);
+    out_transformed_tp = make(tmp_field_types, m_variadic);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -68,7 +68,7 @@ ndt::type ndt::tuple_type::get_canonical_type() const
   }
 
   tmp_field_types.flag_as_immutable();
-  return make_tuple(tmp_field_types, m_variadic);
+  return make(tmp_field_types, m_variadic);
 }
 
 bool ndt::tuple_type::is_lossless_assignment(const type &dst_tp,
@@ -206,7 +206,7 @@ nd::array ndt::pack(intptr_t field_count, const nd::array *field_vals)
     field_types[i] = field_vals[i].get_type();
   }
 
-  nd::array res = nd::empty(ndt::make_tuple(field_types));
+  nd::array res = nd::empty(ndt::tuple_type::make(field_types));
   for (intptr_t i = 0; i < field_count; ++i) {
     res.vals_at(i) = field_vals[i];
   }

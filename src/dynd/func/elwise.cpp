@@ -46,7 +46,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
           kwd_tp.extended<base_struct_type>()->get_field_count();
       nd::array names =
           nd::empty(ndt::make_fixed_dim(old_field_count + 2,
-    ndt::string_type::make()));
+    ndt::make_string()));
       nd::array fields =
           nd::empty(ndt::make_fixed_dim(old_field_count + 2, ndt::make_type()));
       for (intptr_t i = 0; i < old_field_count; ++i) {
@@ -80,7 +80,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
     ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
   }
 
-  return ndt::make_arrfunc(ndt::make_tuple(out_param_types), kwd_tp, ret_tp);
+  return ndt::make_arrfunc(ndt::tuple_type::make(out_param_types), kwd_tp, ret_tp);
 }
 
 nd::arrfunc nd::functional::elwise(const ndt::type &self_tp,

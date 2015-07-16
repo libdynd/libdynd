@@ -903,93 +903,73 @@ namespace ndt {
   };
 
   template <>
-  struct type::equivalent<bool> {
-    static type make() { return type(bool_type_id); }
-  };
-
-  template <>
   struct type::equivalent<bool1> {
-    static type make() { return type(bool_type_id); }
+    static type make() { return type(type_id_of<bool1>::value); }
   };
 
   template <>
-  struct type::equivalent<int8> {
-    static type make() { return type(int8_type_id); }
+  struct type::equivalent<bool> {
+    static type make() { return type::make<bool1>(); }
   };
 
   template <>
-  struct type::equivalent<int16> {
-    static type make() { return type(int16_type_id); }
+  struct type::equivalent<signed char> {
+    static type make() { return type(type_id_of<signed char>::value); }
   };
 
   template <>
-  struct type::equivalent<int32> {
-    static type make() { return type(int32_type_id); }
+  struct type::equivalent<short> {
+    static type make() { return type(type_id_of<short>::value); }
   };
 
   template <>
-  struct type::equivalent<int64> {
-    static type make() { return type(int64_type_id); }
+  struct type::equivalent<int> {
+    static type make() { return type(type_id_of<int>::value); }
+  };
+
+  template <>
+  struct type::equivalent<long> {
+    static type make() { return type(type_id_of<long>::value); }
+  };
+
+  template <>
+  struct type::equivalent<long long> {
+    static type make() { return type(type_id_of<long long>::value); }
   };
 
   template <>
   struct type::equivalent<int128> {
-    static type make() { return type(int128_type_id); }
+    static type make() { return type(type_id_of<int128>::value); }
   };
 
   template <>
-  struct type::equivalent<uint8> {
-    static type make() { return type(uint8_type_id); }
+  struct type::equivalent<unsigned char> {
+    static type make() { return type(type_id_of<unsigned char>::value); }
   };
 
   template <>
-  struct type::equivalent<uint16> {
-    static type make() { return type(uint16_type_id); }
+  struct type::equivalent<unsigned short> {
+    static type make() { return type(type_id_of<unsigned short>::value); }
   };
 
   template <>
-  struct type::equivalent<uint32> {
-    static type make() { return type(uint32_type_id); }
+  struct type::equivalent<unsigned int> {
+    static type make() { return type(type_id_of<unsigned int>::value); }
   };
 
   template <>
-  struct type::equivalent<uint64> {
-    static type make() { return type(uint64_type_id); }
+  struct type::equivalent<unsigned long> {
+    static type make() { return type(type_id_of<unsigned long>::value); }
+  };
+
+  template <>
+  struct type::equivalent<unsigned long long> {
+    static type make() { return type(type_id_of<unsigned long long>::value); }
   };
 
   template <>
   struct type::equivalent<uint128> {
-    static type make() { return type(uint128_type_id); }
-  };
-
-  template <>
-  struct type::equivalent<float16> {
-    static type make() { return type(float16_type_id); }
-  };
-
-  template <>
-  struct type::equivalent<float> {
-    static type make() { return type(float32_type_id); }
-  };
-
-  template <>
-  struct type::equivalent<double> {
-    static type make() { return type(float64_type_id); }
-  };
-
-  template <>
-  struct type::equivalent<float128> {
-    static type make() { return type(float128_type_id); }
-  };
-
-  template <>
-  struct type::equivalent<complex64> {
-    static type make() { return type(complex_float32_type_id); }
-  };
-
-  template <>
-  struct type::equivalent<complex128> {
-    static type make() { return type(complex_float64_type_id); }
+    static type make() { return type(type_id_of<uint128>::value); }
   };
 
   template <>
@@ -998,26 +978,45 @@ namespace ndt {
   };
 
   template <>
-  struct type::equivalent<intptr_t> {
-    static type make() { return type(type_id_of<intptr_t>::value); }
+  struct type::equivalent<float16> {
+    static type make() { return type(type_id_of<float16>::value); }
   };
 
   template <>
-  struct type::equivalent<uintptr_t> {
-    static type make() { return type(type_id_of<uintptr_t>::value); }
+  struct type::equivalent<float> {
+    static type make() { return type(type_id_of<float>::value); }
   };
 
-  template <typename ValueType>
-  struct type::equivalent<std::complex<ValueType>> {
-    static type make()
-    {
-      return type::equivalent<dynd::complex<ValueType>>::make();
-    }
+  template <>
+  struct type::equivalent<double> {
+    static type make() { return type(type_id_of<double>::value); }
+  };
+
+  /*
+    template <>
+    struct type::equivalent<long double> {
+      static type make() { return type(type_id_of<long double>::value); }
+    };
+  */
+
+  template <>
+  struct type::equivalent<float128> {
+    static type make() { return type(type_id_of<float128>::value); }
+  };
+
+  template <typename T>
+  struct type::equivalent<complex<T>> {
+    static type make() { return type(type_id_of<complex<T>>::value); }
+  };
+
+  template <typename T>
+  struct type::equivalent<std::complex<T>> {
+    static type make() { return type::make<complex<T>>(); }
   };
 
   template <>
   struct type::equivalent<void> {
-    static type make() { return type(void_type_id); }
+    static type make() { return type(type_id_of<void>::value); }
   };
 
   template <>
@@ -1097,7 +1096,7 @@ namespace ndt {
   template <typename T>
   type get_forward_type(const T &DYND_UNUSED(val))
   {
-// check for exact type
+    // check for exact type
 
     // Default case is for when T and the ndt::type have identical
     // memory layout, which is guaranteed by make_exact_type<T>().
@@ -1107,13 +1106,12 @@ namespace ndt {
   template <typename T>
   type get_forward_type(const std::vector<T> &val)
   {
-// check for exact type
+    // check for exact type
 
     // Depending on the data size, store the data by value or as a pointer
     // to an nd::array
     if (sizeof(T) * val.size() > 32) {
-      return make_pointer_type(
-          make_fixed_dim(val.size(), type::make<T>()));
+      return make_pointer_type(make_fixed_dim(val.size(), type::make<T>()));
     } else {
       return make_fixed_dim(val.size(), type::make<T>());
     }

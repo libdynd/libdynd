@@ -988,7 +988,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
           if (!funcproto_kwd.is_null()) {
             if (!parse_token_ds(begin, end, "->")) {
               rbegin = begin;
-              return ndt::make_tuple(field_type_list);
+              return ndt::tuple_type::make(field_type_list);
             }
 
             ndt::type return_type = parse_datashape(begin, end, symtable);
@@ -997,7 +997,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                   begin, "expected function prototype return type");
             }
             rbegin = begin;
-            return ndt::make_arrfunc(ndt::make_tuple(field_type_list, variadic),
+            return ndt::make_arrfunc(ndt::tuple_type::make(field_type_list, variadic),
                                      funcproto_kwd, return_type);
           } else {
             throw datashape_parse_error(begin,
@@ -1040,7 +1040,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
   // It might be a function prototype, check for the "->" token
   if (!parse_token_ds(begin, end, "->")) {
     rbegin = begin;
-    return ndt::make_tuple(field_type_list, variadic);
+    return ndt::tuple_type::make(field_type_list, variadic);
   }
 
   ndt::type return_type = parse_datashape(begin, end, symtable);
@@ -1054,7 +1054,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
   //       the requirement that arrays into arrfunc constructors are
   //       immutable, that too
   //       many copies may be occurring.
-  return ndt::make_arrfunc(ndt::make_tuple(field_type_list, variadic),
+  return ndt::make_arrfunc(ndt::tuple_type::make(field_type_list, variadic),
                            return_type);
 }
 

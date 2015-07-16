@@ -395,7 +395,7 @@ namespace ndt {
     {
       nd::array arg_tp = nd::empty(0, make_type());
       arg_tp.flag_as_immutable();
-      return make_arrfunc(make_tuple(arg_tp), type::make<R>());
+      return make_arrfunc(tuple_type::make(arg_tp), type::make<R>());
     }
   };
 
@@ -405,7 +405,7 @@ namespace ndt {
     {
       type tp[sizeof...(A)] = {type::make<typename std::remove_cv<
           typename std::remove_reference<A>::type>::type>()...};
-      return make_arrfunc(make_tuple(tp), type::make<R>());
+      return make_arrfunc(tuple_type::make(tp), type::make<R>());
     }
 
     template <typename... T>
@@ -415,7 +415,7 @@ namespace ndt {
           typename std::remove_reference<A>::type>::type>()...};
 
       return make_arrfunc(
-          make_tuple(nd::array(tp, sizeof...(A) - sizeof...(T))),
+          tuple_type::make(nd::array(tp, sizeof...(A) - sizeof...(T))),
           make_struct({names...}, nd::array(tp + (sizeof...(A) - sizeof...(T)),
                                             sizeof...(T))),
           type::make<R>());
@@ -436,7 +436,7 @@ namespace ndt {
       type arg_tp[sizeof...(A)] = {
           make_cuda_device(type::make<typename std::remove_cv<
               typename std::remove_reference<A>::type>::type>())...};
-      return make_arrfunc(make_tuple(arg_tp), ret_tp);
+      return make_arrfunc(tuple_type::make(arg_tp), ret_tp);
     }
 
     template <typename... T>
@@ -451,7 +451,7 @@ namespace ndt {
           make_cuda_device(type::make<typename std::remove_cv<
               typename std::remove_reference<A>::type>::type>())...};
       return make_arrfunc(
-          make_tuple(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
+          tuple_type::make(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
           make_struct(
               {names...},
               nd::array(arg_tp + (sizeof...(A) - sizeof...(T)), sizeof...(T))),
@@ -465,7 +465,7 @@ namespace ndt {
     {
       nd::array arg_tp = nd::empty(0, make_type());
       arg_tp.flag_as_immutable();
-      return make_arrfunc(make_tuple(arg_tp), make_cuda_device(type::make<R>()));
+      return make_arrfunc(tuple_type::make(arg_tp), make_cuda_device(type::make<R>()));
     }
   };
 
@@ -483,7 +483,7 @@ namespace ndt {
                            const nd::array &kwd_names,
                            const nd::array &kwd_types, const type &return_type)
   {
-    return type(new arrfunc_type(make_tuple(pos_types),
+    return type(new arrfunc_type(tuple_type::make(pos_types),
                                  make_struct(kwd_names, kwd_types),
                                  return_type),
                 false);
@@ -505,7 +505,7 @@ namespace ndt {
       tmp_vals[i] = arg_types[i];
     }
     tmp.flag_as_immutable();
-    return make_arrfunc(make_tuple(tmp), return_type);
+    return make_arrfunc(tuple_type::make(tmp), return_type);
   }
 
   /** Makes a funcproto type from the C++ function type */

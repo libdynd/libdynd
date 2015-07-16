@@ -95,7 +95,7 @@ ndt::type ndt::detail::internal_substitute(
             pattern.extended<base_tuple_type>()->get_field_types(), typevars,
             concrete));
   case tuple_type_id:
-    return ndt::make_tuple(substitute_type_array(
+    return ndt::tuple_type::make(substitute_type_array(
         pattern.extended<base_tuple_type>()->get_field_types(), typevars,
         concrete));
   case option_type_id:

@@ -105,19 +105,19 @@ bool dynd::make_date_adapter_arrfunc(const ndt::type &operand_tp,
     case int32_type_id:
       out_forward = make_int_offset_arrfunc<int32_t, int32_t>(
           epoch_date,
-          ndt::make_arrfunc(ndt::make_tuple(ndt::type::make<int32_t>()),
+          ndt::make_arrfunc(ndt::tuple_type::make(ndt::type::make<int32_t>()),
                             ndt::make_date()));
       out_reverse = make_int_offset_arrfunc<int32_t, int32_t>(
-          -epoch_date, ndt::make_arrfunc(ndt::make_tuple(ndt::make_date()),
+          -epoch_date, ndt::make_arrfunc(ndt::tuple_type::make(ndt::make_date()),
                                          ndt::type::make<int32_t>()));
       return true;
     case int64_type_id:
       out_forward = make_int_offset_arrfunc<int64_t, int32_t>(
           epoch_date,
-          ndt::make_arrfunc(ndt::make_tuple(ndt::type::make<int64_t>()),
+          ndt::make_arrfunc(ndt::tuple_type::make(ndt::type::make<int64_t>()),
                             ndt::make_date()));
       out_reverse = make_int_offset_arrfunc<int32_t, int64_t>(
-          -epoch_date, ndt::make_arrfunc(ndt::make_tuple(ndt::make_date()),
+          -epoch_date, ndt::make_arrfunc(ndt::tuple_type::make(ndt::make_date()),
                                          ndt::type::make<int64_t>()));
       return true;
     default:

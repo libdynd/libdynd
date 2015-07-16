@@ -150,7 +150,7 @@ nd::arrfunc nd::take_by_pointer::make()
   static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
 
   return arrfunc::make<take_by_pointer_virtual_ck>(
-      ndt::make_arrfunc(ndt::make_tuple(param_types),
+      ndt::make_arrfunc(ndt::tuple_type::make(param_types),
                         ndt::type("R * pointer[T]")),
       0);
 }

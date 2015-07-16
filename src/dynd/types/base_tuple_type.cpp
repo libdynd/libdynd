@@ -199,7 +199,7 @@ ndt::type ndt::base_tuple_type::apply_linear_index(intptr_t nindices,
       }
 
       tmp_field_types.flag_as_immutable();
-      return make_tuple(tmp_field_types);
+      return tuple_type::make(tmp_field_types);
     }
   }
 }

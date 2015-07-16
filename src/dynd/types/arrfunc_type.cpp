@@ -424,7 +424,7 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
   nd::array args = make_typevar_range("T", nargs);
   args.flag_as_immutable();
   type ret = make_typevar("R");
-  return make_arrfunc(make_tuple(args), ret);
+  return make_arrfunc(tuple_type::make(args), ret);
 }
 
 ///////// functions on the nd::array
@@ -516,7 +516,7 @@ void ndt::arrfunc_type::get_dynamic_array_functions(
 ndt::type ndt::arrfunc_type::make(const nd::array &pos_tp,
                                   const ndt::type &ret_tp)
 {
-  return type(new arrfunc_type(make_tuple(pos_tp), ret_tp), false);
+  return type(new arrfunc_type(tuple_type::make(pos_tp), ret_tp), false);
 }
 
 ndt::type ndt::arrfunc_type::make(const initializer_list<type_id_t> &,

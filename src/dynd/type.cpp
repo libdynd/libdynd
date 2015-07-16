@@ -113,10 +113,10 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(),                                    // busdate_type_id
     type(),                                    // json_type_id
     fixed_dim_kind_type::make(any_kind_type::make()),
-    type(),                                      // offset_dim_type_id
-    var_dim_type::make(any_kind_type::make()),   // var_dim_type_id
-    type(),                                      // struct_type_id
-    make_tuple(nd::empty(0, make_type()), true), // tuple_type_id
+    type(),                                            // offset_dim_type_id
+    var_dim_type::make(any_kind_type::make()),         // var_dim_type_id
+    type(),                                            // struct_type_id
+    tuple_type::make(nd::empty(0, make_type()), true), // tuple_type_id
 };
 
 ndt::type::type(const std::string &rep) : m_extended(NULL)

@@ -194,20 +194,20 @@ bool dynd::make_datetime_adapter_arrfunc(const ndt::type &value_tp,
         //       avoid overflow issues.
         out_forward = make_int_offset_and_divide_arrfunc<int64_t, int64_t>(
             epoch_datetime * unit_divisor, unit_divisor,
-            ndt::make_arrfunc(ndt::make_tuple(ndt::type::make<int64_t>()),
+            ndt::make_arrfunc(ndt::tuple_type::make(ndt::type::make<int64_t>()),
                               value_tp));
         out_reverse = make_int_multiply_and_offset_arrfunc<int64_t, int64_t>(
             unit_divisor, -epoch_datetime * unit_divisor,
-            ndt::make_arrfunc(ndt::make_tuple(value_tp),
+            ndt::make_arrfunc(ndt::tuple_type::make(value_tp),
                               ndt::type::make<int64_t>()));
       } else {
         out_forward = make_int_multiply_and_offset_arrfunc<int64_t, int64_t>(
             unit_factor, epoch_datetime,
-            ndt::make_arrfunc(ndt::make_tuple(ndt::type::make<int64_t>()),
+            ndt::make_arrfunc(ndt::tuple_type::make(ndt::type::make<int64_t>()),
                               value_tp));
         out_reverse = make_int_offset_and_divide_arrfunc<int64_t, int64_t>(
             -epoch_datetime, unit_factor,
-            ndt::make_arrfunc(ndt::make_tuple(value_tp),
+            ndt::make_arrfunc(ndt::tuple_type::make(value_tp),
                               ndt::type::make<int64_t>()));
       }
       return true;

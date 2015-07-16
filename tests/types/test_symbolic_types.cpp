@@ -306,7 +306,7 @@ TEST(SymbolicTypes, VariadicTuple)
 {
   ndt::type tp;
 
-  tp = ndt::make_tuple({ndt::type::make<int>(), ndt::type::make<float>()}, true);
+  tp = ndt::tuple_type::make({ndt::type::make<int>(), ndt::type::make<float>()}, true);
   EXPECT_EQ(tuple_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());

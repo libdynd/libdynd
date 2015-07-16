@@ -44,5 +44,5 @@ nd::arrfunc nd::functional::rolling(const nd::arrfunc &window_op,
   data->window_op = window_op;
 
   return arrfunc::make<rolling_ck>(
-      ndt::make_arrfunc(ndt::make_tuple(roll_src_tp), roll_dst_tp), data, 0);
+      ndt::make_arrfunc(ndt::tuple_type::make(roll_src_tp), roll_dst_tp), data, 0);
 }
