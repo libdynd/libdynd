@@ -100,9 +100,9 @@ static const map<string, ndt::type> &builtin_types()
     bit["complex128"] = ndt::type::make<dynd::complex<double>>();
     bit["complex"] = ndt::type::make<dynd::complex<double>>();
     bit["json"] = ndt::make_json();
-    bit["date"] = ndt::make_date();
-    bit["time"] = ndt::make_time(tz_abstract);
-    bit["datetime"] = ndt::make_datetime();
+    bit["date"] = ndt::date_type::make();
+    bit["time"] = ndt::time_type::make(tz_abstract);
+    bit["datetime"] = ndt::datetime_type::make();
     bit["bytes"] = ndt::bytes_type::make(1);
     bit["type"] = ndt::make_type();
     bit["ndarrayarg"] = ndt::make_ndarrayarg();
@@ -685,9 +685,9 @@ static ndt::type parse_datetime_parameters(const char *&rbegin, const char *end)
     }
 
     rbegin = begin;
-    return ndt::make_datetime(timezone);
+    return ndt::datetime_type::make(timezone);
   } else {
-    return ndt::make_datetime();
+    return ndt::datetime_type::make();
   }
 }
 
@@ -724,9 +724,9 @@ static ndt::type parse_time_parameters(const char *&rbegin, const char *end)
     }
 
     rbegin = begin;
-    return ndt::make_time(timezone);
+    return ndt::time_type::make(timezone);
   } else {
-    return ndt::make_time(tz_abstract);
+    return ndt::time_type::make(tz_abstract);
   }
 }
 

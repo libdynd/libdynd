@@ -57,9 +57,9 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::type::make<dynd::complex<double>>(),
             ndt::type("complex[float64]"));
   EXPECT_EQ(ndt::make_json(), ndt::type("json"));
-  EXPECT_EQ(ndt::make_date(), ndt::type("date"));
-  EXPECT_EQ(ndt::make_time(), ndt::type("time"));
-  EXPECT_EQ(ndt::make_datetime(), ndt::type("datetime"));
+  EXPECT_EQ(ndt::date_type::make(), ndt::type("date"));
+  EXPECT_EQ(ndt::time_type::make(), ndt::type("time"));
+  EXPECT_EQ(ndt::datetime_type::make(), ndt::type("datetime"));
   // Aliases for some of the above types
   EXPECT_EQ(ndt::type::make<int32_t>(), ndt::type("int"));
   EXPECT_EQ(ndt::type::make<double>(), ndt::type("real"));

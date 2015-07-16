@@ -27,19 +27,19 @@ TEST(DatetimeType, Create) {
     ndt::type d;
     const ndt::datetime_type *dd;
 
-    d = ndt::make_datetime();
+    d = ndt::datetime_type::make();
     ASSERT_EQ(datetime_type_id, d.get_type_id());
     dd = d.extended<ndt::datetime_type>();
     EXPECT_EQ(8u, d.get_data_size());
     EXPECT_EQ((size_t)scalar_align_of<int64_t>::value, d.get_data_alignment());
-    EXPECT_EQ(ndt::make_datetime(tz_abstract), d);
+    EXPECT_EQ(ndt::datetime_type::make(tz_abstract), d);
     EXPECT_EQ(tz_abstract, dd->get_timezone());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 
-    d = ndt::make_datetime(tz_utc);
+    d = ndt::datetime_type::make(tz_utc);
     dd = d.extended<ndt::datetime_type>();
-    EXPECT_EQ(ndt::make_datetime(tz_utc), d);
+    EXPECT_EQ(ndt::datetime_type::make(tz_utc), d);
     EXPECT_EQ(tz_utc, dd->get_timezone());
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
@@ -65,7 +65,7 @@ TEST(DatetimeType, CreateFromString) {
 }
 
 TEST(DatetimeType, ValueCreationAbstract) {
-    ndt::type d = ndt::make_datetime(), di = ndt::type::make<int64_t>();
+    ndt::type d = ndt::datetime_type::make(), di = ndt::type::make<int64_t>();
 
     EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
                     nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
@@ -91,7 +91,7 @@ TEST(DatetimeType, ValueCreationAbstract) {
 
 
 TEST(DatetimeType, ValueCreationUTC) {
-    ndt::type d = ndt::make_datetime(tz_utc), di = ndt::type::make<int64_t>();
+    ndt::type d = ndt::datetime_type::make(tz_utc), di = ndt::type::make<int64_t>();
 
     EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
                     nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
@@ -175,19 +175,19 @@ TEST(DatetimeType, AdaptFromInt) {
     nd::array a, b;
 
     a = parse_json("3 * int64", "[31968000000, -999480000, 45296789]");
-    b = a.adapt(ndt::make_datetime(), "milliseconds since 2000-01-01T00:00");
+    b = a.adapt(ndt::datetime_type::make(), "milliseconds since 2000-01-01T00:00");
     EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
     EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
     EXPECT_EQ("2000-01-01T12:34:56.789", b(2).as<string>());
 
     a = parse_json("3 * int64", "[31968000000000, -999480000000, 45296789123]");
-    b = a.adapt(ndt::make_datetime(), "microseconds since 2000-01-01");
+    b = a.adapt(ndt::datetime_type::make(), "microseconds since 2000-01-01");
     EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
     EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
     EXPECT_EQ("2000-01-01T12:34:56.789123", b(2).as<string>());
 
     a = parse_json("3 * int64", "[31968000000000000, -999480000000000, 45296789123456]");
-    b = a.adapt(ndt::make_datetime(), "nanoseconds since 2000");
+    b = a.adapt(ndt::datetime_type::make(), "nanoseconds since 2000");
     EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
     EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
     EXPECT_EQ("2000-01-01T12:34:56.7891234", b(2).as<string>());

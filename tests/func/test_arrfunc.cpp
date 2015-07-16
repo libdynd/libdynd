@@ -254,11 +254,11 @@ TEST(ArrFunc, Assignment_CallInterface)
 TEST(ArrFunc, Property)
 {
   // Create an arrfunc for getting the year from a date
-  nd::arrfunc af = make_arrfunc_from_property(ndt::make_date(), "year");
+  nd::arrfunc af = make_arrfunc_from_property(ndt::date_type::make(), "year");
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::make_date(), af.get_type()->get_pos_type(0));
+  ASSERT_EQ(ndt::date_type::make(), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
 

@@ -697,7 +697,7 @@ namespace nd {
      * adaption operator. This creates an adapt[] type.
      *
      * Example:
-     * nd::array({3, 5, 10}).adapt(ndt::make_date(), "days since 2001-1-1");
+     * nd::array({3, 5, 10}).adapt(ndt::date_type::make(), "days since 2001-1-1");
      */
     array adapt(const ndt::type &tp, const nd::string &adapt_op);
 

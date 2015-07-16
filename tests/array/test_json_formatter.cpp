@@ -71,11 +71,11 @@ TEST(JSONFormatter, JSON) {
 
 TEST(JSONFormatter, DateTime) {
   nd::array a;
-  a = nd::array("2013-12-15").ucast(ndt::make_date());
+  a = nd::array("2013-12-15").ucast(ndt::date_type::make());
   EXPECT_EQ("\"2013-12-15\"", format_json(a).as<string>());
-  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::make_datetime());
+  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::datetime_type::make());
   EXPECT_EQ("\"2013-12-15T13:14:22.19\"", format_json(a).as<string>());
-  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::make_datetime(tz_utc));
+  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::datetime_type::make(tz_utc));
   EXPECT_EQ("\"2013-12-15T13:14:22.19Z\"", format_json(a).as<string>());
 }
 

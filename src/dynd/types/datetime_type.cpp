@@ -751,11 +751,11 @@ ndt::type ndt::datetime_type::get_elwise_property_type(size_t property_index,
   case datetimeprop_date:
     out_readable = true;
     out_writable = false;
-    return make_date();
+    return date_type::make();
   case datetimeprop_time:
     out_readable = true;
     out_writable = false;
-    return make_time(m_timezone);
+    return time_type::make(m_timezone);
   default:
     out_readable = true;
     out_writable = false;

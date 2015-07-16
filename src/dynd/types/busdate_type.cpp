@@ -27,7 +27,7 @@ ndt::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask,
     m_busdays_in_weekmask += weekmask[i] ? 1 : 0;
   }
   if (!holidays.is_null()) {
-    nd::array hol = holidays.ucast(make_date()).eval_immutable();
+    nd::array hol = holidays.ucast(date_type::make()).eval_immutable();
     // TODO: Make sure hol is contiguous and one-dimensional
     m_holidays = hol;
   }

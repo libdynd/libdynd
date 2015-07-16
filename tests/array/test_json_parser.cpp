@@ -374,7 +374,7 @@ TEST(JSONParser, NestedListInts) {
 TEST(JSONParser, Struct) {
     nd::array n;
     ndt::type sdt = ndt::struct_type::make(ndt::type::make<int>(), "id", ndt::type::make<double>(), "amount",
-                    ndt::string_type::make(), "name", ndt::make_date(), "when");
+                    ndt::string_type::make(), "name", ndt::date_type::make(), "when");
 
     // A straightforward struct
     n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,"
@@ -404,7 +404,7 @@ TEST(JSONParser, NestedStruct) {
     nd::array n;
     ndt::type sdt = ndt::struct_type::make(ndt::make_fixed_dim(3, ndt::type::make<float>()), "position",
                     ndt::type::make<double>(), "amount",
-                    ndt::struct_type::make(ndt::string_type::make(), "name", ndt::make_date(), "when"), "data");
+                    ndt::struct_type::make(ndt::string_type::make(), "name", ndt::date_type::make(), "when"), "data");
 
     n = parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }");
@@ -436,7 +436,7 @@ TEST(JSONParser, ListOfStruct) {
     nd::array n;
     ndt::type sdt = ndt::make_var_dim(ndt::struct_type::make(ndt::make_fixed_dim(3, ndt::type::make<float>()), "position",
                     ndt::type::make<double>(), "amount",
-                    ndt::struct_type::make(ndt::string_type::make(), "name", ndt::make_date(), "when"), "data"));
+                    ndt::struct_type::make(ndt::string_type::make(), "name", ndt::date_type::make(), "when"), "data"));
 
     n = parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"

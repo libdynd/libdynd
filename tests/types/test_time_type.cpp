@@ -25,19 +25,19 @@ TEST(TimeDType, Create) {
   ndt::type d;
   const ndt::time_type *tt;
 
-  d = ndt::make_time(tz_abstract);
+  d = ndt::time_type::make(tz_abstract);
   ASSERT_EQ(time_type_id, d.get_type_id());
   tt = d.extended<ndt::time_type>();
   EXPECT_EQ(8u, d.get_data_size());
   EXPECT_EQ((size_t)scalar_align_of<int64_t>::value, d.get_data_alignment());
-  EXPECT_EQ(ndt::make_time(tz_abstract), d);
+  EXPECT_EQ(ndt::time_type::make(tz_abstract), d);
   EXPECT_EQ(tz_abstract, tt->get_timezone());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::make_time(tz_utc);
+  d = ndt::time_type::make(tz_utc);
   tt = d.extended<ndt::time_type>();
-  EXPECT_EQ(ndt::make_time(tz_utc), d);
+  EXPECT_EQ(ndt::time_type::make(tz_utc), d);
   EXPECT_EQ(tz_utc, tt->get_timezone());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
@@ -63,7 +63,7 @@ TEST(TimeDType, CreateFromString) {
 }
 
 TEST(TimeDType, ValueCreationAbstract) {
-  ndt::type d = ndt::make_time(tz_abstract), di = ndt::type::make<int64_t>();
+  ndt::type d = ndt::time_type::make(tz_abstract), di = ndt::type::make<int64_t>();
 
   EXPECT_EQ(0, nd::array("00:00").ucast(d).view_scalars(di).as<int64_t>());
   EXPECT_EQ(0, nd::array("12:00 am").ucast(d).view_scalars(di).as<int64_t>());

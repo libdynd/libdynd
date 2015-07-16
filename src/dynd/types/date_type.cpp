@@ -237,7 +237,7 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
   nd::arrfunc af = nd::functional::elwise(nd::functional::apply(date_from_ymd));
 
   return af(year_as_int, month_as_int, day_as_int)
-      .view_scalars(ndt::make_date());
+      .view_scalars(ndt::date_type::make());
 }
 
 void ndt::date_type::get_dynamic_type_functions(
@@ -324,7 +324,7 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year,
         "no parameters provided to date.replace, should provide at least one");
   }
   return n.replace_dtype(
-      ndt::make_unary_expr(ndt::make_date(), n.get_dtype(),
+      ndt::make_unary_expr(ndt::date_type::make(), n.get_dtype(),
                            make_replace_kernelgen(year, month, day)));
 }
 
