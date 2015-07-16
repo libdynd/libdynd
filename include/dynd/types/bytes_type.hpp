@@ -80,18 +80,18 @@ namespace ndt {
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;
+
+    static const type &make()
+    {
+      static const type bytes_tp(new bytes_type(1), false);
+      return *reinterpret_cast<const type *>(&bytes_tp);
+    }
+
+    static type make(size_t alignment)
+    {
+      return type(new bytes_type(alignment), false);
+    }
   };
-
-  inline const type &make_bytes()
-  {
-    static const type bytes_tp(new bytes_type(1), false);
-    return *reinterpret_cast<const type *>(&bytes_tp);
-  }
-
-  inline type make_bytes(size_t alignment)
-  {
-    return type(new bytes_type(alignment), false);
-  }
 
 } // namespace dynd::ndt
 } // namespace dynd

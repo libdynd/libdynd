@@ -161,15 +161,15 @@ TEST(DateType, DateProperties) {
 TEST(DateType, DatePropertyConvertOfString) {
     nd::array a, b, c;
     const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
-    a = nd::array(strs).ucast(ndt::make_fixed_string(10, string_encoding_ascii)).eval();
+    a = nd::array(strs).ucast(ndt::fixed_string_type::make(10, string_encoding_ascii)).eval();
     b = a.ucast(ndt::make_date());
     EXPECT_EQ(ndt::make_fixed_dim(
-                  3, ndt::make_fixed_string(10, string_encoding_ascii)),
+                  3, ndt::fixed_string_type::make(10, string_encoding_ascii)),
               a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(
                   3, ndt::make_convert(
                          ndt::make_date(),
-                         ndt::make_fixed_string(10, string_encoding_ascii))),
+                         ndt::fixed_string_type::make(10, string_encoding_ascii))),
               b.get_type());
 
     // year property
@@ -294,7 +294,7 @@ TEST(DateType, StrFTimeOfConvert) {
     const char *vals[] = {"1920-03-12", "2013-01-01", "2000-12-25"};
     nd::array a = nd::array(vals).ucast(ndt::make_date());
     EXPECT_EQ(ndt::make_fixed_dim(
-                  3, ndt::make_convert(ndt::make_date(), ndt::make_string())),
+                  3, ndt::make_convert(ndt::make_date(), ndt::string_type::make())),
               a.get_type());
 
     nd::array b = a.f("strftime", "%Y %m %d");
@@ -380,7 +380,7 @@ TEST(DateType, ReplaceOfConvert) {
 
     // Make an expression type with value type 'date'
     a = nd::array("1955-03-13").ucast(ndt::make_date());
-    EXPECT_EQ(ndt::make_convert(ndt::make_date(), ndt::make_string()),
+    EXPECT_EQ(ndt::make_convert(ndt::make_date(), ndt::string_type::make()),
                     a.get_type());
     // Call replace on it
     EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());

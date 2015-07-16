@@ -365,7 +365,7 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   intptr_t lhs_n = lhs_tp.extended<ndt::base_struct_type>()->get_field_count();
   intptr_t rhs_n = rhs_tp.extended<ndt::base_struct_type>()->get_field_count();
   intptr_t res_n = lhs_n + rhs_n;
-  nd::array res_field_names = nd::empty(res_n, ndt::make_string());
+  nd::array res_field_names = nd::empty(res_n, ndt::string_type::make());
   nd::array res_field_types = nd::empty(res_n, ndt::make_type());
   res_field_names(irange(0, lhs_n)).vals() =
       lhs_tp.extended<ndt::base_struct_type>()->get_field_names();

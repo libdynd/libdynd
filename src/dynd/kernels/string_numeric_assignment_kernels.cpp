@@ -561,7 +561,7 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst,
                                          const char *str_end,
                                          const eval::eval_context *ectx)
 {
-  ndt::type dt = ndt::make_string();
+  ndt::type dt = ndt::string_type::make();
   string_type_data d;
   string_type_arrmeta md;
   d.begin = const_cast<char *>(str_begin);

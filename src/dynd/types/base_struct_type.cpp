@@ -103,7 +103,7 @@ ndt::type ndt::base_struct_type::apply_linear_index(
       // string text data. TODO: encapsulate this into a function.
       char *data_ptr;
       string_type_data *string_arr_ptr;
-      type stp = make_string(string_encoding_utf_8);
+      type stp = string_type::make(string_encoding_utf_8);
       type tp = make_fixed_dim(dimension_size, stp);
       nd::array tmp_field_names(
           make_array_memory_block(tp.extended()->get_arrmeta_size(),

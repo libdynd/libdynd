@@ -101,11 +101,11 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(reinterpret_cast<const base_type *>(void_type_id), false),
     type(),                                    // void_pointer_type_id
     pointer_type::make(any_kind_type::make()), // pointer_type_id
-    make_bytes(),                              //   bytes_type_id,
+    bytes_type::make(),                        //   bytes_type_id,
     make_fixed_bytes_kind(),                   //   fixed_bytes_type_id,
     type(),                                    //   char_type_id,
-    make_string(),                             //   string_type_id,
-    make_fixed_string_kind(),                  //   fixed_string_type_id,
+    string_type::make(),                       //   string_type_id,
+    fixed_string_kind_type::make(),            //   fixed_string_type_id,
     type(),                                    // categorical_type_id
     type(),                                    // date_type_id
     type(),                                    // time_type_id

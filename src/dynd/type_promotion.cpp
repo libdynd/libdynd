@@ -192,7 +192,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
                 (tp1_val.get_type_id() == string_type_id ||
                     tp1_val.get_type_id() == fixed_string_type_id)) {
         // Always promote to the default utf-8 string (for now, maybe return encoding, etc later?)
-        return ndt::make_string();
+        return ndt::string_type::make();
     }
 
     // the value underneath the option type promotes

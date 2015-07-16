@@ -28,11 +28,11 @@ TEST(ArrFunc, Assignment)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::make_fixed_string(16), assign_error_default);
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::make_fixed_string(16), af.get_type()->get_pos_type(0));
+  ASSERT_EQ(ndt::fixed_string_type::make(16), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
 
@@ -226,7 +226,7 @@ TEST(ArrFunc, Assignment_CallInterface)
 {
   // Test with the unary operation prototype
   nd::arrfunc af = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::make_string(), assign_error_default);
+      ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
 
   // Call it through the call() interface
   nd::array b = af("12345678");
@@ -238,7 +238,7 @@ TEST(ArrFunc, Assignment_CallInterface)
   EXPECT_THROW(af(false), invalid_argument);
 
   // Test with the expr operation prototype
-  af = make_arrfunc_from_assignment(ndt::type::make<int>(), ndt::make_string(),
+  af = make_arrfunc_from_assignment(ndt::type::make<int>(), ndt::string_type::make(),
                                     assign_error_default);
 
   // Call it through the call() interface
@@ -282,11 +282,11 @@ TEST(ArrFunc, AssignmentAsExpr)
 {
   // Create an arrfunc for converting string to int
   nd::arrfunc af = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::make_fixed_string(16), assign_error_default);
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::make_fixed_string(16), af.get_type()->get_pos_type(0));
+  ASSERT_EQ(ndt::fixed_string_type::make(16), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
 

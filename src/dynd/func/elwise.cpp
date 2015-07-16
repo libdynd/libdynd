@@ -46,7 +46,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
           kwd_tp.extended<base_struct_type>()->get_field_count();
       nd::array names =
           nd::empty(ndt::make_fixed_dim(old_field_count + 2,
-    ndt::make_string()));
+    ndt::string_type::make()));
       nd::array fields =
           nd::empty(ndt::make_fixed_dim(old_field_count + 2, ndt::make_type()));
       for (intptr_t i = 0; i < old_field_count; ++i) {

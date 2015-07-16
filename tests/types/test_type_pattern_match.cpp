@@ -155,7 +155,7 @@ TEST(TypePatternMatch, Option)
 TEST(TypePatternMatch, Categorical)
 {
   const char *a_vals[] = {"foo", "bar", "baz"};
-  nd::array a = nd::empty(3, ndt::make_fixed_string(3, string_encoding_ascii));
+  nd::array a = nd::empty(3, ndt::fixed_string_type::make(3, string_encoding_ascii));
   a.vals() = a_vals;
 
   EXPECT_TRUE(ndt::type("Categorical").match(ndt::make_categorical(a)));

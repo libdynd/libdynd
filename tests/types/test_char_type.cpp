@@ -75,10 +75,10 @@ TEST(CharDType, Assign) {
 
     // Round-trip a string through a char assignment
     a = nd::array("t");
-    EXPECT_EQ(a.get_type(), ndt::make_string());
+    EXPECT_EQ(a.get_type(), ndt::string_type::make());
     b = nd::empty(ndt::make_char());
     b.vals() = a;
-    c = b.cast(ndt::make_string()).eval();
-    EXPECT_EQ(c.get_type(), ndt::make_string());
+    c = b.cast(ndt::string_type::make()).eval();
+    EXPECT_EQ(c.get_type(), ndt::string_type::make());
     EXPECT_EQ("t", c.as<string>());
 }

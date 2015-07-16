@@ -103,7 +103,7 @@ static const map<string, ndt::type> &builtin_types()
     bit["date"] = ndt::make_date();
     bit["time"] = ndt::make_time(tz_abstract);
     bit["datetime"] = ndt::make_datetime();
-    bit["bytes"] = ndt::make_bytes(1);
+    bit["bytes"] = ndt::bytes_type::make(1);
     bit["type"] = ndt::make_type();
     bit["ndarrayarg"] = ndt::make_ndarrayarg();
   }
@@ -379,9 +379,9 @@ static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_string(encoding);
+    return ndt::string_type::make(encoding);
   } else {
-    return ndt::make_string(string_encoding_utf_8);
+    return ndt::string_type::make(string_encoding_utf_8);
   }
 }
 
@@ -421,7 +421,7 @@ static ndt::type parse_fixed_string_parameters(const char *&rbegin,
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_fixed_string(string_size, encoding);
+    return ndt::fixed_string_type::make(string_size, encoding);
   }
 
   throw datashape_parse_error(begin, "expected opening '['");
@@ -525,11 +525,11 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
         throw datashape_parse_error(begin, "expected closing ']'");
       }
       rbegin = begin;
-      return ndt::make_bytes(atoi(align_val.c_str()));
+      return ndt::bytes_type::make(atoi(align_val.c_str()));
     }
     throw datashape_parse_error(begin, "expected 'align'");
   } else {
-    return ndt::make_bytes(1);
+    return ndt::bytes_type::make(1);
   }
 }
 
@@ -1204,7 +1204,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedBytes")) {
       result = ndt::make_fixed_bytes_kind();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedString")) {
-      result = ndt::make_fixed_string_kind();
+      result = ndt::fixed_string_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Bool")) {
       result = ndt::make_kind_sym(bool_kind);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Int")) {

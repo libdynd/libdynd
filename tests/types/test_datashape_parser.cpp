@@ -75,43 +75,43 @@ TEST(DataShapeParser, BasicThrow)
 TEST(DataShapeParser, StringAtoms)
 {
   // Default string
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8), ndt::type("string"));
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), ndt::type("string"));
   // String with encoding
-  EXPECT_EQ(ndt::make_string(string_encoding_ascii), ndt::type("string['A']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_ascii),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_ascii), ndt::type("string['A']"));
+  EXPECT_EQ(ndt::string_type::make(string_encoding_ascii),
             ndt::type("string['ascii']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8), ndt::type("string['U8']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), ndt::type("string['U8']"));
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
             ndt::type("string['utf8']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
             ndt::type("string['utf-8']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
             ndt::type("string['U16']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
             ndt::type("string['utf16']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_16),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
             ndt::type("string['utf-16']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
             ndt::type("string['U32']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
             ndt::type("string['utf32']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_32),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
             ndt::type("string['utf-32']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_ucs_2),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_ucs_2),
             ndt::type("string['ucs2']"));
-  EXPECT_EQ(ndt::make_string(string_encoding_ucs_2),
+  EXPECT_EQ(ndt::string_type::make(string_encoding_ucs_2),
             ndt::type("string['ucs-2']"));
   // String with size
-  EXPECT_EQ(ndt::make_fixed_string(1, string_encoding_utf_8),
+  EXPECT_EQ(ndt::fixed_string_type::make(1, string_encoding_utf_8),
             ndt::type("fixed_string[1]"));
-  EXPECT_EQ(ndt::make_fixed_string(100, string_encoding_utf_8),
+  EXPECT_EQ(ndt::fixed_string_type::make(100, string_encoding_utf_8),
             ndt::type("fixed_string[100]"));
   // String with size and encoding
-  EXPECT_EQ(ndt::make_fixed_string(1, string_encoding_ascii),
+  EXPECT_EQ(ndt::fixed_string_type::make(1, string_encoding_ascii),
             ndt::type("fixed_string[1, 'A']"));
-  EXPECT_EQ(ndt::make_fixed_string(10, string_encoding_utf_8),
+  EXPECT_EQ(ndt::fixed_string_type::make(10, string_encoding_utf_8),
             ndt::type("fixed_string[10, 'U8']"));
-  EXPECT_EQ(ndt::make_fixed_string(1000, string_encoding_utf_16),
+  EXPECT_EQ(ndt::fixed_string_type::make(1000, string_encoding_utf_16),
             ndt::type("fixed_string[1000,'U16']"));
 }
 

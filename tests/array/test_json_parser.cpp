@@ -294,21 +294,21 @@ TEST(JSONParser, BuiltinsFromFloat) {
 TEST(JSONParser, String) {
     nd::array n;
 
-    n = parse_json(ndt::make_string(string_encoding_utf_8), "\"testing one two three\"");
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), n.get_type());
+    n = parse_json(ndt::string_type::make(string_encoding_utf_8), "\"testing one two three\"");
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), n.get_type());
     EXPECT_EQ("testing one two three", n.as<string>());
-    n = parse_json(ndt::make_string(string_encoding_utf_8), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_8), n.get_type());
+    n = parse_json(ndt::string_type::make(string_encoding_utf_8), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), n.get_type());
     EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<string>());
 
-    n = parse_json(ndt::make_string(string_encoding_utf_16), "\"testing one two three\"");
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_16), n.get_type());
+    n = parse_json(ndt::string_type::make(string_encoding_utf_16), "\"testing one two three\"");
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), n.get_type());
     EXPECT_EQ("testing one two three", n.as<string>());
-    n = parse_json(ndt::make_string(string_encoding_utf_16), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
-    EXPECT_EQ(ndt::make_string(string_encoding_utf_16), n.get_type());
+    n = parse_json(ndt::string_type::make(string_encoding_utf_16), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), n.get_type());
     EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<string>());
 
-    EXPECT_THROW(parse_json(ndt::make_string(string_encoding_utf_8), "false"), invalid_argument);
+    EXPECT_THROW(parse_json(ndt::string_type::make(string_encoding_utf_8), "false"), invalid_argument);
 }
 
 TEST(JSONParser, ListBools) {
@@ -374,7 +374,7 @@ TEST(JSONParser, NestedListInts) {
 TEST(JSONParser, Struct) {
     nd::array n;
     ndt::type sdt = ndt::make_struct(ndt::type::make<int>(), "id", ndt::type::make<double>(), "amount",
-                    ndt::make_string(), "name", ndt::make_date(), "when");
+                    ndt::string_type::make(), "name", ndt::make_date(), "when");
 
     // A straightforward struct
     n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,"
@@ -404,7 +404,7 @@ TEST(JSONParser, NestedStruct) {
     nd::array n;
     ndt::type sdt = ndt::make_struct(ndt::make_fixed_dim(3, ndt::type::make<float>()), "position",
                     ndt::type::make<double>(), "amount",
-                    ndt::make_struct(ndt::make_string(), "name", ndt::make_date(), "when"), "data");
+                    ndt::make_struct(ndt::string_type::make(), "name", ndt::make_date(), "when"), "data");
 
     n = parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }");
@@ -436,7 +436,7 @@ TEST(JSONParser, ListOfStruct) {
     nd::array n;
     ndt::type sdt = ndt::make_var_dim(ndt::make_struct(ndt::make_fixed_dim(3, ndt::type::make<float>()), "position",
                     ndt::type::make<double>(), "amount",
-                    ndt::make_struct(ndt::make_string(), "name", ndt::make_date(), "when"), "data"));
+                    ndt::make_struct(ndt::string_type::make(), "name", ndt::make_date(), "when"), "data"));
 
     n = parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"
@@ -474,7 +474,7 @@ TEST(JSONParser, JSONDType) {
     // Parsing JSON with a piece of it being a json string
     n = parse_json("{a: json, b: int32, c: string}",
                     "{\"c\": \"testing string\", \"a\": [3.1, {\"X\":2}, [1,2]], \"b\":12}");
-    EXPECT_EQ(ndt::make_struct(ndt::make_json(), "a", ndt::type::make<int32_t>(), "b", ndt::make_string(), "c"),
+    EXPECT_EQ(ndt::make_struct(ndt::make_json(), "a", ndt::type::make<int32_t>(), "b", ndt::string_type::make(), "c"),
                     n.get_type());
     EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n(0).as<string>());
     EXPECT_EQ(12, n(1).as<int>());

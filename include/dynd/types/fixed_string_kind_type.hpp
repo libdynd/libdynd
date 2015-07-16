@@ -69,12 +69,9 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
-  };
 
-  inline type make_fixed_string_kind()
-  {
-    return type(new fixed_string_kind_type(), false);
-  }
+    static type make() { return type(new fixed_string_kind_type(), false); }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd
