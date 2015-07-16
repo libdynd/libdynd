@@ -79,8 +79,7 @@ ndt::type ndt::c_contiguous_type::at_single(intptr_t i0,
                                             const char **inout_arrmeta,
                                             const char **inout_data) const
 {
-  return make_c_contiguous(
-      m_child_tp.extended()->at_single(i0, inout_arrmeta, inout_data));
+  return make(m_child_tp.extended()->at_single(i0, inout_arrmeta, inout_data));
 }
 
 ndt::type
@@ -97,7 +96,7 @@ ndt::c_contiguous_type::get_type_at_dimension(char **inout_arrmeta, intptr_t i,
     return child_tp;
   }
 
-  return make_c_contiguous(child_tp);
+  return make(child_tp);
 }
 
 bool

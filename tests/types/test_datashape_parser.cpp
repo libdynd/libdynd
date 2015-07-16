@@ -77,10 +77,12 @@ TEST(DataShapeParser, StringAtoms)
   // Default string
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), ndt::type("string"));
   // String with encoding
-  EXPECT_EQ(ndt::string_type::make(string_encoding_ascii), ndt::type("string['A']"));
+  EXPECT_EQ(ndt::string_type::make(string_encoding_ascii),
+            ndt::type("string['A']"));
   EXPECT_EQ(ndt::string_type::make(string_encoding_ascii),
             ndt::type("string['ascii']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), ndt::type("string['U8']"));
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
+            ndt::type("string['U8']"));
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
             ndt::type("string['utf8']"));
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
@@ -119,13 +121,13 @@ TEST(DataShapeParser, Unaligned)
 {
   EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::type::make<bool1>()),
             ndt::type("Fixed * unaligned[bool]"));
-  EXPECT_EQ(
-      ndt::make_fixed_dim_kind(ndt::make_unaligned(ndt::type::make<float>()), 2),
-      ndt::type("Fixed * Fixed * unaligned[float32]"));
-  EXPECT_EQ(
-      ndt::struct_type::make(ndt::make_unaligned(ndt::type::make<int32_t>()), "x",
-                       ndt::make_unaligned(ndt::type::make<int64_t>()), "y"),
-      ndt::type("{x : unaligned[int32], y : unaligned[int64]}"));
+  EXPECT_EQ(ndt::make_fixed_dim_kind(
+                ndt::make_unaligned(ndt::type::make<float>()), 2),
+            ndt::type("Fixed * Fixed * unaligned[float32]"));
+  EXPECT_EQ(ndt::struct_type::make(
+                ndt::make_unaligned(ndt::type::make<int32_t>()), "x",
+                ndt::make_unaligned(ndt::type::make<int64_t>()), "y"),
+            ndt::type("{x : unaligned[int32], y : unaligned[int64]}"));
 }
 
 TEST(DataShapeParser, Option)
@@ -140,9 +142,10 @@ TEST(DataShapeParser, Option)
   EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_option(
                 ndt::make_fixed_dim_kind(ndt::type::make<float>()))),
             ndt::type("Fixed * ?Fixed * float32"));
-  EXPECT_EQ(ndt::struct_type::make(ndt::make_option(ndt::type::make<int32_t>()), "x",
+  EXPECT_EQ(
+      ndt::struct_type::make(ndt::make_option(ndt::type::make<int32_t>()), "x",
                              ndt::make_option(ndt::type::make<int64_t>()), "y"),
-            ndt::type("{x : ?int32, y : ?int64}"));
+      ndt::type("{x : ?int32, y : ?int64}"));
 }
 
 TEST(DataShapeParser, StridedDim)
@@ -169,10 +172,10 @@ TEST(DataShapeParser, FixedDim)
 
 TEST(DataShapeParser, CContiguous)
 {
-  EXPECT_EQ(
-      ndt::make_c_contiguous(ndt::make_fixed_dim(3, ndt::type::make<bool1>())),
-      ndt::type("C[3 * bool]"));
-  EXPECT_EQ(ndt::make_c_contiguous(make_fixed_dim(
+  EXPECT_EQ(ndt::c_contiguous_type::make(
+                ndt::make_fixed_dim(3, ndt::type::make<bool1>())),
+            ndt::type("C[3 * bool]"));
+  EXPECT_EQ(ndt::c_contiguous_type::make(make_fixed_dim(
                 4, ndt::make_fixed_dim(3, ndt::type::make<float>()))),
             ndt::type("C[4 * 3 * float32]"));
 }
@@ -181,7 +184,8 @@ TEST(DataShapeParser, VarDim)
 {
   EXPECT_EQ(ndt::var_dim_type::make(ndt::type::make<bool1>()),
             ndt::type("var * bool"));
-  EXPECT_EQ(ndt::var_dim_type::make(ndt::var_dim_type::make(ndt::type::make<float>())),
+  EXPECT_EQ(ndt::var_dim_type::make(
+                ndt::var_dim_type::make(ndt::type::make<float>())),
             ndt::type("var * var * float32"));
   EXPECT_EQ(ndt::type("var * var * var * var * var * float32"),
             ndt::type("var**5 * float32"));
@@ -189,12 +193,12 @@ TEST(DataShapeParser, VarDim)
 
 TEST(DataShapeParser, StridedFixedDim)
 {
-  EXPECT_EQ(
-      ndt::make_fixed_dim_kind(ndt::make_fixed_dim(3, ndt::type::make<float>())),
-      ndt::type("Fixed * 3 * float32"));
-  EXPECT_EQ(
-      ndt::make_fixed_dim(3, ndt::make_fixed_dim_kind(ndt::type::make<float>())),
-      ndt::type("3 * Fixed * float32"));
+  EXPECT_EQ(ndt::make_fixed_dim_kind(
+                ndt::make_fixed_dim(3, ndt::type::make<float>())),
+            ndt::type("Fixed * 3 * float32"));
+  EXPECT_EQ(ndt::make_fixed_dim(
+                3, ndt::make_fixed_dim_kind(ndt::type::make<float>())),
+            ndt::type("3 * Fixed * float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim)
@@ -225,13 +229,13 @@ TEST(DataShapeParser, RecordOneField)
 TEST(DataShapeParser, RecordTwoFields)
 {
   EXPECT_EQ(ndt::struct_type::make(ndt::type::make<float>(), "val",
-                             ndt::type::make<int64_t>(), "id"),
+                                   ndt::type::make<int64_t>(), "id"),
             ndt::type("{\n"
                       "    val: float32,\n"
                       "    id: int64\n"
                       "}\n"));
   EXPECT_EQ(ndt::struct_type::make(ndt::type::make<float>(), "val",
-                             ndt::type::make<int64_t>(), "id"),
+                                   ndt::type::make<int64_t>(), "id"),
             ndt::type("{\n"
                       "    val: float32,\n"
                       "    id: int64,\n"
@@ -600,25 +604,29 @@ TEST(DataShapeParser, SpecialCharacterFields)
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), "sepal length"));
+  EXPECT_EQ(p_dt,
+            ndt::struct_type::make(ndt::type::make<double>(), "sepal length"));
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ ' sepal length' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), " sepal length"));
+  EXPECT_EQ(p_dt,
+            ndt::struct_type::make(ndt::type::make<double>(), " sepal length"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ 'sepal length ' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), "sepal length "));
+  EXPECT_EQ(p_dt,
+            ndt::struct_type::make(ndt::type::make<double>(), "sepal length "));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ ' sepal length ' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), " sepal length "));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(),
+                                         " sepal length "));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -626,7 +634,7 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   p_dt = ndt::type("{ '   sepal         length   ' : float64 }");
   EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(),
-                                   "   sepal         length   "));
+                                         "   sepal         length   "));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -640,40 +648,40 @@ TEST(DataShapeParser, SpecialCharacterFields)
   // unmatched parens
   // multiple parens
   p_dt = ndt::type("{ 'unique key(foo)' : float64 }");
-  EXPECT_EQ(p_dt,
-            ndt::struct_type::make(ndt::type::make<double>(), "unique key(foo)"));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(),
+                                         "unique key(foo)"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '(foo unique key' : float64 }");
-  EXPECT_EQ(p_dt,
-            ndt::struct_type::make(ndt::type::make<double>(), "(foo unique key"));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(),
+                                         "(foo unique key"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '(foo unique key)' : float64 }");
-  EXPECT_EQ(p_dt,
-            ndt::struct_type::make(ndt::type::make<double>(), "(foo unique key)"));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(),
+                                         "(foo unique key)"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ 'foo unique key)' : float64 }");
-  EXPECT_EQ(p_dt,
-            ndt::struct_type::make(ndt::type::make<double>(), "foo unique key)"));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(),
+                                         "foo unique key)"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '( foo unique key' : float64 }");
-  EXPECT_EQ(p_dt,
-            ndt::struct_type::make(ndt::type::make<double>(), "( foo unique key"));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(),
+                                         "( foo unique key"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -681,7 +689,7 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   p_dt = ndt::type("{ '((((foouniquekey))())((' : float64 }");
   EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(),
-                                   "((((foouniquekey))())(("));
+                                         "((((foouniquekey))())(("));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -691,9 +699,9 @@ TEST(DataShapeParser, SpecialCharacterFields)
   // escaped, and the backslashes may have to be escaped as well
   p_dt =
       ndt::type("{ 'sepal \"\"\" length' : float64, 'sepal width' : float64 }");
-  EXPECT_EQ(p_dt,
-            ndt::struct_type::make(ndt::type::make<double>(), "sepal \"\"\" length",
-                             ndt::type::make<double>(), "sepal width"));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(
+                      ndt::type::make<double>(), "sepal \"\"\" length",
+                      ndt::type::make<double>(), "sepal width"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -701,8 +709,9 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   p_dt = ndt::type(
       "{ 'sepal \\'\\'\\' length' : float64, 'sepal width' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), "sepal ''' length",
-                                   ndt::type::make<double>(), "sepal width"));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(
+                      ndt::type::make<double>(), "sepal ''' length",
+                      ndt::type::make<double>(), "sepal width"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -720,8 +729,9 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   p_dt = ndt::type(
       "{ 'sepal \\'\\'\\' length' : float64, 'sepal width' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), "sepal ''' length",
-                                   ndt::type::make<double>(), "sepal width"));
+  EXPECT_EQ(p_dt, ndt::struct_type::make(
+                      ndt::type::make<double>(), "sepal ''' length",
+                      ndt::type::make<double>(), "sepal width"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -787,14 +797,16 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   // Testing forward slashes
   p_dt = ndt::type("{ '/usr/bin' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), "/usr/bin"));
+  EXPECT_EQ(p_dt,
+            ndt::struct_type::make(ndt::type::make<double>(), "/usr/bin"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '\\\\abcdef' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), "\\abcdef"));
+  EXPECT_EQ(p_dt,
+            ndt::struct_type::make(ndt::type::make<double>(), "\\abcdef"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -802,7 +814,7 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   p_dt = ndt::type("{'a field with spaces and \" \\\'': int}");
   EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<int>(),
-                                   "a field with spaces and \" \'"));
+                                         "a field with spaces and \" \'"));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -810,7 +822,8 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   // Testing field names as numbers
   p_dt = ndt::type("{ '1234' : float64, '-1234':float64,'500=1234':float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<double>(), "1234",
+  EXPECT_EQ(p_dt,
+            ndt::struct_type::make(ndt::type::make<double>(), "1234",
                                    ndt::type::make<double>(), "-1234",
                                    ndt::type::make<double>(), "500=1234"));
   ss << p_dt;
@@ -822,7 +835,8 @@ TEST(DataShapeParser, SpecialCharacterFields)
   // {,},[,],:,comma,...,>,=,*,<,>,-
   p_dt = ndt::type("{'field name[100]': int, 'field name [x]': int, "
                    "'field : {name-=foo} [0*<>...,]': int}");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(ndt::type::make<int>(), "field name[100]",
+  EXPECT_EQ(p_dt,
+            ndt::struct_type::make(ndt::type::make<int>(), "field name[100]",
                                    ndt::type::make<int>(), "field name [x]",
                                    ndt::type::make<int>(),
                                    "field : {name-=foo} [0*<>...,]"));

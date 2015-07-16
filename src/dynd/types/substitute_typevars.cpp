@@ -59,7 +59,7 @@ ndt::type ndt::detail::internal_substitute(
         concrete));
 #endif
   case c_contiguous_type_id:
-    return ndt::make_c_contiguous(
+    return ndt::c_contiguous_type::make(
         ndt::substitute(pattern.extended<c_contiguous_type>()->get_child_type(),
                         typevars, concrete));
   case pointer_type_id:

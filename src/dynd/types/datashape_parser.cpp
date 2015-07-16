@@ -591,7 +591,7 @@ static ndt::type parse_c_contiguous_parameters(const char *&rbegin,
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_c_contiguous(tp);
+    return ndt::c_contiguous_type::make(tp);
   } else {
     throw datashape_parse_error(begin, "expected opening '['");
   }

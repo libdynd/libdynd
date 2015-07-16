@@ -18,7 +18,7 @@ using namespace dynd;
 
 TEST(CContiguousType, Basic)
 {
-  ndt::type tp = ndt::make_c_contiguous(ndt::type("10 * int32"));
+  ndt::type tp = ndt::c_contiguous_type::make(ndt::type("10 * int32"));
 
   EXPECT_EQ(c_contiguous_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
@@ -28,7 +28,7 @@ TEST(CContiguousType, Basic)
   EXPECT_EQ(tp, ndt::type(tp.str()));
   EXPECT_TRUE(tp.is_symbolic());
 
-  EXPECT_THROW(ndt::make_c_contiguous(ndt::type("int32")), invalid_argument);
+  EXPECT_THROW(ndt::c_contiguous_type::make(ndt::type("int32")), invalid_argument);
 }
 
 TEST(CContiguousType, PatternMatch)
