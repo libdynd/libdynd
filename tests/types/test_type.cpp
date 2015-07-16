@@ -186,7 +186,7 @@ TEST(Type, TypeIDConstructor)
             ndt::type(complex_float64_type_id).get_type_id());
   EXPECT_EQ(void_type_id, ndt::type(void_type_id).get_type_id());
   EXPECT_EQ(ndt::bytes_type::make(), ndt::type(bytes_type_id));
-  EXPECT_EQ(ndt::make_fixed_bytes_kind(), ndt::type(fixed_bytes_type_id));
+  EXPECT_EQ(ndt::fixed_bytes_kind_type::make(), ndt::type(fixed_bytes_type_id));
   EXPECT_EQ(ndt::pointer_type::make(ndt::any_kind_type::make()),
             ndt::type(pointer_type_id));
 }

@@ -15,7 +15,7 @@ using namespace dynd;
 
 TEST(FixedBytesKindType, Construction)
 {
-  ndt::type tp = ndt::make_fixed_bytes_kind();
+  ndt::type tp = ndt::fixed_bytes_kind_type::make();
   EXPECT_EQ(fixed_bytes_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_EQ(0u, tp.get_data_alignment());

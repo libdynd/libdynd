@@ -102,7 +102,7 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(),                                    // void_pointer_type_id
     pointer_type::make(any_kind_type::make()), // pointer_type_id
     bytes_type::make(),                        //   bytes_type_id,
-    make_fixed_bytes_kind(),                   //   fixed_bytes_type_id,
+    fixed_bytes_kind_type::make(),             //   fixed_bytes_type_id,
     type(),                                    //   char_type_id,
     string_type::make(),                       //   string_type_id,
     fixed_string_kind_type::make(),            //   fixed_string_type_id,

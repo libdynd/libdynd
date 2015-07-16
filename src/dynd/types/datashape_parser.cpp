@@ -1202,7 +1202,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     } else if (parse::compare_range_to_literal(nbegin, nend, "Categorical")) {
       result = ndt::make_categorical_kind();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedBytes")) {
-      result = ndt::make_fixed_bytes_kind();
+      result = ndt::fixed_bytes_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedString")) {
       result = ndt::fixed_string_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Bool")) {
