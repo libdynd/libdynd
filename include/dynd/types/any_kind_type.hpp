@@ -84,7 +84,5 @@ namespace ndt {
     static type make() { return type(new any_kind_type(), false); }
   };
 
-  inline type make_any_kind() { return type(new any_kind_type(), false); }
-
 } // namespace dynd::ndt
 } // namespace dynd

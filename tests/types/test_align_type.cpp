@@ -62,8 +62,8 @@ TEST(AlignDType, Basic) {
 TEST(AlignDType, Chained) {
   // The unaligned type can give back an expression type as the value type,
   // make sure that is handled properly at the type object level.
-  ndt::type d = make_unaligned(ndt::make_byteswap<int>());
-  EXPECT_EQ(ndt::make_byteswap(ndt::type::make<int>(),
+  ndt::type d = make_unaligned(ndt::byteswap_type::make(ndt::type::make<int>()));
+  EXPECT_EQ(ndt::byteswap_type::make(ndt::type::make<int>(),
                                ndt::make_view(ndt::make_fixed_bytes(4, 4),
                                               ndt::make_fixed_bytes(4, 1))),
             d);

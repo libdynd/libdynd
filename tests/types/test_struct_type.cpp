@@ -191,7 +191,7 @@ TEST(StructType, CanonicalType)
 
   // Struct with three fields
   ndt::type d1 = ndt::make_convert<dynd::complex<double>, float>();
-  ndt::type d2 = ndt::make_byteswap<int32_t>();
+  ndt::type d2 = ndt::byteswap_type::make(ndt::type::make<int32_t>());
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_32);
   dt = ndt::struct_type::make(d1, "x", d2, "y", d3, "z");
   EXPECT_EQ(ndt::struct_type::make(ndt::type::make<dynd::complex<double>>(), "x",
@@ -202,7 +202,7 @@ TEST(StructType, CanonicalType)
 TEST(StructType, IsExpression)
 {
   ndt::type d1 = ndt::type::make<float>();
-  ndt::type d2 = ndt::make_byteswap<int32_t>();
+  ndt::type d2 = ndt::byteswap_type::make(ndt::type::make<int32_t>());
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_32);
   ndt::type d = ndt::struct_type::make(d1, "x", d2, "y", d3, "z");
 

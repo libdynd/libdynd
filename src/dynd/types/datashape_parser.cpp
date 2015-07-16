@@ -336,7 +336,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(
+  return ndt::adapt_type::make(
       proto_tp.extended<ndt::arrfunc_type>()->get_pos_type(0),
       proto_tp.extended<ndt::arrfunc_type>()->get_return_type(), adapt_op);
 }
@@ -501,7 +501,7 @@ static ndt::type parse_byteswap_parameters(const char *&rbegin, const char *end,
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_byteswap(tp);
+    return ndt::byteswap_type::make(tp);
   } else {
     throw datashape_parse_error(begin, "expected opening '['");
   }
@@ -1200,7 +1200,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     } else if (parse::compare_range_to_literal(nbegin, nend, "adapt")) {
       result = parse_adapt_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
-      result = ndt::make_any_kind();
+      result = ndt::any_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Categorical")) {
       result = ndt::categorical_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedBytes")) {

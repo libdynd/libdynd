@@ -50,26 +50,21 @@ namespace ndt {
         void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
         const char *src_arrmeta, kernel_request_t kernreq,
         const eval::eval_context *ectx) const;
+
+    /**
+     * Makes a byteswapped type to view the given type with a swapped byte
+     * order.
+     */
+    static type make(const type &native_tp)
+    {
+      return type(new byteswap_type(native_tp), false);
+    }
+
+    static type make(const type &native_tp, const type &operand_type)
+    {
+      return type(new byteswap_type(native_tp, operand_type), false);
+    }
   };
-
-  /**
-   * Makes a byteswapped type to view the given type with a swapped byte order.
-   */
-  inline type make_byteswap(const type &native_tp)
-  {
-    return type(new byteswap_type(native_tp), false);
-  }
-
-  inline type make_byteswap(const type &native_tp, const type &operand_type)
-  {
-    return type(new byteswap_type(native_tp, operand_type), false);
-  }
-
-  template <typename Tnative>
-  type make_byteswap()
-  {
-    return type(new byteswap_type(type::make<Tnative>()), false);
-  }
 
 } // namespace dynd::ndt
 } // namespace dynd

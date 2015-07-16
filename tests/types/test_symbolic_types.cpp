@@ -200,7 +200,7 @@ TEST(SymbolicTypes, AnySym)
 {
   ndt::type tp;
 
-  tp = ndt::make_any_kind();
+  tp = ndt::any_kind_type::make();
   EXPECT_EQ(any_kind_type_id, tp.get_type_id());
   EXPECT_EQ("Any", tp.str());
   EXPECT_TRUE(tp.is_symbolic());

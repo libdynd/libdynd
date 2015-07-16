@@ -1256,7 +1256,7 @@ nd::array nd::array::uview(const ndt::type &uniform_dt,
 
 nd::array nd::array::adapt(const ndt::type &tp, const nd::string &adapt_op)
 {
-  return uview(ndt::make_adapt(get_dtype(), tp, adapt_op), 0);
+  return uview(ndt::adapt_type::make(get_dtype(), tp, adapt_op), 0);
 }
 
 namespace {
