@@ -158,7 +158,7 @@ TEST(TypePatternMatch, Categorical)
   nd::array a = nd::empty(3, ndt::fixed_string_type::make(3, string_encoding_ascii));
   a.vals() = a_vals;
 
-  EXPECT_TRUE(ndt::type("Categorical").match(ndt::make_categorical(a)));
+  EXPECT_TRUE(ndt::type("Categorical").match(ndt::categorical_type::make(a)));
   EXPECT_TRUE(ndt::type("Categorical").match(ndt::type("Categorical")));
   EXPECT_FALSE(ndt::type("Categorical").match(ndt::type("int32")));
 }
