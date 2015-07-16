@@ -21,6 +21,11 @@
 
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
+#include <dynd/types/categorical_kind_type.hpp>
+#include <dynd/types/char_type.hpp>
+#include <dynd/types/date_type.hpp>
+#include <dynd/types/datetime_type.hpp>
+#include <dynd/types/time_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -99,23 +104,23 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(reinterpret_cast<const base_type *>(complex_float32_type_id), false),
     type(reinterpret_cast<const base_type *>(complex_float64_type_id), false),
     type(reinterpret_cast<const base_type *>(void_type_id), false),
-    type(),                                    // void_pointer_type_id
-    pointer_type::make(any_kind_type::make()), // pointer_type_id
-    bytes_type::make(),                        //   bytes_type_id,
-    fixed_bytes_kind_type::make(),             //   fixed_bytes_type_id,
-    type(),                                    //   char_type_id,
-    string_type::make(),                       //   string_type_id,
-    fixed_string_kind_type::make(),            //   fixed_string_type_id,
-    type(),                                    // categorical_type_id
-    type(),                                    // date_type_id
-    type(),                                    // time_type_id
-    type(),                                    // datetime_type_id
-    type(),                                    // busdate_type_id
-    type(),                                    // json_type_id
-    fixed_dim_kind_type::make(any_kind_type::make()),
-    type(),                                            // offset_dim_type_id
-    var_dim_type::make(any_kind_type::make()),         // var_dim_type_id
-    type(),                                            // struct_type_id
+    type(),                                           // void_pointer_type_id
+    pointer_type::make(any_kind_type::make()),        // pointer_type_id
+    bytes_type::make(),                               //   bytes_type_id,
+    fixed_bytes_kind_type::make(),                    //   fixed_bytes_type_id,
+    char_type::make(),                                //   char_type_id,
+    string_type::make(),                              //   string_type_id,
+    fixed_string_kind_type::make(),                   //   fixed_string_type_id,
+    categorical_kind_type::make(),                    // categorical_type_id
+    date_type::make(),                                // date_type_id
+    time_type::make(),                                // time_type_id
+    datetime_type::make(),                            // datetime_type_id
+    type(),                                           // busdate_type_id
+    type(),                                           // json_type_id
+    fixed_dim_kind_type::make(any_kind_type::make()), // fixed_dim_type_id
+    type(),                                           // offset_dim_type_id
+    var_dim_type::make(any_kind_type::make()),        // var_dim_type_id
+    struct_type::make_empty(true),                    // struct_type_id
     tuple_type::make(nd::empty(0, make_type()), true), // tuple_type_id
 };
 
@@ -527,12 +532,12 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
   if (ndim > 0) {
     ndt::type result_tp = shape[ndim - 1] >= 0
                               ? ndt::make_fixed_dim(shape[ndim - 1], dtp)
-                              : ndt::make_var_dim(dtp);
+                              : ndt::var_dim_type::make(dtp);
     for (intptr_t i = ndim - 2; i >= 0; --i) {
       if (shape[i] >= 0) {
         result_tp = ndt::make_fixed_dim(shape[i], result_tp);
       } else {
-        result_tp = ndt::make_var_dim(result_tp);
+        result_tp = ndt::var_dim_type::make(result_tp);
       }
     }
     return result_tp;
@@ -550,7 +555,7 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
       if (shape[i] >= 0) {
         result_tp = ndt::make_fixed_dim(shape[i], result_tp);
       } else {
-        result_tp = ndt::make_var_dim(result_tp);
+        result_tp = ndt::var_dim_type::make(result_tp);
         out_any_var = true;
       }
     }

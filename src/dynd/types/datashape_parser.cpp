@@ -46,6 +46,7 @@
 #include <dynd/types/kind_sym_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -448,9 +449,9 @@ static ndt::type parse_char_parameters(const char *&rbegin, const char *end)
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_char(encoding);
+    return ndt::char_type::make(encoding);
   } else {
-    return ndt::make_char();
+    return ndt::char_type::make();
   }
 }
 
@@ -1086,7 +1087,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
             intptr_t dim_size = parse::checked_string_to_intptr(bbegin, bend);
             result = ndt::make_fixed_dim(dim_size, element_tp, exponent);
           } else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
-            result = make_var_dim(element_tp, exponent);
+            result = ndt::var_dim_type::make(element_tp, exponent);
           } else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
             result = make_fixed_dim_kind(element_tp, exponent);
           } else if (isupper(*bbegin)) {
@@ -1106,8 +1107,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                   exponent_name, parse_datashape(begin, end, symtable));
             } else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
               result = ndt::make_pow_dimsym(
-                  ndt::make_var_dim(ndt::type::make<void>()), exponent_name,
-                  parse_datashape(begin, end, symtable));
+                  ndt::var_dim_type::make(ndt::type::make<void>()),
+                  exponent_name, parse_datashape(begin, end, symtable));
             } else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
               result = ndt::make_pow_dimsym(
                   ndt::make_fixed_dim_kind(ndt::type::make<void>()),
@@ -1141,7 +1142,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
         intptr_t size = parse::checked_string_to_intptr(nbegin, nend);
         result = ndt::make_fixed_dim(size, element_tp);
       } else if (parse::compare_range_to_literal(nbegin, nend, "var")) {
-        result = ndt::make_var_dim(element_tp);
+        result = ndt::var_dim_type::make(element_tp);
       } else if (parse::compare_range_to_literal(nbegin, nend, "Fixed")) {
         result = ndt::make_fixed_dim_kind(element_tp);
       } else if (isupper(*nbegin)) {
@@ -1201,7 +1202,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     } else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
       result = ndt::make_any_kind();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Categorical")) {
-      result = ndt::make_categorical_kind();
+      result = ndt::categorical_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedBytes")) {
       result = ndt::fixed_bytes_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedString")) {

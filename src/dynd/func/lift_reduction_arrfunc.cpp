@@ -98,7 +98,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
         }
         break;
       case var_dim_type_id:
-        lifted_dst_type = ndt::make_var_dim(lifted_dst_type);
+        lifted_dst_type = ndt::var_dim_type::make(lifted_dst_type);
         break;
       default: {
         stringstream ss;

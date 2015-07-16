@@ -251,12 +251,12 @@ void nd::take_ck::resolve_dst_type(
 
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
-    dst_tp = ndt::make_var_dim(
+    dst_tp = ndt::var_dim_type::make(
         src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
   } else if (mask_el_tp.get_type_id() ==
              (type_id_t)type_id_of<intptr_t>::value) {
     if (src_tp[1].get_type_id() == var_dim_type_id) {
-      dst_tp = ndt::make_var_dim(
+      dst_tp = ndt::var_dim_type::make(
           src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
     } else {
       dst_tp = ndt::make_fixed_dim(

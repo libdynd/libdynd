@@ -30,8 +30,6 @@ struct var_dim_type_data {
 
 namespace ndt {
 
-  type make_var_dim(const type &element_tp);
-
   class var_dim_type : public base_dim_type {
     std::vector<std::pair<std::string, gfunc::callable>> m_array_properties,
         m_array_functions;
@@ -130,19 +128,19 @@ namespace ndt {
 
     static type make(const type &element_tp)
     {
-      return make_var_dim(element_tp);
+      return type(new var_dim_type(element_tp), false);
+    }
+
+    static type make(const type &element_tp, intptr_t ndim)
+    {
+      type result = element_tp;
+      for (intptr_t i = 0; i < ndim; ++i) {
+        result = make(result);
+      }
+
+      return result;
     }
   };
-
-  inline type make_var_dim(const type &element_tp, intptr_t ndim)
-  {
-    type result = element_tp;
-    for (intptr_t i = 0; i < ndim; ++i) {
-      result = make_var_dim(result);
-    }
-
-    return result;
-  }
 
   /**
    * A helper function for reserving initial space in a var dim element.

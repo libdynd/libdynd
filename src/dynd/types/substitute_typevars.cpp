@@ -85,7 +85,7 @@ ndt::type ndt::detail::internal_substitute(
               concrete));
     }
   case var_dim_type_id:
-    return ndt::make_var_dim(
+    return ndt::var_dim_type::make(
         ndt::substitute(pattern.extended<var_dim_type>()->get_element_type(),
                         typevars, concrete));
   case struct_type_id:
@@ -178,7 +178,7 @@ ndt::type ndt::detail::internal_substitute(
                     typevars, concrete));
           }
         case var_dim_type_id:
-          return ndt::make_var_dim(ndt::substitute(
+          return ndt::var_dim_type::make(ndt::substitute(
               pattern.extended<typevar_dim_type>()->get_element_type(),
               typevars, concrete));
         default: {
@@ -302,7 +302,7 @@ ndt::type ndt::detail::internal_substitute(
       }
       case var_dim_type_id:
         for (intptr_t i = 0; i < exponent; ++i) {
-          result = ndt::make_var_dim(result);
+          result = ndt::var_dim_type::make(result);
         }
         return result;
       case typevar_dim_type_id: {

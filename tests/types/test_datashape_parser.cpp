@@ -179,9 +179,9 @@ TEST(DataShapeParser, CContiguous)
 
 TEST(DataShapeParser, VarDim)
 {
-  EXPECT_EQ(ndt::make_var_dim(ndt::type::make<bool1>()),
+  EXPECT_EQ(ndt::var_dim_type::make(ndt::type::make<bool1>()),
             ndt::type("var * bool"));
-  EXPECT_EQ(ndt::make_var_dim(ndt::make_var_dim(ndt::type::make<float>())),
+  EXPECT_EQ(ndt::var_dim_type::make(ndt::var_dim_type::make(ndt::type::make<float>())),
             ndt::type("var * var * float32"));
   EXPECT_EQ(ndt::type("var * var * var * var * var * float32"),
             ndt::type("var**5 * float32"));
@@ -199,7 +199,7 @@ TEST(DataShapeParser, StridedFixedDim)
 
 TEST(DataShapeParser, StridedVarFixedDim)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_var_dim(
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::var_dim_type::make(
                 ndt::make_fixed_dim(3, ndt::type::make<float>()))),
             ndt::type("Fixed * var * 3 * float32"));
 }

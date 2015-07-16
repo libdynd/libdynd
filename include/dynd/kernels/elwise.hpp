@@ -141,7 +141,7 @@ namespace nd {
           ndt::type tp = child_dst_tp.without_memory_type();
           for (intptr_t i = ndim - 1; i >= 0; --i) {
             if (shape[i] == -1) {
-              tp = ndt::make_var_dim(tp);
+              tp = ndt::var_dim_type::make(tp);
             } else {
               tp = ndt::make_fixed_dim(shape[i], tp);
             }

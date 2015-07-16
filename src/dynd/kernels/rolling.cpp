@@ -180,7 +180,7 @@ void nd::functional::rolling_ck::resolve_dst_type(
   }
 
   if (src_tp[0].get_type_id() == var_dim_type_id) {
-    dst_tp = ndt::make_var_dim(child_dst_tp);
+    dst_tp = ndt::var_dim_type::make(child_dst_tp);
   } else {
     dst_tp =
         ndt::make_fixed_dim(src_tp[0].get_dim_size(NULL, NULL), child_dst_tp);

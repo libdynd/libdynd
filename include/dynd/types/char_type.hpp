@@ -78,18 +78,18 @@ namespace ndt {
                                   const type &src1_dt, const char *src1_arrmeta,
                                   comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
+
+    static const type &make()
+    {
+      static const type char_tp(new char_type(string_encoding_utf_32), false);
+      return char_tp;
+    }
+
+    static type make(string_encoding_t encoding)
+    {
+      return type(new char_type(encoding), false);
+    }
   };
-
-  inline const type &make_char()
-  {
-    static const type char_tp(new char_type(string_encoding_utf_32), false);
-    return char_tp;
-  }
-
-  inline type make_char(string_encoding_t encoding)
-  {
-    return type(new char_type(encoding), false);
-  }
 
 } // namespace dynd::ndt
 } // namespace dynd

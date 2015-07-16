@@ -791,8 +791,3 @@ void ndt::var_dim_element_resize(const type &tp, const char *arrmeta,
     throw runtime_error(ss.str());
   }
 }
-
-ndt::type ndt::make_var_dim(const type &element_tp)
-{
-  return type(new var_dim_type(element_tp), false);
-}

@@ -18,11 +18,11 @@
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
 
 namespace ndt {
-  type make_var_dim(const type &element_tp);
   type make_fixed_dim(size_t dim_size, const type &element_tp);
 } // namespace ndt;
 
@@ -1185,10 +1185,10 @@ namespace nd {
     if (ndim > 0) {
       intptr_t i = ndim - 1;
       ndt::type rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], tp)
-                                    : ndt::make_var_dim(tp);
+                                    : ndt::var_dim_type::make(tp);
       while (i-- > 0) {
         rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], rtp)
-                            : ndt::make_var_dim(rtp);
+                            : ndt::var_dim_type::make(rtp);
       }
       return empty(rtp);
     } else {
@@ -1225,7 +1225,7 @@ namespace nd {
   inline array empty(intptr_t dim0, const ndt::type &tp)
   {
     return nd::empty(dim0 >= 0 ? ndt::make_fixed_dim(dim0, tp)
-                               : ndt::make_var_dim(tp));
+                               : ndt::var_dim_type::make(tp));
   }
 
   /**
@@ -1248,8 +1248,8 @@ namespace nd {
   inline array empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
   {
     ndt::type rtp =
-        (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp) : ndt::make_var_dim(tp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::make_var_dim(rtp);
+        (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp) : ndt::var_dim_type::make(tp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
     return nd::empty(rtp);
   }
 
@@ -1275,9 +1275,9 @@ namespace nd {
                      const ndt::type &tp)
   {
     ndt::type rtp =
-        (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp) : ndt::make_var_dim(tp);
-    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp) : ndt::make_var_dim(rtp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::make_var_dim(rtp);
+        (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp) : ndt::var_dim_type::make(tp);
+    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp) : ndt::var_dim_type::make(rtp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
     return empty(rtp);
   }
 

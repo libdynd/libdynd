@@ -233,7 +233,7 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type& tp0, const ndt::type& 
          tp1_val.get_kind() == dim_kind) ||
         (tp1_val.get_type_id() == var_dim_type_id &&
          tp0_val.get_kind() == dim_kind)) {
-      return ndt::make_var_dim(promote_types_arithmetic(
+      return ndt::var_dim_type::make(promote_types_arithmetic(
           tp0_val.extended<ndt::base_dim_type>()->get_element_type(),
           tp1_val.extended<ndt::base_dim_type>()->get_element_type()));
     }
