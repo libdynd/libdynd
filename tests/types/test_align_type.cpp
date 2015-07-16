@@ -64,7 +64,7 @@ TEST(AlignDType, Chained) {
   // make sure that is handled properly at the type object level.
   ndt::type d = make_unaligned(ndt::byteswap_type::make(ndt::type::make<int>()));
   EXPECT_EQ(ndt::byteswap_type::make(ndt::type::make<int>(),
-                               ndt::make_view(ndt::make_fixed_bytes(4, 4),
+                               ndt::view_type::make(ndt::make_fixed_bytes(4, 4),
                                               ndt::make_fixed_bytes(4, 1))),
             d);
   EXPECT_EQ(ndt::make_fixed_bytes(4, 1), d.storage_type());

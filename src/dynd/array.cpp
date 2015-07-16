@@ -1544,7 +1544,7 @@ static void view_scalar_types(const ndt::type &dt,
       default:
         break;
       }
-      out_transformed_tp = ndt::make_view(*e, dt);
+      out_transformed_tp = ndt::view_type::make(*e, dt);
       out_was_transformed = true;
     } else {
       out_transformed_tp = *e;

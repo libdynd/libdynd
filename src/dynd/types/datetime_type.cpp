@@ -403,7 +403,7 @@ static nd::array function_ndo_strftime(const nd::array &n,
   if (format.empty()) {
     throw runtime_error("format string for strftime should not be empty");
   }
-  return n.replace_dtype(ndt::make_unary_expr(ndt::string_type::make(), n.get_dtype(),
+  return n.replace_dtype(ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(),
                                               make_strftime_kernelgen(format)));
 }
 

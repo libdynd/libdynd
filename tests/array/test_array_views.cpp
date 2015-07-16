@@ -50,7 +50,7 @@ TEST(ArrayViews, OneDimensionalRawMemory)
   // where necessary
   a(1 <= irange() < 9).vals() = c_values;
   b = a(1 <= irange() < 73).view_scalars<uint64_t>();
-  EXPECT_EQ(ndt::make_fixed_dim(9, ndt::make_view(ndt::type::make<uint64_t>(),
+  EXPECT_EQ(ndt::make_fixed_dim(9, ndt::view_type::make(ndt::type::make<uint64_t>(),
                                                   ndt::make_fixed_bytes(8, 1))),
             b.get_type());
   EXPECT_EQ(1u, b.get_shape().size());
@@ -106,7 +106,7 @@ TEST(ArrayViews, ExpressionDType)
   b = a_u2.view_scalars<int16_t>();
   EXPECT_EQ(ndt::make_fixed_dim(
                 2, ndt::make_fixed_dim(
-                       3, ndt::make_view(
+                       3, ndt::view_type::make(
                               ndt::type::make<int16_t>(),
                               ndt::convert_type::make(ndt::type::make<uint16_t>(),
                                                 ndt::type::make<uint32_t>())))),

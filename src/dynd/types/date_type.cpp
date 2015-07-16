@@ -302,7 +302,7 @@ static nd::array function_ndo_strftime(const nd::array &n,
   if (format.empty()) {
     throw runtime_error("format string for strftime should not be empty");
   }
-  return n.replace_dtype(ndt::make_unary_expr(ndt::string_type::make(),
+  return n.replace_dtype(ndt::unary_expr_type::make(ndt::string_type::make(),
                                               n.get_dtype(),
                                               make_strftime_kernelgen(format)));
 }
@@ -324,7 +324,7 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year,
         "no parameters provided to date.replace, should provide at least one");
   }
   return n.replace_dtype(
-      ndt::make_unary_expr(ndt::date_type::make(), n.get_dtype(),
+      ndt::unary_expr_type::make(ndt::date_type::make(), n.get_dtype(),
                            make_replace_kernelgen(year, month, day)));
 }
 
