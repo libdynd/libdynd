@@ -115,7 +115,7 @@ time_hmst time_hmst::get_current_local_time()
  
 const ndt::type& time_hmst::type()
 {
-    static ndt::type tp = ndt::make_struct(
+    static ndt::type tp = ndt::struct_type::make(
             ndt::type::make<int8_t>(), "hour",
             ndt::type::make<int8_t>(), "minute",
             ndt::type::make<int8_t>(), "second",

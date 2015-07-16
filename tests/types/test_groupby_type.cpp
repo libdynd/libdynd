@@ -103,7 +103,7 @@ TEST(GroupByDType, Struct) {
                     ndt::fixed_string_type::make(1, string_encoding_ascii)).eval();
 
     // Create a simple structured array
-    ndt::type d = ndt::make_struct(ndt::string_type::make(), "name", ndt::type::make<float>(), "height",
+    ndt::type d = ndt::struct_type::make(ndt::string_type::make(), "name", ndt::type::make<float>(), "height",
                     ndt::fixed_string_type::make(1, string_encoding_ascii), "gender");
     nd::array a = nd::empty(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
@@ -140,7 +140,7 @@ TEST(GroupByDType, Struct) {
 
 TEST(GroupByDType, StructSubset) {
     // Create a simple structured array
-    ndt::type d = ndt::make_struct(ndt::string_type::make(), "lastname",
+    ndt::type d = ndt::struct_type::make(ndt::string_type::make(), "lastname",
                     ndt::string_type::make(), "firstname",
                     ndt::fixed_string_type::make(1, string_encoding_ascii), "gender");
     nd::array a = nd::empty(7, d);
@@ -173,7 +173,7 @@ TEST(GroupByDType, StructSubset) {
 
     // Validate the list of groups it produced
     nd::array groups_list = g.p("groups");
-    EXPECT_EQ(ndt::make_fixed_dim(5, ndt::make_struct(ndt::string_type::make(), "lastname",
+    EXPECT_EQ(ndt::make_fixed_dim(5, ndt::struct_type::make(ndt::string_type::make(), "lastname",
                     ndt::fixed_string_type::make(1, string_encoding_ascii), "gender")),
                         groups_list.get_type());
     EXPECT_EQ(5, groups_list.get_shape()[0]);
@@ -222,7 +222,7 @@ TEST(GroupByDType, StructUnsortedCats) {
     nd::array gender_cats = nd::array(gender_cats_vals);
 
     // Create a simple structured array
-    ndt::type d = ndt::make_struct(ndt::string_type::make(), "name", ndt::type::make<float>(), "height",
+    ndt::type d = ndt::struct_type::make(ndt::string_type::make(), "name", ndt::type::make<float>(), "height",
                     ndt::fixed_string_type::make(1, string_encoding_ascii), "gender");
     nd::array a = nd::empty(5, d);
     const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};

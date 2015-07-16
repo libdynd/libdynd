@@ -200,7 +200,7 @@ TEST(DateType, ToStructFunction) {
     EXPECT_EQ(ndt::make_property(d, "struct"),
                     b.get_type());
     b = b.eval();
-    EXPECT_EQ(ndt::make_struct(ndt::type::make<int16_t>(), "year",
+    EXPECT_EQ(ndt::struct_type::make(ndt::type::make<int16_t>(), "year",
                         ndt::type::make<int8_t>(), "month",
                         ndt::type::make<int8_t>(), "day"),
                     b.get_type());
@@ -222,7 +222,7 @@ TEST(DateType, ToStruct) {
     a = nd::array("1955-03-13").ucast(d).eval();
 
     // This is the default struct produced
-    ds = ndt::make_struct(ndt::type::make<int32_t>(), "year", ndt::type::make<int8_t>(), "month", ndt::type::make<int8_t>(), "day");
+    ds = ndt::struct_type::make(ndt::type::make<int32_t>(), "year", ndt::type::make<int8_t>(), "month", ndt::type::make<int8_t>(), "day");
     b = nd::empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b(0).as<int32_t>());
@@ -230,7 +230,7 @@ TEST(DateType, ToStruct) {
     EXPECT_EQ(13, b(2).as<int8_t>());
 
     // This should work too
-    ds = ndt::make_struct(ndt::type::make<int16_t>(), "month", ndt::type::make<int16_t>(), "year", ndt::type::make<float>(), "day");
+    ds = ndt::struct_type::make(ndt::type::make<int16_t>(), "month", ndt::type::make<int16_t>(), "year", ndt::type::make<float>(), "day");
     b = nd::empty(ds);
     b.vals() = a;
     EXPECT_EQ(1955, b(1).as<int16_t>());
@@ -243,7 +243,7 @@ TEST(DateType, FromStruct) {
     nd::array a, b;
 
     // This is the default struct accepted
-    ds = ndt::make_struct(ndt::type::make<int32_t>(), "year", ndt::type::make<int8_t>(), "month", ndt::type::make<int8_t>(), "day");
+    ds = ndt::struct_type::make(ndt::type::make<int32_t>(), "year", ndt::type::make<int8_t>(), "month", ndt::type::make<int8_t>(), "day");
     a = nd::empty(ds);
     a(0).vals() = 1955;
     a(1).vals() = 3;
@@ -255,7 +255,7 @@ TEST(DateType, FromStruct) {
     EXPECT_EQ(13,   b.p("day").as<int32_t>());
 
     // This should work too
-    ds = ndt::make_struct(ndt::type::make<int16_t>(), "month", ndt::type::make<int16_t>(), "year", ndt::type::make<float>(), "day");
+    ds = ndt::struct_type::make(ndt::type::make<int16_t>(), "month", ndt::type::make<int16_t>(), "year", ndt::type::make<float>(), "day");
     a = nd::empty(ds);
     a.p("year").vals() = 1955;
     a.p("month").vals() = 3;

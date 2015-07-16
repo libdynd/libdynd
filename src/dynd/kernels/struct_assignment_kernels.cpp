@@ -31,13 +31,13 @@ size_t dynd::make_struct_assignment_kernel(void *ckb, intptr_t ckb_offset,
 {
   if (src_struct_tp.get_kind() != struct_kind) {
     stringstream ss;
-    ss << "make_struct_assignment_kernel: provided source type "
+    ss << "struct_type::make_assignment_kernel: provided source type "
        << src_struct_tp << " is not of struct kind";
     throw runtime_error(ss.str());
   }
   if (dst_struct_tp.get_kind() != struct_kind) {
     stringstream ss;
-    ss << "make_struct_assignment_kernel: provided destination type "
+    ss << "struct_type::make_assignment_kernel: provided destination type "
        << dst_struct_tp << " is not of struct kind";
     throw runtime_error(ss.str());
   }

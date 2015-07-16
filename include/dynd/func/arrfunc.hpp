@@ -832,7 +832,7 @@ namespace nd {
 
       // ...
       array kwds_as_array =
-          kwds.as_array(ndt::make_struct(self_tp->get_kwd_names(), kwd_tp),
+          kwds.as_array(ndt::struct_type::make(self_tp->get_kwd_names(), kwd_tp),
                         available, missing);
 
       ndt::type dst_tp;

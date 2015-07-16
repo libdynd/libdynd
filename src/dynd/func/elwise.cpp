@@ -61,7 +61,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
       names(old_field_count + 1).val_assign("blocks");
       fields(old_field_count + 1)
           .val_assign(ndt::make_option(ndt::make_type<int>()));
-      kwd_tp = ndt::make_struct(names, fields);
+      kwd_tp = ndt::struct_type::make(names, fields);
     }
   */
 

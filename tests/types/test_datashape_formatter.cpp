@@ -143,12 +143,12 @@ TEST(DataShapeFormatter, DTypeUniformArrays)
 
 TEST(DataShapeFormatter, ArrayStructs) {
     EXPECT_EQ("{x: int32, y: float64}", format_datashape(
-                    nd::empty(ndt::make_struct(
+                    nd::empty(ndt::struct_type::make(
                                     ndt::type::make<int32_t>(), "x",
                                     ndt::type::make<double>(), "y")), "", false));
     EXPECT_EQ("{x: var * {a: int32, b: int8}, y: 5 * var * uint8}",
-                    format_datashape(nd::empty(ndt::make_struct(
-                                    ndt::make_var_dim(ndt::make_struct(
+                    format_datashape(nd::empty(ndt::struct_type::make(
+                                    ndt::make_var_dim(ndt::struct_type::make(
                                         ndt::type::make<int32_t>(), "a",
                                         ndt::type::make<int8_t>(), "b")), "x",
                                     ndt::make_fixed_dim(5, ndt::make_var_dim(
@@ -157,12 +157,12 @@ TEST(DataShapeFormatter, ArrayStructs) {
 
 TEST(DataShapeFormatter, DTypeStructs) {
     EXPECT_EQ("{x: int32, y: float64}", format_datashape(
-                    ndt::make_struct(
+                    ndt::struct_type::make(
                                     ndt::type::make<int32_t>(), "x",
                                     ndt::type::make<double>(), "y"), "", false));
     EXPECT_EQ("{x: var * {a: int32, b: int8}, y: 5 * var * uint8}",
-                    format_datashape(ndt::make_struct(
-                                    ndt::make_var_dim(ndt::make_struct(
+                    format_datashape(ndt::struct_type::make(
+                                    ndt::make_var_dim(ndt::struct_type::make(
                                         ndt::type::make<int32_t>(), "a",
                                         ndt::type::make<int8_t>(), "b")), "x",
                                     ndt::make_fixed_dim(5, ndt::make_var_dim(
@@ -170,7 +170,7 @@ TEST(DataShapeFormatter, DTypeStructs) {
     EXPECT_EQ(
         "{x: 7 * {a: int32, b: int8}, y: var * 4 * uint8}",
         format_datashape(
-            ndt::make_struct(ndt::make_fixed_dim(7, ndt::make_struct(
+            ndt::struct_type::make(ndt::make_fixed_dim(7, ndt::struct_type::make(
                                  ndt::type::make<int32_t>(), "a",
                                  ndt::type::make<int8_t>(), "b")),
                              "x", ndt::make_var_dim(ndt::make_fixed_dim(4,

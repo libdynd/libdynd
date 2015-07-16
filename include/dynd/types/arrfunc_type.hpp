@@ -389,7 +389,7 @@ namespace ndt {
                      const nd::array &kwd_types, const type &return_type)
     {
       return type(new arrfunc_type(tuple_type::make(pos_types),
-                                   make_struct(kwd_names, kwd_types),
+                                   struct_type::make(kwd_names, kwd_types),
                                    return_type),
                   false);
     }
@@ -439,7 +439,7 @@ namespace ndt {
 
       return arrfunc_type::make(
           tuple_type::make(nd::array(tp, sizeof...(A) - sizeof...(T))),
-          make_struct({names...}, nd::array(tp + (sizeof...(A) - sizeof...(T)),
+          struct_type::make({names...}, nd::array(tp + (sizeof...(A) - sizeof...(T)),
                                             sizeof...(T))),
           type::make<R>());
     }

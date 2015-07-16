@@ -39,7 +39,7 @@ void datetime_struct::set_from_str(const char *begin, const char *end,
 
 const ndt::type& datetime_struct::type()
 {
-    static ndt::type tp = ndt::make_struct(
+    static ndt::type tp = ndt::struct_type::make(
             ndt::type::make<int16_t>(), "year",
             ndt::type::make<int8_t>(), "month",
             ndt::type::make<int8_t>(), "day",

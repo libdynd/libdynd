@@ -138,7 +138,7 @@ ndt::type ndt::base_struct_type::apply_linear_index(
       }
 
       tmp_field_types.flag_as_immutable();
-      return make_struct(tmp_field_names, tmp_field_types);
+      return struct_type::make(tmp_field_names, tmp_field_types);
     }
   }
 }

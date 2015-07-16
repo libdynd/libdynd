@@ -326,7 +326,7 @@ TEST(SymbolicTypes, VariadicStruct)
 {
   ndt::type tp;
 
-  tp = ndt::make_struct({"x", "y"},
+  tp = ndt::struct_type::make({"x", "y"},
                         {ndt::type::make<int>(), ndt::type::make<float>()}, true);
   EXPECT_EQ(struct_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());

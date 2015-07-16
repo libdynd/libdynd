@@ -30,7 +30,7 @@ nd::arrfunc nd::functional::neighborhood(const nd::arrfunc &neighborhood_op,
                          .with_replaced_dtype(funcproto_tp->get_return_type());
   ndt::type self_tp =
       ndt::arrfunc_type::make(funcproto_tp->get_pos_tuple(),
-                              ndt::make_struct(arg_names, arg_tp), ret_tp);
+                              ndt::struct_type::make(arg_names, arg_tp), ret_tp);
 
   std::ostringstream oss;
   oss << "Fixed**" << nh_ndim;

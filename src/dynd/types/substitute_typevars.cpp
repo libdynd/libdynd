@@ -89,7 +89,7 @@ ndt::type ndt::detail::internal_substitute(
         ndt::substitute(pattern.extended<var_dim_type>()->get_element_type(),
                         typevars, concrete));
   case struct_type_id:
-    return ndt::make_struct(
+    return ndt::struct_type::make(
         pattern.extended<struct_type>()->get_field_names(),
         substitute_type_array(
             pattern.extended<base_tuple_type>()->get_field_types(), typevars,

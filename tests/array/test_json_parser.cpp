@@ -373,7 +373,7 @@ TEST(JSONParser, NestedListInts) {
 
 TEST(JSONParser, Struct) {
     nd::array n;
-    ndt::type sdt = ndt::make_struct(ndt::type::make<int>(), "id", ndt::type::make<double>(), "amount",
+    ndt::type sdt = ndt::struct_type::make(ndt::type::make<int>(), "id", ndt::type::make<double>(), "amount",
                     ndt::string_type::make(), "name", ndt::make_date(), "when");
 
     // A straightforward struct
@@ -402,9 +402,9 @@ TEST(JSONParser, Struct) {
 
 TEST(JSONParser, NestedStruct) {
     nd::array n;
-    ndt::type sdt = ndt::make_struct(ndt::make_fixed_dim(3, ndt::type::make<float>()), "position",
+    ndt::type sdt = ndt::struct_type::make(ndt::make_fixed_dim(3, ndt::type::make<float>()), "position",
                     ndt::type::make<double>(), "amount",
-                    ndt::make_struct(ndt::string_type::make(), "name", ndt::make_date(), "when"), "data");
+                    ndt::struct_type::make(ndt::string_type::make(), "name", ndt::make_date(), "when"), "data");
 
     n = parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] }");
@@ -434,9 +434,9 @@ TEST(JSONParser, NestedStruct) {
 
 TEST(JSONParser, ListOfStruct) {
     nd::array n;
-    ndt::type sdt = ndt::make_var_dim(ndt::make_struct(ndt::make_fixed_dim(3, ndt::type::make<float>()), "position",
+    ndt::type sdt = ndt::make_var_dim(ndt::struct_type::make(ndt::make_fixed_dim(3, ndt::type::make<float>()), "position",
                     ndt::type::make<double>(), "amount",
-                    ndt::make_struct(ndt::string_type::make(), "name", ndt::make_date(), "when"), "data"));
+                    ndt::struct_type::make(ndt::string_type::make(), "name", ndt::make_date(), "when"), "data"));
 
     n = parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
                     "\"amount\": 10.5, \"position\": [3.5,1.0,1e10] },\n"
@@ -474,7 +474,7 @@ TEST(JSONParser, JSONDType) {
     // Parsing JSON with a piece of it being a json string
     n = parse_json("{a: json, b: int32, c: string}",
                     "{\"c\": \"testing string\", \"a\": [3.1, {\"X\":2}, [1,2]], \"b\":12}");
-    EXPECT_EQ(ndt::make_struct(ndt::make_json(), "a", ndt::type::make<int32_t>(), "b", ndt::string_type::make(), "c"),
+    EXPECT_EQ(ndt::struct_type::make(ndt::make_json(), "a", ndt::type::make<int32_t>(), "b", ndt::string_type::make(), "c"),
                     n.get_type());
     EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n(0).as<string>());
     EXPECT_EQ(12, n(1).as<int>());
