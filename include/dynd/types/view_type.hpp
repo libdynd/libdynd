@@ -64,29 +64,25 @@ namespace ndt {
                                                              out_count);
       }
     }
-  };
 
-  /**
-   * Makes an unaligned type to view the given type without alignment
-   * requirements.
-   */
-  inline type make_view(const type &value_type, const type &operand_type)
-  {
-    if (value_type.get_kind() != expr_kind) {
-      return type(new view_type(value_type, operand_type), false);
-    } else {
-      // When the value type has an expr_kind, we need to chain things together
-      // so that the view operation happens just at the primitive level.
-      return value_type.extended<base_expr_type>()->with_replaced_storage_type(
-          type(new view_type(value_type.storage_type(), operand_type), false));
+    /**
+     * Makes an unaligned type to view the given type without alignment
+     * requirements.
+     */
+    static type make(const type &value_type, const type &operand_type)
+    {
+      if (value_type.get_kind() != expr_kind) {
+        return type(new view_type(value_type, operand_type), false);
+      } else {
+        // When the value type has an expr_kind, we need to chain things
+        // together
+        // so that the view operation happens just at the primitive level.
+        return value_type.extended<base_expr_type>()
+            ->with_replaced_storage_type(type(
+                new view_type(value_type.storage_type(), operand_type), false));
+      }
     }
-  }
-
-  template <typename Tvalue, typename Toperand>
-  type make_view()
-  {
-    return type(new view_type(make_type<Tvalue>()), false);
-  }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

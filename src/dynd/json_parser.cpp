@@ -54,7 +54,7 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref,
       break;
     default: {
       // The data needs to be converted to UTF-8 before parsing
-      ndt::type utf8_tp = ndt::make_string(string_encoding_utf_8);
+      ndt::type utf8_tp = ndt::string_type::make(string_encoding_utf_8);
       out_tmp_ref = json.ucast(utf8_tp).eval();
       sdt = static_cast<const ndt::base_string_type *>(utf8_tp.extended());
       sdt->get_string_range(&begin, &end, out_tmp_ref.get_arrmeta(),
@@ -479,7 +479,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta,
       *out_data = value;
     }
     else {
-      typed_data_assign(tp, arrmeta, out_data, ndt::make_type<bool1>(),
+      typed_data_assign(tp, arrmeta, out_data, ndt::type::make<bool1>(),
                         NULL, &value);
     }
     rbegin = begin;

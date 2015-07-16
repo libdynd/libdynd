@@ -103,7 +103,7 @@ ndt::type ndt::base_struct_type::apply_linear_index(
       // string text data. TODO: encapsulate this into a function.
       char *data_ptr;
       string_type_data *string_arr_ptr;
-      type stp = make_string(string_encoding_utf_8);
+      type stp = string_type::make(string_encoding_utf_8);
       type tp = make_fixed_dim(dimension_size, stp);
       nd::array tmp_field_names(
           make_array_memory_block(tp.extended()->get_arrmeta_size(),
@@ -138,7 +138,7 @@ ndt::type ndt::base_struct_type::apply_linear_index(
       }
 
       tmp_field_types.flag_as_immutable();
-      return make_struct(tmp_field_names, tmp_field_types);
+      return struct_type::make(tmp_field_names, tmp_field_types);
     }
   }
 }
@@ -266,7 +266,7 @@ ndt::type ndt::base_struct_type::get_elwise_property_type(
     out_writable = false;
     return get_field_type(elwise_property_index).value_type();
   } else {
-    return make_type<void>();
+    return type::make<void>();
   }
 }
 

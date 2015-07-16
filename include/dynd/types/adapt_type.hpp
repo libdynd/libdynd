@@ -45,13 +45,13 @@ namespace ndt {
         void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
         const char *src_arrmeta, kernel_request_t kernreq,
         const eval::eval_context *ectx) const;
-  };
 
-  inline type make_adapt(const type &operand_type, const type &value_type,
-                         const nd::string &op)
-  {
-    return type(new adapt_type(operand_type, value_type, op), false);
-  }
+    static type make(const type &operand_type, const type &value_type,
+                     const nd::string &op)
+    {
+      return type(new adapt_type(operand_type, value_type, op), false);
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

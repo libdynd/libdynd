@@ -36,7 +36,8 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   std::shared_ptr<lifted_reduction_arrfunc_data> data =
-      *reinterpret_cast<std::shared_ptr<lifted_reduction_arrfunc_data> *>(static_data);
+      *reinterpret_cast<std::shared_ptr<lifted_reduction_arrfunc_data> *>(
+          static_data);
   return make_lifted_reduction_ckernel(
       data->child_elwise_reduction.get(),
       data->child_elwise_reduction.get_type(),
@@ -97,7 +98,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
         }
         break;
       case var_dim_type_id:
-        lifted_dst_type = ndt::make_var_dim(lifted_dst_type);
+        lifted_dst_type = ndt::var_dim_type::make(lifted_dst_type);
         break;
       default: {
         stringstream ss;
@@ -136,6 +137,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
          sizeof(bool) * reduction_ndim);
 
   return nd::arrfunc(
-      ndt::make_arrfunc(ndt::make_tuple(lifted_arr_type), lifted_dst_type),
+      ndt::arrfunc_type::make(ndt::tuple_type::make(lifted_arr_type),
+                              lifted_dst_type),
       self, 0, NULL, NULL, &instantiate_lifted_reduction_arrfunc_data);
 }

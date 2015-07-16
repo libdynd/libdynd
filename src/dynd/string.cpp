@@ -23,7 +23,7 @@ nd::string::string(const nd::array& rhs)
             // It's already immutable and the right type
             m_value = rhs;
         } else if (rhs.get_type().value_type().get_kind() == string_kind) {
-            m_value = rhs.ucast(ndt::make_string()).eval_immutable();
+            m_value = rhs.ucast(ndt::string_type::make()).eval_immutable();
         } else {
             stringstream ss;
             ss << "Cannot implicitly convert nd::array of type "

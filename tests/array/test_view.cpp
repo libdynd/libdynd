@@ -61,8 +61,8 @@ TEST(View, AsBytes) {
 
     // View a scalar as bytes
     a = (int32_t)100;
-    b = nd::view(a, ndt::make_bytes(4));
-    ASSERT_EQ(b.get_type(), ndt::make_bytes(4));
+    b = nd::view(a, ndt::bytes_type::make(4));
+    ASSERT_EQ(b.get_type(), ndt::bytes_type::make(4));
     // Confirm the bytes arrmeta points to the right data reference
     btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
     EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
@@ -74,8 +74,8 @@ TEST(View, AsBytes) {
     // View a 1D array as bytes
     double a_data[2] = {1, 2};
     a = a_data;
-    b = nd::view(a, ndt::make_bytes(1));
-    ASSERT_EQ(b.get_type(), ndt::make_bytes(1));
+    b = nd::view(a, ndt::bytes_type::make(1));
+    ASSERT_EQ(b.get_type(), ndt::bytes_type::make(1));
     // Confirm the bytes arrmeta points to the right data reference
     btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
     EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
@@ -87,8 +87,8 @@ TEST(View, AsBytes) {
     // View a 2D array as bytes
     double a_data2[2][3] = {{1, 2, 3}, {1, 2, 5}};
     a = a_data2;
-    b = nd::view(a, ndt::make_bytes(2));
-    ASSERT_EQ(b.get_type(), ndt::make_bytes(2));
+    b = nd::view(a, ndt::bytes_type::make(2));
+    ASSERT_EQ(b.get_type(), ndt::bytes_type::make(2));
     // Confirm the bytes arrmeta points to the right data reference
     btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
     EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
@@ -96,12 +96,12 @@ TEST(View, AsBytes) {
     btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
     EXPECT_EQ(a.get_readonly_originptr(), btd->begin);
     EXPECT_EQ(2*3*8, btd->end - btd->begin);
-    EXPECT_THROW(nd::view(a(irange(), irange(0, 2)), ndt::make_bytes(1)), type_error);
+    EXPECT_THROW(nd::view(a(irange(), irange(0, 2)), ndt::bytes_type::make(1)), type_error);
 
     // View an array with var outer dimension
     a = parse_json("var * 2 * int16", "[[1, 2], [3, 4], [5, 6]]");
-    b = nd::view(a, ndt::make_bytes(1));
-    ASSERT_EQ(b.get_type(), ndt::make_bytes(1));
+    b = nd::view(a, ndt::bytes_type::make(1));
+    ASSERT_EQ(b.get_type(), ndt::bytes_type::make(1));
     // Confirm the bytes arrmeta points to the right data reference
     btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
     const var_dim_type_arrmeta *vdt_meta =
@@ -144,8 +144,8 @@ TEST(View, FromBytes) {
 
     double x = 3.25;
     a = nd::make_bytes_array(reinterpret_cast<const char *>(&x), sizeof(x), 8);
-    ASSERT_EQ(ndt::make_bytes(8), a.get_type());
-    b = nd::view(a, ndt::make_type<double>());
+    ASSERT_EQ(ndt::bytes_type::make(8), a.get_type());
+    b = nd::view(a, ndt::type::make<double>());
     EXPECT_EQ(3.25, b.as<double>());
     btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
     btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
@@ -158,7 +158,7 @@ TEST(View, FromBytes) {
 
     float y[3] = {1.f, 2.5f, -1.25f};
     a = nd::make_bytes_array(reinterpret_cast<const char *>(&y), sizeof(y), 4);
-    ASSERT_EQ(ndt::make_bytes(4), a.get_type());
+    ASSERT_EQ(ndt::bytes_type::make(4), a.get_type());
     b = nd::view(a, ndt::type("Fixed * float32"));
     EXPECT_EQ(1.f, b(0).as<float>());
     EXPECT_EQ(2.5f, b(1).as<float>());

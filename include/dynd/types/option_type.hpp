@@ -11,6 +11,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/option.hpp>
 
 namespace dynd {
 
@@ -135,7 +136,7 @@ namespace ndt {
   template <typename Tnative>
   inline type make_option()
   {
-    return make_option(make_type<Tnative>());
+    return make_option(type::make<Tnative>());
   }
 
 } // namespace dynd::ndt

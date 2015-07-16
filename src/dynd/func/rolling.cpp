@@ -33,10 +33,10 @@ nd::arrfunc nd::functional::rolling(const nd::arrfunc &window_op,
   }
 
   nd::string rolldimname("RollDim");
-  ndt::type roll_src_tp = ndt::make_typevar_dim(
+  ndt::type roll_src_tp = ndt::typevar_dim_type::make(
       rolldimname, window_src_tp.get_type_at_dimension(NULL, 1));
   ndt::type roll_dst_tp =
-      ndt::make_typevar_dim(rolldimname, window_af_tp->get_return_type());
+      ndt::typevar_dim_type::make(rolldimname, window_af_tp->get_return_type());
 
   // Create the data for the arrfunc
   std::shared_ptr<rolling_arrfunc_data> data(new rolling_arrfunc_data);
@@ -44,5 +44,6 @@ nd::arrfunc nd::functional::rolling(const nd::arrfunc &window_op,
   data->window_op = window_op;
 
   return arrfunc::make<rolling_ck>(
-      ndt::make_arrfunc(ndt::make_tuple(roll_src_tp), roll_dst_tp), data, 0);
+      ndt::arrfunc_type::make(ndt::tuple_type::make(roll_src_tp), roll_dst_tp),
+      data, 0);
 }

@@ -249,9 +249,9 @@ ndt::categorical_type::categorical_type(const nd::array &categories,
     set<const char *, cmp> uniques(less);
 
     m_value_to_category_index =
-        nd::empty(category_count, make_type<intptr_t>());
+        nd::empty(category_count, type::make<intptr_t>());
     m_category_index_to_value =
-        nd::empty(category_count, make_type<intptr_t>());
+        nd::empty(category_count, type::make<intptr_t>());
 
     // create the mapping from indices of (to be lexicographically sorted)
     // categories to values
@@ -294,11 +294,11 @@ ndt::categorical_type::categorical_type(const nd::array &categories,
 
   // Use the number of categories to set which underlying integer storage to use
   if (category_count <= 256) {
-    m_storage_type = make_type<uint8_t>();
+    m_storage_type = type::make<uint8_t>();
   } else if (category_count <= 65536) {
-    m_storage_type = make_type<uint16_t>();
+    m_storage_type = type::make<uint16_t>();
   } else {
-    m_storage_type = make_type<uint32_t>();
+    m_storage_type = type::make<uint32_t>();
   }
   m_members.data_size = m_storage_type.get_data_size();
   m_members.data_alignment = (uint8_t)m_storage_type.get_data_alignment();
@@ -495,7 +495,7 @@ intptr_t ndt::categorical_type::make_assignment_kernel(
     } else if (src_tp.value_type() != m_category_tp &&
                src_tp.value_type().get_type_id() != categorical_type_id) {
       // Make a convert type to the category type, and have it do the chaining
-      type src_cvt_tp = make_convert(m_category_tp, src_tp);
+      type src_cvt_tp = convert_type::make(m_category_tp, src_tp);
       return src_cvt_tp.extended()->make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp, src_arrmeta,
           kernreq, ectx);

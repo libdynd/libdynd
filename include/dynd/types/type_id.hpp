@@ -135,20 +135,12 @@ enum type_id_t {
   // A tuple type with variable layout
   tuple_type_id,
 
+  option_type_id,
+
   // A type that enforces C contiguity
   c_contiguous_type_id,
 
-  option_type_id,
-
   ndarrayarg_type_id,
-
-  // Named symbolic types
-  // Types matching a single type_kind_t, like Bool, UInt, SInt, Real, etc.
-  kind_sym_type_id,
-  // "Int", matching both UInt and SInt
-  int_sym_type_id,
-  // "Any", matching any type (dimensions and dtype)
-  any_sym_type_id,
 
   // Adapter types
   adapt_type_id,
@@ -171,6 +163,14 @@ enum type_id_t {
 
   // Instances of this type are themselves types
   type_type_id,
+
+  // Named symbolic types
+  // Types matching a single type_kind_t, like Bool, UInt, SInt, Real, etc.
+  kind_sym_type_id,
+  // "Int", matching both UInt and SInt
+  int_sym_type_id,
+  // "Any", matching any type (dimensions and dtype)
+  any_kind_type_id,
 
   // Symbolic types
   arrfunc_type_id,
@@ -213,6 +213,13 @@ typedef type_id_sequence<
     complex_float64_type_id, void_type_id,
     void_pointer_type_id> builtin_type_ids;
 typedef type_id_sequence<fixed_dim_type_id, var_dim_type_id> dim_type_ids;
+
+inline void validate_type_id(type_id_t tp_id)
+{
+  if (tp_id > static_cast<type_id_t>(DYND_TYPE_ID_MAX)) {
+    throw std::runtime_error("invalid type id");
+  }
+}
 
 enum type_flags_t {
   // A symbolic name instead of just "0"

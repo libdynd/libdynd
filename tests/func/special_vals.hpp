@@ -316,7 +316,7 @@ dynd::nd::array factorial_vals() {
         3.80892263763057e+260
     };
 
-    dynd::nd::array vals = dynd::nd::empty(150, dynd::ndt::make_tuple(dynd::ndt::make_type<int>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(150, dynd::ndt::tuple_type::make(dynd::ndt::type::make<int>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = n;
     vals(dynd::irange(), 1).vals() = fac;
 
@@ -629,7 +629,7 @@ dynd::nd::array factorial2_vals() {
         6.09581828152342e+130
     };
 
-    dynd::nd::array vals = dynd::nd::empty(150, dynd::ndt::make_tuple(dynd::ndt::make_type<int>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(150, dynd::ndt::tuple_type::make(dynd::ndt::type::make<int>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = n;
     vals(dynd::irange(), 1).vals() = fac2;
 
@@ -68144,7 +68144,7 @@ dynd::nd::array factorial_ratio_vals() {
         1.0
     };
 
-    dynd::nd::array vals = dynd::nd::empty(22500, dynd::ndt::make_tuple(dynd::ndt::make_type<int>(), dynd::ndt::make_type<int>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(22500, dynd::ndt::tuple_type::make(dynd::ndt::type::make<int>(), dynd::ndt::type::make<int>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = m;
     vals(dynd::irange(), 1).vals() = n;
     vals(dynd::irange(), 2).vals() = fac_ratio;
@@ -68368,7 +68368,7 @@ dynd::nd::array gamma_vals() {
         8.8417619937397e+30
     };
 
-    dynd::nd::array vals = dynd::nd::empty(105, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(105, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = ga;
 
@@ -68587,7 +68587,7 @@ dynd::nd::array lgamma_vals() {
         71.257038967168
     };
 
-    dynd::nd::array vals = dynd::nd::empty(103, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(103, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = lga;
 
@@ -68642,7 +68642,7 @@ dynd::nd::array airy_vals() {
         {{2.16496252073799e-18, -8.42056795401777e-18}, {1.89820995674936e+16, 7.31974920340701e+16}}
     };
 
-    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::fixed_dim_from_array<double[2][2]>::make()));
+    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double[2][2]>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = aibi;
 
@@ -68697,7 +68697,7 @@ dynd::nd::array bessel_j0_vals() {
         -0.0142244728267808
     };
 
-    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = j0;
 
@@ -68752,7 +68752,7 @@ dynd::nd::array bessel_j1_vals() {
         0.205104038613523
     };
 
-    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(21, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = j1;
 
@@ -68983,7 +68983,7 @@ dynd::nd::array bessel_j_vals() {
         -0.11670435275958
     };
 
-    dynd::nd::array vals = dynd::nd::empty(72, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(72, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = j;
@@ -69029,7 +69029,7 @@ dynd::nd::array sph_bessel_j0_vals() {
         0.0433525226771411
     };
 
-    dynd::nd::array vals = dynd::nd::empty(16, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(16, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = j0;
 
@@ -69344,7 +69344,7 @@ dynd::nd::array sph_bessel_j_vals() {
         -0.0157850298982693
     };
 
-    dynd::nd::array vals = dynd::nd::empty(100, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(100, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = j;
@@ -69390,7 +69390,7 @@ dynd::nd::array bessel_y0_vals() {
         0.205464296038918
     };
 
-    dynd::nd::array vals = dynd::nd::empty(16, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(16, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = y0;
 
@@ -69435,7 +69435,7 @@ dynd::nd::array bessel_y1_vals() {
         0.0210736280368735
     };
 
-    dynd::nd::array vals = dynd::nd::empty(16, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(16, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = y1;
 
@@ -69666,7 +69666,7 @@ dynd::nd::array bessel_y_vals() {
         0.0164426339481158
     };
 
-    dynd::nd::array vals = dynd::nd::empty(72, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(72, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = y;
@@ -69710,7 +69710,7 @@ dynd::nd::array sph_bessel_y0_vals() {
         0.0506458608572547
     };
 
-    dynd::nd::array vals = dynd::nd::empty(15, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(15, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = x;
     vals(dynd::irange(), 1).vals() = y0;
 
@@ -69995,7 +69995,7 @@ dynd::nd::array sph_bessel_y_vals() {
         0.0137595313025412
     };
 
-    dynd::nd::array vals = dynd::nd::empty(90, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(90, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = y;
@@ -70227,7 +70227,7 @@ dynd::nd::array hankel_h1_vals() {
         dynd::complex<double>(-0.11670435275958, 0.0164426339481158)
     };
 
-    dynd::nd::array vals = dynd::nd::empty(72, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<dynd::complex<double> >()));
+    dynd::nd::array vals = dynd::nd::empty(72, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<dynd::complex<double> >()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = h1;
@@ -70513,7 +70513,7 @@ dynd::nd::array sph_hankel_h1_vals() {
         dynd::complex<double>(-0.0157850298982693, 0.0137595313025412)
     };
 
-    dynd::nd::array vals = dynd::nd::empty(90, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<dynd::complex<double> >()));
+    dynd::nd::array vals = dynd::nd::empty(90, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<dynd::complex<double> >()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = h1;
@@ -70745,7 +70745,7 @@ dynd::nd::array hankel_h2_vals() {
         dynd::complex<double>(-0.11670435275958, -0.0164426339481158)
     };
 
-    dynd::nd::array vals = dynd::nd::empty(72, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<dynd::complex<double> >()));
+    dynd::nd::array vals = dynd::nd::empty(72, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<dynd::complex<double> >()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = h2;
@@ -71031,7 +71031,7 @@ dynd::nd::array sph_hankel_h2_vals() {
         dynd::complex<double>(-0.0157850298982693, -0.0137595313025412)
     };
 
-    dynd::nd::array vals = dynd::nd::empty(90, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<dynd::complex<double> >()));
+    dynd::nd::array vals = dynd::nd::empty(90, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<dynd::complex<double> >()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = h2;
@@ -71173,7 +71173,7 @@ dynd::nd::array struve_h_vals() {
         3.65997660617964
     };
 
-    dynd::nd::array vals = dynd::nd::empty(42, dynd::ndt::make_tuple(dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(42, dynd::ndt::tuple_type::make(dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = nu;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = h;
@@ -72194,7 +72194,7 @@ dynd::nd::array legendre_p_vals() {
         0.90223254375
     };
 
-    dynd::nd::array vals = dynd::nd::empty(335, dynd::ndt::make_tuple(dynd::ndt::make_type<int>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(335, dynd::ndt::tuple_type::make(dynd::ndt::type::make<int>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = l;
     vals(dynd::irange(), 1).vals() = x;
     vals(dynd::irange(), 2).vals() = p;
@@ -78912,7 +78912,7 @@ dynd::nd::array assoc_legendre_p_vals() {
         0.0415810500000001
     };
 
-    dynd::nd::array vals = dynd::nd::empty(1675, dynd::ndt::make_tuple(dynd::ndt::make_type<int>(), dynd::ndt::make_type<int>(), dynd::ndt::make_type<double>(), dynd::ndt::make_type<double>()));
+    dynd::nd::array vals = dynd::nd::empty(1675, dynd::ndt::tuple_type::make(dynd::ndt::type::make<int>(), dynd::ndt::type::make<int>(), dynd::ndt::type::make<double>(), dynd::ndt::type::make<double>()));
     vals(dynd::irange(), 0).vals() = l;
     vals(dynd::irange(), 1).vals() = m;
     vals(dynd::irange(), 2).vals() = x;

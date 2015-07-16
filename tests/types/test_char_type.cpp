@@ -21,7 +21,7 @@ TEST(CharDType, Create) {
     ndt::type d;
 
     // Chars of various encodings
-    d = ndt::make_char();
+    d = ndt::char_type::make();
     EXPECT_EQ(char_type_id, d.get_type_id());
     EXPECT_EQ(char_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_size());
@@ -33,7 +33,7 @@ TEST(CharDType, Create) {
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 
-    d = ndt::make_char(string_encoding_ascii);
+    d = ndt::char_type::make(string_encoding_ascii);
     EXPECT_EQ(char_type_id, d.get_type_id());
     EXPECT_EQ(char_kind, d.get_kind());
     EXPECT_EQ(1u, d.get_data_size());
@@ -45,7 +45,7 @@ TEST(CharDType, Create) {
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 
-    d = ndt::make_char(string_encoding_ucs_2);
+    d = ndt::char_type::make(string_encoding_ucs_2);
     EXPECT_EQ(char_type_id, d.get_type_id());
     EXPECT_EQ(char_kind, d.get_kind());
     EXPECT_EQ(2u, d.get_data_size());
@@ -57,7 +57,7 @@ TEST(CharDType, Create) {
     // Roundtripping through a string
     EXPECT_EQ(d, ndt::type(d.str()));
 
-    d = ndt::make_char(string_encoding_utf_32);
+    d = ndt::char_type::make(string_encoding_utf_32);
     EXPECT_EQ(char_type_id, d.get_type_id());
     EXPECT_EQ(char_kind, d.get_kind());
     EXPECT_EQ(4u, d.get_data_size());
@@ -75,10 +75,10 @@ TEST(CharDType, Assign) {
 
     // Round-trip a string through a char assignment
     a = nd::array("t");
-    EXPECT_EQ(a.get_type(), ndt::make_string());
-    b = nd::empty(ndt::make_char());
+    EXPECT_EQ(a.get_type(), ndt::string_type::make());
+    b = nd::empty(ndt::char_type::make());
     b.vals() = a;
-    c = b.cast(ndt::make_string()).eval();
-    EXPECT_EQ(c.get_type(), ndt::make_string());
+    c = b.cast(ndt::string_type::make()).eval();
+    EXPECT_EQ(c.get_type(), ndt::string_type::make());
     EXPECT_EQ("t", c.as<string>());
 }

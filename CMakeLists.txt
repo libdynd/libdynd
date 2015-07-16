@@ -154,7 +154,7 @@ set(libdynd_SRC
     include/dynd/codegen/codegen_cache.hpp
     # Types
     src/dynd/types/adapt_type.cpp
-    src/dynd/types/any_sym_type.cpp
+    src/dynd/types/any_kind_type.cpp
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_expr_type.cpp
@@ -220,7 +220,7 @@ set(libdynd_SRC
     src/dynd/types/view_type.cpp
     src/dynd/types/void_pointer_type.cpp
     include/dynd/types/adapt_type.hpp
-    include/dynd/types/any_sym_type.hpp
+    include/dynd/types/any_kind_type.hpp
     include/dynd/types/arrfunc_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
@@ -313,6 +313,7 @@ set(libdynd_SRC
     src/dynd/func/math.cpp
     src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood.cpp
+    src/dynd/func/option.cpp
     src/dynd/func/outer.cpp
     src/dynd/func/permute.cpp
     src/dynd/func/random.cpp
@@ -339,6 +340,7 @@ set(libdynd_SRC
     include/dynd/func/math.hpp
     include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood.hpp
+    include/dynd/func/option.hpp
     include/dynd/func/outer.hpp
     include/dynd/func/permute.hpp
     include/dynd/func/random.hpp

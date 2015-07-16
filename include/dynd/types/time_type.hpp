@@ -95,20 +95,20 @@ namespace ndt {
     nd::arrfunc get_is_avail() const;
 
     nd::arrfunc get_assign_na() const;
+
+    /** Returns type "time" (with abstract/naive time zone) */
+    static const type &make()
+    {
+      static const type time_tp(new time_type(tz_abstract), false);
+      return time_tp;
+    }
+
+    /** Returns type "time[tz=<timezone>]" */
+    static type make(datetime_tz_t timezone)
+    {
+      return type(new time_type(timezone), false);
+    }
   };
-
-  /** Returns type "time" (with abstract/naive time zone) */
-  inline const type &make_time()
-  {
-    static const type time_tp(new time_type(tz_abstract), false);
-    return time_tp;
-  }
-
-  /** Returns type "time[tz=<timezone>]" */
-  inline type make_time(datetime_tz_t timezone)
-  {
-    return type(new time_type(timezone), false);
-  }
 
 } // namespace dynd::ndt
 } // namespace dynd

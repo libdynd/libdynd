@@ -112,19 +112,20 @@ namespace ndt {
     bool reverse_adapt_type(const type &value_tp, const nd::string &op,
                             nd::arrfunc &out_forward,
                             nd::arrfunc &out_reverse) const;
-  };
 
-  /** Returns type "datetime" (with abstract/naive time zone) */
-  inline const type &make_datetime()
-  {
-    static const type datetime_tp(new datetime_type(tz_abstract), false);
-    return datetime_tp;
-  }
-  /** Returns type "datetime[tz=<timezone>]" */
-  inline type make_datetime(datetime_tz_t timezone)
-  {
-    return type(new datetime_type(timezone), false);
-  }
+    /** Returns type "datetime" (with abstract/naive time zone) */
+    static const type &make()
+    {
+      static const type datetime_tp(new datetime_type(tz_abstract), false);
+      return datetime_tp;
+    }
+
+    /** Returns type "datetime[tz=<timezone>]" */
+    static type make(datetime_tz_t timezone)
+    {
+      return type(new datetime_type(timezone), false);
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

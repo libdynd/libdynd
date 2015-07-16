@@ -26,7 +26,7 @@ namespace nd {
   typename std::enable_if<is_dynd_scalar<T>::value, nd::array>::type
   range(T beginval, T endval, T stepval = T(1))
   {
-    return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
+    return range(ndt::type::make<T>(), &beginval, &endval, &stepval);
   }
 
   /**
@@ -38,7 +38,7 @@ namespace nd {
   range(T endval)
   {
     T beginval = T(0), stepval = T(1);
-    return range(ndt::make_type<T>(), &beginval, &endval, &stepval);
+    return range(ndt::type::make<T>(), &beginval, &endval, &stepval);
   }
 
   /**
@@ -46,7 +46,7 @@ namespace nd {
    */
   inline nd::array range(const irange &i)
   {
-    return range(ndt::make_type<intptr_t>(), &i.start(), &i.finish(),
+    return range(ndt::type::make<intptr_t>(), &i.start(), &i.finish(),
                  &i.step());
   }
 

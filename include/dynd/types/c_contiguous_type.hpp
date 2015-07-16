@@ -59,12 +59,12 @@ namespace ndt {
     virtual bool match(const char *arrmeta, const type &candidate_tp,
                        const char *candidate_arrmeta,
                        std::map<nd::string, type> &tp_vars) const;
-  };
 
-  inline type make_c_contiguous(const type &child_tp)
-  {
-    return type(new c_contiguous_type(child_tp), false);
-  }
+    static type make(const type &child_tp)
+    {
+      return type(new c_contiguous_type(child_tp), false);
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

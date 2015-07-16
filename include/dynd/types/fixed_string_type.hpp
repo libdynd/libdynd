@@ -78,14 +78,13 @@ namespace ndt {
                           const char *arrmeta, const char *data,
                           const memory_block_ptr &ref, intptr_t buffer_max_mem,
                           const eval::eval_context *ectx) const;
-  };
 
-  inline type
-  make_fixed_string(intptr_t stringsize,
-                    string_encoding_t encoding = string_encoding_utf_8)
-  {
-    return type(new fixed_string_type(stringsize, encoding), false);
-  }
+    static type make(intptr_t stringsize,
+                     string_encoding_t encoding = string_encoding_utf_8)
+    {
+      return type(new fixed_string_type(stringsize, encoding), false);
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

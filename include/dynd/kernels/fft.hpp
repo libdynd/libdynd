@@ -275,7 +275,7 @@ namespace nd {
                                 2 +
                             1;
       dst_tp = ndt::make_fixed_dim(ndim, src_shape.get(),
-                                   ndt::make_type<complex<double>>());
+                                   ndt::type::make<complex<double>>());
     }
 
     template <bool real_to_complex>
@@ -296,7 +296,7 @@ namespace nd {
         dst_tp = ndt::make_fixed_dim(
             shape.get_dim_size(),
             reinterpret_cast<const intptr_t *>(shape.get_readonly_originptr()),
-            ndt::make_type<complex<double>>());
+            ndt::type::make<complex<double>>());
       }
     }
 

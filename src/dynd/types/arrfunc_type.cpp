@@ -48,7 +48,7 @@ ndt::arrfunc_type::arrfunc_type(const type &pos_types, const type &ret_type)
     throw invalid_argument(ss.str());
   }
   m_kwd_struct =
-      make_empty_struct(m_pos_tuple.extended<tuple_type>()->is_variadic());
+      struct_type::make_empty(m_pos_tuple.extended<tuple_type>()->is_variadic());
 
   // Note that we don't base the flags of this type on that of its arguments
   // and return types, because it is something the can be instantiated, even
@@ -166,8 +166,7 @@ void ndt::arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
   transform_fn(m_kwd_struct, arrmeta_offset, extra, tmp_kwd_types,
                was_transformed);
   if (was_transformed) {
-    out_transformed_tp =
-        make_arrfunc(tmp_pos_types, tmp_kwd_types, tmp_return_type);
+    out_transformed_tp = make(tmp_pos_types, tmp_kwd_types, tmp_return_type);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -181,7 +180,7 @@ ndt::type ndt::arrfunc_type::get_canonical_type() const
   tmp_return_type = m_return_type.get_canonical_type();
   tmp_pos_types = m_pos_tuple.get_canonical_type();
   tmp_kwd_types = m_kwd_struct.get_canonical_type();
-  return make_arrfunc(tmp_pos_types, tmp_kwd_types, tmp_return_type);
+  return make(tmp_pos_types, tmp_kwd_types, tmp_return_type);
 }
 
 void ndt::arrfunc_type::get_vars(std::unordered_set<std::string> &vars) const
@@ -423,8 +422,8 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 {
   nd::array args = make_typevar_range("T", nargs);
   args.flag_as_immutable();
-  type ret = make_typevar("R");
-  return make_arrfunc(make_tuple(args), ret);
+  type ret = typevar_type::make("R");
+  return arrfunc_type::make(tuple_type::make(args), ret);
 }
 
 ///////// functions on the nd::array
@@ -489,7 +488,7 @@ static array_preamble *function___call__(const array_preamble *params,
   }
   usngo(args[0].get_readwrite_originptr(), in_ptrs, ckb.get());
   // Return void
-  return nd::empty(ndt::make_type<void>()).release();
+  return nd::empty(ndt::type::make<void>()).release();
 }
 
 void ndt::arrfunc_type::get_dynamic_array_functions(
@@ -513,17 +512,13 @@ void ndt::arrfunc_type::get_dynamic_array_functions(
       sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
 }
 
+/*
 ndt::type ndt::arrfunc_type::make(const nd::array &pos_tp,
                                   const ndt::type &ret_tp)
 {
-  return type(new arrfunc_type(make_tuple(pos_tp), ret_tp), false);
+  return type(new arrfunc_type(tuple_type::make(pos_tp), ret_tp), false);
 }
-
-ndt::type ndt::arrfunc_type::make(const initializer_list<type_id_t> &,
-                                  const ndt::type &)
-{
-  return type();
-}
+*/
 
 nd::array arrfunc_type_data::
 operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,

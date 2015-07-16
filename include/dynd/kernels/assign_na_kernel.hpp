@@ -8,6 +8,7 @@
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/time_type.hpp>
 
 namespace dynd {
 namespace nd {

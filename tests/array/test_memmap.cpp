@@ -32,24 +32,24 @@ TEST(ArrayMemMap, SimpleString) {
     // Open the whole file as a memory map
     nd::array a = nd::memmap("test.txt");
     // Should have type 'bytes'
-    EXPECT_EQ(ndt::make_bytes(1), a.get_type());
+    EXPECT_EQ(ndt::bytes_type::make(1), a.get_type());
     // If we view it as a string, should still point to the same data
-    nd::array b = a.view_scalars(ndt::make_string());
-    EXPECT_EQ(ndt::make_string(), b.get_type());
+    nd::array b = a.view_scalars(ndt::string_type::make());
+    EXPECT_EQ(ndt::string_type::make(), b.get_type());
     EXPECT_EQ(string(str), b.as<string>());
 
     // Remap a subset of the file
     a = nd::array();
     b = nd::array();
     a = nd::memmap("test.txt", 5, 7);
-    EXPECT_EQ(ndt::make_bytes(1), a.get_type());
-    EXPECT_EQ("is", a.view_scalars(ndt::make_string()).as<string>());
+    EXPECT_EQ(ndt::bytes_type::make(1), a.get_type());
+    EXPECT_EQ("is", a.view_scalars(ndt::string_type::make()).as<string>());
 
     // Remap the file using a negative index
     a = nd::array();
     a = nd::memmap("test.txt", -7);
-    EXPECT_EQ(ndt::make_bytes(1), a.get_type());
-    EXPECT_EQ("string.", a.view_scalars(ndt::make_string()).as<string>());
+    EXPECT_EQ(ndt::bytes_type::make(1), a.get_type());
+    EXPECT_EQ("string.", a.view_scalars(ndt::string_type::make()).as<string>());
 
 #ifdef WIN32
     _unlink("test.txt");

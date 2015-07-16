@@ -77,41 +77,35 @@ namespace ndt {
         *out_count = 0;
       }
     }
-  };
 
-  /**
-   * Makes a conversion type to convert from the operand_type to the value_type.
-   * If the value_type has expr_kind, it chains operand_type.value_type()
-   * into value_type.storage_type().
-   */
-  inline type make_convert(const type &value_type, const type &operand_type)
-  {
-    if (operand_type.value_type() != value_type) {
-      if (value_type.get_kind() != expr_kind) {
-        // Create a conversion type when the value kind is different
-        return type(new convert_type(value_type, operand_type), false);
-      } else if (value_type.storage_type() == operand_type.value_type()) {
-        // No conversion required at the connection
-        return static_cast<const base_expr_type *>(value_type.extended())
-            ->with_replaced_storage_type(operand_type);
+    /**
+     * Makes a conversion type to convert from the operand_type to the
+     * value_type.
+     * If the value_type has expr_kind, it chains operand_type.value_type()
+     * into value_type.storage_type().
+     */
+    static type make(const type &value_type, const type &operand_type)
+    {
+      if (operand_type.value_type() != value_type) {
+        if (value_type.get_kind() != expr_kind) {
+          // Create a conversion type when the value kind is different
+          return type(new convert_type(value_type, operand_type), false);
+        } else if (value_type.storage_type() == operand_type.value_type()) {
+          // No conversion required at the connection
+          return static_cast<const base_expr_type *>(value_type.extended())
+              ->with_replaced_storage_type(operand_type);
+        } else {
+          // A conversion required at the connection
+          return static_cast<const base_expr_type *>(value_type.extended())
+              ->with_replaced_storage_type(type(
+                  new convert_type(value_type.storage_type(), operand_type),
+                  false));
+        }
       } else {
-        // A conversion required at the connection
-        return static_cast<const base_expr_type *>(value_type.extended())
-            ->with_replaced_storage_type(
-                type(new convert_type(value_type.storage_type(), operand_type),
-                     false));
+        return operand_type;
       }
-    } else {
-      return operand_type;
     }
-  }
-
-  template <typename Tvalue, typename Tstorage>
-  type make_convert()
-  {
-    return type(new convert_type(make_type<Tvalue>(), make_type<Tstorage>()),
-                false);
-  }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

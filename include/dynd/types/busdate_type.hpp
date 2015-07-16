@@ -89,14 +89,13 @@ namespace ndt {
                              const std::string &DYND_UNUSED(indent)) const
     {
     }
+
+    static type make(busdate_roll_t roll = busdate_roll_following,
+                     const bool *weekmask = NULL,
+                     const nd::array &holidays = nd::array())
+    {
+      return type(new busdate_type(roll, weekmask, holidays), false);
+    }
   };
-
-  inline type make_busdate(busdate_roll_t roll = busdate_roll_following,
-                           const bool *weekmask = NULL,
-                           const nd::array &holidays = nd::array())
-  {
-    return type(new busdate_type(roll, weekmask, holidays), false);
-  }
-
 } // namespace dynd::ndt
 } // namespace dynd

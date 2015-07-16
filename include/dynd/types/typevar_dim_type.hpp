@@ -58,24 +58,24 @@ namespace ndt {
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;
-  };
 
-  /** Makes a typevar type with the specified name and element type */
-  inline type make_typevar_dim(const nd::string &name, const type &element_type)
-  {
-    return type(new typevar_dim_type(name, element_type), false);
-  }
-
-  inline type make_typevar_dim(const nd::string &name, const type &element_tp,
-                               intptr_t ndim)
-  {
-    type result = element_tp;
-    for (intptr_t i = 0; i < ndim; ++i) {
-      result = make_typevar_dim(name, result);
+    /** Makes a typevar type with the specified name and element type */
+    static type make(const nd::string &name, const type &element_type)
+    {
+      return type(new typevar_dim_type(name, element_type), false);
     }
 
-    return result;
-  }
+    static type make(const nd::string &name, const type &element_tp,
+                     intptr_t ndim)
+    {
+      type result = element_tp;
+      for (intptr_t i = 0; i < ndim; ++i) {
+        result = make(name, result);
+      }
+
+      return result;
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

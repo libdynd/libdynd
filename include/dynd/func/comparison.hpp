@@ -32,19 +32,21 @@ namespace nd {
 
       arrfunc self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
-      for (type_id_t i0 : numeric_type_ids::vals()) {
-        for (type_id_t i1 : dim_type_ids::vals()) {
+      for (type_id_t i0 : numeric_type_ids()) {
+        for (type_id_t i1 : dim_type_ids()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
-              {ndt::type(i0), ndt::type(i1)}, ndt::type("Any"));
+              ndt::tuple_type::make(ndt::type(i0), ndt::type(i1)),
+              ndt::type("Any"));
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
 
-      for (type_id_t i0 : dim_type_ids::vals()) {
+      for (type_id_t i0 : dim_type_ids()) {
         typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
-        for (type_id_t i1 : type_ids::vals()) {
+        for (type_id_t i1 : type_ids()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
-              {ndt::type(i0), ndt::type(i1)}, ndt::type("Any"));
+              ndt::tuple_type::make(ndt::type(i0), ndt::type(i1)),
+              ndt::type("Any"));
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
@@ -88,8 +90,6 @@ namespace nd {
   extern struct equal : comparison_operator<equal, equal_kernel, 2> {
     static std::map<std::array<type_id_t, 2>, arrfunc> make_children()
     {
-      std::cout << "equal::make_children (start)" << std::endl;
-
       std::map<std::array<type_id_t, 2>, arrfunc> children =
           comparison_operator::make_children();
       children[{{tuple_type_id, tuple_type_id}}] =
@@ -101,8 +101,6 @@ namespace nd {
       children[{{type_type_id, type_type_id}}] =
           arrfunc::make<equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"), 0);
-
-      std::cout << "equal::make_children (stop)" << std::endl;
 
       return children;
     }

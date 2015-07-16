@@ -42,10 +42,11 @@
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/types/any_sym_type.hpp>
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/kind_sym_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -76,34 +77,34 @@ static const map<string, ndt::type> &builtin_types()
 {
   static map<string, ndt::type> bit;
   if (bit.empty()) {
-    bit["void"] = ndt::make_type<void>();
-    bit["bool"] = ndt::make_type<bool1>();
-    bit["int8"] = ndt::make_type<int8>();
-    bit["int16"] = ndt::make_type<int16>();
-    bit["int32"] = ndt::make_type<int32>();
-    bit["int"] = ndt::make_type<int32>();
-    bit["int64"] = ndt::make_type<int64>();
-    bit["int128"] = ndt::make_type<int128>();
-    bit["intptr"] = ndt::make_type<intptr_t>();
-    bit["uint8"] = ndt::make_type<uint8>();
-    bit["uint16"] = ndt::make_type<uint16>();
-    bit["uint32"] = ndt::make_type<uint32>();
-    bit["uint64"] = ndt::make_type<uint64>();
-    bit["uint128"] = ndt::make_type<uint128>();
-    bit["uintptr"] = ndt::make_type<uintptr_t>();
-    bit["float16"] = ndt::make_type<float16>();
-    bit["float32"] = ndt::make_type<float32>();
-    bit["float64"] = ndt::make_type<float64>();
-    bit["real"] = ndt::make_type<double>();
-    bit["float128"] = ndt::make_type<float128>();
-    bit["complex64"] = ndt::make_type<dynd::complex<float>>();
-    bit["complex128"] = ndt::make_type<dynd::complex<double>>();
-    bit["complex"] = ndt::make_type<dynd::complex<double>>();
+    bit["void"] = ndt::type::make<void>();
+    bit["bool"] = ndt::type::make<bool1>();
+    bit["int8"] = ndt::type::make<int8>();
+    bit["int16"] = ndt::type::make<int16>();
+    bit["int32"] = ndt::type::make<int32>();
+    bit["int"] = ndt::type::make<int32>();
+    bit["int64"] = ndt::type::make<int64>();
+    bit["int128"] = ndt::type::make<int128>();
+    bit["intptr"] = ndt::type::make<intptr_t>();
+    bit["uint8"] = ndt::type::make<uint8>();
+    bit["uint16"] = ndt::type::make<uint16>();
+    bit["uint32"] = ndt::type::make<uint32>();
+    bit["uint64"] = ndt::type::make<uint64>();
+    bit["uint128"] = ndt::type::make<uint128>();
+    bit["uintptr"] = ndt::type::make<uintptr_t>();
+    bit["float16"] = ndt::type::make<float16>();
+    bit["float32"] = ndt::type::make<float32>();
+    bit["float64"] = ndt::type::make<float64>();
+    bit["real"] = ndt::type::make<double>();
+    bit["float128"] = ndt::type::make<float128>();
+    bit["complex64"] = ndt::type::make<dynd::complex<float>>();
+    bit["complex128"] = ndt::type::make<dynd::complex<double>>();
+    bit["complex"] = ndt::type::make<dynd::complex<double>>();
     bit["json"] = ndt::make_json();
-    bit["date"] = ndt::make_date();
-    bit["time"] = ndt::make_time(tz_abstract);
-    bit["datetime"] = ndt::make_datetime();
-    bit["bytes"] = ndt::make_bytes(1);
+    bit["date"] = ndt::date_type::make();
+    bit["time"] = ndt::time_type::make(tz_abstract);
+    bit["datetime"] = ndt::datetime_type::make();
+    bit["bytes"] = ndt::bytes_type::make(1);
     bit["type"] = ndt::make_type();
     bit["ndarrayarg"] = ndt::make_ndarrayarg();
   }
@@ -335,7 +336,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_adapt(
+  return ndt::adapt_type::make(
       proto_tp.extended<ndt::arrfunc_type>()->get_pos_type(0),
       proto_tp.extended<ndt::arrfunc_type>()->get_return_type(), adapt_op);
 }
@@ -379,9 +380,9 @@ static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_string(encoding);
+    return ndt::string_type::make(encoding);
   } else {
-    return ndt::make_string(string_encoding_utf_8);
+    return ndt::string_type::make(string_encoding_utf_8);
   }
 }
 
@@ -421,7 +422,7 @@ static ndt::type parse_fixed_string_parameters(const char *&rbegin,
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_fixed_string(string_size, encoding);
+    return ndt::fixed_string_type::make(string_size, encoding);
   }
 
   throw datashape_parse_error(begin, "expected opening '['");
@@ -448,9 +449,9 @@ static ndt::type parse_char_parameters(const char *&rbegin, const char *end)
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_char(encoding);
+    return ndt::char_type::make(encoding);
   } else {
-    return ndt::make_char();
+    return ndt::char_type::make();
   }
 }
 
@@ -471,17 +472,17 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end,
     }
     if (tp.get_type_id() == float32_type_id) {
       rbegin = begin;
-      return ndt::make_type<dynd::complex<float>>();
+      return ndt::type::make<dynd::complex<float>>();
     } else if (tp.get_type_id() == float64_type_id) {
       rbegin = begin;
-      return ndt::make_type<dynd::complex<double>>();
+      return ndt::type::make<dynd::complex<double>>();
     } else {
       throw datashape_parse_error(saved_begin,
                                   "unsupported real type for complex numbers");
     }
   } else {
     // Default to complex[double] if no parameters are provided
-    return ndt::make_type<dynd::complex<double>>();
+    return ndt::type::make<dynd::complex<double>>();
   }
 }
 
@@ -500,7 +501,7 @@ static ndt::type parse_byteswap_parameters(const char *&rbegin, const char *end,
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_byteswap(tp);
+    return ndt::byteswap_type::make(tp);
   } else {
     throw datashape_parse_error(begin, "expected opening '['");
   }
@@ -525,11 +526,11 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
         throw datashape_parse_error(begin, "expected closing ']'");
       }
       rbegin = begin;
-      return ndt::make_bytes(atoi(align_val.c_str()));
+      return ndt::bytes_type::make(atoi(align_val.c_str()));
     }
     throw datashape_parse_error(begin, "expected 'align'");
   } else {
-    return ndt::make_bytes(1);
+    return ndt::bytes_type::make(1);
   }
 }
 
@@ -590,7 +591,7 @@ static ndt::type parse_c_contiguous_parameters(const char *&rbegin,
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::make_c_contiguous(tp);
+    return ndt::c_contiguous_type::make(tp);
   } else {
     throw datashape_parse_error(begin, "expected opening '['");
   }
@@ -685,9 +686,9 @@ static ndt::type parse_datetime_parameters(const char *&rbegin, const char *end)
     }
 
     rbegin = begin;
-    return ndt::make_datetime(timezone);
+    return ndt::datetime_type::make(timezone);
   } else {
-    return ndt::make_datetime();
+    return ndt::datetime_type::make();
   }
 }
 
@@ -724,9 +725,9 @@ static ndt::type parse_time_parameters(const char *&rbegin, const char *end)
     }
 
     rbegin = begin;
-    return ndt::make_time(timezone);
+    return ndt::time_type::make(timezone);
   } else {
-    return ndt::make_time(tz_abstract);
+    return ndt::time_type::make(tz_abstract);
   }
 }
 
@@ -769,7 +770,7 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end,
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::make_pointer(tp);
+  return ndt::pointer_type::make(tp);
 }
 
 // record_item_bare : BARENAME COLON rhs_expression
@@ -869,7 +870,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   if (parse_token_ds(begin, end, '}')) {
     // Empty struct
     rbegin = begin;
-    return ndt::make_empty_struct();
+    return ndt::struct_type::make_empty();
   }
   for (;;) {
     if (parse_token_ds(begin, end, "...")) {
@@ -902,7 +903,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   }
 
   rbegin = begin;
-  return ndt::make_struct(field_name_list, field_type_list, variadic);
+  return ndt::struct_type::make(field_name_list, field_type_list, variadic);
 }
 
 // funcproto_kwds : record_item, record_item*
@@ -950,7 +951,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
   }
 
   rbegin = begin;
-  return ndt::make_struct(field_name_list, field_type_list, variadic);
+  return ndt::struct_type::make(field_name_list, field_type_list, variadic);
 }
 
 // tuple : LPAREN tuple_item tuple_item* RPAREN
@@ -988,7 +989,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
           if (!funcproto_kwd.is_null()) {
             if (!parse_token_ds(begin, end, "->")) {
               rbegin = begin;
-              return ndt::make_tuple(field_type_list);
+              return ndt::tuple_type::make(field_type_list);
             }
 
             ndt::type return_type = parse_datashape(begin, end, symtable);
@@ -997,8 +998,9 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                   begin, "expected function prototype return type");
             }
             rbegin = begin;
-            return ndt::make_arrfunc(ndt::make_tuple(field_type_list, variadic),
-                                     funcproto_kwd, return_type);
+            return ndt::arrfunc_type::make(
+                ndt::tuple_type::make(field_type_list, variadic), funcproto_kwd,
+                return_type);
           } else {
             throw datashape_parse_error(begin,
                                         "expected funcproto keyword arguments");
@@ -1040,7 +1042,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
   // It might be a function prototype, check for the "->" token
   if (!parse_token_ds(begin, end, "->")) {
     rbegin = begin;
-    return ndt::make_tuple(field_type_list, variadic);
+    return ndt::tuple_type::make(field_type_list, variadic);
   }
 
   ndt::type return_type = parse_datashape(begin, end, symtable);
@@ -1054,8 +1056,8 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
   //       the requirement that arrays into arrfunc constructors are
   //       immutable, that too
   //       many copies may be occurring.
-  return ndt::make_arrfunc(ndt::make_tuple(field_type_list, variadic),
-                           return_type);
+  return ndt::arrfunc_type::make(
+      ndt::tuple_type::make(field_type_list, variadic), return_type);
 }
 
 //    datashape_nooption : dim ASTERISK datashape
@@ -1085,12 +1087,12 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
             intptr_t dim_size = parse::checked_string_to_intptr(bbegin, bend);
             result = ndt::make_fixed_dim(dim_size, element_tp, exponent);
           } else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
-            result = make_var_dim(element_tp, exponent);
+            result = ndt::var_dim_type::make(element_tp, exponent);
           } else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
             result = make_fixed_dim_kind(element_tp, exponent);
           } else if (isupper(*bbegin)) {
-            result = make_typevar_dim(nd::string(bbegin, bend), element_tp,
-                                      exponent);
+            result = ndt::typevar_dim_type::make(nd::string(bbegin, bend),
+                                                 element_tp, exponent);
           } else {
             throw datashape_parse_error(
                 bbegin, "invalid dimension type for base of dimensional power");
@@ -1101,20 +1103,20 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
             if ('0' <= *bbegin && *bbegin <= '9') {
               intptr_t dim_size = parse::checked_string_to_intptr(bbegin, bend);
               result = ndt::make_pow_dimsym(
-                  ndt::make_fixed_dim(dim_size, ndt::make_type<void>()),
+                  ndt::make_fixed_dim(dim_size, ndt::type::make<void>()),
                   exponent_name, parse_datashape(begin, end, symtable));
             } else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
               result = ndt::make_pow_dimsym(
-                  ndt::make_var_dim(ndt::make_type<void>()), exponent_name,
-                  parse_datashape(begin, end, symtable));
+                  ndt::var_dim_type::make(ndt::type::make<void>()),
+                  exponent_name, parse_datashape(begin, end, symtable));
             } else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
               result = ndt::make_pow_dimsym(
-                  ndt::make_fixed_dim_kind(ndt::make_type<void>()),
+                  ndt::make_fixed_dim_kind(ndt::type::make<void>()),
                   exponent_name, parse_datashape(begin, end, symtable));
             } else if (isupper(*bbegin)) {
               result = ndt::make_pow_dimsym(
-                  ndt::make_typevar_dim(nd::string(bbegin, bend),
-                                        ndt::make_type<void>()),
+                  ndt::typevar_dim_type::make(nd::string(bbegin, bend),
+                                              ndt::type::make<void>()),
                   exponent_name, parse_datashape(begin, end, symtable));
             } else {
               throw datashape_parse_error(
@@ -1140,11 +1142,12 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
         intptr_t size = parse::checked_string_to_intptr(nbegin, nend);
         result = ndt::make_fixed_dim(size, element_tp);
       } else if (parse::compare_range_to_literal(nbegin, nend, "var")) {
-        result = ndt::make_var_dim(element_tp);
+        result = ndt::var_dim_type::make(element_tp);
       } else if (parse::compare_range_to_literal(nbegin, nend, "Fixed")) {
         result = ndt::make_fixed_dim_kind(element_tp);
       } else if (isupper(*nbegin)) {
-        result = ndt::make_typevar_dim(nd::string(nbegin, nend), element_tp);
+        result =
+            ndt::typevar_dim_type::make(nd::string(nbegin, nend), element_tp);
       } else {
         parse::skip_whitespace_and_pound_comments(rbegin, end);
         throw datashape_parse_error(rbegin, "unrecognized dimension type");
@@ -1198,13 +1201,13 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
     } else if (parse::compare_range_to_literal(nbegin, nend, "adapt")) {
       result = parse_adapt_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
-      result = ndt::make_any_sym();
+      result = ndt::any_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Categorical")) {
-      result = ndt::make_categorical_kind();
+      result = ndt::categorical_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedBytes")) {
-      result = ndt::make_fixed_bytes_kind();
+      result = ndt::fixed_bytes_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedString")) {
-      result = ndt::make_fixed_string_kind();
+      result = ndt::fixed_string_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Bool")) {
       result = ndt::make_kind_sym(bool_kind);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Int")) {
@@ -1219,7 +1222,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = ndt::make_kind_sym(complex_kind);
     } else if (isupper(*nbegin)) {
       if (!parse_token_ds(begin, end, '[')) {
-        result = ndt::make_typevar(nd::string(nbegin, nend));
+        result = ndt::typevar_type::make(nd::string(nbegin, nend));
       } else {
         ndt::type arg_tp = parse_datashape(begin, end, symtable);
         if (arg_tp.is_null()) {
@@ -1229,7 +1232,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
           throw datashape_parse_error(begin, "expected closing ']'");
         }
         result =
-            ndt::make_typevar_constructed(nd::string(nbegin, nend), arg_tp);
+            ndt::typevar_constructed_type::make(nd::string(nbegin, nend), arg_tp);
       }
     } else {
       string n(nbegin, nend);

@@ -74,16 +74,16 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
-  };
 
-  /**
-   * Makes a unary expr type.
-   */
-  inline type make_unary_expr(const type &value_tp, const type &operand_tp,
-                              const expr_kernel_generator *kgen)
-  {
-    return type(new unary_expr_type(value_tp, operand_tp, kgen), false);
-  }
+    /**
+     * Makes a unary expr type.
+     */
+    static type make(const type &value_tp, const type &operand_tp,
+                     const expr_kernel_generator *kgen)
+    {
+      return type(new unary_expr_type(value_tp, operand_tp, kgen), false);
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

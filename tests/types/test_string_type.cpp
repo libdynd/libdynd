@@ -25,7 +25,7 @@ TEST(StringType, Create)
   ndt::type d;
 
   // Strings with various encodings
-  d = ndt::make_string(string_encoding_utf_8);
+  d = ndt::string_type::make(string_encoding_utf_8);
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -34,7 +34,7 @@ TEST(StringType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::make_string(string_encoding_utf_8);
+  d = ndt::string_type::make(string_encoding_utf_8);
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -42,7 +42,7 @@ TEST(StringType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::make_string(string_encoding_ascii);
+  d = ndt::string_type::make(string_encoding_ascii);
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -50,7 +50,7 @@ TEST(StringType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::make_string(string_encoding_utf_16);
+  d = ndt::string_type::make(string_encoding_utf_16);
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -58,7 +58,7 @@ TEST(StringType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::make_string(string_encoding_utf_32);
+  d = ndt::string_type::make(string_encoding_utf_32);
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -73,19 +73,19 @@ TEST(StringType, ArrayCreation)
 
   // A C-style string literal
   a = "testing string construction";
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
   EXPECT_EQ("testing string construction", a.as<string>());
 
   // A C-style char array variable
   const char carr[] = "string construction";
   a = carr;
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
   EXPECT_EQ("string construction", a.as<string>());
 
   // A C-style char pointer variable
   const char *cptr = "construction";
   a = cptr;
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
   EXPECT_EQ("construction", a.as<string>());
 
   // An array of UTF8 strings
@@ -107,45 +107,45 @@ TEST(StringType, Basic)
 
   // std::string goes in as a utf8 string
   a = std::string("abcdefg");
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8), a.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
   EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
   // Make it a fixed_string for this test
-  a = a.ucast(ndt::make_fixed_string(7, string_encoding_utf_8)).eval();
+  a = a.ucast(ndt::fixed_string_type::make(7, string_encoding_utf_8)).eval();
 
   // Convert to a blockref string type with the same utf8 codec
-  b = a.ucast(ndt::make_string(string_encoding_utf_8));
-  EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_8),
-                              ndt::make_fixed_string(7, string_encoding_utf_8)),
+  b = a.ucast(ndt::string_type::make(string_encoding_utf_8));
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_8),
+                              ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), b.get_type());
   EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
   // Convert to a blockref string type with the utf16 codec
-  b = a.ucast(ndt::make_string(string_encoding_utf_16));
-  EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_16),
-                              ndt::make_fixed_string(7, string_encoding_utf_8)),
+  b = a.ucast(ndt::string_type::make(string_encoding_utf_16));
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_16),
+                              ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_16), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), b.get_type());
   EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
   // Convert to a blockref string type with the utf32 codec
-  b = a.ucast(ndt::make_string(string_encoding_utf_32));
-  EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_utf_32),
-                              ndt::make_fixed_string(7, string_encoding_utf_8)),
+  b = a.ucast(ndt::string_type::make(string_encoding_utf_32));
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_32),
+                              ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_32), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32), b.get_type());
   EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
   // Convert to a blockref string type with the ascii codec
-  b = a.ucast(ndt::make_string(string_encoding_ascii));
-  EXPECT_EQ(ndt::make_convert(ndt::make_string(string_encoding_ascii),
-                              ndt::make_fixed_string(7, string_encoding_utf_8)),
+  b = a.ucast(ndt::string_type::make(string_encoding_ascii));
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_ascii),
+                              ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
-  EXPECT_EQ(ndt::make_string(string_encoding_ascii), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_ascii), b.get_type());
   EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 }
 
@@ -159,15 +159,15 @@ TEST(StringType, AccessFlags)
   EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag,
             (int)a.get_access_flags());
   // Turn it into a fixed_string type for this test
-  a = a.ucast(ndt::make_fixed_string(95, string_encoding_utf_8)).eval();
-  EXPECT_EQ(ndt::make_fixed_string(95, string_encoding_utf_8), a.get_type());
+  a = a.ucast(ndt::fixed_string_type::make(95, string_encoding_utf_8)).eval();
+  EXPECT_EQ(ndt::fixed_string_type::make(95, string_encoding_utf_8), a.get_type());
 
   // Converting to a blockref string of the same encoding produces a reference
   // into the fixed_string value
-  b = a.ucast(ndt::make_string(string_encoding_utf_8)).eval();
+  b = a.ucast(ndt::string_type::make(string_encoding_utf_8)).eval();
   EXPECT_EQ(nd::read_access_flag | nd::write_access_flag,
             (int)b.get_access_flags());
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_8), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), b.get_type());
   // The data array for 'a' matches the referenced data for 'b' (TODO: Restore
   // this property)
   //    EXPECT_EQ(a.get_readonly_originptr(), reinterpret_cast<const char *
@@ -175,10 +175,10 @@ TEST(StringType, AccessFlags)
 
   // Converting to a blockref string of a different encoding makes a new
   // copy, so gets read write access
-  b = a.ucast(ndt::make_string(string_encoding_utf_16)).eval();
+  b = a.ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
   EXPECT_EQ(nd::read_access_flag | nd::write_access_flag,
             (int)b.get_access_flags());
-  EXPECT_EQ(ndt::make_string(string_encoding_utf_16), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), b.get_type());
 }
 
 TEST(StringType, Unicode)
@@ -219,43 +219,43 @@ TEST(StringType, Unicode)
   nd::array c(nd::make_utf8_array(utf8_string));
 
   // Convert all to utf32 and compare with the reference
-  x = a.ucast(ndt::make_string(string_encoding_utf_32)).eval();
+  x = a.ucast(ndt::string_type::make(string_encoding_utf_32)).eval();
   EXPECT_EQ(0, memcmp(utf32_string, *reinterpret_cast<const char *const *>(
                                         x.get_readonly_originptr()),
                       sizeof(utf32_string)));
-  x = b.ucast(ndt::make_string(string_encoding_utf_32)).eval();
+  x = b.ucast(ndt::string_type::make(string_encoding_utf_32)).eval();
   EXPECT_EQ(0, memcmp(utf32_string, *reinterpret_cast<const char *const *>(
                                         x.get_readonly_originptr()),
                       sizeof(utf32_string)));
-  x = c.ucast(ndt::make_string(string_encoding_utf_32)).eval();
+  x = c.ucast(ndt::string_type::make(string_encoding_utf_32)).eval();
   EXPECT_EQ(0, memcmp(utf32_string, *reinterpret_cast<const char *const *>(
                                         x.get_readonly_originptr()),
                       sizeof(utf32_string)));
 
   // Convert all to utf16 and compare with the reference
-  x = a.ucast(ndt::make_string(string_encoding_utf_16)).eval();
+  x = a.ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
   EXPECT_EQ(0, memcmp(utf16_string, *reinterpret_cast<const char *const *>(
                                         x.get_readonly_originptr()),
                       sizeof(utf16_string)));
-  x = b.ucast(ndt::make_string(string_encoding_utf_16)).eval();
+  x = b.ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
   EXPECT_EQ(0, memcmp(utf16_string, *reinterpret_cast<const char *const *>(
                                         x.get_readonly_originptr()),
                       sizeof(utf16_string)));
-  x = c.ucast(ndt::make_string(string_encoding_utf_16)).eval();
+  x = c.ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
   EXPECT_EQ(0, memcmp(utf16_string, *reinterpret_cast<const char *const *>(
                                         x.get_readonly_originptr()),
                       sizeof(utf16_string)));
 
   // Convert all to utf8 and compare with the reference
-  x = a.ucast(ndt::make_string(string_encoding_utf_8)).eval();
+  x = a.ucast(ndt::string_type::make(string_encoding_utf_8)).eval();
   EXPECT_EQ(0, memcmp(utf8_string, *reinterpret_cast<const char *const *>(
                                        x.get_readonly_originptr()),
                       sizeof(utf8_string)));
-  x = b.ucast(ndt::make_string(string_encoding_utf_8)).eval();
+  x = b.ucast(ndt::string_type::make(string_encoding_utf_8)).eval();
   EXPECT_EQ(0, memcmp(utf8_string, *reinterpret_cast<const char *const *>(
                                        x.get_readonly_originptr()),
                       sizeof(utf8_string)));
-  x = c.ucast(ndt::make_string(string_encoding_utf_8)).eval();
+  x = c.ucast(ndt::string_type::make(string_encoding_utf_8)).eval();
   EXPECT_EQ(0, memcmp(utf8_string, *reinterpret_cast<const char *const *>(
                                        x.get_readonly_originptr()),
                       sizeof(utf8_string)));
@@ -264,14 +264,14 @@ TEST(StringType, Unicode)
 TEST(StringType, CanonicalDType)
 {
   // The canonical type of a string type is the same type
-  EXPECT_EQ((ndt::make_string(string_encoding_ascii)),
-            (ndt::make_string(string_encoding_ascii).get_canonical_type()));
-  EXPECT_EQ((ndt::make_string(string_encoding_utf_8)),
-            (ndt::make_string(string_encoding_utf_8).get_canonical_type()));
-  EXPECT_EQ((ndt::make_string(string_encoding_utf_16)),
-            (ndt::make_string(string_encoding_utf_16).get_canonical_type()));
-  EXPECT_EQ((ndt::make_string(string_encoding_utf_32)),
-            (ndt::make_string(string_encoding_utf_32).get_canonical_type()));
+  EXPECT_EQ((ndt::string_type::make(string_encoding_ascii)),
+            (ndt::string_type::make(string_encoding_ascii).get_canonical_type()));
+  EXPECT_EQ((ndt::string_type::make(string_encoding_utf_8)),
+            (ndt::string_type::make(string_encoding_utf_8).get_canonical_type()));
+  EXPECT_EQ((ndt::string_type::make(string_encoding_utf_16)),
+            (ndt::string_type::make(string_encoding_utf_16).get_canonical_type()));
+  EXPECT_EQ((ndt::string_type::make(string_encoding_utf_32)),
+            (ndt::string_type::make(string_encoding_utf_32).get_canonical_type()));
 }
 
 TEST(StringType, Storage)
@@ -279,13 +279,13 @@ TEST(StringType, Storage)
   nd::array a;
 
   a = "testing";
-  EXPECT_EQ(ndt::make_bytes(1), a.storage().get_type());
+  EXPECT_EQ(ndt::bytes_type::make(1), a.storage().get_type());
 
-  a = a.ucast(ndt::make_string(string_encoding_utf_16)).eval();
-  EXPECT_EQ(ndt::make_bytes(2), a.storage().get_type());
+  a = a.ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
+  EXPECT_EQ(ndt::bytes_type::make(2), a.storage().get_type());
 
-  a = a.ucast(ndt::make_string(string_encoding_utf_32)).eval();
-  EXPECT_EQ(ndt::make_bytes(4), a.storage().get_type());
+  a = a.ucast(ndt::string_type::make(string_encoding_utf_32)).eval();
+  EXPECT_EQ(ndt::bytes_type::make(4), a.storage().get_type());
 }
 
 TEST(StringType, EncodingSizes)
@@ -516,7 +516,7 @@ TEST(StringType, StringToFloat64SpecialValues)
 TEST(StringType, StringEncodeError)
 {
   nd::array a = parse_json("string", "\"\\uc548\\ub155\""), b;
-  EXPECT_THROW(a.ucast(ndt::make_string(string_encoding_ascii)).eval(),
+  EXPECT_THROW(a.ucast(ndt::string_type::make(string_encoding_ascii)).eval(),
                string_encode_error);
 }
 
@@ -562,8 +562,8 @@ TEST(StringType, Comparisons)
 
   // Expression and different encodings
   /*
-  a = nd::array("abcd").ucast(ndt::make_string(string_encoding_ucs_2));
-  b = nd::array("abcde").ucast(ndt::make_string(string_encoding_utf_32)).eval();
+  a = nd::array("abcd").ucast(ndt::string_type::make(string_encoding_ucs_2));
+  b = nd::array("abcde").ucast(ndt::string_type::make(string_encoding_utf_32)).eval();
         EXPECT_TRUE(a.op_sorting_less(b));
         EXPECT_TRUE(a < b);
         EXPECT_TRUE(a <= b);

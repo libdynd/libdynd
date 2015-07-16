@@ -18,11 +18,11 @@
 #include <dynd/memblock/array_memory_block.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/var_dim_type.hpp>
 
 namespace dynd {
 
 namespace ndt {
-  type make_var_dim(const type &element_tp);
   type make_fixed_dim(size_t dim_size, const type &element_tp);
 } // namespace ndt;
 
@@ -665,7 +665,7 @@ namespace nd {
     template <class T>
     inline array ucast(intptr_t replace_ndim = 0) const
     {
-      return ucast(ndt::make_type<T>(), replace_ndim);
+      return ucast(ndt::type::make<T>(), replace_ndim);
     }
 
     /**
@@ -697,7 +697,7 @@ namespace nd {
      * adaption operator. This creates an adapt[] type.
      *
      * Example:
-     * nd::array({3, 5, 10}).adapt(ndt::make_date(), "days since 2001-1-1");
+     * nd::array({3, 5, 10}).adapt(ndt::date_type::make(), "days since 2001-1-1");
      */
     array adapt(const ndt::type &tp, const nd::string &adapt_op);
 
@@ -766,7 +766,7 @@ namespace nd {
     template <class T>
     array view_scalars() const
     {
-      return view_scalars(ndt::make_type<T>());
+      return view_scalars(ndt::type::make<T>());
     }
 
     /**
@@ -797,7 +797,7 @@ namespace nd {
 
     /** Sorting comparison between two arrays. (Returns a bool, does not
      * broadcast) */
- //   bool op_sorting_less(const array &rhs) const;
+    //   bool op_sorting_less(const array &rhs) const;
 
     bool equals_exact(const array &rhs) const;
 
@@ -895,7 +895,7 @@ namespace nd {
     typename std::enable_if<is_dynd_scalar<T>::value, array_vals &>::type
     operator=(const T &rhs)
     {
-      m_arr.val_assign(ndt::make_exact_type<T>(), NULL, (const char *)&rhs);
+      m_arr.val_assign(ndt::type::make<T>(), NULL, (const char *)&rhs);
       return *this;
     }
     /**
@@ -912,8 +912,7 @@ namespace nd {
     operator=(const T &rhs)
     {
       bool1 v(rhs);
-      m_arr.val_assign(ndt::make_exact_type<bool1>(), NULL,
-                       (const char *)&v);
+      m_arr.val_assign(ndt::type::make<bool1>(), NULL, (const char *)&v);
       return *this;
     }
 
@@ -954,7 +953,7 @@ namespace nd {
     typename std::enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type
     operator=(const T &rhs)
     {
-      m_arr.val_assign(ndt::make_exact_type<T>(), NULL, (const char *)&rhs);
+      m_arr.val_assign(ndt::type::make<T>(), NULL, (const char *)&rhs);
       return *this;
     }
     /**
@@ -971,8 +970,7 @@ namespace nd {
     operator=(const T &rhs)
     {
       bool1 v(rhs);
-      m_arr.val_assign(ndt::make_exact_type<bool1>(), NULL,
-                       (const char *)&v);
+      m_arr.val_assign(ndt::type::make<bool1>(), NULL, (const char *)&v);
       return *this;
     }
 
@@ -1187,10 +1185,10 @@ namespace nd {
     if (ndim > 0) {
       intptr_t i = ndim - 1;
       ndt::type rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], tp)
-                                    : ndt::make_var_dim(tp);
+                                    : ndt::var_dim_type::make(tp);
       while (i-- > 0) {
         rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], rtp)
-                            : ndt::make_var_dim(rtp);
+                            : ndt::var_dim_type::make(rtp);
       }
       return empty(rtp);
     } else {
@@ -1227,7 +1225,7 @@ namespace nd {
   inline array empty(intptr_t dim0, const ndt::type &tp)
   {
     return nd::empty(dim0 >= 0 ? ndt::make_fixed_dim(dim0, tp)
-                               : ndt::make_var_dim(tp));
+                               : ndt::var_dim_type::make(tp));
   }
 
   /**
@@ -1250,8 +1248,8 @@ namespace nd {
   inline array empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
   {
     ndt::type rtp =
-        (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp) : ndt::make_var_dim(tp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::make_var_dim(rtp);
+        (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp) : ndt::var_dim_type::make(tp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
     return nd::empty(rtp);
   }
 
@@ -1277,9 +1275,9 @@ namespace nd {
                      const ndt::type &tp)
   {
     ndt::type rtp =
-        (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp) : ndt::make_var_dim(tp);
-    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp) : ndt::make_var_dim(rtp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::make_var_dim(rtp);
+        (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp) : ndt::var_dim_type::make(tp);
+    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp) : ndt::var_dim_type::make(rtp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
     return empty(rtp);
   }
 
@@ -1307,9 +1305,9 @@ namespace nd {
    * array b = nd::empty<double[3][4]>();
    */
   template <typename T>
-  inline array empty()
+  array empty()
   {
-    return empty(ndt::fixed_dim_from_array<T>::make());
+    return empty(ndt::type::make<T>());
   }
 
   /**
@@ -1529,8 +1527,8 @@ namespace nd {
       : m_memblock()
   {
     intptr_t dim0 = il.size();
-    make_strided_array(ndt::make_exact_type<T>(), 1, &dim0,
-                       nd::default_access_flags, NULL).swap(*this);
+    make_strided_array(ndt::type::make<T>(), 1, &dim0, nd::default_access_flags,
+                       NULL).swap(*this);
     DYND_MEMCPY(get_ndo()->m_data_pointer, il.begin(), sizeof(T) * dim0);
   }
   template <class T>
@@ -1543,8 +1541,8 @@ namespace nd {
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    make_strided_array(ndt::make_exact_type<T>(), 2, shape,
-                       nd::default_access_flags, NULL).swap(*this);
+    make_strided_array(ndt::type::make<T>(), 2, shape, nd::default_access_flags,
+                       NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
@@ -1559,8 +1557,8 @@ namespace nd {
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    make_strided_array(ndt::make_exact_type<T>(), 3, shape,
-                       nd::default_access_flags, NULL).swap(*this);
+    make_strided_array(ndt::type::make<T>(), 3, shape, nd::default_access_flags,
+                       NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
@@ -1587,7 +1585,7 @@ namespace nd {
       : m_memblock()
   {
     intptr_t dim0 = il.size();
-    make_strided_array(ndt::make_type<bool>(), 1, &dim0,
+    make_strided_array(ndt::type::make<bool>(), 1, &dim0,
                        nd::default_access_flags, NULL).swap(*this);
     auto data_ptr = reinterpret_cast<bool1 *>(get_ndo()->m_data_pointer);
     for (intptr_t i = 0; i < dim0; ++i) {
@@ -1662,7 +1660,7 @@ namespace nd {
   template <class T>
   inline nd::array::array(const T *rhs, intptr_t dim_size)
   {
-    nd::empty(dim_size, ndt::make_exact_type<T>()).swap(*this);
+    nd::empty(dim_size, ndt::type::make<T>()).swap(*this);
     DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs),
                 dim_size * sizeof(T));
   }
@@ -1684,7 +1682,7 @@ namespace nd {
                                             array>::type
       make(const std::vector<T> &vec)
       {
-        array result = nd::empty(vec.size(), ndt::make_exact_type<T>());
+        array result = nd::empty(vec.size(), ndt::type::make<T>());
         if (!vec.empty()) {
           DYND_MEMCPY(result.get_readwrite_originptr(), &vec[0],
                       vec.size() * sizeof(T));
@@ -1724,7 +1722,7 @@ namespace nd {
           throw std::runtime_error(
               "can only convert arrays with 0 dimensions to scalars");
         }
-        typed_data_assign(ndt::make_exact_type<T>(), NULL, (char *)&result,
+        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result,
                           lhs.get_type(), lhs.get_arrmeta(),
                           lhs.get_ndo()->m_data_pointer, ectx);
         return result;

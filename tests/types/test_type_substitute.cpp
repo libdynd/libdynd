@@ -45,7 +45,7 @@ TEST(SubstituteTypeVars, SimpleSubstitution)
   typevars["Mfixed"] = ndt::type("8 * void");
   typevars["Mvar"] = ndt::type("var * void");
   typevars["Msym"] = ndt::type("TV * void");
-  typevars["Aempty"] = ndt::make_dim_fragment(0, ndt::make_type<void>());
+  typevars["Aempty"] = ndt::make_dim_fragment(0, ndt::type::make<void>());
   typevars["Afixed_sym"] = ndt::make_dim_fragment(1, ndt::type("Fixed * void"));
   typevars["Afixed"] = ndt::make_dim_fragment(1, ndt::type("5 * void"));
   typevars["Avar"] = ndt::make_dim_fragment(1, ndt::type("var * void"));

@@ -239,7 +239,7 @@ nd::array dynd::nd::linspace(const nd::array &start, const nd::array &stop,
   // Make sure it's at least floating point
   if (dt.get_kind() == bool_kind || dt.get_kind() == sint_kind ||
       dt.get_kind() == uint_kind) {
-    dt = ndt::make_type<double>();
+    dt = ndt::type::make<double>();
   }
   return linspace(start, stop, count, dt);
 }

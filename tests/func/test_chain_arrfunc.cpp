@@ -29,7 +29,7 @@ using namespace dynd;
 TEST(ChainArrFunc, Simple)
 {
   nd::arrfunc chained = nd::functional::chain(
-      nd::copy, func::get_regfunction("sin"), ndt::make_type<double>());
+      nd::copy, func::get_regfunction("sin"), ndt::type::make<double>());
   nd::array a = nd::empty<double>();
   chained("0.0", kwds("dst", a));
   EXPECT_EQ(0., a.as<double>());

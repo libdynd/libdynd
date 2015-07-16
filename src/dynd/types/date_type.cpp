@@ -137,7 +137,7 @@ intptr_t ndt::date_type::make_assignment_kernel(
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          ckb, ckb_offset, make_property(dst_tp, "struct"), dst_arrmeta, src_tp,
+          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
@@ -152,7 +152,7 @@ intptr_t ndt::date_type::make_assignment_kernel(
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      make_property(src_tp, "struct"),
+                                      property_type::make(src_tp, "struct"),
                                       src_arrmeta, kernreq, ectx);
     }
     // TODO
@@ -230,14 +230,14 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
                                    const nd::array &month, const nd::array &day)
 {
   // TODO proper buffering
-  nd::array year_as_int = year.ucast(ndt::make_type<int32_t>()).eval();
-  nd::array month_as_int = month.ucast(ndt::make_type<int32_t>()).eval();
-  nd::array day_as_int = day.ucast(ndt::make_type<int32_t>()).eval();
+  nd::array year_as_int = year.ucast(ndt::type::make<int32_t>()).eval();
+  nd::array month_as_int = month.ucast(ndt::type::make<int32_t>()).eval();
+  nd::array day_as_int = day.ucast(ndt::type::make<int32_t>()).eval();
 
   nd::arrfunc af = nd::functional::elwise(nd::functional::apply(date_from_ymd));
 
   return af(year_as_int, month_as_int, day_as_int)
-      .view_scalars(ndt::make_date());
+      .view_scalars(ndt::date_type::make());
 }
 
 void ndt::date_type::get_dynamic_type_functions(
@@ -259,17 +259,17 @@ void ndt::date_type::get_dynamic_type_functions(
 
 static nd::array property_ndo_get_year(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "year"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "year"));
 }
 
 static nd::array property_ndo_get_month(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "month"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "month"));
 }
 
 static nd::array property_ndo_get_day(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "day"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "day"));
 }
 
 void ndt::date_type::get_dynamic_array_properties(
@@ -292,7 +292,7 @@ void ndt::date_type::get_dynamic_array_properties(
 
 static nd::array function_ndo_to_struct(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "struct"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
 }
 
 static nd::array function_ndo_strftime(const nd::array &n,
@@ -302,13 +302,14 @@ static nd::array function_ndo_strftime(const nd::array &n,
   if (format.empty()) {
     throw runtime_error("format string for strftime should not be empty");
   }
-  return n.replace_dtype(ndt::make_unary_expr(ndt::make_string(), n.get_dtype(),
+  return n.replace_dtype(ndt::unary_expr_type::make(ndt::string_type::make(),
+                                              n.get_dtype(),
                                               make_strftime_kernelgen(format)));
 }
 
 static nd::array function_ndo_weekday(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "weekday"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
 }
 
 static nd::array function_ndo_replace(const nd::array &n, int32_t year,
@@ -323,7 +324,7 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year,
         "no parameters provided to date.replace, should provide at least one");
   }
   return n.replace_dtype(
-      ndt::make_unary_expr(ndt::make_date(), n.get_dtype(),
+      ndt::unary_expr_type::make(ndt::date_type::make(), n.get_dtype(),
                            make_replace_kernelgen(year, month, day)));
 }
 
@@ -461,7 +462,7 @@ ndt::type ndt::date_type::get_elwise_property_type(size_t property_index,
   case dateprop_weekday:
     out_readable = true;
     out_writable = false;
-    return make_type<int32_t>();
+    return type::make<int32_t>();
   case dateprop_struct:
     out_readable = true;
     out_writable = true;
@@ -469,7 +470,7 @@ ndt::type ndt::date_type::get_elwise_property_type(size_t property_index,
   default:
     out_readable = false;
     out_writable = false;
-    return make_type<void>();
+    return type::make<void>();
   }
 }
 

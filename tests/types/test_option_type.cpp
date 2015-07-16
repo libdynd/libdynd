@@ -27,7 +27,7 @@ TEST(OptionType, Create) {
   EXPECT_EQ(option_kind, d.get_kind());
   EXPECT_EQ(2u, d.get_data_alignment());
   EXPECT_EQ(2u, d.get_data_size());
-  EXPECT_EQ(ndt::make_type<int16_t>(),
+  EXPECT_EQ(ndt::type::make<int16_t>(),
             d.extended<ndt::option_type>()->get_value_type());
   EXPECT_TRUE(d.is_scalar());
   EXPECT_FALSE(d.is_expression());
@@ -37,19 +37,19 @@ TEST(OptionType, Create) {
   EXPECT_EQ(d, ndt::type("?int16"));
   EXPECT_EQ(d, ndt::type("option[int16]"));
 
-  d = ndt::make_option(ndt::make_string());
+  d = ndt::make_option(ndt::string_type::make());
   EXPECT_EQ(option_type_id, d.get_type_id());
   EXPECT_EQ(option_kind, d.get_kind());
-  EXPECT_EQ(ndt::make_string().get_data_alignment(), d.get_data_alignment());
-  EXPECT_EQ(ndt::make_string().get_data_size(), d.get_data_size());
-  EXPECT_EQ(ndt::make_string(), d.extended<ndt::option_type>()->get_value_type());
+  EXPECT_EQ(ndt::string_type::make().get_data_alignment(), d.get_data_alignment());
+  EXPECT_EQ(ndt::string_type::make().get_data_size(), d.get_data_size());
+  EXPECT_EQ(ndt::string_type::make(), d.extended<ndt::option_type>()->get_value_type());
   EXPECT_FALSE(d.is_expression());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
   EXPECT_EQ("?string", d.str());
 
   // No option of option allowed
-  EXPECT_THROW(ndt::make_option(ndt::make_option(ndt::make_type<int>())),
+  EXPECT_THROW(ndt::make_option(ndt::make_option(ndt::type::make<int>())),
                type_error);
   EXPECT_THROW(ndt::type("option[option[bool]]"), type_error);
 }

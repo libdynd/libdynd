@@ -518,6 +518,6 @@ ndt::type dynd::char_type_of_encoding(string_encoding_t encoding)
     } else if (encoding == string_encoding_utf_16) {
         return ndt::make_fixed_bytes(2, 2);
     } else {
-        return ndt::make_char(encoding);
+        return ndt::char_type::make(encoding);
     }
 }

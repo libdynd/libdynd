@@ -87,7 +87,7 @@ void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn,
   if (was_transformed) {
     tmp_field_types.flag_as_immutable();
     out_transformed_tp =
-        make_struct(m_field_names, tmp_field_types, m_variadic);
+        struct_type::make(m_field_names, tmp_field_types, m_variadic);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -105,7 +105,7 @@ ndt::type ndt::struct_type::get_canonical_type() const
   }
 
   tmp_field_types.flag_as_immutable();
-  return make_struct(m_field_names, tmp_field_types, m_variadic);
+  return struct_type::make(m_field_names, tmp_field_types, m_variadic);
 }
 
 ndt::type ndt::struct_type::at_single(intptr_t i0, const char **inout_arrmeta,
@@ -271,7 +271,7 @@ static array_preamble *property_get_array_field(const array_preamble *params,
   if (udt.get_kind() == expr_kind) {
     string field_name =
         udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
-    return n.replace_dtype(ndt::make_property(udt, field_name, i)).release();
+    return n.replace_dtype(ndt::property_type::make(udt, field_name, i)).release();
   } else {
     if (undim == 0) {
       return n(i).release();
@@ -302,7 +302,7 @@ ndt::struct_type::struct_type(int, int)
     : base_struct_type(struct_type_id, make_self_names(), make_self_types(),
                        type_flag_none, false, false)
 {
-  // Equivalent to ndt::make_struct(ndt::make_ndarrayarg(), "self");
+  // Equivalent to ndt::struct_type::make(ndt::make_ndarrayarg(), "self");
   // but hardcoded to break the dependency of struct_type::array_parameters_type
   uintptr_t metaoff[1] = {0};
   m_arrmeta_offsets = nd::array(metaoff);
@@ -365,7 +365,7 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   intptr_t lhs_n = lhs_tp.extended<ndt::base_struct_type>()->get_field_count();
   intptr_t rhs_n = rhs_tp.extended<ndt::base_struct_type>()->get_field_count();
   intptr_t res_n = lhs_n + rhs_n;
-  nd::array res_field_names = nd::empty(res_n, ndt::make_string());
+  nd::array res_field_names = nd::empty(res_n, ndt::string_type::make());
   nd::array res_field_types = nd::empty(res_n, ndt::make_type());
   res_field_names(irange(0, lhs_n)).vals() =
       lhs_tp.extended<ndt::base_struct_type>()->get_field_names();
@@ -375,7 +375,7 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
       lhs_tp.extended<ndt::base_struct_type>()->get_field_types();
   res_field_types(irange(lhs_n, res_n)).vals() =
       rhs_tp.extended<ndt::base_struct_type>()->get_field_types();
-  ndt::type res_tp = ndt::make_struct(res_field_names, res_field_types);
+  ndt::type res_tp = ndt::struct_type::make(res_field_names, res_field_types);
   const ndt::type *res_field_tps =
       res_tp.extended<ndt::base_struct_type>()->get_field_types_raw();
   res = nd::empty_shell(res_tp);

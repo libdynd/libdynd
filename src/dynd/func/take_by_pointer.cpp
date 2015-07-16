@@ -139,8 +139,9 @@ struct take_by_pointer_virtual_ck
       throw invalid_argument(ss.str());
     }
 
-    dst_tp = ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL),
-                                 ndt::make_pointer(src_tp[0].get_dtype()));
+    dst_tp =
+        ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL),
+                            ndt::pointer_type::make(src_tp[0].get_dtype()));
   }
 };
 
@@ -149,8 +150,8 @@ nd::arrfunc nd::take_by_pointer::make()
   static ndt::type param_types[2] = {ndt::type("M * T"), ndt::type("N * Ix")};
 
   return arrfunc::make<take_by_pointer_virtual_ck>(
-      ndt::make_arrfunc(ndt::make_tuple(param_types),
-                        ndt::type("R * pointer[T]")),
+      ndt::arrfunc_type::make(ndt::tuple_type::make(param_types),
+                              ndt::type("R * pointer[T]")),
       0);
 }
 

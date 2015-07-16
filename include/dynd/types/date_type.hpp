@@ -96,14 +96,14 @@ namespace ndt {
     bool reverse_adapt_type(const type &value_tp, const nd::string &op,
                             nd::arrfunc &out_forward,
                             nd::arrfunc &out_reverse) const;
-  };
 
-  /** Returns type "date" */
-  inline const type &make_date()
-  {
-    static const type date_tp(new date_type(), false);
-    return date_tp;
-  }
+    /** Returns type "date" */
+    static const type &make()
+    {
+      static const type date_tp(new date_type(), false);
+      return date_tp;
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

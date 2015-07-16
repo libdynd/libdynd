@@ -81,16 +81,6 @@ char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata,
 // Forward declaration of nd::array and nd::strided_vals
 namespace nd {
   class array;
-
-  template <typename T, int N>
-  class strided_vals;
-
-  namespace detail {
-
-    template <typename... T>
-    class has_make_type;
-
-  } // namespace dynd::nd::detail
 } // namespace dynd::nd
 
 namespace ndt {
@@ -98,15 +88,10 @@ namespace ndt {
 
     DYND_HAS(make);
 
-  } // namespace ndt::detail
+  } // namespace dynd::ndt::detail
 
-  template <class T>
-  struct fixed_dim_from_array;
-
-  type make_var_dim(const type &element_tp);
+  type make_pointer_type(const type &target_tp);
   type make_fixed_dim(size_t dim_size, const type &element_tp);
-  type make_fixed_dim_kind(const type &element_tp);
-  ndt::type make_c_contiguous(const ndt::type &child_tp);
 
   /**
    * This class represents a data type.
@@ -122,6 +107,8 @@ namespace ndt {
    *
    */
   class type {
+    static type instances[DYND_TYPE_ID_MAX + 1];
+
     const base_type *m_extended;
 
     /**
@@ -195,23 +182,10 @@ namespace ndt {
       return *this;
     }
 
-    /** Construct from a builtin type ID */
-    explicit type(type_id_t type_id)
-        : m_extended(type::validate_builtin_type_id(type_id))
+    /** Construct from a type ID */
+    explicit type(type_id_t tp_id)
+        : type((validate_type_id(tp_id), instances[tp_id]))
     {
-      switch (type_id) {
-      case fixed_dim_type_id:
-        *this = ndt::type("Fixed * Any");
-        break;
-      case var_dim_type_id:
-        *this = ndt::type("var * Any");
-        break;
-      case tuple_type_id:
-        *this = ndt::type("(...)");
-        break;
-      default:
-        break;
-      }
     }
 
     /** Construct from a string representation */
@@ -904,99 +878,182 @@ namespace ndt {
       static const bool value = detail::has_make<equivalent<T>>::value;
     };
 
+    /**
+     * ``value'' should be true for an ndt::type object whose memory layout
+     * matches that of C++.
+     */
+    template <typename T>
+    struct is_layout_compatible {
+      static const bool value = false;
+    };
+
+    /**
+     * Convenience function which makes an ndt::type
+     * object from a template parameter. This includes
+     * convenience cases, where the memory layout of the given
+     * type may not precisely match that of T.
+     */
+    template <typename T, typename... A>
+    static type make(A &&... a)
+    {
+      return equivalent<T>::make(std::forward<A>(a)...);
+    }
+
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
-  // Forward declarations
-  type make_pointer(const type &target_tp);
+  template <>
+  struct type::equivalent<bool1> {
+    static type make() { return type(type_id_of<bool1>::value); }
+  };
 
-  namespace detail {
-    template <typename T>
-    struct exact_type_from;
+  template <>
+  struct type::equivalent<bool> {
+    static type make() { return type::make<bool1>(); }
+  };
 
-    template <typename T>
-    struct exact_type_from {
-      static type make()
-      {
-        return type(static_cast<type_id_t>(type_id_of<T>::value));
-      }
-    };
+  template <>
+  struct type::equivalent<signed char> {
+    static type make() { return type(type_id_of<signed char>::value); }
+  };
 
+  template <>
+  struct type::equivalent<short> {
+    static type make() { return type(type_id_of<short>::value); }
+  };
+
+  template <>
+  struct type::equivalent<int> {
+    static type make() { return type(type_id_of<int>::value); }
+  };
+
+  template <>
+  struct type::equivalent<long> {
+    static type make() { return type(type_id_of<long>::value); }
+  };
+
+  template <>
+  struct type::equivalent<long long> {
+    static type make() { return type(type_id_of<long long>::value); }
+  };
+
+  template <>
+  struct type::equivalent<int128> {
+    static type make() { return type(type_id_of<int128>::value); }
+  };
+
+  template <>
+  struct type::equivalent<unsigned char> {
+    static type make() { return type(type_id_of<unsigned char>::value); }
+  };
+
+  template <>
+  struct type::equivalent<unsigned short> {
+    static type make() { return type(type_id_of<unsigned short>::value); }
+  };
+
+  template <>
+  struct type::equivalent<unsigned int> {
+    static type make() { return type(type_id_of<unsigned int>::value); }
+  };
+
+  template <>
+  struct type::equivalent<unsigned long> {
+    static type make() { return type(type_id_of<unsigned long>::value); }
+  };
+
+  template <>
+  struct type::equivalent<unsigned long long> {
+    static type make() { return type(type_id_of<unsigned long long>::value); }
+  };
+
+  template <>
+  struct type::equivalent<uint128> {
+    static type make() { return type(type_id_of<uint128>::value); }
+  };
+
+  template <>
+  struct type::equivalent<char> {
+    static type make() { return type(type_id_of<char>::value); }
+  };
+
+  template <>
+  struct type::equivalent<float16> {
+    static type make() { return type(type_id_of<float16>::value); }
+  };
+
+  template <>
+  struct type::equivalent<float> {
+    static type make() { return type(type_id_of<float>::value); }
+  };
+
+  template <>
+  struct type::equivalent<double> {
+    static type make() { return type(type_id_of<double>::value); }
+  };
+
+  /*
     template <>
-    struct exact_type_from<ndt::type> {
-      static type make() { return ndt::type("type"); }
+    struct type::equivalent<long double> {
+      static type make() { return type(type_id_of<long double>::value); }
     };
+  */
 
-    template <typename T>
-    struct exact_type_from<T *> {
-      static type make() { return make_pointer(exact_type_from<T>::make()); }
-    };
+  template <>
+  struct type::equivalent<float128> {
+    static type make() { return type(type_id_of<float128>::value); }
+  };
 
-    template <typename T, int N>
-    struct exact_type_from<T[N]> {
-      static type make()
-      {
-        return ndt::make_c_contiguous(fixed_dim_from_array<T[N]>::make());
-      }
-    };
+  template <typename T>
+  struct type::equivalent<complex<T>> {
+    static type make() { return type(type_id_of<complex<T>>::value); }
+  };
 
-    // The default implementation of type_from is exact_type_from, after
-    // which we add additional overloads
-    template <typename T>
-    struct type_from : public exact_type_from<T> {
-    };
+  template <typename T>
+  struct type::equivalent<std::complex<T>> {
+    static type make() { return type::make<complex<T>>(); }
+  };
 
-    template <>
-    struct type_from<bool> {
-      static type make() { return type(bool_type_id); }
-    };
+  template <>
+  struct type::equivalent<void> {
+    static type make() { return type(type_id_of<void>::value); }
+  };
 
-    // Produces type "Fixed ** <N> * <T>"
-    template <typename T, int N>
-    struct type_from<nd::strided_vals<T, N>> {
-      static type make()
-      {
-        return make_fixed_dim_kind(type_from<T>::make(), N);
-      }
-    };
+  template <>
+  struct type::equivalent<type> {
+    static type make() { return type(type_type_id); }
+  };
 
-    // Produces type "Fixed * <T>"
-    template <typename T>
-    struct type_from<T[]> {
-      static type make()
-      {
-        return ndt::make_fixed_dim_kind(type_from<T>::make());
-      }
-    };
+  // The removal of const is a temporary solution until we decide if and how
+  // types should support const
+  template <typename T>
+  struct type::equivalent<const T> {
+    template <typename... A>
+    static type make(A &&... a)
+    {
+      return type::make<T>(std::forward<A>(a)...);
+    }
+  };
 
-    // Produces type "<N> * <T>"
-    template <typename T, int N>
-    struct type_from<T[N]> {
-      static type make() { return make_fixed_dim(N, type_from<T>::make()); }
-    };
-  } // namespace detail
+  // Same as for const
+  template <typename T>
+  struct type::equivalent<T &> {
+    template <typename... A>
+    static type make(A &&... a)
+    {
+      return type::make<T>(std::forward<A>(a)...);
+    }
+  };
 
-  /**
-   * Convenience function which makes an ndt::type
-   * object from a template parameter. This includes
-   * convenience cases, where the memory layout of the given
-   * type may not precisely match that of T.
-   */
-  template <class T>
-  type make_type()
-  {
-    return detail::type_from<T>::make();
-  }
-
-  /**
-   * Convenience function which makes an ndt::type object whose memory layout
-   * matches that of C++.
-   */
-  template <class T>
-  type make_exact_type()
-  {
-    return detail::exact_type_from<T>::make();
-  }
+  // Same as for const
+  template <typename T>
+  struct type::equivalent<T &&> {
+    template <typename... A>
+    static type make(A &&... a)
+    {
+      return type::make<T>(std::forward<A>(a)...);
+    }
+  };
 
   /**
    * Constructs an array type from a shape and
@@ -1044,31 +1101,19 @@ namespace ndt {
   type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
                  bool &out_any_var);
 
-  template <class T>
-  struct fixed_dim_from_array {
-    static inline ndt::type make() { return ndt::make_type<T>(); }
-  };
-  template <class T, int N>
-  struct fixed_dim_from_array<T[N]> {
-    static inline ndt::type make()
-    {
-      return ndt::make_fixed_dim(N, ndt::fixed_dim_from_array<T>::make());
-    }
-  };
-
   /**
    * Returns the type of an array constructed from a value.
    */
   template <typename T>
   type type_of(const T &DYND_UNUSED(value))
   {
-    return make_type<T>();
+    return type::make<T>();
   }
 
   template <typename T>
   type type_of(const std::vector<T> &value)
   {
-    return make_fixed_dim(value.size(), make_type<T>());
+    return make_fixed_dim(value.size(), type::make<T>());
   }
 
   type type_of(const nd::array &val);
@@ -1082,20 +1127,24 @@ namespace ndt {
   template <typename T>
   type get_forward_type(const T &DYND_UNUSED(val))
   {
+    // check for exact type
+
     // Default case is for when T and the ndt::type have identical
     // memory layout, which is guaranteed by make_exact_type<T>().
-    return make_exact_type<T>();
+    return type::make<T>();
   }
 
   template <typename T>
   type get_forward_type(const std::vector<T> &val)
   {
+    // check for exact type
+
     // Depending on the data size, store the data by value or as a pointer
     // to an nd::array
     if (sizeof(T) * val.size() > 32) {
-      return make_pointer(make_fixed_dim(val.size(), make_exact_type<T>()));
+      return make_pointer_type(make_fixed_dim(val.size(), type::make<T>()));
     } else {
-      return make_fixed_dim(val.size(), make_exact_type<T>());
+      return make_fixed_dim(val.size(), type::make<T>());
     }
   }
 

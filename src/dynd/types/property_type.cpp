@@ -78,7 +78,7 @@ ndt::property_type::property_type(const type &value_tp, const type &operand_tp,
   // If the operand type doesn't match the property, add a
   // conversion to the correct type
   if (m_operand_tp.value_type() != property_dt) {
-    m_operand_tp = make_convert(property_dt, m_operand_tp);
+    m_operand_tp = convert_type::make(property_dt, m_operand_tp);
   }
   m_members.flags =
       inherited_flags(m_value_tp.get_flags(), m_operand_tp.get_flags());

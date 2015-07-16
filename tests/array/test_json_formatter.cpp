@@ -57,9 +57,9 @@ TEST(JSONFormatter, String) {
     EXPECT_EQ("\"testing string\"", format_json(a).as<string>());
     a = " \" \\ / \b \f \n \r \t ";
     EXPECT_EQ("\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \"", format_json(a).as<string>());
-    a = nd::array("testing string").ucast(ndt::make_string(string_encoding_utf_16)).eval();
+    a = nd::array("testing string").ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
     EXPECT_EQ("\"testing string\"", format_json(a).as<string>());
-    a = nd::array("testing string").ucast(ndt::make_string(string_encoding_utf_32)).eval();
+    a = nd::array("testing string").ucast(ndt::string_type::make(string_encoding_utf_32)).eval();
     EXPECT_EQ("\"testing string\"", format_json(a).as<string>());
 }
 
@@ -71,11 +71,11 @@ TEST(JSONFormatter, JSON) {
 
 TEST(JSONFormatter, DateTime) {
   nd::array a;
-  a = nd::array("2013-12-15").ucast(ndt::make_date());
+  a = nd::array("2013-12-15").ucast(ndt::date_type::make());
   EXPECT_EQ("\"2013-12-15\"", format_json(a).as<string>());
-  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::make_datetime());
+  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::datetime_type::make());
   EXPECT_EQ("\"2013-12-15T13:14:22.19\"", format_json(a).as<string>());
-  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::make_datetime(tz_utc));
+  a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::datetime_type::make(tz_utc));
   EXPECT_EQ("\"2013-12-15T13:14:22.19Z\"", format_json(a).as<string>());
 }
 

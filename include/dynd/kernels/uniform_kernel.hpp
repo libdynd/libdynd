@@ -270,7 +270,7 @@ namespace ndt {
     static type make()
     {
       std::map<nd::string, ndt::type> tp_vars;
-      tp_vars["R"] = ndt::make_type<R>();
+      tp_vars["R"] = ndt::type::make<R>();
 
       return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars, true);
     }

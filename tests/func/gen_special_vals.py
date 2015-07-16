@@ -44,9 +44,9 @@ def make_special_vals(func_name, *args):
             if (prefix[-1] == '>'):
                 prefix += ' '
 
-            return 'dynd::ndt::make_type<{}>()'.format(prefix)
+            return 'dynd::ndt::type::make<{}>()'.format(prefix)
 
-        return 'dynd::ndt::fixed_dim_from_array<{}>::make()'.format(prefix + suffix)
+        return 'dynd::ndt::type::make<{}>()'.format(prefix + suffix)
 
     def decl_asgn_static_array(name, vals):
         return 'static {} {}{} = {{\n        {}\n    }};\n'.format(ctype(vals), name, dims(vals),
@@ -55,7 +55,7 @@ def make_special_vals(func_name, *args):
     def decl_asgn_ndarray(*args):
         size = len(args[0])
 
-        return 'dynd::nd::array vals = dynd::nd::empty({}, dynd::ndt::make_tuple({}));\n'.format(size,
+        return 'dynd::nd::array vals = dynd::nd::empty({}, dynd::ndt::tuple_type::make({}));\n'.format(size,
             ', '.join(make_type(vals) for vals in args))
 
     def asgn_vals(index, name):

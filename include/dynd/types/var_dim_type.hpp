@@ -125,19 +125,22 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
-  };
 
-  type make_var_dim(const type &element_tp);
-
-  inline type make_var_dim(const type &element_tp, intptr_t ndim)
-  {
-    type result = element_tp;
-    for (intptr_t i = 0; i < ndim; ++i) {
-      result = make_var_dim(result);
+    static type make(const type &element_tp)
+    {
+      return type(new var_dim_type(element_tp), false);
     }
 
-    return result;
-  }
+    static type make(const type &element_tp, intptr_t ndim)
+    {
+      type result = element_tp;
+      for (intptr_t i = 0; i < ndim; ++i) {
+        result = make(result);
+      }
+
+      return result;
+    }
+  };
 
   /**
    * A helper function for reserving initial space in a var dim element.

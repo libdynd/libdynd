@@ -14,6 +14,11 @@
 using namespace std;
 using namespace dynd;
 
+// ndt::type type_id
+// ndt::type_id<int>::value
+// ndt::type_kind<type_id>::value
+// ndt::type<id>
+
 // c{is_avail : (T) -> bool, assign_na : () -> T}
 // naf.p("assign_na").vals() =
 // nd::as_arrfunc<nd::assign_na_ck<T>>(naf.p("assign_na").get_type(), 0);

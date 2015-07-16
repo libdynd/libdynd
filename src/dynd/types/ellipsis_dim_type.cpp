@@ -135,7 +135,7 @@ bool ndt::ellipsis_dim_type::match(const char *arrmeta,
 {
   // TODO XXX This is wrong, "Any" could represent a type that doesn't match
   // against this one...
-  if (candidate_tp.get_type_id() == any_sym_type_id) {
+  if (candidate_tp.get_type_id() == any_kind_type_id) {
     return true;
   }
 

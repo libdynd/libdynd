@@ -34,7 +34,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool)
   ectx_inexact.errmode = assign_error_inexact;
 
   // assignment to a bool scalar
-  a = nd::empty(TestFixture::First::MakeType(ndt::make_type<bool1>()));
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<bool1>()));
   const bool1 *ptr_a = (const bool1 *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
@@ -50,11 +50,11 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool)
   EXPECT_FALSE(TestFixture::First::Dereference(ptr_a));
   a.val_assign(TestFixture::Second::To(1.5), &ectx_nocheck);
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
-/*
-  Todo: Why doesn't this test consistently pass with CUDA?
-  a.val_assign(TestFixture::Second::To(-3.5f), &ectx_nocheck);
-  EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
-*/
+  /*
+    Todo: Why doesn't this test consistently pass with CUDA?
+    a.val_assign(TestFixture::Second::To(-3.5f), &ectx_nocheck);
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
+  */
   a.val_assign(TestFixture::Second::To(22), &ectx_nocheck);
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
   if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
@@ -81,7 +81,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Int8)
   ectx_inexact.errmode = assign_error_inexact;
 
   // Assignment to an int8_t scalar
-  a = nd::empty(TestFixture::First::MakeType(ndt::make_type<int8_t>()));
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<int8_t>()));
   ptr_i8 = (const int8_t *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_i8));
@@ -129,7 +129,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_UInt16)
   ectx_overflow.errmode = assign_error_overflow;
 
   // Assignment to a uint16_t scalar
-  a = nd::empty(TestFixture::First::MakeType(ndt::make_type<uint16_t>()));
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint16_t>()));
   ptr_u16 = (const uint16_t *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_u16));
@@ -157,7 +157,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float32)
   ectx_inexact.errmode = assign_error_inexact;
 
   // Assignment to a float scalar
-  a = nd::empty(TestFixture::First::MakeType(ndt::make_type<float>()));
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<float>()));
   ptr_f32 = (const float *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_f32));
@@ -196,7 +196,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float64)
   ectx_inexact.errmode = assign_error_inexact;
 
   // Assignment to a double scalar
-  a = nd::empty(TestFixture::First::MakeType(ndt::make_type<double>()));
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<double>()));
   ptr_f64 = (const double *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_f64));
@@ -228,7 +228,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64)
   const uint64_t *ptr_u64;
 
   // Assignment to a double scalar
-  a = nd::empty(TestFixture::First::MakeType(ndt::make_type<uint64_t>()));
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint64_t>()));
   ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1u, TestFixture::First::Dereference(ptr_u64));
@@ -253,7 +253,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers)
   ectx_nocheck.errmode = assign_error_nocheck;
 
   // Assignment to a double scalar
-  a = nd::empty(TestFixture::First::MakeType(ndt::make_type<uint64_t>()));
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint64_t>()));
   ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
   // Assign some values that don't fit in signed 64-bits
   a.val_assign(TestFixture::Second::To(13835058055282163712.f));
@@ -276,7 +276,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float32)
 
   // Assignment to a complex float scalar
   a = nd::empty(
-      TestFixture::First::MakeType(ndt::make_type<dynd::complex<float>>()));
+      TestFixture::First::MakeType(ndt::type::make<dynd::complex<float>>()));
   ptr_cf32 = (const dynd::complex<float> *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(dynd::complex<float>(1), TestFixture::First::Dereference(ptr_cf32));
@@ -328,12 +328,14 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64)
 
   // Assignment to a complex float scalar
   a = nd::empty(
-      TestFixture::First::MakeType(ndt::make_type<dynd::complex<double>>()));
+      TestFixture::First::MakeType(ndt::type::make<dynd::complex<double>>()));
   ptr_cf64 = (const dynd::complex<double> *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
-  EXPECT_EQ(dynd::complex<double>(1), TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(1),
+            TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(false));
-  EXPECT_EQ(dynd::complex<double>(0), TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(0),
+            TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(1 / 3.0f));
   EXPECT_EQ(dynd::complex<double>(1 / 3.0f),
             TestFixture::First::Dereference(ptr_cf64));
@@ -375,7 +377,7 @@ TYPED_TEST_P(ArrayAssign, BroadcastAssign)
 {
   nd::array a = nd::empty(TestFixture::First::MakeType(ndt::make_fixed_dim(
       2, ndt::make_fixed_dim(
-             3, ndt::make_fixed_dim(4, ndt::make_type<float>())))));
+             3, ndt::make_fixed_dim(4, ndt::type::make<float>())))));
   int v0[4] = {3, 4, 5, 6};
   nd::array b = TestFixture::Second::To(v0);
 
@@ -427,13 +429,13 @@ TEST(ArrayAssign, Casting)
   nd::array a = nd::array_rw(v0), b;
   eval::eval_context tmp_ectx;
 
-  b = a.ucast(ndt::make_type<int>());
+  b = a.ucast(ndt::type::make<int>());
   // This triggers the conversion from float to int,
   // but the default assign policy is 'fractional'
   EXPECT_THROW(b.eval(), runtime_error);
 
   // Allow truncation of fractional part
-  b = a.ucast(ndt::make_type<int>());
+  b = a.ucast(ndt::type::make<int>());
   tmp_ectx.errmode = assign_error_overflow;
   b = b.eval(&tmp_ectx);
   EXPECT_EQ(3, b(0).as<int>());
@@ -442,7 +444,7 @@ TEST(ArrayAssign, Casting)
   EXPECT_EQ(1000, b(3).as<int>());
 
   // cast_scalars<int>() should be equivalent to
-  // cast_scalars(ndt::make_type<int>())
+  // cast_scalars(ndt::type::make<int>())
   b = a.ucast<int>(0);
   tmp_ectx.errmode = assign_error_overflow;
   b = b.eval(&tmp_ectx);
@@ -451,7 +453,7 @@ TEST(ArrayAssign, Casting)
   EXPECT_EQ(0, b(2).as<int>());
   EXPECT_EQ(1000, b(3).as<int>());
 
-  b = a.ucast(ndt::make_type<int8_t>());
+  b = a.ucast(ndt::type::make<int8_t>());
   // This triggers conversion from float to int8,
   // which overflows
   tmp_ectx.errmode = assign_error_overflow;
@@ -497,10 +499,12 @@ TEST(ArrayAssign, ChainedCastingRead)
   b = a.ucast<int>();
   b = b.ucast<float>();
   // Multiple cast_scalars operations should make a chained conversion type
-  EXPECT_EQ(ndt::make_fixed_dim(
-                5, ndt::make_convert(ndt::make_type<float>(),
-                                     ndt::make_convert<int, float>())),
-            b.get_type());
+  EXPECT_EQ(
+      ndt::make_fixed_dim(
+          5, ndt::convert_type::make(ndt::type::make<float>(),
+                               ndt::convert_type::make(ndt::type::make<int>(),
+                                                 ndt::type::make<float>()))),
+      b.get_type());
 
   // Evaluating the values should truncate them to integers
   tmp_ectx.errmode = assign_error_overflow;
@@ -523,17 +527,19 @@ TEST(ArrayAssign, ChainedCastingRead)
 
   EXPECT_EQ(
       ndt::make_fixed_dim(
-          5, ndt::make_convert(
-                 ndt::make_type<int32_t>(),
-                 ndt::make_convert(
-                     ndt::make_type<float>(),
-                     ndt::make_convert(
-                         ndt::make_type<int64_t>(),
-                         ndt::make_convert(
-                             ndt::make_type<int16_t>(),
-                             ndt::make_convert(
-                                 ndt::make_type<int32_t>(),
-                                 ndt::make_convert<int16_t, float>())))))),
+          5,
+          ndt::convert_type::make(
+              ndt::type::make<int32_t>(),
+              ndt::convert_type::make(
+                  ndt::type::make<float>(),
+                  ndt::convert_type::make(
+                      ndt::type::make<int64_t>(),
+                      ndt::convert_type::make(
+                          ndt::type::make<int16_t>(),
+                          ndt::convert_type::make(
+                              ndt::type::make<int32_t>(),
+                              ndt::convert_type::make(ndt::type::make<int16_t>(),
+                                                ndt::type::make<float>()))))))),
       b.get_type());
   tmp_ectx.errmode = assign_error_overflow;
   b = b.eval(&tmp_ectx);
@@ -559,7 +565,7 @@ TEST(ArrayAssign, ChainedCastingWrite) {
     b = b.ucast<float>(0);
     // Multiple cast_scalars operations should make a chained conversion type
     EXPECT_EQ(ndt::make_fixed_dim(
-                  3, ndt::make_convert(ndt::make_type<float>(),
+                  3, ndt::convert_type::make(ndt::type::make<float>(),
                                        ndt::make_convert<int, float>())),
               b.get_type());
 
@@ -662,7 +668,8 @@ REGISTER_TYPED_TEST_CASE_P(
     ScalarAssignment_Uint64,
     ScalarAssignment_Uint64_LargeNumbers, // This one is excluded on 32-bit
                                           // windows
-    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign, Overflow); 
+    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64,
+    BroadcastAssign, Overflow);
 #else
 REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool,
                            ScalarAssignment_Int8, ScalarAssignment_UInt16,

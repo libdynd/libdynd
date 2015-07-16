@@ -84,7 +84,7 @@ static void substitute_shape_visitor(const ndt::type &tp,
         out_transformed_tp = tp;
       }
       else {
-        out_transformed_tp = ndt::make_var_dim(subtp);
+        out_transformed_tp = ndt::var_dim_type::make(subtp);
       }
       break;
     default:

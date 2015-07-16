@@ -40,7 +40,7 @@ ndt::byteswap_type::byteswap_type(const type &value_type,
   // Automatically realign if needed
   if (operand_type.value_type().get_data_alignment() <
       value_type.get_data_alignment()) {
-    m_operand_type = make_view(
+    m_operand_type = view_type::make(
         operand_type, make_fixed_bytes(operand_type.get_data_size(),
                                        value_type.get_data_alignment()));
   }

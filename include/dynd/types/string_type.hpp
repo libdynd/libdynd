@@ -97,19 +97,21 @@ namespace ndt {
     nd::arrfunc get_is_avail() const;
 
     nd::arrfunc get_assign_na() const;
-  };
 
-  /** Returns type "string" */
-  inline const type &make_string()
-  {
-    static const type string_tp(new string_type(string_encoding_utf_8), false);
-    return string_tp;
-  }
-  /** Returns type "string[<encoding>]" */
-  inline type make_string(string_encoding_t encoding)
-  {
-    return type(new string_type(encoding), false);
-  }
+    /** Returns type "string" */
+    static const type &make()
+    {
+      static const type string_tp(new string_type(string_encoding_utf_8),
+                                  false);
+      return string_tp;
+    }
+
+    /** Returns type "string[<encoding>]" */
+    static type make(string_encoding_t encoding)
+    {
+      return type(new string_type(encoding), false);
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

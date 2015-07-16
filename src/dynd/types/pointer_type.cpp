@@ -87,7 +87,7 @@ void ndt::pointer_type::transform_child_types(type_transform_fn_t transform_fn,
   transform_fn(m_target_tp, arrmeta_offset + sizeof(pointer_type_arrmeta),
                extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = make_pointer(tmp_tp);
+    out_transformed_tp = make(tmp_tp);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -102,7 +102,7 @@ ndt::type ndt::pointer_type::get_canonical_type() const
 
 const ndt::type &ndt::pointer_type::get_operand_type() const
 {
-  static type vpt = make_pointer<void>();
+  static type vpt = make(type::make<void>());
 
   if (m_target_tp.get_type_id() == pointer_type_id) {
     return m_target_tp;
@@ -125,7 +125,7 @@ ndt::type ndt::pointer_type::apply_linear_index(intptr_t nindices,
     if (dt == m_target_tp) {
       return type(this, true);
     } else {
-      return make_pointer(dt);
+      return make(dt);
     }
   }
 }
@@ -188,7 +188,7 @@ ndt::type ndt::pointer_type::get_type_at_dimension(char **inout_arrmeta,
     if (inout_arrmeta != NULL) {
       *inout_arrmeta += sizeof(pointer_type_arrmeta);
     }
-    return make_pointer(
+    return make(
         m_target_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim));
   }
 }
@@ -538,7 +538,7 @@ struct static_pointer {
 };
 } // anonymous namespace
 
-ndt::type ndt::make_pointer(const type &target_tp)
+ndt::type ndt::pointer_type::make(const type &target_tp)
 {
   // Static instances of the type, which have a reference
   // count > 0 for the lifetime of the program. This static
