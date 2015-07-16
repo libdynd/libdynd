@@ -399,6 +399,6 @@ size_t dynd::make_general_string_comparison_kernel(
   // TODO: Make more efficient, direct comparison kernels
   ndt::type sdt = ndt::string_type::make();
   return make_comparison_kernel(
-      ckb, ckb_offset, ndt::make_convert(sdt, src0_dt), src0_arrmeta,
-      ndt::make_convert(sdt, src1_dt), src1_arrmeta, comptype, ectx);
+      ckb, ckb_offset, ndt::convert_type::make(sdt, src0_dt), src0_arrmeta,
+      ndt::convert_type::make(sdt, src1_dt), src1_arrmeta, comptype, ectx);
 }

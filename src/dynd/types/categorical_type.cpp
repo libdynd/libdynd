@@ -495,7 +495,7 @@ intptr_t ndt::categorical_type::make_assignment_kernel(
     } else if (src_tp.value_type() != m_category_tp &&
                src_tp.value_type().get_type_id() != categorical_type_id) {
       // Make a convert type to the category type, and have it do the chaining
-      type src_cvt_tp = make_convert(m_category_tp, src_tp);
+      type src_cvt_tp = convert_type::make(m_category_tp, src_tp);
       return src_cvt_tp.extended()->make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp, src_arrmeta,
           kernreq, ectx);

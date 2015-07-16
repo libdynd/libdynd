@@ -50,11 +50,11 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool)
   EXPECT_FALSE(TestFixture::First::Dereference(ptr_a));
   a.val_assign(TestFixture::Second::To(1.5), &ectx_nocheck);
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
-/*
-  Todo: Why doesn't this test consistently pass with CUDA?
-  a.val_assign(TestFixture::Second::To(-3.5f), &ectx_nocheck);
-  EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
-*/
+  /*
+    Todo: Why doesn't this test consistently pass with CUDA?
+    a.val_assign(TestFixture::Second::To(-3.5f), &ectx_nocheck);
+    EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
+  */
   a.val_assign(TestFixture::Second::To(22), &ectx_nocheck);
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
   if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
@@ -331,9 +331,11 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64)
       TestFixture::First::MakeType(ndt::type::make<dynd::complex<double>>()));
   ptr_cf64 = (const dynd::complex<double> *)a.get_ndo()->m_data_pointer;
   a.val_assign(TestFixture::Second::To(true));
-  EXPECT_EQ(dynd::complex<double>(1), TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(1),
+            TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(false));
-  EXPECT_EQ(dynd::complex<double>(0), TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(0),
+            TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(1 / 3.0f));
   EXPECT_EQ(dynd::complex<double>(1 / 3.0f),
             TestFixture::First::Dereference(ptr_cf64));
@@ -497,10 +499,12 @@ TEST(ArrayAssign, ChainedCastingRead)
   b = a.ucast<int>();
   b = b.ucast<float>();
   // Multiple cast_scalars operations should make a chained conversion type
-  EXPECT_EQ(ndt::make_fixed_dim(
-                5, ndt::make_convert(ndt::type::make<float>(),
-                                     ndt::make_convert<int, float>())),
-            b.get_type());
+  EXPECT_EQ(
+      ndt::make_fixed_dim(
+          5, ndt::convert_type::make(ndt::type::make<float>(),
+                               ndt::convert_type::make(ndt::type::make<int>(),
+                                                 ndt::type::make<float>()))),
+      b.get_type());
 
   // Evaluating the values should truncate them to integers
   tmp_ectx.errmode = assign_error_overflow;
@@ -523,17 +527,19 @@ TEST(ArrayAssign, ChainedCastingRead)
 
   EXPECT_EQ(
       ndt::make_fixed_dim(
-          5, ndt::make_convert(
-                 ndt::type::make<int32_t>(),
-                 ndt::make_convert(
-                     ndt::type::make<float>(),
-                     ndt::make_convert(
-                         ndt::type::make<int64_t>(),
-                         ndt::make_convert(
-                             ndt::type::make<int16_t>(),
-                             ndt::make_convert(
-                                 ndt::type::make<int32_t>(),
-                                 ndt::make_convert<int16_t, float>())))))),
+          5,
+          ndt::convert_type::make(
+              ndt::type::make<int32_t>(),
+              ndt::convert_type::make(
+                  ndt::type::make<float>(),
+                  ndt::convert_type::make(
+                      ndt::type::make<int64_t>(),
+                      ndt::convert_type::make(
+                          ndt::type::make<int16_t>(),
+                          ndt::convert_type::make(
+                              ndt::type::make<int32_t>(),
+                              ndt::convert_type::make(ndt::type::make<int16_t>(),
+                                                ndt::type::make<float>()))))))),
       b.get_type());
   tmp_ectx.errmode = assign_error_overflow;
   b = b.eval(&tmp_ectx);
@@ -559,7 +565,7 @@ TEST(ArrayAssign, ChainedCastingWrite) {
     b = b.ucast<float>(0);
     // Multiple cast_scalars operations should make a chained conversion type
     EXPECT_EQ(ndt::make_fixed_dim(
-                  3, ndt::make_convert(ndt::type::make<float>(),
+                  3, ndt::convert_type::make(ndt::type::make<float>(),
                                        ndt::make_convert<int, float>())),
               b.get_type());
 
@@ -662,7 +668,8 @@ REGISTER_TYPED_TEST_CASE_P(
     ScalarAssignment_Uint64,
     ScalarAssignment_Uint64_LargeNumbers, // This one is excluded on 32-bit
                                           // windows
-    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign, Overflow); 
+    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64,
+    BroadcastAssign, Overflow);
 #else
 REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool,
                            ScalarAssignment_Int8, ScalarAssignment_UInt16,

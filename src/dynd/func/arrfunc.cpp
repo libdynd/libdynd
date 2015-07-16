@@ -112,7 +112,7 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
        << ", got " << tp;
     throw type_error(ss.str());
   }
-  ndt::type prop_tp = ndt::make_property(tp, propname);
+  ndt::type prop_tp = ndt::property_type::make(tp, propname);
   return nd::arrfunc::make<property_kernel>(
       ndt::arrfunc_type::make(ndt::tuple_type::make(tp), prop_tp.value_type()),
       prop_tp, 0);

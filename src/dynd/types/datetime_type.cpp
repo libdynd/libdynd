@@ -230,7 +230,7 @@ intptr_t ndt::datetime_type::make_assignment_kernel(
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          ckb, ckb_offset, make_property(dst_tp, "struct"), dst_arrmeta, src_tp,
+          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
@@ -246,7 +246,7 @@ intptr_t ndt::datetime_type::make_assignment_kernel(
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      make_property(src_tp, "struct"),
+                                      property_type::make(src_tp, "struct"),
                                       src_arrmeta, kernreq, ectx);
     }
     // TODO
@@ -316,47 +316,47 @@ void ndt::datetime_type::get_dynamic_type_functions(
 
 static nd::array property_ndo_get_date(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "date"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "date"));
 }
 
 static nd::array property_ndo_get_year(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "year"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "year"));
 }
 
 static nd::array property_ndo_get_month(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "month"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "month"));
 }
 
 static nd::array property_ndo_get_day(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "day"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "day"));
 }
 
 static nd::array property_ndo_get_hour(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "hour"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "hour"));
 }
 
 static nd::array property_ndo_get_minute(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "minute"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "minute"));
 }
 
 static nd::array property_ndo_get_second(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "second"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "second"));
 }
 
 static nd::array property_ndo_get_microsecond(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "microsecond"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "microsecond"));
 }
 
 static nd::array property_ndo_get_tick(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "tick"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "tick"));
 }
 
 void ndt::datetime_type::get_dynamic_array_properties(
@@ -393,7 +393,7 @@ void ndt::datetime_type::get_dynamic_array_properties(
 
 static nd::array function_ndo_to_struct(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "struct"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
 }
 
 static nd::array function_ndo_strftime(const nd::array &n,

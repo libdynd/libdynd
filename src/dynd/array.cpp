@@ -1213,7 +1213,7 @@ static void cast_dtype(const ndt::type &dt,
         }
       }
     }
-    out_transformed_tp = ndt::make_convert(e->replacement_tp, dt);
+    out_transformed_tp = ndt::convert_type::make(e->replacement_tp, dt);
     // Only flag the transformation if this actually created a convert type
     if (out_transformed_tp.extended() != e->replacement_tp.extended()) {
       out_was_transformed = true;

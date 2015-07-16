@@ -79,7 +79,7 @@ TEST(CategoricalType, Convert)
   EXPECT_FALSE(is_lossless_assignment(cd, sd));
 
   // This operation was crashing, hence the test
-  ndt::type cvt = ndt::make_convert(sd, cd);
+  ndt::type cvt = ndt::convert_type::make(sd, cd);
   EXPECT_EQ(cd, cvt.operand_type());
   EXPECT_EQ(sd, cvt.value_type());
 }
@@ -339,7 +339,7 @@ TEST(CategoricalType, AssignFromOther)
   int16_t a_values[] = {6, 3, 100, 3, 1000, 100, 6, 1000};
   nd::array a = nd::array(a_values).ucast(cd);
   EXPECT_EQ(
-      ndt::make_fixed_dim(8, ndt::make_convert(cd, ndt::type::make<int16_t>())),
+      ndt::make_fixed_dim(8, ndt::convert_type::make(cd, ndt::type::make<int16_t>())),
       a.get_type());
   a = a.eval();
   EXPECT_EQ(ndt::make_fixed_dim(8, cd), a.get_type());

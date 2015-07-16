@@ -91,33 +91,32 @@ namespace ndt {
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
+
+    /**
+     * Makes a property type for accessing a named element-wise property
+     * of the provided operand type.
+     */
+    static type make(const type &operand_tp, const std::string &property_name,
+                     size_t property_index = std::numeric_limits<size_t>::max())
+    {
+      return type(new property_type(operand_tp, property_name, property_index),
+                  false);
+    }
+
+    /**
+     * Makes a reversed property type for viewing the operand as the output
+     * of a property of value_tp (with its getters/setters exchanged).
+     */
+    static type
+    make_reversed(const type &value_tp, const type &operand_tp,
+                  const std::string &property_name,
+                  size_t property_index = std::numeric_limits<size_t>::max())
+    {
+      return type(new property_type(value_tp, operand_tp, property_name,
+                                    property_index),
+                  false);
+    }
   };
-
-  /**
-   * Makes a property type for accessing a named element-wise property
-   * of the provided operand type.
-   */
-  inline type
-  make_property(const type &operand_tp, const std::string &property_name,
-                size_t property_index = std::numeric_limits<size_t>::max())
-  {
-    return type(new property_type(operand_tp, property_name, property_index),
-                false);
-  }
-
-  /**
-   * Makes a reversed property type for viewing the operand as the output
-   * of a property of value_tp (with its getters/setters exchanged).
-   */
-  inline type make_reversed_property(
-      const type &value_tp, const type &operand_tp,
-      const std::string &property_name,
-      size_t property_index = std::numeric_limits<size_t>::max())
-  {
-    return type(
-        new property_type(value_tp, operand_tp, property_name, property_index),
-        false);
-  }
 
 } // namespace dynd::ndt
 } // namespace dynd

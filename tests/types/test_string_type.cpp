@@ -114,7 +114,7 @@ TEST(StringType, Basic)
 
   // Convert to a blockref string type with the same utf8 codec
   b = a.ucast(ndt::string_type::make(string_encoding_utf_8));
-  EXPECT_EQ(ndt::make_convert(ndt::string_type::make(string_encoding_utf_8),
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_8),
                               ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
@@ -123,7 +123,7 @@ TEST(StringType, Basic)
 
   // Convert to a blockref string type with the utf16 codec
   b = a.ucast(ndt::string_type::make(string_encoding_utf_16));
-  EXPECT_EQ(ndt::make_convert(ndt::string_type::make(string_encoding_utf_16),
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_16),
                               ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
@@ -132,7 +132,7 @@ TEST(StringType, Basic)
 
   // Convert to a blockref string type with the utf32 codec
   b = a.ucast(ndt::string_type::make(string_encoding_utf_32));
-  EXPECT_EQ(ndt::make_convert(ndt::string_type::make(string_encoding_utf_32),
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_32),
                               ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
@@ -141,7 +141,7 @@ TEST(StringType, Basic)
 
   // Convert to a blockref string type with the ascii codec
   b = a.ucast(ndt::string_type::make(string_encoding_ascii));
-  EXPECT_EQ(ndt::make_convert(ndt::string_type::make(string_encoding_ascii),
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_ascii),
                               ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();

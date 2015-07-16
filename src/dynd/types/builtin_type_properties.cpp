@@ -12,15 +12,15 @@ using namespace std;
 using namespace dynd;
 
 static nd::array property_complex_real(const nd::array& n) {
-    return n.replace_dtype(ndt::make_property(n.get_dtype(), "real"));
+    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "real"));
 }
 
 static nd::array property_complex_imag(const nd::array& n) {                        
-    return n.replace_dtype(ndt::make_property(n.get_dtype(), "imag"));
+    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "imag"));
 }
 
 static nd::array property_complex_conj(const nd::array& n) {
-    return n.replace_dtype(ndt::make_property(n.get_dtype(), "conj"));
+    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "conj"));
 }
 
 static size_t complex_array_properties_size() { return 3; }

@@ -271,7 +271,7 @@ static array_preamble *property_get_array_field(const array_preamble *params,
   if (udt.get_kind() == expr_kind) {
     string field_name =
         udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
-    return n.replace_dtype(ndt::make_property(udt, field_name, i)).release();
+    return n.replace_dtype(ndt::property_type::make(udt, field_name, i)).release();
   } else {
     if (undim == 0) {
       return n(i).release();

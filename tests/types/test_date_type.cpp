@@ -138,9 +138,9 @@ TEST(DateType, DateProperties) {
     nd::array a;
 
     a = nd::array("1955-03-13").ucast(d).eval();
-    EXPECT_EQ(ndt::make_property(d, "year"), a.p("year").get_type());
-    EXPECT_EQ(ndt::make_property(d, "month"), a.p("month").get_type());
-    EXPECT_EQ(ndt::make_property(d, "day"), a.p("day").get_type());
+    EXPECT_EQ(ndt::property_type::make(d, "year"), a.p("year").get_type());
+    EXPECT_EQ(ndt::property_type::make(d, "month"), a.p("month").get_type());
+    EXPECT_EQ(ndt::property_type::make(d, "day"), a.p("day").get_type());
     EXPECT_EQ(1955, a.p("year").as<int32_t>());
     EXPECT_EQ(3, a.p("month").as<int32_t>());
     EXPECT_EQ(13, a.p("day").as<int32_t>());
@@ -167,7 +167,7 @@ TEST(DateType, DatePropertyConvertOfString) {
                   3, ndt::fixed_string_type::make(10, string_encoding_ascii)),
               a.get_type());
     EXPECT_EQ(ndt::make_fixed_dim(
-                  3, ndt::make_convert(
+                  3, ndt::convert_type::make(
                          ndt::date_type::make(),
                          ndt::fixed_string_type::make(10, string_encoding_ascii))),
               b.get_type());
@@ -197,7 +197,7 @@ TEST(DateType, ToStructFunction) {
 
     a = nd::array("1955-03-13").ucast(d).eval();
     b = a.f("to_struct");
-    EXPECT_EQ(ndt::make_property(d, "struct"),
+    EXPECT_EQ(ndt::property_type::make(d, "struct"),
                     b.get_type());
     b = b.eval();
     EXPECT_EQ(ndt::struct_type::make(ndt::type::make<int16_t>(), "year",
@@ -294,7 +294,7 @@ TEST(DateType, StrFTimeOfConvert) {
     const char *vals[] = {"1920-03-12", "2013-01-01", "2000-12-25"};
     nd::array a = nd::array(vals).ucast(ndt::date_type::make());
     EXPECT_EQ(ndt::make_fixed_dim(
-                  3, ndt::make_convert(ndt::date_type::make(), ndt::string_type::make())),
+                  3, ndt::convert_type::make(ndt::date_type::make(), ndt::string_type::make())),
               a.get_type());
 
     nd::array b = a.f("strftime", "%Y %m %d");
@@ -380,7 +380,7 @@ TEST(DateType, ReplaceOfConvert) {
 
     // Make an expression type with value type 'date'
     a = nd::array("1955-03-13").ucast(ndt::date_type::make());
-    EXPECT_EQ(ndt::make_convert(ndt::date_type::make(), ndt::string_type::make()),
+    EXPECT_EQ(ndt::convert_type::make(ndt::date_type::make(), ndt::string_type::make()),
                     a.get_type());
     // Call replace on it
     EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());

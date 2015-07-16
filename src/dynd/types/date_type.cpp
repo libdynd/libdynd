@@ -137,7 +137,7 @@ intptr_t ndt::date_type::make_assignment_kernel(
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          ckb, ckb_offset, make_property(dst_tp, "struct"), dst_arrmeta, src_tp,
+          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
           src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
@@ -152,7 +152,7 @@ intptr_t ndt::date_type::make_assignment_kernel(
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      make_property(src_tp, "struct"),
+                                      property_type::make(src_tp, "struct"),
                                       src_arrmeta, kernreq, ectx);
     }
     // TODO
@@ -259,17 +259,17 @@ void ndt::date_type::get_dynamic_type_functions(
 
 static nd::array property_ndo_get_year(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "year"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "year"));
 }
 
 static nd::array property_ndo_get_month(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "month"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "month"));
 }
 
 static nd::array property_ndo_get_day(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "day"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "day"));
 }
 
 void ndt::date_type::get_dynamic_array_properties(
@@ -292,7 +292,7 @@ void ndt::date_type::get_dynamic_array_properties(
 
 static nd::array function_ndo_to_struct(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "struct"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
 }
 
 static nd::array function_ndo_strftime(const nd::array &n,
@@ -309,7 +309,7 @@ static nd::array function_ndo_strftime(const nd::array &n,
 
 static nd::array function_ndo_weekday(const nd::array &n)
 {
-  return n.replace_dtype(ndt::make_property(n.get_dtype(), "weekday"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
 }
 
 static nd::array function_ndo_replace(const nd::array &n, int32_t year,

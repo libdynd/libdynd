@@ -76,7 +76,7 @@ TEST(FixedstringDType, Basic)
   EXPECT_EQ("abcdefg", a.as<string>());
 
   a = a.ucast(ndt::fixed_string_type::make(7, string_encoding_utf_16));
-  EXPECT_EQ(ndt::make_convert(ndt::fixed_string_type::make(7, string_encoding_utf_16),
+  EXPECT_EQ(ndt::convert_type::make(ndt::fixed_string_type::make(7, string_encoding_utf_16),
                               ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             a.get_type());
   a = a.eval();
