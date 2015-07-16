@@ -119,6 +119,12 @@ namespace ndt {
     static type make() { return fixed_dim_kind_type::make(type::make<T>()); }
   };
 
+  // Need to handle const properly
+  template <typename T>
+  struct type::equivalent<const T[]> {
+    static type make() { return type::make<T[]>(); }
+  };
+
   // Produces type "Fixed ** <N> * <T>"
   template <typename T, int N>
   struct type::equivalent<nd::strided_vals<T, N>> {

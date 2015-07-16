@@ -386,11 +386,8 @@ namespace ndt {
                      const type &DYND_UNUSED(ret_tp));
   };
 
-  template <kernel_request_t kernreq, typename funcproto_type>
-  struct as_arrfunc_type;
-
   template <typename R>
-  struct as_arrfunc_type<kernel_request_host, R()> {
+  struct type::equivalent<R()> {
     static type make()
     {
       nd::array arg_tp = nd::empty(0, make_type());
@@ -400,19 +397,17 @@ namespace ndt {
   };
 
   template <typename R, typename... A>
-  struct as_arrfunc_type<kernel_request_host, R(A...)> {
+  struct type::equivalent<R(A...)> {
     static type make()
     {
-      type tp[sizeof...(A)] = {type::make<typename std::remove_cv<
-          typename std::remove_reference<A>::type>::type>()...};
+      type tp[sizeof...(A)] = {type::make<A>()...};
       return make_arrfunc(tuple_type::make(tp), type::make<R>());
     }
 
     template <typename... T>
     static type make(T &&... names)
     {
-      type tp[sizeof...(A)] = {type::make<typename std::remove_cv<
-          typename std::remove_reference<A>::type>::type>()...};
+      type tp[sizeof...(A)] = {type::make<A>()...};
 
       return make_arrfunc(
           tuple_type::make(nd::array(tp, sizeof...(A) - sizeof...(T))),
@@ -421,55 +416,6 @@ namespace ndt {
           type::make<R>());
     }
   };
-
-#ifdef DYND_CUDA
-
-  template <typename R, typename... A>
-  struct as_arrfunc_type<kernel_request_cuda_device, R(A...)> {
-    static type make()
-    {
-      type ret_tp = type::make<R>();
-      if (ret_tp.get_kind() != void_kind) {
-        ret_tp = make_cuda_device(ret_tp);
-      }
-
-      type arg_tp[sizeof...(A)] = {
-          make_cuda_device(type::make<typename std::remove_cv<
-              typename std::remove_reference<A>::type>::type>())...};
-      return make_arrfunc(tuple_type::make(arg_tp), ret_tp);
-    }
-
-    template <typename... T>
-    static type make(T &&... names)
-    {
-      type ret_tp = type::make<R>();
-      if (ret_tp.get_kind() != void_kind) {
-        ret_tp = make_cuda_device(ret_tp);
-      }
-
-      type arg_tp[sizeof...(A)] = {
-          make_cuda_device(type::make<typename std::remove_cv<
-              typename std::remove_reference<A>::type>::type>())...};
-      return make_arrfunc(
-          tuple_type::make(nd::array(arg_tp, sizeof...(A) - sizeof...(T))),
-          make_struct(
-              {names...},
-              nd::array(arg_tp + (sizeof...(A) - sizeof...(T)), sizeof...(T))),
-          ret_tp);
-    }
-  };
-
-  template <typename R>
-  struct as_arrfunc_type<kernel_request_cuda_device, R()> {
-    static type make()
-    {
-      nd::array arg_tp = nd::empty(0, make_type());
-      arg_tp.flag_as_immutable();
-      return make_arrfunc(tuple_type::make(arg_tp), make_cuda_device(type::make<R>()));
-    }
-  };
-
-#endif
 
   /** Makes an arrfunc type with both positional and keyword arguments */
   inline type make_arrfunc(const type &pos_tuple, const type &kwd_struct,
@@ -512,8 +458,7 @@ namespace ndt {
   template <kernel_request_t kernreq, typename funcproto_type, typename... T>
   type make_arrfunc(T &&... names)
   {
-    return as_arrfunc_type<kernreq, funcproto_type>::make(
-        std::forward<T>(names)...);
+    return type::make<funcproto_type>(std::forward<T>(names)...);
   }
 
   template <typename funcproto_type, typename... T>

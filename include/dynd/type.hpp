@@ -893,10 +893,10 @@ namespace ndt {
      * convenience cases, where the memory layout of the given
      * type may not precisely match that of T.
      */
-    template <typename T>
-    static type make()
+    template <typename T, typename... A>
+    static type make(A &&... a)
     {
-      return equivalent<T>::make();
+      return equivalent<T>::make(std::forward<A>(a)...);
     }
 
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
@@ -1022,6 +1022,37 @@ namespace ndt {
   template <>
   struct type::equivalent<type> {
     static type make() { return type(type_type_id); }
+  };
+
+  // The removal of const is a temporary solution until we decide if and how
+  // types should support const
+  template <typename T>
+  struct type::equivalent<const T> {
+    template <typename... A>
+    static type make(A &&... a)
+    {
+      return type::make<T>(std::forward<A>(a)...);
+    }
+  };
+
+  // Same as for const
+  template <typename T>
+  struct type::equivalent<T &> {
+    template <typename... A>
+    static type make(A &&... a)
+    {
+      return type::make<T>(std::forward<A>(a)...);
+    }
+  };
+
+  // Same as for const
+  template <typename T>
+  struct type::equivalent<T &&> {
+    template <typename... A>
+    static type make(A &&... a)
+    {
+      return type::make<T>(std::forward<A>(a)...);
+    }
   };
 
   /**

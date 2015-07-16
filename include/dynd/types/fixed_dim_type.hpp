@@ -202,5 +202,11 @@ namespace ndt {
     static type make() { return make_fixed_dim(N, type::make<T>()); }
   };
 
+  // Need to handle const properly
+  template <typename T, int N>
+  struct type::equivalent<const T[N]> {
+    static type make() { return type::make<T[N]>(); }
+  };
+
 } // namespace dynd::ndt
 } // namespace dynd
