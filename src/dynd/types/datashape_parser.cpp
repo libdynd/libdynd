@@ -1091,8 +1091,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
           } else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
             result = make_fixed_dim_kind(element_tp, exponent);
           } else if (isupper(*bbegin)) {
-            result = make_typevar_dim(nd::string(bbegin, bend), element_tp,
-                                      exponent);
+            result = ndt::typevar_dim_type::make(nd::string(bbegin, bend),
+                                                 element_tp, exponent);
           } else {
             throw datashape_parse_error(
                 bbegin, "invalid dimension type for base of dimensional power");
@@ -1115,8 +1115,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
                   exponent_name, parse_datashape(begin, end, symtable));
             } else if (isupper(*bbegin)) {
               result = ndt::make_pow_dimsym(
-                  ndt::make_typevar_dim(nd::string(bbegin, bend),
-                                        ndt::type::make<void>()),
+                  ndt::typevar_dim_type::make(nd::string(bbegin, bend),
+                                              ndt::type::make<void>()),
                   exponent_name, parse_datashape(begin, end, symtable));
             } else {
               throw datashape_parse_error(
@@ -1146,7 +1146,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       } else if (parse::compare_range_to_literal(nbegin, nend, "Fixed")) {
         result = ndt::make_fixed_dim_kind(element_tp);
       } else if (isupper(*nbegin)) {
-        result = ndt::make_typevar_dim(nd::string(nbegin, nend), element_tp);
+        result =
+            ndt::typevar_dim_type::make(nd::string(nbegin, nend), element_tp);
       } else {
         parse::skip_whitespace_and_pound_comments(rbegin, end);
         throw datashape_parse_error(rbegin, "unrecognized dimension type");
@@ -1221,7 +1222,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = ndt::make_kind_sym(complex_kind);
     } else if (isupper(*nbegin)) {
       if (!parse_token_ds(begin, end, '[')) {
-        result = ndt::make_typevar(nd::string(nbegin, nend));
+        result = ndt::typevar_type::make(nd::string(nbegin, nend));
       } else {
         ndt::type arg_tp = parse_datashape(begin, end, symtable);
         if (arg_tp.is_null()) {
@@ -1231,7 +1232,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
           throw datashape_parse_error(begin, "expected closing ']'");
         }
         result =
-            ndt::make_typevar_constructed(nd::string(nbegin, nend), arg_tp);
+            ndt::typevar_constructed_type::make(nd::string(nbegin, nend), arg_tp);
       }
     } else {
       string n(nbegin, nend);

@@ -201,7 +201,7 @@ ndt::type ndt::detail::internal_substitute(
            << " was available";
         throw invalid_argument(ss.str());
       } else {
-        return ndt::make_typevar_dim(
+        return ndt::typevar_dim_type::make(
             pattern.extended<typevar_dim_type>()->get_name(),
             ndt::substitute(
                 pattern.extended<typevar_dim_type>()->get_element_type(),
@@ -309,7 +309,7 @@ ndt::type ndt::detail::internal_substitute(
         const nd::string &tvname =
             base_tp.extended<typevar_dim_type>()->get_name();
         for (intptr_t i = 0; i < exponent; ++i) {
-          result = ndt::make_typevar_dim(tvname, result);
+          result = ndt::typevar_dim_type::make(tvname, result);
         }
         return result;
       }

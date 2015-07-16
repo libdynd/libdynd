@@ -422,7 +422,7 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 {
   nd::array args = make_typevar_range("T", nargs);
   args.flag_as_immutable();
-  type ret = make_typevar("R");
+  type ret = typevar_type::make("R");
   return arrfunc_type::make(tuple_type::make(args), ret);
 }
 

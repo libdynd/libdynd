@@ -160,7 +160,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
           tp_vars[candidate_tp.extended<pow_dimsym_type>()->get_exponent()];
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet
-        tv_type = make_typevar_dim(
+        tv_type = typevar_dim_type::make(
             candidate_tp.extended<pow_dimsym_type>()->get_exponent(),
             type::make<void>());
         return true;

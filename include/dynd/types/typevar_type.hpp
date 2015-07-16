@@ -60,13 +60,13 @@ namespace ndt {
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;
-  }; // class typevar_type
 
-  /** Makes a typevar type with the specified types */
-  inline type make_typevar(const nd::string &name)
-  {
-    return type(new typevar_type(name), false);
-  }
+    /** Makes a typevar type with the specified types */
+    static type make(const nd::string &name)
+    {
+      return type(new typevar_type(name), false);
+    }
+  }; // class typevar_type
 
   nd::array make_typevar_range(const char *name, intptr_t count);
 

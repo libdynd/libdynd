@@ -28,7 +28,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
               ndt::make_ellipsis_dim(dimsname,
                                      param_types[i].without_memory_type()));
     } else if (param_types[i].get_type_id() == typevar_constructed_type_id) {
-      pt[i] = ndt::make_typevar_constructed(
+      pt[i] = ndt::typevar_constructed_type::make(
           param_types[i].extended<ndt::typevar_constructed_type>()->get_name(),
           ndt::make_ellipsis_dim(dimsname,
                                  param_types[i]
@@ -71,7 +71,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
         ret_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(
             ndt::make_ellipsis_dim(dimsname, ret_tp.without_memory_type()));
   } else if (ret_tp.get_type_id() == typevar_constructed_type_id) {
-    ret_tp = ndt::make_typevar_constructed(
+    ret_tp = ndt::typevar_constructed_type::make(
         ret_tp.extended<ndt::typevar_constructed_type>()->get_name(),
         ndt::make_ellipsis_dim(
             dimsname,

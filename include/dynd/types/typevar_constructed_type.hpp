@@ -65,13 +65,13 @@ namespace ndt {
     void get_dynamic_type_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;
-  }; // class typevar_type
 
-  /** Makes a typevar_constructed type with the specified types */
-  inline type make_typevar_constructed(const nd::string &name, const type &arg)
-  {
-    return type(new typevar_constructed_type(name, arg), false);
-  }
+    /** Makes a typevar_constructed type with the specified types */
+    static type make(const nd::string &name, const type &arg)
+    {
+      return type(new typevar_constructed_type(name, arg), false);
+    }
+  };
 
 } // namespace dynd::ndt
 } // namespace dynd

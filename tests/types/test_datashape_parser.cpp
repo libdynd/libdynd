@@ -210,12 +210,13 @@ TEST(DataShapeParser, StridedVarFixedDim)
 
 TEST(DataShapeParser, TypeVarConstructed)
 {
-  EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("int32")),
+  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("int32")),
             ndt::type("T[int32]"));
-  EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("10 * A")),
+  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("10 * A")),
             ndt::type("T[10 * A]"));
-  EXPECT_EQ(ndt::make_typevar_constructed("T", ndt::type("Dims... * int32")),
-            ndt::type("T[Dims... * int32]"));
+  EXPECT_EQ(
+      ndt::typevar_constructed_type::make("T", ndt::type("Dims... * int32")),
+      ndt::type("T[Dims... * int32]"));
 }
 
 TEST(DataShapeParser, RecordOneField)

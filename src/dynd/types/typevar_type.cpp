@@ -183,7 +183,7 @@ nd::array ndt::make_typevar_range(const char *name, intptr_t count)
   result = nd::empty(count, make_type());
   auto result_ptr = reinterpret_cast<type *>(result.get_readwrite_originptr());
   for (int i = 0; i < count; ++i) {
-    result_ptr[i] = make_typevar(s);
+    result_ptr[i] = typevar_type::make(s);
     s[s.size() - 1]++;
   }
   return move(result);
