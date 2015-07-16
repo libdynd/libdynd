@@ -102,7 +102,7 @@ ndt::type ndt::detail::internal_substitute(
     return ndt::make_option(ndt::substitute(
         pattern.extended<option_type>()->get_value_type(), typevars, concrete));
   case arrfunc_type_id:
-    return ndt::make_arrfunc(
+    return ndt::arrfunc_type::make(
         substitute(pattern.extended<arrfunc_type>()->get_pos_tuple(), typevars,
                    concrete),
         substitute(pattern.extended<arrfunc_type>()->get_kwd_struct(), typevars,

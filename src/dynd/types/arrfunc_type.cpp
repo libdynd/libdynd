@@ -166,8 +166,7 @@ void ndt::arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
   transform_fn(m_kwd_struct, arrmeta_offset, extra, tmp_kwd_types,
                was_transformed);
   if (was_transformed) {
-    out_transformed_tp =
-        make_arrfunc(tmp_pos_types, tmp_kwd_types, tmp_return_type);
+    out_transformed_tp = make(tmp_pos_types, tmp_kwd_types, tmp_return_type);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -181,7 +180,7 @@ ndt::type ndt::arrfunc_type::get_canonical_type() const
   tmp_return_type = m_return_type.get_canonical_type();
   tmp_pos_types = m_pos_tuple.get_canonical_type();
   tmp_kwd_types = m_kwd_struct.get_canonical_type();
-  return make_arrfunc(tmp_pos_types, tmp_kwd_types, tmp_return_type);
+  return make(tmp_pos_types, tmp_kwd_types, tmp_return_type);
 }
 
 void ndt::arrfunc_type::get_vars(std::unordered_set<std::string> &vars) const
@@ -424,7 +423,7 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
   nd::array args = make_typevar_range("T", nargs);
   args.flag_as_immutable();
   type ret = make_typevar("R");
-  return make_arrfunc(tuple_type::make(args), ret);
+  return arrfunc_type::make(tuple_type::make(args), ret);
 }
 
 ///////// functions on the nd::array
@@ -513,17 +512,13 @@ void ndt::arrfunc_type::get_dynamic_array_functions(
       sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
 }
 
+/*
 ndt::type ndt::arrfunc_type::make(const nd::array &pos_tp,
                                   const ndt::type &ret_tp)
 {
   return type(new arrfunc_type(tuple_type::make(pos_tp), ret_tp), false);
 }
-
-ndt::type ndt::arrfunc_type::make(const initializer_list<type_id_t> &,
-                                  const ndt::type &)
-{
-  return type();
-}
+*/
 
 nd::array arrfunc_type_data::
 operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,

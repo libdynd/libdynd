@@ -37,7 +37,7 @@ ndt::option_type::option_type(const type &value_tp)
   }
 
   if (value_tp.is_builtin()) {
-//    nd::is_avail::make();
+    //    nd::is_avail::make();
     m_is_avail = get_option_builtin_is_avail(value_tp.get_type_id());
     m_assign_na = get_option_builtin_assign_na(value_tp.get_type_id());
     if (!m_is_avail.is_null() && !m_assign_na.is_null()) {
@@ -66,14 +66,15 @@ void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const
 
 const ndt::type &ndt::option_type::make_is_avail_type()
 {
-  static ndt::type static_instance =
-      make_arrfunc(tuple_type::make(make_typevar("T")), type::make<bool1>());
+  static ndt::type static_instance = arrfunc_type::make(
+      tuple_type::make(make_typevar("T")), type::make<bool1>());
   return static_instance;
 }
 
 const ndt::type &ndt::option_type::make_assign_na_type()
 {
-  static ndt::type static_instance = make_arrfunc(0, NULL, make_typevar("T"));
+  static ndt::type static_instance =
+      arrfunc_type::make(0, NULL, make_typevar("T"));
   return static_instance;
 }
 
@@ -122,8 +123,8 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
     ckernel_builder<kernel_request_host> ckb;
     const arrfunc_type_data *af = get_is_avail_arrfunc();
     type src_tp[1] = {type(this, true)};
-    af->instantiate(NULL, 0, NULL, &ckb, 0, type::make<bool1>(), NULL, 1, src_tp,
-                    &arrmeta, kernel_request_single, ectx, nd::array(),
+    af->instantiate(NULL, 0, NULL, &ckb, 0, type::make<bool1>(), NULL, 1,
+                    src_tp, &arrmeta, kernel_request_single, ectx, nd::array(),
                     std::map<nd::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;

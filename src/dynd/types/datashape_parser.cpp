@@ -997,8 +997,9 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                   begin, "expected function prototype return type");
             }
             rbegin = begin;
-            return ndt::make_arrfunc(ndt::tuple_type::make(field_type_list, variadic),
-                                     funcproto_kwd, return_type);
+            return ndt::arrfunc_type::make(
+                ndt::tuple_type::make(field_type_list, variadic), funcproto_kwd,
+                return_type);
           } else {
             throw datashape_parse_error(begin,
                                         "expected funcproto keyword arguments");
@@ -1054,8 +1055,8 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
   //       the requirement that arrays into arrfunc constructors are
   //       immutable, that too
   //       many copies may be occurring.
-  return ndt::make_arrfunc(ndt::tuple_type::make(field_type_list, variadic),
-                           return_type);
+  return ndt::arrfunc_type::make(
+      ndt::tuple_type::make(field_type_list, variadic), return_type);
 }
 
 //    datashape_nooption : dim ASTERISK datashape

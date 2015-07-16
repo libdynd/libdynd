@@ -55,5 +55,6 @@ ndt::type nd::functional::outer_make_type(const ndt::arrfunc_type *child_tp)
     ret_tp = ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
   }
 
-  return ndt::make_arrfunc(ndt::tuple_type::make(out_param_types), kwd_tp, ret_tp);
+  return ndt::arrfunc_type::make(ndt::tuple_type::make(out_param_types), kwd_tp,
+                                 ret_tp);
 }
