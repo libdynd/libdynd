@@ -80,8 +80,8 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
     ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
   }
 
-  return ndt::arrfunc_type::make(ndt::tuple_type::make(out_param_types), kwd_tp,
-                                 ret_tp);
+  return ndt::arrfunc_type::make(ret_tp, ndt::tuple_type::make(out_param_types),
+                                 kwd_tp);
 }
 
 nd::arrfunc nd::functional::elwise(const ndt::type &self_tp,

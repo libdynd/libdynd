@@ -34,7 +34,7 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
   }
 }
 
-ndt::arrfunc_type::arrfunc_type(const type &pos_types, const type &ret_type)
+ndt::arrfunc_type::arrfunc_type(const type &ret_type, const type &pos_types)
     : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),
                 scalar_align_of<uint64_t>::value,
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
@@ -47,16 +47,16 @@ ndt::arrfunc_type::arrfunc_type(const type &pos_types, const type &ret_type)
           "type \"" << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
-  m_kwd_struct =
-      struct_type::make_empty(m_pos_tuple.extended<tuple_type>()->is_variadic());
+  m_kwd_struct = struct_type::make_empty(
+      m_pos_tuple.extended<tuple_type>()->is_variadic());
 
   // Note that we don't base the flags of this type on that of its arguments
   // and return types, because it is something the can be instantiated, even
   // for arguments that are symbolic.
 }
 
-ndt::arrfunc_type::arrfunc_type(const type &pos_types, const type &kwd_types,
-                                const type &ret_type)
+ndt::arrfunc_type::arrfunc_type(const type &ret_type, const type &pos_types,
+                                const type &kwd_types)
     : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),
                 scalar_align_of<uint64_t>::value,
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
@@ -166,7 +166,7 @@ void ndt::arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
   transform_fn(m_kwd_struct, arrmeta_offset, extra, tmp_kwd_types,
                was_transformed);
   if (was_transformed) {
-    out_transformed_tp = make(tmp_pos_types, tmp_kwd_types, tmp_return_type);
+    out_transformed_tp = make(tmp_return_type, tmp_pos_types, tmp_kwd_types);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -180,7 +180,7 @@ ndt::type ndt::arrfunc_type::get_canonical_type() const
   tmp_return_type = m_return_type.get_canonical_type();
   tmp_pos_types = m_pos_tuple.get_canonical_type();
   tmp_kwd_types = m_kwd_struct.get_canonical_type();
-  return make(tmp_pos_types, tmp_kwd_types, tmp_return_type);
+  return make(tmp_return_type, tmp_pos_types, tmp_kwd_types);
 }
 
 void ndt::arrfunc_type::get_vars(std::unordered_set<std::string> &vars) const
@@ -423,7 +423,7 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
   nd::array args = make_typevar_range("T", nargs);
   args.flag_as_immutable();
   type ret = typevar_type::make("R");
-  return arrfunc_type::make(tuple_type::make(args), ret);
+  return arrfunc_type::make(ret, tuple_type::make(args));
 }
 
 ///////// functions on the nd::array
@@ -516,7 +516,7 @@ void ndt::arrfunc_type::get_dynamic_array_functions(
 ndt::type ndt::arrfunc_type::make(const nd::array &pos_tp,
                                   const ndt::type &ret_tp)
 {
-  return type(new arrfunc_type(tuple_type::make(pos_tp), ret_tp), false);
+  return type(new arrfunc_type(ret_tp, tuple_type::make(pos_tp)), false);
 }
 */
 

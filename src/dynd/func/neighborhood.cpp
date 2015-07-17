@@ -29,8 +29,8 @@ nd::arrfunc nd::functional::neighborhood(const nd::arrfunc &neighborhood_op,
   ndt::type ret_tp = funcproto_tp->get_pos_type(0)
                          .with_replaced_dtype(funcproto_tp->get_return_type());
   ndt::type self_tp =
-      ndt::arrfunc_type::make(funcproto_tp->get_pos_tuple(),
-                              ndt::struct_type::make(arg_names, arg_tp), ret_tp);
+      ndt::arrfunc_type::make(ret_tp, funcproto_tp->get_pos_tuple(),
+                              ndt::struct_type::make(arg_names, arg_tp));
 
   std::ostringstream oss;
   oss << "Fixed**" << nh_ndim;

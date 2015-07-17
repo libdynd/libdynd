@@ -52,7 +52,8 @@ namespace nd {
 
         for (type_id_t i0 : dim_type_ids::vals()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
-              {ndt::type(i0)}, self.get_type()->get_return_type());
+self.get_type()->get_return_type(),
+              {ndt::type(i0)});
           children[i0] = functional::elwise(child_tp, self);
         }
 

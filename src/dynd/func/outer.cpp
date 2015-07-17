@@ -27,15 +27,17 @@ ndt::type nd::functional::outer_make_type(const ndt::arrfunc_type *child_tp)
   for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
     nd::string dimsname("Dims" + std::to_string(i));
     if (param_types[i].get_kind() == memory_kind) {
-      pt[i] = pt[i].extended<ndt::base_memory_type>()->with_replaced_storage_type(
-          ndt::make_ellipsis_dim(dimsname,
-                                 param_types[i].without_memory_type()));
+      pt[i] =
+          pt[i].extended<ndt::base_memory_type>()->with_replaced_storage_type(
+              ndt::make_ellipsis_dim(dimsname,
+                                     param_types[i].without_memory_type()));
     } else if (param_types[i].get_type_id() == typevar_constructed_type_id) {
       pt[i] = ndt::typevar_constructed_type::make(
           param_types[i].extended<ndt::typevar_constructed_type>()->get_name(),
-          ndt::make_ellipsis_dim(
-              dimsname,
-              param_types[i].extended<ndt::typevar_constructed_type>()->get_arg()));
+          ndt::make_ellipsis_dim(dimsname,
+                                 param_types[i]
+                                     .extended<ndt::typevar_constructed_type>()
+                                     ->get_arg()));
     } else {
       pt[i] = ndt::make_ellipsis_dim(dimsname, param_types[i]);
     }
@@ -50,11 +52,12 @@ ndt::type nd::functional::outer_make_type(const ndt::arrfunc_type *child_tp)
     ret_tp = ndt::typevar_constructed_type::make(
         ret_tp.extended<ndt::typevar_constructed_type>()->get_name(),
         ndt::make_ellipsis_dim(
-            "Dims", ret_tp.extended<ndt::typevar_constructed_type>()->get_arg()));
+            "Dims",
+            ret_tp.extended<ndt::typevar_constructed_type>()->get_arg()));
   } else {
     ret_tp = ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
   }
 
-  return ndt::arrfunc_type::make(ndt::tuple_type::make(out_param_types), kwd_tp,
-                                 ret_tp);
+  return ndt::arrfunc_type::make(ret_tp, ndt::tuple_type::make(out_param_types),
+                                 kwd_tp);
 }

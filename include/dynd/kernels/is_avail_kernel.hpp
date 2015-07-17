@@ -389,8 +389,8 @@ namespace ndt {
     static type make()
     {
       return type("(T) -> bool");
-      //      return arrfunc_type::make({make_option(type(Src0ValueTypeID))},
-      //                                make_type<bool1>());
+      //      return arrfunc_type::make(make_type<bool1>(), {make_option(type(Src0ValueTypeID))}
+      //                                );
     }
   };
 

@@ -171,8 +171,8 @@ namespace nd {
 
       static ndt::type make_type()
       {
-        return ndt::arrfunc_type::make({ndt::type(Src0TypeID)},
-                                       ndt::type(DstTypeID));
+        return ndt::arrfunc_type::make(ndt::type(DstTypeID),
+                                       {ndt::type(Src0TypeID)});
       }
     };
 
@@ -2329,8 +2329,8 @@ namespace ndt {
       dynd::type_kind_of<Src0TypeID>::value>> {
     static type make()
     {
-      return ndt::arrfunc_type::make({ndt::type(Src0TypeID)},
-                                     ndt::type(DstTypeID));
+      return ndt::arrfunc_type::make(ndt::type(DstTypeID),
+                                     {ndt::type(Src0TypeID)});
     }
   };
 
