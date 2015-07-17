@@ -205,10 +205,10 @@ namespace ndt {
   public:
     arrfunc_type(const type &ret_type);
 
-    arrfunc_type(const type &pos_types, const type &ret_type);
+    arrfunc_type(const type &ret_type, const type &pos_types);
 
-    arrfunc_type(const type &pos_types, const type &kwd_types,
-                 const type &ret_type);
+    arrfunc_type(const type &ret_type, const type &pos_types,
+                 const type &kwd_types);
 
     virtual ~arrfunc_type() {}
 
@@ -375,34 +375,33 @@ namespace ndt {
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
 
-//    static type make(const nd::array &pos_tp, const type &ret_tp);
+    //    static type make(const nd::array &pos_tp, const type &ret_tp);
 
     /** Makes an arrfunc type with both positional and keyword arguments */
-    static type make(const type &pos_tuple, const type &kwd_struct,
-                     const type &return_type)
+    static type make(const type &return_type, const type &pos_tuple,
+                     const type &kwd_struct)
     {
-      return type(new arrfunc_type(pos_tuple, kwd_struct, return_type), false);
+      return type(new arrfunc_type(return_type, pos_tuple, kwd_struct), false);
     }
 
     /** Makes an arrfunc type with both positional and keyword arguments */
-    static type make(const nd::array &pos_types, const nd::array &kwd_names,
-                     const nd::array &kwd_types, const type &return_type)
+    static type make(const type &return_type, const nd::array &pos_types,
+                     const nd::array &kwd_names, const nd::array &kwd_types)
     {
-      return type(new arrfunc_type(tuple_type::make(pos_types),
-                                   struct_type::make(kwd_names, kwd_types),
-                                   return_type),
+      return type(new arrfunc_type(return_type, tuple_type::make(pos_types),
+                                   struct_type::make(kwd_names, kwd_types)),
                   false);
     }
 
     /** Makes an arrfunc type with just positional arguments */
-    static type make(const type &pos_tuple, const type &return_type)
+    static type make(const type &return_type, const type &pos_tuple)
     {
-      return type(new arrfunc_type(pos_tuple, return_type), false);
+      return type(new arrfunc_type(return_type, pos_tuple), false);
     }
 
     /** Makes a funcproto type with the specified types */
-    static type make(intptr_t narg, const type *arg_types,
-                     const type &return_type)
+    static type make(const type &return_type, intptr_t narg,
+                     const type *arg_types)
     {
       nd::array tmp = nd::empty(narg, make_type());
       type *tmp_vals = reinterpret_cast<type *>(tmp.get_readwrite_originptr());
@@ -410,7 +409,7 @@ namespace ndt {
         tmp_vals[i] = arg_types[i];
       }
       tmp.flag_as_immutable();
-      return make(tuple_type::make(tmp), return_type);
+      return make(return_type, tuple_type::make(tmp));
     }
   };
 
@@ -420,7 +419,7 @@ namespace ndt {
     {
       nd::array arg_tp = nd::empty(0, make_type());
       arg_tp.flag_as_immutable();
-      return arrfunc_type::make(tuple_type::make(arg_tp), type::make<R>());
+      return arrfunc_type::make(type::make<R>(), tuple_type::make(arg_tp));
     }
   };
 
@@ -429,7 +428,7 @@ namespace ndt {
     static type make()
     {
       type tp[sizeof...(A)] = {type::make<A>()...};
-      return arrfunc_type::make(tuple_type::make(tp), type::make<R>());
+      return arrfunc_type::make(type::make<R>(), tuple_type::make(tp));
     }
 
     template <typename... T>
@@ -438,10 +437,11 @@ namespace ndt {
       type tp[sizeof...(A)] = {type::make<A>()...};
 
       return arrfunc_type::make(
+          type::make<R>(),
           tuple_type::make(nd::array(tp, sizeof...(A) - sizeof...(T))),
-          struct_type::make({names...}, nd::array(tp + (sizeof...(A) - sizeof...(T)),
-                                            sizeof...(T))),
-          type::make<R>());
+          struct_type::make(
+              {names...},
+              nd::array(tp + (sizeof...(A) - sizeof...(T)), sizeof...(T))));
     }
   };
 

@@ -999,8 +999,8 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
             }
             rbegin = begin;
             return ndt::arrfunc_type::make(
-                ndt::tuple_type::make(field_type_list, variadic), funcproto_kwd,
-                return_type);
+                return_type, ndt::tuple_type::make(field_type_list, variadic),
+                funcproto_kwd);
           } else {
             throw datashape_parse_error(begin,
                                         "expected funcproto keyword arguments");
@@ -1057,7 +1057,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
   //       immutable, that too
   //       many copies may be occurring.
   return ndt::arrfunc_type::make(
-      ndt::tuple_type::make(field_type_list, variadic), return_type);
+      return_type, ndt::tuple_type::make(field_type_list, variadic));
 }
 
 //    datashape_nooption : dim ASTERISK datashape
@@ -1231,8 +1231,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
         if (!parse_token_ds(begin, end, ']')) {
           throw datashape_parse_error(begin, "expected closing ']'");
         }
-        result =
-            ndt::typevar_constructed_type::make(nd::string(nbegin, nend), arg_tp);
+        result = ndt::typevar_constructed_type::make(nd::string(nbegin, nend),
+                                                     arg_tp);
       }
     } else {
       string n(nbegin, nend);

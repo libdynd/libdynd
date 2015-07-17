@@ -54,8 +54,9 @@ nd::arrfunc nd::functional::permute(const arrfunc &child,
   }
 
   ndt::type self_tp = ndt::arrfunc_type::make(
+      ret_tp,
       ndt::tuple_type::make(nd::array(pos_tp.data(), npos)),
-      child_tp->get_kwd_struct(), ret_tp);
+      child_tp->get_kwd_struct());
 
   switch (child_tp->get_npos()) {
   case 2:
