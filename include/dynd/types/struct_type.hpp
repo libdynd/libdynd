@@ -82,14 +82,6 @@ namespace ndt {
         const std::pair<std::string, gfunc::callable> **out_properties,
         size_t *out_count) const;
 
-    static type make_empty(bool variadic = false)
-    {
-      // TODO: return a static instance
-      nd::array field_names = nd::empty(0, string_type::make());
-      nd::array field_types = nd::empty(0, make_type());
-      return type(new struct_type(field_names, field_types, variadic), false);
-    }
-
     /** Makes a struct type with the specified fields */
     static type make(const nd::array &field_names, const nd::array &field_types,
                      bool variadic = false)
@@ -97,125 +89,11 @@ namespace ndt {
       return type(new struct_type(field_names, field_types, variadic), false);
     }
 
-    /** Makes a struct type with the specified fields */
-    static type make(const type &tp0, const std::string &name0)
+    /** Makes an empty struct type */
+    static type make(bool variadic = false)
     {
-      const std::string *names[1] = {&name0};
-      nd::array field_names = nd::make_strided_string_array(names, 1);
-      nd::array field_types = nd::empty(1, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      field_types.flag_as_immutable();
-      return make(field_names, field_types);
-    }
-
-    /** Makes a struct type with the specified fields */
-    static type make(const type &tp0, const std::string &name0, const type &tp1,
-                     const std::string &name1)
-    {
-      const std::string *names[2] = {&name0, &name1};
-      nd::array field_names = nd::make_strided_string_array(names, 2);
-      nd::array field_types = nd::empty(2, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      field_types.flag_as_immutable();
-      return make(field_names, field_types);
-    }
-
-    /** Makes a struct type with the specified fields */
-    static type make(const type &tp0, const std::string &name0, const type &tp1,
-                     const std::string &name1, const type &tp2,
-                     const std::string &name2)
-    {
-      const std::string *names[3] = {&name0, &name1, &name2};
-      nd::array field_names = nd::make_strided_string_array(names, 3);
-      nd::array field_types = nd::empty(3, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      field_types.flag_as_immutable();
-      return make(field_names, field_types);
-    }
-
-    /** Makes a struct type with the specified fields */
-    static type make(const type &tp0, const std::string &name0, const type &tp1,
-                     const std::string &name1, const type &tp2,
-                     const std::string &name2, const type &tp3,
-                     const std::string &name3)
-    {
-      const std::string *names[4] = {&name0, &name1, &name2, &name3};
-      nd::array field_names = nd::make_strided_string_array(names, 4);
-      nd::array field_types = nd::empty(4, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      unchecked_fixed_dim_get_rw<type>(field_types, 3) = tp3;
-      field_types.flag_as_immutable();
-      return make(field_names, field_types);
-    }
-
-    /** Makes a struct type with the specified fields */
-    static type make(const type &tp0, const std::string &name0, const type &tp1,
-                     const std::string &name1, const type &tp2,
-                     const std::string &name2, const type &tp3,
-                     const std::string &name3, const type &tp4,
-                     const std::string &name4)
-    {
-      const std::string *names[5] = {&name0, &name1, &name2, &name3, &name4};
-      nd::array field_names = nd::make_strided_string_array(names, 5);
-      nd::array field_types = nd::empty(5, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      unchecked_fixed_dim_get_rw<type>(field_types, 3) = tp3;
-      unchecked_fixed_dim_get_rw<type>(field_types, 4) = tp4;
-      field_types.flag_as_immutable();
-      return make(field_names, field_types);
-    }
-
-    /** Makes a struct type with the specified fields */
-    static type make(const type &tp0, const std::string &name0, const type &tp1,
-                     const std::string &name1, const type &tp2,
-                     const std::string &name2, const type &tp3,
-                     const std::string &name3, const type &tp4,
-                     const std::string &name4, const type &tp5,
-                     const std::string &name5)
-    {
-      const std::string *names[6] = {&name0, &name1, &name2,
-                                     &name3, &name4, &name5};
-      nd::array field_names = nd::make_strided_string_array(names, 6);
-      nd::array field_types = nd::empty(6, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      unchecked_fixed_dim_get_rw<type>(field_types, 3) = tp3;
-      unchecked_fixed_dim_get_rw<type>(field_types, 4) = tp4;
-      unchecked_fixed_dim_get_rw<type>(field_types, 5) = tp5;
-      field_types.flag_as_immutable();
-      return make(field_names, field_types);
-    }
-
-    /** Makes a struct type with the specified fields */
-    static type make(const type &tp0, const std::string &name0, const type &tp1,
-                     const std::string &name1, const type &tp2,
-                     const std::string &name2, const type &tp3,
-                     const std::string &name3, const type &tp4,
-                     const std::string &name4, const type &tp5,
-                     const std::string &name5, const type &tp6,
-                     const std::string &name6)
-    {
-      const std::string *names[7] = {&name0, &name1, &name2, &name3,
-                                     &name4, &name5, &name6};
-      nd::array field_names = nd::make_strided_string_array(names, 7);
-      nd::array field_types = nd::empty(7, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      unchecked_fixed_dim_get_rw<type>(field_types, 3) = tp3;
-      unchecked_fixed_dim_get_rw<type>(field_types, 4) = tp4;
-      unchecked_fixed_dim_get_rw<type>(field_types, 5) = tp5;
-      unchecked_fixed_dim_get_rw<type>(field_types, 6) = tp6;
-      field_types.flag_as_immutable();
-      return make(field_names, field_types);
+      return make(nd::empty(0, string_type::make()), nd::empty(0, make_type()),
+                  variadic);
     }
   };
 
@@ -246,7 +124,7 @@ nd::array struct_concat(nd::array lhs, nd::array rhs);
                                                                                \
     /* Allocate res with empty_shell, leaves unconstructed arrmeta */          \
     nd::array res =                                                            \
-        nd::empty_shell(ndt::struct_type::make(field_names, field_types));           \
+        nd::empty_shell(ndt::struct_type::make(field_names, field_types));     \
     /* The struct's arrmeta includes data offsets, init them to default */     \
     ndt::struct_type::fill_default_data_offsets(                               \
         N, field_types, reinterpret_cast<uintptr_t *>(res.get_arrmeta()));     \

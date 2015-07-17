@@ -28,10 +28,10 @@ using namespace dynd;
 
 TEST(StructType, Basic)
 {
-  EXPECT_NE(ndt::struct_type::make(ndt::type::make<int>(), "x"),
-            ndt::struct_type::make(ndt::type::make<int>(), "y"));
-  EXPECT_NE(ndt::struct_type::make(ndt::type::make<float>(), "x"),
-            ndt::struct_type::make(ndt::type::make<int>(), "x"));
+  EXPECT_NE(ndt::struct_type::make({"x"}, {ndt::type::make<int>()}),
+            ndt::struct_type::make({"y"}, {ndt::type::make<int>()}));
+  EXPECT_NE(ndt::struct_type::make({"x"}, {ndt::type::make<float>()}),
+            ndt::struct_type::make({"x"}, {ndt::type::make<int>()}));
 }
 
 TEST(StructType, Equality)
@@ -47,22 +47,23 @@ TEST(StructType, IOStream)
   stringstream ss;
   ndt::type tp;
 
-  tp = ndt::struct_type::make(ndt::type::make<float>(), "x");
+  tp = ndt::struct_type::make({"x"}, {ndt::type::make<float>()});
   ss << tp;
   EXPECT_EQ("{x : float32}", ss.str());
 
   ss.str("");
   ss.clear();
-  tp = ndt::struct_type::make(ndt::type::make<int32_t>(), "x",
-                              ndt::type::make<int16_t>(), "y");
+  tp = ndt::struct_type::make(
+      {"x", "y"}, {ndt::type::make<int32_t>(), ndt::type::make<int16_t>()});
   ss << tp;
   EXPECT_EQ("{x : int32, y : int16}", ss.str());
 
   ss.str("");
   ss.clear();
-  tp = ndt::struct_type::make(ndt::type::make<int32_t>(), "x",
-                              ndt::type::make<int16_t>(), "y",
-                              ndt::type::make<float>(), "Verbose Field!");
+  tp = ndt::struct_type::make({"x", "y", "Verbose Field!"},
+                              {ndt::type::make<int32_t>(),
+                               ndt::type::make<int16_t>(),
+                               ndt::type::make<float>()});
   ss << tp;
   EXPECT_EQ("{x : int32, y : int16, 'Verbose Field!' : float32}", ss.str());
 }
@@ -73,7 +74,7 @@ TEST(StructType, CreateOneField)
   const ndt::struct_type *tdt;
 
   // Struct with one field
-  dt = ndt::struct_type::make(ndt::type::make<int32_t>(), "x");
+  dt = ndt::struct_type::make({"x"}, {ndt::type::make<int32_t>()});
   EXPECT_EQ(struct_type_id, dt.get_type_id());
   EXPECT_EQ(struct_kind, dt.get_kind());
   EXPECT_EQ(0u, dt.get_data_size()); // No size
@@ -98,8 +99,8 @@ TEST(StructType, CreateTwoField)
   const ndt::struct_type *tdt;
 
   // Struct with two fields
-  dt = ndt::struct_type::make(ndt::type::make<int64_t>(), "a",
-                              ndt::type::make<int32_t>(), "b");
+  dt = ndt::struct_type::make(
+      {"a", "b"}, {ndt::type::make<int64_t>(), ndt::type::make<int32_t>()});
   EXPECT_EQ(struct_type_id, dt.get_type_id());
   EXPECT_EQ(struct_kind, dt.get_kind());
   EXPECT_EQ(0u, dt.get_data_size());
@@ -131,7 +132,7 @@ TEST(StructType, CreateThreeField)
   ndt::type d1 = ndt::type::make<int64_t>();
   ndt::type d2 = ndt::type::make<int32_t>();
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_8);
-  dt = ndt::struct_type::make(d1, "x", d2, "y", d3, "z");
+  dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
   EXPECT_EQ(struct_type_id, dt.get_type_id());
   EXPECT_EQ(struct_kind, dt.get_kind());
   EXPECT_EQ(0u, dt.get_data_size());
@@ -159,12 +160,13 @@ TEST(StructType, ReplaceScalarTypes)
   ndt::type d1 = ndt::type::make<dynd::complex<double>>();
   ndt::type d2 = ndt::type::make<int32_t>();
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_8);
-  dt = ndt::struct_type::make(d1, "x", d2, "y", d3, "z");
+  dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
   dt2 = dt.with_replaced_scalar_types(ndt::type::make<int16_t>());
   EXPECT_EQ(ndt::struct_type::make(
-                ndt::convert_type::make(ndt::type::make<int16_t>(), d1), "x",
-                ndt::convert_type::make(ndt::type::make<int16_t>(), d2), "y",
-                ndt::convert_type::make(ndt::type::make<int16_t>(), d3), "z"),
+                {"x", "y", "z"},
+                {ndt::convert_type::make(ndt::type::make<int16_t>(), d1),
+                 ndt::convert_type::make(ndt::type::make<int16_t>(), d2),
+                 ndt::convert_type::make(ndt::type::make<int16_t>(), d3)}),
             dt2);
 }
 
@@ -176,13 +178,15 @@ TEST(StructType, TypeAt)
   ndt::type d1 = ndt::type::make<dynd::complex<double>>();
   ndt::type d2 = ndt::type::make<int32_t>();
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_8);
-  dt = ndt::struct_type::make(d1, "x", d2, "y", d3, "z");
+  dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
 
   // indexing into a type with a slice produces another
   // struct type with the subset of fields.
-  EXPECT_EQ(ndt::struct_type::make(d1, "x", d2, "y"), dt.at(irange() < 2));
-  EXPECT_EQ(ndt::struct_type::make(d1, "x", d3, "z"), dt.at(irange(0, 3, 2)));
-  EXPECT_EQ(ndt::struct_type::make(d3, "z", d2, "y"), dt.at(irange(2, 0, -1)));
+  EXPECT_EQ(ndt::struct_type::make({"x", "y"}, {d1, d2}), dt.at(irange() < 2));
+  EXPECT_EQ(ndt::struct_type::make({"x", "z"}, {d1, d3}),
+            dt.at(irange(0, 3, 2)));
+  EXPECT_EQ(ndt::struct_type::make({"z", "y"}, {d3, d2}),
+            dt.at(irange(2, 0, -1)));
 }
 
 TEST(StructType, CanonicalType)
@@ -190,14 +194,14 @@ TEST(StructType, CanonicalType)
   ndt::type dt, dt2;
 
   // Struct with three fields
-  ndt::type d1 = ndt::convert_type::make(ndt::type::make<dynd::complex<double>>(),
-                                   ndt::type::make<float>());
+  ndt::type d1 = ndt::convert_type::make(
+      ndt::type::make<dynd::complex<double>>(), ndt::type::make<float>());
   ndt::type d2 = ndt::byteswap_type::make(ndt::type::make<int32_t>());
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_32);
-  dt = ndt::struct_type::make(d1, "x", d2, "y", d3, "z");
-  EXPECT_EQ(ndt::struct_type::make(ndt::type::make<dynd::complex<double>>(),
-                                   "x", ndt::type::make<int32_t>(), "y", d3,
-                                   "z"),
+  dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
+  EXPECT_EQ(ndt::struct_type::make({"x", "y", "z"},
+                                   {ndt::type::make<dynd::complex<double>>(),
+                                    ndt::type::make<int32_t>(), d3}),
             dt.get_canonical_type());
 }
 
@@ -206,7 +210,7 @@ TEST(StructType, IsExpression)
   ndt::type d1 = ndt::type::make<float>();
   ndt::type d2 = ndt::byteswap_type::make(ndt::type::make<int32_t>());
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_32);
-  ndt::type d = ndt::struct_type::make(d1, "x", d2, "y", d3, "z");
+  ndt::type d = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
 
   EXPECT_TRUE(d.is_expression());
   EXPECT_FALSE(d.at(irange(0, 3, 2)).is_expression());
@@ -214,9 +218,9 @@ TEST(StructType, IsExpression)
 
 TEST(StructType, PropertyAccess)
 {
-  ndt::type dt = ndt::struct_type::make(ndt::type::make<int>(), "x",
-                                        ndt::type::make<double>(), "y",
-                                        ndt::type::make<short>(), "z");
+  ndt::type dt = ndt::struct_type::make(
+      {"x", "y", "z"}, {ndt::type::make<int>(), ndt::type::make<double>(),
+                        ndt::type::make<short>()});
   nd::array a = nd::empty(dt);
   a(0).vals() = 3;
   a(1).vals() = 4.25;
@@ -229,9 +233,9 @@ TEST(StructType, PropertyAccess)
 
 TEST(StructType, EqualTypeAssign)
 {
-  ndt::type dt = ndt::struct_type::make(ndt::type::make<int>(), "x",
-                                        ndt::type::make<double>(), "y",
-                                        ndt::type::make<short>(), "z");
+  ndt::type dt = ndt::struct_type::make(
+      {"x", "y", "z"}, {ndt::type::make<int>(), ndt::type::make<double>(),
+                        ndt::type::make<short>()});
   nd::array a = nd::empty(2, dt);
   a(0, 0).vals() = 3;
   a(0, 1).vals() = 4.25;
@@ -252,9 +256,9 @@ TEST(StructType, EqualTypeAssign)
 
 TEST(StructType, DifferentTypeAssign)
 {
-  ndt::type dt = ndt::struct_type::make(ndt::type::make<int>(), "x",
-                                        ndt::type::make<double>(), "y",
-                                        ndt::type::make<short>(), "z");
+  ndt::type dt = ndt::struct_type::make(
+      {"x", "y", "z"}, {ndt::type::make<int>(), ndt::type::make<double>(),
+                        ndt::type::make<short>()});
   nd::array a = nd::empty(2, dt);
   a(0, 0).vals() = 3;
   a(0, 1).vals() = 4.25;
@@ -263,9 +267,9 @@ TEST(StructType, DifferentTypeAssign)
   a(1, 1).vals() = 7.25;
   a(1, 2).vals() = 8;
 
-  ndt::type dt2 = ndt::struct_type::make(ndt::type::make<float>(), "y",
-                                         ndt::type::make<int>(), "z",
-                                         ndt::type::make<uint8_t>(), "x");
+  ndt::type dt2 = ndt::struct_type::make(
+      {"y", "z", "x"}, {ndt::type::make<float>(), ndt::type::make<int>(),
+                        ndt::type::make<uint8_t>()});
   nd::array b = nd::empty(2, dt2);
   b.val_assign(a);
   EXPECT_EQ(3, b(0, 2).as<int>());
@@ -279,9 +283,9 @@ TEST(StructType, DifferentTypeAssign)
 TEST(StructType, SingleCompare)
 {
   nd::array a, b;
-  ndt::type sdt = ndt::struct_type::make(ndt::type::make<int32_t>(), "a",
-                                         ndt::type::make<float>(), "b",
-                                         ndt::type::make<int64_t>(), "c");
+  ndt::type sdt = ndt::struct_type::make(
+      {"a", "b", "c"}, {ndt::type::make<int32_t>(), ndt::type::make<float>(),
+                        ndt::type::make<int64_t>()});
   a = nd::empty(sdt);
   b = nd::empty(sdt);
 
@@ -379,12 +383,12 @@ TEST(StructType, SingleCompare)
 TEST(StructType, SingleCompareDifferentArrmeta)
 {
   nd::array a, b;
-  ndt::type sdt = ndt::struct_type::make(ndt::type::make<int32_t>(), "a",
-                                         ndt::type::make<float>(), "b",
-                                         ndt::type::make<int64_t>(), "c");
+  ndt::type sdt = ndt::struct_type::make(
+      {"a", "b", "c"}, {ndt::type::make<int32_t>(), ndt::type::make<float>(),
+                        ndt::type::make<int64_t>()});
   ndt::type sdt_reverse = ndt::struct_type::make(
-      ndt::type::make<int64_t>(), "c", ndt::type::make<float>(), "b",
-      ndt::type::make<int32_t>(), "a");
+      {"c", "b", "a"}, {ndt::type::make<int64_t>(), ndt::type::make<float>(),
+                        ndt::type::make<int32_t>()});
   a = nd::empty(sdt);
   b = nd::empty(sdt_reverse)(irange().by(-1));
 
@@ -498,30 +502,31 @@ TEST(StructType, Pack)
 
   a = pack("val", 5);
   EXPECT_EQ(a.get_type(),
-            ndt::struct_type::make(ndt::type::make<int>(), "val"));
+            ndt::struct_type::make({"val"}, {ndt::type::make<int>()}));
   EXPECT_EQ(a.p("val").as<int>(), 5);
 
   a = pack("val0", -3, "val1", 7.5);
-  EXPECT_EQ(a.get_type(),
-            ndt::struct_type::make(ndt::type::make<int>(), "val0",
-                                   ndt::type::make<double>(), "val1"));
+  EXPECT_EQ(a.get_type(), ndt::struct_type::make({"val0", "val1"},
+                                                 {ndt::type::make<int>(),
+                                                  ndt::type::make<double>()}));
   EXPECT_EQ(a.p("val0").as<int>(), -3);
   EXPECT_EQ(a.p("val1").as<double>(), 7.5);
 
   a = struct_concat(a, pack("val2", 10));
-  EXPECT_EQ(a.get_type(),
-            ndt::struct_type::make(ndt::type::make<int>(), "val0",
-                                   ndt::type::make<double>(), "val1",
-                                   ndt::type::make<int>(), "val2"));
+  EXPECT_EQ(a.get_type(), ndt::struct_type::make({"val0", "val1", "val2"},
+                                                 {ndt::type::make<int>(),
+                                                  ndt::type::make<double>(),
+                                                  ndt::type::make<int>()}));
   EXPECT_EQ(a.p("val0").as<int>(), -3);
   EXPECT_EQ(a.p("val1").as<double>(), 7.5);
   EXPECT_EQ(a.p("val2").as<int>(), 10);
 
   a = pack("val0", 2.3, "val1", 7.5f, "val2", std::complex<double>(0.0, 1.0));
   EXPECT_EQ(a.get_type(),
-            ndt::struct_type::make(
-                ndt::type::make<double>(), "val0", ndt::type::make<float>(),
-                "val1", ndt::type::make<std::complex<double>>(), "val2"));
+            ndt::struct_type::make({"val0", "val1", "val2"},
+                                   {ndt::type::make<double>(),
+                                    ndt::type::make<float>(),
+                                    ndt::type::make<std::complex<double>>()}));
   EXPECT_EQ(a.p("val0").as<double>(), 2.3);
   EXPECT_EQ(a.p("val1").as<float>(), 7.5f);
   EXPECT_EQ(a.p("val2").as<std::complex<double>>(),
@@ -530,9 +535,10 @@ TEST(StructType, Pack)
   b = parse_json("4 * int", "[0, 1, 2, 3]");
 
   a = pack("val0", 5, "val1", b);
-  EXPECT_EQ(a.get_type(), ndt::struct_type::make(
-                              ndt::type::make<int>(), "val0",
-                              ndt::pointer_type::make(b.get_type()), "val1"));
+  EXPECT_EQ(a.get_type(),
+            ndt::struct_type::make({"val0", "val1"},
+                                   {ndt::type::make<int>(),
+                                    ndt::pointer_type::make(b.get_type())}));
   EXPECT_EQ(5, a.p("val0").as<int>());
   EXPECT_EQ(*reinterpret_cast<const char *const *>(
                 a.p("val1").get_readonly_originptr()),

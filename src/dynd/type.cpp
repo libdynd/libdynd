@@ -120,7 +120,7 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     fixed_dim_kind_type::make(any_kind_type::make()), // fixed_dim_type_id
     type(),                                           // offset_dim_type_id
     var_dim_type::make(any_kind_type::make()),        // var_dim_type_id
-    struct_type::make_empty(true),                    // struct_type_id
+    struct_type::make(true),                          // struct_type_id
     tuple_type::make(true),                           // tuple_type_id
 };
 

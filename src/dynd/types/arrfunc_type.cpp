@@ -47,8 +47,8 @@ ndt::arrfunc_type::arrfunc_type(const type &ret_type, const type &pos_types)
           "type \"" << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
-  m_kwd_struct = struct_type::make_empty(
-      m_pos_tuple.extended<tuple_type>()->is_variadic());
+  m_kwd_struct =
+      struct_type::make(m_pos_tuple.extended<tuple_type>()->is_variadic());
 
   // Note that we don't base the flags of this type on that of its arguments
   // and return types, because it is something the can be instantiated, even

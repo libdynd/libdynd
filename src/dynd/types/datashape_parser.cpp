@@ -870,7 +870,7 @@ static ndt::type parse_struct(const char *&rbegin, const char *end,
   if (parse_token_ds(begin, end, '}')) {
     // Empty struct
     rbegin = begin;
-    return ndt::struct_type::make_empty();
+    return ndt::struct_type::make();
   }
   for (;;) {
     if (parse_token_ds(begin, end, "...")) {
