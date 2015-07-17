@@ -121,7 +121,7 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(),                                           // offset_dim_type_id
     var_dim_type::make(any_kind_type::make()),        // var_dim_type_id
     struct_type::make_empty(true),                    // struct_type_id
-    tuple_type::make(nd::empty(0, make_type()), true), // tuple_type_id
+    tuple_type::make(true),                           // tuple_type_id
 };
 
 ndt::type::type(const std::string &rep) : m_extended(NULL)

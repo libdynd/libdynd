@@ -67,14 +67,14 @@ void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const
 const ndt::type &ndt::option_type::make_is_avail_type()
 {
   static ndt::type static_instance = arrfunc_type::make(
-      type::make<bool1>(), tuple_type::make(typevar_type::make("T")));
+      type::make<bool1>(), tuple_type::make({typevar_type::make("T")}));
   return static_instance;
 }
 
 const ndt::type &ndt::option_type::make_assign_na_type()
 {
   static ndt::type static_instance =
-      arrfunc_type::make(typevar_type::make("T"), 0, NULL);
+      arrfunc_type::make({typevar_type::make("T")}, 0, NULL);
   return static_instance;
 }
 
