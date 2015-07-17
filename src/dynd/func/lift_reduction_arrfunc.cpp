@@ -138,6 +138,6 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
 
   return nd::arrfunc(
       ndt::arrfunc_type::make(lifted_dst_type,
-                              ndt::tuple_type::make(lifted_arr_type)),
+                              ndt::tuple_type::make({lifted_arr_type})),
       self, 0, NULL, NULL, &instantiate_lifted_reduction_arrfunc_data);
 }

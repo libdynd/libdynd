@@ -99,7 +99,7 @@ nd::arrfunc dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
                                                assign_error_mode errmode)
 {
   return nd::arrfunc::make<unary_assignment_ck>(
-      ndt::arrfunc_type::make(dst_tp, ndt::tuple_type::make(src_tp)), errmode,
+      ndt::arrfunc_type::make(dst_tp, ndt::tuple_type::make({src_tp})), errmode,
       0);
 }
 
@@ -114,7 +114,7 @@ nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
   }
   ndt::type prop_tp = ndt::property_type::make(tp, propname);
   return nd::arrfunc::make<property_kernel>(
-      ndt::arrfunc_type::make(prop_tp.value_type(), ndt::tuple_type::make(tp)),
+      ndt::arrfunc_type::make(prop_tp.value_type(), ndt::tuple_type::make({tp})),
       prop_tp, 0);
 }
 

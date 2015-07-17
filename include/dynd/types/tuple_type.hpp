@@ -74,106 +74,13 @@ namespace ndt {
     /** Makes a tuple type with the specified types */
     static type make(const nd::array &field_types, bool variadic = false)
     {
-      // field_types.flag_as_immutable();
       return type(new tuple_type(field_types, variadic), false);
     }
 
-    static type make_empty_tuple()
+    /** Makes an empty tuple */
+    static type make(bool variadic = false)
     {
-      // TODO: return a static instance
-      nd::array field_types = nd::empty(0, make_type());
-      return make(field_types);
-    }
-
-    static type make() { return make_empty_tuple(); }
-
-    /** Makes a tuple type with the specified types */
-    static type make(const type &tp0)
-    {
-      nd::array field_types = nd::empty(1, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      field_types.flag_as_immutable();
-      return make(field_types);
-    }
-
-    /** Makes a tuple type with the specified types */
-    static type make(const type &tp0, const type &tp1)
-    {
-      nd::array field_types = nd::empty(2, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      field_types.flag_as_immutable();
-      return make(field_types);
-    }
-
-    /** Makes a tuple type with the specified types */
-    static type make(const type &tp0, const type &tp1, const type &tp2)
-    {
-      nd::array field_types = nd::empty(3, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      field_types.flag_as_immutable();
-      return make(field_types);
-    }
-
-    /** Makes a tuple type with the specified types */
-    static type make(const type &tp0, const type &tp1, const type &tp2,
-                     const type &tp3)
-    {
-      nd::array field_types = nd::empty(4, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      unchecked_fixed_dim_get_rw<type>(field_types, 3) = tp3;
-      field_types.flag_as_immutable();
-      return make(field_types);
-    }
-
-    /** Makes a tuple type with the specified types */
-    static type make(const type &tp0, const type &tp1, const type &tp2,
-                     const type &tp3, const type &tp4)
-    {
-      nd::array field_types = nd::empty(5, ndt::make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      unchecked_fixed_dim_get_rw<type>(field_types, 3) = tp3;
-      unchecked_fixed_dim_get_rw<type>(field_types, 4) = tp4;
-      field_types.flag_as_immutable();
-      return make(field_types);
-    }
-
-    /** Makes a tuple type with the specified types */
-    static type make(const type &tp0, const type &tp1, const type &tp2,
-                     const type &tp3, const type &tp4, const type &tp5)
-    {
-      nd::array field_types = nd::empty(6, make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      unchecked_fixed_dim_get_rw<type>(field_types, 3) = tp3;
-      unchecked_fixed_dim_get_rw<type>(field_types, 4) = tp4;
-      unchecked_fixed_dim_get_rw<type>(field_types, 5) = tp5;
-      field_types.flag_as_immutable();
-      return make(field_types);
-    }
-
-    /** Makes a tuple type with the specified types */
-    static type make(const type &tp0, const type &tp1, const type &tp2,
-                     const type &tp3, const type &tp4, const type &tp5,
-                     const type &tp6)
-    {
-      nd::array field_types = nd::empty(7, ndt::make_type());
-      unchecked_fixed_dim_get_rw<type>(field_types, 0) = tp0;
-      unchecked_fixed_dim_get_rw<type>(field_types, 1) = tp1;
-      unchecked_fixed_dim_get_rw<type>(field_types, 2) = tp2;
-      unchecked_fixed_dim_get_rw<type>(field_types, 3) = tp3;
-      unchecked_fixed_dim_get_rw<type>(field_types, 4) = tp4;
-      unchecked_fixed_dim_get_rw<type>(field_types, 5) = tp5;
-      unchecked_fixed_dim_get_rw<type>(field_types, 6) = tp6;
-      field_types.flag_as_immutable();
-      return make(field_types);
+      return make(nd::empty(0, make_type()), variadic);
     }
   };
 

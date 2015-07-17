@@ -427,8 +427,8 @@ namespace ndt {
   struct type::equivalent<R(A...)> {
     static type make()
     {
-      type tp[sizeof...(A)] = {type::make<A>()...};
-      return arrfunc_type::make(type::make<R>(), tuple_type::make(tp));
+      return arrfunc_type::make(type::make<R>(),
+                                tuple_type::make({type::make<A>()...}));
     }
 
     template <typename... T>

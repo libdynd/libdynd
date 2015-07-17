@@ -36,7 +36,7 @@ namespace nd {
         for (type_id_t i1 : dim_type_ids()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
               ndt::type("Any"),
-              ndt::tuple_type::make(ndt::type(i0), ndt::type(i1)));
+              ndt::tuple_type::make({ndt::type(i0), ndt::type(i1)}));
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
@@ -46,7 +46,7 @@ namespace nd {
         for (type_id_t i1 : type_ids()) {
           const ndt::type child_tp = ndt::arrfunc_type::make(
               ndt::type("Any"),
-              ndt::tuple_type::make(ndt::type(i0), ndt::type(i1)));
+              ndt::tuple_type::make({ndt::type(i0), ndt::type(i1)}));
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }

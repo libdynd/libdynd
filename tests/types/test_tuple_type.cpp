@@ -24,7 +24,7 @@ TEST(TupleType, CreateSimple)
   const ndt::tuple_type *tt;
 
   // Tuple with one field
-  tp = ndt::tuple_type::make(ndt::type::make<int32_t>());
+  tp = ndt::tuple_type::make({ndt::type::make<int32_t>()});
   EXPECT_EQ(tuple_type_id, tp.get_type_id());
   EXPECT_EQ(tuple_kind, tp.get_kind());
   EXPECT_EQ(0u, tp.get_data_size());
@@ -39,7 +39,7 @@ TEST(TupleType, CreateSimple)
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   // Tuple with two fields
-  tp = ndt::tuple_type::make(ndt::type::make<int16_t>(), ndt::type::make<double>());
+  tp = ndt::tuple_type::make({ndt::type::make<int16_t>(), ndt::type::make<double>()});
   EXPECT_EQ(tuple_type_id, tp.get_type_id());
   EXPECT_EQ(tuple_kind, tp.get_kind());
   EXPECT_EQ(0u, tp.get_data_size());
