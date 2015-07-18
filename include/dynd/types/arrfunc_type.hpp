@@ -432,22 +432,23 @@ namespace ndt {
     }
   };
 
-  template <typename R, typename... A>
-  struct type::equivalent<R(A...)> {
+  template <typename R, typename A0, typename... A>
+  struct type::equivalent<R(A0, A...)> {
     static type make()
     {
-      return arrfunc_type::make(type::make<R>(), {type::make<A>()...});
+      return arrfunc_type::make(type::make<R>(),
+                                {type::make<A0>(), type::make<A>()...});
     }
 
     template <typename... T>
     static type make(T &&... names)
     {
-      type tp[sizeof...(A)] = {type::make<A>()...};
+      type tp[1 + sizeof...(A)] = {type::make<A0>(), type::make<A>()...};
 
       return arrfunc_type::make(
-          type::make<R>(), nd::array(tp, sizeof...(A) - sizeof...(T)),
+          type::make<R>(), nd::array(tp, 1 + sizeof...(A) - sizeof...(T)),
           {names...},
-          nd::array(tp + (sizeof...(A) - sizeof...(T)), sizeof...(T)));
+          nd::array(tp + (1 + sizeof...(A) - sizeof...(T)), sizeof...(T)));
     }
   };
 
