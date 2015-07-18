@@ -259,20 +259,23 @@ intptr_t ndt::datetime_type::make_assignment_kernel(
 
 ///////// functions on the type
 
+/*
 static nd::array fn_type_now(const ndt::type &DYND_UNUSED(dt))
 {
   throw runtime_error("TODO: implement datetime.now function");
   // datetime_struct dts;
   // fill_current_local_datetime(&fields);
   // nd::array result = nd::empty(dt);
-  //*reinterpret_cast<int64_t *>(result.get_readwrite_originptr()) =
+  //reinterpret_cast<int64_t *>(result.get_readwrite_originptr()) =
   // dt.to_ticks();
   // Make the result immutable (we own the only reference to the data at this
   // point)
   // result.flag_as_immutable();
   // return result;
 }
+*/
 
+/*
 static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
                                    const nd::array &DYND_UNUSED(year),
                                    const nd::array &DYND_UNUSED(month),
@@ -281,17 +284,21 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
   throw runtime_error("dynd type datetime __construct__");
   // Make this like the date version
 }
+*/
 
 void ndt::datetime_type::get_dynamic_type_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
+    const std::pair<std::string, nd::arrfunc> **out_functions,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> datetime_type_functions[] = {
+  static pair<string, nd::arrfunc> datetime_type_functions[] = {
+/*
       pair<string, gfunc::callable>("now",
                                     gfunc::make_callable(&fn_type_now, "self")),
       pair<string, gfunc::callable>(
           "__construct__", gfunc::make_callable(&fn_type_construct, "self",
-                                                "year", "month", "day"))};
+                                                "year", "month", "day"))
+*/
+};
 
   *out_functions = datetime_type_functions;
   *out_count =

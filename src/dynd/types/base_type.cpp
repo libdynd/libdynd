@@ -363,7 +363,7 @@ void ndt::base_type::get_dynamic_type_properties(
 }
 
 void ndt::base_type::get_dynamic_type_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
+    const std::pair<std::string, nd::arrfunc> **out_functions,
     size_t *out_count) const
 {
   // Default to no functions
