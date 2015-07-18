@@ -117,9 +117,7 @@ nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
     throw type_error(ss.str());
   }
   return nd::arrfunc::make<builtin_sum_reduction_kernel>(
-      ndt::arrfunc_type::make(ndt::type(tid),
-                              ndt::tuple_type::make({ndt::type(tid)})),
-      tid, 0);
+      ndt::arrfunc_type::make(ndt::type(tid), ndt::type(tid)), tid, 0);
 }
 
 nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
@@ -213,8 +211,8 @@ nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
     throw type_error(ss.str());
   }
   return nd::arrfunc::make<mean1d_kernel>(
-      ndt::arrfunc_type::make(ndt::type::make<double>(),
-                              ndt::tuple_type::make({ndt::make_fixed_dim_kind(
-                                  ndt::type::make<double>())})),
+      ndt::arrfunc_type::make(
+          ndt::type::make<double>(),
+          ndt::make_fixed_dim_kind(ndt::type::make<double>())),
       minp, 0);
 }
