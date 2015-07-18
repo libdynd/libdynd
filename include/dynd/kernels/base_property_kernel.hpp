@@ -50,6 +50,7 @@ namespace nd {
       self_type::make(ckb, kernreq, ckb_offset,
                       *reinterpret_cast<ndt::type *>(data), dst_tp,
                       dst_arrmeta);
+      reinterpret_cast<ndt::type *>(data)->~type();
       return ckb_offset;
     }
   };
