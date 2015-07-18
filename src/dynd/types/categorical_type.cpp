@@ -674,7 +674,7 @@ void ndt::categorical_type::get_dynamic_type_properties(
   struct categories_kernel : nd::base_property_kernel<categories_kernel> {
     categories_kernel(const ndt::type &tp, const ndt::type &dst_tp,
                       const char *dst_arrmeta)
-        : base_property_kernel<categories_kernel>(tp, dst_tp, dst_arrmeta)
+        : base_property_kernel(tp, dst_tp, dst_arrmeta)
     {
     }
 
