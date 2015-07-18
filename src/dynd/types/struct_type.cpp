@@ -9,6 +9,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
+#include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
@@ -226,6 +227,7 @@ void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   }
 }
 
+/*
 static nd::array property_get_field_names(const ndt::type &tp)
 {
   return tp.extended<ndt::struct_type>()->get_field_names();
@@ -240,21 +242,103 @@ static nd::array property_get_arrmeta_offsets(const ndt::type &tp)
 {
   return tp.extended<ndt::struct_type>()->get_arrmeta_offsets();
 }
+*/
 
 void ndt::struct_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> type_properties[] = {
-      pair<string, gfunc::callable>(
-          "field_names",
-          gfunc::make_callable(&property_get_field_names, "self")),
-      pair<string, gfunc::callable>(
+  struct field_types_kernel : nd::base_property_kernel<field_types_kernel> {
+    field_types_kernel(const ndt::type &tp, const ndt::type &dst_tp,
+                       const char *dst_arrmeta)
+        : base_property_kernel<field_types_kernel>(tp, dst_tp, dst_arrmeta)
+    {
+    }
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      typed_data_copy(dst_tp, dst_arrmeta, dst,
+                      tp.extended<struct_type>()->m_field_types.get_arrmeta(),
+                      tp.extended<struct_type>()->m_field_types.get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp = tp.extended<struct_type>()->m_field_types.get_type();
+    }
+  };
+
+  struct field_names_kernel : nd::base_property_kernel<field_names_kernel> {
+    field_names_kernel(const ndt::type &tp, const ndt::type &dst_tp,
+                       const char *dst_arrmeta)
+        : base_property_kernel<field_names_kernel>(tp, dst_tp, dst_arrmeta)
+    {
+    }
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      typed_data_copy(dst_tp, dst_arrmeta, dst,
+                      tp.extended<struct_type>()->m_field_names.get_arrmeta(),
+                      tp.extended<struct_type>()->m_field_names.get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp = tp.extended<struct_type>()->m_field_names.get_type();
+    }
+  };
+
+  struct arrmeta_offsets_kernel
+      : nd::base_property_kernel<arrmeta_offsets_kernel> {
+    arrmeta_offsets_kernel(const ndt::type &tp, const ndt::type &dst_tp,
+                           const char *dst_arrmeta)
+        : base_property_kernel<arrmeta_offsets_kernel>(tp, dst_tp, dst_arrmeta)
+    {
+    }
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      typed_data_copy(
+          dst_tp, dst_arrmeta, dst,
+          tp.extended<struct_type>()->m_arrmeta_offsets.get_arrmeta(),
+          tp.extended<struct_type>()->m_arrmeta_offsets.get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp = tp.extended<struct_type>()->m_arrmeta_offsets.get_type();
+    }
+  };
+
+  static pair<string, nd::arrfunc> type_properties[] = {
+      pair<string, nd::arrfunc>(
           "field_types",
-          gfunc::make_callable(&property_get_field_types, "self")),
-      pair<string, gfunc::callable>(
+          nd::arrfunc::make<field_types_kernel>(type("(self: type) -> Any"))),
+      pair<string, nd::arrfunc>(
+          "field_names",
+          nd::arrfunc::make<field_names_kernel>(type("(self: type) -> Any"))),
+      pair<string, nd::arrfunc>(
           "arrmeta_offsets",
-          gfunc::make_callable(&property_get_arrmeta_offsets, "self"))};
+          nd::arrfunc::make<field_names_kernel>(type("(self: type) -> Any"))),
+  };
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
@@ -271,7 +355,8 @@ static array_preamble *property_get_array_field(const array_preamble *params,
   if (udt.get_kind() == expr_kind) {
     string field_name =
         udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
-    return n.replace_dtype(ndt::property_type::make(udt, field_name, i)).release();
+    return n.replace_dtype(ndt::property_type::make(udt, field_name, i))
+        .release();
   } else {
     if (undim == 0) {
       return n(i).release();

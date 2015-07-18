@@ -32,8 +32,8 @@ size_t ndt::any_kind_type::get_default_data_size() const
 }
 
 void ndt::any_kind_type::print_data(std::ostream &DYND_UNUSED(o),
-                                   const char *DYND_UNUSED(arrmeta),
-                                   const char *DYND_UNUSED(data)) const
+                                    const char *DYND_UNUSED(arrmeta),
+                                    const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of symbolic any kind type");
 }
@@ -63,39 +63,37 @@ ndt::type ndt::any_kind_type::get_canonical_type() const
 
 ndt::type
 ndt::any_kind_type::at_single(intptr_t DYND_UNUSED(i0),
-                             const char **DYND_UNUSED(inout_arrmeta),
-                             const char **DYND_UNUSED(inout_data)) const
+                              const char **DYND_UNUSED(inout_arrmeta),
+                              const char **DYND_UNUSED(inout_data)) const
 {
   return type(this, true);
 }
 
-ndt::type
-ndt::any_kind_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta),
-                                         intptr_t DYND_UNUSED(i),
-                                         intptr_t DYND_UNUSED(total_ndim)) const
+ndt::type ndt::any_kind_type::get_type_at_dimension(
+    char **DYND_UNUSED(inout_arrmeta), intptr_t DYND_UNUSED(i),
+    intptr_t DYND_UNUSED(total_ndim)) const
 {
   return type(this, true);
 }
 
 intptr_t ndt::any_kind_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
-                                         const char *DYND_UNUSED(data)) const
+                                          const char *DYND_UNUSED(data)) const
 {
   return -1;
 }
 
 void ndt::any_kind_type::get_shape(intptr_t ndim, intptr_t i,
-                                  intptr_t *out_shape,
-                                  const char *DYND_UNUSED(arrmeta),
-                                  const char *DYND_UNUSED(data)) const
+                                   intptr_t *out_shape,
+                                   const char *DYND_UNUSED(arrmeta),
+                                   const char *DYND_UNUSED(data)) const
 {
   for (; i < ndim; ++i) {
     out_shape[i] = -1;
   }
 }
 
-bool
-ndt::any_kind_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
-                                          const type &DYND_UNUSED(src_tp)) const
+bool ndt::any_kind_type::is_lossless_assignment(
+    const type &DYND_UNUSED(dst_tp), const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
@@ -157,7 +155,7 @@ void ndt::any_kind_type::arrmeta_debug_print(
 }
 
 void ndt::any_kind_type::data_destruct(const char *DYND_UNUSED(arrmeta),
-                                      char *DYND_UNUSED(data)) const
+                                       char *DYND_UNUSED(data)) const
 {
   stringstream ss;
   ss << "Cannot have data for symbolic type " << type(this, true);
@@ -165,45 +163,20 @@ void ndt::any_kind_type::data_destruct(const char *DYND_UNUSED(arrmeta),
 }
 
 void ndt::any_kind_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
-                                              char *DYND_UNUSED(data),
-                                              intptr_t DYND_UNUSED(stride),
-                                              size_t DYND_UNUSED(count)) const
+                                               char *DYND_UNUSED(data),
+                                               intptr_t DYND_UNUSED(stride),
+                                               size_t DYND_UNUSED(count)) const
 {
   stringstream ss;
   ss << "Cannot have data for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-bool
-ndt::any_kind_type::match(const char *DYND_UNUSED(arrmeta),
-                         const type &DYND_UNUSED(candidate_tp),
-                         const char *DYND_UNUSED(candidate_arrmeta),
-                         std::map<nd::string, type> &DYND_UNUSED(tp_vars)) const
+bool ndt::any_kind_type::match(
+    const char *DYND_UNUSED(arrmeta), const type &DYND_UNUSED(candidate_tp),
+    const char *DYND_UNUSED(candidate_arrmeta),
+    std::map<nd::string, type> &DYND_UNUSED(tp_vars)) const
 {
   // "Any" matches against everything
   return true;
-}
-
-void ndt::any_kind_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-void ndt::any_kind_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-void ndt::any_kind_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
-{
-  *out_functions = NULL;
-  *out_count = 0;
 }

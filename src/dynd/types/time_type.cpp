@@ -197,26 +197,6 @@ size_t ndt::time_type::make_comparison_kernel(
   throw not_comparable_error(src0_tp, src1_tp, comptype);
 }
 
-///////// properties on the type
-
-void ndt::time_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-///////// functions on the type
-
-void ndt::time_type::get_dynamic_type_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
-{
-  *out_functions = NULL;
-  *out_count = 0;
-}
-
 ///////// properties on the nd::array
 
 static nd::array property_ndo_get_hour(const nd::array &n)

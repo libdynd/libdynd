@@ -10,6 +10,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/pp/list.hpp>
 
 #include <algorithm>
@@ -412,20 +413,20 @@ bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp,
       tp_vars);
 }
 
-static ndt::type property_get_target_type(const ndt::type &tp)
+static ndt::type property_get_target_type(ndt::type tp)
 {
   const ndt::pointer_type *pd = tp.extended<ndt::pointer_type>();
   return pd->get_target_type();
 }
 
 void ndt::pointer_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> type_properties[] = {
-      pair<string, gfunc::callable>(
+  static pair<string, nd::arrfunc> type_properties[] = {
+      pair<string, nd::arrfunc>(
           "target_type",
-          gfunc::make_callable(&property_get_target_type, "self"))};
+          nd::functional::apply(&property_get_target_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

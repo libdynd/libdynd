@@ -52,16 +52,6 @@ namespace ndt {
                const char *candidate_arrmeta,
                std::map<nd::string, type> &tp_vars) const;
 
-    void get_dynamic_type_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
-        size_t *out_count) const;
-    void get_dynamic_array_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
-        size_t *out_count) const;
-    void get_dynamic_array_functions(
-        const std::pair<std::string, gfunc::callable> **out_functions,
-        size_t *out_count) const;
-
     static type make() { return type(new fixed_bytes_kind_type(), false); }
   };
 

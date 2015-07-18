@@ -7,6 +7,7 @@
 #include <dynd/types/typevar_constructed_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/make_callable.hpp>
+#include <dynd/func/arrfunc.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -164,16 +165,19 @@ bool ndt::typevar_constructed_type::match(
       candidate_arrmeta, tp_vars);
 }
 
+/*
 static nd::array property_get_name(const ndt::type &tp)
 {
   return tp.extended<ndt::typevar_constructed_type>()->get_name();
 }
+*/
 
+/*
 void ndt::typevar_constructed_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> type_properties[] = {
+  static pair<string, nd::arrfunc> type_properties[] = {
       pair<string, gfunc::callable>(
           "name", gfunc::make_callable(&property_get_name, "self")),
   };
@@ -181,3 +185,4 @@ void ndt::typevar_constructed_type::get_dynamic_type_properties(
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
+*/

@@ -15,6 +15,7 @@
 #include <dynd/func/make_callable.hpp>
 #include <dynd/pp/list.hpp>
 #include <dynd/parser_util.hpp>
+#include <dynd/func/apply.hpp>
 
 #include <algorithm>
 
@@ -384,12 +385,13 @@ bool ndt::option_type::match(const char *arrmeta, const type &candidate_tp,
                           candidate_arrmeta, tp_vars);
 }
 
-static ndt::type property_get_value_type(const ndt::type &tp)
+static ndt::type property_get_value_type(ndt::type tp)
 {
   const ndt::option_type *pd = tp.extended<ndt::option_type>();
   return pd->get_value_type();
 }
 
+/*
 static nd::array property_get_is_avail(const ndt::type &tp)
 {
   const ndt::option_type *pd = tp.extended<ndt::option_type>();
@@ -401,18 +403,20 @@ static nd::array property_get_assign_na(const ndt::type &tp)
   const ndt::option_type *pd = tp.extended<ndt::option_type>();
   return pd->get_assign_na();
 }
+*/
 
 void ndt::option_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> type_properties[] = {
-      pair<string, gfunc::callable>(
-          "value_type", gfunc::make_callable(&property_get_value_type, "self")),
-      pair<string, gfunc::callable>(
-          "is_avail", gfunc::make_callable(&property_get_is_avail, "self")),
-      pair<string, gfunc::callable>(
-          "assign_na", gfunc::make_callable(&property_get_assign_na, "self")),
+  static pair<string, nd::arrfunc> type_properties[] = {
+      pair<string, nd::arrfunc>("value_type",
+                                nd::functional::apply(&property_get_value_type, "self")),
+      //      pair<string, gfunc::callable>(
+      //        "is_avail", gfunc::make_callable(&property_get_is_avail,
+      //        "self")),
+      //  pair<string, gfunc::callable>(
+      //    "assign_na", gfunc::make_callable(&property_get_assign_na, "self")),
   };
 
   *out_properties = type_properties;

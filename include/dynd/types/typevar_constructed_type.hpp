@@ -62,9 +62,11 @@ namespace ndt {
                const char *candidate_arrmeta,
                std::map<nd::string, type> &tp_vars) const;
 
+/*
     void get_dynamic_type_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
+        const std::pair<std::string, nd::arrfunc> **out_properties,
         size_t *out_count) const;
+*/
 
     /** Makes a typevar_constructed type with the specified types */
     static type make(const nd::string &name, const type &arg)

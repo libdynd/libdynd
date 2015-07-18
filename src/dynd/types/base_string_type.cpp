@@ -5,6 +5,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/shape_tools.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/make_callable.hpp>
 
 #include <dynd/types/expr_type.hpp>
@@ -32,28 +33,27 @@ ndt::base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
   return 0;
 }
 
-static string get_extended_string_encoding(const ndt::type &dt)
+static void get_extended_string_encoding(const ndt::type &dt)
 {
   const ndt::base_string_type *d = dt.extended<ndt::base_string_type>();
   stringstream ss;
   ss << d->get_encoding();
-  return ss.str();
+//  return ss.str();
 }
 
 static size_t base_string_type_properties_size() { return 1; }
 
-static const pair<string, gfunc::callable> *base_string_type_properties()
+static const pair<string, nd::arrfunc> *base_string_type_properties()
 {
-  static pair<string, gfunc::callable> base_string_type_properties[1] = {
-      pair<string, gfunc::callable>(
-          "encoding",
-          gfunc::make_callable(&get_extended_string_encoding, "self"))};
+  static pair<string, nd::arrfunc> base_string_type_properties[1] = {
+      pair<string, nd::arrfunc>(
+          "encoding", nd::functional::apply(&get_extended_string_encoding))};
 
   return base_string_type_properties;
 }
 
 void ndt::base_string_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
   *out_properties = base_string_type_properties();

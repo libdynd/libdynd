@@ -38,15 +38,13 @@ size_t ndt::kind_sym_type::get_default_data_size() const
 }
 
 void ndt::kind_sym_type::print_data(std::ostream &DYND_UNUSED(o),
-                                   const char *DYND_UNUSED(arrmeta),
-                                   const char *DYND_UNUSED(data)) const
+                                    const char *DYND_UNUSED(arrmeta),
+                                    const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of symbolic kind_sym type");
 }
 
-void ndt::kind_sym_type::print_type(std::ostream &o) const {
-  o << m_kind;
-}
+void ndt::kind_sym_type::print_type(std::ostream &o) const { o << m_kind; }
 
 bool ndt::kind_sym_type::is_expression() const { return false; }
 
@@ -69,9 +67,8 @@ ndt::type ndt::kind_sym_type::get_canonical_type() const
   return type(this, true);
 }
 
-bool
-ndt::kind_sym_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
-                                          const type &DYND_UNUSED(src_tp)) const
+bool ndt::kind_sym_type::is_lossless_assignment(
+    const type &DYND_UNUSED(dst_tp), const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
@@ -134,7 +131,7 @@ void ndt::kind_sym_type::arrmeta_debug_print(
 }
 
 void ndt::kind_sym_type::data_destruct(const char *DYND_UNUSED(arrmeta),
-                                      char *DYND_UNUSED(data)) const
+                                       char *DYND_UNUSED(data)) const
 {
   stringstream ss;
   ss << "Cannot have data for symbolic type " << type(this, true);
@@ -142,9 +139,9 @@ void ndt::kind_sym_type::data_destruct(const char *DYND_UNUSED(arrmeta),
 }
 
 void ndt::kind_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
-                                              char *DYND_UNUSED(data),
-                                              intptr_t DYND_UNUSED(stride),
-                                              size_t DYND_UNUSED(count)) const
+                                               char *DYND_UNUSED(data),
+                                               intptr_t DYND_UNUSED(stride),
+                                               size_t DYND_UNUSED(count)) const
 {
   stringstream ss;
   ss << "Cannot have data for symbolic type " << type(this, true);
@@ -159,28 +156,3 @@ bool ndt::kind_sym_type::match(
   // Matches against the 'kind' of the candidate type
   return candidate_tp.get_kind() == m_kind;
 }
-
-void ndt::kind_sym_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-void ndt::kind_sym_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-void ndt::kind_sym_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
-{
-  *out_functions = NULL;
-  *out_count = 0;
-}
- 

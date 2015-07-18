@@ -137,8 +137,8 @@ intptr_t ndt::date_type::make_assignment_kernel(
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx);
+          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta,
+          src_tp, src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
@@ -182,32 +182,11 @@ size_t ndt::date_type::make_comparison_kernel(
   throw not_comparable_error(src0_tp, src1_tp, comptype);
 }
 
-///////// properties on the type
-
-// static pair<string, gfunc::callable> date_type_properties[] = {
-//};
-
-void ndt::date_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL; // date_type_properties;
-  *out_count =
-      0; // sizeof(date_type_properties) / sizeof(date_type_properties[0]);
-}
-
 ///////// functions on the type
 
-static nd::array fn_type_today(const ndt::type &dt)
+static int32_t fn_type_today(ndt::type DYND_UNUSED(dt))
 {
-  date_ymd ymd = date_ymd::get_current_local_date();
-  nd::array result = nd::empty(dt);
-  *reinterpret_cast<int32_t *>(result.get_readwrite_originptr()) =
-      ymd.to_days();
-  // Make the result immutable (we own the only reference to the data at this
-  // point)
-  result.flag_as_immutable();
-  return result;
+  return date_ymd::get_current_local_date().to_days();
 }
 
 static int32_t date_from_ymd(int year, int month, int day)
@@ -225,31 +204,37 @@ static int32_t date_from_ymd(int year, int month, int day)
   return ymd.to_days();
 }
 
-static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
-                                   const nd::array &year,
-                                   const nd::array &month, const nd::array &day)
+static int32_t fn_type_construct(ndt::type DYND_UNUSED(dt), int year, int month,
+                                 int day)
 {
-  // TODO proper buffering
-  nd::array year_as_int = year.ucast(ndt::type::make<int32_t>()).eval();
-  nd::array month_as_int = month.ucast(ndt::type::make<int32_t>()).eval();
-  nd::array day_as_int = day.ucast(ndt::type::make<int32_t>()).eval();
+  return date_from_ymd(year, month, day);
+}
+
+/*
+static nd::array fn_type_construct(ndt::type DYND_UNUSED(dt), int32_t year,
+                                   int32_t month, int32_t day)
+{
+  return
 
   nd::arrfunc af = nd::functional::elwise(nd::functional::apply(date_from_ymd));
+
 
   return af(year_as_int, month_as_int, day_as_int)
       .view_scalars(ndt::date_type::make());
 }
+*/
 
 void ndt::date_type::get_dynamic_type_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
+    const std::pair<std::string, nd::arrfunc> **out_functions,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> date_type_functions[] = {
-      pair<string, gfunc::callable>(
-          "today", gfunc::make_callable(&fn_type_today, "self")),
-      pair<string, gfunc::callable>(
-          "__construct__", gfunc::make_callable(&fn_type_construct, "self",
-                                                "year", "month", "day"))};
+  static pair<string, nd::arrfunc> date_type_functions[] = {
+      pair<string, nd::arrfunc>("today",
+                                nd::functional::apply(&fn_type_today, "self")),
+      pair<string, nd::arrfunc>(
+          "__construct__", nd::functional::apply(&fn_type_construct, "self",
+                                                 "year", "month", "day")),
+  };
 
   *out_functions = date_type_functions;
   *out_count = sizeof(date_type_functions) / sizeof(date_type_functions[0]);
@@ -302,9 +287,9 @@ static nd::array function_ndo_strftime(const nd::array &n,
   if (format.empty()) {
     throw runtime_error("format string for strftime should not be empty");
   }
-  return n.replace_dtype(ndt::unary_expr_type::make(ndt::string_type::make(),
-                                              n.get_dtype(),
-                                              make_strftime_kernelgen(format)));
+  return n.replace_dtype(
+      ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(),
+                                 make_strftime_kernelgen(format)));
 }
 
 static nd::array function_ndo_weekday(const nd::array &n)
@@ -325,7 +310,7 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year,
   }
   return n.replace_dtype(
       ndt::unary_expr_type::make(ndt::date_type::make(), n.get_dtype(),
-                           make_replace_kernelgen(year, month, day)));
+                                 make_replace_kernelgen(year, month, day)));
 }
 
 void ndt::date_type::get_dynamic_array_functions(

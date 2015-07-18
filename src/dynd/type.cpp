@@ -122,6 +122,20 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     var_dim_type::make(any_kind_type::make()),        // var_dim_type_id
     struct_type::make(true),                          // struct_type_id
     tuple_type::make(true),                           // tuple_type_id
+    type(),                                           //   option_type_id,
+    type(),                                           // c_contiguous_type_id
+    type(),                                           // ndarrayarg_type_id
+    type(),                                           // adapt_type_id
+    type(),                                           // convert_type_id
+    type(),                                           // byteswap_type_id
+    type(),                                           // view_type_id
+    type(),                                           // cuda_host_type_id
+    type(),                                           // cuda_device_type_id
+    type(),                                           // property_type_id
+    type(),                                           // expr_type_id
+    type(),                                           // unary_expr_type_id
+    type(),                                           // groupby_type_id
+    make_type(),                                      // type_type_id
 };
 
 ndt::type::type(const std::string &rep) : m_extended(NULL)
@@ -187,7 +201,7 @@ bool ndt::type::match(const ndt::type &candidate_tp) const
 nd::array ndt::type::p(const char *property_name) const
 {
   if (!is_builtin()) {
-    const std::pair<std::string, gfunc::callable> *properties;
+    const std::pair<std::string, nd::arrfunc> *properties;
     size_t count;
     extended()->get_dynamic_type_properties(&properties, &count);
     // TODO: We probably want to make some kind of acceleration structure for
@@ -195,7 +209,8 @@ nd::array ndt::type::p(const char *property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return properties[i].second.call(*this);
+          return const_cast<nd::arrfunc &>(properties[i].second)(
+              kwds("self", *this));
         }
       }
     }
@@ -209,7 +224,7 @@ nd::array ndt::type::p(const char *property_name) const
 nd::array ndt::type::p(const std::string &property_name) const
 {
   if (!is_builtin()) {
-    const std::pair<std::string, gfunc::callable> *properties;
+    const std::pair<std::string, nd::arrfunc> *properties;
     size_t count;
     extended()->get_dynamic_type_properties(&properties, &count);
     // TODO: We probably want to make some kind of acceleration structure for
@@ -217,7 +232,8 @@ nd::array ndt::type::p(const std::string &property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return properties[i].second.call(*this);
+          return const_cast<nd::arrfunc &>(properties[i].second)(
+              kwds("self", *this));
         }
       }
     }

@@ -202,6 +202,8 @@ namespace ndt {
     // Indices of the optional args
     std::vector<intptr_t> m_opt_kwd_indices;
 
+    struct get_pos_types_kernel;
+
   public:
     arrfunc_type(const type &ret_type, const type &pos_types,
                  const type &kwd_types);
@@ -365,7 +367,7 @@ namespace ndt {
                std::map<nd::string, type> &tp_vars) const;
 
     void get_dynamic_type_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
+        const std::pair<std::string, nd::arrfunc> **out_properties,
         size_t *out_count) const;
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
