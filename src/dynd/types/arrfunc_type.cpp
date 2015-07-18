@@ -34,27 +34,6 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
   }
 }
 
-ndt::arrfunc_type::arrfunc_type(const type &ret_type, const type &pos_types)
-    : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),
-                scalar_align_of<uint64_t>::value,
-                type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
-                0, 0),
-      m_return_type(ret_type), m_pos_tuple(pos_types)
-{
-  if (m_pos_tuple.get_type_id() != tuple_type_id) {
-    stringstream ss;
-    ss << "dynd arrfunc positional arg types require a tuple type, got a "
-          "type \"" << m_pos_tuple << "\"";
-    throw invalid_argument(ss.str());
-  }
-  m_kwd_struct =
-      struct_type::make(m_pos_tuple.extended<tuple_type>()->is_variadic());
-
-  // Note that we don't base the flags of this type on that of its arguments
-  // and return types, because it is something the can be instantiated, even
-  // for arguments that are symbolic.
-}
-
 ndt::arrfunc_type::arrfunc_type(const type &ret_type, const type &pos_types,
                                 const type &kwd_types)
     : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),
@@ -420,10 +399,8 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
 
 ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 {
-  nd::array args = make_typevar_range("T", nargs);
-  args.flag_as_immutable();
-  type ret = typevar_type::make("R");
-  return arrfunc_type::make(ret, tuple_type::make(args));
+  return arrfunc_type::make(typevar_type::make("R"),
+                            make_typevar_range("T", nargs));
 }
 
 ///////// functions on the nd::array
@@ -511,14 +488,6 @@ void ndt::arrfunc_type::get_dynamic_array_functions(
   *out_count =
       sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
 }
-
-/*
-ndt::type ndt::arrfunc_type::make(const nd::array &pos_tp,
-                                  const ndt::type &ret_tp)
-{
-  return type(new arrfunc_type(ret_tp, tuple_type::make(pos_tp)), false);
-}
-*/
 
 nd::array arrfunc_type_data::
 operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,

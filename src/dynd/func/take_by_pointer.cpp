@@ -148,9 +148,8 @@ struct take_by_pointer_virtual_ck
 nd::arrfunc nd::take_by_pointer::make()
 {
   return arrfunc::make<take_by_pointer_virtual_ck>(
-      ndt::arrfunc_type::make(
-          ndt::type("R * pointer[T]"),
-          ndt::tuple_type::make({ndt::type("M * T"), ndt::type("N * Ix")})),
+      ndt::arrfunc_type::make(ndt::type("R * pointer[T]"),
+                              {ndt::type("M * T"), ndt::type("N * Ix")}),
       0);
 }
 
