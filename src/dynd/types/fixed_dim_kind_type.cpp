@@ -243,7 +243,7 @@ bool ndt::fixed_dim_kind_type::match(const char *arrmeta,
   }
 }
 
-static ndt::type get_element_type(const ndt::type &dt)
+static ndt::type get_element_type(ndt::type dt)
 {
   return dt.extended<ndt::fixed_dim_kind_type>()->get_element_type();
 }
@@ -254,7 +254,7 @@ void ndt::fixed_dim_kind_type::get_dynamic_type_properties(
 {
   static pair<string, nd::arrfunc> fixed_dim_kind_type_properties[] = {
       pair<string, nd::arrfunc>(
-          "element_type", nd::functional::apply(&::get_element_type))};
+          "element_type", nd::functional::apply(&::get_element_type, "self"))};
 
   *out_properties = fixed_dim_kind_type_properties;
   *out_count = sizeof(fixed_dim_kind_type_properties) /

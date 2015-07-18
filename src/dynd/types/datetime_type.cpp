@@ -257,20 +257,6 @@ intptr_t ndt::datetime_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-///////// properties on the type
-
-// static pair<string, gfunc::callable> datetime_type_properties[] = {
-//};
-
-void ndt::datetime_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL; // datetime_type_properties;
-  *out_count = 0;         // sizeof(datetime_type_properties) /
-                          // sizeof(datetime_type_properties[0]);
-}
-
 ///////// functions on the type
 
 static nd::array fn_type_now(const ndt::type &DYND_UNUSED(dt))

@@ -166,7 +166,7 @@ bool ndt::base_memory_type::match(const char *arrmeta, const type &candidate_tp,
       candidate_arrmeta, tp_vars);
 }
 
-static ndt::type property_get_storage_type(const ndt::type &tp)
+static ndt::type property_get_storage_type(ndt::type tp)
 {
   const ndt::base_memory_type *md = tp.extended<ndt::base_memory_type>();
   return md->get_element_type();
@@ -178,7 +178,7 @@ void ndt::base_memory_type::get_dynamic_type_properties(
 {
   static pair<string, nd::arrfunc> type_properties[] = {
       pair<string, nd::arrfunc>(
-          "storage_type", nd::functional::apply(&property_get_storage_type))};
+          "storage_type", nd::functional::apply(&property_get_storage_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

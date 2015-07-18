@@ -10,6 +10,7 @@
 #include <dynd/func/make_callable.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
+#include <dynd/kernels/base_property_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -185,16 +186,60 @@ void ndt::tuple_type::get_dynamic_type_properties(
     const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
+  struct field_types_kernel : nd::base_property_kernel<field_types_kernel> {
+    using base_property_kernel::base_property_kernel;
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      typed_data_copy(dst_tp, dst_arrmeta, dst,
+                      tp.extended<tuple_type>()->m_field_types.get_arrmeta(),
+                      tp.extended<tuple_type>()->m_field_types.get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp = tp.extended<tuple_type>()->m_field_types.get_type();
+    }
+  };
+
+  struct arrmeta_offsets_kernel
+      : nd::base_property_kernel<arrmeta_offsets_kernel> {
+    using base_property_kernel::base_property_kernel;
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      typed_data_copy(
+          dst_tp, dst_arrmeta, dst,
+          tp.extended<tuple_type>()->m_arrmeta_offsets.get_arrmeta(),
+          tp.extended<tuple_type>()->m_arrmeta_offsets.get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp = tp.extended<tuple_type>()->m_arrmeta_offsets.get_type();
+    }
+  };
+
   static pair<string, nd::arrfunc> type_properties[] = {
-/*
-      pair<string, gfunc::callable>(
+      pair<string, nd::arrfunc>(
           "field_types",
-          gfunc::make_callable(&property_get_field_types, "self")),
-      pair<string, gfunc::callable>(
-          "arrmeta_offsets",
-          gfunc::make_callable(&property_get_arrmeta_offsets, "self"))
-*/
-};
+          nd::arrfunc::make<field_types_kernel>(type("(self: type) -> Any"))),
+      pair<string, nd::arrfunc>("arrmeta_offsets",
+                                nd::arrfunc::make<arrmeta_offsets_kernel>(
+                                    type("(self: type) -> Any"))),
+  };
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

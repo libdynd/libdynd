@@ -138,27 +138,3 @@ bool ndt::categorical_kind_type::match(
 {
   return candidate_tp.get_type_id() == categorical_type_id;
 }
-
-void ndt::categorical_kind_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-void ndt::categorical_kind_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-void ndt::categorical_kind_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
-{
-  *out_functions = NULL;
-  *out_count = 0;
-}

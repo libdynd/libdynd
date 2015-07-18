@@ -413,7 +413,7 @@ bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp,
       tp_vars);
 }
 
-static ndt::type property_get_target_type(const ndt::type &tp)
+static ndt::type property_get_target_type(ndt::type tp)
 {
   const ndt::pointer_type *pd = tp.extended<ndt::pointer_type>();
   return pd->get_target_type();
@@ -426,7 +426,7 @@ void ndt::pointer_type::get_dynamic_type_properties(
   static pair<string, nd::arrfunc> type_properties[] = {
       pair<string, nd::arrfunc>(
           "target_type",
-          nd::functional::apply(&property_get_target_type))};
+          nd::functional::apply(&property_get_target_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

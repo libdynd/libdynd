@@ -156,27 +156,3 @@ bool ndt::kind_sym_type::match(
   // Matches against the 'kind' of the candidate type
   return candidate_tp.get_kind() == m_kind;
 }
-
-void ndt::kind_sym_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-void ndt::kind_sym_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
-{
-  *out_properties = NULL;
-  *out_count = 0;
-}
-
-void ndt::kind_sym_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
-{
-  *out_functions = NULL;
-  *out_count = 0;
-}

@@ -202,6 +202,8 @@ namespace ndt {
     // Indices of the optional args
     std::vector<intptr_t> m_opt_kwd_indices;
 
+    struct get_pos_types_kernel;
+
   public:
     arrfunc_type(const type &ret_type, const type &pos_types,
                  const type &kwd_types);

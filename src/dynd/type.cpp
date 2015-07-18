@@ -209,7 +209,8 @@ nd::array ndt::type::p(const char *property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return const_cast<nd::arrfunc &>(properties[i].second)(*this);
+          return const_cast<nd::arrfunc &>(properties[i].second)(
+              kwds("self", *this));
         }
       }
     }
@@ -231,7 +232,8 @@ nd::array ndt::type::p(const std::string &property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return const_cast<nd::arrfunc &>(properties[i].second)(*this);
+          return const_cast<nd::arrfunc &>(properties[i].second)(
+              kwds("self", *this));
         }
       }
     }

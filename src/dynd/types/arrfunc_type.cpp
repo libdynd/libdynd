@@ -11,6 +11,7 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
+#include <dynd/kernels/base_property_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -371,32 +372,111 @@ static nd::array property_get_kwd_names(const ndt::type &tp)
   return tp.extended<ndt::arrfunc_type>()->get_kwd_names();
 }
 
-static nd::array property_get_return_type(const ndt::type &dt)
-{
-  return dt.extended<ndt::arrfunc_type>()->get_return_type();
-}
 */
+
+static ndt::type property_get_return_type(ndt::type tp)
+{
+  return tp.extended<ndt::arrfunc_type>()->get_return_type();
+}
 
 void ndt::arrfunc_type::get_dynamic_type_properties(
     const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
+  struct pos_types_kernel : nd::base_property_kernel<pos_types_kernel> {
+    using base_property_kernel::base_property_kernel;
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      typed_data_copy(
+          dst_tp, dst_arrmeta, dst,
+          tp.extended<arrfunc_type>()->get_pos_types().get_arrmeta(),
+          tp.extended<arrfunc_type>()->get_pos_types().get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp =
+          make_fixed_dim(tp.extended<arrfunc_type>()->get_npos(), make_type());
+    }
+  };
+
+  struct kwd_types_kernel : nd::base_property_kernel<kwd_types_kernel> {
+    using base_property_kernel::base_property_kernel;
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      typed_data_copy(
+          dst_tp, dst_arrmeta, dst,
+          tp.extended<arrfunc_type>()->get_kwd_types().get_arrmeta(),
+          tp.extended<arrfunc_type>()->get_kwd_types().get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp =
+          make_fixed_dim(tp.extended<arrfunc_type>()->get_nkwd(), make_type());
+    }
+  };
+
+  struct kwd_names_kernel : nd::base_property_kernel<kwd_names_kernel> {
+    using base_property_kernel::base_property_kernel;
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      typed_data_copy(
+          dst_tp, dst_arrmeta, dst,
+          tp.extended<arrfunc_type>()->get_kwd_names().get_arrmeta(),
+          tp.extended<arrfunc_type>()->get_kwd_names().get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp = tp.extended<arrfunc_type>()->get_kwd_names().get_type();
+    }
+  };
+
   static pair<string, nd::arrfunc> type_properties[] = {
-/*
-      pair<string, nd::arrfunc>("pos",
-                                nd::functional::apply(&property_get_pos)),
-      pair<string, nd::arrfunc>("kwd",
-                                nd::functional::apply(&property_get_kwd)),
       pair<string, nd::arrfunc>("pos_types",
-                                nd::functional::apply(&property_get_pos_types)),
+                                nd::arrfunc::make<pos_types_kernel>(
+                                    type("(self: type) -> Fixed * type"))),
       pair<string, nd::arrfunc>("kwd_types",
-                                nd::functional::apply(&property_get_kwd_types)),
+                                nd::arrfunc::make<kwd_types_kernel>(
+                                    type("(self: type) -> Fixed * type"))),
       pair<string, nd::arrfunc>("kwd_names",
-                                nd::functional::apply(&property_get_kwd_names)),
+                                nd::arrfunc::make<kwd_names_kernel>(
+                                    type("(self: type) -> Fixed * Any"))),
+      /*
+            pair<string, nd::arrfunc>("kwd",
+                                      nd::functional::apply(&property_get_kwd)),
+            pair<string, nd::arrfunc>("pos_types",
+                                      nd::functional::apply(&property_get_pos_types)),
+            pair<string, nd::arrfunc>("kwd_types",
+                                      nd::functional::apply(&property_get_kwd_types)),
+            pair<string, nd::arrfunc>("kwd_names",
+                                      nd::functional::apply(&property_get_kwd_names)),
+      */
       pair<string, nd::arrfunc>(
-          "return_type", nd::functional::apply(&property_get_return_type))
-*/
-};
+          "return_type",
+          nd::functional::apply(&property_get_return_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

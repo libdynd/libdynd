@@ -8,6 +8,7 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/func/make_callable.hpp>
+#include <dynd/kernels/base_property_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -210,7 +211,7 @@ static nd::array property_get_name(const ndt::type &tp)
 }
 */
 
-static ndt::type property_get_element_type(const ndt::type &dt)
+static ndt::type property_get_element_type(ndt::type dt)
 {
   return dt.extended<ndt::ellipsis_dim_type>()->get_element_type();
 }
@@ -219,11 +220,38 @@ void ndt::ellipsis_dim_type::get_dynamic_type_properties(
     const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
+  struct name_kernel : nd::base_property_kernel<name_kernel> {
+    using base_property_kernel::base_property_kernel;
+
+    void single(char *dst, char *const *DYND_UNUSED(src))
+    {
+      nd::array a = static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name());
+      typed_data_copy(
+          dst_tp, dst_arrmeta, dst,
+          static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name())
+              .get_arrmeta(),
+          a.get_data());
+    }
+
+    static void resolve_dst_type(
+        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+        const ndt::type *DYND_UNUSED(src_tp),
+        const dynd::nd::array &DYND_UNUSED(kwds),
+        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      const type &tp = *reinterpret_cast<const ndt::type *>(data);
+      dst_tp = static_cast<nd::array>(
+                   tp.extended<ellipsis_dim_type>()->get_name()).get_type();
+    }
+  };
+
   static pair<string, nd::arrfunc> type_properties[] = {
-//      pair<string, nd::arrfunc>("name",
-  //                              nd::functional::apply(&property_get_name)),
+//      pair<string, nd::arrfunc>(
+  //        "name", nd::arrfunc::make<name_kernel>(type("(self: type) -> Any"))),
       pair<string, nd::arrfunc>(
-          "element_type", nd::functional::apply(&property_get_element_type))};
+          "element_type",
+          nd::functional::apply(&property_get_element_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
