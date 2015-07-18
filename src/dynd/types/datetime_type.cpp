@@ -263,7 +263,7 @@ intptr_t ndt::datetime_type::make_assignment_kernel(
 //};
 
 void ndt::datetime_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
   *out_properties = NULL; // datetime_type_properties;

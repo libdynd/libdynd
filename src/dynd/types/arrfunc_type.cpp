@@ -5,6 +5,7 @@
 
 #include <dynd/types/arrfunc_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -344,6 +345,7 @@ bool ndt::arrfunc_type::match(const char *arrmeta, const type &candidate_tp,
   return true;
 }
 
+/*
 static nd::array property_get_pos(const ndt::type &tp)
 {
   return tp.extended<ndt::arrfunc_type>()->get_pos_types();
@@ -373,25 +375,28 @@ static nd::array property_get_return_type(const ndt::type &dt)
 {
   return dt.extended<ndt::arrfunc_type>()->get_return_type();
 }
+*/
 
 void ndt::arrfunc_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> type_properties[] = {
-      pair<string, gfunc::callable>(
-          "pos", gfunc::make_callable(&property_get_pos, "self")),
-      pair<string, gfunc::callable>(
-          "kwd", gfunc::make_callable(&property_get_kwd, "self")),
-      pair<string, gfunc::callable>(
-          "pos_types", gfunc::make_callable(&property_get_pos_types, "self")),
-      pair<string, gfunc::callable>(
-          "kwd_types", gfunc::make_callable(&property_get_kwd_types, "self")),
-      pair<string, gfunc::callable>(
-          "kwd_names", gfunc::make_callable(&property_get_kwd_names, "self")),
-      pair<string, gfunc::callable>(
-          "return_type",
-          gfunc::make_callable(&property_get_return_type, "self"))};
+  static pair<string, nd::arrfunc> type_properties[] = {
+/*
+      pair<string, nd::arrfunc>("pos",
+                                nd::functional::apply(&property_get_pos)),
+      pair<string, nd::arrfunc>("kwd",
+                                nd::functional::apply(&property_get_kwd)),
+      pair<string, nd::arrfunc>("pos_types",
+                                nd::functional::apply(&property_get_pos_types)),
+      pair<string, nd::arrfunc>("kwd_types",
+                                nd::functional::apply(&property_get_kwd_types)),
+      pair<string, nd::arrfunc>("kwd_names",
+                                nd::functional::apply(&property_get_kwd_names)),
+      pair<string, nd::arrfunc>(
+          "return_type", nd::functional::apply(&property_get_return_type))
+*/
+};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

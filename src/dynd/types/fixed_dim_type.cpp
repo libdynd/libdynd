@@ -4,6 +4,7 @@
 //
 
 #include <dynd/func/arrfunc.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -779,15 +780,14 @@ bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp,
 }
 
 void ndt::fixed_dim_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> fixed_dim_type_properties[] = {
-      pair<string, gfunc::callable>(
-          "fixed_dim_size",
-          gfunc::make_callable(&::get_fixed_dim_size, "self")),
-      pair<string, gfunc::callable>(
-          "element_type", gfunc::make_callable(&::get_element_type, "self"))};
+  static pair<string, nd::arrfunc> fixed_dim_type_properties[] = {
+      pair<string, nd::arrfunc>("fixed_dim_size",
+                                nd::functional::apply(&::get_fixed_dim_size)),
+      pair<string, nd::arrfunc>("element_type",
+                                nd::functional::apply(&::get_element_type))};
 
   *out_properties = fixed_dim_type_properties;
   *out_count =

@@ -11,6 +11,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
@@ -248,12 +249,12 @@ static ndt::type get_element_type(const ndt::type &dt)
 }
 
 void ndt::fixed_dim_kind_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> fixed_dim_kind_type_properties[] = {
-      pair<string, gfunc::callable>(
-          "element_type", gfunc::make_callable(&::get_element_type, "self"))};
+  static pair<string, nd::arrfunc> fixed_dim_kind_type_properties[] = {
+      pair<string, nd::arrfunc>(
+          "element_type", nd::functional::apply(&::get_element_type))};
 
   *out_properties = fixed_dim_kind_type_properties;
   *out_count = sizeof(fixed_dim_kind_type_properties) /

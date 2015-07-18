@@ -354,7 +354,7 @@ nd::arrfunc ndt::base_type::get_assign_na() const
 }
 
 void ndt::base_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
   // Default to no properties

@@ -15,6 +15,7 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_range.hpp>
+#include <dynd/func/apply.hpp>
 
 using namespace dynd;
 using namespace std;
@@ -653,11 +654,13 @@ void ndt::categorical_type::get_dynamic_array_properties(
   *out_count = categorical_array_properties_size();
 }
 
+/*
 static nd::array property_type_get_categories(const ndt::type &d)
 {
   const ndt::categorical_type *cd = d.extended<ndt::categorical_type>();
   return cd->get_categories();
 }
+*/
 
 static ndt::type property_type_get_storage_type(const ndt::type &d)
 {
@@ -672,19 +675,18 @@ static ndt::type property_type_get_category_type(const ndt::type &d)
 }
 
 void ndt::categorical_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> categorical_type_properties[] = {
-      pair<string, gfunc::callable>(
-          "categories",
-          gfunc::make_callable(&property_type_get_categories, "self")),
-      pair<string, gfunc::callable>(
+  static pair<string, nd::arrfunc> categorical_type_properties[] = {
+//      pair<string, nd::arrfunc>(
+  //        "categories", nd::functional::apply(&property_type_get_categories)),
+      pair<string, nd::arrfunc>(
           "storage_type",
-          gfunc::make_callable(&property_type_get_storage_type, "self")),
-      pair<string, gfunc::callable>(
+          nd::functional::apply(&property_type_get_storage_type)),
+      pair<string, nd::arrfunc>(
           "category_type",
-          gfunc::make_callable(&property_type_get_category_type, "self"))};
+          nd::functional::apply(&property_type_get_category_type))};
 
   *out_properties = categorical_type_properties;
   *out_count = sizeof(categorical_type_properties) /

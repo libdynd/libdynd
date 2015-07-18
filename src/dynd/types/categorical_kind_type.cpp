@@ -140,7 +140,7 @@ bool ndt::categorical_kind_type::match(
 }
 
 void ndt::categorical_kind_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
   *out_properties = NULL;

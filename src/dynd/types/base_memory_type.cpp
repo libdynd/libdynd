@@ -4,6 +4,7 @@
 //
 
 #include <dynd/types/base_memory_type.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/make_callable.hpp>
 
 using namespace std;
@@ -172,13 +173,12 @@ static ndt::type property_get_storage_type(const ndt::type &tp)
 }
 
 void ndt::base_memory_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> type_properties[] = {
-      pair<string, gfunc::callable>(
-          "storage_type",
-          gfunc::make_callable(&property_get_storage_type, "self"))};
+  static pair<string, nd::arrfunc> type_properties[] = {
+      pair<string, nd::arrfunc>(
+          "storage_type", nd::functional::apply(&property_get_storage_type))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

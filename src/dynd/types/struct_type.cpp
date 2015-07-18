@@ -226,6 +226,7 @@ void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   }
 }
 
+/*
 static nd::array property_get_field_names(const ndt::type &tp)
 {
   return tp.extended<ndt::struct_type>()->get_field_names();
@@ -240,21 +241,23 @@ static nd::array property_get_arrmeta_offsets(const ndt::type &tp)
 {
   return tp.extended<ndt::struct_type>()->get_arrmeta_offsets();
 }
+*/
 
 void ndt::struct_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> type_properties[] = {
-      pair<string, gfunc::callable>(
-          "field_names",
-          gfunc::make_callable(&property_get_field_names, "self")),
-      pair<string, gfunc::callable>(
-          "field_types",
-          gfunc::make_callable(&property_get_field_types, "self")),
-      pair<string, gfunc::callable>(
+  static pair<string, nd::arrfunc> type_properties[] = {
+/*
+      pair<string, nd::arrfunc>(
+          "field_names", nd::functional::apply(&property_get_field_names)),
+      pair<string, nd::arrfunc>(
+          "field_types", nd::functional::apply(&property_get_field_types)),
+      pair<string, nd::arrfunc>(
           "arrmeta_offsets",
-          gfunc::make_callable(&property_get_arrmeta_offsets, "self"))};
+          nd::functional::apply(&property_get_arrmeta_offsets))
+*/
+};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
@@ -271,7 +274,8 @@ static array_preamble *property_get_array_field(const array_preamble *params,
   if (udt.get_kind() == expr_kind) {
     string field_name =
         udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
-    return n.replace_dtype(ndt::property_type::make(udt, field_name, i)).release();
+    return n.replace_dtype(ndt::property_type::make(udt, field_name, i))
+        .release();
   } else {
     if (undim == 0) {
       return n(i).release();

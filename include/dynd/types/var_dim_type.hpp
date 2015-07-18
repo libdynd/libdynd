@@ -117,7 +117,7 @@ namespace ndt {
                          void *callback_data) const;
 
     void get_dynamic_type_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
+        const std::pair<std::string, nd::arrfunc> **out_properties,
         size_t *out_count) const;
     void get_dynamic_array_properties(
         const std::pair<std::string, gfunc::callable> **out_properties,

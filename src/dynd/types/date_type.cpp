@@ -188,7 +188,7 @@ size_t ndt::date_type::make_comparison_kernel(
 //};
 
 void ndt::date_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
   *out_properties = NULL; // date_type_properties;

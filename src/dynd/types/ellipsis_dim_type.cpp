@@ -6,6 +6,7 @@
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
+#include <dynd/func/apply.hpp>
 #include <dynd/func/make_callable.hpp>
 
 using namespace std;
@@ -202,10 +203,12 @@ bool ndt::ellipsis_dim_type::match(const char *arrmeta,
   return false;
 }
 
+/*
 static nd::array property_get_name(const ndt::type &tp)
 {
   return tp.extended<ndt::ellipsis_dim_type>()->get_name();
 }
+*/
 
 static ndt::type property_get_element_type(const ndt::type &dt)
 {
@@ -213,16 +216,14 @@ static ndt::type property_get_element_type(const ndt::type &dt)
 }
 
 void ndt::ellipsis_dim_type::get_dynamic_type_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::arrfunc> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> type_properties[] = {
-      pair<string, gfunc::callable>(
-          "name", gfunc::make_callable(&property_get_name, "self")),
-      pair<string, gfunc::callable>(
-          "element_type",
-          gfunc::make_callable(&property_get_element_type, "self")),
-  };
+  static pair<string, nd::arrfunc> type_properties[] = {
+//      pair<string, nd::arrfunc>("name",
+  //                              nd::functional::apply(&property_get_name)),
+      pair<string, nd::arrfunc>(
+          "element_type", nd::functional::apply(&property_get_element_type))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
