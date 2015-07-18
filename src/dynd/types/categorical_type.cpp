@@ -680,6 +680,7 @@ void ndt::categorical_type::get_dynamic_type_properties(
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
+      std::cout << "(DEBUG)" << std::endl;
       typed_data_copy(
           dst_tp, dst_arrmeta, dst,
           tp.extended<categorical_type>()->m_categories.get_arrmeta(),
@@ -699,9 +700,11 @@ void ndt::categorical_type::get_dynamic_type_properties(
   };
 
   static pair<string, nd::arrfunc> categorical_type_properties[] = {
+/*
       pair<string, nd::arrfunc>("categories",
                                 nd::arrfunc::make<categories_kernel>(
                                     ndt::type("(self: type) -> Fixed * Any"))),
+*/
       pair<string, nd::arrfunc>(
           "storage_type",
           nd::functional::apply(&property_type_get_storage_type, "self")),
