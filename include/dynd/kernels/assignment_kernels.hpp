@@ -172,7 +172,7 @@ namespace nd {
       static ndt::type make_type()
       {
         return ndt::arrfunc_type::make(ndt::type(DstTypeID),
-                                       {ndt::type(Src0TypeID)});
+                                       ndt::type(Src0TypeID));
       }
     };
 
@@ -2330,7 +2330,7 @@ namespace ndt {
     static type make()
     {
       return ndt::arrfunc_type::make(ndt::type(DstTypeID),
-                                     {ndt::type(Src0TypeID)});
+                                     ndt::type(Src0TypeID));
     }
   };
 
