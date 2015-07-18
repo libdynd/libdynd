@@ -230,8 +230,8 @@ intptr_t ndt::datetime_type::make_assignment_kernel(
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx);
+          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta,
+          src_tp, src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
@@ -290,19 +290,20 @@ void ndt::datetime_type::get_dynamic_type_functions(
     const std::pair<std::string, nd::arrfunc> **out_functions,
     size_t *out_count) const
 {
-  static pair<string, nd::arrfunc> datetime_type_functions[] = {
-/*
-      pair<string, gfunc::callable>("now",
-                                    gfunc::make_callable(&fn_type_now, "self")),
-      pair<string, gfunc::callable>(
-          "__construct__", gfunc::make_callable(&fn_type_construct, "self",
-                                                "year", "month", "day"))
-*/
-};
+  //  static pair<string, nd::arrfunc> datetime_type_functions[] = {
+  /*
+        pair<string, gfunc::callable>("now",
+                                      gfunc::make_callable(&fn_type_now,
+     "self")),
+        pair<string, gfunc::callable>(
+            "__construct__", gfunc::make_callable(&fn_type_construct, "self",
+                                                  "year", "month", "day"))
+  */
+  //};
 
-  *out_functions = datetime_type_functions;
-  *out_count =
-      sizeof(datetime_type_functions) / sizeof(datetime_type_functions[0]);
+  *out_functions = NULL;
+  *out_count = 0;
+  //      sizeof(datetime_type_functions) / sizeof(datetime_type_functions[0]);
 }
 
 ///////// properties on the nd::array
@@ -344,7 +345,8 @@ static nd::array property_ndo_get_second(const nd::array &n)
 
 static nd::array property_ndo_get_microsecond(const nd::array &n)
 {
-  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "microsecond"));
+  return n.replace_dtype(
+      ndt::property_type::make(n.get_dtype(), "microsecond"));
 }
 
 static nd::array property_ndo_get_tick(const nd::array &n)
@@ -396,8 +398,9 @@ static nd::array function_ndo_strftime(const nd::array &n,
   if (format.empty()) {
     throw runtime_error("format string for strftime should not be empty");
   }
-  return n.replace_dtype(ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(),
-                                              make_strftime_kernelgen(format)));
+  return n.replace_dtype(
+      ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(),
+                                 make_strftime_kernelgen(format)));
 }
 
 void ndt::datetime_type::get_dynamic_array_functions(
