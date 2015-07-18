@@ -221,11 +221,16 @@ void ndt::ellipsis_dim_type::get_dynamic_type_properties(
     size_t *out_count) const
 {
   struct name_kernel : nd::base_property_kernel<name_kernel> {
-    using base_property_kernel::base_property_kernel;
+    name_kernel(const ndt::type &tp, const ndt::type &dst_tp,
+                const char *dst_arrmeta)
+        : base_property_kernel<name_kernel>(tp, dst_tp, dst_arrmeta)
+    {
+    }
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      nd::array a = static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name());
+      nd::array a =
+          static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name());
       typed_data_copy(
           dst_tp, dst_arrmeta, dst,
           static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name())
@@ -247,8 +252,9 @@ void ndt::ellipsis_dim_type::get_dynamic_type_properties(
   };
 
   static pair<string, nd::arrfunc> type_properties[] = {
-//      pair<string, nd::arrfunc>(
-  //        "name", nd::arrfunc::make<name_kernel>(type("(self: type) -> Any"))),
+      //      pair<string, nd::arrfunc>(
+      //        "name", nd::arrfunc::make<name_kernel>(type("(self: type) ->
+      //        Any"))),
       pair<string, nd::arrfunc>(
           "element_type",
           nd::functional::apply(&property_get_element_type, "self"))};

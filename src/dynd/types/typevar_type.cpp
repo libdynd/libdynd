@@ -147,7 +147,11 @@ void ndt::typevar_type::get_dynamic_type_properties(
     size_t *out_count) const
 {
   struct name_kernel : nd::base_property_kernel<name_kernel> {
-    using base_property_kernel::base_property_kernel;
+    name_kernel(const ndt::type &tp, const ndt::type &dst_tp,
+                const char *dst_arrmeta)
+        : base_property_kernel<name_kernel>(tp, dst_tp, dst_arrmeta)
+    {
+    }
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {

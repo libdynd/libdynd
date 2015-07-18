@@ -384,7 +384,11 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
     size_t *out_count) const
 {
   struct pos_types_kernel : nd::base_property_kernel<pos_types_kernel> {
-    using base_property_kernel::base_property_kernel;
+    pos_types_kernel(const ndt::type &tp, const ndt::type &dst_tp,
+                     const char *dst_arrmeta)
+        : base_property_kernel<pos_types_kernel>(tp, dst_tp, dst_arrmeta)
+    {
+    }
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
@@ -408,7 +412,11 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
   };
 
   struct kwd_types_kernel : nd::base_property_kernel<kwd_types_kernel> {
-    using base_property_kernel::base_property_kernel;
+    kwd_types_kernel(const ndt::type &tp, const ndt::type &dst_tp,
+                     const char *dst_arrmeta)
+        : base_property_kernel<kwd_types_kernel>(tp, dst_tp, dst_arrmeta)
+    {
+    }
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
@@ -432,7 +440,11 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
   };
 
   struct kwd_names_kernel : nd::base_property_kernel<kwd_names_kernel> {
-    using base_property_kernel::base_property_kernel;
+    kwd_names_kernel(const ndt::type &tp, const ndt::type &dst_tp,
+                     const char *dst_arrmeta)
+        : base_property_kernel<kwd_names_kernel>(tp, dst_tp, dst_arrmeta)
+    {
+    }
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
