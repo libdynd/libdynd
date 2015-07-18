@@ -393,7 +393,7 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(
-          dst_tp, dst_arrmeta, dst,
+          dst_tp, dst_arrmeta, dst, 
           tp.extended<arrfunc_type>()->get_pos_types().get_arrmeta(),
           tp.extended<arrfunc_type>()->get_pos_types().get_data());
     }

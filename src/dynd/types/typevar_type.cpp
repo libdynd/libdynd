@@ -155,12 +155,10 @@ void ndt::typevar_type::get_dynamic_type_properties(
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(
-          dst_tp, dst_arrmeta, dst,
-          static_cast<nd::array>(tp.extended<typevar_type>()->get_name())
-              .get_arrmeta(),
-          static_cast<nd::array>(tp.extended<typevar_type>()->get_name())
-              .get_readonly_originptr());
+      const nd::array &a = tp.extended<typevar_type>()->get_name();
+      typed_data_assign(dst_tp, dst_arrmeta, dst, a.get_type(), a.get_arrmeta(),
+                        a.get_readonly_originptr(),
+                        &eval::default_eval_context);
     }
 
     static void resolve_dst_type(
@@ -171,8 +169,8 @@ void ndt::typevar_type::get_dynamic_type_properties(
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = static_cast<nd::array>(
-                   tp.extended<typevar_type>()->get_name()).get_type();
+      const nd::array &a = tp.extended<typevar_type>()->get_name();
+      dst_tp = a.get_type();
     }
   };
 
