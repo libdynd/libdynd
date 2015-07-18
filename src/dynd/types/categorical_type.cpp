@@ -672,7 +672,7 @@ void ndt::categorical_type::get_dynamic_type_properties(
     size_t *out_count) const
 {
   struct categories_kernel : nd::base_property_kernel<categories_kernel> {
-    using base_property_kernel::base_property_kernel;
+    using base_property_kernel<categories_kernel>::base_property_kernel;
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
