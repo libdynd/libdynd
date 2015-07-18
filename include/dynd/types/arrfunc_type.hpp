@@ -416,6 +416,22 @@ namespace ndt {
     static type make() { return arrfunc_type::make(type::make<R>()); }
   };
 
+  template <typename R, typename A0>
+  struct type::equivalent<R(A0)> {
+    static type make()
+    {
+      return arrfunc_type::make(type::make<R>(), type::make<A0>());
+    }
+
+    template <typename T>
+    static type make(T &&name)
+    {
+      return arrfunc_type::make(
+          type::make<R>(), tuple_type::make(),
+          struct_type::make({std::forward<T>(name)}, {type::make<A0>()}));
+    }
+  };
+
   template <typename R, typename... A>
   struct type::equivalent<R(A...)> {
     static type make()
