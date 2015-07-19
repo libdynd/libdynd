@@ -376,17 +376,18 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
-  template <type_id_t Src0TypeID>
-  using is_avail_kernel =
-      detail::is_avail_kernel<Src0TypeID, type_kind_of<Src0TypeID>::value>;
+  template <type_id_t Src0ValueTypeID>
+  struct is_avail_kernel
+      : detail::is_avail_kernel<Src0ValueTypeID,
+                                type_kind_of<Src0ValueTypeID>::value> {
+  };
 
 } // namespace dynd::nd
 
 namespace ndt {
 
   template <type_id_t Src0ValueTypeID>
-  struct type::equivalent<nd::detail::is_avail_kernel<
-      Src0ValueTypeID, type_kind_of<Src0ValueTypeID>::value>> {
+  struct type::equivalent<nd::is_avail_kernel<Src0ValueTypeID>> {
     static type make()
     {
       return type("(T) -> bool");
