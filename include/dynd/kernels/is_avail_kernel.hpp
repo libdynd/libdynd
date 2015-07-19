@@ -385,11 +385,13 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t Src0ValueTypeID>
-  struct type::equivalent<nd::is_avail_kernel<Src0ValueTypeID>> {
+  struct type::equivalent<nd::detail::is_avail_kernel<
+      Src0ValueTypeID, type_kind_of<Src0ValueTypeID>::value>> {
     static type make()
     {
       return type("(T) -> bool");
-      //      return arrfunc_type::make(make_type<bool1>(), {make_option(type(Src0ValueTypeID))}
+      //      return arrfunc_type::make(make_type<bool1>(),
+      //      {make_option(type(Src0ValueTypeID))}
       //                                );
     }
   };
