@@ -86,8 +86,6 @@ namespace ndt {
         size_t dst_elwise_property_index, const char *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
-    nd::arrfunc get_assign_na() const;
-
     /** Returns type "time" (with abstract/naive time zone) */
     static const type &make()
     {

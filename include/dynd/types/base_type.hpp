@@ -610,8 +610,6 @@ namespace ndt {
     {
     }
 
-    virtual nd::arrfunc get_assign_na() const;
-
     /**
      * Additional dynamic properties exposed by the type as gfunc::callable.
      */

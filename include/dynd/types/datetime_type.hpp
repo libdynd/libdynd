@@ -100,8 +100,6 @@ namespace ndt {
         size_t dst_elwise_property_index, const char *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
-    nd::arrfunc get_assign_na() const;
-
     bool adapt_type(const type &operand_tp, const nd::string &op,
                     nd::arrfunc &out_forward, nd::arrfunc &out_reverse) const;
     bool reverse_adapt_type(const type &value_tp, const nd::string &op,

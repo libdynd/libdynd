@@ -219,11 +219,10 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-  const arrfunc_type_data *af =
-      dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
-  ckb_offset =
-      af->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                      NULL, NULL, kernreq, ectx, kwds, tp_vars);
+  nd::arrfunc &assign_na = dst_tp.extended<ndt::option_type>()->get_assign_na();
+  ckb_offset = assign_na.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset,
+                                            dst_tp, dst_arrmeta, nsrc, NULL,
+                                            NULL, kernreq, ectx, kwds, tp_vars);
   // instantiate value_assign
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -395,11 +394,10 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
              ->get_at<string_to_option_tp_ck>(root_ckb_offset);
   // Second child ckernel is the NA assignment
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-  const arrfunc_type_data *af =
-      dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
-  ckb_offset =
-      af->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                      NULL, NULL, kernreq, ectx, kwds, tp_vars);
+  nd::arrfunc &assign_na = dst_tp.extended<ndt::option_type>()->get_assign_na();
+  ckb_offset = assign_na.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset,
+                                            dst_tp, dst_arrmeta, nsrc, NULL,
+                                            NULL, kernreq, ectx, kwds, tp_vars);
   return ckb_offset;
 }
 

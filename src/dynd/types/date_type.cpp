@@ -20,8 +20,6 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/date_adapter_kernels.hpp>
-#include <dynd/kernels/is_avail_kernel.hpp>
-#include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/exceptions.hpp>
@@ -503,11 +501,6 @@ size_t ndt::date_type::make_elwise_property_setter_kernel(
        << dst_property_index;
     throw runtime_error(ss.str());
   }
-}
-
-nd::arrfunc ndt::date_type::get_assign_na() const
-{
-  return nd::arrfunc::make<nd::assign_na_kernel<date_type_id>>(0);
 }
 
 bool ndt::date_type::adapt_type(const type &operand_tp, const nd::string &op,

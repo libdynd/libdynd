@@ -30,9 +30,6 @@ namespace ndt {
   class option_type : public base_type {
     type m_value_tp;
 
-    // A function that assigns the NA # () -> option[T]
-    nd::arrfunc m_assign_na;
-
   public:
     option_type(const type &value_tp);
 
@@ -44,12 +41,6 @@ namespace ndt {
     }
 
     void get_vars(std::unordered_set<std::string> &vars) const;
-
-    /** Returns the type that m_is_avail has */
-    static const type &make_is_avail_type();
-
-    /** Returns the type that m_assign_na has */
-    static const type &make_assign_na_type();
 
     const type &get_value_type() const { return m_value_tp.value_type(); }
 
@@ -66,14 +57,9 @@ namespace ndt {
       return nd::is_avail::get_child(m_value_tp);
     }
 
-    const arrfunc_type_data *get_assign_na_arrfunc() const
+    nd::arrfunc &get_assign_na() const
     {
-      return m_assign_na.get();
-    }
-
-    const arrfunc_type *get_assign_na_arrfunc_type() const
-    {
-      return m_assign_na.get_type();
+      return nd::assign_na_decl::get_child(m_value_tp);
     }
 
     void print_data(std::ostream &o, const char *arrmeta,

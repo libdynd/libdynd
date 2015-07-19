@@ -10,8 +10,6 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
-#include <dynd/kernels/is_avail_kernel.hpp>
-#include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -334,9 +332,4 @@ void ndt::string_type::make_string_iter(dim_iter *out_di,
   }
   iter::make_string_iter(out_di, encoding, m_encoding, d->begin, d->end,
                          dataref, buffer_max_mem, ectx);
-}
-
-nd::arrfunc ndt::string_type::get_assign_na() const
-{
-  return nd::arrfunc::make<nd::assign_na_kernel<string_type_id>>(0);
 }

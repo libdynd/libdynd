@@ -22,8 +22,6 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/datetime_adapter_kernels.hpp>
-#include <dynd/kernels/is_avail_kernel.hpp>
-#include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/array_iter.hpp>
@@ -859,11 +857,6 @@ size_t ndt::datetime_type::make_elwise_property_setter_kernel(
     throw runtime_error(ss.str());
   }
   return ckb_offset;
-}
-
-nd::arrfunc ndt::datetime_type::get_assign_na() const
-{
-  return nd::arrfunc::make<nd::assign_na_kernel<datetime_type_id>>(0);
 }
 
 bool ndt::datetime_type::adapt_type(const type &operand_tp,
