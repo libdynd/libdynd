@@ -38,19 +38,10 @@ ndt::option_type::option_type(const type &value_tp)
   }
 
   if (value_tp.is_builtin()) {
-    //    nd::is_avail::make();
-    m_is_avail = nd::is_avail::get_child(value_tp);
-//    m_is_avail = get_option_builtin_is_avail(value_tp.get_type_id());
     m_assign_na = get_option_builtin_assign_na(value_tp.get_type_id());
-    if (!m_is_avail.is_null() && !m_assign_na.is_null()) {
-      return;
-    }
   } else {
-    m_is_avail = value_tp.extended()->get_is_avail();
     m_assign_na = value_tp.extended()->get_assign_na();
-    if (!m_is_avail.is_null() &&
-        m_is_avail.get_array_type() != option_type::make_is_avail_type() &&
-        !m_assign_na.is_null() &&
+    if (!m_assign_na.is_null() &&
         m_assign_na.get_array_type() != option_type::make_assign_na_type()) {
       stringstream ss;
       ss << "Type " << m_value_tp << " returned invalid is_avail or assign_na";
@@ -83,12 +74,6 @@ const ndt::type &ndt::option_type::make_assign_na_type()
 bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
                                 const eval::eval_context *ectx) const
 {
-  if (m_is_avail.is_null()) {
-    stringstream ss;
-    ss << "cannot instantiate data with type " << type(this, true);
-    throw type_error(ss.str());
-  }
-
   if (m_value_tp.is_builtin()) {
     switch (m_value_tp.get_type_id()) {
     // Just use the known value assignments for these builtins
@@ -123,11 +108,11 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
     }
   } else {
     ckernel_builder<kernel_request_host> ckb;
-    const arrfunc_type_data *af = get_is_avail_arrfunc();
+    nd::arrfunc &af = get_is_avail();
     type src_tp[1] = {type(this, true)};
-    af->instantiate(NULL, 0, NULL, &ckb, 0, type::make<bool1>(), NULL, 1,
-                    src_tp, &arrmeta, kernel_request_single, ectx, nd::array(),
-                    std::map<nd::string, type>());
+    af.get()->instantiate(NULL, 0, NULL, &ckb, 0, type::make<bool1>(), NULL, 1,
+                          src_tp, &arrmeta, kernel_request_single, ectx,
+                          nd::array(), std::map<nd::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<expr_single_t>()(&result, const_cast<char **>(&data),
@@ -306,7 +291,7 @@ bool ndt::option_type::operator==(const base_type &rhs) const
 void ndt::option_type::arrmeta_default_construct(char *arrmeta,
                                                  bool blockref_alloc) const
 {
-  if (m_is_avail.is_null() || m_assign_na.is_null()) {
+  if (m_assign_na.is_null()) {
     stringstream ss;
     ss << "cannot instantiate data with type " << type(this, true);
     throw type_error(ss.str());
@@ -411,8 +396,9 @@ void ndt::option_type::get_dynamic_type_properties(
     size_t *out_count) const
 {
   static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, nd::arrfunc>("value_type",
-                                nd::functional::apply(&property_get_value_type, "self")),
+      pair<string, nd::arrfunc>(
+          "value_type",
+          nd::functional::apply(&property_get_value_type, "self")),
       //      pair<string, gfunc::callable>(
       //        "is_avail", gfunc::make_callable(&property_get_is_avail,
       //        "self")),

@@ -339,13 +339,6 @@ void ndt::base_type::get_scalar_properties_and_functions(
   }
 }
 
-nd::arrfunc ndt::base_type::get_is_avail() const
-{
-  // Default to return a NULL nd::arrfunc, signalling no
-  // option_type support.
-  return nd::arrfunc();
-}
-
 nd::arrfunc ndt::base_type::get_assign_na() const
 {
   // Default to return a NULL nd::arrfunc, signalling no

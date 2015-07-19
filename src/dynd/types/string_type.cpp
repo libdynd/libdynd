@@ -336,11 +336,6 @@ void ndt::string_type::make_string_iter(dim_iter *out_di,
                          dataref, buffer_max_mem, ectx);
 }
 
-nd::arrfunc ndt::string_type::get_is_avail() const
-{
-  return nd::arrfunc::make<nd::is_avail_kernel<string_type_id>>(0);
-}
-
 nd::arrfunc ndt::string_type::get_assign_na() const
 {
   return nd::arrfunc::make<nd::assign_na_kernel<string_type_id>>(0);

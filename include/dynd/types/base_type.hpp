@@ -610,14 +610,6 @@ namespace ndt {
     {
     }
 
-    /**
-     * If a subclass implements this, it should return an nd::array
-     * whose type is option_type::make_nafunc_type(), which contains
-     * basic arrfuncs for is_avail and assign_na. These allow option[T]
-     * to work for the subclass type.
-     */
-    virtual nd::arrfunc get_is_avail() const;
-
     virtual nd::arrfunc get_assign_na() const;
 
     /**

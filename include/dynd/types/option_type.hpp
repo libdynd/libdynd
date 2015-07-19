@@ -30,8 +30,6 @@ namespace ndt {
   class option_type : public base_type {
     type m_value_tp;
 
-    // A function that classifies whether values are available # (option[T]) -> bool
-    nd::arrfunc m_is_avail;
     // A function that assigns the NA # () -> option[T]
     nd::arrfunc m_assign_na;
 
@@ -63,14 +61,9 @@ namespace ndt {
     bool is_avail(const char *arrmeta, const char *data,
                   const eval::eval_context *ectx) const;
 
-    const arrfunc_type_data *get_is_avail_arrfunc() const
+    nd::arrfunc &get_is_avail() const
     {
-      return m_is_avail.get();
-    }
-
-    const arrfunc_type *get_is_avail_arrfunc_type() const
-    {
-      return m_is_avail.get_type();
+      return nd::is_avail::get_child(m_value_tp);
     }
 
     const arrfunc_type_data *get_assign_na_arrfunc() const

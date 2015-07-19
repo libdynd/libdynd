@@ -208,18 +208,19 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
       src_tp[0].extended<ndt::option_type>()->get_value_type();
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // instantiate src_is_avail
-  const arrfunc_type_data *af =
-      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
-  ckb_offset = af->instantiate(NULL, 0, NULL, ckb, ckb_offset,
-                               ndt::type::make<bool1>(), NULL, nsrc, src_tp,
-                               src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  nd::arrfunc &is_avail =
+      src_tp[0].extended<ndt::option_type>()->get_is_avail();
+  ckb_offset = is_avail.get()->instantiate(
+      NULL, 0, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc,
+      src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate dst_assign_na
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-  af = dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
+  const arrfunc_type_data *af =
+      dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
   ckb_offset =
       af->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                       NULL, NULL, kernreq, ectx, kwds, tp_vars);
@@ -256,11 +257,10 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
       src_tp[0].extended<ndt::option_type>()->get_value_type();
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // instantiate src_is_avail
-  const arrfunc_type_data *af =
-      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
-  ckb_offset = af->instantiate(NULL, 0, NULL, ckb, ckb_offset,
-                               ndt::type::make<bool1>(), NULL, nsrc, src_tp,
-                               src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  nd::arrfunc &af = src_tp[0].extended<ndt::option_type>()->get_is_avail();
+  ckb_offset = af.get()->instantiate(
+      NULL, 0, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc,
+      src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate value_assign
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));

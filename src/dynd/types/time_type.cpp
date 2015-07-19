@@ -446,11 +446,6 @@ size_t ndt::time_type::make_elwise_property_setter_kernel(
   }
 }
 
-nd::arrfunc ndt::time_type::get_is_avail() const
-{
-  return nd::arrfunc::make<nd::is_avail_kernel<time_type_id>>(0);
-}
-
 nd::arrfunc ndt::time_type::get_assign_na() const
 {
   return nd::arrfunc::make<nd::assign_na_kernel<time_type_id>>(0);

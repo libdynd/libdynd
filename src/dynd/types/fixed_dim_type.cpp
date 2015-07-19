@@ -584,11 +584,6 @@ intptr_t ndt::fixed_dim_type::make_assignment_kernel(
   }
 }
 
-nd::arrfunc ndt::fixed_dim_type::get_is_avail() const
-{
-  return nd::arrfunc::make<nd::is_avail_kernel<fixed_dim_type_id>>(0);
-}
-
 nd::arrfunc ndt::fixed_dim_type::get_assign_na() const
 {
   return nd::arrfunc::make<nd::assign_na_kernel<fixed_dim_type_id>>(0);

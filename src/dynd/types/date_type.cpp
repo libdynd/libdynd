@@ -505,11 +505,6 @@ size_t ndt::date_type::make_elwise_property_setter_kernel(
   }
 }
 
-nd::arrfunc ndt::date_type::get_is_avail() const
-{
-  return nd::arrfunc::make<nd::is_avail_kernel<date_type_id>>(0);
-}
-
 nd::arrfunc ndt::date_type::get_assign_na() const
 {
   return nd::arrfunc::make<nd::assign_na_kernel<date_type_id>>(0);
