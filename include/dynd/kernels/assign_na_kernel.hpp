@@ -321,8 +321,9 @@ namespace nd {
   } // namespace dynd::nd::detail
 
   template <type_id_t DstTypeID>
-  using assign_na_kernel =
-      detail::assign_na_kernel<DstTypeID, type_kind_of<DstTypeID>::value>;
+  struct assign_na_kernel :
+      detail::assign_na_kernel<DstTypeID, type_kind_of<DstTypeID>::value> {
+  };
 
 } // namespace dynd::nd
 
