@@ -11,7 +11,6 @@
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/iter/string_iter.hpp>
 #include <dynd/exceptions.hpp>

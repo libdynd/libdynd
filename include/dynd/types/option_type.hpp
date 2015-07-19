@@ -108,15 +108,9 @@ namespace ndt {
     void get_dynamic_type_properties(
         const std::pair<std::string, nd::arrfunc> **out_properties,
         size_t *out_count) const;
+
+    static type make(const type &value_tp);
   };
-
-  type make_option(const type &value_tp);
-
-  template <typename Tnative>
-  inline type make_option()
-  {
-    return make_option(type::make<Tnative>());
-  }
 
 } // namespace dynd::ndt
 } // namespace dynd

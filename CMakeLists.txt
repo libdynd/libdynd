@@ -374,7 +374,6 @@ set(libdynd_SRC
     src/dynd/kernels/make_lifted_reduction_ckernel.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
-    src/dynd/kernels/option_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
     src/dynd/kernels/reduction_kernels.cpp
     src/dynd/kernels/rolling.cpp
@@ -392,6 +391,7 @@ set(libdynd_SRC
     src/dynd/kernels/var_dim_assignment_kernels.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
+    include/dynd/kernels/assign_na_kernel.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/base_kernel.hpp
     include/dynd/kernels/base_virtual_kernel.hpp
@@ -415,11 +415,11 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
-    include/dynd/func/fft.hpp
+    include/dynd/kernels/fft.hpp
+    include/dynd/kernels/is_avail_kernel.hpp
     include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/multidispatch_kernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
-    include/dynd/kernels/option_kernels.hpp
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/pointer_assignment_kernels.hpp
     include/dynd/kernels/reduction_kernels.hpp

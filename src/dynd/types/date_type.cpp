@@ -13,7 +13,6 @@
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/unary_expr_type.hpp>
-#include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/date_assignment_kernels.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>

@@ -50,17 +50,17 @@ TEST(JSONParser, BuiltinsFromBool)
   }
 
   // Handling of NULL with option[bool]
-  a = parse_json(ndt::make_option<bool1>(), "null");
-  EXPECT_EQ(ndt::make_option<bool1>(), a.get_type());
+  a = parse_json(ndt::option_type::make(ndt::type::make<bool1>()), "null");
+  EXPECT_EQ(ndt::option_type::make(ndt::type::make<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
-  a = parse_json(ndt::make_option<bool1>(), "\"NULL\"");
-  EXPECT_EQ(ndt::make_option<bool1>(), a.get_type());
+  a = parse_json(ndt::option_type::make(ndt::type::make<bool1>()), "\"NULL\"");
+  EXPECT_EQ(ndt::option_type::make(ndt::type::make<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
-  a = parse_json(ndt::make_option<bool1>(), "\"NA\"");
-  EXPECT_EQ(ndt::make_option<bool1>(), a.get_type());
+  a = parse_json(ndt::option_type::make(ndt::type::make<bool1>()), "\"NA\"");
+  EXPECT_EQ(ndt::option_type::make(ndt::type::make<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
-  a = parse_json(ndt::make_option<bool1>(), "\"\"");
-  EXPECT_EQ(ndt::make_option<bool1>(), a.get_type());
+  a = parse_json(ndt::option_type::make(ndt::type::make<bool1>()), "\"\"");
+  EXPECT_EQ(ndt::option_type::make(ndt::type::make<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
 
   // Handling of an NULL, invalid token, string with junk in it, empty string
@@ -122,11 +122,11 @@ TEST(JSONParser, OptionInt)
 {
   nd::array a, b, c;
 
-  a = parse_json(ndt::make_option<int8_t>(), "123");
-  EXPECT_EQ(ndt::make_option<int8_t>(), a.get_type());
+  a = parse_json(ndt::option_type::make(ndt::type::make<int8_t>()), "123");
+  EXPECT_EQ(ndt::option_type::make(ndt::type::make<int8_t>()), a.get_type());
   EXPECT_EQ(123, a.as<int8_t>());
-  a = parse_json(ndt::make_option<int8_t>(), "null");
-  EXPECT_EQ(ndt::make_option<int8_t>(), a.get_type());
+  a = parse_json(ndt::option_type::make(ndt::type::make<int8_t>()), "null");
+  EXPECT_EQ(ndt::option_type::make(ndt::type::make<int8_t>()), a.get_type());
   EXPECT_EQ(DYND_INT8_NA,
             *reinterpret_cast<const int8_t *>(a.get_readonly_originptr()));
   EXPECT_THROW(a.as<int8_t>(), overflow_error);

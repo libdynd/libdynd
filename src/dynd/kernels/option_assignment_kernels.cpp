@@ -412,7 +412,7 @@ static intptr_t instantiate_float_to_option_assignment_kernel(
   // Deal with some float32 to option[T] conversions where any NaN is
   // interpreted
   // as NA.
-  ndt::type src_tp_as_option = ndt::make_option(src_tp[0]);
+  ndt::type src_tp_as_option = ndt::option_type::make(src_tp[0]);
   return instantiate_option_to_option_assignment_kernel(
       NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
       &src_tp_as_option, src_arrmeta, kernreq, ectx, kwds, tp_vars);

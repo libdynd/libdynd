@@ -8,7 +8,6 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
-#include <dynd/kernels/option_kernels.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -187,7 +186,7 @@ void ndt::option_type::transform_child_types(type_transform_fn_t transform_fn,
   bool was_transformed = false;
   transform_fn(m_value_tp, arrmeta_offset + 0, extra, tmp_tp, was_transformed);
   if (was_transformed) {
-    out_transformed_tp = make_option(tmp_tp);
+    out_transformed_tp = make(tmp_tp);
     out_was_transformed = true;
   } else {
     out_transformed_tp = type(this, true);
@@ -196,7 +195,7 @@ void ndt::option_type::transform_child_types(type_transform_fn_t transform_fn,
 
 ndt::type ndt::option_type::get_canonical_type() const
 {
-  return make_option(m_value_tp.get_canonical_type());
+  return make(m_value_tp.get_canonical_type());
 }
 
 void ndt::option_type::set_from_utf8_string(
@@ -430,7 +429,7 @@ struct static_options {
 };
 } // anonymous namespace
 
-ndt::type ndt::make_option(const type &value_tp)
+ndt::type ndt::option_type::make(const type &value_tp)
 {
   // Static instances of the types, which have a reference
   // count > 0 for the lifetime of the program. This static
