@@ -7,15 +7,12 @@
 #include <dynd/func/apply.hpp>
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/option_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/kernels/elwise.hpp>
-#include <dynd/kernels/is_avail_kernel.hpp>
-#include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/make_callable.hpp>
@@ -582,16 +579,6 @@ intptr_t ndt::fixed_dim_type::make_assignment_kernel(
     ss << "Cannot assign from " << src_tp << " to " << dst_tp;
     throw dynd::type_error(ss.str());
   }
-}
-
-nd::arrfunc ndt::fixed_dim_type::get_is_avail() const
-{
-  return nd::arrfunc::make<nd::is_avail_kernel<fixed_dim_type_id>>(0);
-}
-
-nd::arrfunc ndt::fixed_dim_type::get_assign_na() const
-{
-  return nd::arrfunc::make<nd::assign_na_kernel<fixed_dim_type_id>>(0);
 }
 
 void ndt::fixed_dim_type::foreach_leading(const char *arrmeta, char *data,

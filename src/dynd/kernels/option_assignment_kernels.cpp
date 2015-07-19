@@ -208,21 +208,21 @@ static intptr_t instantiate_option_to_option_assignment_kernel(
       src_tp[0].extended<ndt::option_type>()->get_value_type();
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // instantiate src_is_avail
-  const arrfunc_type_data *af =
-      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
-  ckb_offset = af->instantiate(NULL, 0, NULL, ckb, ckb_offset,
-                               ndt::type::make<bool1>(), NULL, nsrc, src_tp,
-                               src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  nd::arrfunc &is_avail =
+      src_tp[0].extended<ndt::option_type>()->get_is_avail();
+  ckb_offset = is_avail.get()->instantiate(
+      NULL, 0, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc,
+      src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate dst_assign_na
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
              ->get_at<self_type>(root_ckb_offset);
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-  af = dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
-  ckb_offset =
-      af->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                      NULL, NULL, kernreq, ectx, kwds, tp_vars);
+  nd::arrfunc &assign_na = dst_tp.extended<ndt::option_type>()->get_assign_na();
+  ckb_offset = assign_na.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset,
+                                            dst_tp, dst_arrmeta, nsrc, NULL,
+                                            NULL, kernreq, ectx, kwds, tp_vars);
   // instantiate value_assign
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -256,11 +256,10 @@ static intptr_t instantiate_option_to_value_assignment_kernel(
       src_tp[0].extended<ndt::option_type>()->get_value_type();
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // instantiate src_is_avail
-  const arrfunc_type_data *af =
-      src_tp[0].extended<ndt::option_type>()->get_is_avail_arrfunc();
-  ckb_offset = af->instantiate(NULL, 0, NULL, ckb, ckb_offset,
-                               ndt::type::make<bool1>(), NULL, nsrc, src_tp,
-                               src_arrmeta, kernreq, ectx, kwds, tp_vars);
+  nd::arrfunc &af = src_tp[0].extended<ndt::option_type>()->get_is_avail();
+  ckb_offset = af.get()->instantiate(
+      NULL, 0, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc,
+      src_tp, src_arrmeta, kernreq, ectx, kwds, tp_vars);
   // instantiate value_assign
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -395,11 +394,10 @@ static intptr_t instantiate_string_to_option_assignment_kernel(
              ->get_at<string_to_option_tp_ck>(root_ckb_offset);
   // Second child ckernel is the NA assignment
   self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-  const arrfunc_type_data *af =
-      dst_tp.extended<ndt::option_type>()->get_assign_na_arrfunc();
-  ckb_offset =
-      af->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                      NULL, NULL, kernreq, ectx, kwds, tp_vars);
+  nd::arrfunc &assign_na = dst_tp.extended<ndt::option_type>()->get_assign_na();
+  ckb_offset = assign_na.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset,
+                                            dst_tp, dst_arrmeta, nsrc, NULL,
+                                            NULL, kernreq, ectx, kwds, tp_vars);
   return ckb_offset;
 }
 
@@ -414,7 +412,7 @@ static intptr_t instantiate_float_to_option_assignment_kernel(
   // Deal with some float32 to option[T] conversions where any NaN is
   // interpreted
   // as NA.
-  ndt::type src_tp_as_option = ndt::make_option(src_tp[0]);
+  ndt::type src_tp_as_option = ndt::option_type::make(src_tp[0]);
   return instantiate_option_to_option_assignment_kernel(
       NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
       &src_tp_as_option, src_arrmeta, kernreq, ectx, kwds, tp_vars);

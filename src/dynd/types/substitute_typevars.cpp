@@ -99,7 +99,7 @@ ndt::type ndt::detail::internal_substitute(
         pattern.extended<base_tuple_type>()->get_field_types(), typevars,
         concrete));
   case option_type_id:
-    return ndt::make_option(ndt::substitute(
+    return ndt::option_type::make(ndt::substitute(
         pattern.extended<option_type>()->get_value_type(), typevars, concrete));
   case arrfunc_type_id:
     return ndt::arrfunc_type::make(

@@ -7,11 +7,8 @@
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/property_type.hpp>
-#include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/is_avail_kernel.hpp>
-#include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/kernels/time_assignment_kernels.hpp>
 #include <dynd/func/make_callable.hpp>
 #include <dynd/parser_util.hpp>
@@ -444,14 +441,4 @@ size_t ndt::time_type::make_elwise_property_setter_kernel(
        << dst_property_index;
     throw runtime_error(ss.str());
   }
-}
-
-nd::arrfunc ndt::time_type::get_is_avail() const
-{
-  return nd::arrfunc::make<nd::is_avail_kernel<time_type_id>>(0);
-}
-
-nd::arrfunc ndt::time_type::get_assign_na() const
-{
-  return nd::arrfunc::make<nd::assign_na_kernel<time_type_id>>(0);
 }
