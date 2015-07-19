@@ -38,7 +38,8 @@ ndt::option_type::option_type(const type &value_tp)
   }
 
   if (value_tp.is_builtin()) {
-    m_assign_na = get_option_builtin_assign_na(value_tp.get_type_id());
+    m_assign_na = nd::assign_na_decl::get_child(value_tp);
+//    m_assign_na = get_option_builtin_assign_na(value_tp.get_type_id());
   } else {
     m_assign_na = value_tp.extended()->get_assign_na();
     if (!m_assign_na.is_null() &&
