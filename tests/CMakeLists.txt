@@ -72,7 +72,7 @@ set(tests_SRC
     func/test_apply.cpp
     func/test_arithmetic.cpp
     func/test_callable.cpp
-    func/test_chain_arrfunc.cpp
+    func/test_chain.cpp
     func/test_comparison.cpp
     func/test_elwise.cpp
     func/test_fft.cpp
