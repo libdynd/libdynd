@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/lift_reduction_arrfunc.hpp>
+#include <dynd/func/lift_reduction_callable.hpp>
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>

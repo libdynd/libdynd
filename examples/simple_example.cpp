@@ -14,7 +14,7 @@
 #include <dynd/array_range.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/func/apply.hpp>
-#include <dynd/func/lift_reduction_arrfunc.hpp>
+#include <dynd/func/lift_reduction_callable.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
 
 using namespace std;
@@ -39,7 +39,7 @@ int main()
 #ifdef DYND_CUDA
   cout << "moving to CUDA device..." << endl;
 
-  nd::arrfunc af = nd::functional::apply<kernel_request_cuda_device, callable0>();
+  nd::callable af = nd::functional::apply<kernel_request_cuda_device, callable0>();
   std::cout << "af: " << af(nd::array(1).to_cuda_device(), nd::array(2).to_cuda_device()) << std::endl;
 
   a = a.to_cuda_device();

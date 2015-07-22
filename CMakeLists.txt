@@ -308,7 +308,7 @@ set(libdynd_SRC
     src/dynd/func/elwise_gfunc.cpp
     src/dynd/func/elwise_reduce_gfunc.cpp
     src/dynd/func/fft.cpp
-    src/dynd/func/lift_reduction_arrfunc.cpp
+    src/dynd/func/lift_reduction_callable.cpp
     src/dynd/func/math.cpp
     src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood.cpp
@@ -331,7 +331,7 @@ set(libdynd_SRC
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/fft.hpp
     include/dynd/func/apply.hpp
-    include/dynd/func/lift_reduction_arrfunc.hpp
+    include/dynd/func/lift_reduction_callable.hpp
     include/dynd/func/math.hpp
     include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood.hpp
