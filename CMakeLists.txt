@@ -632,13 +632,11 @@ if (DYND_SHARED_LIB)
     else()
         add_library(libdynd SHARED $<TARGET_OBJECTS:libdynd_OBJ>)
     endif()
-    if (NOT WIN32)
-        set_target_properties(libdynd
-            PROPERTIES
-            OUTPUT_NAME "dynd"
-            PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
-            )
-    endif()
+    set_target_properties(libdynd
+        PROPERTIES
+        OUTPUT_NAME "dynd"
+        PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
+        )
 else()
     if (DYND_CUDA)
         cuda_add_library(libdynd STATIC ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
