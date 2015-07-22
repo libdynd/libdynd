@@ -11,11 +11,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
-# -DDYND_SRC_MAX, the maximum number of src parameters that functor arrfuncs will support
+# -DDYND_SRC_MAX, the maximum number of src parameters that functor callables will support
 SET(DYND_SRC_MAX 4 CACHE STRING
-    "Build a libdynd library with functor arrfuncs that support the specified maximum number of arguments")
+    "Build a libdynd library with functor callables that support the specified maximum number of arguments")
 # TODO: Check that the preprocessor can handle this number
-# -DDYND_ARG_MAX, the maximum number of arguments that functor arrfuncs must support,
+# -DDYND_ARG_MAX, the maximum number of arguments that functor callables must support,
 # which is DYND_SRC_MAX + ?reference_dst
 MATH(EXPR DYND_ARG_MAX "${DYND_SRC_MAX} + 1")
 
@@ -299,7 +299,7 @@ set(libdynd_SRC
     # Func
     src/dynd/func/arithmetic.cpp
     src/dynd/func/arrfunc.cpp
-    src/dynd/func/arrfunc_registry.cpp
+    src/dynd/func/callable_registry.cpp
     src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
     src/dynd/func/copy.cpp
@@ -321,7 +321,7 @@ set(libdynd_SRC
     src/dynd/func/take_by_pointer.cpp
     include/dynd/func/arithmetic.hpp
     include/dynd/func/arrfunc.hpp
-    include/dynd/func/arrfunc_registry.hpp
+    include/dynd/func/callable_registry.hpp
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
     include/dynd/func/comparison.hpp

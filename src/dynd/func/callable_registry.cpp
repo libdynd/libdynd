@@ -6,11 +6,11 @@
 #include <map>
 #include <cmath>
 
-#include <dynd/func/arrfunc_registry.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/random.hpp>
+#include <dynd/func/callable_registry.hpp>
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/func/take.hpp>
 

@@ -20,7 +20,7 @@
 #include <dynd/func/chain.hpp>
 #include <dynd/func/copy.hpp>
 #include <dynd/types/adapt_type.hpp>
-#include <dynd/func/arrfunc_registry.hpp>
+#include <dynd/func/callable_registry.hpp>
 
 using namespace std;
 using namespace dynd;
