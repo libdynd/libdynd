@@ -71,7 +71,6 @@ set(tests_SRC
     func/special_vals.hpp
     func/test_apply.cpp
     func/test_arithmetic.cpp
-    func/test_arrfunc.cpp
     func/test_callable.cpp
     func/test_chain_arrfunc.cpp
     func/test_comparison.cpp
@@ -89,6 +88,7 @@ set(tests_SRC
     func/test_special.cpp
     func/test_take.cpp
     func/test_take_by_pointer.cpp
+    gfunc/test_callable.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp

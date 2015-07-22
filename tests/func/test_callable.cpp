@@ -10,504 +10,368 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/gfunc/callable.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/types/fixed_string_type.hpp>
+#include <dynd/types/date_type.hpp>
+#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/apply.hpp>
+#include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/expr_kernel_generator.hpp>
+#include <dynd/func/elwise.hpp>
+#include <dynd/func/take.hpp>
 #include <dynd/gfunc/call_callable.hpp>
-#include <dynd/types/string_type.hpp>
-#include <dynd/types/struct_type.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;
 
-static int one_parameter(int x) { return 3 * x; }
-
-TEST(GFuncCallable, OneParameter)
+TEST(Callable, Assignment)
 {
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable(&one_parameter, "x");
-  EXPECT_EQ(ndt::struct_type::make({"x"}, {ndt::type::make<int>()}),
-            c.get_parameters_type());
+  // Create an callable for converting string to int
+  nd::callable af = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
+  // Validate that its types, etc are set right
+  ASSERT_EQ(1, af.get_type()->get_narg());
+  ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
+  ASSERT_EQ(ndt::fixed_string_type::make(16), af.get_type()->get_pos_type(0));
 
-  // Call it with the generic interface and see that it gave what we want
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
+  const char *src_arrmeta[1] = {NULL};
 
-  a(0).val_assign(12);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<int>(), r.get_type());
-  EXPECT_EQ(36, r.as<int>());
+  // Instantiate a single ckernel
+  ckernel_builder<kernel_request_host> ckb;
+  af.get()->instantiate(
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_single, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
+  int int_out = 0;
+  char str_in[16] = "3251";
+  const char *str_in_ptr = str_in;
+  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+  usngo(reinterpret_cast<char *>(&int_out), const_cast<char **>(&str_in_ptr),
+        ckb.get());
+  EXPECT_EQ(3251, int_out);
 
-  a(0).val_assign(3);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<int>(), r.get_type());
-  EXPECT_EQ(9, r.as<int>());
-
-  // Also call it through the C++ interface
-  EXPECT_EQ(3, c.call(1).as<int>());
-  EXPECT_EQ(-15, c.call(-5).as<int>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(), runtime_error);
-  EXPECT_THROW(c.call(1, 2), runtime_error);
+  // Instantiate a strided ckernel
+  ckb.reset();
+  af.get()->instantiate(
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_strided, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
+  int ints_out[3] = {0, 0, 0};
+  char strs_in[3][16] = {"123", "4567", "891029"};
+  const char *strs_in_ptr = strs_in[0];
+  expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
+  intptr_t strs_in_stride = sizeof(strs_in[0]);
+  ustro(reinterpret_cast<char *>(&ints_out), sizeof(int),
+        const_cast<char **>(&strs_in_ptr), &strs_in_stride, 3, ckb.get());
+  EXPECT_EQ(123, ints_out[0]);
+  EXPECT_EQ(4567, ints_out[1]);
+  EXPECT_EQ(891029, ints_out[2]);
 }
 
-TEST(GFuncCallable, OneParameterWithDefault)
-{
-  // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable_with_default(&one_parameter, "x", 12);
-  EXPECT_EQ(ndt::struct_type::make({"x"}, {ndt::type::make<int>()}),
-            c.get_parameters_type());
+static double func(int x, double y) { return 2.0 * x + y; }
 
-  // Call it through the C++ interface with and without a parameter
-  EXPECT_EQ(3, c.call(1).as<int>());
-  EXPECT_EQ(-15, c.call(-5).as<int>());
-  EXPECT_EQ(36, c.call().as<int>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(1, 2), runtime_error);
+TEST(Callable, Construction)
+{
+  nd::callable af0 = nd::functional::apply(&func);
+  EXPECT_EQ(4.5, af0(1, 2.5).as<double>());
+
+  nd::callable af1 = nd::functional::apply(&func, "y");
+  EXPECT_EQ(4.5, af1(1, kwds("y", 2.5)).as<double>());
+
+  nd::callable af2 = nd::functional::apply([](int x, int y) { return x - y; });
+  EXPECT_EQ(-4, af2(3, 7).as<int>());
+
+  nd::callable af3 =
+      nd::functional::apply([](int x, int y) { return x - y; }, "y");
+  EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
 }
 
-static double two_parameters(double a, long b) { return a * b; }
-
-TEST(GFuncCallable, TwoParameters)
+TEST(Callable, CallOperator)
 {
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable(&two_parameters, "a", "b");
-  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(),
-                                                ndt::type::make<long>()}),
-            c.get_parameters_type());
+  nd::callable af = nd::functional::apply(&func);
+  // Calling with positional arguments
+  EXPECT_EQ(4.5, af(1, 2.5).as<double>());
+  EXPECT_EQ(7.5, af(2, 3.5).as<double>());
+  // Wrong number of positional argumetns
+  EXPECT_THROW(af(2), invalid_argument);
+  EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
+  // Extra keyword argument
+  EXPECT_THROW(af(2, 3.5, kwds("x", 10)), invalid_argument);
 
-  // Call it and see that it gave what we want
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
+  af = nd::functional::apply(&func, "x");
+  // Calling with positional and keyword arguments
+  EXPECT_EQ(4.5, af(1, kwds("x", 2.5)).as<double>());
+  EXPECT_EQ(7.5, af(2, kwds("x", 3.5)).as<double>());
+  // Wrong number of positional/keyword arguments
+  EXPECT_THROW(af(2), invalid_argument);
+  EXPECT_THROW(af(2, 3.5), invalid_argument);
+  EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
+  // Extra/wrong keyword argument
+  EXPECT_THROW(af(2, kwds("y", 3.5)), invalid_argument);
+  EXPECT_THROW(af(2, kwds("x", 10, "y", 20)), invalid_argument);
+  EXPECT_THROW(af(2, 3.5, kwds("x", 10, "y", 20)), invalid_argument);
 
-  a(0).val_assign(2.25);
-  a(1).val_assign(3);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<double>(), r.get_type());
-  EXPECT_EQ(6.75, r.as<double>());
-
-  a(0).val_assign(-1.5);
-  a(1).val_assign(2);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<double>(), r.get_type());
-  EXPECT_EQ(-3, r.as<double>());
+  af = nd::functional::apply([]() { return 10; });
+  // Calling with no arguments
+  EXPECT_EQ(10, af().as<int>());
+  // Calling with empty keyword arguments
+  EXPECT_EQ(10, af(kwds()).as<int>());
+  // Wrong number of positional/keyword arguments
+  EXPECT_THROW(af(2), invalid_argument);
+  EXPECT_THROW(af(kwds("y", 3.5)), invalid_argument);
 }
 
-TEST(GFuncCallable, TwoParametersWithOneDefault)
+TEST(Callable, DynamicCall)
 {
-  // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable_with_default(&two_parameters, "a", "b", 5);
-  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(),
-                                                ndt::type::make<long>()}),
-            c.get_parameters_type());
+  nd::callable af;
 
-  // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(15, c.call(3, 5).as<double>());
-  EXPECT_EQ(-4.5, c.call(2.25, -2).as<double>());
-  EXPECT_EQ(-7.5, c.call(-1.5).as<double>());
-  EXPECT_EQ(-10, c.call(-2).as<double>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(), runtime_error);
+  nd::array values[3] = {7, 2.5, 5};
+  const char *names[3] = {"x", "y", "z"};
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; });
+  EXPECT_EQ(26.5, af(3, values).as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
+  EXPECT_EQ(26.5, af(2, values, kwds(1, names + 2, values + 2)).as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
+  EXPECT_EQ(26.5, af(1, values, kwds(2, names + 1, values + 1)).as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
+  EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
 }
 
-TEST(GFuncCallable, TwoParametersWithTwoDefaults)
+TEST(Callable, DecomposedDynamicCall)
 {
-  // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable_with_default(&two_parameters, "a", "b", 1.5, 7);
-  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(),
-                                                ndt::type::make<long>()}),
-            c.get_parameters_type());
+  nd::callable af;
 
-  // Call it through the C++ interface with and without a parameter
-  EXPECT_EQ(15, c.call(3, 5).as<double>());
-  EXPECT_EQ(-4.5, c.call(2.25, -2).as<double>());
-  EXPECT_EQ(-10.5, c.call(-1.5).as<double>());
-  EXPECT_EQ(-14, c.call(-2).as<double>());
-  EXPECT_EQ(10.5, c.call().as<double>());
+  nd::array values[3] = {7, 2.5, 5};
+  ndt::type types[3] = {values[0].get_type(), values[1].get_type(),
+                        values[2].get_type()};
+  const char *const arrmetas[3] = {values[0].get_arrmeta(),
+                                   values[1].get_arrmeta(),
+                                   values[2].get_arrmeta()};
+  char *const datas[3] = {values[0].get_ndo()->m_data_pointer,
+                          values[1].get_ndo()->m_data_pointer,
+                          values[2].get_ndo()->m_data_pointer};
+  const char *names[3] = {"x", "y", "z"};
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; });
+  EXPECT_EQ(26.5, af(3, types, arrmetas, datas).as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
+  EXPECT_EQ(26.5, af(2, types, arrmetas, datas, kwds(1, names + 2, values + 2))
+                      .as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
+  EXPECT_EQ(26.5, af(1, types, arrmetas, datas, kwds(2, names + 1, values + 1))
+                      .as<double>());
+
+  af = nd::functional::apply(
+      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
+  EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
 }
 
-static dynd::complex<float> three_parameters(bool x, int a, int b)
+TEST(Callable, KeywordParsing)
 {
-  if (x) {
-    return dynd::complex<float>((float)a, (float)b);
-  } else {
-    return dynd::complex<float>((float)b, (float)a);
-  }
+  nd::callable af0 =
+      nd::functional::apply([](int x, int y) { return x + y; }, "y");
+  EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
+  EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("y", 2.5)).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0(1, kwds("y", 4, "y", 2.5)).as<int>(), std::invalid_argument);
 }
 
-TEST(GFuncCallable, ThreeParameters)
+/*
+TEST(Callable, Option)
 {
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable(&three_parameters, "s", "a", "b");
-  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"}, {ndt::type::make<bool1>(),
-                                                     ndt::type::make<int>(),
-                                                     ndt::type::make<int>()}),
-            c.get_parameters_type());
+  struct callable {
+    int operator()(int x, int y) { return x + y; }
 
-  // Call it and see that it gave what we want
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
+    static void
+    resolve_option_vals(const callable_type_data *DYND_UNUSED(self),
+                        const callable_type *DYND_UNUSED(self_tp),
+                        intptr_t DYND_UNUSED(nsrc),
+                        const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
+                        const std::map<nd::string, ndt::type>
+&DYND_UNUSED(tp_vars))
+    {
+      nd::array x = kwds.p("x");
+      if (x.is_missing()) {
+        x.vals() = 4;
+      }
+    }
+  };
 
-  a(0).val_assign(true);
-  a(1).val_assign(3);
-  a(2).val_assign(4);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<dynd::complex<float>>(), r.get_type());
-  EXPECT_EQ(dynd::complex<float>(3, 4), r.as<dynd::complex<float>>());
+  nd::callable af = nd::functional::apply(callable(), "x");
+  EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
 
-  a(0).val_assign(false);
-  a(1).val_assign(5);
-  a(2).val_assign(6);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<dynd::complex<float>>(), r.get_type());
-  EXPECT_EQ(dynd::complex<float>(6, 5), r.as<dynd::complex<float>>());
+  af.set_as_option(&callable::resolve_option_vals, "x");
+  EXPECT_EQ(6, af(1, kwds("x", 5)).as<int>());
+  EXPECT_EQ(5, af(1).as<int>());
+}
+*/
+
+TEST(Callable, Assignment_CallInterface)
+{
+  // Test with the unary operation prototype
+  nd::callable af = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
+
+  // Call it through the call() interface
+  nd::array b = af("12345678");
+  EXPECT_EQ(ndt::type::make<int>(), b.get_type());
+  EXPECT_EQ(12345678, b.as<int>());
+
+  // Call it with some incompatible arguments
+  EXPECT_THROW(af(12345), invalid_argument);
+  EXPECT_THROW(af(false), invalid_argument);
+
+  // Test with the expr operation prototype
+  af = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
+
+  // Call it through the call() interface
+  b = af("12345678");
+  EXPECT_EQ(ndt::type::make<int>(), b.get_type());
+  EXPECT_EQ(12345678, b.as<int>());
+
+  // Call it with some incompatible arguments
+  EXPECT_THROW(af(12345), invalid_argument);
+  EXPECT_THROW(af(false), invalid_argument);
 }
 
-TEST(GFuncCallable, ThreeParametersWithOneDefault)
+TEST(Callable, Property)
 {
-  // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", 12);
-  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"}, {ndt::type::make<bool1>(),
-                                                     ndt::type::make<int>(),
-                                                     ndt::type::make<int>()}),
-            c.get_parameters_type());
+  // Create an callable for getting the year from a date
+  nd::callable af = make_callable_from_property(ndt::date_type::make(), "year");
+  // Validate that its types, etc are set right
+  ASSERT_EQ(1, af.get_type()->get_narg());
+  ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
+  ASSERT_EQ(ndt::date_type::make(), af.get_type()->get_pos_type(0));
 
-  // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(dynd::complex<float>(3, 4),
-            c.call(true, 3, 4).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 5),
-            c.call(false, 5, 6).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(7, 12),
-            c.call(true, 7).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 5),
-            c.call(false, 5).as<dynd::complex<float>>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(), runtime_error);
-  EXPECT_THROW(c.call(false), runtime_error);
-  EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
+  const char *src_arrmeta[1] = {NULL};
+
+  // Instantiate a single ckernel
+  ckernel_builder<kernel_request_host> ckb;
+  af.get()->instantiate(
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_single, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
+  int int_out = 0;
+  int date_in = date_ymd::to_days(2013, 12, 30);
+  const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
+  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+  usngo(reinterpret_cast<char *>(&int_out), const_cast<char **>(&date_in_ptr),
+        ckb.get());
+  EXPECT_EQ(2013, int_out);
 }
 
-TEST(GFuncCallable, ThreeParametersWithTwoDefaults)
+TEST(Callable, AssignmentAsExpr)
 {
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s",
-                                                        "a", "b", 6, 12);
-  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"}, {ndt::type::make<bool1>(),
-                                                     ndt::type::make<int>(),
-                                                     ndt::type::make<int>()}),
-            c.get_parameters_type());
+  // Create an callable for converting string to int
+  nd::callable af = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
+  // Validate that its types, etc are set right
+  ASSERT_EQ(1, af.get_type()->get_narg());
+  ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
+  ASSERT_EQ(ndt::fixed_string_type::make(16), af.get_type()->get_pos_type(0));
 
-  // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(dynd::complex<float>(3, 4),
-            c.call(true, 3, 4).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 5),
-            c.call(false, 5, 6).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(7, 12),
-            c.call(true, 7).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 5),
-            c.call(false, 5).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 12),
-            c.call(true).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 6),
-            c.call(false).as<dynd::complex<float>>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(), runtime_error);
-  EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
+  const char *src_arrmeta[1] = {NULL};
+
+  // Instantiate a single ckernel
+  ckernel_builder<kernel_request_host> ckb;
+  af.get()->instantiate(
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_single, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
+  int int_out = 0;
+  char str_in[16] = "3251";
+  char *str_in_ptr = str_in;
+  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+  usngo(reinterpret_cast<char *>(&int_out), &str_in_ptr, ckb.get());
+  EXPECT_EQ(3251, int_out);
+
+  // Instantiate a strided ckernel
+  ckb.reset();
+  af.get()->instantiate(
+      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
+      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
+      src_arrmeta, kernel_request_strided, &eval::default_eval_context,
+      nd::array(), std::map<nd::string, ndt::type>());
+  int ints_out[3] = {0, 0, 0};
+  char strs_in[3][16] = {"123", "4567", "891029"};
+  char *strs_in_ptr = strs_in[0];
+  intptr_t strs_in_stride = 16;
+  expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
+  ustro(reinterpret_cast<char *>(&ints_out), sizeof(int), &strs_in_ptr,
+        &strs_in_stride, 3, ckb.get());
+  EXPECT_EQ(123, ints_out[0]);
+  EXPECT_EQ(4567, ints_out[1]);
+  EXPECT_EQ(891029, ints_out[2]);
 }
 
-TEST(GFuncCallable, ThreeParametersWithThreeDefaults)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s",
-                                                        "a", "b", false, 6, 12);
-  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"}, {ndt::type::make<bool1>(),
-                                                     ndt::type::make<int>(),
-                                                     ndt::type::make<int>()}),
-            c.get_parameters_type());
+/*
+// TODO Reenable once there's a convenient way to make the binary callable
+TEST(Callable, Expr) {
+    callable_type_data af;
+    // Create an callable for adding two ints
+    ndt::type add_ints_type = (nd::array((int)0) +
+nd::array((int)0)).get_type();
+    make_callable_from_assignment(
+                    ndt::type::make<int>(), add_ints_type,
+                    expr_operation_funcproto, assign_error_default, af);
+    // Validate that its types, etc are set right
+    ASSERT_EQ(expr_operation_funcproto, (callable_proto_t)af.ckernel_funcproto);
+    ASSERT_EQ(2, af.get_narg());
+    ASSERT_EQ(ndt::type::make<int>(), af.get_return_type());
+    ASSERT_EQ(ndt::type::make<int>(), af.get_arg_type(0));
+    ASSERT_EQ(ndt::type::make<int>(), af.get_arg_type(1));
 
-  // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(dynd::complex<float>(3, 4),
-            c.call(true, 3, 4).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 5),
-            c.call(false, 5, 6).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(7, 12),
-            c.call(true, 7).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 5),
-            c.call(false, 5).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 12),
-            c.call(true).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 6),
-            c.call(false).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 6), c.call().as<dynd::complex<float>>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
+    const char *src_arrmeta[2] = {NULL, NULL};
+
+    // Instantiate a single ckernel
+    ckernel_builder ckb;
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
+                        af.get_arg_types(), src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context);
+    int int_out = 0;
+    int int_in1 = 1, int_in2 = 3;
+    char *int_in_ptr[2] = {reinterpret_cast<char *>(&int_in1),
+                        reinterpret_cast<char *>(&int_in2)};
+    expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+    usngo(reinterpret_cast<char *>(&int_out), int_in_ptr, ckb.get());
+    EXPECT_EQ(4, int_out);
+
+    // Instantiate a strided ckernel
+    ckb.reset();
+    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
+                        af.get_arg_types(), src_arrmeta,
+                        kernel_request_strided, &eval::default_eval_context);
+    int ints_out[3] = {0, 0, 0};
+    int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};
+    char *ints_in_ptr[2] = {reinterpret_cast<char *>(&ints_in1),
+                        reinterpret_cast<char *>(&ints_in2)};
+    intptr_t ints_in_strides[2] = {sizeof(int), sizeof(int)};
+    expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
+    ustro(reinterpret_cast<char *>(ints_out), sizeof(int),
+                    ints_in_ptr, ints_in_strides, 3, ckb.get());
+    EXPECT_EQ(6, ints_out[0]);
+    EXPECT_EQ(-208, ints_out[1]);
+    EXPECT_EQ(1237, ints_out[2]);
 }
-
-static uint8_t four_parameters(int8_t x, int16_t y, double alpha, uint32_t z)
-{
-  return (uint8_t)(x * (1 - alpha) + y * alpha + z);
-}
-
-TEST(GFuncCallable, FourParameters)
-{
-  // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable(&four_parameters, "x", "y", "alpha", "z");
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
-            c.get_parameters_type());
-
-  // Call it and see that it gave what we want
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
-
-  a(0).val_assign(-1);
-  a(1).val_assign(7);
-  a(2).val_assign(0.25);
-  a(3).val_assign(3);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<uint8_t>(), r.get_type());
-  EXPECT_EQ(4, r.as<uint8_t>());
-
-  a(0).val_assign(1);
-  a(1).val_assign(3);
-  a(2).val_assign(0.5);
-  a(3).val_assign(12);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<uint8_t>(), r.get_type());
-  EXPECT_EQ(14, r.as<uint8_t>());
-}
-
-TEST(GFuncCallable, FourParametersWithOneDefault)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(
-      &four_parameters, "x", "y", "alpha", "z", 240u);
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
-            c.get_parameters_type());
-
-  // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(4u, c.call(-1, 7, 0.25, 3).as<uint8_t>());
-  EXPECT_EQ(14u, c.call(1, 3, 0.5, 12).as<uint8_t>());
-  EXPECT_EQ(242u, c.call(1, 3, 0.5).as<uint8_t>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(), runtime_error);
-  EXPECT_THROW(c.call(2), runtime_error);
-  EXPECT_THROW(c.call(2, 5), runtime_error);
-  EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
-}
-
-TEST(GFuncCallable, FourParametersWithTwoDefaults)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(
-      &four_parameters, "x", "y", "alpha", "z", 0.75, 240u);
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
-            c.get_parameters_type());
-
-  // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(4u, c.call(-1, 7, 0.25, 3).as<uint8_t>());
-  EXPECT_EQ(14u, c.call(1, 3, 0.5, 12).as<uint8_t>());
-  EXPECT_EQ(242u, c.call(1, 3, 0.5).as<uint8_t>());
-  EXPECT_EQ(245u, c.call(-1, 7).as<uint8_t>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(), runtime_error);
-  EXPECT_THROW(c.call(2), runtime_error);
-  EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
-}
-
-TEST(GFuncCallable, FourParametersWithThreeDefaults)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(
-      &four_parameters, "x", "y", "alpha", "z", 8, 0.75, 240u);
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
-            c.get_parameters_type());
-
-  // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(4u, c.call(-1, 7, 0.25, 3).as<uint8_t>());
-  EXPECT_EQ(14u, c.call(1, 3, 0.5, 12).as<uint8_t>());
-  EXPECT_EQ(242u, c.call(1, 3, 0.5).as<uint8_t>());
-  EXPECT_EQ(245u, c.call(-1, 7).as<uint8_t>());
-  EXPECT_EQ(246u, c.call(0).as<uint8_t>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(), runtime_error);
-  EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
-}
-
-TEST(GFuncCallable, FourParametersWithFourDefaults)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(
-      &four_parameters, "x", "y", "alpha", "z", -8, 8, 0.75, 240u);
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
-            c.get_parameters_type());
-
-  // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(4u, c.call(-1, 7, 0.25, 3).as<uint8_t>());
-  EXPECT_EQ(14u, c.call(1, 3, 0.5, 12).as<uint8_t>());
-  EXPECT_EQ(242u, c.call(1, 3, 0.5).as<uint8_t>());
-  EXPECT_EQ(245u, c.call(-1, 7).as<uint8_t>());
-  EXPECT_EQ(246u, c.call(0).as<uint8_t>());
-  EXPECT_EQ(244u, c.call().as<uint8_t>());
-  // Should throw with the wrong number of arguments
-  EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
-}
-
-static double five_parameters(float (&x)[3], uint16_t a1, uint32_t a2,
-                              uint64_t a3, double (&y)[3])
-{
-  return x[0] * a1 * y[0] + x[1] * a2 * y[1] + x[2] * a3 * y[2];
-}
-
-TEST(GFuncCallable, FiveParameters)
-{
-  // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable(&five_parameters, "x", "a1", "a2", "a3", "y");
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "a1", "a2", "a3", "y"},
-                {ndt::make_fixed_dim(3, ndt::type::make<float>()),
-                 ndt::type::make<uint16_t>(), ndt::type::make<uint32_t>(),
-                 ndt::type::make<uint64_t>(),
-                 ndt::make_fixed_dim(3, ndt::type::make<double>())}),
-            c.get_parameters_type());
-
-  // Call it and see that it gave what we want
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
-
-  float f0[3] = {1, 2, 3};
-  double d0[3] = {1.5, 2.5, 3.5};
-  a(0).val_assign(f0);
-  a(1).val_assign(2);
-  a(2).val_assign(4);
-  a(3).val_assign(6);
-  a(4).val_assign(d0);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<double>(), r.get_type());
-  EXPECT_EQ(86, r.as<double>());
-}
-
-static nd::array array_return(int a, int b, int c)
-{
-  nd::array result = nd::empty<int[3]>();
-  result(0).vals() = a;
-  result(1).vals() = b;
-  result(2).vals() = c;
-  return result;
-}
-
-TEST(GFuncCallable, ArrayReturn)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable(&array_return, "a", "b", "c");
-
-  // Call it and see that it gave what we want
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
-
-  a(0).val_assign(-10);
-  a(1).val_assign(20);
-  a(2).val_assign(1000);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<int>()), r.get_type());
-  EXPECT_EQ(-10, r(0).as<int>());
-  EXPECT_EQ(20, r(1).as<int>());
-  EXPECT_EQ(1000, r(2).as<int>());
-}
-
-static size_t array_param(const nd::array &n)
-{
-  return n.get_type().get_ndim();
-}
-
-TEST(GFuncCallable, ArrayParam)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable(&array_param, "n");
-
-  // Call it and see that it gave what we want
-  nd::array tmp;
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
-
-  tmp = nd::empty<int[2][3][1]>();
-  *(void **)a.get_ndo()->m_data_pointer = tmp.get_ndo();
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
-  EXPECT_EQ(3, r.as<int>());
-}
-
-static size_t ndt_type_param(const ndt::type &d)
-{
-  return d.get_default_data_size();
-}
-
-TEST(GFuncCallable, DTypeParam)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable(&ndt_type_param, "d");
-
-  // Call it and see that it gave what we want
-  ndt::type tmp;
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
-
-  // With a base_type
-  tmp = ndt::struct_type::make(
-      {"A", "B"},
-      {ndt::type::make<dynd::complex<float>>(), ndt::type::make<int8_t>()});
-  *(const void **)a.get_ndo()->m_data_pointer = tmp.extended();
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
-  EXPECT_EQ(12u, r.as<size_t>());
-
-  // With a builtin type
-  tmp = ndt::type::make<uint64_t>();
-  *(void **)a.get_ndo()->m_data_pointer = (void *)tmp.get_type_id();
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
-  EXPECT_EQ(8u, r.as<size_t>());
-}
-
-static string string_return(int a, int b, int c)
-{
-  stringstream ss;
-  ss << a << ", " << b << ", " << c;
-  return ss.str();
-}
-
-TEST(GFuncCallable, StringReturn)
-{
-  // Create the callable
-  gfunc::callable c = gfunc::make_callable(&string_return, "a", "b", "c");
-
-  // Call it and see that it gave what we want
-  nd::array a, r;
-  a = nd::empty(c.get_parameters_type());
-
-  a(0).val_assign(-10);
-  a(1).val_assign(20);
-  a(2).val_assign(1000);
-  r = c.call_generic(a);
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), r.get_type());
-  EXPECT_EQ("-10, 20, 1000", r.as<string>());
-}
+*/
