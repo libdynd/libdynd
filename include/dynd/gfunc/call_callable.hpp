@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/func/callable.hpp>
+#include <dynd/gfunc/callable.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>

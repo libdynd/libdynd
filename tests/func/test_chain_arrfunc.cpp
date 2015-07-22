@@ -17,7 +17,6 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
-#include <dynd/func/call_callable.hpp>
 #include <dynd/func/chain.hpp>
 #include <dynd/func/copy.hpp>
 #include <dynd/types/adapt_type.hpp>

@@ -3,10 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/callable_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/func/apply.hpp>
-#include <dynd/func/make_callable.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/arrfunc.hpp>

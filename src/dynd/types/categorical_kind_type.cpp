@@ -8,8 +8,6 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/func/callable.hpp>
-#include <dynd/func/make_callable.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 

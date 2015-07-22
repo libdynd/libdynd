@@ -7,6 +7,8 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/date_util.hpp>
+#include <dynd/gfunc/callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 
 namespace dynd {
 namespace ndt {

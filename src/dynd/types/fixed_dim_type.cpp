@@ -14,8 +14,6 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/kernels/elwise.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
-#include <dynd/func/callable.hpp>
-#include <dynd/func/make_callable.hpp>
 #include <dynd/types/typevar_type.hpp>
 
 using namespace std;

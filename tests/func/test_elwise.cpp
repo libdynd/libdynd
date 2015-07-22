@@ -17,7 +17,6 @@
 #include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
-#include <dynd/func/call_callable.hpp>
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
 #include "../dynd_assertions.hpp"

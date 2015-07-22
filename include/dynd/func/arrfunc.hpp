@@ -10,7 +10,7 @@
 #include <dynd/config.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/types/base_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/callable_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/substitute_typevars.hpp>

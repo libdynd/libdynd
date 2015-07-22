@@ -8,7 +8,7 @@
 #include <dynd/parser_util.hpp>
 #include <dynd/types/datetime_parser.hpp>
 #include <dynd/types/datetime_type.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/callable_type.hpp>
 #include <dynd/func/arrfunc.hpp>
 #include <dynd/string.hpp>
 

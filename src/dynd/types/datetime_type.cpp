@@ -22,7 +22,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/datetime_adapter_kernels.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/func/make_callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/parser_util.hpp>
 

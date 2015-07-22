@@ -12,8 +12,8 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/func/make_callable.hpp>
-#include <dynd/func/call_callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 #include <dynd/func/arrfunc.hpp>
 
 #include <dynd/types/convert_type.hpp>

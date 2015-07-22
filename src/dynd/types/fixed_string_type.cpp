@@ -11,7 +11,6 @@
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/func/make_callable.hpp>
 #include <dynd/iter/string_iter.hpp>
 
 using namespace std;

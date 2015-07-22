@@ -4,7 +4,6 @@
 //
 
 #include <dynd/type.hpp>
-#include <dynd/func/callable.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/func/arrfunc.hpp>
 

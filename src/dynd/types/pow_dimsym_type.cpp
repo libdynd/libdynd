@@ -8,7 +8,6 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
-#include <dynd/func/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;

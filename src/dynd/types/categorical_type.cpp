@@ -13,7 +13,7 @@
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
-#include <dynd/func/make_callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>

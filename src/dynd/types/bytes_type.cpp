@@ -9,7 +9,6 @@
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/apply.hpp>
-#include <dynd/func/make_callable.hpp>
 
 #include <algorithm>
 

@@ -11,7 +11,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/func/arrfunc.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/callable_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>

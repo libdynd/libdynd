@@ -18,8 +18,6 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/callable.hpp>
-#include <dynd/func/call_callable.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/type.hpp>
 

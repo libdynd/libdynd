@@ -16,7 +16,6 @@
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/func/callable.hpp>
 
 #include "dynd_assertions.hpp"
 

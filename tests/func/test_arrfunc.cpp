@@ -18,7 +18,7 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
-#include <dynd/func/call_callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 #include <dynd/array.hpp>
 
 using namespace std;

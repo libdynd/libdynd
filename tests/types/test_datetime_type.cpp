@@ -16,8 +16,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/func/callable.hpp>
-#include <dynd/func/call_callable.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;
