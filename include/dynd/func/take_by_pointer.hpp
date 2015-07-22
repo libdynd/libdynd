@@ -13,12 +13,12 @@ namespace dynd {
 namespace nd {
 
   /**
-   * Create an arrfunc which applies an indexed take/"fancy indexing" operation,
-   * but stores the pointers.
+   * Create an callable which applies an indexed take/"fancy indexing"
+   * operation, but stores the pointers.
    *
    */
   extern struct take_by_pointer : declfunc<take_by_pointer> {
-    static arrfunc make();
+    static callable make();
   } take_by_pointer;
 
 } // namespace dynd::nd

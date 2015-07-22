@@ -684,7 +684,7 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
 }
 
 static void
-check_dst_initialization(const ndt::arrfunc_type *dst_initialization_tp,
+check_dst_initialization(const ndt::callable_type *dst_initialization_tp,
                          const ndt::type &dst_tp, const ndt::type &src_tp)
 {
   if (dst_initialization_tp->get_return_type() != dst_tp) {
@@ -711,20 +711,20 @@ check_dst_initialization(const ndt::arrfunc_type *dst_initialization_tp,
  * If dst_initialization is NULL, an assignment kernel is used.
  */
 static size_t make_strided_inner_reduction_dimension_kernel(
-    const arrfunc_type_data *elwise_reduction_const,
-    const ndt::arrfunc_type *elwise_reduction_tp,
-    const arrfunc_type_data *dst_initialization_const,
-    const ndt::arrfunc_type *dst_initialization_tp, void *ckb,
+    const callable_type_data *elwise_reduction_const,
+    const ndt::callable_type *elwise_reduction_tp,
+    const callable_type_data *dst_initialization_const,
+    const ndt::callable_type *dst_initialization_tp, void *ckb,
     intptr_t ckb_offset, intptr_t src_stride, intptr_t src_size,
     const ndt::type &dst_tp, const char *dst_arrmeta, const ndt::type &src_tp,
     const char *src_arrmeta, bool right_associative,
     const nd::array &reduction_identity, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-  arrfunc_type_data *elwise_reduction =
-      const_cast<arrfunc_type_data *>(elwise_reduction_const);
-  arrfunc_type_data *dst_initialization =
-      const_cast<arrfunc_type_data *>(dst_initialization_const);
+  callable_type_data *elwise_reduction =
+      const_cast<callable_type_data *>(elwise_reduction_const);
+  callable_type_data *dst_initialization =
+      const_cast<callable_type_data *>(dst_initialization_const);
 
   intptr_t root_ckb_offset = ckb_offset;
   strided_inner_reduction_kernel_extra *e =
@@ -783,7 +783,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   // The striding parameters
   e->src_stride = src_stride;
   e->size = src_size;
-  // Validate that the provided arrfuncs are unary operations,
+  // Validate that the provided callables are unary operations,
   // and have the correct types
   if (elwise_reduction_tp->get_npos() != 1 &&
       elwise_reduction_tp->get_npos() != 2) {
@@ -858,20 +858,20 @@ static size_t make_strided_inner_reduction_dimension_kernel(
  * the final dimension before the accumulation operation.
  */
 static size_t make_strided_inner_broadcast_dimension_kernel(
-    const arrfunc_type_data *elwise_reduction_const,
-    const ndt::arrfunc_type *elwise_reduction_tp,
-    const arrfunc_type_data *dst_initialization_const,
-    const ndt::arrfunc_type *dst_initialization_tp, void *ckb,
+    const callable_type_data *elwise_reduction_const,
+    const ndt::callable_type *elwise_reduction_tp,
+    const callable_type_data *dst_initialization_const,
+    const ndt::callable_type *dst_initialization_tp, void *ckb,
     intptr_t ckb_offset, intptr_t dst_stride, intptr_t src_stride,
     intptr_t src_size, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type &src_tp, const char *src_arrmeta, bool right_associative,
     const nd::array &reduction_identity, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-  arrfunc_type_data *elwise_reduction =
-      const_cast<arrfunc_type_data *>(elwise_reduction_const);
-  arrfunc_type_data *dst_initialization =
-      const_cast<arrfunc_type_data *>(dst_initialization_const);
+  callable_type_data *elwise_reduction =
+      const_cast<callable_type_data *>(elwise_reduction_const);
+  callable_type_data *dst_initialization =
+      const_cast<callable_type_data *>(dst_initialization_const);
 
   intptr_t root_ckb_offset = ckb_offset;
   strided_inner_broadcast_kernel_extra *e =
@@ -931,7 +931,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   e->dst_stride = dst_stride;
   e->src_stride = src_stride;
   e->size = src_size;
-  // Validate that the provided arrfuncs are unary operations,
+  // Validate that the provided callables are unary operations,
   // and have the correct types
   if (elwise_reduction_tp->get_npos() != 1 &&
       elwise_reduction_tp->get_npos() != 2) {
@@ -1001,20 +1001,20 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
 }
 
 size_t dynd::make_lifted_reduction_ckernel(
-    const arrfunc_type_data *elwise_reduction_const,
-    const ndt::arrfunc_type *elwise_reduction_tp,
-    const arrfunc_type_data *dst_initialization_const,
-    const ndt::arrfunc_type *dst_initialization_tp, void *ckb,
+    const callable_type_data *elwise_reduction_const,
+    const ndt::callable_type *elwise_reduction_tp,
+    const callable_type_data *dst_initialization_const,
+    const ndt::callable_type *dst_initialization_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type &src_tp, const char *src_arrmeta, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,
     bool right_associative, const nd::array &reduction_identity,
     dynd::kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-  arrfunc_type_data *elwise_reduction =
-      const_cast<arrfunc_type_data *>(elwise_reduction_const);
-  arrfunc_type_data *dst_initialization =
-      const_cast<arrfunc_type_data *>(dst_initialization_const);
+  callable_type_data *elwise_reduction =
+      const_cast<callable_type_data *>(elwise_reduction_const);
+  callable_type_data *dst_initialization =
+      const_cast<callable_type_data *>(dst_initialization_const);
 
   // Count the number of dimensions being reduced
   intptr_t reducedim_count = 0;

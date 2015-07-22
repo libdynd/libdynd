@@ -390,8 +390,8 @@ namespace ndt {
   struct type::equivalent<nd::is_avail_kernel<Src0ValueTypeID>> {
     static type make()
     {
-      return arrfunc_type::make(type::make<bool1>(),
-                                option_type::make(Src0ValueTypeID));
+      return callable_type::make(type::make<bool1>(),
+                                 option_type::make(Src0ValueTypeID));
     }
   };
 

@@ -106,7 +106,7 @@ struct int_multiply_and_offset_ck
 };
 
 template <class Tsrc, class Tdst>
-static intptr_t instantiate_int_multiply_and_offset_arrfunc(
+static intptr_t instantiate_int_multiply_and_offset_callable(
     char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -123,11 +123,12 @@ static intptr_t instantiate_int_multiply_and_offset_arrfunc(
 }
 
 template <class Tsrc, class Tdst>
-nd::arrfunc make_int_multiply_and_offset_arrfunc(Tdst factor, Tdst offset,
-                                                 const ndt::type &func_proto)
+nd::callable make_int_multiply_and_offset_callable(Tdst factor, Tdst offset,
+                                                   const ndt::type &func_proto)
 {
-  return nd::arrfunc(func_proto, make_pair(factor, offset), 0, NULL, NULL,
-                     &instantiate_int_multiply_and_offset_arrfunc<Tsrc, Tdst>);
+  return nd::callable(
+      func_proto, make_pair(factor, offset), 0, NULL, NULL,
+      &instantiate_int_multiply_and_offset_callable<Tsrc, Tdst>);
 }
 
 template <class Tsrc, class Tdst>
@@ -149,7 +150,7 @@ struct int_offset_and_divide_ck
 };
 
 template <class Tsrc, class Tdst>
-static intptr_t instantiate_int_offset_and_divide_arrfunc(
+static intptr_t instantiate_int_offset_and_divide_callable(
     char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -166,20 +167,20 @@ static intptr_t instantiate_int_offset_and_divide_arrfunc(
 }
 
 template <class Tsrc, class Tdst>
-nd::arrfunc make_int_offset_and_divide_arrfunc(Tdst offset, Tdst divisor,
-                                               const ndt::type &func_proto)
+nd::callable make_int_offset_and_divide_callable(Tdst offset, Tdst divisor,
+                                                 const ndt::type &func_proto)
 {
-  return nd::arrfunc(func_proto, make_pair(offset, divisor), 0, NULL, NULL,
-                     &instantiate_int_offset_and_divide_arrfunc<Tsrc, Tdst>);
+  return nd::callable(func_proto, make_pair(offset, divisor), 0, NULL, NULL,
+                      &instantiate_int_offset_and_divide_callable<Tsrc, Tdst>);
 }
 
 } // anonymous namespace
 
-bool dynd::make_datetime_adapter_arrfunc(const ndt::type &value_tp,
-                                         const ndt::type &operand_tp,
-                                         const nd::string &op,
-                                         nd::arrfunc &out_forward,
-                                         nd::arrfunc &out_reverse)
+bool dynd::make_datetime_adapter_callable(const ndt::type &value_tp,
+                                          const ndt::type &operand_tp,
+                                          const nd::string &op,
+                                          nd::callable &out_forward,
+                                          nd::callable &out_reverse)
 {
   int64_t epoch_datetime, unit_factor = 1, unit_divisor = 1;
   if (value_tp.get_type_id() != datetime_type_id) {
@@ -192,19 +193,19 @@ bool dynd::make_datetime_adapter_arrfunc(const ndt::type &value_tp,
       if (unit_divisor > 1) {
         // TODO: This is a bad implementation, should do divide_and_offset to
         //       avoid overflow issues.
-        out_forward = make_int_offset_and_divide_arrfunc<int64_t, int64_t>(
+        out_forward = make_int_offset_and_divide_callable<int64_t, int64_t>(
             epoch_datetime * unit_divisor, unit_divisor,
-            ndt::arrfunc_type::make(value_tp, ndt::type::make<int64_t>()));
-        out_reverse = make_int_multiply_and_offset_arrfunc<int64_t, int64_t>(
+            ndt::callable_type::make(value_tp, ndt::type::make<int64_t>()));
+        out_reverse = make_int_multiply_and_offset_callable<int64_t, int64_t>(
             unit_divisor, -epoch_datetime * unit_divisor,
-            ndt::arrfunc_type::make(ndt::type::make<int64_t>(), value_tp));
+            ndt::callable_type::make(ndt::type::make<int64_t>(), value_tp));
       } else {
-        out_forward = make_int_multiply_and_offset_arrfunc<int64_t, int64_t>(
+        out_forward = make_int_multiply_and_offset_callable<int64_t, int64_t>(
             unit_factor, epoch_datetime,
-            ndt::arrfunc_type::make(value_tp, ndt::type::make<int64_t>()));
-        out_reverse = make_int_offset_and_divide_arrfunc<int64_t, int64_t>(
+            ndt::callable_type::make(value_tp, ndt::type::make<int64_t>()));
+        out_reverse = make_int_offset_and_divide_callable<int64_t, int64_t>(
             -epoch_datetime, unit_factor,
-            ndt::arrfunc_type::make(ndt::type::make<int64_t>(), value_tp));
+            ndt::callable_type::make(ndt::type::make<int64_t>(), value_tp));
       }
       return true;
     default:

@@ -23,7 +23,7 @@ static double func0(double x, double y, double z) { return x + y + z; }
 TEST(Outer, 1D)
 {
   nd::array x, y, z, res;
-  nd::arrfunc af = nd::functional::outer(nd::functional::apply(&func0));
+  nd::callable af = nd::functional::outer(nd::functional::apply(&func0));
 
   x = nd::random::uniform(
       kwds("dst_tp", ndt::make_fixed_dim(10, ndt::type::make<double>())));

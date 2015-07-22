@@ -20,7 +20,7 @@ using namespace dynd;
  *
  * e.g. "(int16, int16) -> int16)" and "(int32, int16) -> int32"
  */
-static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
+static bool supercedes(const nd::callable &lhs, const nd::callable &rhs)
 {
   // TODO: Deal with keyword args
   if (lhs.get_type()->get_nkwd() > 0 || rhs.get_type()->get_nkwd() > 0) {
@@ -49,7 +49,7 @@ static bool supercedes(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
  *
  * e.g. "(int16, int16) -> int16)" and "(int32, int16) -> int32"
  */
-static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
+static bool toposort_edge(const nd::callable &lhs, const nd::callable &rhs)
 {
   // TODO: Deal with keyword args
   if (lhs.get_type()->get_nkwd() > 0 || rhs.get_type()->get_nkwd() > 0) {
@@ -78,7 +78,7 @@ static bool toposort_edge(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
  *
  * e.g. "(int16, int32) -> int16)" and "(int32, int16) -> int32"
  */
-static bool ambiguous(const nd::arrfunc &lhs, const nd::arrfunc &rhs)
+static bool ambiguous(const nd::callable &lhs, const nd::callable &rhs)
 {
   // TODO: Deal with keyword args
   if (lhs.get_type()->get_nkwd() > 0 || rhs.get_type()->get_nkwd() > 0) {
@@ -120,12 +120,12 @@ struct toposort_marker {
 
 static void toposort_visit(intptr_t n, vector<toposort_marker> &marker,
                            vector<vector<intptr_t>> &adjlist, intptr_t naf,
-                           const nd::arrfunc *af,
-                           vector<nd::arrfunc> &sorted_af)
+                           const nd::callable *af,
+                           vector<nd::callable> &sorted_af)
 {
   if (marker[n].temp_mark) {
     throw invalid_argument("Detected a graph loop trying to topologically sort "
-                           "arrfunc signatures for a multidispatch arrfunc");
+                           "callable signatures for a multidispatch callable");
   }
   if (!marker[n].mark) {
     marker[n].temp_mark = true;
@@ -144,7 +144,7 @@ static void toposort_visit(intptr_t n, vector<toposort_marker> &marker,
  * Does a DFS-based topological sort.
  */
 static void toposort(vector<vector<intptr_t>> &adjlist, intptr_t naf,
-                     const nd::arrfunc *af, vector<nd::arrfunc> &sorted_af)
+                     const nd::callable *af, vector<nd::callable> &sorted_af)
 {
   vector<toposort_marker> marker(naf);
   for (intptr_t n = 0; n < naf; ++n) {
@@ -160,7 +160,7 @@ static void toposort(vector<vector<intptr_t>> &adjlist, intptr_t naf,
  *
  * NOTE: Presently O(naf ** 2)
  */
-static void get_graph(intptr_t naf, const nd::arrfunc *af,
+static void get_graph(intptr_t naf, const nd::callable *af,
                       vector<vector<intptr_t>> &adjlist)
 {
   for (intptr_t i = 0; i < naf; ++i) {
@@ -170,7 +170,7 @@ static void get_graph(intptr_t naf, const nd::arrfunc *af,
           adjlist[i].push_back(j);
         } else {
           stringstream ss;
-          ss << "Multidispatch provided with two arrfunc signatures matching "
+          ss << "Multidispatch provided with two callable signatures matching "
                 "the same types: " << af[i].get_array_type() << " and "
              << af[j].get_array_type();
           throw invalid_argument(ss.str());
@@ -180,8 +180,8 @@ static void get_graph(intptr_t naf, const nd::arrfunc *af,
   }
 }
 
-static void sort_arrfuncs(intptr_t naf, const nd::arrfunc *af,
-                          vector<nd::arrfunc> &sorted_af)
+static void sort_callables(intptr_t naf, const nd::callable *af,
+                           vector<nd::callable> &sorted_af)
 {
   vector<vector<intptr_t>> adjlist(naf);
   get_graph(naf, af, adjlist);
@@ -201,13 +201,13 @@ static void sort_arrfuncs(intptr_t naf, const nd::arrfunc *af,
 
 /**
  * Returns all the pairs of signatures which are ambiguous. This
- * assumes that the arrfunc array is already topologically sorted.
+ * assumes that the callable array is already topologically sorted.
  *
  * NOTE: Presently O(naf ** 3)
  */
 static void
-get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
-                    vector<pair<nd::arrfunc, nd::arrfunc>> &ambig_pairs)
+get_ambiguous_pairs(intptr_t naf, const nd::callable *af,
+                    vector<pair<nd::callable, nd::callable>> &ambig_pairs)
 {
   for (intptr_t i = 0; i < naf; ++i) {
     for (intptr_t j = i + 1; j < naf; ++j) {
@@ -226,29 +226,29 @@ get_ambiguous_pairs(intptr_t naf, const nd::arrfunc *af,
   }
 }
 
-nd::arrfunc nd::functional::old_multidispatch(intptr_t naf,
-                                              const arrfunc *child_af)
+nd::callable nd::functional::old_multidispatch(intptr_t naf,
+                                               const callable *child_af)
 {
   if (naf <= 0) {
     throw invalid_argument(
-        "Require one or more functions to create a multidispatch arrfunc");
+        "Require one or more functions to create a multidispatch callable");
   }
   // Number of parameters must be the same across all
   intptr_t nargs = child_af[0].get_type()->get_narg();
   for (intptr_t i = 1; i < naf; ++i) {
     if (nargs != child_af[i].get_type()->get_narg()) {
       stringstream ss;
-      ss << "All child arrfuncs must have the same number of arguments to "
-            "generate a multidispatch arrfunc, differing: "
+      ss << "All child callables must have the same number of arguments to "
+            "generate a multidispatch callable, differing: "
          << child_af[0].get_array_type() << " and "
          << child_af[i].get_array_type();
       throw invalid_argument(ss.str());
     }
   }
 
-  // Generate the topologically sorted array of arrfuncs
-  vector<nd::arrfunc> sorted_af;
-  sort_arrfuncs(naf, child_af, sorted_af);
+  // Generate the topologically sorted array of callables
+  vector<nd::callable> sorted_af;
+  sort_callables(naf, child_af, sorted_af);
 
   /*
   cout << "Before: \n";
@@ -263,11 +263,11 @@ nd::arrfunc nd::functional::old_multidispatch(intptr_t naf,
   cout << endl;
   //*/
 
-  vector<pair<nd::arrfunc, nd::arrfunc>> ambig_pairs;
+  vector<pair<nd::callable, nd::callable>> ambig_pairs;
   get_ambiguous_pairs(naf, &sorted_af[0], ambig_pairs);
   if (!ambig_pairs.empty()) {
     stringstream ss;
-    ss << "Arrfuncs provided to create multidispatch arrfunc have ambiguous "
+    ss << "Arrfuncs provided to create multidispatch callable have ambiguous "
           "case(s):\n";
     for (intptr_t i = 0; i < (intptr_t)ambig_pairs.size(); ++i) {
       ss << ambig_pairs[i].first.get_array_type() << " and "
@@ -276,17 +276,17 @@ nd::arrfunc nd::functional::old_multidispatch(intptr_t naf,
     throw invalid_argument(ss.str());
   }
 
-  // TODO: Component arrfuncs might be arrays, not just scalars
-  return arrfunc::make<old_multidispatch_ck>(ndt::make_generic_funcproto(nargs),
-                                             std::move(sorted_af), 0);
+  // TODO: Component callables might be arrays, not just scalars
+  return callable::make<old_multidispatch_ck>(
+      ndt::make_generic_funcproto(nargs), std::move(sorted_af), 0);
 }
 
-nd::arrfunc
+nd::callable
 nd::functional::multidispatch(const ndt::type &self_tp,
-                              const std::initializer_list<arrfunc> &children,
-                              const arrfunc &default_child)
+                              const std::initializer_list<callable> &children,
+                              const callable &default_child)
 {
-  switch (self_tp.extended<ndt::arrfunc_type>()->get_npos()) {
+  switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
   case 1:
     return multidispatch<1>(self_tp, children, default_child);
   case 2:

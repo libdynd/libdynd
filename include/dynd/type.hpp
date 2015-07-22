@@ -1115,7 +1115,7 @@ namespace ndt {
 
   type type_of(const nd::array &val);
 
-  type type_of(const nd::arrfunc &val);
+  type type_of(const nd::callable &val);
 
   /**
    * Returns the type to use for packing this specific value. The value
@@ -1147,7 +1147,7 @@ namespace ndt {
 
   type get_forward_type(const nd::array &val);
 
-  type get_forward_type(const nd::arrfunc &val);
+  type get_forward_type(const nd::callable &val);
 
   /**
    * A static array of the builtin types and void.

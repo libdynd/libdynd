@@ -52,12 +52,12 @@ namespace ndt {
     bool is_avail(const char *arrmeta, const char *data,
                   const eval::eval_context *ectx) const;
 
-    nd::arrfunc &get_is_avail() const
+    nd::callable &get_is_avail() const
     {
       return nd::is_avail::get_child(m_value_tp);
     }
 
-    nd::arrfunc &get_assign_na() const
+    nd::callable &get_assign_na() const
     {
       return nd::assign_na_decl::get_child(m_value_tp);
     }
@@ -106,7 +106,7 @@ namespace ndt {
                std::map<nd::string, type> &tp_vars) const;
 
     void get_dynamic_type_properties(
-        const std::pair<std::string, nd::arrfunc> **out_properties,
+        const std::pair<std::string, nd::callable> **out_properties,
         size_t *out_count) const;
 
     static type make(const type &value_tp);

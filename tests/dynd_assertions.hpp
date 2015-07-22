@@ -385,7 +385,7 @@ AssertArrayNear(const char *expected_expr, const char *actual_expr,
   std::unique_ptr<test_class<dynd::complex<double>>> c(
       new test_class<dynd::complex<double>>(rel_error_max));
 
-  dynd::nd::arrfunc af =
+  dynd::nd::callable af =
       dynd::nd::functional::elwise(dynd::nd::functional::apply(c.get()));
   af(expected, actual);
 

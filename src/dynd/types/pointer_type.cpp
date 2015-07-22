@@ -420,11 +420,11 @@ static ndt::type property_get_target_type(ndt::type tp)
 }
 
 void ndt::pointer_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> type_properties[] = {
+      pair<string, nd::callable>(
           "target_type",
           nd::functional::apply(&property_get_target_type, "self"))};
 

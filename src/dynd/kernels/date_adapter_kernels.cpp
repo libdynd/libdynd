@@ -70,7 +70,7 @@ struct int_offset_ck
 };
 
 template <class Tsrc, class Tdst>
-static intptr_t instantiate_int_offset_arrfunc(
+static intptr_t instantiate_int_offset_callable(
     char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -87,36 +87,36 @@ static intptr_t instantiate_int_offset_arrfunc(
 }
 
 template <class Tsrc, class Tdst>
-nd::arrfunc make_int_offset_arrfunc(Tdst offset, const ndt::type &func_proto)
+nd::callable make_int_offset_callable(Tdst offset, const ndt::type &func_proto)
 {
-  return nd::arrfunc(func_proto, offset, 0, NULL, NULL,
-                     &instantiate_int_offset_arrfunc<Tsrc, Tdst>);
+  return nd::callable(func_proto, offset, 0, NULL, NULL,
+                      &instantiate_int_offset_callable<Tsrc, Tdst>);
 }
 } // anonymous namespace
 
-bool dynd::make_date_adapter_arrfunc(const ndt::type &operand_tp,
-                                     const nd::string &op,
-                                     nd::arrfunc &out_forward,
-                                     nd::arrfunc &out_reverse)
+bool dynd::make_date_adapter_callable(const ndt::type &operand_tp,
+                                      const nd::string &op,
+                                      nd::callable &out_forward,
+                                      nd::callable &out_reverse)
 {
   int32_t epoch_date;
   if (parse_days_since(op.begin(), op.end(), epoch_date)) {
     switch (operand_tp.get_type_id()) {
     case int32_type_id:
-      out_forward = make_int_offset_arrfunc<int32_t, int32_t>(
-          epoch_date, ndt::arrfunc_type::make(ndt::date_type::make(),
-                                              ndt::type::make<int32_t>()));
-      out_reverse = make_int_offset_arrfunc<int32_t, int32_t>(
-          -epoch_date, ndt::arrfunc_type::make(ndt::type::make<int32_t>(),
-                                               ndt::date_type::make()));
+      out_forward = make_int_offset_callable<int32_t, int32_t>(
+          epoch_date, ndt::callable_type::make(ndt::date_type::make(),
+                                               ndt::type::make<int32_t>()));
+      out_reverse = make_int_offset_callable<int32_t, int32_t>(
+          -epoch_date, ndt::callable_type::make(ndt::type::make<int32_t>(),
+                                                ndt::date_type::make()));
       return true;
     case int64_type_id:
-      out_forward = make_int_offset_arrfunc<int64_t, int32_t>(
-          epoch_date, ndt::arrfunc_type::make(ndt::date_type::make(),
-                                              ndt::type::make<int64_t>()));
-      out_reverse = make_int_offset_arrfunc<int32_t, int64_t>(
-          -epoch_date, ndt::arrfunc_type::make(ndt::type::make<int64_t>(),
-                                               ndt::date_type::make()));
+      out_forward = make_int_offset_callable<int64_t, int32_t>(
+          epoch_date, ndt::callable_type::make(ndt::date_type::make(),
+                                               ndt::type::make<int64_t>()));
+      out_reverse = make_int_offset_callable<int32_t, int64_t>(
+          -epoch_date, ndt::callable_type::make(ndt::type::make<int64_t>(),
+                                                ndt::date_type::make()));
       return true;
     default:
       return false;

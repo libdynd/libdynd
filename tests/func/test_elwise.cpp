@@ -31,11 +31,11 @@ struct callable0 {
 
 TEST(Elwise, UnaryExpr_FixedDim)
 {
-  // Create an arrfunc for converting string to int
-  nd::arrfunc af_base = make_arrfunc_from_assignment(
+  // Create an callable for converting string to int
+  nd::callable af_base = make_callable_from_assignment(
       ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
-  // Lift the arrfunc
-  nd::arrfunc af = nd::functional::elwise(af_base);
+  // Lift the callable
+  nd::callable af = nd::functional::elwise(af_base);
 
   // Test it on some data
   const char *in[3] = {"172", "-139", "12345"};
@@ -50,11 +50,12 @@ TEST(Elwise, UnaryExpr_FixedDim)
 
 TEST(Elwise, UnaryExpr_StridedDim)
 {
-  // Create an arrfunc for converting string to int
-  nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
-  // Lift the arrfunc
-  nd::arrfunc af = nd::functional::elwise(af_base);
+  // Create an callable for converting string to int
+  nd::callable af_base = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
+  // Lift the callable
+  nd::callable af = nd::functional::elwise(af_base);
 
   // Test it on some data
   ckernel_builder<kernel_request_host> ckb;
@@ -71,11 +72,12 @@ TEST(Elwise, UnaryExpr_StridedDim)
 
 TEST(Elwise, UnaryExpr_VarDim)
 {
-  // Create an arrfunc for converting string to int
-  nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
-  // Lift the arrfunc
-  nd::arrfunc af = nd::functional::elwise(af_base);
+  // Create an callable for converting string to int
+  nd::callable af_base = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
+  // Lift the callable
+  nd::callable af = nd::functional::elwise(af_base);
 
   const char *in[5] = {"172", "-139", "12345", "-1111", "284"};
   nd::array a = nd::empty("var * fixed_string[16]");
@@ -93,12 +95,13 @@ TEST(Elwise, UnaryExpr_VarDim)
 
 TEST(Elwise, UnaryExpr_StridedToVarDim)
 {
-  // Create an arrfunc for converting string to int
-  nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+  // Create an callable for converting string to int
+  nd::callable af_base = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
-  nd::arrfunc af = nd::functional::elwise(af_base);
+  nd::callable af = nd::functional::elwise(af_base);
 
   // Test it on some data
   ndt::type dst_tp("var * int32");
@@ -130,12 +133,13 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
 
 TEST(Elwise, UnaryExpr_VarToVarDim)
 {
-  // Create an arrfunc for converting string to int
-  nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+  // Create an callable for converting string to int
+  nd::callable af_base = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
-  nd::arrfunc af = nd::functional::elwise(af_base);
+  nd::callable af = nd::functional::elwise(af_base);
 
   // Test it on some data
   ckernel_builder<kernel_request_host> ckb;
@@ -162,11 +166,12 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
 
 TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
 {
-  // Create an arrfunc for converting string to int
-  nd::arrfunc af_base = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
-  // Lift the arrfunc
-  nd::arrfunc af = nd::functional::elwise(af_base);
+  // Create an callable for converting string to int
+  nd::callable af_base = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
+  // Lift the callable
+  nd::callable af = nd::functional::elwise(af_base);
 
   // Test it on some data
   nd::array in = nd::empty("3 * var * fixed_string[16]");
@@ -195,19 +200,19 @@ TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
 }
 
 /*
-// TODO Reenable once there's a convenient way to make the binary arrfunc
-TEST(LiftArrFunc, Expr_MultiDimVarToVarDim) {
-    // Create an arrfunc for adding two ints
+// TODO Reenable once there's a convenient way to make the binary callable
+TEST(LiftCallable, Expr_MultiDimVarToVarDim) {
+    // Create an callable for adding two ints
     ndt::type add_ints_type = (nd::array((int32_t)0) +
 nd::array((int32_t)0)).get_type();
-    nd::arrfunc af_base = make_arrfunc_from_assignment(
+    nd::callable af_base = make_callable_from_assignment(
         ndt::type::make<int32_t>(), add_ints_type,
         assign_error_default);
-    // Lift the arrfunc
-    nd::arrfunc af = lift_arrfunc(af_base);
+    // Lift the callable
+    nd::callable af = lift_callable(af_base);
 
     // Lift the kernel to particular arrays
-    nd::array af_lifted = nd::empty(ndt::make_arrfunc());
+    nd::array af_lifted = nd::empty(ndt::make_callable());
     ndt::type src0_tp("3 * var * int32");
     ndt::type src1_tp("Fixed * int32");
 
@@ -241,7 +246,7 @@ nd::array((int32_t)0)).get_type();
 
 TEST(Elwise, Simple)
 {
-  nd::arrfunc af;
+  nd::callable af;
 
   nd::array a = parse_json("3 * int", "[0, 1, 2]");
   nd::array b = parse_json("3 * int", "[3, 4, 5]");

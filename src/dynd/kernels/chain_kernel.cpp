@@ -18,9 +18,9 @@ void nd::functional::chain_kernel::resolve_dst_type(
 }
 
 /**
- * Instantiate the chaining of arrfuncs ``first`` and ``second``, using
+ * Instantiate the chaining of callables ``first`` and ``second``, using
  * ``buffer_tp`` as the intermediate type, without creating a temporary chained
- * arrfunc.
+ * callable.
  */
 intptr_t nd::functional::chain_kernel::instantiate(
     char *static_data, size_t data_size, char *data, void *ckb,
@@ -33,10 +33,10 @@ intptr_t nd::functional::chain_kernel::instantiate(
   const struct static_data *static_data_x =
       reinterpret_cast<struct static_data *>(static_data);
 
-  arrfunc_type_data *first =
-      const_cast<arrfunc_type_data *>(static_data_x->first.get());
-  arrfunc_type_data *second =
-      const_cast<arrfunc_type_data *>(static_data_x->second.get());
+  callable_type_data *first =
+      const_cast<callable_type_data *>(static_data_x->first.get());
+  callable_type_data *second =
+      const_cast<callable_type_data *>(static_data_x->second.get());
 
   const ndt::type &buffer_tp = static_data_x->buffer_tp;
 

@@ -11,7 +11,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
+ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp)
 {
   const ndt::type *param_types = child_tp->get_pos_types_raw();
   intptr_t param_count = child_tp->get_npos();
@@ -80,18 +80,18 @@ ndt::type nd::functional::elwise_make_type(const ndt::arrfunc_type *child_tp)
     ret_tp = ndt::make_ellipsis_dim(dimsname, ret_tp);
   }
 
-  return ndt::arrfunc_type::make(ret_tp, ndt::tuple_type::make(out_param_types),
-                                 kwd_tp);
+  return ndt::callable_type::make(
+      ret_tp, ndt::tuple_type::make(out_param_types), kwd_tp);
 }
 
-nd::arrfunc nd::functional::elwise(const ndt::type &self_tp,
-                                   const arrfunc &child)
+nd::callable nd::functional::elwise(const ndt::type &self_tp,
+                                    const callable &child)
 {
-  return arrfunc::make<elwise_virtual_ck>(
+  return callable::make<elwise_virtual_ck>(
       self_tp, child, 0); // child.get()->data_size + sizeof(ndt::type));
 }
 
-nd::arrfunc nd::functional::elwise(const arrfunc &child)
+nd::callable nd::functional::elwise(const callable &child)
 {
   return elwise(elwise_make_type(child.get_type()), child);
 }

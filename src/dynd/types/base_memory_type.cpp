@@ -173,12 +173,13 @@ static ndt::type property_get_storage_type(ndt::type tp)
 }
 
 void ndt::base_memory_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, nd::arrfunc>(
-          "storage_type", nd::functional::apply(&property_get_storage_type, "self"))};
+  static pair<string, nd::callable> type_properties[] = {
+      pair<string, nd::callable>(
+          "storage_type",
+          nd::functional::apply(&property_get_storage_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

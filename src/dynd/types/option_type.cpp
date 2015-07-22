@@ -81,7 +81,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
     }
   } else {
     ckernel_builder<kernel_request_host> ckb;
-    nd::arrfunc &af = get_is_avail();
+    nd::callable &af = get_is_avail();
     type src_tp[1] = {type(this, true)};
     af.get()->instantiate(NULL, 0, NULL, &ckb, 0, type::make<bool1>(), NULL, 1,
                           src_tp, &arrmeta, kernel_request_single, ectx,
@@ -137,7 +137,7 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data,
     }
   } else {
     ckernel_builder<kernel_request_host> ckb;
-    nd::arrfunc &af = get_assign_na();
+    nd::callable &af = get_assign_na();
     af.get()->instantiate(NULL, 0, NULL, &ckb, 0, type(this, true), arrmeta, 0,
                           NULL, NULL, kernel_request_single, ectx, nd::array(),
                           std::map<nd::string, type>());
@@ -353,11 +353,11 @@ static nd::array property_get_assign_na(const ndt::type &tp)
 */
 
 void ndt::option_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> type_properties[] = {
+      pair<string, nd::callable>(
           "value_type",
           nd::functional::apply(&property_get_value_type, "self")),
       //      pair<string, gfunc::callable>(

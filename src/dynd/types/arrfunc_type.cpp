@@ -36,9 +36,9 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
   }
 }
 
-ndt::arrfunc_type::arrfunc_type(const type &ret_type, const type &pos_types,
-                                const type &kwd_types)
-    : base_type(arrfunc_type_id, function_kind, sizeof(arrfunc_type_data),
+ndt::callable_type::callable_type(const type &ret_type, const type &pos_types,
+                                  const type &kwd_types)
+    : base_type(callable_type_id, function_kind, sizeof(callable_type_data),
                 scalar_align_of<uint64_t>::value,
                 type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
                 0, 0),
@@ -46,13 +46,13 @@ ndt::arrfunc_type::arrfunc_type(const type &ret_type, const type &pos_types,
 {
   if (m_pos_tuple.get_type_id() != tuple_type_id) {
     stringstream ss;
-    ss << "dynd arrfunc positional arg types require a tuple type, got a "
+    ss << "dynd callable positional arg types require a tuple type, got a "
           "type \"" << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
   if (m_kwd_struct.get_type_id() != struct_type_id) {
     stringstream ss;
-    ss << "dynd arrfunc keyword arg types require a struct type, got a "
+    ss << "dynd callable keyword arg types require a struct type, got a "
           "type \"" << m_kwd_struct << "\"";
     throw invalid_argument(ss.str());
   }
@@ -72,23 +72,23 @@ ndt::arrfunc_type::arrfunc_type(const type &ret_type, const type &pos_types,
   // for arguments that are symbolic.
 }
 
-static void print_arrfunc(std::ostream &o,
-                          const ndt::arrfunc_type *DYND_UNUSED(af_tp),
-                          const arrfunc_type_data *af)
+static void print_callable(std::ostream &o,
+                           const ndt::callable_type *DYND_UNUSED(af_tp),
+                           const callable_type_data *af)
 {
-  o << "<arrfunc at " << (void *)af << ">";
+  o << "<callable at " << (void *)af << ">";
 }
 
-void ndt::arrfunc_type::print_data(std::ostream &o,
-                                   const char *DYND_UNUSED(arrmeta),
-                                   const char *data) const
+void ndt::callable_type::print_data(std::ostream &o,
+                                    const char *DYND_UNUSED(arrmeta),
+                                    const char *data) const
 {
-  const arrfunc_type_data *af =
-      reinterpret_cast<const arrfunc_type_data *>(data);
-  print_arrfunc(o, this, af);
+  const callable_type_data *af =
+      reinterpret_cast<const callable_type_data *>(data);
+  print_callable(o, this, af);
 }
 
-void ndt::arrfunc_type::print_type(std::ostream &o) const
+void ndt::callable_type::print_type(std::ostream &o) const
 {
   intptr_t npos = get_npos();
   intptr_t nkwd = get_nkwd();
@@ -131,11 +131,11 @@ void ndt::arrfunc_type::print_type(std::ostream &o) const
   o << ") -> " << m_return_type;
 }
 
-void ndt::arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
-                                              intptr_t arrmeta_offset,
-                                              void *extra,
-                                              type &out_transformed_tp,
-                                              bool &out_was_transformed) const
+void ndt::callable_type::transform_child_types(type_transform_fn_t transform_fn,
+                                               intptr_t arrmeta_offset,
+                                               void *extra,
+                                               type &out_transformed_tp,
+                                               bool &out_was_transformed) const
 {
   type tmp_return_type, tmp_pos_types, tmp_kwd_types;
 
@@ -154,7 +154,7 @@ void ndt::arrfunc_type::transform_child_types(type_transform_fn_t transform_fn,
   }
 }
 
-ndt::type ndt::arrfunc_type::get_canonical_type() const
+ndt::type ndt::callable_type::get_canonical_type() const
 {
   type tmp_return_type, tmp_pos_types, tmp_kwd_types;
 
@@ -164,14 +164,14 @@ ndt::type ndt::arrfunc_type::get_canonical_type() const
   return make(tmp_return_type, tmp_pos_types, tmp_kwd_types);
 }
 
-void ndt::arrfunc_type::get_vars(std::unordered_set<std::string> &vars) const
+void ndt::callable_type::get_vars(std::unordered_set<std::string> &vars) const
 {
   m_return_type.get_vars(vars);
   m_pos_tuple.get_vars(vars);
   m_kwd_struct.get_vars(vars);
 }
 
-ndt::type ndt::arrfunc_type::apply_linear_index(
+ndt::type ndt::callable_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
     size_t DYND_UNUSED(current_i), const type &DYND_UNUSED(root_tp),
     bool DYND_UNUSED(leading_dimension)) const
@@ -179,7 +179,7 @@ ndt::type ndt::arrfunc_type::apply_linear_index(
   throw type_error("Cannot store data of funcproto type");
 }
 
-intptr_t ndt::arrfunc_type::apply_linear_index(
+intptr_t ndt::callable_type::apply_linear_index(
     intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
     const char *DYND_UNUSED(arrmeta), const type &DYND_UNUSED(result_tp),
     char *DYND_UNUSED(out_arrmeta),
@@ -191,13 +191,13 @@ intptr_t ndt::arrfunc_type::apply_linear_index(
   throw type_error("Cannot store data of funcproto type");
 }
 
-bool ndt::arrfunc_type::is_lossless_assignment(const type &dst_tp,
-                                               const type &src_tp) const
+bool ndt::callable_type::is_lossless_assignment(const type &dst_tp,
+                                                const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == arrfunc_type_id) {
+    } else if (src_tp.get_type_id() == callable_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -205,86 +205,86 @@ bool ndt::arrfunc_type::is_lossless_assignment(const type &dst_tp,
   return false;
 }
 
-bool ndt::arrfunc_type::operator==(const base_type &rhs) const
+bool ndt::callable_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != arrfunc_type_id) {
+  } else if (rhs.get_type_id() != callable_type_id) {
     return false;
   } else {
-    const arrfunc_type *fpt = static_cast<const arrfunc_type *>(&rhs);
+    const callable_type *fpt = static_cast<const callable_type *>(&rhs);
     return m_return_type == fpt->m_return_type &&
            m_pos_tuple == fpt->m_pos_tuple && m_kwd_struct == fpt->m_kwd_struct;
   }
 }
 
-void ndt::arrfunc_type::arrmeta_default_construct(
+void ndt::callable_type::arrmeta_default_construct(
     char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
 {
 }
 
-void ndt::arrfunc_type::arrmeta_copy_construct(
+void ndt::callable_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
     memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
 }
 
-void ndt::arrfunc_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
+void ndt::callable_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
 void
-ndt::arrfunc_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
+ndt::callable_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void ndt::arrfunc_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::callable_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
 
-void ndt::arrfunc_type::data_destruct(const char *DYND_UNUSED(arrmeta),
-                                      char *data) const
+void ndt::callable_type::data_destruct(const char *DYND_UNUSED(arrmeta),
+                                       char *data) const
 {
-  const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
-  d->~arrfunc_type_data();
+  const callable_type_data *d = reinterpret_cast<callable_type_data *>(data);
+  d->~callable_type_data();
 }
 
-void ndt::arrfunc_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
-                                              char *data, intptr_t stride,
-                                              size_t count) const
+void ndt::callable_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
+                                               char *data, intptr_t stride,
+                                               size_t count) const
 {
   for (size_t i = 0; i != count; ++i, data += stride) {
-    const arrfunc_type_data *d = reinterpret_cast<arrfunc_type_data *>(data);
-    d->~arrfunc_type_data();
+    const callable_type_data *d = reinterpret_cast<callable_type_data *>(data);
+    d->~callable_type_data();
   }
 }
 
 /////////////////////////////////////////
-// arrfunc to string assignment
+// callable to string assignment
 
 namespace {
-struct arrfunc_to_string_ck
-    : nd::base_kernel<arrfunc_to_string_ck, kernel_request_host, 1> {
+struct callable_to_string_ck
+    : nd::base_kernel<callable_to_string_ck, kernel_request_host, 1> {
   ndt::type m_src_tp, m_dst_string_dt;
   const char *m_dst_arrmeta;
   eval::eval_context m_ectx;
 
   void single(char *dst, char *const *src)
   {
-    const arrfunc_type_data *af =
-        reinterpret_cast<const arrfunc_type_data *>(src[0]);
+    const callable_type_data *af =
+        reinterpret_cast<const callable_type_data *>(src[0]);
     stringstream ss;
-    print_arrfunc(ss, m_src_tp.extended<ndt::arrfunc_type>(), af);
+    print_callable(ss, m_src_tp.extended<ndt::callable_type>(), af);
     m_dst_string_dt.extended<ndt::base_string_type>()->set_from_utf8_string(
         m_dst_arrmeta, dst, ss.str(), &m_ectx);
   }
 };
 } // anonymous namespace
 
-static intptr_t make_arrfunc_to_string_assignment_kernel(
+static intptr_t make_callable_to_string_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_string_dt,
     const char *dst_arrmeta, const ndt::type &src_tp, kernel_request_t kernreq,
     const eval::eval_context *ectx)
 {
-  typedef arrfunc_to_string_ck self_type;
+  typedef callable_to_string_ck self_type;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   // The kernel data owns a reference to this type
   self->m_src_tp = src_tp;
@@ -294,7 +294,7 @@ static intptr_t make_arrfunc_to_string_assignment_kernel(
   return ckb_offset;
 }
 
-intptr_t ndt::arrfunc_type::make_assignment_kernel(
+intptr_t ndt::callable_type::make_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
     const type &src_tp, const char *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx) const
@@ -303,42 +303,42 @@ intptr_t ndt::arrfunc_type::make_assignment_kernel(
   } else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
-      return make_arrfunc_to_string_assignment_kernel(
+      return make_callable_to_string_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
     }
   }
 
-  // Nothing can be assigned to/from arrfunc
+  // Nothing can be assigned to/from callable
   stringstream ss;
   ss << "Cannot assign from " << src_tp << " to " << dst_tp;
   throw dynd::type_error(ss.str());
 }
 
-bool ndt::arrfunc_type::match(const char *arrmeta, const type &candidate_tp,
-                              const char *candidate_arrmeta,
-                              std::map<nd::string, type> &tp_vars) const
+bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp,
+                               const char *candidate_arrmeta,
+                               std::map<nd::string, type> &tp_vars) const
 {
-  if (candidate_tp.get_type_id() != arrfunc_type_id) {
+  if (candidate_tp.get_type_id() != callable_type_id) {
     return false;
   }
 
   // First match the return type
-  if (!m_return_type.match(arrmeta,
-                           candidate_tp.extended<arrfunc_type>()->m_return_type,
-                           candidate_arrmeta, tp_vars)) {
+  if (!m_return_type.match(
+          arrmeta, candidate_tp.extended<callable_type>()->m_return_type,
+          candidate_arrmeta, tp_vars)) {
     return false;
   }
 
   // Next match all the positional parameters
   if (!m_pos_tuple.match(arrmeta,
-                         candidate_tp.extended<arrfunc_type>()->m_pos_tuple,
+                         candidate_tp.extended<callable_type>()->m_pos_tuple,
                          candidate_arrmeta, tp_vars)) {
     return false;
   }
 
   // Finally match all the keyword parameters
   if (!m_kwd_struct.match(
-          arrmeta, candidate_tp.extended<arrfunc_type>()->get_kwd_struct(),
+          arrmeta, candidate_tp.extended<callable_type>()->get_kwd_struct(),
           candidate_arrmeta, tp_vars)) {
     return false;
   }
@@ -349,38 +349,38 @@ bool ndt::arrfunc_type::match(const char *arrmeta, const type &candidate_tp,
 /*
 static nd::array property_get_pos(const ndt::type &tp)
 {
-  return tp.extended<ndt::arrfunc_type>()->get_pos_types();
+  return tp.extended<ndt::callable_type>()->get_pos_types();
 }
 
 static nd::array property_get_kwd(const ndt::type &tp)
 {
-  return tp.extended<ndt::arrfunc_type>()->get_kwd_types();
+  return tp.extended<ndt::callable_type>()->get_kwd_types();
 }
 
 static nd::array property_get_pos_types(const ndt::type &tp)
 {
-  return tp.extended<ndt::arrfunc_type>()->get_pos_types();
+  return tp.extended<ndt::callable_type>()->get_pos_types();
 }
 
 static nd::array property_get_kwd_types(const ndt::type &tp)
 {
-  return tp.extended<ndt::arrfunc_type>()->get_kwd_types();
+  return tp.extended<ndt::callable_type>()->get_kwd_types();
 }
 
 static nd::array property_get_kwd_names(const ndt::type &tp)
 {
-  return tp.extended<ndt::arrfunc_type>()->get_kwd_names();
+  return tp.extended<ndt::callable_type>()->get_kwd_names();
 }
 
 */
 
 static ndt::type property_get_return_type(ndt::type tp)
 {
-  return tp.extended<ndt::arrfunc_type>()->get_return_type();
+  return tp.extended<ndt::callable_type>()->get_return_type();
 }
 
-void ndt::arrfunc_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+void ndt::callable_type::get_dynamic_type_properties(
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
   struct pos_types_kernel : nd::base_property_kernel<pos_types_kernel> {
@@ -393,9 +393,9 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(
-          dst_tp, dst_arrmeta, dst, 
-          tp.extended<arrfunc_type>()->get_pos_types().get_arrmeta(),
-          tp.extended<arrfunc_type>()->get_pos_types().get_data());
+          dst_tp, dst_arrmeta, dst,
+          tp.extended<callable_type>()->get_pos_types().get_arrmeta(),
+          tp.extended<callable_type>()->get_pos_types().get_data());
     }
 
     static void resolve_dst_type(
@@ -407,7 +407,7 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
       dst_tp =
-          make_fixed_dim(tp.extended<arrfunc_type>()->get_npos(), make_type());
+          make_fixed_dim(tp.extended<callable_type>()->get_npos(), make_type());
     }
   };
 
@@ -422,8 +422,8 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
     {
       typed_data_copy(
           dst_tp, dst_arrmeta, dst,
-          tp.extended<arrfunc_type>()->get_kwd_types().get_arrmeta(),
-          tp.extended<arrfunc_type>()->get_kwd_types().get_data());
+          tp.extended<callable_type>()->get_kwd_types().get_arrmeta(),
+          tp.extended<callable_type>()->get_kwd_types().get_data());
     }
 
     static void resolve_dst_type(
@@ -435,7 +435,7 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
       dst_tp =
-          make_fixed_dim(tp.extended<arrfunc_type>()->get_nkwd(), make_type());
+          make_fixed_dim(tp.extended<callable_type>()->get_nkwd(), make_type());
     }
   };
 
@@ -450,8 +450,8 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
     {
       typed_data_copy(
           dst_tp, dst_arrmeta, dst,
-          tp.extended<arrfunc_type>()->get_kwd_names().get_arrmeta(),
-          tp.extended<arrfunc_type>()->get_kwd_names().get_data());
+          tp.extended<callable_type>()->get_kwd_names().get_arrmeta(),
+          tp.extended<callable_type>()->get_kwd_names().get_data());
     }
 
     static void resolve_dst_type(
@@ -462,31 +462,31 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
         const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = tp.extended<arrfunc_type>()->get_kwd_names().get_type();
+      dst_tp = tp.extended<callable_type>()->get_kwd_names().get_type();
     }
   };
 
-  static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, nd::arrfunc>("pos_types",
-                                nd::arrfunc::make<pos_types_kernel>(
-                                    type("(self: type) -> Fixed * type"))),
-      pair<string, nd::arrfunc>("kwd_types",
-                                nd::arrfunc::make<kwd_types_kernel>(
-                                    type("(self: type) -> Fixed * type"))),
-      pair<string, nd::arrfunc>("kwd_names",
-                                nd::arrfunc::make<kwd_names_kernel>(
-                                    type("(self: type) -> Fixed * Any"))),
+  static pair<string, nd::callable> type_properties[] = {
+      pair<string, nd::callable>("pos_types",
+                                 nd::callable::make<pos_types_kernel>(
+                                     type("(self: type) -> Fixed * type"))),
+      pair<string, nd::callable>("kwd_types",
+                                 nd::callable::make<kwd_types_kernel>(
+                                     type("(self: type) -> Fixed * type"))),
+      pair<string, nd::callable>("kwd_names",
+                                 nd::callable::make<kwd_names_kernel>(
+                                     type("(self: type) -> Fixed * Any"))),
       /*
-            pair<string, nd::arrfunc>("kwd",
+            pair<string, nd::callable>("kwd",
                                       nd::functional::apply(&property_get_kwd)),
-            pair<string, nd::arrfunc>("pos_types",
+            pair<string, nd::callable>("pos_types",
                                       nd::functional::apply(&property_get_pos_types)),
-            pair<string, nd::arrfunc>("kwd_types",
+            pair<string, nd::callable>("kwd_types",
                                       nd::functional::apply(&property_get_kwd_types)),
-            pair<string, nd::arrfunc>("kwd_names",
+            pair<string, nd::callable>("kwd_names",
                                       nd::functional::apply(&property_get_kwd_names)),
       */
-      pair<string, nd::arrfunc>(
+      pair<string, nd::callable>(
           "return_type",
           nd::functional::apply(&property_get_return_type, "self"))};
 
@@ -496,8 +496,8 @@ void ndt::arrfunc_type::get_dynamic_type_properties(
 
 ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 {
-  return arrfunc_type::make(typevar_type::make("R"),
-                            make_typevar_range("T", nargs));
+  return callable_type::make(typevar_type::make("R"),
+                             make_typevar_range("T", nargs));
 }
 
 ///////// functions on the nd::array
@@ -513,9 +513,9 @@ static array_preamble *function___call__(const array_preamble *params,
   nd::array par(const_cast<array_preamble *>(params), true);
   const nd::array *par_arrs =
       reinterpret_cast<const nd::array *>(par.get_readonly_originptr());
-  if (par_arrs[0].get_type().get_type_id() != arrfunc_type_id) {
-    throw runtime_error("arrfunc method '__call__' only works on individual "
-                        "arrfunc instances presently");
+  if (par_arrs[0].get_type().get_type_id() != callable_type_id) {
+    throw runtime_error("callable method '__call__' only works on individual "
+                        "callable instances presently");
   }
   // Figure out how many args were provided
   int nargs;
@@ -528,15 +528,15 @@ static array_preamble *function___call__(const array_preamble *params,
       args[nargs - 1] = par_arrs[nargs];
     }
   }
-  const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
+  const callable_type_data *af = reinterpret_cast<const callable_type_data *>(
       par_arrs[0].get_readonly_originptr());
-  const ndt::arrfunc_type *af_tp =
-      par_arrs[0].get_type().extended<ndt::arrfunc_type>();
+  const ndt::callable_type *af_tp =
+      par_arrs[0].get_type().extended<ndt::callable_type>();
   nargs -= 1;
   // Validate the number of arguments
   if (nargs != af_tp->get_narg() + 1) {
     stringstream ss;
-    ss << "arrfunc expected " << (af_tp->get_narg() + 1) << " arguments, got "
+    ss << "callable expected " << (af_tp->get_narg() + 1) << " arguments, got "
        << nargs;
     throw runtime_error(ss.str());
   }
@@ -565,11 +565,11 @@ static array_preamble *function___call__(const array_preamble *params,
   return nd::empty(ndt::type::make<void>()).release();
 }
 
-void ndt::arrfunc_type::get_dynamic_array_functions(
+void ndt::callable_type::get_dynamic_array_functions(
     const std::pair<std::string, gfunc::callable> **out_functions,
     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> arrfunc_array_functions[] = {
+  static pair<string, gfunc::callable> callable_array_functions[] = {
       pair<string, gfunc::callable>(
           "execute",
           gfunc::callable(
@@ -581,12 +581,12 @@ void ndt::arrfunc_type::get_dynamic_array_functions(
                         "p1:ndarrayarg,p2:ndarrayarg,"
                         "p3:ndarrayarg,p4:ndarrayarg}")))};
 
-  *out_functions = arrfunc_array_functions;
+  *out_functions = callable_array_functions;
   *out_count =
-      sizeof(arrfunc_array_functions) / sizeof(arrfunc_array_functions[0]);
+      sizeof(callable_array_functions) / sizeof(callable_array_functions[0]);
 }
 
-nd::array arrfunc_type_data::
+nd::array callable_type_data::
 operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
            const char *const *src_arrmeta, char *const *src_data,
            const nd::array &kwds,
@@ -625,7 +625,7 @@ operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
   return dst;
 }
 
-void arrfunc_type_data::
+void callable_type_data::
 operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data,
            intptr_t nsrc, const ndt::type *src_tp,
            const char *const *src_arrmeta, char *const *src_data,

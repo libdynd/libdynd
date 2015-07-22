@@ -26,9 +26,9 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ChainArrFunc, Simple)
+TEST(Chain, Simple)
 {
-  nd::arrfunc chained = nd::functional::chain(
+  nd::callable chained = nd::functional::chain(
       nd::copy, func::get_regfunction("sin"), ndt::type::make<double>());
   nd::array a = nd::empty<double>();
   chained("0.0", kwds("dst", a));

@@ -38,22 +38,22 @@ static void get_extended_string_encoding(const ndt::type &dt)
   const ndt::base_string_type *d = dt.extended<ndt::base_string_type>();
   stringstream ss;
   ss << d->get_encoding();
-//  return ss.str();
+  //  return ss.str();
 }
 
 static size_t base_string_type_properties_size() { return 1; }
 
-static const pair<string, nd::arrfunc> *base_string_type_properties()
+static const pair<string, nd::callable> *base_string_type_properties()
 {
-  static pair<string, nd::arrfunc> base_string_type_properties[1] = {
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> base_string_type_properties[1] = {
+      pair<string, nd::callable>(
           "encoding", nd::functional::apply(&get_extended_string_encoding))};
 
   return base_string_type_properties;
 }
 
 void ndt::base_string_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
   *out_properties = base_string_type_properties();

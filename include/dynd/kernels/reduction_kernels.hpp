@@ -8,37 +8,37 @@
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/func/arrfunc.hpp>
 
-namespace dynd { namespace kernels {
+namespace dynd {
+namespace kernels {
 
-/**
- * Makes a unary reduction ckernel which adds values for the
- * given type id. This is not defined for all type_id values.
- */
-intptr_t make_builtin_sum_reduction_ckernel(void *ckb,
-                                            intptr_t ckb_offset,
-                                            type_id_t tid,
-                                            kernel_request_t kernreq);
+  /**
+   * Makes a unary reduction ckernel which adds values for the
+   * given type id. This is not defined for all type_id values.
+   */
+  intptr_t make_builtin_sum_reduction_ckernel(void *ckb, intptr_t ckb_offset,
+                                              type_id_t tid,
+                                              kernel_request_t kernreq);
 
-/**
- * Makes a unary reduction arrfunc for the requested
- * type id.
- */
-nd::arrfunc make_builtin_sum_reduction_arrfunc(type_id_t tid);
+  /**
+   * Makes a unary reduction callable for the requested
+   * type id.
+   */
+  nd::callable make_builtin_sum_reduction_callable(type_id_t tid);
 
-/**
- * Makes a 1D sum arrfunc.
- * (Fixed * <tid>) -> <tid>
- */
-nd::arrfunc make_builtin_sum1d_arrfunc(type_id_t tid);
+  /**
+   * Makes a 1D sum callable.
+   * (Fixed * <tid>) -> <tid>
+   */
+  nd::callable make_builtin_sum1d_callable(type_id_t tid);
 
-/**
- * Makes a 1D mean arrfunc.
- * (Fixed * <tid>) -> <tid>
- */
-nd::arrfunc make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp);
+  /**
+   * Makes a 1D mean callable.
+   * (Fixed * <tid>) -> <tid>
+   */
+  nd::callable make_builtin_mean1d_callable(type_id_t tid, intptr_t minp);
 
-intptr_t make_strided_reduction_ckernel(void *ckb, intptr_t ckb_offset);
+  intptr_t make_strided_reduction_ckernel(void *ckb, intptr_t ckb_offset);
 
-nd::arrfunc make_strided_reduction_arrfunc();
-
-}} // namespace dynd::kernels
+  nd::callable make_strided_reduction_callable();
+}
+} // namespace dynd::kernels

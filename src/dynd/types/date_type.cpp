@@ -213,7 +213,8 @@ static nd::array fn_type_construct(ndt::type DYND_UNUSED(dt), int32_t year,
 {
   return
 
-  nd::arrfunc af = nd::functional::elwise(nd::functional::apply(date_from_ymd));
+  nd::callable af =
+nd::functional::elwise(nd::functional::apply(date_from_ymd));
 
 
   return af(year_as_int, month_as_int, day_as_int)
@@ -222,13 +223,13 @@ static nd::array fn_type_construct(ndt::type DYND_UNUSED(dt), int32_t year,
 */
 
 void ndt::date_type::get_dynamic_type_functions(
-    const std::pair<std::string, nd::arrfunc> **out_functions,
+    const std::pair<std::string, nd::callable> **out_functions,
     size_t *out_count) const
 {
-  static pair<string, nd::arrfunc> date_type_functions[] = {
-      pair<string, nd::arrfunc>("today",
-                                nd::functional::apply(&fn_type_today, "self")),
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> date_type_functions[] = {
+      pair<string, nd::callable>("today",
+                                 nd::functional::apply(&fn_type_today, "self")),
+      pair<string, nd::callable>(
           "__construct__", nd::functional::apply(&fn_type_construct, "self",
                                                  "year", "month", "day")),
   };
@@ -503,18 +504,18 @@ size_t ndt::date_type::make_elwise_property_setter_kernel(
 }
 
 bool ndt::date_type::adapt_type(const type &operand_tp, const nd::string &op,
-                                nd::arrfunc &out_forward,
-                                nd::arrfunc &out_reverse) const
+                                nd::callable &out_forward,
+                                nd::callable &out_reverse) const
 {
-  return make_date_adapter_arrfunc(operand_tp, op, out_forward, out_reverse);
+  return make_date_adapter_callable(operand_tp, op, out_forward, out_reverse);
 }
 
 bool ndt::date_type::reverse_adapt_type(const type &value_tp,
                                         const nd::string &op,
-                                        nd::arrfunc &out_forward,
-                                        nd::arrfunc &out_reverse) const
+                                        nd::callable &out_forward,
+                                        nd::callable &out_reverse) const
 {
   // Note that out_reverse and out_forward are swapped compared with
   // adapt_type
-  return make_date_adapter_arrfunc(value_tp, op, out_reverse, out_forward);
+  return make_date_adapter_callable(value_tp, op, out_reverse, out_forward);
 }

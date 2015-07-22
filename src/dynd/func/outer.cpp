@@ -10,12 +10,12 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::functional::outer(const arrfunc &child)
+nd::callable nd::functional::outer(const callable &child)
 {
-  return arrfunc::make<outer_ck>(outer_make_type(child.get_type()), child, 0);
+  return callable::make<outer_ck>(outer_make_type(child.get_type()), child, 0);
 }
 
-ndt::type nd::functional::outer_make_type(const ndt::arrfunc_type *child_tp)
+ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp)
 {
   const ndt::type *param_types = child_tp->get_pos_types_raw();
   intptr_t param_count = child_tp->get_npos();
@@ -58,6 +58,6 @@ ndt::type nd::functional::outer_make_type(const ndt::arrfunc_type *child_tp)
     ret_tp = ndt::make_ellipsis_dim("Dims", child_tp->get_return_type());
   }
 
-  return ndt::arrfunc_type::make(ret_tp, ndt::tuple_type::make(out_param_types),
-                                 kwd_tp);
+  return ndt::callable_type::make(
+      ret_tp, ndt::tuple_type::make(out_param_types), kwd_tp);
 }

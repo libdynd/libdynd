@@ -11,7 +11,7 @@ namespace nd {
   namespace random {
 
     extern struct uniform : declfunc<uniform> {
-      static arrfunc make();
+      static callable make();
     } uniform;
 
   } // namespace dynd::nd::random
@@ -46,7 +46,7 @@ namespace nd {
 #ifdef DYND_CUDA
       template <kernel_request_t kernreq>
       static typename std::enable_if<kernreq == kernel_request_cuda_device,
-                                     arrfunc>::type
+                                     callable>::type
       make();
 #endif
 
@@ -81,8 +81,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *self,
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+        const callable_type_data *self,
+        const ndt::callable_type *DYND_UNUSED(self_tp),
         const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
         const ndt::type &DYND_UNUSED(dst_tp),
@@ -151,8 +151,8 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        const arrfunc_type_data *self,
-        const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+        const callable_type_data *self,
+        const ndt::callable_type *DYND_UNUSED(self_tp),
         const char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
         const ndt::type &DYND_UNUSED(dst_tp),

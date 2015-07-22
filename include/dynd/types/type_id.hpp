@@ -52,7 +52,7 @@ enum type_kind_t {
   // For types that specify a memory space
   memory_kind,
 
-  // For arrfuncs
+  // For callables
   function_kind,
 
   // For symbolic types that represent a kind of type, like 'Any' or 'Fixed'
@@ -173,7 +173,7 @@ enum type_id_t {
   any_kind_type_id,
 
   // Symbolic types
-  arrfunc_type_id,
+  callable_type_id,
   typevar_type_id,
   typevar_dim_type_id,
   typevar_constructed_type_id,

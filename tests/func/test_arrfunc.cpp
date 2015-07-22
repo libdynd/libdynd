@@ -24,11 +24,12 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ArrFunc, Assignment)
+TEST(Callable, Assignment)
 {
-  // Create an arrfunc for converting string to int
-  nd::arrfunc af = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+  // Create an callable for converting string to int
+  nd::callable af = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
@@ -72,25 +73,25 @@ TEST(ArrFunc, Assignment)
 
 static double func(int x, double y) { return 2.0 * x + y; }
 
-TEST(ArrFunc, Construction)
+TEST(Callable, Construction)
 {
-  nd::arrfunc af0 = nd::functional::apply(&func);
+  nd::callable af0 = nd::functional::apply(&func);
   EXPECT_EQ(4.5, af0(1, 2.5).as<double>());
 
-  nd::arrfunc af1 = nd::functional::apply(&func, "y");
+  nd::callable af1 = nd::functional::apply(&func, "y");
   EXPECT_EQ(4.5, af1(1, kwds("y", 2.5)).as<double>());
 
-  nd::arrfunc af2 = nd::functional::apply([](int x, int y) { return x - y; });
+  nd::callable af2 = nd::functional::apply([](int x, int y) { return x - y; });
   EXPECT_EQ(-4, af2(3, 7).as<int>());
 
-  nd::arrfunc af3 =
+  nd::callable af3 =
       nd::functional::apply([](int x, int y) { return x - y; }, "y");
   EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
 }
 
-TEST(ArrFunc, CallOperator)
+TEST(Callable, CallOperator)
 {
-  nd::arrfunc af = nd::functional::apply(&func);
+  nd::callable af = nd::functional::apply(&func);
   // Calling with positional arguments
   EXPECT_EQ(4.5, af(1, 2.5).as<double>());
   EXPECT_EQ(7.5, af(2, 3.5).as<double>());
@@ -123,9 +124,9 @@ TEST(ArrFunc, CallOperator)
   EXPECT_THROW(af(kwds("y", 3.5)), invalid_argument);
 }
 
-TEST(Arrfunc, DynamicCall)
+TEST(Callable, DynamicCall)
 {
-  nd::arrfunc af;
+  nd::callable af;
 
   nd::array values[3] = {7, 2.5, 5};
   const char *names[3] = {"x", "y", "z"};
@@ -147,9 +148,9 @@ TEST(Arrfunc, DynamicCall)
   EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
 }
 
-TEST(Arrfunc, DecomposedDynamicCall)
+TEST(Callable, DecomposedDynamicCall)
 {
-  nd::arrfunc af;
+  nd::callable af;
 
   nd::array values[3] = {7, 2.5, 5};
   ndt::type types[3] = {values[0].get_type(), values[1].get_type(),
@@ -181,9 +182,9 @@ TEST(Arrfunc, DecomposedDynamicCall)
   EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
 }
 
-TEST(ArrFunc, KeywordParsing)
+TEST(Callable, KeywordParsing)
 {
-  nd::arrfunc af0 =
+  nd::callable af0 =
       nd::functional::apply([](int x, int y) { return x + y; }, "y");
   EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
   EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
@@ -193,14 +194,14 @@ TEST(ArrFunc, KeywordParsing)
 }
 
 /*
-TEST(ArrFunc, Option)
+TEST(Callable, Option)
 {
   struct callable {
     int operator()(int x, int y) { return x + y; }
 
     static void
-    resolve_option_vals(const arrfunc_type_data *DYND_UNUSED(self),
-                        const arrfunc_type *DYND_UNUSED(self_tp),
+    resolve_option_vals(const callable_type_data *DYND_UNUSED(self),
+                        const callable_type *DYND_UNUSED(self_tp),
                         intptr_t DYND_UNUSED(nsrc),
                         const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
                         const std::map<nd::string, ndt::type>
@@ -213,7 +214,7 @@ TEST(ArrFunc, Option)
     }
   };
 
-  nd::arrfunc af = nd::functional::apply(callable(), "x");
+  nd::callable af = nd::functional::apply(callable(), "x");
   EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
 
   af.set_as_option(&callable::resolve_option_vals, "x");
@@ -222,10 +223,10 @@ TEST(ArrFunc, Option)
 }
 */
 
-TEST(ArrFunc, Assignment_CallInterface)
+TEST(Callable, Assignment_CallInterface)
 {
   // Test with the unary operation prototype
-  nd::arrfunc af = make_arrfunc_from_assignment(
+  nd::callable af = make_callable_from_assignment(
       ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
 
   // Call it through the call() interface
@@ -238,8 +239,8 @@ TEST(ArrFunc, Assignment_CallInterface)
   EXPECT_THROW(af(false), invalid_argument);
 
   // Test with the expr operation prototype
-  af = make_arrfunc_from_assignment(ndt::type::make<int>(), ndt::string_type::make(),
-                                    assign_error_default);
+  af = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
 
   // Call it through the call() interface
   b = af("12345678");
@@ -251,10 +252,10 @@ TEST(ArrFunc, Assignment_CallInterface)
   EXPECT_THROW(af(false), invalid_argument);
 }
 
-TEST(ArrFunc, Property)
+TEST(Callable, Property)
 {
-  // Create an arrfunc for getting the year from a date
-  nd::arrfunc af = make_arrfunc_from_property(ndt::date_type::make(), "year");
+  // Create an callable for getting the year from a date
+  nd::callable af = make_callable_from_property(ndt::date_type::make(), "year");
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
@@ -278,11 +279,12 @@ TEST(ArrFunc, Property)
   EXPECT_EQ(2013, int_out);
 }
 
-TEST(ArrFunc, AssignmentAsExpr)
+TEST(Callable, AssignmentAsExpr)
 {
-  // Create an arrfunc for converting string to int
-  nd::arrfunc af = make_arrfunc_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+  // Create an callable for converting string to int
+  nd::callable af = make_callable_from_assignment(
+      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
+      assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
@@ -324,17 +326,17 @@ TEST(ArrFunc, AssignmentAsExpr)
 }
 
 /*
-// TODO Reenable once there's a convenient way to make the binary arrfunc
-TEST(ArrFunc, Expr) {
-    arrfunc_type_data af;
-    // Create an arrfunc for adding two ints
+// TODO Reenable once there's a convenient way to make the binary callable
+TEST(Callable, Expr) {
+    callable_type_data af;
+    // Create an callable for adding two ints
     ndt::type add_ints_type = (nd::array((int)0) +
 nd::array((int)0)).get_type();
-    make_arrfunc_from_assignment(
+    make_callable_from_assignment(
                     ndt::type::make<int>(), add_ints_type,
                     expr_operation_funcproto, assign_error_default, af);
     // Validate that its types, etc are set right
-    ASSERT_EQ(expr_operation_funcproto, (arrfunc_proto_t)af.ckernel_funcproto);
+    ASSERT_EQ(expr_operation_funcproto, (callable_proto_t)af.ckernel_funcproto);
     ASSERT_EQ(2, af.get_narg());
     ASSERT_EQ(ndt::type::make<int>(), af.get_return_type());
     ASSERT_EQ(ndt::type::make<int>(), af.get_arg_type(0));

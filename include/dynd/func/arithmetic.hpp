@@ -17,20 +17,20 @@ namespace nd {
 
   template <typename F, template <type_id_t> class K>
   struct arithmetic_operator<F, K, 1> : declfunc<F> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
+    static callable children[DYND_TYPE_ID_MAX + 1];
+    static callable default_child;
 
-    static arrfunc make()
+    static callable make()
     {
-      const arrfunc self = functional::call<F>(ndt::type("(Any) -> Any"));
+      const callable self = functional::call<F>(ndt::type("(Any) -> Any"));
 
-      for (const std::pair<const type_id_t, arrfunc> &pair :
-           arrfunc::make_all<K, numeric_type_ids>(0)) {
+      for (const std::pair<const type_id_t, callable> &pair :
+           callable::make_all<K, numeric_type_ids>(0)) {
         children[pair.first] = pair.second;
       }
 
       for (type_id_t i0 : dim_type_ids()) {
-        const ndt::type child_tp = ndt::arrfunc_type::make(
+        const ndt::type child_tp = ndt::callable_type::make(
             self.get_type()->get_return_type(), ndt::type(i0));
         children[i0] = functional::elwise(child_tp, self);
       }
@@ -41,10 +41,10 @@ namespace nd {
   };
 
   template <typename F, template <type_id_t> class K>
-  arrfunc arithmetic_operator<F, K, 1>::children[DYND_TYPE_ID_MAX + 1];
+  callable arithmetic_operator<F, K, 1>::children[DYND_TYPE_ID_MAX + 1];
 
   template <typename F, template <type_id_t> class K>
-  arrfunc arithmetic_operator<F, K, 1>::default_child;
+  callable arithmetic_operator<F, K, 1>::default_child;
 
   extern struct plus : arithmetic_operator<plus, plus_kernel, 1> {
   } plus;
@@ -54,23 +54,23 @@ namespace nd {
 
   template <typename F, template <type_id_t, type_id_t> class K>
   struct arithmetic_operator<F, K, 2> : declfunc<F> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
+    static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+    static callable default_child;
 
-    static arrfunc make()
+    static callable make()
     {
-      arrfunc self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
+      callable self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
-      for (const std::pair<std::array<type_id_t, 2>, arrfunc> &pair :
-           arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>(0)) {
+      for (const std::pair<std::array<type_id_t, 2>, callable> &pair :
+           callable::make_all<K, numeric_type_ids, numeric_type_ids>(0)) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
 
       for (type_id_t i0 : numeric_type_ids()) {
         for (type_id_t i1 : dim_type_ids()) {
           const ndt::type child_tp =
-              ndt::arrfunc_type::make(self.get_type()->get_return_type(),
-                                      {ndt::type(i0), ndt::type(i1)});
+              ndt::callable_type::make(self.get_type()->get_return_type(),
+                                       {ndt::type(i0), ndt::type(i1)});
           children[i0][i1] = functional::elwise(child_tp, self);
         }
       }
@@ -79,8 +79,8 @@ namespace nd {
         typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
         for (type_id_t i1 : type_ids()) {
           const ndt::type child_tp =
-              ndt::arrfunc_type::make(self.get_type()->get_return_type(),
-                                      {ndt::type(i0), ndt::type(i1)});
+              ndt::callable_type::make(self.get_type()->get_return_type(),
+                                       {ndt::type(i0), ndt::type(i1)});
           children[i0][i1] = functional::elwise(child_tp, self);
         }
       }
@@ -91,11 +91,11 @@ namespace nd {
   };
 
   template <typename T, template <type_id_t, type_id_t> class K>
-  arrfunc arithmetic_operator<T, K, 2>::children[DYND_TYPE_ID_MAX +
-                                                 1][DYND_TYPE_ID_MAX + 1];
+  callable arithmetic_operator<T, K, 2>::children[DYND_TYPE_ID_MAX +
+                                                  1][DYND_TYPE_ID_MAX + 1];
 
   template <typename T, template <type_id_t, type_id_t> class K>
-  arrfunc arithmetic_operator<T, K, 2>::default_child;
+  callable arithmetic_operator<T, K, 2>::default_child;
 
   extern struct add : arithmetic_operator<add, add_kernel, 2> {
   } add;

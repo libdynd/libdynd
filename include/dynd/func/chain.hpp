@@ -12,11 +12,11 @@ namespace nd {
   namespace functional {
 
     /**
-     * Returns an arrfunc which chains the two arrfuncs together.
+     * Returns an callable which chains the two callables together.
      * The buffer used to connect them is made out of the provided ``buf_tp``.
      */
-    arrfunc chain(const arrfunc &first, const arrfunc &second,
-                  const ndt::type &buf_tp = ndt::type());
+    callable chain(const callable &first, const callable &second,
+                   const ndt::type &buf_tp = ndt::type());
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

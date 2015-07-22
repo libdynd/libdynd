@@ -11,29 +11,29 @@ namespace dynd {
 namespace nd {
 
   extern struct is_avail : declfunc<is_avail> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
+    static callable children[DYND_TYPE_ID_MAX + 1];
+    static callable default_child;
 
-    static arrfunc &get_child(const ndt::type &value_tp)
+    static callable &get_child(const ndt::type &value_tp)
     {
       get();
       return children[value_tp.get_type_id()];
     }
 
-    static arrfunc make();
+    static callable make();
   } is_avail;
 
   extern struct assign_na_decl : declfunc<assign_na_decl> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
+    static callable children[DYND_TYPE_ID_MAX + 1];
+    static callable default_child;
 
-    static arrfunc &get_child(const ndt::type &value_tp)
+    static callable &get_child(const ndt::type &value_tp)
     {
       get();
       return children[value_tp.get_type_id()];
     }
 
-    static arrfunc make();
+    static callable make();
   } assign_na_decl;
 
 } // namespace dynd::nd

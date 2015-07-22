@@ -340,7 +340,7 @@ void ndt::base_type::get_scalar_properties_and_functions(
 }
 
 void ndt::base_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
   // Default to no properties
@@ -349,7 +349,7 @@ void ndt::base_type::get_dynamic_type_properties(
 }
 
 void ndt::base_type::get_dynamic_type_functions(
-    const std::pair<std::string, nd::arrfunc> **out_functions,
+    const std::pair<std::string, nd::callable> **out_functions,
     size_t *out_count) const
 {
   // Default to no functions
@@ -420,8 +420,8 @@ size_t ndt::base_type::make_elwise_property_setter_kernel(
 
 bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp),
                                 const nd::string &DYND_UNUSED(op),
-                                nd::arrfunc &DYND_UNUSED(out_forward),
-                                nd::arrfunc &DYND_UNUSED(out_reverse)) const
+                                nd::callable &DYND_UNUSED(out_forward),
+                                nd::callable &DYND_UNUSED(out_reverse)) const
 {
   return false;
 }
@@ -429,8 +429,8 @@ bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp),
 bool
 ndt::base_type::reverse_adapt_type(const type &DYND_UNUSED(value_tp),
                                    const nd::string &DYND_UNUSED(op),
-                                   nd::arrfunc &DYND_UNUSED(out_forward),
-                                   nd::arrfunc &DYND_UNUSED(out_reverse)) const
+                                   nd::callable &DYND_UNUSED(out_forward),
+                                   nd::callable &DYND_UNUSED(out_reverse)) const
 {
   return false;
 }

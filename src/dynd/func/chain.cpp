@@ -10,12 +10,12 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::functional::chain(const nd::arrfunc &first,
-                                  const nd::arrfunc &second,
-                                  const ndt::type &buf_tp)
+nd::callable nd::functional::chain(const nd::callable &first,
+                                   const nd::callable &second,
+                                   const ndt::type &buf_tp)
 {
   if (first.get_type()->get_npos() != 1) {
-    throw runtime_error("Multi-parameter arrfunc chaining is not implemented");
+    throw runtime_error("Multi-parameter callable chaining is not implemented");
   }
 
   if (second.get_type()->get_npos() != 1) {
@@ -38,9 +38,9 @@ nd::arrfunc nd::functional::chain(const nd::arrfunc &first,
       ndt::substitute(second.get_type()->get_return_type(), tp_vars, false);
   */
 
-  return arrfunc::make<chain_kernel>(
-      ndt::arrfunc_type::make(second.get_type()->get_return_type(),
-                              first.get_type()->get_pos_tuple()),
+  return callable::make<chain_kernel>(
+      ndt::callable_type::make(second.get_type()->get_return_type(),
+                               first.get_type()->get_pos_tuple()),
       chain_kernel::static_data(first, second, buf_tp),
       first.get()->data_size + second.get()->data_size);
 }

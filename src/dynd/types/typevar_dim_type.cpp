@@ -165,7 +165,7 @@ static ndt::type property_get_element_type(ndt::type dt)
 }
 
 void ndt::typevar_dim_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
   struct name_kernel : nd::base_property_kernel<name_kernel> {
@@ -198,10 +198,10 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(
     }
   };
 
-  static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, nd::arrfunc>(
-          "name", nd::arrfunc::make<name_kernel>(type("(self: type) -> Any"))),
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> type_properties[] = {
+      pair<string, nd::callable>(
+          "name", nd::callable::make<name_kernel>(type("(self: type) -> Any"))),
+      pair<string, nd::callable>(
           "element_type",
           nd::functional::apply(&property_get_element_type, "self"))};
 

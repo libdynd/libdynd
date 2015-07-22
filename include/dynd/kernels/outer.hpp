@@ -33,8 +33,7 @@ namespace nd {
         std::vector<ndt::type> new_src_tp(nsrc);
         std::vector<const char *> new_src_arrmeta;
 
-        arrmeta_holder *new_src_arrmeta_holder =
-            new arrmeta_holder[nsrc];
+        arrmeta_holder *new_src_arrmeta_holder = new arrmeta_holder[nsrc];
         for (intptr_t i = 0, j = 0; i < nsrc; ++i) {
           ndt::type old_tp = src_tp[i];
           new_src_tp[i] = old_tp.with_new_axis(0, j);
@@ -95,10 +94,10 @@ namespace nd {
                        const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        arrfunc_type_data *child =
-            reinterpret_cast<arrfunc *>(static_data)->get();
-        const ndt::arrfunc_type *child_tp =
-            reinterpret_cast<arrfunc *>(static_data)->get_type();
+        callable_type_data *child =
+            reinterpret_cast<callable *>(static_data)->get();
+        const ndt::callable_type *child_tp =
+            reinterpret_cast<callable *>(static_data)->get_type();
 
         if (child->resolve_dst_type != NULL) {
           child->resolve_dst_type(child->static_data, 0, NULL, dst_tp, nsrc,

@@ -333,7 +333,7 @@ namespace ndt {
   struct type::equivalent<nd::assign_na_kernel<Src0ValueTypeID>> {
     static type make()
     {
-      return arrfunc_type::make(option_type::make(Src0ValueTypeID));
+      return callable_type::make(option_type::make(Src0ValueTypeID));
     }
   };
 

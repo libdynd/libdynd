@@ -26,19 +26,19 @@ using namespace dynd;
 TEST(SymbolicTypes, CreateFuncProto)
 {
   ndt::type tp;
-  const ndt::arrfunc_type *fpt;
+  const ndt::callable_type *fpt;
 
   // Function prototype from C++ template parameter
   tp = ndt::type::make<int64_t(float, int32_t, double)>();
-  EXPECT_EQ(arrfunc_type_id, tp.get_type_id());
-  EXPECT_EQ(sizeof(arrfunc_type_data), tp.get_data_size());
+  EXPECT_EQ(callable_type_id, tp.get_type_id());
+  EXPECT_EQ(sizeof(callable_type_data), tp.get_data_size());
   EXPECT_EQ((size_t)scalar_align_of<int64_t>::value, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   // function prototype is not actually symbolic, it is
-  // used to store arrfunc objects
+  // used to store callable objects
   EXPECT_FALSE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_variadic());
-  fpt = tp.extended<ndt::arrfunc_type>();
+  fpt = tp.extended<ndt::callable_type>();
   ASSERT_EQ(3, fpt->get_narg());
   EXPECT_EQ(ndt::type::make<float>(), fpt->get_pos_type(0));
   EXPECT_EQ(ndt::type::make<int32_t>(), fpt->get_pos_type(1));
@@ -59,18 +59,18 @@ TEST(SymbolicTypes, CreateFuncProto)
 
   // Exercise a few different variations
   tp = ndt::type::make<int8_t()>();
-  fpt = tp.extended<ndt::arrfunc_type>();
+  fpt = tp.extended<ndt::callable_type>();
   ASSERT_EQ(0, fpt->get_narg());
   EXPECT_EQ(ndt::type::make<int8_t>(), fpt->get_return_type());
 
   tp = ndt::type::make<int16_t(int32_t)>();
-  fpt = tp.extended<ndt::arrfunc_type>();
+  fpt = tp.extended<ndt::callable_type>();
   ASSERT_EQ(1, fpt->get_narg());
   EXPECT_EQ(ndt::type::make<int16_t>(), fpt->get_return_type());
   EXPECT_EQ(ndt::type::make<int32_t>(), fpt->get_pos_type(0));
 
   tp = ndt::type::make<int16_t(int32_t, int64_t)>();
-  fpt = tp.extended<ndt::arrfunc_type>();
+  fpt = tp.extended<ndt::callable_type>();
   ASSERT_EQ(2, fpt->get_narg());
   EXPECT_EQ(ndt::type::make<int16_t>(), fpt->get_return_type());
   EXPECT_EQ(ndt::type::make<int32_t>(), fpt->get_pos_type(0));
@@ -346,23 +346,23 @@ TEST(SymbolicTypes, VariadicStruct)
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }
 
-TEST(SymbolicTypes, VariadicArrfunc)
+TEST(SymbolicTypes, VariadicCallable)
 {
   ndt::type tp;
 
   tp = ndt::type("(int32, ...) -> float32");
   EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p("pos_types"));
-  EXPECT_TRUE(tp.extended<ndt::arrfunc_type>()->is_pos_variadic());
+  EXPECT_TRUE(tp.extended<ndt::callable_type>()->is_pos_variadic());
   EXPECT_EQ(ndt::type("(int32, ...)"),
-            tp.extended<ndt::arrfunc_type>()->get_pos_tuple());
+            tp.extended<ndt::callable_type>()->get_pos_tuple());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 
   tp = ndt::type("(int32, ..., shape: 3 * intptr) -> float32");
   EXPECT_JSON_EQ_ARR("[\"int32\"]", tp.p("pos_types"));
   EXPECT_JSON_EQ_ARR("[\"3 * intptr\"]", tp.p("kwd_types"));
   EXPECT_EQ(ndt::type("(int32, ...)"),
-            tp.extended<ndt::arrfunc_type>()->get_pos_tuple());
+            tp.extended<ndt::callable_type>()->get_pos_tuple());
   EXPECT_EQ(ndt::type("{shape: 3 * intptr}"),
-            tp.extended<ndt::arrfunc_type>()->get_kwd_struct());
+            tp.extended<ndt::callable_type>()->get_kwd_struct());
   EXPECT_EQ(tp, ndt::type(tp.str()));
 }

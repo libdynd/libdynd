@@ -21,7 +21,7 @@ using namespace dynd;
 namespace {
 
 ////////////////////////////////////////////////////////////////
-// Functions for the unary assignment as an arrfunc
+// Functions for the unary assignment as an callable
 
 struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
   static intptr_t
@@ -56,7 +56,7 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
 };
 
 ////////////////////////////////////////////////////////////////
-// Functions for property access as an arrfunc
+// Functions for property access as an callable
 
 struct property_kernel : nd::base_virtual_kernel<property_kernel> {
   static intptr_t
@@ -86,7 +86,7 @@ struct property_kernel : nd::base_virtual_kernel<property_kernel> {
     }
 
     stringstream ss;
-    ss << "Cannot instantiate arrfunc for assigning from ";
+    ss << "Cannot instantiate callable for assigning from ";
     ss << " using input type " << src_tp[0];
     ss << " and output type " << dst_tp;
     throw type_error(ss.str());
@@ -95,29 +95,29 @@ struct property_kernel : nd::base_virtual_kernel<property_kernel> {
 
 } // anonymous namespace
 
-nd::arrfunc dynd::make_arrfunc_from_assignment(const ndt::type &dst_tp,
-                                               const ndt::type &src_tp,
-                                               assign_error_mode errmode)
+nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp,
+                                                 const ndt::type &src_tp,
+                                                 assign_error_mode errmode)
 {
-  return nd::arrfunc::make<unary_assignment_ck>(
-      ndt::arrfunc_type::make(dst_tp, src_tp), errmode, 0);
+  return nd::callable::make<unary_assignment_ck>(
+      ndt::callable_type::make(dst_tp, src_tp), errmode, 0);
 }
 
-nd::arrfunc dynd::make_arrfunc_from_property(const ndt::type &tp,
-                                             const std::string &propname)
+nd::callable dynd::make_callable_from_property(const ndt::type &tp,
+                                               const std::string &propname)
 {
   if (tp.get_kind() == expr_kind) {
     stringstream ss;
-    ss << "Creating an arrfunc from a property requires a non-expression"
+    ss << "Creating an callable from a property requires a non-expression"
        << ", got " << tp;
     throw type_error(ss.str());
   }
   ndt::type prop_tp = ndt::property_type::make(tp, propname);
-  return nd::arrfunc::make<property_kernel>(
-      ndt::arrfunc_type::make(prop_tp.value_type(), tp), prop_tp, 0);
+  return nd::callable::make<property_kernel>(
+      ndt::callable_type::make(prop_tp.value_type(), tp), prop_tp, 0);
 }
 
-void nd::detail::validate_kwd_types(const ndt::arrfunc_type *af_tp,
+void nd::detail::validate_kwd_types(const ndt::callable_type *af_tp,
                                     std::vector<ndt::type> &kwd_tp,
                                     const std::vector<intptr_t> &available,
                                     const std::vector<intptr_t> &missing,
@@ -138,7 +138,7 @@ void nd::detail::validate_kwd_types(const ndt::arrfunc_type *af_tp,
     if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
       std::stringstream ss;
       ss << "keyword \"" << af_tp->get_kwd_name(j) << "\" does not match, ";
-      ss << "arrfunc expected " << expected_tp << " but passed " << actual_tp;
+      ss << "callable expected " << expected_tp << " but passed " << actual_tp;
       throw std::invalid_argument(ss.str());
     }
 
@@ -170,17 +170,17 @@ void nd::detail::fill_missing_values(const ndt::type *tp, char *arrmeta,
   }
 }
 
-void nd::detail::check_narg(const ndt::arrfunc_type *af_tp, intptr_t npos)
+void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t npos)
 {
   if (!af_tp->is_pos_variadic() && npos != af_tp->get_npos()) {
     std::stringstream ss;
-    ss << "arrfunc expected " << af_tp->get_npos()
+    ss << "callable expected " << af_tp->get_npos()
        << " positional arguments, but received " << npos;
     throw std::invalid_argument(ss.str());
   }
 }
 
-void nd::detail::check_arg(const ndt::arrfunc_type *af_tp, intptr_t i,
+void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i,
                            const ndt::type &actual_tp,
                            const char *actual_arrmeta,
                            std::map<nd::string, ndt::type> &tp_vars)
@@ -189,13 +189,13 @@ void nd::detail::check_arg(const ndt::arrfunc_type *af_tp, intptr_t i,
   if (!expected_tp.match(NULL, actual_tp.value_type(), actual_arrmeta,
                          tp_vars)) {
     std::stringstream ss;
-    ss << "positional argument " << i << " to arrfunc does not match, ";
+    ss << "positional argument " << i << " to callable does not match, ";
     ss << "expected " << expected_tp << ", received " << actual_tp;
     throw std::invalid_argument(ss.str());
   }
 }
 
-void nd::detail::check_nkwd(const ndt::arrfunc_type *af_tp,
+void nd::detail::check_nkwd(const ndt::callable_type *af_tp,
                             const std::vector<intptr_t> &available,
                             const std::vector<intptr_t> &missing)
 {
@@ -203,30 +203,31 @@ void nd::detail::check_nkwd(const ndt::arrfunc_type *af_tp,
     std::stringstream ss;
     // TODO: Provide the missing keyword parameter names in this error
     //       message
-    ss << "arrfunc requires keyword parameters that were not provided. "
-          "arrfunc signature " << ndt::type(af_tp, true);
+    ss << "callable requires keyword parameters that were not provided. "
+          "callable signature " << ndt::type(af_tp, true);
     throw std::invalid_argument(ss.str());
   }
 }
 
-nd::arrfunc::arrfunc(const nd::array &rhs)
+nd::callable::callable(const nd::array &rhs)
 {
   if (!rhs.is_null()) {
-    if (rhs.get_type().get_type_id() == arrfunc_type_id) {
-      const arrfunc_type_data *af = reinterpret_cast<const arrfunc_type_data *>(
-          rhs.get_readonly_originptr());
+    if (rhs.get_type().get_type_id() == callable_type_id) {
+      const callable_type_data *af =
+          reinterpret_cast<const callable_type_data *>(
+              rhs.get_readonly_originptr());
       if (af->instantiate != NULL) {
-        // It's valid: arrfunc type, contains instantiate function.
+        // It's valid: callable type, contains instantiate function.
         m_value = rhs;
       } else {
-        throw invalid_argument("Require a non-empty arrfunc, "
-                               "provided arrfunc has NULL "
+        throw invalid_argument("Require a non-empty callable, "
+                               "provided callable has NULL "
                                "instantiate function");
       }
     } else {
       stringstream ss;
       ss << "Cannot implicitly convert nd::array of type "
-         << rhs.get_type().value_type() << " to  arrfunc";
+         << rhs.get_type().value_type() << " to  callable";
       throw type_error(ss.str());
     }
   }

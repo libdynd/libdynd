@@ -16,7 +16,7 @@ namespace ndt {
   class adapt_type : public base_expr_type {
     type m_value_type, m_operand_type;
     nd::string m_op;
-    nd::arrfunc m_forward, m_reverse;
+    nd::callable m_forward, m_reverse;
 
   public:
     adapt_type(const type &operand_type, const type &value_type,

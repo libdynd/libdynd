@@ -663,7 +663,7 @@ void ndt::var_dim_type::foreach_leading(const char *arrmeta, char *data,
 }
 
 void ndt::var_dim_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
   struct get_element_type {
@@ -677,8 +677,8 @@ void ndt::var_dim_type::get_dynamic_type_properties(
     }
   };
 
-  static pair<string, nd::arrfunc> var_dim_type_properties[] = {
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> var_dim_type_properties[] = {
+      pair<string, nd::callable>(
           "element_type",
           nd::functional::apply<get_element_type, type>("self"))};
 

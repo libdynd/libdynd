@@ -316,9 +316,9 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   }
   const char *saved_begin = begin;
   ndt::type proto_tp = parse_datashape(begin, end, symtable);
-  if (proto_tp.is_null() || proto_tp.get_type_id() != arrfunc_type_id ||
-      proto_tp.extended<ndt::arrfunc_type>()->get_npos() != 1 ||
-      proto_tp.extended<ndt::arrfunc_type>()->get_nkwd() != 0) {
+  if (proto_tp.is_null() || proto_tp.get_type_id() != callable_type_id ||
+      proto_tp.extended<ndt::callable_type>()->get_npos() != 1 ||
+      proto_tp.extended<ndt::callable_type>()->get_nkwd() != 0) {
     throw datashape_parse_error(saved_begin,
                                 "expected a unary function signature");
   }
@@ -337,8 +337,8 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end,
   // shown
   rbegin = begin;
   return ndt::adapt_type::make(
-      proto_tp.extended<ndt::arrfunc_type>()->get_pos_type(0),
-      proto_tp.extended<ndt::arrfunc_type>()->get_return_type(), adapt_op);
+      proto_tp.extended<ndt::callable_type>()->get_pos_type(0),
+      proto_tp.extended<ndt::callable_type>()->get_return_type(), adapt_op);
 }
 
 static string_encoding_t string_to_encoding(const char *error_begin,
@@ -921,8 +921,8 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
     // Check for variadic ending
     if (parse_token_ds(begin, end, "...")) {
       if (!parse_token_ds(begin, end, ')')) {
-        throw datashape_parse_error(begin,
-                                    "expected ',' or ')' in arrfunc prototype");
+        throw datashape_parse_error(
+            begin, "expected ',' or ')' in callable prototype");
       }
       variadic = true;
       break;
@@ -935,7 +935,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
       field_type_list.push_back(field_type);
     } else {
       throw datashape_parse_error(saved_begin,
-                                  "expected a kwd arg in arrfunc prototype");
+                                  "expected a kwd arg in callable prototype");
     }
 
     if (parse_token_ds(begin, end, ',')) {
@@ -946,7 +946,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end,
       break;
     } else {
       throw datashape_parse_error(begin,
-                                  "expected ',' or ')' in arrfunc prototype");
+                                  "expected ',' or ')' in callable prototype");
     }
   }
 
@@ -998,7 +998,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
                   begin, "expected function prototype return type");
             }
             rbegin = begin;
-            return ndt::arrfunc_type::make(
+            return ndt::callable_type::make(
                 return_type, ndt::tuple_type::make(field_type_list, variadic),
                 funcproto_kwd);
           } else {
@@ -1053,10 +1053,10 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end,
   rbegin = begin;
   // TODO: I suspect because of the change away from immutable default
   // construction, and
-  //       the requirement that arrays into arrfunc constructors are
+  //       the requirement that arrays into callable constructors are
   //       immutable, that too
   //       many copies may be occurring.
-  return ndt::arrfunc_type::make(
+  return ndt::callable_type::make(
       return_type, ndt::tuple_type::make(field_type_list, variadic));
 }
 

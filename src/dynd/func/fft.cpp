@@ -10,17 +10,17 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::fft::make()
+nd::callable nd::fft::make()
 {
-  std::vector<nd::arrfunc> children;
+  std::vector<nd::callable> children;
 
 #ifdef DYND_FFTW
   typedef fftw_ck<fftw_complex, fftw_complex, FFTW_FORWARD> CKT;
-  children.push_back(nd::arrfunc::make<CKT>(0));
+  children.push_back(nd::callable::make<CKT>(0));
 #endif
 
 #ifdef DYND_CUDA
-  children.push_back(nd::arrfunc::make<
+  children.push_back(nd::callable::make<
       cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_FORWARD>>(0));
 #endif
 
@@ -38,17 +38,17 @@ nd::arrfunc nd::fft::make()
 */
 }
 
-nd::arrfunc nd::ifft::make()
+nd::callable nd::ifft::make()
 {
-  std::vector<nd::arrfunc> children;
+  std::vector<nd::callable> children;
 
 #ifdef DYND_FFTW
   children.push_back(
-      nd::arrfunc::make<fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>(0));
+      nd::callable::make<fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>(0));
 #endif
 
 #ifdef DYND_CUDA
-  children.push_back(nd::arrfunc::make<
+  children.push_back(nd::callable::make<
       cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_INVERSE>>(0));
 #endif
 
@@ -66,19 +66,19 @@ nd::arrfunc nd::ifft::make()
 */
 }
 
-nd::arrfunc nd::rfft::make()
+nd::callable nd::rfft::make()
 {
 #ifdef DYND_FFTW
-  return nd::arrfunc::make<fftw_ck<fftw_complex, double>>(0);
+  return nd::callable::make<fftw_ck<fftw_complex, double>>(0);
 #else
   throw std::runtime_error("no fft enabled");
 #endif
 }
 
-nd::arrfunc nd::irfft::make()
+nd::callable nd::irfft::make()
 {
 #ifdef DYND_FFTW
-  return nd::arrfunc::make<fftw_ck<double, fftw_complex>>(0);
+  return nd::callable::make<fftw_ck<double, fftw_complex>>(0);
 #else
   throw std::runtime_error("no fft enabled");
 #endif

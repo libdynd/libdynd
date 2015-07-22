@@ -14,7 +14,7 @@ struct uniform_kernel_alias {
   using type = nd::random::uniform_kernel<DstTypeID, GeneratorType>;
 };
 
-nd::arrfunc nd::random::uniform::make()
+nd::callable nd::random::uniform::make()
 {
   typedef type_id_sequence<int32_type_id, int64_type_id, uint32_type_id,
                            uint64_type_id, float32_type_id, float64_type_id,
@@ -24,20 +24,11 @@ nd::arrfunc nd::random::uniform::make()
   std::random_device random_device;
 
   auto children =
-      arrfunc::make_all<uniform_kernel_alias<std::default_random_engine>::type,
-                        numeric_type_ids>(0);
+      callable::make_all<uniform_kernel_alias<std::default_random_engine>::type,
+                         numeric_type_ids>(0);
 
   return functional::elwise(functional::multidispatch<1>(
-      ndt::type("(a: ?R, b: ?R) -> R"), std::move(children), arrfunc(), {-1}));
-
-  /*
-    arrfunc self =
-        as_arrfunc<bind2<uniform_ck, std::default_random_engine>::type,
-    numeric_types>(
-            ndt::type("(a: ?R, b: ?R) -> R"),
-            std::shared_ptr<std::default_random_engine>(
-                new std::default_random_engine(random_device())));
-  */
+      ndt::type("(a: ?R, b: ?R) -> R"), std::move(children), callable(), {-1}));
 }
 
 struct nd::random::uniform nd::random::uniform;
@@ -48,7 +39,7 @@ struct nd::random::uniform nd::random::uniform;
 
 template <kernel_request_t kernreq>
 typename std::enable_if<kernreq == kernel_request_cuda_device,
-                        nd::arrfunc>::type
+                        nd::callable>::type
 nd::random::uniform::make()
 {
   unsigned int blocks_per_grid = 512;
@@ -58,7 +49,7 @@ nd::random::uniform::make()
   cudaMalloc(&s, blocks_per_grid * threads_per_block * sizeof(curandState_t));
   cuda_device_curand_init << <blocks_per_grid, threads_per_block>>> (s);
 
-  return nd::as_arrfunc<uniform_ck, kernel_request_cuda_device, curandState_t,
+  return nd::as_callable<uniform_ck, kernel_request_cuda_device, curandState_t,
                         type_sequence<double, dynd::complex<double>>>(
       ndt::type("(a: ?R, b: ?R) -> cuda_device[R]"), s);
 }

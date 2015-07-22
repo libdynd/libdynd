@@ -32,9 +32,9 @@ double manip1(double x, double y) { return x - y; };
 
 // TODO: Reenable tests involving float16
 
-TEST(MultiDispatchArrfunc, Ambiguous)
+TEST(MultiDispatchCallable, Ambiguous)
 {
-  vector<nd::arrfunc> funcs;
+  vector<nd::callable> funcs;
   funcs.push_back(nd::functional::apply(&func0));
   funcs.push_back(nd::functional::apply(&func1));
   funcs.push_back(nd::functional::apply(&func2));
@@ -47,9 +47,9 @@ TEST(MultiDispatchArrfunc, Ambiguous)
   funcs.push_back(nd::functional::apply(&func5));
 }
 
-TEST(MultiDispatchArrfunc, ExactSignatures)
+TEST(MultiDispatchCallable, ExactSignatures)
 {
-  vector<nd::arrfunc> funcs;
+  vector<nd::callable> funcs;
   funcs.push_back(nd::functional::apply(&func0));
   funcs.push_back(nd::functional::apply(&func1));
   funcs.push_back(nd::functional::apply(&func2));
@@ -57,7 +57,7 @@ TEST(MultiDispatchArrfunc, ExactSignatures)
   funcs.push_back(nd::functional::apply(&func4));
   funcs.push_back(nd::functional::apply(&func5));
 
-  nd::arrfunc af = nd::functional::old_multidispatch(funcs.size(), &funcs[0]);
+  nd::callable af = nd::functional::old_multidispatch(funcs.size(), &funcs[0]);
 
   EXPECT_EQ(0, af(1, 1.f, 1.0).as<int>());
   EXPECT_EQ(1, af(1, 1.0, 1.0).as<int>());
@@ -67,9 +67,9 @@ TEST(MultiDispatchArrfunc, ExactSignatures)
   EXPECT_EQ(5, af((int16_t)1, 1.f, 1.f).as<int>());
 }
 
-TEST(MultiDispatchArrfunc, PromoteToSignature)
+TEST(MultiDispatchCallable, PromoteToSignature)
 {
-  vector<nd::arrfunc> funcs;
+  vector<nd::callable> funcs;
   funcs.push_back(nd::functional::apply(&func0));
   funcs.push_back(nd::functional::apply(&func1));
   funcs.push_back(nd::functional::apply(&func2));
@@ -77,7 +77,7 @@ TEST(MultiDispatchArrfunc, PromoteToSignature)
   funcs.push_back(nd::functional::apply(&func4));
   funcs.push_back(nd::functional::apply(&func5));
 
-  nd::arrfunc af = nd::functional::old_multidispatch(funcs.size(), &funcs[0]);
+  nd::callable af = nd::functional::old_multidispatch(funcs.size(), &funcs[0]);
 
   //  EXPECT_EQ(0, af(1, float16(1.f), 1.0).as<int>());
   EXPECT_EQ(1, af(1, 1.0, 1.f).as<int>());
@@ -87,12 +87,12 @@ TEST(MultiDispatchArrfunc, PromoteToSignature)
   EXPECT_EQ(5, af((int8_t)1, 1.f, 1.f).as<int>());
 }
 
-TEST(MultiDispatchArrfunc, Values)
+TEST(MultiDispatchCallable, Values)
 {
-  vector<nd::arrfunc> funcs;
+  vector<nd::callable> funcs;
   funcs.push_back(nd::functional::apply(&manip0));
   funcs.push_back(nd::functional::apply(&manip1));
-  nd::arrfunc af = nd::functional::elwise(
+  nd::callable af = nd::functional::elwise(
       nd::functional::old_multidispatch(funcs.size(), &funcs[0]));
   nd::array a, b, c;
 
@@ -132,14 +132,14 @@ TODO: This test broken when the order of resolve_option_values and
       resolve_dst_type changed. It should be fixed when we sort out
 multidispatch.
 
-TEST(MultiDispatchArrfunc, Dims)
+TEST(MultiDispatchCallable, Dims)
 {
-  vector<nd::arrfunc> funcs;
-  // Instead of making a multidispatch arrfunc, then lifting it,
-  // we lift multiple arrfuncs, then make a multidispatch arrfunc from them.
+  vector<nd::callable> funcs;
+  // Instead of making a multidispatch callable, then lifting it,
+  // we lift multiple callables, then make a multidispatch callable from them.
   funcs.push_back(nd::functional::elwise(nd::functional::apply(&manip0)));
   funcs.push_back(nd::functional::elwise(nd::functional::apply(&manip1)));
-  nd::arrfunc af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
+  nd::callable af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
   nd::array a, b, c;
 
   // Exactly match (int, int) -> real
@@ -158,9 +158,9 @@ T tester(T x, T y)
 }
 
 /*
-TEST(MultidispatchArrfunc, Untitled)
+TEST(MultidispatchCallable, Untitled)
 {
-  nd::arrfunc af = nd::functional::multidispatch<2>(
+  nd::callable af = nd::functional::multidispatch<2>(
       ndt::type("(Any, Any) -> Any"),
       {nd::functional::apply(&tester<int>),
        nd::functional::apply(&tester<double>),
@@ -178,22 +178,23 @@ TEST(MultidispatchArrfunc, Untitled)
 
 TEST(Multidispatch, CArray)
 {
-  nd::arrfunc children[DYND_TYPE_ID_MAX];
+  nd::callable children[DYND_TYPE_ID_MAX];
   children[float64_type_id] = nd::functional::apply(&func<double>);
 
-  nd::arrfunc func = nd::functional::multidispatch(ndt::type("(Any) -> Any"),
-                                                   children, nd::arrfunc());
+  nd::callable func = nd::functional::multidispatch(ndt::type("(Any) -> Any"),
+                                                   children, nd::callable());
   func(3.0);
 }
 
 TEST(Multidispatch, Vector)
 {
-  vector<nd::arrfunc> children(DYND_TYPE_ID_MAX);
+  vector<nd::callabe> children(DYND_TYPE_ID_MAX);
   children[float64_type_id] = nd::functional::apply(&func<double>);
 
-  nd::arrfunc func = nd::functional::multidispatch<1>(ndt::type("(Any) -> Any"),
+  nd::callable func = nd::functional::multidispatch<1>(ndt::type("(Any) ->
+Any"),
                                                       std::move(children),
-nd::arrfunc());
+nd::callable());
   children.clear();
 
   std::cout << func(3.0) << std::endl;
@@ -213,14 +214,14 @@ TEST(Multidispatch, Map)
 {
   //  std::array<type_id_t, 2> key;
 
-  map<array<type_id_t, 2>, nd::arrfunc> children;
+  map<array<type_id_t, 2>, nd::callable> children;
   children[{{float64_type_id, float32_type_id}}] =
       nd::functional::apply(&func<double, float>);
   children[{{int32_type_id, int32_type_id}}] =
       nd::functional::apply(&func<int32, int32>);
 
-  nd::arrfunc func = nd::functional::multidispatch<2>(
-      ndt::type("(Any, Any) -> Any"), children, nd::arrfunc());
+  nd::callable func = nd::functional::multidispatch<2>(
+      ndt::type("(Any, Any) -> Any"), children, nd::callable());
 
   //  std::cout << "made" << std::endl;
 
@@ -247,7 +248,7 @@ struct callable0 {
 
 TEST(MultidispatchFunc, CudaHostDevice)
 {
-  nd::arrfunc af = nd::functional::multidispatch(
+  nd::callable af = nd::functional::multidispatch(
       ndt::type("(M[R], M[R]) -> M[R]"),
       {nd::functional::apply<callable0<int>>(),
        nd::functional::apply<kernel_request_cuda_device, callable0<int>>()});
@@ -256,7 +257,7 @@ TEST(MultidispatchFunc, CudaHostDevice)
   std::cout << af(nd::array(1).to_cuda_device(), nd::array(2).to_cuda_device())
             << std::endl;
 
-  nd::arrfunc af1 = nd::functional::elwise(af);
+  nd::callable af1 = nd::functional::elwise(af);
   std::cout << af1 << std::endl;
 
   nd::array a = nd::random::uniform(kwds("dst_tp", ndt::type("10 * int32")));

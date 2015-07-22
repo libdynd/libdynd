@@ -10,24 +10,25 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::functional::rolling(const nd::arrfunc &window_op,
-                                    intptr_t window_size)
+nd::callable nd::functional::rolling(const nd::callable &window_op,
+                                     intptr_t window_size)
 {
-  // Validate the input arrfunc
+  // Validate the input callable
   if (window_op.is_null()) {
-    throw invalid_argument("make_rolling_arrfunc() 'window_op' cannot be null");
+    throw invalid_argument(
+        "make_rolling_callable() 'window_op' cannot be null");
   }
-  const ndt::arrfunc_type *window_af_tp = window_op.get_type();
+  const ndt::callable_type *window_af_tp = window_op.get_type();
   if (window_af_tp->get_npos() != 1) {
     stringstream ss;
-    ss << "To make a rolling window arrfunc, an operation with one "
+    ss << "To make a rolling window callable, an operation with one "
           "argument is required, got " << window_af_tp;
     throw invalid_argument(ss.str());
   }
   const ndt::type &window_src_tp = window_af_tp->get_pos_type(0);
   if (window_src_tp.get_ndim() < 1) {
     stringstream ss;
-    ss << "To make a rolling window arrfunc, an operation with which "
+    ss << "To make a rolling window callable, an operation with which "
           "accepts a dimension is required, got " << window_af_tp;
     throw invalid_argument(ss.str());
   }
@@ -38,11 +39,11 @@ nd::arrfunc nd::functional::rolling(const nd::arrfunc &window_op,
   ndt::type roll_dst_tp =
       ndt::typevar_dim_type::make(rolldimname, window_af_tp->get_return_type());
 
-  // Create the data for the arrfunc
-  std::shared_ptr<rolling_arrfunc_data> data(new rolling_arrfunc_data);
+  // Create the data for the callable
+  std::shared_ptr<rolling_callable_data> data(new rolling_callable_data);
   data->window_size = window_size;
   data->window_op = window_op;
 
-  return arrfunc::make<rolling_ck>(
-      ndt::arrfunc_type::make(roll_dst_tp, roll_src_tp), data, 0);
+  return callable::make<rolling_ck>(
+      ndt::callable_type::make(roll_dst_tp, roll_src_tp), data, 0);
 }

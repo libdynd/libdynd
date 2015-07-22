@@ -108,7 +108,7 @@ struct builtin_sum_reduction_kernel {
   }
 };
 
-nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
+nd::callable kernels::make_builtin_sum_reduction_callable(type_id_t tid)
 {
   if (tid < 0 || tid >= builtin_type_id_count) {
     stringstream ss;
@@ -116,15 +116,15 @@ nd::arrfunc kernels::make_builtin_sum_reduction_arrfunc(type_id_t tid)
     ss << ndt::type(tid) << " is not supported";
     throw type_error(ss.str());
   }
-  return nd::arrfunc::make<builtin_sum_reduction_kernel>(
-      ndt::arrfunc_type::make(ndt::type(tid), ndt::type(tid)), tid, 0);
+  return nd::callable::make<builtin_sum_reduction_kernel>(
+      ndt::callable_type::make(ndt::type(tid), ndt::type(tid)), tid, 0);
 }
 
-nd::arrfunc kernels::make_builtin_sum1d_arrfunc(type_id_t tid)
+nd::callable kernels::make_builtin_sum1d_callable(type_id_t tid)
 {
-  nd::arrfunc sum_ew = kernels::make_builtin_sum_reduction_arrfunc(tid);
+  nd::callable sum_ew = kernels::make_builtin_sum_reduction_callable(tid);
   bool reduction_dimflags[1] = {true};
-  return lift_reduction_arrfunc(
+  return lift_reduction_callable(
       sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)), nd::array(), false, 1,
       reduction_dimflags, true, true, false, 0);
 }
@@ -202,16 +202,16 @@ struct mean1d_kernel {
 };
 } // anonymous namespace
 
-nd::arrfunc kernels::make_builtin_mean1d_arrfunc(type_id_t tid, intptr_t minp)
+nd::callable kernels::make_builtin_mean1d_callable(type_id_t tid, intptr_t minp)
 {
   if (tid != float64_type_id) {
     stringstream ss;
-    ss << "make_builtin_mean1d_arrfunc: data type ";
+    ss << "make_builtin_mean1d_callable: data type ";
     ss << ndt::type(tid) << " is not supported";
     throw type_error(ss.str());
   }
-  return nd::arrfunc::make<mean1d_kernel>(
-      ndt::arrfunc_type::make(
+  return nd::callable::make<mean1d_kernel>(
+      ndt::callable_type::make(
           ndt::type::make<double>(),
           ndt::make_fixed_dim_kind(ndt::type::make<double>())),
       minp, 0);

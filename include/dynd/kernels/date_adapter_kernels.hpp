@@ -11,10 +11,10 @@
 namespace dynd {
 
 /**
- * Makes arrfuncs which adapt to/from a date.
+ * Makes callables which adapt to/from a date.
  */
-bool make_date_adapter_arrfunc(const ndt::type &operand_tp,
-                                 const nd::string &op, nd::arrfunc &out_forward,
-                                 nd::arrfunc &out_reverse);
+bool make_date_adapter_callable(const ndt::type &operand_tp,
+                                const nd::string &op, nd::callable &out_forward,
+                                nd::callable &out_reverse);
 
 } // namespace dynd
