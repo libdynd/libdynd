@@ -13,8 +13,11 @@
 
 #include <dynd/config.hpp>
 
-using namespace std;
-using namespace dynd;
+using std::is_same;
+using dynd::outer;
+using dynd::integer_sequence;
+using dynd::type_sequence;
+using dynd::for_each;
 
 template <typename T>
 class IntegerSequence : public ::testing::Test {
