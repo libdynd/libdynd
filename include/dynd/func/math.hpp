@@ -11,19 +11,19 @@ namespace dynd {
 namespace nd {
 
   extern struct cos : declfunc<cos> {
-    static arrfunc make();
+    static callable make();
   } cos;
 
   extern struct sin : declfunc<sin> {
-    static arrfunc make();
+    static callable make();
   } sin;
 
   extern struct tan : declfunc<tan> {
-    static arrfunc make();
+    static callable make();
   } tan;
 
   extern struct exp : declfunc<exp> {
-    static arrfunc make();
+    static callable make();
   } exp;
 
 } // namespace dynd::nd

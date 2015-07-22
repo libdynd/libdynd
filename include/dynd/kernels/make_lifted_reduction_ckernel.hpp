@@ -17,8 +17,8 @@ namespace dynd {
  * This lifts a unary_operation ckernel, which accumulates an individual value
  * or a strided run of values with the possibility of a 0-stride in the output.
  *
- * \param elwise_reduction  The arrfunc being lifted
- * \param dst_initialization  A arrfunc for initializing the
+ * \param elwise_reduction  The callable being lifted
+ * \param dst_initialization  A callable for initializing the
  *                            accumulator values from the source data.
  *                            If this is NULL, an assignment
  *                            kernel is used here.
@@ -47,10 +47,10 @@ namespace dynd {
  * \param ectx  The evaluation context to use.
  */
 size_t make_lifted_reduction_ckernel(
-    const arrfunc_type_data *elwise_reduction,
-    const ndt::arrfunc_type *elwise_reduction_tp,
-    const arrfunc_type_data *dst_initialization,
-    const ndt::arrfunc_type *dst_initialization_tp, void *ckb,
+    const callable_type_data *elwise_reduction,
+    const ndt::callable_type *elwise_reduction_tp,
+    const callable_type_data *dst_initialization,
+    const ndt::callable_type *dst_initialization_tp, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     const ndt::type &src_tp, const char *src_arrmeta, intptr_t reduction_ndim,
     const bool *reduction_dimflags, bool associative, bool commutative,

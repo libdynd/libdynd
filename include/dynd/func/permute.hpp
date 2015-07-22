@@ -62,11 +62,11 @@ namespace kernels {
                 const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
     {
-      const std::pair<nd::arrfunc, std::vector<intptr_t>> *data =
-          reinterpret_cast<std::pair<nd::arrfunc, std::vector<intptr_t>> *>(
+      const std::pair<nd::callable, std::vector<intptr_t>> *data =
+          reinterpret_cast<std::pair<nd::callable, std::vector<intptr_t>> *>(
               static_data);
 
-      const arrfunc_type_data *child = data->first.get();
+      const callable_type_data *child = data->first.get();
 
       const intptr_t *perm = data->second.data();
 
@@ -156,11 +156,11 @@ namespace kernels {
                 const nd::array &kwds,
                 const std::map<nd::string, ndt::type> &tp_vars)
     {
-      const std::pair<nd::arrfunc, std::vector<intptr_t>> *data =
-          reinterpret_cast<std::pair<nd::arrfunc, std::vector<intptr_t>> *>(
+      const std::pair<nd::callable, std::vector<intptr_t>> *data =
+          reinterpret_cast<std::pair<nd::callable, std::vector<intptr_t>> *>(
               static_data);
 
-      const arrfunc_type_data *child = data->first.get();
+      const callable_type_data *child = data->first.get();
 
       const intptr_t *perm = data->second.data();
 
@@ -193,7 +193,7 @@ namespace kernels {
 namespace nd {
   namespace functional {
 
-    arrfunc permute(const arrfunc &child, const std::vector<intptr_t> &perm);
+    callable permute(const callable &child, const std::vector<intptr_t> &perm);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

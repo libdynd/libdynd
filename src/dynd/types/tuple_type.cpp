@@ -183,7 +183,7 @@ static nd::array property_get_arrmeta_offsets(const ndt::type &tp)
 */
 
 void ndt::tuple_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
   struct field_types_kernel : nd::base_property_kernel<field_types_kernel> {
@@ -240,13 +240,13 @@ void ndt::tuple_type::get_dynamic_type_properties(
     }
   };
 
-  static pair<string, nd::arrfunc> type_properties[] = {
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> type_properties[] = {
+      pair<string, nd::callable>(
           "field_types",
-          nd::arrfunc::make<field_types_kernel>(type("(self: type) -> Any"))),
-      pair<string, nd::arrfunc>("arrmeta_offsets",
-                                nd::arrfunc::make<arrmeta_offsets_kernel>(
-                                    type("(self: type) -> Any"))),
+          nd::callable::make<field_types_kernel>(type("(self: type) -> Any"))),
+      pair<string, nd::callable>("arrmeta_offsets",
+                                 nd::callable::make<arrmeta_offsets_kernel>(
+                                     type("(self: type) -> Any"))),
   };
 
   *out_properties = type_properties;

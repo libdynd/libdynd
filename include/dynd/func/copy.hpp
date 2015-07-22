@@ -15,7 +15,7 @@ namespace nd {
    * array to another, without broadcasting
    */
   extern struct copy : declfunc<copy> {
-    static arrfunc make();
+    static callable make();
   } copy;
 
   /**
@@ -23,7 +23,7 @@ namespace nd {
    * array to another, with broadcasting.
    */
   extern struct broadcast_copy : declfunc<broadcast_copy> {
-    static arrfunc make();
+    static callable make();
   } broadcast_copy;
 
 } // namespace dynd::nd

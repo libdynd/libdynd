@@ -90,15 +90,15 @@ namespace nd {
       typedef StaticDataType static_data_type;
 
       struct data {
-        const arrfunc &child;
+        const callable &child;
 
-        data(const arrfunc &child) : child(child) {}
+        data(const callable &child) : child(child) {}
       };
 
       /*
             static void
-            data_init(const arrfunc_type_data *self,
-                      const ndt::arrfunc_type *DYND_UNUSED(self_tp),
+            data_init(const callable_type_data *self,
+                      const ndt::callable_type *DYND_UNUSED(self_tp),
                       const char *DYND_UNUSED(static_data),
                       size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                       intptr_t nsrc, const ndt::type *src_tp, array
@@ -109,7 +109,7 @@ namespace nd {
               static_data &static_data =
                   *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
 
-              const arrfunc &child = static_data(dst_tp, nsrc, src_tp);
+              const callable &child = static_data(dst_tp, nsrc, src_tp);
               if (child->data_init != NULL) {
                 child->data_init(child, self_tp, NULL, 0, NULL, nsrc, src_tp,
          kwds,
@@ -128,8 +128,8 @@ namespace nd {
             *reinterpret_cast<std::shared_ptr<StaticDataType> *>(static_data)
                  ->get();
 
-        arrfunc &child =
-            const_cast<arrfunc &>(static_data_x(dst_tp, nsrc, src_tp));
+        callable &child =
+            const_cast<callable &>(static_data_x(dst_tp, nsrc, src_tp));
 
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
@@ -154,8 +154,8 @@ namespace nd {
             *reinterpret_cast<std::shared_ptr<StaticDataType> *>(static_data)
                  ->get();
 
-        arrfunc &child =
-            const_cast<arrfunc &>(static_data_x(dst_tp, nsrc, src_tp));
+        callable &child =
+            const_cast<callable &>(static_data_x(dst_tp, nsrc, src_tp));
         return child.get()->instantiate(
             child.get()->static_data, child.get()->data_size, data, ckb,
             ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,

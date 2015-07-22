@@ -75,7 +75,7 @@ namespace ndt {
     size_t get_iterdata_size(intptr_t ndim) const;
 
     void get_dynamic_type_properties(
-        const std::pair<std::string, nd::arrfunc> **out_properties,
+        const std::pair<std::string, nd::callable> **out_properties,
         size_t *out_count) const;
 
     void get_dynamic_array_functions(

@@ -13,10 +13,10 @@ namespace nd {
   namespace functional {
 
     struct neighborhood_data {
-      arrfunc op;
+      callable op;
       start_stop_t *start_stop;
 
-      neighborhood_data(const arrfunc &neighborhood_op, intptr_t ndim)
+      neighborhood_data(const callable &neighborhood_op, intptr_t ndim)
       {
         op = neighborhood_op;
         start_stop = static_cast<start_stop_t *>(
@@ -95,7 +95,7 @@ namespace nd {
         std::shared_ptr<neighborhood_data> nh =
             *reinterpret_cast<std::shared_ptr<neighborhood_data> *>(
                 static_data);
-        nd::arrfunc nh_op = nh->op;
+        nd::callable nh_op = nh->op;
 
         nd::array shape;
         // TODO: Eliminate all try/catch(...)
@@ -120,7 +120,7 @@ namespace nd {
         if (!dst_tp.get_as_strided(dst_arrmeta, ndim, &dst_shape, &nh_dst_tp,
                                    &nh_dst_arrmeta)) {
           std::stringstream ss;
-          ss << "neighborhood arrfunc dst must be a strided array, not "
+          ss << "neighborhood callable dst must be a strided array, not "
              << dst_tp;
           throw std::invalid_argument(ss.str());
         }
@@ -132,7 +132,7 @@ namespace nd {
         if (!src_tp[0].get_as_strided(src_arrmeta[0], ndim, &src0_shape,
                                       &src0_el_tp, &src0_el_arrmeta)) {
           std::stringstream ss;
-          ss << "neighborhood arrfunc argument 1 must be a 2D strided array, "
+          ss << "neighborhood callable argument 1 must be a 2D strided array, "
                 "not " << src_tp[0];
           throw std::invalid_argument(ss.str());
         }
@@ -203,33 +203,6 @@ namespace nd {
           const nd::array &DYND_UNUSED(kwds),
           const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        // TODO: Should be able to express the match/subsitution without special
-        // code
-
-        // This is basically resolve() from arrfunc.hpp
-        /*
-          if (nsrc != af_tp->get_npos()) {
-            std::stringstream ss;
-            ss << "arrfunc expected " << af_tp->get_npos()
-               << " parameters, but received " << nsrc;
-            throw std::invalid_argument(ss.str());
-          }
-          const ndt::type *param_types = af_tp->get_pos_types_raw();
-          std::map<nd::string, ndt::type> typevars;
-          for (intptr_t i = 0; i != nsrc; ++i) {
-            if (!ndt::pattern_match(src_tp[i].value_type(), param_types[i],
-          typevars))
-          {
-              std::stringstream ss;
-              ss << "parameter " << (i + 1) << " to arrfunc does not match, ";
-              ss << "expected " << param_types[i] << ", received " << src_tp[i];
-              throw std::invalid_argument(ss.str());
-            }
-          }
-        */
-        //  out_dst_tp = ndt::substitute(af_tp->get_return_type(), typevars,
-        //  false);
-
         // swap in the input dimension values for the Fixed**N
         intptr_t ndim = src_tp[0].get_ndim();
         dimvector shape(ndim);

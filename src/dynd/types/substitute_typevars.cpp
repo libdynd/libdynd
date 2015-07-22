@@ -101,14 +101,14 @@ ndt::type ndt::detail::internal_substitute(
   case option_type_id:
     return ndt::option_type::make(ndt::substitute(
         pattern.extended<option_type>()->get_value_type(), typevars, concrete));
-  case arrfunc_type_id:
-    return ndt::arrfunc_type::make(
-        substitute(pattern.extended<arrfunc_type>()->get_return_type(),
+  case callable_type_id:
+    return ndt::callable_type::make(
+        substitute(pattern.extended<callable_type>()->get_return_type(),
                    typevars, concrete),
-        substitute(pattern.extended<arrfunc_type>()->get_pos_tuple(), typevars,
+        substitute(pattern.extended<callable_type>()->get_pos_tuple(), typevars,
                    concrete),
-        substitute(pattern.extended<arrfunc_type>()->get_kwd_struct(), typevars,
-                   concrete));
+        substitute(pattern.extended<callable_type>()->get_kwd_struct(),
+                   typevars, concrete));
   case typevar_constructed_type_id: {
     map<nd::string, ndt::type>::const_iterator it =
         typevars.find(pattern.extended<typevar_constructed_type>()->get_name());

@@ -17,24 +17,24 @@ namespace nd {
 
   template <typename F, template <type_id_t, type_id_t> class K>
   struct comparison_operator<F, K, 2> : declfunc<F> {
-    static arrfunc children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
-    static arrfunc default_child;
+    static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+    static callable default_child;
 
-    static std::map<std::array<type_id_t, 2>, arrfunc> make_children()
+    static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
       typedef type_id_sequence<
           bool_type_id, int8_type_id, int16_type_id, int32_type_id,
           int64_type_id, uint8_type_id, uint16_type_id, uint32_type_id,
           uint64_type_id, float32_type_id, float64_type_id> numeric_type_ids;
 
-      std::map<std::array<type_id_t, 2>, arrfunc> children =
-          arrfunc::make_all<K, numeric_type_ids, numeric_type_ids>(0);
+      std::map<std::array<type_id_t, 2>, callable> children =
+          callable::make_all<K, numeric_type_ids, numeric_type_ids>(0);
 
-      arrfunc self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
+      callable self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
       for (type_id_t i0 : numeric_type_ids()) {
         for (type_id_t i1 : dim_type_ids()) {
-          const ndt::type child_tp = ndt::arrfunc_type::make(
+          const ndt::type child_tp = ndt::callable_type::make(
               ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
@@ -43,25 +43,25 @@ namespace nd {
       for (type_id_t i0 : dim_type_ids()) {
         typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
         for (type_id_t i1 : type_ids()) {
-          const ndt::type child_tp = ndt::arrfunc_type::make(
+          const ndt::type child_tp = ndt::callable_type::make(
               ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
 
       children[{{string_type_id, string_type_id}}] =
-          arrfunc::make<K<string_type_id, string_type_id>>(
+          callable::make<K<string_type_id, string_type_id>>(
               ndt::type("(string, string) -> int32"), 0);
       children[{{fixed_string_type_id, fixed_string_type_id}}] =
-          arrfunc::make<K<fixed_string_type_id, fixed_string_type_id>>(
+          callable::make<K<fixed_string_type_id, fixed_string_type_id>>(
               ndt::type("(FixedString, FixedString) -> int32"), 0);
 
       return children;
     }
 
-    static arrfunc make()
+    static callable make()
     {
-      for (const std::pair<std::array<type_id_t, 2>, arrfunc> &pair :
+      for (const std::pair<std::array<type_id_t, 2>, callable> &pair :
            F::make_children()) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
@@ -72,11 +72,11 @@ namespace nd {
   };
 
   template <typename T, template <type_id_t, type_id_t> class K>
-  arrfunc comparison_operator<T, K, 2>::children[DYND_TYPE_ID_MAX +
-                                                 1][DYND_TYPE_ID_MAX + 1];
+  callable comparison_operator<T, K, 2>::children[DYND_TYPE_ID_MAX +
+                                                  1][DYND_TYPE_ID_MAX + 1];
 
   template <typename T, template <type_id_t, type_id_t> class K>
-  arrfunc comparison_operator<T, K, 2>::default_child;
+  callable comparison_operator<T, K, 2>::default_child;
 
   extern struct less : comparison_operator<less, less_kernel, 2> {
   } less;
@@ -86,18 +86,18 @@ namespace nd {
   } less_equal;
 
   extern struct equal : comparison_operator<equal, equal_kernel, 2> {
-    static std::map<std::array<type_id_t, 2>, arrfunc> make_children()
+    static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
-      std::map<std::array<type_id_t, 2>, arrfunc> children =
+      std::map<std::array<type_id_t, 2>, callable> children =
           comparison_operator::make_children();
       children[{{tuple_type_id, tuple_type_id}}] =
-          arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
+          callable::make<equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("((...), (...)) -> int32"), 0);
       children[{{struct_type_id, struct_type_id}}] =
-          arrfunc::make<equal_kernel<tuple_type_id, tuple_type_id>>(
+          callable::make<equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("({...}, {...}) -> int32"), 0);
       children[{{type_type_id, type_type_id}}] =
-          arrfunc::make<equal_kernel<type_type_id, type_type_id>>(
+          callable::make<equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"), 0);
 
       return children;
@@ -106,18 +106,18 @@ namespace nd {
 
   extern struct not_equal
       : comparison_operator<not_equal, not_equal_kernel, 2> {
-    static std::map<std::array<type_id_t, 2>, arrfunc> make_children()
+    static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
-      std::map<std::array<type_id_t, 2>, arrfunc> children =
+      std::map<std::array<type_id_t, 2>, callable> children =
           comparison_operator::make_children();
       children[{{tuple_type_id, tuple_type_id}}] =
-          arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
+          callable::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("((...), (...)) -> int32"), 0);
       children[{{struct_type_id, struct_type_id}}] =
-          arrfunc::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
+          callable::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
               ndt::type("({...}, {...}) -> int32"), 0);
       children[{{type_type_id, type_type_id}}] =
-          arrfunc::make<not_equal_kernel<type_type_id, type_type_id>>(
+          callable::make<not_equal_kernel<type_type_id, type_type_id>>(
               ndt::type("(type, type) -> int32"), 0);
 
       return children;

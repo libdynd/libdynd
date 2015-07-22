@@ -201,7 +201,7 @@ bool ndt::type::match(const ndt::type &candidate_tp) const
 nd::array ndt::type::p(const char *property_name) const
 {
   if (!is_builtin()) {
-    const std::pair<std::string, nd::arrfunc> *properties;
+    const std::pair<std::string, nd::callable> *properties;
     size_t count;
     extended()->get_dynamic_type_properties(&properties, &count);
     // TODO: We probably want to make some kind of acceleration structure for
@@ -209,7 +209,7 @@ nd::array ndt::type::p(const char *property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return const_cast<nd::arrfunc &>(properties[i].second)(
+          return const_cast<nd::callable &>(properties[i].second)(
               kwds("self", *this));
         }
       }
@@ -224,7 +224,7 @@ nd::array ndt::type::p(const char *property_name) const
 nd::array ndt::type::p(const std::string &property_name) const
 {
   if (!is_builtin()) {
-    const std::pair<std::string, nd::arrfunc> *properties;
+    const std::pair<std::string, nd::callable> *properties;
     size_t count;
     extended()->get_dynamic_type_properties(&properties, &count);
     // TODO: We probably want to make some kind of acceleration structure for
@@ -232,7 +232,7 @@ nd::array ndt::type::p(const std::string &property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return const_cast<nd::arrfunc &>(properties[i].second)(
+          return const_cast<nd::callable &>(properties[i].second)(
               kwds("self", *this));
         }
       }
@@ -583,14 +583,14 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
 
 ndt::type ndt::type_of(const nd::array &value) { return value.get_type(); }
 
-ndt::type ndt::type_of(const nd::arrfunc &value)
+ndt::type ndt::type_of(const nd::callable &value)
 {
   return value.get_array_type();
 }
 
 ndt::type ndt::get_forward_type(const nd::array &val)
 {
-  if (val.get_type().get_type_id() == arrfunc_type_id) {
+  if (val.get_type().get_type_id() == callable_type_id) {
     return val.get_type();
   }
   /*

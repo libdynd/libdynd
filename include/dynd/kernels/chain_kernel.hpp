@@ -20,11 +20,11 @@ namespace nd {
      */
     struct chain_kernel : base_kernel<chain_kernel, kernel_request_host, 1> {
       struct static_data {
-        arrfunc first;
-        arrfunc second;
+        callable first;
+        callable second;
         ndt::type buffer_tp;
 
-        static_data(const arrfunc &first, const arrfunc &second,
+        static_data(const callable &first, const callable &second,
                     const ndt::type &buffer_tp)
             : first(first), second(second), buffer_tp(buffer_tp)
         {

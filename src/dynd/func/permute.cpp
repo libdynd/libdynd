@@ -15,10 +15,10 @@ using namespace dynd;
 // dst
 // src_copy[perm[i]] = src[i]
 
-nd::arrfunc nd::functional::permute(const arrfunc &child,
-                                    const std::vector<intptr_t> &perm)
+nd::callable nd::functional::permute(const callable &child,
+                                     const std::vector<intptr_t> &perm)
 {
-  const ndt::arrfunc_type *child_tp = child.get_type();
+  const ndt::callable_type *child_tp = child.get_type();
 
   ndt::type ret_tp;
   intptr_t npos = perm.size();
@@ -53,20 +53,19 @@ nd::arrfunc nd::functional::permute(const arrfunc &child,
     ret_tp = child_tp->get_return_type();
   }
 
-  ndt::type self_tp = ndt::arrfunc_type::make(
-      ret_tp,
-      ndt::tuple_type::make(nd::array(pos_tp.data(), npos)),
+  ndt::type self_tp = ndt::callable_type::make(
+      ret_tp, ndt::tuple_type::make(nd::array(pos_tp.data(), npos)),
       child_tp->get_kwd_struct());
 
   switch (child_tp->get_npos()) {
   case 2:
-    return arrfunc::make<kernels::permute_ck<2>>(
+    return callable::make<kernels::permute_ck<2>>(
         self_tp, std::make_pair(child, perm), 0);
   case 3:
-    return arrfunc::make<kernels::permute_ck<3>>(
+    return callable::make<kernels::permute_ck<3>>(
         self_tp, std::make_pair(child, perm), 0);
   case 4:
-    return arrfunc::make<kernels::permute_ck<4>>(
+    return callable::make<kernels::permute_ck<4>>(
         self_tp, std::make_pair(child, perm), 0);
   default:
     throw std::runtime_error("not yet implemented");

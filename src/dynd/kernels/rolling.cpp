@@ -85,12 +85,12 @@ intptr_t nd::functional::rolling_ck::instantiate(
     const std::map<nd::string, ndt::type> &tp_vars)
 {
   typedef dynd::nd::functional::strided_rolling_ck self_type;
-  rolling_arrfunc_data *data =
-      *reinterpret_cast<rolling_arrfunc_data **>(static_data);
+  rolling_callable_data *data =
+      *reinterpret_cast<rolling_callable_data **>(static_data);
 
   intptr_t root_ckb_offset = ckb_offset;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
-  const arrfunc_type_data *window_af = data->window_op.get();
+  const callable_type_data *window_af = data->window_op.get();
   ndt::type dst_el_tp, src_el_tp;
   const char *dst_el_arrmeta, *src_el_arrmeta;
   if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dim_size,
@@ -158,16 +158,16 @@ void nd::functional::rolling_ck::resolve_dst_type(
   /*
     if (nsrc != 1) {
       stringstream ss;
-      ss << "Wrong number of arguments to rolling arrfunc with prototype ";
+      ss << "Wrong number of arguments to rolling callable with prototype ";
       ss << af_tp << ", got " << nsrc << " arguments";
       throw invalid_argument(ss.str());
     }
   */
 
-  nd::functional::rolling_arrfunc_data *data =
-      *reinterpret_cast<nd::functional::rolling_arrfunc_data **>(static_data);
-  const arrfunc_type_data *child_af = data->window_op.get();
-  // First get the type for the child arrfunc
+  nd::functional::rolling_callable_data *data =
+      *reinterpret_cast<nd::functional::rolling_callable_data **>(static_data);
+  const callable_type_data *child_af = data->window_op.get();
+  // First get the type for the child callable
   ndt::type child_dst_tp;
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(

@@ -668,7 +668,7 @@ static ndt::type property_type_get_category_type(ndt::type d)
 }
 
 void ndt::categorical_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
   struct categories_kernel : nd::base_property_kernel<categories_kernel> {
@@ -699,16 +699,17 @@ void ndt::categorical_type::get_dynamic_type_properties(
     }
   };
 
-  static pair<string, nd::arrfunc> categorical_type_properties[] = {
-/*
-      pair<string, nd::arrfunc>("categories",
-                                nd::arrfunc::make<categories_kernel>(
-                                    ndt::type("(self: type) -> Fixed * Any"))),
-*/
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> categorical_type_properties[] = {
+      /*
+            pair<string, nd::callable>("categories",
+                                      nd::callable::make<categories_kernel>(
+                                          ndt::type("(self: type) -> Fixed *
+         Any"))),
+      */
+      pair<string, nd::callable>(
           "storage_type",
           nd::functional::apply(&property_type_get_storage_type, "self")),
-      pair<string, nd::arrfunc>(
+      pair<string, nd::callable>(
           "category_type",
           nd::functional::apply(&property_type_get_category_type, "self"))};
 

@@ -2193,23 +2193,6 @@ void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data,
     const ndt::type &dtp = tp.get_dtype().value_type();
     if (dtp.get_type_id() == option_type_id) {
       throw std::runtime_error("nd::assign_na is not yet implemented");
-
-      /*
-      const arrfunc_type_data *af =
-          dtp.extended<option_type>()->get_assign_na_arrfunc();
-      const arrfunc_type *af_tp =
-          dtp.extended<option_type>()->get_assign_na_arrfunc_type();
-      ckernel_builder<kernel_request_host> ckb;
-
-      // Todo: This is probably broken, but no tests depend on it.
-      nd::functional::elwise_virtual_ck::instantiate(
-          af, af_tp, NULL, &ckb, tp.get_ndim(), tp, arrmeta, 0, NULL, NULL,
-          kernel_request_single, ectx, nd::array(),
-          std::map<nd::string, ndt::type>());
-      ckernel_prefix *ckp = ckb.get();
-      expr_single_t ckp_fn = ckp->get_function<expr_single_t>();
-      ckp_fn(data, NULL, ckp);
-      */
     } else {
       stringstream ss;
       ss << "Cannot assign missing value token NA to dtype " << dtp;
@@ -2283,7 +2266,7 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
                           const nd::array &val)
 {
 
-  if (tp.is_builtin() || tp.get_type_id() == arrfunc_type_id) {
+  if (tp.is_builtin() || tp.get_type_id() == callable_type_id) {
     memcpy(data, val.get_readonly_originptr(), tp.get_data_size());
   } else {
     pointer_type_arrmeta *am =
@@ -2305,7 +2288,7 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
 }
 
 void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
-                          const nd::arrfunc &value)
+                          const nd::callable &value)
 {
   forward_as_array(tp, arrmeta, data, static_cast<nd::array>(value));
 }

@@ -80,7 +80,7 @@ struct take_by_pointer_virtual_ck
     if (!dst_tp.get_as_strided(dst_arrmeta, 1, &dst_size_stride, &dst_el_tp,
                                &dst_el_meta)) {
       stringstream ss;
-      ss << "take_by_pointer arrfunc: could not process type " << dst_tp;
+      ss << "take_by_pointer callable: could not process type " << dst_tp;
       ss << " as a strided dimension";
       throw type_error(ss.str());
     }
@@ -93,7 +93,7 @@ struct take_by_pointer_virtual_ck
                                     &src_size_stride[i], &src_el_tp[i],
                                     &src_el_meta[i])) {
         stringstream ss;
-        ss << "take_by_pointer arrfunc: could not process type " << src_tp[i];
+        ss << "take_by_pointer callable: could not process type " << src_tp[i];
         ss << " as a strided dimension";
         throw type_error(ss.str());
       }
@@ -125,7 +125,7 @@ struct take_by_pointer_virtual_ck
     /*
         if (nsrc != 2) {
           stringstream ss;
-          ss << "Wrong number of arguments to take arrfunc with prototype ";
+          ss << "Wrong number of arguments to take callable with prototype ";
           ss << af_tp << ", got " << nsrc << " arguments";
           throw invalid_argument(ss.str());
         }
@@ -145,11 +145,11 @@ struct take_by_pointer_virtual_ck
   }
 };
 
-nd::arrfunc nd::take_by_pointer::make()
+nd::callable nd::take_by_pointer::make()
 {
-  return arrfunc::make<take_by_pointer_virtual_ck>(
-      ndt::arrfunc_type::make(ndt::type("R * pointer[T]"),
-                              {ndt::type("M * T"), ndt::type("N * Ix")}),
+  return callable::make<take_by_pointer_virtual_ck>(
+      ndt::callable_type::make(ndt::type("R * pointer[T]"),
+                               {ndt::type("M * T"), ndt::type("N * Ix")}),
       0);
 }
 

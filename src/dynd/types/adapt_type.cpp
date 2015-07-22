@@ -31,12 +31,12 @@ ndt::adapt_type::adapt_type(const type &operand_type, const type &value_type,
     throw type_error(ss.str());
   }
 
-  // If the operand is an expression, make a buffering arrfunc
+  // If the operand is an expression, make a buffering callable
   if (m_operand_type.get_kind() == expr_kind && !m_forward.is_null() &&
       m_operand_type != m_forward.get_type()->get_pos_type(0)) {
     m_forward = nd::functional::chain(
-        make_arrfunc_from_assignment(m_forward.get_type()->get_pos_type(0),
-                                     m_operand_type, assign_error_default),
+        make_callable_from_assignment(m_forward.get_type()->get_pos_type(0),
+                                      m_operand_type, assign_error_default),
         m_forward, m_forward.get_type()->get_pos_type(0));
   }
 }
@@ -101,7 +101,7 @@ size_t ndt::adapt_type::make_operand_to_value_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  arrfunc_type_data *af = const_cast<arrfunc_type_data *>(m_forward.get());
+  callable_type_data *af = const_cast<callable_type_data *>(m_forward.get());
   if (af != NULL) {
     return af->instantiate(af->static_data, 0, NULL, ckb, ckb_offset,
                            m_value_type, dst_arrmeta, -1, &m_operand_type,
@@ -121,7 +121,7 @@ size_t ndt::adapt_type::make_value_to_operand_assignment_kernel(
     const char *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx) const
 {
-  arrfunc_type_data *af = const_cast<arrfunc_type_data *>(m_reverse.get());
+  callable_type_data *af = const_cast<callable_type_data *>(m_reverse.get());
   if (af != NULL) {
     return af->instantiate(af->static_data, 0, NULL, ckb, ckb_offset,
                            m_operand_type, src_arrmeta, -1, &m_value_type,

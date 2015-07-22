@@ -14,10 +14,10 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct rolling_arrfunc_data {
+    struct rolling_callable_data {
       intptr_t window_size;
       // The window op
-      arrfunc window_op;
+      callable window_op;
     };
 
     struct strided_rolling_ck

@@ -13,10 +13,10 @@ using namespace dynd;
 
 namespace {
 
-struct lifted_reduction_arrfunc_data {
-  // Pointer to the child arrfunc
-  nd::arrfunc child_elwise_reduction;
-  nd::arrfunc child_dst_initialization;
+struct lifted_reduction_callable_data {
+  // Pointer to the child callable
+  nd::callable child_elwise_reduction;
+  nd::callable child_dst_initialization;
   nd::array reduction_identity;
   // The types of the child ckernel and this one
   const ndt::type *child_data_types;
@@ -26,7 +26,7 @@ struct lifted_reduction_arrfunc_data {
   shortvector<bool> reduction_dimflags;
 };
 
-static intptr_t instantiate_lifted_reduction_arrfunc_data(
+static intptr_t instantiate_lifted_reduction_callable_data(
     char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
@@ -35,8 +35,8 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
     const nd::array &DYND_UNUSED(kwds),
     const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
-  std::shared_ptr<lifted_reduction_arrfunc_data> data =
-      *reinterpret_cast<std::shared_ptr<lifted_reduction_arrfunc_data> *>(
+  std::shared_ptr<lifted_reduction_callable_data> data =
+      *reinterpret_cast<std::shared_ptr<lifted_reduction_callable_data> *>(
           static_data);
   return make_lifted_reduction_ckernel(
       data->child_elwise_reduction.get(),
@@ -51,19 +51,19 @@ static intptr_t instantiate_lifted_reduction_arrfunc_data(
 
 } // anonymous namespace
 
-nd::arrfunc dynd::lift_reduction_arrfunc(
-    const nd::arrfunc &elwise_reduction_arr, const ndt::type &lifted_arr_type,
-    const nd::arrfunc &dst_initialization_arr, bool keepdims,
+nd::callable dynd::lift_reduction_callable(
+    const nd::callable &elwise_reduction_arr, const ndt::type &lifted_arr_type,
+    const nd::callable &dst_initialization_arr, bool keepdims,
     intptr_t reduction_ndim, const bool *reduction_dimflags, bool associative,
     bool commutative, bool right_associative,
     const nd::array &reduction_identity)
 {
-  // Validate the input elwise_reduction arrfunc
+  // Validate the input elwise_reduction callable
   if (elwise_reduction_arr.is_null()) {
     throw runtime_error(
-        "lift_reduction_arrfunc: 'elwise_reduction' may not be empty");
+        "lift_reduction_callable: 'elwise_reduction' may not be empty");
   }
-  const ndt::arrfunc_type *elwise_reduction_tp =
+  const ndt::callable_type *elwise_reduction_tp =
       elwise_reduction_arr.get_type();
   if (elwise_reduction_tp->get_npos() != 1 &&
       !(elwise_reduction_tp->get_npos() == 2 &&
@@ -72,7 +72,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
         elwise_reduction_tp->get_pos_type(0) ==
             elwise_reduction_tp->get_return_type())) {
     stringstream ss;
-    ss << "lift_reduction_arrfunc: 'elwise_reduction' must contain a"
+    ss << "lift_reduction_callable: 'elwise_reduction' must contain a"
           " unary operation ckernel or a binary expr ckernel with all "
           "equal types, its prototype is " << elwise_reduction_tp;
     throw invalid_argument(ss.str());
@@ -102,7 +102,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
         break;
       default: {
         stringstream ss;
-        ss << "lift_reduction_arrfunc: don't know how to process ";
+        ss << "lift_reduction_callable: don't know how to process ";
         ss << "dimension of type " << subtype;
         throw type_error(ss.str());
       }
@@ -110,8 +110,8 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
     }
   }
 
-  std::shared_ptr<lifted_reduction_arrfunc_data> self =
-      make_shared<lifted_reduction_arrfunc_data>();
+  std::shared_ptr<lifted_reduction_callable_data> self =
+      make_shared<lifted_reduction_callable_data>();
   self->child_elwise_reduction = elwise_reduction_arr;
   self->child_dst_initialization = dst_initialization_arr;
   if (!reduction_identity.is_null()) {
@@ -136,7 +136,7 @@ nd::arrfunc dynd::lift_reduction_arrfunc(
   memcpy(self->reduction_dimflags.get(), reduction_dimflags,
          sizeof(bool) * reduction_ndim);
 
-  return nd::arrfunc(ndt::arrfunc_type::make(lifted_dst_type, lifted_arr_type),
-                     self, 0, NULL, NULL,
-                     &instantiate_lifted_reduction_arrfunc_data);
+  return nd::callable(
+      ndt::callable_type::make(lifted_dst_type, lifted_arr_type), self, 0, NULL,
+      NULL, &instantiate_lifted_reduction_callable_data);
 }

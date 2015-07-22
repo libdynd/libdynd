@@ -16,8 +16,9 @@
 using namespace std;
 using namespace dynd;
 
-TEST(ArrFuncRegistry, Dispatch) {
-  nd::arrfunc af;
+TEST(CallableRegistry, Dispatch)
+{
+  nd::callable af;
   af = func::get_regfunction("sin");
   // These are exact overloads of ``sin``
   EXPECT_DOUBLE_EQ(sin(1.0), af(1.0).as<double>());
@@ -29,9 +30,10 @@ TEST(ArrFuncRegistry, Dispatch) {
   EXPECT_THROW(af(true), type_error);
 }
 
-TEST(ArrFuncRegistry, Arithmetic) {
+TEST(CallableRegistry, Arithmetic)
+{
   // Simple sanity checks
-  nd::arrfunc af;
+  nd::callable af;
   af = func::get_regfunction("add");
   EXPECT_EQ(ndt::type("int32"), af((int8_t)3, (int8_t)4).get_type());
   EXPECT_EQ(8, af(3, 5).as<int>());
@@ -48,9 +50,10 @@ TEST(ArrFuncRegistry, Arithmetic) {
   EXPECT_EQ(3, af(12.0, (int8_t)4).as<double>());
 }
 
-TEST(ArrFuncRegistry, Trig) {
+TEST(CallableRegistry, Trig)
+{
   // Simple sanity checks
-  nd::arrfunc af;
+  nd::callable af;
   af = func::get_regfunction("sin");
   EXPECT_FLOAT_EQ(sinf(2.0f), af(2.0f).as<float>());
   EXPECT_DOUBLE_EQ(sin(1.0), af(1.0).as<double>());

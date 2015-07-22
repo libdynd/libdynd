@@ -11,12 +11,12 @@
 namespace dynd {
 
 /**
- * Creates a ckernel which applies the provided arrfunc to a
+ * Creates a ckernel which applies the provided callable to a
  * series of fields at fixed offsets within a tuple or struct.
  *
- * This function applies a single arrfunc to all the fields.
+ * This function applies a single callable to all the fields.
  *
- * \param af  The arrfunc to apply to each field.
+ * \param af  The callable to apply to each field.
  * \param ckb  The ckernel_builder.
  * \param ckb_offset  The offset within the ckernel builder at which to make the
  *                    ckernel.
@@ -31,7 +31,7 @@ namespace dynd {
  * \param ectx  The evaluation context.
  */
 intptr_t make_tuple_unary_op_ckernel(
-    const arrfunc_type_data *af, const ndt::arrfunc_type *af_tp, void *ckb,
+    const callable_type_data *af, const ndt::callable_type *af_tp, void *ckb,
     intptr_t ckb_offset, intptr_t field_count, const uintptr_t *dst_offsets,
     const ndt::type *dst_tp, const char *const *dst_arrmeta,
     const uintptr_t *src_offsets, const ndt::type *src_tp,
@@ -39,12 +39,12 @@ intptr_t make_tuple_unary_op_ckernel(
     const eval::eval_context *ectx);
 
 /**
- * Creates a ckernel which applies the provided arrfuncs to a
+ * Creates a ckernel which applies the provided callables to a
  * series of fields at fixed offsets within a tuple or struct.
  *
- * This function accepts an array of arrfuncs, one for each field.
+ * This function accepts an array of callables, one for each field.
  *
- * \param af  The arrfunc to apply to each field.
+ * \param af  The callable to apply to each field.
  * \param ckb  The ckernel_builder.
  * \param ckb_offset  The offset within the ckernel builder at which to make the
  *                    ckernel.
@@ -59,7 +59,7 @@ intptr_t make_tuple_unary_op_ckernel(
  * \param ectx  The evaluation context.
  */
 intptr_t make_tuple_unary_op_ckernel(
-    const arrfunc_type_data *const *af, const ndt::arrfunc_type *const *af_tp,
+    const callable_type_data *const *af, const ndt::callable_type *const *af_tp,
     void *ckb, intptr_t ckb_offset, intptr_t field_count,
     const uintptr_t *dst_offsets, const ndt::type *dst_tp,
     const char *const *dst_arrmeta, const uintptr_t *src_offsets,

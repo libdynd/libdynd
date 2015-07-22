@@ -28,31 +28,10 @@ namespace nd {
 
     /**
      * This defines the type and keyword argument resolution for
-     * an elwise arrfunc.
+     * an elwise callable.
      */
     template <int N>
     struct elwise_virtual_ck : base_virtual_kernel<elwise_virtual_ck<N>> {
-      /*
-            static void data_init(const arrfunc_type_data *self,
-                                  const ndt::arrfunc_type *DYND_UNUSED(self_tp),
-                                  const char *DYND_UNUSED(static_data),
-                                  size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), intptr_t nsrc,
-                                  const ndt::type *src_tp, nd::array &kwds,
-                                  const std::map<nd::string, ndt::type>
-         &tp_vars)
-            {
-              const arrfunc_type_data *child =
-                  self->get_data_as<dynd::nd::arrfunc>()->get();
-              const ndt::arrfunc_type *child_tp =
-                  self->get_data_as<dynd::nd::arrfunc>()->get_type();
-
-              return child->data_init(child, child_tp, NULL, 0, NULL, nsrc,
-         src_tp,
-                                      kwds, tp_vars);
-            }
-      */
-
       static void
       resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
@@ -60,13 +39,13 @@ namespace nd {
                        const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        const arrfunc_type_data *child_af =
-            reinterpret_cast<arrfunc *>(static_data)->get();
-        const ndt::arrfunc_type *child_af_tp =
-            reinterpret_cast<arrfunc *>(static_data)->get_type();
+        const callable_type_data *child_af =
+            reinterpret_cast<callable *>(static_data)->get();
+        const ndt::callable_type *child_af_tp =
+            reinterpret_cast<callable *>(static_data)->get_type();
 
         intptr_t ndim = 0;
-        // First get the type for the child arrfunc
+        // First get the type for the child callable
         ndt::type child_dst_tp;
         std::vector<ndt::type> child_src_tp(nsrc);
         for (intptr_t i = 0; i < nsrc; ++i) {
@@ -166,9 +145,9 @@ namespace nd {
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
 
       {
-        arrfunc &child = *reinterpret_cast<arrfunc *>(static_data);
-        const ndt::arrfunc_type *child_tp =
-            reinterpret_cast<arrfunc *>(static_data)->get_type();
+        callable &child = *reinterpret_cast<callable *>(static_data);
+        const ndt::callable_type *child_tp =
+            reinterpret_cast<callable *>(static_data)->get_type();
 
         // Check if no lifting is required
         intptr_t dst_ndim = dst_tp.get_ndim();
@@ -199,7 +178,7 @@ namespace nd {
                << src_tp[i] << " into 0 dimensions of " << dst_tp
                << ", the destination dimension count must be greater. The "
                   "element "
-                  "arrfunc type is \"" << ndt::type(child_tp, true) << "\"";
+                  "callable type is \"" << ndt::type(child_tp, true) << "\"";
             throw broadcast_error(ss.str());
           }
         }
@@ -336,8 +315,8 @@ namespace nd {
                   const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        arrfunc &child = *reinterpret_cast<arrfunc *>(static_data);
-        const ndt::arrfunc_type *child_tp = child.get_type();
+        callable &child = *reinterpret_cast<callable *>(static_data);
+        const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
         if (!child_tp->get_return_type().is_symbolic() ||
@@ -459,8 +438,8 @@ namespace nd {
                   const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        arrfunc &child = *reinterpret_cast<arrfunc *>(static_data);
-        const ndt::arrfunc_type *child_tp = child.get_type();
+        callable &child = *reinterpret_cast<callable *>(static_data);
+        const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
         if (!child_tp->get_return_type().is_symbolic()) {
@@ -586,8 +565,8 @@ namespace nd {
                   const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        arrfunc &child = *reinterpret_cast<arrfunc *>(static_data);
-        const ndt::arrfunc_type *child_tp = child.get_type();
+        callable &child = *reinterpret_cast<callable *>(static_data);
+        const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
         if (!child_tp->get_return_type().is_symbolic()) {
@@ -717,8 +696,8 @@ namespace nd {
                   const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        arrfunc &child = *reinterpret_cast<arrfunc *>(static_data);
-        const ndt::arrfunc_type *child_tp = child.get_type();
+        callable &child = *reinterpret_cast<callable *>(static_data);
+        const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
         if (!child_tp->get_return_type().is_symbolic()) {
@@ -925,8 +904,8 @@ namespace nd {
                   const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        arrfunc &child = *reinterpret_cast<arrfunc *>(static_data);
-        const ndt::arrfunc_type *child_tp = child.get_type();
+        callable &child = *reinterpret_cast<callable *>(static_data);
+        const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
         if (!child_tp->get_return_type().is_symbolic()) {
@@ -1090,8 +1069,8 @@ namespace nd {
                   const nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        arrfunc &child = *reinterpret_cast<arrfunc *>(static_data);
-        const ndt::arrfunc_type *child_tp = child.get_type();
+        callable &child = *reinterpret_cast<callable *>(static_data);
+        const ndt::callable_type *child_tp = child.get_type();
 
         intptr_t dst_ndim = dst_tp.get_ndim();
         if (!child_tp->get_return_type().is_symbolic()) {

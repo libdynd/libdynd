@@ -287,7 +287,7 @@ TEST(Apply, Function)
 {
   typedef Apply<HostKernelRequest> TestFixture;
 
-  nd::arrfunc af;
+  nd::callable af;
 
   af = nd::functional::apply<kernel_request_host, decltype(&func0), &func0>();
   EXPECT_ARR_EQ(TestFixture::To(4), af(TestFixture::To(5), TestFixture::To(3)));
@@ -325,7 +325,7 @@ TEST(Apply, FunctionWithKeywords)
 {
   typedef Apply<HostKernelRequest> TestFixture;
 
-  nd::arrfunc af;
+  nd::callable af;
 
   af = nd::functional::apply<decltype(&func0), &func0>("y");
   EXPECT_ARR_EQ(TestFixture::To(4),
@@ -373,7 +373,7 @@ TEST(Apply, MemberFunction)
 {
   struct0 *s0 = new struct0;
 
-  nd::arrfunc af = nd::functional::apply(s0, &struct0::func0);
+  nd::callable af = nd::functional::apply(s0, &struct0::func0);
   EXPECT_ARR_EQ(nd::array(7), af(1, 2, 3));
 
   delete s0;
@@ -381,7 +381,7 @@ TEST(Apply, MemberFunction)
 
 TYPED_TEST_P(Apply, Callable)
 {
-  nd::arrfunc af;
+  nd::callable af;
 
   if (TestFixture::KernelRequest == kernel_request_host) {
     af = nd::functional::apply<kernel_request_host>(
@@ -518,7 +518,7 @@ TYPED_TEST_P(Apply, Callable)
 
 TYPED_TEST_P(Apply, CallableWithKeywords)
 {
-  nd::arrfunc af;
+  nd::callable af;
 
   if (TestFixture::KernelRequest == kernel_request_host) {
     af = nd::functional::apply<kernel_request_host>(

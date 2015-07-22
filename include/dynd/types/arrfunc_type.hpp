@@ -20,46 +20,46 @@
 namespace dynd {
 
 /**
- * Resolves any missing keyword arguments for this arrfunc based on
+ * Resolves any missing keyword arguments for this callable based on
  * the types of the positional arguments and the available keywords arguments.
  *
- * \param self    The arrfunc.
- * \param self_tp The function prototype of the arrfunc.
+ * \param self    The callable.
+ * \param self_tp The function prototype of the callable.
  * \param nsrc    The number of positional arguments.
  * \param src_tp  An array of the source types.
  * \param kwds    An array of the.
  */
-typedef void (*arrfunc_data_init_t)(
+typedef void (*callable_data_init_t)(
     char *static_data, size_t data_size, char *data, const ndt::type &dst_tp,
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
- * Resolves the destination type for this arrfunc based on the types
+ * Resolves the destination type for this callable based on the types
  * of the source parameters.
  *
- * \param self  The arrfunc.
- * \param af_tp  The function prototype of the arrfunc.
+ * \param self  The callable.
+ * \param af_tp  The function prototype of the callable.
  * \param dst_tp  To be filled with the destination type.
  * \param nsrc  The number of source parameters.
  * \param src_tp  An array of the source types.
  */
-typedef void (*arrfunc_resolve_dst_type_t)(
+typedef void (*callable_resolve_dst_type_t)(
     char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars);
 
 /**
- * Function prototype for instantiating a ckernel from an
- * arrfunc. To use this function, the
+ * Function prototype for instantiating a kernel from an
+ * callable. To use this function, the
  * caller should first allocate a `ckernel_builder` instance,
  * either from C++ normally or by reserving appropriately aligned/sized
  * data and calling the C function constructor dynd provides. When the
  * data types of the kernel require arrmeta, such as for 'strided'
  * or 'var' dimension types, the arrmeta must be provided as well.
  *
- * \param self  The arrfunc.
- * \param self_tp  The function prototype of the arrfunc.
+ * \param self  The callable.
+ * \param self_tp  The function prototype of the callable.
  * \param ckb  A ckernel_builder instance where the kernel is placed.
  * \param ckb_offset  The offset into the output ckernel_builder `ckb`
  *                    where the kernel should be placed.
@@ -81,7 +81,7 @@ typedef void (*arrfunc_resolve_dst_type_t)(
  *
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
-typedef intptr_t (*arrfunc_instantiate_t)(
+typedef intptr_t (*callable_instantiate_t)(
     char *static_data, size_t data_size, char *data, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -92,22 +92,20 @@ typedef intptr_t (*arrfunc_instantiate_t)(
  * A function which deallocates the memory behind data_ptr after
  * freeing any additional resources it might contain.
  */
-typedef void (*arrfunc_static_data_free_t)(char *static_data);
-
-typedef ndt::type (*arrfunc_make_type_t)();
+typedef void (*callable_static_data_free_t)(char *static_data);
 
 /**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
- * to pass arrfuncs from one library to another
+ * to pass callable from one library to another
  * with no dependencies between them.
  *
- * The arrfunc can produce a ckernel with with a few
+ * The callable can produce a ckernel with with a few
  * variations, like choosing between a single
  * operation and a strided operation, or constructing
  * with different array arrmeta.
  */
-struct arrfunc_type_data {
+struct callable_type_data {
   /**
    * On 32-bit platforms, if the size changes, it may be
    * necessary to use
@@ -119,20 +117,20 @@ struct arrfunc_type_data {
 
   char static_data[static_data_size];
   std::size_t data_size;
-  arrfunc_data_init_t data_init;
-  arrfunc_resolve_dst_type_t resolve_dst_type;
-  arrfunc_instantiate_t instantiate;
-  arrfunc_static_data_free_t static_data_free;
+  callable_data_init_t data_init;
+  callable_resolve_dst_type_t resolve_dst_type;
+  callable_instantiate_t instantiate;
+  callable_static_data_free_t static_data_free;
 
-  arrfunc_type_data()
+  callable_type_data()
       : data_size(0), data_init(NULL), resolve_dst_type(NULL),
         instantiate(NULL), static_data_free(NULL)
   {
   }
 
-  arrfunc_type_data(std::size_t data_size, arrfunc_data_init_t data_init,
-                    arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_instantiate_t instantiate)
+  callable_type_data(std::size_t data_size, callable_data_init_t data_init,
+                     callable_resolve_dst_type_t resolve_dst_type,
+                     callable_instantiate_t instantiate)
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
         static_data_free(NULL)
@@ -140,10 +138,10 @@ struct arrfunc_type_data {
   }
 
   template <typename T>
-  arrfunc_type_data(T &&static_data, std::size_t data_size,
-                    arrfunc_data_init_t data_init,
-                    arrfunc_resolve_dst_type_t resolve_dst_type,
-                    arrfunc_instantiate_t instantiate)
+  callable_type_data(T &&static_data, std::size_t data_size,
+                     callable_data_init_t data_init,
+                     callable_resolve_dst_type_t resolve_dst_type,
+                     callable_instantiate_t instantiate)
       : data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
         static_data_free(
@@ -159,9 +157,9 @@ struct arrfunc_type_data {
   }
 
   // non-copyable
-  arrfunc_type_data(const arrfunc_type_data &) = delete;
+  callable_type_data(const callable_type_data &) = delete;
 
-  ~arrfunc_type_data()
+  ~callable_type_data()
   {
     // Call the static_data_free function, if it exists
     if (static_data_free != NULL) {
@@ -187,12 +185,12 @@ struct arrfunc_type_data {
   }
 };
 
-static_assert((sizeof(arrfunc_type_data) & 7) == 0,
-              "arrfunc_type_data must have size divisible by 8");
+static_assert((sizeof(callable_type_data) & 7) == 0,
+              "callable_type_data must have size divisible by 8");
 
 namespace ndt {
 
-  class arrfunc_type : public base_type {
+  class callable_type : public base_type {
     type m_return_type;
     // Always a tuple type containing the types for positional args
     type m_pos_tuple;
@@ -205,10 +203,10 @@ namespace ndt {
     struct get_pos_types_kernel;
 
   public:
-    arrfunc_type(const type &ret_type, const type &pos_types,
-                 const type &kwd_types);
+    callable_type(const type &ret_type, const type &pos_types,
+                  const type &kwd_types);
 
-    virtual ~arrfunc_type() {}
+    virtual ~callable_type() {}
 
     const string_type_data &get_kwd_name_raw(intptr_t i) const
     {
@@ -308,7 +306,7 @@ namespace ndt {
         if (!actual_tp.value_type().matches(expected_tp, typevars)) {
           std::stringstream ss;
           ss << "keyword \"" << get_kwd_name(j) << "\" does not match, ";
-          ss << "arrfunc expected " << expected_tp << " but passed " <<
+          ss << "callable expected " << expected_tp << " but passed " <<
       actual_tp;
           throw std::invalid_argument(ss.str());
         }
@@ -367,20 +365,20 @@ namespace ndt {
                std::map<nd::string, type> &tp_vars) const;
 
     void get_dynamic_type_properties(
-        const std::pair<std::string, nd::arrfunc> **out_properties,
+        const std::pair<std::string, nd::callable> **out_properties,
         size_t *out_count) const;
     void get_dynamic_array_functions(
         const std::pair<std::string, gfunc::callable> **out_functions,
         size_t *out_count) const;
 
-    /** Makes an arrfunc type with both positional and keyword arguments */
+    /** Makes an callable type with both positional and keyword arguments */
     static type make(const type &ret_tp, const type &tuple_tp,
                      const type &struct_tp)
     {
-      return type(new arrfunc_type(ret_tp, tuple_tp, struct_tp), false);
+      return type(new callable_type(ret_tp, tuple_tp, struct_tp), false);
     }
 
-    /** Makes an arrfunc type with both positional and keyword arguments */
+    /** Makes an callable type with both positional and keyword arguments */
     static type make(const type &ret_tp, const nd::array &pos_tp,
                      const nd::array &kwd_names, const nd::array &kwd_tp)
     {
@@ -388,7 +386,7 @@ namespace ndt {
                   struct_type::make(kwd_names, kwd_tp));
     }
 
-    /** Makes an arrfunc type with just positional arguments */
+    /** Makes an callable type with just positional arguments */
     static type make(const type &ret_tp, const type &tuple_tp)
     {
       if (tuple_tp.get_type_id() != tuple_type_id) {
@@ -400,13 +398,13 @@ namespace ndt {
                       tuple_tp.extended<base_tuple_type>()->is_variadic()));
     }
 
-    /** Makes an arrfunc type with just positional arguments */
+    /** Makes an callable type with just positional arguments */
     static type make(const type &ret_tp, const nd::array &pos_tp)
     {
       return make(ret_tp, tuple_type::make(pos_tp), struct_type::make());
     }
 
-    /** Makes an arrfunc type with no arguments */
+    /** Makes an callable type with no arguments */
     static type make(const type &ret_tp)
     {
       return make(ret_tp, tuple_type::make(), struct_type::make());
@@ -415,20 +413,20 @@ namespace ndt {
 
   template <typename R>
   struct type::equivalent<R()> {
-    static type make() { return arrfunc_type::make(type::make<R>()); }
+    static type make() { return callable_type::make(type::make<R>()); }
   };
 
   template <typename R, typename A0>
   struct type::equivalent<R(A0)> {
     static type make()
     {
-      return arrfunc_type::make(type::make<R>(), type::make<A0>());
+      return callable_type::make(type::make<R>(), type::make<A0>());
     }
 
     template <typename T>
     static type make(T &&name)
     {
-      return arrfunc_type::make(
+      return callable_type::make(
           type::make<R>(), tuple_type::make(),
           struct_type::make({std::forward<T>(name)}, {type::make<A0>()}));
     }
@@ -438,8 +436,8 @@ namespace ndt {
   struct type::equivalent<R(A0, A...)> {
     static type make()
     {
-      return arrfunc_type::make(type::make<R>(),
-                                {type::make<A0>(), type::make<A>()...});
+      return callable_type::make(type::make<R>(),
+                                 {type::make<A0>(), type::make<A>()...});
     }
 
     template <typename... T>
@@ -447,7 +445,7 @@ namespace ndt {
     {
       type tp[1 + sizeof...(A)] = {type::make<A0>(), type::make<A>()...};
 
-      return arrfunc_type::make(
+      return callable_type::make(
           type::make<R>(), nd::array(tp, 1 + sizeof...(A) - sizeof...(T)),
           {names...},
           nd::array(tp + (1 + sizeof...(A) - sizeof...(T)), sizeof...(T)));

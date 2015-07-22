@@ -11,11 +11,11 @@
 using namespace std;
 using namespace dynd;
 
-nd::arrfunc nd::functional::neighborhood(const nd::arrfunc &neighborhood_op,
-                                         intptr_t nh_ndim)
+nd::callable nd::functional::neighborhood(const nd::callable &neighborhood_op,
+                                          intptr_t nh_ndim)
 {
-  const ndt::arrfunc_type *funcproto_tp =
-      neighborhood_op.get_array_type().extended<ndt::arrfunc_type>();
+  const ndt::callable_type *funcproto_tp =
+      neighborhood_op.get_array_type().extended<ndt::callable_type>();
 
   nd::array arg_tp = nd::empty(3, ndt::make_type());
   arg_tp(0).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
@@ -29,8 +29,8 @@ nd::arrfunc nd::functional::neighborhood(const nd::arrfunc &neighborhood_op,
   ndt::type ret_tp = funcproto_tp->get_pos_type(0)
                          .with_replaced_dtype(funcproto_tp->get_return_type());
   ndt::type self_tp =
-      ndt::arrfunc_type::make(ret_tp, funcproto_tp->get_pos_tuple(),
-                              ndt::struct_type::make(arg_names, arg_tp));
+      ndt::callable_type::make(ret_tp, funcproto_tp->get_pos_tuple(),
+                               ndt::struct_type::make(arg_names, arg_tp));
 
   std::ostringstream oss;
   oss << "Fixed**" << nh_ndim;
@@ -48,5 +48,5 @@ nd::arrfunc nd::functional::neighborhood(const nd::arrfunc &neighborhood_op,
 
   std::shared_ptr<neighborhood_data> nh(
       new nd::functional::neighborhood_data(neighborhood_op, nh_ndim));
-  return arrfunc::make<neighborhood_ck<1>>(self_tp, nh, 0);
+  return callable::make<neighborhood_ck<1>>(self_tp, nh, 0);
 }

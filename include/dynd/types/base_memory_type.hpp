@@ -114,7 +114,7 @@ namespace ndt {
                        std::map<nd::string, type> &tp_vars) const;
 
     virtual void get_dynamic_type_properties(
-        const std::pair<std::string, nd::arrfunc> **out_properties,
+        const std::pair<std::string, nd::callable> **out_properties,
         size_t *out_count) const;
   };
 

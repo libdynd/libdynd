@@ -757,18 +757,18 @@ bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp,
 }
 
 void ndt::fixed_dim_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::arrfunc> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
-  static pair<string, nd::arrfunc> fixed_dim_type_properties[] = {
-      pair<string, nd::arrfunc>(
+  static pair<string, nd::callable> fixed_dim_type_properties[] = {
+      pair<string, nd::callable>(
           "fixed_dim_size",
           nd::functional::apply(
               [](type self) {
                 return self.extended<fixed_dim_type>()->get_fixed_dim_size();
               },
               "self")),
-      pair<string, nd::arrfunc>(
+      pair<string, nd::callable>(
           "element_type",
           nd::functional::apply(
               [](type self) {

@@ -37,7 +37,7 @@ float myexp(float x) { return exp(x); }
 double myexp(double x) { return exp(x); }
 } // anonymous namespace
 
-nd::arrfunc nd::cos::make()
+nd::callable nd::cos::make()
 {
   /*
   #ifdef DYND_CUDA
@@ -48,7 +48,7 @@ nd::arrfunc nd::cos::make()
   */
   ndt::type pattern_tp("(R) -> R");
 
-  vector<nd::arrfunc> children;
+  vector<nd::callable> children;
   children.push_back(functional::apply<float (*)(float), &mycos>());
   children.push_back(functional::apply<double (*)(double), &mycos>());
   /*
@@ -64,7 +64,7 @@ nd::arrfunc nd::cos::make()
       functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
-nd::arrfunc nd::sin::make()
+nd::callable nd::sin::make()
 {
   /*
   #ifdef DYND_CUDA
@@ -75,7 +75,7 @@ nd::arrfunc nd::sin::make()
   */
   ndt::type pattern_tp("(R) -> R");
 
-  vector<nd::arrfunc> children;
+  vector<nd::callable> children;
   children.push_back(functional::apply<float (*)(float), &mysin>());
   children.push_back(functional::apply<double (*)(double), &mysin>());
   /*
@@ -91,7 +91,7 @@ nd::arrfunc nd::sin::make()
       functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
-nd::arrfunc nd::tan::make()
+nd::callable nd::tan::make()
 {
   /*
   #ifdef DYND_CUDA
@@ -102,7 +102,7 @@ nd::arrfunc nd::tan::make()
   */
   ndt::type pattern_tp("(R) -> R");
 
-  vector<nd::arrfunc> children;
+  vector<nd::callable> children;
   children.push_back(functional::apply<float (*)(float), &mytan>());
   children.push_back(functional::apply<double (*)(double), &mytan>());
   /*
@@ -118,7 +118,7 @@ nd::arrfunc nd::tan::make()
       functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
-nd::arrfunc nd::exp::make()
+nd::callable nd::exp::make()
 {
   /*
   #ifdef DYND_CUDA
@@ -129,7 +129,7 @@ nd::arrfunc nd::exp::make()
   */
   ndt::type pattern_tp("(R) -> R");
 
-  vector<nd::arrfunc> children;
+  vector<nd::callable> children;
   children.push_back(functional::apply<float (*)(float), &myexp>());
   children.push_back(functional::apply<double (*)(double), &myexp>());
   /*

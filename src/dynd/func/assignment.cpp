@@ -9,16 +9,16 @@
 using namespace std;
 using namespace dynd;
 
-map<array<type_id_t, 2>, nd::arrfunc> nd::assign::make_children()
+map<array<type_id_t, 2>, nd::callable> nd::assign::make_children()
 {
   typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id,
                            int32_type_id, int64_type_id, uint8_type_id,
                            uint16_type_id, uint32_type_id, uint64_type_id,
                            float32_type_id, float64_type_id> numeric_type_ids;
 
-  map<std::array<type_id_t, 2>, arrfunc> children2 =
-      arrfunc::make_all<bind<assign_error_mode, assignment_kernel>::type,
-                        numeric_type_ids, numeric_type_ids>(0);
+  map<std::array<type_id_t, 2>, callable> children2 =
+      callable::make_all<bind<assign_error_mode, assignment_kernel>::type,
+                         numeric_type_ids, numeric_type_ids>(0);
 
   return children2;
 }
@@ -238,8 +238,8 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
 #ifdef DYND_CUDA
 
 intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+    const callable_type_data *DYND_UNUSED(self),
+    const ndt::callable_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -279,8 +279,8 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
 }
 
 intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+    const callable_type_data *DYND_UNUSED(self),
+    const ndt::callable_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
@@ -311,8 +311,8 @@ intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
 }
 
 intptr_t dynd::make_cuda_from_device_builtin_type_assignment_kernel(
-    const arrfunc_type_data *DYND_UNUSED(self),
-    const ndt::arrfunc_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
+    const callable_type_data *DYND_UNUSED(self),
+    const ndt::callable_type *DYND_UNUSED(af_tp), char *DYND_UNUSED(data),
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),

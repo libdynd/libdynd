@@ -26,7 +26,7 @@ namespace gfunc {
 // Forward definition from dynd/type.hpp
 namespace ndt {
   class base_type;
-  class arrfunc_type;
+  class callable_type;
   class type;
 } // namespace dynd::ndt
 
@@ -34,7 +34,7 @@ namespace ndt {
 namespace nd {
   class array;
   class string;
-  class arrfunc;
+  class callable;
 } // namsepace dynd::nd
 
 struct iterdata_common;
@@ -614,14 +614,14 @@ namespace ndt {
      * Additional dynamic properties exposed by the type as gfunc::callable.
      */
     virtual void get_dynamic_type_properties(
-        const std::pair<std::string, nd::arrfunc> **out_properties,
+        const std::pair<std::string, nd::callable> **out_properties,
         size_t *out_count) const;
 
     /**
      * Additional dynamic functions exposed by the type as gfunc::callable.
      */
     virtual void get_dynamic_type_functions(
-        const std::pair<std::string, nd::arrfunc> **out_functions,
+        const std::pair<std::string, nd::callable> **out_functions,
         size_t *out_count) const;
 
     /**
@@ -720,17 +720,17 @@ namespace ndt {
         kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     /**
-     * Produces forward and reverse arrfuncs for adapting the operand
+     * Produces forward and reverse callables for adapting the operand
      * type to the current type, according to the information stored in
      * ``op``.
      *
      * \returns  True if the adapt is ok, false otherwise.
      */
     virtual bool adapt_type(const ndt::type &operand_tp, const nd::string &op,
-                            nd::arrfunc &out_forward,
-                            nd::arrfunc &out_reverse) const;
+                            nd::callable &out_forward,
+                            nd::callable &out_reverse) const;
     /**
-     * Produces forward and reverse arrfuncs for adapting the current type
+     * Produces forward and reverse callables for adapting the current type
      * to the value type, according to the information stored in
      * ``op``.
      *
@@ -738,8 +738,8 @@ namespace ndt {
      */
     virtual bool reverse_adapt_type(const ndt::type &value_tp,
                                     const nd::string &op,
-                                    nd::arrfunc &out_forward,
-                                    nd::arrfunc &out_reverse) const;
+                                    nd::callable &out_forward,
+                                    nd::callable &out_reverse) const;
 
     friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);

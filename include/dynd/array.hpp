@@ -1856,7 +1856,7 @@ namespace nd {
                         const nd::array &val);
 
   void forward_as_array(const ndt::type &tp, char *arrmeta, char *out_data,
-                        const nd::arrfunc &val);
+                        const nd::callable &val);
 
   template <typename T>
   void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,

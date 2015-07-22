@@ -10,12 +10,12 @@
 using namespace std;
 using namespace dynd;
 
-//      const arrfunc self = functional::call<F>(ndt::type("(?Any) ->
+//      const callable self = functional::call<F>(ndt::type("(?Any) ->
 //      bool"));
 
 /*
       for (type_id_t i0 : dim_type_ids::vals()) {
-        const ndt::type child_tp = ndt::arrfunc_type::make(
+        const ndt::type child_tp = ndt::callable::make(
 self.get_type()->get_return_type(),
             {ndt::type(i0)});
         children[i0] = functional::elwise(child_tp, self);
@@ -25,9 +25,9 @@ self.get_type()->get_return_type(),
                                        default_child);
 */
 
-nd::arrfunc nd::is_avail::children[DYND_TYPE_ID_MAX + 1];
+nd::callable nd::is_avail::children[DYND_TYPE_ID_MAX + 1];
 
-nd::arrfunc nd::is_avail::make()
+nd::callable nd::is_avail::make()
 {
   typedef type_id_sequence<
       bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
@@ -35,14 +35,14 @@ nd::arrfunc nd::is_avail::make()
       complex_float64_type_id, void_type_id, string_type_id, fixed_dim_type_id,
       date_type_id, time_type_id, datetime_type_id> type_ids;
 
-  for (const std::pair<const type_id_t, arrfunc> &pair :
-       arrfunc::make_all<is_avail_kernel, type_ids>(0)) {
+  for (const std::pair<const type_id_t, callable> &pair :
+       callable::make_all<is_avail_kernel, type_ids>(0)) {
     children[pair.first] = pair.second;
   }
 
   // ...
 
-  return arrfunc();
+  return callable();
 }
 
 // underlying_type<type_id>::type
@@ -51,9 +51,9 @@ nd::arrfunc nd::is_avail::make()
 
 struct nd::is_avail nd::is_avail;
 
-nd::arrfunc nd::assign_na_decl::children[DYND_TYPE_ID_MAX + 1];
+nd::callable nd::assign_na_decl::children[DYND_TYPE_ID_MAX + 1];
 
-nd::arrfunc nd::assign_na_decl::make()
+nd::callable nd::assign_na_decl::make()
 {
   typedef type_id_sequence<
       bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
@@ -61,14 +61,14 @@ nd::arrfunc nd::assign_na_decl::make()
       complex_float64_type_id, void_type_id, string_type_id, fixed_dim_type_id,
       date_type_id, time_type_id, datetime_type_id> type_ids;
 
-  for (const std::pair<const type_id_t, arrfunc> &pair :
-       arrfunc::make_all<assign_na_kernel, type_ids>(0)) {
+  for (const std::pair<const type_id_t, callable> &pair :
+       callable::make_all<assign_na_kernel, type_ids>(0)) {
     children[pair.first] = pair.second;
   }
 
   // ...
 
-  return arrfunc();
+  return callable();
 }
 
 struct nd::assign_na_decl nd::assign_na_decl;

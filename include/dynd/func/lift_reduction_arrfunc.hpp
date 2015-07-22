@@ -12,14 +12,14 @@
 namespace dynd {
 
 /**
- * Lifts the provided arrfunc, broadcasting it as necessary to execute
+ * Lifts the provided callable, broadcasting it as necessary to execute
  * across the additional dimensions in the ``lifted_types`` array.
  *
- * \param elwise_reduction  The arrfunc to be lifted. This must
+ * \param elwise_reduction  The callable to be lifted. This must
  *                          be a unary operation, which modifies the output
  *                          in place.
  * \param lifted_arr_type  The type the input should be lifted to.
- * \param dst_initialization  Either a NULL nd::array, or a arrfunc
+ * \param dst_initialization  Either a NULL nd::array, or a callable
  *                            which initializes an accumulator value from an
  *                            input value. If it is NULL, either the value in
  *                            `reduction_identity` is used, or a copy operation
@@ -35,20 +35,23 @@ namespace dynd {
  *                     from is associative.
  * \param commutative  Indicate whether the operation the reduction is derived
  *                     from is commutative.
- * \param right_associative  If true, the reduction associates to the right instead of
- *                           the left. This is relevant if 'associative' and/or 'commutative'
- *                           are false, and in that case forces the reduction to happen
+ * \param right_associative  If true, the reduction associates to the right
+ *instead of
+ *                           the left. This is relevant if 'associative' and/or
+ *'commutative'
+ *                           are false, and in that case forces the reduction to
+ *happen
  *                           from right to left instead of left to right.
  * \param reduction_identity  If not a NULL nd::array, this is the identity
  *                            value for the accumulator.
  */
-nd::arrfunc lift_reduction_arrfunc(const nd::arrfunc &elwise_reduction,
-                                   const ndt::type &lifted_arr_type,
-                                   const nd::arrfunc &dst_initialization,
-                                   bool keepdims, intptr_t reduction_ndim,
-                                   const bool *reduction_dimflags,
-                                   bool associative, bool commutative,
-                                   bool right_associative,
-                                   const nd::array &reduction_identity);
+nd::callable lift_reduction_callable(const nd::callable &elwise_reduction,
+                                     const ndt::type &lifted_arr_type,
+                                     const nd::callable &dst_initialization,
+                                     bool keepdims, intptr_t reduction_ndim,
+                                     const bool *reduction_dimflags,
+                                     bool associative, bool commutative,
+                                     bool right_associative,
+                                     const nd::array &reduction_identity);
 
 } // namespace dynd

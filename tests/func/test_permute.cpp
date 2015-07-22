@@ -32,8 +32,8 @@ static void func1(double (&res)[3], double x, double y, double z)
 
 TEST(Permute, ReturnType)
 {
-  nd::arrfunc af = nd::functional::apply(&func0);
-  nd::arrfunc paf = nd::functional::permute(af, {-1, 0});
+  nd::callable af = nd::functional::apply(&func0);
+  nd::callable paf = nd::functional::permute(af, {-1, 0});
 
   nd::array res = nd::empty(ndt::type::make<double>());
   af(res, 15);

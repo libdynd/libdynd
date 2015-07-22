@@ -14,10 +14,10 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<nd::string, ndt::type> &tp_vars)
 {
-  const vector<nd::arrfunc> *icd =
-      reinterpret_cast<const vector<nd::arrfunc> *>(static_data);
+  const vector<nd::callable> *icd =
+      reinterpret_cast<const vector<nd::callable> *>(static_data);
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
-    const nd::arrfunc &child = (*icd)[i];
+    const nd::callable &child = (*icd)[i];
     if (nsrc == child.get_type()->get_npos()) {
       intptr_t isrc;
       std::map<nd::string, ndt::type> typevars;
@@ -61,10 +61,10 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &kwds, const std::map<dynd::nd::string, ndt::type> &tp_vars)
 {
-  const vector<nd::arrfunc> *icd =
-      reinterpret_cast<vector<nd::arrfunc> *>(static_data);
+  const vector<nd::callable> *icd =
+      reinterpret_cast<vector<nd::callable> *>(static_data);
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
-    const nd::arrfunc &af = (*icd)[i];
+    const nd::callable &af = (*icd)[i];
     intptr_t isrc, nsrc = af.get_type()->get_npos();
     std::map<nd::string, ndt::type> typevars;
     for (isrc = 0; isrc < nsrc; ++isrc) {
@@ -96,6 +96,6 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
   }
   // TODO: Good message here
   stringstream ss;
-  ss << "No matching signature found in multidispatch arrfunc";
+  ss << "No matching signature found in multidispatch callable";
   throw invalid_argument(ss.str());
 }

@@ -18,14 +18,14 @@ using namespace std;
 using namespace dynd;
 
 template <typename T0, typename T1>
-static nd::arrfunc make_ufunc(T0 f0, T1 f1)
+static nd::callable make_ufunc(T0 f0, T1 f1)
 {
   return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1)}));
 }
 
 template <typename T0, typename T1, typename T2>
-static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
+static nd::callable make_ufunc(T0 f0, T1 f1, T2 f2)
 {
   return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
@@ -33,7 +33,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2)
 }
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4>
-static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
+static nd::callable make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
 {
   return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
@@ -43,7 +43,7 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4)
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
           typename T5, typename T6>
-static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
+static nd::callable make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
 {
   return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
@@ -54,8 +54,8 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6)
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
           typename T5, typename T6, typename T7>
-static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
-                              T7 f7)
+static nd::callable make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
+                               T7 f7)
 {
   return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
@@ -66,8 +66,8 @@ static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
 
 template <typename T0, typename T1, typename T2, typename T3, typename T4,
           typename T5, typename T6, typename T7, typename T8, typename T9>
-static nd::arrfunc make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
-                              T7 f7, T8 f8, T9 f9)
+static nd::callable make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6,
+                               T7 f7, T8 f8, T9 f9)
 {
   return nd::functional::elwise(nd::functional::old_multidispatch(
       {nd::functional::apply(f0), nd::functional::apply(f1),
@@ -154,11 +154,11 @@ struct logaddexp2 {
 #endif
 } // anonymous namespace
 
-std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
+std::map<nd::string, nd::callable> &func::get_regfunctions()
 {
   // Probably want to use a concurrent_hash_map, like
   // http://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.htm
-  static map<nd::string, nd::arrfunc> registry;
+  static map<nd::string, nd::callable> registry;
   if (registry.empty()) {
     // Arithmetic
     /*
@@ -245,11 +245,11 @@ std::map<nd::string, nd::arrfunc> &func::get_regfunctions()
   return registry;
 }
 
-nd::arrfunc func::get_regfunction(const nd::string &name)
+nd::callable func::get_regfunction(const nd::string &name)
 {
-  const std::map<nd::string, nd::arrfunc> &registry = get_regfunctions();
+  const std::map<nd::string, nd::callable> &registry = get_regfunctions();
 
-  map<nd::string, nd::arrfunc>::const_iterator it = registry.find(name);
+  map<nd::string, nd::callable>::const_iterator it = registry.find(name);
   if (it != registry.end()) {
     return it->second;
   } else {
@@ -261,9 +261,9 @@ nd::arrfunc func::get_regfunction(const nd::string &name)
   }
 }
 
-void func::set_regfunction(const nd::string &name, const nd::arrfunc &af)
+void func::set_regfunction(const nd::string &name, const nd::callable &af)
 {
-  std::map<nd::string, nd::arrfunc> &registry = get_regfunctions();
+  std::map<nd::string, nd::callable> &registry = get_regfunctions();
 
   registry[name] = af;
 }

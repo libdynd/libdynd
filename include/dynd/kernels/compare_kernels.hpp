@@ -1429,7 +1429,7 @@ namespace ndt {
   struct type::equivalent<nd::less_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
-      return arrfunc_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
+      return callable_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
                                 );
     }
   };
@@ -1438,7 +1438,7 @@ namespace ndt {
   struct type::equivalent<nd::less_equal_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
-      return arrfunc_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
+      return callable_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
                                 );
     }
   };
@@ -1447,7 +1447,7 @@ namespace ndt {
   struct type::equivalent<nd::equal_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
-      return arrfunc_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
+      return callable_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
                                );
     }
   };
@@ -1456,7 +1456,7 @@ namespace ndt {
   struct type::equivalent<nd::not_equal_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
-      return arrfunc_type::make(ndt::type::make<int>(),
+      return callable_type::make(ndt::type::make<int>(),
       {ndt::type(Src0TypeID), ndt::type(Src1TypeID)});
     }
   };
@@ -1465,7 +1465,7 @@ namespace ndt {
   struct type::equivalent<nd::greater_equal_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
-      return arrfunc_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
+      return callable_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
                                 );
     }
   };
@@ -1474,7 +1474,7 @@ namespace ndt {
   struct type::equivalent<nd::greater_kernel<Src0TypeID, Src1TypeID>> {
     static type make()
     {
-      return arrfunc_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
+      return callable_type::make(ndt::type::make<int>(), {ndt::type(Src0TypeID), ndt::type(Src1TypeID)}
                                 );
     }
   };

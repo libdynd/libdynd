@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
@@ -20,13 +20,13 @@ namespace nd {
      * Lifts the provided ckernel, broadcasting it as necessary to execute
      * across the additional dimensions in the ``lifted_types`` array.
      *
-     * \param child  The arrfunc being lifted
+     * \param child  The callable being lifted
      */
-    arrfunc elwise(const arrfunc &child);
+    callable elwise(const callable &child);
 
-    arrfunc elwise(const ndt::type &self_tp, const arrfunc &child);
+    callable elwise(const ndt::type &self_tp, const callable &child);
 
-    ndt::type elwise_make_type(const ndt::arrfunc_type *child_tp);
+    ndt::type elwise_make_type(const ndt::callable_type *child_tp);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

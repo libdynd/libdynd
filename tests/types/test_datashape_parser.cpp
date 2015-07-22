@@ -246,7 +246,7 @@ TEST(DataShapeParser, RecordTwoFields)
                       "}\n"));
 }
 
-TEST(DataShapeParser, ArrFunc)
+TEST(DataShapeParser, Callable)
 {
   ndt::type tp;
 
@@ -418,7 +418,7 @@ TEST(DataShapeParser, ErrorRecord)
     string msg = e.what();
     // The name field works as a funcproto until it hits the '}' token
     EXPECT_TRUE(msg.find("line 4, column 20") != string::npos);
-    EXPECT_TRUE(msg.find("expected a kwd arg in arrfunc prototype") !=
+    EXPECT_TRUE(msg.find("expected a kwd arg in callable prototype") !=
                 string::npos);
   }
 }

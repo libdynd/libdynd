@@ -7,24 +7,24 @@
 
 #include <dynd/func/arrfunc.hpp>
 
-namespace dynd { namespace func {
+namespace dynd {
+namespace func {
 
-/**
- * Returns a reference to the map of registered arrfuncs.
- * NOTE: The internal representation will change, this
- *       function will change.
- */
-std::map<nd::string, nd::arrfunc>& get_regfunctions();
+  /**
+   * Returns a reference to the map of registered callables.
+   * NOTE: The internal representation will change, this
+   *       function will change.
+   */
+  std::map<nd::string, nd::callable> &get_regfunctions();
 
-/**
-  * Looks up a named arrfunc from the registry.
-  */
-nd::arrfunc get_regfunction(const nd::string &name);
-/**
-  * Sets a named arrfunc in the registry.
-  */
-void set_regfunction(const nd::string &name, const nd::arrfunc &af);
+  /**
+    * Looks up a named callable from the registry.
+    */
+  nd::callable get_regfunction(const nd::string &name);
+  /**
+    * Sets a named callable in the registry.
+    */
+  void set_regfunction(const nd::string &name, const nd::callable &af);
 
 } // namespace func
-
 } // namespace dynd

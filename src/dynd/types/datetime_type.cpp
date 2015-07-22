@@ -284,10 +284,10 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
 */
 
 void ndt::datetime_type::get_dynamic_type_functions(
-    const std::pair<std::string, nd::arrfunc> **out_functions,
+    const std::pair<std::string, nd::callable> **out_functions,
     size_t *out_count) const
 {
-  //  static pair<string, nd::arrfunc> datetime_type_functions[] = {
+  //  static pair<string, nd::callable> datetime_type_functions[] = {
   /*
         pair<string, gfunc::callable>("now",
                                       gfunc::make_callable(&fn_type_now,
@@ -860,20 +860,20 @@ size_t ndt::datetime_type::make_elwise_property_setter_kernel(
 
 bool ndt::datetime_type::adapt_type(const type &operand_tp,
                                     const nd::string &op,
-                                    nd::arrfunc &out_forward,
-                                    nd::arrfunc &out_reverse) const
+                                    nd::callable &out_forward,
+                                    nd::callable &out_reverse) const
 {
-  return make_datetime_adapter_arrfunc(type(this, true), operand_tp, op,
-                                       out_forward, out_reverse);
+  return make_datetime_adapter_callable(type(this, true), operand_tp, op,
+                                        out_forward, out_reverse);
 }
 
 bool ndt::datetime_type::reverse_adapt_type(const type &value_tp,
                                             const nd::string &op,
-                                            nd::arrfunc &out_forward,
-                                            nd::arrfunc &out_reverse) const
+                                            nd::callable &out_forward,
+                                            nd::callable &out_reverse) const
 {
   // Note that out_reverse and out_forward are swapped compared with
   // adapt_type
-  return make_datetime_adapter_arrfunc(type(this, true), value_tp, op,
-                                       out_reverse, out_forward);
+  return make_datetime_adapter_callable(type(this, true), value_tp, op,
+                                        out_reverse, out_forward);
 }
