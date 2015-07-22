@@ -11,7 +11,7 @@
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/type.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 
 namespace dynd {
 namespace nd {

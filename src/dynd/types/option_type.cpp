@@ -4,14 +4,13 @@
 //
 
 #include <dynd/array.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/func/make_callable.hpp>
 #include <dynd/pp/list.hpp>
 #include <dynd/parser_util.hpp>
 #include <dynd/func/apply.hpp>

@@ -8,7 +8,7 @@
 #include <cerrno>
 #include <algorithm>
 
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -22,7 +22,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/func/make_callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/parser_util.hpp>
 

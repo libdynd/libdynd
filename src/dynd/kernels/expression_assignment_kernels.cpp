@@ -9,7 +9,7 @@
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
 #include <dynd/func/assignment.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

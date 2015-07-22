@@ -8,8 +8,8 @@
 
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/parser_util.hpp>
-#include <dynd/func/arrfunc.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/func/callable.hpp>
+#include <dynd/types/callable_type.hpp>
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -41,7 +41,6 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/adapt_type.hpp>
-#include <dynd/func/callable.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/kind_sym_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>

@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -14,8 +14,6 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/kernels/elwise.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
-#include <dynd/func/callable.hpp>
-#include <dynd/func/make_callable.hpp>
 #include <dynd/types/typevar_type.hpp>
 
 using namespace std;

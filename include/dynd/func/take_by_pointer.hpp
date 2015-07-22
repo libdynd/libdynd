@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/shape_tools.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/pointer_type.hpp>
 
 namespace dynd {

@@ -13,13 +13,12 @@
 #include <dynd/array.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
-#include <dynd/func/lift_reduction_arrfunc.hpp>
-#include <dynd/func/call_callable.hpp>
+#include <dynd/func/lift_reduction_callable.hpp>
 
 using namespace std;
 using namespace dynd;
  
-TEST(ArrFunc, Take) {
+TEST(Callable, Take) {
     nd::array a, b, c;
 
     int avals[5] = {1, 2, 3, 4, 5};
@@ -47,7 +46,7 @@ TEST(ArrFunc, Take) {
     EXPECT_EQ(5, c(3).as<int>());
 }
 
-TEST(ArrFunc, TakeOfArray) {
+TEST(Callable, TakeOfArray) {
     nd::array a, b, c;
 
     int avals[3][2] = {{0, 1}, {2, 3}, {4, 5}};

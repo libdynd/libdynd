@@ -5,7 +5,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/func/assignment.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/base_kernel.hpp>

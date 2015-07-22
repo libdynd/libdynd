@@ -15,7 +15,6 @@
 #include <dynd/func/apply.hpp>
 #include <dynd/func/neighborhood.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/func/call_callable.hpp>
 
 using namespace std;
 using namespace dynd;

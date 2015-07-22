@@ -5,7 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/comparison.hpp>
 #include <dynd/func/elwise.hpp>
@@ -27,8 +27,6 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/func/callable.hpp>
-#include <dynd/func/call_callable.hpp>
 #include <dynd/types/groupby_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>

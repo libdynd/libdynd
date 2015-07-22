@@ -14,7 +14,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

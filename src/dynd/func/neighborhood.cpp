@@ -4,7 +4,7 @@
 //
 
 #include <dynd/arrmeta_holder.hpp>
-#include <dynd/func/call_callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 #include <dynd/func/neighborhood.hpp>
 #include <dynd/kernels/neighborhood.hpp>
 

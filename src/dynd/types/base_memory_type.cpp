@@ -5,7 +5,6 @@
 
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/func/apply.hpp>
-#include <dynd/func/make_callable.hpp>
 
 using namespace std;
 using namespace dynd;

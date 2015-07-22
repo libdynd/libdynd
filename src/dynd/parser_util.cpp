@@ -7,7 +7,7 @@
 #include <climits>
 
 #include <dynd/parser_util.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>

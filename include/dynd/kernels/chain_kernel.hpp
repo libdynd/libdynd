@@ -7,7 +7,7 @@
 
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/buffer_storage.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {

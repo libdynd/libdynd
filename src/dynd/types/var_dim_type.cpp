@@ -14,8 +14,6 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/var_dim_assignment_kernels.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
-#include <dynd/func/callable.hpp>
-#include <dynd/func/make_callable.hpp>
 #include <dynd/func/apply.hpp>
 
 using namespace std;

@@ -11,11 +11,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
-# -DDYND_SRC_MAX, the maximum number of src parameters that functor arrfuncs will support
+# -DDYND_SRC_MAX, the maximum number of src parameters that functor callables will support
 SET(DYND_SRC_MAX 4 CACHE STRING
-    "Build a libdynd library with functor arrfuncs that support the specified maximum number of arguments")
+    "Build a libdynd library with functor callables that support the specified maximum number of arguments")
 # TODO: Check that the preprocessor can handle this number
-# -DDYND_ARG_MAX, the maximum number of arguments that functor arrfuncs must support,
+# -DDYND_ARG_MAX, the maximum number of arguments that functor callables must support,
 # which is DYND_SRC_MAX + ?reference_dst
 MATH(EXPR DYND_ARG_MAX "${DYND_SRC_MAX} + 1")
 
@@ -191,7 +191,7 @@ set(libdynd_SRC
     src/dynd/types/fixed_bytes_type.cpp
     src/dynd/types/fixed_string_kind_type.cpp
     src/dynd/types/fixed_string_type.cpp
-    src/dynd/types/arrfunc_type.cpp
+    src/dynd/types/callable_type.cpp
     src/dynd/types/groupby_type.cpp
     src/dynd/types/int_kind_sym_type.cpp
     src/dynd/types/json_type.cpp
@@ -221,7 +221,7 @@ set(libdynd_SRC
     src/dynd/types/void_pointer_type.cpp
     include/dynd/types/adapt_type.hpp
     include/dynd/types/any_kind_type.hpp
-    include/dynd/types/arrfunc_type.hpp
+    include/dynd/types/callable_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
     include/dynd/types/base_memory_type.hpp
@@ -298,10 +298,9 @@ set(libdynd_SRC
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
     src/dynd/func/arithmetic.cpp
-    src/dynd/func/arrfunc.cpp
-    src/dynd/func/arrfunc_registry.cpp
-    src/dynd/func/assignment.cpp
     src/dynd/func/callable.cpp
+    src/dynd/func/callable_registry.cpp
+    src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
     src/dynd/func/copy.cpp
     src/dynd/func/chain.cpp
@@ -309,7 +308,7 @@ set(libdynd_SRC
     src/dynd/func/elwise_gfunc.cpp
     src/dynd/func/elwise_reduce_gfunc.cpp
     src/dynd/func/fft.cpp
-    src/dynd/func/lift_reduction_arrfunc.cpp
+    src/dynd/func/lift_reduction_callable.cpp
     src/dynd/func/math.cpp
     src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood.cpp
@@ -321,11 +320,9 @@ set(libdynd_SRC
     src/dynd/func/take.cpp
     src/dynd/func/take_by_pointer.cpp
     include/dynd/func/arithmetic.hpp
-    include/dynd/func/arrfunc.hpp
-    include/dynd/func/arrfunc_registry.hpp
-    include/dynd/func/assignment.hpp
     include/dynd/func/callable.hpp
-    include/dynd/func/call_callable.hpp
+    include/dynd/func/callable_registry.hpp
+    include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
     include/dynd/func/comparison.hpp
     include/dynd/func/chain.hpp
@@ -334,9 +331,7 @@ set(libdynd_SRC
     include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/fft.hpp
     include/dynd/func/apply.hpp
-    include/dynd/func/make_callable.hpp
-    include/dynd/func/lift_reduction_arrfunc.hpp
-    include/dynd/func/make_callable.hpp
+    include/dynd/func/lift_reduction_callable.hpp
     include/dynd/func/math.hpp
     include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood.hpp
@@ -347,6 +342,11 @@ set(libdynd_SRC
     include/dynd/func/rolling.hpp
     include/dynd/func/take.hpp
     include/dynd/func/take_by_pointer.hpp
+    # GFunc
+    src/dynd/gfunc/callable.cpp
+    include/dynd/gfunc/callable.hpp
+    include/dynd/gfunc/call_callable.hpp
+    include/dynd/gfunc/make_callable.hpp
     # Iter
     src/dynd/iter/string_iter.cpp
     include/dynd/iter/string_iter.hpp

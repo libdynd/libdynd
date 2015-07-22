@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/arrfunc_registry.hpp>
+#include <dynd/func/callable_registry.hpp>
 
 using namespace std;
 using namespace dynd;

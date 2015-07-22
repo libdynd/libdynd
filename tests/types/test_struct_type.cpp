@@ -11,15 +11,13 @@
 #include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/callable.hpp>
-#include <dynd/func/call_callable.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/type.hpp>
 

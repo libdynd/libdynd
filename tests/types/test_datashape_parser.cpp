@@ -9,7 +9,7 @@
 #include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
 
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -25,7 +25,6 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
-#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -6,7 +6,7 @@
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
-#include <dynd/func/lift_reduction_arrfunc.hpp>
+#include <dynd/func/lift_reduction_callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 

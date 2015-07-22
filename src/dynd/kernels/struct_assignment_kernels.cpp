@@ -12,7 +12,6 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
-#include <dynd/func/callable.hpp>
 #include <dynd/func/copy.hpp>
 
 using namespace std;

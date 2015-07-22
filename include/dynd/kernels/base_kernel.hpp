@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/ckernel_builder.hpp>
-#include <dynd/types/arrfunc_type.hpp>
+#include <dynd/types/callable_type.hpp>
 
 namespace dynd {
 namespace nd {

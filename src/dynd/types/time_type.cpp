@@ -4,13 +4,13 @@
 //
 
 #include <dynd/array.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/time_assignment_kernels.hpp>
-#include <dynd/func/make_callable.hpp>
+#include <dynd/gfunc/make_callable.hpp>
 #include <dynd/parser_util.hpp>
 
 using namespace std;

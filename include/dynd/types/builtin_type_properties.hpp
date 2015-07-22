@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/types/type_id.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/gfunc/callable.hpp>
 
 namespace dynd {
 

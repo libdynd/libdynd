@@ -10,7 +10,7 @@
 #include <dynd/array_range.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <map>
-#include <dynd/func/call_callable.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 
 #ifdef DYND_CUDA
 #include <cufft.h>

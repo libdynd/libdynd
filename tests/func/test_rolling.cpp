@@ -13,8 +13,7 @@
 #include <dynd/array.hpp>
 #include <dynd/func/rolling.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
-#include <dynd/func/lift_reduction_arrfunc.hpp>
-#include <dynd/func/call_callable.hpp>
+#include <dynd/func/lift_reduction_callable.hpp>
 
 using namespace std;
 using namespace dynd;

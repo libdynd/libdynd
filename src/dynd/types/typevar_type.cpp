@@ -5,7 +5,6 @@
 
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/apply.hpp>
-#include <dynd/func/make_callable.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
 
 using namespace std;

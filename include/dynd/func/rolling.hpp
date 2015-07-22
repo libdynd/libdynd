@@ -7,7 +7,6 @@
 
 #include <dynd/config.hpp>
 #include <dynd/array.hpp>
-#include <dynd/func/callable.hpp>
 
 namespace dynd {
 namespace nd {
