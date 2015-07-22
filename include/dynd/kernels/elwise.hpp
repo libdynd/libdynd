@@ -11,7 +11,7 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 
 namespace dynd {
 namespace nd {

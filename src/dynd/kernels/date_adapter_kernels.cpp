@@ -9,7 +9,7 @@
 #include <dynd/types/date_parser.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/callable_type.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/string.hpp>
 
 using namespace std;

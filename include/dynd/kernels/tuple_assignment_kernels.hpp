@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/types/struct_type.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 
 namespace dynd {
 

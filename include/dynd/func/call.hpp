@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/call_kernel.hpp>
 
 namespace dynd {

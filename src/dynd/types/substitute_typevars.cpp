@@ -4,7 +4,7 @@
 //
 
 #include <dynd/types/substitute_typevars.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/option_type.hpp>

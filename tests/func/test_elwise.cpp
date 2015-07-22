@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/apply.hpp>

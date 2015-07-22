@@ -13,7 +13,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>

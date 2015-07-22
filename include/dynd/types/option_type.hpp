@@ -10,7 +10,7 @@
 #pragma once
 
 #include <dynd/type.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/func/option.hpp>
 
 namespace dynd {

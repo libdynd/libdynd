@@ -8,7 +8,7 @@
 #include <numeric>
 
 #include <dynd/iterator.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
 #include <typeinfo>

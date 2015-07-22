@@ -14,7 +14,7 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/gfunc/call_callable.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/datashape_parser.hpp>

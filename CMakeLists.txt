@@ -298,7 +298,7 @@ set(libdynd_SRC
     include/dynd/eval/unary_elwise_eval.hpp
     # Func
     src/dynd/func/arithmetic.cpp
-    src/dynd/func/arrfunc.cpp
+    src/dynd/func/callable.cpp
     src/dynd/func/callable_registry.cpp
     src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
@@ -320,7 +320,7 @@ set(libdynd_SRC
     src/dynd/func/take.cpp
     src/dynd/func/take_by_pointer.cpp
     include/dynd/func/arithmetic.hpp
-    include/dynd/func/arrfunc.hpp
+    include/dynd/func/callable.hpp
     include/dynd/func/callable_registry.hpp
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp

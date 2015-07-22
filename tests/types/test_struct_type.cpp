@@ -11,7 +11,7 @@
 #include "../dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>

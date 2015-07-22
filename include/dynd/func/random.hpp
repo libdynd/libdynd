@@ -4,7 +4,7 @@
 #include <memory>
 #include <random>
 
-#include <dynd/func/arrfunc.hpp>
+#include <dynd/func/callable.hpp>
 
 namespace dynd {
 namespace nd {
