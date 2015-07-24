@@ -138,20 +138,6 @@ set(libdynd_SRC
     include/dynd/pp/meta.hpp
     include/dynd/pp/token.hpp
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
-    # CodeGen
-    src/dynd/codegen/unary_kernel_adapter_codegen_windows_x64.cpp
-    src/dynd/codegen/unary_kernel_adapter_codegen_x64_sysvabi.cpp
-    src/dynd/codegen/unary_kernel_adapter_codegen_unsupported.cpp
-    src/dynd/codegen/binary_kernel_adapter_codegen_windows_x64.cpp
-    src/dynd/codegen/binary_kernel_adapter_codegen_x64_sysvabi.cpp
-    src/dynd/codegen/binary_kernel_adapter_codegen_unsupported.cpp
-    src/dynd/codegen/binary_reduce_kernel_adapter_codegen.cpp
-    src/dynd/codegen/codegen_cache.cpp
-    include/dynd/codegen/unary_kernel_adapter_codegen.hpp
-    include/dynd/codegen/binary_kernel_adapter_codegen.hpp
-    include/dynd/codegen/binary_reduce_kernel_adapter_codegen.hpp
-    include/dynd/codegen/calling_conventions.hpp
-    include/dynd/codegen/codegen_cache.hpp
     # Types
     src/dynd/types/adapt_type.cpp
     src/dynd/types/any_kind_type.cpp
@@ -287,12 +273,10 @@ set(libdynd_SRC
     include/dynd/types/void_pointer_type.hpp
     # Eval
     src/dynd/eval/eval_context.cpp
-    src/dynd/eval/eval_elwise_vm.cpp
     src/dynd/eval/eval_engine.cpp
     src/dynd/eval/groupby_elwise_reduce_eval.cpp
     src/dynd/eval/unary_elwise_eval.cpp
     include/dynd/eval/eval_context.hpp
-    include/dynd/eval/eval_elwise_vm.hpp
     include/dynd/eval/eval_engine.hpp
     include/dynd/eval/groupby_elwise_reduce_eval.hpp
     include/dynd/eval/unary_elwise_eval.hpp
@@ -305,8 +289,6 @@ set(libdynd_SRC
     src/dynd/func/copy.cpp
     src/dynd/func/chain.cpp
     src/dynd/func/elwise.cpp
-    src/dynd/func/elwise_gfunc.cpp
-    src/dynd/func/elwise_reduce_gfunc.cpp
     src/dynd/func/fft.cpp
     src/dynd/func/lift_reduction_callable.cpp
     src/dynd/func/math.cpp
@@ -327,8 +309,6 @@ set(libdynd_SRC
     include/dynd/func/comparison.hpp
     include/dynd/func/chain.hpp
     include/dynd/func/elwise.hpp
-    include/dynd/func/elwise_gfunc.hpp
-    include/dynd/func/elwise_reduce_gfunc.hpp
     include/dynd/func/fft.hpp
     include/dynd/func/apply.hpp
     include/dynd/func/lift_reduction_callable.hpp
@@ -456,11 +436,6 @@ set(libdynd_SRC
     include/dynd/memblock/array_memory_block.hpp
     include/dynd/memblock/objectarray_memory_block.hpp
     include/dynd/memblock/zeroinit_memory_block.hpp
-    # VM
-    src/dynd/vm/elwise_program.cpp
-    src/dynd/vm/register_allocation.cpp
-    include/dynd/vm/elwise_program.hpp
-    include/dynd/vm/register_allocation.hpp
     # Main
     src/dynd/array.cpp
     src/dynd/array_range.cpp
@@ -538,8 +513,6 @@ include_directories(
 
 source_group("Main Source" REGULAR_EXPRESSION "src/dynd/.*cpp")
 source_group("Main Headers" REGULAR_EXPRESSION "include/dynd/.*hpp")
-source_group("CodeGen Source" REGULAR_EXPRESSION "src/dynd/codegen/.*cpp")
-source_group("CodeGen Headers" REGULAR_EXPRESSION "include/dynd/codegen/.*hpp")
 source_group("Types Source" REGULAR_EXPRESSION "src/dynd/types/.*cpp")
 source_group("Types Headers" REGULAR_EXPRESSION "include/dynd/types/.*hpp")
 source_group("Eval Source" REGULAR_EXPRESSION "src/dynd/eval/.*cpp")
@@ -553,8 +526,6 @@ source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
 source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
 source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
 source_group("PP Headers" REGULAR_EXPRESSION "include/dynd/pp/.*hpp")
-source_group("VM Source" REGULAR_EXPRESSION "src/dynd/vm/.*cpp")
-source_group("VM Headers" REGULAR_EXPRESSION "include/dynd/vm/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 #set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
