@@ -27,10 +27,6 @@ set(tests_SRC
     pp/test_pp_list.cpp
     pp/test_pp_logical.cpp
     pp/test_pp_token.cpp
-    codegen/test_codegen_cache.cpp
-    codegen/test_unary_kernel_adapter.cpp
-    codegen/test_binary_kernel_adapter.cpp
-#    codegen/assembly_samples/asm_tests.cpp
     types/test_align_type.cpp
     types/test_bytes_type.cpp
     types/test_byteswap_type.cpp
@@ -103,7 +99,6 @@ set(tests_SRC
     array/test_memmap.cpp
     array/test_view.cpp
     array/test_with.cpp
-    vm/test_elwise_program.cpp
     test_bool1.cpp
     test_config.cpp
     test_float16.cpp
@@ -123,10 +118,8 @@ include_directories(
 
 source_group("Other Tests" REGULAR_EXPRESSION "\\/test_[^\\/]*\\.cpp$")
 source_group("Array Tests" REGULAR_EXPRESSION "\\/array\\/test_[^\\/]*\\.cpp$")
-source_group("CodeGen Tests" REGULAR_EXPRESSION "\\/codegen\\/test_[^\\/]*\\.cpp$")
 source_group("Types Tests" REGULAR_EXPRESSION "\\/types\\/test_[^\\/]*\\.cpp$")
 source_group("Func Tests" REGULAR_EXPRESSION "\\/func\\/test_[^\\/]*\\.cpp$")
-source_group("VM Tests" REGULAR_EXPRESSION "\\/vm\\/test_[^\\/]*\\.cpp$")
 
 if (DYND_CUDA)
     # Specify that some source files are CUDA files

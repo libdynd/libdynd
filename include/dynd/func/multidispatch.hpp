@@ -291,6 +291,16 @@ namespace nd {
         return multidispatch<1>(self_tp, begin, end, default_child);
       case 2:
         return multidispatch<2>(self_tp, begin, end, default_child);
+      case 3:
+        return multidispatch<3>(self_tp, begin, end, default_child);
+      case 4:
+        return multidispatch<4>(self_tp, begin, end, default_child);
+      case 5:
+        return multidispatch<5>(self_tp, begin, end, default_child);
+      case 6:
+        return multidispatch<6>(self_tp, begin, end, default_child);
+      case 7:
+        return multidispatch<7>(self_tp, begin, end, default_child);
       default:
         throw std::runtime_error("error");
       }
