@@ -11,10 +11,11 @@ using namespace dynd;
 
 map<array<type_id_t, 2>, nd::callable> nd::assign::make_children()
 {
-  typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id,
-                           int32_type_id, int64_type_id, uint8_type_id,
-                           uint16_type_id, uint32_type_id, uint64_type_id,
-                           float32_type_id, float64_type_id> numeric_type_ids;
+  typedef type_id_sequence<
+      bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
+      int128_type_id, uint8_type_id, uint16_type_id, uint32_type_id,
+      uint64_type_id, uint128_type_id, float32_type_id, float64_type_id,
+      complex_float32_type_id, complex_float64_type_id> numeric_type_ids;
 
   map<std::array<type_id_t, 2>, callable> children2 =
       callable::make_all<bind<assign_error_mode, assignment_kernel>::type,
@@ -24,83 +25,6 @@ map<array<type_id_t, 2>, nd::callable> nd::assign::make_children()
 }
 
 struct nd::assign nd::assign;
-
-static nd::make_t assign_make[builtin_type_id_count - 2][builtin_type_id_count -
-                                                         2][4] = {
-#define SINGLE_OPERATION_PAIR_LEVEL(dst_type_id, src_type_id, errmode)         \
-  &nd::make<nd::detail::assignment_kernel<                                     \
-      dst_type_id, dynd::type_kind_of<dst_type_id>::value, src_type_id,        \
-      dynd::type_kind_of<src_type_id>::value, errmode>>
-
-#define ERROR_MODE_LEVEL(dst_type, src_type)                                   \
-  {                                                                            \
-    SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_nocheck),     \
-        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type,                        \
-                                    assign_error_overflow),                    \
-        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type,                        \
-                                    assign_error_fractional),                  \
-        SINGLE_OPERATION_PAIR_LEVEL(dst_type, src_type, assign_error_inexact)  \
-  }
-
-#define SRC_TYPE_LEVEL(dst_type_id)                                            \
-  {                                                                            \
-    ERROR_MODE_LEVEL(dst_type_id, bool_type_id),                               \
-        ERROR_MODE_LEVEL(dst_type_id, int8_type_id),                           \
-        ERROR_MODE_LEVEL(dst_type_id, int16_type_id),                          \
-        ERROR_MODE_LEVEL(dst_type_id, int32_type_id),                          \
-        ERROR_MODE_LEVEL(dst_type_id, int64_type_id),                          \
-        ERROR_MODE_LEVEL(dst_type_id, int128_type_id),                         \
-        ERROR_MODE_LEVEL(dst_type_id, uint8_type_id),                          \
-        ERROR_MODE_LEVEL(dst_type_id, uint16_type_id),                         \
-        ERROR_MODE_LEVEL(dst_type_id, uint32_type_id),                         \
-        ERROR_MODE_LEVEL(dst_type_id, uint64_type_id),                         \
-        ERROR_MODE_LEVEL(dst_type_id, uint128_type_id),                        \
-        ERROR_MODE_LEVEL(dst_type_id, float16_type_id),                        \
-        ERROR_MODE_LEVEL(dst_type_id, float32_type_id),                        \
-        ERROR_MODE_LEVEL(dst_type_id, float64_type_id),                        \
-        ERROR_MODE_LEVEL(dst_type_id, float128_type_id),                       \
-        ERROR_MODE_LEVEL(dst_type_id, complex_float32_type_id),                \
-        ERROR_MODE_LEVEL(dst_type_id, complex_float64_type_id)                 \
-  }
-
-    SRC_TYPE_LEVEL(bool_type_id), SRC_TYPE_LEVEL(int8_type_id),
-    SRC_TYPE_LEVEL(int16_type_id), SRC_TYPE_LEVEL(int32_type_id),
-    SRC_TYPE_LEVEL(int64_type_id), SRC_TYPE_LEVEL(int128_type_id),
-    SRC_TYPE_LEVEL(uint8_type_id), SRC_TYPE_LEVEL(uint16_type_id),
-    SRC_TYPE_LEVEL(uint32_type_id), SRC_TYPE_LEVEL(uint64_type_id),
-    SRC_TYPE_LEVEL(uint128_type_id), SRC_TYPE_LEVEL(float16_type_id),
-    SRC_TYPE_LEVEL(float32_type_id), SRC_TYPE_LEVEL(float64_type_id),
-    SRC_TYPE_LEVEL(float128_type_id), SRC_TYPE_LEVEL(complex_float32_type_id),
-    SRC_TYPE_LEVEL(complex_float64_type_id)
-#undef SRC_TYPE_LEVEL
-#undef ERROR_MODE_LEVEL
-#undef SINGLE_OPERATION_PAIR_LEVEL
-};
-
-size_t dynd::make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                                 type_id_t dst_type_id,
-                                                 type_id_t src_type_id,
-                                                 kernel_request_t kernreq,
-                                                 assign_error_mode errmode)
-{
-  //  std::cout << nd::assign << std::endl;
-  // std::exit(-1);
-
-  // Do a table lookup for the built-in range of dynd types
-  if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id &&
-      src_type_id >= bool_type_id && src_type_id <= complex_float64_type_id &&
-      errmode != assign_error_default) {
-    (*assign_make[dst_type_id - bool_type_id][src_type_id -
-                                              bool_type_id][errmode])(
-        ckb, kernreq, ckb_offset);
-    return ckb_offset;
-  } else {
-    stringstream ss;
-    ss << "Cannot assign from " << ndt::type(src_type_id) << " to "
-       << ndt::type(dst_type_id);
-    throw runtime_error(ss.str());
-  }
-}
 
 size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb,
                                                    intptr_t ckb_offset,
@@ -151,20 +75,13 @@ intptr_t dynd::make_assignment_kernel(
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
-  //  std::cout << "(make_assignment_kernel) dst_tp = " << dst_tp << std::endl;
-  //  std::cout << "(make_assignment_kernel) src_tp = " << src_tp << std::endl;
-
   if (dst_tp.is_builtin()) {
     if (src_tp.is_builtin()) {
-      if (dst_tp.extended() == src_tp.extended()) {
-        return make_pod_typed_data_assignment_kernel(
-            ckb, ckb_offset, dst_tp.get_data_size(),
-            dst_tp.get_data_alignment(), kernreq);
-      } else {
-        return make_builtin_type_assignment_kernel(
-            ckb, ckb_offset, dst_tp.get_type_id(), src_tp.get_type_id(),
-            kernreq, ectx->errmode);
-      }
+      nd::callable &child = nd::assign::overload(dst_tp, src_tp);
+      return child.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+                                      dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                      kernreq, ectx, nd::array(),
+                                      std::map<nd::string, ndt::type>());
     } else {
       return src_tp.extended()->make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,

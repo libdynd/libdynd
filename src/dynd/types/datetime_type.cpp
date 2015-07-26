@@ -16,7 +16,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/unary_expr_type.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/kernels/datetime_assignment_kernels.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -221,9 +220,11 @@ intptr_t ndt::datetime_type::make_assignment_kernel(
       }
     } else if (src_tp.get_kind() == string_kind) {
       // Assignment from strings
-      return make_string_to_datetime_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx);
+      typedef nd::assignment_kernel<datetime_type_id, string_type_id> self_type;
+      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+                                    dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                    kernreq, ectx, nd::array(),
+                                    std::map<nd::string, ndt::type>());
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
@@ -237,9 +238,11 @@ intptr_t ndt::datetime_type::make_assignment_kernel(
   } else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
-      return make_datetime_to_string_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx);
+      typedef nd::assignment_kernel<string_type_id, datetime_type_id> self_type;
+      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+                                    dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                    kernreq, ectx, nd::array(),
+                                    std::map<nd::string, ndt::type>());
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,

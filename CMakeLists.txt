@@ -341,9 +341,7 @@ set(libdynd_SRC
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy.cpp
-    src/dynd/kernels/date_assignment_kernels.cpp
     src/dynd/kernels/date_adapter_kernels.cpp
-    src/dynd/kernels/datetime_assignment_kernels.cpp
     src/dynd/kernels/datetime_adapter_kernels.cpp
     src/dynd/kernels/date_expr_kernels.cpp
     src/dynd/kernels/elwise_expr_kernels.cpp
@@ -363,7 +361,6 @@ set(libdynd_SRC
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/take.cpp
-    src/dynd/kernels/time_assignment_kernels.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_comparer_builtin.hpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
@@ -385,9 +382,7 @@ set(libdynd_SRC
     include/dynd/kernels/comparison_kernels.hpp
     include/dynd/kernels/copy.hpp
     include/dynd/kernels/cuda_launch.hpp
-    include/dynd/kernels/date_assignment_kernels.hpp
     include/dynd/kernels/date_adapter_kernels.hpp
-    include/dynd/kernels/datetime_assignment_kernels.hpp
     include/dynd/kernels/datetime_adapter_kernels.hpp
     include/dynd/kernels/date_expr_kernels.hpp
     include/dynd/kernels/elwise.hpp
@@ -410,7 +405,6 @@ set(libdynd_SRC
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/take.hpp
-    include/dynd/kernels/time_assignment_kernels.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
     include/dynd/kernels/tuple_comparison_kernels.hpp
     include/dynd/kernels/uniform_kernel.hpp

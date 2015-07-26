@@ -43,9 +43,11 @@ intptr_t nd::copy_ck::instantiate(
                 [dst_tp.unchecked_get_builtin_type_id()],
             kernreq);
       } else {
-        return make_builtin_type_assignment_kernel(
-            ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0].get_type_id(),
-            kernreq, ectx->errmode);
+        nd::callable &child = nd::assign::overload(dst_tp, src_tp[0]);
+        return child.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+                                        dst_arrmeta, 1, src_tp, src_arrmeta,
+                                        kernreq, ectx, nd::array(),
+                                        std::map<nd::string, ndt::type>());
       }
     } else {
       return src_tp[0].extended()->make_assignment_kernel(
