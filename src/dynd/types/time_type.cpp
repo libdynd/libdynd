@@ -9,7 +9,6 @@
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/time_assignment_kernels.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/parser_util.hpp>
 
@@ -144,13 +143,16 @@ intptr_t ndt::time_type::make_assignment_kernel(
           ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
     } else if (src_tp.get_kind() == string_kind) {
       // Assignment from strings
-      return make_string_to_time_assignment_kernel(
-          ckb, ckb_offset, dst_tp, src_tp, src_arrmeta, kernreq, ectx);
+      typedef nd::assignment_kernel<time_type_id, string_type_id> self_type;
+      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+                                    dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                    kernreq, ectx, nd::array(),
+                                    std::map<nd::string, ndt::type>());
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
-          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
-          src_arrmeta, kernreq, ectx);
+          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta,
+          src_tp, src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
@@ -159,8 +161,11 @@ intptr_t ndt::time_type::make_assignment_kernel(
   } else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
-      return make_time_to_string_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
+      typedef nd::assignment_kernel<string_type_id, time_type_id> self_type;
+      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
+                                    dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                    kernreq, ectx, nd::array(),
+                                    std::map<nd::string, ndt::type>());
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
@@ -213,7 +218,8 @@ static nd::array property_ndo_get_second(const nd::array &n)
 
 static nd::array property_ndo_get_microsecond(const nd::array &n)
 {
-  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "microsecond"));
+  return n.replace_dtype(
+      ndt::property_type::make(n.get_dtype(), "microsecond"));
 }
 
 static nd::array property_ndo_get_tick(const nd::array &n)

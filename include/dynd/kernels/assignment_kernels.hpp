@@ -17,6 +17,9 @@
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
+#include <dynd/types/datetime_type.hpp>
+#include <dynd/types/date_type.hpp>
+#include <dynd/types/time_type.hpp>
 #include <map>
 
 #if defined(_MSC_VER)
@@ -1771,6 +1774,315 @@ namespace nd {
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = d;
+      }
+    };
+
+    template <assign_error_mode ErrorMode>
+    struct assignment_kernel<date_type_id, datetime_kind, string_type_id,
+                             string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<date_type_id, datetime_kind,
+                                        string_type_id, string_kind, ErrorMode>,
+                      kernel_request_host, 1> {
+      ndt::type m_src_string_tp;
+      const char *m_src_arrmeta;
+      assign_error_mode m_errmode;
+      date_parse_order_t m_date_parse_order;
+      int m_century_window;
+
+      assignment_kernel(const ndt::type &src_tp, const char *src_arrmeta,
+                        assign_error_mode errmode,
+                        date_parse_order_t date_parse_order, int century_window)
+          : m_src_string_tp(src_tp), m_src_arrmeta(src_arrmeta),
+            m_errmode(errmode), m_date_parse_order(date_parse_order),
+            m_century_window(century_window)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        const ndt::base_string_type *bst =
+            static_cast<const ndt::base_string_type *>(
+                m_src_string_tp.extended());
+        const std::string &s =
+            bst->get_utf8_string(m_src_arrmeta, src[0], m_errmode);
+        date_ymd ymd;
+        // TODO: properly distinguish "date" and "option[date]" with respect to
+        // NA support
+        if (s == "NA") {
+          ymd.set_to_na();
+        } else {
+          ymd.set_from_str(s, m_date_parse_order, m_century_window);
+        }
+        *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
+      }
+
+      static intptr_t
+      instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &DYND_UNUSED(dst_tp),
+                  const char *DYND_UNUSED(dst_arrmeta),
+                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx,
+                  const nd::array &DYND_UNUSED(kwds),
+                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0],
+                                src_arrmeta[0], ectx->errmode,
+                                ectx->date_parse_order, ectx->century_window);
+        return ckb_offset;
+      }
+    };
+
+    template <assign_error_mode ErrorMode>
+    struct assignment_kernel<string_type_id, string_kind, date_type_id,
+                             datetime_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_type_id, string_kind,
+                                        date_type_id, datetime_kind, ErrorMode>,
+                      kernel_request_host, 1> {
+      ndt::type m_dst_string_tp;
+      const char *m_dst_arrmeta;
+      eval::eval_context m_ectx;
+
+      assignment_kernel(const ndt::type &dst_tp, const char *dst_arrmeta,
+                        const eval::eval_context *ectx)
+          : m_dst_string_tp(dst_tp), m_dst_arrmeta(dst_arrmeta), m_ectx(*ectx)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        date_ymd ymd;
+        ymd.set_from_days(*reinterpret_cast<const int32_t *>(src[0]));
+        std::string s = ymd.to_str();
+        if (s.empty()) {
+          s = "NA";
+        }
+        const ndt::base_string_type *bst =
+            static_cast<const ndt::base_string_type *>(
+                m_dst_string_tp.extended());
+        bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
+      }
+
+      static intptr_t instantiate(
+          char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+          char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+          const ndt::type &dst_tp, const char *dst_arrmeta,
+          intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
+          const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, dst_tp, dst_arrmeta,
+                                ectx);
+        return ckb_offset;
+      }
+    };
+
+    template <assign_error_mode ErrorMode>
+    struct assignment_kernel<datetime_type_id, datetime_kind, string_type_id,
+                             string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<datetime_type_id, datetime_kind,
+                                        string_type_id, string_kind, ErrorMode>,
+                      kernel_request_host, 1> {
+      ndt::type m_dst_datetime_tp;
+      ndt::type m_src_string_tp;
+      const char *m_src_arrmeta;
+      date_parse_order_t m_date_parse_order;
+      int m_century_window;
+
+      assignment_kernel(const ndt::type &dst_tp, const ndt::type &src_tp,
+                        const char *src_arrmeta,
+                        date_parse_order_t date_parse_order, int century_window)
+          : m_dst_datetime_tp(dst_tp), m_src_string_tp(src_tp),
+            m_src_arrmeta(src_arrmeta), m_date_parse_order(date_parse_order),
+            m_century_window(century_window)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        const ndt::base_string_type *bst =
+            static_cast<const ndt::base_string_type *>(
+                m_src_string_tp.extended());
+        const std::string &s =
+            bst->get_utf8_string(m_src_arrmeta, src[0], ErrorMode);
+        datetime_struct dts;
+        // TODO: properly distinguish "date" and "option[date]" with respect to
+        // NA
+        // support
+        if (s == "NA") {
+          dts.set_to_na();
+        } else {
+          dts.set_from_str(s, m_date_parse_order, m_century_window);
+        }
+        *reinterpret_cast<int64_t *>(dst) = dts.to_ticks();
+      }
+
+      static intptr_t
+      instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx,
+                  const nd::array &DYND_UNUSED(kwds),
+                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, dst_tp, src_tp[0],
+                                src_arrmeta[0], ectx->date_parse_order,
+                                ectx->century_window);
+        return ckb_offset;
+      }
+    };
+
+    template <assign_error_mode ErrorMode>
+    struct assignment_kernel<string_type_id, string_kind, datetime_type_id,
+                             datetime_kind, ErrorMode>
+        : base_kernel<
+              assignment_kernel<string_type_id, string_kind, datetime_type_id,
+                                datetime_kind, ErrorMode>,
+              kernel_request_host, 1> {
+      ndt::type m_dst_string_tp;
+      const char *m_dst_arrmeta;
+      ndt::type m_src_datetime_tp;
+      eval::eval_context m_ectx;
+
+      assignment_kernel(const ndt::type &dst_tp, const char *dst_arrmeta,
+                        const ndt::type &src_tp, const eval::eval_context *ectx)
+          : m_dst_string_tp(dst_tp), m_dst_arrmeta(dst_arrmeta),
+            m_src_datetime_tp(src_tp), m_ectx(*ectx)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        datetime_struct dts;
+        dts.set_from_ticks(*reinterpret_cast<const int64_t *>(src[0]));
+        std::string s = dts.to_str();
+        if (s.empty()) {
+          s = "NA";
+        } else if (m_src_datetime_tp.extended<ndt::datetime_type>()
+                       ->get_timezone() == tz_utc) {
+          s += "Z";
+        }
+        const ndt::base_string_type *bst =
+            static_cast<const ndt::base_string_type *>(
+                m_dst_string_tp.extended());
+        bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
+      }
+
+      static intptr_t
+      instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &dst_tp, const char *dst_arrmeta,
+                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                  const char *const *DYND_UNUSED(src_arrmeta),
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const nd::array &DYND_UNUSED(kwds),
+                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, dst_tp, dst_arrmeta,
+                                src_tp[0], ectx);
+        return ckb_offset;
+      }
+    };
+
+    template <assign_error_mode ErrorMode>
+    struct assignment_kernel<time_type_id, datetime_kind, string_type_id,
+                             string_kind, ErrorMode>
+        : base_kernel<assignment_kernel<time_type_id, datetime_kind,
+                                        string_type_id, string_kind, ErrorMode>,
+                      kernel_request_host, 1> {
+      ndt::type m_src_string_tp;
+      const char *m_src_arrmeta;
+      assign_error_mode m_errmode;
+
+      assignment_kernel(const ndt::type &src_tp, const char *src_arrmeta,
+                        assign_error_mode errmode)
+          : m_src_string_tp(src_tp), m_src_arrmeta(src_arrmeta),
+            m_errmode(errmode)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        const ndt::base_string_type *bst =
+            static_cast<const ndt::base_string_type *>(
+                m_src_string_tp.extended());
+        const std::string &s =
+            bst->get_utf8_string(m_src_arrmeta, src[0], m_errmode);
+        time_hmst hmst;
+        // TODO: properly distinguish "time" and "option[time]" with respect to
+        // NA
+        // support
+        if (s == "NA") {
+          hmst.set_to_na();
+        } else {
+          hmst.set_from_str(s);
+        }
+        *reinterpret_cast<int64_t *>(dst) = hmst.to_ticks();
+      }
+
+      static intptr_t
+      instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  const ndt::type &DYND_UNUSED(dst_tp),
+                  const char *DYND_UNUSED(dst_arrmeta),
+                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx,
+                  const nd::array &DYND_UNUSED(kwds),
+                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0],
+                                src_arrmeta[0], ectx->errmode);
+        return ckb_offset;
+      }
+    };
+
+    template <assign_error_mode ErrorMode>
+    struct assignment_kernel<string_type_id, string_kind, time_type_id,
+                             datetime_kind, ErrorMode>
+        : base_kernel<assignment_kernel<string_type_id, string_kind,
+                                        time_type_id, datetime_kind, ErrorMode>,
+                      kernel_request_host, 1> {
+      ndt::type m_dst_string_tp;
+      const char *m_dst_arrmeta;
+      eval::eval_context m_ectx;
+
+      assignment_kernel(const ndt::type &dst_tp, const char *dst_arrmeta,
+                        const eval::eval_context *ectx)
+          : m_dst_string_tp(dst_tp), m_dst_arrmeta(dst_arrmeta), m_ectx(*ectx)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        time_hmst hmst;
+        hmst.set_from_ticks(*reinterpret_cast<const int64_t *>(src[0]));
+        std::string s = hmst.to_str();
+        if (s.empty()) {
+          s = "NA";
+        }
+        const ndt::base_string_type *bst =
+            static_cast<const ndt::base_string_type *>(
+                m_dst_string_tp.extended());
+        bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
+      }
+
+      static intptr_t instantiate(
+          char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+          char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+          const ndt::type &dst_tp, const char *dst_arrmeta,
+          intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+          const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
+          const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, dst_tp, dst_arrmeta,
+                                ectx);
+        return ckb_offset;
       }
     };
 
