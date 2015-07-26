@@ -84,10 +84,10 @@ namespace nd {
                   const std::map<dynd::nd::string, ndt::type> &tp_vars);
     };
 
-    template <typename StaticDataType>
+    template <typename DispatcherType>
     struct multidispatch_kernel
-        : base_virtual_kernel<multidispatch_kernel<StaticDataType>> {
-      typedef StaticDataType static_data_type;
+        : base_virtual_kernel<multidispatch_kernel<DispatcherType>> {
+      typedef DispatcherType dispatcher_type;
 
       struct data {
         const callable &child;
@@ -95,41 +95,18 @@ namespace nd {
         data(const callable &child) : child(child) {}
       };
 
-      /*
-            static void
-            data_init(const callable_type_data *self,
-                      const ndt::callable_type *DYND_UNUSED(self_tp),
-                      const char *DYND_UNUSED(static_data),
-                      size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                      intptr_t nsrc, const ndt::type *src_tp, array
-         &DYND_UNUSED(kwds),
-                      const std::map<nd::string, ndt::type>
-         &DYND_UNUSED(tp_vars))
-            {
-              static_data &static_data =
-                  *self->get_data_as<std::shared_ptr<StaticDataType>>()->get();
-
-              const callable &child = static_data(dst_tp, nsrc, src_tp);
-              if (child->data_init != NULL) {
-                child->data_init(child, self_tp, NULL, 0, NULL, nsrc, src_tp,
-         kwds,
-                                 tp_vars);
-              }
-            }
-      */
-
       static void
       resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
                        char *data, ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
                        const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        static_data_type &static_data_x =
-            *reinterpret_cast<std::shared_ptr<StaticDataType> *>(static_data)
+        dispatcher_type &dispatcher =
+            *reinterpret_cast<std::shared_ptr<DispatcherType> *>(static_data)
                  ->get();
 
         callable &child =
-            const_cast<callable &>(static_data_x(dst_tp, nsrc, src_tp));
+            const_cast<callable &>(dispatcher(dst_tp, nsrc, src_tp));
 
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
@@ -150,12 +127,58 @@ namespace nd {
                   const dynd::nd::array &kwds,
                   const std::map<dynd::nd::string, ndt::type> &tp_vars)
       {
-        static_data_type &static_data_x =
-            *reinterpret_cast<std::shared_ptr<StaticDataType> *>(static_data)
+        dispatcher_type &dispatcher =
+            *reinterpret_cast<std::shared_ptr<DispatcherType> *>(static_data)
                  ->get();
 
         callable &child =
-            const_cast<callable &>(static_data_x(dst_tp, nsrc, src_tp));
+            const_cast<callable &>(dispatcher(dst_tp, nsrc, src_tp));
+        return child.get()->instantiate(
+            child.get()->static_data, child.get()->data_size, data, ckb,
+            ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
+            ectx, kwds, tp_vars);
+      }
+    };
+
+    template <typename DispatcherType>
+    struct multidispatch_kernel2
+        : base_virtual_kernel<multidispatch_kernel2<DispatcherType>> {
+      static void
+      resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
+                       char *data, ndt::type &dst_tp, intptr_t nsrc,
+                       const ndt::type *src_tp, const dynd::nd::array &kwds,
+                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      {
+        DispatcherType &dispatcher =
+            *reinterpret_cast<DispatcherType *>(static_data);
+
+        callable &child =
+            const_cast<callable &>(dispatcher(dst_tp, nsrc, src_tp));
+
+        const ndt::type &child_dst_tp = child.get_type()->get_return_type();
+        if (child_dst_tp.is_symbolic()) {
+          child.get()->resolve_dst_type(child.get()->static_data,
+                                        child.get()->data_size, data, dst_tp,
+                                        nsrc, src_tp, kwds, tp_vars);
+        } else {
+          dst_tp = child_dst_tp;
+        }
+      }
+
+      static intptr_t
+      instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *data,
+                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                  kernel_request_t kernreq, const eval::eval_context *ectx,
+                  const dynd::nd::array &kwds,
+                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+      {
+        DispatcherType &dispatcher =
+            *reinterpret_cast<DispatcherType *>(static_data);
+
+        callable &child =
+            const_cast<callable &>(dispatcher(dst_tp, nsrc, src_tp));
         return child.get()->instantiate(
             child.get()->static_data, child.get()->data_size, data, ckb,
             ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,

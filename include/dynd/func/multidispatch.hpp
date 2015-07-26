@@ -162,6 +162,16 @@ namespace nd {
 
     } // namespace dynd::nd::functional::detail
 
+    template <typename T>
+    callable multidispatch(const ndt::type &tp, T &&dispatcher,
+                           std::size_t data_size)
+    {
+      typedef typename std::decay<T>::type dispatcher_type;
+
+      return callable::make<multidispatch_kernel2<dispatcher_type>>(
+          tp, std::forward<T>(dispatcher), data_size);
+    }
+
     template <int N, typename T,
               bool ArraySubscript = detail::multidispatch_is_array_subscript<
                   typename std::remove_reference<T>::type>::value>
