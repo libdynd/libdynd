@@ -226,6 +226,7 @@ namespace nd {
       return multidispatch(tp, std::begin(children), std::end(children));
     }
 
+/*
     template <typename IteratorType>
     callable multidispatch(const ndt::type &tp, const IteratorType &begin_child,
                            const IteratorType &end_child,
@@ -262,6 +263,7 @@ namespace nd {
       return multidispatch(tp, std::begin(children), std::end(children),
                            default_child);
     }
+*/
 
     template <typename IteratorType>
     callable multidispatch(const ndt::type &tp, const IteratorType &begin_child,
@@ -303,6 +305,7 @@ namespace nd {
                            permutation);
     }
 
+/*
     template <typename IteratorType>
     callable multidispatch(const ndt::type &tp, const IteratorType &begin_child,
                            const IteratorType &end_child,
@@ -341,6 +344,7 @@ namespace nd {
       return multidispatch(tp, std::begin(children), std::end(children),
                            default_child, permutation);
     }
+*/
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
