@@ -159,7 +159,7 @@ void ndt::fixed_string_kind_type::data_destruct_strided(
 bool ndt::fixed_string_kind_type::match(
     const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
     const char *DYND_UNUSED(candidate_arrmeta),
-    std::map<nd::string, type> &DYND_UNUSED(tp_vars)) const
+    std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   return candidate_tp.get_type_id() == fixed_string_type_id;
 }

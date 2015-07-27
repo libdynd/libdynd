@@ -13,7 +13,7 @@ void nd::copy_ck::resolve_dst_type(
     char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
     const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (nsrc != 1) {
     std::stringstream ss;
@@ -31,7 +31,7 @@ intptr_t nd::copy_ck::instantiate(
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (dst_tp.is_builtin()) {
     if (src_tp[0].is_builtin()) {
@@ -47,7 +47,7 @@ intptr_t nd::copy_ck::instantiate(
         return child.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                         dst_arrmeta, 1, src_tp, src_arrmeta,
                                         kernreq, ectx, nd::array(),
-                                        std::map<nd::string, ndt::type>());
+                                        std::map<std::string, ndt::type>());
       }
     } else {
       return src_tp[0].extended()->make_assignment_kernel(

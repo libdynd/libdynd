@@ -19,7 +19,7 @@ TEST(SubstituteTypeVars, SimpleNoSubstitutions)
 {
 // SimpleNoSubstitutions is segfaulting on Mac OS X
 #ifndef __APPLE__
-  map<nd::string, ndt::type> typevars;
+  map<std::string, ndt::type> typevars;
   EXPECT_EQ(ndt::type("int32"),
             ndt::substitute(ndt::type("int32"), typevars, false));
   EXPECT_EQ(ndt::type("int32"),
@@ -38,7 +38,7 @@ TEST(SubstituteTypeVars, SimpleSubstitution)
 {
 // SimpleSubstitution is segfaulting on Mac OS X
 #ifndef __APPLE__
-  map<nd::string, ndt::type> typevars;
+  map<std::string, ndt::type> typevars;
   typevars["Tint"] = ndt::type("int32");
   typevars["Tsym"] = ndt::type("S");
   typevars["Mfixed_sym"] = ndt::type("Fixed * void");
@@ -142,7 +142,7 @@ TEST(SubstituteTypeVars, SimpleSubstitution)
 
 TEST(SubstituteTypeVars, Tuple)
 {
-  map<nd::string, ndt::type> typevars;
+  map<std::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
   typevars["A"] =
@@ -166,7 +166,7 @@ TEST(SubstituteTypeVars, Tuple)
 
 TEST(SubstituteTypeVars, Struct)
 {
-  map<nd::string, ndt::type> typevars;
+  map<std::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
   typevars["A"] =
@@ -191,7 +191,7 @@ TEST(SubstituteTypeVars, Struct)
 
 TEST(SubstituteTypeVars, FuncProto)
 {
-  map<nd::string, ndt::type> typevars;
+  map<std::string, ndt::type> typevars;
   typevars["T"] = ndt::type("int32");
   typevars["M"] = ndt::type("3 * void");
   typevars["A"] = ndt::make_dim_fragment(3, ndt::type("var * 4 * 9 * void"));

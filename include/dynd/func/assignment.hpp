@@ -172,7 +172,7 @@ intptr_t make_cuda_device_builtin_type_assignment_kernel(
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
+    const std::map<std::string, ndt::type> &tp_vars);
 
 intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
@@ -180,7 +180,7 @@ intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
+    const std::map<std::string, ndt::type> &tp_vars);
 
 intptr_t make_cuda_from_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
@@ -188,7 +188,7 @@ intptr_t make_cuda_from_device_builtin_type_assignment_kernel(
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
+    const std::map<std::string, ndt::type> &tp_vars);
 
 #endif // DYND_CUDA
 

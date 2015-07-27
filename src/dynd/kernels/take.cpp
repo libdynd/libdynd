@@ -63,7 +63,7 @@ intptr_t nd::masked_take_ck::instantiate(
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef nd::masked_take_ck self_type;
 
@@ -154,7 +154,7 @@ intptr_t nd::indexed_take_ck::instantiate(
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef nd::indexed_take_ck self_type;
 
@@ -214,7 +214,7 @@ intptr_t nd::take_ck::instantiate(
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
@@ -238,7 +238,7 @@ void nd::take_ck::resolve_dst_type(
     char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
     const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   /*
     if (nsrc != 2) {

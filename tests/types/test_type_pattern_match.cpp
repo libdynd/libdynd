@@ -269,7 +269,7 @@ TEST(TypePatternMatch, TypeVarConstructed)
 
 TEST(TypePatternMatch, Broadcast) {
   // Confirm that "T..." type variables broadcast together as they match
-  std::map<nd::string, ndt::type> tp_vars;
+  std::map<std::string, ndt::type> tp_vars;
   EXPECT_TRUE(
       ndt::type("Dims... * int32").match(ndt::type("3 * 1 * int32"), tp_vars));
   EXPECT_TRUE(ndt::type("Dims... * float32")

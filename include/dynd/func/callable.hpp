@@ -30,7 +30,7 @@ namespace nd {
     bool is_special_kwd(const ndt::callable_type *DYND_UNUSED(self_tp),
                         const std::string &DYND_UNUSED(name),
                         const T &DYND_UNUSED(value),
-                        std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                        std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return false;
     }
@@ -98,7 +98,7 @@ namespace nd {
 
     void check_arg(const ndt::callable_type *af_tp, intptr_t i,
                    const ndt::type &actual_tp, const char *actual_arrmeta,
-                   std::map<nd::string, ndt::type> &tp_vars);
+                   std::map<std::string, ndt::type> &tp_vars);
 
     void check_nkwd(const ndt::callable_type *af_tp,
                     const std::vector<intptr_t> &available,
@@ -108,7 +108,7 @@ namespace nd {
                             std::vector<ndt::type> &kwd_tp,
                             const std::vector<intptr_t> &available,
                             const std::vector<intptr_t> &missing,
-                            std::map<nd::string, ndt::type> &tp_vars);
+                            std::map<std::string, ndt::type> &tp_vars);
 
     inline char *data_of(array &value)
     {
@@ -147,7 +147,7 @@ namespace nd {
                      std::vector<ndt::type> &src_tp,
                      std::vector<const char *> &src_arrmeta,
                      std::vector<char *> &src_data,
-                     std::map<nd::string, ndt::type> &tp_vars) const
+                     std::map<std::string, ndt::type> &tp_vars) const
         {
           auto &value = std::get<I>(self->m_values);
           const ndt::type &tp = ndt::type_of(value);
@@ -164,7 +164,7 @@ namespace nd {
                         std::vector<ndt::type> &src_tp,
                         std::vector<const char *> &src_arrmeta,
                         std::vector<char *> &src_data,
-                        std::map<nd::string, ndt::type> &tp_vars) const
+                        std::map<std::string, ndt::type> &tp_vars) const
         {
           check_narg(af_tp, sizeof...(A));
 
@@ -185,7 +185,7 @@ namespace nd {
           std::vector<ndt::type> &DYND_UNUSED(src_tp),
           std::vector<const char *> &DYND_UNUSED(src_arrmeta),
           std::vector<char *> &DYND_UNUSED(src_data),
-          std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+          std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) const
       {
         check_narg(af_tp, 0);
       }
@@ -206,7 +206,7 @@ namespace nd {
                           std::vector<ndt::type> &src_tp,
                           std::vector<const char *> &src_arrmeta,
                           std::vector<char *> &src_data,
-                          std::map<nd::string, ndt::type> &tp_vars) const
+                          std::map<std::string, ndt::type> &tp_vars) const
       {
         check_narg(af_tp, m_size);
 
@@ -249,7 +249,7 @@ namespace nd {
                           std::vector<ndt::type> &src_tp,
                           std::vector<const char *> &src_arrmeta,
                           std::vector<char *> &src_data,
-                          std::map<nd::string, ndt::type> &tp_vars) const
+                          std::map<std::string, ndt::type> &tp_vars) const
       {
         check_narg(af_tp, m_size);
 
@@ -816,7 +816,7 @@ namespace nd {
       std::vector<intptr_t> available, missing;
       kwds.validate_names(self_tp, dst, kwd_tp, available, missing);
 
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       std::vector<ndt::type> arg_tp;
       std::vector<const char *> arg_arrmeta;
       std::vector<char *> arg_data;

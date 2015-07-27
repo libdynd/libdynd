@@ -33,7 +33,7 @@ static intptr_t instantiate_lifted_reduction_callable_data(
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(kwds),
-    const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   std::shared_ptr<lifted_reduction_callable_data> data =
       *reinterpret_cast<std::shared_ptr<lifted_reduction_callable_data> *>(

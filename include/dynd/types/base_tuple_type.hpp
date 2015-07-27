@@ -98,8 +98,8 @@ namespace ndt {
                    const char *arrmeta, const char *data) const;
 
     type apply_linear_index(intptr_t nindices, const irange *indices,
-                                 size_t current_i, const type &root_tp,
-                                 bool leading_dimension) const;
+                            size_t current_i, const type &root_tp,
+                            bool leading_dimension) const;
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
                                 const char *arrmeta, const type &result_tp,
                                 char *out_arrmeta,
@@ -124,7 +124,7 @@ namespace ndt {
 
     virtual bool match(const char *arrmeta, const type &candidate_tp,
                        const char *candidate_arrmeta,
-                       std::map<nd::string, type> &tp_vars) const;
+                       std::map<std::string, type> &tp_vars) const;
 
     /**
      * Fills in the array of default data offsets based on the data sizes

@@ -12,7 +12,7 @@ void nd::functional::chain_kernel::resolve_dst_type(
     char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
     const ndt::type *DYND_UNUSED(src_tp), const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &tp_vars)
+    const std::map<std::string, ndt::type> &tp_vars)
 {
   dst_tp = ndt::substitute(dst_tp, tp_vars, true);
 }
@@ -28,7 +28,7 @@ intptr_t nd::functional::chain_kernel::instantiate(
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
     const eval::eval_context *ectx, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars)
+    const std::map<std::string, ndt::type> &tp_vars)
 {
   const struct static_data *static_data_x =
       reinterpret_cast<struct static_data *>(static_data);

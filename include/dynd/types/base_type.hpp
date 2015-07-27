@@ -587,7 +587,7 @@ namespace ndt {
 
     virtual bool match(const char *arrmeta, const ndt::type &candidate_tp,
                        const char *candidate_arrmeta,
-                       std::map<nd::string, ndt::type> &tp_vars) const;
+                       std::map<std::string, ndt::type> &tp_vars) const;
 
     /**
      * Call the callback on each element of the array with given data/arrmeta

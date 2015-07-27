@@ -23,7 +23,7 @@ namespace nd {
                   const char *const *src_arrmeta,
                   dynd::kernel_request_t kernreq,
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         intptr_t ndim = 0;
         for (intptr_t i = 0; i < nsrc; ++i) {
@@ -92,7 +92,7 @@ namespace nd {
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
                        intptr_t nsrc, const ndt::type *src_tp,
                        const dynd::nd::array &kwds,
-                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                       const std::map<std::string, ndt::type> &tp_vars)
       {
         callable_type_data *child =
             reinterpret_cast<callable *>(static_data)->get();

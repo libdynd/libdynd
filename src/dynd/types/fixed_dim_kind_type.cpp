@@ -219,7 +219,7 @@ void ndt::fixed_dim_kind_type::data_destruct_strided(
 bool ndt::fixed_dim_kind_type::match(const char *arrmeta,
                                      const type &candidate_tp,
                                      const char *candidate_arrmeta,
-                                     std::map<nd::string, type> &tp_vars) const
+                                     std::map<std::string, type> &tp_vars) const
 {
   switch (candidate_tp.get_type_id()) {
   case fixed_dim_type_id:

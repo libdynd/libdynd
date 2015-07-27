@@ -37,7 +37,7 @@ namespace nd {
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
                        intptr_t nsrc, const ndt::type *src_tp,
                        const dynd::nd::array &kwds,
-                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                       const std::map<std::string, ndt::type> &tp_vars)
       {
         const callable_type_data *child_af =
             reinterpret_cast<callable *>(static_data)->get();
@@ -142,7 +142,7 @@ namespace nd {
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   dynd::kernel_request_t kernreq,
                   const eval::eval_context *ectx, const dynd::nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
 
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
@@ -313,7 +313,7 @@ namespace nd {
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -436,7 +436,7 @@ namespace nd {
                   const char *const *DYND_UNUSED(src_arrmeta),
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -563,7 +563,7 @@ namespace nd {
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -694,7 +694,7 @@ namespace nd {
                   const char *const *DYND_UNUSED(src_arrmeta),
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -902,7 +902,7 @@ namespace nd {
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();
@@ -1067,7 +1067,7 @@ namespace nd {
                   const char *const *DYND_UNUSED(src_arrmeta),
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         const ndt::callable_type *child_tp = child.get_type();

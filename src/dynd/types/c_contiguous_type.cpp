@@ -142,7 +142,7 @@ void ndt::c_contiguous_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 bool ndt::c_contiguous_type::match(const char *arrmeta,
                                    const type &candidate_tp,
                                    const char *candidate_arrmeta,
-                                   std::map<nd::string, type> &tp_vars) const
+                                   std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() == c_contiguous_type_id) {
     return m_child_tp.match(

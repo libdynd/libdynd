@@ -40,7 +40,7 @@ namespace nd {
         intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
         int DYND_UNUSED(throw_on_error), ndt::type &dst_tp,
         const nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds.p("shape");
       //      if (shape.is_missing()) {
@@ -58,7 +58,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const size_stride_t *dst_size_stride =
           reinterpret_cast<const size_stride_t *>(dst_arrmeta);

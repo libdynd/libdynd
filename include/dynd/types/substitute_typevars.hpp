@@ -16,7 +16,7 @@ namespace ndt {
   namespace detail {
     ndt::type
     internal_substitute(const ndt::type &pattern,
-                        const std::map<nd::string, ndt::type> &typevars,
+                        const std::map<std::string, ndt::type> &typevars,
                         bool concrete);
   }
 
@@ -28,7 +28,7 @@ namespace ndt {
    * \param concrete  If true, requires that the result be concrete.
    */
   inline ndt::type substitute(const ndt::type &pattern,
-                              const std::map<nd::string, ndt::type> &typevars,
+                              const std::map<std::string, ndt::type> &typevars,
                               bool concrete)
   {
     // This check for whether ``pattern`` is symbolic is put here in

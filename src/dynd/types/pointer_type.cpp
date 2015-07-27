@@ -398,7 +398,7 @@ nd::array ndt::pointer_type::get_option_nafunc() const
 
 bool ndt::pointer_type::match(const char *arrmeta, const type &candidate_tp,
                               const char *candidate_arrmeta,
-                              std::map<nd::string, type> &tp_vars) const
+                              std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() != pointer_type_id) {
     return false;

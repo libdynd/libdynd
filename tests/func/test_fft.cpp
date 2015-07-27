@@ -33,7 +33,7 @@ public:
         std::tr1::tuple<const char *, const char *,  const char *>>::GetParam()));
 
     if (pattern_tp == ndt::type("T")) {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = dtp;
 
       return ndt::substitute(concrete_tp, tp_vars, true);      
@@ -41,7 +41,7 @@ public:
 
 #ifdef DYND_CUDA
     if (pattern_tp == ndt::type("cuda_device[T]")) {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = dtp;
 
       return ndt::substitute(ndt::make_cuda_device(concrete_tp), tp_vars, true);      
@@ -66,7 +66,7 @@ public:
         std::tr1::tuple<const char *, const char *,  const char *>>::GetParam()));
 
     if (pattern_tp == ndt::type("T")) {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = dtp;
 
       return ndt::substitute(concrete_tp, tp_vars, true);      
@@ -74,7 +74,7 @@ public:
 
 #ifdef DYND_CUDA
     if (pattern_tp == ndt::type("cuda_device[T]")) {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = dtp;
 
       return ndt::substitute(ndt::make_cuda_device(concrete_tp), tp_vars, true);      

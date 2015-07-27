@@ -29,20 +29,18 @@ size_t ndt::int_kind_sym_type::get_default_data_size() const
 }
 
 void ndt::int_kind_sym_type::print_data(std::ostream &DYND_UNUSED(o),
-                                   const char *DYND_UNUSED(arrmeta),
-                                   const char *DYND_UNUSED(data)) const
+                                        const char *DYND_UNUSED(arrmeta),
+                                        const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of symbolic kind_sym type");
 }
 
-void ndt::int_kind_sym_type::print_type(std::ostream &o) const {
-  o << "Int";
-}
+void ndt::int_kind_sym_type::print_type(std::ostream &o) const { o << "Int"; }
 
 bool ndt::int_kind_sym_type::is_expression() const { return false; }
 
-bool
-ndt::int_kind_sym_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
+bool ndt::int_kind_sym_type::is_unique_data_owner(
+    const char *DYND_UNUSED(arrmeta)) const
 {
   return false;
 }
@@ -60,9 +58,8 @@ ndt::type ndt::int_kind_sym_type::get_canonical_type() const
   return type(this, true);
 }
 
-bool
-ndt::int_kind_sym_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
-                                          const type &DYND_UNUSED(src_tp)) const
+bool ndt::int_kind_sym_type::is_lossless_assignment(
+    const type &DYND_UNUSED(dst_tp), const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
@@ -103,16 +100,19 @@ size_t ndt::int_kind_sym_type::arrmeta_copy_construct_onedim(
   throw runtime_error(ss.str());
 }
 
-void ndt::int_kind_sym_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
-{
-}
-
 void
-ndt::int_kind_sym_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
+ndt::int_kind_sym_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void ndt::int_kind_sym_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::int_kind_sym_type::arrmeta_finalize_buffers(
+    char *DYND_UNUSED(arrmeta)) const
+{
+}
+
+void ndt::int_kind_sym_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+{
+}
 
 void ndt::int_kind_sym_type::arrmeta_debug_print(
     const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
@@ -124,17 +124,16 @@ void ndt::int_kind_sym_type::arrmeta_debug_print(
 }
 
 void ndt::int_kind_sym_type::data_destruct(const char *DYND_UNUSED(arrmeta),
-                                      char *DYND_UNUSED(data)) const
+                                           char *DYND_UNUSED(data)) const
 {
   stringstream ss;
   ss << "Cannot have data for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void ndt::int_kind_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
-                                              char *DYND_UNUSED(data),
-                                              intptr_t DYND_UNUSED(stride),
-                                              size_t DYND_UNUSED(count)) const
+void ndt::int_kind_sym_type::data_destruct_strided(
+    const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data),
+    intptr_t DYND_UNUSED(stride), size_t DYND_UNUSED(count)) const
 {
   stringstream ss;
   ss << "Cannot have data for symbolic type " << type(this, true);
@@ -144,10 +143,9 @@ void ndt::int_kind_sym_type::data_destruct_strided(const char *DYND_UNUSED(arrme
 bool ndt::int_kind_sym_type::match(
     const char *DYND_UNUSED(arrmeta), const type &candidate_tp,
     const char *DYND_UNUSED(candidate_arrmeta),
-    std::map<nd::string, type> &DYND_UNUSED(tp_vars)) const
+    std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   // Matches against the 'kind' of the candidate type
   type_kind_t kind = candidate_tp.get_kind();
   return kind == uint_kind || kind == sint_kind;
 }
- 

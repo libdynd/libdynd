@@ -38,7 +38,7 @@ nd::callable nd::functional::neighborhood(const nd::callable &neighborhood_op,
   ndt::type result_pattern("(" + oss.str() + " * NH) -> " + oss.str() +
                            " * OUT");
 
-  map<nd::string, ndt::type> typevars;
+  map<std::string, ndt::type> typevars;
   if (!nhop_pattern.match(neighborhood_op.get_array_type(), typevars)) {
     stringstream ss;
     ss << "provided neighborhood op proto " << neighborhood_op.get_array_type()

@@ -254,7 +254,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(ckb, kernreq, ckb_offset,                                \
                       args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));  \
@@ -319,7 +319,7 @@ namespace nd {
                 const char *const *src_arrmeta, kernel_request_t kernreq,      \
                 const eval::eval_context *DYND_UNUSED(ectx),                   \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))   \
+                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))   \
     {                                                                          \
       self_type::make(ckb, kernreq, ckb_offset,                                \
                       args_type(src_tp, src_arrmeta, kwds), kwds_type(kwds));  \
@@ -407,7 +407,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(                                                       \
           ckb, kernreq, ckb_offset, reinterpret_cast<data_type *>(static_data)->first,     \
@@ -425,7 +425,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,       \
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &tp_vars);               \
+                const std::map<std::string, ndt::type> &tp_vars);               \
   };                                                                           \
                                                                                \
   template <typename T, typename mem_func_type, typename... A, size_t... I,    \
@@ -491,7 +491,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(                                                       \
           ckb, kernreq, ckb_offset, reinterpret_cast<data_type *>(static_data)->first,     \
@@ -509,7 +509,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,       \
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &tp_vars);               \
+                const std::map<std::string, ndt::type> &tp_vars);               \
   }
 
     APPLY_MEMBER_FUNCTION_CK(kernel_request_host);
@@ -527,7 +527,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const ndt::type *src_tp, const char *const *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx,
                     const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
+                    const std::map<std::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
           static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -547,7 +547,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const ndt::type *src_tp, const char *const *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx,
                     const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
+                    const std::map<std::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
           static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -629,7 +629,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(                                                       \
           ckb, kernreq, ckb_offset,                                            \
@@ -646,7 +646,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 const ndt::type *src_tp, const char *const *src_arrmeta,       \
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &tp_vars);               \
+                const std::map<std::string, ndt::type> &tp_vars);               \
   };                                                                           \
                                                                                \
   template <typename func_type, typename... A, size_t... I, typename... K,     \
@@ -707,7 +707,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(                                                       \
           ckb, kernreq, ckb_offset,                                            \
@@ -724,7 +724,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),    \
                 const ndt::type *src_tp, const char *const *src_arrmeta,       \
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &tp_vars);               \
+                const std::map<std::string, ndt::type> &tp_vars);               \
   }
 
     APPLY_CALLABLE_CK(kernel_request_host);
@@ -741,7 +741,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const ndt::type *src_tp, const char *const *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx,
                     const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
+                    const std::map<std::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
           static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -811,7 +811,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
                                                                                \
       self_type::make(                                                       \
@@ -828,7 +828,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 const ndt::type *src_tp, const char *const *src_arrmeta,       \
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &tp_vars);               \
+                const std::map<std::string, ndt::type> &tp_vars);               \
   };                                                                           \
                                                                                \
   template <typename func_type, typename... A, size_t... I, typename... K,     \
@@ -889,7 +889,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
                                                                                \
       self_type::make(                                                       \
@@ -906,7 +906,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 const ndt::type *src_tp, const char *const *src_arrmeta,       \
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &tp_vars);               \
+                const std::map<std::string, ndt::type> &tp_vars);               \
   }
 
     APPLY_CALLABLE_CK(kernel_request_host);
@@ -923,7 +923,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const ndt::type *src_tp, const char *const *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx,
                     const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
+                    const std::map<std::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
           static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -942,7 +942,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                     const ndt::type *src_tp, const char *const *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx,
                     const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
+                    const std::map<std::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
           static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
@@ -1022,7 +1022,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,              
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(ckb, kernreq, ckb_offset,                              \
                         args_type(src_tp, src_arrmeta, kwds),                  \
@@ -1038,7 +1038,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 const ndt::type *src_tp, const char *const *src_arrmeta,       \
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &tp_vars);               \
+                const std::map<std::string, ndt::type> &tp_vars);               \
   };                                                                           \
                                                                                \
   template <typename func_type, typename... A, size_t... I, typename... K,     \
@@ -1100,7 +1100,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
         const ndt::type *src_tp, const char *const *src_arrmeta,               \
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), \
         const nd::array &kwds,                                                 \
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))           \
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))           \
     {                                                                          \
       self_type::make(ckb, kernreq, ckb_offset,                              \
                         args_type(src_tp, src_arrmeta, kwds),                  \
@@ -1116,7 +1116,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                 const ndt::type *src_tp, const char *const *src_arrmeta,       \
                 kernel_request_t kernreq, const eval::eval_context *ectx,      \
                 const nd::array &kwds,                                         \
-                const std::map<nd::string, ndt::type> &tp_vars);               \
+                const std::map<std::string, ndt::type> &tp_vars);               \
   }
 
     CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_host);
@@ -1133,7 +1133,7 @@ size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),   \
                     const ndt::type *src_tp, const char *const *src_arrmeta,
                     kernel_request_t kernreq, const eval::eval_context *ectx,
                     const nd::array &kwds,
-                    const std::map<nd::string, ndt::type> &tp_vars)
+                    const std::map<std::string, ndt::type> &tp_vars)
     {
       return instantiate_without_cuda_launch(
           static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,

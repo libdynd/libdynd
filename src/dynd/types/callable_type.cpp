@@ -315,7 +315,7 @@ intptr_t ndt::callable_type::make_assignment_kernel(
 
 bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp,
                                const char *candidate_arrmeta,
-                               std::map<nd::string, type> &tp_vars) const
+                               std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() != callable_type_id) {
     return false;
@@ -402,7 +402,7 @@ void ndt::callable_type::get_dynamic_type_properties(
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
       dst_tp =
@@ -430,7 +430,7 @@ void ndt::callable_type::get_dynamic_type_properties(
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
       dst_tp =
@@ -458,7 +458,7 @@ void ndt::callable_type::get_dynamic_type_properties(
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
       dst_tp = tp.extended<callable_type>()->get_kwd_names().get_type();
@@ -552,7 +552,7 @@ static array_preamble *function___call__(const array_preamble *params,
   af->instantiate(NULL, 0, NULL, &ckb, 0, args[0].get_type(),
                   args[0].get_arrmeta(), nargs, src_tp, dynd_arrmeta,
                   kernel_request_single, &eval::default_eval_context,
-                  nd::array(), std::map<nd::string, ndt::type>());
+                  nd::array(), std::map<std::string, ndt::type>());
   // Call the ckernel
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   char *in_ptrs[max_args];
@@ -589,7 +589,7 @@ nd::array callable_type_data::
 operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
            const char *const *src_arrmeta, char *const *src_data,
            const nd::array &kwds,
-           const std::map<nd::string, ndt::type> &tp_vars)
+           const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
   std::unique_ptr<char[]> data(new char[data_size]);
@@ -629,7 +629,7 @@ operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data,
            intptr_t nsrc, const ndt::type *src_tp,
            const char *const *src_arrmeta, char *const *src_data,
            const nd::array &kwds,
-           const std::map<nd::string, ndt::type> &tp_vars)
+           const std::map<std::string, ndt::type> &tp_vars)
 {
   std::unique_ptr<char[]> data(new char[data_size]);
   if (data_size > 0) {

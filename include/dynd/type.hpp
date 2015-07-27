@@ -325,13 +325,13 @@ namespace ndt {
      */
     bool match(const char *arrmeta, const ndt::type &candidate_tp,
                const char *candidate_arrmeta,
-               std::map<nd::string, ndt::type> &tp_vars) const;
+               std::map<std::string, ndt::type> &tp_vars) const;
 
     bool match(const char *arrmeta, const ndt::type &candidate_tp,
                const char *candidate_arrmeta) const;
 
     bool match(const ndt::type &candidate_tp,
-               std::map<nd::string, ndt::type> &tp_vars) const;
+               std::map<std::string, ndt::type> &tp_vars) const;
 
     bool match(const ndt::type &candidate_tp) const;
 

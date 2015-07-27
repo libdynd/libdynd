@@ -140,7 +140,7 @@ void ndt::pow_dimsym_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 
 bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
                                  const char *candidate_arrmeta,
-                                 std::map<nd::string, type> &tp_vars) const
+                                 std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() == typevar_constructed_type_id) {
     return candidate_tp.extended<typevar_constructed_type>()->match(
@@ -156,7 +156,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
           arrmeta, candidate_tp.extended<pow_dimsym_type>()->get_element_type(),
           NULL, tp_vars);
       type &tv_type =
-          tp_vars[candidate_tp.extended<pow_dimsym_type>()->get_exponent()];
+          tp_vars[candidate_tp.extended<pow_dimsym_type>()->get_exponent().str()];
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet
         tv_type = typevar_dim_type::make(
@@ -174,7 +174,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   } else if (candidate_tp.get_ndim() == 0) {
     if (get_element_type().get_ndim() == 0) {
       // Look up to see if the exponent typevar is already matched
-      type &tv_type = tp_vars[get_exponent()];
+      type &tv_type = tp_vars[get_exponent().str()];
       if (tv_type.is_null()) {
         // Fill in the exponent by the number of dimensions left
         tv_type = make_fixed_dim(0, type::make<void>());
@@ -195,7 +195,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   }
 
   // Look up to see if the exponent typevar is already matched
-  type &tv_type = tp_vars[get_exponent()];
+  type &tv_type = tp_vars[get_exponent().str()];
   intptr_t exponent;
   if (tv_type.is_null()) {
     // Fill in the exponent by the number of dimensions left
@@ -221,7 +221,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   // Get the base type
   type base_tp = get_base_type();
   if (base_tp.get_type_id() == typevar_dim_type_id) {
-    type &btv_type = tp_vars[base_tp.extended<typevar_dim_type>()->get_name()];
+    type &btv_type = tp_vars[base_tp.extended<typevar_dim_type>()->get_name().str()];
     if (btv_type.is_null()) {
       // We haven't seen this typevar yet, set it to the concrete's
       // dimension type

@@ -32,7 +32,7 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
               const char *const *src_arrmeta, kernel_request_t kernreq,
               const eval::eval_context *ectx,
               const nd::array &DYND_UNUSED(kwds),
-              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     try {
       assign_error_mode errmode =
@@ -67,7 +67,7 @@ struct property_kernel : nd::base_virtual_kernel<property_kernel> {
               const char *const *src_arrmeta, kernel_request_t kernreq,
               const eval::eval_context *ectx,
               const nd::array &DYND_UNUSED(kwds),
-              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     ndt::type prop_src_tp = *reinterpret_cast<ndt::type *>(static_data);
 
@@ -121,7 +121,7 @@ void nd::detail::validate_kwd_types(const ndt::callable_type *af_tp,
                                     std::vector<ndt::type> &kwd_tp,
                                     const std::vector<intptr_t> &available,
                                     const std::vector<intptr_t> &missing,
-                                    std::map<nd::string, ndt::type> &tp_vars)
+                                    std::map<std::string, ndt::type> &tp_vars)
 {
   for (intptr_t j : available) {
     if (j == -1) {
@@ -183,7 +183,7 @@ void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t npos)
 void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i,
                            const ndt::type &actual_tp,
                            const char *actual_arrmeta,
-                           std::map<nd::string, ndt::type> &tp_vars)
+                           std::map<std::string, ndt::type> &tp_vars)
 {
   if (af_tp->is_pos_variadic()) {
     return;

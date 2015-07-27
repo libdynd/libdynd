@@ -51,7 +51,7 @@ namespace nd {
                       intptr_t DYND_UNUSED(nsrc), const ndt::type
            *DYND_UNUSED(src_tp),
                       nd::array &kwds,
-                      const std::map<dynd::nd::string, ndt::type>
+                      const std::map<std::string, ndt::type>
            &DYND_UNUSED(tp_vars))
             {
               nd::array a = kwds.p("a");
@@ -75,7 +75,7 @@ namespace nd {
             const char *const *DYND_UNUSED(src_arrmeta),
             kernel_request_t kernreq,
             const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-            const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
         {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
@@ -128,7 +128,7 @@ namespace nd {
                       intptr_t DYND_UNUSED(nsrc), const ndt::type
            *DYND_UNUSED(src_tp),
                       nd::array &kwds,
-                      const std::map<dynd::nd::string, ndt::type>
+                      const std::map<std::string, ndt::type>
            &DYND_UNUSED(tp_vars))
             {
               nd::array a = kwds.p("a");
@@ -152,7 +152,7 @@ namespace nd {
             const char *const *DYND_UNUSED(src_arrmeta),
             kernel_request_t kernreq,
             const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-            const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
         {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
@@ -204,7 +204,7 @@ namespace nd {
                       intptr_t DYND_UNUSED(nsrc), const ndt::type
            *DYND_UNUSED(src_tp),
                       nd::array &kwds,
-                      const std::map<dynd::nd::string, ndt::type>
+                      const std::map<std::string, ndt::type>
            &DYND_UNUSED(tp_vars))
             {
               nd::array a = kwds.p("a");
@@ -228,7 +228,7 @@ namespace nd {
             const char *const *DYND_UNUSED(src_arrmeta),
             kernel_request_t kernreq,
             const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-            const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
         {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
@@ -269,7 +269,7 @@ namespace ndt {
 
     static type make()
     {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = ndt::type::make<R>();
 
       return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars, true);

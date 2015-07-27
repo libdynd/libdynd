@@ -405,7 +405,7 @@ void ndt::base_tuple_type::foreach_leading(const char *arrmeta, char *data,
 
 bool ndt::base_tuple_type::match(const char *arrmeta, const type &candidate_tp,
                                  const char *candidate_arrmeta,
-                                 std::map<nd::string, type> &tp_vars) const
+                                 std::map<std::string, type> &tp_vars) const
 {
   intptr_t candidate_field_count =
       candidate_tp.extended<base_tuple_type>()->get_field_count();

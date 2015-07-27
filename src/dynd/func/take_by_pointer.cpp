@@ -70,7 +70,7 @@ struct take_by_pointer_virtual_ck
               const char *const *src_arrmeta, kernel_request_t kernreq,
               const eval::eval_context *ectx,
               const nd::array &DYND_UNUSED(kwds),
-              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     intptr_t ndim = src_tp[0].get_ndim();
 
@@ -120,7 +120,7 @@ struct take_by_pointer_virtual_ck
                    size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                    ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
-                   const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     /*
         if (nsrc != 2) {

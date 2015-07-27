@@ -95,7 +95,7 @@ struct builtin_sum_reduction_kernel {
               kernel_request_t kernreq,
               const eval::eval_context *DYND_UNUSED(ectx),
               const nd::array &DYND_UNUSED(kwds),
-              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     if (dst_tp != src_tp[0]) {
       stringstream ss;
@@ -166,7 +166,7 @@ struct mean1d_kernel {
               const char *const *src_arrmeta, kernel_request_t kernreq,
               const eval::eval_context *DYND_UNUSED(ectx),
               const nd::array &DYND_UNUSED(kwds),
-              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     typedef double_mean1d_ck self_type;
     self_type *self = self_type::make(ckb, kernreq, ckb_offset);

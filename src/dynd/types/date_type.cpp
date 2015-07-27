@@ -132,7 +132,7 @@ intptr_t ndt::date_type::make_assignment_kernel(
       return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                     dst_arrmeta, 1, &src_tp, &src_arrmeta,
                                     kernreq, ectx, nd::array(),
-                                    std::map<nd::string, ndt::type>());
+                                    std::map<std::string, ndt::type>());
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
@@ -150,7 +150,7 @@ intptr_t ndt::date_type::make_assignment_kernel(
       return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                     dst_arrmeta, 1, &src_tp, &src_arrmeta,
                                     kernreq, ectx, nd::array(),
-                                    std::map<nd::string, ndt::type>());
+                                    std::map<std::string, ndt::type>());
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
@@ -231,10 +231,10 @@ void ndt::date_type::get_dynamic_type_functions(
     const std::pair<std::string, nd::callable> **out_functions,
     size_t *out_count) const
 {
-  static pair<string, nd::callable> date_type_functions[] = {
-      pair<string, nd::callable>("today",
-                                 nd::functional::apply(&fn_type_today, "self")),
-      pair<string, nd::callable>(
+  static pair<std::string, nd::callable> date_type_functions[] = {
+      pair<std::string, nd::callable>(
+          "today", nd::functional::apply(&fn_type_today, "self")),
+      pair<std::string, nd::callable>(
           "__construct__", nd::functional::apply(&fn_type_construct, "self",
                                                  "year", "month", "day")),
   };
