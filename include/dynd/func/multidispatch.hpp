@@ -162,9 +162,9 @@ namespace nd {
         return multidispatch(tp, begin_child, end_child,
                              [](const ndt::type &DYND_UNUSED(dst_tp),
                                 intptr_t nsrc, const ndt::type *src_tp) {
-                               std::vector<type_id_t> key(nsrc);
+                               std::vector<type_id_t> key;
                                for (std::intptr_t i = 0; i < nsrc; ++i) {
-                                 key[i] = src_tp[i].get_type_id();
+                                 key.push_back(src_tp[i].get_type_id());
                                }
                                return key;
                              },
@@ -178,44 +178,6 @@ namespace nd {
                              const std::vector<intptr_t> &permutation,
                              const OnNullType &on_null)
       {
-        switch (permutation.size()) {
-        case 0:
-          throw std::runtime_error(
-              "cannot multidispatch on a function with no arguments");
-        case 1:
-          return multidispatch(
-              tp, begin_child, end_child,
-              [permutation](const ndt::type &DYND_UNUSED(dst_tp),
-                            intptr_t DYND_UNUSED(nsrc),
-                            const ndt::type *src_tp) {
-                return (src_tp + permutation[0])->get_type_id();
-              },
-              on_null);
-        case 2:
-          return multidispatch(
-              tp, begin_child, end_child,
-              [permutation](const ndt::type &DYND_UNUSED(dst_tp),
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp)
-                  -> std::array<type_id_t, 2> {
-                return {{(src_tp + permutation[0])->get_type_id(),
-                         (src_tp + permutation[1])->get_type_id()}};
-              },
-              on_null);
-        case 3:
-          return multidispatch(
-              tp, begin_child, end_child,
-              [permutation](const ndt::type &DYND_UNUSED(dst_tp),
-                            intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp)
-                  -> std::array<type_id_t, 3> {
-                return {{(src_tp + permutation[0])->get_type_id(),
-                         (src_tp + permutation[1])->get_type_id(),
-                         (src_tp + permutation[2])->get_type_id()}};
-              },
-              on_null);
-        default:
-          break;
-        }
-
         return multidispatch(tp, begin_child, end_child,
                              [permutation](const ndt::type &DYND_UNUSED(dst_tp),
                                            std::intptr_t DYND_UNUSED(nsrc),
@@ -299,6 +261,85 @@ namespace nd {
     {
       return multidispatch(tp, std::begin(children), std::end(children),
                            default_child);
+    }
+
+    template <typename IteratorType>
+    callable multidispatch(const ndt::type &tp, const IteratorType &begin_child,
+                           const IteratorType &end_child,
+                           const std::vector<intptr_t> &permutation)
+    {
+      return detail::multidispatch(tp, begin_child, end_child, permutation,
+                                   []() -> callable & {
+        std::stringstream ss;
+        ss << "no viable overload for nd::functional::multidispatch "
+              "with argument types";
+        throw std::runtime_error(ss.str());
+      });
+    }
+
+    template <typename IteratorType>
+    callable multidispatch(const IteratorType &begin_child,
+                           const IteratorType &end_child,
+                           const std::vector<intptr_t> &permutation)
+    {
+      return multidispatch(ndt::type("(...) -> Any"), begin_child, end_child,
+                           permutation);
+    }
+
+    inline callable
+    multidispatch(const std::initializer_list<callable> &children,
+                  const std::vector<intptr_t> &permutation)
+    {
+      return multidispatch(std::begin(children), std::end(children),
+                           permutation);
+    }
+
+    inline callable
+    multidispatch(const ndt::type &tp,
+                  const std::initializer_list<callable> &children,
+                  const std::vector<intptr_t> &permutation)
+    {
+      return multidispatch(tp, std::begin(children), std::end(children),
+                           permutation);
+    }
+
+    template <typename IteratorType>
+    callable multidispatch(const ndt::type &tp, const IteratorType &begin_child,
+                           const IteratorType &end_child,
+                           const callable &default_child,
+                           const std::vector<intptr_t> &permutation)
+    {
+      return detail::multidispatch(tp, begin_child, end_child, permutation,
+                                   [default_child]() -> callable & {
+        return const_cast<callable &>(default_child);
+      });
+    }
+
+    template <typename IteratorType>
+    callable multidispatch(const IteratorType &begin_child,
+                           const IteratorType &end_child,
+                           const callable &default_child,
+                           const std::vector<intptr_t> &permutation)
+    {
+      return multidispatch(ndt::type("(...) -> Any"), begin_child, end_child,
+                           default_child, permutation);
+    }
+
+    inline callable
+    multidispatch(const std::initializer_list<callable> &children,
+                  const callable &default_child,
+                  const std::vector<intptr_t> &permutation)
+    {
+      return multidispatch(std::begin(children), std::end(children),
+                           default_child, permutation);
+    }
+
+    inline callable multidispatch(
+        const ndt::type &tp, const std::initializer_list<callable> &children,
+        const callable &default_child, const std::vector<intptr_t> &permutation)
+    {
+      return multidispatch(tp, std::begin(children), std::end(children),
+                           default_child, permutation);
     }
 
   } // namespace dynd::nd::functional

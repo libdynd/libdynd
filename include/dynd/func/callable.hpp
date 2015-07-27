@@ -756,7 +756,7 @@ namespace nd {
       * Constructor from an nd::array. Validates that the input
       * has "callable" type.
       */
-    callable(const nd::array &rhs);
+    explicit callable(const nd::array &rhs);
 
     callable &operator=(const callable &rhs)
     {

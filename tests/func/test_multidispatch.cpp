@@ -149,7 +149,6 @@ TEST(Multidispatch, Unary)
   EXPECT_THROW(func(float16()), runtime_error);
 }
 
-/*
 TEST(Multidispatch, UnaryWithPermutation)
 {
   nd::callable func0 = nd::functional::apply([](int32) { return 0; });
@@ -163,7 +162,6 @@ TEST(Multidispatch, UnaryWithPermutation)
   EXPECT_THROW(func(int64()), runtime_error);
   EXPECT_THROW(func(float16()), runtime_error);
 }
-*/
 
 TEST(Multidispatch, Binary)
 {
@@ -199,7 +197,6 @@ TEST(Multidispatch, Binary)
   EXPECT_EQ(5, func(float64(), float64()));
 }
 
-/*
 TEST(Multidispatch, BinaryWithPermutation)
 {
   nd::callable func0 = nd::functional::apply([](int32, int32) { return 0; });
@@ -213,4 +210,3 @@ TEST(Multidispatch, BinaryWithPermutation)
   EXPECT_THROW(func(int32(), int64()), runtime_error);
   EXPECT_THROW(func(int32(), float16()), runtime_error);
 }
-*/
