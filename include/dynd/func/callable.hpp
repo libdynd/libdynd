@@ -137,6 +137,8 @@ namespace nd {
         old_index_proxy<I>::template get_arrmeta(m_arrmeta, m_values);
       }
 
+      std::size_t size() const { return sizeof...(A); }
+
       struct {
         args *self;
 
@@ -153,9 +155,9 @@ namespace nd {
 
           check_arg(af_tp, I, tp, arrmeta, tp_vars);
 
-          src_tp[I] = tp;
-          src_arrmeta[I] = arrmeta;
-          src_data[I] = data_of(value);
+          src_tp.push_back(tp);
+          src_arrmeta.push_back(arrmeta);
+          src_data.push_back(data_of(value));
         }
 
         void operator()(const ndt::callable_type *af_tp,
@@ -176,6 +178,8 @@ namespace nd {
     template <>
     class args<> {
     public:
+      std::size_t size() const { return 0; }
+
       void validate_types(
           const ndt::callable_type *af_tp,
           std::vector<ndt::type> &DYND_UNUSED(src_tp),
@@ -196,6 +200,8 @@ namespace nd {
     public:
       args(intptr_t size, nd::array *values) : m_size(size), m_values(values) {}
 
+      std::size_t size() const { return m_size; }
+
       void validate_types(const ndt::callable_type *af_tp,
                           std::vector<ndt::type> &src_tp,
                           std::vector<const char *> &src_arrmeta,
@@ -211,9 +217,9 @@ namespace nd {
 
           check_arg(af_tp, i, tp, arrmeta, tp_vars);
 
-          src_tp[i] = tp;
-          src_arrmeta[i] = arrmeta;
-          src_data[i] = data_of(value);
+          src_tp.push_back(tp);
+          src_arrmeta.push_back(arrmeta);
+          src_data.push_back(data_of(value));
         }
       }
     };
@@ -237,6 +243,8 @@ namespace nd {
       {
       }
 
+      std::size_t size() const { return m_size; }
+
       void validate_types(const ndt::callable_type *af_tp,
                           std::vector<ndt::type> &src_tp,
                           std::vector<const char *> &src_arrmeta,
@@ -251,9 +259,9 @@ namespace nd {
 
           check_arg(af_tp, i, tp, arrmeta, tp_vars);
 
-          src_tp[i] = tp;
-          src_arrmeta[i] = arrmeta;
-          src_data[i] = m_datas[i];
+          src_tp.push_back(tp);
+          src_arrmeta.push_back(arrmeta);
+          src_data.push_back(m_datas[i]);
         }
       }
     };
@@ -783,6 +791,13 @@ namespace nd {
 
     const ndt::type &get_array_type() const { return m_value.get_type(); }
 
+    const ndt::type &get_ret_type() const
+    {
+      return get_type()->get_return_type();
+    }
+
+    const array &get_arg_types() const { return get_type()->get_pos_types(); }
+
     operator nd::array() const { return m_value; }
 
     void swap(nd::callable &rhs) { m_value.swap(rhs.m_value); }
@@ -802,9 +817,9 @@ namespace nd {
       kwds.validate_names(self_tp, dst, kwd_tp, available, missing);
 
       std::map<nd::string, ndt::type> tp_vars;
-      std::vector<ndt::type> arg_tp(self_tp->get_npos());
-      std::vector<const char *> arg_arrmeta(self_tp->get_npos());
-      std::vector<char *> arg_data(self_tp->get_npos());
+      std::vector<ndt::type> arg_tp;
+      std::vector<const char *> arg_arrmeta;
+      std::vector<char *> arg_data;
       // Validate the array arguments
       args.validate_types(self_tp, arg_tp, arg_arrmeta, arg_data, tp_vars);
 

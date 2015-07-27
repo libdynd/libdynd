@@ -280,18 +280,3 @@ nd::callable nd::functional::old_multidispatch(intptr_t naf,
   return callable::make<old_multidispatch_ck>(
       ndt::make_generic_funcproto(nargs), std::move(sorted_af), 0);
 }
-
-nd::callable
-nd::functional::multidispatch(const ndt::type &self_tp,
-                              const std::initializer_list<callable> &children,
-                              const callable &default_child)
-{
-  switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
-  case 1:
-    return multidispatch<1>(self_tp, children, default_child);
-  case 2:
-    return multidispatch<2>(self_tp, children, default_child);
-  default:
-    throw std::runtime_error("error");
-  }
-}

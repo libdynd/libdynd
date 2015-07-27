@@ -18,14 +18,28 @@ namespace nd {
     static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
     static callable default_child;
 
+    static callable &overload(const ndt::type &dst_tp, const ndt::type &src0_tp)
+    {
+      return children[dst_tp.get_type_id()][src0_tp.get_type_id()];
+    }
+
     static callable make()
     {
       for (const auto &pair : T::make_children()) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
 
-      return functional::multidispatch(dynd::ndt::type("(Any) -> Any"),
-                                       children, default_child, {-1, 0});
+      return functional::multidispatch(
+          ndt::type("(Any) -> Any"),
+          [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+             const ndt::type *src_tp) -> callable & {
+            callable &child = overload(dst_tp, src_tp[0]);
+            if (child.is_null()) {
+              throw std::runtime_error("assignment error");
+            }
+            return child;
+          },
+          0);
     }
   };
 
