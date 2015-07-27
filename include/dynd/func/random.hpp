@@ -11,6 +11,8 @@ namespace nd {
   namespace random {
 
     extern struct uniform : declfunc<uniform> {
+      static callable children[DYND_TYPE_ID_MAX + 1];
+
       static callable make();
     } uniform;
 

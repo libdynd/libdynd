@@ -185,6 +185,10 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i,
                            const char *actual_arrmeta,
                            std::map<nd::string, ndt::type> &tp_vars)
 {
+  if (af_tp->is_pos_variadic()) {
+    return;
+  }
+
   ndt::type expected_tp = af_tp->get_pos_type(i);
   if (!expected_tp.match(NULL, actual_tp.value_type(), actual_arrmeta,
                          tp_vars)) {

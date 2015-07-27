@@ -127,147 +127,86 @@ TEST(MultiDispatchCallable, Values)
   */
 }
 
-/**
-TODO: This test broken when the order of resolve_option_values and
-      resolve_dst_type changed. It should be fixed when we sort out
-multidispatch.
-
-TEST(MultiDispatchCallable, Dims)
+TEST(Multidispatch, Unary)
 {
-  vector<nd::callable> funcs;
-  // Instead of making a multidispatch callable, then lifting it,
-  // we lift multiple callables, then make a multidispatch callable from them.
-  funcs.push_back(nd::functional::elwise(nd::functional::apply(&manip0)));
-  funcs.push_back(nd::functional::elwise(nd::functional::apply(&manip1)));
-  nd::callable af = nd::functional::multidispatch(funcs.size(), &funcs[0]);
-  nd::array a, b, c;
+  nd::callable func0 = nd::functional::apply([](int32) { return 0; });
+  nd::callable func1 = nd::functional::apply([](float32) { return 1; });
+  nd::callable func2 = nd::functional::apply([](float64) { return 2; });
 
-  // Exactly match (int, int) -> real
-  a = parse_json("3 * int", "[1, 3, 5]");
-  b = parse_json("3 * int", "[2, 5, 1]");
-  c = af(a, b);
-  EXPECT_EQ(ndt::type("3 * float64"), c.get_type());
-  EXPECT_JSON_EQ_ARR("[3, 8, 6]", c);
-}
-*/
+  nd::callable func = nd::functional::multidispatch({func0, func1, func2});
+  EXPECT_EQ(0, func(int32()));
+  EXPECT_EQ(1, func(float32()));
+  EXPECT_EQ(2, func(float64()));
+  EXPECT_THROW(func(int64()), runtime_error);
+  EXPECT_THROW(func(float16()), runtime_error);
 
-template <typename T>
-T tester(T x, T y)
-{
-  return x + y;
+  func = nd::functional::multidispatch(ndt::type("(Any) -> Any"),
+                                       {func0, func1, func2});
+  EXPECT_EQ(0, func(int32()));
+  EXPECT_EQ(1, func(float32()));
+  EXPECT_EQ(2, func(float64()));
+  EXPECT_THROW(func(int64()), runtime_error);
+  EXPECT_THROW(func(float16()), runtime_error);
 }
 
-/*
-TEST(MultidispatchCallable, Untitled)
+TEST(Multidispatch, UnaryWithPermutation)
 {
-  nd::callable af = nd::functional::multidispatch<2>(
-      ndt::type("(Any, Any) -> Any"),
-      {nd::functional::apply(&tester<int>),
-       nd::functional::apply(&tester<double>),
-       nd::functional::apply(&tester<int>)});
+  nd::callable func0 = nd::functional::apply([](int32) { return 0; });
+  nd::callable func1 = nd::functional::apply([](float32) { return 1; });
+  nd::callable func2 = nd::functional::apply([](float64) { return 2; });
 
-  std::cout << af << std::endl;
-  std::cout << af(2.0, 3.5) << std::endl;
-  std::cout << af(1, 2) << std::endl;
-
-  std::exit(-1);
-}
-*/
-
-/*
-
-TEST(Multidispatch, CArray)
-{
-  nd::callable children[DYND_TYPE_ID_MAX];
-  children[float64_type_id] = nd::functional::apply(&func<double>);
-
-  nd::callable func = nd::functional::multidispatch(ndt::type("(Any) -> Any"),
-                                                   children, nd::callable());
-  func(3.0);
+  nd::callable func = nd::functional::multidispatch({func0, func1, func2}, {0});
+  EXPECT_EQ(0, func(int32()));
+  EXPECT_EQ(1, func(float32()));
+  EXPECT_EQ(2, func(float64()));
+  EXPECT_THROW(func(int64()), runtime_error);
+  EXPECT_THROW(func(float16()), runtime_error);
 }
 
-TEST(Multidispatch, Vector)
+TEST(Multidispatch, Binary)
 {
-  vector<nd::callabe> children(DYND_TYPE_ID_MAX);
-  children[float64_type_id] = nd::functional::apply(&func<double>);
+  nd::callable func0 = nd::functional::apply([](int32, int32) { return 0; });
+  nd::callable func1 = nd::functional::apply([](int32, float32) { return 1; });
+  nd::callable func2 = nd::functional::apply([](int32, float64) { return 2; });
+  nd::callable func3 = nd::functional::apply([](float32, int32) { return 3; });
+  nd::callable func4 =
+      nd::functional::apply([](float64, float32) { return 4; });
+  nd::callable func5 =
+      nd::functional::apply([](float64, float64) { return 5; });
 
-  nd::callable func = nd::functional::multidispatch<1>(ndt::type("(Any) ->
-Any"),
-                                                      std::move(children),
-nd::callable());
-  children.clear();
+  nd::callable func =
+      nd::functional::multidispatch({func0, func1, func2, func3, func4, func5});
+  EXPECT_EQ(0, func(int32(), int32()));
+  EXPECT_EQ(1, func(int32(), float32()));
+  EXPECT_EQ(2, func(int32(), float64()));
+  EXPECT_EQ(3, func(float32(), int32()));
+  EXPECT_EQ(4, func(float64(), float32()));
+  EXPECT_EQ(5, func(float64(), float64()));
+  EXPECT_THROW(func(int32()), runtime_error);
+  EXPECT_THROW(func(float32()), runtime_error);
+  EXPECT_THROW(func(int64()), runtime_error);
 
-  std::cout << func(3.0) << std::endl;
-  std::cout << func << std::endl;
-
-  std::exit(-1);
-}
-*/
-
-template <typename A0, typename A1>
-typename std::common_type<A0, A1>::type func(A0 x, A1 y)
-{
-  return x + y;
-}
-
-TEST(Multidispatch, Map)
-{
-  //  std::array<type_id_t, 2> key;
-
-  map<array<type_id_t, 2>, nd::callable> children;
-  children[{{float64_type_id, float32_type_id}}] =
-      nd::functional::apply(&func<double, float>);
-  children[{{int32_type_id, int32_type_id}}] =
-      nd::functional::apply(&func<int32, int32>);
-
-  nd::callable func = nd::functional::multidispatch<2>(
-      ndt::type("(Any, Any) -> Any"), children, nd::callable());
-
-  //  std::cout << "made" << std::endl;
-
-  EXPECT_EQ(5.5, func(2.0, 3.5f));
-  EXPECT_EQ(3, func(1, 2));
+  func =
+      nd::functional::multidispatch(ndt::type("(Any, Any) -> Any"),
+                                    {func0, func1, func2, func3, func4, func5});
+  EXPECT_EQ(0, func(int32(), int32()));
+  EXPECT_EQ(1, func(int32(), float32()));
+  EXPECT_EQ(2, func(int32(), float64()));
+  EXPECT_EQ(3, func(float32(), int32()));
+  EXPECT_EQ(4, func(float64(), float32()));
+  EXPECT_EQ(5, func(float64(), float64()));
 }
 
-/*
-TEST(Multidispatch, Map)
+TEST(Multidispatch, BinaryWithPermutation)
 {
-  std::cout << has_key_type<std::map<int, int>>::value << std::endl;
-  std::cout << has_key_type<std::vector<int>>::value << std::endl;
-  std::exit(-1);
+  nd::callable func0 = nd::functional::apply([](int32, int32) { return 0; });
+  nd::callable func1 = nd::functional::apply([](int32, float32) { return 1; });
+  nd::callable func2 = nd::functional::apply([](int32, float64) { return 2; });
+
+  nd::callable func = nd::functional::multidispatch({func0, func1, func2}, {1});
+  EXPECT_EQ(0, func(int32(), int32()));
+  EXPECT_EQ(1, func(int32(), float32()));
+  EXPECT_EQ(2, func(int32(), float64()));
+  EXPECT_THROW(func(int32(), int64()), runtime_error);
+  EXPECT_THROW(func(int32(), float16()), runtime_error);
 }
-*/
-
-#ifdef DYND_CUDA
-
-/*
-template <typename T>
-struct callable0 {
-  DYND_CUDA_HOST_DEVICE T operator()(T x, T y) const { return x + y; }
-};
-
-TEST(MultidispatchFunc, CudaHostDevice)
-{
-  nd::callable af = nd::functional::multidispatch(
-      ndt::type("(M[R], M[R]) -> M[R]"),
-      {nd::functional::apply<callable0<int>>(),
-       nd::functional::apply<kernel_request_cuda_device, callable0<int>>()});
-
-  std::cout << af(1, 2) << std::endl;
-  std::cout << af(nd::array(1).to_cuda_device(), nd::array(2).to_cuda_device())
-            << std::endl;
-
-  nd::callable af1 = nd::functional::elwise(af);
-  std::cout << af1 << std::endl;
-
-  nd::array a = nd::random::uniform(kwds("dst_tp", ndt::type("10 * int32")));
-  nd::array b = nd::random::uniform(kwds("dst_tp", ndt::type("10 * int32")));
-
-  std::cout << af1(a, b) << std::endl;
-  std::cout << af1(a.to_cuda_device(), b.to_cuda_device()) << std::endl;
-
-//  std::exit(-1);
-}
-*/
-
-#endif

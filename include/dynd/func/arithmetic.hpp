@@ -15,17 +15,22 @@ namespace nd {
   template <typename F, template <type_id_t...> class K, int N>
   struct arithmetic_operator;
 
-  template <typename F, template <type_id_t> class K>
-  struct arithmetic_operator<F, K, 1> : declfunc<F> {
+  template <typename FuncType, template <type_id_t> class KernelType>
+  struct arithmetic_operator<FuncType, KernelType, 1> : declfunc<FuncType> {
     static callable children[DYND_TYPE_ID_MAX + 1];
-    static callable default_child;
+
+    static callable &overload(const ndt::type &src0_tp)
+    {
+      return children[src0_tp.get_type_id()];
+    }
 
     static callable make()
     {
-      const callable self = functional::call<F>(ndt::type("(Any) -> Any"));
+      const callable self =
+          functional::call<FuncType>(ndt::type("(Any) -> Any"));
 
       for (const std::pair<const type_id_t, callable> &pair :
-           callable::make_all<K, numeric_type_ids>(0)) {
+           callable::make_all<KernelType, numeric_type_ids>(0)) {
         children[pair.first] = pair.second;
       }
 
@@ -35,34 +40,65 @@ namespace nd {
         children[i0] = functional::elwise(child_tp, self);
       }
 
-      return functional::multidispatch(self.get_array_type(), children,
-                                       default_child);
+      return functional::multidispatch(
+          self.get_array_type(),
+          [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+             const ndt::type *src_tp) -> callable & {
+            callable &child = overload(src_tp[0]);
+            if (child.is_null()) {
+              throw std::runtime_error(FuncType::what(src_tp[0]));
+            }
+
+            return child;
+          },
+          0);
     }
   };
 
-  template <typename F, template <type_id_t> class K>
-  callable arithmetic_operator<F, K, 1>::children[DYND_TYPE_ID_MAX + 1];
-
-  template <typename F, template <type_id_t> class K>
-  callable arithmetic_operator<F, K, 1>::default_child;
+  template <typename FuncType, template <type_id_t> class KernelType>
+  callable arithmetic_operator<FuncType, KernelType,
+                               1>::children[DYND_TYPE_ID_MAX + 1];
 
   extern struct plus : arithmetic_operator<plus, plus_kernel, 1> {
+    static std::string what(const ndt::type &src0_type)
+    {
+      std::stringstream ss;
+      ss << "no viable overload for dynd::nd::plus with argument type \"";
+      ss << src0_type;
+      ss << "\"";
+      return ss.str();
+    }
   } plus;
 
   extern struct minus : arithmetic_operator<minus, minus_kernel, 1> {
+    static std::string what(const ndt::type &src0_type)
+    {
+      std::stringstream ss;
+      ss << "no viable overload for dynd::nd::minus with argument type \"";
+      ss << src0_type;
+      ss << "\"";
+      return ss.str();
+    }
   } minus;
 
-  template <typename F, template <type_id_t, type_id_t> class K>
-  struct arithmetic_operator<F, K, 2> : declfunc<F> {
+  template <typename FuncType, template <type_id_t, type_id_t> class KernelType>
+  struct arithmetic_operator<FuncType, KernelType, 2> : declfunc<FuncType> {
     static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
-    static callable default_child;
+
+    static callable &overload(const ndt::type &src0_tp,
+                              const ndt::type &src1_tp)
+    {
+      return children[src0_tp.get_type_id()][src1_tp.get_type_id()];
+    }
 
     static callable make()
     {
-      callable self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
+      callable self =
+          functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
 
       for (const std::pair<std::array<type_id_t, 2>, callable> &pair :
-           callable::make_all<K, numeric_type_ids, numeric_type_ids>(0)) {
+           callable::make_all<KernelType, numeric_type_ids, numeric_type_ids>(
+               0)) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
 
@@ -85,28 +121,64 @@ namespace nd {
         }
       }
 
-      return functional::multidispatch(self.get_array_type(), children,
-                                       default_child);
+      return functional::multidispatch(
+          self.get_array_type(),
+          [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+             const ndt::type *src_tp) -> callable & {
+            callable &child = overload(src_tp[0], src_tp[1]);
+            if (child.is_null()) {
+              throw std::runtime_error(FuncType::what(src_tp[0], src_tp[1]));
+            }
+
+            return child;
+          },
+          0);
     }
   };
 
-  template <typename T, template <type_id_t, type_id_t> class K>
-  callable arithmetic_operator<T, K, 2>::children[DYND_TYPE_ID_MAX +
-                                                  1][DYND_TYPE_ID_MAX + 1];
-
-  template <typename T, template <type_id_t, type_id_t> class K>
-  callable arithmetic_operator<T, K, 2>::default_child;
+  template <typename FuncType, template <type_id_t, type_id_t> class KernelType>
+  callable arithmetic_operator<FuncType, KernelType,
+                               2>::children[DYND_TYPE_ID_MAX +
+                                            1][DYND_TYPE_ID_MAX + 1];
 
   extern struct add : arithmetic_operator<add, add_kernel, 2> {
+    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
+    {
+      std::stringstream ss;
+      ss << "no viable overload for dynd::nd::add with argument types \""
+         << src0_tp << "\" and \"" << src1_tp << "\"";
+      return ss.str();
+    }
   } add;
 
   extern struct subtract : arithmetic_operator<subtract, subtract_kernel, 2> {
+    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
+    {
+      std::stringstream ss;
+      ss << "no viable overload for dynd::nd::subtract with argument types \""
+         << src0_tp << "\" and \"" << src1_tp << "\"";
+      return ss.str();
+    }
   } subtract;
 
   extern struct multiply : arithmetic_operator<multiply, multiply_kernel, 2> {
+    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
+    {
+      std::stringstream ss;
+      ss << "no viable overload for dynd::nd::multiply with argument types \""
+         << src0_tp << "\" and \"" << src1_tp << "\"";
+      return ss.str();
+    }
   } multiply;
 
   extern struct divide : arithmetic_operator<divide, divide_kernel, 2> {
+    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
+    {
+      std::stringstream ss;
+      ss << "no viable overload for dynd::nd::divide with argument types \""
+         << src0_tp << "\" and \"" << src1_tp << "\"";
+      return ss.str();
+    }
   } divide;
 
 } // namespace dynd::nd
