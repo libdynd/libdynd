@@ -202,7 +202,7 @@ intptr_t ndt::base_struct_type::apply_linear_index(
 
 bool ndt::base_struct_type::match(const char *arrmeta, const type &candidate_tp,
                                   const char *candidate_arrmeta,
-                                  std::map<nd::string, type> &tp_vars) const
+                                  std::map<std::string, type> &tp_vars) const
 {
   intptr_t candidate_field_count =
       candidate_tp.extended<base_struct_type>()->get_field_count();

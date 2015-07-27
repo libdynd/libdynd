@@ -60,7 +60,7 @@ namespace kernels {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       const std::pair<nd::callable, std::vector<intptr_t>> *data =
           reinterpret_cast<std::pair<nd::callable, std::vector<intptr_t>> *>(
@@ -154,7 +154,7 @@ namespace kernels {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       const std::pair<nd::callable, std::vector<intptr_t>> *data =
           reinterpret_cast<std::pair<nd::callable, std::vector<intptr_t>> *>(

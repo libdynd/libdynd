@@ -84,7 +84,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
     type src_tp[1] = {type(this, true)};
     af.get()->instantiate(NULL, 0, NULL, &ckb, 0, type::make<bool1>(), NULL, 1,
                           src_tp, &arrmeta, kernel_request_single, ectx,
-                          nd::array(), std::map<nd::string, type>());
+                          nd::array(), std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<expr_single_t>()(&result, const_cast<char **>(&data),
@@ -139,7 +139,7 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data,
     nd::callable &af = get_assign_na();
     af.get()->instantiate(NULL, 0, NULL, &ckb, 0, type(this, true), arrmeta, 0,
                           NULL, NULL, kernel_request_single, ectx, nd::array(),
-                          std::map<nd::string, type>());
+                          std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<expr_single_t>()(data, NULL, ckp);
   }
@@ -320,7 +320,7 @@ intptr_t ndt::option_type::make_assignment_kernel(
 
 bool ndt::option_type::match(const char *arrmeta, const type &candidate_tp,
                              const char *candidate_arrmeta,
-                             std::map<nd::string, type> &tp_vars) const
+                             std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() != option_type_id) {
     return false;

@@ -114,7 +114,7 @@ static intptr_t instantiate_int_multiply_and_offset_callable(
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
@@ -158,7 +158,7 @@ static intptr_t instantiate_int_offset_and_divide_callable(
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
     const eval::eval_context *DYND_UNUSED(ectx),
     const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef int_offset_and_divide_ck<Tsrc, Tdst> self_type;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);

@@ -81,7 +81,7 @@ intptr_t dynd::make_assignment_kernel(
       return child.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, 1, &src_tp, &src_arrmeta,
                                       kernreq, ectx, nd::array(),
-                                      std::map<nd::string, ndt::type>());
+                                      std::map<std::string, ndt::type>());
     } else {
       return src_tp.extended()->make_assignment_kernel(
           ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
@@ -161,7 +161,7 @@ intptr_t dynd::make_cuda_device_builtin_type_assignment_kernel(
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   assign_error_mode errmode = ectx->cuda_device_errmode;
 
@@ -203,7 +203,7 @@ intptr_t dynd::make_cuda_to_device_builtin_type_assignment_kernel(
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   assign_error_mode errmode = ectx->errmode;
 
@@ -235,7 +235,7 @@ intptr_t dynd::make_cuda_from_device_builtin_type_assignment_kernel(
     const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &DYND_UNUSED(kwds),
-    const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   assign_error_mode errmode = ectx->errmode;
 

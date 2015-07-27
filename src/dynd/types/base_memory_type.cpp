@@ -154,7 +154,7 @@ void ndt::base_memory_type::arrmeta_destruct(char *arrmeta) const
 
 bool ndt::base_memory_type::match(const char *arrmeta, const type &candidate_tp,
                                   const char *candidate_arrmeta,
-                                  std::map<nd::string, type> &tp_vars) const
+                                  std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_kind() != memory_kind) {
     return false;

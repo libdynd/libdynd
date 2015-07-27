@@ -147,7 +147,7 @@ intptr_t ndt::time_type::make_assignment_kernel(
       return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                     dst_arrmeta, 1, &src_tp, &src_arrmeta,
                                     kernreq, ectx, nd::array(),
-                                    std::map<nd::string, ndt::type>());
+                                    std::map<std::string, ndt::type>());
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(
@@ -165,7 +165,7 @@ intptr_t ndt::time_type::make_assignment_kernel(
       return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                     dst_arrmeta, 1, &src_tp, &src_arrmeta,
                                     kernreq, ectx, nd::array(),
-                                    std::map<nd::string, ndt::type>());
+                                    std::map<std::string, ndt::type>());
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,

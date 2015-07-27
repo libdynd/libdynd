@@ -173,7 +173,7 @@ namespace nd {
                   intptr_t DYND_UNUSED(nsrc), const ndt::type
        *DYND_UNUSED(src_tp),
                   nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type>
+                  const std::map<std::string, ndt::type>
        &DYND_UNUSED(tp_vars))
         {
         }
@@ -186,7 +186,7 @@ namespace nd {
         intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
         const char *const *src_arrmeta, kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       int flags;
       if (kwds.p("flags").is_missing()) {
@@ -258,7 +258,7 @@ namespace nd {
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, const nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape;
       try {
@@ -284,7 +284,7 @@ namespace nd {
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *src_tp, const nd::array &kwds,
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds.p("shape");
       if (shape.is_missing()) {
@@ -303,7 +303,7 @@ namespace nd {
     static void resolve_dst_type(char *static_data, size_t data_size,
                                  char *data, ndt::type &dst_tp, intptr_t nsrc,
                                  const ndt::type *src_tp, const nd::array &kwds,
-                                 const std::map<nd::string, ndt::type> &tp_vars)
+                                 const std::map<std::string, ndt::type> &tp_vars)
     {
       resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(
           static_data, data_size, data, dst_tp, nsrc, src_tp, kwds, tp_vars);

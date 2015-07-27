@@ -33,7 +33,7 @@ namespace nd {
      */
     inline bool
     can_implicitly_convert(const ndt::type &src, const ndt::type &dst,
-                           std::map<nd::string, ndt::type> &typevars)
+                           std::map<std::string, ndt::type> &typevars)
     {
       if (src == dst) {
         return true;
@@ -72,7 +72,7 @@ namespace nd {
       resolve_dst_type(char *static_data, size_t data_size, char *data,
                        ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const nd::array &kwds,
-                       const std::map<nd::string, ndt::type> &tp_vars);
+                       const std::map<std::string, ndt::type> &tp_vars);
 
       static intptr_t
       instantiate(char *static_data, size_t data_size, char *data, void *ckb,
@@ -81,7 +81,7 @@ namespace nd {
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars);
+                  const std::map<std::string, ndt::type> &tp_vars);
     };
 
     template <typename DispatcherType>
@@ -91,7 +91,7 @@ namespace nd {
       resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
                        char *data, ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const dynd::nd::array &kwds,
-                       const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                       const std::map<std::string, ndt::type> &tp_vars)
       {
         DispatcherType &dispatcher =
             **reinterpret_cast<std::unique_ptr<DispatcherType> *>(static_data);
@@ -114,7 +114,7 @@ namespace nd {
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const dynd::nd::array &kwds,
-                  const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         DispatcherType &dispatcher =
             **reinterpret_cast<std::unique_ptr<DispatcherType> *>(static_data);

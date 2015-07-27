@@ -729,7 +729,7 @@ void ndt::fixed_dim_type::reorder_default_constructed_strides(
 
 bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp,
                                 const char *candidate_arrmeta,
-                                std::map<nd::string, type> &tp_vars) const
+                                std::map<std::string, type> &tp_vars) const
 {
   switch (candidate_tp.get_type_id()) {
   case fixed_dim_type_id:
@@ -770,7 +770,8 @@ void ndt::fixed_dim_type::get_dynamic_type_properties(
           "element_type",
           nd::functional::apply(
               [](type self) {
-                return type(self.extended<fixed_dim_type>()->get_element_type());
+                return type(
+                    self.extended<fixed_dim_type>()->get_element_type());
               },
               "self"))};
 

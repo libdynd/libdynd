@@ -15,7 +15,7 @@ intptr_t nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   intptr_t root_ckb_offset = ckb_offset;
   auto bsd = src_tp->extended<ndt::base_tuple_type>();
@@ -61,7 +61,7 @@ intptr_t nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars)
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   intptr_t root_ckb_offset = ckb_offset;
   auto bsd = src_tp->extended<ndt::base_tuple_type>();

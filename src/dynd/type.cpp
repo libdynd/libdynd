@@ -163,7 +163,7 @@ ndt::type ndt::type::at_array(int nindices, const irange *indices) const
 
 bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
                       const char *candidate_arrmeta,
-                      std::map<nd::string, ndt::type> &tp_vars) const
+                      std::map<std::string, ndt::type> &tp_vars) const
 {
   // A type being matched against itself works for both type id and more
   // complicated types
@@ -182,19 +182,19 @@ bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
 bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
                       const char *candidate_arrmeta) const
 {
-  std::map<nd::string, ndt::type> tp_vars;
+  std::map<std::string, ndt::type> tp_vars;
   return match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
 }
 
 bool ndt::type::match(const ndt::type &candidate_tp,
-                      std::map<nd::string, ndt::type> &tp_vars) const
+                      std::map<std::string, ndt::type> &tp_vars) const
 {
   return match(NULL, candidate_tp, NULL, tp_vars);
 }
 
 bool ndt::type::match(const ndt::type &candidate_tp) const
 {
-  std::map<nd::string, ndt::type> tp_vars;
+  std::map<std::string, ndt::type> tp_vars;
   return match(candidate_tp, tp_vars);
 }
 

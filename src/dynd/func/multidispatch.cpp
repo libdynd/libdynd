@@ -32,7 +32,7 @@ static bool supercedes(const nd::callable &lhs, const nd::callable &rhs)
     for (intptr_t i = 0; i < npos; ++i) {
       const ndt::type &lpt = lhs.get_type()->get_pos_type(i);
       const ndt::type &rpt = rhs.get_type()->get_pos_type(i);
-      std::map<nd::string, ndt::type> typevars;
+      std::map<std::string, ndt::type> typevars;
       if (!nd::functional::can_implicitly_convert(lpt, rpt, typevars)) {
         return false;
       }
@@ -61,7 +61,7 @@ static bool toposort_edge(const nd::callable &lhs, const nd::callable &rhs)
     for (intptr_t i = 0; i < npos; ++i) {
       const ndt::type &lpt = lhs.get_type()->get_pos_type(i);
       const ndt::type &rpt = rhs.get_type()->get_pos_type(i);
-      std::map<nd::string, ndt::type> typevars;
+      std::map<std::string, ndt::type> typevars;
       if (lpt.get_kind() >= rpt.get_kind() &&
           !nd::functional::can_implicitly_convert(lpt, rpt, typevars)) {
         return false;
@@ -92,7 +92,7 @@ static bool ambiguous(const nd::callable &lhs, const nd::callable &rhs)
       const ndt::type &lpt = lhs.get_type()->get_pos_type(i);
       const ndt::type &rpt = rhs.get_type()->get_pos_type(i);
       bool either = false;
-      std::map<nd::string, ndt::type> typevars;
+      std::map<std::string, ndt::type> typevars;
       if (nd::functional::can_implicitly_convert(lpt, rpt, typevars)) {
         lsupercount++;
         either = true;

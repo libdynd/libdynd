@@ -10,7 +10,7 @@ namespace nd {
     static void data_init(char *DYND_UNUSED(static_data), size_t data_size,
                           char *data, const ndt::type &dst_tp, intptr_t nsrc,
                           const ndt::type *src_tp, const nd::array &kwds,
-                          const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                          const std::map<std::string, ndt::type> &tp_vars)
     {
       CallableType::get().get()->data_init(
           CallableType::get().get()->static_data, data_size, data, dst_tp, nsrc,
@@ -21,7 +21,7 @@ namespace nd {
     resolve_dst_type(char *DYND_UNUSED(static_data), size_t data_size,
                      char *data, ndt::type &dst_tp, intptr_t nsrc,
                      const ndt::type *src_tp, const dynd::nd::array &kwds,
-                     const std::map<dynd::nd::string, ndt::type> &tp_vars)
+                     const std::map<std::string, ndt::type> &tp_vars)
     {
       CallableType::get().get()->resolve_dst_type(
           CallableType::get().get()->static_data, data_size, data, dst_tp, nsrc,
@@ -34,7 +34,7 @@ namespace nd {
                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *ectx, const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       return CallableType::get().get()->instantiate(
           CallableType::get().get()->static_data, data_size, data, ckb,

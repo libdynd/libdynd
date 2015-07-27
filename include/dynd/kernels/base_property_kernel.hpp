@@ -31,7 +31,7 @@ namespace nd {
               char *data, const ndt::type &DYND_UNUSED(dst_tp),
               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
               const array &kwds,
-              const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       new (reinterpret_cast<ndt::type *>(data))
           ndt::type(kwds(0).as<ndt::type>());
@@ -45,7 +45,7 @@ namespace nd {
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
         const eval::eval_context *DYND_UNUSED(ectx),
         const array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       self_type::make(ckb, kernreq, ckb_offset,
                       *reinterpret_cast<ndt::type *>(data), dst_tp,

@@ -174,7 +174,7 @@ void ndt::any_kind_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
 bool ndt::any_kind_type::match(
     const char *DYND_UNUSED(arrmeta), const type &DYND_UNUSED(candidate_tp),
     const char *DYND_UNUSED(candidate_arrmeta),
-    std::map<nd::string, type> &DYND_UNUSED(tp_vars)) const
+    std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   // "Any" matches against everything
   return true;

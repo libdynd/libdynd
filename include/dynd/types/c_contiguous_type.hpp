@@ -58,7 +58,7 @@ namespace ndt {
 
     virtual bool match(const char *arrmeta, const type &candidate_tp,
                        const char *candidate_arrmeta,
-                       std::map<nd::string, type> &tp_vars) const;
+                       std::map<std::string, type> &tp_vars) const;
 
     static type make(const type &child_tp)
     {

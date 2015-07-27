@@ -100,7 +100,7 @@ namespace ndt {
 
     static type make()
     {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["A0"] = ndt::type::make<A0>();
       tp_vars["R"] = ndt::type::make<R>();
 
@@ -115,7 +115,7 @@ namespace ndt {
 
     static type make()
     {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["A0"] = ndt::type::make<A0>();
       tp_vars["R"] = ndt::type::make<R>();
 
@@ -131,7 +131,7 @@ namespace ndt {
 
     static type make()
     {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["A0"] = ndt::type::make<A0>();
       tp_vars["A1"] = ndt::type::make<A1>();
       tp_vars["R"] = ndt::type::make<R>();
@@ -148,7 +148,7 @@ namespace ndt {
 
     static type make()
     {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["A0"] = ndt::type::make<A0>();
       tp_vars["A1"] = ndt::type::make<A1>();
       tp_vars["R"] = ndt::type::make<R>();
@@ -165,7 +165,7 @@ namespace ndt {
 
     static type make()
     {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["A0"] = ndt::type::make<A0>();
       tp_vars["A1"] = ndt::type::make<A1>();
       tp_vars["R"] = ndt::type::make<R>();
@@ -182,7 +182,7 @@ namespace ndt {
 
     static type make()
     {
-      std::map<nd::string, ndt::type> tp_vars;
+      std::map<std::string, ndt::type> tp_vars;
       tp_vars["A0"] = ndt::type::make<A0>();
       tp_vars["A1"] = ndt::type::make<A1>();
       tp_vars["R"] = ndt::type::make<R>();

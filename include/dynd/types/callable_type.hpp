@@ -32,7 +32,7 @@ namespace dynd {
 typedef void (*callable_data_init_t)(
     char *static_data, size_t data_size, char *data, const ndt::type &dst_tp,
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
+    const std::map<std::string, ndt::type> &tp_vars);
 
 /**
  * Resolves the destination type for this callable based on the types
@@ -47,7 +47,7 @@ typedef void (*callable_data_init_t)(
 typedef void (*callable_resolve_dst_type_t)(
     char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
-    const std::map<nd::string, ndt::type> &tp_vars);
+    const std::map<std::string, ndt::type> &tp_vars);
 
 /**
  * Function prototype for instantiating a kernel from an
@@ -86,7 +86,7 @@ typedef intptr_t (*callable_instantiate_t)(
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<nd::string, ndt::type> &tp_vars);
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars);
 
 /**
  * A function which deallocates the memory behind data_ptr after
@@ -170,13 +170,13 @@ struct callable_type_data {
   nd::array operator()(ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta,
                        char *const *src_data, const nd::array &kwds,
-                       const std::map<nd::string, ndt::type> &tp_vars);
+                       const std::map<std::string, ndt::type> &tp_vars);
 
   void operator()(const ndt::type &dst_tp, const char *dst_arrmeta,
                   char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
                   const char *const *src_arrmeta, char *const *src_data,
                   const nd::array &kwds,
-                  const std::map<nd::string, ndt::type> &tp_vars);
+                  const std::map<std::string, ndt::type> &tp_vars);
 
   template <typename StaticDataType>
   static void static_data_destroy(char *static_data)
@@ -295,25 +295,6 @@ namespace ndt {
       return m_kwd_struct.extended<tuple_type>()->get_field_count();
     }
 
-    /*
-      bool matches(intptr_t j, const type &actual_tp,
-                   std::map<nd::string, type> &typevars) const
-      {
-        type expected_tp = get_kwd_type(j);
-        if (expected_tp.get_type_id() == option_type_id) {
-          expected_tp = expected_tp.p("value_type").as<type>();
-        }
-        if (!actual_tp.value_type().matches(expected_tp, typevars)) {
-          std::stringstream ss;
-          ss << "keyword \"" << get_kwd_name(j) << "\" does not match, ";
-          ss << "callable expected " << expected_tp << " but passed " <<
-      actual_tp;
-          throw std::invalid_argument(ss.str());
-        }
-        return true;
-      }
-    */
-
     /** Returns the number of optional arguments. */
     intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
 
@@ -362,7 +343,7 @@ namespace ndt {
 
     bool match(const char *arrmeta, const type &candidate_tp,
                const char *candidate_arrmeta,
-               std::map<nd::string, type> &tp_vars) const;
+               std::map<std::string, type> &tp_vars) const;
 
     void get_dynamic_type_properties(
         const std::pair<std::string, nd::callable> **out_properties,

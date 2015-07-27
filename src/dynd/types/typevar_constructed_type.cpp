@@ -132,7 +132,7 @@ void ndt::typevar_constructed_type::arrmeta_destruct(
 
 bool ndt::typevar_constructed_type::match(
     const char *arrmeta, const type &candidate_tp,
-    const char *candidate_arrmeta, std::map<nd::string, type> &tp_vars) const
+    const char *candidate_arrmeta, std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() == typevar_constructed_type_id) {
     return m_arg.match(arrmeta,
@@ -142,7 +142,7 @@ bool ndt::typevar_constructed_type::match(
 
   if (candidate_tp.get_kind() != memory_kind) {
     if (m_arg.match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars)) {
-      type &tv_type = tp_vars[m_name];
+      type &tv_type = tp_vars[m_name.str()];
       if (tv_type.is_null()) {
         tv_type = type::make<void>();
       }
@@ -151,7 +151,7 @@ bool ndt::typevar_constructed_type::match(
     return false;
   }
 
-  type &tv_type = tp_vars[m_name];
+  type &tv_type = tp_vars[m_name.str()];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
     tv_type =

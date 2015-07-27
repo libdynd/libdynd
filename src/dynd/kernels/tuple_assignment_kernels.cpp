@@ -75,7 +75,7 @@ intptr_t dynd::make_tuple_unary_op_ckernel(
     ckb_offset = af->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp[i],
                                  dst_arrmeta[i], 1, &src_tp[i], &src_arrmeta[i],
                                  kernel_request_single, ectx, nd::array(),
-                                 std::map<nd::string, ndt::type>());
+                                 std::map<std::string, ndt::type>());
   }
   return ckb_offset;
 }
@@ -104,7 +104,7 @@ intptr_t dynd::make_tuple_unary_op_ckernel(
     ckb_offset = af[i]->instantiate(
         NULL, 0, NULL, ckb, ckb_offset, dst_tp[i], dst_arrmeta[i], 1,
         &src_tp[i], &src_arrmeta[i], kernel_request_single, ectx, nd::array(),
-        std::map<nd::string, ndt::type>());
+        std::map<std::string, ndt::type>());
   }
   return ckb_offset;
 }

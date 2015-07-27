@@ -131,7 +131,7 @@ namespace nd {
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &kwds,
-                  const std::map<nd::string, ndt::type> &tp_vars)
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         switch (ectx->errmode) {
         case assign_error_nocheck:
@@ -1825,7 +1825,7 @@ namespace nd {
                   const char *const *src_arrmeta, kernel_request_t kernreq,
                   const eval::eval_context *ectx,
                   const nd::array &DYND_UNUSED(kwds),
-                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0],
                                 src_arrmeta[0], ectx->errmode,
@@ -1871,7 +1871,7 @@ namespace nd {
           intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
           const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
           const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
-          const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         assignment_kernel::make(ckb, kernreq, ckb_offset, dst_tp, dst_arrmeta,
                                 ectx);
@@ -1927,7 +1927,7 @@ namespace nd {
                   const char *const *src_arrmeta, kernel_request_t kernreq,
                   const eval::eval_context *ectx,
                   const nd::array &DYND_UNUSED(kwds),
-                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         assignment_kernel::make(ckb, kernreq, ckb_offset, dst_tp, src_tp[0],
                                 src_arrmeta[0], ectx->date_parse_order,
@@ -1980,7 +1980,7 @@ namespace nd {
                   const char *const *DYND_UNUSED(src_arrmeta),
                   kernel_request_t kernreq, const eval::eval_context *ectx,
                   const nd::array &DYND_UNUSED(kwds),
-                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         assignment_kernel::make(ckb, kernreq, ckb_offset, dst_tp, dst_arrmeta,
                                 src_tp[0], ectx);
@@ -2033,7 +2033,7 @@ namespace nd {
                   const char *const *src_arrmeta, kernel_request_t kernreq,
                   const eval::eval_context *ectx,
                   const nd::array &DYND_UNUSED(kwds),
-                  const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0],
                                 src_arrmeta[0], ectx->errmode);
@@ -2078,7 +2078,7 @@ namespace nd {
           intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
           const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
           const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
-          const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         assignment_kernel::make(ckb, kernreq, ckb_offset, dst_tp, dst_arrmeta,
                                 ectx);

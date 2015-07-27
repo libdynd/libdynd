@@ -273,7 +273,7 @@ bool
 ndt::base_type::match(const char *DYND_UNUSED(arrmeta),
                       const type &candidate_tp,
                       const char *DYND_UNUSED(candidate_arrmeta),
-                      std::map<nd::string, type> &DYND_UNUSED(tp_vars)) const
+                      std::map<std::string, type> &DYND_UNUSED(tp_vars)) const
 {
   // The default match implementation is equality, pattern types
   // must override this virtual function.

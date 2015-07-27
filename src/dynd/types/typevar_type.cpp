@@ -111,7 +111,7 @@ void ndt::typevar_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta),
                               const type &candidate_tp,
                               const char *DYND_UNUSED(candidate_arrmeta),
-                              std::map<nd::string, type> &tp_vars) const
+                              std::map<std::string, type> &tp_vars) const
 {
   if (candidate_tp.get_type_id() == typevar_type_id) {
     return *this == *candidate_tp.extended();
@@ -122,7 +122,7 @@ bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta),
     return false;
   }
 
-  type &tv_type = tp_vars[m_name];
+  type &tv_type = tp_vars[m_name.str()];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
     tv_type = candidate_tp;
@@ -165,7 +165,7 @@ void ndt::typevar_type::get_dynamic_type_properties(
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
       const nd::array &a = tp.extended<typevar_type>()->get_name();

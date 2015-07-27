@@ -133,7 +133,7 @@ void ndt::ellipsis_dim_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 bool ndt::ellipsis_dim_type::match(const char *arrmeta,
                                    const type &candidate_tp,
                                    const char *candidate_arrmeta,
-                                   std::map<nd::string, type> &tp_vars) const
+                                   std::map<std::string, type> &tp_vars) const
 {
   // TODO XXX This is wrong, "Any" could represent a type that doesn't match
   // against this one...
@@ -142,8 +142,8 @@ bool ndt::ellipsis_dim_type::match(const char *arrmeta,
   }
 
   if (candidate_tp.get_ndim() == 0) {
-    const nd::string &tv_name = get_name();
-    if (!tv_name.is_null()) {
+    const std::string &tv_name = (get_name().is_null() ? "" : get_name().str());
+    if (!tv_name.empty()) {
       type &tv_type = tp_vars[tv_name];
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet, make it
@@ -170,8 +170,8 @@ bool ndt::ellipsis_dim_type::match(const char *arrmeta,
         candidate_arrmeta, tp_vars);
   } else if (candidate_tp.get_ndim() >= get_ndim() - 1) {
     intptr_t matched_ndim = candidate_tp.get_ndim() - get_ndim() + 1;
-    const nd::string &tv_name = get_name();
-    if (!tv_name.is_null()) {
+    const std::string &tv_name = (get_name().is_null() ? "" : get_name().str());
+    if (!tv_name.empty()) {
       type &tv_type = tp_vars[tv_name];
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet, so it's
@@ -243,7 +243,7 @@ void ndt::ellipsis_dim_type::get_dynamic_type_properties(
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
         const ndt::type *DYND_UNUSED(src_tp),
         const dynd::nd::array &DYND_UNUSED(kwds),
-        const std::map<dynd::nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
       dst_tp = static_cast<nd::array>(

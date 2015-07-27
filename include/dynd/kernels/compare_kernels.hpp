@@ -70,7 +70,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -103,7 +103,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -136,7 +136,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -155,7 +155,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::fixed_string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -203,7 +203,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -275,7 +275,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -309,7 +309,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -343,7 +343,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -362,7 +362,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::fixed_string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -418,7 +418,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -489,7 +489,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -535,7 +535,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -572,7 +572,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -609,7 +609,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -628,7 +628,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::fixed_string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -715,7 +715,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *src_arrmeta,
         kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *ectx,
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars));
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -768,7 +768,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -805,7 +805,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -842,7 +842,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -861,7 +861,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::fixed_string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -915,7 +915,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -993,7 +993,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *src_arrmeta,
         kernel_request_t DYND_UNUSED(kernreq), const eval::eval_context *ectx,
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars));
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
   };
 
   template <type_id_t I0, type_id_t I1>
@@ -1049,7 +1049,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -1094,7 +1094,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -1127,7 +1127,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -1161,7 +1161,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -1179,7 +1179,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::fixed_string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -1261,7 +1261,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::string_type>()->get_encoding()) {
       case string_encoding_ascii:
@@ -1307,7 +1307,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -1340,7 +1340,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -1373,7 +1373,7 @@ namespace nd {
         const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
         kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
         const nd::array &DYND_UNUSED(kwds),
-        const std::map<nd::string, ndt::type> &DYND_UNUSED(tp_vars))
+        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       make(ckb, kernreq, ckb_offset,
            src_tp[0].extended<ndt::fixed_string_type>()->get_size());
@@ -1391,7 +1391,7 @@ namespace nd {
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
                 const nd::array &kwds,
-                const std::map<nd::string, ndt::type> &tp_vars)
+                const std::map<std::string, ndt::type> &tp_vars)
     {
       switch (src_tp[0].extended<ndt::fixed_string_type>()->get_encoding()) {
       case string_encoding_ascii:

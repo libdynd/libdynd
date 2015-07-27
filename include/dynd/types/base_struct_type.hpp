@@ -72,7 +72,7 @@ namespace ndt {
 
     virtual bool match(const char *arrmeta, const type &candidate_tp,
                        const char *candidate_arrmeta,
-                       std::map<nd::string, type> &tp_vars) const;
+                       std::map<std::string, type> &tp_vars) const;
 
     size_t get_elwise_property_index(const std::string &property_name) const;
     type get_elwise_property_type(size_t elwise_property_index,
