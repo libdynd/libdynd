@@ -17,19 +17,14 @@ namespace ndt {
 
   class ellipsis_dim_type : public base_dim_type {
     // m_name is either NULL or an immutable array of type "string"
-    nd::string m_name;
+    std::string m_name;
 
   public:
-    ellipsis_dim_type(const nd::string &name, const type &element_type);
+    ellipsis_dim_type(const std::string &name, const type &element_type);
 
     virtual ~ellipsis_dim_type() {}
 
-    inline const nd::string &get_name() const { return m_name; }
-
-    inline std::string get_name_str() const
-    {
-      return m_name.is_null() ? "" : m_name.str();
-    }
+    const std::string &get_name() const { return m_name; }
 
     void get_vars(std::unordered_set<std::string> &vars) const;
 
@@ -65,7 +60,7 @@ namespace ndt {
   };
 
   /** Makes an ellipsis type with the specified name and element type */
-  inline type make_ellipsis_dim(const nd::string &name,
+  inline type make_ellipsis_dim(const std::string &name,
                                 const type &element_type)
   {
     return type(new ellipsis_dim_type(name, element_type), false);
@@ -74,7 +69,7 @@ namespace ndt {
   /** Make an unnamed ellipsis type */
   inline type make_ellipsis_dim(const type &element_type)
   {
-    return type(new ellipsis_dim_type(nd::array(), element_type), false);
+    return type(new ellipsis_dim_type("", element_type), false);
   }
 
 } // namespace dynd::ndt

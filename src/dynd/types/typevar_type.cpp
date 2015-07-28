@@ -10,17 +10,17 @@
 using namespace std;
 using namespace dynd;
 
-ndt::typevar_type::typevar_type(const nd::string &name)
+ndt::typevar_type::typevar_type(const std::string &name)
     : base_type(typevar_type_id, pattern_kind, 0, 1, type_flag_symbolic, 0, 0,
                 0),
       m_name(name)
 {
-  if (m_name.is_null()) {
+  if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  } else if (!is_valid_typevar_name(m_name.begin(), m_name.end())) {
+  } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
-    print_escaped_utf8_string(ss, m_name.begin(), m_name.end());
+    print_escaped_utf8_string(ss, m_name);
     ss << " is not valid, it must be alphanumeric and begin with a capital";
     throw type_error(ss.str());
   }
@@ -28,7 +28,7 @@ ndt::typevar_type::typevar_type(const nd::string &name)
 
 void ndt::typevar_type::get_vars(std::unordered_set<std::string> &vars) const
 {
-  vars.insert(m_name.str());
+  vars.insert(m_name);
 }
 
 void ndt::typevar_type::print_data(std::ostream &DYND_UNUSED(o),
@@ -41,7 +41,7 @@ void ndt::typevar_type::print_data(std::ostream &DYND_UNUSED(o),
 void ndt::typevar_type::print_type(std::ostream &o) const
 {
   // Type variables are barewords starting with a capital letter
-  o << m_name.str();
+  o << m_name;
 }
 
 ndt::type ndt::typevar_type::apply_linear_index(
@@ -122,7 +122,7 @@ bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta),
     return false;
   }
 
-  type &tv_type = tp_vars[m_name.str()];
+  type &tv_type = tp_vars[m_name];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
     tv_type = candidate_tp;

@@ -111,7 +111,7 @@ ndt::type ndt::detail::internal_substitute(
                    typevars, concrete));
   case typevar_constructed_type_id: {
     map<std::string, ndt::type>::const_iterator it =
-        typevars.find(pattern.extended<typevar_constructed_type>()->get_name().str());
+        typevars.find(pattern.extended<typevar_constructed_type>()->get_name());
     if (it->second.get_type_id() == void_type_id) {
       return substitute(pattern.extended<typevar_constructed_type>()->get_arg(),
                         typevars, concrete);
@@ -126,7 +126,7 @@ ndt::type ndt::detail::internal_substitute(
   }
   case typevar_type_id: {
     map<std::string, ndt::type>::const_iterator it =
-        typevars.find(pattern.extended<typevar_type>()->get_name().str());
+        typevars.find(pattern.extended<typevar_type>()->get_name());
     if (it != typevars.end()) {
       if (it->second.get_ndim() != 0) {
         stringstream ss;
@@ -155,7 +155,7 @@ ndt::type ndt::detail::internal_substitute(
   }
   case typevar_dim_type_id: {
     map<std::string, ndt::type>::const_iterator it =
-        typevars.find(pattern.extended<typevar_dim_type>()->get_name().str());
+        typevars.find(pattern.extended<typevar_dim_type>()->get_name());
     if (it != typevars.end()) {
       if (it->second.get_ndim() == 0) {
         stringstream ss;
@@ -212,7 +212,7 @@ ndt::type ndt::detail::internal_substitute(
   case pow_dimsym_type_id: {
     // Look up to the exponent typevar
     std::string exponent_name =
-        pattern.extended<pow_dimsym_type>()->get_exponent().str();
+        pattern.extended<pow_dimsym_type>()->get_exponent();
     map<std::string, ndt::type>::const_iterator tv_type =
         typevars.find(exponent_name);
     intptr_t exponent = -1;
@@ -223,7 +223,7 @@ ndt::type ndt::detail::internal_substitute(
       } else if (tv_type->second.get_type_id() == typevar_dim_type_id) {
         // If it's a typevar, substitute the new name in
         exponent_name =
-            tv_type->second.extended<typevar_dim_type>()->get_name().str();
+            tv_type->second.extended<typevar_dim_type>()->get_name();
         if (concrete) {
           stringstream ss;
           ss << "The substitution for dynd typevar " << exponent_name
@@ -248,7 +248,7 @@ ndt::type ndt::detail::internal_substitute(
     ndt::type base_tp = pattern.extended<pow_dimsym_type>()->get_base_type();
     if (base_tp.get_type_id() == typevar_dim_type_id) {
       map<std::string, ndt::type>::const_iterator btv_type =
-          typevars.find(base_tp.extended<typevar_dim_type>()->get_name().str());
+          typevars.find(base_tp.extended<typevar_dim_type>()->get_name());
       if (btv_type == typevars.end()) {
         // We haven't seen this typevar yet, check if concrete
         // is required
@@ -307,7 +307,7 @@ ndt::type ndt::detail::internal_substitute(
         return result;
       case typevar_dim_type_id: {
         const std::string &tvname =
-            base_tp.extended<typevar_dim_type>()->get_name().str();
+            base_tp.extended<typevar_dim_type>()->get_name();
         for (intptr_t i = 0; i < exponent; ++i) {
           result = ndt::typevar_dim_type::make(tvname, result);
         }
@@ -323,10 +323,10 @@ ndt::type ndt::detail::internal_substitute(
     }
   }
   case ellipsis_dim_type_id: {
-    const std::string &name = pattern.extended<ellipsis_dim_type>()->get_name().str();
+    const std::string &name = pattern.extended<ellipsis_dim_type>()->get_name();
     if (!name.empty()) {
       map<std::string, ndt::type>::const_iterator it =
-          typevars.find(pattern.extended<typevar_dim_type>()->get_name().str());
+          typevars.find(pattern.extended<typevar_dim_type>()->get_name());
       if (it != typevars.end()) {
         if (it->second.get_type_id() == dim_fragment_type_id) {
           return it->second.extended<dim_fragment_type>()->apply_to_dtype(

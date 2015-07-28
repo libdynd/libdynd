@@ -17,19 +17,17 @@ namespace ndt {
 
   class pow_dimsym_type : public base_dim_type {
     type m_base_tp;
-    nd::string m_exponent;
+    std::string m_exponent;
 
   public:
-    pow_dimsym_type(const type &base_tp, const nd::string &exponent,
+    pow_dimsym_type(const type &base_tp, const std::string &exponent,
                     const type &element_type);
 
     virtual ~pow_dimsym_type() {}
 
     const type &get_base_type() const { return m_base_tp; }
 
-    const nd::string &get_exponent() const { return m_exponent; }
-
-    std::string get_exponent_str() const { return m_exponent.str(); }
+    const std::string &get_exponent() const { return m_exponent; }
 
     void print_data(std::ostream &o, const char *arrmeta,
                     const char *data) const;
@@ -67,7 +65,7 @@ namespace ndt {
   }; // class pow_dimsym_type
 
   /** Makes a dimensional power type with the specified base and exponent */
-  inline type make_pow_dimsym(const type &base_tp, const nd::string &exponent,
+  inline type make_pow_dimsym(const type &base_tp, const std::string &exponent,
                               const type &element_type)
   {
     return type(new pow_dimsym_type(base_tp, exponent, element_type), false);

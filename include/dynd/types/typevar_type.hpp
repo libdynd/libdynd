@@ -15,16 +15,14 @@ namespace dynd {
 namespace ndt {
 
   class typevar_type : public base_type {
-    nd::string m_name;
+    std::string m_name;
 
   public:
-    typevar_type(const nd::string &name);
+    typevar_type(const std::string &name);
 
     virtual ~typevar_type() {}
 
-    inline const nd::string &get_name() const { return m_name; }
-
-    inline std::string get_name_str() const { return m_name.str(); }
+    const std::string &get_name() const { return m_name; }
 
     void get_vars(std::unordered_set<std::string> &vars) const;
 
@@ -62,7 +60,7 @@ namespace ndt {
         size_t *out_count) const;
 
     /** Makes a typevar type with the specified types */
-    static type make(const nd::string &name)
+    static type make(const std::string &name)
     {
       return type(new typevar_type(name), false);
     }

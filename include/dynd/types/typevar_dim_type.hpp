@@ -16,16 +16,14 @@ namespace dynd {
 namespace ndt {
 
   class typevar_dim_type : public base_dim_type {
-    nd::string m_name;
+    std::string m_name;
 
   public:
-    typevar_dim_type(const nd::string &name, const type &element_type);
+    typevar_dim_type(const std::string &name, const type &element_type);
 
     virtual ~typevar_dim_type() {}
 
-    inline const nd::string &get_name() const { return m_name; }
-
-    inline std::string get_name_str() const { return m_name.str(); }
+    const std::string &get_name() const { return m_name; }
 
     void print_data(std::ostream &o, const char *arrmeta,
                     const char *data) const;
@@ -60,12 +58,12 @@ namespace ndt {
         size_t *out_count) const;
 
     /** Makes a typevar type with the specified name and element type */
-    static type make(const nd::string &name, const type &element_type)
+    static type make(const std::string &name, const type &element_type)
     {
       return type(new typevar_dim_type(name, element_type), false);
     }
 
-    static type make(const nd::string &name, const type &element_tp,
+    static type make(const std::string &name, const type &element_tp,
                      intptr_t ndim)
     {
       type result = element_tp;

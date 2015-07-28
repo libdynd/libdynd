@@ -862,7 +862,7 @@ size_t ndt::datetime_type::make_elwise_property_setter_kernel(
 }
 
 bool ndt::datetime_type::adapt_type(const type &operand_tp,
-                                    const nd::string &op,
+                                    const std::string &op,
                                     nd::callable &out_forward,
                                     nd::callable &out_reverse) const
 {
@@ -871,7 +871,7 @@ bool ndt::datetime_type::adapt_type(const type &operand_tp,
 }
 
 bool ndt::datetime_type::reverse_adapt_type(const type &value_tp,
-                                            const nd::string &op,
+                                            const std::string &op,
                                             nd::callable &out_forward,
                                             nd::callable &out_reverse) const
 {
