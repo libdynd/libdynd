@@ -43,6 +43,8 @@
 #define DYND_ISSPACE std::isspace
 #define DYND_TOLOWER std::tolower
 
+#define DYND_API
+
 #elif defined(__GNUC__)
 
 // Hack trying to work around gcc isfinite problems
@@ -56,6 +58,8 @@
 
 #define DYND_ISSPACE isspace
 #define DYND_TOLOWER tolower
+
+#define DYND_API
 
 #elif defined(_MSC_VER)
 
@@ -113,6 +117,14 @@ public:
     _set_invalid_parameter_handler(m_saved);
   }
 };
+
+#if defined(DYND_EXPORT)
+// Building the library
+#define DYND_API __declspec(dllexport)
+#else
+// Importing the library
+#define DYND_API __declspec(dllimport)
+#endif
 
 #endif // end of compiler vendor checks
 

@@ -587,6 +587,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 
 if (DYND_SHARED_LIB)
+    set_property(
+        TARGET libdynd_OBJ
+        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
+        )
+
     if (DYND_CUDA)
         cuda_add_library(libdynd SHARED ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
     else()
@@ -596,6 +601,10 @@ if (DYND_SHARED_LIB)
         PROPERTIES
         OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
+        )
+    set_property(
+        TARGET libdynd
+        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
         )
 else()
     if (DYND_CUDA)
