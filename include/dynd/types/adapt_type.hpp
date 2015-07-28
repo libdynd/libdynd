@@ -15,12 +15,12 @@ namespace ndt {
 
   class adapt_type : public base_expr_type {
     type m_value_type, m_operand_type;
-    nd::string m_op;
+    std::string m_op;
     nd::callable m_forward, m_reverse;
 
   public:
     adapt_type(const type &operand_type, const type &value_type,
-               const nd::string &op);
+               const std::string &op);
 
     virtual ~adapt_type();
 
@@ -47,7 +47,7 @@ namespace ndt {
         const eval::eval_context *ectx) const;
 
     static type make(const type &operand_type, const type &value_type,
-                     const nd::string &op)
+                     const std::string &op)
     {
       return type(new adapt_type(operand_type, value_type, op), false);
     }

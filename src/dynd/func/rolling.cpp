@@ -33,7 +33,7 @@ nd::callable nd::functional::rolling(const nd::callable &window_op,
     throw invalid_argument(ss.str());
   }
 
-  nd::string rolldimname("RollDim");
+  std::string rolldimname("RollDim");
   ndt::type roll_src_tp = ndt::typevar_dim_type::make(
       rolldimname, window_src_tp.get_type_at_dimension(NULL, 1));
   ndt::type roll_dst_tp =

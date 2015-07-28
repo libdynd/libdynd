@@ -13,7 +13,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::pow_dimsym_type::pow_dimsym_type(const type &base_tp,
-                                      const nd::string &exponent,
+                                      const std::string &exponent,
                                       const type &element_type)
     : base_dim_type(pow_dimsym_type_id, pattern_kind, element_type, 0, 1, 0,
                     type_flag_symbolic, false),
@@ -27,12 +27,13 @@ ndt::pow_dimsym_type::pow_dimsym_type(const type &base_tp,
        << base_tp;
     throw type_error(ss.str());
   }
-  if (m_exponent.is_null()) {
+  if (m_exponent.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  } else if (!is_valid_typevar_name(m_exponent.begin(), m_exponent.end())) {
+  } else if (!is_valid_typevar_name(m_exponent.c_str(),
+                                    m_exponent.c_str() + m_exponent.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
-    print_escaped_utf8_string(ss, m_exponent.begin(), m_exponent.end());
+    print_escaped_utf8_string(ss, m_exponent);
     ss << " is not valid, it must be alphanumeric and begin with a capital";
     throw type_error(ss.str());
   }
@@ -59,13 +60,13 @@ void ndt::pow_dimsym_type::print_type(std::ostream &o) const
     o << "var";
     break;
   case typevar_dim_type_id:
-    o << m_base_tp.extended<typevar_dim_type>()->get_name_str();
+    o << m_base_tp.extended<typevar_dim_type>()->get_name();
     break;
   default:
     break;
   }
 
-  o << "**" << m_exponent.str() << " * " << get_element_type();
+  o << "**" << m_exponent << " * " << get_element_type();
 }
 
 ndt::type ndt::pow_dimsym_type::apply_linear_index(
@@ -156,7 +157,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
           arrmeta, candidate_tp.extended<pow_dimsym_type>()->get_element_type(),
           NULL, tp_vars);
       type &tv_type =
-          tp_vars[candidate_tp.extended<pow_dimsym_type>()->get_exponent().str()];
+          tp_vars[candidate_tp.extended<pow_dimsym_type>()->get_exponent()];
       if (tv_type.is_null()) {
         // This typevar hasn't been seen yet
         tv_type = typevar_dim_type::make(
@@ -174,7 +175,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   } else if (candidate_tp.get_ndim() == 0) {
     if (get_element_type().get_ndim() == 0) {
       // Look up to see if the exponent typevar is already matched
-      type &tv_type = tp_vars[get_exponent().str()];
+      type &tv_type = tp_vars[get_exponent()];
       if (tv_type.is_null()) {
         // Fill in the exponent by the number of dimensions left
         tv_type = make_fixed_dim(0, type::make<void>());
@@ -195,7 +196,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   }
 
   // Look up to see if the exponent typevar is already matched
-  type &tv_type = tp_vars[get_exponent().str()];
+  type &tv_type = tp_vars[get_exponent()];
   intptr_t exponent;
   if (tv_type.is_null()) {
     // Fill in the exponent by the number of dimensions left
@@ -221,7 +222,7 @@ bool ndt::pow_dimsym_type::match(const char *arrmeta, const type &candidate_tp,
   // Get the base type
   type base_tp = get_base_type();
   if (base_tp.get_type_id() == typevar_dim_type_id) {
-    type &btv_type = tp_vars[base_tp.extended<typevar_dim_type>()->get_name().str()];
+    type &btv_type = tp_vars[base_tp.extended<typevar_dim_type>()->get_name()];
     if (btv_type.is_null()) {
       // We haven't seen this typevar yet, set it to the concrete's
       // dimension type

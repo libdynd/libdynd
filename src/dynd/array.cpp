@@ -1252,7 +1252,7 @@ nd::array nd::array::uview(const ndt::type &uniform_dt,
   return view(get_type().with_replaced_dtype(uniform_dt, replace_ndim));
 }
 
-nd::array nd::array::adapt(const ndt::type &tp, const nd::string &adapt_op)
+nd::array nd::array::adapt(const ndt::type &tp, const std::string &adapt_op)
 {
   return uview(ndt::adapt_type::make(get_dtype(), tp, adapt_op), 0);
 }

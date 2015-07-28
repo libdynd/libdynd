@@ -697,9 +697,10 @@ namespace nd {
      * adaption operator. This creates an adapt[] type.
      *
      * Example:
-     * nd::array({3, 5, 10}).adapt(ndt::date_type::make(), "days since 2001-1-1");
+     * nd::array({3, 5, 10}).adapt(ndt::date_type::make(), "days since
+     *2001-1-1");
      */
-    array adapt(const ndt::type &tp, const nd::string &adapt_op);
+    array adapt(const ndt::type &tp, const std::string &adapt_op);
 
     /**
      * Permutes the dimensions of the array, returning a view to the result.
@@ -1247,9 +1248,10 @@ namespace nd {
    */
   inline array empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
   {
-    ndt::type rtp =
-        (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp) : ndt::var_dim_type::make(tp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
+    ndt::type rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp)
+                                : ndt::var_dim_type::make(tp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp)
+                      : ndt::var_dim_type::make(rtp);
     return nd::empty(rtp);
   }
 
@@ -1274,10 +1276,12 @@ namespace nd {
   inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2,
                      const ndt::type &tp)
   {
-    ndt::type rtp =
-        (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp) : ndt::var_dim_type::make(tp);
-    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp) : ndt::var_dim_type::make(rtp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
+    ndt::type rtp = (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp)
+                                : ndt::var_dim_type::make(tp);
+    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp)
+                      : ndt::var_dim_type::make(rtp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp)
+                      : ndt::var_dim_type::make(rtp);
     return empty(rtp);
   }
 

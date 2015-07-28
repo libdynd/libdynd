@@ -15,17 +15,15 @@ namespace dynd {
 namespace ndt {
 
   class typevar_constructed_type : public base_type {
-    nd::string m_name;
+    std::string m_name;
     type m_arg;
 
   public:
-    typevar_constructed_type(const nd::string &name, const type &arg);
+    typevar_constructed_type(const std::string &name, const type &arg);
 
     virtual ~typevar_constructed_type() {}
 
-    const nd::string &get_name() const { return m_name; }
-
-    std::string get_name_str() const { return m_name.str(); }
+    std::string get_name() const { return m_name; }
 
     type get_arg() const { return m_arg; }
 
@@ -69,7 +67,7 @@ namespace ndt {
     */
 
     /** Makes a typevar_constructed type with the specified types */
-    static type make(const nd::string &name, const type &arg)
+    static type make(const std::string &name, const type &arg)
     {
       return type(new typevar_constructed_type(name, arg), false);
     }

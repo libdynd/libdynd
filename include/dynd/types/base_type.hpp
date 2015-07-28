@@ -726,7 +726,7 @@ namespace ndt {
      *
      * \returns  True if the adapt is ok, false otherwise.
      */
-    virtual bool adapt_type(const ndt::type &operand_tp, const nd::string &op,
+    virtual bool adapt_type(const ndt::type &operand_tp, const std::string &op,
                             nd::callable &out_forward,
                             nd::callable &out_reverse) const;
     /**
@@ -737,7 +737,7 @@ namespace ndt {
      * \returns  True if the adapt is ok, false otherwise.
      */
     virtual bool reverse_adapt_type(const ndt::type &value_tp,
-                                    const nd::string &op,
+                                    const std::string &op,
                                     nd::callable &out_forward,
                                     nd::callable &out_reverse) const;
 

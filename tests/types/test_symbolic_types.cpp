@@ -91,7 +91,7 @@ TEST(SymbolicTypes, CreateTypeVar)
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_variadic());
   tvt = tp.extended<ndt::typevar_type>();
-  EXPECT_EQ("Blah", tvt->get_name_str());
+  EXPECT_EQ("Blah", tvt->get_name());
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));
   EXPECT_EQ("Blah", tp.str());
@@ -122,7 +122,7 @@ TEST(SymbolicTypes, CreateTypeVarDim)
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_FALSE(tp.is_variadic());
   tvt = tp.extended<ndt::typevar_dim_type>();
-  EXPECT_EQ("Blah", tvt->get_name_str());
+  EXPECT_EQ("Blah", tvt->get_name());
   EXPECT_EQ(ndt::type::make<int>(), tvt->get_element_type());
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));
@@ -156,7 +156,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.is_variadic());
   et = tp.extended<ndt::ellipsis_dim_type>();
-  EXPECT_EQ("Blah", et->get_name_str());
+  EXPECT_EQ("Blah", et->get_name());
   EXPECT_EQ(ndt::type::make<int>(), et->get_element_type());
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));
@@ -175,7 +175,7 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_TRUE(tp.is_symbolic());
   EXPECT_TRUE(tp.is_variadic());
   et = tp.extended<ndt::ellipsis_dim_type>();
-  EXPECT_TRUE(et->get_name().is_null());
+  EXPECT_TRUE(et->get_name().empty());
   EXPECT_EQ(ndt::type::make<int>(), et->get_element_type());
   // Roundtripping through a string
   EXPECT_EQ(tp, ndt::type(tp.str()));

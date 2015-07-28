@@ -25,7 +25,7 @@ ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp)
       reinterpret_cast<ndt::type *>(out_param_types.get_readwrite_originptr());
 
   for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
-    nd::string dimsname("Dims" + std::to_string(i));
+    std::string dimsname("Dims" + std::to_string(i));
     if (param_types[i].get_kind() == memory_kind) {
       pt[i] =
           pt[i].extended<ndt::base_memory_type>()->with_replaced_storage_type(

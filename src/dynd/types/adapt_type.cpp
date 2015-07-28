@@ -11,7 +11,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::adapt_type::adapt_type(const type &operand_type, const type &value_type,
-                            const nd::string &op)
+                            const std::string &op)
     : base_expr_type(
           adapt_type_id, expr_kind, operand_type.get_data_size(),
           operand_type.get_data_alignment(),

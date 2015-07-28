@@ -418,7 +418,7 @@ size_t ndt::base_type::make_elwise_property_setter_kernel(
 }
 
 bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp),
-                                const nd::string &DYND_UNUSED(op),
+                                const std::string &DYND_UNUSED(op),
                                 nd::callable &DYND_UNUSED(out_forward),
                                 nd::callable &DYND_UNUSED(out_reverse)) const
 {
@@ -427,7 +427,7 @@ bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp),
 
 bool
 ndt::base_type::reverse_adapt_type(const type &DYND_UNUSED(value_tp),
-                                   const nd::string &DYND_UNUSED(op),
+                                   const std::string &DYND_UNUSED(op),
                                    nd::callable &DYND_UNUSED(out_forward),
                                    nd::callable &DYND_UNUSED(out_reverse)) const
 {

@@ -11,19 +11,19 @@
 using namespace std;
 using namespace dynd;
 
-ndt::typevar_constructed_type::typevar_constructed_type(const nd::string &name,
+ndt::typevar_constructed_type::typevar_constructed_type(const std::string &name,
                                                         const type &arg)
     : base_type(typevar_constructed_type_id, pattern_kind, 0, 1,
                 type_flag_symbolic, 0, arg.get_ndim(), arg.get_strided_ndim()),
       m_name(name), m_arg(arg)
 {
   //  static ndt::type args_pattern("((...), {...})");
-  if (m_name.is_null()) {
+  if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  } else if (!is_valid_typevar_name(m_name.begin(), m_name.end())) {
+  } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
-    print_escaped_utf8_string(ss, m_name.begin(), m_name.end());
+    print_escaped_utf8_string(ss, m_name);
     ss << " is not valid, it must be alphanumeric and begin with a capital";
     throw type_error(ss.str());
   }
@@ -38,7 +38,7 @@ ndt::typevar_constructed_type::typevar_constructed_type(const nd::string &name,
 void ndt::typevar_constructed_type::get_vars(
     std::unordered_set<std::string> &vars) const
 {
-  vars.insert(m_name.str());
+  vars.insert(m_name);
   m_arg.get_vars(vars);
 }
 
@@ -53,7 +53,7 @@ ndt::typevar_constructed_type::print_data(std::ostream &DYND_UNUSED(o),
 void ndt::typevar_constructed_type::print_type(std::ostream &o) const
 {
   // Type variables are barewords starting with a capital letter
-  o << m_name.str() << "[" << m_arg << "]";
+  o << m_name << "[" << m_arg << "]";
 }
 
 intptr_t
@@ -142,7 +142,7 @@ bool ndt::typevar_constructed_type::match(
 
   if (candidate_tp.get_kind() != memory_kind) {
     if (m_arg.match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars)) {
-      type &tv_type = tp_vars[m_name.str()];
+      type &tv_type = tp_vars[m_name];
       if (tv_type.is_null()) {
         tv_type = type::make<void>();
       }
@@ -151,7 +151,7 @@ bool ndt::typevar_constructed_type::match(
     return false;
   }
 
-  type &tv_type = tp_vars[m_name.str()];
+  type &tv_type = tp_vars[m_name];
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
     tv_type =
