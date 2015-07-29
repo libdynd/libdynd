@@ -20,47 +20,47 @@ using namespace dynd;
  * This requires that the child kernel be created with the
  * kernel_request_strided type of kernel.
  */
-template<int N>
+template <int N>
 struct strided_expr_kernel_extra {
-    typedef strided_expr_kernel_extra extra_type;
+  typedef strided_expr_kernel_extra extra_type;
 
-    ckernel_prefix base;
-    intptr_t size;
-    intptr_t dst_stride, src_stride[N];
+  ckernel_prefix base;
+  intptr_t size;
+  intptr_t dst_stride, src_stride[N];
 
-    static void single(char *dst, char *const *src,
-                    ckernel_prefix *extra)
-    {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
-        expr_strided_t opchild = echild->get_function<expr_strided_t>();
-        opchild(dst, e->dst_stride, src, e->src_stride, e->size, echild);
+  static void single(ckernel_prefix *extra, char *dst, char *const *src)
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    expr_strided_t opchild = echild->get_function<expr_strided_t>();
+    opchild(echild, dst, e->dst_stride, src, e->src_stride, e->size);
+  }
+
+  static void strided(ckernel_prefix *extra, char *dst, intptr_t dst_stride,
+                      char *const *src, const intptr_t *src_stride,
+                      size_t count)
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    expr_strided_t opchild = echild->get_function<expr_strided_t>();
+    intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride;
+    const intptr_t *inner_src_stride = e->src_stride;
+    char *src_loop[N];
+    memcpy(src_loop, src, sizeof(src_loop));
+    for (size_t i = 0; i != count; ++i) {
+      opchild(echild, dst, inner_dst_stride, src_loop, inner_src_stride,
+              inner_size);
+      dst += dst_stride;
+      for (int j = 0; j != N; ++j) {
+        src_loop[j] += src_stride[j];
+      }
     }
+  }
 
-    static void strided(char *dst, intptr_t dst_stride,
-                    char *const *src, const intptr_t *src_stride,
-                    size_t count, ckernel_prefix *extra)
-    {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
-        expr_strided_t opchild = echild->get_function<expr_strided_t>();
-        intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride;
-        const intptr_t *inner_src_stride = e->src_stride;
-        char *src_loop[N];
-        memcpy(src_loop, src, sizeof(src_loop));
-        for (size_t i = 0; i != count; ++i) {
-            opchild(dst, inner_dst_stride, src_loop, inner_src_stride, inner_size, echild);
-            dst += dst_stride;
-            for (int j = 0; j != N; ++j) {
-                src_loop[j] += src_stride[j];
-            }
-        }
-    }
-
-    static void destruct(ckernel_prefix *self)
-    {
-        self->destroy_child_ckernel(sizeof(extra_type));
-    }
+  static void destruct(ckernel_prefix *self)
+  {
+    self->destroy_child_ckernel(sizeof(extra_type));
+  }
 };
 
 template <int N>
@@ -80,11 +80,11 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   strided_expr_kernel_extra<N> *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->alloc_ck<strided_expr_kernel_extra<N>>(ckb_offset);
-  e->base.template set_expr_function<strided_expr_kernel_extra<N> >(kernreq);
+  e->base.template set_expr_function<strided_expr_kernel_extra<N>>(kernreq);
   e->base.destructor = strided_expr_kernel_extra<N>::destruct;
   // The dst strided parameters
   if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride,
-                                 &dst_child_dt, &dst_child_arrmeta)) {
+                             &dst_child_dt, &dst_child_arrmeta)) {
     throw type_error("make_elwise_strided_dimension_expr_kernel: dst was not "
                      "strided as expected");
   }
@@ -114,58 +114,40 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
 }
 
 inline static size_t make_elwise_strided_dimension_expr_kernel(
-                void *ckb, intptr_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
-                kernel_request_t kernreq, const eval::eval_context *ectx,
-                const expr_kernel_generator *elwise_handler)
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, size_t src_count, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const expr_kernel_generator *elwise_handler)
 {
-    switch (src_count) {
-        case 1:
-            return make_elwise_strided_dimension_expr_kernel_for_N<1>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 2:
-            return make_elwise_strided_dimension_expr_kernel_for_N<2>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 3:
-            return make_elwise_strided_dimension_expr_kernel_for_N<3>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 4:
-            return make_elwise_strided_dimension_expr_kernel_for_N<4>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 5:
-            return make_elwise_strided_dimension_expr_kernel_for_N<5>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 6:
-            return make_elwise_strided_dimension_expr_kernel_for_N<6>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        default:
-            throw runtime_error("make_elwise_strided_dimension_expr_kernel with src_count > 6 not implemented yet");
-    }
+  switch (src_count) {
+  case 1:
+    return make_elwise_strided_dimension_expr_kernel_for_N<1>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 2:
+    return make_elwise_strided_dimension_expr_kernel_for_N<2>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 3:
+    return make_elwise_strided_dimension_expr_kernel_for_N<3>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 4:
+    return make_elwise_strided_dimension_expr_kernel_for_N<4>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 5:
+    return make_elwise_strided_dimension_expr_kernel_for_N<5>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 6:
+    return make_elwise_strided_dimension_expr_kernel_for_N<6>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  default:
+    throw runtime_error("make_elwise_strided_dimension_expr_kernel with "
+                        "src_count > 6 not implemented yet");
+  }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -177,64 +159,64 @@ inline static size_t make_elwise_strided_dimension_expr_kernel(
  * This requires that the child kernel be created with the
  * kernel_request_strided type of kernel.
  */
-template<int N>
+template <int N>
 struct strided_or_var_to_strided_expr_kernel_extra {
-    typedef strided_or_var_to_strided_expr_kernel_extra extra_type;
+  typedef strided_or_var_to_strided_expr_kernel_extra extra_type;
 
-    ckernel_prefix base;
-    intptr_t size;
-    intptr_t dst_stride, src_stride[N], src_offset[N];
-    bool is_src_var[N];
+  ckernel_prefix base;
+  intptr_t size;
+  intptr_t dst_stride, src_stride[N], src_offset[N];
+  bool is_src_var[N];
 
-    static void single(char *dst, char *const *src,
-                    ckernel_prefix *extra)
-    {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
-        expr_strided_t opchild = echild->get_function<expr_strided_t>();
-        // Broadcast all the src 'var' dimensions to dst
-        intptr_t dim_size = e->size;
-        char *modified_src[N];
-        intptr_t modified_src_stride[N];
-        for (int i = 0; i < N; ++i) {
-            if (e->is_src_var[i]) {
-                var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
-                modified_src[i] = vddd->begin + e->src_offset[i];
-                if (vddd->size == 1) {
-                    modified_src_stride[i] = 0;
-                } else if (vddd->size == static_cast<size_t>(dim_size)) {
-                    modified_src_stride[i] = e->src_stride[i];
-                } else {
-                    throw broadcast_error(dim_size, vddd->size, "strided dim", "var dim");
-                }
-            } else {
-                // strided dimensions were fully broadcast in the kernel factory
-                modified_src[i] = src[i];
-                modified_src_stride[i] = e->src_stride[i];
-            }
+  static void single(ckernel_prefix *extra, char *dst, char *const *src)
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    expr_strided_t opchild = echild->get_function<expr_strided_t>();
+    // Broadcast all the src 'var' dimensions to dst
+    intptr_t dim_size = e->size;
+    char *modified_src[N];
+    intptr_t modified_src_stride[N];
+    for (int i = 0; i < N; ++i) {
+      if (e->is_src_var[i]) {
+        var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
+        modified_src[i] = vddd->begin + e->src_offset[i];
+        if (vddd->size == 1) {
+          modified_src_stride[i] = 0;
+        } else if (vddd->size == static_cast<size_t>(dim_size)) {
+          modified_src_stride[i] = e->src_stride[i];
+        } else {
+          throw broadcast_error(dim_size, vddd->size, "strided dim", "var dim");
         }
-        opchild(dst, e->dst_stride, modified_src, modified_src_stride, dim_size, echild);
+      } else {
+        // strided dimensions were fully broadcast in the kernel factory
+        modified_src[i] = src[i];
+        modified_src_stride[i] = e->src_stride[i];
+      }
     }
+    opchild(echild, dst, e->dst_stride, modified_src, modified_src_stride,
+            dim_size);
+  }
 
-    static void strided(char *dst, intptr_t dst_stride,
-                    char *const *src, const intptr_t *src_stride,
-                    size_t count, ckernel_prefix *extra)
-    {
-        char *src_loop[N];
-        memcpy(src_loop, src, sizeof(src_loop));
-        for (size_t i = 0; i != count; ++i) {
-            single(dst, src_loop, extra);
-            dst += dst_stride;
-            for (int j = 0; j != N; ++j) {
-                src_loop[j] += src_stride[j];
-            }
-        }
+  static void strided(ckernel_prefix *extra, char *dst, intptr_t dst_stride,
+                      char *const *src, const intptr_t *src_stride,
+                      size_t count)
+  {
+    char *src_loop[N];
+    memcpy(src_loop, src, sizeof(src_loop));
+    for (size_t i = 0; i != count; ++i) {
+      single(extra, dst, src_loop);
+      dst += dst_stride;
+      for (int j = 0; j != N; ++j) {
+        src_loop[j] += src_stride[j];
+      }
     }
+  }
 
-    static void destruct(ckernel_prefix *self)
-    {
-        self->destroy_child_ckernel(sizeof(extra_type));
-    }
+  static void destruct(ckernel_prefix *self)
+  {
+    self->destroy_child_ckernel(sizeof(extra_type));
+  }
 };
 
 template <int N>
@@ -256,7 +238,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
           ->alloc_ck<strided_or_var_to_strided_expr_kernel_extra<N>>(
               ckb_offset);
   e->base.template set_expr_function<
-      strided_or_var_to_strided_expr_kernel_extra<N> >(kernreq);
+      strided_or_var_to_strided_expr_kernel_extra<N>>(kernreq);
   e->base.destructor =
       &strided_or_var_to_strided_expr_kernel_extra<N>::destruct;
   // The dst strided parameters
@@ -303,58 +285,40 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
-                void *ckb, intptr_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                size_t src_count, const ndt::type *src_tp, const char *const*src_arrmeta,
-                kernel_request_t kernreq, const eval::eval_context *ectx,
-                const expr_kernel_generator *elwise_handler)
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, size_t src_count, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq,
+    const eval::eval_context *ectx, const expr_kernel_generator *elwise_handler)
 {
-    switch (src_count) {
-        case 1:
-            return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<1>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 2:
-            return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<2>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 3:
-            return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<3>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 4:
-            return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<4>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 5:
-            return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<5>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        case 6:
-            return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<6>(
-                            ckb, ckb_offset,
-                            dst_tp, dst_arrmeta,
-                            src_count, src_tp, src_arrmeta,
-                            kernreq, ectx,
-                            elwise_handler);
-        default:
-            throw runtime_error("make_elwise_strided_or_var_to_strided_dimension_expr_kernel with src_count > 6 not implemented yet");
-    }
+  switch (src_count) {
+  case 1:
+    return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<1>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 2:
+    return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<2>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 3:
+    return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<3>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 4:
+    return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<4>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 5:
+    return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<5>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  case 6:
+    return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<6>(
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+        kernreq, ectx, elwise_handler);
+  default:
+    throw runtime_error("make_elwise_strided_or_var_to_strided_dimension_expr_"
+                        "kernel with src_count > 6 not implemented yet");
+  }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -366,132 +330,136 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
  * This requires that the child kernel be created with the
  * kernel_request_strided type of kernel.
  */
-template<int N>
+template <int N>
 struct strided_or_var_to_var_expr_kernel_extra {
-    typedef strided_or_var_to_var_expr_kernel_extra extra_type;
+  typedef strided_or_var_to_var_expr_kernel_extra extra_type;
 
-    ckernel_prefix base;
-    memory_block_data *dst_memblock;
-    size_t dst_target_alignment;
-    intptr_t dst_stride, dst_offset, src_stride[N], src_offset[N];
-    bool is_src_var[N];
+  ckernel_prefix base;
+  memory_block_data *dst_memblock;
+  size_t dst_target_alignment;
+  intptr_t dst_stride, dst_offset, src_stride[N], src_offset[N];
+  bool is_src_var[N];
 
-    static void single(char *dst, char *const *src,
-                    ckernel_prefix *extra)
-    {
-        extra_type *e = reinterpret_cast<extra_type *>(extra);
-        ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
-        expr_strided_t opchild = echild->get_function<expr_strided_t>();
-        var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
-        char *modified_dst;
-        intptr_t modified_dst_stride = 0;
-        intptr_t dim_size;
-        char *modified_src[N];
-        intptr_t modified_src_stride[N];
-        if (dst_vddd->begin != NULL) {
-            // If the destination already has allocated data, broadcast to that data
-            modified_dst = dst_vddd->begin + e->dst_offset;
-            // Broadcast all the inputs to the existing destination dimension size
-            dim_size = dst_vddd->size;
-            for (int i = 0; i < N; ++i) {
-                if (e->is_src_var[i]) {
-                    var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
-                    modified_src[i] = vddd->begin + e->src_offset[i];
-                    if (vddd->size == 1) {
-                        modified_src_stride[i] = 0;
-                    } else if (vddd->size == static_cast<size_t>(dim_size)) {
-                        modified_src_stride[i] = e->src_stride[i];
-                    } else {
-                        throw broadcast_error(dim_size, vddd->size, "var dim", "var dim");
-                    }
-                } else {
-                    // strided dimensions are all size 1
-                    modified_src[i] = src[i];
-                    modified_src_stride[i] = e->src_stride[i];
-                }
-            }
+  static void single(ckernel_prefix *extra, char *dst, char *const *src)
+  {
+    extra_type *e = reinterpret_cast<extra_type *>(extra);
+    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    expr_strided_t opchild = echild->get_function<expr_strided_t>();
+    var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
+    char *modified_dst;
+    intptr_t modified_dst_stride = 0;
+    intptr_t dim_size;
+    char *modified_src[N];
+    intptr_t modified_src_stride[N];
+    if (dst_vddd->begin != NULL) {
+      // If the destination already has allocated data, broadcast to that data
+      modified_dst = dst_vddd->begin + e->dst_offset;
+      // Broadcast all the inputs to the existing destination dimension size
+      dim_size = dst_vddd->size;
+      for (int i = 0; i < N; ++i) {
+        if (e->is_src_var[i]) {
+          var_dim_type_data *vddd =
+              reinterpret_cast<var_dim_type_data *>(src[i]);
+          modified_src[i] = vddd->begin + e->src_offset[i];
+          if (vddd->size == 1) {
+            modified_src_stride[i] = 0;
+          } else if (vddd->size == static_cast<size_t>(dim_size)) {
+            modified_src_stride[i] = e->src_stride[i];
+          } else {
+            throw broadcast_error(dim_size, vddd->size, "var dim", "var dim");
+          }
         } else {
-            if (e->dst_offset != 0) {
-                throw runtime_error("Cannot assign to an uninitialized dynd var_dim which has a non-zero offset");
-            }
-            // Broadcast all the inputs together to get the destination size
-            dim_size = 1;
-            for (int i = 0; i < N; ++i) {
-                if (e->is_src_var[i]) {
-                    const var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
-                    modified_src[i] = vddd->begin + e->src_offset[i];
-                    if (vddd->size == 1) {
-                        modified_src_stride[i] = 0;
-                    } else if (dim_size == 1) {
-                        dim_size = vddd->size;
-                        modified_src_stride[i] = e->src_stride[i];
-                    } else if (vddd->size == static_cast<size_t>(dim_size)) {
-                        modified_src_stride[i] = e->src_stride[i];
-                    } else {
-                        throw broadcast_error(dim_size, vddd->size, "var dim", "var dim");
-                    }
-                } else {
-                    // strided dimensions are all size 1
-                    modified_src[i] = src[i];
-                    modified_src_stride[i] = e->src_stride[i];
-                }
-            }
-            // Allocate the output
-            memory_block_data *memblock = e->dst_memblock;
-            if (memblock->m_type == objectarray_memory_block_type) {
-                memory_block_objectarray_allocator_api *allocator =
-                                get_memory_block_objectarray_allocator_api(memblock);
-
-                // Allocate the output array data
-                dst_vddd->begin = allocator->allocate(memblock, dim_size);
-            } else {
-                memory_block_pod_allocator_api *allocator =
-                                get_memory_block_pod_allocator_api(memblock);
-
-                // Allocate the output array data
-                char *dst_end = NULL;
-                allocator->allocate(memblock, dim_size * e->dst_stride,
-                            e->dst_target_alignment, &dst_vddd->begin, &dst_end);
-            }
-            modified_dst = dst_vddd->begin;
-            dst_vddd->size = dim_size;
-            if (dim_size <= 1) {
-                modified_dst_stride = 0;
-            } else {
-                modified_dst_stride = e->dst_stride;
-            }
+          // strided dimensions are all size 1
+          modified_src[i] = src[i];
+          modified_src_stride[i] = e->src_stride[i];
         }
-        opchild(modified_dst, modified_dst_stride, modified_src, modified_src_stride, dim_size, echild);
-    }
-
-    static void strided(char *dst, intptr_t dst_stride,
-                    char *const *src, const intptr_t *src_stride,
-                    size_t count, ckernel_prefix *extra)
-    {
-        char *src_loop[N];
-        memcpy(src_loop, src, sizeof(src_loop));
-        for (size_t i = 0; i != count; ++i) {
-            single(dst, src_loop, extra);
-            dst += dst_stride;
-            for (int j = 0; j != N; ++j) {
-                src_loop[j] += src_stride[j];
-            }
+      }
+    } else {
+      if (e->dst_offset != 0) {
+        throw runtime_error("Cannot assign to an uninitialized dynd var_dim "
+                            "which has a non-zero offset");
+      }
+      // Broadcast all the inputs together to get the destination size
+      dim_size = 1;
+      for (int i = 0; i < N; ++i) {
+        if (e->is_src_var[i]) {
+          const var_dim_type_data *vddd =
+              reinterpret_cast<var_dim_type_data *>(src[i]);
+          modified_src[i] = vddd->begin + e->src_offset[i];
+          if (vddd->size == 1) {
+            modified_src_stride[i] = 0;
+          } else if (dim_size == 1) {
+            dim_size = vddd->size;
+            modified_src_stride[i] = e->src_stride[i];
+          } else if (vddd->size == static_cast<size_t>(dim_size)) {
+            modified_src_stride[i] = e->src_stride[i];
+          } else {
+            throw broadcast_error(dim_size, vddd->size, "var dim", "var dim");
+          }
+        } else {
+          // strided dimensions are all size 1
+          modified_src[i] = src[i];
+          modified_src_stride[i] = e->src_stride[i];
         }
-    }
+      }
+      // Allocate the output
+      memory_block_data *memblock = e->dst_memblock;
+      if (memblock->m_type == objectarray_memory_block_type) {
+        memory_block_objectarray_allocator_api *allocator =
+            get_memory_block_objectarray_allocator_api(memblock);
 
-    static void destruct(ckernel_prefix *self)
-    {
-        self->destroy_child_ckernel(sizeof(extra_type));
+        // Allocate the output array data
+        dst_vddd->begin = allocator->allocate(memblock, dim_size);
+      } else {
+        memory_block_pod_allocator_api *allocator =
+            get_memory_block_pod_allocator_api(memblock);
+
+        // Allocate the output array data
+        char *dst_end = NULL;
+        allocator->allocate(memblock, dim_size * e->dst_stride,
+                            e->dst_target_alignment, &dst_vddd->begin,
+                            &dst_end);
+      }
+      modified_dst = dst_vddd->begin;
+      dst_vddd->size = dim_size;
+      if (dim_size <= 1) {
+        modified_dst_stride = 0;
+      } else {
+        modified_dst_stride = e->dst_stride;
+      }
     }
+    opchild(echild, modified_dst, modified_dst_stride, modified_src,
+            modified_src_stride, dim_size);
+  }
+
+  static void strided(ckernel_prefix *extra, char *dst, intptr_t dst_stride,
+                      char *const *src, const intptr_t *src_stride,
+                      size_t count)
+  {
+    char *src_loop[N];
+    memcpy(src_loop, src, sizeof(src_loop));
+    for (size_t i = 0; i != count; ++i) {
+      single(extra, dst, src_loop);
+      dst += dst_stride;
+      for (int j = 0; j != N; ++j) {
+        src_loop[j] += src_stride[j];
+      }
+    }
+  }
+
+  static void destruct(ckernel_prefix *self)
+  {
+    self->destroy_child_ckernel(sizeof(extra_type));
+  }
 };
 
-template<int N>
+template <int N>
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
-                void *ckb, intptr_t ckb_offset,
-                const ndt::type& dst_tp, const char *dst_arrmeta,
-                size_t DYND_UNUSED(src_count), const ndt::type *src_tp, const char *const*src_arrmeta,
-                kernel_request_t kernreq, const eval::eval_context *ectx,
-                const expr_kernel_generator *elwise_handler)
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+    const char *dst_arrmeta, size_t DYND_UNUSED(src_count),
+    const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const expr_kernel_generator *elwise_handler)
 {
   intptr_t undim = dst_tp.get_ndim();
   const char *dst_child_arrmeta;
@@ -502,8 +470,8 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   strided_or_var_to_var_expr_kernel_extra<N> *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->alloc_ck<strided_or_var_to_var_expr_kernel_extra<N>>(ckb_offset);
-  e->base.template set_expr_function<strided_or_var_to_var_expr_kernel_extra<N> >(
-      kernreq);
+  e->base.template set_expr_function<
+      strided_or_var_to_var_expr_kernel_extra<N>>(kernreq);
   e->base.destructor = &strided_or_var_to_var_expr_kernel_extra<N>::destruct;
   // The dst var parameters
   const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();

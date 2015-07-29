@@ -372,7 +372,7 @@ struct operand_to_value_ck
     // The src value is a pointer, and copy_value_fn expects a pointer
     // to that pointer
     char **src_ptr = reinterpret_cast<char **>(src[0]);
-    copy_value_fn(dst, src_ptr, copy_value);
+    copy_value_fn(copy_value, dst, src_ptr);
   }
 
   void destruct_children() { get_child_ckernel()->destroy(); }

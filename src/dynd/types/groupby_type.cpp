@@ -265,7 +265,7 @@ struct groupby_to_value_assign_kernel
     for (intptr_t i = 0; i < dvit_dim_size; ++i) {
       UIntType value = *reinterpret_cast<const UIntType *>(by_values_ptr);
       char *&cp = cat_pointers[value];
-      opchild(cp, &dvit_data, echild);
+      opchild(echild, cp, &dvit_data);
       // Advance the pointer inside the cat_pointers array
       cp += vad_stride;
       by_values_ptr += by_values_stride;

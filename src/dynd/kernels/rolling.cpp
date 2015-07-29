@@ -18,13 +18,14 @@ void nd::functional::strided_rolling_ck::single(char *dst, char *const *src)
   expr_strided_t wopchild_fn = wopchild->get_function<expr_strided_t>();
   // Fill in NA/NaN at the beginning
   if (m_dim_size > 0) {
-    nachild_fn(dst, m_dst_stride, NULL, NULL,
-               std::min(m_window_size - 1, m_dim_size), nachild);
+    nachild_fn(nachild, dst, m_dst_stride, NULL, NULL,
+               std::min(m_window_size - 1, m_dim_size));
   }
   // Use stride trickery to do this as one strided call
   if (m_dim_size >= m_window_size) {
-    wopchild_fn(dst + m_dst_stride * (m_window_size - 1), m_dst_stride, src,
-                &m_src_stride, m_dim_size - m_window_size + 1, wopchild);
+    wopchild_fn(wopchild, dst + m_dst_stride * (m_window_size - 1),
+                m_dst_stride, src, &m_src_stride,
+                m_dim_size - m_window_size + 1);
   }
 }
 
@@ -56,14 +57,14 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
 
   // Fill in NA/NaN at the beginning
   if (dim_size > 0) {
-    nachild_fn(dst_arr_ptr, dst_stride, NULL, NULL,
-               std::min(m_window_size - 1, dim_size), nachild);
+    nachild_fn(nachild, dst_arr_ptr, dst_stride, NULL, NULL,
+               std::min(m_window_size - 1, dim_size));
   }
   // Use stride trickery to do this as one strided call
   if (dim_size >= m_window_size) {
-    wopchild_fn(dst_arr_ptr + dst_stride * (m_window_size - 1), dst_stride,
-                &src_arr_ptr, &m_src_stride, dim_size - m_window_size + 1,
-                wopchild);
+    wopchild_fn(wopchild, dst_arr_ptr + dst_stride * (m_window_size - 1),
+                dst_stride, &src_arr_ptr, &m_src_stride,
+                dim_size - m_window_size + 1);
   }
 }
 

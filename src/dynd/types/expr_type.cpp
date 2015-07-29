@@ -236,7 +236,7 @@ struct expr_type_offset_applier_extra
     }
     ckernel_prefix *echild = this->get_child_ckernel();
     expr_single_t opchild = echild->get_function<expr_single_t>();
-    opchild(dst, src_modified, echild);
+    opchild(echild, dst, src_modified);
   }
 
   static void destruct(ckernel_prefix *self)
@@ -264,7 +264,7 @@ struct expr_type_offset_applier_general_extra
     ckernel_prefix *echild = this->get_child_ckernel(
         sizeof(extra_type) + src_count * sizeof(size_t));
     expr_single_t opchild = echild->get_function<expr_single_t>();
-    opchild(dst, src_modified.get(), echild);
+    opchild(echild, dst, src_modified.get());
   }
 
   static void destruct(ckernel_prefix *self)
@@ -314,11 +314,11 @@ static size_t make_expr_type_offset_applier(void *ckb, kernel_request_t kernreq,
   }
 }
 
-static void src_deref_single(char *dst, char *const *src, ckernel_prefix *self)
+static void src_deref_single(ckernel_prefix *self, char *dst, char *const *src)
 {
   ckernel_prefix *child = self->get_child_ckernel(sizeof(ckernel_prefix));
   expr_single_t child_fn = child->get_function<expr_single_t>();
-  child_fn(dst, reinterpret_cast<char *const *>(*src), child);
+  child_fn(child, dst, reinterpret_cast<char *const *>(*src));
 }
 
 static size_t make_src_deref_ckernel(void *ckb, intptr_t ckb_offset)

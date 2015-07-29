@@ -32,13 +32,13 @@ TEST(Reduction, BuiltinSum_Kernel)
   fn = ckb.get()->get_function<expr_single_t>();
   int32_t s32 = 0, a32[3] = {1, -2, 12};
   src = (char *)&a32[0];
-  fn((char *)&s32, &src, ckb.get());
+  fn(ckb.get(), (char *)&s32, &src);
   EXPECT_EQ(1, s32);
   src = (char *)&a32[1];
-  fn((char *)&s32, &src, ckb.get());
+  fn(ckb.get(), (char *)&s32, &src);
   EXPECT_EQ(-1, s32);
   src = (char *)&a32[2];
-  fn((char *)&s32, &src, ckb.get());
+  fn(ckb.get(), (char *)&s32, &src);
   EXPECT_EQ(11, s32);
 
   // int64
@@ -48,13 +48,13 @@ TEST(Reduction, BuiltinSum_Kernel)
   fn = ckb.get()->get_function<expr_single_t>();
   int64_t s64 = 0, a64[3] = {1, -20000000000LL, 12};
   src = (char *)&a64[0];
-  fn((char *)&s64, &src, ckb.get());
+  fn(ckb.get(), (char *)&s64, &src);
   EXPECT_EQ(1, s64);
   src = (char *)&a64[1];
-  fn((char *)&s64, &src, ckb.get());
+  fn(ckb.get(), (char *)&s64, &src);
   EXPECT_EQ(-19999999999LL, s64);
   src = (char *)&a64[2];
-  fn((char *)&s64, &src, ckb.get());
+  fn(ckb.get(), (char *)&s64, &src);
   EXPECT_EQ(-19999999987LL, s64);
 
   // float32
@@ -64,13 +64,13 @@ TEST(Reduction, BuiltinSum_Kernel)
   fn = ckb.get()->get_function<expr_single_t>();
   float sf32 = 0, af32[3] = {1.25f, -2.5f, 12.125f};
   src = (char *)&af32[0];
-  fn((char *)&sf32, &src, ckb.get());
+  fn(ckb.get(), (char *)&sf32, &src);
   EXPECT_EQ(1.25f, sf32);
   src = (char *)&af32[1];
-  fn((char *)&sf32, &src, ckb.get());
+  fn(ckb.get(), (char *)&sf32, &src);
   EXPECT_EQ(-1.25f, sf32);
   src = (char *)&af32[2];
-  fn((char *)&sf32, &src, ckb.get());
+  fn(ckb.get(), (char *)&sf32, &src);
   EXPECT_EQ(10.875f, sf32);
 
   // float64
@@ -80,13 +80,13 @@ TEST(Reduction, BuiltinSum_Kernel)
   fn = ckb.get()->get_function<expr_single_t>();
   double sf64 = 0, af64[3] = {1.25, -2.5, 12.125};
   src = (char *)&af64[0];
-  fn((char *)&sf64, &src, ckb.get());
+  fn(ckb.get(), (char *)&sf64, &src);
   EXPECT_EQ(1.25, sf64);
   src = (char *)&af64[1];
-  fn((char *)&sf64, &src, ckb.get());
+  fn(ckb.get(), (char *)&sf64, &src);
   EXPECT_EQ(-1.25, sf64);
   src = (char *)&af64[2];
-  fn((char *)&sf64, &src, ckb.get());
+  fn(ckb.get(), (char *)&sf64, &src);
   EXPECT_EQ(10.875, sf64);
 
   // complex[float32]
@@ -99,13 +99,13 @@ TEST(Reduction, BuiltinSum_Kernel)
                                    dynd::complex<float>(-2.5f, 1.0f),
                                    dynd::complex<float>(12.125f, 12345.f)};
   src = (char *)&acf32[0];
-  fn((char *)&scf32, &src, ckb.get());
+  fn(ckb.get(), (char *)&scf32, &src);
   EXPECT_EQ(dynd::complex<float>(1.25f, -2.125f), scf32);
   src = (char *)&acf32[1];
-  fn((char *)&scf32, &src, ckb.get());
+  fn(ckb.get(), (char *)&scf32, &src);
   EXPECT_EQ(dynd::complex<float>(-1.25f, -1.125f), scf32);
   src = (char *)&acf32[2];
-  fn((char *)&scf32, &src, ckb.get());
+  fn(ckb.get(), (char *)&scf32, &src);
   EXPECT_EQ(dynd::complex<float>(10.875f, 12343.875f), scf32);
 
   // complex[float64]
@@ -118,13 +118,13 @@ TEST(Reduction, BuiltinSum_Kernel)
                                     dynd::complex<double>(-2.5, 1.0),
                                     dynd::complex<double>(12.125, 12345.)};
   src = (char *)&acf64[0];
-  fn((char *)&scf64, &src, ckb.get());
+  fn(ckb.get(), (char *)&scf64, &src);
   EXPECT_EQ(dynd::complex<float>(1.25, -2.125), scf64);
   src = (char *)&acf64[1];
-  fn((char *)&scf64, &src, ckb.get());
+  fn(ckb.get(), (char *)&scf64, &src);
   EXPECT_EQ(dynd::complex<double>(-1.25, -1.125), scf64);
   src = (char *)&acf64[2];
-  fn((char *)&scf64, &src, ckb.get());
+  fn(ckb.get(), (char *)&scf64, &src);
   EXPECT_EQ(dynd::complex<double>(10.875, 12343.875), scf64);
 }
 
@@ -158,7 +158,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(1.25f, b.as<float>());
 }
 
@@ -193,7 +193,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(100.f + 1.25f, b.as<float>());
 }
 
@@ -228,7 +228,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
             b.as<float>());
 
@@ -246,7 +246,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
 
   // Call it on the data
   src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(vals1[0], b.as<float>());
 }
 
@@ -282,7 +282,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(100.f + vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
             b.as<float>());
 }
@@ -318,7 +318,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f, b.as<float>());
 
   // Instantiate it again with some different data
@@ -334,7 +334,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
 
   // Call it on the data
   src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(1.5f - 2.f, b.as<float>());
 }
 
@@ -369,7 +369,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f, b(0, 0).as<float>());
 }
 
@@ -404,7 +404,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   ASSERT_EQ(2, b.get_shape()[0]);
   EXPECT_EQ(1.5f + 2.f + 7.f, b(0).as<float>());
   EXPECT_EQ(-2.25f + 7 + 2.125f, b(1).as<float>());
@@ -423,7 +423,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
 
   // Call it on the data
   src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   ASSERT_EQ(1, b.get_shape()[0]);
   EXPECT_EQ(1.5f - 2.f, b(0).as<float>());
 }
@@ -459,7 +459,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   ASSERT_EQ(2, b.get_shape()[0]);
   EXPECT_EQ(1.5f + 2.f + 7.f, b(0, 0).as<float>());
   EXPECT_EQ(-2.25f + 7 + 2.125f, b(1, 0).as<float>());
@@ -496,7 +496,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   ASSERT_EQ(3, b.get_shape()[0]);
   EXPECT_EQ(1.5f - 2.25f, b(0).as<float>());
   EXPECT_EQ(2.f + 7.f, b(1).as<float>());
@@ -516,7 +516,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
 
   // Call it on the data
   src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   ASSERT_EQ(2, b.get_shape()[0]);
   EXPECT_EQ(1.5f, b(0).as<float>());
   EXPECT_EQ(-2.f, b(1).as<float>());
@@ -553,7 +553,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   ASSERT_EQ(3, b.get_shape()[1]);
   EXPECT_EQ(1.5f - 2.25f, b(0, 0).as<float>());
   EXPECT_EQ(2.f + 7.f, b(0, 1).as<float>());
@@ -593,7 +593,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   EXPECT_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f - 2.25f + 1.f + 7.f +
                 2.125f + 0.25f,
             b.as<float>());
@@ -632,7 +632,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   ASSERT_EQ(2, b.get_shape()[0]);
   EXPECT_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f, b(0).as<float>());
   EXPECT_EQ(-2.25f + 1.f + 7.f + 2.125f + 0.25f, b(1).as<float>());
@@ -672,7 +672,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
 
   // Call it on the data
   char *src = const_cast<char *>(a.get_readonly_originptr());
-  fn(b.get_readwrite_originptr(), &src, ckb.get());
+  fn(ckb.get(), b.get_readwrite_originptr(), &src);
   ASSERT_EQ(3, b.get_shape()[0]);
   EXPECT_EQ(1.5f - 2.375f - 2.25f + 1.f, b(0).as<float>());
   EXPECT_EQ(2.f + 1.25f + 7.f, b(1).as<float>());

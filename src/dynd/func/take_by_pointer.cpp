@@ -29,7 +29,7 @@ struct take_by_pointer_outer_ck
 
     char *src_copy[2] = {src[0], src[1]};
     for (intptr_t i = 0; i < dst_size; ++i) {
-      child_fn(dst, src_copy, child);
+      child_fn(child, dst, src_copy);
       dst += dst_stride;
       src_copy[1] += src1_stride;
     }
@@ -56,7 +56,7 @@ struct take_by_pointer_ck
     intptr_t i = apply_single_index(*reinterpret_cast<const intptr_t *>(src[1]),
                                     src0_size, NULL);
     char *src_copy[2] = {src[0] + i * src0_stride, src[1] + src1_inner_stride};
-    child_fn(dst, src_copy, child);
+    child_fn(child, dst, src_copy);
   }
 };
 

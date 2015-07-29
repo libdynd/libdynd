@@ -41,7 +41,7 @@ public:
   {
     int dst;
     char *s[2] = {m_originptr + i * m_stride, m_originptr + j * m_stride};
-    m_less(reinterpret_cast<char *>(&dst), s, m_less_self);
+    m_less(m_less_self, reinterpret_cast<char *>(&dst), s);
 
     return dst != 0;
   }
@@ -62,7 +62,7 @@ public:
     int dst;
     char *s[2] = {const_cast<char *>(a), const_cast<char *>(b)};
 
-    m_less(reinterpret_cast<char *>(&dst), s, m_less_self);
+    m_less(m_less_self, reinterpret_cast<char *>(&dst), s);
     return dst != 0;
   }
 };
@@ -84,7 +84,7 @@ struct categorical_to_other_kernel
     uint32_t value = *reinterpret_cast<const UIntType *>(src[0]);
     char *src_val =
         const_cast<char *>(src_cat_tp->get_category_data_from_value(value));
-    opchild(dst, &src_val, echild);
+    opchild(echild, dst, &src_val);
   }
 
   static void destruct(ckernel_prefix *self)
@@ -192,7 +192,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
   for (set<const char *, cmp>::const_iterator it = uniques.begin();
        it != uniques.end(); ++it) {
     char *src = const_cast<char *>(*it);
-    fn(dst_ptr, &src, k.get());
+    fn(k.get(), dst_ptr, &src);
     dst_ptr += stride;
   }
   categories.get_type().extended()->arrmeta_finalize_buffers(
@@ -421,7 +421,7 @@ nd::array ndt::categorical_type::get_categories() const
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   for (intptr_t i = 0; i < dim_size; ++i) {
     char *src = const_cast<char *>(get_category_data_from_value((uint32_t)i));
-    fn(categories.get_readwrite_originptr() + i * stride, &src, k.get());
+    fn(k.get(), categories.get_readwrite_originptr() + i * stride, &src);
   }
   return categories;
 }

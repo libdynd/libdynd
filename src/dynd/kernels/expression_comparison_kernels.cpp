@@ -71,13 +71,13 @@ struct buffered_kernel_extra {
     expr_single_t opchild;
     echild = reinterpret_cast<ckernel_prefix *>(eraw + b.kernel_offset);
     opchild = echild->get_function<expr_single_t>();
-    opchild(dst, const_cast<char **>(&src), echild);
+    opchild(echild, dst, const_cast<char **>(&src));
 
     // Return the buffer
     return dst;
   }
 
-  static void kernel(char *dst, char *const *src, ckernel_prefix *extra)
+  static void kernel(ckernel_prefix *extra, char *dst, char *const *src)
   {
     char *src_buffered[2];
     char *eraw = reinterpret_cast<char *>(extra);
@@ -100,7 +100,7 @@ struct buffered_kernel_extra {
     echild = reinterpret_cast<ckernel_prefix *>(eraw + e->cmp_kernel_offset);
     opchild = echild->get_function<expr_single_t>();
     int result;
-    opchild(reinterpret_cast<char *>(&result), src_buffered, echild);
+    opchild(echild, reinterpret_cast<char *>(&result), src_buffered);
 
     // Clear the buffer data if necessary
     if (e->buf[0].arrmeta != NULL) {

@@ -658,34 +658,44 @@ static float checked_float64_to_float32(double value, assign_error_mode errmode)
   char *src[1] = {reinterpret_cast<char *>(&value)};
   switch (errmode) {
   case assign_error_nocheck:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind,
-                                        float64_type_id, real_kind,
-                                        assign_error_nocheck>::
-        single_wrapper(reinterpret_cast<char *>(&out.dst), src, NULL);
+    dynd::nd::detail::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_nocheck>::single_wrapper(NULL,
+                                              reinterpret_cast<char *>(
+                                                  &out.dst),
+                                              src);
     break;
   case assign_error_overflow:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind,
-                                        float64_type_id, real_kind,
-                                        assign_error_overflow>::
-        single_wrapper(reinterpret_cast<char *>(&out.dst), src, NULL);
+    dynd::nd::detail::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_overflow>::single_wrapper(NULL,
+                                               reinterpret_cast<char *>(
+                                                   &out.dst),
+                                               src);
     break;
   case assign_error_fractional:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind,
-                                        float64_type_id, real_kind,
-                                        assign_error_fractional>::
-        single_wrapper(reinterpret_cast<char *>(&out.dst), src, NULL);
+    dynd::nd::detail::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_fractional>::single_wrapper(NULL,
+                                                 reinterpret_cast<char *>(
+                                                     &out.dst),
+                                                 src);
     break;
   case assign_error_inexact:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind,
-                                        float64_type_id, real_kind,
-                                        assign_error_inexact>::
-        single_wrapper(reinterpret_cast<char *>(&out.dst), src, NULL);
+    dynd::nd::detail::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_inexact>::single_wrapper(NULL,
+                                              reinterpret_cast<char *>(
+                                                  &out.dst),
+                                              src);
     break;
   default:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind,
-                                        float64_type_id, real_kind,
-                                        assign_error_fractional>::
-        single_wrapper(reinterpret_cast<char *>(&out.dst), src, NULL);
+    dynd::nd::detail::assignment_kernel<
+        float32_type_id, real_kind, float64_type_id, real_kind,
+        assign_error_fractional>::single_wrapper(NULL,
+                                                 reinterpret_cast<char *>(
+                                                     &out.dst),
+                                                 src);
     break;
   }
   return out.result;

@@ -777,8 +777,8 @@ struct op_ne<src0_type, src1_type, bool_kind, bool_kind, src0_bigger,
 // Comparison operations
 template <class src0_type, class src1_type>
 struct single_comparison_builtin {
-  inline static void sorting_less(char *dst, char *const *src,
-                                  ckernel_prefix *DYND_UNUSED(self))
+  inline static void sorting_less(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                                  char *const *src)
   {
     src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
     src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
@@ -788,8 +788,8 @@ struct single_comparison_builtin {
         (sizeof(src0_type) > sizeof(src1_type)),
         (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
   }
-  inline static void less(char *dst, char *const *src,
-                          ckernel_prefix *DYND_UNUSED(self))
+  inline static void less(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                          char *const *src)
   {
     src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
     src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
@@ -799,8 +799,8 @@ struct single_comparison_builtin {
         (sizeof(src0_type) > sizeof(src1_type)),
         (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
   }
-  inline static void less_equal(char *dst, char *const *src,
-                                ckernel_prefix *DYND_UNUSED(self))
+  inline static void less_equal(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                                char *const *src)
   {
     src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
     src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
@@ -810,8 +810,8 @@ struct single_comparison_builtin {
         (sizeof(src0_type) > sizeof(src1_type)),
         (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
   }
-  inline static void equal(char *dst, char *const *src,
-                           ckernel_prefix *DYND_UNUSED(self))
+  inline static void equal(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                           char *const *src)
   {
     src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
     src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
@@ -821,8 +821,8 @@ struct single_comparison_builtin {
         (sizeof(src0_type) > sizeof(src1_type)),
         (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
   }
-  inline static void not_equal(char *dst, char *const *src,
-                               ckernel_prefix *DYND_UNUSED(self))
+  inline static void not_equal(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                               char *const *src)
   {
     src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
     src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
@@ -832,8 +832,8 @@ struct single_comparison_builtin {
         (sizeof(src0_type) > sizeof(src1_type)),
         (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
   }
-  inline static void greater_equal(char *dst, char *const *src,
-                                   ckernel_prefix *DYND_UNUSED(self))
+  inline static void greater_equal(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                                   char *const *src)
   {
     src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
     src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);
@@ -843,8 +843,8 @@ struct single_comparison_builtin {
         (sizeof(src0_type) > sizeof(src1_type)),
         (sizeof(src0_type) < sizeof(src1_type))>::f(v0, v1);
   }
-  inline static void greater(char *dst, char *const *src,
-                             ckernel_prefix *DYND_UNUSED(self))
+  inline static void greater(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                             char *const *src)
   {
     src0_type v0 = *reinterpret_cast<const src0_type *>(src[0]);
     src1_type v1 = *reinterpret_cast<const src1_type *>(src[1]);

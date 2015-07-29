@@ -559,7 +559,7 @@ static array_preamble *function___call__(const array_preamble *params,
   for (int i = 0; i < nargs - 1; ++i) {
     in_ptrs[i] = const_cast<char *>(args[i + 1].get_readonly_originptr());
   }
-  usngo(args[0].get_readwrite_originptr(), in_ptrs, ckb.get());
+  usngo(ckb.get(), args[0].get_readwrite_originptr(), in_ptrs);
   // Return void
   return nd::empty(ndt::type::make<void>()).release();
 }
@@ -619,7 +619,7 @@ operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
               kernel_request_single, &eval::default_eval_context, kwds,
               tp_vars);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-  fn(dst.get_readwrite_originptr(), src_data, ckb.get());
+  fn(ckb.get(), dst.get_readwrite_originptr(), src_data);
 
   return dst;
 }
@@ -643,5 +643,5 @@ operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data,
               nsrc, src_tp, src_arrmeta, kernel_request_single,
               &eval::default_eval_context, kwds, tp_vars);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-  fn(dst_data, src_data, ckb.get());
+  fn(ckb.get(), dst_data, src_data);
 }

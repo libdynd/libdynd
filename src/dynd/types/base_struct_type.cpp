@@ -278,7 +278,7 @@ struct struct_property_getter_ck
     ckernel_prefix *child = get_child_ckernel();
     expr_single_t child_fn = child->get_function<expr_single_t>();
     char *src_copy = src[0] + m_field_offset;
-    child_fn(dst, &src_copy, child);
+    child_fn(child, dst, &src_copy);
   }
 
   void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -287,7 +287,7 @@ struct struct_property_getter_ck
     ckernel_prefix *child = get_child_ckernel();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     char *src_copy = src[0] + m_field_offset;
-    child_fn(dst, dst_stride, &src_copy, src_stride, count, child);
+    child_fn(child, dst, dst_stride, &src_copy, src_stride, count);
   }
 
   inline void destruct_children() { get_child_ckernel()->destroy(); }
