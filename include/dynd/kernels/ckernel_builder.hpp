@@ -25,7 +25,7 @@ inline void inc_ckb_offset(intptr_t &inout_ckb_offset, size_t inc)
   inout_ckb_offset += static_cast<intptr_t>(ckernel_prefix::align_offset(inc));
 }
 
-template <class T>
+template <class T = ckernel_prefix>
 void inc_ckb_offset(intptr_t &inout_ckb_offset)
 {
   inc_ckb_offset(inout_ckb_offset, sizeof(T));
@@ -125,19 +125,19 @@ public:
     return reinterpret_cast<T *>(m_data + ckb_offset);
   }
 
+  ckernel_prefix *get() const
+  {
+    return reinterpret_cast<ckernel_prefix *>(m_data);
+  }
+
   /**
    * For use during construction, gets the ckernel component
    * at the requested offset.
    */
-  template <class T>
-  T *get_at(size_t offset)
+  template <typename KernelType>
+  KernelType *get_at(size_t offset)
   {
-    return reinterpret_cast<T *>(m_data + offset);
-  }
-
-  ckernel_prefix *get() const
-  {
-    return reinterpret_cast<ckernel_prefix *>(m_data);
+    return reinterpret_cast<KernelType *>(m_data + offset);
   }
 
   void swap(base_ckernel_builder &rhs)
@@ -375,5 +375,48 @@ public:
 };
 
 #endif
+
+template <typename CKBT>
+ckernel_prefix *ckernel_prefix::make(CKBT *ckb, kernel_request_t kernreq,
+                                     intptr_t &inout_ckb_offset, void *func)
+{
+  intptr_t ckb_offset = inout_ckb_offset;
+  inc_ckb_offset<ckernel_prefix>(inout_ckb_offset);
+  ckb->reserve(inout_ckb_offset);
+  ckernel_prefix *rawself = ckb->template get_at<ckernel_prefix>(ckb_offset);
+  return ckb->template init<ckernel_prefix>(rawself, kernreq, func);
+}
+
+inline intptr_t ckernel_prefix::instantiate(
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+    void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *DYND_UNUSED(src_tp),
+    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx),
+    const nd::array &DYND_UNUSED(kwds),
+    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+{
+  void *func;
+  switch (kernreq) {
+  case kernel_request_single:
+    func = *reinterpret_cast<void **>(static_data);
+    break;
+  case kernel_request_strided:
+    func = *(reinterpret_cast<void **>(static_data) + 1);
+    break;
+  default:
+    throw std::invalid_argument("unrecognized kernel request");
+    break;
+  }
+
+  if (func == NULL) {
+    throw std::invalid_argument("no kernel request");
+  }
+
+  make(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
+       ckb_offset, func);
+  return ckb_offset;
+}
 
 } // namespace dynd

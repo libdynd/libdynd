@@ -24,6 +24,19 @@
 using namespace std;
 using namespace dynd;
 
+TEST(Callable, SingleStridedConstructor)
+{
+  nd::callable f(
+      ndt::type("(int32) -> int32"),
+      [](char *dst, char *const *src, ckernel_prefix *DYND_UNUSED(self)) {
+        *reinterpret_cast<int32 *>(dst) =
+            *reinterpret_cast<int32 *>(src[0]) + 5;
+      },
+      NULL);
+
+  EXPECT_EQ(8, f(3));
+}
+
 TEST(Callable, Assignment)
 {
   // Create an callable for converting string to int

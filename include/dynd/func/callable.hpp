@@ -728,6 +728,14 @@ namespace nd {
   public:
     callable() = default;
 
+    callable(const ndt::type &self_tp, expr_single_t single,
+             expr_strided_t strided)
+        : m_value(empty(self_tp))
+    {
+      new (m_value.get_readwrite_originptr())
+          callable_type_data(single, strided);
+    }
+
     callable(const ndt::type &self_tp, std::size_t data_size,
              callable_data_init_t data_init,
              callable_resolve_dst_type_t resolve_dst_type,
