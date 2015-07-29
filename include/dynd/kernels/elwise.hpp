@@ -276,7 +276,7 @@ namespace nd {
         ckernel_prefix *child = this->get_child_ckernel();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
-        opchild(dst, m_dst_stride, src, m_src_stride, m_size, child);
+        opchild(child, dst, m_dst_stride, src, m_src_stride, m_size);
       }
 
       DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
@@ -293,7 +293,7 @@ namespace nd {
         }
 
         for (size_t i = 0; i < count; i += 1) {
-          opchild(dst, m_dst_stride, src_loop, m_src_stride, m_size, child);
+          opchild(child, dst, m_dst_stride, src_loop, m_src_stride, m_size);
           dst += dst_stride;
           for (int j = 0; j != N; ++j) {
             src_loop[j] += src_stride[j];
@@ -407,7 +407,7 @@ namespace nd {
       {
         ckernel_prefix *child = this->get_child_ckernel();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
-        opchild(dst, m_dst_stride, src, NULL, m_size, child);
+        opchild(child, dst, m_dst_stride, src, NULL, m_size);
       }
 
       DYND_CUDA_HOST_DEVICE void
@@ -418,7 +418,7 @@ namespace nd {
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         for (size_t i = 0; i < count; i += 1) {
-          opchild(dst, m_dst_stride, NULL, NULL, m_size, child);
+          opchild(child, dst, m_dst_stride, NULL, NULL, m_size);
           dst += dst_stride;
         }
       }
@@ -533,8 +533,8 @@ namespace nd {
             modified_src_stride[i] = m_src_stride[i];
           }
         }
-        opchild(dst, m_dst_stride, modified_src, modified_src_stride, dim_size,
-                child);
+        opchild(child, dst, m_dst_stride, modified_src, modified_src_stride,
+                dim_size);
       }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -668,7 +668,7 @@ namespace nd {
 
         // Broadcast all the src 'var' dimensions to dst
         intptr_t dim_size = m_size;
-        opchild(dst, m_dst_stride, NULL, NULL, dim_size, child);
+        opchild(child, dst, m_dst_stride, NULL, NULL, dim_size);
       }
 
       void strided(char *dst, intptr_t dst_stride,
@@ -872,8 +872,8 @@ namespace nd {
         } else {
           modified_dst_stride = m_dst_stride;
         }
-        opchild(modified_dst, modified_dst_stride, modified_src,
-                modified_src_stride, dim_size, child);
+        opchild(child, modified_dst, modified_dst_stride, modified_src,
+                modified_src_stride, dim_size);
       }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -1051,7 +1051,7 @@ namespace nd {
         } else {
           modified_dst_stride = m_dst_stride;
         }
-        opchild(modified_dst, modified_dst_stride, NULL, NULL, dim_size, child);
+        opchild(child, modified_dst, modified_dst_stride, NULL, NULL, dim_size);
       }
 
       static void destruct(ckernel_prefix *self)

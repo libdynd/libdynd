@@ -20,7 +20,7 @@ struct buffered_ck
   vector<intptr_t> m_src_buf_ck_offsets;
   vector<buffer_storage> m_bufs;
 
-  static void single(char *dst, char *const *src, ckernel_prefix *rawself)
+  static void single(ckernel_prefix *rawself, char *dst, char *const *src)
   {
     self_type *self = get_self(rawself);
     vector<char *> buf_src(self->m_nsrc);
@@ -30,7 +30,7 @@ struct buffered_ck
         ckernel_prefix *ck =
             self->get_child_ckernel(self->m_src_buf_ck_offsets[i]);
         expr_single_t ck_fn = ck->get_function<expr_single_t>();
-        ck_fn(self->m_bufs[i].get_storage(), &src[i], ck);
+        ck_fn(ck, self->m_bufs[i].get_storage(), &src[i]);
         buf_src[i] = self->m_bufs[i].get_storage();
       } else {
         buf_src[i] = src[i];
@@ -38,12 +38,12 @@ struct buffered_ck
     }
     ckernel_prefix *child = self->get_child_ckernel();
     expr_single_t child_fn = child->get_function<expr_single_t>();
-    child_fn(dst, &buf_src[0], child);
+    child_fn(child, dst, &buf_src[0]);
   }
 
-  static void strided(char *dst, intptr_t dst_stride, char *const *src,
-                      const intptr_t *src_stride, size_t count,
-                      ckernel_prefix *rawself)
+  static void strided(ckernel_prefix *rawself, char *dst, intptr_t dst_stride,
+                      char *const *src, const intptr_t *src_stride,
+                      size_t count)
   {
     self_type *self = get_self(rawself);
     vector<char *> buf_src(self->m_nsrc);
@@ -69,19 +69,19 @@ struct buffered_ck
           ckernel_prefix *ck =
               self->get_child_ckernel(self->m_src_buf_ck_offsets[i]);
           expr_strided_t ck_fn = ck->get_function<expr_strided_t>();
-          ck_fn(self->m_bufs[i].get_storage(), self->m_bufs[i].get_stride(),
-                &src[i], &src_stride[i], chunk_size, ck);
+          ck_fn(ck, self->m_bufs[i].get_storage(), self->m_bufs[i].get_stride(),
+                &src[i], &src_stride[i], chunk_size);
         }
       }
-      child_fn(dst, dst_stride, &buf_src[0], &buf_stride[0], chunk_size, child);
+      child_fn(child, dst, dst_stride, &buf_src[0], &buf_stride[0], chunk_size);
       for (intptr_t i = 0; i < self->m_nsrc; ++i) {
         if (!self->m_bufs[i].is_null()) {
           self->m_bufs[i].reset_arrmeta();
           ckernel_prefix *ck =
               self->get_child_ckernel(self->m_src_buf_ck_offsets[i]);
           expr_strided_t ck_fn = ck->get_function<expr_strided_t>();
-          ck_fn(self->m_bufs[i].get_storage(), buf_stride[i], &src[i],
-                &src_stride[i], chunk_size, ck);
+          ck_fn(ck, self->m_bufs[i].get_storage(), buf_stride[i], &src[i],
+                &src_stride[i], chunk_size);
         } else {
           buf_src[i] += chunk_size * buf_stride[i];
         }

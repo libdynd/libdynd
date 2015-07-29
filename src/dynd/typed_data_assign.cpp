@@ -191,7 +191,7 @@ void dynd::typed_data_copy(const ndt::type &tp, const char *dst_arrmeta,
                            kernel_request_single, &eval::default_eval_context);
     expr_single_t fn = k.get()->get_function<expr_single_t>();
     char *src = const_cast<char *>(src_data);
-    fn(dst_data, &src, k.get());
+    fn(k.get(), dst_data, &src);
   }
 }
 
@@ -210,7 +210,7 @@ void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
                          kernel_request_single, ectx);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   char *src = const_cast<char *>(src_data);
-  fn(dst_data, &src, k.get());
+  fn(k.get(), dst_data, &src);
 }
 
 void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,

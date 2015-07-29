@@ -135,8 +135,8 @@ static int buffered_strided_dim_iter_next(dim_iter *self)
     ckernel_prefix *kdp = ckb->get();
     expr_strided_t fn = kdp->get_function<expr_strided_t>();
     const char *child_data_ptr = data_ptr + i * stride;
-    fn(buf.get_readwrite_originptr(), self->data_stride,
-       const_cast<char **>(&child_data_ptr), &stride, bufsize, kdp);
+    fn(kdp, buf.get_readwrite_originptr(), self->data_stride,
+       const_cast<char **>(&child_data_ptr), &stride, bufsize);
     // Update the dim_iter's size
     self->data_elcount = bufsize;
     return 1;
@@ -206,8 +206,8 @@ void dynd::make_buffered_strided_dim_iter(
     // create a strided dim_iter around it.
     ckernel_prefix *kdp = k.get();
     expr_strided_t fn = kdp->get_function<expr_strided_t>();
-    fn(buf.get_readwrite_originptr(), buffer_stride,
-       const_cast<char **>(&data_ptr), &stride, size, kdp);
+    fn(kdp, buf.get_readwrite_originptr(), buffer_stride,
+       const_cast<char **>(&data_ptr), &stride, size);
     make_strided_dim_iter(
         out_di, val_tp, buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta),
         buf.get_readonly_originptr(), size, buffer_stride, buf.get_memblock());

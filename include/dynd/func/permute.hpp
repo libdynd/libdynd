@@ -35,7 +35,7 @@ namespace kernels {
 
       ckernel_prefix *child = this->get_child_ckernel();
       expr_single_t single = child->get_function<expr_single_t>();
-      single(NULL, src_inv_perm, child);
+      single(child, NULL, src_inv_perm);
     }
 
     DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
@@ -50,7 +50,7 @@ namespace kernels {
 
       ckernel_prefix *child = this->get_child_ckernel();
       expr_strided_t strided = child->get_function<expr_strided_t>();
-      strided(NULL, 0, src_inv_perm, src_stride_inv_perm, count, child);
+      strided(child, NULL, 0, src_inv_perm, src_stride_inv_perm, count);
     }
 
     static intptr_t

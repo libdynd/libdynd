@@ -24,6 +24,19 @@
 using namespace std;
 using namespace dynd;
 
+TEST(Callable, SingleStridedConstructor)
+{
+  nd::callable f(
+      ndt::type("(int32) -> int32"),
+      [](ckernel_prefix *DYND_UNUSED(self), char *dst, char *const *src) {
+        *reinterpret_cast<int32 *>(dst) =
+            *reinterpret_cast<int32 *>(src[0]) + 5;
+      },
+      NULL);
+
+  EXPECT_EQ(8, f(3));
+}
+
 TEST(Callable, Assignment)
 {
   // Create an callable for converting string to int
@@ -48,8 +61,8 @@ TEST(Callable, Assignment)
   char str_in[16] = "3251";
   const char *str_in_ptr = str_in;
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  usngo(reinterpret_cast<char *>(&int_out), const_cast<char **>(&str_in_ptr),
-        ckb.get());
+  usngo(ckb.get(), reinterpret_cast<char *>(&int_out),
+        const_cast<char **>(&str_in_ptr));
   EXPECT_EQ(3251, int_out);
 
   // Instantiate a strided ckernel
@@ -64,8 +77,8 @@ TEST(Callable, Assignment)
   const char *strs_in_ptr = strs_in[0];
   expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
   intptr_t strs_in_stride = sizeof(strs_in[0]);
-  ustro(reinterpret_cast<char *>(&ints_out), sizeof(int),
-        const_cast<char **>(&strs_in_ptr), &strs_in_stride, 3, ckb.get());
+  ustro(ckb.get(), reinterpret_cast<char *>(&ints_out), sizeof(int),
+        const_cast<char **>(&strs_in_ptr), &strs_in_stride, 3);
   EXPECT_EQ(123, ints_out[0]);
   EXPECT_EQ(4567, ints_out[1]);
   EXPECT_EQ(891029, ints_out[2]);
@@ -274,8 +287,8 @@ TEST(Callable, Property)
   int date_in = date_ymd::to_days(2013, 12, 30);
   const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  usngo(reinterpret_cast<char *>(&int_out), const_cast<char **>(&date_in_ptr),
-        ckb.get());
+  usngo(ckb.get(), reinterpret_cast<char *>(&int_out),
+        const_cast<char **>(&date_in_ptr));
   EXPECT_EQ(2013, int_out);
 }
 
@@ -303,7 +316,7 @@ TEST(Callable, AssignmentAsExpr)
   char str_in[16] = "3251";
   char *str_in_ptr = str_in;
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  usngo(reinterpret_cast<char *>(&int_out), &str_in_ptr, ckb.get());
+  usngo(ckb.get(), reinterpret_cast<char *>(&int_out), &str_in_ptr);
   EXPECT_EQ(3251, int_out);
 
   // Instantiate a strided ckernel
@@ -318,8 +331,8 @@ TEST(Callable, AssignmentAsExpr)
   char *strs_in_ptr = strs_in[0];
   intptr_t strs_in_stride = 16;
   expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
-  ustro(reinterpret_cast<char *>(&ints_out), sizeof(int), &strs_in_ptr,
-        &strs_in_stride, 3, ckb.get());
+  ustro(ckb.get(), reinterpret_cast<char *>(&ints_out), sizeof(int),
+        &strs_in_ptr, &strs_in_stride, 3);
   EXPECT_EQ(123, ints_out[0]);
   EXPECT_EQ(4567, ints_out[1]);
   EXPECT_EQ(891029, ints_out[2]);

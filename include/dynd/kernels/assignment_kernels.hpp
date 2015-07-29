@@ -2561,9 +2561,9 @@ namespace nd {
 
   template <int N>
   struct wrap_single_as_strided_fixedcount_ck {
-    static void strided(char *dst, intptr_t dst_stride, char *const *src,
-                        const intptr_t *src_stride, size_t count,
-                        ckernel_prefix *self)
+    static void strided(ckernel_prefix *self, char *dst, intptr_t dst_stride,
+                        char *const *src, const intptr_t *src_stride,
+                        size_t count)
     {
       ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
       expr_single_t opchild = echild->get_function<expr_single_t>();
@@ -2572,7 +2572,7 @@ namespace nd {
         src_copy[j] = src[j];
       }
       for (size_t i = 0; i != count; ++i) {
-        opchild(dst, src_copy, echild);
+        opchild(echild, dst, src_copy);
         dst += dst_stride;
         for (int j = 0; j < N; ++j) {
           src_copy[j] += src_stride[j];
@@ -2583,15 +2583,14 @@ namespace nd {
 
   template <>
   struct wrap_single_as_strided_fixedcount_ck<0> {
-    static void strided(char *dst, intptr_t dst_stride,
+    static void strided(ckernel_prefix *self, char *dst, intptr_t dst_stride,
                         char *const *DYND_UNUSED(src),
-                        const intptr_t *DYND_UNUSED(src_stride), size_t count,
-                        ckernel_prefix *self)
+                        const intptr_t *DYND_UNUSED(src_stride), size_t count)
     {
       ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
       expr_single_t opchild = echild->get_function<expr_single_t>();
       for (size_t i = 0; i != count; ++i) {
-        opchild(dst, NULL, echild);
+        opchild(echild, dst, NULL);
         dst += dst_stride;
       }
     }
@@ -2602,16 +2601,16 @@ namespace nd {
     ckernel_prefix base;
     intptr_t nsrc;
 
-    static inline void strided(char *dst, intptr_t dst_stride, char *const *src,
-                               const intptr_t *src_stride, size_t count,
-                               ckernel_prefix *self)
+    static inline void strided(ckernel_prefix *self, char *dst,
+                               intptr_t dst_stride, char *const *src,
+                               const intptr_t *src_stride, size_t count)
     {
       intptr_t nsrc = reinterpret_cast<self_type *>(self)->nsrc;
       shortvector<char *> src_copy(nsrc, src);
       ckernel_prefix *child = self->get_child_ckernel(sizeof(self_type));
       expr_single_t child_fn = child->get_function<expr_single_t>();
       for (size_t i = 0; i != count; ++i) {
-        child_fn(dst, src_copy.get(), child);
+        child_fn(child, dst, src_copy.get());
         dst += dst_stride;
         for (intptr_t j = 0; j < nsrc; ++j) {
           src_copy[j] += src_stride[j];

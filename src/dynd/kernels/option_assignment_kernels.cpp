@@ -34,19 +34,19 @@ struct option_to_option_ck
     ckernel_prefix *src_is_avail = get_child_ckernel();
     expr_single_t src_is_avail_fn = src_is_avail->get_function<expr_single_t>();
     bool1 avail = bool1(false);
-    src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
+    src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(&avail), src);
     if (avail) {
       // It's available, copy using value assignment
       ckernel_prefix *value_assign = get_child_ckernel(m_value_assign_offset);
       expr_single_t value_assign_fn =
           value_assign->get_function<expr_single_t>();
-      value_assign_fn(dst, src, value_assign);
+      value_assign_fn(value_assign, dst, src);
     } else {
       // It's not available, assign an NA
       ckernel_prefix *dst_assign_na = get_child_ckernel(m_dst_assign_na_offset);
       expr_single_t dst_assign_na_fn =
           dst_assign_na->get_function<expr_single_t>();
-      dst_assign_na_fn(dst, NULL, dst_assign_na);
+      dst_assign_na_fn(dst_assign_na, dst, NULL);
     }
   }
 
@@ -68,23 +68,23 @@ struct option_to_option_ck
     while (count > 0) {
       size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
       count -= chunk_size;
-      src_is_avail_fn(reinterpret_cast<char *>(avail), 1, src, src_stride,
-                      chunk_size, src_is_avail);
+      src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(avail), 1, src,
+                      src_stride, chunk_size);
       void *avail_ptr = avail;
       char *src_copy = src[0];
       do {
         // Process a run of available values
         void *next_avail_ptr = memchr(avail_ptr, 0, chunk_size);
         if (!next_avail_ptr) {
-          value_assign_fn(dst, dst_stride, &src_copy, src_stride, chunk_size,
-                          value_assign);
+          value_assign_fn(value_assign, dst, dst_stride, &src_copy, src_stride,
+                          chunk_size);
           dst += chunk_size * dst_stride;
           src += chunk_size * src_stride[0];
           break;
         } else if (next_avail_ptr > avail_ptr) {
           size_t segment_size = (char *)next_avail_ptr - (char *)avail_ptr;
-          value_assign_fn(dst, dst_stride, &src_copy, src_stride, segment_size,
-                          value_assign);
+          value_assign_fn(value_assign, dst, dst_stride, &src_copy, src_stride,
+                          segment_size);
           dst += segment_size * dst_stride;
           src_copy += segment_size * src_stride[0];
           chunk_size -= segment_size;
@@ -93,15 +93,15 @@ struct option_to_option_ck
         // Process a run of not available values
         next_avail_ptr = memchr(avail_ptr, 1, chunk_size);
         if (!next_avail_ptr) {
-          dst_assign_na_fn(dst, dst_stride, NULL, NULL, chunk_size,
-                           dst_assign_na);
+          dst_assign_na_fn(dst_assign_na, dst, dst_stride, NULL, NULL,
+                           chunk_size);
           dst += chunk_size * dst_stride;
           src_copy += chunk_size * src_stride[0];
           break;
         } else if (next_avail_ptr > avail_ptr) {
           size_t segment_size = (char *)next_avail_ptr - (char *)avail_ptr;
-          dst_assign_na_fn(dst, dst_stride, NULL, NULL, segment_size,
-                           dst_assign_na);
+          dst_assign_na_fn(dst_assign_na, dst, dst_stride, NULL, NULL,
+                           segment_size);
           dst += segment_size * dst_stride;
           src_copy += segment_size * src_stride[0];
           chunk_size -= segment_size;
@@ -138,12 +138,12 @@ struct option_to_value_ck
     expr_single_t value_assign_fn = value_assign->get_function<expr_single_t>();
     // Make sure it's not an NA
     bool1 avail = bool1(false);
-    src_is_avail_fn(reinterpret_cast<char *>(&avail), src, src_is_avail);
+    src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(&avail), src);
     if (!avail) {
       throw overflow_error("cannot assign an NA value to a non-option type");
     }
     // Copy using value assignment
-    value_assign_fn(dst, src, value_assign);
+    value_assign_fn(value_assign, dst, src);
   }
 
   void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -161,13 +161,13 @@ struct option_to_value_ck
     char *src_copy = src[0];
     while (count > 0) {
       size_t chunk_size = min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
-      src_is_avail_fn(reinterpret_cast<char *>(avail), 1, &src_copy, src_stride,
-                      chunk_size, src_is_avail);
+      src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(avail), 1,
+                      &src_copy, src_stride, chunk_size);
       if (memchr(avail, 0, chunk_size) != NULL) {
         throw overflow_error("cannot assign an NA value to a non-option type");
       }
-      value_assign_fn(dst, dst_stride, &src_copy, src_stride, chunk_size,
-                      value_assign);
+      value_assign_fn(value_assign, dst, dst_stride, &src_copy, src_stride,
+                      chunk_size);
       dst += chunk_size * dst_stride;
       src_copy += chunk_size * src_stride[0];
       count -= chunk_size;
@@ -307,13 +307,13 @@ struct string_to_option_tp_ck
       ckernel_prefix *dst_assign_na = get_child_ckernel(m_dst_assign_na_offset);
       expr_single_t dst_assign_na_fn =
           dst_assign_na->get_function<expr_single_t>();
-      dst_assign_na_fn(dst, NULL, dst_assign_na);
+      dst_assign_na_fn(dst_assign_na, dst, NULL);
     } else {
       // It's available, copy using value assignment
       ckernel_prefix *value_assign = get_child_ckernel();
       expr_single_t value_assign_fn =
           value_assign->get_function<expr_single_t>();
-      value_assign_fn(dst, src, value_assign);
+      value_assign_fn(value_assign, dst, src);
     }
   }
 

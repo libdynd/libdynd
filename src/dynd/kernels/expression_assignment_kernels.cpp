@@ -71,7 +71,7 @@ struct buffered_kernel_extra {
     }
   }
 
-  static void single(char *dst, char *const *src, ckernel_prefix *extra)
+  static void single(ckernel_prefix *extra, char *dst, char *const *src)
   {
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -92,18 +92,18 @@ struct buffered_kernel_extra {
     }
     // First kernel (src -> buffer)
     opchild = echild_first->get_function<expr_single_t>();
-    opchild(buffer_data_ptr, src, echild_first);
+    opchild(echild_first, buffer_data_ptr, src);
     // Second kernel (buffer -> dst)
     opchild = echild_second->get_function<expr_single_t>();
-    opchild(dst, &buffer_data_ptr, echild_second);
+    opchild(echild_second, dst, &buffer_data_ptr);
     // Reset the buffer storage if used
     if (buffer_arrmeta != NULL) {
       buffer_tp->arrmeta_reset_buffers(buffer_arrmeta);
     }
   }
-  static void strided(char *dst, intptr_t dst_stride, char *const *src,
-                      const intptr_t *src_stride, size_t count,
-                      ckernel_prefix *extra)
+  static void strided(ckernel_prefix *extra, char *dst, intptr_t dst_stride,
+                      char *const *src, const intptr_t *src_stride,
+                      size_t count)
   {
     char *eraw = reinterpret_cast<char *>(extra);
     extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -130,11 +130,11 @@ struct buffered_kernel_extra {
         memset(buffer_data_ptr, 0, chunk_size * e->buffer_stride);
       }
       // First kernel (src -> buffer)
-      opchild_first(buffer_data_ptr, buffer_stride, &src0, &src0_stride,
-                    chunk_size, echild_first);
+      opchild_first(echild_first, buffer_data_ptr, buffer_stride, &src0,
+                    &src0_stride, chunk_size);
       // Second kernel (buffer -> dst)
-      opchild_second(dst, dst_stride, &buffer_data_ptr, &buffer_stride,
-                     chunk_size, echild_second);
+      opchild_second(echild_second, dst, dst_stride, &buffer_data_ptr,
+                     &buffer_stride, chunk_size);
       // Reset the buffer storage if used
       if (buffer_arrmeta != NULL) {
         buffer_tp->arrmeta_reset_buffers(buffer_arrmeta);

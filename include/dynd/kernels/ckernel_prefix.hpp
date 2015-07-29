@@ -16,11 +16,11 @@ namespace dynd {
 
 struct ckernel_prefix;
 
-typedef void (*expr_single_t)(char *dst, char *const *src,
-                              ckernel_prefix *self);
-typedef void (*expr_strided_t)(char *dst, intptr_t dst_stride, char *const *src,
-                               const intptr_t *src_stride, size_t count,
-                               ckernel_prefix *self);
+typedef void (*expr_single_t)(ckernel_prefix *self, char *dst,
+                              char *const *src);
+typedef void (*expr_strided_t)(ckernel_prefix *self, char *dst,
+                               intptr_t dst_stride, char *const *src,
+                               const intptr_t *src_stride, size_t count);
 
 /**
  * Definition for kernel request parameters.
@@ -30,7 +30,7 @@ enum {
   kernel_request_host = 0x00000000,
   /** Kernel function in CUDA device memory */
   kernel_request_cuda_device = 0x00000001,
-  /** Kernel function in both host memory and CUDA device memory */
+/** Kernel function in both host memory and CUDA device memory */
 #ifdef DYND_CUDA
   kernel_request_cuda_host_device = 0x00000002,
 #else
@@ -155,32 +155,61 @@ struct ckernel_prefix {
       child->destroy();
     }
   }
+
+  static ckernel_prefix *init(ckernel_prefix *self,
+                              kernel_request_t DYND_UNUSED(kernreq), void *func)
+  {
+    self->function = func;
+    self->destructor = NULL;
+    return self;
+  }
+
+  template <typename CKBT>
+  static ckernel_prefix *make(CKBT *ckb, kernel_request_t kernreq,
+                              intptr_t &inout_ckb_offset, void *func);
+
+  static intptr_t
+  instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+              char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+              const ndt::type &DYND_UNUSED(dst_tp),
+              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+              const ndt::type *DYND_UNUSED(src_tp),
+              const char *const *DYND_UNUSED(src_arrmeta),
+              kernel_request_t kernreq,
+              const eval::eval_context *DYND_UNUSED(ectx),
+              const nd::array &DYND_UNUSED(kwds),
+              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
 };
 
-
-template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T, bool flatten = false>
+template <template <kernel_request_t, typename...> class F,
+          kernel_request_t kernreq, typename T, bool flatten = false>
 struct ex_for_each;
 
-template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T0>
+template <template <kernel_request_t, typename...> class F,
+          kernel_request_t kernreq, typename T0>
 struct ex_for_each<F, kernreq, type_sequence<T0>, false> {
   typedef type_sequence<F<kernreq, T0>> type;
 };
 
-template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T0, typename... T>
+template <template <kernel_request_t, typename...> class F,
+          kernel_request_t kernreq, typename T0, typename... T>
 struct ex_for_each<F, kernreq, type_sequence<T0, T...>, false> {
   typedef type_sequence<F<kernreq, T0>, F<kernreq, T>...> type;
 };
 
-template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename... T0>
+template <template <kernel_request_t, typename...> class F,
+          kernel_request_t kernreq, typename... T0>
 struct ex_for_each<F, kernreq, type_sequence<type_sequence<T0...>>, true> {
   typedef type_sequence<F<kernreq, T0...>> type;
 };
 
-template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename... T0, typename... T>
-struct ex_for_each<F, kernreq, type_sequence<type_sequence<T0...>, T...>, true> {
+template <template <kernel_request_t, typename...> class F,
+          kernel_request_t kernreq, typename... T0, typename... T>
+struct ex_for_each<F, kernreq, type_sequence<type_sequence<T0...>, T...>,
+                   true> {
   typedef typename join<type_sequence<F<kernreq, T0...>>,
-                        typename ex_for_each<F, kernreq, type_sequence<T...>, true>::type>::type
-      type;
+                        typename ex_for_each<F, kernreq, type_sequence<T...>,
+                                             true>::type>::type type;
 };
 
 } // namespace dynd

@@ -55,12 +55,12 @@ struct broadcast_to_var_assign_ck
       dst_d->size = 1;
       // Copy a single input to the newly allocated element
       intptr_t zero_stride = 0;
-      child_fn(dst_d->begin, 0, src, &zero_stride, 1, child);
+      child_fn(child, dst_d->begin, 0, src, &zero_stride, 1);
     } else {
       // We're broadcasting elements to an already allocated array segment
       dst = dst_d->begin + m_dst_md->offset;
       intptr_t zero_stride = 0;
-      child_fn(dst, m_dst_md->stride, src, &zero_stride, dst_d->size, child);
+      child_fn(child, dst, m_dst_md->stride, src, &zero_stride, dst_d->size);
     }
   }
 
@@ -139,7 +139,7 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, kernel_request_host, 1> {
         // Copy to the newly allocated element
         dst = dst_d->begin;
         char *src_copy = src_d->begin + m_src_md->offset;
-        child_fn(dst, dst_stride, &src_copy, &src_stride, dim_size, child);
+        child_fn(child, dst, dst_stride, &src_copy, &src_stride, dim_size);
       }
     } else {
       if (src_d->begin == NULL) {
@@ -160,7 +160,7 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, kernel_request_host, 1> {
       // segment
       dst = dst_d->begin + m_dst_md->offset;
       char *src_copy = src_d->begin + m_src_md->offset;
-      child_fn(dst, dst_stride, &src_copy, &src_stride, dst_dim_size, child);
+      child_fn(child, dst, dst_stride, &src_copy, &src_stride, dst_dim_size);
     }
   }
 
@@ -250,7 +250,7 @@ struct strided_to_var_assign_ck
       dst_d->size = dim_size;
       // Copy to the newly allocated element
       dst = dst_d->begin;
-      child_fn(dst, dst_stride, src, &src_stride, dim_size, child);
+      child_fn(child, dst, dst_stride, src, &src_stride, dim_size);
     } else {
       intptr_t dst_dim_size = dst_d->size, src_dim_size = m_src_dim_size;
       intptr_t dst_stride = m_dst_md->stride, src_stride = m_src_stride;
@@ -264,7 +264,7 @@ struct strided_to_var_assign_ck
       // We're copying/broadcasting elements to an already allocated array
       // segment
       dst = dst_d->begin + m_dst_md->offset;
-      child_fn(dst, dst_stride, src, &src_stride, dst_dim_size, child);
+      child_fn(child, dst, dst_stride, src, &src_stride, dst_dim_size);
     }
   }
 
@@ -333,7 +333,7 @@ struct var_to_strided_assign_ck
     }
     // Copying/broadcasting elements
     char *src_copy = src_d->begin + m_src_md->offset;
-    child_fn(dst, dst_stride, &src_copy, &src_stride, dst_dim_size, child);
+    child_fn(child, dst, dst_stride, &src_copy, &src_stride, dst_dim_size);
   }
 
   void destruct_children() { get_child_ckernel()->destroy(); }

@@ -1992,15 +1992,15 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
       const char *const src_try0[2] = {data, trial_data};
       const char *const src_try1[2] = {trial_data, data};
       int dst;
-      fn_n_less_d(reinterpret_cast<char *>(&dst),
-                  const_cast<char *const *>(src_try0), k_n_less_d.get());
+      fn_n_less_d(k_n_less_d.get(), reinterpret_cast<char *>(&dst),
+                  const_cast<char *const *>(src_try0));
       if (dst) {
         // value < arr[trial]
         last = trial;
       } else {
         int dst;
-        fn_n_less_d(reinterpret_cast<char *>(&dst),
-                    const_cast<char *const *>(src_try1), k_n_less_d.get());
+        fn_n_less_d(k_n_less_d.get(), reinterpret_cast<char *>(&dst),
+                    const_cast<char *const *>(src_try1));
         if (dst) {
           // value > arr[trial]
           first = trial + 1;
@@ -2046,15 +2046,15 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
       const char *const src_try0[2] = {data, trial_data};
       const char *const src_try1[2] = {trial_data, data};
       int dst;
-      f_d_less_n(reinterpret_cast<char *>(&dst),
-                 const_cast<char *const *>(src_try0), k_d_less_n.get());
+      f_d_less_n(k_d_less_n.get(), reinterpret_cast<char *>(&dst),
+                 const_cast<char *const *>(src_try0));
       if (dst) {
         // value < arr[trial]
         last = trial;
       } else {
         int dst;
-        f_n_less_d(reinterpret_cast<char *>(&dst),
-                   const_cast<char *const *>(src_try1), k_n_less_d.get());
+        f_n_less_d(k_n_less_d.get(), reinterpret_cast<char *>(&dst),
+                   const_cast<char *const *>(src_try1));
         if (dst) {
           // value > arr[trial]
           first = trial + 1;

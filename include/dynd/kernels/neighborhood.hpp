@@ -55,7 +55,7 @@ namespace nd {
         nh_start_stop->start = count[0];
         nh_start_stop->stop = nh_size; // min(nh_size, dst_size)
         for (intptr_t i = 0; i < count[0]; ++i) {
-          child_fn(dst, src_copy, child);
+          child_fn(child, dst, src_copy);
           --(nh_start_stop->start);
           dst += dst_stride;
           for (intptr_t j = 0; j < N; ++j) {
@@ -65,7 +65,7 @@ namespace nd {
         //  *nh_start = 0;
         //    *nh_stop = nh_size;
         for (intptr_t i = 0; i < count[1]; ++i) {
-          child_fn(dst, src_copy, child);
+          child_fn(child, dst, src_copy);
           dst += dst_stride;
           for (intptr_t j = 0; j < N; ++j) {
             src_copy[j] += src_stride[j];
@@ -75,7 +75,7 @@ namespace nd {
         //        *nh_stop = count[2]; // 0 if count[2] >
         for (intptr_t i = 0; i < count[2]; ++i) {
           --(nh_start_stop->stop);
-          child_fn(dst, src_copy, child);
+          child_fn(child, dst, src_copy);
           dst += dst_stride;
           for (intptr_t j = 0; j < N; ++j) {
             src_copy[j] += src_stride[j];

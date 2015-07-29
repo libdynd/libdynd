@@ -118,7 +118,7 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed)
                          &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   char *src = const_cast<char *>(b.get_readonly_originptr());
-  fn(a.get_readwrite_originptr(), &src, k.get());
+  fn(k.get(), a.get_readwrite_originptr(), &src);
   EXPECT_EQ(9, a(0).as<int>());
   EXPECT_EQ(9, a(1).as<int>());
   EXPECT_EQ(9, a(2).as<int>());
@@ -140,7 +140,7 @@ TEST(FixedDimType, AssignKernel_FixedToFixed)
                          &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   char *src = const_cast<char *>(b.get_readonly_originptr());
-  fn(a.get_readwrite_originptr(), &src, k.get());
+  fn(k.get(), a.get_readwrite_originptr(), &src);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
   EXPECT_EQ(7, a(2).as<int>());

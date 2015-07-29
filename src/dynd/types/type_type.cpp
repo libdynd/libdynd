@@ -208,8 +208,8 @@ intptr_t ndt::type_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-static void equal_comparison(char *dst, char *const *src,
-                             ckernel_prefix *DYND_UNUSED(self))
+static void equal_comparison(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                             char *const *src)
 {
   const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
   const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];
@@ -217,8 +217,8 @@ static void equal_comparison(char *dst, char *const *src,
   *reinterpret_cast<int *>(dst) = *da == *db;
 }
 
-static void not_equal_comparison(char *dst, char *const *src,
-                                 ckernel_prefix *DYND_UNUSED(self))
+static void not_equal_comparison(ckernel_prefix *DYND_UNUSED(self), char *dst,
+                                 char *const *src)
 {
   const ndt::type *da = reinterpret_cast<const ndt::type *const *>(src)[0];
   const ndt::type *db = reinterpret_cast<const ndt::type *const *>(src)[1];

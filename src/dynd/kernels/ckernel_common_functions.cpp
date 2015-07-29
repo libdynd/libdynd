@@ -29,7 +29,7 @@ struct constant_value_assignment_ck
   {
     ckernel_prefix *child = get_child_ckernel();
     expr_single_t child_fn = child->get_function<expr_single_t>();
-    child_fn(dst, const_cast<char *const *>(&m_constant_data), child);
+    child_fn(child, dst, const_cast<char *const *>(&m_constant_data));
   }
 
   inline void strided(char *dst, intptr_t dst_stride,
@@ -39,8 +39,8 @@ struct constant_value_assignment_ck
     ckernel_prefix *child = get_child_ckernel();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     intptr_t zero_stride = 0;
-    child_fn(dst, dst_stride, const_cast<char *const *>(&m_constant_data),
-             &zero_stride, count, child);
+    child_fn(child, dst, dst_stride,
+             const_cast<char *const *>(&m_constant_data), &zero_stride, count);
   }
 
   inline void destruct_children()
@@ -69,7 +69,7 @@ size_t kernels::make_constant_value_assignment_ckernel(
 }
 
 static void binary_as_unary_right_associative_reduction_adapter_single_ckernel(
-    char *dst, char *const *src, ckernel_prefix *ckp)
+    ckernel_prefix *ckp, char *dst, char *const *src)
 {
   // Right associative, evaluate the reduction from right to left:
   //    dst_(0) = a[n-1]
@@ -77,11 +77,11 @@ static void binary_as_unary_right_associative_reduction_adapter_single_ckernel(
   ckernel_prefix *child = ckp + 1;
   expr_single_t childop = child->get_function<expr_single_t>();
   char *src_binary[2] = {dst, src[0]};
-  childop(dst, src_binary, child);
+  childop(child, dst, src_binary);
 }
 
 static void binary_as_unary_left_associative_reduction_adapter_single_ckernel(
-    char *dst, char *const *src, ckernel_prefix *ckp)
+    ckernel_prefix *ckp, char *dst, char *const *src)
 {
   // Left associative, evaluate the reduction from left to right:
   //    dst_(0) = a[0]
@@ -89,12 +89,12 @@ static void binary_as_unary_left_associative_reduction_adapter_single_ckernel(
   ckernel_prefix *child = ckp + 1;
   expr_single_t childop = child->get_function<expr_single_t>();
   char *src_binary[2] = {src[0], dst};
-  childop(dst, src_binary, child);
+  childop(child, dst, src_binary);
 }
 
 static void binary_as_unary_right_associative_reduction_adapter_strided_ckernel(
-    char *dst, intptr_t dst_stride, char *const *src,
-    const intptr_t *src_stride, size_t count, ckernel_prefix *ckp)
+    ckernel_prefix *ckp, char *dst, intptr_t dst_stride, char *const *src,
+    const intptr_t *src_stride, size_t count)
 {
   // Right associative, evaluate the reduction from right to left:
   //    dst_(0) = a[n-1]
@@ -103,12 +103,12 @@ static void binary_as_unary_right_associative_reduction_adapter_strided_ckernel(
   expr_strided_t childop = child->get_function<expr_strided_t>();
   char *src_binary[2] = {dst, src[0]};
   const intptr_t src_binary_stride[2] = {dst_stride, src_stride[0]};
-  childop(dst, dst_stride, src_binary, src_binary_stride, count, child);
+  childop(child, dst, dst_stride, src_binary, src_binary_stride, count);
 }
 
 static void binary_as_unary_left_associative_reduction_adapter_strided_ckernel(
-    char *dst, intptr_t dst_stride, char *const *src,
-    const intptr_t *src_stride, size_t count, ckernel_prefix *ckp)
+    ckernel_prefix *ckp, char *dst, intptr_t dst_stride, char *const *src,
+    const intptr_t *src_stride, size_t count)
 {
   // Right associative, evaluate the reduction from right to left:
   //    dst_(0) = a[n-1]
@@ -117,7 +117,7 @@ static void binary_as_unary_left_associative_reduction_adapter_strided_ckernel(
   expr_strided_t childop = child->get_function<expr_strided_t>();
   char *src_binary[2] = {src[0], dst};
   const intptr_t src_binary_stride[2] = {src_stride[0], dst_stride};
-  childop(dst, dst_stride, src_binary, src_binary_stride, count, child);
+  childop(child, dst, dst_stride, src_binary, src_binary_stride, count);
 }
 
 intptr_t

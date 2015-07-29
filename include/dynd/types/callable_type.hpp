@@ -128,6 +128,20 @@ struct callable_type_data {
   {
   }
 
+  callable_type_data(expr_single_t single, expr_strided_t strided)
+      : data_size(0), data_init(NULL), resolve_dst_type(NULL),
+        instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
+  {
+    typedef void *static_data_type[2];
+    static_assert(sizeof(static_data_type) <= static_data_size,
+                  "static data does not fit");
+    static_assert(scalar_align_of<static_data_type>::value <=
+                      scalar_align_of<std::uint64_t>::value,
+                  "static data requires stronger alignment");
+    new (static_data) static_data_type{reinterpret_cast<void *>(single),
+                                       reinterpret_cast<void *>(strided)};
+  }
+
   callable_type_data(std::size_t data_size, callable_data_init_t data_init,
                      callable_resolve_dst_type_t resolve_dst_type,
                      callable_instantiate_t instantiate)

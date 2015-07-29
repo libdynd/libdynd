@@ -40,7 +40,7 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
     // Copy the run of true
     if (i > i_saved) {
       intptr_t run_count = i - i_saved;
-      child_fn(dst_ptr, dst_stride, &src0, &src0_stride, run_count, child);
+      child_fn(child, dst_ptr, dst_stride, &src0, &src0_stride, run_count);
       dst_ptr += run_count * dst_stride;
       src0 += run_count * src0_stride;
       dst_count += run_count;
@@ -135,7 +135,7 @@ void nd::indexed_take_ck::single(char *dst, char *const *src)
     ix = apply_single_index(ix, src0_dim_size, NULL);
     // Copy one element at a time
     char *child_src0 = src0 + ix * src0_stride;
-    child_fn(dst, &child_src0, child);
+    child_fn(child, dst, &child_src0);
     dst += dst_stride;
     index += index_stride;
   }

@@ -55,8 +55,8 @@ namespace nd {
         ckernel_prefix *second = get_child_ckernel(second_offset);
         expr_single_t second_func = second->get_function<expr_single_t>();
 
-        first_func(buffer_data, src, first);
-        second_func(dst, &buffer_data, second);
+        first_func(first, buffer_data, src);
+        second_func(second, dst, &buffer_data);
       }
 
       void strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -80,10 +80,10 @@ namespace nd {
 
         size_t chunk_size =
             std::min(count, static_cast<size_t>(DYND_BUFFER_CHUNK_SIZE));
-        first_func(buffer_data, buffer_stride, &src0, src_stride, chunk_size,
-                   first);
-        second_func(dst, dst_stride, &buffer_data, &buffer_stride, chunk_size,
-                    second);
+        first_func(first, buffer_data, buffer_stride, &src0, src_stride,
+                   chunk_size);
+        second_func(second, dst, dst_stride, &buffer_data, &buffer_stride,
+                    chunk_size);
         count -= chunk_size;
         while (count) {
           src0 += chunk_size * src0_stride;
@@ -91,10 +91,10 @@ namespace nd {
           reset_strided_buffer_array(buffer);
           chunk_size =
               std::min(count, static_cast<size_t>(DYND_BUFFER_CHUNK_SIZE));
-          first_func(buffer_data, buffer_stride, &src0, src_stride, chunk_size,
-                     first);
-          second_func(dst, dst_stride, &buffer_data, &buffer_stride, chunk_size,
-                      second);
+          first_func(first, buffer_data, buffer_stride, &src0, src_stride,
+                     chunk_size);
+          second_func(second, dst, dst_stride, &buffer_data, &buffer_stride,
+                      chunk_size);
           count -= chunk_size;
         }
       }

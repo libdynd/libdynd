@@ -210,7 +210,7 @@ struct string_to_json_ck
     // First copy it as a string
     ckernel_prefix *child = get_child_ckernel();
     expr_single_t child_fn = child->get_function<expr_single_t>();
-    child_fn(dst, src, child);
+    child_fn(child, dst, src);
     // Then validate that it's correct JSON
     if (m_validate) {
       try {

@@ -39,7 +39,7 @@ struct tuple_unary_op_ck
       child = get_child_ckernel(item.child_kernel_offset);
       child_fn = child->get_function<expr_single_t>();
       char *child_src = src[0] + item.src_data_offset;
-      child_fn(dst + item.dst_data_offset, &child_src, child);
+      child_fn(child, dst + item.dst_data_offset, &child_src);
     }
   }
 

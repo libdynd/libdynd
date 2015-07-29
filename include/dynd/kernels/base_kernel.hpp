@@ -144,17 +144,17 @@ namespace nd {
       return self;                                                             \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ static void single_wrapper(char *dst, char *const *src,        \
-                                           ckernel_prefix *rawself)            \
+    __VA_ARGS__ static void single_wrapper(ckernel_prefix *rawself, char *dst, \
+                                           char *const *src)                   \
     {                                                                          \
       return get_self(rawself)->single(dst, src);                              \
     }                                                                          \
                                                                                \
-    __VA_ARGS__ static void strided_wrapper(char *dst, intptr_t dst_stride,    \
+    __VA_ARGS__ static void strided_wrapper(ckernel_prefix *rawself,           \
+                                            char *dst, intptr_t dst_stride,    \
                                             char *const *src,                  \
                                             const intptr_t *src_stride,        \
-                                            size_t count,                      \
-                                            ckernel_prefix *rawself)           \
+                                            size_t count)                      \
     {                                                                          \
       return get_self(rawself)                                                 \
           ->strided(dst, dst_stride, src, src_stride, count);                  \
