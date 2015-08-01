@@ -32,7 +32,9 @@ namespace nd {
 
   template <size_t... I>
   struct old_index_proxy<index_sequence<I...>> {
-    enum { size = index_sequence<I...>::size };
+    enum {
+      size = index_sequence<I...>::size
+    };
 
     template <typename... T>
     static void get_arrmeta(const char **arrmeta,
@@ -85,7 +87,7 @@ namespace nd {
      * Move constructs an array (should be "= default", but MSVC 2013 does not
      * support that)
      */
-    array(array &&rhs) : m_memblock(std::move(rhs.m_memblock)){};
+    array(array &&rhs) : m_memblock(std::move(rhs.m_memblock)) {};
 
     /**
      * Constructs a zero-dimensional scalar from a C++ scalar.
@@ -265,7 +267,10 @@ namespace nd {
     }
 
     /** Low level access to the reference-counted memory */
-    inline memory_block_ptr get_memblock() const { return m_memblock; }
+    inline memory_block_ptr get_memblock() const
+    {
+      return m_memblock;
+    }
 
     /** Low level access to the array preamble */
     inline array_preamble *get_ndo() const
@@ -274,13 +279,22 @@ namespace nd {
     }
 
     /** Low level access to the array arrmeta */
-    inline const char *get_arrmeta() const { return get_ndo()->get_arrmeta(); }
+    inline const char *get_arrmeta() const
+    {
+      return get_ndo()->get_arrmeta();
+    }
 
     /** Low level access to the array arrmeta */
-    inline char *get_arrmeta() { return get_ndo()->get_arrmeta(); }
+    inline char *get_arrmeta()
+    {
+      return get_ndo()->get_arrmeta();
+    }
 
     /** Returns true if the array is NULL */
-    inline bool is_null() const { return m_memblock.get() == NULL; }
+    inline bool is_null() const
+    {
+      return m_memblock.get() == NULL;
+    }
 
     char *get_readwrite_originptr() const
     {
@@ -297,9 +311,15 @@ namespace nd {
       return get_ndo()->m_data_pointer;
     }
 
-    char *get_data() { return get_readwrite_originptr(); }
+    char *get_data()
+    {
+      return get_readwrite_originptr();
+    }
 
-    const char *get_data() const { return get_readonly_originptr(); }
+    const char *get_data() const
+    {
+      return get_readonly_originptr();
+    }
 
     inline uint32_t get_access_flags() const
     {
@@ -313,7 +333,10 @@ namespace nd {
     }
 
     /** Returns true if the object is a scalar */
-    inline bool is_scalar() const { return get_type().is_scalar(); }
+    inline bool is_scalar() const
+    {
+      return get_type().is_scalar();
+    }
 
     /** The type */
     const ndt::type &get_type() const
@@ -384,7 +407,10 @@ namespace nd {
     void flag_as_immutable();
 
     /** The flags, including access permissions. */
-    inline uint64_t get_flags() const { return get_ndo()->m_flags; }
+    inline uint64_t get_flags() const
+    {
+      return get_ndo()->m_flags;
+    }
 
     inline std::vector<intptr_t> get_shape() const
     {
@@ -549,15 +575,15 @@ namespace nd {
      * required. If the array is not ane expression, simply
      * returns it as is, otherwise evaluates into a new copy.
      */
-    array
-    eval(const eval::eval_context *ectx = &eval::default_eval_context) const;
+    array eval(const eval::eval_context *ectx =
+                   &eval::default_eval_context) const;
 
     /**
      * Evaluates the array into an immutable strided array, or
      * returns it untouched if it is already both immutable and strided.
      */
-    array eval_immutable(
-        const eval::eval_context *ectx = &eval::default_eval_context) const;
+    array eval_immutable(const eval::eval_context *ectx =
+                             &eval::default_eval_context) const;
 
     /**
      * Evaluates the array node into a newly allocated strided array,
@@ -566,9 +592,9 @@ namespace nd {
      * \param access_flags  The access flags for the result, default immutable.
      * \param ectx  The evaluation context
      */
-    array eval_copy(
-        uint32_t access_flags = 0,
-        const eval::eval_context *ectx = &eval::default_eval_context) const;
+    array eval_copy(uint32_t access_flags = 0,
+                    const eval::eval_context *ectx =
+                        &eval::default_eval_context) const;
 
     /**
      * Returns a view of the array as bytes (for POD) or the storage type,
@@ -594,7 +620,10 @@ namespace nd {
      * The function call operator is used for indexing. Overloading
      * operator[] isn't practical for multidimensional objects.
      */
-    array operator()(const irange &i0) const { return at_array(1, &i0); }
+    array operator()(const irange &i0) const
+    {
+      return at_array(1, &i0);
+    }
 
     /** Indexing with two index values */
     array operator()(const irange &i0, const irange &i1) const
@@ -624,17 +653,24 @@ namespace nd {
       return at_array(5, i);
     }
 
-    array at(const irange &i0) const { return at_array(1, &i0); }
+    array at(const irange &i0) const
+    {
+      return at_array(1, &i0);
+    }
 
-    explicit operator bool() const { return as<bool>(); }
+    explicit operator bool() const
+    {
+      return as<bool>();
+    }
 
     /** Does a value-assignment from the rhs array. */
     void val_assign(const array &rhs, const eval::eval_context *ectx =
                                           &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(
-        const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
-        const eval::eval_context *ectx = &eval::default_eval_context) const;
+    void val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta,
+                    const char *rhs_data,
+                    const eval::eval_context *ectx =
+                        &eval::default_eval_context) const;
 
     /**
      * Casts the type of the array into the specified type.
@@ -785,8 +821,8 @@ namespace nd {
 
 #ifdef DYND_CUDA
     /** Returns a copy of this array in CUDA host memory. */
-    array
-    to_cuda_host(unsigned int cuda_host_flags = cudaHostAllocDefault) const;
+    array to_cuda_host(unsigned int cuda_host_flags =
+                           cudaHostAllocDefault) const;
 
     /** Returns a copy of this array in CUDA global memory. */
     array to_cuda_device() const;
@@ -804,10 +840,45 @@ namespace nd {
 
     void debug_print(std::ostream &o, const std::string &indent = "") const;
 
+    template <typename T>
+    struct convert {
+      static_assert(ndt::type::is_layout_compatible<T>::value,
+                    "must be layout compatible");
+
+      static void from(char *DYND_UNUSED(metadata), char *data, const T &value)
+      {
+        *reinterpret_cast<const T *>(data) = value;
+      }
+
+      static const T &to(const char *DYND_UNUSED(metadata), const char *data)
+      {
+        return *reinterpret_cast<const T *>(data);
+      }
+    };
+
     friend std::ostream &operator<<(std::ostream &o, const array &rhs);
     friend class array_vals;
     friend class array_vals_at;
   };
+
+} // namespace dynd::nd
+
+namespace ndt {
+
+  template <>
+  struct type::equivalent<nd::array> {
+    static const type &make(const nd::array &val)
+    {
+      return val.get_type();
+    }
+  };
+
+} // namespace dynd::ndt
+
+namespace nd {
+
+  array as_struct();
+  array as_struct(std::size_t size, const char **names, const array *values);
 
   array operator+(const array &a0);
   array operator-(const array &a0);
@@ -874,7 +945,9 @@ namespace nd {
    */
   class array_vals {
     const array &m_arr;
-    array_vals(const array &arr) : m_arr(arr) {}
+    array_vals(const array &arr) : m_arr(arr)
+    {
+    }
 
     // Non-copyable, not default-constructable
     array_vals(const array_vals &);
@@ -930,9 +1003,13 @@ namespace nd {
    */
   class array_vals_at {
     array m_arr;
-    array_vals_at(const array &arr) : m_arr(arr) {}
+    array_vals_at(const array &arr) : m_arr(arr)
+    {
+    }
 
-    array_vals_at(array &&arr) : m_arr(std::move(arr)) {}
+    array_vals_at(array &&arr) : m_arr(std::move(arr))
+    {
+    }
 
     // Non-copyable, not default-constructable
     array_vals_at(const array_vals &);
@@ -990,8 +1067,8 @@ namespace nd {
    * C-order */
   array make_strided_array(const ndt::type &uniform_dtype, intptr_t ndim,
                            const intptr_t *shape,
-                           int64_t access_flags = read_access_flag |
-                                                  write_access_flag,
+                           int64_t access_flags =
+                               read_access_flag | write_access_flag,
                            const int *axis_perm = NULL);
 
   /**
@@ -1093,7 +1170,10 @@ namespace nd {
   array make_strided_string_array(const std::string **str_array,
                                   size_t array_size);
 
-  inline array_vals array::vals() const { return array_vals(*this); }
+  inline array_vals array::vals() const
+  {
+    return array_vals(*this);
+  }
 
   inline array_vals_at array::vals_at(const irange &i0) const
   {
@@ -1126,28 +1206,43 @@ namespace nd {
     template <class T>
     struct dtype_from_array {
       typedef T type;
-      enum { element_size = sizeof(T) };
-      enum { type_id = type_id_of<T>::value };
+      enum {
+        element_size = sizeof(T)
+      };
+      enum {
+        type_id = type_id_of<T>::value
+      };
     };
     template <class T, int N>
     struct dtype_from_array<T[N]> {
       typedef typename dtype_from_array<T>::type type;
-      enum { element_size = dtype_from_array<T>::element_size };
-      enum { type_id = dtype_from_array<T>::type_id };
+      enum {
+        element_size = dtype_from_array<T>::element_size
+      };
+      enum {
+        type_id = dtype_from_array<T>::type_id
+      };
     };
 
     template <class T>
     struct ndim_from_array {
-      enum { value = 0 };
+      enum {
+        value = 0
+      };
     };
     template <class T, int N>
     struct ndim_from_array<T[N]> {
-      enum { value = ndim_from_array<T>::value + 1 };
+      enum {
+        value = ndim_from_array<T>::value + 1
+      };
     };
 
     template <class T>
     struct fill_shape {
-      inline static size_t fill(intptr_t *) { return sizeof(T); }
+      inline static size_t fill(intptr_t *)
+      {
+        return sizeof(T);
+      }
     };
     template <class T, int N>
     struct fill_shape<T[N]> {
@@ -1717,9 +1812,9 @@ namespace nd {
   namespace detail {
     template <class T>
     struct array_as_helper {
-      inline static typename std::enable_if<
-          is_dynd_scalar<T>::value || is_dynd_scalar_pointer<T>::value, T>::type
-      as(const array &lhs, const eval::eval_context *ectx)
+      inline static typename std::enable_if < is_dynd_scalar<T>::value ||
+          is_dynd_scalar_pointer<T>::value,
+          T > ::type as(const array &lhs, const eval::eval_context *ectx)
       {
         T result;
         if (!lhs.is_scalar()) {
@@ -1816,9 +1911,8 @@ namespace nd {
   /**
    * Returns true if the array is a scalar whose value is available (not NA).
    */
-  inline bool
-  is_scalar_avail(const array &arr,
-                  const eval::eval_context *ectx = &eval::default_eval_context)
+  inline bool is_scalar_avail(const array &arr, const eval::eval_context *ectx =
+                                                    &eval::default_eval_context)
   {
     return is_scalar_avail(arr.get_type(), arr.get_arrmeta(),
                            arr.get_readonly_originptr(), ectx);
@@ -1827,9 +1921,8 @@ namespace nd {
   void assign_na(const ndt::type &tp, const char *arrmeta, char *data,
                  const eval::eval_context *ectx);
 
-  inline void
-  assign_na(array &out,
-            const eval::eval_context *ectx = &eval::default_eval_context)
+  inline void assign_na(array &out, const eval::eval_context *ectx =
+                                        &eval::default_eval_context)
   {
     assign_na(out.get_type(), out.get_arrmeta(), out.get_readwrite_originptr(),
               ectx);

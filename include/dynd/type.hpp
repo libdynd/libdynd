@@ -896,6 +896,11 @@ namespace ndt {
       return equivalent<T>::make(std::forward<A>(a)...);
     }
 
+    template <typename A0, typename... A>
+    static type make(A0 &&a0, A &&... a) {
+      return equivalent<A0>::make(std::forward<A0>(a0), std::forward<A>(a)...);
+    }
+
     friend std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 

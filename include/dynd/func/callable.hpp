@@ -137,7 +137,10 @@ namespace nd {
         old_index_proxy<I>::template get_arrmeta(m_arrmeta, m_values);
       }
 
-      std::size_t size() const { return sizeof...(A); }
+      std::size_t size() const
+      {
+        return sizeof...(A);
+      }
 
       struct {
         args *self;
@@ -150,7 +153,7 @@ namespace nd {
                      std::map<std::string, ndt::type> &tp_vars) const
         {
           auto &value = std::get<I>(self->m_values);
-          const ndt::type &tp = ndt::type_of(value);
+          const ndt::type &tp = ndt::type::make(value);
           const char *arrmeta = self->m_arrmeta[I];
 
           check_arg(af_tp, I, tp, arrmeta, tp_vars);
@@ -178,7 +181,10 @@ namespace nd {
     template <>
     class args<> {
     public:
-      std::size_t size() const { return 0; }
+      std::size_t size() const
+      {
+        return 0;
+      }
 
       void validate_types(
           const ndt::callable_type *af_tp,
@@ -198,9 +204,14 @@ namespace nd {
       array *m_values;
 
     public:
-      args(intptr_t size, nd::array *values) : m_size(size), m_values(values) {}
+      args(intptr_t size, nd::array *values) : m_size(size), m_values(values)
+      {
+      }
 
-      std::size_t size() const { return m_size; }
+      std::size_t size() const
+      {
+        return m_size;
+      }
 
       void validate_types(const ndt::callable_type *af_tp,
                           std::vector<ndt::type> &src_tp,
@@ -225,54 +236,14 @@ namespace nd {
     };
 
     /**
-     * A way to pass a run-time array of array arguments, split up into the
-     * type/arrmeta/data components
-     */
-    template <>
-    class args<intptr_t, const ndt::type *, const char *const *,
-               char *const *> {
-      intptr_t m_size;
-      const ndt::type *m_types;
-      const char *const *m_arrmetas;
-      char *const *m_datas;
-
-    public:
-      args(intptr_t size, const ndt::type *types, const char *const *arrmetas,
-           char *const *datas)
-          : m_size(size), m_types(types), m_arrmetas(arrmetas), m_datas(datas)
-      {
-      }
-
-      std::size_t size() const { return m_size; }
-
-      void validate_types(const ndt::callable_type *af_tp,
-                          std::vector<ndt::type> &src_tp,
-                          std::vector<const char *> &src_arrmeta,
-                          std::vector<char *> &src_data,
-                          std::map<std::string, ndt::type> &tp_vars) const
-      {
-        check_narg(af_tp, m_size);
-
-        for (intptr_t i = 0; i < m_size; ++i) {
-          const ndt::type &tp = m_types[i];
-          const char *arrmeta = m_arrmetas[i];
-
-          check_arg(af_tp, i, tp, arrmeta, tp_vars);
-
-          src_tp.push_back(tp);
-          src_arrmeta.push_back(arrmeta);
-          src_data.push_back(m_datas[i]);
-        }
-      }
-    };
-
-    /**
      * A metafunction to distinguish the general C++ variadic arguments versus
      * the special args<> for bypassing the C++ interface layer.
      */
     template <typename... T>
     struct is_variadic_args {
-      enum { value = true };
+      enum {
+        value = true
+      };
     };
     template <typename T0, typename T1>
     struct is_variadic_args<T0, T1> {
@@ -604,7 +575,9 @@ namespace nd {
 
     template <typename... T>
     struct is_variadic_kwds {
-      enum { value = true };
+      enum {
+        value = true
+      };
     };
 
     template <typename T0, typename T1, typename T2>
@@ -665,7 +638,10 @@ kwds(T &&... t)
 /**
  * Empty keyword args.
  */
-inline nd::detail::kwds<> kwds() { return nd::detail::kwds<>(); }
+inline nd::detail::kwds<> kwds()
+{
+  return nd::detail::kwds<>();
+}
 
 /**
  * TODO: This `as_array` metafunction should either go somewhere better (this
@@ -758,7 +734,9 @@ namespace nd {
                              resolve_dst_type, instantiate);
     }
 
-    callable(const callable &rhs) : m_value(rhs.m_value) {}
+    callable(const callable &rhs) : m_value(rhs.m_value)
+    {
+    }
 
     /**
       * Constructor from an nd::array. Validates that the input
@@ -772,7 +750,10 @@ namespace nd {
       return *this;
     }
 
-    bool is_null() const { return m_value.is_null(); }
+    bool is_null() const
+    {
+      return m_value.is_null();
+    }
 
     callable_type_data *get()
     {
@@ -797,24 +778,35 @@ namespace nd {
                  : NULL;
     }
 
-    const ndt::type &get_array_type() const { return m_value.get_type(); }
+    const ndt::type &get_array_type() const
+    {
+      return m_value.get_type();
+    }
 
     const ndt::type &get_ret_type() const
     {
       return get_type()->get_return_type();
     }
 
-    const array &get_arg_types() const { return get_type()->get_pos_types(); }
+    const array &get_arg_types() const
+    {
+      return get_type()->get_pos_types();
+    }
 
-    operator nd::array() const { return m_value; }
+    operator nd::array() const
+    {
+      return m_value;
+    }
 
-    void swap(nd::callable &rhs) { m_value.swap(rhs.m_value); }
+    void swap(nd::callable &rhs)
+    {
+      m_value.swap(rhs.m_value);
+    }
 
     /** Implements the general call operator which returns an array */
     template <typename A, typename K>
     array call(const A &args, const K &kwds)
     {
-      callable_type_data *self = const_cast<callable_type_data *>(get());
       const ndt::callable_type *self_tp = get_type();
 
       array dst;
@@ -828,8 +820,10 @@ namespace nd {
       std::vector<ndt::type> arg_tp;
       std::vector<const char *> arg_arrmeta;
       std::vector<char *> arg_data;
+
       // Validate the array arguments
       args.validate_types(self_tp, arg_tp, arg_arrmeta, arg_data, tp_vars);
+      get_type()->validate(args);
 
       // Validate the destination type, if it was provided
       if (!dst.is_null()) {
@@ -855,25 +849,28 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        return (*self)(
+        return (*get())(
             dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
             arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
             arg_data.empty() ? NULL : arg_data.data(), kwds_as_array, tp_vars);
       }
 
       dst_tp = dst.get_type();
-      (*self)(dst_tp, dst.get_arrmeta(), dst.get_readwrite_originptr(),
-              arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
-              arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
-              arg_data.empty() ? NULL : arg_data.data(), kwds_as_array,
-              tp_vars);
+      (*get())(dst_tp, dst.get_arrmeta(), dst.get_readwrite_originptr(),
+               arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
+               arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
+               arg_data.empty() ? NULL : arg_data.data(), kwds_as_array,
+               tp_vars);
       return dst;
     }
 
     /**
      * operator()()
      */
-    nd::array operator()() { return call(detail::args<>(), detail::kwds<>()); }
+    nd::array operator()()
+    {
+      return call(detail::args<>(), detail::kwds<>());
+    }
 
     /**
     * operator()(kwds<...>(...))
@@ -894,15 +891,15 @@ namespace nd {
         array>::type
     operator()(T &&... a)
     {
-      typedef make_index_sequence<sizeof...(T)-1> I;
+      typedef make_index_sequence<sizeof...(T) - 1> I;
       typedef typename instantiate<
           detail::args,
           typename to<type_sequence<typename as_array<T>::type...>,
-                      sizeof...(T)-1>::type>::type args_type;
+                      sizeof...(T) - 1>::type>::type args_type;
 
       args_type arr =
           index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
-      return call(arr, dynd::get<sizeof...(T)-1>(std::forward<T>(a)...));
+      return call(arr, dynd::get<sizeof...(T) - 1>(std::forward<T>(a)...));
     }
 
     template <typename A0, typename A1, typename... K>
@@ -1153,9 +1150,15 @@ namespace nd {
 
   template <typename FuncType>
   struct declfunc {
-    operator callable &() { return get(); }
+    operator callable &()
+    {
+      return get();
+    }
 
-    operator const callable &() const { return get(); }
+    operator const callable &() const
+    {
+      return get();
+    }
 
     template <typename... A>
     array operator()(A &&... a)
