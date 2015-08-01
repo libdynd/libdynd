@@ -28,7 +28,7 @@ TEST(Callable, SingleStridedConstructor)
 {
   nd::callable f(
       ndt::type("(int32) -> int32"),
-      [](ckernel_prefix *DYND_UNUSED(self), char *dst, char *const *src) {
+      [](ckernel_prefix *DYND_UNUSED(self), char * dst, char * const * src) {
         *reinterpret_cast<int32 *>(dst) =
             *reinterpret_cast<int32 *>(src[0]) + 5;
       },
@@ -84,7 +84,10 @@ TEST(Callable, Assignment)
   EXPECT_EQ(891029, ints_out[2]);
 }
 
-static double func(int x, double y) { return 2.0 * x + y; }
+static double func(int x, double y)
+{
+  return 2.0 * x + y;
+}
 
 TEST(Callable, Construction)
 {
@@ -144,20 +147,23 @@ TEST(Callable, DynamicCall)
   nd::array values[3] = {7, 2.5, 5};
   const char *names[3] = {"x", "y", "z"};
 
-  af = nd::functional::apply(
-      [](int x, double y, int z) { return 2 * x - y + 3 * z; });
+  af = nd::functional::apply([](int x, double y,
+                                int z) { return 2 * x - y + 3 * z; });
   EXPECT_EQ(26.5, af(3, values).as<double>());
 
-  af = nd::functional::apply(
-      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
+  af = nd::functional::apply([](int x, double y,
+                                int z) { return 2 * x - y + 3 * z; },
+                             "z");
   EXPECT_EQ(26.5, af(2, values, kwds(1, names + 2, values + 2)).as<double>());
 
-  af = nd::functional::apply(
-      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
+  af = nd::functional::apply([](int x, double y,
+                                int z) { return 2 * x - y + 3 * z; },
+                             "y", "z");
   EXPECT_EQ(26.5, af(1, values, kwds(2, names + 1, values + 1)).as<double>());
 
-  af = nd::functional::apply(
-      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
+  af = nd::functional::apply([](int x, double y,
+                                int z) { return 2 * x - y + 3 * z; },
+                             "x", "y", "z");
   EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
 }
 
@@ -165,6 +171,7 @@ TEST(Callable, DecomposedDynamicCall)
 {
   nd::callable af;
 
+  ndt::type ret_tp;
   nd::array values[3] = {7, 2.5, 5};
   ndt::type types[3] = {values[0].get_type(), values[1].get_type(),
                         values[2].get_type()};
@@ -176,23 +183,35 @@ TEST(Callable, DecomposedDynamicCall)
                           values[2].get_ndo()->m_data_pointer};
   const char *names[3] = {"x", "y", "z"};
 
-  af = nd::functional::apply(
-      [](int x, double y, int z) { return 2 * x - y + 3 * z; });
-  EXPECT_EQ(26.5, af(3, types, arrmetas, datas).as<double>());
+  af = nd::functional::apply([](int x, double y,
+                                int z) { return 2 * x - y + 3 * z; });
+  ret_tp = af.get_ret_type();
+  EXPECT_EQ(26.5, (*af.get())(ret_tp, 3, types, arrmetas, datas, nd::as_struct(),
+                              map<string, ndt::type>()).as<double>());
 
-  af = nd::functional::apply(
-      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
-  EXPECT_EQ(26.5, af(2, types, arrmetas, datas, kwds(1, names + 2, values + 2))
-                      .as<double>());
+  af = nd::functional::apply([](int x, double y,
+                                int z) { return 2 * x - y + 3 * z; },
+                             "z");
+  ret_tp = af.get_ret_type();
+  EXPECT_EQ(26.5, (*af.get())(ret_tp, 2, types, arrmetas, datas,
+                              nd::as_struct(1, names + 2, values + 2),
+                              map<string, ndt::type>()).as<double>());
 
-  af = nd::functional::apply(
-      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
-  EXPECT_EQ(26.5, af(1, types, arrmetas, datas, kwds(2, names + 1, values + 1))
-                      .as<double>());
+  af = nd::functional::apply([](int x, double y,
+                                int z) { return 2 * x - y + 3 * z; },
+                             "y", "z");
+  ret_tp = af.get_ret_type();
+  EXPECT_EQ(26.5, (*af.get())(ret_tp, 1, types, arrmetas, datas,
+                              nd::as_struct(2, names + 1, values + 1),
+                              map<string, ndt::type>()).as<double>());
 
-  af = nd::functional::apply(
-      [](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
-  EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
+  af = nd::functional::apply([](int x, double y,
+                                int z) { return 2 * x - y + 3 * z; },
+                             "x", "y", "z");
+  ret_tp = af.get_ret_type();
+  EXPECT_EQ(26.5, (*af.get())(ret_tp, 0, NULL, NULL, NULL,
+                              nd::as_struct(3, names, values),
+                              map<string, ndt::type>()).as<double>());
 }
 
 TEST(Callable, KeywordParsing)

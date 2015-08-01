@@ -36,7 +36,10 @@
 using namespace std;
 using namespace dynd;
 
-void nd::array::swap(array &rhs) { m_memblock.swap(rhs.m_memblock); }
+void nd::array::swap(array &rhs)
+{
+  m_memblock.swap(rhs.m_memblock);
+}
 
 template <class T>
 inline typename std::enable_if<is_dynd_scalar<T>::value, memory_block_ptr>::type
@@ -749,9 +752,9 @@ static void as_storage_type(const ndt::type &dt,
           storage_dt.get_data_size(), storage_dt.get_data_alignment());
       out_was_transformed = true;
     } else if (storage_dt.get_type_id() == string_type_id) {
-      out_transformed_tp = ndt::bytes_type::make(
-          static_cast<const ndt::string_type *>(storage_dt.extended())
-              ->get_target_alignment());
+      out_transformed_tp =
+          ndt::bytes_type::make(static_cast<const ndt::string_type *>(
+              storage_dt.extended())->get_target_alignment());
       out_was_transformed = true;
     } else {
       if (dt.get_kind() == expr_kind) {
@@ -1072,7 +1075,8 @@ bool nd::array::is_missing() const
   ndt::type tp = get_type();
   if (tp.get_type_id() == option_type_id) {
     return !tp.extended<ndt::option_type>()->is_avail(
-        get_arrmeta(), get_readonly_originptr(), &eval::default_eval_context);
+                get_arrmeta(), get_readonly_originptr(),
+                &eval::default_eval_context);
   }
 
   return false;
@@ -1114,7 +1118,8 @@ bool nd::array::equals_exact(const array &rhs) const
     if (memcmp(shape0.get(), shape1.get(), ndim * sizeof(intptr_t)) != 0) {
       return false;
     }
-    try {
+    try
+    {
       array_iter<0, 2> iter(*this, rhs);
       if (!iter.empty()) {
         do {
@@ -1132,7 +1137,8 @@ bool nd::array::equals_exact(const array &rhs) const
       }
       return true;
     }
-    catch (const broadcast_error &) {
+    catch (const broadcast_error &)
+    {
       // If there's a broadcast error in a variable-sized dimension, return
       // false for it too
       return false;
@@ -1721,6 +1727,27 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs)
   return o;
 }
 
+nd::array nd::as_struct() {
+  return empty(ndt::struct_type::make());
+}
+
+nd::array nd::as_struct(std::size_t size, const char **names,
+                        const array *values)
+{
+  std::vector<ndt::type> types(size);
+  for (std::size_t i = 0; i < size; ++i) {
+    types[i] = values[i].get_type();
+  }
+
+  array res = empty(ndt::struct_type::make(
+      make_strided_string_array(names, size), array(types)));
+  for (std::size_t i = 0; i < size; ++i) {
+    res(i).val_assign(values[i]);
+  }
+
+  return res;
+}
+
 nd::array nd::eval_raw_copy(const ndt::type &dt, const char *arrmeta,
                             const char *data)
 {
@@ -1749,12 +1776,12 @@ nd::array nd::empty_shell(const ndt::type &tp)
 {
   if (tp.is_builtin()) {
     char *data_ptr = NULL;
-    intptr_t data_size = static_cast<intptr_t>(
-        dynd::ndt::detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(
-            tp.extended())]);
-    intptr_t data_alignment = static_cast<intptr_t>(
-        dynd::ndt::detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(
-            tp.extended())]);
+    intptr_t data_size =
+        static_cast<intptr_t>(dynd::ndt::detail::builtin_data_sizes
+                                  [reinterpret_cast<uintptr_t>(tp.extended())]);
+    intptr_t data_alignment =
+        static_cast<intptr_t>(dynd::ndt::detail::builtin_data_alignments
+                                  [reinterpret_cast<uintptr_t>(tp.extended())]);
     memory_block_ptr result(
         make_array_memory_block(0, data_size, data_alignment, &data_ptr));
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
@@ -1825,7 +1852,7 @@ nd::array nd::empty_like(const nd::array &rhs, const ndt::type &uniform_tp)
       result.get_type()
           .extended<ndt::fixed_dim_type>()
           ->reorder_default_constructed_strides(
-              result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
+                result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
     }
     return result;
   }
@@ -1852,7 +1879,7 @@ nd::array nd::empty_like(const nd::array &rhs)
       result.get_type()
           .extended<ndt::fixed_dim_type>()
           ->reorder_default_constructed_strides(
-              result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
+                result.get_arrmeta(), rhs.get_type(), rhs.get_arrmeta());
     }
     return result;
   }
@@ -1981,7 +2008,7 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
 
     const char *n_data = n.get_readonly_originptr();
     intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                            n.get_arrmeta())->stride;
+        n.get_arrmeta())->stride;
     intptr_t first = 0, last = n.get_dim_size();
     while (first < last) {
       intptr_t trial = first + (last - first) / 2;
@@ -2035,7 +2062,7 @@ intptr_t nd::binary_search(const nd::array &n, const char *arrmeta,
 
     const char *n_data = n.get_readonly_originptr();
     intptr_t n_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                            n.get_arrmeta())->stride;
+        n.get_arrmeta())->stride;
     intptr_t first = 0, last = n.get_dim_size();
     while (first < last) {
       intptr_t trial = first + (last - first) / 2;
