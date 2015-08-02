@@ -154,7 +154,7 @@ namespace nd {
         {
           auto &value = std::get<I>(self->m_values);
           const ndt::type &tp = ndt::type::make(value);
-          const char *arrmeta = self->m_arrmeta[I];
+          const char *arrmeta = value.get_arrmeta();
 
           check_arg(af_tp, I, tp, arrmeta, tp_vars);
 
