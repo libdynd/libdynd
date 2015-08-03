@@ -130,11 +130,6 @@ namespace nd {
       args(A &&... a) : m_values(std::forward<A>(a)...)
       {
         validate_types.self = this;
-
-        // Todo: This should be removed, but it seems to trigger an error on
-        // travis if it is
-        typedef make_index_sequence<sizeof...(A)> I;
-        old_index_proxy<I>::template get_arrmeta(m_arrmeta, m_values);
       }
 
       std::size_t size() const
@@ -152,7 +147,7 @@ namespace nd {
                      std::vector<char *> &src_data,
                      std::map<std::string, ndt::type> &tp_vars) const
         {
-          auto &value = std::get<I>(self->m_values);
+          auto value = std::get<I>(self->m_values);
           const ndt::type &tp = ndt::type::make(value);
           const char *arrmeta = value.get_arrmeta();
 
