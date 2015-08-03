@@ -133,11 +133,14 @@ TEST(SymbolicTypes, CreateTypeVarDim)
 
   // The typevar name must start with a capital
   // and look like an identifier
-  EXPECT_THROW(ndt::typevar_dim_type::make("", ndt::type::make<int>()), type_error);
+  EXPECT_THROW(ndt::typevar_dim_type::make("", ndt::type::make<int>()),
+               type_error);
   EXPECT_THROW(ndt::typevar_dim_type::make("blah", ndt::type::make<int>()),
                type_error);
-  EXPECT_THROW(ndt::typevar_dim_type::make("T ", ndt::type::make<int>()), type_error);
-  EXPECT_THROW(ndt::typevar_dim_type::make("123", ndt::type::make<int>()), type_error);
+  EXPECT_THROW(ndt::typevar_dim_type::make("T ", ndt::type::make<int>()),
+               type_error);
+  EXPECT_THROW(ndt::typevar_dim_type::make("123", ndt::type::make<int>()),
+               type_error);
   EXPECT_THROW(ndt::typevar_dim_type::make("Two+", ndt::type::make<int>()),
                type_error);
 }
@@ -163,8 +166,8 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_EQ("Blah... * int32", tp.str());
 
   // Dynamic type properties
-//  Todo: Fix this
-//  EXPECT_EQ("Blah", tp.p("name").as<std::string>());
+  //  Todo: Fix this
+  //  EXPECT_EQ("Blah", tp.p("name").as<std::string>());
 
   // Unnamed Ellipsis Dimension
   tp = ndt::make_ellipsis_dim(ndt::type::make<int>());
@@ -184,14 +187,15 @@ TEST(SymbolicTypes, CreateEllipsisDim)
   EXPECT_EQ(tp, ndt::make_ellipsis_dim("", ndt::type::make<int>()));
 
   // Dynamic type properties
-//  Todo: Fix this
-//  EXPECT_TRUE(tp.p("name").is_null());
+  //  Todo: Fix this
+  //  EXPECT_TRUE(tp.p("name").is_null());
 
   // The ellipsis name must start with a capital
   // and look like an identifier
   EXPECT_THROW(ndt::make_ellipsis_dim("blah", ndt::type::make<int>()),
                type_error);
-  EXPECT_THROW(ndt::make_ellipsis_dim("T ", ndt::type::make<int>()), type_error);
+  EXPECT_THROW(ndt::make_ellipsis_dim("T ", ndt::type::make<int>()),
+               type_error);
   EXPECT_THROW(ndt::make_ellipsis_dim("123", ndt::type::make<int>()),
                type_error);
   EXPECT_THROW(ndt::make_ellipsis_dim("Two+", ndt::type::make<int>()),
@@ -308,7 +312,8 @@ TEST(SymbolicTypes, VariadicTuple)
 {
   ndt::type tp;
 
-  tp = ndt::tuple_type::make({ndt::type::make<int>(), ndt::type::make<float>()}, true);
+  tp = ndt::tuple_type::make({ndt::type::make<int>(), ndt::type::make<float>()},
+                             true);
   EXPECT_EQ(tuple_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
@@ -328,8 +333,8 @@ TEST(SymbolicTypes, VariadicStruct)
 {
   ndt::type tp;
 
-  tp = ndt::struct_type::make({"x", "y"},
-                        {ndt::type::make<int>(), ndt::type::make<float>()}, true);
+  tp = ndt::struct_type::make(
+      {"x", "y"}, {ndt::type::make<int>(), ndt::type::make<float>()}, true);
   EXPECT_EQ(struct_type_id, tp.get_type_id());
   EXPECT_EQ(kind_kind, tp.get_kind());
   EXPECT_TRUE(tp.is_symbolic());
