@@ -42,6 +42,7 @@
 #include <dynd/types/categorical_kind_type.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/scalar_kind_type.hpp>
 #include <dynd/types/kind_sym_type.hpp>
 #include <dynd/types/int_kind_sym_type.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
@@ -60,9 +61,17 @@ public:
       : m_position(position), m_message(message)
   {
   }
-  virtual ~datashape_parse_error() {}
-  const char *get_position() const { return m_position; }
-  const char *get_message() const { return m_message; }
+  virtual ~datashape_parse_error()
+  {
+  }
+  const char *get_position() const
+  {
+    return m_position;
+  }
+  const char *get_message() const
+  {
+    return m_message;
+  }
 };
 } // anonymous namespace
 
@@ -1201,6 +1210,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = parse_adapt_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
       result = ndt::any_kind_type::make();
+    } else if (parse::compare_range_to_literal(nbegin, nend, "Scalar")) {
+      result = ndt::scalar_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "Categorical")) {
       result = ndt::categorical_kind_type::make();
     } else if (parse::compare_range_to_literal(nbegin, nend, "FixedBytes")) {
@@ -1428,14 +1439,16 @@ static void get_error_line_column(const char *begin, const char *end,
 ndt::type dynd::type_from_datashape(const char *datashape_begin,
                                     const char *datashape_end)
 {
-  try {
+  try
+  {
     // Symbol table for intermediate types declared in the datashape
     map<string, ndt::type> symtable;
     // Parse the datashape and construct the type
     const char *begin = datashape_begin, *end = datashape_end;
     return parse_top(begin, end, symtable);
   }
-  catch (const datashape_parse_error &e) {
+  catch (const datashape_parse_error &e)
+  {
     stringstream ss;
     string line_prev, line_cur;
     int line, column;

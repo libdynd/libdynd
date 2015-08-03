@@ -209,6 +209,13 @@ namespace ndt {
     virtual size_t get_default_data_size() const;
 
     /**
+     * Print a representation of the type itself
+     *
+     * \param o  The std::ostream to print to.
+     */
+    virtual void print_type(std::ostream &o) const = 0;
+
+    /**
      * Print the raw data interpreted as a single instance of this type.
      *
      * \param o  The std::ostream to print to.
@@ -216,14 +223,7 @@ namespace ndt {
      * \param data  Pointer to the data element to print.
      */
     virtual void print_data(std::ostream &o, const char *arrmeta,
-                            const char *data) const = 0;
-
-    /**
-     * Print a representation of the type itself
-     *
-     * \param o  The std::ostream to print to.
-     */
-    virtual void print_type(std::ostream &o) const = 0;
+                            const char *data) const;
 
     /**
      * Returns true if the type is a scalar.

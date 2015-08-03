@@ -11,7 +11,9 @@ using namespace std;
 using namespace dynd;
 
 // Default destructor for the extended type does nothing
-ndt::base_type::~base_type() {}
+ndt::base_type::~base_type()
+{
+}
 
 bool ndt::base_type::is_type_subarray(const type &subarray_tp) const
 {
@@ -20,7 +22,22 @@ bool ndt::base_type::is_type_subarray(const type &subarray_tp) const
   return !subarray_tp.is_builtin() && (*this) == (*subarray_tp.extended());
 }
 
-bool ndt::base_type::is_expression() const { return false; }
+void ndt::base_type::print_data(ostream &DYND_UNUSED(o),
+                                const char *DYND_UNUSED(arrmeta),
+                                const char *DYND_UNUSED(data)) const
+{
+  stringstream ss;
+  ss << "cannot print data of type \"";
+  print_type(ss);
+  ss << "\"";
+
+  throw std::runtime_error(ss.str());
+}
+
+bool ndt::base_type::is_expression() const
+{
+  return false;
+}
 
 bool
 ndt::base_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
@@ -142,7 +159,10 @@ bool ndt::base_type::is_lossless_assignment(const type &dst_tp,
   return dst_tp == src_tp;
 }
 
-size_t ndt::base_type::get_default_data_size() const { return get_data_size(); }
+size_t ndt::base_type::get_default_data_size() const
+{
+  return get_data_size();
+}
 
 // TODO: Make this a pure virtual function eventually
 void ndt::base_type::arrmeta_default_construct(

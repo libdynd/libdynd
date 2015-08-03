@@ -51,6 +51,7 @@ set(tests_SRC
     types/test_json_type.cpp
     types/test_option_type.cpp
     types/test_pointer_type.cpp
+    types/test_scalar_kind_type.cpp
     types/test_string_type.cpp
     types/test_struct_type.cpp
     types/test_symbolic_types.cpp
@@ -157,7 +158,7 @@ elseif(APPLE)
 else()
     set_target_properties(test_libdynd PROPERTIES
         COMPILE_FLAGS "-pthread")
-    #-Wno-unnamed-type-template-args 
+    #-Wno-unnamed-type-template-args
 
     target_link_libraries(test_libdynd
         ${LINK_LIBS}

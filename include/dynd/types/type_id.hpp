@@ -171,6 +171,8 @@ enum type_id_t {
   int_sym_type_id,
   // "Any", matching any type (dimensions and dtype)
   any_kind_type_id,
+  // "Scalar" matchines any scalar type
+  scalar_kind_type_id,
 
   // Symbolic types
   callable_type_id,

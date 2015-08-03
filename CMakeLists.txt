@@ -93,7 +93,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # -WX: Treat warnings as errors
     # -bigobj: Allow lots of symbols (assignment_kernels.cpp and assignment_kernels.cu need this flag)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503")
-    
+
     if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 18)
         message(FATAL_ERROR "Only MSVC 2013 (Version 18.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
     endif ()
@@ -200,6 +200,7 @@ set(libdynd_SRC
     src/dynd/types/typevar_constructed_type.cpp
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/pow_dimsym_type.cpp
+    src/dynd/types/scalar_kind_type.cpp
     src/dynd/types/typevar_type.cpp
     src/dynd/types/unary_expr_type.cpp
     src/dynd/types/var_dim_type.cpp
@@ -253,6 +254,7 @@ set(libdynd_SRC
     include/dynd/types/pointer_type.hpp
     include/dynd/types/pow_dimsym_type.hpp
     include/dynd/types/property_type.hpp
+    include/dynd/types/scalar_kind_type.hpp
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
     include/dynd/types/substitute_shape.hpp
