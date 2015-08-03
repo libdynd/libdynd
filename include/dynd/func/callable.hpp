@@ -130,11 +130,6 @@ namespace nd {
       args(A &&... a) : m_values(std::forward<A>(a)...)
       {
         validate_types.self = this;
-
-        // Todo: This should be removed, but it seems to trigger an error on
-        // travis if it is
-        typedef make_index_sequence<sizeof...(A)> I;
-        old_index_proxy<I>::template get_arrmeta(m_arrmeta, m_values);
       }
 
       std::size_t size() const
@@ -152,9 +147,9 @@ namespace nd {
                      std::vector<char *> &src_data,
                      std::map<std::string, ndt::type> &tp_vars) const
         {
-          auto &value = std::get<I>(self->m_values);
+          auto value = std::get<I>(self->m_values);
           const ndt::type &tp = ndt::type::make(value);
-          const char *arrmeta = self->m_arrmeta[I];
+          const char *arrmeta = value.get_arrmeta();
 
           check_arg(af_tp, I, tp, arrmeta, tp_vars);
 
@@ -199,12 +194,12 @@ namespace nd {
 
     /** A way to pass a run-time array of array arguments */
     template <>
-    class args<intptr_t, nd::array *> {
-      intptr_t m_size;
+    class args<std::size_t, array *> {
+      std::size_t m_size;
       array *m_values;
 
     public:
-      args(intptr_t size, nd::array *values) : m_size(size), m_values(values)
+      args(std::size_t size, array *values) : m_size(size), m_values(values)
       {
       }
 
@@ -221,7 +216,7 @@ namespace nd {
       {
         check_narg(af_tp, m_size);
 
-        for (intptr_t i = 0; i < m_size; ++i) {
+        for (std::size_t i = 0; i < m_size; ++i) {
           array &value = m_values[i];
           const ndt::type &tp = value.get_type();
           const char *arrmeta = value.get_arrmeta();
@@ -233,33 +228,6 @@ namespace nd {
           src_data.push_back(data_of(value));
         }
       }
-    };
-
-    /**
-     * A metafunction to distinguish the general C++ variadic arguments versus
-     * the special args<> for bypassing the C++ interface layer.
-     */
-    template <typename... T>
-    struct is_variadic_args {
-      enum {
-        value = true
-      };
-    };
-    template <typename T0, typename T1>
-    struct is_variadic_args<T0, T1> {
-      enum {
-        value = !(std::is_convertible<T0, intptr_t>::value &&
-                  std::is_convertible<T1, array *>::value)
-      };
-    };
-    template <typename T0, typename T1, typename T2, typename T3>
-    struct is_variadic_args<T0, T1, T2, T3> {
-      enum {
-        value = !(std::is_convertible<T0, intptr_t>::value &&
-                  std::is_convertible<T1, const ndt::type *>::value &&
-                  std::is_convertible<T2, const char *const *>::value &&
-                  std::is_convertible<T3, char *const *>::value)
-      };
     };
 
     /** A holder class for the keyword arguments */
@@ -823,7 +791,6 @@ namespace nd {
 
       // Validate the array arguments
       args.validate_types(self_tp, arg_tp, arg_arrmeta, arg_data, tp_vars);
-      get_type()->validate(args);
 
       // Validate the destination type, if it was provided
       if (!dst.is_null()) {
@@ -886,7 +853,7 @@ namespace nd {
      */
     template <typename... T>
     typename std::enable_if<
-        sizeof...(T) != 3 && sizeof...(T) != 5 &&
+        sizeof...(T) != 3 &&
             detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
         array>::type
     operator()(T &&... a)
@@ -903,7 +870,8 @@ namespace nd {
     }
 
     template <typename A0, typename A1, typename... K>
-    typename std::enable_if<detail::is_variadic_args<A0, A1>::value,
+    typename std::enable_if<!std::is_convertible<A0 &&, std::size_t>::value ||
+                                !std::is_convertible<A1 &&, array *>::value,
                             array>::type
     operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
@@ -913,37 +881,13 @@ namespace nd {
     }
 
     template <typename A0, typename A1, typename... K>
-    typename std::enable_if<!detail::is_variadic_args<A0, A1>::value,
+    typename std::enable_if<std::is_convertible<A0 &&, std::size_t>::value &&
+                                std::is_convertible<A1 &&, array *>::value,
                             array>::type
     operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
-      return call(detail::args<intptr_t, array *>(std::forward<A0>(a0),
-                                                  std::forward<A1>(a1)),
-                  kwds);
-    }
-
-    template <typename A0, typename A1, typename A2, typename A3, typename... K>
-    typename std::enable_if<detail::is_variadic_args<A0, A1, A2, A3>::value,
-                            array>::type
-    operator()(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3,
-               const detail::kwds<K...> &kwds)
-    {
-      return call(detail::args<array, array, array, array, array>(
-                      std::forward<A0>(a0), std::forward<A1>(a1),
-                      std::forward<A2>(a2), std::forward<A3>(a3)),
-                  kwds);
-    }
-
-    template <typename A0, typename A1, typename A2, typename A3, typename... K>
-    typename std::enable_if<!detail::is_variadic_args<A0, A1, A2, A3>::value,
-                            array>::type
-    operator()(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3,
-               const detail::kwds<K...> &kwds)
-    {
-      return call(detail::args<intptr_t, const ndt::type *, const char *const *,
-                               char *const *>(
-                      std::forward<A0>(a0), std::forward<A1>(a1),
-                      std::forward<A2>(a2), std::forward<A3>(a3)),
+      return call(detail::args<std::size_t, array *>(std::forward<A0>(a0),
+                                                     std::forward<A1>(a1)),
                   kwds);
     }
 

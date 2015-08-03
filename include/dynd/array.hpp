@@ -27,19 +27,6 @@ namespace ndt {
 } // namespace ndt;
 
 namespace nd {
-  template <typename I>
-  struct old_index_proxy;
-
-  template <size_t... I>
-  struct old_index_proxy<index_sequence<I...>> {
-    enum {
-      size = index_sequence<I...>::size
-    };
-
-    template <typename... T>
-    static void get_arrmeta(const char **arrmeta,
-                            const std::tuple<T...> &values);
-  };
 
   class array;
 
@@ -1971,29 +1958,5 @@ namespace nd {
     }
   }
 
-  inline void get_arrmeta(const char **arrmeta, nd::array &a)
-  {
-    *arrmeta = a.get_arrmeta();
-  }
-
-  inline void get_arrmeta(const char **arrmeta, const nd::array &a)
-  {
-    *arrmeta = a.get_arrmeta();
-  }
-
-  template <typename A0, typename... A>
-  void get_arrmeta(const char **arrmeta, A0 &&a0, A &&... a)
-  {
-    get_arrmeta(arrmeta, a0);
-    get_arrmeta(arrmeta + 1, std::forward<A>(a)...);
-  }
-
-  template <size_t... I>
-  template <typename... T>
-  void old_index_proxy<index_sequence<I...>>::get_arrmeta(
-      const char **arrmeta, const std::tuple<T...> &values)
-  {
-    nd::get_arrmeta(arrmeta, std::get<I>(values)...);
-  }
 } // namespace dynd::nd
 } // namespace dynd

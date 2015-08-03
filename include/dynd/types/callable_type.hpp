@@ -312,11 +312,6 @@ namespace ndt {
     /** Returns the number of optional arguments. */
     intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
 
-    template <typename A>
-    void validate(const A &DYND_UNUSED(args)) const {
-
-    }
-
     void print_data(std::ostream &o, const char *arrmeta,
                     const char *data) const;
 
