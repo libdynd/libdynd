@@ -273,7 +273,7 @@ static void replace_scalar_types(const ndt::type &dt,
 {
   const replace_scalar_type_extra *e =
       reinterpret_cast<const replace_scalar_type_extra *>(extra);
-  if (dt.is_scalar()) {
+  if (!dt.is_indexable()) {
     out_transformed_tp = ndt::convert_type::make(e->scalar_tp, dt);
     out_was_transformed = true;
   } else {

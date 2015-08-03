@@ -183,7 +183,9 @@ namespace ndt {
     }
 
     /** Construct from a type ID */
-    type(type_id_t tp_id) : type((validate_type_id(tp_id), instances[tp_id])) {}
+    type(type_id_t tp_id) : type((validate_type_id(tp_id), instances[tp_id]))
+    {
+    }
 
     /** Construct from a string representation */
     explicit type(const std::string &rep);
@@ -211,9 +213,15 @@ namespace ndt {
       return result;
     }
 
-    void swap(type &rhs) { std::swap(m_extended, rhs.m_extended); }
+    void swap(type &rhs)
+    {
+      std::swap(m_extended, rhs.m_extended);
+    }
 
-    void swap(const base_type *&rhs) { std::swap(m_extended, rhs); }
+    void swap(const base_type *&rhs)
+    {
+      std::swap(m_extended, rhs);
+    }
 
     bool operator==(const type &rhs) const
     {
@@ -221,16 +229,25 @@ namespace ndt {
              (!is_builtin() && !rhs.is_builtin() &&
               *m_extended == *rhs.m_extended);
     }
-    bool operator!=(const type &rhs) const { return !(operator==(rhs)); }
+    bool operator!=(const type &rhs) const
+    {
+      return !(operator==(rhs));
+    }
 
-    bool is_null() const { return m_extended == NULL; }
+    bool is_null() const
+    {
+      return m_extended == NULL;
+    }
 
     /**
      * Returns true if this type is built in, which
      * means the type id is encoded directly in the m_extended
      * pointer.
      */
-    bool is_builtin() const { return is_builtin_type(m_extended); }
+    bool is_builtin() const
+    {
+      return is_builtin_type(m_extended);
+    }
 
     /**
      * Indexes into the type. This function returns the type which results
@@ -280,7 +297,10 @@ namespace ndt {
      *       If you do not want this collapsing behavior, use the 'at_single'
      *function.
      */
-    type at(const irange &i0) const { return at_array(1, &i0); }
+    type at(const irange &i0) const
+    {
+      return at_array(1, &i0);
+    }
 
     /** Indexing with two index values */
     type at(const irange &i0, const irange &i1) const
@@ -439,7 +459,10 @@ namespace ndt {
     }
 
     /** The 'kind' of the type (int, uint, float, etc) */
-    type_kind_t get_kind() const { return get_base_type_kind(m_extended); }
+    type_kind_t get_kind() const
+    {
+      return get_base_type_kind(m_extended);
+    }
 
     /** The alignment of the type */
     size_t get_data_alignment() const
@@ -448,15 +471,18 @@ namespace ndt {
     }
 
     /** The element size of the type */
-    size_t get_data_size() const { return get_base_type_data_size(m_extended); }
+    size_t get_data_size() const
+    {
+      return get_base_type_data_size(m_extended);
+    }
 
     /** The element size of the type when default-constructed */
     size_t get_default_data_size() const
     {
       if (is_builtin_type(m_extended)) {
         return static_cast<intptr_t>(
-            detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(
-                m_extended)]);
+            detail::builtin_data_sizes
+                [reinterpret_cast<uintptr_t>(m_extended)]);
       } else {
         return m_extended->get_default_data_size();
       }
@@ -519,7 +545,15 @@ namespace ndt {
       return m_extended->is_c_contiguous(arrmeta);
     }
 
-    bool is_scalar() const { return is_builtin() || m_extended->is_scalar(); }
+    bool is_indexable() const
+    {
+      return !is_builtin() && m_extended->is_indexable();
+    }
+
+    bool is_scalar() const
+    {
+      return is_builtin() || m_extended->is_scalar();
+    }
 
 #ifdef DYND_CUDA
 
@@ -718,7 +752,10 @@ namespace ndt {
      * type information exists. The returned pointer is only valid during
      * the lifetime of the type.
      */
-    const base_type *extended() const { return m_extended; }
+    const base_type *extended() const
+    {
+      return m_extended;
+    }
 
     /**
      * Casts to the specified <x>_type class using static_cast.
@@ -897,7 +934,8 @@ namespace ndt {
     }
 
     template <typename A0, typename... A>
-    static type make(A0 &&a0, A &&... a) {
+    static type make(A0 &&a0, A &&... a)
+    {
       return equivalent<A0>::make(std::forward<A0>(a0), std::forward<A>(a)...);
     }
 
@@ -906,92 +944,146 @@ namespace ndt {
 
   template <>
   struct type::equivalent<bool1> {
-    static type make() { return type(type_id_of<bool1>::value); }
+    static type make()
+    {
+      return type(type_id_of<bool1>::value);
+    }
   };
 
   template <>
   struct type::equivalent<bool> {
-    static type make() { return type::make<bool1>(); }
+    static type make()
+    {
+      return type::make<bool1>();
+    }
   };
 
   template <>
   struct type::equivalent<signed char> {
-    static type make() { return type(type_id_of<signed char>::value); }
+    static type make()
+    {
+      return type(type_id_of<signed char>::value);
+    }
   };
 
   template <>
   struct type::equivalent<short> {
-    static type make() { return type(type_id_of<short>::value); }
+    static type make()
+    {
+      return type(type_id_of<short>::value);
+    }
   };
 
   template <>
   struct type::equivalent<int> {
-    static type make() { return type(type_id_of<int>::value); }
+    static type make()
+    {
+      return type(type_id_of<int>::value);
+    }
   };
 
   template <>
   struct type::equivalent<long> {
-    static type make() { return type(type_id_of<long>::value); }
+    static type make()
+    {
+      return type(type_id_of<long>::value);
+    }
   };
 
   template <>
   struct type::equivalent<long long> {
-    static type make() { return type(type_id_of<long long>::value); }
+    static type make()
+    {
+      return type(type_id_of<long long>::value);
+    }
   };
 
   template <>
   struct type::equivalent<int128> {
-    static type make() { return type(type_id_of<int128>::value); }
+    static type make()
+    {
+      return type(type_id_of<int128>::value);
+    }
   };
 
   template <>
   struct type::equivalent<unsigned char> {
-    static type make() { return type(type_id_of<unsigned char>::value); }
+    static type make()
+    {
+      return type(type_id_of<unsigned char>::value);
+    }
   };
 
   template <>
   struct type::equivalent<unsigned short> {
-    static type make() { return type(type_id_of<unsigned short>::value); }
+    static type make()
+    {
+      return type(type_id_of<unsigned short>::value);
+    }
   };
 
   template <>
   struct type::equivalent<unsigned int> {
-    static type make() { return type(type_id_of<unsigned int>::value); }
+    static type make()
+    {
+      return type(type_id_of<unsigned int>::value);
+    }
   };
 
   template <>
   struct type::equivalent<unsigned long> {
-    static type make() { return type(type_id_of<unsigned long>::value); }
+    static type make()
+    {
+      return type(type_id_of<unsigned long>::value);
+    }
   };
 
   template <>
   struct type::equivalent<unsigned long long> {
-    static type make() { return type(type_id_of<unsigned long long>::value); }
+    static type make()
+    {
+      return type(type_id_of<unsigned long long>::value);
+    }
   };
 
   template <>
   struct type::equivalent<uint128> {
-    static type make() { return type(type_id_of<uint128>::value); }
+    static type make()
+    {
+      return type(type_id_of<uint128>::value);
+    }
   };
 
   template <>
   struct type::equivalent<char> {
-    static type make() { return type(type_id_of<char>::value); }
+    static type make()
+    {
+      return type(type_id_of<char>::value);
+    }
   };
 
   template <>
   struct type::equivalent<float16> {
-    static type make() { return type(type_id_of<float16>::value); }
+    static type make()
+    {
+      return type(type_id_of<float16>::value);
+    }
   };
 
   template <>
   struct type::equivalent<float> {
-    static type make() { return type(type_id_of<float>::value); }
+    static type make()
+    {
+      return type(type_id_of<float>::value);
+    }
   };
 
   template <>
   struct type::equivalent<double> {
-    static type make() { return type(type_id_of<double>::value); }
+    static type make()
+    {
+      return type(type_id_of<double>::value);
+    }
   };
 
   /*
@@ -1003,27 +1095,42 @@ namespace ndt {
 
   template <>
   struct type::equivalent<float128> {
-    static type make() { return type(type_id_of<float128>::value); }
+    static type make()
+    {
+      return type(type_id_of<float128>::value);
+    }
   };
 
   template <typename T>
   struct type::equivalent<complex<T>> {
-    static type make() { return type(type_id_of<complex<T>>::value); }
+    static type make()
+    {
+      return type(type_id_of<complex<T>>::value);
+    }
   };
 
   template <typename T>
   struct type::equivalent<std::complex<T>> {
-    static type make() { return type::make<complex<T>>(); }
+    static type make()
+    {
+      return type::make<complex<T>>();
+    }
   };
 
   template <>
   struct type::equivalent<void> {
-    static type make() { return type(type_id_of<void>::value); }
+    static type make()
+    {
+      return type(type_id_of<void>::value);
+    }
   };
 
   template <>
   struct type::equivalent<type> {
-    static type make() { return type(type_type_id); }
+    static type make()
+    {
+      return type(type_type_id);
+    }
   };
 
   // The removal of const is a temporary solution until we decide if and how

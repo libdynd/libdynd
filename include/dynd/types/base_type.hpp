@@ -171,7 +171,10 @@ namespace ndt {
     virtual ~base_type();
 
     /** For debugging purposes, the type's use count */
-    inline int32_t get_use_count() const { return m_use_count; }
+    inline int32_t get_use_count() const
+    {
+      return m_use_count;
+    }
 
     /** Returns the struct of data common to all types. */
     inline const base_type_members &get_base_type_members() const
@@ -191,7 +194,10 @@ namespace ndt {
     }
     /** The size of one instance of the type, or 0 if there is not one fixed
      * size. */
-    inline size_t get_data_size() const { return m_members.data_size; }
+    inline size_t get_data_size() const
+    {
+      return m_members.data_size;
+    }
     /** The type's data alignment. Every data pointer for this type _must_ be
      * aligned. */
     inline size_t get_data_alignment() const
@@ -199,9 +205,15 @@ namespace ndt {
       return m_members.data_alignment;
     }
     /** The number of array dimensions this type has */
-    inline intptr_t get_ndim() const { return m_members.ndim; }
+    inline intptr_t get_ndim() const
+    {
+      return m_members.ndim;
+    }
     /** The number of outer strided dimensions this type has in a row */
-    inline intptr_t get_strided_ndim() const { return m_members.strided_ndim; }
+    inline intptr_t get_strided_ndim() const
+    {
+      return m_members.strided_ndim;
+    }
     inline base_type_members::flags_type get_flags() const
     {
       return m_members.flags;
@@ -225,6 +237,11 @@ namespace ndt {
     virtual void print_data(std::ostream &o, const char *arrmeta,
                             const char *data) const;
 
+    inline bool is_indexable() const
+    {
+      return m_members.flags & type_flag_indexable;
+    }
+
     /**
      * Returns true if the type is a scalar.
      *
@@ -232,9 +249,9 @@ namespace ndt {
      *behavior,
      * but the simplicity seems to probably be worth it.
      */
-    inline bool is_scalar() const
+    bool is_scalar() const
     {
-      return (m_members.flags & type_flag_scalar) != 0;
+      return m_members.ndim == 0 && (m_members.flags & type_flag_variadic) == 0;
     }
 
     /**
@@ -463,7 +480,10 @@ namespace ndt {
     virtual bool operator==(const base_type &rhs) const = 0;
 
     /** The size of the nd::array arrmeta for this type */
-    inline size_t get_arrmeta_size() const { return m_members.arrmeta_size; }
+    inline size_t get_arrmeta_size() const
+    {
+      return m_members.arrmeta_size;
+    }
     /**
      * Constructs the nd::array arrmeta for this type using default settings.
      * The element size of the result must match that from

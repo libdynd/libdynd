@@ -21,7 +21,9 @@ ndt::base_tuple_type::base_tuple_type(type_id_t type_id,
                                       flags_type flags, bool layout_in_arrmeta,
                                       bool variadic)
     : base_type(type_id, variadic ? kind_kind : tuple_kind, 0, 1,
-                flags | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
+                flags | type_flag_indexable |
+                    (variadic ? type_flag_symbolic : 0),
+                0, 0, 0),
       m_field_count(field_types.get_dim_size()), m_field_types(field_types),
       m_arrmeta_offsets(nd::empty(m_field_count, type::make<uintptr_t>())),
       m_variadic(variadic)
@@ -59,7 +61,9 @@ ndt::base_tuple_type::base_tuple_type(type_id_t type_id,
   m_arrmeta_offsets.flag_as_immutable();
 }
 
-ndt::base_tuple_type::~base_tuple_type() {}
+ndt::base_tuple_type::~base_tuple_type()
+{
+}
 
 void ndt::base_tuple_type::print_data(std::ostream &o, const char *arrmeta,
                                       const char *data) const
@@ -276,11 +280,13 @@ void ndt::base_tuple_type::arrmeta_default_construct(char *arrmeta,
   for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
     const type &tp = field_tps[i];
     if (!tp.is_builtin()) {
-      try {
+      try
+      {
         tp.extended()->arrmeta_default_construct(arrmeta + arrmeta_offsets[i],
                                                  blockref_alloc);
       }
-      catch (...) {
+      catch (...)
+      {
         // Since we're explicitly controlling the memory, need to manually do
         // the cleanup too
         for (intptr_t j = 0; j < i; ++j) {

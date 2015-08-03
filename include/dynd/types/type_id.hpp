@@ -247,6 +247,8 @@ enum type_flags_t {
   // This dimensions of this type are variadic (outermost dimensions, but not
   // dimensions within a struct, for example)
   type_flag_variadic = 0x00000100,
+  // ...
+  type_flag_indexable = 0x00000200,
 };
 
 enum axis_order_classification_t {
