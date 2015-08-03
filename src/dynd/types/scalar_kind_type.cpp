@@ -18,11 +18,6 @@ ndt::scalar_kind_type::~scalar_kind_type()
 {
 }
 
-void ndt::scalar_kind_type::print_type(ostream &o) const
-{
-  o << "Scalar";
-}
-
 bool ndt::scalar_kind_type::operator==(const base_type &other) const
 {
   return this == &other || other.get_type_id() == scalar_kind_type_id;
@@ -35,4 +30,9 @@ bool ndt::scalar_kind_type::match(
 {
   // Match against any scalar
   return candidate_tp.get_ndim() == 0 && !candidate_tp.is_variadic();
+}
+
+void ndt::scalar_kind_type::print_type(ostream &o) const
+{
+  o << "Scalar";
 }
