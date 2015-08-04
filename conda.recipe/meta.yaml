@@ -8,6 +8,7 @@ build:
 requirements:
   build:
     - cmake    [unix]
+    - gcc >= 4.8
 
 test:
   commands:
