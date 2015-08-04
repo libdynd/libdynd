@@ -7,8 +7,8 @@ conda install -c stuarteberg gcc=4.8.4.99
 
 echo Setting the compiler...
 if [ `uname` == Linux ]; then
-    export CC="$PREFIX/bin/gcc -D__USE_XOPEN2K8"
-    export CXX="$PREFIX/bin/g++ -D__USE_XOPEN2K8"
+    export CC="$PREFIX/bin/gcc"
+    export CXX="$PREFIX/bin/g++"
 elif [ `uname` == Darwin ]; then
     CPPFLAGS="-stdlib=libc++"
     EXTRAOPTIONS="-DCMAKE_OSX_DEPLOYMENT_TARGET=10.8"
