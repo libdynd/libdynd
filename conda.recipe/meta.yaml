@@ -9,7 +9,6 @@ requirements:
   build:
     - cmake    [unix]
     - gcc >=4.8
-    - build-essential
 
 test:
   commands:
