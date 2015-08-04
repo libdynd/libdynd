@@ -1,5 +1,18 @@
 language: cpp
 
+sudo: false
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.7
+    - g++-4.7
+    - cmake
+    - valgrind
+    - libfftw3-dev
+
 compiler:
   - gcc
   - clang
@@ -9,7 +22,7 @@ env:
 #  - DYND_CUDA=ON DYND_FFTW=OFF
   - DYND_CUDA=OFF DYND_FFTW=ON
   - ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
-  - PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF DYND_BUILD_BENCHMARKS=OFF
+#  - PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF DYND_BUILD_BENCHMARKS=OFF
 #  - MSAN=ON DYND_CUDA=OFF DYND_FFTW=ON
 
 matrix:
@@ -18,26 +31,17 @@ matrix:
       env: ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
     - compiler: gcc
       env: MSAN=ON DYND_CUDA=OFF DYND_FFTW=ON
-    - compiler: gcc
-      env: PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF DYND_BUILD_BENCHMARKS=OFF
+#    - compiler: gcc
+#      env: PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF DYND_BUILD_BENCHMARKS=OFF
     - compiler: clang
       env: DYND_CUDA=ON DYND_FFTW=OFF
 
 before_script:
-  # For newer cmake
-  - sudo add-apt-repository -y ppa:kalakris/cmake
-  # For gcc 4.7
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update
-  - sudo apt-get install cmake
-  - if [ "$CC" = "gcc" ]; then sudo apt-get -y install gcc-4.7; sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.7 90; export CC="gcc-4.7"; fi
-  - if [ "$CXX" = "g++" ] || [ "$CXX" = "clang++" ]; then sudo apt-get -y install g++-4.7; sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.7 90; fi
+  - if [ "$CC" = "gcc" ]; export CC="gcc-4.7"; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.7"; fi
-  - if [ "$VALGRIND" == "ON" ]; then sudo apt-get -y install valgrind; fi
-  - if [ "$DYND_CUDA" == "ON" ]; then wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1204/x86_64/cuda-repo-ubuntu1204_7.0-28_amd64.deb;
-    sudo dpkg -i cuda-repo-ubuntu1204_7.0-28_amd64.deb; sudo apt-get update; sudo apt-get -y install cuda; fi
-  - if [ "$DYND_FFTW" == "ON" ]; then sudo apt-get -y install libfftw3-dev; fi
-  - if [ "$PYTHON" == "ON" ]; then sudo pip install numpy cython; fi
+#  - if [ "$DYND_CUDA" == "ON" ]; then wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1204/x86_64/cuda-repo-ubuntu1204_7.0-28_amd64.deb;
+#    sudo dpkg -i cuda-repo-ubuntu1204_7.0-28_amd64.deb; sudo apt-get update; sudo apt-get -y install cuda; fi
+#  - if [ "$PYTHON" == "ON" ]; then travis_retry pip install numpy cython; fi
   - if [ "$ASAN" == "ON" ]; then export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'; fi
   - if [ "$MSAN" == "ON" ]; then export CXXFLAGS='-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer'; fi
   - if [ "$DYND_BUILD_TESTS" == "" ]; then export DYND_BUILD_TESTS=ON; fi
@@ -51,10 +55,10 @@ script:
   - if [ "$DYND_CUDA" == "ON" ]; then exit; fi
   - if [ "$DYND_BUILD_TESTS" == "ON" ]; then ./tests/test_libdynd; fi
   - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi
-  - if [ "$PYTHON" == "ON" ]; then sudo make install; sudo ldconfig; popd; fi
-  - if [ "$PYTHON" == "ON" ]; then git clone https://github.com/libdynd/dynd-python.git; fi
-  - if [ "$PYTHON" == "ON" ]; then pushd dynd-python && sudo python setup.py install; popd; fi
-  - if [ "$PYTHON" == "ON" ]; then python -c 'import dynd;dynd.test(exit=True)'; fi
+#  - if [ "$PYTHON" == "ON" ]; then make install; sudo ldconfig; popd; fi
+#  - if [ "$PYTHON" == "ON" ]; then git clone https://github.com/libdynd/dynd-python.git; fi
+#  - if [ "$PYTHON" == "ON" ]; then pushd dynd-python && python setup.py install; popd; fi
+#  - if [ "$PYTHON" == "ON" ]; then python -c 'import dynd;dynd.test(exit=True)'; fi
 
 notifications:
   email: false
