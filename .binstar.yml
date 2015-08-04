@@ -4,7 +4,6 @@ platform:
     - osx-64
     - win-64
 script:
-    - conda config --set binstar_upload yes
     - conda build conda.recipe -c stuarteberg
 build_targets:
     files: conda
