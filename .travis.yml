@@ -16,6 +16,9 @@ matrix:
           - g++-4.7
           - cmake
           - valgrind
+      before_install:
+        - export CC="gcc-4.7"
+        - export CXX="g++-4.7"
     - compiler: gcc
       env: DYND_CUDA=OFF DYND_FFTW=ON
       addons:
@@ -28,6 +31,9 @@ matrix:
           - g++-4.7
           - cmake
           - libfftw3-dev
+      before_install:
+        - export CC="gcc-4.7"
+        - export CXX="g++-4.7"
     - compiler: clang
       env: VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
       addons:
@@ -39,6 +45,10 @@ matrix:
           - g++-4.7
           - cmake
           - valgrind
+      script:
+        - make || exit 1
+        - ./tests/test_libdynd
+        - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
     - compiler: clang
       env: DYND_CUDA=OFF DYND_FFTW=ON
       addons:
@@ -61,22 +71,17 @@ matrix:
           - g++-4.7
           - cmake
           - libfftw3-dev
+      before_install:
+        - export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
 
 before_script:
-  - if [ "$CC" = "gcc" ]; then export CC="gcc-4.7"; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.7"; fi
-  - if [ "$ASAN" == "ON" ]; then export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'; fi
-  - if [ "$DYND_BUILD_TESTS" == "" ]; then export DYND_BUILD_TESTS=ON; fi
-  - if [ "$DYND_BUILD_BENCHMARKS" == "" ]; then export DYND_BUILD_BENCHMARKS=ON; fi
   - mkdir build
   - pushd build
-  - cmake $(if [ $DYND_CUDA = ON ]; then echo -DCMAKE_BUILD_TYPE=RelWithDebInfo; fi) -DDYND_CUDA=${DYND_CUDA} -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_TESTS=${DYND_BUILD_TESTS} -DDYND_BUILD_BENCHMARKS=${DYND_BUILD_BENCHMARKS} ..
+  - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=ON ..
 
 script:
   - make || exit 1
-  - if [ "$DYND_CUDA" == "ON" ]; then exit; fi
-  - if [ "$DYND_BUILD_TESTS" == "ON" ]; then ./tests/test_libdynd; fi
-  - if [ "$VALGRIND" == "ON" ]; then valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd; fi
+  - ./tests/test_libdynd
 
 notifications:
   email: false
