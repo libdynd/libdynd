@@ -7,7 +7,10 @@ echo Setting the compiler...
 CC=cc
 CXX=c++
 
-if [ `uname` == Darwin ]; then
+if [ `uname` == Linux ]; then
+    CC=gcc48
+    CXX=g++48
+elif [ `uname` == Darwin ]; then
     CPPFLAGS="-stdlib=libc++"
     EXTRAOPTIONS="-DCMAKE_OSX_DEPLOYMENT_TARGET=10.8"
     MACOSX_DEPLOYMENT_TARGET=10.8
