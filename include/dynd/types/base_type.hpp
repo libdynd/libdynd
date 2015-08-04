@@ -239,7 +239,7 @@ namespace ndt {
 
     inline bool is_indexable() const
     {
-      return m_members.flags & type_flag_indexable;
+      return (m_members.flags & type_flag_indexable) != 0;
     }
 
     /**
