@@ -28,9 +28,8 @@ cmake \
     $EXTRAOPTIONS \
     -DCMAKE_BUILD_TYPE=Release  \
     -DDYND_SHARED_LIB=ON \
-    -DDYND_INSTALL_LIB=ON \
+#    -DDYND_INSTALL_LIB=ON \
     -DDYND_BUILD_BENCHMARKS=OFF \
-    -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
     -DCMAKE_INSTALL_PREFIX=$PREFIX .. || exit 1
 echo Building with make...
 make || exit 1
