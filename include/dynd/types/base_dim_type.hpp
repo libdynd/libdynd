@@ -26,7 +26,7 @@ namespace ndt {
                   const type &element_tp, size_t data_size, size_t alignment,
                   size_t element_arrmeta_offset, flags_type flags, bool strided)
         : base_type(type_id, tp_kind, data_size, alignment,
-                    flags | type_flag_indexable | type_flag_dim,
+                    flags | type_flag_indexable,
                     element_arrmeta_offset + element_tp.get_arrmeta_size(),
                     1 + element_tp.get_ndim(),
                     strided ? (1 + element_tp.get_strided_ndim()) : 0),

@@ -582,15 +582,6 @@ namespace ndt {
     }
 
     /**
-     * Returns true if the outermost type is a dimension.
-     */
-    bool is_dim() const
-    {
-      return !is_builtin() && (get_kind() == dim_kind ||
-                               m_extended->get_flags() & type_flag_dim);
-    }
-
-    /**
      * Returns true if the type contains a symbolic construct
      * like a type var.
      */
@@ -656,7 +647,7 @@ namespace ndt {
     base_type::flags_type get_flags() const
     {
       if (is_builtin()) {
-        return type_flag_scalar;
+        return type_flag_none;
       } else {
         return m_extended->get_flags();
       }

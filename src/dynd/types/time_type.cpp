@@ -17,12 +17,14 @@ using namespace dynd;
 
 ndt::time_type::time_type(datetime_tz_t timezone)
     : base_type(time_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value,
-                type_flag_scalar, 0, 0, 0),
+                type_flag_none, 0, 0, 0),
       m_timezone(timezone)
 {
 }
 
-ndt::time_type::~time_type() {}
+ndt::time_type::~time_type()
+{
+}
 
 void ndt::time_type::set_time(const char *DYND_UNUSED(arrmeta), char *data,
                               assign_error_mode errmode, int32_t hour,
@@ -261,8 +263,8 @@ void ndt::time_type::get_dynamic_array_functions(
 {
   static pair<string, gfunc::callable> time_array_functions[] = {
       pair<string, gfunc::callable>(
-          "to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-  };
+          "to_struct",
+          gfunc::make_callable(&function_ndo_to_struct, "self")), };
 
   *out_functions = time_array_functions;
   *out_count = sizeof(time_array_functions) / sizeof(time_array_functions[0]);

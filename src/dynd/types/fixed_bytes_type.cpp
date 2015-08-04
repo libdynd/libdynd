@@ -16,7 +16,7 @@ using namespace dynd;
 ndt::fixed_bytes_type::fixed_bytes_type(intptr_t data_size,
                                         intptr_t data_alignment)
     : base_bytes_type(fixed_bytes_type_id, bytes_kind, data_size,
-                      data_alignment, type_flag_scalar, 0)
+                      data_alignment, type_flag_none, 0)
 {
   if (data_alignment > data_size) {
     std::stringstream ss;
@@ -40,7 +40,9 @@ ndt::fixed_bytes_type::fixed_bytes_type(intptr_t data_size,
   }
 }
 
-ndt::fixed_bytes_type::~fixed_bytes_type() {}
+ndt::fixed_bytes_type::~fixed_bytes_type()
+{
+}
 
 void ndt::fixed_bytes_type::get_bytes_range(const char **out_begin,
                                             const char **out_end,

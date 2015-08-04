@@ -24,13 +24,13 @@ ndt::fixed_dim_kind_type::fixed_dim_kind_type(const type &element_tp)
                     type_flag_symbolic, true)
 {
   // Propagate the inherited flags from the element
-  m_members.flags |=
-      (element_tp.get_flags() &
-       ((type_flags_operand_inherited | type_flags_value_inherited) &
-        ~type_flag_scalar));
+  m_members.flags |= (element_tp.get_flags() & (type_flags_operand_inherited |
+                                                type_flags_value_inherited));
 }
 
-ndt::fixed_dim_kind_type::~fixed_dim_kind_type() {}
+ndt::fixed_dim_kind_type::~fixed_dim_kind_type()
+{
+}
 
 size_t ndt::fixed_dim_kind_type::get_default_data_size() const
 {
@@ -175,8 +175,8 @@ size_t ndt::fixed_dim_kind_type::arrmeta_copy_construct_onedim(
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_dim_kind_type::arrmeta_reset_buffers(
-    char *DYND_UNUSED(arrmeta)) const
+void ndt::fixed_dim_kind_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta))
+    const
 {
 }
 

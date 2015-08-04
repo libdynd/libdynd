@@ -19,7 +19,7 @@ ndt::pow_dimsym_type::pow_dimsym_type(const type &base_tp,
                     type_flag_symbolic, false),
       m_base_tp(base_tp), m_exponent(exponent)
 {
-  if (!base_tp.is_dim() ||
+  if (base_tp.is_scalar() ||
       base_tp.extended<base_dim_type>()->get_element_type().get_type_id() !=
           void_type_id) {
     stringstream ss;

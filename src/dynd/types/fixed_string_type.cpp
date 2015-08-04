@@ -18,7 +18,7 @@ using namespace dynd;
 
 ndt::fixed_string_type::fixed_string_type(intptr_t stringsize,
                                           string_encoding_t encoding)
-    : base_string_type(fixed_string_type_id, 0, 1, type_flag_scalar, 0),
+    : base_string_type(fixed_string_type_id, 0, 1, type_flag_none, 0),
       m_stringsize(stringsize), m_encoding(encoding)
 {
   switch (encoding) {
@@ -42,7 +42,9 @@ ndt::fixed_string_type::fixed_string_type(intptr_t stringsize,
   }
 }
 
-ndt::fixed_string_type::~fixed_string_type() {}
+ndt::fixed_string_type::~fixed_string_type()
+{
+}
 
 void ndt::fixed_string_type::get_string_range(const char **out_begin,
                                               const char **out_end,

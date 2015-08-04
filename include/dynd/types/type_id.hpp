@@ -24,7 +24,6 @@ enum type_kind_t {
   // string_kind means subclass of base_string_type
   string_kind,
   bytes_kind,
-
   datetime_kind,
 
   // For type_type_id and other types that themselves represent types
@@ -134,12 +133,10 @@ enum type_id_t {
   struct_type_id,
   // A tuple type with variable layout
   tuple_type_id,
-
   option_type_id,
 
   // A type that enforces C contiguity
   c_contiguous_type_id,
-
   ndarrayarg_type_id,
 
   // Adapter types
@@ -201,7 +198,7 @@ typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id,
 typedef type_id_sequence<float16_type_id, float32_type_id, float64_type_id,
                          float128_type_id> real_type_ids;
 typedef type_id_sequence<complex_float32_type_id, complex_float64_type_id>
-    complex_type_ids;
+complex_type_ids;
 typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
                          int64_type_id, float32_type_id, float64_type_id,
                          complex_float32_type_id,
@@ -226,29 +223,25 @@ inline void validate_type_id(type_id_t tp_id)
 enum type_flags_t {
   // A symbolic name instead of just "0"
   type_flag_none = 0x00000000,
-  // The type should be considered as a scalar
-  type_flag_scalar = 0x00000001,
-  // The (outermost) type should be considered as a dimension
-  type_flag_dim = 0x00000002,
   // Memory of this type must be zero-initialized
-  type_flag_zeroinit = 0x00000004,
+  type_flag_zeroinit = 0x00000001,
   // Memory of this type must be constructed
-  // type_flag_constructor = 0x00000008,
+  // type_flag_constructor = 0x00000002,
   // Instances of this type point into other memory
   // blocks, e.g. string_type, var_dim_type.
-  type_flag_blockref = 0x00000010,
+  type_flag_blockref = 0x00000004,
   // Memory of this type must be destroyed,
   // e.g. it might hold a reference count or similar state
-  type_flag_destructor = 0x00000020,
+  type_flag_destructor = 0x00000008,
   // Memory of this type is not readable directly from the host
-  type_flag_not_host_readable = 0x00000040,
+  type_flag_not_host_readable = 0x00000010,
   // This type contains a symbolic construct like a type var
-  type_flag_symbolic = 0x00000080,
+  type_flag_symbolic = 0x00000020,
   // This dimensions of this type are variadic (outermost dimensions, but not
   // dimensions within a struct, for example)
-  type_flag_variadic = 0x00000100,
-  // ...
-  type_flag_indexable = 0x00000200,
+  type_flag_variadic = 0x00000040,
+  // This type is indexable, either as a dimension or as a tuple / struct
+  type_flag_indexable = 0x00000080,
 };
 
 enum axis_order_classification_t {
@@ -274,8 +267,7 @@ enum {
       type_flag_not_host_readable | type_flag_symbolic,
   // These are the flags expression types should inherit
   // from their value type
-  type_flags_value_inherited =
-      type_flag_scalar | type_flag_symbolic | type_flag_variadic
+  type_flags_value_inherited = type_flag_symbolic | type_flag_variadic
 };
 
 std::ostream &operator<<(std::ostream &o, type_kind_t kind);
@@ -302,19 +294,27 @@ namespace detail {
   struct log2_x;
   template <>
   struct log2_x<1> {
-    enum { value = 0 };
+    enum {
+      value = 0
+    };
   };
   template <>
   struct log2_x<2> {
-    enum { value = 1 };
+    enum {
+      value = 1
+    };
   };
   template <>
   struct log2_x<4> {
-    enum { value = 2 };
+    enum {
+      value = 2
+    };
   };
   template <>
   struct log2_x<8> {
-    enum { value = 3 };
+    enum {
+      value = 3
+    };
   };
 }
 
@@ -656,107 +656,157 @@ struct type_kind_of<datetime_type_id> {
 // of a particular type.
 template <typename T>
 struct is_dynd_scalar {
-  enum { value = false };
+  enum {
+    value = false
+  };
 };
 template <>
 struct is_dynd_scalar<bool1> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<char> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<signed char> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<short> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<int> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<long> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<long long> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<int128> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<unsigned char> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<unsigned short> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<unsigned int> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<unsigned long> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<unsigned long long> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<uint128> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<float16> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<float32> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<float64> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<float128> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<complex64> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<complex128> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 // Allow std::complex as scalars equivalent to dynd_complex
 template <>
 struct is_dynd_scalar<std::complex<float>> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 template <>
 struct is_dynd_scalar<std::complex<double>> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 
 // Metaprogram for determining if a type is a valid C++ pointer to a scalar
 // of a particular type.
 template <typename T>
 struct is_dynd_scalar_pointer {
-  enum { value = false };
+  enum {
+    value = false
+  };
 };
 template <typename T>
 struct is_dynd_scalar_pointer<T *> {
-  enum { value = is_dynd_scalar<T>::value };
+  enum {
+    value = is_dynd_scalar<T>::value
+  };
 };
 
 // Metaprogram for determining scalar alignment
@@ -772,11 +822,15 @@ struct scalar_align_of {
 // Metaprogram for determining if a type is the C++ "bool" or not
 template <typename T>
 struct is_type_bool {
-  enum { value = false };
+  enum {
+    value = false
+  };
 };
 template <>
 struct is_type_bool<bool> {
-  enum { value = true };
+  enum {
+    value = true
+  };
 };
 
 namespace detail {
@@ -796,14 +850,32 @@ namespace detail {
       }
     }
 
-    T *data() { return m_data; }
-    const T *data() const { return m_data; }
+    T *data()
+    {
+      return m_data;
+    }
+    const T *data() const
+    {
+      return m_data;
+    }
 
-    T &at(type_id_t i) { return m_data[i]; }
-    const T &at(type_id_t i) const { return m_data[i]; }
+    T &at(type_id_t i)
+    {
+      return m_data[i];
+    }
+    const T &at(type_id_t i) const
+    {
+      return m_data[i];
+    }
 
-    T &operator()(type_id_t i) { return at(i); }
-    const T &operator()(type_id_t i) const { return at(i); }
+    T &operator()(type_id_t i)
+    {
+      return at(i);
+    }
+    const T &operator()(type_id_t i) const
+    {
+      return at(i);
+    }
   };
 
   template <typename T>
@@ -811,7 +883,9 @@ namespace detail {
     T m_data[builtin_type_id_count][builtin_type_id_count];
 
   public:
-    array_by_type_id() {}
+    array_by_type_id()
+    {
+    }
 
     array_by_type_id(const std::initializer_list<
         std::pair<std::pair<type_id_t, type_id_t>, T>> &data)
@@ -821,14 +895,32 @@ namespace detail {
       }
     }
 
-    T *data() { return m_data; }
-    const T *data() const { return m_data; }
+    T *data()
+    {
+      return m_data;
+    }
+    const T *data() const
+    {
+      return m_data;
+    }
 
-    T &at(type_id_t i, type_id_t j) { return m_data[i][j]; }
-    const T &at(type_id_t i, type_id_t j) const { return m_data[i][j]; }
+    T &at(type_id_t i, type_id_t j)
+    {
+      return m_data[i][j];
+    }
+    const T &at(type_id_t i, type_id_t j) const
+    {
+      return m_data[i][j];
+    }
 
-    T &operator()(type_id_t i, type_id_t j) { return at(i, j); }
-    const T &operator()(type_id_t i, type_id_t j) const { return at(i, j); }
+    T &operator()(type_id_t i, type_id_t j)
+    {
+      return at(i, j);
+    }
+    const T &operator()(type_id_t i, type_id_t j) const
+    {
+      return at(i, j);
+    }
   };
 
 } // namespace dynd::detail

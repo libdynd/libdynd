@@ -23,8 +23,7 @@ using namespace dynd;
 ndt::string_type::string_type(string_encoding_t encoding)
     : base_string_type(
           string_type_id, sizeof(string_type_data), sizeof(const char *),
-          type_flag_scalar | type_flag_zeroinit | type_flag_blockref,
-          sizeof(string_type_arrmeta)),
+          type_flag_zeroinit | type_flag_blockref, sizeof(string_type_arrmeta)),
       m_encoding(encoding)
 {
   switch (encoding) {
@@ -40,7 +39,9 @@ ndt::string_type::string_type(string_encoding_t encoding)
   }
 }
 
-ndt::string_type::~string_type() {}
+ndt::string_type::~string_type()
+{
+}
 
 void ndt::string_type::get_string_range(const char **out_begin,
                                         const char **out_end,

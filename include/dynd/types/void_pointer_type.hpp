@@ -20,9 +20,8 @@ namespace ndt {
   public:
     void_pointer_type()
         : base_type(void_pointer_type_id, void_kind, sizeof(void *),
-                    sizeof(void *),
-                    type_flag_scalar | type_flag_zeroinit | type_flag_blockref,
-                    0, 0, 0)
+                    sizeof(void *), type_flag_zeroinit | type_flag_blockref, 0,
+                    0, 0)
     {
     }
 
@@ -44,7 +43,9 @@ namespace ndt {
         memory_block_data *DYND_UNUSED(embedded_reference)) const
     {
     }
-    void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+    void arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+    {
+    }
     void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta),
                              std::ostream &DYND_UNUSED(o),
                              const std::string &DYND_UNUSED(indent)) const

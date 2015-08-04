@@ -30,14 +30,15 @@ ndt::var_dim_type::var_dim_type(const type &element_tp)
   //       objectarray_memory_block,
   //       not by the var_dim elements.
   // Propagate just the value-inherited flags from the element
-  m_members.flags |= (element_tp.get_flags() &
-                      (type_flags_value_inherited & ~type_flag_scalar));
+  m_members.flags |= (element_tp.get_flags() & type_flags_value_inherited);
 
   // Copy nd::array properties and functions from the first non-array dimension
   get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
-ndt::var_dim_type::~var_dim_type() {}
+ndt::var_dim_type::~var_dim_type()
+{
+}
 
 void ndt::var_dim_type::print_data(std::ostream &o, const char *arrmeta,
                                    const char *data) const
@@ -667,7 +668,9 @@ void ndt::var_dim_type::get_dynamic_type_properties(
   struct get_element_type {
     type tp;
 
-    get_element_type(type tp) : tp(tp) {}
+    get_element_type(type tp) : tp(tp)
+    {
+    }
 
     type operator()() const
     {

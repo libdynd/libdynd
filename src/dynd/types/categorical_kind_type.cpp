@@ -15,12 +15,14 @@ using namespace std;
 using namespace dynd;
 
 ndt::categorical_kind_type::categorical_kind_type()
-    : base_type(categorical_type_id, kind_kind, 0, 0,
-                type_flag_scalar | type_flag_symbolic, 0, 0, 0)
+    : base_type(categorical_type_id, kind_kind, 0, 0, type_flag_symbolic, 0, 0,
+                0)
 {
 }
 
-ndt::categorical_kind_type::~categorical_kind_type() {}
+ndt::categorical_kind_type::~categorical_kind_type()
+{
+}
 
 size_t ndt::categorical_kind_type::get_default_data_size() const
 {
@@ -41,7 +43,10 @@ void ndt::categorical_kind_type::print_type(std::ostream &o) const
   o << "Categorical";
 }
 
-bool ndt::categorical_kind_type::is_expression() const { return false; }
+bool ndt::categorical_kind_type::is_expression() const
+{
+  return false;
+}
 
 bool ndt::categorical_kind_type::is_unique_data_owner(
     const char *DYND_UNUSED(arrmeta)) const

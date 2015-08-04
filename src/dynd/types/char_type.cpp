@@ -19,7 +19,7 @@ using namespace dynd;
 ndt::char_type::char_type(string_encoding_t encoding)
     : base_type(
           char_type_id, char_kind, string_encoding_char_size_table[encoding],
-          string_encoding_char_size_table[encoding], type_flag_scalar, 0, 0, 0),
+          string_encoding_char_size_table[encoding], type_flag_none, 0, 0, 0),
       m_encoding(encoding)
 {
   switch (encoding) {
@@ -37,7 +37,9 @@ ndt::char_type::char_type(string_encoding_t encoding)
   }
 }
 
-ndt::char_type::~char_type() {}
+ndt::char_type::~char_type()
+{
+}
 
 uint32_t ndt::char_type::get_code_point(const char *data) const
 {

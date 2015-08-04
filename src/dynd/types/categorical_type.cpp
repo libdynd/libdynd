@@ -187,7 +187,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
   expr_single_t fn = k.get()->get_function<expr_single_t>();
 
   intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                        categories.get_arrmeta())->stride;
+      categories.get_arrmeta())->stride;
   char *dst_ptr = categories.get_readwrite_originptr();
   for (set<const char *, cmp>::const_iterator it = uniques.begin();
        it != uniques.end(); ++it) {
@@ -204,8 +204,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques,
 
 ndt::categorical_type::categorical_type(const nd::array &categories,
                                         bool presorted)
-    : base_type(categorical_type_id, custom_kind, 4, 4, type_flag_scalar, 0, 0,
-                0)
+    : base_type(categorical_type_id, custom_kind, 4, 4, type_flag_none, 0, 0, 0)
 {
   intptr_t category_count;
   if (presorted) {
@@ -558,13 +557,15 @@ bool ndt::categorical_type::operator==(const base_type &rhs) const
   if (rhs.get_type_id() != categorical_type_id)
     return false;
   if (!m_categories.equals_exact(
-          static_cast<const categorical_type &>(rhs).m_categories))
+           static_cast<const categorical_type &>(rhs).m_categories))
     return false;
   if (!m_category_index_to_value.equals_exact(
-          static_cast<const categorical_type &>(rhs).m_category_index_to_value))
+           static_cast<const categorical_type &>(rhs)
+               .m_category_index_to_value))
     return false;
   if (!m_value_to_category_index.equals_exact(
-          static_cast<const categorical_type &>(rhs).m_value_to_category_index))
+           static_cast<const categorical_type &>(rhs)
+               .m_value_to_category_index))
     return false;
 
   return true;
@@ -636,7 +637,10 @@ static nd::array property_ndo_get_ints(const nd::array &n)
   return n.view_scalars(cd->get_storage_type());
 }
 
-static size_t categorical_array_properties_size() { return 1; }
+static size_t categorical_array_properties_size()
+{
+  return 1;
+}
 
 static const pair<string, gfunc::callable> *categorical_array_properties()
 {

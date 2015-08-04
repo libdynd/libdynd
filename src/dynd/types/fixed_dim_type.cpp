@@ -26,15 +26,15 @@ ndt::fixed_dim_type::fixed_dim_type(intptr_t dim_size, const type &element_tp)
       m_dim_size(dim_size)
 {
   // Propagate the inherited flags from the element
-  m_members.flags |=
-      (element_tp.get_flags() &
-       ((type_flags_operand_inherited | type_flags_value_inherited) &
-        ~type_flag_scalar));
+  m_members.flags |= (element_tp.get_flags() & (type_flags_operand_inherited |
+                                                type_flags_value_inherited));
   // Copy nd::array properties and functions from the first non-array dimension
   get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
 
-ndt::fixed_dim_type::~fixed_dim_type() {}
+ndt::fixed_dim_type::~fixed_dim_type()
+{
+}
 
 size_t ndt::fixed_dim_type::get_default_data_size() const
 {
@@ -761,19 +761,18 @@ void ndt::fixed_dim_type::get_dynamic_type_properties(
   static pair<string, nd::callable> fixed_dim_type_properties[] = {
       pair<string, nd::callable>(
           "fixed_dim_size",
-          nd::functional::apply(
-              [](type self) {
-                return self.extended<fixed_dim_type>()->get_fixed_dim_size();
-              },
-              "self")),
+          nd::functional::apply([](type self) {
+                                  return self.extended<fixed_dim_type>()
+                                      ->get_fixed_dim_size();
+                                },
+                                "self")),
       pair<string, nd::callable>(
           "element_type",
-          nd::functional::apply(
-              [](type self) {
-                return type(
-                    self.extended<fixed_dim_type>()->get_element_type());
-              },
-              "self"))};
+          nd::functional::apply([](type self) {
+                                  return type(self.extended<fixed_dim_type>()
+                                                  ->get_element_type());
+                                },
+                                "self"))};
 
   *out_properties = fixed_dim_type_properties;
   *out_count =
