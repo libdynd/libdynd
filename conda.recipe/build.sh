@@ -4,12 +4,9 @@ set -ex
 cd $RECIPE_DIR
 
 echo Setting the compiler...
-CC=cc
-CXX=c++
-
 if [ `uname` == Linux ]; then
-    CC=gcc48
-    CXX=g++48
+    export CC=$PREFIX/bin/gcc
+    export CXX=$PREFIX/bin/g++
 elif [ `uname` == Darwin ]; then
     CPPFLAGS="-stdlib=libc++"
     EXTRAOPTIONS="-DCMAKE_OSX_DEPLOYMENT_TARGET=10.8"
