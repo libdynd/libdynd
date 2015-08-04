@@ -2,39 +2,51 @@ language: cpp
 
 sudo: false
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-4.7
-    - g++-4.7
-    - cmake
-    - valgrind
-    - libfftw3-dev
-
-compiler:
-  - gcc
-  - clang
-
-env:
-  - VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
-#  - DYND_CUDA=ON DYND_FFTW=OFF
-  - DYND_CUDA=OFF DYND_FFTW=ON
-  - ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
-#  - PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF DYND_BUILD_BENCHMARKS=OFF
-#  - MSAN=ON DYND_CUDA=OFF DYND_FFTW=ON
-
 matrix:
-  exclude:
+  include:
     - compiler: gcc
-      env: ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
+      env: VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-4.7
+          - g++-4.7
+          - cmake
+          - valgrind
     - compiler: gcc
-      env: MSAN=ON DYND_CUDA=OFF DYND_FFTW=ON
-#    - compiler: gcc
-#      env: PYTHON=ON DYND_CUDA=OFF DYND_FFTW=ON DYND_BUILD_TESTS=OFF DYND_BUILD_BENCHMARKS=OFF
+      env: DYND_CUDA=OFF DYND_FFTW=ON
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - gcc-4.7
+          - g++-4.7
+          - cmake
+          - libfftw3-dev
     - compiler: clang
-      env: DYND_CUDA=ON DYND_FFTW=OFF
+      env: VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
+      addons:
+        apt:
+          packages:
+          - cmake
+          - valgrind
+    - compiler: clang
+      env: DYND_CUDA=OFF DYND_FFTW=ON
+      addons:
+        apt:
+          packages:
+          - cmake
+          - libfftw3-dev
+    - compiler: clang
+      env: ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
+      addons:
+        apt:
+          packages:
+          - cmake
+          - libfftw3-dev
 
 before_script:
   - if [ "$CC" = "gcc" ]; export CC="gcc-4.7"; fi
