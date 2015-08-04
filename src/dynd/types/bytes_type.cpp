@@ -18,8 +18,7 @@ using namespace dynd;
 ndt::bytes_type::bytes_type(size_t alignment)
     : base_bytes_type(bytes_type_id, bytes_kind, sizeof(bytes_type_data),
                       sizeof(const char *),
-                      type_flag_scalar | type_flag_zeroinit |
-                          type_flag_blockref,
+                      type_flag_zeroinit | type_flag_blockref,
                       sizeof(bytes_type_arrmeta)),
       m_alignment(alignment)
 {
@@ -32,7 +31,9 @@ ndt::bytes_type::bytes_type(size_t alignment)
   }
 }
 
-ndt::bytes_type::~bytes_type() {}
+ndt::bytes_type::~bytes_type()
+{
+}
 
 void ndt::bytes_type::get_bytes_range(const char **out_begin,
                                       const char **out_end,
@@ -245,11 +246,11 @@ void ndt::bytes_type::get_dynamic_type_properties(
   static pair<string, nd::callable> type_properties[] = {
       pair<string, nd::callable>(
           "target_alignment",
-          nd::functional::apply(
-              [](type self) {
-                return self.extended<bytes_type>()->get_target_alignment();
-              },
-              "self"))};
+          nd::functional::apply([](type self) {
+                                  return self.extended<bytes_type>()
+                                      ->get_target_alignment();
+                                },
+                                "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

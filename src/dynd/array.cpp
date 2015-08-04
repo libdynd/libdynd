@@ -787,7 +787,7 @@ nd::array nd::array::storage() const
 nd::array nd::array::at_array(intptr_t nindices, const irange *indices,
                               bool collapse_leading) const
 {
-  if (is_scalar()) {
+  if (!get_type().is_indexable()) {
     if (nindices != 0) {
       throw too_many_indices(get_type(), nindices, 0);
     }

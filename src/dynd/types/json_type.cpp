@@ -23,14 +23,15 @@ using namespace dynd;
 ndt::json_type::json_type()
     : base_string_type(
           json_type_id, sizeof(json_type_data), sizeof(const char *),
-          type_flag_scalar | type_flag_zeroinit | type_flag_blockref,
-          sizeof(json_type_arrmeta))
+          type_flag_zeroinit | type_flag_blockref, sizeof(json_type_arrmeta))
 {
   // While stored as a string, JSON data can hold many types of data
   m_members.kind = dynamic_kind;
 }
 
-ndt::json_type::~json_type() {}
+ndt::json_type::~json_type()
+{
+}
 
 void ndt::json_type::get_string_range(const char **out_begin,
                                       const char **out_end,
@@ -85,7 +86,10 @@ void ndt::json_type::print_data(std::ostream &o,
   o << "\"";
 }
 
-void ndt::json_type::print_type(std::ostream &o) const { o << "json"; }
+void ndt::json_type::print_type(std::ostream &o) const
+{
+  o << "json";
+}
 
 bool ndt::json_type::is_unique_data_owner(const char *arrmeta) const
 {
@@ -213,10 +217,12 @@ struct string_to_json_ck
     child_fn(child, dst, src);
     // Then validate that it's correct JSON
     if (m_validate) {
-      try {
+      try
+      {
         validate_json(out_d->begin, out_d->end);
       }
-      catch (const std::exception &) {
+      catch (const std::exception &)
+      {
         // Free the memory allocated for the output json data
         memory_block_pod_allocator_api *allocator =
             get_memory_block_pod_allocator_api(md->blockref);

@@ -39,8 +39,7 @@ ndt::callable_type::callable_type(const type &ret_type, const type &pos_types,
                                   const type &kwd_types)
     : base_type(callable_type_id, function_kind, sizeof(callable_type_data),
                 scalar_align_of<uint64_t>::value,
-                type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
-                0, 0),
+                type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types)
 {
   if (m_pos_tuple.get_type_id() != tuple_type_id) {
@@ -237,7 +236,9 @@ ndt::callable_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void ndt::callable_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::callable_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+{
+}
 
 void ndt::callable_type::data_destruct(const char *DYND_UNUSED(arrmeta),
                                        char *data) const
@@ -323,8 +324,8 @@ bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp,
 
   // First match the return type
   if (!m_return_type.match(
-          arrmeta, candidate_tp.extended<callable_type>()->m_return_type,
-          candidate_arrmeta, tp_vars)) {
+           arrmeta, candidate_tp.extended<callable_type>()->m_return_type,
+           candidate_arrmeta, tp_vars)) {
     return false;
   }
 
@@ -337,8 +338,8 @@ bool ndt::callable_type::match(const char *arrmeta, const type &candidate_tp,
 
   // Finally match all the keyword parameters
   if (!m_kwd_struct.match(
-          arrmeta, candidate_tp.extended<callable_type>()->get_kwd_struct(),
-          candidate_arrmeta, tp_vars)) {
+           arrmeta, candidate_tp.extended<callable_type>()->get_kwd_struct(),
+           candidate_arrmeta, tp_vars)) {
     return false;
   }
 

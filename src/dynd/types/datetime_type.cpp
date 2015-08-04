@@ -33,12 +33,14 @@ using namespace dynd;
 
 ndt::datetime_type::datetime_type(datetime_tz_t timezone)
     : base_type(datetime_type_id, datetime_kind, 8,
-                scalar_align_of<int64_t>::value, type_flag_scalar, 0, 0, 0),
+                scalar_align_of<int64_t>::value, type_flag_none, 0, 0, 0),
       m_timezone(timezone)
 {
 }
 
-ndt::datetime_type::~datetime_type() {}
+ndt::datetime_type::~datetime_type()
+{
+}
 
 void ndt::datetime_type::set_cal(const char *DYND_UNUSED(arrmeta), char *data,
                                  assign_error_mode errmode, int32_t year,
@@ -377,8 +379,7 @@ void ndt::datetime_type::get_dynamic_array_properties(
           "microsecond",
           gfunc::make_callable(&property_ndo_get_microsecond, "self")),
       pair<string, gfunc::callable>(
-          "tick", gfunc::make_callable(&property_ndo_get_tick, "self")),
-  };
+          "tick", gfunc::make_callable(&property_ndo_get_tick, "self")), };
 
   *out_properties = date_array_properties;
   *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
@@ -412,8 +413,7 @@ void ndt::datetime_type::get_dynamic_array_functions(
           "to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
       pair<string, gfunc::callable>(
           "strftime",
-          gfunc::make_callable(&function_ndo_strftime, "self", "format")),
-  };
+          gfunc::make_callable(&function_ndo_strftime, "self", "format")), };
 
   *out_functions = date_array_functions;
   *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
@@ -427,7 +427,10 @@ struct datetime_get_struct_kernel
     : nd::base_kernel<datetime_get_struct_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_struct_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_struct_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
   {
@@ -439,7 +442,10 @@ struct datetime_set_struct_kernel
     : nd::base_kernel<datetime_set_struct_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_set_struct_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_set_struct_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
   {
@@ -451,7 +457,10 @@ struct datetime_get_date_kernel
     : nd::base_kernel<datetime_get_date_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_date_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_date_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -476,7 +485,10 @@ struct datetime_get_time_kernel
     : nd::base_kernel<datetime_get_time_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_time_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_time_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -500,7 +512,10 @@ struct datetime_get_year_kernel
     : nd::base_kernel<datetime_get_year_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_year_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_year_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -521,7 +536,10 @@ struct datetime_get_month_kernel
     : nd::base_kernel<datetime_get_month_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_month_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_month_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -542,7 +560,10 @@ struct datetime_get_day_kernel
     : nd::base_kernel<datetime_get_day_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_day_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_day_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -563,7 +584,10 @@ struct datetime_get_hour_kernel
     : nd::base_kernel<datetime_get_hour_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_hour_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_hour_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -588,7 +612,10 @@ struct datetime_get_minute_kernel
     : nd::base_kernel<datetime_get_minute_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_minute_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_minute_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -614,7 +641,10 @@ struct datetime_get_second_kernel
     : nd::base_kernel<datetime_get_second_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_second_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_second_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -639,7 +669,10 @@ struct datetime_get_microsecond_kernel
     : nd::base_kernel<datetime_get_microsecond_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_microsecond_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_microsecond_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -664,7 +697,10 @@ struct datetime_get_tick_kernel
     : nd::base_kernel<datetime_get_tick_kernel, kernel_request_host, 1> {
   const ndt::datetime_type *datetime_tp;
 
-  ~datetime_get_tick_kernel() { base_type_xdecref(datetime_tp); }
+  ~datetime_get_tick_kernel()
+  {
+    base_type_xdecref(datetime_tp);
+  }
 
   void single(char *dst, char *const *src)
   {

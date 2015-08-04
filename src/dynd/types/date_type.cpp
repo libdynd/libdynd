@@ -33,11 +33,13 @@ using namespace dynd;
 
 ndt::date_type::date_type()
     : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value,
-                type_flag_scalar, 0, 0, 0)
+                type_flag_none, 0, 0, 0)
 {
 }
 
-ndt::date_type::~date_type() {}
+ndt::date_type::~date_type()
+{
+}
 
 void ndt::date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data,
                              assign_error_mode errmode, int32_t year,
@@ -86,7 +88,10 @@ void ndt::date_type::print_data(std::ostream &o,
   }
 }
 
-void ndt::date_type::print_type(std::ostream &o) const { o << "date"; }
+void ndt::date_type::print_type(std::ostream &o) const
+{
+  o << "date";
+}
 
 bool ndt::date_type::is_lossless_assignment(const type &dst_tp,
                                             const type &src_tp) const
@@ -236,8 +241,7 @@ void ndt::date_type::get_dynamic_type_functions(
           "today", nd::functional::apply(&fn_type_today, "self")),
       pair<std::string, nd::callable>(
           "__construct__", nd::functional::apply(&fn_type_construct, "self",
-                                                 "year", "month", "day")),
-  };
+                                                 "year", "month", "day")), };
 
   *out_functions = date_type_functions;
   *out_count = sizeof(date_type_functions) / sizeof(date_type_functions[0]);

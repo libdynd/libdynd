@@ -17,8 +17,7 @@ using namespace dynd;
 
 ndt::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask,
                                 const nd::array &holidays)
-    : base_type(busdate_type_id, datetime_kind, 4, 4, type_flag_scalar, 0, 0,
-                0),
+    : base_type(busdate_type_id, datetime_kind, 4, 4, type_flag_none, 0, 0, 0),
       m_roll(roll)
 {
   memcpy(m_workweek, weekmask, sizeof(m_workweek));
@@ -33,7 +32,9 @@ ndt::busdate_type::busdate_type(busdate_roll_t roll, const bool *weekmask,
   }
 }
 
-ndt::busdate_type::~busdate_type() {}
+ndt::busdate_type::~busdate_type()
+{
+}
 
 void ndt::busdate_type::print_workweek(std::ostream &o) const
 {

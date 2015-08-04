@@ -13,7 +13,7 @@ using namespace dynd;
 
 ndt::byteswap_type::byteswap_type(const type &value_type)
     : base_expr_type(byteswap_type_id, expr_kind, value_type.get_data_size(),
-                     value_type.get_data_alignment(), type_flag_scalar, 0),
+                     value_type.get_data_alignment(), type_flag_none, 0),
       m_value_type(value_type),
       m_operand_type(make_fixed_bytes(value_type.get_data_size(),
                                       value_type.get_data_alignment()))
@@ -27,7 +27,7 @@ ndt::byteswap_type::byteswap_type(const type &value_type)
 ndt::byteswap_type::byteswap_type(const type &value_type,
                                   const type &operand_type)
     : base_expr_type(byteswap_type_id, expr_kind, operand_type.get_data_size(),
-                     operand_type.get_data_alignment(), type_flag_scalar, 0),
+                     operand_type.get_data_alignment(), type_flag_none, 0),
       m_value_type(value_type), m_operand_type(operand_type)
 {
   // Only a bytes type be the operand to the byteswap
@@ -46,7 +46,9 @@ ndt::byteswap_type::byteswap_type(const type &value_type,
   }
 }
 
-ndt::byteswap_type::~byteswap_type() {}
+ndt::byteswap_type::~byteswap_type()
+{
+}
 
 void ndt::byteswap_type::print_data(std::ostream &DYND_UNUSED(o),
                                     const char *DYND_UNUSED(arrmeta),

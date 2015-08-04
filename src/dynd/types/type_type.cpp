@@ -17,16 +17,14 @@ using namespace dynd;
 ndt::type_type::type_type()
     : base_type(type_type_id, type_kind, sizeof(const base_type *),
                 sizeof(const base_type *),
-                type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
-                0, 0)
+                type_flag_zeroinit | type_flag_destructor, 0, 0, 0)
 {
 }
 
 ndt::type_type::type_type(const type &pattern_tp)
     : base_type(type_type_id, type_kind, sizeof(const base_type *),
                 sizeof(const base_type *),
-                type_flag_scalar | type_flag_zeroinit | type_flag_destructor, 0,
-                0, 0),
+                type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_pattern_tp(pattern_tp)
 {
   if (!m_pattern_tp.is_symbolic()) {
@@ -34,7 +32,9 @@ ndt::type_type::type_type(const type &pattern_tp)
   }
 }
 
-ndt::type_type::~type_type() {}
+ndt::type_type::~type_type()
+{
+}
 
 void ndt::type_type::print_data(std::ostream &o,
                                 const char *DYND_UNUSED(arrmeta),
@@ -80,13 +80,17 @@ void ndt::type_type::arrmeta_copy_construct(
 {
 }
 
-void ndt::type_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::type_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
+{
+}
 
 void ndt::type_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void ndt::type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
+void ndt::type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+{
+}
 
 void ndt::type_type::data_destruct(const char *DYND_UNUSED(arrmeta),
                                    char *data) const
@@ -131,7 +135,10 @@ struct string_to_type_kernel
   const char *src_arrmeta;
   assign_error_mode errmode;
 
-  ~string_to_type_kernel() { base_type_xdecref(src_string_dt); }
+  ~string_to_type_kernel()
+  {
+    base_type_xdecref(src_string_dt);
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -147,7 +154,10 @@ struct type_to_string_kernel
   const char *dst_arrmeta;
   eval::eval_context ectx;
 
-  ~type_to_string_kernel() { base_type_xdecref(dst_string_dt); }
+  ~type_to_string_kernel()
+  {
+    base_type_xdecref(dst_string_dt);
+  }
 
   void single(char *dst, char *const *src)
   {

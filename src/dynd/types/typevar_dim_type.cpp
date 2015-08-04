@@ -120,7 +120,7 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
                                   const char *DYND_UNUSED(candidate_arrmeta),
                                   std::map<std::string, type> &tp_vars) const
 {
-  if (!candidate_tp.is_dim()) {
+  if (candidate_tp.is_scalar()) {
     return false;
   }
 

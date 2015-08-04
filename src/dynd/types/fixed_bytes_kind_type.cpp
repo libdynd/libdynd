@@ -15,12 +15,14 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_bytes_kind_type::fixed_bytes_kind_type()
-    : base_bytes_type(fixed_bytes_type_id, kind_kind, 0, 0,
-                      type_flag_scalar | type_flag_symbolic, 0)
+    : base_bytes_type(fixed_bytes_type_id, kind_kind, 0, 0, type_flag_symbolic,
+                      0)
 {
 }
 
-ndt::fixed_bytes_kind_type::~fixed_bytes_kind_type() {}
+ndt::fixed_bytes_kind_type::~fixed_bytes_kind_type()
+{
+}
 
 size_t ndt::fixed_bytes_kind_type::get_default_data_size() const
 {
@@ -41,7 +43,10 @@ void ndt::fixed_bytes_kind_type::print_type(std::ostream &o) const
   o << "FixedBytes";
 }
 
-bool ndt::fixed_bytes_kind_type::is_expression() const { return false; }
+bool ndt::fixed_bytes_kind_type::is_expression() const
+{
+  return false;
+}
 
 bool ndt::fixed_bytes_kind_type::is_unique_data_owner(
     const char *DYND_UNUSED(arrmeta)) const
