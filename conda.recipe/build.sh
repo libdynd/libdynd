@@ -3,6 +3,8 @@ set -ex
 
 cd $RECIPE_DIR
 
+conda install -c stuarteberg gcc=4.8.4.99
+
 echo Setting the compiler...
 if [ `uname` == Linux ]; then
     export CC="$PREFIX/bin/gcc -D__USE_XOPEN2K8"
