@@ -5,8 +5,9 @@ cd $RECIPE_DIR
 
 echo Setting the compiler...
 if [ `uname` == Linux ]; then
-    export CC="$PREFIX/bin/gcc -D__USE_XOPEN2K8"
-    export CXX="$PREFIX/bin/g++ -D__USE_XOPEN2K8"
+    export CC=$PREFIX/bin/gcc
+    export CXX=$PREFIX/bin/g++
+    # -D__USE_XOPEN2K8
 elif [ `uname` == Darwin ]; then
     CPPFLAGS="-stdlib=libc++"
     EXTRAOPTIONS="-DCMAKE_OSX_DEPLOYMENT_TARGET=10.8"
@@ -24,8 +25,6 @@ pwd
 echo Configuring build with cmake...
 cmake \
     $EXTRAOPTIONS \
-    -DCMAKE_C_COMPILER=$CC \
-    -DCMAKE_CXX_COMPILER=$CXX \
     -DCMAKE_BUILD_TYPE=Release  \
     -DDYND_SHARED_LIB=ON \
     -DDYND_INSTALL_LIB=ON \
