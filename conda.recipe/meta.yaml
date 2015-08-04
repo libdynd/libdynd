@@ -9,6 +9,8 @@ requirements:
   build:
     - cmake    [unix]
     - gcc=4.8.4.99
+  run:
+    - gcc=4.8.4.99
 
 test:
   commands:
