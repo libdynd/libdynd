@@ -49,7 +49,7 @@ matrix:
           - libfftw3-dev
 
 before_script:
-  - if [ "$CC" = "gcc" ]; export CC="gcc-4.7"; fi
+  - if [ "$CC" = "gcc" ]; then export CC="gcc-4.7"; fi
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.7"; fi
 #  - if [ "$DYND_CUDA" == "ON" ]; then wget http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1204/x86_64/cuda-repo-ubuntu1204_7.0-28_amd64.deb;
 #    sudo dpkg -i cuda-repo-ubuntu1204_7.0-28_amd64.deb; sudo apt-get update; sudo apt-get -y install cuda; fi
