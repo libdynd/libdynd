@@ -33,8 +33,10 @@ matrix:
       addons:
         apt:
           sources:
+          - ubuntu-toolchain-r-test
           - kalakris-cmake
           packages:
+          - g++-4.7
           - cmake
           - valgrind
     - compiler: clang
@@ -42,8 +44,10 @@ matrix:
       addons:
         apt:
           sources:
+          - ubuntu-toolchain-r-test
           - kalakris-cmake
           packages:
+          - g++-4.7
           - cmake
           - libfftw3-dev
     - compiler: clang
@@ -51,8 +55,10 @@ matrix:
       addons:
         apt:
           sources:
+          - ubuntu-toolchain-r-test
           - kalakris-cmake
           packages:
+          - g++-4.7
           - cmake
           - libfftw3-dev
 
