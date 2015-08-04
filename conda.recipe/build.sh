@@ -24,8 +24,6 @@ pwd
 echo Configuring build with cmake...
 cmake \
     $EXTRAOPTIONS \
-    -DCMAKE_C_COMPILER=$CC \
-    -DCMAKE_CXX_COMPILER="$CXX"  \
     -DCMAKE_CXX_FLAGS="$CPPFLAGS" \
     -DCMAKE_BUILD_TYPE=Release  \
     -DDYND_SHARED_LIB=ON \
