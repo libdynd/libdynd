@@ -24,7 +24,6 @@ pwd
 echo Configuring build with cmake...
 cmake \
     $EXTRAOPTIONS \
-    -DCMAKE_BUILD_TYPE=Release  \
     -DDYND_INSTALL_LIB=ON \
     -DDYND_BUILD_BENCHMARKS=OFF \
     -DCMAKE_INSTALL_PREFIX=$PREFIX .. || exit 1
