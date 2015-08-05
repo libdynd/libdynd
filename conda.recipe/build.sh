@@ -24,6 +24,7 @@ pwd
 echo Configuring build with cmake...
 cmake \
     $EXTRAOPTIONS \
+    -DCMAKE_CXX_FLAGS="$CPPFLAGS" \
     -DDYND_INSTALL_LIB=ON \
     -DDYND_BUILD_BENCHMARKS=OFF \
     -DCMAKE_INSTALL_PREFIX=$PREFIX .. || exit 1
