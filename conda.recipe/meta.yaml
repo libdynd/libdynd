@@ -11,7 +11,7 @@ requirements:
     - gcc >=4.8
 #    - gcc 4.8.4.99 [linux]
   run:
-    - gcc >=4.8
+    - libstd >=4.8
 #    - gcc 4.8.4.99 [linux]
 
 test:
