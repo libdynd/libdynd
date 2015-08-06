@@ -87,7 +87,7 @@ matrix:
         - export CC=clang
         - export CXX=clang++
         - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
-        - travis_retry pip install numpy
+        - travis_retry pip install --upgrade --force-reinstall numpy
       before_script:
         - cd ..
         - travis_retry git clone https://github.com/libdynd/dynd-python.git
@@ -95,6 +95,7 @@ matrix:
         - mv libdynd dynd-python/libraries/libdynd
         - cd dynd-python
       script:
+        - python -c "import numpy; print numpy.__version__"
         - python setup.py install
         - cd ..
         - python -c "import dynd; dynd.test(exit=True)"
