@@ -4,7 +4,9 @@ package:
 
 build:
   always_include_files:
+    - lib/libstdc++.so
     - lib/libstdc++.so.6
+    - lib/libstdc++.so.6.0.19
   number: {{environ.get('BINSTAR_BUILD', 1)}}
 
 requirements:
