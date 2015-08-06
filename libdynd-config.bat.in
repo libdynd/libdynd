@@ -26,6 +26,11 @@ if NOT "%1"=="-version" goto notversion
     exit /B 0
 :notversion
 
+if NOT "%1"=="-cuda" goto notcuda
+    echo @DYND_CUDA@
+    exit /B 0
+:notcuda
+
 echo Usage: %0 OPTION
 echo Print information for linking libdynd.
 echo
@@ -35,4 +40,3 @@ echo   -libpath     Prints the full path of the libdynd library.
 echo   -includedir  Prints the directory with the libdynd include files.
 echo   -version     Prints the version of libdynd.
 exit /B 1
-
