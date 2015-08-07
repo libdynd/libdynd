@@ -3,20 +3,14 @@ package:
   version: 0.7.0
 
 build:
-  always_include_files:
-    - lib/libstdc++.so
-    - lib/libstdc++.so.6
-    - lib/libstdc++.so.6.0.19
   number: {{environ.get('BINSTAR_BUILD', 1)}}
 
 requirements:
   build:
     - cmake [unix]
     - gcc >=4.8
-#    - gcc 4.8.4.99 [linux]
-#  run:
-#    - libstd >=4.8
-#    - gcc 4.8.4.99 [linux]
+  run:
+    - libgcc >=4.8
 
 test:
   commands:
