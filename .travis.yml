@@ -2,6 +2,34 @@ sudo: false
 
 matrix:
   include:
+    - language: python
+      env: DYND_CUDA=OFF DYND_FFTW=OFF VERBOSE=1
+      compiler: clang
+      python: 2.7
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          - kalakris-cmake
+          packages:
+          - g++-4.7
+          - cmake
+      before_install:
+        - export CC=clang
+        - export CXX=clang++
+        - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
+        - travis_retry pip install --upgrade --force-reinstall numpy
+      before_script:
+        - cd ..
+        - travis_retry git clone https://github.com/libdynd/dynd-python.git
+        - mkdir dynd-python/libraries
+        - mv libdynd dynd-python/libraries/libdynd
+        - cd dynd-python
+      script:
+        - python -c "import numpy; print numpy.__version__"
+        - python setup.py install
+        - cd ..
+        - python -c "import dynd; dynd.test(exit=True)"
     - compiler: gcc
       env: VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
       addons:
@@ -71,34 +99,6 @@ matrix:
           - libfftw3-dev
       before_install:
         - export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
-    - language: python
-      env: DYND_CUDA=OFF DYND_FFTW=OFF VERBOSE=1
-      compiler: clang
-      python: 2.7
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          - kalakris-cmake
-          packages:
-          - g++-4.7
-          - cmake
-      before_install:
-        - export CC=clang
-        - export CXX=clang++
-        - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
-        - travis_retry pip install --upgrade --force-reinstall numpy
-      before_script:
-        - cd ..
-        - travis_retry git clone https://github.com/libdynd/dynd-python.git
-        - mkdir dynd-python/libraries
-        - mv libdynd dynd-python/libraries/libdynd
-        - cd dynd-python
-      script:
-        - python -c "import numpy; print numpy.__version__"
-        - python setup.py install
-        - cd ..
-        - python -c "import dynd; dynd.test(exit=True)"
 
 language: cpp
 
