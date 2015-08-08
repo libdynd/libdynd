@@ -6,7 +6,7 @@
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
-#include <dynd/func/lift_reduction_callable.hpp>
+#include <dynd/func/reduction.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 
@@ -124,9 +124,9 @@ nd::callable kernels::make_builtin_sum1d_callable(type_id_t tid)
 {
   nd::callable sum_ew = kernels::make_builtin_sum_reduction_callable(tid);
   bool reduction_dimflags[1] = {true};
-  return lift_reduction_callable(
-      sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)), nd::callable(), false, 1,
-      reduction_dimflags, true, true, false, 0);
+  return nd::functional::reduction(
+      sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)), nd::callable(), false,
+      1, reduction_dimflags, true, true, false, 0);
 }
 
 namespace {

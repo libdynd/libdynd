@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/lift_reduction_callable.hpp>
+#include <dynd/func/reduction.hpp>
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -37,7 +37,7 @@ static intptr_t instantiate_lifted_reduction_callable_data(
 {
   std::shared_ptr<lifted_reduction_callable_data> data =
       *reinterpret_cast<std::shared_ptr<lifted_reduction_callable_data> *>(
-          static_data);
+           static_data);
   return make_lifted_reduction_ckernel(
       data->child_elwise_reduction.get(),
       data->child_elwise_reduction.get_type(),
@@ -51,12 +51,11 @@ static intptr_t instantiate_lifted_reduction_callable_data(
 
 } // anonymous namespace
 
-nd::callable dynd::lift_reduction_callable(
-    const nd::callable &elwise_reduction_arr, const ndt::type &lifted_arr_type,
-    const nd::callable &dst_initialization_arr, bool keepdims,
+nd::callable nd::functional::reduction(
+    const callable &elwise_reduction_arr, const ndt::type &lifted_arr_type,
+    const callable &dst_initialization_arr, bool keepdims,
     intptr_t reduction_ndim, const bool *reduction_dimflags, bool associative,
-    bool commutative, bool right_associative,
-    const nd::array &reduction_identity)
+    bool commutative, bool right_associative, const array &reduction_identity)
 {
   // Validate the input elwise_reduction callable
   if (elwise_reduction_arr.is_null()) {
@@ -120,8 +119,7 @@ nd::callable dynd::lift_reduction_callable(
             elwise_reduction_tp->get_return_type()) {
       self->reduction_identity = reduction_identity;
     } else {
-      self->reduction_identity =
-          nd::empty(elwise_reduction_tp->get_return_type());
+      self->reduction_identity = empty(elwise_reduction_tp->get_return_type());
       self->reduction_identity.vals() = reduction_identity;
       self->reduction_identity.flag_as_immutable();
     }
@@ -136,7 +134,7 @@ nd::callable dynd::lift_reduction_callable(
   memcpy(self->reduction_dimflags.get(), reduction_dimflags,
          sizeof(bool) * reduction_ndim);
 
-  return nd::callable(
-      ndt::callable_type::make(lifted_dst_type, lifted_arr_type), self, 0, NULL,
-      NULL, &instantiate_lifted_reduction_callable_data);
+  return callable(ndt::callable_type::make(lifted_dst_type, lifted_arr_type),
+                  self, 0, NULL, NULL,
+                  &instantiate_lifted_reduction_callable_data);
 }
