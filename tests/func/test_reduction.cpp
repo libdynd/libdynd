@@ -13,6 +13,7 @@
 #include <dynd/array.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
 #include <dynd/func/reduction.hpp>
+#include <dynd/func/sum.hpp>
 #include <dynd/json_parser.hpp>
 
 #include "dynd_assertions.hpp"

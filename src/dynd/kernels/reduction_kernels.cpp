@@ -9,44 +9,10 @@
 #include <dynd/func/reduction.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/kernels/sum_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
-
-namespace {
-template <class T, class Accum>
-struct sum_reduction
-    : nd::base_kernel<sum_reduction<T, Accum>, kernel_request_host, 1> {
-  void single(char *dst, char *const *src)
-  {
-    *reinterpret_cast<T *>(dst) =
-        *reinterpret_cast<T *>(dst) + **reinterpret_cast<T *const *>(src);
-  }
-
-  void strided(char *dst, intptr_t dst_stride, char *const *src,
-               const intptr_t *src_stride, size_t count)
-  {
-    char *src0 = src[0];
-    intptr_t src0_stride = src_stride[0];
-    if (dst_stride == 0) {
-      Accum s = 0;
-      for (size_t i = 0; i < count; ++i) {
-        s = s + *reinterpret_cast<T *>(src0);
-        src0 += src0_stride;
-      }
-      *reinterpret_cast<T *>(dst) =
-          static_cast<T>(*reinterpret_cast<T *>(dst) + s);
-    } else {
-      for (size_t i = 0; i < count; ++i) {
-        *reinterpret_cast<T *>(dst) =
-            *reinterpret_cast<T *>(dst) + *reinterpret_cast<T *>(src0);
-        dst += dst_stride;
-        src0 += src0_stride;
-      }
-    }
-  }
-};
-} // anonymous namespace
 
 intptr_t kernels::make_builtin_sum_reduction_ckernel(void *ckb,
                                                      intptr_t ckb_offset,
@@ -55,24 +21,22 @@ intptr_t kernels::make_builtin_sum_reduction_ckernel(void *ckb,
 {
   switch (tid) {
   case int32_type_id:
-    sum_reduction<int32_t, int32_t>::make(ckb, kernreq, ckb_offset);
+    nd::sum_kernel<int32_type_id>::make(ckb, kernreq, ckb_offset);
     break;
   case int64_type_id:
-    sum_reduction<int64_t, int64_t>::make(ckb, kernreq, ckb_offset);
+    nd::sum_kernel<int64_type_id>::make(ckb, kernreq, ckb_offset);
     break;
   case float32_type_id:
-    sum_reduction<float, double>::make(ckb, kernreq, ckb_offset);
+    nd::sum_kernel<float32_type_id>::make(ckb, kernreq, ckb_offset);
     break;
   case float64_type_id:
-    sum_reduction<double, double>::make(ckb, kernreq, ckb_offset);
+    nd::sum_kernel<float64_type_id>::make(ckb, kernreq, ckb_offset);
     break;
   case complex_float32_type_id:
-    sum_reduction<complex<float>, complex<float>>::make(ckb, kernreq,
-                                                        ckb_offset);
+    nd::sum_kernel<complex_float32_type_id>::make(ckb, kernreq, ckb_offset);
     break;
   case complex_float64_type_id:
-    sum_reduction<complex<double>, complex<double>>::make(ckb, kernreq,
-                                                          ckb_offset);
+    nd::sum_kernel<complex_float64_type_id>::make(ckb, kernreq, ckb_offset);
     break;
   default: {
     stringstream ss;

@@ -301,6 +301,7 @@ set(libdynd_SRC
     src/dynd/func/permute.cpp
     src/dynd/func/random.cpp
     src/dynd/func/rolling.cpp
+    src/dynd/func/sum.cpp
     src/dynd/func/take.cpp
     src/dynd/func/take_by_pointer.cpp
     include/dynd/func/arithmetic.hpp
@@ -322,6 +323,7 @@ set(libdynd_SRC
     include/dynd/func/permute.hpp
     include/dynd/func/random.hpp
     include/dynd/func/rolling.hpp
+    include/dynd/func/sum.hpp
     include/dynd/func/take.hpp
     include/dynd/func/take_by_pointer.hpp
     # GFunc
@@ -351,7 +353,6 @@ set(libdynd_SRC
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
     src/dynd/kernels/fft.cpp
-    src/dynd/kernels/make_lifted_reduction_ckernel.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
