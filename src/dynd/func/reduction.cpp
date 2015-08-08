@@ -7,14 +7,6 @@
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
-#include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
-#include <dynd/kernels/ckernel_builder.hpp>
-#include <dynd/func/assignment.hpp>
-#include <dynd/types/fixed_dim_type.hpp>
-#include <dynd/types/var_dim_type.hpp>
-#include <dynd/kernels/expr_kernel_generator.hpp>
-#include <dynd/kernels/ckernel_common_functions.hpp>
-#include <dynd/kernels/base_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -46,7 +38,7 @@ static intptr_t instantiate_lifted_reduction_callable_data(
   std::shared_ptr<lifted_reduction_callable_data> data =
       *reinterpret_cast<std::shared_ptr<lifted_reduction_callable_data> *>(
            static_data);
-  return make_lifted_reduction_ckernel(
+  return nd::functional::make_lifted_reduction_ckernel(
       data->child_elwise_reduction.get(),
       data->child_elwise_reduction.get_type(),
       data->child_dst_initialization.get(),
@@ -156,17 +148,17 @@ static size_t make_strided_initial_reduction_dimension_kernel(
     void *ckb, intptr_t ckb_offset, intptr_t src_stride, intptr_t src_size,
     kernel_request_t kernreq)
 {
-  nd::strided_initial_reduction_kernel_extra *e =
+  nd::functional::strided_initial_reduction_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<nd::strided_initial_reduction_kernel_extra>(ckb_offset);
-  e->destructor = &nd::strided_initial_reduction_kernel_extra::destruct;
+          ->alloc_ck<nd::functional::strided_initial_reduction_kernel_extra>(ckb_offset);
+  e->destructor = &nd::functional::strided_initial_reduction_kernel_extra::destruct;
   // Get the function pointer for the first_call
   if (kernreq == kernel_request_single) {
     e->set_first_call_function(
-        &nd::strided_initial_reduction_kernel_extra::single_first);
+        &nd::functional::strided_initial_reduction_kernel_extra::single_first);
   } else if (kernreq == kernel_request_strided) {
     e->set_first_call_function(
-        &nd::strided_initial_reduction_kernel_extra::strided_first);
+        &nd::functional::strided_initial_reduction_kernel_extra::strided_first);
   } else {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: unrecognized request "
@@ -175,7 +167,7 @@ static size_t make_strided_initial_reduction_dimension_kernel(
   }
   // The function pointer for followup accumulation calls
   e->set_followup_call_function(
-      &nd::strided_initial_reduction_kernel_extra::strided_followup);
+      &nd::functional::strided_initial_reduction_kernel_extra::strided_followup);
   // The striding parameters
   e->src_stride = src_stride;
   e->size = src_size;
@@ -191,17 +183,17 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
     void *ckb, intptr_t ckb_offset, intptr_t dst_stride, intptr_t src_stride,
     intptr_t src_size, kernel_request_t kernreq)
 {
-  nd::strided_initial_broadcast_kernel_extra *e =
+  nd::functional::strided_initial_broadcast_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<nd::strided_initial_broadcast_kernel_extra>(ckb_offset);
-  e->destructor = &nd::strided_initial_broadcast_kernel_extra::destruct;
+          ->alloc_ck<nd::functional::strided_initial_broadcast_kernel_extra>(ckb_offset);
+  e->destructor = &nd::functional::strided_initial_broadcast_kernel_extra::destruct;
   // Get the function pointer for the first_call
   if (kernreq == kernel_request_single) {
     e->set_first_call_function(
-        &nd::strided_initial_broadcast_kernel_extra::single_first);
+        &nd::functional::strided_initial_broadcast_kernel_extra::single_first);
   } else if (kernreq == kernel_request_strided) {
     e->set_first_call_function(
-        &nd::strided_initial_broadcast_kernel_extra::strided_first);
+        &nd::functional::strided_initial_broadcast_kernel_extra::strided_first);
   } else {
     stringstream ss;
     ss << "make_lifted_reduction_ckernel: unrecognized request "
@@ -210,7 +202,7 @@ static size_t make_strided_initial_broadcast_dimension_kernel(
   }
   // The function pointer for followup accumulation calls
   e->set_followup_call_function(
-      &nd::strided_initial_broadcast_kernel_extra::strided_followup);
+      &nd::functional::strided_initial_broadcast_kernel_extra::strided_followup);
   // The striding parameters
   e->dst_stride = dst_stride;
   e->src_stride = src_stride;
@@ -262,10 +254,10 @@ static size_t make_strided_inner_reduction_dimension_kernel(
       const_cast<callable_type_data *>(dst_initialization_const);
 
   intptr_t root_ckb_offset = ckb_offset;
-  nd::strided_inner_reduction_kernel_extra *e =
+  nd::functional::strided_inner_reduction_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<nd::strided_inner_reduction_kernel_extra>(ckb_offset);
-  e->destructor = &nd::strided_inner_reduction_kernel_extra::destruct;
+          ->alloc_ck<nd::functional::strided_inner_reduction_kernel_extra>(ckb_offset);
+  e->destructor = &nd::functional::strided_inner_reduction_kernel_extra::destruct;
   // Cannot have both a dst_initialization kernel and a reduction identity
   if (dst_initialization != NULL && !reduction_identity.is_null()) {
     throw invalid_argument(
@@ -277,10 +269,10 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     // no reduction identity
     if (kernreq == kernel_request_single) {
       e->set_first_call_function(
-          &nd::strided_inner_reduction_kernel_extra::single_first);
+          &nd::functional::strided_inner_reduction_kernel_extra::single_first);
     } else if (kernreq == kernel_request_strided) {
       e->set_first_call_function(
-          &nd::strided_inner_reduction_kernel_extra::strided_first);
+          &nd::functional::strided_inner_reduction_kernel_extra::strided_first);
     } else {
       stringstream ss;
       ss << "make_lifted_reduction_ckernel: unrecognized request "
@@ -292,10 +284,10 @@ static size_t make_strided_inner_reduction_dimension_kernel(
     // a reduction identity
     if (kernreq == kernel_request_single) {
       e->set_first_call_function(
-          &nd::strided_inner_reduction_kernel_extra::single_first_with_ident);
+          &nd::functional::strided_inner_reduction_kernel_extra::single_first_with_ident);
     } else if (kernreq == kernel_request_strided) {
       e->set_first_call_function(
-          &nd::strided_inner_reduction_kernel_extra::strided_first_with_ident);
+          &nd::functional::strided_inner_reduction_kernel_extra::strided_first_with_ident);
     } else {
       stringstream ss;
       ss << "make_lifted_reduction_ckernel: unrecognized request "
@@ -314,7 +306,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
   }
   // The function pointer for followup accumulation calls
   e->set_followup_call_function(
-      &nd::strided_inner_reduction_kernel_extra::strided_followup);
+      &nd::functional::strided_inner_reduction_kernel_extra::strided_followup);
   // The striding parameters
   e->src_stride = src_stride;
   e->size = src_size;
@@ -366,7 +358,7 @@ static size_t make_strided_inner_reduction_dimension_kernel(
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
   // Need to retrieve 'e' again because it may have moved
   e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->get_at<nd::strided_inner_reduction_kernel_extra>(root_ckb_offset);
+          ->get_at<nd::functional::strided_inner_reduction_kernel_extra>(root_ckb_offset);
   e->dst_init_kernel_offset = ckb_offset - root_ckb_offset;
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
@@ -409,10 +401,10 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
       const_cast<callable_type_data *>(dst_initialization_const);
 
   intptr_t root_ckb_offset = ckb_offset;
-  nd::strided_inner_broadcast_kernel_extra *e =
+  nd::functional::strided_inner_broadcast_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<nd::strided_inner_broadcast_kernel_extra>(ckb_offset);
-  e->destructor = &nd::strided_inner_broadcast_kernel_extra::destruct;
+          ->alloc_ck<nd::functional::strided_inner_broadcast_kernel_extra>(ckb_offset);
+  e->destructor = &nd::functional::strided_inner_broadcast_kernel_extra::destruct;
   // Cannot have both a dst_initialization kernel and a reduction identity
   if (dst_initialization != NULL && !reduction_identity.is_null()) {
     throw invalid_argument(
@@ -424,10 +416,10 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     // no reduction identity
     if (kernreq == kernel_request_single) {
       e->set_first_call_function(
-          &nd::strided_inner_broadcast_kernel_extra::single_first);
+          &nd::functional::strided_inner_broadcast_kernel_extra::single_first);
     } else if (kernreq == kernel_request_strided) {
       e->set_first_call_function(
-          &nd::strided_inner_broadcast_kernel_extra::strided_first);
+          &nd::functional::strided_inner_broadcast_kernel_extra::strided_first);
     } else {
       stringstream ss;
       ss << "make_lifted_reduction_ckernel: unrecognized request "
@@ -439,10 +431,10 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
     // a reduction identity
     if (kernreq == kernel_request_single) {
       e->set_first_call_function(
-          &nd::strided_inner_broadcast_kernel_extra::single_first_with_ident);
+          &nd::functional::strided_inner_broadcast_kernel_extra::single_first_with_ident);
     } else if (kernreq == kernel_request_strided) {
       e->set_first_call_function(
-          &nd::strided_inner_broadcast_kernel_extra::strided_first_with_ident);
+          &nd::functional::strided_inner_broadcast_kernel_extra::strided_first_with_ident);
     } else {
       stringstream ss;
       ss << "make_lifted_reduction_ckernel: unrecognized request "
@@ -461,7 +453,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   }
   // The function pointer for followup accumulation calls
   e->set_followup_call_function(
-      &nd::strided_inner_broadcast_kernel_extra::strided_followup);
+      &nd::functional::strided_inner_broadcast_kernel_extra::strided_followup);
   // The striding parameters
   e->dst_stride = dst_stride;
   e->src_stride = src_stride;
@@ -514,7 +506,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
       ->reserve(ckb_offset + sizeof(ckernel_prefix));
   // Need to retrieve 'e' again because it may have moved
   e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->get_at<nd::strided_inner_broadcast_kernel_extra>(root_ckb_offset);
+          ->get_at<nd::functional::strided_inner_broadcast_kernel_extra>(root_ckb_offset);
   e->dst_init_kernel_offset = ckb_offset - root_ckb_offset;
   if (dst_initialization != NULL) {
     ckb_offset = dst_initialization->instantiate(
@@ -535,7 +527,7 @@ static size_t make_strided_inner_broadcast_dimension_kernel(
   return ckb_offset;
 }
 
-size_t nd::make_lifted_reduction_ckernel(
+size_t nd::functional::make_lifted_reduction_ckernel(
     const callable_type_data *elwise_reduction_const,
     const ndt::callable_type *elwise_reduction_tp,
     const callable_type_data *dst_initialization_const,
