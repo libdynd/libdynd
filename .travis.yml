@@ -14,6 +14,10 @@ matrix:
           packages:
           - g++-4.7
           - cmake
+      cache:
+        directories:
+          - $HOME/.cache/pip
+          - $HOME/dynd-python/build
       before_install:
         - export CC=clang
         - export CXX=clang++
@@ -101,6 +105,10 @@ matrix:
           - libfftw3-dev
 
 language: cpp
+
+cache:
+  directories:
+    - $HOME/libdynd/build
 
 before_script:
   - mkdir build
