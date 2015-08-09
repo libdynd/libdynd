@@ -3,7 +3,7 @@ sudo: false
 matrix:
   include:
     - language: python
-      env: DYND_CUDA=OFF DYND_FFTW=OFF VERBOSE=1
+      env: DYND_FFTW=OFF VERBOSE=1
       compiler: clang
       python: 2.7
       addons:
@@ -35,7 +35,7 @@ matrix:
         - cd ..
         - python -c "import dynd; dynd.test(exit=True)"
     - compiler: gcc
-      env: VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
+      env: VALGRIND=ON DYND_FFTW=OFF
       addons:
         apt:
           sources:
@@ -50,7 +50,7 @@ matrix:
         - export CC="gcc-4.7"
         - export CXX="g++-4.7"
     - compiler: gcc
-      env: DYND_CUDA=OFF DYND_FFTW=ON
+      env: DYND_FFTW=ON
       addons:
         apt:
           sources:
@@ -65,7 +65,7 @@ matrix:
         - export CC="gcc-4.7"
         - export CXX="g++-4.7"
     - compiler: clang
-      env: VALGRIND=ON DYND_CUDA=OFF DYND_FFTW=OFF
+      env: VALGRIND=ON DYND_FFTW=OFF
       addons:
         apt:
           sources:
@@ -80,7 +80,7 @@ matrix:
         - ./tests/test_libdynd
         - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
     - compiler: clang
-      env: ASAN=ON DYND_CUDA=OFF DYND_FFTW=ON
+      env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
       addons:
         apt:
           sources:
@@ -90,10 +90,8 @@ matrix:
           - g++-4.7
           - cmake
           - libfftw3-dev
-      before_install:
-        - export CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
     - compiler: clang
-      env: DYND_CUDA=OFF DYND_FFTW=ON
+      env: DYND_FFTW=ON
       addons:
         apt:
           sources:
