@@ -1210,7 +1210,7 @@ namespace nd {
                << " not supported as source";
             throw type_error(ss.str());
           }
-          if (static_data->reduction_dimflags.size() > 0 && i == static_data->reduction_dimflags[j]) {
+          if (static_cast<size_t>(j) < static_data->reduction_dimflags.size() && i == static_data->reduction_dimflags[j]) {
             // This dimension is being reduced
             if (src_size == 0 && static_data->reduction_identity.is_null()) {
               // If the size of the src is 0, a reduction identity is required
