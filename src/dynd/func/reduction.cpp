@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/func/compound.hpp>
 #include <dynd/func/reduction.hpp>
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
@@ -17,7 +18,7 @@ nd::callable nd::functional::reduction(
     intptr_t reduction_ndim, const bool *reduction_dimflags, bool associative,
     bool commutative, bool right_associative, const array &reduction_identity)
 {
-  // Validate the input elwise_reduction callable 
+  // Validate the input elwise_reduction callable
   if (elwise_reduction_arr.is_null()) {
     throw runtime_error(
         "lift_reduction_callable: 'elwise_reduction' may not be empty");

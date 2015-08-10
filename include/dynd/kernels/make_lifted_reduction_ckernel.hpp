@@ -700,7 +700,7 @@ namespace nd {
           check_dst_initialization(dst_initialization_tp, dst_tp, src_tp);
         }
         if (elwise_reduction_tp->get_npos() == 2) {
-          ckb_offset = kernels::wrap_binary_as_unary_reduction_ckernel(
+          ckb_offset = wrap_binary_as_unary_reduction_ckernel(
               ckb, ckb_offset, static_data->right_associative,
               kernel_request_strided);
           ndt::type src_tp_doubled[2] = {src_tp, src_tp};
@@ -1062,7 +1062,7 @@ namespace nd {
           check_dst_initialization(dst_initialization_tp, dst_tp, src_tp);
         }
         if (elwise_reduction_tp->get_npos() == 2) {
-          ckb_offset = kernels::wrap_binary_as_unary_reduction_ckernel(
+          ckb_offset = wrap_binary_as_unary_reduction_ckernel(
               ckb, ckb_offset, static_data->right_associative,
               kernel_request_strided);
           ndt::type src_tp_doubled[2] = {src_tp, src_tp};
@@ -1127,9 +1127,8 @@ namespace nd {
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                   const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx,
-                  const nd::array &DYND_UNUSED(kwds),
-                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+                  const eval::eval_context *ectx, const array &kwds,
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         static_data_type &static_data =
             *reinterpret_cast<static_data_type *>(_static_data);
@@ -1155,7 +1154,7 @@ namespace nd {
                   dst_initialization.get()->static_data, 0, NULL, ckb,
                   ckb_offset, dst_tp, dst_arrmeta,
                   elwise_reduction_tp->get_npos(), src_tp, src_arrmeta, kernreq,
-                  ectx, nd::array(), std::map<std::string, ndt::type>());
+                  ectx, kwds, tp_vars);
             } else if (static_data->reduction_identity.is_null()) {
               return make_assignment_kernel(ckb, ckb_offset, dst_tp,
                                             dst_arrmeta, src_tp[0],
