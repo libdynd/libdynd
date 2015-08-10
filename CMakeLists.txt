@@ -292,7 +292,7 @@ set(libdynd_SRC
     src/dynd/func/chain.cpp
     src/dynd/func/elwise.cpp
     src/dynd/func/fft.cpp
-    src/dynd/func/lift_reduction_callable.cpp
+    src/dynd/func/reduction.cpp
     src/dynd/func/math.cpp
     src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood.cpp
@@ -301,6 +301,7 @@ set(libdynd_SRC
     src/dynd/func/permute.cpp
     src/dynd/func/random.cpp
     src/dynd/func/rolling.cpp
+    src/dynd/func/sum.cpp
     src/dynd/func/take.cpp
     src/dynd/func/take_by_pointer.cpp
     include/dynd/func/arithmetic.hpp
@@ -313,7 +314,7 @@ set(libdynd_SRC
     include/dynd/func/elwise.hpp
     include/dynd/func/fft.hpp
     include/dynd/func/apply.hpp
-    include/dynd/func/lift_reduction_callable.hpp
+    include/dynd/func/reduction.hpp
     include/dynd/func/math.hpp
     include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood.hpp
@@ -322,6 +323,7 @@ set(libdynd_SRC
     include/dynd/func/permute.hpp
     include/dynd/func/random.hpp
     include/dynd/func/rolling.hpp
+    include/dynd/func/sum.hpp
     include/dynd/func/take.hpp
     include/dynd/func/take_by_pointer.hpp
     # GFunc
@@ -351,7 +353,6 @@ set(libdynd_SRC
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
     src/dynd/kernels/fft.cpp
-    src/dynd/kernels/make_lifted_reduction_ckernel.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp

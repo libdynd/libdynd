@@ -12,7 +12,8 @@
 
 #include <dynd/array.hpp>
 #include <dynd/kernels/reduction_kernels.hpp>
-#include <dynd/func/lift_reduction_callable.hpp>
+#include <dynd/func/reduction.hpp>
+#include <dynd/func/sum.hpp>
 #include <dynd/json_parser.hpp>
 
 #include "dynd_assertions.hpp"
@@ -136,7 +137,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
 
   // Lift it to a zero-dimensional reduction callable (basically a no-op)
   bool reduction_dimflags[1] = {false};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("float32"), nd::callable(), false, 0,
       reduction_dimflags, true, true, false, nd::array());
 
@@ -171,7 +172,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
   // Lift it to a zero-dimensional reduction callable (basically a no-op)
   // Use 100.f as the "identity" to confirm it's really being used
   bool reduction_dimflags[1] = {false};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("float32"), nd::callable(), false, 0,
       reduction_dimflags, true, true, false, nd::array(100.f));
 
@@ -205,7 +206,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
 
   // Lift it to a one-dimensional strided float32 reduction callable
   bool reduction_dimflags[1] = {true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * float32"), nd::callable(), false, 1,
       reduction_dimflags, true, true, false, nd::array());
 
@@ -259,7 +260,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   // Lift it to a one-dimensional strided float32 reduction callable
   // Use 100.f as the "identity" to confirm it's really being used
   bool reduction_dimflags[1] = {true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * float32"), nd::callable(), false, 1,
       reduction_dimflags, true, true, false, nd::array(100.f));
 
@@ -295,7 +296,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
 
   // Lift it to a two-dimensional strided float32 reduction callable
   bool reduction_dimflags[2] = {true, true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
       false, 2, reduction_dimflags, true, true, false, nd::array());
 
@@ -346,7 +347,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
 
   // Lift it to a two-dimensional strided float32 reduction callable
   bool reduction_dimflags[2] = {true, true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
       true, 2, reduction_dimflags, true, true, false, nd::array());
 
@@ -381,7 +382,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
 
   // Lift it to a two-dimensional strided float32 reduction callable
   bool reduction_dimflags[2] = {false, true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
       false, 2, reduction_dimflags, true, true, false, nd::array());
 
@@ -436,7 +437,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
 
   // Lift it to a two-dimensional strided float32 reduction callable
   bool reduction_dimflags[2] = {false, true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
       true, 2, reduction_dimflags, true, true, false, nd::array());
 
@@ -473,7 +474,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
 
   // Lift it to a two-dimensional strided float32 reduction callable
   bool reduction_dimflags[2] = {true, false};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
       false, 2, reduction_dimflags, true, true, false, nd::array());
 
@@ -530,7 +531,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
 
   // Lift it to a two-dimensional strided float32 reduction callable
   bool reduction_dimflags[2] = {true, false};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
       true, 2, reduction_dimflags, true, true, false, nd::array());
 
@@ -568,7 +569,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
 
   // Lift it to a three-dimensional strided float32 reduction callable
   bool reduction_dimflags[3] = {true, true, true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * Fixed * float32"),
       nd::callable(), false, 3, reduction_dimflags, true, true, false,
       nd::array());
@@ -607,7 +608,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
 
   // Lift it to a three-dimensional strided float32 reduction callable
   bool reduction_dimflags[3] = {false, true, true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * Fixed * float32"),
       nd::callable(), false, 3, reduction_dimflags, true, true, false,
       nd::array());
@@ -646,7 +647,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
 
   // Lift it to a three-dimensional strided float32 reduction callable
   bool reduction_dimflags[3] = {true, false, true};
-  nd::callable af = lift_reduction_callable(
+  nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * Fixed * float32"),
       nd::callable(), false, 3, reduction_dimflags, true, true, false,
       nd::array());
