@@ -12,11 +12,14 @@
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::functional::reduction(
-    const callable &elwise_reduction_arr, const ndt::type &lifted_arr_type,
-    const callable &dst_initialization_arr, bool keepdims,
-    intptr_t reduction_ndim, const bool *reduction_dimflags, bool associative,
-    bool commutative, bool right_associative, const array &reduction_identity)
+nd::callable nd::functional::reduction(const callable &elwise_reduction_arr,
+                                       const ndt::type &lifted_arr_type,
+                                       const callable &dst_initialization_arr,
+                                       bool keepdims, intptr_t reduction_ndim,
+                                       const vector<int> &reduction_dimflags,
+                                       bool associative, bool commutative,
+                                       bool right_associative,
+                                       const array &reduction_identity)
 {
   // Validate the input elwise_reduction callable
   if (elwise_reduction_arr.is_null()) {
@@ -104,9 +107,7 @@ nd::callable nd::functional::reduction(
   self->associative = associative;
   self->commutative = commutative;
   self->right_associative = right_associative;
-  self->reduction_dimflags.init(reduction_ndim);
-  memcpy(self->reduction_dimflags.get(), reduction_dimflags,
-         sizeof(bool) * reduction_ndim);
+  self->reduction_dimflags = reduction_dimflags;
 
   return callable::make<reduction_kernel>(
       ndt::callable_type::make(lifted_dst_type, lifted_arr_type), self, 0);

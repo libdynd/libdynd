@@ -60,7 +60,8 @@ namespace nd {
     callable reduction(const callable &elwise_reduction,
                        const ndt::type &lifted_arr_type,
                        const callable &dst_initialization, bool keepdims,
-                       intptr_t reduction_ndim, const bool *reduction_dimflags,
+                       intptr_t reduction_ndim,
+                       const std::vector<int> &reduction_dimflags,
                        bool associative, bool commutative,
                        bool right_associative, const array &reduction_identity);
 
