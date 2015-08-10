@@ -87,10 +87,9 @@ nd::callable kernels::make_builtin_sum_reduction_callable(type_id_t tid)
 nd::callable kernels::make_builtin_sum1d_callable(type_id_t tid)
 {
   nd::callable sum_ew = kernels::make_builtin_sum_reduction_callable(tid);
-  bool reduction_dimflags[1] = {true};
   return nd::functional::reduction(
       sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)), nd::callable(), false,
-      1, reduction_dimflags, true, true, false, 0);
+      1, {0}, true, true, false, 0);
 }
 
 namespace {

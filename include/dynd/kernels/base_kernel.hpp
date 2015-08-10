@@ -19,7 +19,7 @@ namespace nd {
    * For most ckernels, the structure is not known beyond that
    * the ckernel_prefix is at the beginning. In some, such
    * as the reduction ckernel, more is known, in which case
-   * CKP may be overriden.
+   * CKP may be overriden. 
    */
   template <typename T, kernel_request_t kernreq, int N,
             typename CKP = ckernel_prefix>

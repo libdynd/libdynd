@@ -288,6 +288,7 @@ set(libdynd_SRC
     src/dynd/func/callable_registry.cpp
     src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
+    src/dynd/func/compound.cpp
     src/dynd/func/copy.cpp
     src/dynd/func/chain.cpp
     src/dynd/func/elwise.cpp
@@ -310,6 +311,7 @@ set(libdynd_SRC
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
     include/dynd/func/comparison.hpp
+    include/dynd/func/compound.hpp
     include/dynd/func/chain.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/fft.hpp
@@ -383,6 +385,7 @@ set(libdynd_SRC
     include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
+    include/dynd/kernels/compound_kernel.hpp
     include/dynd/kernels/copy.hpp
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/date_adapter_kernels.hpp
