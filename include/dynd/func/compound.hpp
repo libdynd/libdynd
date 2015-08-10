@@ -11,10 +11,6 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    callable left_compound(const callable &child);
-
-    callable right_compound(const callable &child);
-
     /**
      * Adds an adapter ckernel which wraps a child binary expr ckernel
      * as a unary reduction ckernel. The three types of the binary
@@ -32,10 +28,9 @@ namespace nd {
      *
      * \returns  The ckb_offset where the child ckernel should be placed.
      */
-    intptr_t wrap_binary_as_unary_reduction_ckernel(void *ckb,
-                                                    intptr_t ckb_offset,
-                                                    bool right_associative,
-                                                    kernel_request_t kernreq);
+    callable left_compound(const callable &child);
+
+    callable right_compound(const callable &child);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

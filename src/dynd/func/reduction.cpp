@@ -37,6 +37,19 @@ nd::callable nd::functional::reduction(
           "equal types, its prototype is " << elwise_reduction_tp;
     throw invalid_argument(ss.str());
   }
+  if (elwise_reduction_tp->get_npos() == 2) {
+    if (right_associative) {
+      return reduction(left_compound(elwise_reduction_arr), lifted_arr_type,
+                       dst_initialization_arr, keepdims, reduction_ndim,
+                       reduction_dimflags, associative, commutative,
+                       right_associative, reduction_identity);
+    }
+
+    return reduction(right_compound(elwise_reduction_arr), lifted_arr_type,
+                     dst_initialization_arr, keepdims, reduction_ndim,
+                     reduction_dimflags, associative, commutative,
+                     right_associative, reduction_identity);
+  }
 
   // Figure out the result type
   ndt::type lifted_dst_type = elwise_reduction_tp->get_return_type();
@@ -95,7 +108,6 @@ nd::callable nd::functional::reduction(
   memcpy(self->reduction_dimflags.get(), reduction_dimflags,
          sizeof(bool) * reduction_ndim);
 
-  return callable(ndt::callable_type::make(lifted_dst_type, lifted_arr_type),
-                  self, 0, NULL, NULL,
-                  &nd::functional::reduction_kernel::instantiate);
+  return callable::make<reduction_kernel>(
+      ndt::callable_type::make(lifted_dst_type, lifted_arr_type), self, 0);
 }

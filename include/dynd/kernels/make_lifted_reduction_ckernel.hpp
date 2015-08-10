@@ -5,11 +5,8 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-#include <dynd/array.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/func/assignment.hpp>
 
 namespace dynd {
@@ -699,24 +696,11 @@ namespace nd {
         if (dst_initialization != NULL) {
           check_dst_initialization(dst_initialization_tp, dst_tp, src_tp);
         }
-        if (elwise_reduction_tp->get_npos() == 2) {
-          ckb_offset = wrap_binary_as_unary_reduction_ckernel(
-              ckb, ckb_offset, static_data->right_associative,
-              kernel_request_strided);
-          ndt::type src_tp_doubled[2] = {src_tp, src_tp};
-          const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
-          ckb_offset = elwise_reduction->instantiate(
-              elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
-              dst_arrmeta, elwise_reduction_tp->get_npos(), src_tp_doubled,
-              src_arrmeta_doubled, kernel_request_strided, ectx, nd::array(),
-              std::map<std::string, ndt::type>());
-        } else {
           ckb_offset = elwise_reduction->instantiate(
               elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
               dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp,
               &src_arrmeta, kernel_request_strided, ectx, nd::array(),
               std::map<std::string, ndt::type>());
-        }
         // Make sure there's capacity for the next ckernel
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -1061,24 +1045,11 @@ namespace nd {
         if (dst_initialization != NULL) {
           check_dst_initialization(dst_initialization_tp, dst_tp, src_tp);
         }
-        if (elwise_reduction_tp->get_npos() == 2) {
-          ckb_offset = wrap_binary_as_unary_reduction_ckernel(
-              ckb, ckb_offset, static_data->right_associative,
-              kernel_request_strided);
-          ndt::type src_tp_doubled[2] = {src_tp, src_tp};
-          const char *src_arrmeta_doubled[2] = {src_arrmeta, src_arrmeta};
-          ckb_offset = elwise_reduction->instantiate(
-              elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
-              dst_arrmeta, elwise_reduction_tp->get_npos(), src_tp_doubled,
-              src_arrmeta_doubled, kernel_request_strided, ectx, nd::array(),
-              std::map<std::string, ndt::type>());
-        } else {
-          ckb_offset = elwise_reduction->instantiate(
-              elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
-              dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp,
-              &src_arrmeta, kernel_request_strided, ectx, nd::array(),
-              std::map<std::string, ndt::type>());
-        }
+        ckb_offset = elwise_reduction->instantiate(
+            elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
+            dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta,
+            kernel_request_strided, ectx, nd::array(),
+            std::map<std::string, ndt::type>());
         // Make sure there's capacity for the next ckernel
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->reserve(ckb_offset + sizeof(ckernel_prefix));

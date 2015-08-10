@@ -26,23 +26,3 @@ nd::callable nd::functional::right_compound(const callable &child)
           child.get_type()->get_pos_types()(1 >= irange())),
       child, 0);
 }
-
-intptr_t nd::functional::wrap_binary_as_unary_reduction_ckernel(
-    void *ckb, intptr_t ckb_offset, bool right_associative,
-    kernel_request_t kernreq)
-{
-  // Add an adapter kernel which converts the binary expr kernel to an expr
-  // kernel
-  ckernel_prefix *ckp =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<ckernel_prefix>(ckb_offset);
-  ckp->destructor = &kernels::destroy_trivial_parent_ckernel;
-  if (right_associative) {
-    ckp->set_expr_function(kernreq, &left_compound_kernel::single_wrapper,
-                           &left_compound_kernel::strided_wrapper);
-  } else {
-    ckp->set_expr_function(kernreq, &right_compound_kernel::single_wrapper,
-                           &left_compound_kernel::strided_wrapper);
-  }
-  return ckb_offset;
-}
