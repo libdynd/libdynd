@@ -34,10 +34,7 @@ namespace nd {
      * \param reduction_ndim  The number of dimensions being lifted. This should
      *                        be equal to the number of dimensions added in
      *                        `lifted_types` over what is in `elwise_reduction`.
-     * \param reduction_dimflags  An array of length `reduction_ndim`,
-     *indicating
-     *                            for each dimension whether it is being
-     *reduced.
+     * \param axes  Each dimension that should be reduced.
      * \param associative  Indicate whether the operation the reduction is
      *derived
      *                     from is associative.
@@ -60,8 +57,7 @@ namespace nd {
     callable reduction(const callable &elwise_reduction,
                        const ndt::type &lifted_arr_type,
                        const callable &dst_initialization, bool keepdims,
-                       intptr_t reduction_ndim,
-                       const std::vector<int> &reduction_dimflags,
+                       intptr_t reduction_ndim, const std::vector<int> &axes,
                        bool associative, bool commutative,
                        bool right_associative, const array &reduction_identity);
 

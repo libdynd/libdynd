@@ -1075,9 +1075,9 @@ namespace nd {
               &src_arrmeta, kernel_request_strided, ectx, nd::array(),
               std::map<std::string, ndt::type>());
         } else if (reduction_identity.is_null()) {
-          ckb_offset = make_assignment_kernel(ckb, ckb_offset, dst_tp,
-                                              dst_arrmeta, src_tp[0], src_arrmeta,
-                                              kernel_request_strided, ectx);
+          ckb_offset = make_assignment_kernel(
+              ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta,
+              kernel_request_strided, ectx);
         } else {
           ckb_offset = make_assignment_kernel(
               ckb, ckb_offset, dst_tp, dst_arrmeta,
@@ -1121,10 +1121,7 @@ namespace nd {
         callable &dst_initialization = static_data->child_dst_initialization;
 
         // Count the number of dimensions being reduced
-        intptr_t reducedim_count = 0;
-        for (intptr_t i = 0; i < static_data->reduction_ndim; ++i) {
-          reducedim_count += static_data->reduction_dimflags[i];
-        }
+        intptr_t reducedim_count = static_data->reduction_dimflags.size();
         if (reducedim_count == 0) {
           if (static_data->reduction_ndim == 0) {
             // If there are no dimensions to reduce, it's
@@ -1202,7 +1199,7 @@ namespace nd {
         }
 
         ndt::type dst_i_tp = dst_tp, src_i_tp = src_tp[0];
-        for (intptr_t i = 0; i < static_data->reduction_ndim; ++i) {
+        for (intptr_t i = 0, j = 0; i < static_data->reduction_ndim; ++i) {
           intptr_t dst_stride, dst_size, src_stride, src_size;
           // Get the striding parameters for the source dimension
           if (!src_i_tp.get_as_strided(
@@ -1213,7 +1210,7 @@ namespace nd {
                << " not supported as source";
             throw type_error(ss.str());
           }
-          if (static_data->reduction_dimflags[i]) {
+          if (static_data->reduction_dimflags.size() > 0 && i == static_data->reduction_dimflags[j]) {
             // This dimension is being reduced
             if (src_size == 0 && static_data->reduction_identity.is_null()) {
               // If the size of the src is 0, a reduction identity is required
@@ -1261,6 +1258,7 @@ namespace nd {
                   _static_data, ckb, ckb_offset, src_stride, src_size, dst_i_tp,
                   dst_arrmeta, src_i_tp, src_arrmeta[0], kernreq, ectx);
             }
+            ++j;
           } else {
             // This dimension is being broadcast, not reduced
             if (!dst_i_tp.get_as_strided(dst_arrmeta, &dst_size, &dst_stride,

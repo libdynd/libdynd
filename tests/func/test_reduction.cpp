@@ -138,7 +138,7 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
   // Lift it to a zero-dimensional reduction callable (basically a no-op)
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("float32"), nd::callable(), false, 0,
-      {false}, true, true, false, nd::array());
+      {}, true, true, false, nd::array());
 
   // Set up some data for the test reduction
   nd::array a = 1.25f;
@@ -172,7 +172,7 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
   // Use 100.f as the "identity" to confirm it's really being used
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("float32"), nd::callable(), false, 0,
-      {false}, true, true, false, nd::array(100.f));
+      {}, true, true, false, nd::array(100.f));
 
   // Set up some data for the test reduction
   nd::array a = 1.25f;
@@ -205,7 +205,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   // Lift it to a one-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * float32"), nd::callable(), false, 1,
-      {true}, true, true, false, nd::array());
+      {0}, true, true, false, nd::array());
 
   // Set up some data for the test reduction
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
@@ -258,7 +258,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   // Use 100.f as the "identity" to confirm it's really being used
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * float32"), nd::callable(), false, 1,
-      {true}, true, true, false, nd::array(100.f));
+      {0}, true, true, false, nd::array(100.f));
 
   // Set up some data for the test reduction
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
@@ -293,7 +293,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
-      false, 2, {true, true}, true, true, false, nd::array());
+      false, 2, {0, 1}, true, true, false, nd::array());
 
   // Set up some data for the test reduction
   nd::array a =
@@ -343,7 +343,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
-      true, 2, {true, true}, true, true, false, nd::array());
+      true, 2, {0, 1}, true, true, false, nd::array());
 
   // Set up some data for the test reduction
   nd::array a =
@@ -377,7 +377,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
-      false, 2, {false, true}, true, true, false, nd::array());
+      false, 2, {1}, true, true, false, nd::array());
 
   // Set up some data for the test reduction
   nd::array a =
@@ -431,7 +431,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
-      true, 2, {false, true}, true, true, false, nd::array());
+      true, 2, {1}, true, true, false, nd::array());
 
   // Set up some data for the test reduction
   nd::array a =
@@ -467,7 +467,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
-      false, 2, {true, false}, true, true, false, nd::array());
+      false, 2, {0}, true, true, false, nd::array());
 
   // Set up some data for the test reduction
   nd::array a =
@@ -523,7 +523,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * float32"), nd::callable(),
-      true, 2, {true, false}, true, true, false, nd::array());
+      true, 2, {0}, true, true, false, nd::array());
 
   // Set up some data for the test reduction
   nd::array a =
@@ -560,7 +560,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
   // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * Fixed * float32"),
-      nd::callable(), false, 3, {true, true, true}, true, true, false,
+      nd::callable(), false, 3, {0, 1, 2}, true, true, false,
       nd::array());
 
   // Set up some data for the test reduction
@@ -598,7 +598,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
   // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * Fixed * float32"),
-      nd::callable(), false, 3, {false, true, true}, true, true, false,
+      nd::callable(), false, 3, {1, 2}, true, true, false,
       nd::array());
 
   // Set up some data for the test reduction
@@ -636,7 +636,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
   // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable af = nd::functional::reduction(
       reduction_kernel, ndt::type("Fixed * Fixed * Fixed * float32"),
-      nd::callable(), false, 3, {true, false, true}, true, true, false,
+      nd::callable(), false, 3, {0, 2}, true, true, false,
       nd::array());
 
   // Set up some data for the test reduction
