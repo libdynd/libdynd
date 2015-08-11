@@ -65,7 +65,7 @@ nd::callable nd::functional::reduction(const callable &child,
     }
   }
 
-  int reduction_ndim =
+  intptr_t reduction_ndim =
       src0_tp.get_ndim() - child.get_type()->get_return_type().get_ndim();
 
   // Figure out the result type
