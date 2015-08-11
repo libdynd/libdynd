@@ -57,6 +57,8 @@ namespace ndt {
     void get_dynamic_type_properties(
         const std::pair<std::string, nd::callable> **out_properties,
         size_t *out_count) const;
+
+    virtual type with_element_type(const type &element_tp) const;
   };
 
   /** Makes an ellipsis type with the specified name and element type */

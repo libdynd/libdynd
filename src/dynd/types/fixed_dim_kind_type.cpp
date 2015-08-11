@@ -357,3 +357,8 @@ ndt::type ndt::make_fixed_dim_kind(const type &element_tp)
     return type(new fixed_dim_kind_type(element_tp), false);
   }
 }
+
+ndt::type ndt::fixed_dim_kind_type::with_element_type(const type &element_tp) const
+{
+  return make_fixed_dim_kind(element_tp);
+}

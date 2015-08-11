@@ -19,7 +19,8 @@ ndt::typevar_dim_type::typevar_dim_type(const std::string &name,
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
+  } else if (!is_valid_typevar_name(m_name.c_str(),
+                                    m_name.c_str() + m_name.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
     print_escaped_utf8_string(ss, m_name);
@@ -193,7 +194,7 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
       dst_tp = static_cast<nd::array>(
-                   tp.extended<typevar_dim_type>()->get_name()).get_type();
+          tp.extended<typevar_dim_type>()->get_name()).get_type();
     }
   };
 
@@ -206,4 +207,9 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+}
+
+ndt::type ndt::typevar_dim_type::with_element_type(const type &element_tp) const
+{
+  return make(m_name, element_tp);
 }

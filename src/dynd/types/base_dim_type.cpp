@@ -10,7 +10,19 @@
 using namespace std;
 using namespace dynd;
 
-ndt::base_dim_type::~base_dim_type() {}
+ndt::base_dim_type::~base_dim_type()
+{
+}
+
+void ndt::base_dim_type::get_element_types(std::size_t ndim,
+                                           const type **element_tp) const
+{
+  if (ndim > 0) {
+    element_tp[0] = &m_element_tp;
+    m_element_tp.extended<base_dim_type>()->get_element_types(ndim - 1,
+                                                              element_tp + 1);
+  }
+}
 
 bool ndt::base_dim_type::match(const char *arrmeta, const type &candidate_tp,
                                const char *candidate_arrmeta,

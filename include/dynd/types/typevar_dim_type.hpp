@@ -57,6 +57,8 @@ namespace ndt {
         const std::pair<std::string, nd::callable> **out_properties,
         size_t *out_count) const;
 
+    virtual type with_element_type(const type &element_tp) const;
+
     /** Makes a typevar type with the specified name and element type */
     static type make(const std::string &name, const type &element_type)
     {

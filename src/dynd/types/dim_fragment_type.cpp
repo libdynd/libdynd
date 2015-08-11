@@ -278,3 +278,8 @@ const ndt::type &ndt::make_dim_fragment()
   static const type static_instance(&dft, true);
   return static_instance;
 }
+
+ndt::type ndt::dim_fragment_type::with_element_type(const type &DYND_UNUSED(element_tp)) const
+{
+  throw runtime_error("with_element_type is not implemented for dim_fragment_type");
+}

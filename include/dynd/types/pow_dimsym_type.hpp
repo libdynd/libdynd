@@ -62,6 +62,8 @@ namespace ndt {
     bool match(const char *arrmeta, const type &candidate_tp,
                const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
+
+    virtual type with_element_type(const type &element_tp) const;
   }; // class pow_dimsym_type
 
   /** Makes a dimensional power type with the specified base and exponent */

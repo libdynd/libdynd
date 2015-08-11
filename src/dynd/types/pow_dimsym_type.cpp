@@ -308,3 +308,8 @@ void typevar_dim_type::get_dynamic_type_properties(
     *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 */
+
+ndt::type ndt::pow_dimsym_type::with_element_type(const type &element_tp) const
+{
+  return make_pow_dimsym(m_base_tp, m_exponent, element_tp);
+}
