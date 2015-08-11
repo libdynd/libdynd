@@ -88,6 +88,20 @@ typedef intptr_t (*callable_instantiate_t)(
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars);
 
+template <typename InstantiateType>
+struct instantiate_traits;
+
+template <typename StaticDataType, typename DataType>
+struct instantiate_traits<intptr_t(
+    StaticDataType *static_data, size_t data_size, DataType *data, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+  typedef StaticDataType static_data_type;
+  typedef DataType data_type;
+};
+
 /**
  * A function which deallocates the memory behind data_ptr after
  * freeing any additional resources it might contain.
