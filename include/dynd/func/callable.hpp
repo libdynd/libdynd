@@ -674,7 +674,7 @@ namespace nd {
                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *ectx, const array &kwds,
-                const std::map<std::string, ndt::type> &tp_vars) {
+                const std::map<std::string, ndt::type> &tp_vars) -> intptr_t {
         typedef instantiate_traits<decltype(KernelType::instantiate)> traits;
         return KernelType::instantiate(
             reinterpret_cast<typename traits::static_data_type *>(static_data),
