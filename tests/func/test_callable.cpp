@@ -32,7 +32,7 @@ TEST(Callable, SingleStridedConstructor)
         *reinterpret_cast<int32 *>(dst) =
             *reinterpret_cast<int32 *>(src[0]) + 5;
       },
-      NULL);
+      0);
 
   EXPECT_EQ(8, f(3));
 }
@@ -186,8 +186,9 @@ TEST(Callable, DecomposedDynamicCall)
   af = nd::functional::apply([](int x, double y,
                                 int z) { return 2 * x - y + 3 * z; });
   ret_tp = af.get_ret_type();
-  EXPECT_EQ(26.5, (*af.get())(ret_tp, 3, types, arrmetas, datas, nd::as_struct(),
-                              map<string, ndt::type>()).as<double>());
+  EXPECT_EQ(26.5,
+            (*af.get())(ret_tp, 3, types, arrmetas, datas, nd::as_struct(),
+                        map<string, ndt::type>()).as<double>());
 
   af = nd::functional::apply([](int x, double y,
                                 int z) { return 2 * x - y + 3 * z; },
