@@ -61,8 +61,8 @@ namespace nd {
       }
     };
 
-    template <typename SelfType, int N>
-    struct base_reduction_kernel {
+    template <typename SelfType>
+    struct base_reduction_kernel : reduction_ckernel_prefix {
       typedef SelfType self_type;
     };
 
@@ -80,10 +80,15 @@ namespace nd {
      *  - The child followup_call function must be *strided*.
      *
      */
-    struct strided_initial_reduction_kernel_extra
-        : nd::base_kernel<strided_initial_reduction_kernel_extra,
-                          kernel_request_host, 1, reduction_ckernel_prefix> {
-      typedef strided_initial_reduction_kernel_extra self_type;
+    template <type_id_t Src0TypeID>
+    struct initial_reduction_kernel;
+
+    template <>
+    struct initial_reduction_kernel<
+        fixed_dim_type_id> : base_kernel<initial_reduction_kernel<fixed_dim_type_id>,
+                                         kernel_request_host, 1,
+                                         reduction_ckernel_prefix> {
+      typedef initial_reduction_kernel self_type;
 
       // The code assumes that size >= 1
       intptr_t size;
@@ -187,26 +192,19 @@ namespace nd {
        * This is for a strided dimension which is being reduced, and is not
        * the final dimension before the accumulation operation.
        */
-      static size_t instantiate(char *DYND_UNUSED(static_data), void *ckb,
-                                intptr_t ckb_offset, intptr_t src_stride,
-                                intptr_t src_size, kernel_request_t kernreq)
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), void *ckb,
+                                  intptr_t ckb_offset, intptr_t src_stride,
+                                  intptr_t src_size, kernel_request_t kernreq)
       {
-        nd::functional::strided_initial_reduction_kernel_extra *e =
+        initial_reduction_kernel *e =
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-                ->alloc_ck<
-                      nd::functional::strided_initial_reduction_kernel_extra>(
-                      ckb_offset);
-        e->destructor =
-            &nd::functional::strided_initial_reduction_kernel_extra::destruct;
+                ->alloc_ck<initial_reduction_kernel>(ckb_offset);
+        e->destructor = &initial_reduction_kernel::destruct;
         // Get the function pointer for the first_call
         if (kernreq == kernel_request_single) {
-          e->set_first_call_function(
-              &nd::functional::strided_initial_reduction_kernel_extra::
-                   single_first);
+          e->set_first_call_function(&initial_reduction_kernel::single_first);
         } else if (kernreq == kernel_request_strided) {
-          e->set_first_call_function(
-              &nd::functional::strided_initial_reduction_kernel_extra::
-                   strided_first);
+          e->set_first_call_function(&initial_reduction_kernel::strided_first);
         } else {
           std::stringstream ss;
           ss << "make_lifted_reduction_ckernel: unrecognized request "
@@ -215,8 +213,7 @@ namespace nd {
         }
         // The function pointer for followup accumulation calls
         e->set_followup_call_function(
-            &nd::functional::strided_initial_reduction_kernel_extra::
-                 strided_followup);
+            &initial_reduction_kernel::strided_followup);
         // The striding parameters
         e->src_stride = src_stride;
         e->size = src_size;
@@ -399,6 +396,7 @@ namespace nd {
         intptr_t reduction_ndim;
         bool associative, commutative, right_associative;
         std::vector<int> reduction_dimflags;
+        bool keepdims;
       };
 
       typedef std::shared_ptr<stored_data_type> static_data_type;
@@ -756,6 +754,7 @@ namespace nd {
         intptr_t reduction_ndim;
         bool associative, commutative, right_associative;
         std::vector<int> reduction_dimflags;
+        bool keepdims;
       };
 
       typedef std::shared_ptr<stored_data_type> static_data_type;
@@ -1098,9 +1097,67 @@ namespace nd {
         intptr_t reduction_ndim;
         bool associative, commutative, right_associative;
         std::vector<int> reduction_dimflags;
+        bool keepdims;
       };
 
       typedef std::shared_ptr<stored_data_type> static_data_type;
+
+      static void
+      data_init(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+                char *DYND_UNUSED(data), const ndt::type &DYND_UNUSED(dst_tp),
+                intptr_t DYND_UNUSED(nsrc),
+                const ndt::type *DYND_UNUSED(src_tp),
+                const nd::array &DYND_UNUSED(kwds),
+                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        std::cout << "reduction_kernel::data_init" << std::endl;
+        std::exit(-1);
+      }
+
+      static void resolve_dst_type(
+          char *_static_data, size_t DYND_UNUSED(data_size),
+          char *DYND_UNUSED(data), ndt::type &dst_tp,
+          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+          const nd::array &DYND_UNUSED(kwds),
+          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        static_data_type &static_data =
+            *reinterpret_cast<static_data_type *>(_static_data);
+
+        ndt::type lifted_arr_type = static_data->data_types[1];
+
+        ndt::type lifted_dst_type =
+            static_data->child_elwise_reduction.get_type()->get_return_type();
+        for (intptr_t i = static_data->reduction_ndim - 1; i >= 0; --i) {
+          if (std::find(static_data->reduction_dimflags.begin(),
+                        static_data->reduction_dimflags.end(),
+                        i) != static_data->reduction_dimflags.end()) {
+            if (static_data->keepdims) {
+              lifted_dst_type = ndt::make_fixed_dim(1, lifted_dst_type);
+            }
+          } else {
+            ndt::type subtype = src_tp[0].get_type_at_dimension(NULL, i);
+            switch (subtype.get_type_id()) {
+            case fixed_dim_type_id:
+              lifted_dst_type = ndt::make_fixed_dim(
+                  subtype.extended<ndt::fixed_dim_type>()->get_fixed_dim_size(),
+                  lifted_dst_type);
+              break;
+            case var_dim_type_id:
+              lifted_dst_type = ndt::var_dim_type::make(lifted_dst_type);
+              break;
+            default: {
+              std::stringstream ss;
+              ss << "lift_reduction_callable: don't know how to process ";
+              ss << "dimension of type " << subtype;
+              throw type_error(ss.str());
+            }
+            }
+          }
+        }
+
+        dst_tp = lifted_dst_type;
+      }
 
       static intptr_t
       instantiate(char *_static_data, size_t DYND_UNUSED(data_size),
@@ -1210,7 +1267,8 @@ namespace nd {
                << " not supported as source";
             throw type_error(ss.str());
           }
-          if (static_cast<size_t>(j) < static_data->reduction_dimflags.size() && i == static_data->reduction_dimflags[j]) {
+          if (static_cast<size_t>(j) < static_data->reduction_dimflags.size() &&
+              i == static_data->reduction_dimflags[j]) {
             // This dimension is being reduced
             if (src_size == 0 && static_data->reduction_identity.is_null()) {
               // If the size of the src is 0, a reduction identity is required
@@ -1247,8 +1305,10 @@ namespace nd {
             }
             if (i < static_data->reduction_ndim - 1) {
               // An initial dimension being reduced
-              ckb_offset = strided_initial_reduction_kernel_extra::instantiate(
-                  _static_data, ckb, ckb_offset, src_stride, src_size, kernreq);
+              ckb_offset =
+                  initial_reduction_kernel<fixed_dim_type_id>::instantiate(
+                      _static_data, ckb, ckb_offset, src_stride, src_size,
+                      kernreq);
               // The next request should be single, as that's the kind of
               // ckernel the 'first_call' should be in this case
               kernreq = kernel_request_single;
