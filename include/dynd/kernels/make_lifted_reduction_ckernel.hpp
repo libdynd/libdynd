@@ -34,7 +34,7 @@ namespace nd {
   namespace functional {
 
     struct reduction_ckernel_prefix : ckernel_prefix {
-      struct stored_data_type {
+      struct static_data_type {
         callable child;
         std::vector<std::intptr_t> axes;
         bool keepdims;
@@ -43,7 +43,7 @@ namespace nd {
         callable child_dst_initialization;
         array reduction_identity;
 
-        stored_data_type(const callable &child,
+        static_data_type(const callable &child,
                          const std::vector<std::intptr_t> &axes, bool keepdims,
                          callable_property properties)
             : child(child), axes(axes), keepdims(keepdims),
@@ -406,8 +406,6 @@ namespace nd {
                           kernel_request_host, 1, reduction_ckernel_prefix> {
       typedef strided_inner_reduction_kernel_extra self_type;
 
-      typedef stored_data_type static_data_type;
-
       // The code assumes that size >= 1
       intptr_t size;
       intptr_t src_stride;
@@ -749,8 +747,6 @@ namespace nd {
                       reduction_ckernel_prefix> {
       typedef strided_inner_broadcast_kernel self_type;
 
-      typedef stored_data_type static_data_type;
-
       // The code assumes that size >= 1
       intptr_t size;
       intptr_t dst_stride, src_stride;
@@ -1077,24 +1073,18 @@ namespace nd {
     };
 
     struct reduction_kernel : reduction_ckernel_prefix {
-      typedef stored_data_type static_data_type;
-
       struct data_type {
         std::size_t ndim;
       };
 
       static void
-      data_init(char *_static_data, std::size_t DYND_UNUSED(data_size),
-                char *_data, const ndt::type &dst_tp,
-                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                const array &DYND_UNUSED(kwds),
+      data_init(static_data_type *static_data,
+                std::size_t DYND_UNUSED(data_size), data_type *data,
+                const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                const ndt::type *src_tp, const array &DYND_UNUSED(kwds),
                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         if (!dst_tp.is_symbolic()) {
-          static_data_type *static_data =
-              reinterpret_cast<static_data_type *>(_static_data);
-          data_type *data = reinterpret_cast<data_type *>(_data);
-
           data->ndim =
               src_tp[0].get_ndim() -
               static_data->child.get_type()->get_return_type().get_ndim();

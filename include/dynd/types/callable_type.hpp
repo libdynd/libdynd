@@ -34,6 +34,18 @@ typedef void (*callable_data_init_t)(
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<std::string, ndt::type> &tp_vars);
 
+template <typename DataInitType>
+struct data_init_traits;
+
+template <typename StaticDataType, typename DataType>
+struct data_init_traits<void (*)(
+    StaticDataType *static_data, size_t data_size, DataType *data,
+    const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+  typedef StaticDataType static_data_type;
+  typedef DataType data_type;
+};
+
 /**
  * Resolves the destination type for this callable based on the types
  * of the source parameters.
