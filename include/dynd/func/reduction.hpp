@@ -54,13 +54,11 @@ namespace nd {
      * \param reduction_identity  If not a NULL nd::array, this is the identity
      *                            value for the accumulator.
      */
-    callable reduction(const callable &elwise_reduction,
-                       const ndt::type &lifted_arr_type,
+    callable reduction(const callable &child, const ndt::type &src_tp,
                        const callable &dst_initialization, bool keepdims,
-                       intptr_t reduction_ndim,
-                       const std::vector<intptr_t> &axes, bool associative,
-                       bool commutative, bool right_associative,
-                       const array &reduction_identity);
+                       const std::vector<intptr_t> &axes,
+                       const array &reduction_identity,
+                       callable_property properties = callable_property::none);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

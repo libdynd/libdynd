@@ -165,8 +165,8 @@ void nd::functional::rolling_ck::resolve_dst_type(
     }
   */
 
-  nd::functional::rolling_callable_data *static_data =
-      *reinterpret_cast<nd::functional::rolling_callable_data **>(_static_data);
+  static_data_type *static_data =
+      *reinterpret_cast<static_data_type **>(_static_data);
   const callable_type_data *child_af = static_data->window_op.get();
   // First get the type for the child callable
   ndt::type child_dst_tp;

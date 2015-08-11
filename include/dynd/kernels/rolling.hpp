@@ -14,12 +14,6 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct rolling_callable_data {
-      intptr_t window_size;
-      // The window op
-      callable window_op;
-    };
-
     struct strided_rolling_ck
         : base_kernel<strided_rolling_ck, kernel_request_host, 1> {
       intptr_t m_window_size;
@@ -46,6 +40,24 @@ namespace nd {
     };
 
     struct rolling_ck : base_virtual_kernel<rolling_ck> {
+      struct static_data_type {
+        callable window_op;
+        intptr_t window_size;
+      };
+
+      static void data_init(char *_static_data, std::size_t data_size,
+                            char *data, const ndt::type &dst_tp, intptr_t nsrc,
+                            const ndt::type *src_tp, const array &kwds,
+                            const std::map<std::string, ndt::type> &tp_vars)
+      {
+        static_data_type *static_data =
+            *reinterpret_cast<static_data_type **>(_static_data);
+
+        static_data->window_op.get()->data_init(
+            static_data->window_op.get()->static_data, data_size, data, dst_tp,
+            nsrc, src_tp, kwds, tp_vars);
+      }
+
       static void
       resolve_dst_type(char *static_data, size_t data_size, char *data,
                        ndt::type &dst_tp, intptr_t nsrc,
@@ -61,6 +73,8 @@ namespace nd {
                   const nd::array &kwds,
                   const std::map<std::string, ndt::type> &tp_vars);
     };
+
+    typedef rolling_ck::static_data_type rolling_callable_data;
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

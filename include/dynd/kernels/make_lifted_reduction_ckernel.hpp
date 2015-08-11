@@ -38,11 +38,18 @@ namespace nd {
         callable child;
         std::vector<std::intptr_t> axes;
         bool keepdims;
-
+        callable_property properties;
 
         callable child_dst_initialization;
         array reduction_identity;
-        bool associative, commutative, right_associative;
+
+        stored_data_type(const callable &child,
+                         const std::vector<std::intptr_t> &axes, bool keepdims,
+                         callable_property properties)
+            : child(child), axes(axes), keepdims(keepdims),
+              properties(properties)
+        {
+        }
       };
 
       // This function pointer is for all the calls of the function
@@ -1113,11 +1120,11 @@ namespace nd {
         dst_tp = static_data->child.get_type()->get_return_type();
         data->ndim = src_tp[0].get_ndim() - dst_tp.get_ndim();
 
-//        std::vector<const ndt::type *> element_tp =
-  //          src_tp[0].extended<ndt::base_dim_type>()->get_element_types(
-    //            data->ndim);
-      //  for (auto tp : element_tp) {
-//          std::cout << *tp << std::endl;
+        //        std::vector<const ndt::type *> element_tp =
+        //          src_tp[0].extended<ndt::base_dim_type>()->get_element_types(
+        //            data->ndim);
+        //  for (auto tp : element_tp) {
+        //          std::cout << *tp << std::endl;
         //}
 
         for (intptr_t i = data->ndim - 1, j = static_data->axes.size() - 1;
@@ -1185,14 +1192,15 @@ namespace nd {
         }
 
         if (!(reducedim_count == 1 ||
-              (static_data->associative && static_data->commutative))) {
+              (static_data->properties & left_associative &&
+               static_data->properties & commutative))) {
           throw std::runtime_error(
               "make_lifted_reduction_ckernel: for reducing "
               "along multiple dimensions,"
               " the reduction function must be both "
               "associative and commutative");
         }
-        if (static_data->right_associative) {
+        if (static_data->properties & right_associative) {
           throw std::runtime_error(
               "make_lifted_reduction_ckernel: right_associative is "
               "not yet supported");
