@@ -105,6 +105,7 @@ nd::callable nd::functional::reduction(
   self->commutative = commutative;
   self->right_associative = right_associative;
   self->reduction_dimflags = axes;
+  self->keepdims = keepdims;
 
   return callable::make<reduction_kernel>(
       ndt::callable_type::make(lifted_dst_type, lifted_arr_type), self, 0);
