@@ -34,6 +34,24 @@ namespace nd {
   namespace functional {
 
     struct reduction_ckernel_prefix : ckernel_prefix {
+      struct stored_data_type {
+        callable child;
+        std::vector<std::intptr_t> axes;
+        bool keepdims;
+        callable_property properties;
+
+        callable child_dst_initialization;
+        array reduction_identity;
+
+        stored_data_type(const callable &child,
+                         const std::vector<std::intptr_t> &axes, bool keepdims,
+                         callable_property properties)
+            : child(child), axes(axes), keepdims(keepdims),
+              properties(properties)
+        {
+        }
+      };
+
       // This function pointer is for all the calls of the function
       // on a given destination data address after the "first call".
       expr_strided_t followup_call_function;
@@ -388,17 +406,6 @@ namespace nd {
                           kernel_request_host, 1, reduction_ckernel_prefix> {
       typedef strided_inner_reduction_kernel_extra self_type;
 
-      struct stored_data_type {
-        callable child_elwise_reduction;
-        callable child_dst_initialization;
-        array reduction_identity;
-        ndt::type data_types[2];
-        intptr_t reduction_ndim;
-        bool associative, commutative, right_associative;
-        std::vector<int> reduction_dimflags;
-        bool keepdims;
-      };
-
       typedef std::shared_ptr<stored_data_type> static_data_type;
 
       // The code assumes that size >= 1
@@ -593,10 +600,9 @@ namespace nd {
         static_data_type &static_data =
             *reinterpret_cast<static_data_type *>(_static_data);
 
-        callable_type_data *elwise_reduction =
-            static_data->child_elwise_reduction.get();
+        callable_type_data *elwise_reduction = static_data->child.get();
         const ndt::callable_type *elwise_reduction_tp =
-            static_data->child_elwise_reduction.get_type();
+            static_data->child.get_type();
         callable_type_data *dst_initialization =
             static_data->child_dst_initialization.get();
         const ndt::callable_type *dst_initialization_tp =
@@ -745,17 +751,6 @@ namespace nd {
         : base_kernel<strided_inner_broadcast_kernel, kernel_request_host, 1,
                       reduction_ckernel_prefix> {
       typedef strided_inner_broadcast_kernel self_type;
-
-      struct stored_data_type {
-        callable child_elwise_reduction;
-        callable child_dst_initialization;
-        array reduction_identity;
-        ndt::type data_types[2];
-        intptr_t reduction_ndim;
-        bool associative, commutative, right_associative;
-        std::vector<int> reduction_dimflags;
-        bool keepdims;
-      };
 
       typedef std::shared_ptr<stored_data_type> static_data_type;
 
@@ -956,10 +951,9 @@ namespace nd {
         static_data_type &static_data =
             *reinterpret_cast<static_data_type *>(_static_data);
 
-        callable_type_data *elwise_reduction =
-            static_data->child_elwise_reduction.get();
+        callable_type_data *elwise_reduction = static_data->child.get();
         const ndt::callable_type *elwise_reduction_tp =
-            static_data->child_elwise_reduction.get_type();
+            static_data->child.get_type();
         callable_type_data *dst_initialization =
             static_data->child_dst_initialization.get();
         const ndt::callable_type *dst_initialization_tp =
@@ -1088,80 +1082,69 @@ namespace nd {
       }
     };
 
-    struct reduction_kernel {
-      struct stored_data_type {
-        callable child_elwise_reduction;
-        callable child_dst_initialization;
-        array reduction_identity;
-        ndt::type data_types[2];
-        intptr_t reduction_ndim;
-        bool associative, commutative, right_associative;
-        std::vector<int> reduction_dimflags;
-        bool keepdims;
-      };
-
+    struct reduction_kernel : reduction_ckernel_prefix {
       typedef std::shared_ptr<stored_data_type> static_data_type;
 
+      struct data_type {
+        std::size_t ndim;
+      };
+
       static void
-      data_init(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                char *DYND_UNUSED(data), const ndt::type &DYND_UNUSED(dst_tp),
-                intptr_t DYND_UNUSED(nsrc),
-                const ndt::type *DYND_UNUSED(src_tp),
-                const nd::array &DYND_UNUSED(kwds),
+      data_init(char *_static_data, std::size_t DYND_UNUSED(data_size),
+                char *_data, const ndt::type &dst_tp,
+                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                const array &DYND_UNUSED(kwds),
                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        std::cout << "reduction_kernel::data_init" << std::endl;
-        std::exit(-1);
+        if (!dst_tp.is_symbolic()) {
+          static_data_type &static_data =
+              *reinterpret_cast<static_data_type *>(_static_data);
+          data_type *data = reinterpret_cast<data_type *>(_data);
+
+          data->ndim =
+              src_tp[0].get_ndim() -
+              static_data->child.get_type()->get_return_type().get_ndim();
+        }
       }
 
       static void resolve_dst_type(
-          char *_static_data, size_t DYND_UNUSED(data_size),
-          char *DYND_UNUSED(data), ndt::type &dst_tp,
-          intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-          const nd::array &DYND_UNUSED(kwds),
+          char *_static_data, size_t DYND_UNUSED(data_size), char *_data,
+          ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+          const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         static_data_type &static_data =
             *reinterpret_cast<static_data_type *>(_static_data);
+        data_type *data = reinterpret_cast<data_type *>(_data);
 
-        ndt::type lifted_arr_type = static_data->data_types[1];
+        dst_tp = static_data->child.get_type()->get_return_type();
+        data->ndim = src_tp[0].get_ndim() - dst_tp.get_ndim();
 
-        ndt::type lifted_dst_type =
-            static_data->child_elwise_reduction.get_type()->get_return_type();
-        for (intptr_t i = static_data->reduction_ndim - 1; i >= 0; --i) {
-          if (std::find(static_data->reduction_dimflags.begin(),
-                        static_data->reduction_dimflags.end(),
-                        i) != static_data->reduction_dimflags.end()) {
+        //        std::vector<const ndt::type *> element_tp =
+        //          src_tp[0].extended<ndt::base_dim_type>()->get_element_types(
+        //            data->ndim);
+        //  for (auto tp : element_tp) {
+        //          std::cout << *tp << std::endl;
+        //}
+
+        for (intptr_t i = data->ndim - 1, j = static_data->axes.size() - 1;
+             i >= 0; --i) {
+          if (j >= 0 && i == static_data->axes[j]) {
             if (static_data->keepdims) {
-              lifted_dst_type = ndt::make_fixed_dim(1, lifted_dst_type);
+              dst_tp = ndt::make_fixed_dim(1, dst_tp);
             }
+            --j;
           } else {
-            ndt::type subtype = src_tp[0].get_type_at_dimension(NULL, i);
-            switch (subtype.get_type_id()) {
-            case fixed_dim_type_id:
-              lifted_dst_type = ndt::make_fixed_dim(
-                  subtype.extended<ndt::fixed_dim_type>()->get_fixed_dim_size(),
-                  lifted_dst_type);
-              break;
-            case var_dim_type_id:
-              lifted_dst_type = ndt::var_dim_type::make(lifted_dst_type);
-              break;
-            default: {
-              std::stringstream ss;
-              ss << "lift_reduction_callable: don't know how to process ";
-              ss << "dimension of type " << subtype;
-              throw type_error(ss.str());
-            }
-            }
+            ndt::type dim_tp = src_tp[0].get_type_at_dimension(NULL, i);
+            dst_tp = dim_tp.extended<ndt::base_dim_type>()->with_element_type(
+                dst_tp);
           }
         }
-
-        dst_tp = lifted_dst_type;
       }
 
       static intptr_t
       instantiate(char *_static_data, size_t DYND_UNUSED(data_size),
-                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                  char *_data, void *ckb, intptr_t ckb_offset,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                   const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -1170,17 +1153,18 @@ namespace nd {
       {
         static_data_type &static_data =
             *reinterpret_cast<static_data_type *>(_static_data);
+        data_type *data = reinterpret_cast<data_type *>(_data);
 
-        callable &elwise_reduction = static_data->child_elwise_reduction;
+        callable &elwise_reduction = static_data->child;
         const ndt::callable_type *elwise_reduction_tp =
             elwise_reduction.get_type();
 
         callable &dst_initialization = static_data->child_dst_initialization;
 
         // Count the number of dimensions being reduced
-        intptr_t reducedim_count = static_data->reduction_dimflags.size();
+        intptr_t reducedim_count = static_data->axes.size();
         if (reducedim_count == 0) {
-          if (static_data->reduction_ndim == 0) {
+          if (data->ndim == 0) {
             // If there are no dimensions to reduce, it's
             // just a dst_initialization operation, so create
             // that ckernel directly
@@ -1208,14 +1192,15 @@ namespace nd {
         }
 
         if (!(reducedim_count == 1 ||
-              (static_data->associative && static_data->commutative))) {
+              (static_data->properties & left_associative &&
+               static_data->properties & commutative))) {
           throw std::runtime_error(
               "make_lifted_reduction_ckernel: for reducing "
               "along multiple dimensions,"
               " the reduction function must be both "
               "associative and commutative");
         }
-        if (static_data->right_associative) {
+        if (static_data->properties & right_associative) {
           throw std::runtime_error(
               "make_lifted_reduction_ckernel: right_associative is "
               "not yet supported");
@@ -1225,38 +1210,20 @@ namespace nd {
         ndt::type src_el_tp = elwise_reduction_tp->get_pos_type(0);
 
         // This is the number of dimensions being processed by the reduction
-        if (static_data->reduction_ndim !=
+        if (static_cast<intptr_t>(data->ndim) !=
             src_tp->get_ndim() - src_el_tp.get_ndim()) {
           std::stringstream ss;
           ss << "make_lifted_reduction_ckernel: wrong number of reduction "
                 "dimensions, ";
-          ss << "requested " << static_data->reduction_ndim
-             << ", but types have ";
+          ss << "requested " << data->ndim << ", but types have ";
           ss << (src_tp[0].get_ndim() - src_el_tp.get_ndim());
           ss << " lifting from " << src_el_tp << " to " << src_tp;
           throw std::runtime_error(ss.str());
         }
-        // Determine whether reduced dimensions are being kept or not
-        bool keep_dims;
-        if (static_data->reduction_ndim ==
-            dst_tp.get_ndim() - dst_el_tp.get_ndim()) {
-          keep_dims = true;
-        } else if (static_data->reduction_ndim - reducedim_count ==
-                   dst_tp.get_ndim() - dst_el_tp.get_ndim()) {
-          keep_dims = false;
-        } else {
-          std::stringstream ss;
-          ss << "make_lifted_reduction_ckernel: The number of dimensions "
-                "flagged for "
-                "reduction, ";
-          ss << reducedim_count
-             << ", is not consistent with the destination type ";
-          ss << "reducing " << dst_tp << " with element " << dst_el_tp;
-          throw std::runtime_error(ss.str());
-        }
 
         ndt::type dst_i_tp = dst_tp, src_i_tp = src_tp[0];
-        for (intptr_t i = 0, j = 0; i < static_data->reduction_ndim; ++i) {
+        for (intptr_t i = 0, j = 0; i < static_cast<intptr_t>(data->ndim);
+             ++i) {
           intptr_t dst_stride, dst_size, src_stride, src_size;
           // Get the striding parameters for the source dimension
           if (!src_i_tp.get_as_strided(
@@ -1267,8 +1234,8 @@ namespace nd {
                << " not supported as source";
             throw type_error(ss.str());
           }
-          if (static_cast<size_t>(j) < static_data->reduction_dimflags.size() &&
-              i == static_data->reduction_dimflags[j]) {
+          if (static_cast<size_t>(j) < static_data->axes.size() &&
+              i == static_data->axes[j]) {
             // This dimension is being reduced
             if (src_size == 0 && static_data->reduction_identity.is_null()) {
               // If the size of the src is 0, a reduction identity is required
@@ -1280,7 +1247,7 @@ namespace nd {
               ss << " has no identity";
               throw std::invalid_argument(ss.str());
             }
-            if (keep_dims) {
+            if (static_data->keepdims) {
               // If the dimensions are being kept, the output should be a
               // a strided dimension of size one
               if (dst_i_tp.get_as_strided(dst_arrmeta, &dst_size, &dst_stride,
@@ -1303,7 +1270,7 @@ namespace nd {
                 throw type_error(ss.str());
               }
             }
-            if (i < static_data->reduction_ndim - 1) {
+            if (static_cast<size_t>(i) < data->ndim - 1) {
               // An initial dimension being reduced
               ckb_offset =
                   initial_reduction_kernel<fixed_dim_type_id>::instantiate(
@@ -1336,7 +1303,7 @@ namespace nd {
                  << " for broadcast dimensions";
               throw std::runtime_error(ss.str());
             }
-            if (i < static_data->reduction_ndim - 1) {
+            if (static_cast<size_t>(i) < data->ndim - 1) {
               // An initial dimension being broadcast
               ckb_offset = strided_initial_broadcast_kernel_extra::instantiate(
                   ckb, ckb_offset, dst_stride, src_stride, src_size, kernreq);

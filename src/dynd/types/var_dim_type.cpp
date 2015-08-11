@@ -704,6 +704,11 @@ void ndt::var_dim_type::get_dynamic_array_functions(
   *out_count = (int)m_array_functions.size();
 }
 
+ndt::type ndt::var_dim_type::with_element_type(const type &element_tp) const
+{
+  return make(element_tp);
+}
+
 void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta,
                                      char *data, intptr_t count)
 {

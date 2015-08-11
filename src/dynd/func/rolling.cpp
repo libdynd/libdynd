@@ -45,5 +45,6 @@ nd::callable nd::functional::rolling(const nd::callable &window_op,
   data->window_op = window_op;
 
   return callable::make<rolling_ck>(
-      ndt::callable_type::make(roll_dst_tp, roll_src_tp), data, 0);
+      ndt::callable_type::make(roll_dst_tp, roll_src_tp), data,
+      window_op.get()->data_size);
 }

@@ -55,6 +55,16 @@ namespace ndt {
       return m_element_tp;
     }
 
+    void get_element_types(std::size_t ndim, const type **element_tp) const;
+
+    std::vector<const type *> get_element_types(std::size_t ndim) const
+    {
+      std::vector<const type *> element_tp(ndim);
+      get_element_types(ndim, element_tp.data());
+
+      return element_tp;
+    }
+
     bool is_type_subarray(const type &subarray_tp) const
     {
       // Uniform dimensions can share one implementation
@@ -115,6 +125,8 @@ namespace ndt {
     virtual bool match(const char *arrmeta, const type &candidate_tp,
                        const char *candidate_arrmeta,
                        std::map<std::string, type> &tp_vars) const;
+
+    virtual type with_element_type(const type &element_tp) const = 0;
   };
 
 } // namespace dynd::ndt

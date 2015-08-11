@@ -94,6 +94,19 @@ typedef intptr_t (*callable_instantiate_t)(
  */
 typedef void (*callable_static_data_free_t)(char *static_data);
 
+enum callable_property {
+  none = 0x00000000,
+  left_associative = 0x00000001,
+  right_associative = 0x00000002,
+  commutative = 0x00000004
+};
+
+inline callable_property operator|(callable_property a, callable_property b)
+{
+  return static_cast<callable_property>(static_cast<int>(a) |
+                                        static_cast<int>(b));
+}
+
 /**
  * This is a struct designed for interoperability at
  * the C ABI level. It contains enough information
@@ -220,16 +233,24 @@ namespace ndt {
     callable_type(const type &ret_type, const type &pos_types,
                   const type &kwd_types);
 
-    virtual ~callable_type() {}
+    virtual ~callable_type()
+    {
+    }
 
     const string_type_data &get_kwd_name_raw(intptr_t i) const
     {
       return m_kwd_struct.extended<struct_type>()->get_field_name_raw(i);
     }
 
-    const type &get_return_type() const { return m_return_type; }
+    const type &get_return_type() const
+    {
+      return m_return_type;
+    }
 
-    const type &get_pos_tuple() const { return m_pos_tuple; }
+    const type &get_pos_tuple() const
+    {
+      return m_pos_tuple;
+    }
 
     const nd::array &get_pos_types() const
     {
@@ -241,7 +262,10 @@ namespace ndt {
       return m_pos_tuple.extended<tuple_type>()->is_variadic();
     }
 
-    const type &get_kwd_struct() const { return m_kwd_struct; }
+    const type &get_kwd_struct() const
+    {
+      return m_kwd_struct;
+    }
 
     const nd::array &get_kwd_types() const
     {
@@ -295,7 +319,10 @@ namespace ndt {
     }
 
     /** Returns the number of arguments, both positional and keyword. */
-    intptr_t get_narg() const { return get_npos() + get_nkwd(); }
+    intptr_t get_narg() const
+    {
+      return get_npos() + get_nkwd();
+    }
 
     /** Returns the number of positional arguments. */
     intptr_t get_npos() const
@@ -310,7 +337,10 @@ namespace ndt {
     }
 
     /** Returns the number of optional arguments. */
-    intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
+    intptr_t get_nopt() const
+    {
+      return m_opt_kwd_indices.size();
+    }
 
     void print_data(std::ostream &o, const char *arrmeta,
                     const char *data) const;
@@ -408,7 +438,10 @@ namespace ndt {
 
   template <typename R>
   struct type::equivalent<R()> {
-    static type make() { return callable_type::make(type::make<R>()); }
+    static type make()
+    {
+      return callable_type::make(type::make<R>());
+    }
   };
 
   template <typename R, typename A0>

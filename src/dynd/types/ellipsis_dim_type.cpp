@@ -262,3 +262,8 @@ void ndt::ellipsis_dim_type::get_dynamic_type_properties(
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
+
+ndt::type ndt::ellipsis_dim_type::with_element_type(const type &element_tp) const
+{
+  return make_ellipsis_dim(m_name, element_tp);
+}

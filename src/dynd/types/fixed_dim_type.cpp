@@ -794,3 +794,8 @@ void ndt::fixed_dim_type::get_dynamic_array_functions(
   *out_functions = m_array_functions.empty() ? NULL : &m_array_functions[0];
   *out_count = (int)m_array_functions.size();
 }
+
+ndt::type ndt::fixed_dim_type::with_element_type(const type &element_tp) const
+{
+  return make_fixed_dim(m_dim_size, element_tp);
+}
