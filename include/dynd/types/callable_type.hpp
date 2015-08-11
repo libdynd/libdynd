@@ -119,16 +119,7 @@ inline callable_property operator|(callable_property a, callable_property b)
  * with different array arrmeta.
  */
 struct callable_type_data {
-  /**
-   * On 32-bit platforms, if the size changes, it may be
-   * necessary to use
-   * char data[4 * 8 + ((sizeof(void *) == 4) ? 4 : 0)];
-   * to ensure the total struct size is divisible by 64 bits.
-   */
-  static const std::size_t static_data_size =
-      4 * 8 + ((sizeof(void *) == 4) ? 4 : 0);
-
-  char static_data[static_data_size];
+  char *static_data;
   std::size_t data_size;
   callable_data_init_t data_init;
   callable_resolve_dst_type_t resolve_dst_type;
@@ -136,8 +127,8 @@ struct callable_type_data {
   callable_static_data_free_t static_data_free;
 
   callable_type_data()
-      : data_size(0), data_init(NULL), resolve_dst_type(NULL),
-        instantiate(NULL), static_data_free(NULL)
+      : static_data(NULL), data_size(0), data_init(NULL),
+        resolve_dst_type(NULL), instantiate(NULL), static_data_free(NULL)
   {
   }
 
@@ -146,11 +137,11 @@ struct callable_type_data {
         instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
   {
     typedef void *static_data_type[2];
-    static_assert(sizeof(static_data_type) <= static_data_size,
-                  "static data does not fit");
     static_assert(scalar_align_of<static_data_type>::value <=
                       scalar_align_of<std::uint64_t>::value,
                   "static data requires stronger alignment");
+
+    this->static_data = new char[sizeof(static_data_type)];
     new (static_data) static_data_type{reinterpret_cast<void *>(single),
                                        reinterpret_cast<void *>(strided)};
   }
@@ -158,7 +149,7 @@ struct callable_type_data {
   callable_type_data(std::size_t data_size, callable_data_init_t data_init,
                      callable_resolve_dst_type_t resolve_dst_type,
                      callable_instantiate_t instantiate)
-      : data_size(data_size), data_init(data_init),
+      : static_data(NULL), data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
         static_data_free(NULL)
   {
@@ -175,11 +166,11 @@ struct callable_type_data {
             &static_data_destroy<typename std::remove_reference<T>::type>)
   {
     typedef typename std::remove_reference<T>::type static_data_type;
-    static_assert(sizeof(static_data_type) <= static_data_size,
-                  "static data does not fit");
     static_assert(scalar_align_of<static_data_type>::value <=
                       scalar_align_of<std::uint64_t>::value,
                   "static data requires stronger alignment");
+
+    this->static_data = new char[sizeof(static_data_type)];
     new (this->static_data)(static_data_type)(std::forward<T>(static_data));
   }
 
@@ -192,6 +183,7 @@ struct callable_type_data {
     if (static_data_free != NULL) {
       static_data_free(static_data);
     }
+    delete[] static_data;
   }
 
   nd::array operator()(ndt::type &dst_tp, intptr_t nsrc,

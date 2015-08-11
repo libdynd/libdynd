@@ -38,6 +38,7 @@ nd::callable nd::functional::reduction(const callable &child,
           "equal types, its prototype is " << elwise_reduction_tp;
     throw invalid_argument(ss.str());
   }
+
   if (elwise_reduction_tp->get_npos() == 2) {
     if (right_associative) {
       return reduction(left_compound(child), src0_tp, dst_initialization_arr,
