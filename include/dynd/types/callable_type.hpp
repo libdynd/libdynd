@@ -61,6 +61,18 @@ typedef void (*callable_resolve_dst_type_t)(
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<std::string, ndt::type> &tp_vars);
 
+template <typename DataInitType>
+struct resolve_dst_type_traits;
+
+template <typename StaticDataType, typename DataType>
+struct resolve_dst_type_traits<void (*)(
+    StaticDataType *static_data, size_t data_size, DataType *data,
+    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+  typedef StaticDataType static_data_type;
+  typedef DataType data_type;
+};
+
 /**
  * Function prototype for instantiating a kernel from an
  * callable. To use this function, the
