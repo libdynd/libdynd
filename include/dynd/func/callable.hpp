@@ -673,11 +673,13 @@ namespace nd {
                 const eval::eval_context *ectx, const array &kwds,
                 const std::map<std::string, ndt::type> &tp_vars) {
         typedef instantiate_traits<decltype(&KernelType::instantiate)> traits;
-        return KernelType::instantiate(
+        intptr_t res_ckb_offset = KernelType::instantiate(
             reinterpret_cast<typename traits::static_data_type *>(static_data),
             data_size, reinterpret_cast<typename traits::data_type *>(data),
             ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
             kernreq, ectx, kwds, tp_vars);
+        reinterpret_cast<typename traits::data_type *>(data)->~data_type();
+        return res_ckb_offset;
       };
     }
 
