@@ -34,6 +34,18 @@ typedef void (*callable_data_init_t)(
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<std::string, ndt::type> &tp_vars);
 
+template <typename DataInitType>
+struct data_init_traits;
+
+template <typename StaticDataType, typename DataType>
+struct data_init_traits<void (*)(
+    StaticDataType *static_data, size_t data_size, DataType *data,
+    const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+  typedef StaticDataType static_data_type;
+  typedef DataType data_type;
+};
+
 /**
  * Resolves the destination type for this callable based on the types
  * of the source parameters.
@@ -48,6 +60,18 @@ typedef void (*callable_resolve_dst_type_t)(
     char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
     intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
     const std::map<std::string, ndt::type> &tp_vars);
+
+template <typename DataInitType>
+struct resolve_dst_type_traits;
+
+template <typename StaticDataType, typename DataType>
+struct resolve_dst_type_traits<void (*)(
+    StaticDataType *static_data, size_t data_size, DataType *data,
+    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+  typedef StaticDataType static_data_type;
+  typedef DataType data_type;
+};
 
 /**
  * Function prototype for instantiating a kernel from an
@@ -87,6 +111,20 @@ typedef intptr_t (*callable_instantiate_t)(
     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx,
     const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars);
+
+template <typename InstantiateType>
+struct instantiate_traits;
+
+template <typename StaticDataType, typename DataType>
+struct instantiate_traits<intptr_t (*)(
+    StaticDataType *static_data, size_t data_size, DataType *data, void *ckb,
+    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+    kernel_request_t kernreq, const eval::eval_context *ectx,
+    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+  typedef StaticDataType static_data_type;
+  typedef DataType data_type;
+};
 
 /**
  * A function which deallocates the memory behind data_ptr after

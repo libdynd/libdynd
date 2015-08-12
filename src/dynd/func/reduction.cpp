@@ -49,20 +49,18 @@ nd::callable nd::functional::reduction(const callable &child,
                      keepdims, axes, reduction_identity, properties);
   }
 
-  std::shared_ptr<reduction_kernel::stored_data_type> self =
-      make_shared<reduction_kernel::stored_data_type>(child, axes, keepdims,
-                                                      properties);
+  reduction_kernel::static_data_type self(child, axes, keepdims, properties);
 
-  self->child_dst_initialization = dst_initialization_arr;
+  self.child_dst_initialization = dst_initialization_arr;
   if (!reduction_identity.is_null()) {
     if (reduction_identity.is_immutable() &&
         reduction_identity.get_type() ==
             elwise_reduction_tp->get_return_type()) {
-      self->reduction_identity = reduction_identity;
+      self.reduction_identity = reduction_identity;
     } else {
-      self->reduction_identity = empty(elwise_reduction_tp->get_return_type());
-      self->reduction_identity.vals() = reduction_identity;
-      self->reduction_identity.flag_as_immutable();
+      self.reduction_identity = empty(elwise_reduction_tp->get_return_type());
+      self.reduction_identity.vals() = reduction_identity;
+      self.reduction_identity.flag_as_immutable();
     }
   }
 
