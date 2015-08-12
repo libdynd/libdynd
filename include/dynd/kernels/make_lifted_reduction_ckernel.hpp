@@ -8,6 +8,7 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/func/assignment.hpp>
+#include <dynd/gfunc/call_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -16,21 +17,19 @@ namespace nd {
     struct reduction_ckernel_prefix : ckernel_prefix {
       struct static_data_type {
         callable child;
-        std::vector<std::intptr_t> axes;
         callable_property properties;
 
-        array reduction_identity;
-
-        static_data_type(const callable &child,
-                         const std::vector<std::intptr_t> &axes,
-                         callable_property properties)
-            : child(child), axes(axes), properties(properties)
+        static_data_type(const callable &child)
+            : child(child), properties(commutative | left_associative)
         {
         }
       };
 
       struct data_type {
-        std::size_t ndim;
+        array identity;
+        std::size_t ndim;          // total number of dimensions being processed
+        std::intptr_t reduce_ndim; // number of dimensions being reduced
+        const int32 *axes;
         bool keepdims;
       };
 
@@ -569,8 +568,8 @@ namespace nd {
        * the final dimension before the accumulation operation.
        */
       static size_t
-      instantiate(static_data_type *static_data, void *ckb, intptr_t ckb_offset,
-                  intptr_t src_stride, intptr_t src_size,
+      instantiate(static_data_type *static_data, data_type *data, void *ckb,
+                  intptr_t ckb_offset, intptr_t src_stride, intptr_t src_size,
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   const ndt::type &src_tp, const char *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -578,7 +577,7 @@ namespace nd {
         callable_type_data *elwise_reduction = static_data->child.get();
         const ndt::callable_type *elwise_reduction_tp =
             static_data->child.get_type();
-        const array &reduction_identity = static_data->reduction_identity;
+        const array &identity = data->identity;
 
         intptr_t root_ckb_offset = ckb_offset;
         nd::functional::strided_inner_reduction_kernel_extra *e =
@@ -589,7 +588,7 @@ namespace nd {
         e->destructor =
             &nd::functional::strided_inner_reduction_kernel_extra::destruct;
         // Cannot have both a dst_initialization kernel and a reduction identity
-        if (reduction_identity.is_null()) {
+        if (identity.is_null()) {
           // Get the function pointer for the first_call, for the case with
           // no reduction identity
           if (kernreq == kernel_request_single) {
@@ -623,15 +622,15 @@ namespace nd {
                << (int)kernreq;
             throw std::runtime_error(ss.str());
           }
-          if (reduction_identity.get_type() != dst_tp) {
+          if (identity.get_type() != dst_tp) {
             std::stringstream ss;
             ss << "make_lifted_reduction_ckernel: reduction identity type ";
-            ss << reduction_identity.get_type() << " does not match dst type ";
+            ss << identity.get_type() << " does not match dst type ";
             ss << dst_tp;
             throw std::runtime_error(ss.str());
           }
-          e->ident_data = reduction_identity.get_readonly_originptr();
-          e->ident_ref = reduction_identity.get_memblock().release();
+          e->ident_data = identity.get_readonly_originptr();
+          e->ident_ref = identity.get_memblock().release();
         }
         // The function pointer for followup accumulation calls
         e->set_followup_call_function(
@@ -676,15 +675,14 @@ namespace nd {
                 ->get_at<nd::functional::strided_inner_reduction_kernel_extra>(
                       root_ckb_offset);
         e->dst_init_kernel_offset = ckb_offset - root_ckb_offset;
-        if (reduction_identity.is_null()) {
+        if (identity.is_null()) {
           ckb_offset = make_assignment_kernel(ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, src_tp, src_arrmeta,
                                               kernel_request_single, ectx);
         } else {
           ckb_offset = make_assignment_kernel(
-              ckb, ckb_offset, dst_tp, dst_arrmeta,
-              reduction_identity.get_type(), reduction_identity.get_arrmeta(),
-              kernel_request_single, ectx);
+              ckb, ckb_offset, dst_tp, dst_arrmeta, identity.get_type(),
+              identity.get_arrmeta(), kernel_request_single, ectx);
         }
 
         return ckb_offset;
@@ -895,18 +893,19 @@ namespace nd {
        * the final dimension before the accumulation operation.
        */
       static size_t
-      instantiate(static_data_type *static_data, void *ckb, intptr_t ckb_offset,
-                  intptr_t dst_stride, intptr_t src_stride, intptr_t src_size,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  const ndt::type *src_tp, const char *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
+      instantiate(static_data_type *static_data, data_type *data, void *ckb,
+                  intptr_t ckb_offset, intptr_t dst_stride, intptr_t src_stride,
+                  intptr_t src_size, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, const ndt::type *src_tp,
+                  const char *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx,
                   const array &DYND_UNUSED(kwds),
                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         callable_type_data *elwise_reduction = static_data->child.get();
         const ndt::callable_type *elwise_reduction_tp =
             static_data->child.get_type();
-        const array &reduction_identity = static_data->reduction_identity;
+        const array &identity = data->identity;
 
         intptr_t root_ckb_offset = ckb_offset;
         nd::functional::strided_inner_broadcast_kernel *e =
@@ -916,7 +915,7 @@ namespace nd {
         e->destructor =
             &nd::functional::strided_inner_broadcast_kernel::destruct;
         // Cannot have both a dst_initialization kernel and a reduction identity
-        if (reduction_identity.is_null()) {
+        if (identity.is_null()) {
           // Get the function pointer for the first_call, for the case with
           // no reduction identity
           if (kernreq == kernel_request_single) {
@@ -948,15 +947,15 @@ namespace nd {
                << (int)kernreq;
             throw std::runtime_error(ss.str());
           }
-          if (reduction_identity.get_type() != dst_tp) {
+          if (identity.get_type() != dst_tp) {
             std::stringstream ss;
             ss << "make_lifted_reduction_ckernel: reduction identity type ";
-            ss << reduction_identity.get_type() << " does not match dst type ";
+            ss << identity.get_type() << " does not match dst type ";
             ss << dst_tp;
             throw std::runtime_error(ss.str());
           }
-          e->ident_data = reduction_identity.get_readonly_originptr();
-          e->ident_ref = reduction_identity.get_memblock().release();
+          e->ident_data = identity.get_readonly_originptr();
+          e->ident_ref = identity.get_memblock().release();
         }
         // The function pointer for followup accumulation calls
         e->set_followup_call_function(
@@ -1001,15 +1000,14 @@ namespace nd {
                 ->get_at<nd::functional::strided_inner_broadcast_kernel>(
                       root_ckb_offset);
         e->dst_init_kernel_offset = ckb_offset - root_ckb_offset;
-        if (reduction_identity.is_null()) {
+        if (identity.is_null()) {
           ckb_offset = make_assignment_kernel(
               ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta,
               kernel_request_strided, ectx);
         } else {
           ckb_offset = make_assignment_kernel(
-              ckb, ckb_offset, dst_tp, dst_arrmeta,
-              reduction_identity.get_type(), reduction_identity.get_arrmeta(),
-              kernel_request_strided, ectx);
+              ckb, ckb_offset, dst_tp, dst_arrmeta, identity.get_type(),
+              identity.get_arrmeta(), kernel_request_strided, ectx);
         }
 
         return ckb_offset;
@@ -1023,6 +1021,17 @@ namespace nd {
                             const ndt::type *src_tp, const array &kwds,
                             const std::map<std::string, ndt::type> &tp_vars)
       {
+        new (data) data_type();
+
+        const array &identity = kwds.p("identity");
+        if (!identity.is_missing()) {
+          data->identity = identity;
+        }
+
+        const array &axes = kwds.p("axes").f("dereference");
+        data->reduce_ndim = axes.get_dim_size();
+        data->axes =
+            reinterpret_cast<const int *>(axes.get_readonly_originptr());
         data->keepdims = kwds.p("keepdims").as<bool>();
 
         const ndt::type &child_dst_tp =
@@ -1056,9 +1065,9 @@ namespace nd {
         //          std::cout << *tp << std::endl;
         //}
 
-        for (intptr_t i = data->ndim - 1, j = static_data->axes.size() - 1;
-             i >= 0; --i) {
-          if (j >= 0 && i == static_data->axes[j]) {
+        for (intptr_t i = data->ndim - 1, j = data->reduce_ndim - 1; i >= 0;
+             --i) {
+          if (j >= 0 && i == data->axes[j]) {
             if (data->keepdims) {
               dst_tp = ndt::make_fixed_dim(1, dst_tp);
             }
@@ -1085,14 +1094,12 @@ namespace nd {
         const ndt::callable_type *elwise_reduction_tp =
             elwise_reduction.get_type();
 
-        // Count the number of dimensions being reduced
-        intptr_t reducedim_count = static_data->axes.size();
-        if (reducedim_count == 0) {
+        if (data->reduce_ndim == 0) {
           if (data->ndim == 0) {
             // If there are no dimensions to reduce, it's
             // just a dst_initialization operation, so create
             // that ckernel directly
-            if (static_data->reduction_identity.is_null()) {
+            if (data->identity.is_null()) {
               return make_assignment_kernel(ckb, ckb_offset, dst_tp,
                                             dst_arrmeta, src_tp[0],
                                             src_arrmeta[0], kernreq, ectx);
@@ -1100,7 +1107,7 @@ namespace nd {
               // Create the kernel which copies the identity and then
               // does one reduction
               return strided_inner_reduction_kernel_extra::instantiate(
-                  static_data, ckb, ckb_offset, 0, 1, dst_tp, dst_arrmeta,
+                  static_data, data, ckb, ckb_offset, 0, 1, dst_tp, dst_arrmeta,
                   src_tp[0], src_arrmeta[0], kernreq, ectx);
             }
           }
@@ -1109,7 +1116,7 @@ namespace nd {
               "flagged for reduction");
         }
 
-        if (!(reducedim_count == 1 ||
+        if (!(data->reduce_ndim == 1 ||
               (static_data->properties & left_associative &&
                static_data->properties & commutative))) {
           throw std::runtime_error(
@@ -1152,10 +1159,9 @@ namespace nd {
                << " not supported as source";
             throw type_error(ss.str());
           }
-          if (static_cast<size_t>(j) < static_data->axes.size() &&
-              i == static_data->axes[j]) {
+          if (j < data->reduce_ndim && i == data->axes[j]) {
             // This dimension is being reduced
-            if (src_size == 0 && static_data->reduction_identity.is_null()) {
+            if (src_size == 0 && data->identity.is_null()) {
               // If the size of the src is 0, a reduction identity is required
               // to get
               // a value
@@ -1200,8 +1206,9 @@ namespace nd {
             } else {
               // The innermost dimension being reduced
               return strided_inner_reduction_kernel_extra::instantiate(
-                  static_data, ckb, ckb_offset, src_stride, src_size, dst_i_tp,
-                  dst_arrmeta, src_i_tp, src_arrmeta[0], kernreq, ectx);
+                  static_data, data, ckb, ckb_offset, src_stride, src_size,
+                  dst_i_tp, dst_arrmeta, src_i_tp, src_arrmeta[0], kernreq,
+                  ectx);
             }
             ++j;
           } else {
@@ -1231,7 +1238,7 @@ namespace nd {
             } else {
               // The innermost dimension being broadcast
               return strided_inner_broadcast_kernel::instantiate(
-                  static_data, ckb, ckb_offset, dst_stride, src_stride,
+                  static_data, data, ckb, ckb_offset, dst_stride, src_stride,
                   src_size, dst_i_tp, dst_arrmeta, &src_i_tp, src_arrmeta[0],
                   kernreq, ectx, kwds, tp_vars);
             }
