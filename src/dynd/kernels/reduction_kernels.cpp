@@ -88,8 +88,8 @@ nd::callable kernels::make_builtin_sum1d_callable(type_id_t tid)
 {
   nd::callable sum_ew = kernels::make_builtin_sum_reduction_callable(tid);
   return nd::functional::reduction(
-      sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)), nd::callable(), false,
-      {0}, 0, left_associative | commutative);
+      sum_ew, ndt::make_fixed_dim_kind(ndt::type(tid)), false, {0}, 0,
+      left_associative | commutative);
 }
 
 namespace {

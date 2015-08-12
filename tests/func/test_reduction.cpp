@@ -134,14 +134,14 @@ TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
   // Lift it to a zero-dimensional reduction callable (basically a no-op)
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("float32"), nd::callable(), false, {}, nd::array(),
+      ndt::type("float32"), false, {}, nd::array(),
       commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a = 1.25f;
   ASSERT_EQ(f.get_type()->get_pos_type(0), a.get_type());
   ASSERT_EQ(f.get_type()->get_return_type(), ndt::type::make<float>());
-  EXPECT_EQ(1.25f, f(a));
+  EXPECT_EQ(1.25f, f(a, kwds("keepdims", false)));
 }
 
 TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
@@ -150,14 +150,14 @@ TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
   // Use 100.f as the "identity" to confirm it's really being used
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("float32"), nd::callable(), false, {}, nd::array(100.f),
+      ndt::type("float32"), false, {}, nd::array(100.f),
       commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a = 1.25f;
   ASSERT_EQ(f.get_type()->get_pos_type(0), a.get_type());
   ASSERT_EQ(f.get_type()->get_return_type(), ndt::type::make<float>());
-  EXPECT_EQ(100.f + 1.25f, f(1.25f));
+  EXPECT_EQ(100.f + 1.25f, f(1.25f, kwds("keepdims", false)));
 }
 
 TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
@@ -165,7 +165,7 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   // Lift it to a one-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * float32"), nd::callable(), false, {0}, nd::array(),
+      ndt::type("Fixed * float32"), false, {0}, nd::array(),
       commutative | left_associative);
 
   // Set up some data for the test reduction
@@ -175,12 +175,13 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
 
   // Call it on the data
-  EXPECT_ARR_EQ(vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4], f(a));
+  EXPECT_ARR_EQ(vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
+                f(a, kwds("keepdims", false)));
 
   // Instantiate it again with some different data
   float vals1[1] = {3.75f};
   a = vals1;
-  EXPECT_ARR_EQ(vals1[0], f(a));
+  EXPECT_ARR_EQ(vals1[0], f(a, kwds("keepdims", false)));
 }
 
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
@@ -189,8 +190,8 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   // Use 100.f as the "identity" to confirm it's really being used
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * float32"), nd::callable(), false, {0},
-      nd::array(100.f), commutative | left_associative);
+      ndt::type("Fixed * float32"), false, {0}, nd::array(100.f),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
@@ -200,7 +201,7 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
 
   // Call it on the data
   EXPECT_ARR_EQ(100.f + vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
-                f(a));
+                f(a, kwds("keepdims", false)));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
@@ -208,8 +209,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * float32"), nd::callable(), false, {0, 1},
-      nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * float32"), false, {0, 1}, nd::array(),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a =
@@ -218,13 +219,14 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
 
   // Call it on the data
-  EXPECT_ARR_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f, f(a));
+  EXPECT_ARR_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f,
+                f(a, kwds("keepdims", false)));
 
   // Instantiate it again with some different data
   a = parse_json("1 * 2 * float32", "[[1.5, -2]]");
 
   // Call it on the data
-  EXPECT_ARR_EQ(1.5f - 2.f, f(a));
+  EXPECT_ARR_EQ(1.5f - 2.f, f(a, kwds("keepdims", false)));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
@@ -232,8 +234,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * float32"), nd::callable(), true, {0, 1},
-      nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * float32"), true, {0, 1}, nd::array(),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a =
@@ -244,7 +246,7 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
 
   // Call it on the data
   EXPECT_ARR_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f,
-                f(a)(0, 0).as<float>());
+                f(a, kwds("keepdims", true))(0, 0).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
@@ -252,8 +254,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * float32"), nd::callable(), false, {1},
-      nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * float32"), false, {1}, nd::array(),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a =
@@ -262,14 +264,14 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type("2 * float32"));
 
   // Call it on the data
-  EXPECT_EQ(1.5f + 2.f + 7.f, f(a)(0).as<float>());
-  EXPECT_EQ(-2.25f + 7 + 2.125f, f(a)(1).as<float>());
+  EXPECT_EQ(1.5f + 2.f + 7.f, f(a, kwds("keepdims", false))(0).as<float>());
+  EXPECT_EQ(-2.25f + 7 + 2.125f, f(a, kwds("keepdims", false))(1).as<float>());
 
   // Instantiate it again with some different data
   a = parse_json("1 * 2 * float32", "[[1.5, -2]]");
 
   // Call it on the data
-  EXPECT_ARR_EQ(1.5f - 2.f, f(a)(0).as<float>());
+  EXPECT_ARR_EQ(1.5f - 2.f, f(a, kwds("keepdims", false))(0).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
@@ -277,8 +279,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * float32"), nd::callable(), true, {1},
-      nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * float32"), true, {1}, nd::array(),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a =
@@ -288,8 +290,9 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
                     ndt::type("2 * 1 * float32"));
 
   // Call it on the data
-  EXPECT_EQ(1.5f + 2.f + 7.f, f(a)(0, 0).as<float>());
-  EXPECT_EQ(-2.25f + 7 + 2.125f, f(a)(1, 0).as<float>());
+  EXPECT_EQ(1.5f + 2.f + 7.f, f(a, kwds("keepdims", true))(0, 0).as<float>());
+  EXPECT_EQ(-2.25f + 7 + 2.125f,
+            f(a, kwds("keepdims", true))(1, 0).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
@@ -297,8 +300,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * float32"), nd::callable(), false, {0},
-      nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * float32"), false, {0}, nd::array(),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a =
@@ -307,15 +310,15 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type("3 * float32"));
 
   // Call it on the data
-  EXPECT_EQ(1.5f - 2.25f, f(a)(0).as<float>());
-  EXPECT_EQ(2.f + 7.f, f(a)(1).as<float>());
-  EXPECT_EQ(7.f + 2.125f, f(a)(2).as<float>());
+  EXPECT_EQ(1.5f - 2.25f, f(a, kwds("keepdims", false))(0).as<float>());
+  EXPECT_EQ(2.f + 7.f, f(a, kwds("keepdims", false))(1).as<float>());
+  EXPECT_EQ(7.f + 2.125f, f(a, kwds("keepdims", false))(2).as<float>());
 
   // Instantiate it again with some different data
   a = parse_json("1 * 2 * float32", "[[1.5, -2]]");
   // Call it on the data
-  EXPECT_EQ(1.5f, f(a)(0).as<float>());
-  EXPECT_EQ(-2.f, f(a)(1).as<float>());
+  EXPECT_EQ(1.5f, f(a, kwds("keepdims", false))(0).as<float>());
+  EXPECT_EQ(-2.f, f(a, kwds("keepdims", false))(1).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
@@ -323,8 +326,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
   // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * float32"), nd::callable(), true, {0},
-      nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * float32"), true, {0}, nd::array(),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a =
@@ -334,9 +337,9 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
                     ndt::type("1 * 3 * float32"));
 
   // Call it on the data
-  EXPECT_EQ(1.5f - 2.25f, f(a)(0, 0).as<float>());
-  EXPECT_EQ(2.f + 7.f, f(a)(0, 1).as<float>());
-  EXPECT_EQ(7.f + 2.125f, f(a)(0, 2).as<float>());
+  EXPECT_EQ(1.5f - 2.25f, f(a, kwds("keepdims", true))(0, 0).as<float>());
+  EXPECT_EQ(2.f + 7.f, f(a, kwds("keepdims", true))(0, 1).as<float>());
+  EXPECT_EQ(7.f + 2.125f, f(a, kwds("keepdims", true))(0, 2).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
@@ -344,8 +347,8 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
   // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * Fixed * float32"), nd::callable(), false,
-      {0, 1, 2}, nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * Fixed * float32"), false, {0, 1, 2},
+      nd::array(), commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
@@ -357,7 +360,7 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
   // Call it on the data
   EXPECT_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f - 2.25f + 1.f + 7.f +
                 2.125f + 0.25f,
-            f(a).as<float>());
+            f(a, kwds("keepdims", false)).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
@@ -365,8 +368,8 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
   // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * Fixed * float32"), nd::callable(), false,
-      {1, 2}, nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * Fixed * float32"), false, {1, 2}, nd::array(),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
@@ -376,8 +379,10 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type("2 * float32"));
 
   // Call it on the data
-  EXPECT_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f, f(a)(0).as<float>());
-  EXPECT_EQ(-2.25f + 1.f + 7.f + 2.125f + 0.25f, f(a)(1).as<float>());
+  EXPECT_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f,
+            f(a, kwds("keepdims", false))(0).as<float>());
+  EXPECT_EQ(-2.25f + 1.f + 7.f + 2.125f + 0.25f,
+            f(a, kwds("keepdims", false))(1).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
@@ -385,8 +390,8 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
   // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
       kernels::make_builtin_sum_reduction_callable(float32_type_id),
-      ndt::type("Fixed * Fixed * Fixed * float32"), nd::callable(), false,
-      {0, 2}, nd::array(), commutative | left_associative);
+      ndt::type("Fixed * Fixed * Fixed * float32"), false, {0, 2}, nd::array(),
+      commutative | left_associative);
 
   // Set up some data for the test reduction
   nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
@@ -397,7 +402,9 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type("3 * float32"));
 
   // Call it on the data
-  EXPECT_EQ(1.5f - 2.375f - 2.25f + 1.f, f(a)(0).as<float>());
-  EXPECT_EQ(2.f + 1.25f + 7.f, f(a)(1).as<float>());
-  EXPECT_EQ(7.f - 0.5f + 2.125f + 0.25f, f(a)(2).as<float>());
+  EXPECT_EQ(1.5f - 2.375f - 2.25f + 1.f,
+            f(a, kwds("keepdims", false))(0).as<float>());
+  EXPECT_EQ(2.f + 1.25f + 7.f, f(a, kwds("keepdims", false))(1).as<float>());
+  EXPECT_EQ(7.f - 0.5f + 2.125f + 0.25f,
+            f(a, kwds("keepdims", false))(2).as<float>());
 }
