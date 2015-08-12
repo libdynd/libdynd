@@ -171,15 +171,17 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
   EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
 
+  nd::array axes = nd::empty(ndt::type("1 * int32"));
+  axes(0).val_assign(0);
+
   // Call it on the data
   EXPECT_ARR_EQ(vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
-                f(a, kwds("axes", nd::array({0}), "keepdims", false)));
+                f(a, kwds("axes", axes, "keepdims", false)));
 
   // Instantiate it again with some different data
   float vals1[1] = {3.75f};
   a = vals1;
-  EXPECT_ARR_EQ(vals1[0],
-                f(a, kwds("axes", nd::array({0}), "keepdims", false)));
+  EXPECT_ARR_EQ(vals1[0], f(a, kwds("axes", axes, "keepdims", false)));
 }
 
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
@@ -195,10 +197,13 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
 
+  nd::array axes = nd::empty(ndt::type("1 * int32"));
+  axes(0).val_assign(0);
+
   // Call it on the data
-  EXPECT_ARR_EQ(100.f + vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
-                f(a, kwds("axes", nd::array({0}), "identity", 100.0f,
-                          "keepdims", false)));
+  EXPECT_ARR_EQ(
+      100.f + vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
+      f(a, kwds("axes", axes, "identity", 100.0f, "keepdims", false)));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
@@ -257,17 +262,19 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type("2 * float32"));
 
   // Call it on the data
-  EXPECT_EQ(1.5f + 2.f + 7.f, f(a, kwds("axes", nd::array({1}), "keepdims",
-                                        false))(0).as<float>());
-  EXPECT_EQ(-2.25f + 7 + 2.125f, f(a, kwds("axes", nd::array({1}), "keepdims",
-                                           false))(1).as<float>());
+  nd::array axes = nd::empty(ndt::type("1 * int32"));
+  axes(0).val_assign(1);
+  EXPECT_EQ(1.5f + 2.f + 7.f,
+            f(a, kwds("axes", axes, "keepdims", false))(0).as<float>());
+  EXPECT_EQ(-2.25f + 7 + 2.125f,
+            f(a, kwds("axes", axes, "keepdims", false))(1).as<float>());
 
   // Instantiate it again with some different data
   a = parse_json("1 * 2 * float32", "[[1.5, -2]]");
 
   // Call it on the data
-  EXPECT_ARR_EQ(1.5f - 2.f, f(a, kwds("axes", nd::array({1}), "keepdims",
-                                      false))(0).as<float>());
+  EXPECT_ARR_EQ(1.5f - 2.f,
+                f(a, kwds("axes", axes, "keepdims", false))(0).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
@@ -283,11 +290,14 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(),
                     ndt::type("2 * 1 * float32"));
 
+  nd::array axes = nd::empty(ndt::type("1 * int32"));
+  axes(0).val_assign(1);
+
   // Call it on the data
-  EXPECT_EQ(1.5f + 2.f + 7.f, f(a, kwds("axes", nd::array({1}), "keepdims",
-                                        true))(0, 0).as<float>());
-  EXPECT_EQ(-2.25f + 7 + 2.125f, f(a, kwds("axes", nd::array({1}), "keepdims",
-                                           true))(1, 0).as<float>());
+  EXPECT_EQ(1.5f + 2.f + 7.f,
+            f(a, kwds("axes", axes, "keepdims", true))(0, 0).as<float>());
+  EXPECT_EQ(-2.25f + 7 + 2.125f,
+            f(a, kwds("axes", axes, "keepdims", true))(1, 0).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
@@ -302,21 +312,22 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
   EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type("3 * float32"));
 
+  nd::array axes = nd::empty(ndt::type("1 * int32"));
+  axes(0).val_assign(0);
+
   // Call it on the data
-  EXPECT_EQ(1.5f - 2.25f, f(a, kwds("axes", nd::array({0}), "keepdims", false))(
-                              0).as<float>());
-  EXPECT_EQ(2.f + 7.f, f(a, kwds("axes", nd::array({0}), "keepdims", false))(1)
-                           .as<float>());
-  EXPECT_EQ(7.f + 2.125f, f(a, kwds("axes", nd::array({0}), "keepdims", false))(
-                              2).as<float>());
+  EXPECT_EQ(1.5f - 2.25f,
+            f(a, kwds("axes", axes, "keepdims", false))(0).as<float>());
+  EXPECT_EQ(2.f + 7.f,
+            f(a, kwds("axes", axes, "keepdims", false))(1).as<float>());
+  EXPECT_EQ(7.f + 2.125f,
+            f(a, kwds("axes", axes, "keepdims", false))(2).as<float>());
 
   // Instantiate it again with some different data
   a = parse_json("1 * 2 * float32", "[[1.5, -2]]");
   // Call it on the data
-  EXPECT_EQ(1.5f, f(a, kwds("axes", nd::array({0}), "keepdims", false))(0)
-                      .as<float>());
-  EXPECT_EQ(-2.f, f(a, kwds("axes", nd::array({0}), "keepdims", false))(1)
-                      .as<float>());
+  EXPECT_EQ(1.5f, f(a, kwds("axes", axes, "keepdims", false))(0).as<float>());
+  EXPECT_EQ(-2.f, f(a, kwds("axes", axes, "keepdims", false))(1).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
@@ -332,13 +343,16 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(),
                     ndt::type("1 * 3 * float32"));
 
+  nd::array axes = nd::empty(ndt::type("1 * int32"));
+  axes(0).val_assign(0);
+
   // Call it on the data
-  EXPECT_EQ(1.5f - 2.25f, f(a, kwds("axes", nd::array({0}), "keepdims", true))(
-                              0, 0).as<float>());
-  EXPECT_EQ(2.f + 7.f, f(a, kwds("axes", nd::array({0}), "keepdims", true))(
-                           0, 1).as<float>());
-  EXPECT_EQ(7.f + 2.125f, f(a, kwds("axes", nd::array({0}), "keepdims", true))(
-                              0, 2).as<float>());
+  EXPECT_EQ(1.5f - 2.25f,
+            f(a, kwds("axes", axes, "keepdims", true))(0, 0).as<float>());
+  EXPECT_EQ(2.f + 7.f,
+            f(a, kwds("axes", axes, "keepdims", true))(0, 1).as<float>());
+  EXPECT_EQ(7.f + 2.125f,
+            f(a, kwds("axes", axes, "keepdims", true))(0, 2).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
