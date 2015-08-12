@@ -106,6 +106,7 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(reinterpret_cast<const base_type *>(void_type_id), false),
     type(),                                           // void_pointer_type_id
     pointer_type::make(any_kind_type::make()),        // pointer_type_id
+    type(),                                           // reference_type_id
     bytes_type::make(),                               //   bytes_type_id,
     fixed_bytes_kind_type::make(),                    //   fixed_bytes_type_id,
     char_type::make(),                                //   char_type_id,
@@ -263,7 +264,9 @@ ndt::type ndt::type::apply_linear_index(intptr_t nindices,
 
 namespace {
 struct replace_scalar_type_extra {
-  replace_scalar_type_extra(const ndt::type &dt) : scalar_tp(dt) {}
+  replace_scalar_type_extra(const ndt::type &dt) : scalar_tp(dt)
+  {
+  }
   const ndt::type &scalar_tp;
 };
 static void replace_scalar_types(const ndt::type &dt,
@@ -454,7 +457,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
              extended<fixed_dim_type>()
                  ->get_element_type()
                  .data_layout_compatible_with(
-                     rhs.extended<fixed_dim_type>()->get_element_type());
+                      rhs.extended<fixed_dim_type>()->get_element_type());
     }
     break;
   case var_dim_type_id:
@@ -581,7 +584,10 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
   }
 }
 
-ndt::type ndt::type_of(const nd::array &value) { return value.get_type(); }
+ndt::type ndt::type_of(const nd::array &value)
+{
+  return value.get_type();
+}
 
 ndt::type ndt::type_of(const nd::callable &value)
 {
