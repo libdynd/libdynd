@@ -7,6 +7,7 @@
 #include <dynd/func/reduction.hpp>
 #include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;
@@ -47,7 +48,7 @@ nd::callable nd::functional::reduction(const callable &child,
                      reduction_identity, properties);
   }
 
-  reduction_kernel::static_data_type self(child, axes, keepdims, properties);
+  reduction_kernel::static_data_type self(child, axes, properties);
 
   if (!reduction_identity.is_null()) {
     if (reduction_identity.is_immutable() &&
@@ -77,8 +78,9 @@ nd::callable nd::functional::reduction(const callable &child,
           subtype.extended<ndt::base_dim_type>()->with_element_type(dst_tp);
     }
   }
-
   return callable::make<reduction_kernel>(
-      ndt::callable_type::make(dst_tp, src0_tp), self,
-      sizeof(reduction_kernel::data_type));
+      ndt::callable_type::make(
+          dst_tp, {src0_tp}, {"keepdims"},
+          {ndt::option_type::make(ndt::type::make<bool>())}),
+      self, sizeof(reduction_kernel::data_type));
 }

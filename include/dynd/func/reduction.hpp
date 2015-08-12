@@ -28,9 +28,6 @@ namespace nd {
      *                            `reduction_identity` is used, or a copy
      *operation
      *                            is used if that is NULL.
-     * \param keepdims  If true, the output type should keep reduced dimensions
-     *as
-     *                  size one, otherwise they are eliminated.
      * \param reduction_ndim  The number of dimensions being lifted. This should
      *                        be equal to the number of dimensions added in
      *                        `lifted_types` over what is in `elwise_reduction`.
@@ -55,7 +52,7 @@ namespace nd {
      *                            value for the accumulator.
      */
     callable reduction(const callable &child, const ndt::type &src_tp,
-                       bool keepdims, const std::vector<intptr_t> &axes,
+                       bool keepdims,const std::vector<intptr_t> &axes,
                        const array &reduction_identity,
                        callable_property properties = callable_property::none);
 

@@ -17,22 +17,21 @@ namespace nd {
       struct static_data_type {
         callable child;
         std::vector<std::intptr_t> axes;
-        bool keepdims;
         callable_property properties;
 
         array reduction_identity;
 
         static_data_type(const callable &child,
-                         const std::vector<std::intptr_t> &axes, bool keepdims,
+                         const std::vector<std::intptr_t> &axes,
                          callable_property properties)
-            : child(child), axes(axes), keepdims(keepdims),
-              properties(properties)
+            : child(child), axes(axes), properties(properties)
         {
         }
       };
 
       struct data_type {
         std::size_t ndim;
+        bool keepdims;
       };
 
       // This function pointer is for all the calls of the function
@@ -1024,6 +1023,8 @@ namespace nd {
                             const ndt::type *src_tp, const array &kwds,
                             const std::map<std::string, ndt::type> &tp_vars)
       {
+        data->keepdims = kwds.p("keepdims").as<bool>();
+
         const ndt::type &child_dst_tp =
             static_data->child.get_type()->get_return_type();
         if (!dst_tp.is_symbolic()) {
@@ -1058,7 +1059,7 @@ namespace nd {
         for (intptr_t i = data->ndim - 1, j = static_data->axes.size() - 1;
              i >= 0; --i) {
           if (j >= 0 && i == static_data->axes[j]) {
-            if (static_data->keepdims) {
+            if (data->keepdims) {
               dst_tp = ndt::make_fixed_dim(1, dst_tp);
             }
             --j;
@@ -1164,7 +1165,7 @@ namespace nd {
               ss << " has no identity";
               throw std::invalid_argument(ss.str());
             }
-            if (static_data->keepdims) {
+            if (data->keepdims) {
               // If the dimensions are being kept, the output should be a
               // a strided dimension of size one
               if (dst_i_tp.get_as_strided(dst_arrmeta, &dst_size, &dst_stride,
