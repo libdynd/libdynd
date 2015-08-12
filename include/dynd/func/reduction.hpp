@@ -51,10 +51,7 @@ namespace nd {
      * \param reduction_identity  If not a NULL nd::array, this is the identity
      *                            value for the accumulator.
      */
-    callable reduction(const callable &child, const ndt::type &src_tp,
-                       bool keepdims,const std::vector<intptr_t> &axes,
-                       const array &reduction_identity,
-                       callable_property properties = callable_property::none);
+    callable reduction(const callable &child);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
