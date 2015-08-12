@@ -55,8 +55,7 @@ namespace nd {
      *                            value for the accumulator.
      */
     callable reduction(const callable &child, const ndt::type &src_tp,
-                       const callable &dst_initialization, bool keepdims,
-                       const std::vector<intptr_t> &axes,
+                       bool keepdims, const std::vector<intptr_t> &axes,
                        const array &reduction_identity,
                        callable_property properties = callable_property::none);
 

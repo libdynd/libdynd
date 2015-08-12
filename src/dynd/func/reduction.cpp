@@ -13,9 +13,7 @@ using namespace std;
 using namespace dynd;
 
 nd::callable nd::functional::reduction(const callable &child,
-                                       const ndt::type &src0_tp,
-                                       const callable &dst_initialization_arr,
-                                       bool keepdims,
+                                       const ndt::type &src0_tp, bool keepdims,
                                        const vector<intptr_t> &axes,
                                        const array &reduction_identity,
                                        callable_property properties)
@@ -41,17 +39,16 @@ nd::callable nd::functional::reduction(const callable &child,
 
   if (elwise_reduction_tp->get_npos() == 2) {
     if (right_associative) {
-      return reduction(left_compound(child), src0_tp, dst_initialization_arr,
-                       keepdims, axes, reduction_identity, properties);
+      return reduction(left_compound(child), src0_tp, keepdims, axes,
+                       reduction_identity, properties);
     }
 
-    return reduction(right_compound(child), src0_tp, dst_initialization_arr,
-                     keepdims, axes, reduction_identity, properties);
+    return reduction(right_compound(child), src0_tp, keepdims, axes,
+                     reduction_identity, properties);
   }
 
   reduction_kernel::static_data_type self(child, axes, keepdims, properties);
 
-  self.child_dst_initialization = dst_initialization_arr;
   if (!reduction_identity.is_null()) {
     if (reduction_identity.is_immutable() &&
         reduction_identity.get_type() ==
