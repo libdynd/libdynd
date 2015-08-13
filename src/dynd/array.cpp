@@ -784,6 +784,24 @@ nd::array nd::array::storage() const
   }
 }
 
+nd::array &nd::array::underlying()
+{
+  if (get_type().get_type_id() == ref_type_id) {
+    return *reinterpret_cast<array *>(get_data());
+  }
+
+  return *this;
+}
+
+const nd::array &nd::array::underlying() const
+{
+  if (get_type().get_type_id() == ref_type_id) {
+    return *reinterpret_cast<const array *>(get_data());
+  }
+
+  return *this;
+}
+
 nd::array nd::array::at_array(intptr_t nindices, const irange *indices,
                               bool collapse_leading) const
 {
@@ -1727,7 +1745,8 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs)
   return o;
 }
 
-nd::array nd::as_struct() {
+nd::array nd::as_struct()
+{
   return empty(ndt::struct_type::make());
 }
 
@@ -1802,6 +1821,9 @@ nd::array nd::empty_shell(const ndt::type &tp)
                                        tp.get_data_alignment(), &data_ptr);
       if (tp.get_flags() & type_flag_zeroinit) {
         memset(data_ptr, 0, data_size);
+      }
+      if (tp.get_flags() & type_flag_construct) {
+        tp.extended()->data_construct(NULL, data_ptr);
       }
     } else {
       // Allocate memory based on the memory_kind type

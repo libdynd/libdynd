@@ -228,7 +228,7 @@ enum type_flags_t {
   // Memory of this type must be zero-initialized
   type_flag_zeroinit = 0x00000001,
   // Memory of this type must be constructed
-  // type_flag_constructor = 0x00000002,
+  type_flag_construct = 0x00000002,
   // Instances of this type point into other memory
   // blocks, e.g. string_type, var_dim_type.
   type_flag_blockref = 0x00000004,
@@ -265,8 +265,8 @@ enum {
   // These are the flags expression types should inherit
   // from their operand type
   type_flags_operand_inherited =
-      type_flag_zeroinit | type_flag_blockref | type_flag_destructor |
-      type_flag_not_host_readable | type_flag_symbolic,
+      type_flag_zeroinit | type_flag_blockref | type_flag_construct |
+      type_flag_destructor | type_flag_not_host_readable | type_flag_symbolic,
   // These are the flags expression types should inherit
   // from their value type
   type_flags_value_inherited = type_flag_symbolic | type_flag_variadic

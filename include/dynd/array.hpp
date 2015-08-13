@@ -590,6 +590,14 @@ namespace nd {
     array storage() const;
 
     /**
+     * Returns either this array or the array stored in the reference if the
+     * type is a reference tpye.
+     */
+    array &underlying();
+
+    const array &underlying() const;
+
+    /**
      * General irange-based indexing operation.
      *
      * \param nindices  The number of 'irange' indices.

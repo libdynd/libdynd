@@ -31,10 +31,18 @@ namespace ndt {
 
     bool operator==(const base_type &rhs) const;
 
+    virtual void data_construct(const char *arrmeta, char *data) const;
+
+    virtual void data_destruct(const char *DYND_UNUSED(arrmeta),
+                               char *DYND_UNUSED(data)) const;
+
     bool is_expression() const
     {
       return m_value_tp.is_expression();
     }
+
+    void print_data(std::ostream &o, const char *arrmeta,
+                    const char *data) const;
 
     void print_type(std::ostream &o) const;
 

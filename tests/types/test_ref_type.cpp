@@ -24,3 +24,10 @@ TEST(RefType, Constructor)
   EXPECT_FALSE(ref_tp.is_expression());
   EXPECT_EQ(ref_tp, ndt::type(ref_tp.str())); // Round trip through a string
 }
+
+TEST(RefType, Null)
+{
+  nd::array a = nd::empty(ndt::type("ref[int32]"));
+  EXPECT_FALSE(a.is_null());
+  EXPECT_TRUE(a.underlying().is_null());
+}
