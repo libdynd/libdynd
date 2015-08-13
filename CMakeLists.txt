@@ -200,6 +200,7 @@ set(libdynd_SRC
     src/dynd/types/typevar_constructed_type.cpp
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/pow_dimsym_type.cpp
+    src/dynd/types/ref_type.cpp
     src/dynd/types/scalar_kind_type.cpp
     src/dynd/types/typevar_type.cpp
     src/dynd/types/unary_expr_type.cpp
@@ -254,6 +255,7 @@ set(libdynd_SRC
     include/dynd/types/pointer_type.hpp
     include/dynd/types/pow_dimsym_type.hpp
     include/dynd/types/property_type.hpp
+    include/dynd/types/ref_type.hpp
     include/dynd/types/scalar_kind_type.hpp
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
