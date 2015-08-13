@@ -539,6 +539,12 @@ namespace ndt {
                                      const std::string &indent) const;
 
     /**
+     * For types that have the flag type_flag_constructor set, this function
+     * or the strided version is called to construct data.
+     */
+    virtual void data_construct(const char *arrmeta, char *data) const;
+
+    /**
      * For types that have the flag type_flag_destructor set, this function
      * or the strided version is called to destruct data.
      */

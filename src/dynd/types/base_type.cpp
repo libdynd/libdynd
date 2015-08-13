@@ -214,6 +214,15 @@ void ndt::base_type::arrmeta_debug_print(
   throw std::runtime_error(ss.str());
 }
 
+void ndt::base_type::data_construct(const char *DYND_UNUSED(arrmeta),
+                                    char *DYND_UNUSED(data)) const
+{
+  stringstream ss;
+  ss << "TODO: data_construct for " << type(this, true)
+     << " is not implemented";
+  throw runtime_error(ss.str());
+}
+
 void ndt::base_type::data_destruct(const char *DYND_UNUSED(arrmeta),
                                    char *DYND_UNUSED(data)) const
 {

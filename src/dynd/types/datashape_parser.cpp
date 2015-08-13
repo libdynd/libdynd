@@ -17,6 +17,7 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/ref_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/json_type.hpp>
@@ -781,6 +782,26 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end,
   return ndt::pointer_type::make(tp);
 }
 
+static ndt::type parse_ref_parameters(const char *&rbegin, const char *end,
+                                      map<string, ndt::type> &symtable)
+{
+  const char *begin = rbegin;
+  if (!parse_token_ds(begin, end, '[')) {
+    throw datashape_parse_error(begin, "expected opening '[' after 'ref'");
+  }
+  ndt::type tp = parse_datashape(begin, end, symtable);
+  if (tp.is_null()) {
+    throw datashape_parse_error(begin, "expected a data type");
+  }
+  if (!parse_token_ds(begin, end, ']')) {
+    throw datashape_parse_error(begin, "expected closing ']'");
+  }
+  // TODO catch errors, convert them to datashape_parse_error so the position is
+  // shown
+  rbegin = begin;
+  return ndt::ref_type::make(tp);
+}
+
 // record_item_bare : BARENAME COLON rhs_expression
 static bool parse_struct_item_bare(const char *&rbegin, const char *end,
                                    map<string, ndt::type> &symtable,
@@ -1188,6 +1209,8 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end,
       result = parse_unaligned_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "pointer")) {
       result = parse_pointer_parameters(begin, end, symtable);
+    } else if (parse::compare_range_to_literal(nbegin, nend, "ref")) {
+      result = parse_ref_parameters(begin, end, symtable);
     } else if (parse::compare_range_to_literal(nbegin, nend, "char")) {
       result = parse_char_parameters(begin, end);
     } else if (parse::compare_range_to_literal(nbegin, nend, "byteswap")) {
