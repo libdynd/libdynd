@@ -14,7 +14,9 @@
 using namespace std;
 using namespace dynd;
 
-ndt::tuple_type::~tuple_type() {}
+ndt::tuple_type::~tuple_type()
+{
+}
 
 void ndt::tuple_type::print_type(std::ostream &o) const
 {
@@ -202,8 +204,8 @@ void ndt::tuple_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
@@ -230,8 +232,8 @@ void ndt::tuple_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
@@ -245,8 +247,7 @@ void ndt::tuple_type::get_dynamic_type_properties(
           nd::callable::make<field_types_kernel>(type("(self: type) -> Any"))),
       pair<string, nd::callable>("arrmeta_offsets",
                                  nd::callable::make<arrmeta_offsets_kernel>(
-                                     type("(self: type) -> Any"))),
-  };
+                                     type("(self: type) -> Any"))), };
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

@@ -1018,21 +1018,22 @@ namespace nd {
       static void data_init(static_data_type *static_data,
                             std::size_t DYND_UNUSED(data_size), data_type *data,
                             const ndt::type &dst_tp, intptr_t nsrc,
-                            const ndt::type *src_tp, const array &kwds,
+                            const ndt::type *src_tp, intptr_t nkwd,
+                            const array *kwds,
                             const std::map<std::string, ndt::type> &tp_vars)
       {
         new (data) data_type();
 
-        const array &identity = kwds.p("identity");
+        const array &identity = kwds[1];
         if (!identity.is_missing()) {
           data->identity = identity;
         }
 
-        const array &axes = kwds.p("axes").f("dereference");
+        const array &axes = kwds[0];
         data->reduce_ndim = axes.get_dim_size();
         data->axes =
             reinterpret_cast<const int *>(axes.get_readonly_originptr());
-        data->keepdims = kwds.p("keepdims").as<bool>();
+        data->keepdims = kwds[2].as<bool>();
 
         const ndt::type &child_dst_tp =
             static_data->child.get_type()->get_return_type();
@@ -1045,14 +1046,15 @@ namespace nd {
               static_data->child.get()->static_data,
               static_data->child.get()->data_size,
               reinterpret_cast<char *>(data) + sizeof(data_type), child_dst_tp,
-              nsrc, src_tp, kwds, tp_vars);
+              nsrc, src_tp, nkwd - 3, kwds, tp_vars);
         }
       }
 
       static void resolve_dst_type(
           static_data_type *static_data, std::size_t DYND_UNUSED(data_size),
           data_type *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-          const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
+          const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
+          const array *DYND_UNUSED(kwds),
           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         dst_tp = static_data->child.get_type()->get_return_type();

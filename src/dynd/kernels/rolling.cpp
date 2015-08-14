@@ -152,8 +152,8 @@ intptr_t nd::functional::rolling_ck::instantiate(
 
 void nd::functional::rolling_ck::resolve_dst_type(
     char *_static_data, size_t data_size, char *data, ndt::type &dst_tp,
-    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const nd::array &kwds,
-    const std::map<std::string, ndt::type> &tp_vars)
+    intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, intptr_t nkwd,
+    const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 
 {
   /*
@@ -175,7 +175,7 @@ void nd::functional::rolling_ck::resolve_dst_type(
         static_data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
     child_af->resolve_dst_type(const_cast<char *>(child_af->static_data),
                                data_size, data, child_dst_tp, 1, &child_src_tp,
-                               kwds, tp_vars);
+                               nkwd, kwds, tp_vars);
   } else {
     child_dst_tp = static_data->window_op.get_type()->get_return_type();
   }

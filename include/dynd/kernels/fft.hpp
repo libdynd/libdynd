@@ -148,14 +148,19 @@ namespace nd {
             fftw_src_type>::type>::type src_type;
 
     typedef typename detail::fftw_plan<fftw_dst_type, fftw_src_type>::type
-        plan_type;
+    plan_type;
     typedef fftw_ck self_type;
 
     plan_type plan;
 
-    fftw_ck(const plan_type &plan) : plan(plan) {}
+    fftw_ck(const plan_type &plan) : plan(plan)
+    {
+    }
 
-    ~fftw_ck() { detail::fftw_destroy_plan(plan); }
+    ~fftw_ck()
+    {
+      detail::fftw_destroy_plan(plan);
+    }
 
     void single(char *dst, char *const *src)
     {
@@ -179,14 +184,15 @@ namespace nd {
         }
     */
 
-    static intptr_t instantiate(
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-        const ndt::type &dst_tp, const char *dst_arrmeta,
-        intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-        const char *const *src_arrmeta, kernel_request_t kernreq,
-        const eval::eval_context *DYND_UNUSED(ectx), const nd::array &kwds,
-        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static intptr_t
+    instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+                char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                const ndt::type &dst_tp, const char *dst_arrmeta,
+                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                const char *const *src_arrmeta, kernel_request_t kernreq,
+                const eval::eval_context *DYND_UNUSED(ectx),
+                const nd::array &kwds,
+                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       int flags;
       if (kwds.p("flags").is_missing()) {
@@ -257,15 +263,11 @@ namespace nd {
     resolve_dst_type_(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp, const nd::array &kwds,
+        const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
+        const nd::array *kwds,
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      nd::array shape;
-      try {
-        shape = kwds.p("shape");
-      }
-      catch (...) {
-      }
+      nd::array shape = kwds[0];
 
       intptr_t ndim = src_tp[0].get_ndim();
       dimvector src_shape(ndim);
@@ -283,10 +285,11 @@ namespace nd {
     resolve_dst_type_(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp, const nd::array &kwds,
+        const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
+        const nd::array *kwds,
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      nd::array shape = kwds.p("shape");
+      nd::array shape = kwds[0];
       if (shape.is_missing()) {
         dst_tp = src_tp[0];
       } else {
@@ -300,13 +303,15 @@ namespace nd {
       }
     }
 
-    static void resolve_dst_type(char *static_data, size_t data_size,
-                                 char *data, ndt::type &dst_tp, intptr_t nsrc,
-                                 const ndt::type *src_tp, const nd::array &kwds,
-                                 const std::map<std::string, ndt::type> &tp_vars)
+    static void
+    resolve_dst_type(char *static_data, size_t data_size, char *data,
+                     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                     intptr_t nkwd, const nd::array *kwds,
+                     const std::map<std::string, ndt::type> &tp_vars)
     {
       resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(
-          static_data, data_size, data, dst_tp, nsrc, src_tp, kwds, tp_vars);
+          static_data, data_size, data, dst_tp, nsrc, src_tp, nkwd, kwds,
+          tp_vars);
     }
   };
 

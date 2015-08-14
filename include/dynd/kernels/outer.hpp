@@ -90,8 +90,8 @@ namespace nd {
       static void
       resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
                        char *DYND_UNUSED(data), ndt::type &dst_tp,
-                       intptr_t nsrc, const ndt::type *src_tp,
-                       const dynd::nd::array &kwds,
+                       intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                       const dynd::nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars)
       {
         callable_type_data *child =
@@ -101,7 +101,7 @@ namespace nd {
 
         if (child->resolve_dst_type != NULL) {
           child->resolve_dst_type(child->static_data, 0, NULL, dst_tp, nsrc,
-                                  src_tp, kwds, tp_vars);
+                                  src_tp, nkwd, kwds, tp_vars);
         } else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
         }

@@ -32,7 +32,7 @@ namespace nd {
                      size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                      ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                      const ndt::type *DYND_UNUSED(src_tp),
-                     const dynd::nd::array &DYND_UNUSED(kwds),
+                     intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                      const std::map<std::string, ndt::type> &tp_vars)
     {
       dst_tp = ndt::substitute(dst_tp, tp_vars, true);

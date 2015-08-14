@@ -12,7 +12,8 @@ using namespace dynd;
 void nd::copy_ck::resolve_dst_type(
     char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
-    const ndt::type *src_tp, const nd::array &DYND_UNUSED(kwds),
+    const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
+    const array *DYND_UNUSED(kwds),
     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   if (nsrc != 1) {

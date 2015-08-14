@@ -11,7 +11,7 @@ using namespace dynd;
 
 void nd::functional::old_multidispatch_ck::resolve_dst_type(
     char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
-    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
+    intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
     const std::map<std::string, ndt::type> &tp_vars)
 {
   const vector<nd::callable> *icd =
@@ -22,8 +22,9 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(
       intptr_t isrc;
       std::map<std::string, ndt::type> typevars;
       for (isrc = 0; isrc < nsrc; ++isrc) {
-        if (!can_implicitly_convert(
-                src_tp[isrc], child.get_type()->get_pos_type(isrc), typevars)) {
+        if (!can_implicitly_convert(src_tp[isrc],
+                                    child.get_type()->get_pos_type(isrc),
+                                    typevars)) {
           break;
         }
       }
@@ -32,7 +33,7 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(
         if (dst_tp.is_symbolic()) {
           child.get()->resolve_dst_type(
               const_cast<char *>(child.get()->static_data), data_size, data,
-              dst_tp, nsrc, src_tp, kwds, tp_vars);
+              dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
         return;
       }
@@ -69,7 +70,7 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
     std::map<std::string, ndt::type> typevars;
     for (isrc = 0; isrc < nsrc; ++isrc) {
       if (!can_implicitly_convert(
-              src_tp[isrc], af.get_type()->get_pos_type(isrc), typevars)) {
+               src_tp[isrc], af.get_type()->get_pos_type(isrc), typevars)) {
         break;
       }
     }

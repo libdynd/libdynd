@@ -401,8 +401,8 @@ void ndt::callable_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
@@ -429,8 +429,8 @@ void ndt::callable_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
@@ -457,8 +457,8 @@ void ndt::callable_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
@@ -589,14 +589,14 @@ void ndt::callable_type::get_dynamic_array_functions(
 nd::array callable_type_data::
 operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
            const char *const *src_arrmeta, char *const *src_data,
-           const nd::array &kwds,
+           const nd::array &kwds, intptr_t nkwd, const nd::array *_kwds,
            const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
   std::unique_ptr<char[]> data(new char[data_size]);
   if (data_size > 0) {
-    data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, kwds,
-              tp_vars);
+    data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, nkwd,
+              _kwds, tp_vars);
   }
 
   // Resolve the destination type
@@ -607,7 +607,7 @@ operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
     }
 
     resolve_dst_type(static_data, data_size, data.get(), dst_tp, nsrc, src_tp,
-                     kwds, tp_vars);
+                     nkwd, _kwds, tp_vars);
   }
 
   // Allocate the destination array
@@ -629,13 +629,13 @@ void callable_type_data::
 operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data,
            intptr_t nsrc, const ndt::type *src_tp,
            const char *const *src_arrmeta, char *const *src_data,
-           const nd::array &kwds,
+           const nd::array &kwds, intptr_t nkwd, const nd::array *_kwds,
            const std::map<std::string, ndt::type> &tp_vars)
 {
   std::unique_ptr<char[]> data(new char[data_size]);
   if (data_size > 0) {
-    data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, kwds,
-              tp_vars);
+    data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, nkwd,
+              _kwds, tp_vars);
   }
 
   // Generate and evaluate the ckernel

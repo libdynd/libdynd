@@ -23,7 +23,10 @@ namespace nd {
             std::malloc(ndim * sizeof(start_stop_t)));
       }
 
-      ~neighborhood_data() { std::free(start_stop); }
+      ~neighborhood_data()
+      {
+        std::free(start_stop);
+      }
     };
 
     template <int N>
@@ -94,15 +97,17 @@ namespace nd {
       {
         std::shared_ptr<neighborhood_data> nh =
             *reinterpret_cast<std::shared_ptr<neighborhood_data> *>(
-                static_data);
+                 static_data);
         nd::callable nh_op = nh->op;
 
         nd::array shape;
         // TODO: Eliminate all try/catch(...)
-        try {
+        try
+        {
           shape = kwds.p("shape").f("dereference");
         }
-        catch (...) {
+        catch (...)
+        {
           const nd::array &mask = kwds.p("mask").f("dereference");
           shape = nd::array(mask.get_shape());
         }
@@ -200,7 +205,7 @@ namespace nd {
           char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
           char *DYND_UNUSED(data), ndt::type &dst_tp,
           intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-          const nd::array &DYND_UNUSED(kwds),
+          intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
           const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         // swap in the input dimension values for the Fixed**N

@@ -30,11 +30,11 @@ namespace nd {
     data_init(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
               char *data, const ndt::type &DYND_UNUSED(dst_tp),
               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-              const array &kwds,
+              intptr_t DYND_UNUSED(nkwd), const array *kwds,
               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      new (reinterpret_cast<ndt::type *>(data))
-          ndt::type(kwds(0).as<ndt::type>());
+      new (reinterpret_cast<ndt::type *>(data)) ndt::type(
+          kwds[0].as<ndt::type>());
     }
 
     static intptr_t instantiate(
