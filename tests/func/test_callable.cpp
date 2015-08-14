@@ -187,15 +187,15 @@ TEST(Callable, DecomposedDynamicCall)
                                 int z) { return 2 * x - y + 3 * z; });
   ret_tp = af.get_ret_type();
   EXPECT_EQ(26.5,
-            (*af.get())(ret_tp, 3, types, arrmetas, datas, nd::as_struct(),
-                        map<string, ndt::type>()).as<double>());
+            (*af.get())(ret_tp, 3, types, arrmetas, datas, nd::as_struct(), 0,
+                        NULL, map<string, ndt::type>()).as<double>());
 
   af = nd::functional::apply([](int x, double y,
                                 int z) { return 2 * x - y + 3 * z; },
                              "z");
   ret_tp = af.get_ret_type();
   EXPECT_EQ(26.5, (*af.get())(ret_tp, 2, types, arrmetas, datas,
-                              nd::as_struct(1, names + 2, values + 2),
+                              nd::as_struct(1, names + 2, values + 2), 0, NULL,
                               map<string, ndt::type>()).as<double>());
 
   af = nd::functional::apply([](int x, double y,
@@ -203,7 +203,7 @@ TEST(Callable, DecomposedDynamicCall)
                              "y", "z");
   ret_tp = af.get_ret_type();
   EXPECT_EQ(26.5, (*af.get())(ret_tp, 1, types, arrmetas, datas,
-                              nd::as_struct(2, names + 1, values + 1),
+                              nd::as_struct(2, names + 1, values + 1), 0, NULL,
                               map<string, ndt::type>()).as<double>());
 
   af = nd::functional::apply([](int x, double y,
@@ -211,7 +211,7 @@ TEST(Callable, DecomposedDynamicCall)
                              "x", "y", "z");
   ret_tp = af.get_ret_type();
   EXPECT_EQ(26.5, (*af.get())(ret_tp, 0, NULL, NULL, NULL,
-                              nd::as_struct(3, names, values),
+                              nd::as_struct(3, names, values), 0, NULL,
                               map<string, ndt::type>()).as<double>());
 }
 

@@ -25,7 +25,9 @@ ndt::struct_type::struct_type(const nd::array &field_names,
   create_array_properties();
 }
 
-ndt::struct_type::~struct_type() {}
+ndt::struct_type::~struct_type()
+{
+}
 
 static bool is_simple_identifier_name(const char *begin, const char *end)
 {
@@ -265,8 +267,8 @@ void ndt::struct_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
@@ -291,8 +293,8 @@ void ndt::struct_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
@@ -335,10 +337,9 @@ void ndt::struct_type::get_dynamic_type_properties(
       pair<string, nd::callable>(
           "field_names",
           nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))),
-      pair<string, nd::callable>(
-          "arrmeta_offsets",
-          nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))),
-  };
+      pair<string, nd::callable>("arrmeta_offsets",
+                                 nd::callable::make<field_names_kernel>(
+                                     type("(self: type) -> Any"))), };
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

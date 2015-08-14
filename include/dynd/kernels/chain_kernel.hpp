@@ -107,11 +107,10 @@ namespace nd {
         destroy_child_ckernel(second_offset);
       }
 
-      static void
-      resolve_dst_type(char *static_data, size_t data_size, char *data,
-                       ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, const dynd::nd::array &kwds,
-                       const std::map<std::string, ndt::type> &tp_vars);
+      static void resolve_dst_type(
+          char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
+          intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+          const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
       static intptr_t
       instantiate(char *static_data, size_t data_size, char *data, void *ckb,

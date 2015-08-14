@@ -47,7 +47,8 @@ namespace nd {
 
       static void data_init(char *_static_data, std::size_t data_size,
                             char *data, const ndt::type &dst_tp, intptr_t nsrc,
-                            const ndt::type *src_tp, const array &kwds,
+                            const ndt::type *src_tp, intptr_t nkwd,
+                            const array *kwds,
                             const std::map<std::string, ndt::type> &tp_vars)
       {
         static_data_type *static_data =
@@ -55,14 +56,13 @@ namespace nd {
 
         static_data->window_op.get()->data_init(
             static_data->window_op.get()->static_data, data_size, data, dst_tp,
-            nsrc, src_tp, kwds, tp_vars);
+            nsrc, src_tp, nkwd, kwds, tp_vars);
       }
 
-      static void
-      resolve_dst_type(char *static_data, size_t data_size, char *data,
-                       ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, const nd::array &kwds,
-                       const std::map<std::string, ndt::type> &tp_vars);
+      static void resolve_dst_type(
+          char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
+          intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+          const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
       static intptr_t
       instantiate(char *static_data, size_t data_size, char *data, void *ckb,

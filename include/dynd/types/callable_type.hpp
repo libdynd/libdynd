@@ -31,17 +31,18 @@ namespace dynd {
  */
 typedef void (*callable_data_init_t)(
     char *static_data, size_t data_size, char *data, const ndt::type &dst_tp,
-    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
-    const std::map<std::string, ndt::type> &tp_vars);
+    intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
 template <typename DataInitType>
 struct data_init_traits;
 
 template <typename StaticDataType, typename DataType>
-struct data_init_traits<void (*)(
-    StaticDataType *static_data, size_t data_size, DataType *data,
-    const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+struct data_init_traits<
+    void (*)(StaticDataType *static_data, size_t data_size, DataType *data,
+             const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+             intptr_t nkwd, const nd::array *kwds,
+             const std::map<std::string, ndt::type> &tp_vars)> {
   typedef StaticDataType static_data_type;
   typedef DataType data_type;
 };
@@ -58,8 +59,8 @@ struct data_init_traits<void (*)(
  */
 typedef void (*callable_resolve_dst_type_t)(
     char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
-    intptr_t nsrc, const ndt::type *src_tp, const nd::array &kwds,
-    const std::map<std::string, ndt::type> &tp_vars);
+    intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
 template <typename DataInitType>
 struct resolve_dst_type_traits;
@@ -67,8 +68,8 @@ struct resolve_dst_type_traits;
 template <typename StaticDataType, typename DataType>
 struct resolve_dst_type_traits<void (*)(
     StaticDataType *static_data, size_t data_size, DataType *data,
-    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)> {
   typedef StaticDataType static_data_type;
   typedef DataType data_type;
 };
@@ -227,12 +228,13 @@ struct callable_type_data {
   nd::array operator()(ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta,
                        char *const *src_data, const nd::array &kwds,
+                       intptr_t nkwd, const nd::array *_kwds,
                        const std::map<std::string, ndt::type> &tp_vars);
 
   void operator()(const ndt::type &dst_tp, const char *dst_arrmeta,
                   char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
                   const char *const *src_arrmeta, char *const *src_data,
-                  const nd::array &kwds,
+                  const nd::array &kwds, intptr_t nkwd, const nd::array *_kwds,
                   const std::map<std::string, ndt::type> &tp_vars);
 
   template <typename StaticDataType>

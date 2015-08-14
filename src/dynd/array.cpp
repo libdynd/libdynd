@@ -1148,7 +1148,8 @@ bool nd::array::equals_exact(const array &rhs) const
           ndt::type dst_tp = ndt::type::make<int>();
           if ((*not_equal::get().get())(
                   dst_tp, 2, tp, arrmeta, const_cast<char *const *>(src),
-                  array(), std::map<std::string, ndt::type>()).as<bool>()) {
+                  array(), 0, NULL,
+                  std::map<std::string, ndt::type>()).as<bool>()) {
             return false;
           }
         } while (iter.next());

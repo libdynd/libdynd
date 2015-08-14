@@ -34,7 +34,8 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
               const nd::array &DYND_UNUSED(kwds),
               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    try {
+    try
+    {
       assign_error_mode errmode =
           *reinterpret_cast<assign_error_mode *>(static_data);
       if (errmode == ectx->errmode) {
@@ -48,7 +49,8 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
                                       &ectx_tmp);
       }
     }
-    catch (const std::exception &e) {
+    catch (const std::exception &e)
+    {
       cout << "exception: " << e.what() << endl;
       throw;
     }
@@ -160,6 +162,7 @@ void nd::detail::validate_kwd_types(const ndt::callable_type *af_tp,
 void nd::detail::fill_missing_values(const ndt::type *tp, char *arrmeta,
                                      const uintptr_t *arrmeta_offsets,
                                      char *data, const uintptr_t *data_offsets,
+                                     std::vector<nd::array> &kwds_as_vector,
                                      const std::vector<intptr_t> &missing)
 {
   for (intptr_t j : missing) {
@@ -167,6 +170,8 @@ void nd::detail::fill_missing_values(const ndt::type *tp, char *arrmeta,
                                                 true);
     assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
               &eval::default_eval_context);
+    kwds_as_vector[j] = nd::empty(tp[j]);
+    kwds_as_vector[j].assign_na();
   }
 }
 

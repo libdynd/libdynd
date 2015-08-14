@@ -17,7 +17,8 @@ ndt::typevar_type::typevar_type(const std::string &name)
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
+  } else if (!is_valid_typevar_name(m_name.c_str(),
+                                    m_name.c_str() + m_name.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
     print_escaped_utf8_string(ss, m_name);
@@ -163,8 +164,8 @@ void ndt::typevar_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
@@ -174,9 +175,8 @@ void ndt::typevar_type::get_dynamic_type_properties(
   };
 
   static pair<string, nd::callable> type_properties[] = {
-      pair<string, nd::callable>(
-          "name", nd::callable::make<name_kernel>(type("(self: type) -> Any"))),
-  };
+      pair<string, nd::callable>("name", nd::callable::make<name_kernel>(
+                                             type("(self: type) -> Any"))), };
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

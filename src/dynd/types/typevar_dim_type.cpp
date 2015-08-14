@@ -188,8 +188,8 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(
     static void resolve_dst_type(
         char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
         char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp),
-        const dynd::nd::array &DYND_UNUSED(kwds),
+        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+        const dynd::nd::array *DYND_UNUSED(kwds),
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
