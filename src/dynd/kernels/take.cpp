@@ -62,7 +62,8 @@ intptr_t nd::masked_take_ck::instantiate(
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
+    const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+    const nd::array *DYND_UNUSED(kwds),
     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef nd::masked_take_ck self_type;
@@ -153,7 +154,8 @@ intptr_t nd::indexed_take_ck::instantiate(
     const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
     const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const nd::array &DYND_UNUSED(kwds),
+    const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+    const nd::array *DYND_UNUSED(kwds),
     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef nd::indexed_take_ck self_type;
@@ -213,19 +215,19 @@ intptr_t nd::take_ck::instantiate(
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
     const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
     const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)
+    kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
+    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
     return nd::masked_take_ck::instantiate(
         NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
   } else if (mask_el_tp.get_type_id() ==
              (type_id_t)type_id_of<intptr_t>::value) {
     return nd::indexed_take_ck::instantiate(
         NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-        src_arrmeta, kernreq, ectx, kwds, tp_vars);
+        src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
   } else {
     stringstream ss;
     ss << "take: unsupported type for the index " << mask_el_tp

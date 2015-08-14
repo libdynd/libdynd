@@ -92,7 +92,8 @@ namespace nd {
                   const ndt::type &dst_tp, const char *dst_arrmeta,
                   intptr_t nsrc, const ndt::type *src_tp,
                   const char *const *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx, const nd::array &kwds,
+                  const eval::eval_context *ectx, intptr_t nkwd,
+                  const nd::array *kwds,
                   const std::map<std::string, ndt::type> &tp_vars)
       {
         std::shared_ptr<neighborhood_data> nh =
@@ -100,22 +101,16 @@ namespace nd {
                  static_data);
         nd::callable nh_op = nh->op;
 
-        nd::array shape;
-        // TODO: Eliminate all try/catch(...)
-        try
-        {
-          shape = kwds.p("shape").f("dereference");
-        }
-        catch (...)
-        {
-          const nd::array &mask = kwds.p("mask").f("dereference");
+        nd::array shape = kwds[0];
+        if (shape.is_missing()) {
+          const nd::array &mask = kwds[2];
           shape = nd::array(mask.get_shape());
         }
         intptr_t ndim = shape.get_dim_size();
 
         nd::array offset;
-        if (!kwds.p("offset").is_missing()) {
-          offset = kwds.p("offset").f("dereference");
+        if (!kwds[1].is_missing()) {
+          offset = kwds[1];
         }
 
         // Process the dst array striding/types
@@ -190,13 +185,16 @@ namespace nd {
           self->nh_start_stop = nh->start_stop + i;
         }
 
+        std::vector<array> new_kwds(nkwd + 1);
+        for (int i = 0; i < nkwd; ++i) {
+          new_kwds[i] = kwds[i];
+        }
+        new_kwds[nkwd] = reinterpret_cast<intptr_t>(nh->start_stop);
+
         ckb_offset = nh_op.get()->instantiate(
             nh_op.get()->static_data, 0, NULL, ckb, ckb_offset, nh_dst_tp,
             nh_dst_arrmeta, nsrc, nh_src_tp, nh_src_arrmeta,
-            kernel_request_single, ectx,
-            struct_concat(kwds, pack("start_stop", reinterpret_cast<intptr_t>(
-                                                       nh->start_stop))),
-            tp_vars);
+            kernel_request_single, ectx, nkwd + 1, new_kwds.data(), tp_vars);
 
         return ckb_offset;
       }

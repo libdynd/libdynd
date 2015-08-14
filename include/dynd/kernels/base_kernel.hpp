@@ -19,7 +19,7 @@ namespace nd {
    * For most ckernels, the structure is not known beyond that
    * the ckernel_prefix is at the beginning. In some, such
    * as the reduction ckernel, more is known, in which case
-   * CKP may be overriden. 
+   * CKP may be overriden.
    */
   template <typename T, kernel_request_t kernreq, int N,
             typename CKP = ckernel_prefix>
@@ -67,7 +67,7 @@ namespace nd {
     static self_type *reserve(void *ckb, kernel_request_t kernreq,             \
                               intptr_t ckb_offset, size_t requested_capacity)  \
     {                                                                          \
-      switch (kernreq & kernel_request_memory) {                               \
+      switch (kernreq &kernel_request_memory) {                                \
       case kernel_request_host:                                                \
         return reserve(                                                        \
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),     \
@@ -174,7 +174,9 @@ namespace nd {
     }                                                                          \
                                                                                \
     /**  Default implementation of destruct_children does nothing.  */         \
-    __VA_ARGS__ void destruct_children() {}                                    \
+    __VA_ARGS__ void destruct_children()                                       \
+    {                                                                          \
+    }                                                                          \
                                                                                \
     /**  Returns the child ckernel immediately following this one. */          \
     __VA_ARGS__ ckernel_prefix *get_child_ckernel()                            \
@@ -196,7 +198,7 @@ namespace nd {
         const ndt::type *DYND_UNUSED(src_tp),                                  \
         const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, \
         const eval::eval_context *DYND_UNUSED(ectx),                           \
-        const nd::array &DYND_UNUSED(kwds),                                    \
+        intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),        \
         const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))          \
     {                                                                          \
       self_type::make(ckb, kernreq, ckb_offset);                               \

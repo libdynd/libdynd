@@ -80,7 +80,7 @@ intptr_t dynd::make_assignment_kernel(
       nd::callable &child = nd::assign::overload(dst_tp, src_tp);
       return child.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                       dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                      kernreq, ectx, nd::array(),
+                                      kernreq, ectx, 0, NULL,
                                       std::map<std::string, ndt::type>());
     } else {
       return src_tp.extended()->make_assignment_kernel(
@@ -103,8 +103,7 @@ static const expr_strided_t wrap_single_as_strided_fixedcount[7] = {
     &nd::wrap_single_as_strided_fixedcount_ck<3>::strided,
     &nd::wrap_single_as_strided_fixedcount_ck<4>::strided,
     &nd::wrap_single_as_strided_fixedcount_ck<5>::strided,
-    &nd::wrap_single_as_strided_fixedcount_ck<6>::strided,
-};
+    &nd::wrap_single_as_strided_fixedcount_ck<6>::strided, };
 
 static void simple_wrapper_kernel_destruct(ckernel_prefix *self)
 {

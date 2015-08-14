@@ -552,8 +552,8 @@ static array_preamble *function___call__(const array_preamble *params,
   ckernel_builder<kernel_request_host> ckb;
   af->instantiate(NULL, 0, NULL, &ckb, 0, args[0].get_type(),
                   args[0].get_arrmeta(), nargs, src_tp, dynd_arrmeta,
-                  kernel_request_single, &eval::default_eval_context,
-                  nd::array(), std::map<std::string, ndt::type>());
+                  kernel_request_single, &eval::default_eval_context, 0, NULL,
+                  std::map<std::string, ndt::type>());
   // Call the ckernel
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   char *in_ptrs[max_args];
@@ -588,15 +588,15 @@ void ndt::callable_type::get_dynamic_array_functions(
 
 nd::array callable_type_data::
 operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-           const char *const *src_arrmeta, char *const *src_data,
-           const nd::array &kwds, intptr_t nkwd, const nd::array *_kwds,
+           const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
+           const nd::array *kwds,
            const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
   std::unique_ptr<char[]> data(new char[data_size]);
   if (data_size > 0) {
     data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, nkwd,
-              _kwds, tp_vars);
+              kwds, tp_vars);
   }
 
   // Resolve the destination type
@@ -607,7 +607,7 @@ operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
     }
 
     resolve_dst_type(static_data, data_size, data.get(), dst_tp, nsrc, src_tp,
-                     nkwd, _kwds, tp_vars);
+                     nkwd, kwds, tp_vars);
   }
 
   // Allocate the destination array
@@ -617,7 +617,7 @@ operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
   ckernel_builder<kernel_request_host> ckb;
   instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp,
               dst.get_arrmeta(), nsrc, src_tp, src_arrmeta,
-              kernel_request_single, &eval::default_eval_context, kwds,
+              kernel_request_single, &eval::default_eval_context, nkwd, kwds,
               tp_vars);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
   fn(ckb.get(), dst.get_readwrite_originptr(), src_data);
@@ -628,21 +628,21 @@ operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
 void callable_type_data::
 operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data,
            intptr_t nsrc, const ndt::type *src_tp,
-           const char *const *src_arrmeta, char *const *src_data,
-           const nd::array &kwds, intptr_t nkwd, const nd::array *_kwds,
+           const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
+           const nd::array *kwds,
            const std::map<std::string, ndt::type> &tp_vars)
 {
   std::unique_ptr<char[]> data(new char[data_size]);
   if (data_size > 0) {
     data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, nkwd,
-              _kwds, tp_vars);
+              kwds, tp_vars);
   }
 
   // Generate and evaluate the ckernel
   ckernel_builder<kernel_request_host> ckb;
   instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst_arrmeta,
               nsrc, src_tp, src_arrmeta, kernel_request_single,
-              &eval::default_eval_context, kwds, tp_vars);
+              &eval::default_eval_context, nkwd, kwds, tp_vars);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
   fn(ckb.get(), dst_data, src_data);
 }

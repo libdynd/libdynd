@@ -76,8 +76,8 @@ static intptr_t instantiate_int_offset_callable(
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
     const ndt::type *DYND_UNUSED(src_tp),
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds),
+    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+    const nd::array *DYND_UNUSED(kwds),
     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef int_offset_ck<Tsrc, Tdst> self_type;

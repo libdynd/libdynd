@@ -16,9 +16,9 @@ namespace kernels {
   struct permute_ck;
 
   template <int N>
-  struct permute_ck<N, true>
-      : nd::base_kernel<permute_ck<N, true>, kernel_request_cuda_host_device,
-                        N> {
+  struct permute_ck<N, true> : nd::base_kernel<permute_ck<N, true>,
+                                               kernel_request_cuda_host_device,
+                                               N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];
@@ -59,7 +59,7 @@ namespace kernels {
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
-                const nd::array &kwds,
+                intptr_t nkwd, const nd::array *kwds,
                 const std::map<std::string, ndt::type> &tp_vars)
     {
       const std::pair<nd::callable, std::vector<intptr_t>> *data =
@@ -81,7 +81,7 @@ namespace kernels {
       return child->instantiate(const_cast<char *>(child->static_data), 0, NULL,
                                 ckb, ckb_offset, ndt::type::make<void>(), NULL,
                                 nsrc, src_tp_inv, src_arrmeta_inv, kernreq,
-                                ectx, kwds, tp_vars);
+                                ectx, nkwd, kwds, tp_vars);
     }
 
   private:
@@ -126,8 +126,8 @@ namespace kernels {
   };
 
   template <int N>
-  struct permute_ck<N, false>
-      : nd::base_kernel<permute_ck<N, false>, kernel_request_host, N> {
+  struct permute_ck<N, false> : nd::base_kernel<permute_ck<N, false>,
+                                                kernel_request_host, N> {
     typedef permute_ck self_type;
 
     intptr_t perm[N];
@@ -153,7 +153,7 @@ namespace kernels {
                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                 const ndt::type *src_tp, const char *const *src_arrmeta,
                 kernel_request_t kernreq, const eval::eval_context *ectx,
-                const nd::array &kwds,
+                intptr_t nkwd, const nd::array *kwds,
                 const std::map<std::string, ndt::type> &tp_vars)
     {
       const std::pair<nd::callable, std::vector<intptr_t>> *data =
@@ -175,7 +175,7 @@ namespace kernels {
       return child->instantiate(const_cast<char *>(child->static_data), 0, NULL,
                                 ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                 src_tp_inv, src_arrmeta_inv, kernreq, ectx,
-                                kwds, tp_vars);
+                                nkwd, kwds, tp_vars);
     }
 
   private:

@@ -46,7 +46,7 @@ namespace nd {
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
+                  intptr_t nkwd, const nd::array *kwds,
                   const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
@@ -57,7 +57,7 @@ namespace nd {
         return child.get()->instantiate(
             child.get()->static_data, data_size, data, ckb, ckb_offset, dst_tp,
             dst_arrmeta, nsrc + 1, child_src_tp, child_src_arrmeta, kernreq,
-            ectx, kwds, tp_vars);
+            ectx, nkwd, kwds, tp_vars);
       }
     };
 
@@ -95,7 +95,7 @@ namespace nd {
                   const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const nd::array &kwds,
+                  intptr_t nkwd, const nd::array *kwds,
                   const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
@@ -106,7 +106,7 @@ namespace nd {
         return child.get()->instantiate(
             child.get()->static_data, data_size, data, ckb, ckb_offset, dst_tp,
             dst_arrmeta, nsrc + 1, child_src_tp, child_src_arrmeta, kernreq,
-            ectx, kwds, tp_vars);
+            ectx, nkwd, kwds, tp_vars);
       }
     };
 

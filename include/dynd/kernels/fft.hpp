@@ -191,28 +191,28 @@ namespace nd {
                 intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
                 const eval::eval_context *DYND_UNUSED(ectx),
-                const nd::array &kwds,
+                intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       int flags;
-      if (kwds.p("flags").is_missing()) {
+      if (kwds[2].is_missing()) {
         flags = FFTW_ESTIMATE;
       } else {
-        flags = kwds.p("flags").as<int>();
+        flags = kwds[2].as<int>();
       }
 
-      nd::array shape = kwds.p("shape");
+      nd::array shape = kwds[0];
       if (!shape.is_missing()) {
         if (shape.get_type().get_type_id() == pointer_type_id) {
-          shape = shape.f("dereference");
+          shape = shape;
         }
       }
 
       nd::array axes;
-      if (!kwds.p("axes").is_missing()) {
-        axes = kwds.p("axes");
+      if (!kwds[1].is_missing()) {
+        axes = kwds[1];
         if (axes.get_type().get_type_id() == pointer_type_id) {
-          axes = axes.f("dereference");
+          axes = axes;
         }
       } else {
         axes = nd::range(src_tp[0].get_ndim());

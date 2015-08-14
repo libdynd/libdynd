@@ -665,7 +665,7 @@ namespace nd {
         ckb_offset = elwise_reduction->instantiate(
             elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
             dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta,
-            kernel_request_strided, ectx, nd::array(),
+            kernel_request_strided, ectx, 0, NULL,
             std::map<std::string, ndt::type>());
         // Make sure there's capacity for the next ckernel
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -898,8 +898,8 @@ namespace nd {
                   intptr_t src_size, const ndt::type &dst_tp,
                   const char *dst_arrmeta, const ndt::type *src_tp,
                   const char *src_arrmeta, kernel_request_t kernreq,
-                  const eval::eval_context *ectx,
-                  const array &DYND_UNUSED(kwds),
+                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                  const array *DYND_UNUSED(kwds),
                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         callable_type_data *elwise_reduction = static_data->child.get();
@@ -990,7 +990,7 @@ namespace nd {
         ckb_offset = elwise_reduction->instantiate(
             elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
             dst_arrmeta, elwise_reduction_tp->get_npos(), src_tp, &src_arrmeta,
-            kernel_request_strided, ectx, nd::array(),
+            kernel_request_strided, ectx, 0, NULL,
             std::map<std::string, ndt::type>());
         // Make sure there's capacity for the next ckernel
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
@@ -1089,7 +1089,7 @@ namespace nd {
                   const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
-                  const array &kwds,
+                  intptr_t DYND_UNUSED(nkwd), const array *kwds,
                   const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &elwise_reduction = static_data->child;
@@ -1242,7 +1242,7 @@ namespace nd {
               return strided_inner_broadcast_kernel::instantiate(
                   static_data, data, ckb, ckb_offset, dst_stride, src_stride,
                   src_size, dst_i_tp, dst_arrmeta, &src_i_tp, src_arrmeta[0],
-                  kernreq, ectx, kwds, tp_vars);
+                  kernreq, ectx, 0, kwds, tp_vars);
             }
           }
         }
