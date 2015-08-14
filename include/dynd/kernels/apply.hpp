@@ -144,7 +144,7 @@ namespace nd {
                       index_sequence<I...>> : apply_arg<A, I>... {
       apply_args(const ndt::type *DYND_IGNORE_UNUSED(src_tp),
                  const char *const *DYND_IGNORE_UNUSED(src_arrmeta),
-                 const nd::array *kwds)
+                 const nd::array *DYND_IGNORE_UNUSED(kwds))
           : apply_arg<A, I>(src_tp[I], src_arrmeta[I], kwds)...
       {
       }
