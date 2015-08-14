@@ -683,14 +683,15 @@ namespace nd {
                 intptr_t ckb_offset, const ndt::type &dst_tp,
                 const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
                 const char *const *src_arrmeta, kernel_request_t kernreq,
-                const eval::eval_context *ectx, const array &kwds,
+                const eval::eval_context *ectx, intptr_t nkwd,
+                const array *kwds,
                 const std::map<std::string, ndt::type> &tp_vars) {
         typedef instantiate_traits<decltype(&KernelType::instantiate)> traits;
         intptr_t res_ckb_offset = KernelType::instantiate(
             reinterpret_cast<typename traits::static_data_type *>(static_data),
             data_size, reinterpret_cast<typename traits::data_type *>(data),
             ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
-            kernreq, ectx, kwds, tp_vars);
+            kernreq, ectx, nkwd, kwds, tp_vars);
         reinterpret_cast<typename traits::data_type *>(data)->~data_type();
         return res_ckb_offset;
       };
@@ -936,19 +937,19 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        return (*get())(
-            dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
-            arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
-            arg_data.empty() ? NULL : arg_data.data(), kwds_as_array,
-            kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
+        return (*get())(dst_tp, arg_tp.size(),
+                        arg_tp.empty() ? NULL : arg_tp.data(),
+                        arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
+                        arg_data.empty() ? NULL : arg_data.data(),
+                        kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
       }
 
       dst_tp = dst.get_type();
       (*get())(dst_tp, dst.get_arrmeta(), dst.get_readwrite_originptr(),
                arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
                arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
-               arg_data.empty() ? NULL : arg_data.data(), kwds_as_array,
-               kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
+               arg_data.empty() ? NULL : arg_data.data(), kwds_as_vector.size(),
+               kwds_as_vector.data(), tp_vars);
       return dst;
     }
 

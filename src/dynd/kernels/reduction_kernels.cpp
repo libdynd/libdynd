@@ -58,7 +58,7 @@ struct builtin_sum_reduction_kernel {
               const char *const *DYND_UNUSED(src_arrmeta),
               kernel_request_t kernreq,
               const eval::eval_context *DYND_UNUSED(ectx),
-              const nd::array &DYND_UNUSED(kwds),
+              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     if (dst_tp != src_tp[0]) {
@@ -126,7 +126,7 @@ struct mean1d_kernel {
               intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
               const char *const *src_arrmeta, kernel_request_t kernreq,
               const eval::eval_context *DYND_UNUSED(ectx),
-              const nd::array &DYND_UNUSED(kwds),
+              intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
     typedef double_mean1d_ck self_type;

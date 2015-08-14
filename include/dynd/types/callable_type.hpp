@@ -110,8 +110,8 @@ typedef intptr_t (*callable_instantiate_t)(
     char *static_data, size_t data_size, char *data, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars);
+    kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
+    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
 template <typename InstantiateType>
 struct instantiate_traits;
@@ -121,8 +121,8 @@ struct instantiate_traits<intptr_t (*)(
     StaticDataType *static_data, size_t data_size, DataType *data, void *ckb,
     intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
     intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const nd::array &kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+    kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
+    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)> {
   typedef StaticDataType static_data_type;
   typedef DataType data_type;
 };
@@ -227,14 +227,14 @@ struct callable_type_data {
 
   nd::array operator()(ndt::type &dst_tp, intptr_t nsrc,
                        const ndt::type *src_tp, const char *const *src_arrmeta,
-                       char *const *src_data, const nd::array &kwds,
-                       intptr_t nkwd, const nd::array *_kwds,
+                       char *const *src_data, intptr_t nkwd,
+                       const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars);
 
   void operator()(const ndt::type &dst_tp, const char *dst_arrmeta,
                   char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
                   const char *const *src_arrmeta, char *const *src_data,
-                  const nd::array &kwds, intptr_t nkwd, const nd::array *_kwds,
+                  intptr_t nkwd, const nd::array *kwds,
                   const std::map<std::string, ndt::type> &tp_vars);
 
   template <typename StaticDataType>

@@ -136,7 +136,7 @@ intptr_t ndt::date_type::make_assignment_kernel(
       typedef nd::assignment_kernel<date_type_id, string_type_id> self_type;
       return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                     dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                    kernreq, ectx, nd::array(),
+                                    kernreq, ectx, 0, NULL,
                                     std::map<std::string, ndt::type>());
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
@@ -154,7 +154,7 @@ intptr_t ndt::date_type::make_assignment_kernel(
       typedef nd::assignment_kernel<string_type_id, date_type_id> self_type;
       return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
                                     dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                    kernreq, ectx, nd::array(),
+                                    kernreq, ectx, 0, NULL,
                                     std::map<std::string, ndt::type>());
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property

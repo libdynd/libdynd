@@ -59,9 +59,15 @@ protected:
   }
 
 public:
-  base_ckernel_builder() { reinterpret_cast<CKBT *>(this)->init(); }
+  base_ckernel_builder()
+  {
+    reinterpret_cast<CKBT *>(this)->init();
+  }
 
-  ~base_ckernel_builder() { reinterpret_cast<CKBT *>(this)->destroy(); }
+  ~base_ckernel_builder()
+  {
+    reinterpret_cast<CKBT *>(this)->destroy();
+  }
 
   template <typename self_type, typename... A>
   self_type *init(ckernel_prefix *rawself, kernel_request_t kernreq,
@@ -93,9 +99,8 @@ public:
         requested_capacity = grown_capacity;
       }
       // Do a realloc
-      char *new_data =
-          reinterpret_cast<char *>(reinterpret_cast<CKBT *>(this)->realloc(
-              m_data, m_capacity, requested_capacity));
+      char *new_data = reinterpret_cast<char *>(reinterpret_cast<CKBT *>(
+          this)->realloc(m_data, m_capacity, requested_capacity));
       if (new_data == NULL) {
         reinterpret_cast<CKBT *>(this)->destroy();
         m_data = NULL;
@@ -147,20 +152,27 @@ public:
   }
 
   /** For debugging/informational purposes */
-  intptr_t get_capacity() const { return m_capacity; }
+  intptr_t get_capacity() const
+  {
+    return m_capacity;
+  }
 };
 
 template <kernel_request_t kernreq>
 class ckernel_builder;
 
 template <>
-class ckernel_builder<kernel_request_host>
-    : public base_ckernel_builder<ckernel_builder<kernel_request_host>> {
+class ckernel_builder<kernel_request_host> : public base_ckernel_builder<
+                                                 ckernel_builder<
+                                                     kernel_request_host>> {
   // When the amount of data is small, this static data is used,
   // otherwise dynamic memory is allocated when it gets too big
   char m_static_data[16 * 8];
 
-  bool using_static_data() const { return m_data == &m_static_data[0]; }
+  bool using_static_data() const
+  {
+    return m_data == &m_static_data[0];
+  }
 
 public:
   void init()
@@ -182,9 +194,15 @@ public:
     base_ckernel_builder<ckernel_builder<kernel_request_host>>::destroy();
   }
 
-  void destroy(ckernel_prefix *self) { self->destroy(); }
+  void destroy(ckernel_prefix *self)
+  {
+    self->destroy();
+  }
 
-  void *alloc(size_t size) { return std::malloc(size); }
+  void *alloc(size_t size)
+  {
+    return std::malloc(size);
+  }
 
   void *realloc(void *ptr, size_t old_size, size_t new_size)
   {
@@ -262,8 +280,10 @@ __global__ void cuda_device_init(ckernel_prefix *rawself,
 __global__ void cuda_device_destroy(ckernel_prefix *self);
 
 template <>
-class ckernel_builder<kernel_request_cuda_device>
-    : public base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>> {
+class
+    ckernel_builder<kernel_request_cuda_device> : public base_ckernel_builder<
+                                                      ckernel_builder<
+                                                          kernel_request_cuda_device>> {
   static class pooled_allocator {
     std::multimap<std::size_t, void *> available_blocks;
     std::map<void *, std::size_t> used_blocks;
@@ -325,7 +345,10 @@ public:
     m_capacity = 16 * 8;
   }
 
-  void *alloc(size_t size) { return allocator.allocate(size); }
+  void *alloc(size_t size)
+  {
+    return allocator.allocate(size);
+  }
 
   void *realloc(void *old_ptr, size_t old_size, size_t new_size)
   {
@@ -335,7 +358,10 @@ public:
     return new_ptr;
   }
 
-  void free(void *ptr) { allocator.deallocate(ptr); }
+  void free(void *ptr)
+  {
+    allocator.deallocate(ptr);
+  }
 
   void *copy(void *dst, const void *src, size_t size)
   {
@@ -393,8 +419,8 @@ inline intptr_t ckernel_prefix::instantiate(
     const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
     const ndt::type *DYND_UNUSED(src_tp),
     const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx),
-    const nd::array &DYND_UNUSED(kwds),
+    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+    const nd::array *DYND_UNUSED(kwds),
     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   void *func;

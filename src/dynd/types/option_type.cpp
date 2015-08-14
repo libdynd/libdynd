@@ -36,7 +36,9 @@ ndt::option_type::option_type(const type &value_tp)
   }
 }
 
-ndt::option_type::~option_type() {}
+ndt::option_type::~option_type()
+{
+}
 
 void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const
 {
@@ -83,8 +85,8 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data,
     nd::callable &af = get_is_avail();
     type src_tp[1] = {type(this, true)};
     af.get()->instantiate(NULL, 0, NULL, &ckb, 0, type::make<bool1>(), NULL, 1,
-                          src_tp, &arrmeta, kernel_request_single, ectx,
-                          nd::array(), std::map<std::string, type>());
+                          src_tp, &arrmeta, kernel_request_single, ectx, 0,
+                          NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<expr_single_t>()(ckp, &result,
@@ -138,7 +140,7 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data,
     ckernel_builder<kernel_request_host> ckb;
     nd::callable &af = get_assign_na();
     af.get()->instantiate(NULL, 0, NULL, &ckb, 0, type(this, true), arrmeta, 0,
-                          NULL, NULL, kernel_request_single, ectx, nd::array(),
+                          NULL, NULL, kernel_request_single, ectx, 0, NULL,
                           std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<expr_single_t>()(ckp, data, NULL);

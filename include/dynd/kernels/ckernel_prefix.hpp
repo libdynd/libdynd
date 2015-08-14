@@ -177,7 +177,7 @@ struct ckernel_prefix {
               const char *const *DYND_UNUSED(src_arrmeta),
               kernel_request_t kernreq,
               const eval::eval_context *DYND_UNUSED(ectx),
-              const nd::array &DYND_UNUSED(kwds),
+              intptr_t DYND_UNUSED(nkwds), const nd::array *DYND_UNUSED(kwds),
               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
 };
 
