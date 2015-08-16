@@ -6,6 +6,7 @@
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/sum.hpp>
 #include <dynd/kernels/sum_kernel.hpp>
+#include <dynd/func/reduction.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -13,9 +14,12 @@ using namespace dynd;
 nd::callable nd::sum::make()
 {
   auto children = callable::make_all<
-      sum_kernel, type_id_sequence<int32_type_id, int64_type_id>>(0);
+      sum_kernel,
+      type_id_sequence<int32_type_id, int64_type_id, float32_type_id,
+                       float64_type_id, complex_float32_type_id,
+                       complex_float64_type_id>>(0);
 
-  return functional::multidispatch(
+  return functional::reduction(functional::multidispatch(
       ndt::type("(Any) -> Any"),
       [children](const ndt::type & DYND_UNUSED(dst_tp),
                  intptr_t DYND_UNUSED(nsrc),
@@ -27,7 +31,7 @@ nd::callable nd::sum::make()
         }
         return child;
       },
-      0);
+      0));
 }
 
 struct nd::sum nd::sum;

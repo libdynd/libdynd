@@ -15,6 +15,8 @@
 namespace dynd {
 namespace ndt {
 
+  type make_ellipsis_dim(const std::string &name, const type &element_type);
+
   class ellipsis_dim_type : public base_dim_type {
     // m_name is either NULL or an immutable array of type "string"
     std::string m_name;
@@ -22,9 +24,14 @@ namespace ndt {
   public:
     ellipsis_dim_type(const std::string &name, const type &element_type);
 
-    virtual ~ellipsis_dim_type() {}
+    virtual ~ellipsis_dim_type()
+    {
+    }
 
-    const std::string &get_name() const { return m_name; }
+    const std::string &get_name() const
+    {
+      return m_name;
+    }
 
     void get_vars(std::unordered_set<std::string> &vars) const;
 
@@ -59,6 +66,15 @@ namespace ndt {
         size_t *out_count) const;
 
     virtual type with_element_type(const type &element_tp) const;
+
+    static type make_if_not_variadic(const type &element_tp)
+    {
+      if (element_tp.is_variadic()) {
+        return element_tp;
+      }
+
+      return make_ellipsis_dim("Dims", element_tp);
+    }
   };
 
   /** Makes an ellipsis type with the specified name and element type */

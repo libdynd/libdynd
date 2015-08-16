@@ -21,6 +21,7 @@ nd::callable nd::functional::reduction(const callable &child)
     throw runtime_error(
         "lift_reduction_callable: 'elwise_reduction' may not be empty");
   }
+
   const ndt::callable_type *elwise_reduction_tp = child.get_type();
   if (elwise_reduction_tp->get_npos() != 1 &&
       !(elwise_reduction_tp->get_npos() == 2 &&
@@ -45,8 +46,10 @@ nd::callable nd::functional::reduction(const callable &child)
 
   return callable::make<reduction_kernel>(
       ndt::callable_type::make(
-          ndt::make_ellipsis_dim("Dims", child.get_type()->get_return_type()),
-          {ndt::make_ellipsis_dim("Dims", child.get_type()->get_pos_type(0))},
+          ndt::ellipsis_dim_type::make_if_not_variadic(
+              child.get_type()->get_return_type()),
+          {ndt::ellipsis_dim_type::make_if_not_variadic(
+              child.get_type()->get_pos_type(0))},
           {"axes", "identity", "keepdims"},
           {ndt::option_type::make(ndt::type("Fixed * int32")),
            ndt::option_type::make(child.get_type()->get_return_type()),
