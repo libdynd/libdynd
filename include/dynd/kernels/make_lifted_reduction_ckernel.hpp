@@ -29,7 +29,7 @@ namespace nd {
         array identity;
         std::size_t ndim;          // total number of dimensions being processed
         std::intptr_t reduce_ndim; // number of dimensions being reduced
-        const int32 *axes;
+        int32 *axes;
         bool keepdims;
       };
 
@@ -1029,11 +1029,22 @@ namespace nd {
           data->identity = identity;
         }
 
-        const array &axes = kwds[0];
-        data->reduce_ndim = axes.get_dim_size();
-        data->axes =
-            reinterpret_cast<const int *>(axes.get_readonly_originptr());
-        data->keepdims = kwds[2].as<bool>();
+        if (kwds[0].is_missing()) {
+          data->reduce_ndim =
+              src_tp[0].get_ndim() -
+              static_data->child.get_type()->get_return_type().get_ndim();
+          data->axes = NULL;
+        } else {
+          data->reduce_ndim = kwds[0].get_dim_size();
+          data->axes = const_cast<int *>(
+              reinterpret_cast<const int *>(kwds[0].get_readonly_originptr()));
+        }
+
+        if (kwds[2].is_missing()) {
+          data->keepdims = false;
+        } else {
+          data->keepdims = kwds[2].as<bool>();
+        }
 
         const ndt::type &child_dst_tp =
             static_data->child.get_type()->get_return_type();
@@ -1069,7 +1080,7 @@ namespace nd {
 
         for (intptr_t i = data->ndim - 1, j = data->reduce_ndim - 1; i >= 0;
              --i) {
-          if (j >= 0 && i == data->axes[j]) {
+          if (data->axes == NULL || (j >= 0 && i == data->axes[j])) {
             if (data->keepdims) {
               dst_tp = ndt::make_fixed_dim(1, dst_tp);
             }
@@ -1161,7 +1172,8 @@ namespace nd {
                << " not supported as source";
             throw type_error(ss.str());
           }
-          if (j < data->reduce_ndim && i == data->axes[j]) {
+          if ((data->axes == NULL) ||
+              (j < data->reduce_ndim && i == data->axes[j])) {
             // This dimension is being reduced
             if (src_size == 0 && data->identity.is_null()) {
               // If the size of the src is 0, a reduction identity is required
