@@ -12,10 +12,9 @@ namespace {
 template <typename T>
 struct value_to_pointer_ck
     : nd::base_kernel<value_to_pointer_ck<T>, dynd::kernel_request_host, 1> {
-  void single(char *dst, const char *const *src)
+  void single(char *dst, char *const *src)
   {
-    *reinterpret_cast<T **>(dst) =
-        const_cast<T *>(*reinterpret_cast<const T *const *>(src));
+    *reinterpret_cast<T **>(dst) = *reinterpret_cast<T **>(src[0]);
   }
 };
 } // anonymous namespace
