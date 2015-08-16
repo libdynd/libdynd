@@ -131,28 +131,24 @@ TEST(Reduction, BuiltinSum_Kernel)
 
 TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
 {
-  // Lift it to a zero-dimensional reduction callable (basically a no-op)
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
-  EXPECT_EQ(1.25f, f(1.25f));
+  EXPECT_ARR_EQ(1.25f, f(1.25f));
 }
 
 TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
 {
-  // Lift it to a zero-dimensional reduction callable (basically a no-op)
-  // Use 100.f as the "identity" to confirm it's really being used
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
-  EXPECT_EQ(100.f + 1.25f, f(1.25f, kwds("identity", 100.0f)));
+  EXPECT_ARR_EQ(100.0f + 1.25f, f(1.25f, kwds("identity", 100.0f)));
 }
 
 TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
 {
-  // Lift it to a one-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
@@ -171,10 +167,8 @@ TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
 
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
 {
-  // Lift it to a one-dimensional strided float32 reduction callable
-  // Use 100.f as the "identity" to confirm it's really being used
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
@@ -183,15 +177,15 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
   EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
 
   // Call it on the data
+  // Use 100.f as the "identity" to confirm it's really being used
   EXPECT_ARR_EQ(100.f + vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
                 f(a, kwds("identity", 100.0f)));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
 {
-  // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a =
@@ -211,9 +205,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
 {
-  // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a =
@@ -229,9 +222,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
 {
-  // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a =
@@ -254,9 +246,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
 {
-  // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a =
@@ -277,9 +268,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce_KeepDim)
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
 {
-  // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a =
@@ -304,9 +294,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
 {
-  // Lift it to a two-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a =
@@ -329,9 +318,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
 {
-  // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
@@ -348,9 +336,8 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
 {
-  // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
