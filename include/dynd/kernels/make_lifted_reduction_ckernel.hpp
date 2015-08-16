@@ -648,20 +648,6 @@ namespace nd {
           ss << "funcproto must be unary or a binary expr with all equal types";
           throw std::runtime_error(ss.str());
         }
-        if (elwise_reduction_tp->get_return_type() != dst_tp) {
-          std::stringstream ss;
-          ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
-          ss << "dst type is " << elwise_reduction_tp->get_return_type();
-          ss << ", expected " << dst_tp;
-          throw type_error(ss.str());
-        }
-        if (elwise_reduction_tp->get_pos_type(0) != src_tp) {
-          std::stringstream ss;
-          ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
-          ss << "src type is " << elwise_reduction_tp->get_return_type();
-          ss << ", expected " << src_tp;
-          throw type_error(ss.str());
-        }
         ckb_offset = elwise_reduction->instantiate(
             elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
             dst_arrmeta, elwise_reduction_tp->get_npos(), &src_tp, &src_arrmeta,
@@ -1063,12 +1049,17 @@ namespace nd {
 
       static void resolve_dst_type(
           static_data_type *static_data, std::size_t DYND_UNUSED(data_size),
-          data_type *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-          const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-          const array *DYND_UNUSED(kwds),
-          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+          data_type *data, ndt::type &dst_tp, intptr_t nsrc,
+          const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+          const std::map<std::string, ndt::type> &tp_vars)
       {
         dst_tp = static_data->child.get_type()->get_return_type();
+        if (dst_tp.is_symbolic()) {
+          static_data->child.get()->resolve_dst_type(
+              static_data->child.get()->static_data, 0, NULL, dst_tp, nsrc,
+              src_tp, nkwd, kwds, tp_vars);
+        }
+
         data->ndim = src_tp[0].get_ndim() - dst_tp.get_ndim();
 
         //        std::vector<const ndt::type *> element_tp =

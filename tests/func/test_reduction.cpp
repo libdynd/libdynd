@@ -132,54 +132,37 @@ TEST(Reduction, BuiltinSum_Kernel)
 TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  EXPECT_ARR_EQ(1.25f, f(1.25f));
+  EXPECT_ARR_EQ(1.25, f(1.25));
 }
 
 TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  EXPECT_ARR_EQ(100.0f + 1.25f, f(1.25f, kwds("identity", 100.0f)));
+  EXPECT_ARR_EQ(100.0 + 1.25, f(1.25, kwds("identity", 100.0)));
 }
 
 TEST(Reduction, BuiltinSum_Lift1D_NoIdentity)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  // Set up some data for the test reduction
-  float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
-  nd::array a = vals0;
-  EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
-  EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
-
-  // Call it on the data
-  EXPECT_ARR_EQ(vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4], f(a));
-
-  // Instantiate it again with some different data
-  float vals1[1] = {3.75f};
-  a = vals1;
-  EXPECT_ARR_EQ(vals1[0], f(a));
+  EXPECT_ARR_EQ(1.5 - 22.0 + 3.75 + 1.125 - 3.375,
+                f(initializer_list<double>{1.5, -22.0, 3.75, 1.125, -3.375}));
+  EXPECT_ARR_EQ(3.75, f(initializer_list<double>{3.75}));
 }
 
 TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  // Set up some data for the test reduction
-  float vals0[5] = {1.5, -22., 3.75, 1.125, -3.375};
-  nd::array a = vals0;
-  EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
-  EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
-
-  // Call it on the data
-  // Use 100.f as the "identity" to confirm it's really being used
-  EXPECT_ARR_EQ(100.f + vals0[0] + vals0[1] + vals0[2] + vals0[3] + vals0[4],
-                f(a, kwds("identity", 100.0f)));
+  EXPECT_ARR_EQ(100.0 + 1.5 - 22.0 + 3.75 + 1.125 - 3.375,
+                f(initializer_list<double>{1.5, -22., 3.75, 1.125, -3.375},
+                  kwds("identity", 100.0)));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
