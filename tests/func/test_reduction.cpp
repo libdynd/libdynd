@@ -223,8 +223,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
                     ndt::type("1 * 1 * float32"));
 
   // Call it on the data
-  EXPECT_ARR_EQ({{1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f}},
-                f(a, kwds("keepdims", true)));
+  EXPECT_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f,
+            f(a, kwds("keepdims", true))(0, 0).as<float>());
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
@@ -368,9 +368,8 @@ TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
 {
-  // Lift it to a three-dimensional strided float32 reduction callable
   nd::callable f = nd::functional::reduction(
-      kernels::make_builtin_sum_reduction_callable(float32_type_id));
+      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
 
   // Set up some data for the test reduction
   nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
