@@ -168,39 +168,24 @@ TEST(Reduction, BuiltinSum_Lift1D_WithIdentity)
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  // Set up some data for the test reduction
-  nd::array a =
-      parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-  EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
-  EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
-
-  // Call it on the data
-  EXPECT_ARR_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f, f(a));
-
-  // Instantiate it again with some different data
-  a = parse_json("1 * 2 * float32", "[[1.5, -2]]");
-
-  // Call it on the data
-  EXPECT_ARR_EQ(1.5f - 2.f, f(a));
+  EXPECT_ARR_EQ(1.5 + 2.0 + 7.0 - 2.25 + 7.0 + 2.125,
+                f(initializer_list<initializer_list<double>>{
+                    {1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}}));
+  EXPECT_ARR_EQ(1.5 - 2.0,
+                f(initializer_list<initializer_list<double>>{{1.5, -2.0}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  // Set up some data for the test reduction
-  nd::array a =
-      parse_json("2 * 3 * float32", "[[1.5, 2, 7], [-2.25, 7, 2.125]]");
-  EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
-  EXPECT_TYPE_MATCH(f.get_type()->get_return_type(),
-                    ndt::type("1 * 1 * float32"));
-
-  // Call it on the data
-  EXPECT_EQ(1.5f + 2.f + 7.f - 2.25f + 7.f + 2.125f,
-            f(a, kwds("keepdims", true))(0, 0).as<float>());
+  EXPECT_ARR_EQ({{1.5 + 2.0 + 7.0 - 2.25 + 7.0 + 2.125}},
+                f(initializer_list<initializer_list<double>>{
+                      {1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}},
+                  kwds("keepdims", true)));
 }
 
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_BroadcastReduce)
