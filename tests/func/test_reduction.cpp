@@ -247,58 +247,38 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  // Set up some data for the test reduction
-  nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
-                                                  "[7, -0.5]], [[-2.25, 1], "
-                                                  "[7, 0], [2.125, 0.25]]]");
-  EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
-  EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type::make<float>());
-
-  // Call it on the data
-  EXPECT_ARR_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f - 2.25f + 1.f + 7.f +
-                    2.125f + 0.25f,
-                f(a));
+  EXPECT_ARR_EQ(1.5 - 2.375 + 2.0 + 1.25 + 7.0 - 0.5 - 2.25 + 1.0 + 7.0 +
+                    2.125 + 0.25,
+                f(initializer_list<initializer_list<initializer_list<double>>>{
+                    {{1.5, -2.375}, {2, 1.25}, {7, -0.5}},
+                    {{-2.25, 1}, {7, 0}, {2.125, 0.25}}}));
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_BroadcastReduceReduce)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  // Set up some data for the test reduction
-  nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
-                                                  "[7, -0.5]], [[-2.25, 1], "
-                                                  "[7, 0], [2.125, 0.25]]]");
-  EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
-  EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type("2 * float32"));
-
-  // Call it on the data
-  EXPECT_EQ(1.5f - 2.375f + 2.f + 1.25f + 7.f - 0.5f,
-            f(a, kwds("axes", nd::array({1, 2})))(0).as<float>());
-  EXPECT_EQ(-2.25f + 1.f + 7.f + 2.125f + 0.25f,
-            f(a, kwds("axes", nd::array({1, 2})))(1).as<float>());
+  EXPECT_ARR_EQ((initializer_list<double>{1.5 - 2.375 + 2.0 + 1.25 + 7.0 - 0.5,
+                                          -2.25 + 1.0 + 7.0 + 2.125 + 0.25}),
+                f(initializer_list<initializer_list<initializer_list<double>>>{
+                      {{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}},
+                      {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}},
+                  kwds("axes", nd::array({1, 2}))));
 }
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceBroadcastReduce)
 {
   nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](float32 x, float32 y) { return x + y; }));
+      nd::functional::apply([](double x, double y) { return x + y; }));
 
-  // Set up some data for the test reduction
-  nd::array a = parse_json("2 * 3 * 2 * float32", "[[[1.5, -2.375], [2, 1.25], "
-                                                  "[7, -0.5]], [[-2.25, 1], "
-                                                  "[7, 0], [2.125, 0.25]]]");
-  a = a(irange(), irange(), irange());
-  EXPECT_TYPE_MATCH(f.get_type()->get_pos_type(0), a.get_type());
-  EXPECT_TYPE_MATCH(f.get_type()->get_return_type(), ndt::type("3 * float32"));
-
-  // Call it on the data
-  EXPECT_EQ(1.5f - 2.375f - 2.25f + 1.f,
-            f(a, kwds("axes", nd::array({0, 2})))(0).as<float>());
-  EXPECT_EQ(2.f + 1.25f + 7.f,
-            f(a, kwds("axes", nd::array({0, 2})))(1).as<float>());
-  EXPECT_EQ(7.f - 0.5f + 2.125f + 0.25f,
-            f(a, kwds("axes", nd::array({0, 2})))(2).as<float>());
+  EXPECT_ARR_EQ(
+      (initializer_list<double>{1.5 - 2.375 - 2.25 + 1.0, 2.0 + 1.25 + 7.0,
+                                7.0 - 0.5 + 2.125 + 0.25}),
+      f(initializer_list<initializer_list<initializer_list<double>>>{
+            {{1.5, -2.375}, {2.0, 1.25}, {7.0, -0.5}},
+            {{-2.25, 1.0}, {7.0, 0.0}, {2.125, 0.25}}},
+        kwds("axes", nd::array({0, 2}))));
 }
