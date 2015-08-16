@@ -21,112 +21,49 @@
 using namespace std;
 using namespace dynd;
 
-TEST(Reduction, BuiltinSum_Kernel)
+TEST(Sum, 1D)
 {
-  ckernel_builder<kernel_request_host> ckb;
-  expr_single_t fn;
-  char *src = NULL;
-
   // int32
-  kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, int32_type_id,
-                                              kernel_request_single);
-  fn = ckb.get()->get_function<expr_single_t>();
-  int32_t s32 = 0, a32[3] = {1, -2, 12};
-  src = (char *)&a32[0];
-  fn(ckb.get(), (char *)&s32, &src);
-  EXPECT_EQ(1, s32);
-  src = (char *)&a32[1];
-  fn(ckb.get(), (char *)&s32, &src);
-  EXPECT_EQ(-1, s32);
-  src = (char *)&a32[2];
-  fn(ckb.get(), (char *)&s32, &src);
-  EXPECT_EQ(11, s32);
+  EXPECT_ARR_EQ(1, nd::sum(nd::array{1}));
+  EXPECT_ARR_EQ(-1, nd::sum(nd::array{1, -2}));
+  EXPECT_ARR_EQ(11, nd::sum(nd::array{1, -2, 12}));
 
   // int64
-  ckb.reset();
-  kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, int64_type_id,
-                                              kernel_request_single);
-  fn = ckb.get()->get_function<expr_single_t>();
-  int64_t s64 = 0, a64[3] = {1, -20000000000LL, 12};
-  src = (char *)&a64[0];
-  fn(ckb.get(), (char *)&s64, &src);
-  EXPECT_EQ(1, s64);
-  src = (char *)&a64[1];
-  fn(ckb.get(), (char *)&s64, &src);
-  EXPECT_EQ(-19999999999LL, s64);
-  src = (char *)&a64[2];
-  fn(ckb.get(), (char *)&s64, &src);
-  EXPECT_EQ(-19999999987LL, s64);
+  EXPECT_ARR_EQ(1LL, nd::sum(nd::array{1LL}));
+  EXPECT_ARR_EQ(-19999999999LL, nd::sum(nd::array{1LL, -20000000000LL}));
+  EXPECT_ARR_EQ(-19999999987LL, nd::sum(nd::array{1LL, -20000000000LL, 12LL}));
 
   // float32
-  ckb.reset();
-  kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, float32_type_id,
-                                              kernel_request_single);
-  fn = ckb.get()->get_function<expr_single_t>();
-  float sf32 = 0, af32[3] = {1.25f, -2.5f, 12.125f};
-  src = (char *)&af32[0];
-  fn(ckb.get(), (char *)&sf32, &src);
-  EXPECT_EQ(1.25f, sf32);
-  src = (char *)&af32[1];
-  fn(ckb.get(), (char *)&sf32, &src);
-  EXPECT_EQ(-1.25f, sf32);
-  src = (char *)&af32[2];
-  fn(ckb.get(), (char *)&sf32, &src);
-  EXPECT_EQ(10.875f, sf32);
+  EXPECT_ARR_EQ(1.25f, nd::sum(nd::array{1.25f}));
+  EXPECT_ARR_EQ(-1.25f, nd::sum(nd::array{1.25f, -2.5f}));
+  EXPECT_ARR_EQ(10.875f, nd::sum(nd::array{1.25f, -2.5f, 12.125f}));
 
   // float64
-  ckb.reset();
-  kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, float64_type_id,
-                                              kernel_request_single);
-  fn = ckb.get()->get_function<expr_single_t>();
-  double sf64 = 0, af64[3] = {1.25, -2.5, 12.125};
-  src = (char *)&af64[0];
-  fn(ckb.get(), (char *)&sf64, &src);
-  EXPECT_EQ(1.25, sf64);
-  src = (char *)&af64[1];
-  fn(ckb.get(), (char *)&sf64, &src);
-  EXPECT_EQ(-1.25, sf64);
-  src = (char *)&af64[2];
-  fn(ckb.get(), (char *)&sf64, &src);
-  EXPECT_EQ(10.875, sf64);
+  EXPECT_ARR_EQ(1.25, nd::sum(nd::array{1.25}));
+  EXPECT_ARR_EQ(-1.25, nd::sum(nd::array{1.25, -2.5}));
+  EXPECT_ARR_EQ(10.875, nd::sum(nd::array{1.25, -2.5, 12.125}));
 
   // complex[float32]
-  ckb.reset();
-  kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, complex_float32_type_id,
-                                              kernel_request_single);
-  fn = ckb.get()->get_function<expr_single_t>();
-  dynd::complex<float> scf32 = 0,
-                       acf32[3] = {dynd::complex<float>(1.25f, -2.125f),
-                                   dynd::complex<float>(-2.5f, 1.0f),
-                                   dynd::complex<float>(12.125f, 12345.f)};
-  src = (char *)&acf32[0];
-  fn(ckb.get(), (char *)&scf32, &src);
-  EXPECT_EQ(dynd::complex<float>(1.25f, -2.125f), scf32);
-  src = (char *)&acf32[1];
-  fn(ckb.get(), (char *)&scf32, &src);
-  EXPECT_EQ(dynd::complex<float>(-1.25f, -1.125f), scf32);
-  src = (char *)&acf32[2];
-  fn(ckb.get(), (char *)&scf32, &src);
-  EXPECT_EQ(dynd::complex<float>(10.875f, 12343.875f), scf32);
+  EXPECT_ARR_EQ(dynd::complex<float>(1.25f, -2.125f),
+                nd::sum(nd::array{dynd::complex<float>(1.25f, -2.125f)}));
+  EXPECT_ARR_EQ(dynd::complex<float>(-1.25f, -1.125f),
+                nd::sum(nd::array{dynd::complex<float>(1.25f, -2.125f),
+                                  dynd::complex<float>(-2.5f, 1.0f)}));
+  EXPECT_ARR_EQ(dynd::complex<float>(10.875f, 12343.875f),
+                nd::sum(nd::array{dynd::complex<float>(1.25f, -2.125f),
+                                  dynd::complex<float>(-2.5f, 1.0f),
+                                  dynd::complex<float>(12.125f, 12345.0f)}));
 
   // complex[float64]
-  ckb.reset();
-  kernels::make_builtin_sum_reduction_ckernel(&ckb, 0, complex_float64_type_id,
-                                              kernel_request_single);
-  fn = ckb.get()->get_function<expr_single_t>();
-  dynd::complex<double> scf64 = 0,
-                        acf64[3] = {dynd::complex<double>(1.25, -2.125),
-                                    dynd::complex<double>(-2.5, 1.0),
-                                    dynd::complex<double>(12.125, 12345.)};
-  src = (char *)&acf64[0];
-  fn(ckb.get(), (char *)&scf64, &src);
-  EXPECT_EQ(dynd::complex<float>(1.25, -2.125), scf64);
-  src = (char *)&acf64[1];
-  fn(ckb.get(), (char *)&scf64, &src);
-  EXPECT_EQ(dynd::complex<double>(-1.25, -1.125), scf64);
-  src = (char *)&acf64[2];
-  fn(ckb.get(), (char *)&scf64, &src);
-  EXPECT_EQ(dynd::complex<double>(10.875, 12343.875), scf64);
+  EXPECT_ARR_EQ(dynd::complex<double>(1.25, -2.125),
+                nd::sum(nd::array{dynd::complex<double>(1.25, -2.125)}));
+  EXPECT_ARR_EQ(dynd::complex<double>(-1.25, -1.125),
+                nd::sum(nd::array{dynd::complex<double>(1.25, -2.125),
+                                  dynd::complex<double>(-2.5, 1.0)}));
+  EXPECT_ARR_EQ(dynd::complex<double>(10.875, 12343.875),
+                nd::sum(nd::array{dynd::complex<double>(1.25, -2.125),
+                                  dynd::complex<double>(-2.5, 1.0),
+                                  dynd::complex<double>(12.125, 12345.0)}));
 }
 
 TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)

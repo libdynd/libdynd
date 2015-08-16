@@ -14,7 +14,10 @@ using namespace dynd;
 nd::callable nd::sum::make()
 {
   auto children = callable::make_all<
-      sum_kernel, type_id_sequence<int32_type_id, int64_type_id>>(0);
+      sum_kernel,
+      type_id_sequence<int32_type_id, int64_type_id, float32_type_id,
+                       float64_type_id, complex_float32_type_id,
+                       complex_float64_type_id>>(0);
 
   return functional::reduction(functional::multidispatch(
       ndt::type("(Any) -> Any"),
