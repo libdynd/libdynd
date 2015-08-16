@@ -182,7 +182,8 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceReduce_KeepDim)
   nd::callable f = nd::functional::reduction(
       nd::functional::apply([](double x, double y) { return x + y; }));
 
-  EXPECT_ARR_EQ({{1.5 + 2.0 + 7.0 - 2.25 + 7.0 + 2.125}},
+  EXPECT_ARR_EQ(initializer_list<initializer_list<double>>{
+                    {1.5 + 2.0 + 7.0 - 2.25 + 7.0 + 2.125}},
                 f(initializer_list<initializer_list<double>>{
                       {1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}},
                   kwds("keepdims", true)));
