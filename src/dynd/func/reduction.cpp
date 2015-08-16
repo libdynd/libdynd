@@ -48,7 +48,7 @@ nd::callable nd::functional::reduction(const callable &child)
           ndt::make_ellipsis_dim("Dims", child.get_type()->get_return_type()),
           {ndt::make_ellipsis_dim("Dims", child.get_type()->get_pos_type(0))},
           {"axes", "identity", "keepdims"},
-          {ndt::type("Fixed * int32"),
+          {ndt::option_type::make(ndt::type("Fixed * int32")),
            ndt::option_type::make(child.get_type()->get_return_type()),
            ndt::option_type::make(ndt::type::make<bool>())}),
       reduction_kernel::static_data_type(child),
