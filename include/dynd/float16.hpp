@@ -22,9 +22,9 @@ namespace dynd {
 
 // Bit-level conversions
 DYND_CUDA_HOST_DEVICE uint16_t
-    float_to_halfbits(float value, assign_error_mode errmode);
+float_to_halfbits(float value, assign_error_mode errmode);
 DYND_CUDA_HOST_DEVICE uint16_t
-    double_to_halfbits(double value, assign_error_mode errmode);
+double_to_halfbits(double value, assign_error_mode errmode);
 DYND_CUDA_HOST_DEVICE float halfbits_to_float(uint16_t value);
 DYND_CUDA_HOST_DEVICE double halfbits_to_double(uint16_t value);
 
@@ -39,7 +39,9 @@ public:
   {
   }
 
-  DYND_CUDA_HOST_DEVICE float16() {}
+  DYND_CUDA_HOST_DEVICE float16()
+  {
+  }
 
   DYND_CUDA_HOST_DEVICE explicit float16(bool1 rhs)
       : m_bits(rhs ? DYND_FLOAT16_ONE : DYND_FLOAT16_ZERO)
@@ -104,7 +106,9 @@ public:
 
   DYND_CUDA_HOST_DEVICE explicit float16(const float128 &value);
 
-  DYND_CUDA_HOST_DEVICE float16(const float16 &rhs) : m_bits(rhs.m_bits) {}
+  DYND_CUDA_HOST_DEVICE float16(const float16 &rhs) : m_bits(rhs.m_bits)
+  {
+  }
 
   DYND_CUDA_HOST_DEVICE explicit operator int8() const
   {
@@ -162,7 +166,10 @@ public:
 
   DYND_CUDA_HOST_DEVICE explicit operator float128() const;
 
-  DYND_CUDA_HOST_DEVICE inline uint16_t bits() const { return m_bits; }
+  DYND_CUDA_HOST_DEVICE inline uint16_t bits() const
+  {
+    return m_bits;
+  }
 
   DYND_CUDA_HOST_DEVICE inline bool iszero() const
   {
@@ -266,12 +273,21 @@ public:
 
   DYND_CUDA_HOST_DEVICE friend float16 float16_from_bits(uint16_t bits);
 
-  float16 operator-() const { return float16(-static_cast<float>(*this)); }
+  float16 operator-() const
+  {
+    return float16(-static_cast<float>(*this));
+  }
 };
 
 DYND_CUDA_HOST_DEVICE inline bool isfinite(float16 value)
 {
   return value.isfinite_();
+}
+
+inline float16 operator+(const float16 &DYND_UNUSED(lhs),
+                         const float16 &DYND_UNUSED(rhs))
+{
+  throw std::runtime_error("+ is not implemented for float16");
 }
 
 inline bool operator<(const float16 &lhs, const float16 &rhs)

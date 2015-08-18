@@ -31,6 +31,8 @@ namespace nd {
         std::intptr_t reduce_ndim; // number of dimensions being reduced
         int32 *axes;
         bool keepdims;
+
+        ndt::type child_src_tp;
       };
 
       // This function pointer is for all the calls of the function
@@ -1053,11 +1055,14 @@ namespace nd {
           const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
           const std::map<std::string, ndt::type> &tp_vars)
       {
-        ndt::type child_dst_tp = static_data->child.get_type()->get_return_type();
+        ndt::type child_dst_tp =
+            static_data->child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
+          data->child_src_tp =
+              src_tp[0].get_type_at_dimension(NULL, data->reduce_ndim);
           static_data->child.get()->resolve_dst_type(
-              static_data->child.get()->static_data, 0, NULL, child_dst_tp, nsrc,
-              src_tp, nkwd, kwds, tp_vars);
+              static_data->child.get()->static_data, 0, NULL, child_dst_tp,
+              nsrc, &data->child_src_tp, nkwd, kwds, tp_vars);
         }
 
         // check that the child_dst_tp and the child_src_tp are the same here

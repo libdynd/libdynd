@@ -205,6 +205,12 @@ typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
                          int64_type_id, float32_type_id, float64_type_id,
                          complex_float32_type_id,
                          complex_float64_type_id> numeric_type_ids;
+typedef type_id_sequence<
+    bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
+    int128_type_id, uint8_type_id, uint16_type_id, uint32_type_id,
+    uint64_type_id, uint128_type_id, float16_type_id, float32_type_id,
+    float64_type_id, float128_type_id, complex_float32_type_id,
+    complex_float64_type_id> arithmetic_type_ids;
 
 typedef type_id_sequence<
     uninitialized_type_id, bool_type_id, int8_type_id, int16_type_id,

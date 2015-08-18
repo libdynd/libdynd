@@ -53,6 +53,11 @@ public:
   */
 };
 
+DYND_CUDA_HOST_DEVICE inline bool operator+(bool1 lhs, bool1 rhs)
+{
+  return static_cast<bool>(lhs) && static_cast<bool>(rhs);
+}
+
 DYND_CUDA_HOST_DEVICE inline bool operator<(bool1 lhs, bool1 rhs)
 {
   return static_cast<bool>(lhs) < static_cast<bool>(rhs);

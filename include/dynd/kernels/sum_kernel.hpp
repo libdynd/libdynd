@@ -29,7 +29,7 @@ namespace nd {
       char *src0 = src[0];
       intptr_t src0_stride = src_stride[0];
       if (dst_stride == 0) {
-        dst_type s = 0;
+        dst_type s(0);
         for (size_t i = 0; i < count; ++i) {
           s = s + *reinterpret_cast<src0_type *>(src0);
           src0 += src0_stride;
