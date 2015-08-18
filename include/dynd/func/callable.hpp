@@ -859,6 +859,11 @@ namespace nd {
                                 : NULL;
     }
 
+    callable_property get_flags() const
+    {
+      return right_associative;
+    }
+
     const ndt::callable_type *get_type() const
     {
       return !m_value.is_null()
@@ -874,6 +879,16 @@ namespace nd {
     const ndt::type &get_ret_type() const
     {
       return get_type()->get_return_type();
+    }
+
+    std::intptr_t get_narg() const
+    {
+      return get_type()->get_npos();
+    }
+
+    const ndt::type &get_arg_type(std::intptr_t i) const
+    {
+      return get_type()->get_pos_type(i);
     }
 
     const array &get_arg_types() const

@@ -85,6 +85,7 @@ set(tests_SRC
     func/test_registry.cpp
     func/test_rolling.cpp
     func/test_special.cpp
+    func/test_sum.cpp
     func/test_take.cpp
     func/test_take_by_pointer.cpp
     gfunc/test_callable.cpp

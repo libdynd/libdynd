@@ -289,33 +289,33 @@ TEST(Apply, Function)
   nd::callable af;
 
   af = nd::functional::apply<kernel_request_host, decltype(&func0), &func0>();
-  EXPECT_ARR_EQ(TestFixture::To(4), af(TestFixture::To(5), TestFixture::To(3)));
+  EXPECT_ARRAY_EQ(TestFixture::To(4), af(TestFixture::To(5), TestFixture::To(3)));
 
   af = nd::functional::apply<kernel_request_host, decltype(&func2), &func2>();
-  EXPECT_ARR_EQ(TestFixture::To(13.6f),
+  EXPECT_ARRAY_EQ(TestFixture::To(13.6f),
                 af(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
   af = nd::functional::apply<kernel_request_host, decltype(&func3), &func3>();
-  EXPECT_ARR_EQ(TestFixture::To(12U), af());
+  EXPECT_ARRAY_EQ(TestFixture::To(12U), af());
 
   /*
   af = nd::functional::apply<kernel_request_host, decltype(&func4), &func4>();
   std::cout << af.get_array_type() << std::endl;
-  EXPECT_ARR_EQ(TestFixture::To(166.765), af(nd::array({9.14, -2.7, 15.32}),
+  EXPECT_ARRAY_EQ(TestFixture::To(166.765), af(nd::array({9.14, -2.7, 15.32}),
                                              nd::array({0.0, 0.65, 11.0})));
 
     af = nd::functional::apply<kernel_request_host,
     decltype(&func5), &func5>();
-    EXPECT_ARR_EQ(TestFixture::To(1251L), af(TestFixture::To({{1242L, 23L, -5L},
+    EXPECT_ARRAY_EQ(TestFixture::To(1251L), af(TestFixture::To({{1242L, 23L, -5L},
     {925L, -836L, -14L}})));
     */
 
   af = nd::functional::apply<kernel_request_host, decltype(&func6), &func6>();
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
   af = nd::functional::apply<kernel_request_host, decltype(&func7), &func7>();
-  EXPECT_ARR_EQ(
+  EXPECT_ARRAY_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 }
@@ -327,39 +327,39 @@ TEST(Apply, FunctionWithKeywords)
   nd::callable af;
 
   af = nd::functional::apply<decltype(&func0), &func0>("y");
-  EXPECT_ARR_EQ(TestFixture::To(4),
+  EXPECT_ARRAY_EQ(TestFixture::To(4),
                 af(TestFixture::To(5), kwds("y", TestFixture::To(3))));
 
   af = nd::functional::apply<decltype(&func0), &func0>("x", "y");
-  EXPECT_ARR_EQ(TestFixture::To(4),
+  EXPECT_ARRAY_EQ(TestFixture::To(4),
                 af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
   af = nd::functional::apply<decltype(&func6), &func6>("z");
-  EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
+  EXPECT_ARRAY_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
 
   af = nd::functional::apply<decltype(&func6), &func6>("y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(TestFixture::To(3),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(7))));
 
   af = nd::functional::apply<decltype(&func6), &func6>("x", "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(kwds("x", TestFixture::To(3), "y", TestFixture::To(5), "z",
                         TestFixture::To(7))));
 
   af = nd::functional::apply<decltype(&func7), &func7>("z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38), TestFixture::To(5),
                    kwds("z", TestFixture::To(12.1))));
 
   af = nd::functional::apply<decltype(&func7), &func7>("y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(12.1))));
 
   af = nd::functional::apply<decltype(&func7), &func7>("x", "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(kwds("x", TestFixture::To(38), "y", TestFixture::To(5), "z",
                         TestFixture::To(12.1))));
 }
@@ -373,7 +373,7 @@ TEST(Apply, MemberFunction)
   struct0 *s0 = new struct0;
 
   nd::callable af = nd::functional::apply(s0, &struct0::func0);
-  EXPECT_ARR_EQ(nd::array(7), af(1, 2, 3));
+  EXPECT_ARRAY_EQ(nd::array(7), af(1, 2, 3));
 
   delete s0;
 }
@@ -385,17 +385,17 @@ TYPED_TEST_P(Apply, Callable)
   if (TestFixture::KernelRequest == kernel_request_host) {
     af = nd::functional::apply<kernel_request_host>(
         get_func0<kernel_request_host>());
-    EXPECT_ARR_EQ(TestFixture::To(4),
+    EXPECT_ARRAY_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), TestFixture::To(3)));
 
     af = nd::functional::apply<kernel_request_host>(
         func0_as_callable<kernel_request_host>());
-    EXPECT_ARR_EQ(TestFixture::To(4),
+    EXPECT_ARRAY_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), TestFixture::To(3)));
 
     af = nd::functional::apply<kernel_request_host,
                                func0_as_callable<kernel_request_host>>();
-    EXPECT_ARR_EQ(TestFixture::To(4),
+    EXPECT_ARRAY_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), TestFixture::To(3)));
   }
 
@@ -403,115 +403,115 @@ TYPED_TEST_P(Apply, Callable)
   if (TestFixture::KernelRequest == kernel_request_cuda_device) {
     af = nd::functional::apply<kernel_request_cuda_device>(
         get_func1<kernel_request_cuda_device>());
-    EXPECT_ARR_EQ(TestFixture::To(58.25),
+    EXPECT_ARRAY_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), TestFixture::To(20)));
 
     af = nd::functional::apply<kernel_request_cuda_device>(
         func1_as_callable<kernel_request_cuda_device>());
-    EXPECT_ARR_EQ(TestFixture::To(58.25),
+    EXPECT_ARRAY_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), TestFixture::To(20)));
 
     af = nd::functional::apply<kernel_request_cuda_device,
                                func1_as_callable<kernel_request_cuda_device>>();
-    EXPECT_ARR_EQ(TestFixture::To(58.25),
+    EXPECT_ARRAY_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), TestFixture::To(20)));
   }
 #endif
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func2<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(13.6f),
+  EXPECT_ARRAY_EQ(TestFixture::To(13.6f),
                 af(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func2_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(13.6f),
+  EXPECT_ARRAY_EQ(TestFixture::To(13.6f),
                 af(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              func2_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARR_EQ(TestFixture::To(13.6f),
+  EXPECT_ARRAY_EQ(TestFixture::To(13.6f),
                 af(TestFixture::To({3.9f, -7.0f, 16.7f})));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func3<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(12U), af());
+  EXPECT_ARRAY_EQ(TestFixture::To(12U), af());
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func3_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(12U), af());
+  EXPECT_ARRAY_EQ(TestFixture::To(12U), af());
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              func3_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARR_EQ(TestFixture::To(12U), af());
+  EXPECT_ARRAY_EQ(TestFixture::To(12U), af());
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func4<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(167.451),
+  EXPECT_ARRAY_EQ(TestFixture::To(167.451),
                 af(TestFixture::To({9.25, -2.7, 15.375}),
                    TestFixture::To({0.0, 0.62, 11.0})));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func4_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(167.451),
+  EXPECT_ARRAY_EQ(TestFixture::To(167.451),
                 af(TestFixture::To({9.25, -2.7, 15.375}),
                    TestFixture::To({0.0, 0.62, 11.0})));
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              func4_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARR_EQ(TestFixture::To(167.451),
+  EXPECT_ARRAY_EQ(TestFixture::To(167.451),
                 af(TestFixture::To({9.25, -2.7, 15.375}),
                    TestFixture::To({0.0, 0.62, 11.0})));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func6_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              func6_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(TestFixture::To(3), TestFixture::To(5), TestFixture::To(7)));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func7<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(
+  EXPECT_ARRAY_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func7_as_callable<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(
+  EXPECT_ARRAY_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              func7_as_callable<TestFixture::KernelRequest>>();
-  EXPECT_ARR_EQ(
+  EXPECT_ARRAY_EQ(
       TestFixture::To(36.3),
       af(TestFixture::To(38), TestFixture::To(5), TestFixture::To(12.1)));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       callable0<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(475.0), af(TestFixture::To(47.5)));
+  EXPECT_ARRAY_EQ(TestFixture::To(475.0), af(TestFixture::To(47.5)));
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              callable0<TestFixture::KernelRequest>>();
-  EXPECT_ARR_EQ(TestFixture::To(475.0), af(TestFixture::To(47.5)));
+  EXPECT_ARRAY_EQ(TestFixture::To(475.0), af(TestFixture::To(47.5)));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       callable2<TestFixture::KernelRequest>());
-  EXPECT_ARR_EQ(TestFixture::To(11),
+  EXPECT_ARRAY_EQ(TestFixture::To(11),
                 af(TestFixture::To(5), TestFixture::To(3)));
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              callable2<TestFixture::KernelRequest>>();
-  EXPECT_ARR_EQ(TestFixture::To(11),
+  EXPECT_ARRAY_EQ(TestFixture::To(11),
                 af(TestFixture::To(5), TestFixture::To(3)));
 }
 
@@ -522,20 +522,20 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
   if (TestFixture::KernelRequest == kernel_request_host) {
     af = nd::functional::apply<kernel_request_host>(
         get_func0<kernel_request_host>(), "y");
-    EXPECT_ARR_EQ(TestFixture::To(4),
+    EXPECT_ARRAY_EQ(TestFixture::To(4),
                   af(TestFixture::To(5), kwds("y", TestFixture::To(3))));
 
     af = nd::functional::apply<kernel_request_host>(
         get_func0<kernel_request_host>(), "x", "y");
-    EXPECT_ARR_EQ(TestFixture::To(4),
+    EXPECT_ARRAY_EQ(TestFixture::To(4),
                   af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
     af = nd::functional::apply(func0_as_callable<kernel_request_host>(), "y");
-    EXPECT_ARR_EQ(TestFixture::To(4), af(5, kwds("y", TestFixture::To(3))));
+    EXPECT_ARRAY_EQ(TestFixture::To(4), af(5, kwds("y", TestFixture::To(3))));
 
     af = nd::functional::apply(func0_as_callable<kernel_request_host>(), "x",
                                "y");
-    EXPECT_ARR_EQ(TestFixture::To(4),
+    EXPECT_ARRAY_EQ(TestFixture::To(4),
                   af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
   }
 
@@ -543,120 +543,120 @@ TYPED_TEST_P(Apply, CallableWithKeywords)
   if (TestFixture::KernelRequest == kernel_request_cuda_device) {
     af = nd::functional::apply<kernel_request_cuda_device>(
         get_func1<kernel_request_cuda_device>(), "y");
-    EXPECT_ARR_EQ(TestFixture::To(58.25),
+    EXPECT_ARRAY_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), kwds("y", TestFixture::To(20))));
 
     af = nd::functional::apply<kernel_request_cuda_device>(
         get_func1<kernel_request_cuda_device>(), "x", "y");
-    EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
+    EXPECT_ARRAY_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
                                                   "y", TestFixture::To(20))));
 
     af = nd::functional::apply<kernel_request_cuda_device>(
         func1_as_callable<kernel_request_cuda_device>(), "y");
-    EXPECT_ARR_EQ(TestFixture::To(58.25),
+    EXPECT_ARRAY_EQ(TestFixture::To(58.25),
                   af(TestFixture::To(3.25), kwds("y", TestFixture::To(20))));
 
     af = nd::functional::apply<kernel_request_cuda_device>(
         func1_as_callable<kernel_request_cuda_device>(), "x", "y");
-    EXPECT_ARR_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
+    EXPECT_ARRAY_EQ(TestFixture::To(58.25), af(kwds("x", TestFixture::To(3.25),
                                                   "y", TestFixture::To(20))));
   }
 #endif
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>(), "z");
-  EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
+  EXPECT_ARRAY_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>(), "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(TestFixture::To(3),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(7))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func6<TestFixture::KernelRequest>(), "x", "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(kwds("x", TestFixture::To(3), "y", TestFixture::To(5), "z",
                         TestFixture::To(7))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func6_as_callable<TestFixture::KernelRequest>(), "z");
-  EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
+  EXPECT_ARRAY_EQ(TestFixture::To(8), af(TestFixture::To(3), TestFixture::To(5),
                                        kwds("z", TestFixture::To(7))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func6_as_callable<TestFixture::KernelRequest>(), "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(TestFixture::To(3),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(7))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func6_as_callable<TestFixture::KernelRequest>(), "x", "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(8),
+  EXPECT_ARRAY_EQ(TestFixture::To(8),
                 af(kwds("x", TestFixture::To(3), "y", TestFixture::To(5), "z",
                         TestFixture::To(7))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func7<TestFixture::KernelRequest>(), "z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38), TestFixture::To(5),
                    kwds("z", TestFixture::To(12.1))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func7<TestFixture::KernelRequest>(), "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(12.1))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       get_func7<TestFixture::KernelRequest>(), "x", "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(kwds("x", TestFixture::To(38), "y", TestFixture::To(5), "z",
                         TestFixture::To(12.1))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func7_as_callable<TestFixture::KernelRequest>(), "z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38), TestFixture::To(5),
                    kwds("z", TestFixture::To(12.1))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func7_as_callable<TestFixture::KernelRequest>(), "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(TestFixture::To(38),
                    kwds("y", TestFixture::To(5), "z", TestFixture::To(12.1))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       func7_as_callable<TestFixture::KernelRequest>(), "x", "y", "z");
-  EXPECT_ARR_EQ(TestFixture::To(36.3),
+  EXPECT_ARRAY_EQ(TestFixture::To(36.3),
                 af(kwds("x", TestFixture::To(38), "y", TestFixture::To(5), "z",
                         TestFixture::To(12.1))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       callable0<TestFixture::KernelRequest>(), "x");
-  EXPECT_ARR_EQ(TestFixture::To(475.0), af(kwds("x", TestFixture::To(47.5))));
+  EXPECT_ARRAY_EQ(TestFixture::To(475.0), af(kwds("x", TestFixture::To(47.5))));
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              callable1<TestFixture::KernelRequest>, int, int>(
       "x", "y");
-  EXPECT_ARR_EQ(TestFixture::To(28),
+  EXPECT_ARRAY_EQ(TestFixture::To(28),
                 af(TestFixture::To(2),
                    kwds("x", TestFixture::To(1), "y", TestFixture::To(7))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       callable2<TestFixture::KernelRequest>(), "y");
-  EXPECT_ARR_EQ(TestFixture::To(11),
+  EXPECT_ARRAY_EQ(TestFixture::To(11),
                 af(TestFixture::To(5), kwds("y", TestFixture::To(3))));
 
   af = nd::functional::apply<TestFixture::KernelRequest>(
       callable2<TestFixture::KernelRequest>(), "x", "y");
-  EXPECT_ARR_EQ(TestFixture::To(11),
+  EXPECT_ARRAY_EQ(TestFixture::To(11),
                 af(kwds("x", TestFixture::To(5), "y", TestFixture::To(3))));
 
   af = nd::functional::apply<TestFixture::KernelRequest,
                              callable2<TestFixture::KernelRequest>, int>("z");
-  EXPECT_ARR_EQ(TestFixture::To(8), af(TestFixture::To(5), TestFixture::To(3),
+  EXPECT_ARRAY_EQ(TestFixture::To(8), af(TestFixture::To(5), TestFixture::To(3),
                                        kwds("z", TestFixture::To(4))));
 }
 

@@ -253,7 +253,7 @@ TEST(Elwise, Simple)
   nd::array b = parse_json("3 * int", "[3, 4, 5]");
 
   af = nd::functional::elwise(nd::functional::apply<callable0>());
-  EXPECT_ARR_EQ(nd::array({3, 5, 7}), af(a, b));
+  EXPECT_ARRAY_EQ(nd::array({3, 5, 7}), af(a, b));
 
 #ifdef __CUDACC__
 //  a = a.to_cuda_device();
@@ -261,10 +261,10 @@ TEST(Elwise, Simple)
 
 //  af = nd::functional::apply<kernel_request_cuda_device, xcallable0>();
 //  std::cout << af << std::endl;
-// EXPECT_ARR_EQ(nd::array({3, 5, 7}).to_cuda_device(), nd::elwise(a, b,
+// EXPECT_ARRAY_EQ(nd::array({3, 5, 7}).to_cuda_device(), nd::elwise(a, b,
 // kwds("func", af)));
 
 //  baf = nd::functional::elwise(af);
-//  EXPECT_ARR_EQ(nd::array({3, 5, 7}).to_cuda_device(), baf(a, b));
+//  EXPECT_ARRAY_EQ(nd::array({3, 5, 7}).to_cuda_device(), baf(a, b));
 #endif
 }

@@ -10,10 +10,7 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/array.hpp>
 #include <dynd/func/take.hpp>
-#include <dynd/kernels/reduction_kernels.hpp>
-#include <dynd/func/reduction.hpp>
 
 using namespace std;
 using namespace dynd;

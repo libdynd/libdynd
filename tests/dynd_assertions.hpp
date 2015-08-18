@@ -122,10 +122,12 @@ CompareDyNDArrayValues(const char *expr1, const char *expr2,
 {
   using namespace dynd;
   ndt::type common_tp;
-  try {
+  try
+  {
     common_tp = promote_types_arithmetic(val1.get_type(), val2.get_type());
   }
-  catch (const type_error &) {
+  catch (const type_error &)
+  {
     return ::testing::AssertionFailure()
            << "The types of " << expr1 << " and " << expr2
            << " do not have mutually promotable types\n" << expr1
@@ -155,10 +157,11 @@ MatchNdtTypes(const char *expr1, const char *expr2,
   if (pattern.match(candidate)) {
     return ::testing::AssertionSuccess();
   } else {
-    return ::testing::AssertionFailure()
-           << "The type of candidate " << expr2 << " does not match pattern "
-           << expr1 << "\n" << expr1 << " has value " << pattern << ",\n"
-           << expr2 << " has value " << candidate << ".";
+    return ::testing::AssertionFailure() << "The type of candidate " << expr2
+                                         << " does not match pattern " << expr1
+                                         << "\n" << expr1 << " has value "
+                                         << pattern << ",\n" << expr2
+                                         << " has value " << candidate << ".";
   }
 }
 
@@ -197,7 +200,7 @@ inline ::testing::AssertionResult ExpectAllTrue(const char *DYND_UNUSED(expr1),
 }
 
 inline ::testing::AssertionResult ExpectAllFalse(const char *DYND_UNUSED(expr1),
-                                                const dynd::nd::array actual)
+                                                 const dynd::nd::array actual)
 {
   if (!actual.as<bool>()) {
     return ::testing::AssertionSuccess();
@@ -213,12 +216,12 @@ inline ::testing::AssertionResult ExpectAllFalse(const char *DYND_UNUSED(expr1),
  * nd::array a = {1, 2, 3};-
  * int bvals[3] = {1, 2, 3}
  * nd::array b = bvals;
- * EXPECT_ARR_EQ(b, a);
+ * EXPECT_ARRAY_EQ(b, a);
  */
-#define EXPECT_ARR_EQ(expected, actual)                                        \
+#define EXPECT_ARRAY_EQ(expected, actual)                                      \
   EXPECT_PRED_FORMAT2(CompareDyNDArrays, expected, actual)
 
-#define EXPECT_ARR_VALS_EQ(expected, actual)                                   \
+#define EXPECT_ARRAY_VALS_EQ(expected, actual)                                 \
   EXPECT_PRED_FORMAT2(CompareDyNDArrayValues, expected, actual)
 
 #define EXPECT_ALL_TRUE(ACTUAL) EXPECT_PRED_FORMAT1(ExpectAllTrue, ACTUAL)
@@ -303,10 +306,11 @@ AssertRelErrorLE(const char *DYND_UNUSED(expected_expr),
     return ::testing::AssertionSuccess();
   }
 
-  return ::testing::AssertionFailure()
-         << "Expected: rel_error(" << expected << ", " << actual
-         << ") <= " << rel_error_max << "\n"
-         << "  Actual: " << rel_error_val << " vs " << rel_error_max;
+  return ::testing::AssertionFailure() << "Expected: rel_error(" << expected
+                                       << ", " << actual
+                                       << ") <= " << rel_error_max << "\n"
+                                       << "  Actual: " << rel_error_val
+                                       << " vs " << rel_error_max;
 }
 
 template <typename T>
@@ -322,10 +326,11 @@ AssertRelErrorLE(const char *DYND_UNUSED(expected_expr),
     return ::testing::AssertionSuccess();
   }
 
-  return ::testing::AssertionFailure()
-         << "Expected: rel_error(" << expected << ", " << actual
-         << ") <= " << rel_error_max << "\n"
-         << "  Actual: " << rel_error_val << " vs " << rel_error_max;
+  return ::testing::AssertionFailure() << "Expected: rel_error(" << expected
+                                       << ", " << actual
+                                       << ") <= " << rel_error_max << "\n"
+                                       << "  Actual: " << rel_error_val
+                                       << " vs " << rel_error_max;
 }
 
 inline ::testing::AssertionResult

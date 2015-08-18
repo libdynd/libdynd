@@ -261,7 +261,7 @@ TYPED_TEST_P(Arithmetic, ComplexScalar)
 TEST(Arithmetic, Minus)
 {
   nd::array a = {0.0, 1.0, 2.0, 3.0, 4.0};
-  EXPECT_ARR_EQ(nd::array({-0.0, -1.0, -2.0, -3.0, -4.0}), -a);
+  EXPECT_ARRAY_EQ(nd::array({-0.0, -1.0, -2.0, -3.0, -4.0}), -a);
 }
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,

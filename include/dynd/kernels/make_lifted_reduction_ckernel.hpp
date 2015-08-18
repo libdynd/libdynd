@@ -1053,13 +1053,16 @@ namespace nd {
           const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
           const std::map<std::string, ndt::type> &tp_vars)
       {
-        dst_tp = static_data->child.get_type()->get_return_type();
-        if (dst_tp.is_symbolic()) {
+        ndt::type child_dst_tp = static_data->child.get_type()->get_return_type();
+        if (child_dst_tp.is_symbolic()) {
           static_data->child.get()->resolve_dst_type(
-              static_data->child.get()->static_data, 0, NULL, dst_tp, nsrc,
+              static_data->child.get()->static_data, 0, NULL, child_dst_tp, nsrc,
               src_tp, nkwd, kwds, tp_vars);
         }
 
+        // check that the child_dst_tp and the child_src_tp are the same here
+
+        dst_tp = child_dst_tp;
         data->ndim = src_tp[0].get_ndim() - dst_tp.get_ndim();
 
         //        std::vector<const ndt::type *> element_tp =
