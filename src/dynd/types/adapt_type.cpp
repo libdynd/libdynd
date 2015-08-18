@@ -5,7 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/types/adapt_type.hpp>
-#include <dynd/func/chain.hpp>
+#include <dynd/func/compose.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -34,7 +34,7 @@ ndt::adapt_type::adapt_type(const type &operand_type, const type &value_type,
   // If the operand is an expression, make a buffering callable
   if (m_operand_type.get_kind() == expr_kind && !m_forward.is_null() &&
       m_operand_type != m_forward.get_type()->get_pos_type(0)) {
-    m_forward = nd::functional::chain(
+    m_forward = nd::functional::compose(
         make_callable_from_assignment(m_forward.get_type()->get_pos_type(0),
                                       m_operand_type, assign_error_default),
         m_forward, m_forward.get_type()->get_pos_type(0));

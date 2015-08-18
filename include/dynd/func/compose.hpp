@@ -12,11 +12,11 @@ namespace nd {
   namespace functional {
 
     /**
-     * Returns an callable which chains the two callables together.
+     * Returns an callable which composes the two callables together.
      * The buffer used to connect them is made out of the provided ``buf_tp``.
      */
-    callable chain(const callable &first, const callable &second,
-                   const ndt::type &buf_tp = ndt::type());
+    callable compose(const callable &first, const callable &second,
+                     const ndt::type &buf_tp = ndt::type());
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

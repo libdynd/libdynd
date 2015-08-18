@@ -290,9 +290,9 @@ set(libdynd_SRC
     src/dynd/func/callable_registry.cpp
     src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
+    src/dynd/func/compose.cpp
     src/dynd/func/compound.cpp
     src/dynd/func/copy.cpp
-    src/dynd/func/chain.cpp
     src/dynd/func/elwise.cpp
     src/dynd/func/fft.cpp
     src/dynd/func/reduction.cpp
@@ -315,8 +315,8 @@ set(libdynd_SRC
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
     include/dynd/func/comparison.hpp
+    include/dynd/func/compose.hpp
     include/dynd/func/compound.hpp
-    include/dynd/func/chain.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/fft.hpp
     include/dynd/func/apply.hpp
@@ -347,7 +347,6 @@ set(libdynd_SRC
     src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
-    src/dynd/kernels/chain_kernel.cpp
     src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
@@ -385,11 +384,11 @@ set(libdynd_SRC
     include/dynd/kernels/buffered_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
-    include/dynd/kernels/chain_kernel.hpp
     include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/ckernel_common_functions.hpp
     include/dynd/kernels/ckernel_prefix.hpp
     include/dynd/kernels/comparison_kernels.hpp
+    include/dynd/kernels/compose_kernel.hpp
     include/dynd/kernels/compound_kernel.hpp
     include/dynd/kernels/copy.hpp
     include/dynd/kernels/cuda_launch.hpp
@@ -403,11 +402,11 @@ set(libdynd_SRC
     include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/fft.hpp
     include/dynd/kernels/is_avail_kernel.hpp
-    include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/multidispatch_kernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/pointer_assignment_kernels.hpp
+    include/dynd/kernels/reduction_kernel.hpp
     include/dynd/kernels/rolling.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
