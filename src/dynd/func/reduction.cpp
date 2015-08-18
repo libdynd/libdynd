@@ -16,44 +16,33 @@ using namespace dynd;
 
 nd::callable nd::functional::reduction(const callable &child)
 {
-  // Validate the input elwise_reduction callable
   if (child.is_null()) {
-    throw runtime_error(
-        "lift_reduction_callable: 'elwise_reduction' may not be empty");
+    throw invalid_argument("'child' cannot be null");
   }
 
-  const ndt::callable_type *elwise_reduction_tp = child.get_type();
-  if (elwise_reduction_tp->get_npos() != 1 &&
-      !(elwise_reduction_tp->get_npos() == 2 &&
-        elwise_reduction_tp->get_pos_type(0) ==
-            elwise_reduction_tp->get_pos_type(1) &&
-        elwise_reduction_tp->get_pos_type(0) ==
-            elwise_reduction_tp->get_return_type())) {
+  switch (child.get_narg()) {
+  case 1:
+    break;
+  case 2:
+    return reduction((child.get_flags() | right_associative)
+                         ? left_compound(child)
+                         : right_compound(child));
+  default: {
     stringstream ss;
-    ss << "lift_reduction_callable: 'elwise_reduction' must contain a"
-          " unary operation ckernel or a binary expr ckernel with all "
-          "equal types, its prototype is " << elwise_reduction_tp;
+    ss << "'child' must be a unary callable, but its signature is "
+       << child.get_array_type();
     throw invalid_argument(ss.str());
   }
-
-  if (elwise_reduction_tp->get_npos() == 2) {
-    if (right_associative) {
-      return reduction(left_compound(child));
-    }
-
-    return reduction(right_compound(child));
   }
 
   return callable::make<reduction_kernel>(
       ndt::callable_type::make(
-          ndt::ellipsis_dim_type::make_if_not_variadic(
-              child.get_type()->get_return_type()),
-          {ndt::ellipsis_dim_type::make_if_not_variadic(
-              child.get_type()->get_pos_type(0))},
+          ndt::ellipsis_dim_type::make_if_not_variadic(child.get_ret_type()),
+          {ndt::ellipsis_dim_type::make_if_not_variadic(child.get_arg_type(0))},
           {"axes", "identity", "keepdims"},
           {ndt::option_type::make(ndt::type("Fixed * int32")),
-           ndt::option_type::make(child.get_type()->get_return_type()),
-           ndt::option_type::make(ndt::type::make<bool>())}),
+           ndt::option_type::make(child.get_ret_type()),
+           ndt::option_type::make(ndt::type::make<bool1>())}),
       reduction_kernel::static_data_type(child),
       sizeof(reduction_kernel::data_type));
 }

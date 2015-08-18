@@ -297,6 +297,7 @@ set(libdynd_SRC
     src/dynd/func/fft.cpp
     src/dynd/func/reduction.cpp
     src/dynd/func/math.cpp
+    src/dynd/func/mean.cpp
     src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood.cpp
     src/dynd/func/option.cpp
@@ -320,6 +321,7 @@ set(libdynd_SRC
     include/dynd/func/apply.hpp
     include/dynd/func/reduction.hpp
     include/dynd/func/math.hpp
+    include/dynd/func/mean.hpp
     include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood.hpp
     include/dynd/func/option.hpp
@@ -360,7 +362,6 @@ set(libdynd_SRC
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
-    src/dynd/kernels/reduction_kernels.cpp
     src/dynd/kernels/rolling.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
@@ -405,7 +406,6 @@ set(libdynd_SRC
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/pointer_assignment_kernels.hpp
-    include/dynd/kernels/reduction_kernels.hpp
     include/dynd/kernels/rolling.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp

@@ -15,7 +15,6 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/func/reduction.hpp>
-#include <dynd/kernels/reduction_kernels.hpp>
 
 using namespace std;
 using namespace dynd;

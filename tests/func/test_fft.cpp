@@ -324,7 +324,7 @@ TEST(FFT1D, Shift)
   EXPECT_JSON_EQ_ARR("[-4, -3, -2, -1, 0, 1, 2, 3, 4]", y0);
 
   y0 = nd::ifftshift(y0);
-  EXPECT_ARR_EQ(x0, y0);
+  EXPECT_ARRAY_EQ(x0, y0);
 
   double vals1[10] = {0.0, 1.0, 2.0, 3.0, 4.0, -5.0, -4.0, -3.0, -2.0, -1.0};
 
@@ -335,7 +335,7 @@ TEST(FFT1D, Shift)
   EXPECT_JSON_EQ_ARR("[-5, -4, -3, -2, -1, 0, 1, 2, 3, 4]", y1);
 
   y1 = nd::ifftshift(y1);
-  EXPECT_ARR_EQ(x1, y1);
+  EXPECT_ARRAY_EQ(x1, y1);
 }
 
 /*

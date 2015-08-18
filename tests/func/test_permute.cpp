@@ -44,6 +44,6 @@ TEST(Permute, ReturnType)
   paf = nd::functional::permute(af, {-1, 0, 1, 2});
   res = nd::empty(paf.get_type()->get_return_type());
   af(res, 5.0, 10.0, 1.0);
-  EXPECT_ARR_EQ(res, paf(5.0, 10.0, 1.0));
+  EXPECT_ARRAY_EQ(res, paf(5.0, 10.0, 1.0));
 */
 }

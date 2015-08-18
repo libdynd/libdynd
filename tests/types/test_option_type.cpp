@@ -76,20 +76,20 @@ TEST(OptionType, OptionIntAssign)
   a = parse_json("3 * ?int32", "[1, 2, 3]");
   b = nd::empty("3 * int32");
   b.vals() = a;
-  EXPECT_ARR_EQ(nd::view(a, "3 * int32"), b);
+  EXPECT_ARRAY_EQ(nd::view(a, "3 * int32"), b);
 
   // Assignment from T to option[T]
   a = parse_json("3 * int32", "[1, 3, 5]");
   b = nd::empty("3 * ?int32");
   b.vals() = a;
-  EXPECT_ARR_EQ(a, nd::view(b, "3 * int32"));
+  EXPECT_ARRAY_EQ(a, nd::view(b, "3 * int32"));
 
   // Assignment from string to option[int]
   a = parse_json("5 * string", "[\"null\", \"12\", \"NA\", \"34\", \"\"]");
   b = nd::empty("5 * ?int32");
   b.vals() = a;
   c = parse_json("5 * ?int32", "[null, 12, null, 34, null]");
-  EXPECT_ARR_EQ(nd::view(c, "Fixed * int32"), nd::view(b, "Fixed * int32"));
+  EXPECT_ARRAY_EQ(nd::view(c, "Fixed * int32"), nd::view(b, "Fixed * int32"));
 }
 
 TEST(OptionType, Cast)
@@ -99,7 +99,7 @@ TEST(OptionType, Cast)
   a = parse_json("3 * string", "[\"null\", \"NA\", \"25\"]");
   b = a.ucast(ndt::type("?int"));
   b = b.eval();
-  EXPECT_ARR_EQ(nd::view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"),
+  EXPECT_ARRAY_EQ(nd::view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"),
                 nd::view(b, "3 * int"));
 }
 
