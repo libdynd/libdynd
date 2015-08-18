@@ -17,7 +17,7 @@
 #include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
-#include <dynd/func/chain.hpp>
+#include <dynd/func/compose.hpp>
 #include <dynd/func/copy.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable_registry.hpp>
@@ -25,15 +25,15 @@
 using namespace std;
 using namespace dynd;
 
-TEST(Chain, Simple)
+TEST(Compose, Simple)
 {
-  nd::callable chained = nd::functional::chain(
+  nd::callable composed = nd::functional::compose(
       nd::copy, func::get_regfunction("sin"), ndt::type::make<double>());
   nd::array a = nd::empty<double>();
-  chained("0.0", kwds("dst", a));
+  composed("0.0", kwds("dst", a));
   EXPECT_EQ(0., a.as<double>());
-  chained("1.5", kwds("dst", a));
+  composed("1.5", kwds("dst", a));
   EXPECT_DOUBLE_EQ(sin(1.5), a.as<double>());
-  chained(3.1, kwds("dst", a));
+  composed(3.1, kwds("dst", a));
   EXPECT_DOUBLE_EQ(sin(3.1), a.as<double>());
 }
