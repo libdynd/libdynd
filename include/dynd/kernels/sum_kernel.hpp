@@ -14,8 +14,9 @@ namespace nd {
   struct sum_kernel
       : base_kernel<sum_kernel<Src0TypeID>, kernel_request_host, 1> {
     typedef typename type_of<Src0TypeID>::type src0_type;
-    typedef decltype(std::declval<src0_type>() +
-                     std::declval<src0_type>()) dst_type;
+    //    typedef decltype(std::declval<src0_type>() +
+    //                     std::declval<src0_type>()) dst_type;
+    typedef src0_type dst_type;
 
     static const std::size_t data_size = 0;
 
