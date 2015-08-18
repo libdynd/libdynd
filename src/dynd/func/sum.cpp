@@ -22,9 +22,9 @@ typedef type_id_sequence<
     void_pointer_type_id> builtin_type_ids;
 */
 
-typedef type_id_sequence<int32_type_id, int64_type_id, int128_type_id,
-                         float32_type_id, float64_type_id,
-                         complex_float32_type_id,
+typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
+                         int64_type_id, int128_type_id, float32_type_id,
+                         float64_type_id, complex_float32_type_id,
                          complex_float64_type_id> fundamental_type_ids;
 
 nd::callable nd::sum::make()
