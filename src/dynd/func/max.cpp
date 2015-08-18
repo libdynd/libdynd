@@ -3,18 +3,18 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/kernels/sum_kernel.hpp>
+#include <dynd/kernels/max_kernel.hpp>
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/reduction.hpp>
-#include <dynd/func/sum.hpp>
+#include <dynd/func/max.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
 
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::sum::make()
+nd::callable nd::max::make()
 {
-  auto children = callable::make_all<sum_kernel, arithmetic_type_ids>();
+  auto children = callable::make_all<max_kernel, arithmetic_type_ids>();
 
   return functional::reduction(functional::multidispatch(
       ndt::callable_type::make(ndt::scalar_kind_type::make(),
@@ -33,4 +33,4 @@ nd::callable nd::sum::make()
       data_size_max(children)));
 }
 
-struct nd::sum nd::sum;
+struct nd::max nd::max;
