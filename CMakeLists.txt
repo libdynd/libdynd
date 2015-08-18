@@ -297,6 +297,7 @@ set(libdynd_SRC
     src/dynd/func/fft.cpp
     src/dynd/func/reduction.cpp
     src/dynd/func/math.cpp
+    src/dynd/func/max.cpp
     src/dynd/func/mean.cpp
     src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood.cpp
@@ -321,6 +322,7 @@ set(libdynd_SRC
     include/dynd/func/apply.hpp
     include/dynd/func/reduction.hpp
     include/dynd/func/math.hpp
+    include/dynd/func/max.hpp
     include/dynd/func/mean.hpp
     include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood.hpp

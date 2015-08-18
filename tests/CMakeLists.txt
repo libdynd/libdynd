@@ -76,6 +76,7 @@ set(tests_SRC
     func/test_elwise.cpp
     func/test_fft.cpp
     func/test_math.cpp
+    func/test_max.cpp
     func/test_multidispatch.cpp
     func/test_neighborhood.cpp
     func/test_outer.cpp
