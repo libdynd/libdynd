@@ -226,15 +226,14 @@ ndt::type ndt::detail::internal_substitute(
             tv_type->second.extended<typevar_dim_type>()->get_name();
         if (concrete) {
           stringstream ss;
-          ss << "The substitution for dynd typevar " << exponent_name
-             << ", " << tv_type->second << ", is not concrete as required";
+          ss << "The substitution for dynd typevar " << exponent_name << ", "
+             << tv_type->second << ", is not concrete as required";
           throw invalid_argument(ss.str());
         }
       } else {
         stringstream ss;
-        ss << "The substitution for dynd typevar " << exponent_name
-           << ", " << tv_type->second
-           << ", is not a fixed_dim integer as required";
+        ss << "The substitution for dynd typevar " << exponent_name << ", "
+           << tv_type->second << ", is not a fixed_dim integer as required";
         throw invalid_argument(ss.str());
       }
     }
@@ -359,6 +358,15 @@ ndt::type ndt::detail::internal_substitute(
     }
   }
   case any_kind_type_id: {
+    if (concrete) {
+      stringstream ss;
+      ss << "The dynd type " << pattern << " is not concrete as required";
+      throw invalid_argument(ss.str());
+    } else {
+      return pattern;
+    }
+  }
+  case scalar_kind_type_id: {
     if (concrete) {
       stringstream ss;
       ss << "The dynd type " << pattern << " is not concrete as required";
