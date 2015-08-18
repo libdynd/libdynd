@@ -402,11 +402,11 @@ set(libdynd_SRC
     include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/fft.hpp
     include/dynd/kernels/is_avail_kernel.hpp
-    include/dynd/kernels/make_lifted_reduction_ckernel.hpp
     include/dynd/kernels/multidispatch_kernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/pointer_assignment_kernels.hpp
+    include/dynd/kernels/reduction_kernel.hpp
     include/dynd/kernels/rolling.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp

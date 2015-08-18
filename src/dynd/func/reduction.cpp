@@ -5,7 +5,7 @@
 
 #include <dynd/func/compound.hpp>
 #include <dynd/func/reduction.hpp>
-#include <dynd/kernels/make_lifted_reduction_ckernel.hpp>
+#include <dynd/kernels/reduction_kernel.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
