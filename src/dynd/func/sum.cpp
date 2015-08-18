@@ -14,7 +14,7 @@ using namespace dynd;
 
 nd::callable nd::sum::make()
 {
-  auto children = callable::make_all<sum_kernel, arithmetic_type_ids>(0);
+  auto children = callable::make_all<sum_kernel, arithmetic_type_ids>();
 
   return functional::reduction(functional::multidispatch(
       ndt::callable_type::make(ndt::scalar_kind_type::make(),
@@ -30,7 +30,7 @@ nd::callable nd::sum::make()
 
         return child;
       },
-      0));
+      data_size_max(children)));
 }
 
 struct nd::sum nd::sum;

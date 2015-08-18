@@ -55,11 +55,9 @@ namespace nd {
       }
 
       children[{{string_type_id, string_type_id}}] =
-          callable::make<K<string_type_id, string_type_id>>(
-              ndt::type("(string, string) -> int32"), 0);
+          callable::make<K<string_type_id, string_type_id>>(0);
       children[{{fixed_string_type_id, fixed_string_type_id}}] =
-          callable::make<K<fixed_string_type_id, fixed_string_type_id>>(
-              ndt::type("(FixedString, FixedString) -> int32"), 0);
+          callable::make<K<fixed_string_type_id, fixed_string_type_id>>(0);
 
       return children;
     }
@@ -106,20 +104,17 @@ namespace nd {
       children[{{complex_float32_type_id, complex_float32_type_id}}] =
           callable::make<
               equal_kernel<complex_float32_type_id, complex_float32_type_id>>(
-              ndt::type("(complex[float32], complex[float32]) -> int32"), 0);
+              0);
       children[{{complex_float64_type_id, complex_float64_type_id}}] =
           callable::make<
               equal_kernel<complex_float64_type_id, complex_float64_type_id>>(
-              ndt::type("(complex[float64], complex[float64]) -> int32"), 0);
+              0);
       children[{{tuple_type_id, tuple_type_id}}] =
-          callable::make<equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("((...), (...)) -> int32"), 0);
+          callable::make<equal_kernel<tuple_type_id, tuple_type_id>>(0);
       children[{{struct_type_id, struct_type_id}}] =
-          callable::make<equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("({...}, {...}) -> int32"), 0);
+          callable::make<equal_kernel<tuple_type_id, tuple_type_id>>(0);
       children[{{type_type_id, type_type_id}}] =
-          callable::make<equal_kernel<type_type_id, type_type_id>>(
-              ndt::type("(type, type) -> int32"), 0);
+          callable::make<equal_kernel<type_type_id, type_type_id>>(0);
 
       return children;
     }
@@ -133,21 +128,16 @@ namespace nd {
           comparison_operator::make_children();
       children[{{complex_float32_type_id, complex_float32_type_id}}] =
           callable::make<not_equal_kernel<complex_float32_type_id,
-                                          complex_float32_type_id>>(
-              ndt::type("(complex[float32], complex[float32]) -> int32"), 0);
+                                          complex_float32_type_id>>(0);
       children[{{complex_float64_type_id, complex_float64_type_id}}] =
           callable::make<not_equal_kernel<complex_float64_type_id,
-                                          complex_float64_type_id>>(
-              ndt::type("(complex[float64], complex[float64]) -> int32"), 0);
+                                          complex_float64_type_id>>(0);
       children[{{tuple_type_id, tuple_type_id}}] =
-          callable::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("((...), (...)) -> int32"), 0);
+          callable::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(0);
       children[{{struct_type_id, struct_type_id}}] =
-          callable::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(
-              ndt::type("({...}, {...}) -> int32"), 0);
+          callable::make<not_equal_kernel<tuple_type_id, tuple_type_id>>(0);
       children[{{type_type_id, type_type_id}}] =
-          callable::make<not_equal_kernel<type_type_id, type_type_id>>(
-              ndt::type("(type, type) -> int32"), 0);
+          callable::make<not_equal_kernel<type_type_id, type_type_id>>(0);
 
       return children;
     }

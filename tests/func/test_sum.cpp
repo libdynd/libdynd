@@ -62,3 +62,8 @@ TEST(Sum, 1D)
                                     dynd::complex<double>(-2.5, 1.0),
                                     dynd::complex<double>(12.125, 12345.0)}));
 }
+
+TEST(Sum, 2D)
+{
+  EXPECT_ARRAY_EQ(15, nd::sum(nd::array{{0, 1, 2}, {3, 4, 5}}));
+}

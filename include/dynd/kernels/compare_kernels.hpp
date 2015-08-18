@@ -19,6 +19,7 @@ namespace nd {
   template <template <type_id_t, type_id_t> class K, type_id_t I0, type_id_t I1>
   struct base_comparison_kernel<
       K<I0, I1>> : base_kernel<K<I0, I1>, kernel_request_host, 2> {
+    static const std::size_t data_size = 0;
   };
 
   template <type_id_t I0, type_id_t I1>

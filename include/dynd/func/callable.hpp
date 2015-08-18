@@ -859,6 +859,11 @@ namespace nd {
                                 : NULL;
     }
 
+    std::size_t get_data_size() const
+    {
+      return get()->data_size;
+    }
+
     callable_property get_flags() const
     {
       return right_associative;
@@ -1228,6 +1233,20 @@ namespace nd {
     };
 
   } // namespace dynd::nd::detail
+
+  template <typename KeyType>
+  std::size_t data_size_max(const std::map<KeyType, callable> &callables)
+  {
+    std::size_t data_size_max = 0;
+    for (const std::pair<KeyType, callable> &pair : callables) {
+      std::size_t data_size = pair.second.get_data_size();
+      if (data_size > data_size_max) {
+        data_size_max = data_size;
+      }
+    }
+
+    return data_size_max;
+  }
 
   template <typename FuncType>
   struct declfunc {
