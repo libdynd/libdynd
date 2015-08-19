@@ -6,6 +6,11 @@ namespace dynd {
 namespace nd {
   namespace detail {
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
     template <type_id_t DstTypeID, type_kind_t DstTypeKind,
               type_id_t Src0TypeID, type_kind_t Src0TypeKind>
     struct compound_add_kernel
@@ -39,6 +44,11 @@ namespace nd {
       */
     };
 
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
+/*
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
     struct compound_add_kernel<
         DstTypeID, sint_kind, Src0TypeID,
@@ -55,21 +65,6 @@ namespace nd {
         *reinterpret_cast<dst_type *>(dst) +=
             static_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
       }
-
-      /*
-          void strided(char *dst, std::intptr_t dst_stride, char *const *src,
-                       const std::intptr_t *src_stride, std::size_t count)
-          {
-            char *src0 = src[0];
-            std::intptr_t src0_stride = src_stride[0];
-            for (std::size_t i = 0; i < count; ++i) {
-              *reinterpret_cast<dst_type *>(dst) +=
-                  *reinterpret_cast<src0_type *>(src0);
-              dst += dst_stride;
-              src0 += src0_stride;
-            }
-          }
-      */
     };
 
     template <>
@@ -88,22 +83,8 @@ namespace nd {
         *reinterpret_cast<dst_type *>(dst) +=
             static_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
       }
-
-      /*
-          void strided(char *dst, std::intptr_t dst_stride, char *const *src,
-                       const std::intptr_t *src_stride, std::size_t count)
-          {
-            char *src0 = src[0];
-            std::intptr_t src0_stride = src_stride[0];
-            for (std::size_t i = 0; i < count; ++i) {
-              *reinterpret_cast<dst_type *>(dst) +=
-                  *reinterpret_cast<src0_type *>(src0);
-              dst += dst_stride;
-              src0 += src0_stride;
-            }
-          }
-      */
     };
+*/
 
   } // namespace dynd::nd::detail
 
