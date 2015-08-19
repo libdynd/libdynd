@@ -522,6 +522,11 @@ namespace nd {
     array f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2,
             const T3 &p3);
 
+    array &operator+=(const array &rhs);
+    array &operator-=(const array &rhs);
+    array &operator*=(const array &rhs);
+    array &operator/=(const array &rhs);
+
     /**
      * A helper for assigning to the values in 'this'. Normal assignment to
      * an array variable has reference semantics, the reference gets

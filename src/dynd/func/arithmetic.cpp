@@ -10,11 +10,17 @@ using namespace dynd;
 
 struct nd::plus nd::plus;
 
-nd::array nd::operator+(const array &a0) { return plus(a0); }
+nd::array nd::operator+(const array &a0)
+{
+  return plus(a0);
+}
 
 struct nd::minus nd::minus;
 
-nd::array nd::operator-(const array &a0) { return minus(a0); }
+nd::array nd::operator-(const array &a0)
+{
+  return minus(a0);
+}
 
 struct nd::add nd::add;
 
@@ -42,4 +48,20 @@ struct nd::divide nd::divide;
 nd::array nd::operator/(const array &a0, const array &a1)
 {
   return divide(a0, a1);
+}
+
+struct nd::compound_add nd::compound_add;
+
+nd::array &nd::array::operator+=(const array &rhs)
+{
+  compound_add(rhs, kwds("dst", *this));
+  return *this;
+}
+
+struct nd::compound_div nd::compound_div;
+
+nd::array &nd::array::operator/=(const array &rhs)
+{
+  compound_div(rhs, kwds("dst", *this));
+  return *this;
 }

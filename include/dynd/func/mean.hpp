@@ -16,5 +16,9 @@ namespace nd {
    */
   callable make_builtin_mean1d_callable(type_id_t tid, intptr_t minp);
 
+  extern struct mean : declfunc<mean> {
+    static callable make();
+  } mean;
+
 } // namespace dynd::nd
 } // namespace dynd

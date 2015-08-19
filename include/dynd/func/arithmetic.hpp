@@ -8,6 +8,8 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/kernels/arithmetic.hpp>
+#include <dynd/kernels/compound_add_kernel.hpp>
+#include <dynd/kernels/compound_div_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -42,8 +44,9 @@ namespace nd {
 
       return functional::multidispatch(
           self.get_array_type(),
-          [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-             const ndt::type *src_tp) -> callable & {
+          [](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+             const ndt::type * src_tp)->callable &
+      {
             callable &child = overload(src_tp[0]);
             if (child.is_null()) {
               throw std::runtime_error(FuncType::what(src_tp[0]));
@@ -56,8 +59,8 @@ namespace nd {
   };
 
   template <typename FuncType, template <type_id_t> class KernelType>
-  callable arithmetic_operator<FuncType, KernelType,
-                               1>::children[DYND_TYPE_ID_MAX + 1];
+  callable arithmetic_operator<FuncType, KernelType, 1>::children
+      [DYND_TYPE_ID_MAX + 1];
 
   extern struct plus : arithmetic_operator<plus, plus_kernel, 1> {
     static std::string what(const ndt::type &src0_type)
@@ -91,40 +94,39 @@ namespace nd {
       return children[src0_tp.get_type_id()][src1_tp.get_type_id()];
     }
 
-    static callable make()
+    static void fill()
     {
-      callable self =
-          functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
-
-      for (const std::pair<std::array<type_id_t, 2>, callable> &pair :
+      for (const auto &pair :
            callable::make_all<KernelType, numeric_type_ids, numeric_type_ids>(
                0)) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
 
+      callable self =
+          functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
       for (type_id_t i0 : numeric_type_ids()) {
         for (type_id_t i1 : dim_type_ids()) {
-          const ndt::type child_tp =
-              ndt::callable_type::make(self.get_type()->get_return_type(),
-                                       {ndt::type(i0), ndt::type(i1)});
-          children[i0][i1] = functional::elwise(child_tp, self);
+          children[i0][i1] = functional::elwise(self);
         }
       }
 
       for (type_id_t i0 : dim_type_ids()) {
         typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
         for (type_id_t i1 : type_ids()) {
-          const ndt::type child_tp =
-              ndt::callable_type::make(self.get_type()->get_return_type(),
-                                       {ndt::type(i0), ndt::type(i1)});
-          children[i0][i1] = functional::elwise(child_tp, self);
+          children[i0][i1] = functional::elwise(self);
         }
       }
+    }
+
+    static callable make()
+    {
+      FuncType::fill();
 
       return functional::multidispatch(
-          self.get_array_type(),
-          [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-             const ndt::type *src_tp) -> callable & {
+          ndt::type("(Any, Any) -> Any"),
+          [](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+             const ndt::type * src_tp)->callable &
+      {
             callable &child = overload(src_tp[0], src_tp[1]);
             if (child.is_null()) {
               throw std::runtime_error(FuncType::what(src_tp[0], src_tp[1]));
@@ -137,9 +139,8 @@ namespace nd {
   };
 
   template <typename FuncType, template <type_id_t, type_id_t> class KernelType>
-  callable arithmetic_operator<FuncType, KernelType,
-                               2>::children[DYND_TYPE_ID_MAX +
-                                            1][DYND_TYPE_ID_MAX + 1];
+  callable arithmetic_operator<FuncType, KernelType, 2>::children
+      [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
   extern struct add : arithmetic_operator<add, add_kernel, 2> {
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
@@ -180,6 +181,69 @@ namespace nd {
       return ss.str();
     }
   } divide;
+
+  template <typename FuncType, template <type_id_t, type_id_t> class KernelType>
+  struct compound_arithmetic_operator : declfunc<FuncType> {
+    static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+
+    static void fill()
+    {
+      typedef type_id_sequence<int32_type_id, int64_type_id, float32_type_id,
+                               float64_type_id> numeric_type_ids;
+
+      for (const auto &pair : callable::make_all<KernelType, numeric_type_ids,
+                                                 numeric_type_ids>()) {
+        children[pair.first[0]][pair.first[1]] = pair.second;
+      }
+
+      callable self =
+          functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
+      for (type_id_t i0 : numeric_type_ids()) {
+        for (type_id_t i1 : dim_type_ids()) {
+          children[i0][i1] = functional::elwise(self);
+        }
+      }
+
+      for (type_id_t i0 : dim_type_ids()) {
+        typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
+        for (type_id_t i1 : type_ids()) {
+          children[i0][i1] = functional::elwise(self);
+        }
+      }
+    }
+
+    static callable make()
+    {
+      FuncType::fill();
+
+      return functional::multidispatch(
+          ndt::type("(Any) -> Any"),
+          [](const ndt::type & dst_tp, intptr_t DYND_UNUSED(nsrc),
+             const ndt::type * src_tp)->callable &
+      {
+            callable &child =
+                children[dst_tp.get_type_id()][src_tp[0].get_type_id()];
+            if (child.is_null()) {
+              throw std::runtime_error("no child found");
+            }
+
+            return child;
+          },
+          0);
+    }
+  };
+
+  template <typename FuncType, template <type_id_t, type_id_t> class KernelType>
+  callable compound_arithmetic_operator<FuncType, KernelType>::children
+      [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+
+  extern struct compound_add
+      : compound_arithmetic_operator<compound_add, compound_add_kernel> {
+  } compound_add;
+
+  extern struct compound_div
+      : compound_arithmetic_operator<compound_div, compound_div_kernel> {
+  } compound_div;
 
 } // namespace dynd::nd
 } // namespace dynd
