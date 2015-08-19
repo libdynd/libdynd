@@ -6,7 +6,8 @@ namespace dynd {
 namespace nd {
   namespace detail {
 
-    template <type_id_t DstTypeID, type_id_t Src0TypeID, bool UseBinaryOperator>
+    template <type_id_t DstTypeID, type_id_t Src0TypeID,
+              bool WithBinaryOperator>
     struct compound_add_kernel;
 
     template <type_id_t DstTypeID, type_id_t Src0TypeID>
@@ -60,11 +61,18 @@ namespace nd {
   } // namespace dynd::nd::detail
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
+  struct is_precise_assignable {
+    static const bool value =
+        (type_kind_of<DstTypeID>::value == sint_kind &&
+         type_kind_of<Src0TypeID>::value == real_kind) ||
+        (DstTypeID == float32_type_id && Src0TypeID == float64_type_id);
+  };
+
+  template <type_id_t DstTypeID, type_id_t Src0TypeID>
   struct compound_add_kernel
       : detail::compound_add_kernel<
             DstTypeID, Src0TypeID,
-            type_kind_of<DstTypeID>::value ==
-                sint_kind &&type_kind_of<Src0TypeID>::value == real_kind> {
+            is_precise_assignable<DstTypeID, Src0TypeID>::value> {
   };
 
 } // namespace dynd::nd
