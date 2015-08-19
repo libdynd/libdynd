@@ -376,6 +376,15 @@ intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
   throw std::invalid_argument(ss.str());
 }
 
+intptr_t ndt::type::get_size(const char *arrmeta) const
+{
+  if (is_scalar()) {
+    return 1;
+  }
+
+  return extended<base_dim_type>()->get_size(arrmeta);
+}
+
 bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
                                intptr_t *out_stride, ndt::type *out_el_tp,
                                const char **out_el_arrmeta) const

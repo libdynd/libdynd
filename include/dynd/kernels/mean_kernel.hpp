@@ -30,16 +30,27 @@ namespace nd {
       compound_div(compound_div_kernel, dst, child_src);
     }
 
-    static void data_init(char *DYND_UNUSED(static_data),
-                          size_t DYND_UNUSED(data_size), char *data,
-                          const ndt::type &dst_tp, intptr_t nsrc,
+    static void data_init(char *static_data, size_t DYND_UNUSED(data_size),
+                          char *data, const ndt::type &dst_tp, intptr_t nsrc,
                           const ndt::type *src_tp, intptr_t nkwd,
                           const nd::array *kwds,
                           const std::map<std::string, ndt::type> &tp_vars)
     {
-      nd::sum::get().get()->data_init(
-          nd::sum::get().get()->static_data, nd::sum::get().get()->data_size,
-          data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      std::size_t sum_data_size = nd::sum::get().get()->data_size;
+      if (sum_data_size > 0) {
+        nd::sum::get().get()->data_init(nd::sum::get().get()->static_data,
+                                        sum_data_size, data, dst_tp, nsrc,
+                                        src_tp, nkwd, kwds, tp_vars);
+      }
+
+      std::size_t compound_div_data_size =
+          nd::compound_div::get().get()->data_size;
+      if (compound_div_data_size > 0) {
+        nd::compound_div::get().get()->data_init(
+            nd::compound_div::get().get()->static_data, compound_div_data_size,
+            data + compound_div_data_size, dst_tp, 1,
+            reinterpret_cast<ndt::type *>(static_data), 0, NULL, tp_vars);
+      }
     }
 
     static void
@@ -55,17 +66,14 @@ namespace nd {
     }
 
     static intptr_t instantiate(
-        char *DYND_UNUSED(static_data), size_t data_size, char *data, void *ckb,
+        char *static_data, size_t data_size, char *data, void *ckb,
         intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
         intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
         kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
         const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
-      static const ndt::type size_tp(int64_type_id);
-
       intptr_t mean_offset = ckb_offset;
-      make(ckb, kernreq, ckb_offset,
-           src_tp[0].get_dim_size(src_arrmeta[0], NULL));
+      make(ckb, kernreq, ckb_offset, src_tp[0].get_size(src_arrmeta[0]));
 
       ckb_offset = nd::sum::get().get()->instantiate(
           nd::sum::get().get()->static_data, data_size, data, ckb, ckb_offset,
@@ -78,8 +86,9 @@ namespace nd {
       self->compound_div_offset = ckb_offset;
       ckb_offset = nd::compound_div::get().get()->instantiate(
           nd::compound_div::get().get()->static_data, data_size, data, ckb,
-          ckb_offset, dst_tp, dst_arrmeta, 1, &size_tp, NULL, kernreq, ectx,
-          nkwd, kwds, tp_vars);
+          ckb_offset, dst_tp, dst_arrmeta, 1,
+          reinterpret_cast<ndt::type *>(static_data), NULL, kernreq, ectx, nkwd,
+          kwds, tp_vars);
 
       return ckb_offset;
     }

@@ -40,7 +40,6 @@ TEST(Rolling, BuiltinSum_Kernel)
     EXPECT_EQ(s, b(i).as<double>());
   }
 }
-*/
 
 TEST(Rolling, BuiltinMean_Kernel)
 {
@@ -63,8 +62,4 @@ TEST(Rolling, BuiltinMean_Kernel)
   }
 }
 
-TEST(Mean, Simple)
-{
-  EXPECT_ARRAY_EQ(4.5, nd::mean(nd::array{0.0, 1.0, 2.0, 3.0, 4.0,
-                                          5.0, 6.0, 7.0, 8.0, 9.0}));
-}
+*/

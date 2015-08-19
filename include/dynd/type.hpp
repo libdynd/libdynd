@@ -710,6 +710,8 @@ namespace ndt {
 
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
 
+    intptr_t get_size(const char *arrmeta) const;
+
     type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
                                intptr_t total_ndim = 0) const
     {
