@@ -36,9 +36,11 @@ struct is_std_equivalent<bool1, bool> {
 TEST(Bool1, Arithmetic)
 {
   EXPECT_TRUE(
-      (is_same<int, decltype(declval<bool1>() / declval<bool1>())>::value));
+      (is_same<decltype(declval<bool1>() / declval<bool1>()), int>::value));
   EXPECT_TRUE(
-      (is_same<int, decltype(declval<bool1>() / declval<int8>())>::value));
+      (is_same<decltype(declval<bool1>() / declval<float>()), float>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<bool1>() / declval<double>()), double>::value));
 }
 
 /*

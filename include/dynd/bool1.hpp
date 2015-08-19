@@ -76,6 +76,22 @@ DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
   return lhs.m_value / rhs.m_value;
 }
 
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
+                                              T>::type
+operator/(bool1 lhs, T rhs)
+{
+  return static_cast<T>(lhs) / rhs;
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
+                                              T>::type
+operator/(T lhs, bool1 rhs)
+{
+  return lhs / static_cast<T>(rhs);
+}
+
 DYND_CUDA_HOST_DEVICE inline bool operator<(bool1 lhs, bool1 rhs)
 {
   return static_cast<bool>(lhs) < static_cast<bool>(rhs);
