@@ -17,7 +17,7 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<dst_type *>(dst) /=
-          *reinterpret_cast<src0_type *>(src[0]);
+          static_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
     }
   };
 

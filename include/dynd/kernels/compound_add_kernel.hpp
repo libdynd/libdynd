@@ -17,21 +17,23 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<dst_type *>(dst) +=
-          *reinterpret_cast<src0_type *>(src[0]);
+          static_cast<dst_type>(*reinterpret_cast<src0_type *>(src[0]));
     }
 
-    void strided(char *dst, std::intptr_t dst_stride, char *const *src,
-                 const std::intptr_t *src_stride, std::size_t count)
-    {
-      char *src0 = src[0];
-      std::intptr_t src0_stride = src_stride[0];
-      for (std::size_t i = 0; i < count; ++i) {
-        *reinterpret_cast<dst_type *>(dst) +=
-            *reinterpret_cast<src0_type *>(src0);
-        dst += dst_stride;
-        src0 += src0_stride;
-      }
-    }
+    /*
+        void strided(char *dst, std::intptr_t dst_stride, char *const *src,
+                     const std::intptr_t *src_stride, std::size_t count)
+        {
+          char *src0 = src[0];
+          std::intptr_t src0_stride = src_stride[0];
+          for (std::size_t i = 0; i < count; ++i) {
+            *reinterpret_cast<dst_type *>(dst) +=
+                *reinterpret_cast<src0_type *>(src0);
+            dst += dst_stride;
+            src0 += src0_stride;
+          }
+        }
+    */
   };
 
 } // namespace dynd::nd
