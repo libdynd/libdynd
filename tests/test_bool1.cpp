@@ -18,6 +18,29 @@
 using namespace std;
 using namespace dynd;
 
+template <typename T, typename U>
+struct is_std_equivalent {
+  static const bool value = std::is_same<T, U>::value;
+};
+
+template <>
+struct is_std_equivalent<bool, bool1> {
+  static const bool value = true;
+};
+
+template <>
+struct is_std_equivalent<bool1, bool> {
+  static const bool value = true;
+};
+
+TEST(Bool1, Arithmetic)
+{
+  EXPECT_TRUE(
+      (is_same<int, decltype(declval<bool1>() / declval<bool1>())>::value));
+  EXPECT_TRUE(
+      (is_same<int, decltype(declval<bool1>() / declval<int8>())>::value));
+}
+
 /*
 TEST(Builtin, Bool1)
 {

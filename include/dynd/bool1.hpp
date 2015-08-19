@@ -16,7 +16,9 @@ class bool1 {
 public:
   DYND_CUDA_HOST_DEVICE bool1() = default;
 
-  DYND_CUDA_HOST_DEVICE explicit bool1(bool value) : m_value(value) {}
+  DYND_CUDA_HOST_DEVICE explicit bool1(bool value) : m_value(value)
+  {
+  }
 
   // Special case complex conversion to avoid ambiguous overload
   /*
@@ -27,7 +29,10 @@ public:
     }
   */
 
-  operator bool() const { return m_value ? true : false; }
+  operator bool() const
+  {
+    return m_value ? true : false;
+  }
 
   /*
     template <typename T,
@@ -44,6 +49,12 @@ public:
     return *this;
   }
 
+  DYND_CUDA_HOST_DEVICE bool1 &operator/=(bool1 rhs)
+  {
+    m_value /= rhs.m_value;
+    return *this;
+  }
+
   /*
 
     DYND_CUDA_HOST_DEVICE bool1 &operator=(bool1 value) {
@@ -51,11 +62,18 @@ public:
       return *this;
     }
   */
+
+  friend int operator/(bool1 lhs, bool1 rhs);
 };
 
 DYND_CUDA_HOST_DEVICE inline bool operator+(bool1 lhs, bool1 rhs)
 {
   return static_cast<bool>(lhs) && static_cast<bool>(rhs);
+}
+
+DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
+{
+  return lhs.m_value / rhs.m_value;
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator<(bool1 lhs, bool1 rhs)
