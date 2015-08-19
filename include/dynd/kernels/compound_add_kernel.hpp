@@ -58,21 +58,42 @@ namespace nd {
       }
     };
 
+    template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t SrcTypeID,
+              type_kind_t SrcTypeKind>
+    struct is_lossless_assignable {
+      static const bool value = false;
+    };
+
+    template <type_id_t DstTypeID, type_id_t SrcTypeID>
+    struct is_lossless_assignable<DstTypeID, real_kind, SrcTypeID, sint_kind> {
+      static const bool value = true;
+    };
+
+    template <type_id_t DstTypeID, type_id_t SrcTypeID>
+    struct is_lossless_assignable<DstTypeID, real_kind, SrcTypeID, uint_kind> {
+      static const bool value = true;
+    };
+
+    template <type_id_t DstTypeID, type_id_t SrcTypeID, type_kind_t TypeKind>
+    struct is_lossless_assignable<DstTypeID, TypeKind, SrcTypeID, TypeKind> {
+      static const bool value = sizeof(typename type_of<DstTypeID>::type) >
+                                sizeof(typename type_of<SrcTypeID>::type);
+    };
+
   } // namespace dynd::nd::detail
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
-  struct is_precise_assignable {
-    static const bool value =
-        (type_kind_of<DstTypeID>::value == sint_kind &&
-         type_kind_of<Src0TypeID>::value == real_kind) ||
-        (DstTypeID == float32_type_id && Src0TypeID == float64_type_id);
+  struct is_lossless_assignable
+      : detail::is_lossless_assignable<
+            DstTypeID, type_kind_of<DstTypeID>::value, Src0TypeID,
+            type_kind_of<Src0TypeID>::value> {
   };
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
   struct compound_add_kernel
       : detail::compound_add_kernel<
             DstTypeID, Src0TypeID,
-            is_precise_assignable<DstTypeID, Src0TypeID>::value> {
+            !is_lossless_assignable<DstTypeID, Src0TypeID>::value> {
   };
 
 } // namespace dynd::nd
