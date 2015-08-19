@@ -665,6 +665,39 @@ struct type_kind_of<option_type_id> {
   static const type_kind_t value = option_kind;
 };
 
+namespace detail {
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t SrcTypeID,
+            type_kind_t SrcTypeKind>
+  struct is_lossless_assignable {
+    static const bool value = false;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, real_kind, SrcTypeID, sint_kind> {
+    static const bool value = true;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, real_kind, SrcTypeID, uint_kind> {
+    static const bool value = true;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID, type_kind_t TypeKind>
+  struct is_lossless_assignable<DstTypeID, TypeKind, SrcTypeID, TypeKind> {
+    static const bool value = sizeof(typename type_of<DstTypeID>::type) >
+                              sizeof(typename type_of<SrcTypeID>::type);
+  };
+
+} // namespace dynd::detail
+
+template <type_id_t DstTypeID, type_id_t Src0TypeID>
+struct is_lossless_assignable
+    : detail::is_lossless_assignable<DstTypeID, type_kind_of<DstTypeID>::value,
+                                     Src0TypeID,
+                                     type_kind_of<Src0TypeID>::value> {
+};
+
 // Metaprogram for determining if a type is a valid C++ scalar
 // of a particular type.
 template <typename T>

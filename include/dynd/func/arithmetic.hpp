@@ -188,7 +188,8 @@ namespace nd {
 
     static void fill()
     {
-      typedef type_id_sequence<int32_type_id, int64_type_id, float32_type_id,
+      typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
+                               int64_type_id, float32_type_id,
                                float64_type_id> numeric_type_ids;
 
       for (const auto &pair : callable::make_all<KernelType, numeric_type_ids,
