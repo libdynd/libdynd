@@ -126,6 +126,14 @@ public:
   }
 };
 
+template <typename T>
+struct is_complex : std::false_type {
+};
+
+template <typename T>
+struct is_complex<complex<T>> : std::true_type {
+};
+
 } // namespace dynd
 
 namespace std {
@@ -135,45 +143,152 @@ struct common_type<dynd::complex<T>, dynd::complex<U>> {
   typedef dynd::complex<typename std::common_type<T, U>::type> type;
 };
 
-template <typename T, typename U>
-struct common_type<dynd::complex<T>, U> {
-  typedef dynd::complex<typename std::common_type<T, U>::type> type;
+template <typename T>
+struct common_type<dynd::complex<T>, bool> {
+  typedef dynd::complex<T> type;
 };
 
-template <typename T, typename U>
-struct common_type<T, dynd::complex<U>> {
-  typedef dynd::complex<typename std::common_type<T, U>::type> type;
+template <typename T>
+struct common_type<dynd::complex<T>, signed char> {
+  typedef dynd::complex<T> type;
 };
-}
+
+template <typename T>
+struct common_type<dynd::complex<T>, short> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, int> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, long> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, long long> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, dynd::int128> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, unsigned char> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, unsigned short> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, unsigned int> {
+  typedef dynd::int128 type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, unsigned long> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, unsigned long long> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, float> {
+  typedef dynd::complex<typename common_type<T, float>::type> type;
+};
+
+template <typename T>
+struct common_type<dynd::complex<T>, double> {
+  typedef dynd::complex<typename common_type<T, double>::type> type;
+};
+
+template <typename T>
+struct common_type<bool, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<signed char, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<short, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<int, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<long, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<long long, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<dynd::int128, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<unsigned char, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<unsigned short, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<unsigned int, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<unsigned long, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<unsigned long long, dynd::complex<T>> {
+  typedef dynd::complex<T> type;
+};
+
+template <typename T>
+struct common_type<float, dynd::complex<T>> {
+  typedef dynd::complex<typename common_type<float, T>::type> type;
+};
+
+template <typename T>
+struct common_type<double, dynd::complex<T>> {
+  typedef dynd::complex<typename common_type<double, T>::type> type;
+};
+
+} // namespace std
 
 namespace dynd {
 
 typedef complex<float32> complex64;
 typedef complex<float64> complex128;
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(bool1 lhs, complex<T> rhs)
-{
-  return static_cast<complex<T>>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(int128 lhs, complex<T> rhs)
-{
-  return static_cast<complex<T>>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, bool1 rhs)
-{
-  return lhs / static_cast<complex<T>>(rhs);
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, int128 rhs)
-{
-  return lhs / static_cast<complex<T>>(rhs);
-}
 
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE bool operator==(complex<T> lhs, complex<U> rhs)

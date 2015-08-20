@@ -264,17 +264,16 @@ public:
   }
 };
 
+template <>
+struct is_integral<int128> : std::true_type {
+};
+
 } // namespace dynd
 
 namespace std {
 
 template <>
 struct common_type<dynd::int128, bool> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<dynd::int128, dynd::bool1> {
   typedef dynd::int128 type;
 };
 
@@ -344,6 +343,56 @@ struct common_type<bool, dynd::int128> {
 };
 
 template <>
+struct common_type<signed char, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<short, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<int, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<long, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<long long, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<unsigned char, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<unsigned short, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<unsigned int, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<unsigned long, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<unsigned long long, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
 struct common_type<float, dynd::int128> {
   typedef float type;
 };
@@ -359,38 +408,6 @@ namespace dynd {
 
 DYND_CUDA_HOST_DEVICE inline int128 operator/(int128 DYND_UNUSED(lhs),
                                               int128 DYND_UNUSED(rhs))
-{
-  throw std::runtime_error("operator/ is not implemented for int128");
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_same<T, bool1>::value || std::is_integral<T>::value, int128>::type
-operator/(int128 lhs, T rhs)
-{
-  return lhs / static_cast<int128>(rhs);
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<is_floating_point<T>::value,
-                                              T>::type
-operator/(int128 lhs, T rhs)
-{
-  return static_cast<T>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_same<T, bool1>::value || std::is_integral<T>::value, int128>::type
-operator/(T lhs, int128 rhs)
-{
-  return static_cast<int128>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
-                                              T>::type
-operator/(T, int128)
 {
   throw std::runtime_error("operator/ is not implemented for int128");
 }

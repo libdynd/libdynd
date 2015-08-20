@@ -20,8 +20,10 @@ using namespace dynd;
 
 TEST(Bool1, ArithmeticType)
 {
+//int32 + uint32 -> uint32
+
 //  EXPECT_TYPE_IS_SAME(decltype(declval<bool1>() / declval<short>()),
-  //                    (typename common_type<bool, short>::type));
+//                    (typename common_type<bool, short>::type));
 
 #define EXPECTATIONS(OPERATOR)                                                 \
   EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<short>()),   \

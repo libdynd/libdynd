@@ -41,11 +41,27 @@ public:
 };
 
 template <>
-struct is_integral<bool1> {
-  static const bool value = true;
+struct is_integral<bool1> : std::true_type {
 };
 
 } // namespace dynd
+
+namespace std {
+
+template <>
+struct common_type<dynd::bool1, dynd::bool1> {
+  typedef dynd::bool1 type;
+};
+
+template <typename T>
+struct common_type<dynd::bool1, T> : common_type<bool, T> {
+};
+
+template <typename T>
+struct common_type<T, dynd::bool1> : common_type<T, bool> {
+};
+
+} // namespace std
 
 namespace dynd {
 
@@ -57,24 +73,6 @@ DYND_CUDA_HOST_DEVICE inline bool operator+(bool1 lhs, bool1 rhs)
 DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
 {
   return lhs.m_value / rhs.m_value;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_arithmetic<T>::value,
-    typename std::common_type<bool, T>::type>::type
-operator/(bool1 lhs, T rhs)
-{
-  return static_cast<typename std::common_type<bool, T>::type>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_arithmetic<T>::value,
-    typename std::common_type<bool, T>::type>::type
-operator/(T lhs, bool1 rhs)
-{
-  return lhs / static_cast<typename std::common_type<T, bool>::type>(rhs);
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator<(bool1 lhs, bool1 rhs)
