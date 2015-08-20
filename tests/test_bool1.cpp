@@ -18,6 +18,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 template <typename T, typename U>
 struct is_std_equivalent {
   static const bool value = std::is_same<T, U>::value;
@@ -33,38 +34,7 @@ struct is_std_equivalent<bool1, bool> {
   static const bool value = true;
 };
 
-TEST(Bool1, Arithmetic)
+TYPED_TEST_P(Bool1, Arithmetic)
 {
-#define TEST_ARITHMETIC_OPERATOR(SYMBOL)                                       \
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() SYMBOL declval<bool1>()),     \
-                       int>::value));                                          \
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() SYMBOL declval<short>()),     \
-                       int>::value));                                          \
-  EXPECT_TRUE((                                                                \
-      is_same<decltype(declval<bool1>() SYMBOL declval<int>()), int>::value)); \
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() SYMBOL declval<float>()),     \
-                       float>::value));                                        \
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() SYMBOL declval<double>()),    \
-                       double>::value))
-
-  TEST_ARITHMETIC_OPERATOR(/ );
-}
-
-/*
-TEST(Builtin, Bool1)
-{
-  std::cout << typeid(typename std::common_type<bool, int8_t>::type).name() <<
-std::endl;
-  std::cout << typeid(int).name() << std::endl;
-
-  std::cout << typeid(typename std::common_type<bool1, int8_t>::type).name() <<
-std::endl;
-  std::cout << typeid(int8_t).name() << std::endl;
-
-  EXPECT_TRUE(
-      (std::is_same<typename std::common_type<bool, int8_t>::type,
-                    typename std::common_type<bool1, int8>::type>::value));
-
-  std::exit(-1);
 }
 */

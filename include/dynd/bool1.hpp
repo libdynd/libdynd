@@ -86,10 +86,26 @@ operator/(bool1 lhs, T rhs)
 
 template <typename T>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value &&(sizeof(T) <= sizeof(int)), int>::type
+operator/(T lhs, bool1 rhs)
+{
+  return lhs / static_cast<int>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
     std::is_integral<T>::value &&(sizeof(T) > sizeof(int)), T>::type
 operator/(bool1 lhs, T rhs)
 {
   return static_cast<T>(lhs) / rhs;
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value &&(sizeof(T) > sizeof(int)), T>::type
+operator/(T lhs, bool1 rhs)
+{
+  return lhs / static_cast<T>(rhs);
 }
 
 template <typename T>
