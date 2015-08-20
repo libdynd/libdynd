@@ -188,11 +188,12 @@ namespace nd {
 
     static void fill()
     {
-      typedef type_id_sequence<
-          bool_type_id, int8_type_id, int16_type_id, int32_type_id,
-          int64_type_id, int128_type_id, uint8_type_id, uint16_type_id,
-          uint32_type_id, uint64_type_id, float32_type_id, float64_type_id,
-          complex_float32_type_id, complex_float64_type_id> numeric_type_ids;
+      typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id,
+                               int32_type_id, int64_type_id, int128_type_id,
+                               uint8_type_id, uint16_type_id, uint32_type_id,
+                               uint64_type_id, uint128_type_id, float32_type_id,
+                               float64_type_id, complex_float32_type_id,
+                               complex_float64_type_id> numeric_type_ids;
 
       for (const auto &pair : callable::make_all<KernelType, numeric_type_ids,
                                                  numeric_type_ids>()) {

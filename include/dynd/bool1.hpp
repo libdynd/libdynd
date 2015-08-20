@@ -49,16 +49,73 @@ struct is_integral<bool1> : std::true_type {
 namespace std {
 
 template <>
+struct common_type<dynd::bool1, bool> : common_type<char, bool> {
+};
+
+template <>
 struct common_type<dynd::bool1, dynd::bool1> {
   typedef dynd::bool1 type;
 };
 
-template <typename T>
-struct common_type<dynd::bool1, T> : common_type<bool, T> {
+template <>
+struct common_type<dynd::bool1, char> : common_type<char, char> {
+};
+
+template <>
+struct common_type<dynd::bool1, signed char> : common_type<char, signed char> {
+};
+
+template <>
+struct common_type<dynd::bool1, unsigned char> : common_type<char,
+                                                             unsigned char> {
+};
+
+template <>
+struct common_type<dynd::bool1, short> : common_type<char, short> {
+};
+
+template <>
+struct common_type<dynd::bool1, unsigned short> : common_type<char,
+                                                              unsigned short> {
+};
+
+template <>
+struct common_type<dynd::bool1, int> : common_type<char, int> {
+};
+
+template <>
+struct common_type<dynd::bool1, unsigned int> : common_type<char,
+                                                            unsigned int> {
+};
+
+template <>
+struct common_type<dynd::bool1, long> : common_type<char, long> {
+};
+
+template <>
+struct common_type<dynd::bool1, unsigned long> : common_type<char,
+                                                             unsigned long> {
+};
+
+template <>
+struct common_type<dynd::bool1, long long> : common_type<char, long long> {
+};
+
+template <>
+struct common_type<dynd::bool1,
+                   unsigned long long> : common_type<char, unsigned long long> {
+};
+
+template <>
+struct common_type<dynd::bool1, float> : common_type<char, float> {
+};
+
+template <>
+struct common_type<dynd::bool1, double> : common_type<char, double> {
 };
 
 template <typename T>
-struct common_type<T, dynd::bool1> : common_type<T, bool> {
+struct common_type<T, dynd::bool1> : common_type<dynd::bool1, T> {
 };
 
 } // namespace std

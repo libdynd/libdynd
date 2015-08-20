@@ -752,18 +752,6 @@ T floor(T value)
 
 namespace dynd {
 
-DYND_CUDA_HOST_DEVICE inline float &operator/=(float &lhs, int128 rhs)
-{
-  lhs /= static_cast<float>(rhs);
-  return lhs;
-}
-
-DYND_CUDA_HOST_DEVICE inline double &operator/=(double &lhs, int128 rhs)
-{
-  lhs /= static_cast<double>(rhs);
-  return lhs;
-}
-
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
     is_mixed_arithmetic<T, U>::value &&
@@ -799,28 +787,12 @@ operator/(T lhs, U rhs)
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(bool1 lhs, complex<T> rhs)
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_floating_point<T>::value &&is_integral<U>::value, T &>::type
+operator/=(T &lhs, U rhs)
 {
-  return static_cast<complex<T>>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(int128 lhs, complex<T> rhs)
-{
-  return static_cast<complex<T>>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, bool1 rhs)
-{
-  return lhs / static_cast<complex<T>>(rhs);
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, int128 rhs)
-{
-  return lhs / static_cast<complex<T>>(rhs);
+  return lhs /= static_cast<T>(rhs);
 }
 
 } // namespace dynd

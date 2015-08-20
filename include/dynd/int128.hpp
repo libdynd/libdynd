@@ -278,27 +278,17 @@ struct common_type<dynd::int128, bool> {
 };
 
 template <>
+struct common_type<dynd::int128, dynd::bool1> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, char> {
+  typedef dynd::int128 type;
+};
+
+template <>
 struct common_type<dynd::int128, signed char> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<dynd::int128, short> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<dynd::int128, int> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<dynd::int128, long> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<dynd::int128, long long> {
   typedef dynd::int128 type;
 };
 
@@ -308,7 +298,17 @@ struct common_type<dynd::int128, unsigned char> {
 };
 
 template <>
+struct common_type<dynd::int128, short> {
+  typedef dynd::int128 type;
+};
+
+template <>
 struct common_type<dynd::int128, unsigned short> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, int> {
   typedef dynd::int128 type;
 };
 
@@ -318,12 +318,27 @@ struct common_type<dynd::int128, unsigned int> {
 };
 
 template <>
+struct common_type<dynd::int128, long> {
+  typedef dynd::int128 type;
+};
+
+template <>
 struct common_type<dynd::int128, unsigned long> {
   typedef dynd::int128 type;
 };
 
 template <>
+struct common_type<dynd::int128, long long> {
+  typedef dynd::int128 type;
+};
+
+template <>
 struct common_type<dynd::int128, unsigned long long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, dynd::int128> {
   typedef dynd::int128 type;
 };
 
@@ -337,69 +352,8 @@ struct common_type<dynd::int128, double> {
   typedef double type;
 };
 
-template <>
-struct common_type<bool, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<signed char, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<short, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<int, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<long, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<long long, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<unsigned char, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<unsigned short, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<unsigned int, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<unsigned long, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<unsigned long long, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<float, dynd::int128> {
-  typedef float type;
-};
-
-template <>
-struct common_type<double, dynd::int128> {
-  typedef double type;
+template <typename T>
+struct common_type<T, dynd::int128> : common_type<dynd::int128, T> {
 };
 
 } // namespace std
