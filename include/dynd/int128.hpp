@@ -246,6 +246,24 @@ public:
   }
 };
 
+} // namespace dynd
+
+namespace std {
+
+template <>
+struct common_type<dynd::bool1, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, dynd::bool1> {
+  typedef dynd::int128 type;
+};
+
+} // namespace std
+
+namespace dynd {
+
 DYND_CUDA_HOST_DEVICE inline bool operator==(int lhs, const int128 &rhs)
 {
   return rhs == lhs;

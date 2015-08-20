@@ -126,7 +126,7 @@ public:
                                       std::is_floating_point<T>::value>>
   explicit operator U() const
   {
-    return m_real;
+    return static_cast<U>(m_real);
   }
 };
 
