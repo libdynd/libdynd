@@ -33,6 +33,7 @@ public:
       : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
   {
   }
+
   DYND_CUDA_HOST_DEVICE int128(char value)
       : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
   {

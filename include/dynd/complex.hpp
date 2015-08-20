@@ -32,13 +32,18 @@ public:
   {
   }
 
-  complex(const std::complex<T> &rhs)
-      : m_real(rhs.real()), m_imag(rhs.imag())
+  complex(const std::complex<T> &rhs) : m_real(rhs.real()), m_imag(rhs.imag())
   {
   }
 
-  DYND_CUDA_HOST_DEVICE T real() const { return m_real; }
-  DYND_CUDA_HOST_DEVICE T imag() const { return m_imag; }
+  DYND_CUDA_HOST_DEVICE T real() const
+  {
+    return m_real;
+  }
+  DYND_CUDA_HOST_DEVICE T imag() const
+  {
+    return m_imag;
+  }
 
   DYND_CUDA_HOST_DEVICE complex<T> &operator=(const complex<T> &rhs)
   {
@@ -81,7 +86,7 @@ public:
   DYND_CUDA_HOST_DEVICE complex<T> operator*=(const complex<T> &rhs)
   {
     new (this) complex<T>(m_real * rhs.m_real - m_imag * rhs.m_imag,
-                               m_real * rhs.m_imag + rhs.m_real * m_imag);
+                          m_real * rhs.m_imag + rhs.m_real * m_imag);
 
     return *this;
   }
@@ -97,9 +102,8 @@ public:
   DYND_CUDA_HOST_DEVICE complex<T> &operator/=(const complex<T> &rhs)
   {
     T denom = rhs.m_real * rhs.m_real + rhs.m_imag * rhs.m_imag;
-    new (this)
-        complex<T>((m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
-                        (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
+    new (this) complex<T>((m_real * rhs.m_real + m_imag * rhs.m_imag) / denom,
+                          (rhs.m_real * m_imag - m_real * rhs.m_imag) / denom);
 
     return *this;
   }
@@ -112,7 +116,18 @@ public:
     return *this;
   }
 
-  operator std::complex<T>() const { return std::complex<T>(m_real, m_imag); }
+  operator std::complex<T>() const
+  {
+    return std::complex<T>(m_real, m_imag);
+  }
+
+  template <typename U,
+            typename = std::enable_if<std::is_integral<T>::value ||
+                                      std::is_floating_point<T>::value>>
+  explicit operator U() const
+  {
+    return m_real;
+  }
 };
 
 typedef complex<float32> complex64;
@@ -171,8 +186,7 @@ DYND_CUDA_HOST_DEVICE complex<T> operator-(const complex<T> &rhs)
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator+(complex<T> lhs,
-                                                complex<T> rhs)
+DYND_CUDA_HOST_DEVICE complex<T> operator+(complex<T> lhs, complex<T> rhs)
 {
   return lhs += rhs;
 }
@@ -218,8 +232,7 @@ operator+(T lhs, complex<U> rhs)
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator-(complex<T> lhs,
-                                                complex<T> rhs)
+DYND_CUDA_HOST_DEVICE complex<T> operator-(complex<T> lhs, complex<T> rhs)
 {
   return lhs -= rhs;
 }
@@ -265,8 +278,7 @@ operator-(T lhs, complex<U> rhs)
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator*(complex<T> lhs,
-                                                complex<T> rhs)
+DYND_CUDA_HOST_DEVICE complex<T> operator*(complex<T> lhs, complex<T> rhs)
 {
   return lhs *= rhs;
 }
@@ -312,8 +324,7 @@ operator*(T lhs, complex<U> rhs)
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs,
-                                                complex<T> rhs)
+DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, complex<T> rhs)
 {
   return lhs /= rhs;
 }
@@ -408,16 +419,14 @@ DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
     if (isfinite(i)) {
       ret = complex<T>(x * c, x * s);
     } else {
-      ret = complex<T>(_nan<T>(NULL),
-                            copysign(_nan<T>(NULL), i));
+      ret = complex<T>(_nan<T>(NULL), copysign(_nan<T>(NULL), i));
     }
   } else if (isnan(r)) {
     // r is nan
     if (i == 0) {
       ret = complex<T>(r, 0);
     } else {
-      ret =
-          complex<T>(r, copysign(_nan<T>(NULL), i));
+      ret = complex<T>(r, copysign(_nan<T>(NULL), i));
     }
   } else {
     // r is +- inf
@@ -477,7 +486,7 @@ DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
     return complex<T>(std::numeric_limits<T>::infinity(), b);
   }
   if (isnan(a)) {
-    t = (b - b) / (b - b);        // raise invalid if b is not a NaN
+    t = (b - b) / (b - b);   // raise invalid if b is not a NaN
     return complex<T>(a, t); // return NaN + NaN i
   }
   if (isinf(a)) {
@@ -543,16 +552,14 @@ template <typename T>
 DYND_CUDA_HOST_DEVICE complex<T> cos(complex<T> z)
 {
   T x = z.real(), y = z.imag();
-  return complex<T>(cos(x) * cosh(y),
-                         -(sin(x) * sinh(y)));
+  return complex<T>(cos(x) * cosh(y), -(sin(x) * sinh(y)));
 }
 
 template <typename T>
 DYND_CUDA_HOST_DEVICE complex<T> sin(complex<T> z)
 {
   T x = z.real(), y = z.imag();
-  return complex<T>(sin(x) * cosh(y),
-                         cos(x) * sinh(y));
+  return complex<T>(sin(x) * cosh(y), cos(x) * sinh(y));
 }
 
 } // namespace dynd
@@ -561,17 +568,16 @@ namespace std {
 
 template <typename T, typename U>
 struct common_type<dynd::complex<T>, dynd::complex<U>> {
-    typedef dynd::complex<typename std::common_type<T, U>::type> type;
+  typedef dynd::complex<typename std::common_type<T, U>::type> type;
 };
 
 template <typename T, typename U>
 struct common_type<T, dynd::complex<U>> {
-    typedef dynd::complex<typename std::common_type<T, U>::type> type;
+  typedef dynd::complex<typename std::common_type<T, U>::type> type;
 };
 
 template <typename T, typename U>
 struct common_type<dynd::complex<T>, U> {
-    typedef dynd::complex<typename std::common_type<T, U>::type> type;
+  typedef dynd::complex<typename std::common_type<T, U>::type> type;
 };
-
 }
