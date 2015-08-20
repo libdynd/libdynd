@@ -18,6 +18,17 @@
 using namespace std;
 using namespace dynd;
 
+template <class T>
+class Bool1 : public testing::Test {
+};
+
+typedef ::testing::Types<int> Implementations;
+TYPED_TEST_CASE(Bool1, Implementations);
+
+TYPED_TEST(Bool1, DefaultConstructor) {
+
+}
+
 /*
 template <typename T, typename U>
 struct is_std_equivalent {
