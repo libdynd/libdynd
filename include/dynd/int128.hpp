@@ -269,6 +269,99 @@ public:
   }
 };
 
+} // namespace dynd
+
+namespace std {
+
+template <>
+struct common_type<dynd::int128, bool> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, dynd::bool1> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, signed char> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, short> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, int> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, long long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned char> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned short> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned int> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned long long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, float> {
+  typedef float type;
+};
+
+template <>
+struct common_type<dynd::int128, double> {
+  typedef double type;
+};
+
+template <>
+struct common_type<bool, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<float, dynd::int128> {
+  typedef float type;
+};
+
+template <>
+struct common_type<double, dynd::int128> {
+  typedef double type;
+};
+
+} // namespace std
+
+namespace dynd {
+
 DYND_CUDA_HOST_DEVICE inline int128 operator/(int128 DYND_UNUSED(lhs),
                                               int128 DYND_UNUSED(rhs))
 {
@@ -278,25 +371,25 @@ DYND_CUDA_HOST_DEVICE inline int128 operator/(int128 DYND_UNUSED(lhs),
 template <typename T>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
     std::is_same<T, bool1>::value || std::is_integral<T>::value, int128>::type
-operator/(int128, T)
+operator/(int128 lhs, T rhs)
 {
-  throw std::runtime_error("operator/ is not implemented for int128");
+  return lhs / static_cast<int128>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<is_floating_point<T>::value,
+                                              T>::type
+operator/(int128 lhs, T rhs)
+{
+  return static_cast<T>(lhs) / rhs;
 }
 
 template <typename T>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
     std::is_same<T, bool1>::value || std::is_integral<T>::value, int128>::type
-operator/(T, int128)
+operator/(T lhs, int128 rhs)
 {
-  throw std::runtime_error("operator/ is not implemented for int128");
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
-                                              T>::type
-operator/(int128, T)
-{
-  throw std::runtime_error("operator/ is not implemented for int128");
+  return static_cast<int128>(lhs) / rhs;
 }
 
 template <typename T>
@@ -417,16 +510,6 @@ std::ostream &operator<<(std::ostream &out, const int128 &val);
 } // namespace dynd
 
 namespace std {
-
-template <>
-struct common_type<dynd::int128, bool> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<bool, dynd::int128> {
-  typedef dynd::int128 type;
-};
 
 template <>
 class numeric_limits<dynd::int128> {

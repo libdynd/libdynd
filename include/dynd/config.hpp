@@ -792,6 +792,14 @@ T floor(T value)
   return std::floor(value);
 }
 
+template <typename T>
+struct is_integral : std::is_integral<T> {
+};
+
+template <typename T>
+struct is_floating_point : std::is_floating_point<T> {
+};
+
 } // namespace dynd
 
 #include <dynd/bool1.hpp>
