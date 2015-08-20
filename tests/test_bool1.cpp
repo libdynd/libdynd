@@ -18,48 +18,84 @@
 using namespace std;
 using namespace dynd;
 
-TEST(Bool1, CommonType)
-{
-  using dynd::complex;
+//#define EXPECT_TYPE_IS_SAME(A, B) EXPECT_TRUE(true);
 
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<signed char>()),
-                       typename common_type<bool, signed char>::type>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<short>()),
-                       typename common_type<bool, short>::type>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<int>()),
-                       typename common_type<bool, int>::type>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<long>()),
-                       typename common_type<bool, long>::type>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<long long>()),
-                       typename common_type<bool, long long>::type>::value));
-  EXPECT_TRUE(
-      (is_same<decltype(declval<bool1>() / declval<unsigned char>()),
-               typename common_type<bool, unsigned char>::type>::value));
-  EXPECT_TRUE(
-      (is_same<decltype(declval<bool1>() / declval<unsigned short>()),
-               typename common_type<bool, unsigned short>::type>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<unsigned int>()),
-                       typename common_type<bool, unsigned int>::type>::value));
-  EXPECT_TRUE(
-      (is_same<decltype(declval<bool1>() / declval<unsigned long>()),
-               typename common_type<bool, unsigned long>::type>::value));
-  EXPECT_TRUE(
-      (is_same<decltype(declval<bool1>() / declval<unsigned long long>()),
-               typename common_type<bool, unsigned long long>::type>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<float>()),
-                       typename common_type<bool, float>::type>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<double>()),
-                       typename common_type<bool, double>::type>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<complex<float>>()),
-                       complex<float>>::value));
-  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<complex<double>>()),
-                       complex<double>>::value));
+TEST(Bool1, ArithmeticType)
+{
+#define EXPECTATIONS(OPERATOR)                                                 \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<short>()),   \
+                       typename common_type<bool, short>::type>::value));      \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<int>()),     \
+                       typename common_type<bool, int>::type>::value));        \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<long>()),    \
+                       typename common_type<bool, long>::type>::value));       \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<bool1>() OPERATOR declval<long long>()),       \
+               typename common_type<bool, long long>::type>::value));          \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<bool1>() OPERATOR declval<unsigned char>()),   \
+               typename common_type<bool, unsigned char>::type>::value));      \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<bool1>() OPERATOR declval<unsigned short>()),  \
+               typename common_type<bool, unsigned short>::type>::value));     \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<bool1>() OPERATOR declval<unsigned int>()),    \
+               typename common_type<bool, unsigned int>::type>::value));       \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<bool1>() OPERATOR declval<unsigned long>()),   \
+               typename common_type<bool, unsigned long>::type>::value));      \
+  EXPECT_TRUE((is_same<                                                        \
+      decltype(declval<bool1>() OPERATOR declval<unsigned long long>()),       \
+      typename common_type<bool, unsigned long long>::type>::value));          \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<float>()),   \
+                       typename common_type<bool, float>::type>::value));      \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<double>()),  \
+                       typename common_type<bool, double>::type>::value));     \
+                                                                               \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<signed char>() OPERATOR declval<bool1>()),     \
+               typename common_type<signed char, bool>::type>::value));        \
+  EXPECT_TRUE((is_same<decltype(declval<short>() OPERATOR declval<bool1>()),   \
+                       typename common_type<short, bool>::type>::value));      \
+  EXPECT_TRUE((is_same<decltype(declval<int>() OPERATOR declval<bool1>()),     \
+                       typename common_type<int, bool>::type>::value));        \
+  EXPECT_TRUE((is_same<decltype(declval<long>() OPERATOR declval<bool1>()),    \
+                       typename common_type<long, bool1>::type>::value));      \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<long long>() OPERATOR declval<bool1>()),       \
+               typename common_type<long long, bool>::type>::value));          \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<unsigned char>() OPERATOR declval<bool1>()),   \
+               typename common_type<unsigned char, bool>::type>::value));      \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<bool1>() OPERATOR declval<unsigned short>()),  \
+               typename common_type<bool, unsigned short>::type>::value));     \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<bool1>() OPERATOR declval<unsigned int>()),    \
+               typename common_type<bool, unsigned int>::type>::value));       \
+  EXPECT_TRUE(                                                                 \
+      (is_same<decltype(declval<bool1>() OPERATOR declval<unsigned long>()),   \
+               typename common_type<bool, unsigned long>::type>::value));      \
+  EXPECT_TRUE((is_same<                                                        \
+      decltype(declval<bool1>() OPERATOR declval<unsigned long long>()),       \
+      typename common_type<bool, unsigned long long>::type>::value));          \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<float>()),   \
+                       typename common_type<bool, float>::type>::value));      \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<double>()),  \
+                       typename common_type<bool, double>::type>::value))
+
+  EXPECTATIONS(/ );
 }
 
 TEST(Complex, CommonType)
 {
   using dynd::complex;
   typedef double T;
+
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<complex<float>>()),
+                       complex<float>>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<complex<double>>()),
+                       complex<double>>::value));
 
   EXPECT_TRUE(
       (is_same<decltype(declval<complex<T>>() / declval<signed char>()),

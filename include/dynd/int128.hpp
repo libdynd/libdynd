@@ -176,7 +176,7 @@ public:
 
   DYND_CUDA_HOST_DEVICE inline int128 operator*(uint32_t rhs) const;
 
-//  DYND_CUDA_HOST_DEVICE inline int128 operator/(uint32_t rhs) const;
+  //  DYND_CUDA_HOST_DEVICE inline int128 operator/(uint32_t rhs) const;
 
   DYND_CUDA_HOST_DEVICE int128 &operator/=(int128 DYND_UNUSED(rhs))
   {
@@ -258,24 +258,6 @@ public:
     return (unsigned long long)m_lo;
   }
 };
-
-} // namespace dynd
-
-namespace std {
-
-template <>
-struct common_type<dynd::bool1, dynd::int128> {
-  typedef dynd::int128 type;
-};
-
-template <>
-struct common_type<dynd::int128, dynd::bool1> {
-  typedef dynd::int128 type;
-};
-
-} // namespace std
-
-namespace dynd {
 
 DYND_CUDA_HOST_DEVICE inline int128 operator/(int128 DYND_UNUSED(lhs),
                                               int128 DYND_UNUSED(rhs))
