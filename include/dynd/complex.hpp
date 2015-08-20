@@ -412,21 +412,3 @@ DYND_CUDA_HOST_DEVICE inline complex<double> _i<double>()
 }
 
 } // namespace dynd
-
-namespace std {
-
-template <typename T, typename U>
-struct common_type<dynd::complex<T>, dynd::complex<U>> {
-  typedef dynd::complex<typename std::common_type<T, U>::type> type;
-};
-
-template <typename T, typename U>
-struct common_type<T, dynd::complex<U>> {
-  typedef dynd::complex<typename std::common_type<T, U>::type> type;
-};
-
-template <typename T, typename U>
-struct common_type<dynd::complex<T>, U> {
-  typedef dynd::complex<typename std::common_type<T, U>::type> type;
-};
-}

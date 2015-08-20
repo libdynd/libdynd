@@ -203,7 +203,7 @@ public:
     }
   }
 
-  DYND_CUDA_HOST_DEVICE explicit operator bool() const
+  DYND_CUDA_HOST_DEVICE operator bool() const
   {
     return m_lo ? true : false;
   }
