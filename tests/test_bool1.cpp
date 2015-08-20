@@ -18,29 +18,156 @@
 using namespace std;
 using namespace dynd;
 
-/*
-template <typename T>
-class Bool1 : public testing::Test {
-};
-
-TYPED_TEST_CASE_P(Bool1);
-
-typedef ::testing::Types<char, short, int, long, unsigned char, unsigned short,
-                         unsigned int, unsigned long> IntegralTypes;
-typedef ::testing::Types<float, double, long double> FloatingPointTypes;
-
-TYPED_TEST_P(Bool1, Arithmetic)
+TEST(Bool1, CommonType)
 {
+  using dynd::complex;
+
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<signed char>()),
+                       typename common_type<bool, signed char>::type>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<short>()),
+                       typename common_type<bool, short>::type>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<int>()),
+                       typename common_type<bool, int>::type>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<long>()),
+                       typename common_type<bool, long>::type>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<long long>()),
+                       typename common_type<bool, long long>::type>::value));
   EXPECT_TRUE(
-      (is_same<decltype(declval<bool>() / declval<TypeParam>()),
-               decltype(declval<bool1>() / declval<TypeParam>())>::value));
+      (is_same<decltype(declval<bool1>() / declval<unsigned char>()),
+               typename common_type<bool, unsigned char>::type>::value));
   EXPECT_TRUE(
-      (is_same<decltype(declval<bool1>() / declval<TypeParam>()),
-               decltype(declval<bool>() / declval<TypeParam>())>::value));
+      (is_same<decltype(declval<bool1>() / declval<unsigned short>()),
+               typename common_type<bool, unsigned short>::type>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<unsigned int>()),
+                       typename common_type<bool, unsigned int>::type>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<bool1>() / declval<unsigned long>()),
+               typename common_type<bool, unsigned long>::type>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<bool1>() / declval<unsigned long long>()),
+               typename common_type<bool, unsigned long long>::type>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<float>()),
+                       typename common_type<bool, float>::type>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<double>()),
+                       typename common_type<bool, double>::type>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<complex<float>>()),
+                       complex<float>>::value));
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() / declval<complex<double>>()),
+                       complex<double>>::value));
 }
 
-REGISTER_TYPED_TEST_CASE_P(Bool1, Arithmetic);
+TEST(Complex, CommonType)
+{
+  using dynd::complex;
+  typedef double T;
 
-INSTANTIATE_TYPED_TEST_CASE_P(Integral, Bool1, IntegralTypes);
-INSTANTIATE_TYPED_TEST_CASE_P(FloatingPoint, Bool1, FloatingPointTypes);
-*/
+  EXPECT_TRUE(
+      (is_same<decltype(declval<complex<T>>() / declval<signed char>()),
+               complex<typename common_type<T, signed char>::type>>::value));
+  EXPECT_TRUE((is_same<decltype(declval<complex<T>>() / declval<short>()),
+                       complex<typename common_type<T, short>::type>>::value));
+  EXPECT_TRUE((is_same<decltype(declval<complex<T>>() / declval<int>()),
+                       complex<typename common_type<T, int>::type>>::value));
+  EXPECT_TRUE((is_same<decltype(declval<complex<T>>() / declval<long>()),
+                       complex<typename common_type<T, long>::type>>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<complex<T>>() / declval<long long>()),
+               complex<typename common_type<T, long long>::type>>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<complex<T>>() / declval<unsigned char>()),
+               complex<typename common_type<T, unsigned char>::type>>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<complex<T>>() / declval<unsigned short>()),
+               complex<typename common_type<T, unsigned short>::type>>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<complex<T>>() / declval<unsigned int>()),
+               complex<typename common_type<T, unsigned int>::type>>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<complex<T>>() / declval<unsigned long>()),
+               complex<typename common_type<T, unsigned long>::type>>::value));
+  EXPECT_TRUE((is_same<
+      decltype(declval<complex<T>>() / declval<unsigned long long>()),
+      complex<typename common_type<T, unsigned long long>::type>>::value));
+  EXPECT_TRUE((is_same<decltype(declval<complex<T>>() / declval<float>()),
+                       complex<typename common_type<T, float>::type>>::value));
+  EXPECT_TRUE((is_same<decltype(declval<complex<T>>() / declval<double>()),
+                       complex<typename common_type<T, double>::type>>::value));
+
+  EXPECT_TRUE((is_same<decltype(declval<complex<T>>() / declval<int128>()),
+                       complex<T>>::value));
+}
+
+TEST(Int128, CommonType)
+{
+  using dynd::complex;
+
+  EXPECT_TRUE(
+      (is_same<decltype(declval<int128>() / declval<bool1>()), int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<signed char>()),
+                       int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<int128>() / declval<short>()), int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<int128>() / declval<int>()), int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<int128>() / declval<long>()), int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<long long>()),
+                       int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<int128>() / declval<bool1>()), int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<unsigned char>()),
+                       int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<unsigned short>()),
+                       int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<unsigned int>()),
+                       int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<unsigned long>()),
+                       int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<int128>() / declval<unsigned long long>()),
+               int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<int128>() / declval<float>()), float>::value));
+  EXPECT_TRUE((
+      is_same<decltype(declval<int128>() / declval<double>()), double>::value));
+  EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<complex<float>>()),
+                       complex<float>>::value));
+  EXPECT_TRUE((is_same<decltype(declval<int128>() / declval<complex<double>>()),
+                       complex<double>>::value));
+
+  EXPECT_TRUE(
+      (is_same<decltype(declval<bool1>() / declval<int128>()), int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<signed char>() / declval<int128>()),
+                       int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<short>() / declval<int128>()), int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<int>() / declval<int128>()), int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<long>() / declval<int128>()), int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<long long>() / declval<int128>()),
+                       int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<unsigned char>() / declval<int128>()),
+                       int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<unsigned short>() / declval<int128>()),
+                       int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<unsigned int>() / declval<int128>()),
+                       int128>::value));
+  EXPECT_TRUE((is_same<decltype(declval<unsigned long>() / declval<int128>()),
+                       int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<unsigned long long>() / declval<int128>()),
+               int128>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<float>() / declval<int128>()), float>::value));
+  EXPECT_TRUE((
+      is_same<decltype(declval<double>() / declval<int128>()), double>::value));
+
+  /*
+    std::cout
+        << ndt::type::make<decltype(declval<int>() + declval<unsigned
+    short>())>()
+        << std::endl;
+    std::exit(-1);
+  */
+}

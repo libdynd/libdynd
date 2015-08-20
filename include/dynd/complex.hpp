@@ -136,7 +136,19 @@ DYND_CUDA_HOST_DEVICE complex<T> operator/(bool1 lhs, complex<T> rhs)
 }
 
 template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> operator/(int128 lhs, complex<T> rhs)
+{
+  return static_cast<complex<T>>(lhs) / rhs;
+}
+
+template <typename T>
 DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, bool1 rhs)
+{
+  return lhs / static_cast<complex<T>>(rhs);
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, int128 rhs)
 {
   return lhs / static_cast<complex<T>>(rhs);
 }

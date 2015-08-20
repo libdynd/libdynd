@@ -803,18 +803,6 @@ T floor(T value)
 
 namespace dynd {
 
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, int128 rhs)
-{
-  return lhs / static_cast<complex<T>>(rhs);
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(int128 lhs, complex<T> rhs)
-{
-  return static_cast<complex<T>>(lhs) / rhs;
-}
-
 DYND_CUDA_HOST_DEVICE inline float &operator/=(float &lhs, int128 rhs)
 {
   lhs /= static_cast<float>(rhs);
