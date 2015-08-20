@@ -71,6 +71,40 @@ namespace nd {
       }
     };
 
+    template <type_id_t Src0TypeID>
+    struct compound_div_kernel<
+        bool_type_id, Src0TypeID,
+        true> : base_kernel<compound_div_kernel<bool_type_id, Src0TypeID, true>,
+                            kernel_request_host, 1> {
+      typedef bool1 dst_type;
+      typedef typename type_of<Src0TypeID>::type src0_type;
+
+      static const std::size_t data_size = 0;
+
+      void single(char *dst, char *const *src)
+      {
+        *reinterpret_cast<dst_type *>(dst) =
+            *reinterpret_cast<dst_type *>(dst) /
+                *reinterpret_cast<src0_type *>(src[0]) !=
+            0;
+      }
+
+      void strided(char *dst, std::intptr_t dst_stride, char *const *src,
+                   const std::intptr_t *src_stride, std::size_t count)
+      {
+        char *src0 = src[0];
+        std::intptr_t src0_stride = src_stride[0];
+        for (std::size_t i = 0; i < count; ++i) {
+          *reinterpret_cast<dst_type *>(dst) =
+              *reinterpret_cast<dst_type *>(dst) /
+                  *reinterpret_cast<src0_type *>(src0) !=
+              0;
+          dst += dst_stride;
+          src0 += src0_stride;
+        }
+      }
+    };
+
   } // namespace dynd::nd::detail
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>

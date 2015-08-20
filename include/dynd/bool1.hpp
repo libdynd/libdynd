@@ -77,6 +77,22 @@ DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
 }
 
 template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value &&(sizeof(T) <= sizeof(int)), int>::type
+operator/(bool1 lhs, T rhs)
+{
+  return static_cast<int>(lhs) / rhs;
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_integral<T>::value &&(sizeof(T) > sizeof(int)), T>::type
+operator/(bool1 lhs, T rhs)
+{
+  return static_cast<T>(lhs) / rhs;
+}
+
+template <typename T>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
                                               T>::type
 operator/(bool1 lhs, T rhs)

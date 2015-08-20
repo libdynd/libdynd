@@ -35,12 +35,19 @@ struct is_std_equivalent<bool1, bool> {
 
 TEST(Bool1, Arithmetic)
 {
-  EXPECT_TRUE(
-      (is_same<decltype(declval<bool1>() / declval<bool1>()), int>::value));
-  EXPECT_TRUE(
-      (is_same<decltype(declval<bool1>() / declval<float>()), float>::value));
-  EXPECT_TRUE(
-      (is_same<decltype(declval<bool1>() / declval<double>()), double>::value));
+#define TEST_ARITHMETIC_OPERATOR(SYMBOL)                                       \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() SYMBOL declval<bool1>()),     \
+                       int>::value));                                          \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() SYMBOL declval<short>()),     \
+                       int>::value));                                          \
+  EXPECT_TRUE((                                                                \
+      is_same<decltype(declval<bool1>() SYMBOL declval<int>()), int>::value)); \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() SYMBOL declval<float>()),     \
+                       float>::value));                                        \
+  EXPECT_TRUE((is_same<decltype(declval<bool1>() SYMBOL declval<double>()),    \
+                       double>::value))
+
+  TEST_ARITHMETIC_OPERATOR(/ );
 }
 
 /*
