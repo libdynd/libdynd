@@ -18,6 +18,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 template <typename T>
 class Bool1 : public testing::Test {
 };
@@ -42,3 +43,4 @@ REGISTER_TYPED_TEST_CASE_P(Bool1, Arithmetic);
 
 INSTANTIATE_TYPED_TEST_CASE_P(Integral, Bool1, IntegralTypes);
 INSTANTIATE_TYPED_TEST_CASE_P(FloatingPoint, Bool1, FloatingPointTypes);
+*/
