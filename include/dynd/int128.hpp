@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-
 #include <limits>
 
 #if !defined(DYND_HAS_INT128)
@@ -178,7 +176,12 @@ public:
 
   DYND_CUDA_HOST_DEVICE inline int128 operator*(uint32_t rhs) const;
 
-  DYND_CUDA_HOST_DEVICE inline int128 operator/(uint32_t rhs) const;
+//  DYND_CUDA_HOST_DEVICE inline int128 operator/(uint32_t rhs) const;
+
+  DYND_CUDA_HOST_DEVICE int128 &operator/=(int128 DYND_UNUSED(rhs))
+  {
+    throw std::runtime_error("operator/= is not implemented for int128");
+  }
 
   DYND_CUDA_HOST_DEVICE operator float() const
   {
@@ -200,47 +203,57 @@ public:
     }
   }
 
-  DYND_CUDA_HOST_DEVICE operator char() const
+  explicit DYND_CUDA_HOST_DEVICE operator char() const
   {
     return (char)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator signed char() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator signed char() const
   {
     return (signed char)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned char() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator unsigned char() const
   {
     return (unsigned char)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator short() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator short() const
   {
     return (short)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned short() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator unsigned short() const
   {
     return (unsigned short)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator int() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator int() const
   {
     return (int)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned int() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator unsigned int() const
   {
     return (unsigned int)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator long() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator long() const
   {
     return (long)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned long() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator unsigned long() const
   {
     return (unsigned long)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator long long() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator long long() const
   {
     return (long long)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned long long() const
+
+  explicit DYND_CUDA_HOST_DEVICE operator unsigned long long() const
   {
     return (unsigned long long)m_lo;
   }
@@ -263,6 +276,44 @@ struct common_type<dynd::int128, dynd::bool1> {
 } // namespace std
 
 namespace dynd {
+
+DYND_CUDA_HOST_DEVICE inline int128 operator/(int128 DYND_UNUSED(lhs),
+                                              int128 DYND_UNUSED(rhs))
+{
+  throw std::runtime_error("operator/ is not implemented for int128");
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_same<T, bool1>::value || std::is_integral<T>::value, int128>::type
+operator/(int128, T)
+{
+  throw std::runtime_error("operator/ is not implemented for int128");
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_same<T, bool1>::value || std::is_integral<T>::value, int128>::type
+operator/(T, int128)
+{
+  throw std::runtime_error("operator/ is not implemented for int128");
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
+                                              T>::type
+operator/(int128, T)
+{
+  throw std::runtime_error("operator/ is not implemented for int128");
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
+                                              T>::type
+operator/(T, int128)
+{
+  throw std::runtime_error("operator/ is not implemented for int128");
+}
 
 DYND_CUDA_HOST_DEVICE inline bool operator==(int lhs, const int128 &rhs)
 {

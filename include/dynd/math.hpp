@@ -252,4 +252,175 @@ using NAMESPACE::isnan;
 
 #undef NAMESPACE
 
+template <typename T>
+DYND_CUDA_HOST_DEVICE T abs(complex<T> z)
+{
+  return static_cast<T>(hypot(z.real(), z.imag()));
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE T arg(complex<T> z)
+{
+  return atan2(z.imag(), z.real());
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> exp(complex<T> z)
+{
+  T x, c, s;
+  T r = z.real(), i = z.imag();
+  complex<T> ret;
+
+  if (isfinite(r)) {
+    x = exp(r);
+
+    c = cos(i);
+    s = sin(i);
+
+    if (isfinite(i)) {
+      ret = complex<T>(x * c, x * s);
+    } else {
+      ret = complex<T>(_nan<T>(NULL), copysign(_nan<T>(NULL), i));
+    }
+  } else if (isnan(r)) {
+    // r is nan
+    if (i == 0) {
+      ret = complex<T>(r, 0);
+    } else {
+      ret = complex<T>(r, copysign(_nan<T>(NULL), i));
+    }
+  } else {
+    // r is +- inf
+    if (r > 0) {
+      if (i == 0) {
+        ret = complex<T>(r, i);
+      } else if (isfinite(i)) {
+        c = cos(i);
+        s = sin(i);
+
+        ret = complex<T>(r * c, r * s);
+      } else {
+        // x = +inf, y = +-inf | nan
+        ret = complex<T>(r, _nan<T>(NULL));
+      }
+    } else {
+      if (isfinite(i)) {
+        x = exp(r);
+        c = cos(i);
+        s = sin(i);
+
+        ret = complex<T>(x * c, x * s);
+      } else {
+        // x = -inf, y = nan | +i inf
+        ret = complex<T>(0, 0);
+      }
+    }
+  }
+
+  return ret;
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> log(complex<T> z)
+{
+  return complex<T>(log(abs(z)), arg(z));
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE inline complex<T> sqrt(complex<T> z)
+{
+  using namespace std;
+  // We risk spurious overflow for components >= DBL_MAX / (1 + sqrt(2))
+  const T thresh =
+      (std::numeric_limits<T>::max)() / (1 + ::sqrt(static_cast<T>(2)));
+
+  complex<T> result;
+  T a = z.real(), b = z.imag();
+  T t;
+  bool scale;
+
+  // Handle special cases.
+  if (a == 0 && b == 0) {
+    return complex<T>(0, b);
+  }
+  if (isinf(b)) {
+    return complex<T>(std::numeric_limits<T>::infinity(), b);
+  }
+  if (isnan(a)) {
+    t = (b - b) / (b - b);   // raise invalid if b is not a NaN
+    return complex<T>(a, t); // return NaN + NaN i
+  }
+  if (isinf(a)) {
+    // csqrt(inf + NaN i) = inf + NaN i
+    // csqrt(inf + y i) = inf + 0 i
+    // csqrt(-inf + NaN i) = NaN +- inf i
+    // csqrt(-inf + y i) = 0 + inf i
+    if (signbit(a)) {
+      return complex<T>(std::fabs(b - b), copysign(a, b));
+    } else {
+      return complex<T>(a, copysign(b - b, b));
+    }
+  }
+  // The remaining special case (b is NaN) is handled below
+
+  // Scale to avoid overflow
+  if (std::fabs(a) >= thresh || std::fabs(b) >= thresh) {
+    a *= 0.25;
+    b *= 0.25;
+    scale = true;
+  } else {
+    scale = false;
+  }
+
+  // Algorithm 312, CACM vol 10, Oct 1967
+  if (a >= 0) {
+    t = std::sqrt((a + hypot(a, b)) * 0.5);
+    result = complex<T>(t, b / (2 * t));
+  } else {
+    t = std::sqrt((-a + hypot(a, b)) * 0.5);
+    result = complex<T>(std::fabs(b) / (2 * t), copysign(t, b));
+  }
+
+  // Rescale
+  if (scale) {
+    return complex<T>(result.real() * 2, result.imag());
+  } else {
+    return result;
+  }
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> pow(complex<T> x, complex<T> y)
+{
+  T yr = y.real(), yi = y.imag();
+
+  complex<T> b = log(x);
+  T br = b.real(), bi = b.imag();
+
+  return exp(complex<T>(br * yr - bi * yi, br * yi + bi * yr));
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> pow(complex<T> x, T y)
+{
+  complex<T> b = log(x);
+  T br = b.real(), bi = b.imag();
+
+  return exp(complex<T>(br * y, bi * y));
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> cos(complex<T> z)
+{
+  T x = z.real(), y = z.imag();
+  return complex<T>(cos(x) * cosh(y), -(sin(x) * sinh(y)));
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> sin(complex<T> z)
+{
+  T x = z.real(), y = z.imag();
+  return complex<T>(sin(x) * cosh(y), cos(x) * sinh(y));
+}
+
 } // namespace dynd

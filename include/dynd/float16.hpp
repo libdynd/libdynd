@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-
 // Half-precision constants, in bits form
 #define DYND_FLOAT16_ZERO (0x0000u)
 #define DYND_FLOAT16_PZERO (0x0000u)
@@ -21,11 +19,12 @@
 namespace dynd {
 
 // Bit-level conversions
-DYND_CUDA_HOST_DEVICE uint16_t
-float_to_halfbits(float value, assign_error_mode errmode);
-DYND_CUDA_HOST_DEVICE uint16_t
-double_to_halfbits(double value, assign_error_mode errmode);
+DYND_CUDA_HOST_DEVICE uint16_t float_to_halfbits(float value);
+
+DYND_CUDA_HOST_DEVICE uint16_t double_to_halfbits(double value);
+
 DYND_CUDA_HOST_DEVICE float halfbits_to_float(uint16_t value);
+
 DYND_CUDA_HOST_DEVICE double halfbits_to_double(uint16_t value);
 
 class float16 {
@@ -93,14 +92,12 @@ public:
   DYND_CUDA_HOST_DEVICE explicit float16(uint128 value);
 
   DYND_CUDA_HOST_DEVICE
-  explicit float16(float f, assign_error_mode errmode = assign_error_nocheck)
-      : m_bits(float_to_halfbits(f, errmode))
+  explicit float16(float f) : m_bits(float_to_halfbits(f))
   {
   }
 
   DYND_CUDA_HOST_DEVICE
-  explicit float16(double d, assign_error_mode errmode = assign_error_nocheck)
-      : m_bits(double_to_halfbits(d, errmode))
+  explicit float16(double d) : m_bits(double_to_halfbits(d))
   {
   }
 

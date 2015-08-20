@@ -3,13 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/float16.hpp>
-#include <dynd/int128.hpp>
-#include <dynd/uint128.hpp>
-
 #include <stdexcept>
 #include <sstream>
 #include <cmath>
+
+#include <dynd/config.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -94,6 +92,7 @@ int128 dynd::int128::operator*(uint32_t rhs) const
   }
 }
 
+/*
 int128 dynd::int128::operator/(uint32_t rhs) const
 {
   if ((int64_t)m_hi < 0) {
@@ -115,6 +114,7 @@ int128 dynd::int128::operator/(uint32_t rhs) const
     return int128(hi_div, (mid_div << 32) | low_div);
   }
 }
+*/
 
 std::ostream &dynd::operator<<(ostream &out, const int128 &val)
 {

@@ -6,6 +6,7 @@
 #include <dynd/func/option.hpp>
 #include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/kernels/is_avail_kernel.hpp>
+#include <dynd/math.hpp>
 
 using namespace std;
 using namespace dynd;

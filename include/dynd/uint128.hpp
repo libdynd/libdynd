@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-
 #include <limits>
 #include <iostream>
 

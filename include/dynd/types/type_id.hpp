@@ -11,6 +11,9 @@
 #include <dynd/config.hpp>
 
 namespace dynd {
+namespace ndt {
+  class type;
+}
 
 enum type_kind_t {
   bool_kind,

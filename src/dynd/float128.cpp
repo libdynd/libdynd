@@ -3,10 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/float16.hpp>
-#include <dynd/float128.hpp>
-
 #include <sstream>
+
+#include <dynd/config.hpp>
 
 #if !defined(DYND_HAS_FLOAT128)
 
@@ -230,4 +229,3 @@ dynd::float128::float128(double value)
 }
 
 #endif // !defined(DYND_HAS_FLOAT128)
-

@@ -5,10 +5,6 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-#include <dynd/diagnostics.hpp>
-#include <dynd/typed_data_assign.hpp>
-
 #include <iostream>
 #include <stdexcept>
 

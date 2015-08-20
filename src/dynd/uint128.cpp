@@ -3,13 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/float16.hpp>
-#include <dynd/int128.hpp>
-#include <dynd/uint128.hpp>
-
 #include <stdexcept>
 #include <sstream>
 #include <cmath>
+
+#include <dynd/config.hpp>
 
 #if !defined(DYND_HAS_UINT128)
 

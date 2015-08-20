@@ -14,6 +14,7 @@
 #include <dynd/pp/list.hpp>
 #include <dynd/parser_util.hpp>
 #include <dynd/func/apply.hpp>
+#include <dynd/math.hpp>
 
 #include <algorithm>
 
