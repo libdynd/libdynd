@@ -419,6 +419,16 @@ std::ostream &operator<<(std::ostream &out, const int128 &val);
 namespace std {
 
 template <>
+struct common_type<dynd::int128, bool> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<bool, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
 class numeric_limits<dynd::int128> {
 public:
   static const bool is_specialized = true;

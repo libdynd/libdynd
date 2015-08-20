@@ -13,8 +13,6 @@
 
 #include <dynd/config.hpp>
 
-#include <typeinfo>
-
 using namespace std;
 using namespace dynd;
 

@@ -20,28 +20,10 @@ public:
   {
   }
 
-  // Special case complex conversion to avoid ambiguous overload
-  /*
-    template <class T>
-    DYND_CUDA_HOST_DEVICE explicit bool1(complex<T> value)
-        : m_value(value != complex<T>(0))
-    {
-    }
-  */
-
   operator bool() const
   {
     return m_value ? true : false;
   }
-
-  /*
-    template <typename T,
-              typename = typename std::enable_if<is_arithmetic<T>::value>::type>
-    DYND_CUDA_HOST_DEVICE explicit operator T() const
-    {
-      return static_cast<T>(static_cast<bool>(m_value));
-    }
-  */
 
   DYND_CUDA_HOST_DEVICE bool1 &operator=(bool value)
   {
@@ -55,27 +37,7 @@ public:
     return *this;
   }
 
-  /*
-
-    DYND_CUDA_HOST_DEVICE bool1 &operator=(bool1 value) {
-      m_value = value.m_value;
-      return *this;
-    }
-  */
-
   friend int operator/(bool1 lhs, bool1 rhs);
-};
-
-template <typename T>
-struct is_signed_integral {
-  static const bool value =
-      std::is_signed<T>::value && std::is_integral<T>::value;
-};
-
-template <typename T>
-struct is_unsigned_integral {
-  static const bool value =
-      std::is_unsigned<T>::value && std::is_integral<T>::value;
 };
 
 DYND_CUDA_HOST_DEVICE inline bool operator+(bool1 lhs, bool1 rhs)
