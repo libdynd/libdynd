@@ -133,6 +133,18 @@ public:
 typedef complex<float32> complex64;
 typedef complex<float64> complex128;
 
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> operator/(bool1 lhs, complex<T> rhs)
+{
+  return static_cast<complex<T>>(lhs) / rhs;
+}
+
+template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, bool1 rhs)
+{
+  return lhs / static_cast<complex<T>>(rhs);
+}
+
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE bool operator==(complex<T> lhs, complex<U> rhs)
 {

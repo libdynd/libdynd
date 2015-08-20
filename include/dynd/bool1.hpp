@@ -89,14 +89,18 @@ DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::common_type<bool, T>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_arithmetic<T>::value,
+    typename std::common_type<bool, T>::type>::type
 operator/(bool1 lhs, T rhs)
 {
   return static_cast<typename std::common_type<bool, T>::type>(lhs) / rhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::common_type<T, bool>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_arithmetic<T>::value,
+    typename std::common_type<bool, T>::type>::type
 operator/(T lhs, bool1 rhs)
 {
   return lhs / static_cast<typename std::common_type<T, bool>::type>(rhs);

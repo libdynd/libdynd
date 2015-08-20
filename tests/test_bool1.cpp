@@ -18,34 +18,27 @@
 using namespace std;
 using namespace dynd;
 
-template <class T>
+template <typename T>
 class Bool1 : public testing::Test {
 };
 
-typedef ::testing::Types<int> Implementations;
-TYPED_TEST_CASE(Bool1, Implementations);
+TYPED_TEST_CASE_P(Bool1);
 
-TYPED_TEST(Bool1, DefaultConstructor) {
-
-}
-
-/*
-template <typename T, typename U>
-struct is_std_equivalent {
-  static const bool value = std::is_same<T, U>::value;
-};
-
-template <>
-struct is_std_equivalent<bool, bool1> {
-  static const bool value = true;
-};
-
-template <>
-struct is_std_equivalent<bool1, bool> {
-  static const bool value = true;
-};
+typedef ::testing::Types<char, short, int, long, unsigned char, unsigned short,
+                         unsigned int, unsigned long> IntegralTypes;
+typedef ::testing::Types<float, double, long double> FloatingPointTypes;
 
 TYPED_TEST_P(Bool1, Arithmetic)
 {
+  EXPECT_TRUE(
+      (is_same<decltype(declval<bool>() / declval<TypeParam>()),
+               decltype(declval<bool1>() / declval<TypeParam>())>::value));
+  EXPECT_TRUE(
+      (is_same<decltype(declval<bool1>() / declval<TypeParam>()),
+               decltype(declval<bool>() / declval<TypeParam>())>::value));
 }
-*/
+
+REGISTER_TYPED_TEST_CASE_P(Bool1, Arithmetic);
+
+INSTANTIATE_TYPED_TEST_CASE_P(Integral, Bool1, IntegralTypes);
+INSTANTIATE_TYPED_TEST_CASE_P(FloatingPoint, Bool1, FloatingPointTypes);
