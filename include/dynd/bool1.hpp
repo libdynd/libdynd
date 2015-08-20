@@ -66,6 +66,18 @@ public:
   friend int operator/(bool1 lhs, bool1 rhs);
 };
 
+template <typename T>
+struct is_signed_integral {
+  static const bool value =
+      std::is_signed<T>::value && std::is_integral<T>::value;
+};
+
+template <typename T>
+struct is_unsigned_integral {
+  static const bool value =
+      std::is_unsigned<T>::value && std::is_integral<T>::value;
+};
+
 DYND_CUDA_HOST_DEVICE inline bool operator+(bool1 lhs, bool1 rhs)
 {
   return static_cast<bool>(lhs) && static_cast<bool>(rhs);
@@ -77,51 +89,17 @@ DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value &&(sizeof(T) <= sizeof(int)), int>::type
+DYND_CUDA_HOST_DEVICE typename std::common_type<bool, T>::type
 operator/(bool1 lhs, T rhs)
 {
-  return static_cast<int>(lhs) / rhs;
+  return static_cast<typename std::common_type<bool, T>::type>(lhs) / rhs;
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value &&(sizeof(T) <= sizeof(int)), int>::type
+DYND_CUDA_HOST_DEVICE typename std::common_type<T, bool>::type
 operator/(T lhs, bool1 rhs)
 {
-  return lhs / static_cast<int>(rhs);
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value &&(sizeof(T) > sizeof(int)), T>::type
-operator/(bool1 lhs, T rhs)
-{
-  return static_cast<T>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value &&(sizeof(T) > sizeof(int)), T>::type
-operator/(T lhs, bool1 rhs)
-{
-  return lhs / static_cast<T>(rhs);
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
-                                              T>::type
-operator/(bool1 lhs, T rhs)
-{
-  return static_cast<T>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value,
-                                              T>::type
-operator/(T lhs, bool1 rhs)
-{
-  return lhs / static_cast<T>(rhs);
+  return lhs / static_cast<typename std::common_type<T, bool>::type>(rhs);
 }
 
 DYND_CUDA_HOST_DEVICE inline bool operator<(bool1 lhs, bool1 rhs)
