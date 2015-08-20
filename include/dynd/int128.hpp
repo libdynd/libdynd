@@ -203,6 +203,11 @@ public:
     }
   }
 
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const
+  {
+    return m_lo ? true : false;
+  }
+
   explicit DYND_CUDA_HOST_DEVICE operator char() const
   {
     return (char)m_lo;

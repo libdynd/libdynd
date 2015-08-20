@@ -18,10 +18,13 @@
 using namespace std;
 using namespace dynd;
 
-//#define EXPECT_TYPE_IS_SAME(A, B) EXPECT_TRUE(true);
+//#define EXPECT_TYPE_IS_SAME(A, B) EXPECT_TRUE((std::is_same<A, B>::value))
 
 TEST(Bool1, ArithmeticType)
 {
+//  EXPECT_TYPE_IS_SAME(decltype(declval<bool1>() / declval<short>()),
+  //                    (typename common_type<bool, short>::type));
+
 #define EXPECTATIONS(OPERATOR)                                                 \
   EXPECT_TRUE((is_same<decltype(declval<bool1>() OPERATOR declval<short>()),   \
                        typename common_type<bool, short>::type>::value));      \
