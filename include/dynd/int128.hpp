@@ -27,6 +27,11 @@ public:
   {
   }
 
+  DYND_CUDA_HOST_DEVICE int128(bool value)
+      : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
+  {
+  }
+
   DYND_CUDA_HOST_DEVICE int128(bool1 value)
       : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
   {
@@ -203,7 +208,7 @@ public:
     }
   }
 
-  DYND_CUDA_HOST_DEVICE operator bool() const
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const
   {
     return m_lo ? true : false;
   }
