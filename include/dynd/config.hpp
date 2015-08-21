@@ -145,8 +145,10 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 namespace dynd {
 
 template <typename T, typename U, typename V>
-struct is_common_type_of
-    : std::is_same<T, typename std::common_type<U, V>::type> {
+struct is_not_common_type_of
+    : std::conditional<
+          std::is_same<T, typename std::common_type<U, V>::type>::value,
+          std::false_type, std::true_type>::type {
 };
 
 template <bool Value, template <typename...> class T, typename U,
@@ -746,16 +748,18 @@ template <typename T>
 struct is_mixed_arithmetic<T, T> : std::false_type {
 };
 
+// T != common_type<T, U>
 template <typename T, typename U>
 struct is_lcast_arithmetic
-    : conditional_make<is_mixed_arithmetic<T, U>::value, is_common_type_of,
-                       std::false_type, U, T, U>::type {
+    : conditional_make<is_mixed_arithmetic<T, U>::value, is_not_common_type_of,
+                       std::false_type, T, T, U>::type {
 };
 
+// U != common_type<T, U>
 template <typename T, typename U>
 struct is_rcast_arithmetic
-    : conditional_make<is_mixed_arithmetic<T, U>::value, is_common_type_of,
-                       std::false_type, T, T, U>::type {
+    : conditional_make<is_mixed_arithmetic<T, U>::value, is_not_common_type_of,
+                       std::false_type, U, T, U>::type {
 };
 
 template <typename T>
