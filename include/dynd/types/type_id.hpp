@@ -693,12 +693,12 @@ namespace detail {
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
   struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, sint_kind> {
-    static const bool value = true;
+    static const bool value = false;
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
   struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, uint_kind> {
-    static const bool value = true;
+    static const bool value = false;
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
