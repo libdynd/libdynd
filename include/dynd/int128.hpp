@@ -29,7 +29,7 @@ public:
 
   DYND_CUDA_HOST_DEVICE int128(bool1)
   {
-    throw std::runtime_error("int128(bool1) is not implemented")
+    throw std::runtime_error("int128(bool1) is not implemented");
   }
 
   DYND_CUDA_HOST_DEVICE int128(char value)
