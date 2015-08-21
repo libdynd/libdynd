@@ -805,33 +805,51 @@ T floor(T value)
 namespace dynd {
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    !std::is_same<T, U>::value &&
-        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-        !is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
-    T>::type
+struct enable_if_only_lcast_arithmetic
+    : std::enable_if<
+          !std::is_same<T, U>::value &&
+              !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+              is_lcast_arithmetic<T, U>::value &&
+              !is_rcast_arithmetic<T, U>::value,
+          U> {
+};
+
+template <typename T, typename U>
+struct enable_if_only_rcast_arithmetic
+    : std::enable_if<
+          !std::is_same<T, U>::value &&
+              !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+              !is_lcast_arithmetic<T, U>::value &&
+              is_rcast_arithmetic<T, U>::value,
+          T> {
+};
+
+template <typename T, typename U>
+struct enable_if_lrcast_arithmetic
+    : std::enable_if<
+          !std::is_same<T, U>::value &&
+              !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+              is_lcast_arithmetic<T, U>::value &&
+              is_rcast_arithmetic<T, U>::value,
+          typename std::common_type<T, U>::type> {
+};
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename enable_if_only_rcast_arithmetic<T, U>::type
 operator/(T lhs, U rhs)
 {
   return lhs / static_cast<T>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    !std::is_same<T, U>::value &&
-        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-        is_lcast_arithmetic<T, U>::value && !is_rcast_arithmetic<T, U>::value,
-    U>::type
+DYND_CUDA_HOST_DEVICE typename enable_if_only_lcast_arithmetic<T, U>::type
 operator/(T lhs, U rhs)
 {
   return static_cast<U>(lhs) / rhs;
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    !std::is_same<T, U>::value &&
-        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-        is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
-    typename std::common_type<T, U>::type>::type
+DYND_CUDA_HOST_DEVICE typename enable_if_lrcast_arithmetic<T, U>::type
 operator/(T lhs, U rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
