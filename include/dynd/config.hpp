@@ -789,9 +789,8 @@ namespace dynd {
 
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    is_mixed_arithmetic<T, U>::value &&
-        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-        is_common_type_of<T, T, U>::value,
+    !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+        !is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
     T>::type
 operator/(T lhs, U rhs)
 {
@@ -800,9 +799,8 @@ operator/(T lhs, U rhs)
 
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    is_mixed_arithmetic<T, U>::value &&
-        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-        is_common_type_of<U, T, U>::value,
+    !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+        is_lcast_arithmetic<T, U>::value && !is_rcast_arithmetic<T, U>::value,
     U>::type
 operator/(T lhs, U rhs)
 {
@@ -811,10 +809,8 @@ operator/(T lhs, U rhs)
 
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    is_mixed_arithmetic<T, U>::value &&
-        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-        !(is_common_type_of<T, T, U>::value ||
-          is_common_type_of<U, T, U>::value),
+    !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+        is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
     typename std::common_type<T, U>::type>::type
 operator/(T lhs, U rhs)
 {
