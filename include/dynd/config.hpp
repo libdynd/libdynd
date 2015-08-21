@@ -145,10 +145,10 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 namespace dynd {
 
 template <typename T, typename U, typename V>
-struct is_not_common_type_of
+struct is_common_type_of
     : std::conditional<
           std::is_same<T, typename std::common_type<U, V>::type>::value,
-          std::false_type, std::true_type>::type {
+          std::true_type, std::false_type>::type {
 };
 
 template <bool Value, template <typename...> class T,
@@ -756,18 +756,23 @@ using true_t = std::true_type;
 template <typename... Ts>
 using false_t = std::false_type;
 
+template <typename T>
+using not_t = std::integral_constant<bool, !T::value>;
+
 // Checks whether T is not the common type of T and U
 template <typename T, typename U>
 struct is_lcast_arithmetic
-    : conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value,
-                       is_not_common_type_of, false_t, T, T, U>::type {
+    : not_t<typename conditional_make<
+          is_arithmetic<T>::value &&is_arithmetic<U>::value, is_common_type_of,
+          true_t, T, T, U>::type> {
 };
 
 // Checks whether U is not the common type of T and U
 template <typename T, typename U>
 struct is_rcast_arithmetic
-    : conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value,
-                       is_not_common_type_of, false_t, U, T, U>::type {
+    : not_t<typename conditional_make<
+          is_arithmetic<T>::value &&is_arithmetic<U>::value, is_common_type_of,
+          true_t, U, T, U>::type> {
 };
 
 template <typename T>
