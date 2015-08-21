@@ -28,6 +28,11 @@ namespace nd {
 
     static callable make()
     {
+      typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
+                               int64_type_id, float32_type_id, float64_type_id,
+                               complex_float32_type_id,
+                               complex_float64_type_id> numeric_type_ids;
+
       const callable self =
           functional::call<FuncType>(ndt::type("(Any) -> Any"));
 
@@ -96,6 +101,11 @@ namespace nd {
 
     static void fill()
     {
+      typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
+                               int64_type_id, float32_type_id, float64_type_id,
+                               complex_float32_type_id,
+                               complex_float64_type_id> numeric_type_ids;
+
       for (const auto &pair :
            callable::make_all<KernelType, numeric_type_ids, numeric_type_ids>(
                0)) {
@@ -188,13 +198,6 @@ namespace nd {
 
     static void fill()
     {
-      typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id,
-                               int32_type_id, int64_type_id, int128_type_id,
-                               uint8_type_id, uint16_type_id, uint32_type_id,
-                               uint64_type_id, uint128_type_id, float32_type_id,
-                               float64_type_id, complex_float32_type_id,
-                               complex_float64_type_id> numeric_type_ids;
-
       for (const auto &pair : callable::make_all<KernelType, numeric_type_ids,
                                                  numeric_type_ids>()) {
         children[pair.first[0]][pair.first[1]] = pair.second;
@@ -241,12 +244,8 @@ namespace nd {
   callable compound_arithmetic_operator<FuncType, KernelType>::children
       [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
-  //  extern struct compound_add
-  //    : compound_arithmetic_operator<compound_add, compound_add_kernel> {
-  //} compound_add;
-
   extern struct compound_div
-      : compound_arithmetic_operator<compound_div, compound_div_kernel> {
+      : compound_arithmetic_operator<compound_div, compound_div_kernel_t> {
   } compound_div;
 
 } // namespace dynd::nd

@@ -31,14 +31,55 @@ public:
     return *this;
   }
 
+  DYND_CUDA_HOST_DEVICE bool1 &operator+=(bool1 rhs)
+  {
+    m_value += rhs.m_value;
+    return *this;
+  }
+
+  DYND_CUDA_HOST_DEVICE bool1 &operator-=(bool1 rhs)
+  {
+    m_value -= rhs.m_value;
+    return *this;
+  }
+
+  DYND_CUDA_HOST_DEVICE bool1 &operator*=(bool1 rhs)
+  {
+    m_value *= rhs.m_value;
+    return *this;
+  }
+
   DYND_CUDA_HOST_DEVICE bool1 &operator/=(bool1 rhs)
   {
     m_value /= rhs.m_value;
     return *this;
   }
 
+  friend int operator+(bool1 lhs, bool1 rhs);
+  friend int operator-(bool1 lhs, bool1 rhs);
+  friend int operator*(bool1 lhs, bool1 rhs);
   friend int operator/(bool1 lhs, bool1 rhs);
 };
+
+DYND_CUDA_HOST_DEVICE inline int operator+(bool1 lhs, bool1 rhs)
+{
+  return lhs.m_value + rhs.m_value;
+}
+
+DYND_CUDA_HOST_DEVICE inline int operator-(bool1 lhs, bool1 rhs)
+{
+  return lhs.m_value - rhs.m_value;
+}
+
+DYND_CUDA_HOST_DEVICE inline int operator*(bool1 lhs, bool1 rhs)
+{
+  return lhs.m_value * rhs.m_value;
+}
+
+DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
+{
+  return lhs.m_value / rhs.m_value;
+}
 
 template <>
 struct is_integral<bool1> : std::true_type {
@@ -121,16 +162,6 @@ struct common_type<T, dynd::bool1> : common_type<dynd::bool1, T> {
 } // namespace std
 
 namespace dynd {
-
-DYND_CUDA_HOST_DEVICE inline bool operator+(bool1 lhs, bool1 rhs)
-{
-  return static_cast<bool>(lhs) && static_cast<bool>(rhs);
-}
-
-DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
-{
-  return lhs.m_value / rhs.m_value;
-}
 
 DYND_CUDA_HOST_DEVICE inline bool operator<(bool1 lhs, bool1 rhs)
 {
