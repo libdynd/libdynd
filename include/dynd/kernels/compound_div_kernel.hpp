@@ -85,8 +85,9 @@ namespace nd {
       {
         *reinterpret_cast<dst_type *>(dst) =
             *reinterpret_cast<dst_type *>(dst) /
-                *reinterpret_cast<src0_type *>(src[0]) !=
-            0;
+                    *reinterpret_cast<src0_type *>(src[0])
+                ? true
+                : false;
       }
 
       void strided(char *dst, std::intptr_t dst_stride, char *const *src,
@@ -97,8 +98,9 @@ namespace nd {
         for (std::size_t i = 0; i < count; ++i) {
           *reinterpret_cast<dst_type *>(dst) =
               *reinterpret_cast<dst_type *>(dst) /
-                  *reinterpret_cast<src0_type *>(src0) !=
-              0;
+                      *reinterpret_cast<src0_type *>(src0)
+                  ? true
+                  : false;
           dst += dst_stride;
           src0 += src0_stride;
         }

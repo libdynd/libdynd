@@ -22,12 +22,12 @@ public:
 
   operator bool() const
   {
-    return m_value ? true : false;
+    return m_value != 0;
   }
 
-  DYND_CUDA_HOST_DEVICE bool1 &operator=(bool value)
+  DYND_CUDA_HOST_DEVICE bool1 &operator=(bool rhs)
   {
-    m_value = value;
+    m_value = rhs;
     return *this;
   }
 

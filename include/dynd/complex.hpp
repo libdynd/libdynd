@@ -112,22 +112,28 @@ public:
     return *this;
   }
 
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const
+  {
+    return m_real || m_imag;
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator T() const
+  {
+    return m_real;
+  }
+
+  template <typename U, typename = typename std::enable_if<
+                            is_mixed_arithmetic<T, U>::value &&
+                            !std::is_same<U, bool>::value>::type>
+  DYND_CUDA_HOST_DEVICE explicit operator U() const
+  {
+    return static_cast<U>(m_real);
+  }
+
   operator std::complex<T>() const
   {
     return std::complex<T>(m_real, m_imag);
   }
-
-  template <typename U,
-            typename = std::enable_if<std::is_integral<T>::value ||
-                                      std::is_floating_point<T>::value>>
-  explicit operator U() const
-  {
-    return static_cast<U>(m_real);
-  }
-};
-
-template <typename T>
-struct is_complex : std::false_type {
 };
 
 template <typename T>
@@ -223,6 +229,11 @@ struct common_type<dynd::complex<T>, double> {
   typedef dynd::complex<typename common_type<T, double>::type> type;
 };
 
+template <typename T>
+struct common_type<dynd::complex<T>, dynd::float128> {
+  typedef dynd::complex<typename common_type<T, dynd::float128>::type> type;
+};
+
 template <typename T, typename U>
 struct common_type<dynd::complex<T>, dynd::complex<U>> {
   typedef dynd::complex<typename common_type<T, U>::type> type;
@@ -277,6 +288,12 @@ template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE bool operator!=(complex<T> lhs, complex<U> rhs)
 {
   return !(lhs == rhs);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE bool operator!=(complex<T> lhs, U rhs)
+{
+  return lhs.m_real == rhs && !lhs.m_imag;
 }
 
 template <typename T>
@@ -449,55 +466,11 @@ DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, T rhs)
   return lhs /= rhs;
 }
 
-template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<U>::value || std::is_floating_point<U>::value,
-    complex<typename std::common_type<T, U>::type>>::type
-operator/(complex<T> lhs, U rhs)
-{
-  return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
-         static_cast<typename std::common_type<T, U>::type>(rhs);
-}
-
 template <typename T>
 DYND_CUDA_HOST_DEVICE complex<T> operator/(T lhs, complex<T> rhs)
 {
   T denom = rhs.m_real * rhs.m_real + rhs.m_imag * rhs.m_imag;
   return complex<T>(lhs * rhs.m_real / denom, -lhs * rhs.m_imag / denom);
-}
-
-template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value,
-    complex<typename std::common_type<T, U>::type>>::type
-operator/(T lhs, complex<U> rhs)
-{
-  return static_cast<typename std::common_type<T, U>::type>(lhs) /
-         static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(bool1 lhs, complex<T> rhs)
-{
-  return static_cast<complex<T>>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(int128 lhs, complex<T> rhs)
-{
-  return static_cast<complex<T>>(lhs) / rhs;
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, bool1 rhs)
-{
-  return lhs / static_cast<complex<T>>(rhs);
-}
-
-template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, int128 rhs)
-{
-  return lhs / static_cast<complex<T>>(rhs);
 }
 
 template <typename T>

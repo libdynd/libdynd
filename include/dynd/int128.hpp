@@ -28,7 +28,8 @@ public:
   }
 
   DYND_CUDA_HOST_DEVICE int128(bool1 value)
-      : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
+      : m_lo(static_cast<bool>(value)),
+        m_hi(static_cast<bool>(value) < 0 ? 0xffffffffffffffffULL : 0ULL)
   {
   }
 
@@ -205,60 +206,60 @@ public:
 
   DYND_CUDA_HOST_DEVICE explicit operator bool() const
   {
-    return m_lo ? true : false;
+    return m_lo || m_hi;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator char() const
+  DYND_CUDA_HOST_DEVICE explicit operator char() const
   {
     return (char)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator signed char() const
+  DYND_CUDA_HOST_DEVICE explicit operator signed char() const
   {
     return (signed char)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator unsigned char() const
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned char() const
   {
     return (unsigned char)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator short() const
+  DYND_CUDA_HOST_DEVICE explicit operator short() const
   {
     return (short)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator unsigned short() const
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned short() const
   {
     return (unsigned short)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator int() const
+  DYND_CUDA_HOST_DEVICE explicit operator int() const
   {
     return (int)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator unsigned int() const
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned int() const
   {
     return (unsigned int)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator long() const
+  DYND_CUDA_HOST_DEVICE explicit operator long() const
   {
     return (long)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator unsigned long() const
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned long() const
   {
     return (unsigned long)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator long long() const
+  DYND_CUDA_HOST_DEVICE explicit operator long long() const
   {
     return (long long)m_lo;
   }
 
-  explicit DYND_CUDA_HOST_DEVICE operator unsigned long long() const
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned long long() const
   {
     return (unsigned long long)m_lo;
   }

@@ -686,6 +686,27 @@ namespace detail {
     static const bool value = true;
   };
 
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, bool_kind> {
+    static const bool value = true;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, sint_kind> {
+    static const bool value = true;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, uint_kind> {
+    static const bool value = true;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, real_kind> {
+    static const bool value = (sizeof(typename type_of<DstTypeID>::type) / 2) >
+                              sizeof(typename type_of<SrcTypeID>::type);
+  };
+
   template <type_id_t DstTypeID, type_id_t SrcTypeID, type_kind_t TypeKind>
   struct is_lossless_assignable<DstTypeID, TypeKind, SrcTypeID, TypeKind> {
     static const bool value = sizeof(typename type_of<DstTypeID>::type) >

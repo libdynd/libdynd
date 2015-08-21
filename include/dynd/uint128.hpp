@@ -30,7 +30,8 @@ public:
   {
   }
 
-  DYND_CUDA_HOST_DEVICE uint128(bool1 value) : m_lo(value), m_hi(0ULL)
+  DYND_CUDA_HOST_DEVICE uint128(bool1 value)
+      : m_lo(static_cast<bool>(value)), m_hi(0ULL)
   {
   }
   DYND_CUDA_HOST_DEVICE uint128(char value) : m_lo(value), m_hi(0ULL)
@@ -181,6 +182,11 @@ public:
   DYND_CUDA_HOST_DEVICE uint128 &operator/=(uint128 DYND_UNUSED(rhs))
   {
     throw std::runtime_error("operator/= is not implemented for uint128");
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const
+  {
+    return m_lo || m_hi;
   }
 
   DYND_CUDA_HOST_DEVICE operator float() const

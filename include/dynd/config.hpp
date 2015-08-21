@@ -695,17 +695,26 @@ class float128;
 #endif
 
 template <typename T>
+struct is_integral : std::is_integral<T> {
+};
+
+template <typename T>
 struct is_floating_point : std::is_floating_point<T> {
 };
 
 template <typename T>
-struct is_integral : std::is_integral<T> {
+struct is_complex : std::false_type {
 };
 
 template <typename T>
 struct is_arithmetic
     : std::integral_constant<bool, is_integral<T>::value ||
                                        is_floating_point<T>::value> {
+};
+
+template <typename T>
+struct is_numeric : std::integral_constant<bool, is_arithmetic<T>::value ||
+                                                     is_complex<T>::value> {
 };
 
 template <typename T, typename U>
@@ -785,6 +794,26 @@ operator/(T lhs, U rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
          static_cast<typename std::common_type<T, U>::type>(rhs);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    is_mixed_arithmetic<T, U>::value,
+    complex<typename std::common_type<T, U>::type>>::type
+operator/(complex<T> lhs, U rhs)
+{
+  return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
+         static_cast<typename std::common_type<T, U>::type>(rhs);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    is_mixed_arithmetic<T, U>::value,
+    complex<typename std::common_type<T, U>::type>>::type
+operator/(T lhs, complex<U> rhs)
+{
+  return static_cast<typename std::common_type<T, U>::type>(lhs) /
+         static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
 }
 
 template <typename T, typename U>
@@ -973,17 +1002,6 @@ namespace detail {
 #endif
 
 } // namespace dynd::detail
-
-template <>
-struct is_arithmetic<complex<float>> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<complex<double>> {
-  static const bool value = true;
-};
-
 } // namespace dynd
 
 #ifdef __CUDA_ARCH__
