@@ -144,6 +144,25 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 // These are small templates 'missing' from the standard library
 namespace dynd {
 
+template <typename T, typename U, typename V>
+struct is_common_type_of
+    : std::is_same<T, typename std::common_type<U, V>::type> {
+};
+
+template <bool Value, template <typename...> class T, typename U,
+          typename... As>
+struct conditional_make;
+
+template <template <typename...> class T, typename U, typename... As>
+struct conditional_make<true, T, U, As...> {
+  typedef T<As...> type;
+};
+
+template <template <typename...> class T, typename U, typename... As>
+struct conditional_make<false, T, U, As...> {
+  typedef U type;
+};
+
 template <typename T>
 struct is_function_pointer {
   static const bool value =
@@ -727,9 +746,16 @@ template <typename T>
 struct is_mixed_arithmetic<T, T> : std::false_type {
 };
 
-template <typename T, typename U, typename V>
-struct is_common_type_of
-    : std::is_same<T, typename std::common_type<U, V>::type> {
+template <typename T, typename U>
+struct is_lcast_arithmetic
+    : conditional_make<is_mixed_arithmetic<T, U>::value, is_common_type_of,
+                       std::false_type, U, T, U>::type {
+};
+
+template <typename T, typename U>
+struct is_rcast_arithmetic
+    : conditional_make<is_mixed_arithmetic<T, U>::value, is_common_type_of,
+                       std::false_type, T, T, U>::type {
 };
 
 template <typename T>
