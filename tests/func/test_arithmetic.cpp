@@ -264,6 +264,14 @@ TEST(Arithmetic, Minus)
   EXPECT_ARRAY_EQ(nd::array({-0.0, -1.0, -2.0, -3.0, -4.0}), -a);
 }
 
+/*
+TEST(Arithmetic, CompoundDiv)
+{
+  nd::array a{1.0, 2.0, 3.0};
+  a /= {2.0, 3.0, 4.0};
+}
+*/
+
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,
                            ScalarOnTheRight, ScalarOnTheLeft, ComplexScalar);
 

@@ -248,7 +248,7 @@ struct remove_all_pointers {
 template <typename T>
 struct remove_all_pointers<T *> {
   typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type
-      type;
+  type;
 };
 
 template <typename T, typename U>
@@ -269,7 +269,9 @@ struct integer_proxy;
 
 template <typename T>
 struct integer_proxy<integer_sequence<T>> {
-  enum { size = 0 };
+  enum {
+    size = 0
+  };
 
   template <typename... U, typename F, typename... A>
   static void for_each(F, A &&...)
@@ -285,7 +287,9 @@ struct integer_proxy<integer_sequence<T>> {
 
 template <typename T, T I0>
 struct integer_proxy<integer_sequence<T, I0>> {
-  enum { size = 1 };
+  enum {
+    size = 1
+  };
 
   template <typename... U, typename F, typename... A>
   static void for_each(F f, A &&... a)
@@ -302,7 +306,9 @@ struct integer_proxy<integer_sequence<T, I0>> {
 
 template <typename T, T I0, T... I>
 struct integer_proxy<integer_sequence<T, I0, I...>> {
-  enum { size = dynd::integer_sequence<T, I0, I...>::size };
+  enum {
+    size = dynd::integer_sequence<T, I0, I...>::size
+  };
 
 #if !(defined(_MSC_VER) && (_MSC_VER == 1800))
   template <typename R, typename... A>
@@ -642,13 +648,18 @@ namespace dynd {
  * Function to call for initializing dynd's global state, such
  * as cached ndt::type objects, the arrfunc registry, etc.
  */
-inline int libdynd_init() { return 0; }
+inline int libdynd_init()
+{
+  return 0;
+}
 
 /**
  * Function to call to free all resources associated with
  * dynd's global state, that were initialized by libdynd_init.
  */
-inline void libdynd_cleanup() {}
+inline void libdynd_cleanup()
+{
+}
 
 /**
   * A function which can be used at runtime to identify whether
@@ -684,83 +695,41 @@ class float128;
 #endif
 
 template <typename T>
-struct is_arithmetic {
-  static const bool value = false;
+struct is_integral : std::is_integral<T> {
 };
 
-template <>
-struct is_arithmetic<bool1> {
-  static const bool value = true;
+template <typename T>
+struct is_floating_point : std::is_floating_point<T> {
 };
 
-template <>
-struct is_arithmetic<int8> {
-  static const bool value = true;
+template <typename T>
+struct is_complex : std::false_type {
 };
 
-template <>
-struct is_arithmetic<int16> {
-  static const bool value = true;
+template <typename T>
+struct is_arithmetic
+    : std::integral_constant<bool, is_integral<T>::value ||
+                                       is_floating_point<T>::value> {
 };
 
-template <>
-struct is_arithmetic<int32> {
-  static const bool value = true;
+template <typename T>
+struct is_numeric : std::integral_constant<bool, is_arithmetic<T>::value ||
+                                                     is_complex<T>::value> {
 };
 
-template <>
-struct is_arithmetic<int64> {
-  static const bool value = true;
+template <typename T, typename U>
+struct is_mixed_arithmetic
+    : std::integral_constant<
+          bool, is_arithmetic<T>::value &&is_arithmetic<U>::value> {
 };
 
-template <>
-struct is_arithmetic<int128> {
-  static const bool value = true;
+template <typename T>
+struct is_mixed_arithmetic<T, T> : std::false_type {
 };
 
-template <>
-struct is_arithmetic<uint8> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint16> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint32> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint64> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<uint128> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<float16> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<float32> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<float64> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<float128> {
-  static const bool value = true;
+template <typename T, typename U, typename V>
+struct is_common_type_of
+    : std::is_same<T, typename std::common_type<U, V>::type> {
 };
 
 template <typename T>
@@ -784,11 +753,78 @@ T floor(T value)
 } // namespace dynd
 
 #include <dynd/bool1.hpp>
-#include <dynd/complex.hpp>
-#include <dynd/float16.hpp>
-#include <dynd/float128.hpp>
 #include <dynd/int128.hpp>
 #include <dynd/uint128.hpp>
+#include <dynd/float16.hpp>
+#include <dynd/float128.hpp>
+#include <dynd/complex.hpp>
+
+namespace dynd {
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    is_mixed_arithmetic<T, U>::value &&
+        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+        is_common_type_of<T, T, U>::value,
+    T>::type
+operator/(T lhs, U rhs)
+{
+  return lhs / static_cast<T>(rhs);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    is_mixed_arithmetic<T, U>::value &&
+        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+        is_common_type_of<U, T, U>::value,
+    U>::type
+operator/(T lhs, U rhs)
+{
+  return static_cast<U>(lhs) / rhs;
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    is_mixed_arithmetic<T, U>::value &&
+        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+        !(is_common_type_of<T, T, U>::value ||
+          is_common_type_of<U, T, U>::value),
+    typename std::common_type<T, U>::type>::type
+operator/(T lhs, U rhs)
+{
+  return static_cast<typename std::common_type<T, U>::type>(lhs) /
+         static_cast<typename std::common_type<T, U>::type>(rhs);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    is_mixed_arithmetic<T, U>::value,
+    complex<typename std::common_type<T, U>::type>>::type
+operator/(complex<T> lhs, U rhs)
+{
+  return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
+         static_cast<typename std::common_type<T, U>::type>(rhs);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    is_mixed_arithmetic<T, U>::value,
+    complex<typename std::common_type<T, U>::type>>::type
+operator/(T lhs, complex<U> rhs)
+{
+  return static_cast<typename std::common_type<T, U>::type>(lhs) /
+         static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
+}
+
+template <typename T, typename U>
+DYND_CUDA_HOST_DEVICE typename std::enable_if<
+    std::is_floating_point<T>::value &&is_integral<U>::value, T &>::type
+operator/=(T &lhs, U rhs)
+{
+  return lhs /= static_cast<T>(rhs);
+}
+
+} // namespace dynd
 
 #ifdef DYND_CUDA
 
@@ -831,11 +867,20 @@ namespace detail {
       memcpy(m_data, data, sizeof(m_data));
     }
 
-    DYND_CUDA_HOST_DEVICE operator T *() { return m_data; }
+    DYND_CUDA_HOST_DEVICE operator T *()
+    {
+      return m_data;
+    }
 
-    DYND_CUDA_HOST_DEVICE operator const T *() const { return m_data; }
+    DYND_CUDA_HOST_DEVICE operator const T *() const
+    {
+      return m_data;
+    }
 
-    DYND_CUDA_HOST_DEVICE T &operator[](intptr_t i) { return m_data[i]; }
+    DYND_CUDA_HOST_DEVICE T &operator[](intptr_t i)
+    {
+      return m_data[i];
+    }
 
     DYND_CUDA_HOST_DEVICE const T &operator[](intptr_t i) const
     {
@@ -848,11 +893,19 @@ namespace detail {
   public:
     DYND_CUDA_HOST_DEVICE array_wrapper() = default;
 
-    DYND_CUDA_HOST_DEVICE array_wrapper(const T *DYND_UNUSED(data)) {}
+    DYND_CUDA_HOST_DEVICE array_wrapper(const T *DYND_UNUSED(data))
+    {
+    }
 
-    DYND_CUDA_HOST_DEVICE operator T *() { return NULL; }
+    DYND_CUDA_HOST_DEVICE operator T *()
+    {
+      return NULL;
+    }
 
-    DYND_CUDA_HOST_DEVICE operator const T *() const { return NULL; }
+    DYND_CUDA_HOST_DEVICE operator const T *() const
+    {
+      return NULL;
+    }
   };
 
   template <int N, typename T>
@@ -866,9 +919,14 @@ namespace detail {
     T m_value;
 
   public:
-    value_wrapper(const T &value) : m_value(value) {}
+    value_wrapper(const T &value) : m_value(value)
+    {
+    }
 
-    DYND_CUDA_HOST_DEVICE operator T() const { return m_value; }
+    DYND_CUDA_HOST_DEVICE operator T() const
+    {
+      return m_value;
+    }
   };
 
   template <typename T>
@@ -944,17 +1002,6 @@ namespace detail {
 #endif
 
 } // namespace dynd::detail
-
-template <>
-struct is_arithmetic<complex<float>> {
-  static const bool value = true;
-};
-
-template <>
-struct is_arithmetic<complex<double>> {
-  static const bool value = true;
-};
-
 } // namespace dynd
 
 #ifdef __CUDA_ARCH__

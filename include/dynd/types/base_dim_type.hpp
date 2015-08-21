@@ -99,6 +99,16 @@ namespace ndt {
     virtual intptr_t get_dim_size(const char *arrmeta = NULL,
                                   const char *data = NULL) const = 0;
 
+    intptr_t get_size(const char *arrmeta) const
+    {
+      std::intptr_t dim_size = get_dim_size(arrmeta, NULL);
+      if (dim_size == -1) {
+        return -1;
+      }
+
+      return dim_size * m_element_tp.get_size(NULL);
+    }
+
     virtual void get_vars(std::unordered_set<std::string> &vars) const
     {
       m_element_tp.get_vars(vars);

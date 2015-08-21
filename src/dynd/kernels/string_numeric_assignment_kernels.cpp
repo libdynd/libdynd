@@ -192,7 +192,10 @@ struct overflow_check<uint32_t> {
 };
 template <>
 struct overflow_check<uint64_t> {
-  inline static bool is_overflow(uint64_t DYND_UNUSED(value)) { return false; }
+  inline static bool is_overflow(uint64_t DYND_UNUSED(value))
+  {
+    return false;
+  }
 };
 
 namespace {
@@ -408,11 +411,9 @@ static void string_to_float64_single(ckernel_prefix *extra, char *dst,
 static void string_to_float16_single(ckernel_prefix *extra, char *dst,
                                      char *const *src)
 {
-  string_to_builtin_kernel *e =
-      reinterpret_cast<string_to_builtin_kernel *>(extra);
   double tmp;
   string_to_float64_single(extra, reinterpret_cast<char *>(&tmp), src);
-  *reinterpret_cast<float16 *>(dst) = float16(tmp, e->errmode);
+  *reinterpret_cast<float16 *>(dst) = float16(tmp);
 }
 
 static void string_to_float128_single(ckernel_prefix *DYND_UNUSED(self),
@@ -436,8 +437,8 @@ static void string_to_complex_float64_single(ckernel_prefix *DYND_UNUSED(self),
   throw std::runtime_error("TODO: implement string_to_complex_float64_single");
 }
 
-static expr_single_t
-    static_string_to_builtin_kernels[builtin_type_id_count - 2] = {
+static expr_single_t static_string_to_builtin_kernels
+    [builtin_type_id_count - 2] = {
         &string_to_bool_single,            &string_to_int<int8_t>::single,
         &string_to_int<int16_t>::single,   &string_to_int<int32_t>::single,
         &string_to_int<int64_t>::single,   &string_to_int128_single,

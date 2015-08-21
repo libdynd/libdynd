@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-
 #include <limits>
 
 #if !defined(DYND_HAS_INT128)
@@ -21,16 +19,19 @@ public:
   uint64_t m_lo, m_hi;
 #endif
 
-  DYND_CUDA_HOST_DEVICE inline int128() {}
+  DYND_CUDA_HOST_DEVICE inline int128()
+  {
+  }
   DYND_CUDA_HOST_DEVICE inline int128(uint64_t hi, uint64_t lo)
       : m_lo(lo), m_hi(hi)
   {
   }
 
-  DYND_CUDA_HOST_DEVICE int128(bool1 value)
-      : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
+  DYND_CUDA_HOST_DEVICE int128(bool1)
   {
+    throw std::runtime_error("int128(bool1) is not implemented");
   }
+
   DYND_CUDA_HOST_DEVICE int128(char value)
       : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
   {
@@ -39,32 +40,28 @@ public:
       : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
   {
   }
-  DYND_CUDA_HOST_DEVICE int128(unsigned char value)
-      : m_lo(value), m_hi(0ULL)
+  DYND_CUDA_HOST_DEVICE int128(unsigned char value) : m_lo(value), m_hi(0ULL)
   {
   }
   DYND_CUDA_HOST_DEVICE int128(short value)
       : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
   {
   }
-  DYND_CUDA_HOST_DEVICE int128(unsigned short value)
-      : m_lo(value), m_hi(0ULL)
+  DYND_CUDA_HOST_DEVICE int128(unsigned short value) : m_lo(value), m_hi(0ULL)
   {
   }
   DYND_CUDA_HOST_DEVICE int128(int value)
       : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
   {
   }
-  DYND_CUDA_HOST_DEVICE int128(unsigned int value)
-      : m_lo(value), m_hi(0ULL)
+  DYND_CUDA_HOST_DEVICE int128(unsigned int value) : m_lo(value), m_hi(0ULL)
   {
   }
   DYND_CUDA_HOST_DEVICE int128(long value)
       : m_lo((int64_t)value), m_hi(value < 0 ? 0xffffffffffffffffULL : 0ULL)
   {
   }
-  DYND_CUDA_HOST_DEVICE int128(unsigned long value)
-      : m_lo(value), m_hi(0ULL)
+  DYND_CUDA_HOST_DEVICE int128(unsigned long value) : m_lo(value), m_hi(0ULL)
   {
   }
   DYND_CUDA_HOST_DEVICE int128(long long value)
@@ -149,6 +146,14 @@ public:
     m_lo = lo_p1;
   }
 
+  DYND_CUDA_HOST_DEVICE int128 &operator+=(const int128 &rhs)
+  {
+    uint64_t lo = m_lo + rhs.m_lo;
+    *this = int128(m_hi + ~rhs.m_hi + (lo < m_lo), lo);
+
+    return *this;
+  }
+
   DYND_CUDA_HOST_DEVICE inline int128 operator-() const
   {
     // twos complement negation, ~x + 1
@@ -157,15 +162,13 @@ public:
     return int128(hi + (lo_p1 < lo), lo_p1);
   }
 
-  DYND_CUDA_HOST_DEVICE inline int128
-  operator+(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE inline int128 operator+(const int128 &rhs) const
   {
     uint64_t lo = m_lo + rhs.m_lo;
     return int128(m_hi + rhs.m_hi + (lo < m_lo), lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline int128
-  operator-(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE inline int128 operator-(const int128 &rhs) const
   {
     uint64_t lo = m_lo + ~rhs.m_lo + 1;
     return int128(m_hi + ~rhs.m_hi + (lo < m_lo), lo);
@@ -173,7 +176,12 @@ public:
 
   DYND_CUDA_HOST_DEVICE inline int128 operator*(uint32_t rhs) const;
 
-  DYND_CUDA_HOST_DEVICE inline int128 operator/(uint32_t rhs) const;
+  //  DYND_CUDA_HOST_DEVICE inline int128 operator/(uint32_t rhs) const;
+
+  DYND_CUDA_HOST_DEVICE int128 &operator/=(int128 DYND_UNUSED(rhs))
+  {
+    throw std::runtime_error("operator/= is not implemented for int128");
+  }
 
   DYND_CUDA_HOST_DEVICE operator float() const
   {
@@ -195,36 +203,168 @@ public:
     }
   }
 
-  DYND_CUDA_HOST_DEVICE operator char() const { return (char)m_lo; }
-  DYND_CUDA_HOST_DEVICE operator signed char() const
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const
+  {
+    return m_lo || m_hi;
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator char() const
+  {
+    return (char)m_lo;
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator signed char() const
   {
     return (signed char)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator unsigned char() const
+
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned char() const
   {
     return (unsigned char)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator short() const { return (short)m_lo; }
-  DYND_CUDA_HOST_DEVICE operator unsigned short() const
+
+  DYND_CUDA_HOST_DEVICE explicit operator short() const
+  {
+    return (short)m_lo;
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned short() const
   {
     return (unsigned short)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator int() const { return (int)m_lo; }
-  DYND_CUDA_HOST_DEVICE operator unsigned int() const
+
+  DYND_CUDA_HOST_DEVICE explicit operator int() const
+  {
+    return (int)m_lo;
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned int() const
   {
     return (unsigned int)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator long() const { return (long)m_lo; }
-  DYND_CUDA_HOST_DEVICE operator unsigned long() const
+
+  DYND_CUDA_HOST_DEVICE explicit operator long() const
+  {
+    return (long)m_lo;
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned long() const
   {
     return (unsigned long)m_lo;
   }
-  DYND_CUDA_HOST_DEVICE operator long long() const { return (long long)m_lo; }
-  DYND_CUDA_HOST_DEVICE operator unsigned long long() const
+
+  DYND_CUDA_HOST_DEVICE explicit operator long long() const
+  {
+    return (long long)m_lo;
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator unsigned long long() const
   {
     return (unsigned long long)m_lo;
   }
 };
+
+template <>
+struct is_integral<int128> : std::true_type {
+};
+
+} // namespace dynd
+
+namespace std {
+
+template <>
+struct common_type<dynd::int128, bool> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, dynd::bool1> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, char> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, signed char> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned char> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, short> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned short> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, int> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned int> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, long long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, unsigned long long> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, dynd::int128> {
+  typedef dynd::int128 type;
+};
+
+template <>
+struct common_type<dynd::int128, float> {
+  typedef float type;
+};
+
+template <>
+struct common_type<dynd::int128, double> {
+  typedef double type;
+};
+
+template <typename T>
+struct common_type<T, dynd::int128> : common_type<dynd::int128, T> {
+};
+
+} // namespace std
+
+namespace dynd {
+
+DYND_CUDA_HOST_DEVICE inline int128 operator/(int128 DYND_UNUSED(lhs),
+                                              int128 DYND_UNUSED(rhs))
+{
+  throw std::runtime_error("operator/ is not implemented for int128");
+}
 
 DYND_CUDA_HOST_DEVICE inline bool operator==(int lhs, const int128 &rhs)
 {
@@ -251,8 +391,7 @@ DYND_CUDA_HOST_DEVICE inline bool operator<(double lhs, const int128 &rhs)
 {
   return lhs < double(rhs);
 }
-DYND_CUDA_HOST_DEVICE inline bool operator<(signed char lhs,
-                                            const int128 &rhs)
+DYND_CUDA_HOST_DEVICE inline bool operator<(signed char lhs, const int128 &rhs)
 {
   return int128(lhs) < rhs;
 }
@@ -274,13 +413,11 @@ DYND_CUDA_HOST_DEVICE inline bool operator<(int lhs, const int128 &rhs)
 {
   return int128(lhs) < rhs;
 }
-DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned int lhs,
-                                            const int128 &rhs)
+DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned int lhs, const int128 &rhs)
 {
   return int128(lhs) < rhs;
 }
-DYND_CUDA_HOST_DEVICE inline bool operator<(long long lhs,
-                                            const int128 &rhs)
+DYND_CUDA_HOST_DEVICE inline bool operator<(long long lhs, const int128 &rhs)
 {
   return int128(lhs) < rhs;
 }
@@ -298,8 +435,7 @@ DYND_CUDA_HOST_DEVICE inline bool operator>(double lhs, const int128 &rhs)
 {
   return lhs > double(rhs);
 }
-DYND_CUDA_HOST_DEVICE inline bool operator>(signed char lhs,
-                                            const int128 &rhs)
+DYND_CUDA_HOST_DEVICE inline bool operator>(signed char lhs, const int128 &rhs)
 {
   return int128(lhs) > rhs;
 }
@@ -321,13 +457,11 @@ DYND_CUDA_HOST_DEVICE inline bool operator>(int lhs, const int128 &rhs)
 {
   return int128(lhs) > rhs;
 }
-DYND_CUDA_HOST_DEVICE inline bool operator>(unsigned int lhs,
-                                            const int128 &rhs)
+DYND_CUDA_HOST_DEVICE inline bool operator>(unsigned int lhs, const int128 &rhs)
 {
   return int128(lhs) > rhs;
 }
-DYND_CUDA_HOST_DEVICE inline bool operator>(long long lhs,
-                                            const int128 &rhs)
+DYND_CUDA_HOST_DEVICE inline bool operator>(long long lhs, const int128 &rhs)
 {
   return int128(lhs) > rhs;
 }
@@ -347,11 +481,11 @@ template <>
 class numeric_limits<dynd::int128> {
 public:
   static const bool is_specialized = true;
-  static dynd::int128 (min)() throw()
+  static dynd::int128(min)() throw()
   {
     return dynd::int128(0x8000000000000000ULL, 0ULL);
   }
-  static dynd::int128 (max)() throw()
+  static dynd::int128(max)() throw()
   {
     return dynd::int128(0x7fffffffffffffffULL, 0xffffffffffffffffULL);
   }

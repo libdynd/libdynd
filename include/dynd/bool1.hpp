@@ -16,47 +16,152 @@ class bool1 {
 public:
   DYND_CUDA_HOST_DEVICE bool1() = default;
 
-  DYND_CUDA_HOST_DEVICE explicit bool1(bool value) : m_value(value) {}
-
-  // Special case complex conversion to avoid ambiguous overload
-  /*
-    template <class T>
-    DYND_CUDA_HOST_DEVICE explicit bool1(complex<T> value)
-        : m_value(value != complex<T>(0))
-    {
-    }
-  */
-
-  operator bool() const { return m_value ? true : false; }
-
-  /*
-    template <typename T,
-              typename = typename std::enable_if<is_arithmetic<T>::value>::type>
-    DYND_CUDA_HOST_DEVICE explicit operator T() const
-    {
-      return static_cast<T>(static_cast<bool>(m_value));
-    }
-  */
-
-  DYND_CUDA_HOST_DEVICE bool1 &operator=(bool value)
+  DYND_CUDA_HOST_DEVICE explicit bool1(bool value) : m_value(value)
   {
-    m_value = value;
+  }
+
+  operator bool() const
+  {
+    return m_value != 0;
+  }
+
+  DYND_CUDA_HOST_DEVICE bool1 &operator=(bool rhs)
+  {
+    m_value = rhs;
     return *this;
   }
 
-  /*
+  DYND_CUDA_HOST_DEVICE bool1 &operator+=(bool1 rhs)
+  {
+    m_value += rhs.m_value;
+    return *this;
+  }
 
-    DYND_CUDA_HOST_DEVICE bool1 &operator=(bool1 value) {
-      m_value = value.m_value;
-      return *this;
-    }
-  */
+  DYND_CUDA_HOST_DEVICE bool1 &operator-=(bool1 rhs)
+  {
+    m_value -= rhs.m_value;
+    return *this;
+  }
+
+  DYND_CUDA_HOST_DEVICE bool1 &operator*=(bool1 rhs)
+  {
+    m_value *= rhs.m_value;
+    return *this;
+  }
+
+  DYND_CUDA_HOST_DEVICE bool1 &operator/=(bool1 rhs)
+  {
+    m_value /= rhs.m_value;
+    return *this;
+  }
+
+  friend int operator+(bool1 lhs, bool1 rhs);
+  friend int operator-(bool1 lhs, bool1 rhs);
+  friend int operator*(bool1 lhs, bool1 rhs);
+  friend int operator/(bool1 lhs, bool1 rhs);
 };
 
-DYND_CUDA_HOST_DEVICE inline bool operator+(bool1 lhs, bool1 rhs)
+DYND_CUDA_HOST_DEVICE inline int operator+(bool1 lhs, bool1 rhs)
 {
-  return static_cast<bool>(lhs) && static_cast<bool>(rhs);
+  return lhs.m_value + rhs.m_value;
 }
+
+DYND_CUDA_HOST_DEVICE inline int operator-(bool1 lhs, bool1 rhs)
+{
+  return lhs.m_value - rhs.m_value;
+}
+
+DYND_CUDA_HOST_DEVICE inline int operator*(bool1 lhs, bool1 rhs)
+{
+  return lhs.m_value * rhs.m_value;
+}
+
+DYND_CUDA_HOST_DEVICE inline int operator/(bool1 lhs, bool1 rhs)
+{
+  return lhs.m_value / rhs.m_value;
+}
+
+template <>
+struct is_integral<bool1> : std::true_type {
+};
+
+} // namespace dynd
+
+namespace std {
+
+template <>
+struct common_type<dynd::bool1, bool> : common_type<char, bool> {
+};
+
+template <>
+struct common_type<dynd::bool1, dynd::bool1> {
+  typedef dynd::bool1 type;
+};
+
+template <>
+struct common_type<dynd::bool1, char> : common_type<char, char> {
+};
+
+template <>
+struct common_type<dynd::bool1, signed char> : common_type<char, signed char> {
+};
+
+template <>
+struct common_type<dynd::bool1, unsigned char> : common_type<char,
+                                                             unsigned char> {
+};
+
+template <>
+struct common_type<dynd::bool1, short> : common_type<char, short> {
+};
+
+template <>
+struct common_type<dynd::bool1, unsigned short> : common_type<char,
+                                                              unsigned short> {
+};
+
+template <>
+struct common_type<dynd::bool1, int> : common_type<char, int> {
+};
+
+template <>
+struct common_type<dynd::bool1, unsigned int> : common_type<char,
+                                                            unsigned int> {
+};
+
+template <>
+struct common_type<dynd::bool1, long> : common_type<char, long> {
+};
+
+template <>
+struct common_type<dynd::bool1, unsigned long> : common_type<char,
+                                                             unsigned long> {
+};
+
+template <>
+struct common_type<dynd::bool1, long long> : common_type<char, long long> {
+};
+
+template <>
+struct common_type<dynd::bool1,
+                   unsigned long long> : common_type<char, unsigned long long> {
+};
+
+template <>
+struct common_type<dynd::bool1, float> : common_type<char, float> {
+};
+
+template <>
+struct common_type<dynd::bool1, double> : common_type<char, double> {
+};
+
+template <typename T>
+struct common_type<T, dynd::bool1> : common_type<dynd::bool1, T> {
+};
+
+} // namespace std
+
+namespace dynd {
 
 DYND_CUDA_HOST_DEVICE inline bool operator<(bool1 lhs, bool1 rhs)
 {

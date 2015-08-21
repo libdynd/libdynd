@@ -11,6 +11,9 @@
 #include <dynd/config.hpp>
 
 namespace dynd {
+namespace ndt {
+  class type;
+}
 
 enum type_kind_t {
   bool_kind,
@@ -201,16 +204,17 @@ typedef type_id_sequence<float16_type_id, float32_type_id, float64_type_id,
                          float128_type_id> real_type_ids;
 typedef type_id_sequence<complex_float32_type_id, complex_float64_type_id>
 complex_type_ids;
-typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
-                         int64_type_id, float32_type_id, float64_type_id,
-                         complex_float32_type_id,
-                         complex_float64_type_id> numeric_type_ids;
 typedef type_id_sequence<
     bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
     int128_type_id, uint8_type_id, uint16_type_id, uint32_type_id,
     uint64_type_id, uint128_type_id, float16_type_id, float32_type_id,
     float64_type_id, float128_type_id, complex_float32_type_id,
     complex_float64_type_id> arithmetic_type_ids;
+typedef type_id_sequence<
+    bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
+    int128_type_id, uint8_type_id, uint16_type_id, uint32_type_id,
+    uint64_type_id, uint128_type_id, float32_type_id, float64_type_id,
+    complex_float32_type_id, complex_float64_type_id> numeric_type_ids;
 
 typedef type_id_sequence<
     uninitialized_type_id, bool_type_id, int8_type_id, int16_type_id,
@@ -663,6 +667,60 @@ struct type_kind_of<datetime_type_id> {
 template <>
 struct type_kind_of<option_type_id> {
   static const type_kind_t value = option_kind;
+};
+
+namespace detail {
+
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t SrcTypeID,
+            type_kind_t SrcTypeKind>
+  struct is_lossless_assignable {
+    static const bool value = false;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, real_kind, SrcTypeID, sint_kind> {
+    static const bool value = true;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, real_kind, SrcTypeID, uint_kind> {
+    static const bool value = true;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, bool_kind> {
+    static const bool value = true;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, sint_kind> {
+    static const bool value = false;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, uint_kind> {
+    static const bool value = false;
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID>
+  struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, real_kind> {
+    static const bool value = (sizeof(typename type_of<DstTypeID>::type) / 2) >
+                              sizeof(typename type_of<SrcTypeID>::type);
+  };
+
+  template <type_id_t DstTypeID, type_id_t SrcTypeID, type_kind_t TypeKind>
+  struct is_lossless_assignable<DstTypeID, TypeKind, SrcTypeID, TypeKind> {
+    static const bool value = sizeof(typename type_of<DstTypeID>::type) >
+                              sizeof(typename type_of<SrcTypeID>::type);
+  };
+
+} // namespace dynd::detail
+
+template <type_id_t DstTypeID, type_id_t Src0TypeID>
+struct is_lossless_assignable
+    : detail::is_lossless_assignable<DstTypeID, type_kind_of<DstTypeID>::value,
+                                     Src0TypeID,
+                                     type_kind_of<Src0TypeID>::value> {
 };
 
 // Metaprogram for determining if a type is a valid C++ scalar

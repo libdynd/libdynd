@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "dynd_assertions.hpp"
 
 #include <dynd/func/rolling.hpp>
 #include <dynd/func/mean.hpp>
@@ -39,7 +40,6 @@ TEST(Rolling, BuiltinSum_Kernel)
     EXPECT_EQ(s, b(i).as<double>());
   }
 }
-*/
 
 TEST(Rolling, BuiltinMean_Kernel)
 {
@@ -61,3 +61,5 @@ TEST(Rolling, BuiltinMean_Kernel)
     EXPECT_EQ(s / 4, b(i).as<double>());
   }
 }
+
+*/

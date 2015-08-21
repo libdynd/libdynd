@@ -8,6 +8,7 @@
 #include <dynd/types/type_id.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/eval/eval_context.hpp>
+#include <dynd/math.hpp>
 
 namespace dynd {
 

@@ -9,6 +9,8 @@
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
 #include <dynd/types/fixed_string_type.hpp>
+#include <dynd/typed_data_assign.hpp>
+#include <dynd/type.hpp>
 
 namespace dynd {
 namespace nd {

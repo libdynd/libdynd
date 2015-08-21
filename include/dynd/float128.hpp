@@ -5,10 +5,6 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-#include <dynd/diagnostics.hpp>
-#include <dynd/typed_data_assign.hpp>
-
 #include <iostream>
 #include <stdexcept>
 
@@ -54,6 +50,11 @@ public:
   DYND_CUDA_HOST_DEVICE float128(const int128 &value);
   DYND_CUDA_HOST_DEVICE float128(const uint128 &value);
   DYND_CUDA_HOST_DEVICE float128(const float16 &value);
+
+  DYND_CUDA_HOST_DEVICE float128 &operator/=(float128 DYND_UNUSED(rhs))
+  {
+    throw std::runtime_error("operator/= is not implemented for float128");
+  }
 
   DYND_CUDA_HOST_DEVICE operator signed char() const
   {
@@ -275,9 +276,24 @@ public:
   }
 };
 
-inline float128 operator+(const float128 &DYND_UNUSED(lhs), const float128 &DYND_UNUSED(rhs))
+template <>
+struct is_floating_point<float128> : std::true_type {
+};
+
+inline float128 operator+(const float128 &DYND_UNUSED(lhs),
+                          const float128 &DYND_UNUSED(rhs))
 {
   throw std::runtime_error("addition for float128 is not implemented");
+}
+
+inline float128 operator*(float128 DYND_UNUSED(lhs), float128 DYND_UNUSED(rhs))
+{
+  throw std::runtime_error("operator* for float128 is not implemented");
+}
+
+inline float128 operator/(float128 DYND_UNUSED(lhs), float128 DYND_UNUSED(rhs))
+{
+  throw std::runtime_error("operator/ for float128 is not implemented");
 }
 
 inline bool operator<(const float128 &lhs, const float128 &rhs)
@@ -411,5 +427,103 @@ inline bool isfinite(float128 DYND_UNUSED(value))
 }
 
 } // namespace dynd
+
+namespace std {
+
+template <>
+struct common_type<dynd::float128, bool> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, dynd::bool1> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, char> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, signed char> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, unsigned char> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, short> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, unsigned short> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, int> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, unsigned int> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, long> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, unsigned long> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, long long> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, unsigned long long> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, dynd::int128> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, dynd::uint128> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, float> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, double> {
+  typedef dynd::float128 type;
+};
+
+template <>
+struct common_type<dynd::float128, dynd::float128> {
+  typedef dynd::float128 type;
+};
+
+template <typename T>
+struct common_type<T, dynd::float128> : common_type<dynd::float128, T> {
+};
+
+} // namespace std
 
 #endif // !defined(DYND_HAS_FLOAT128)

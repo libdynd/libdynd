@@ -10,6 +10,7 @@
 
 #include <dynd/config.hpp>
 #include <dynd/types/type_id.hpp>
+#include <dynd/typed_data_assign.hpp>
 
 namespace dynd { namespace parse {
 
