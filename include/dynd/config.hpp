@@ -151,18 +151,20 @@ struct is_not_common_type_of
           std::false_type, std::true_type>::type {
 };
 
-template <bool Value, template <typename...> class T, typename U,
-          typename... As>
+template <bool Value, template <typename...> class T,
+          template <typename...> class U, typename... As>
 struct conditional_make;
 
-template <template <typename...> class T, typename U, typename... As>
+template <template <typename...> class T, template <typename...> class U,
+          typename... As>
 struct conditional_make<true, T, U, As...> {
   typedef T<As...> type;
 };
 
-template <template <typename...> class T, typename U, typename... As>
+template <template <typename...> class T, template <typename...> class U,
+          typename... As>
 struct conditional_make<false, T, U, As...> {
-  typedef U type;
+  typedef U<As...> type;
 };
 
 template <typename T>
@@ -748,18 +750,24 @@ template <typename T>
 struct is_mixed_arithmetic<T, T> : std::false_type {
 };
 
-// T != common_type<T, U>
+template <typename... Ts>
+using true_t = std::true_type;
+
+template <typename... Ts>
+using false_t = std::false_type;
+
+// Checks whether T is not the common type of T and U
 template <typename T, typename U>
 struct is_lcast_arithmetic
-    : conditional_make<is_mixed_arithmetic<T, U>::value, is_not_common_type_of,
-                       std::false_type, T, T, U>::type {
+    : conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value,
+                       is_not_common_type_of, false_t, T, T, U>::type {
 };
 
-// U != common_type<T, U>
+// Checks whether U is not the common type of T and U
 template <typename T, typename U>
 struct is_rcast_arithmetic
-    : conditional_make<is_mixed_arithmetic<T, U>::value, is_not_common_type_of,
-                       std::false_type, U, T, U>::type {
+    : conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value,
+                       is_not_common_type_of, false_t, U, T, U>::type {
 };
 
 template <typename T>
@@ -793,7 +801,8 @@ namespace dynd {
 
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+    !std::is_same<T, U>::value &&
+        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
         !is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
     T>::type
 operator/(T lhs, U rhs)
@@ -803,7 +812,8 @@ operator/(T lhs, U rhs)
 
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+    !std::is_same<T, U>::value &&
+        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
         is_lcast_arithmetic<T, U>::value && !is_rcast_arithmetic<T, U>::value,
     U>::type
 operator/(T lhs, U rhs)
@@ -813,7 +823,8 @@ operator/(T lhs, U rhs)
 
 template <typename T, typename U>
 DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+    !std::is_same<T, U>::value &&
+        !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
         is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
     typename std::common_type<T, U>::type>::type
 operator/(T lhs, U rhs)
