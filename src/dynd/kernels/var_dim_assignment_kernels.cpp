@@ -21,7 +21,7 @@ using namespace dynd;
 
 namespace {
 struct broadcast_to_var_assign_ck
-    : nd::base_kernel<broadcast_to_var_assign_ck, kernel_request_host, 1> {
+    : nd::base_kernel<broadcast_to_var_assign_ck, 1> {
   intptr_t m_dst_target_alignment;
   const var_dim_type_arrmeta *m_dst_md;
 
@@ -64,7 +64,10 @@ struct broadcast_to_var_assign_ck
     }
   }
 
-  void destruct_children() { get_child_ckernel()->destroy(); }
+  void destruct_children()
+  {
+    get_child_ckernel()->destroy();
+  }
 };
 } // anonymous namespace
 
@@ -98,7 +101,7 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
 // var array to var array assignment
 
 namespace {
-struct var_assign_ck : nd::base_kernel<var_assign_ck, kernel_request_host, 1> {
+struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
   intptr_t m_dst_target_alignment;
   const var_dim_type_arrmeta *m_dst_md, *m_src_md;
 
@@ -164,7 +167,10 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, kernel_request_host, 1> {
     }
   }
 
-  inline void destruct_children() { get_child_ckernel()->destroy(); }
+  inline void destruct_children()
+  {
+    get_child_ckernel()->destroy();
+  }
 };
 } // anonymous namespace
 
@@ -212,8 +218,7 @@ size_t dynd::make_var_dim_assignment_kernel(void *ckb, intptr_t ckb_offset,
 // strided array to var array assignment
 
 namespace {
-struct strided_to_var_assign_ck
-    : nd::base_kernel<strided_to_var_assign_ck, kernel_request_host, 1> {
+struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
   intptr_t m_dst_target_alignment;
   const var_dim_type_arrmeta *m_dst_md;
   intptr_t m_src_stride, m_src_dim_size;
@@ -268,7 +273,10 @@ struct strided_to_var_assign_ck
     }
   }
 
-  inline void destruct_children() { destroy_child_ckernel(sizeof(self_type)); }
+  inline void destruct_children()
+  {
+    destroy_child_ckernel(sizeof(self_type));
+  }
 };
 } // anonymous namespace
 
@@ -306,8 +314,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
 // var array to strided array assignment
 
 namespace {
-struct var_to_strided_assign_ck
-    : nd::base_kernel<var_to_strided_assign_ck, kernel_request_host, 1> {
+struct var_to_strided_assign_ck : nd::base_kernel<var_to_strided_assign_ck, 1> {
   intptr_t m_dst_stride, m_dst_dim_size;
   const var_dim_type_arrmeta *m_src_md;
 
@@ -336,7 +343,10 @@ struct var_to_strided_assign_ck
     child_fn(child, dst, dst_stride, &src_copy, &src_stride, dst_dim_size);
   }
 
-  void destruct_children() { get_child_ckernel()->destroy(); }
+  void destruct_children()
+  {
+    get_child_ckernel()->destroy();
+  }
 };
 } // anonymous namespace
 

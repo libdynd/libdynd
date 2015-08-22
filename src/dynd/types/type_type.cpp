@@ -116,7 +116,7 @@ void ndt::type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
 namespace {
 
 struct typed_data_assignment_kernel
-    : nd::base_kernel<typed_data_assignment_kernel, kernel_request_host, 1> {
+    : nd::base_kernel<typed_data_assignment_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     // Free the destination reference
@@ -129,8 +129,7 @@ struct typed_data_assignment_kernel
   }
 };
 
-struct string_to_type_kernel
-    : nd::base_kernel<string_to_type_kernel, kernel_request_host, 1> {
+struct string_to_type_kernel : nd::base_kernel<string_to_type_kernel, 1> {
   const ndt::base_string_type *src_string_dt;
   const char *src_arrmeta;
   assign_error_mode errmode;
@@ -148,8 +147,7 @@ struct string_to_type_kernel
   }
 };
 
-struct type_to_string_kernel
-    : nd::base_kernel<type_to_string_kernel, kernel_request_host, 1> {
+struct type_to_string_kernel : nd::base_kernel<type_to_string_kernel, 1> {
   const ndt::base_string_type *dst_string_dt;
   const char *dst_arrmeta;
   eval::eval_context ectx;

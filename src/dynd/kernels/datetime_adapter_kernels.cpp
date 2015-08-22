@@ -90,8 +90,7 @@ static bool parse_datetime_since(const char *begin, const char *end,
 namespace {
 template <class Tsrc, class Tdst>
 struct int_multiply_and_offset_ck
-    : nd::base_kernel<int_multiply_and_offset_ck<Tsrc, Tdst>,
-                      kernel_request_host, 1> {
+    : nd::base_kernel<int_multiply_and_offset_ck<Tsrc, Tdst>, 1> {
   pair<Tdst, Tdst> m_factor_offset;
 
   void single(char *dst, char *const *src)
@@ -133,8 +132,7 @@ nd::callable make_int_multiply_and_offset_callable(Tdst factor, Tdst offset,
 
 template <class Tsrc, class Tdst>
 struct int_offset_and_divide_ck
-    : nd::base_kernel<int_offset_and_divide_ck<Tsrc, Tdst>, kernel_request_host,
-                      1> {
+    : nd::base_kernel<int_offset_and_divide_ck<Tsrc, Tdst>, 1> {
   pair<Tdst, Tdst> m_offset_divisor;
 
   void single(char *dst, char *const *src)

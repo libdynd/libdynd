@@ -274,8 +274,7 @@ void ndt::time_type::get_dynamic_array_functions(
 
 namespace {
 
-struct time_get_hour_kernel
-    : nd::base_kernel<time_get_hour_kernel, kernel_request_host, 1> {
+struct time_get_hour_kernel : nd::base_kernel<time_get_hour_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
@@ -284,8 +283,7 @@ struct time_get_hour_kernel
   }
 };
 
-struct time_get_minute_kernel
-    : nd::base_kernel<time_get_minute_kernel, kernel_request_host, 1> {
+struct time_get_minute_kernel : nd::base_kernel<time_get_minute_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
@@ -294,8 +292,7 @@ struct time_get_minute_kernel
   }
 };
 
-struct time_get_second_kernel
-    : nd::base_kernel<time_get_second_kernel, kernel_request_host, 1> {
+struct time_get_second_kernel : nd::base_kernel<time_get_second_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
@@ -305,7 +302,7 @@ struct time_get_second_kernel
 };
 
 struct time_get_microsecond_kernel
-    : nd::base_kernel<time_get_microsecond_kernel, kernel_request_host, 1> {
+    : nd::base_kernel<time_get_microsecond_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
@@ -314,8 +311,7 @@ struct time_get_microsecond_kernel
   }
 };
 
-struct time_get_tick_kernel
-    : nd::base_kernel<time_get_tick_kernel, kernel_request_host, 1> {
+struct time_get_tick_kernel : nd::base_kernel<time_get_tick_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
@@ -323,8 +319,7 @@ struct time_get_tick_kernel
   }
 };
 
-struct time_get_struct_kernel
-    : nd::base_kernel<time_get_struct_kernel, kernel_request_host, 1> {
+struct time_get_struct_kernel : nd::base_kernel<time_get_struct_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     time_hmst *dst_struct = reinterpret_cast<time_hmst *>(dst);
@@ -332,8 +327,7 @@ struct time_get_struct_kernel
   }
 };
 
-struct time_set_struct_kernel
-    : nd::base_kernel<time_set_struct_kernel, kernel_request_host, 1> {
+struct time_set_struct_kernel : nd::base_kernel<time_set_struct_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     time_hmst *src_struct = *reinterpret_cast<time_hmst *const *>(src);

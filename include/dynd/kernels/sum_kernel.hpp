@@ -11,8 +11,7 @@ namespace dynd {
 namespace nd {
 
   template <type_id_t Src0TypeID>
-  struct sum_kernel
-      : base_kernel<sum_kernel<Src0TypeID>, kernel_request_host, 1> {
+  struct sum_kernel : base_kernel<sum_kernel<Src0TypeID>, 1> {
     typedef typename type_of<Src0TypeID>::type src0_type;
     //    typedef decltype(std::declval<src0_type>() +
     //                     std::declval<src0_type>()) dst_type;

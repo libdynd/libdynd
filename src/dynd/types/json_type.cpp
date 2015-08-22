@@ -201,8 +201,7 @@ void ndt::json_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
 }
 
 namespace {
-struct string_to_json_ck
-    : nd::base_kernel<string_to_json_ck, kernel_request_host, 1> {
+struct string_to_json_ck : nd::base_kernel<string_to_json_ck, 1> {
   const char *m_dst_arrmeta;
   bool m_validate;
 

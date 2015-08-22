@@ -18,8 +18,7 @@ namespace nd {
      * A kernel for chaining two other kernels, using temporary buffers
      * dynamically allocated on the heap.
      */
-    struct compose_kernel
-        : base_kernel<compose_kernel, kernel_request_host, 1> {
+    struct compose_kernel : base_kernel<compose_kernel, 1> {
       struct static_data {
         callable first;
         callable second;

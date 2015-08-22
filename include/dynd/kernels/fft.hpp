@@ -134,8 +134,7 @@ namespace nd {
   };
 
   template <typename fftw_dst_type, typename fftw_src_type, int sign = 0>
-  struct fftw_ck : base_kernel<fftw_ck<fftw_dst_type, fftw_src_type, sign>,
-                               kernel_request_host, 1> {
+  struct fftw_ck : base_kernel<fftw_ck<fftw_dst_type, fftw_src_type, sign>, 1> {
     typedef typename std::conditional<
         std::is_same<fftw_dst_type, fftw_complex>::value, complex<double>,
         typename std::conditional<

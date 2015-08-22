@@ -14,8 +14,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct strided_rolling_ck
-        : base_kernel<strided_rolling_ck, kernel_request_host, 1> {
+    struct strided_rolling_ck : base_kernel<strided_rolling_ck, 1> {
       intptr_t m_window_size;
       intptr_t m_dim_size, m_dst_stride, m_src_stride;
       size_t m_window_op_offset;
@@ -26,8 +25,7 @@ namespace nd {
       void destruct_children();
     };
 
-    struct var_rolling_ck
-        : base_kernel<var_rolling_ck, kernel_request_host, 1> {
+    struct var_rolling_ck : base_kernel<var_rolling_ck, 1> {
       intptr_t m_window_size;
       intptr_t m_src_stride, m_src_offset;
       ndt::type m_dst_tp;

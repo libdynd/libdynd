@@ -10,8 +10,7 @@ using namespace dynd;
 
 namespace {
 template <typename T>
-struct value_to_pointer_ck
-    : nd::base_kernel<value_to_pointer_ck<T>, dynd::kernel_request_host, 1> {
+struct value_to_pointer_ck : nd::base_kernel<value_to_pointer_ck<T>, 1> {
   void single(char *dst, char *const *src)
   {
     *reinterpret_cast<T **>(dst) = *reinterpret_cast<T **>(src[0]);

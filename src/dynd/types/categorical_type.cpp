@@ -70,8 +70,7 @@ public:
 // Assign from a categorical type to some other type
 template <typename UIntType>
 struct categorical_to_other_kernel
-    : nd::base_kernel<categorical_to_other_kernel<UIntType>,
-                      kernel_request_host, 1> {
+    : nd::base_kernel<categorical_to_other_kernel<UIntType>, 1> {
   typedef categorical_to_other_kernel extra_type;
 
   const ndt::categorical_type *src_cat_tp;
@@ -99,8 +98,7 @@ struct categorical_to_other_kernel
 
 template <typename UIntType>
 struct category_to_categorical_kernel_extra
-    : nd::base_kernel<category_to_categorical_kernel_extra<UIntType>,
-                      kernel_request_host, 1> {
+    : nd::base_kernel<category_to_categorical_kernel_extra<UIntType>, 1> {
   typedef category_to_categorical_kernel_extra self_type;
 
   const ndt::categorical_type *dst_cat_tp;

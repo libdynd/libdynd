@@ -15,8 +15,7 @@ namespace nd {
     // Right associative, evaluate the reduction from right to left:
     //    dst_(0) = a[n-1]
     //    dst_(i+1) = dst_(i) <OP> a[n-1-(i+1)]
-    struct left_compound_kernel
-        : base_kernel<left_compound_kernel, kernel_request_host, 1> {
+    struct left_compound_kernel : base_kernel<left_compound_kernel, 1> {
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = get_child_ckernel();
@@ -64,8 +63,7 @@ namespace nd {
     // Left associative, evaluate the reduction from left to right:
     //    dst_(0) = a[0]
     //    dst_(i+1) = a[i+1] <OP> dst_(i)
-    struct right_compound_kernel
-        : base_kernel<right_compound_kernel, kernel_request_host, 1> {
+    struct right_compound_kernel : base_kernel<right_compound_kernel, 1> {
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = get_child_ckernel();

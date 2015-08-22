@@ -424,7 +424,7 @@ void ndt::datetime_type::get_dynamic_array_functions(
 namespace {
 
 struct datetime_get_struct_kernel
-    : nd::base_kernel<datetime_get_struct_kernel, kernel_request_host, 1> {
+    : nd::base_kernel<datetime_get_struct_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_struct_kernel()
@@ -439,7 +439,7 @@ struct datetime_get_struct_kernel
 };
 
 struct datetime_set_struct_kernel
-    : nd::base_kernel<datetime_set_struct_kernel, kernel_request_host, 1> {
+    : nd::base_kernel<datetime_set_struct_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_set_struct_kernel()
@@ -453,8 +453,7 @@ struct datetime_set_struct_kernel
   }
 };
 
-struct datetime_get_date_kernel
-    : nd::base_kernel<datetime_get_date_kernel, kernel_request_host, 1> {
+struct datetime_get_date_kernel : nd::base_kernel<datetime_get_date_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_date_kernel()
@@ -481,8 +480,7 @@ struct datetime_get_date_kernel
   }
 };
 
-struct datetime_get_time_kernel
-    : nd::base_kernel<datetime_get_time_kernel, kernel_request_host, 1> {
+struct datetime_get_time_kernel : nd::base_kernel<datetime_get_time_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_time_kernel()
@@ -508,8 +506,7 @@ struct datetime_get_time_kernel
   }
 };
 
-struct datetime_get_year_kernel
-    : nd::base_kernel<datetime_get_year_kernel, kernel_request_host, 1> {
+struct datetime_get_year_kernel : nd::base_kernel<datetime_get_year_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_year_kernel()
@@ -533,7 +530,7 @@ struct datetime_get_year_kernel
 };
 
 struct datetime_get_month_kernel
-    : nd::base_kernel<datetime_get_month_kernel, kernel_request_host, 1> {
+    : nd::base_kernel<datetime_get_month_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_month_kernel()
@@ -556,8 +553,7 @@ struct datetime_get_month_kernel
   }
 };
 
-struct datetime_get_day_kernel
-    : nd::base_kernel<datetime_get_day_kernel, kernel_request_host, 1> {
+struct datetime_get_day_kernel : nd::base_kernel<datetime_get_day_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_day_kernel()
@@ -580,8 +576,7 @@ struct datetime_get_day_kernel
   }
 };
 
-struct datetime_get_hour_kernel
-    : nd::base_kernel<datetime_get_hour_kernel, kernel_request_host, 1> {
+struct datetime_get_hour_kernel : nd::base_kernel<datetime_get_hour_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_hour_kernel()
@@ -609,7 +604,7 @@ struct datetime_get_hour_kernel
 };
 
 struct datetime_get_minute_kernel
-    : nd::base_kernel<datetime_get_minute_kernel, kernel_request_host, 1> {
+    : nd::base_kernel<datetime_get_minute_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_minute_kernel()
@@ -638,7 +633,7 @@ struct datetime_get_minute_kernel
 };
 
 struct datetime_get_second_kernel
-    : nd::base_kernel<datetime_get_second_kernel, kernel_request_host, 1> {
+    : nd::base_kernel<datetime_get_second_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_second_kernel()
@@ -666,7 +661,7 @@ struct datetime_get_second_kernel
 };
 
 struct datetime_get_microsecond_kernel
-    : nd::base_kernel<datetime_get_microsecond_kernel, kernel_request_host, 1> {
+    : nd::base_kernel<datetime_get_microsecond_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_microsecond_kernel()
@@ -693,8 +688,7 @@ struct datetime_get_microsecond_kernel
   }
 };
 
-struct datetime_get_tick_kernel
-    : nd::base_kernel<datetime_get_tick_kernel, kernel_request_host, 1> {
+struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_tick_kernel()

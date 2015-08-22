@@ -11,8 +11,7 @@ namespace dynd {
 namespace nd {
 
   template <type_id_t Src0TypeID>
-  struct max_kernel
-      : base_kernel<max_kernel<Src0TypeID>, kernel_request_host, 1> {
+  struct max_kernel : base_kernel<max_kernel<Src0TypeID>, 1> {
     typedef typename type_of<Src0TypeID>::type src0_type;
     typedef src0_type dst_type;
 

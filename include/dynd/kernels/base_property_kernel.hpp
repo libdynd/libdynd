@@ -11,7 +11,7 @@ namespace dynd {
 namespace nd {
 
   template <typename SelfType>
-  struct base_property_kernel : base_kernel<SelfType, kernel_request_host, 0> {
+  struct base_property_kernel : base_kernel<SelfType, 0> {
     typedef SelfType self_type;
 
     static const std::size_t data_size = sizeof(ndt::type);

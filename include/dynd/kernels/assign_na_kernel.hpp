@@ -20,8 +20,7 @@ namespace nd {
     template <>
     struct assign_na_kernel<
         bool_type_id,
-        bool_kind> : base_kernel<assign_na_kernel<bool_type_id, bool_kind>,
-                                 kernel_request_host, 0> {
+        bool_kind> : base_kernel<assign_na_kernel<bool_type_id, bool_kind>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *dst = 2;
@@ -44,8 +43,7 @@ namespace nd {
     template <type_id_t DstTypeID>
     struct assign_na_kernel<
         DstTypeID,
-        sint_kind> : base_kernel<assign_na_kernel<DstTypeID, sint_kind>,
-                                 kernel_request_host, 0> {
+        sint_kind> : base_kernel<assign_na_kernel<DstTypeID, sint_kind>, 0> {
       typedef typename type_of<DstTypeID>::type dst_type;
 
       void single(char *dst, char *const *DYND_UNUSED(src))
@@ -69,7 +67,7 @@ namespace nd {
     struct assign_na_kernel<
         float32_type_id,
         real_kind> : base_kernel<assign_na_kernel<float32_type_id, real_kind>,
-                                 kernel_request_host, 0> {
+                                 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *reinterpret_cast<uint32_t *>(dst) = DYND_FLOAT32_NA_AS_UINT;
@@ -89,7 +87,7 @@ namespace nd {
     struct assign_na_kernel<
         float64_type_id,
         real_kind> : base_kernel<assign_na_kernel<float64_type_id, real_kind>,
-                                 kernel_request_host, 0> {
+                                 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *reinterpret_cast<uint64_t *>(dst) = DYND_FLOAT64_NA_AS_UINT;
@@ -110,7 +108,7 @@ namespace nd {
         complex_float32_type_id,
         complex_kind> : base_kernel<assign_na_kernel<complex_float32_type_id,
                                                      complex_kind>,
-                                    kernel_request_host, 0> {
+                                    0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         reinterpret_cast<uint32_t *>(dst)[0] = DYND_FLOAT32_NA_AS_UINT;
@@ -133,7 +131,7 @@ namespace nd {
         complex_float64_type_id,
         complex_kind> : base_kernel<assign_na_kernel<complex_float64_type_id,
                                                      complex_kind>,
-                                    kernel_request_host, 0> {
+                                    0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         reinterpret_cast<uint64_t *>(dst)[0] = DYND_FLOAT64_NA_AS_UINT;
@@ -154,8 +152,7 @@ namespace nd {
     template <>
     struct assign_na_kernel<
         void_type_id,
-        void_kind> : base_kernel<assign_na_kernel<void_type_id, void_kind>,
-                                 kernel_request_host, 0> {
+        void_kind> : base_kernel<assign_na_kernel<void_type_id, void_kind>, 0> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
       }
@@ -234,7 +231,7 @@ namespace nd {
     struct assign_na_kernel<
         pointer_type_id,
         expr_kind> : base_kernel<assign_na_kernel<pointer_type_id, expr_kind>,
-                                 kernel_request_host, 0> {
+                                 0> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error(
@@ -256,7 +253,7 @@ namespace nd {
         string_type_id,
         string_kind> : base_kernel<assign_na_kernel<string_type_id,
                                                     string_kind>,
-                                   kernel_request_host, 1> {
+                                   1> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         string_type_data *std = reinterpret_cast<string_type_data *>(dst);
@@ -287,7 +284,7 @@ namespace nd {
         date_type_id,
         datetime_kind> : base_kernel<assign_na_kernel<date_type_id,
                                                       datetime_kind>,
-                                     kernel_request_host, 1> {
+                                     1> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
@@ -308,7 +305,7 @@ namespace nd {
         time_type_id,
         datetime_kind> : base_kernel<assign_na_kernel<time_type_id,
                                                       datetime_kind>,
-                                     kernel_request_host, 1> {
+                                     1> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA;
@@ -329,7 +326,7 @@ namespace nd {
         datetime_type_id,
         datetime_kind> : base_kernel<assign_na_kernel<datetime_type_id,
                                                       datetime_kind>,
-                                     kernel_request_host, 1> {
+                                     1> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;

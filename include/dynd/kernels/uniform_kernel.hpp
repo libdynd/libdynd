@@ -31,7 +31,7 @@ namespace nd {
           DstTypeID, sint_kind,
           GeneratorType> : base_kernel<uniform_kernel<DstTypeID, sint_kind,
                                                       GeneratorType>,
-                                       kernel_request_host, 0> {
+                                       0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;
@@ -114,7 +114,7 @@ namespace nd {
           DstTypeID, real_kind,
           GeneratorType> : base_kernel<uniform_kernel<DstTypeID, real_kind,
                                                       GeneratorType>,
-                                       kernel_request_host, 0> {
+                                       0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;
@@ -191,7 +191,7 @@ namespace nd {
           DstTypeID, complex_kind,
           GeneratorType> : base_kernel<uniform_kernel<DstTypeID, complex_kind,
                                                       GeneratorType>,
-                                       kernel_request_host, 0> {
+                                       0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;

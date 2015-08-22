@@ -19,8 +19,7 @@ using namespace dynd;
 // blockref bytes to blockref bytes assignment
 
 namespace {
-struct blockref_bytes_kernel
-    : nd::base_kernel<blockref_bytes_kernel, kernel_request_host, 1> {
+struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
   size_t dst_alignment, src_alignment;
   const bytes_type_arrmeta *dst_arrmeta, *src_arrmeta;
 
@@ -87,8 +86,7 @@ size_t dynd::make_blockref_bytes_assignment_kernel(
 
 namespace {
 struct fixed_bytes_to_blockref_bytes_kernel
-    : nd::base_kernel<fixed_bytes_to_blockref_bytes_kernel, kernel_request_host,
-                      1> {
+    : nd::base_kernel<fixed_bytes_to_blockref_bytes_kernel, 1> {
   size_t dst_alignment;
   intptr_t src_data_size;
   size_t src_alignment;

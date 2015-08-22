@@ -261,8 +261,7 @@ void ndt::callable_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta),
 // callable to string assignment
 
 namespace {
-struct callable_to_string_ck
-    : nd::base_kernel<callable_to_string_ck, kernel_request_host, 1> {
+struct callable_to_string_ck : nd::base_kernel<callable_to_string_ck, 1> {
   ndt::type m_src_tp, m_dst_string_dt;
   const char *m_dst_arrmeta;
   eval::eval_context m_ectx;

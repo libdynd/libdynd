@@ -30,8 +30,7 @@ namespace nd {
     };
 
     template <int N>
-    struct neighborhood_ck
-        : base_kernel<neighborhood_ck<N>, kernel_request_host, N> {
+    struct neighborhood_ck : base_kernel<neighborhood_ck<N>, N> {
       typedef neighborhood_ck<N> self_type;
 
       intptr_t dst_stride;

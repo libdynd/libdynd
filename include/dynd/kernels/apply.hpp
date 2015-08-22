@@ -194,23 +194,23 @@ namespace nd {
         typename args_of<typename funcproto_of<func_type>::type>::type,
         N>::type;
 
-    template <kernel_request_t kernreq, typename func_type, func_type func,
-              typename R, typename A, typename I, typename K, typename J>
+    template <typename func_type, func_type func, typename R, typename A,
+              typename I, typename K, typename J>
     struct apply_function_ck;
 
-#define APPLY_FUNCTION_CK(KERNREQ, ...)                                        \
+#define APPLY_FUNCTION_CK(...)                                                 \
   template <typename func_type, func_type func, typename R, typename... A,     \
             size_t... I, typename... K, size_t... J>                           \
   struct apply_function_ck<                                                    \
-      KERNREQ, func_type, func, R, type_sequence<A...>, index_sequence<I...>,  \
+      func_type, func, R, type_sequence<A...>, index_sequence<I...>,           \
       type_sequence<K...>,                                                     \
       index_sequence<                                                          \
-          J...>> : base_kernel<apply_function_ck<KERNREQ, func_type, func, R,  \
+          J...>> : base_kernel<apply_function_ck<func_type, func, R,           \
                                                  type_sequence<A...>,          \
                                                  index_sequence<I...>,         \
                                                  type_sequence<K...>,          \
                                                  index_sequence<J...>>,        \
-                               KERNREQ, sizeof...(A)>,                         \
+                               sizeof...(A)>,                                  \
                    apply_args<type_sequence<A...>, index_sequence<I...>>,      \
                    apply_kwds<type_sequence<K...>, index_sequence<J...>> {     \
     typedef apply_function_ck self_type;                                       \
@@ -272,15 +272,15 @@ namespace nd {
   template <typename func_type, func_type func, typename... A, size_t... I,    \
             typename... K, size_t... J>                                        \
   struct apply_function_ck<                                                    \
-      KERNREQ, func_type, func, void, type_sequence<A...>,                     \
-      index_sequence<I...>, type_sequence<K...>,                               \
+      func_type, func, void, type_sequence<A...>, index_sequence<I...>,        \
+      type_sequence<K...>,                                                     \
       index_sequence<                                                          \
-          J...>> : base_kernel<apply_function_ck<KERNREQ, func_type, func,     \
-                                                 void, type_sequence<A...>,    \
+          J...>> : base_kernel<apply_function_ck<func_type, func, void,        \
+                                                 type_sequence<A...>,          \
                                                  index_sequence<I...>,         \
                                                  type_sequence<K...>,          \
                                                  index_sequence<J...>>,        \
-                               KERNREQ, sizeof...(A)>,                         \
+                               sizeof...(A)>,                                  \
                    apply_args<type_sequence<A...>, index_sequence<I...>>,      \
                    apply_kwds<type_sequence<K...>, index_sequence<J...>> {     \
     typedef apply_function_ck self_type;                                       \
@@ -337,36 +337,35 @@ namespace nd {
     }                                                                          \
   }
 
-    APPLY_FUNCTION_CK(kernel_request_host);
+    APPLY_FUNCTION_CK();
 
 #undef APPLY_FUNCTION_CK
 
-    template <kernel_request_t kernreq, typename func_type, func_type func,
-              int N>
-    using as_apply_function_ck = apply_function_ck<
-        kernreq, func_type, func, typename return_of<func_type>::type,
-        as_apply_arg_sequence<func_type, N>, make_index_sequence<N>,
-        as_apply_kwd_sequence<func_type, N>,
-        make_index_sequence<arity_of<func_type>::value - N>>;
+    template <typename func_type, func_type func, int N>
+    using as_apply_function_ck =
+        apply_function_ck<func_type, func, typename return_of<func_type>::type,
+                          as_apply_arg_sequence<func_type, N>,
+                          make_index_sequence<N>,
+                          as_apply_kwd_sequence<func_type, N>,
+                          make_index_sequence<arity_of<func_type>::value - N>>;
 
-    template <kernel_request_t kernreq, typename T, typename mem_func_type,
-              typename R, typename A, typename I, typename K, typename J>
+    template <typename T, typename mem_func_type, typename R, typename A,
+              typename I, typename K, typename J>
     struct apply_member_function_ck;
 
-#define APPLY_MEMBER_FUNCTION_CK(KERNREQ, ...)                                 \
+#define APPLY_MEMBER_FUNCTION_CK(...)                                          \
   template <typename T, typename mem_func_type, typename R, typename... A,     \
             size_t... I, typename... K, size_t... J>                           \
   struct apply_member_function_ck<                                             \
-      KERNREQ, T *, mem_func_type, R, type_sequence<A...>,                     \
-      index_sequence<I...>, type_sequence<K...>,                               \
+      T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,        \
+      type_sequence<K...>,                                                     \
       index_sequence<                                                          \
-          J...>> : base_kernel<apply_member_function_ck<KERNREQ, T *,          \
-                                                        mem_func_type, R,      \
+          J...>> : base_kernel<apply_member_function_ck<T *, mem_func_type, R, \
                                                         type_sequence<A...>,   \
                                                         index_sequence<I...>,  \
                                                         type_sequence<K...>,   \
                                                         index_sequence<J...>>, \
-                               KERNREQ, sizeof...(A)>,                         \
+                               sizeof...(A)>,                                  \
                    apply_args<type_sequence<A...>, index_sequence<I...>>,      \
                    apply_kwds<type_sequence<K...>, index_sequence<J...>> {     \
     typedef apply_member_function_ck self_type;                                \
@@ -445,16 +444,16 @@ namespace nd {
   template <typename T, typename mem_func_type, typename... A, size_t... I,    \
             typename... K, size_t... J>                                        \
   struct apply_member_function_ck<                                             \
-      KERNREQ, T *, mem_func_type, void, type_sequence<A...>,                  \
-      index_sequence<I...>, type_sequence<K...>,                               \
+      T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,     \
+      type_sequence<K...>,                                                     \
       index_sequence<                                                          \
-          J...>> : base_kernel<apply_member_function_ck<KERNREQ, T *,          \
-                                                        mem_func_type, void,   \
+          J...>> : base_kernel<apply_member_function_ck<T *, mem_func_type,    \
+                                                        void,                  \
                                                         type_sequence<A...>,   \
                                                         index_sequence<I...>,  \
                                                         type_sequence<K...>,   \
                                                         index_sequence<J...>>, \
-                               KERNREQ, sizeof...(A)>,                         \
+                               sizeof...(A)>,                                  \
                    apply_args<type_sequence<A...>, index_sequence<I...>>,      \
                    apply_kwds<type_sequence<K...>, index_sequence<J...>> {     \
     typedef apply_member_function_ck self_type;                                \
@@ -530,13 +529,13 @@ namespace nd {
                 const std::map<std::string, ndt::type> &tp_vars);              \
   }
 
-    APPLY_MEMBER_FUNCTION_CK(kernel_request_host);
+    APPLY_MEMBER_FUNCTION_CK();
 
     template <typename T, typename mem_func_type, typename R, typename... A,
               size_t... I, typename... K, size_t... J>
     intptr_t apply_member_function_ck<
-        kernel_request_host, T *, mem_func_type, R, type_sequence<A...>,
-        index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+        T *, mem_func_type, R, type_sequence<A...>, index_sequence<I...>,
+        type_sequence<K...>, index_sequence<J...>>::
         instantiate(char *static_data, size_t DYND_UNUSED(data_size),
                     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -554,8 +553,8 @@ namespace nd {
     template <typename T, typename mem_func_type, typename... A, size_t... I,
               typename... K, size_t... J>
     intptr_t apply_member_function_ck<
-        kernel_request_host, T *, mem_func_type, void, type_sequence<A...>,
-        index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+        T *, mem_func_type, void, type_sequence<A...>, index_sequence<I...>,
+        type_sequence<K...>, index_sequence<J...>>::
         instantiate(char *static_data, size_t DYND_UNUSED(data_size),
                     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -572,31 +571,30 @@ namespace nd {
 
 #undef APPLY_MEMBER_FUNCTION_CK
 
-    template <kernel_request_t kernreq, typename T, typename mem_func_type,
-              int N>
+    template <typename T, typename mem_func_type, int N>
     using as_apply_member_function_ck = apply_member_function_ck<
-        kernreq, T, mem_func_type, typename return_of<mem_func_type>::type,
+        T, mem_func_type, typename return_of<mem_func_type>::type,
         as_apply_arg_sequence<mem_func_type, N>, make_index_sequence<N>,
         as_apply_kwd_sequence<mem_func_type, N>,
         make_index_sequence<arity_of<mem_func_type>::value - N>>;
 
-    template <kernel_request_t kernreq, typename func_type, typename R,
-              typename A, typename I, typename K, typename J>
+    template <typename func_type, typename R, typename A, typename I,
+              typename K, typename J>
     struct apply_callable_ck;
 
-#define APPLY_CALLABLE_CK(KERNREQ, ...)                                        \
+#define APPLY_CALLABLE_CK(...)                                                 \
   template <typename func_type, typename R, typename... A, size_t... I,        \
             typename... K, size_t... J>                                        \
   struct apply_callable_ck<                                                    \
-      KERNREQ, func_type, R, type_sequence<A...>, index_sequence<I...>,        \
+      func_type, R, type_sequence<A...>, index_sequence<I...>,                 \
       type_sequence<K...>,                                                     \
       index_sequence<                                                          \
-          J...>> : base_kernel<apply_callable_ck<KERNREQ, func_type, R,        \
+          J...>> : base_kernel<apply_callable_ck<func_type, R,                 \
                                                  type_sequence<A...>,          \
                                                  index_sequence<I...>,         \
                                                  type_sequence<K...>,          \
                                                  index_sequence<J...>>,        \
-                               KERNREQ, sizeof...(A)>,                         \
+                               sizeof...(A)>,                                  \
                    apply_args<type_sequence<A...>, index_sequence<I...>>,      \
                    apply_kwds<type_sequence<K...>, index_sequence<J...>> {     \
     typedef apply_callable_ck self_type;                                       \
@@ -672,15 +670,15 @@ namespace nd {
   template <typename func_type, typename... A, size_t... I, typename... K,     \
             size_t... J>                                                       \
   struct apply_callable_ck<                                                    \
-      KERNREQ, func_type, void, type_sequence<A...>, index_sequence<I...>,     \
+      func_type, void, type_sequence<A...>, index_sequence<I...>,              \
       type_sequence<K...>,                                                     \
       index_sequence<                                                          \
-          J...>> : base_kernel<apply_callable_ck<KERNREQ, func_type, void,     \
+          J...>> : base_kernel<apply_callable_ck<func_type, void,              \
                                                  type_sequence<A...>,          \
                                                  index_sequence<I...>,         \
                                                  type_sequence<K...>,          \
                                                  index_sequence<J...>>,        \
-                               KERNREQ, sizeof...(A)>,                         \
+                               sizeof...(A)>,                                  \
                    apply_args<type_sequence<A...>, index_sequence<I...>>,      \
                    apply_kwds<type_sequence<K...>, index_sequence<J...>> {     \
     typedef apply_callable_ck self_type;                                       \
@@ -751,13 +749,13 @@ namespace nd {
                 const std::map<std::string, ndt::type> &tp_vars);              \
   }
 
-    APPLY_CALLABLE_CK(kernel_request_host);
+    APPLY_CALLABLE_CK();
 
     template <typename func_type, typename R, typename... A, size_t... I,
               typename... K, size_t... J>
-    intptr_t apply_callable_ck<kernel_request_host, func_type, R,
-                               type_sequence<A...>, index_sequence<I...>,
-                               type_sequence<K...>, index_sequence<J...>>::
+    intptr_t
+    apply_callable_ck<func_type, R, type_sequence<A...>, index_sequence<I...>,
+                      type_sequence<K...>, index_sequence<J...>>::
         instantiate(char *static_data, size_t DYND_UNUSED(data_size),
                     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -774,19 +772,19 @@ namespace nd {
 
 #undef APPLY_CALLABLE_CK
 
-#define APPLY_CALLABLE_CK(KERNREQ, ...)                                        \
+#define APPLY_CALLABLE_CK(...)                                                 \
   template <typename func_type, typename R, typename... A, size_t... I,        \
             typename... K, size_t... J>                                        \
   struct apply_callable_ck<                                                    \
-      KERNREQ, func_type *, R, type_sequence<A...>, index_sequence<I...>,      \
+      func_type *, R, type_sequence<A...>, index_sequence<I...>,               \
       type_sequence<K...>,                                                     \
       index_sequence<                                                          \
-          J...>> : base_kernel<apply_callable_ck<KERNREQ, func_type *, R,      \
+          J...>> : base_kernel<apply_callable_ck<func_type *, R,               \
                                                  type_sequence<A...>,          \
                                                  index_sequence<I...>,         \
                                                  type_sequence<K...>,          \
                                                  index_sequence<J...>>,        \
-                               KERNREQ, sizeof...(A)>,                         \
+                               sizeof...(A)>,                                  \
                    apply_args<type_sequence<A...>, index_sequence<I...>>,      \
                    apply_kwds<type_sequence<K...>, index_sequence<J...>> {     \
     typedef apply_callable_ck self_type;                                       \
@@ -862,15 +860,15 @@ namespace nd {
   template <typename func_type, typename... A, size_t... I, typename... K,     \
             size_t... J>                                                       \
   struct apply_callable_ck<                                                    \
-      KERNREQ, func_type *, void, type_sequence<A...>, index_sequence<I...>,   \
+      func_type *, void, type_sequence<A...>, index_sequence<I...>,            \
       type_sequence<K...>,                                                     \
       index_sequence<                                                          \
-          J...>> : base_kernel<apply_callable_ck<KERNREQ, func_type *, void,   \
+          J...>> : base_kernel<apply_callable_ck<func_type *, void,            \
                                                  type_sequence<A...>,          \
                                                  index_sequence<I...>,         \
                                                  type_sequence<K...>,          \
                                                  index_sequence<J...>>,        \
-                               KERNREQ, sizeof...(A)>,                         \
+                               sizeof...(A)>,                                  \
                    apply_args<type_sequence<A...>, index_sequence<I...>>,      \
                    apply_kwds<type_sequence<K...>, index_sequence<J...>> {     \
     typedef apply_callable_ck self_type;                                       \
@@ -941,13 +939,13 @@ namespace nd {
                 const std::map<std::string, ndt::type> &tp_vars);              \
   }
 
-    APPLY_CALLABLE_CK(kernel_request_host);
+    APPLY_CALLABLE_CK();
 
     template <typename func_type, typename R, typename... A, size_t... I,
               typename... K, size_t... J>
-    intptr_t apply_callable_ck<kernel_request_host, func_type *, R,
-                               type_sequence<A...>, index_sequence<I...>,
-                               type_sequence<K...>, index_sequence<J...>>::
+    intptr_t
+    apply_callable_ck<func_type *, R, type_sequence<A...>, index_sequence<I...>,
+                      type_sequence<K...>, index_sequence<J...>>::
         instantiate(char *static_data, size_t DYND_UNUSED(data_size),
                     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -964,9 +962,9 @@ namespace nd {
 
     template <typename func_type, typename... A, size_t... I, typename... K,
               size_t... J>
-    intptr_t apply_callable_ck<kernel_request_host, func_type *, void,
-                               type_sequence<A...>, index_sequence<I...>,
-                               type_sequence<K...>, index_sequence<J...>>::
+    intptr_t apply_callable_ck<func_type *, void, type_sequence<A...>,
+                               index_sequence<I...>, type_sequence<K...>,
+                               index_sequence<J...>>::
         instantiate(char *static_data, size_t DYND_UNUSED(data_size),
                     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -983,26 +981,26 @@ namespace nd {
 
 #undef APPLY_CALLABLE_CK
 
-    template <kernel_request_t kernreq, typename func_type, int N>
-    using as_apply_callable_ck = apply_callable_ck<
-        kernreq, func_type, typename return_of<func_type>::type,
-        as_apply_arg_sequence<func_type, N>, make_index_sequence<N>,
-        as_apply_kwd_sequence<func_type, N>,
-        make_index_sequence<arity_of<func_type>::value - N>>;
+    template <typename func_type, int N>
+    using as_apply_callable_ck =
+        apply_callable_ck<func_type, typename return_of<func_type>::type,
+                          as_apply_arg_sequence<func_type, N>,
+                          make_index_sequence<N>,
+                          as_apply_kwd_sequence<func_type, N>,
+                          make_index_sequence<arity_of<func_type>::value - N>>;
 
-    template <kernel_request_t kernreq, typename func_type, typename R,
-              typename A, typename I, typename K, typename J>
+    template <typename func_type, typename R, typename A, typename I,
+              typename K, typename J>
     struct construct_then_apply_callable_ck;
 
-#define CONSTRUCT_THEN_APPLY_CALLABLE_CK(KERNREQ, ...)                          \
+#define CONSTRUCT_THEN_APPLY_CALLABLE_CK(...)                                   \
   template <typename func_type, typename R, typename... A, size_t... I,         \
             typename... K, size_t... J>                                         \
   struct construct_then_apply_callable_ck<                                      \
-      KERNREQ, func_type, R, type_sequence<A...>, index_sequence<I...>,         \
+      func_type, R, type_sequence<A...>, index_sequence<I...>,                  \
       type_sequence<K...>,                                                      \
       index_sequence<                                                           \
-          J...>> : base_kernel<construct_then_apply_callable_ck<KERNREQ,        \
-                                                                func_type, R,   \
+          J...>> : base_kernel<construct_then_apply_callable_ck<func_type, R,   \
                                                                 type_sequence<  \
                                                                     A...>,      \
                                                                 index_sequence< \
@@ -1011,7 +1009,7 @@ namespace nd {
                                                                     K...>,      \
                                                                 index_sequence< \
                                                                     J...>>,     \
-                               KERNREQ, sizeof...(A)>,                          \
+                               sizeof...(A)>,                                   \
                    apply_args<type_sequence<A...>, index_sequence<I...>> {      \
     typedef construct_then_apply_callable_ck self_type;                         \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;    \
@@ -1083,11 +1081,10 @@ namespace nd {
   template <typename func_type, typename... A, size_t... I, typename... K,      \
             size_t... J>                                                        \
   struct construct_then_apply_callable_ck<                                      \
-      KERNREQ, func_type, void, type_sequence<A...>, index_sequence<I...>,      \
+      func_type, void, type_sequence<A...>, index_sequence<I...>,               \
       type_sequence<K...>,                                                      \
       index_sequence<                                                           \
-          J...>> : base_kernel<construct_then_apply_callable_ck<KERNREQ,        \
-                                                                func_type,      \
+          J...>> : base_kernel<construct_then_apply_callable_ck<func_type,      \
                                                                 void,           \
                                                                 type_sequence<  \
                                                                     A...>,      \
@@ -1097,7 +1094,7 @@ namespace nd {
                                                                     K...>,      \
                                                                 index_sequence< \
                                                                     J...>>,     \
-                               KERNREQ, sizeof...(A)>,                          \
+                               sizeof...(A)>,                                   \
                    apply_args<type_sequence<A...>, index_sequence<I...>> {      \
     typedef construct_then_apply_callable_ck self_type;                         \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;    \
@@ -1166,13 +1163,13 @@ namespace nd {
                 const std::map<std::string, ndt::type> &tp_vars);               \
   }
 
-    CONSTRUCT_THEN_APPLY_CALLABLE_CK(kernel_request_host);
+    CONSTRUCT_THEN_APPLY_CALLABLE_CK();
 
     template <typename func_type, typename R, typename... A, size_t... I,
               typename... K, size_t... J>
     intptr_t construct_then_apply_callable_ck<
-        kernel_request_host, func_type, R, type_sequence<A...>,
-        index_sequence<I...>, type_sequence<K...>, index_sequence<J...>>::
+        func_type, R, type_sequence<A...>, index_sequence<I...>,
+        type_sequence<K...>, index_sequence<J...>>::
         instantiate(char *static_data, size_t DYND_UNUSED(data_size),
                     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                     const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -1189,10 +1186,10 @@ namespace nd {
 
 #undef CONSTRUCT_THEN_APPLY_CALLABLE_CK
 
-    template <kernel_request_t kernreq, typename func_type, typename... K>
+    template <typename func_type, typename... K>
     using as_construct_then_apply_callable_ck =
         construct_then_apply_callable_ck<
-            kernreq, func_type, typename return_of<func_type>::type,
+            func_type, typename return_of<func_type>::type,
             as_apply_arg_sequence<func_type, arity_of<func_type>::value>,
             make_index_sequence<arity_of<func_type>::value>,
             type_sequence<K...>, make_index_sequence<sizeof...(K)>>;

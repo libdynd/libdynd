@@ -11,8 +11,7 @@
 using namespace std;
 using namespace dynd;
 
-struct take_by_pointer_outer_ck
-    : nd::base_kernel<take_by_pointer_outer_ck, kernel_request_host, 2> {
+struct take_by_pointer_outer_ck : nd::base_kernel<take_by_pointer_outer_ck, 2> {
   const intptr_t dst_size, dst_stride;
   const intptr_t src1_stride;
 
@@ -36,8 +35,7 @@ struct take_by_pointer_outer_ck
   }
 };
 
-struct take_by_pointer_ck
-    : nd::base_kernel<take_by_pointer_ck, kernel_request_host, 2> {
+struct take_by_pointer_ck : nd::base_kernel<take_by_pointer_ck, 2> {
   const intptr_t src0_size, src0_stride;
   const intptr_t src1_inner_stride;
 

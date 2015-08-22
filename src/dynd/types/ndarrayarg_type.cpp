@@ -41,8 +41,7 @@ bool ndt::ndarrayarg_type::operator==(const base_type &rhs) const
 }
 
 namespace {
-struct ndarrayarg_assign_ck
-    : nd::base_kernel<ndarrayarg_assign_ck, kernel_request_host, 1> {
+struct ndarrayarg_assign_ck : nd::base_kernel<ndarrayarg_assign_ck, 1> {
   void single(char *dst, char *const *src)
   {
     if (*reinterpret_cast<void *const *>(src[0]) == NULL) {

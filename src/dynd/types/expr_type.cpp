@@ -47,7 +47,10 @@ ndt::expr_type::expr_type(const type &value_type, const type &operand_type,
   }
 }
 
-ndt::expr_type::~expr_type() { expr_kernel_generator_decref(m_kgen); }
+ndt::expr_type::~expr_type()
+{
+  expr_kernel_generator_decref(m_kgen);
+}
 
 void ndt::expr_type::print_data(std::ostream &DYND_UNUSED(o),
                                 const char *DYND_UNUSED(arrmeta),
@@ -221,8 +224,7 @@ bool ndt::expr_type::operator==(const base_type &rhs) const
 namespace {
 template <int N>
 struct expr_type_offset_applier_extra
-    : nd::base_kernel<expr_type_offset_applier_extra<N>, kernel_request_host,
-                      1> {
+    : nd::base_kernel<expr_type_offset_applier_extra<N>, 1> {
   typedef expr_type_offset_applier_extra<N> extra_type;
 
   size_t offsets[N];
@@ -246,8 +248,7 @@ struct expr_type_offset_applier_extra
 };
 
 struct expr_type_offset_applier_general_extra
-    : nd::base_kernel<expr_type_offset_applier_general_extra,
-                      kernel_request_host, 1> {
+    : nd::base_kernel<expr_type_offset_applier_general_extra, 1> {
   typedef expr_type_offset_applier_general_extra extra_type;
 
   size_t src_count;
