@@ -60,6 +60,8 @@ nd::array &nd::array::operator+=(const array &rhs)
 }
 */
 
+struct nd::compound_add nd::compound_add;
+
 struct nd::compound_div nd::compound_div;
 
 nd::array &nd::array::operator/=(const array &rhs)
