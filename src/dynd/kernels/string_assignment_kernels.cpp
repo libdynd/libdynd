@@ -19,8 +19,7 @@ using namespace dynd;
 // fixed_string to fixed_string assignment
 
 namespace {
-struct fixed_string_assign_ck
-    : nd::base_kernel<fixed_string_assign_ck, kernel_request_host, 1> {
+struct fixed_string_assign_ck : nd::base_kernel<fixed_string_assign_ck, 1> {
   next_unicode_codepoint_t m_next_fn;
   append_unicode_codepoint_t m_append_fn;
   intptr_t m_dst_data_size, m_src_data_size;
@@ -83,7 +82,7 @@ size_t dynd::make_fixed_string_assignment_kernel(void *ckb, intptr_t ckb_offset,
 
 namespace {
 struct blockref_string_assign_ck
-    : nd::base_kernel<blockref_string_assign_ck, kernel_request_host, 1> {
+    : nd::base_kernel<blockref_string_assign_ck, 1> {
   string_encoding_t m_dst_encoding, m_src_encoding;
   next_unicode_codepoint_t m_next_fn;
   append_unicode_codepoint_t m_append_fn;
@@ -188,8 +187,7 @@ size_t dynd::make_blockref_string_assignment_kernel(
 
 namespace {
 struct fixed_string_to_blockref_string_assign_ck
-    : nd::base_kernel<fixed_string_to_blockref_string_assign_ck,
-                      kernel_request_host, 1> {
+    : nd::base_kernel<fixed_string_to_blockref_string_assign_ck, 1> {
   string_encoding_t m_dst_encoding, m_src_encoding;
   intptr_t m_src_element_size;
   next_unicode_codepoint_t m_next_fn;
@@ -282,8 +280,7 @@ size_t dynd::make_fixed_string_to_blockref_string_assignment_kernel(
 
 namespace {
 struct blockref_string_to_fixed_string_assign_ck
-    : nd::base_kernel<blockref_string_to_fixed_string_assign_ck,
-                      kernel_request_host, 1> {
+    : nd::base_kernel<blockref_string_to_fixed_string_assign_ck, 1> {
   next_unicode_codepoint_t m_next_fn;
   append_unicode_codepoint_t m_append_fn;
   intptr_t m_dst_data_size, m_src_element_size;
@@ -334,7 +331,7 @@ size_t dynd::make_blockref_string_to_fixed_string_assignment_kernel(
 }
 
 namespace {
-struct date_to_string_ck : nd::base_kernel<date_to_string_ck, kernel_request_host, 1> {
+struct date_to_string_ck : nd::base_kernel<date_to_string_ck, 1> {
   ndt::type m_dst_string_tp;
   const char *m_dst_arrmeta;
   ndt::type m_src_tp;

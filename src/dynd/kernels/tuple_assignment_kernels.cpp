@@ -23,8 +23,7 @@ struct tuple_unary_op_item {
   size_t src_data_offset;
 };
 
-struct tuple_unary_op_ck
-    : nd::base_kernel<tuple_unary_op_ck, kernel_request_host, 1> {
+struct tuple_unary_op_ck : nd::base_kernel<tuple_unary_op_ck, 1> {
   vector<tuple_unary_op_item> m_fields;
 
   void single(char *dst, char *const *src)

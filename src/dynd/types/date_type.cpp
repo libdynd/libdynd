@@ -347,8 +347,7 @@ void ndt::date_type::get_dynamic_array_functions(
 
 namespace {
 
-struct date_get_year_kernel
-    : nd::base_kernel<date_get_year_kernel, kernel_request_host, 1> {
+struct date_get_year_kernel : nd::base_kernel<date_get_year_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     date_ymd ymd;
@@ -357,8 +356,7 @@ struct date_get_year_kernel
   }
 };
 
-struct date_get_month_kernel
-    : nd::base_kernel<date_get_month_kernel, kernel_request_host, 1> {
+struct date_get_month_kernel : nd::base_kernel<date_get_month_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     date_ymd ymd;
@@ -367,8 +365,7 @@ struct date_get_month_kernel
   }
 };
 
-struct date_get_day_kernel
-    : nd::base_kernel<date_get_day_kernel, kernel_request_host, 1> {
+struct date_get_day_kernel : nd::base_kernel<date_get_day_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     date_ymd ymd;
@@ -377,8 +374,7 @@ struct date_get_day_kernel
   }
 };
 
-struct date_get_weekday_kernel
-    : nd::base_kernel<date_get_weekday_kernel, kernel_request_host, 1> {
+struct date_get_weekday_kernel : nd::base_kernel<date_get_weekday_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     int32_t days = **reinterpret_cast<int32_t *const *>(src);
@@ -391,8 +387,7 @@ struct date_get_weekday_kernel
   }
 };
 
-struct date_get_struct_kernel
-    : nd::base_kernel<date_get_struct_kernel, kernel_request_host, 1> {
+struct date_get_struct_kernel : nd::base_kernel<date_get_struct_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
@@ -400,8 +395,7 @@ struct date_get_struct_kernel
   }
 };
 
-struct date_set_struct_kernel
-    : nd::base_kernel<date_set_struct_kernel, kernel_request_host, 1> {
+struct date_set_struct_kernel : nd::base_kernel<date_set_struct_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     const date_ymd *src_struct = *reinterpret_cast<date_ymd *const *>(src);

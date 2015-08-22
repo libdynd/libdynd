@@ -39,7 +39,9 @@ ndt::pointer_type::pointer_type(const type &target_tp)
   }
 }
 
-ndt::pointer_type::~pointer_type() {}
+ndt::pointer_type::~pointer_type()
+{
+}
 
 void ndt::pointer_type::print_data(std::ostream &o, const char *arrmeta,
                                    const char *data) const
@@ -363,8 +365,7 @@ intptr_t ndt::pointer_type::make_assignment_kernel(
 
 namespace {
 
-struct operand_to_value_ck
-    : nd::base_kernel<operand_to_value_ck, kernel_request_host, 1> {
+struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
   void single(char *dst, char *const *src)
   {
     ckernel_prefix *copy_value = get_child_ckernel();
@@ -375,7 +376,10 @@ struct operand_to_value_ck
     copy_value_fn(copy_value, dst, src_ptr);
   }
 
-  void destruct_children() { get_child_ckernel()->destroy(); }
+  void destruct_children()
+  {
+    get_child_ckernel()->destroy();
+  }
 };
 
 } // anonymous namespace

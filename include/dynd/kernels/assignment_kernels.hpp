@@ -181,7 +181,7 @@ namespace nd {
     struct assignment_kernel
         : base_kernel<assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID,
                                         Src0TypeKind, ErrorMode>,
-                      kernel_request_host, 1> {
+                      1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src_type;
 
@@ -236,7 +236,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               complex_kind,
                                                               assign_error_nocheck>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -259,7 +259,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               complex_kind,
                                                               assign_error_nocheck>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -282,7 +282,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               complex_kind,
                                                               assign_error_nocheck>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -306,7 +306,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               sint_kind,
                                                               assign_error_nocheck>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -330,7 +330,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               sint_kind,
                                                               assign_error_inexact>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -379,7 +379,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               Src0TypeKind,
                                                               assign_error_nocheck>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
 
       void single(char *dst, char *const *src)
@@ -401,7 +401,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               uint_kind,
                                                               assign_error_inexact>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -449,7 +449,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               uint_kind,
                                                               assign_error_nocheck>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -473,7 +473,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               uint_kind,
                                                               assign_error_inexact>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -522,7 +522,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                real_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -553,7 +553,7 @@ namespace nd {
                                                                  Src0TypeID,
                                                                  real_kind,
                                                                  assign_error_fractional>,
-                                               kernel_request_host, 1> {
+                                               1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -601,7 +601,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                complex_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -641,7 +641,7 @@ namespace nd {
                                                                  Src0TypeID,
                                                                  complex_kind,
                                                                  assign_error_fractional>,
-                                               kernel_request_host, 1> {
+                                               1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -698,7 +698,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                real_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -728,7 +728,7 @@ namespace nd {
                                                                  Src0TypeID,
                                                                  real_kind,
                                                                  assign_error_fractional>,
-                                               kernel_request_host, 1> {
+                                               1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -775,7 +775,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                complex_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -814,7 +814,7 @@ namespace nd {
                                                                  Src0TypeID,
                                                                  complex_kind,
                                                                  assign_error_fractional>,
-                                               kernel_request_host, 1> {
+                                               1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1092,7 +1092,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                real_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1145,7 +1145,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               real_kind,
                                                               assign_error_inexact>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1205,7 +1205,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                Src0TypeKind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<Src0TypeID>::type src0_type;
 
       void single(char *dst, char *const *src)
@@ -1304,7 +1304,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                sint_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1351,7 +1351,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                uint_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1399,7 +1399,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                sint_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1448,7 +1448,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                uint_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1495,7 +1495,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               sint_kind,
                                                               assign_error_inexact>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1541,7 +1541,7 @@ namespace nd {
         ErrorMode> : base_kernel<assignment_kernel<DstTypeID, complex_kind,
                                                    Src0TypeID, real_kind,
                                                    ErrorMode>,
-                                 kernel_request_host, 1> {
+                                 1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1565,7 +1565,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                complex_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1638,7 +1638,7 @@ namespace nd {
                                                               complex_float64_type_id,
                                                               complex_kind,
                                                               assign_error_inexact>,
-                                            kernel_request_host, 1> {
+                                            1> {
       void single(char *dst, char *const *src)
       {
         complex<double> s = *reinterpret_cast<complex<double> *>(src[0]);
@@ -1698,7 +1698,7 @@ namespace nd {
                                                                Src0TypeID,
                                                                real_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1754,7 +1754,7 @@ namespace nd {
                                                               Src0TypeID,
                                                               real_kind,
                                                               assign_error_inexact>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef typename type_of<DstTypeID>::type dst_type;
       typedef typename type_of<Src0TypeID>::type src0_type;
 
@@ -1810,7 +1810,7 @@ namespace nd {
                                                                complex_float64_type_id,
                                                                complex_kind,
                                                                assign_error_overflow>,
-                                             kernel_request_host, 1> {
+                                             1> {
       typedef complex<float> dst_type;
       typedef complex<double> src0_type;
 
@@ -1871,7 +1871,7 @@ namespace nd {
                                                               complex_float64_type_id,
                                                               complex_kind,
                                                               assign_error_inexact>,
-                                            kernel_request_host, 1> {
+                                            1> {
       typedef complex<float> dst_type;
       typedef complex<double> src0_type;
 
@@ -1936,7 +1936,7 @@ namespace nd {
         ErrorMode> : base_kernel<assignment_kernel<date_type_id, datetime_kind,
                                                    string_type_id, string_kind,
                                                    ErrorMode>,
-                                 kernel_request_host, 1> {
+                                 1> {
       ndt::type m_src_string_tp;
       const char *m_src_arrmeta;
       assign_error_mode m_errmode;
@@ -1994,7 +1994,7 @@ namespace nd {
         ErrorMode> : base_kernel<assignment_kernel<string_type_id, string_kind,
                                                    date_type_id, datetime_kind,
                                                    ErrorMode>,
-                                 kernel_request_host, 1> {
+                                 1> {
       ndt::type m_dst_string_tp;
       const char *m_dst_arrmeta;
       eval::eval_context m_ectx;
@@ -2042,7 +2042,7 @@ namespace nd {
                                                    datetime_kind,
                                                    string_type_id, string_kind,
                                                    ErrorMode>,
-                                 kernel_request_host, 1> {
+                                 1> {
       ndt::type m_dst_datetime_tp;
       ndt::type m_src_string_tp;
       const char *m_src_arrmeta;
@@ -2100,7 +2100,7 @@ namespace nd {
         ErrorMode> : base_kernel<assignment_kernel<string_type_id, string_kind,
                                                    datetime_type_id,
                                                    datetime_kind, ErrorMode>,
-                                 kernel_request_host, 1> {
+                                 1> {
       ndt::type m_dst_string_tp;
       const char *m_dst_arrmeta;
       ndt::type m_src_datetime_tp;
@@ -2153,7 +2153,7 @@ namespace nd {
         ErrorMode> : base_kernel<assignment_kernel<time_type_id, datetime_kind,
                                                    string_type_id, string_kind,
                                                    ErrorMode>,
-                                 kernel_request_host, 1> {
+                                 1> {
       ndt::type m_src_string_tp;
       const char *m_src_arrmeta;
       assign_error_mode m_errmode;
@@ -2207,7 +2207,7 @@ namespace nd {
         ErrorMode> : base_kernel<assignment_kernel<string_type_id, string_kind,
                                                    time_type_id, datetime_kind,
                                                    ErrorMode>,
-                                 kernel_request_host, 1> {
+                                 1> {
       ndt::type m_dst_string_tp;
       const char *m_dst_arrmeta;
       eval::eval_context m_ectx;
@@ -2257,7 +2257,7 @@ namespace nd {
         ErrorMode> : base_kernel<assignment_kernel<option_type_id, option_kind,
                                                    option_type_id, option_kind,
                                                    ErrorMode>,
-                                 kernel_request_host, 1> {
+                                 1> {
       // The default child is the src is_avail ckernel
       // This child is the dst assign_na ckernel
       size_t m_dst_assign_na_offset;
@@ -2418,7 +2418,7 @@ namespace nd {
     };
 
     struct string_to_option_bool_ck
-        : nd::base_kernel<string_to_option_bool_ck, kernel_request_host, 1> {
+        : nd::base_kernel<string_to_option_bool_ck, 1> {
       assign_error_mode m_errmode;
 
       void single(char *dst, char *const *src)
@@ -2430,7 +2430,7 @@ namespace nd {
     };
 
     struct string_to_option_number_ck
-        : nd::base_kernel<string_to_option_number_ck, kernel_request_host, 1> {
+        : nd::base_kernel<string_to_option_number_ck, 1> {
       type_id_t m_tid;
       assign_error_mode m_errmode;
 
@@ -2443,8 +2443,7 @@ namespace nd {
       }
     };
 
-    struct string_to_option_tp_ck
-        : nd::base_kernel<string_to_option_tp_ck, kernel_request_host, 1> {
+    struct string_to_option_tp_ck : nd::base_kernel<string_to_option_tp_ck, 1> {
       intptr_t m_dst_assign_na_offset;
 
       void single(char *dst, char *const *src)
@@ -2593,8 +2592,7 @@ namespace nd {
   /**
    * A ckernel which assigns option[S] to T.
    */
-  struct option_to_value_ck
-      : nd::base_kernel<option_to_value_ck, kernel_request_host, 1> {
+  struct option_to_value_ck : nd::base_kernel<option_to_value_ck, 1> {
     // The default child is the src_is_avail ckernel
     size_t m_value_assign_offset;
 
@@ -3078,8 +3076,7 @@ namespace nd {
 
   template <class T>
   struct aligned_fixed_size_copy_assign_type
-      : base_kernel<aligned_fixed_size_copy_assign_type<T>, kernel_request_host,
-                    1> {
+      : base_kernel<aligned_fixed_size_copy_assign_type<T>, 1> {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<T *>(dst) = **reinterpret_cast<T *const *>(src);
@@ -3103,8 +3100,7 @@ namespace nd {
 
   template <>
   struct aligned_fixed_size_copy_assign<
-      1> : base_kernel<aligned_fixed_size_copy_assign<1>, kernel_request_host,
-                       1> {
+      1> : base_kernel<aligned_fixed_size_copy_assign<1>, 1> {
     void single(char *dst, char *const *src)
     {
       *dst = **src;
@@ -3140,8 +3136,7 @@ namespace nd {
 
   template <int N>
   struct unaligned_fixed_size_copy_assign
-      : base_kernel<unaligned_fixed_size_copy_assign<N>, kernel_request_host,
-                    1> {
+      : base_kernel<unaligned_fixed_size_copy_assign<N>, 1> {
     static void single(char *dst, char *const *src)
     {
       memcpy(dst, *src, N);
@@ -3160,8 +3155,7 @@ namespace nd {
     }
   };
 
-  struct unaligned_copy_ck
-      : base_kernel<unaligned_copy_ck, kernel_request_host, 1> {
+  struct unaligned_copy_ck : base_kernel<unaligned_copy_ck, 1> {
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size)

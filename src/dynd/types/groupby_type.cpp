@@ -51,7 +51,9 @@ ndt::groupby_type::groupby_type(const type &data_values_tp,
       inherited_flags(m_value_type.get_flags(), m_operand_type.get_flags());
 }
 
-ndt::groupby_type::~groupby_type() {}
+ndt::groupby_type::~groupby_type()
+{
+}
 
 void ndt::groupby_type::print_data(std::ostream &DYND_UNUSED(o),
                                    const char *DYND_UNUSED(arrmeta),
@@ -87,7 +89,7 @@ void ndt::groupby_type::get_shape(intptr_t ndim, intptr_t i,
 {
   // The first dimension is the groups, the second variable-sized
   out_shape[i] = reinterpret_cast<const categorical_type *>(
-                     m_groups_type.extended())->get_category_count();
+      m_groups_type.extended())->get_category_count();
   if (i + 1 < ndim) {
     out_shape[i + 1] = -1;
   }
@@ -132,8 +134,7 @@ namespace {
 // Assign from a categorical type to some other type
 template <typename UIntType>
 struct groupby_to_value_assign_kernel
-    : nd::base_kernel<groupby_to_value_assign_kernel<UIntType>,
-                      kernel_request_host, 1> {
+    : nd::base_kernel<groupby_to_value_assign_kernel<UIntType>, 1> {
   typedef groupby_to_value_assign_kernel extra_type;
 
   // The groupby type
@@ -240,10 +241,10 @@ struct groupby_to_value_assign_kernel
     vector<char *> cat_pointers(cat_sizes.size());
     for (size_t i = 0, i_end = cat_pointers.size(); i != i_end; ++i) {
       cat_pointers[i] = out_begin;
-      reinterpret_cast<var_dim_type_data *>(dst + i * fad_stride)->begin =
+      reinterpret_cast<var_dim_type_data *>(dst + i *fad_stride)->begin =
           out_begin;
       size_t csize = cat_sizes[i];
-      reinterpret_cast<var_dim_type_data *>(dst + i * fad_stride)->size = csize;
+      reinterpret_cast<var_dim_type_data *>(dst + i *fad_stride)->size = csize;
       out_begin += csize * vad_stride;
     }
 
@@ -310,10 +311,9 @@ size_t ndt::groupby_type::make_operand_to_value_assignment_kernel(
 
   // The following is the setup for copying a single 'data' value to the output
   // The destination element type and arrmeta
-  const type &dst_element_tp =
-      static_cast<const var_dim_type *>(m_value_type.extended<fixed_dim_type>()
-                                            ->get_element_type()
-                                            .extended())->get_element_type();
+  const type &dst_element_tp = static_cast<const var_dim_type *>(
+      m_value_type.extended<fixed_dim_type>()->get_element_type().extended())
+                                   ->get_element_type();
   const char *dst_element_arrmeta = dst_arrmeta +
                                     sizeof(fixed_dim_type_arrmeta) +
                                     sizeof(var_dim_type_arrmeta);
@@ -366,8 +366,7 @@ void ndt::groupby_type::get_dynamic_array_properties(
 {
   static pair<string, gfunc::callable> groupby_array_properties[] = {
       pair<string, gfunc::callable>(
-          "groups", gfunc::make_callable(&property_ndo_get_groups, "self")),
-  };
+          "groups", gfunc::make_callable(&property_ndo_get_groups, "self")), };
 
   *out_properties = groupby_array_properties;
   *out_count =

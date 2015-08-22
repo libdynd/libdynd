@@ -33,7 +33,7 @@ ndt::base_struct_type::base_struct_type(type_id_t type_id,
 
   // Make sure that the number of names matches
   intptr_t name_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                            m_field_names.get_arrmeta())->dim_size;
+      m_field_names.get_arrmeta())->dim_size;
   if (name_count != m_field_count) {
     stringstream ss;
     ss << "dynd struct type requires that the number of names, " << name_count
@@ -44,7 +44,9 @@ ndt::base_struct_type::base_struct_type(type_id_t type_id,
   m_members.kind = variadic ? kind_kind : struct_kind;
 }
 
-ndt::base_struct_type::~base_struct_type() {}
+ndt::base_struct_type::~base_struct_type()
+{
+}
 
 intptr_t
 ndt::base_struct_type::get_field_index(const char *field_name_begin,
@@ -56,7 +58,7 @@ ndt::base_struct_type::get_field_index(const char *field_name_begin,
     intptr_t field_count = get_field_count();
     const char *fn_ptr = m_field_names.get_readonly_originptr();
     intptr_t fn_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                             m_field_names.get_arrmeta())->stride;
+        m_field_names.get_arrmeta())->stride;
     for (intptr_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
       const string_type_data *fn =
           reinterpret_cast<const string_type_data *>(fn_ptr);
@@ -214,14 +216,14 @@ bool ndt::base_struct_type::match(const char *arrmeta, const type &candidate_tp,
     // Compare the field names
     if (m_field_count == candidate_field_count) {
       if (!get_field_names().equals_exact(
-              candidate_tp.extended<base_struct_type>()->get_field_names())) {
+               candidate_tp.extended<base_struct_type>()->get_field_names())) {
         return false;
       }
     } else {
       nd::array leading_field_names = get_field_names();
       if (!leading_field_names.equals_exact(
-              candidate_tp.extended<base_struct_type>()->get_field_names()(
-                  irange() < m_field_count))) {
+               candidate_tp.extended<base_struct_type>()->get_field_names()(
+                   irange() < m_field_count))) {
         return false;
       }
     }
@@ -270,7 +272,7 @@ ndt::type ndt::base_struct_type::get_elwise_property_type(
 
 namespace {
 struct struct_property_getter_ck
-    : nd::base_kernel<struct_property_getter_ck, kernel_request_host, 1> {
+    : nd::base_kernel<struct_property_getter_ck, 1> {
   size_t m_field_offset;
 
   void single(char *dst, char *const *src)
@@ -290,7 +292,10 @@ struct struct_property_getter_ck
     child_fn(child, dst, dst_stride, &src_copy, src_stride, count);
   }
 
-  inline void destruct_children() { get_child_ckernel()->destroy(); }
+  inline void destruct_children()
+  {
+    get_child_ckernel()->destroy();
+  }
 };
 } // anonymous namespace
 

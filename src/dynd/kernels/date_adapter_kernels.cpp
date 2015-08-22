@@ -56,8 +56,7 @@ static bool parse_days_since(const char *begin, const char *end,
 
 namespace {
 template <class Tsrc, class Tdst>
-struct int_offset_ck
-    : nd::base_kernel<int_offset_ck<Tsrc, Tdst>, kernel_request_host, 1> {
+struct int_offset_ck : nd::base_kernel<int_offset_ck<Tsrc, Tdst>, 1> {
   Tdst m_offset;
 
   void single(char *dst, char *const *src)

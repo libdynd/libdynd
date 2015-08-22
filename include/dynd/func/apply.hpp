@@ -20,9 +20,8 @@ namespace nd {
               typename... T>
     callable apply(T &&... names)
     {
-      typedef as_apply_function_ck<kernreq, func_type, func,
-                                   arity_of<func_type>::value - sizeof...(T)>
-          CKT;
+      typedef as_apply_function_ck<func_type, func, arity_of<func_type>::value -
+                                                        sizeof...(T)> CKT;
 
       ndt::type self_tp =
           ndt::type::make<typename funcproto_of<func_type>::type>(
@@ -48,9 +47,8 @@ namespace nd {
                             callable>::type
     apply(func_type func, T &&... names)
     {
-      typedef as_apply_callable_ck<kernreq, func_type,
-                                   arity_of<func_type>::value - sizeof...(T)>
-          ck_type;
+      typedef as_apply_callable_ck<func_type, arity_of<func_type>::value -
+                                                  sizeof...(T)> ck_type;
 
       ndt::type self_tp =
           ndt::type::make<typename funcproto_of<func_type>::type>(
@@ -72,9 +70,8 @@ namespace nd {
     template <kernel_request_t kernreq, typename func_type, typename... T>
     callable apply(func_type *func, T &&... names)
     {
-      typedef as_apply_callable_ck<kernreq, func_type *,
-                                   arity_of<func_type>::value - sizeof...(T)>
-          ck_type;
+      typedef as_apply_callable_ck<func_type *, arity_of<func_type>::value -
+                                                    sizeof...(T)> ck_type;
 
       ndt::type self_tp =
           ndt::type::make<typename funcproto_of<func_type>::type>(
@@ -93,7 +90,7 @@ namespace nd {
               typename... S>
     callable apply(T *obj, R (T::*mem_func)(A...), S &&... names)
     {
-      typedef as_apply_member_function_ck<kernreq, T *, R (T::*)(A...),
+      typedef as_apply_member_function_ck<T *, R (T::*)(A...),
                                           sizeof...(A) - sizeof...(S)> ck_type;
 
       ndt::type self_tp =
@@ -119,8 +116,7 @@ namespace nd {
               typename... T>
     callable apply(T &&... names)
     {
-      typedef as_construct_then_apply_callable_ck<kernreq, func_type, K...>
-          ck_type;
+      typedef as_construct_then_apply_callable_ck<func_type, K...> ck_type;
 
       ndt::type self_tp =
           ndt::type::make<typename funcproto_of<func_type, K...>::type>(
