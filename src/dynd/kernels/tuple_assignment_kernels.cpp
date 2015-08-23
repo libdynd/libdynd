@@ -26,6 +26,13 @@ struct tuple_unary_op_item {
 struct tuple_unary_op_ck : nd::base_kernel<tuple_unary_op_ck, 1> {
   vector<tuple_unary_op_item> m_fields;
 
+  ~tuple_unary_op_ck()
+  {
+    for (size_t i = 0; i < m_fields.size(); ++i) {
+      destroy_child_ckernel(m_fields[i].child_kernel_offset);
+    }
+  }
+
   void single(char *dst, char *const *src)
   {
     const tuple_unary_op_item *fi = &m_fields[0];
@@ -39,13 +46,6 @@ struct tuple_unary_op_ck : nd::base_kernel<tuple_unary_op_ck, 1> {
       child_fn = child->get_function<expr_single_t>();
       char *child_src = src[0] + item.src_data_offset;
       child_fn(child, dst + item.dst_data_offset, &child_src);
-    }
-  }
-
-  void destruct_children()
-  {
-    for (size_t i = 0; i < m_fields.size(); ++i) {
-      destroy_child_ckernel(m_fields[i].child_kernel_offset);
     }
   }
 };

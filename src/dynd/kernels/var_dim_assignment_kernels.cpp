@@ -25,6 +25,11 @@ struct broadcast_to_var_assign_ck
   intptr_t m_dst_target_alignment;
   const var_dim_type_arrmeta *m_dst_md;
 
+  ~broadcast_to_var_assign_ck()
+  {
+    get_child_ckernel()->destroy();
+  }
+
   void single(char *dst, char *const *src)
   {
     var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
@@ -63,11 +68,6 @@ struct broadcast_to_var_assign_ck
       child_fn(child, dst, m_dst_md->stride, src, &zero_stride, dst_d->size);
     }
   }
-
-  void destruct_children()
-  {
-    get_child_ckernel()->destroy();
-  }
 };
 } // anonymous namespace
 
@@ -104,6 +104,11 @@ namespace {
 struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
   intptr_t m_dst_target_alignment;
   const var_dim_type_arrmeta *m_dst_md, *m_src_md;
+
+  ~var_assign_ck()
+  {
+    get_child_ckernel()->destroy();
+  }
 
   void single(char *dst, char *const *src)
   {
@@ -166,11 +171,6 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
       child_fn(child, dst, dst_stride, &src_copy, &src_stride, dst_dim_size);
     }
   }
-
-  inline void destruct_children()
-  {
-    get_child_ckernel()->destroy();
-  }
 };
 } // anonymous namespace
 
@@ -223,6 +223,11 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
   const var_dim_type_arrmeta *m_dst_md;
   intptr_t m_src_stride, m_src_dim_size;
 
+  ~strided_to_var_assign_ck()
+  {
+    destroy_child_ckernel(sizeof(self_type));
+  }
+
   void single(char *dst, char *const *src)
   {
     var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
@@ -272,11 +277,6 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
       child_fn(child, dst, dst_stride, src, &src_stride, dst_dim_size);
     }
   }
-
-  inline void destruct_children()
-  {
-    destroy_child_ckernel(sizeof(self_type));
-  }
 };
 } // anonymous namespace
 
@@ -318,6 +318,11 @@ struct var_to_strided_assign_ck : nd::base_kernel<var_to_strided_assign_ck, 1> {
   intptr_t m_dst_stride, m_dst_dim_size;
   const var_dim_type_arrmeta *m_src_md;
 
+  ~var_to_strided_assign_ck()
+  {
+    get_child_ckernel()->destroy();
+  }
+
   void single(char *dst, char *const *src)
   {
     var_dim_type_data *src_d = reinterpret_cast<var_dim_type_data *>(src[0]);
@@ -341,11 +346,6 @@ struct var_to_strided_assign_ck : nd::base_kernel<var_to_strided_assign_ck, 1> {
     // Copying/broadcasting elements
     char *src_copy = src_d->begin + m_src_md->offset;
     child_fn(child, dst, dst_stride, &src_copy, &src_stride, dst_dim_size);
-  }
-
-  void destruct_children()
-  {
-    get_child_ckernel()->destroy();
   }
 };
 } // anonymous namespace
