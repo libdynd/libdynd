@@ -146,7 +146,7 @@ namespace nd {
       /* If there are any child kernels, a child class must implement */
       /* this to destroy them. */
       self->destruct_children();
-      self->~self_type();
+      self->~SelfType();
     }
 
     /**  Default implementation of destruct_children does nothing.  */

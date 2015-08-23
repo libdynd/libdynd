@@ -14,6 +14,11 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
+    struct reduction_kernel_prefix {
+      void *init_func;
+      void *func;
+    };
+
     struct reduction_ckernel_prefix : ckernel_prefix {
       struct static_data_type {
         callable child;
