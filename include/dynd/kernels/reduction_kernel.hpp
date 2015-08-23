@@ -101,6 +101,11 @@ namespace nd {
       intptr_t size;
       intptr_t src_stride;
 
+      ~initial_reduction_kernel()
+      {
+        get_child_ckernel()->destroy();
+      }
+
       static void single_first(ckernel_prefix *extra, char *dst,
                                char *const *src)
       {
@@ -189,11 +194,6 @@ namespace nd {
         }
       }
 
-      void destruct_children()
-      {
-        get_child_ckernel()->destroy();
-      }
-
       /**
        * Adds a ckernel layer for processing one dimension of the reduction.
        * This is for a strided dimension which is being reduced, and is not
@@ -249,6 +249,11 @@ namespace nd {
       // The code assumes that size >= 1
       intptr_t size;
       intptr_t dst_stride, src_stride;
+
+      ~strided_initial_broadcast_kernel_extra()
+      {
+        get_child_ckernel()->destroy();
+      }
 
       static void single_first(ckernel_prefix *extra, char *dst,
                                char *const *src)
@@ -328,11 +333,6 @@ namespace nd {
         }
       }
 
-      void destruct_children()
-      {
-        get_child_ckernel()->destroy();
-      }
-
       /**
        * Adds a ckernel layer for processing one dimension of the reduction.
        * This is for a strided dimension which is being broadcast, and is not
@@ -400,6 +400,17 @@ namespace nd {
       // For the case with a reduction identity
       const char *ident_data;
       memory_block_data *ident_ref;
+
+      ~strided_inner_reduction_kernel_extra()
+      {
+        if (ident_ref != NULL) {
+          memory_block_decref(ident_ref);
+        }
+        // The reduction kernel
+        get_child_ckernel()->destroy();
+        // The destination initialization kernel
+        destroy_child_ckernel(dst_init_kernel_offset);
+      }
 
       static void single_first(ckernel_prefix *extra, char *dst,
                                char *const *src)
@@ -557,17 +568,6 @@ namespace nd {
         }
       }
 
-      void destruct_children()
-      {
-        if (ident_ref != NULL) {
-          memory_block_decref(ident_ref);
-        }
-        // The reduction kernel
-        get_child_ckernel()->destroy();
-        // The destination initialization kernel
-        destroy_child_ckernel(dst_init_kernel_offset);
-      }
-
       /**
        * Adds a ckernel layer for processing one dimension of the reduction.
        * This is for a strided dimension which is being reduced, and is
@@ -712,6 +712,17 @@ namespace nd {
       // For the case with a reduction identity
       const char *ident_data;
       memory_block_data *ident_ref;
+
+      ~strided_inner_broadcast_kernel()
+      {
+        if (ident_ref != NULL) {
+          memory_block_decref(ident_ref);
+        }
+        // The reduction kernel
+        get_child_ckernel()->destroy();
+        // The destination initialization kernel
+        destroy_child_ckernel(dst_init_kernel_offset);
+      }
 
       static void single_first(ckernel_prefix *extra, char *dst,
                                char *const *src)
@@ -860,17 +871,6 @@ namespace nd {
           dst += dst_stride;
           src0 += src0_stride;
         }
-      }
-
-      void destruct_children()
-      {
-        if (ident_ref != NULL) {
-          memory_block_decref(ident_ref);
-        }
-        // The reduction kernel
-        get_child_ckernel()->destroy();
-        // The destination initialization kernel
-        destroy_child_ckernel(dst_init_kernel_offset);
       }
 
       /*

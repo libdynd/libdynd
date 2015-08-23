@@ -24,28 +24,27 @@ struct constant_value_assignment_ck
   // Reference which owns the constant value to assign
   nd::array m_constant;
 
-  inline void single(char *dst, char *const *DYND_UNUSED(src))
+  ~constant_value_assignment_ck()
+  {
+    // Destroy the child ckernel
+    get_child_ckernel()->destroy();
+  }
+
+  void single(char *dst, char *const *DYND_UNUSED(src))
   {
     ckernel_prefix *child = get_child_ckernel();
     expr_single_t child_fn = child->get_function<expr_single_t>();
     child_fn(child, dst, const_cast<char *const *>(&m_constant_data));
   }
 
-  inline void strided(char *dst, intptr_t dst_stride,
-                      char *const *DYND_UNUSED(src),
-                      const intptr_t *DYND_UNUSED(src_stride), size_t count)
+  void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+               const intptr_t *DYND_UNUSED(src_stride), size_t count)
   {
     ckernel_prefix *child = get_child_ckernel();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     intptr_t zero_stride = 0;
     child_fn(child, dst, dst_stride,
              const_cast<char *const *>(&m_constant_data), &zero_stride, count);
-  }
-
-  inline void destruct_children()
-  {
-    // Destroy the child ckernel
-    get_child_ckernel()->destroy();
   }
 };
 } // anonymous namespace
