@@ -16,9 +16,12 @@ namespace nd {
     const char *m_dst_meta;
     intptr_t m_dim_size, m_src0_stride, m_mask_stride;
 
-    void single(char *dst, char *const *src);
+    ~masked_take_ck()
+    {
+      get_child_ckernel()->destroy();
+    }
 
-    void destruct_children();
+    void single(char *dst, char *const *src);
 
     static intptr_t instantiate(
         char *static_data, size_t data_size, char *data, void *ckb,
@@ -36,9 +39,12 @@ namespace nd {
     intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
     intptr_t m_src0_dim_size, m_src0_stride;
 
-    void single(char *dst, char *const *src);
+    ~indexed_take_ck()
+    {
+      get_child_ckernel()->destroy();
+    }
 
-    void destruct_children();
+    void single(char *dst, char *const *src);
 
     static intptr_t instantiate(
         char *static_data, size_t data_size, char *data, void *ckb,

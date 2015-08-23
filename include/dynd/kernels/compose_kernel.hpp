@@ -43,6 +43,14 @@ namespace nd {
         buffer_shape.push_back(DYND_BUFFER_CHUNK_SIZE);
       }
 
+      ~compose_kernel()
+      {
+        // The first child ckernel
+        get_child_ckernel()->destroy();
+        // The second child ckernel
+        destroy_child_ckernel(second_offset);
+      }
+
       void single(char *dst, char *const *src)
       {
         // Allocate a temporary buffer on the heap
@@ -97,14 +105,6 @@ namespace nd {
                       chunk_size);
           count -= chunk_size;
         }
-      }
-
-      void destruct_children()
-      {
-        // The first child ckernel
-        get_child_ckernel()->destroy();
-        // The second child ckernel
-        destroy_child_ckernel(second_offset);
       }
 
       static void resolve_dst_type(
