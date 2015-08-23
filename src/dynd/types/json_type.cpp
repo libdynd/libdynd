@@ -205,6 +205,12 @@ struct string_to_json_ck : nd::base_kernel<string_to_json_ck, 1> {
   const char *m_dst_arrmeta;
   bool m_validate;
 
+  ~string_to_json_ck()
+  {
+    // Destroy the child ckernel
+    get_child_ckernel()->destroy();
+  }
+
   void single(char *dst, char *const *src)
   {
     const json_type_arrmeta *md =
@@ -231,12 +237,6 @@ struct string_to_json_ck : nd::base_kernel<string_to_json_ck, 1> {
         throw;
       }
     }
-  }
-
-  void destruct_children()
-  {
-    // Destroy the child ckernel
-    get_child_ckernel()->destroy();
   }
 };
 } // anonymous namespace

@@ -366,6 +366,11 @@ intptr_t ndt::pointer_type::make_assignment_kernel(
 namespace {
 
 struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
+  ~operand_to_value_ck()
+  {
+    get_child_ckernel()->destroy();
+  }
+
   void single(char *dst, char *const *src)
   {
     ckernel_prefix *copy_value = get_child_ckernel();
@@ -374,11 +379,6 @@ struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
     // to that pointer
     char **src_ptr = reinterpret_cast<char **>(src[0]);
     copy_value_fn(copy_value, dst, src_ptr);
-  }
-
-  void destruct_children()
-  {
-    get_child_ckernel()->destroy();
   }
 };
 
