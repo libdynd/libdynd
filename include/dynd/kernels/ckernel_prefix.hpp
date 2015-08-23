@@ -151,6 +151,10 @@ struct ckernel_prefix {
    */
   DYND_CUDA_HOST_DEVICE void destroy_child_ckernel(size_t offset)
   {
+    if (offset == 0) {
+      throw std::runtime_error("offset == 0");
+    }
+
     if (offset != 0) {
       ckernel_prefix *child = get_child_ckernel(offset);
       child->destroy();
