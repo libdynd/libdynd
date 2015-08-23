@@ -20,9 +20,15 @@ namespace nd {
       size_t m_window_op_offset;
       arrmeta_holder m_src_winop_meta;
 
-      void single(char *dst, char *const *src);
+      ~strided_rolling_ck()
+      {
+        // The NA filler
+        get_child_ckernel()->destroy();
+        // The window op
+        get_child_ckernel(m_window_op_offset)->destroy();
+      }
 
-      void destruct_children();
+      void single(char *dst, char *const *src);
     };
 
     struct var_rolling_ck : base_kernel<var_rolling_ck, 1> {
@@ -32,9 +38,15 @@ namespace nd {
       const char *m_dst_meta;
       size_t m_window_op_offset;
 
-      void single(char *dst, char *const *src);
+      ~var_rolling_ck()
+      {
+        // The NA filler
+        get_child_ckernel()->destroy();
+        // The window op
+        get_child_ckernel(m_window_op_offset)->destroy();
+      }
 
-      void destruct_children();
+      void single(char *dst, char *const *src);
     };
 
     struct rolling_ck : base_virtual_kernel<rolling_ck> {

@@ -50,12 +50,6 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
   ndt::var_dim_element_resize(m_dst_tp, m_dst_meta, dst, dst_count);
 }
 
-void nd::masked_take_ck::destruct_children()
-{
-  // The child copy ckernel
-  get_child_ckernel()->destroy();
-}
-
 intptr_t nd::masked_take_ck::instantiate(
     char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
     char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
@@ -140,12 +134,6 @@ void nd::indexed_take_ck::single(char *dst, char *const *src)
     dst += dst_stride;
     index += index_stride;
   }
-}
-
-void nd::indexed_take_ck::destruct_children()
-{
-  // The child copy ckernel
-  get_child_ckernel()->destroy();
 }
 
 intptr_t nd::indexed_take_ck::instantiate(

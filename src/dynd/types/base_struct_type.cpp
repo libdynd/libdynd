@@ -275,6 +275,11 @@ struct struct_property_getter_ck
     : nd::base_kernel<struct_property_getter_ck, 1> {
   size_t m_field_offset;
 
+  ~struct_property_getter_ck()
+  {
+    get_child_ckernel()->destroy();
+  }
+
   void single(char *dst, char *const *src)
   {
     ckernel_prefix *child = get_child_ckernel();
@@ -290,11 +295,6 @@ struct struct_property_getter_ck
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     char *src_copy = src[0] + m_field_offset;
     child_fn(child, dst, dst_stride, &src_copy, src_stride, count);
-  }
-
-  inline void destruct_children()
-  {
-    get_child_ckernel()->destroy();
   }
 };
 } // anonymous namespace

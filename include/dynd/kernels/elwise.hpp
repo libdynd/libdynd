@@ -273,6 +273,11 @@ namespace nd {
         memcpy(m_src_stride, src_stride, sizeof(m_src_stride));
       }
 
+      DYND_CUDA_HOST_DEVICE ~elwise_ck()
+      {
+        this->get_child_ckernel()->destroy();
+      }
+
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = this->get_child_ckernel();
@@ -301,11 +306,6 @@ namespace nd {
             src_loop[j] += src_stride[j];
           }
         }
-      }
-
-      DYND_CUDA_HOST_DEVICE static void destruct(ckernel_prefix *self)
-      {
-        self->destroy_child_ckernel(sizeof(self_type));
       }
 
       static size_t
@@ -406,6 +406,11 @@ namespace nd {
       {
       }
 
+      DYND_CUDA_HOST_DEVICE ~elwise_ck()
+      {
+        this->get_child_ckernel()->destroy();
+      }
+
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = this->get_child_ckernel();
@@ -424,11 +429,6 @@ namespace nd {
           opchild(child, dst, m_dst_stride, NULL, NULL, m_size);
           dst += dst_stride;
         }
-      }
-
-      DYND_CUDA_HOST_DEVICE static void destruct(ckernel_prefix *self)
-      {
-        self->destroy_child_ckernel(sizeof(self_type));
       }
 
       static size_t
@@ -510,6 +510,11 @@ namespace nd {
         memcpy(m_is_src_var, is_src_var, sizeof(m_is_src_var));
       }
 
+      ~elwise_ck()
+      {
+        this->get_child_ckernel()->destroy();
+      }
+
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = this->get_child_ckernel();
@@ -553,11 +558,6 @@ namespace nd {
             src_loop[j] += src_stride[j];
           }
         }
-      }
-
-      static void destruct(ckernel_prefix *self)
-      {
-        self->destroy_child_ckernel(sizeof(self_type));
       }
 
       static size_t
@@ -665,6 +665,11 @@ namespace nd {
       {
       }
 
+      ~elwise_ck()
+      {
+        this->get_child_ckernel()->destroy();
+      }
+
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         ckernel_prefix *child = this->get_child_ckernel();
@@ -683,11 +688,6 @@ namespace nd {
           single(dst, NULL);
           dst += dst_stride;
         }
-      }
-
-      static void destruct(ckernel_prefix *self)
-      {
-        self->destroy_child_ckernel(sizeof(self_type));
       }
 
       static size_t
@@ -768,6 +768,11 @@ namespace nd {
         memcpy(m_src_offset, src_offset, sizeof(m_src_offset));
         memcpy(m_src_size, src_size, sizeof(m_src_size));
         memcpy(m_is_src_var, is_src_var, sizeof(m_is_src_var));
+      }
+
+      ~elwise_ck()
+      {
+        this->get_child_ckernel()->destroy();
       }
 
       void single(char *dst, char *const *src)
@@ -894,11 +899,6 @@ namespace nd {
         }
       }
 
-      static void destruct(ckernel_prefix *self)
-      {
-        self->destroy_child_ckernel(sizeof(self_type));
-      }
-
       static size_t
       instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *data,
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
@@ -1005,6 +1005,11 @@ namespace nd {
       {
       }
 
+      ~elwise_ck()
+      {
+        this->get_child_ckernel()->destroy();
+      }
+
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         ckernel_prefix *child = this->get_child_ckernel();
@@ -1056,11 +1061,6 @@ namespace nd {
           modified_dst_stride = m_dst_stride;
         }
         opchild(child, modified_dst, modified_dst_stride, NULL, NULL, dim_size);
-      }
-
-      static void destruct(ckernel_prefix *self)
-      {
-        self->destroy_child_ckernel(sizeof(self_type));
       }
 
       static size_t

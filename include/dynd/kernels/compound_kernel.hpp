@@ -16,6 +16,11 @@ namespace nd {
     //    dst_(0) = a[n-1]
     //    dst_(i+1) = dst_(i) <OP> a[n-1-(i+1)]
     struct left_compound_kernel : base_kernel<left_compound_kernel, 1> {
+      ~left_compound_kernel()
+      {
+        get_child_ckernel()->destroy();
+      }
+
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = get_child_ckernel();
@@ -32,11 +37,6 @@ namespace nd {
         char *src_binary[2] = {dst, src[0]};
         const intptr_t src_binary_stride[2] = {dst_stride, src_stride[0]};
         childop(child, dst, dst_stride, src_binary, src_binary_stride, count);
-      }
-
-      void destruct_children()
-      {
-        get_child_ckernel()->destroy();
       }
 
       static intptr_t
@@ -64,6 +64,11 @@ namespace nd {
     //    dst_(0) = a[0]
     //    dst_(i+1) = a[i+1] <OP> dst_(i)
     struct right_compound_kernel : base_kernel<right_compound_kernel, 1> {
+      ~right_compound_kernel()
+      {
+        get_child_ckernel()->destroy();
+      }
+
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = get_child_ckernel();
@@ -80,11 +85,6 @@ namespace nd {
         char *src_binary[2] = {src[0], dst};
         const intptr_t src_binary_stride[2] = {src_stride[0], dst_stride};
         childop(child, dst, dst_stride, src_binary, src_binary_stride, count);
-      }
-
-      void destruct_children()
-      {
-        get_child_ckernel()->destroy();
       }
 
       static intptr_t

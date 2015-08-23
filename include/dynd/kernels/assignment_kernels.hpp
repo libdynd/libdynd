@@ -2263,6 +2263,16 @@ namespace nd {
       size_t m_dst_assign_na_offset;
       size_t m_value_assign_offset;
 
+      ~assignment_kernel()
+      {
+        // src_is_avail
+        this->get_child_ckernel()->destroy();
+        // dst_assign_na
+        this->destroy_child_ckernel(m_dst_assign_na_offset);
+        // value_assign
+        this->destroy_child_ckernel(m_value_assign_offset);
+      }
+
       void single(char *dst, char *const *src)
       {
         // Check whether the value is available
@@ -2353,16 +2363,6 @@ namespace nd {
         }
       }
 
-      void destruct_children()
-      {
-        // src_is_avail
-        this->get_child_ckernel()->destroy();
-        // dst_assign_na
-        this->destroy_child_ckernel(m_dst_assign_na_offset);
-        // value_assign
-        this->destroy_child_ckernel(m_value_assign_offset);
-      }
-
       static intptr_t
       instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
                   char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
@@ -2446,6 +2446,14 @@ namespace nd {
     struct string_to_option_tp_ck : nd::base_kernel<string_to_option_tp_ck, 1> {
       intptr_t m_dst_assign_na_offset;
 
+      ~string_to_option_tp_ck()
+      {
+        // value_assign
+        get_child_ckernel()->destroy();
+        // dst_assign_na
+        destroy_child_ckernel(m_dst_assign_na_offset);
+      }
+
       void single(char *dst, char *const *src)
       {
         const string_type_data *std =
@@ -2464,14 +2472,6 @@ namespace nd {
               value_assign->get_function<expr_single_t>();
           value_assign_fn(value_assign, dst, src);
         }
-      }
-
-      void destruct_children()
-      {
-        // value_assign
-        get_child_ckernel()->destroy();
-        // dst_assign_na
-        destroy_child_ckernel(m_dst_assign_na_offset);
       }
     };
 
@@ -2596,6 +2596,14 @@ namespace nd {
     // The default child is the src_is_avail ckernel
     size_t m_value_assign_offset;
 
+    ~option_to_value_ck()
+    {
+      // src_is_avail
+      get_child_ckernel()->destroy();
+      // value_assign
+      destroy_child_ckernel(m_value_assign_offset);
+    }
+
     void single(char *dst, char *const *src)
     {
       ckernel_prefix *src_is_avail = get_child_ckernel();
@@ -2642,14 +2650,6 @@ namespace nd {
         src_copy += chunk_size * src_stride[0];
         count -= chunk_size;
       }
-    }
-
-    void destruct_children()
-    {
-      // src_is_avail
-      get_child_ckernel()->destroy();
-      // value_assign
-      destroy_child_ckernel(m_value_assign_offset);
     }
 
     static intptr_t
