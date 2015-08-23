@@ -14,6 +14,11 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
+    struct reduction_kernel_prefix {
+      void *init_func;
+      void *func;
+    };
+
     struct reduction_ckernel_prefix : ckernel_prefix {
       struct static_data_type {
         callable child;
@@ -63,7 +68,8 @@ namespace nd {
     };
 
     template <typename SelfType>
-    struct base_reduction_kernel : reduction_ckernel_prefix {
+    struct base_reduction_kernel
+        : kernel_prefix_wrapper<SelfType, reduction_ckernel_prefix> {
       typedef SelfType self_type;
     };
 
@@ -85,9 +91,10 @@ namespace nd {
     struct initial_reduction_kernel;
 
     template <>
-    struct initial_reduction_kernel<
-        fixed_dim_type_id> : base_kernel<initial_reduction_kernel<fixed_dim_type_id>,
-                                         1, reduction_ckernel_prefix> {
+    struct
+        initial_reduction_kernel<fixed_dim_type_id> : base_reduction_kernel<
+                                                          initial_reduction_kernel<
+                                                              fixed_dim_type_id>> {
       typedef initial_reduction_kernel self_type;
 
       // The code assumes that size >= 1
@@ -236,8 +243,7 @@ namespace nd {
      *
      */
     struct strided_initial_broadcast_kernel_extra
-        : nd::base_kernel<strided_initial_broadcast_kernel_extra, 1,
-                          reduction_ckernel_prefix> {
+        : base_reduction_kernel<strided_initial_broadcast_kernel_extra> {
       typedef strided_initial_broadcast_kernel_extra self_type;
 
       // The code assumes that size >= 1
@@ -384,8 +390,7 @@ namespace nd {
      *
      */
     struct strided_inner_reduction_kernel_extra
-        : nd::base_kernel<strided_inner_reduction_kernel_extra, 1,
-                          reduction_ckernel_prefix> {
+        : base_reduction_kernel<strided_inner_reduction_kernel_extra> {
       typedef strided_inner_reduction_kernel_extra self_type;
 
       // The code assumes that size >= 1
@@ -676,6 +681,13 @@ namespace nd {
       }
     };
 
+    //    base_kernel<SelfType, PrefixType>
+    //    base_strided_kernel
+
+    //    base_strided_kernel
+
+    //    base_strided_kernel
+
     /**
      * STRIDED INNER BROADCAST DIMENSION
      * This ckernel handles one dimension of the reduction processing,
@@ -690,8 +702,7 @@ namespace nd {
      *
      */
     struct strided_inner_broadcast_kernel
-        : base_kernel<strided_inner_broadcast_kernel, 1,
-                      reduction_ckernel_prefix> {
+        : base_reduction_kernel<strided_inner_broadcast_kernel> {
       typedef strided_inner_broadcast_kernel self_type;
 
       // The code assumes that size >= 1
