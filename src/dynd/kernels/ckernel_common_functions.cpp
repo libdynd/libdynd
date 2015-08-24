@@ -13,7 +13,7 @@ using namespace dynd;
 
 void kernels::destroy_trivial_parent_ckernel(ckernel_prefix *self)
 {
-  self->destroy_child_ckernel(sizeof(ckernel_prefix));
+  self->get_child_ckernel(sizeof(ckernel_prefix))->destroy();
 }
 
 namespace {

@@ -409,7 +409,7 @@ namespace nd {
         // The reduction kernel
         get_child_ckernel()->destroy();
         // The destination initialization kernel
-        destroy_child_ckernel(dst_init_kernel_offset);
+        get_child_ckernel(dst_init_kernel_offset)->destroy();
       }
 
       static void single_first(ckernel_prefix *extra, char *dst,
@@ -721,7 +721,7 @@ namespace nd {
         // The reduction kernel
         get_child_ckernel()->destroy();
         // The destination initialization kernel
-        destroy_child_ckernel(dst_init_kernel_offset);
+        get_child_ckernel(dst_init_kernel_offset)->destroy();
       }
 
       static void single_first(ckernel_prefix *extra, char *dst,

@@ -107,7 +107,7 @@ static const expr_strided_t wrap_single_as_strided_fixedcount[7] = {
 
 static void simple_wrapper_kernel_destruct(ckernel_prefix *self)
 {
-  self->destroy_child_ckernel(sizeof(ckernel_prefix));
+  self->get_child_ckernel(sizeof(ckernel_prefix))->destroy();
 }
 
 } // anonymous namespace

@@ -92,7 +92,7 @@ struct categorical_to_other_kernel
     if (e->src_cat_tp != NULL) {
       base_type_decref(e->src_cat_tp);
     }
-    self->destroy_child_ckernel(sizeof(extra_type));
+    self->get_child_ckernel(sizeof(extra_type))->destroy();
   }
 };
 

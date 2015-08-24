@@ -2268,9 +2268,9 @@ namespace nd {
         // src_is_avail
         this->get_child_ckernel()->destroy();
         // dst_assign_na
-        this->destroy_child_ckernel(m_dst_assign_na_offset);
+        this->get_child_ckernel(m_dst_assign_na_offset)->destroy();
         // value_assign
-        this->destroy_child_ckernel(m_value_assign_offset);
+        this->get_child_ckernel(m_value_assign_offset)->destroy();
       }
 
       void single(char *dst, char *const *src)
@@ -2451,7 +2451,7 @@ namespace nd {
         // value_assign
         get_child_ckernel()->destroy();
         // dst_assign_na
-        destroy_child_ckernel(m_dst_assign_na_offset);
+        get_child_ckernel(m_dst_assign_na_offset)->destroy();
       }
 
       void single(char *dst, char *const *src)
@@ -2601,7 +2601,7 @@ namespace nd {
       // src_is_avail
       get_child_ckernel()->destroy();
       // value_assign
-      destroy_child_ckernel(m_value_assign_offset);
+      get_child_ckernel(m_value_assign_offset)->destroy();
     }
 
     void single(char *dst, char *const *src)
@@ -3241,7 +3241,7 @@ namespace nd {
 
     static void destruct(ckernel_prefix *self)
     {
-      self->destroy_child_ckernel(sizeof(self_type));
+      self->get_child_ckernel(sizeof(self_type))->destroy();
     }
   };
 
