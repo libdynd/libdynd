@@ -75,8 +75,8 @@ kernel_request_t without_memory(kernel_request_t kernreq) {
 struct ckernel_prefix {
   typedef void (*destructor_fn_t)(ckernel_prefix *);
 
+  void (*destructor)(ckernel_prefix *self);
   void *function;
-  destructor_fn_t destructor;
 
   /**
    * Aligns an offset as required by ckernels.

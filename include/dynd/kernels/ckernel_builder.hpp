@@ -69,12 +69,12 @@ public:
     reinterpret_cast<CKBT *>(this)->destroy();
   }
 
-  template <typename self_type, typename... A>
-  self_type *init(ckernel_prefix *rawself, kernel_request_t kernreq,
-                  A &&... args)
+  template <typename SelfType, typename... A>
+  SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq,
+                 A &&... args)
   {
     return reinterpret_cast<CKBT *>(this)
-        ->template init<self_type>(rawself, kernreq, std::forward<A>(args)...);
+        ->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);
   }
 
   void reset()
@@ -182,11 +182,15 @@ public:
     set(m_static_data, 0, sizeof(m_static_data));
   }
 
-  template <typename self_type, typename... A>
-  self_type *init(ckernel_prefix *rawself, kernel_request_t kernreq,
-                  A &&... args)
+  template <typename SelfType, typename PrefixType, typename... A>
+  SelfType *init(PrefixType *rawself, kernel_request_t kernreq, A &&... args)
   {
-    return self_type::init(rawself, kernreq, std::forward<A>(args)...);
+    /* Alignment requirement of the type. */
+    static_assert(static_cast<size_t>(scalar_align_of<SelfType>::value) <=
+                      static_cast<size_t>(scalar_align_of<uint64_t>::value),
+                  "ckernel types require alignment <= 64 bits");
+
+    return SelfType::init(rawself, kernreq, std::forward<A>(args)...);
   }
 
   void destroy()
