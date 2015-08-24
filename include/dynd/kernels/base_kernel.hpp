@@ -248,6 +248,8 @@ namespace nd {
                                                                                \
   template <typename SelfType, int N>                                          \
   struct base_kernel<SelfType, N> : base_kernel<SelfType> {                    \
+    static_assert(N > 0, "N must be greater or equal to 0");                   \
+                                                                               \
     typedef SelfType self_type;                                                \
     typedef base_kernel<SelfType> parent_type;                                 \
                                                                                \
