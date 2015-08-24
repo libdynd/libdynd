@@ -59,7 +59,7 @@ struct strided_expr_kernel_extra {
 
   static void destruct(ckernel_prefix *self)
   {
-    self->destroy_child_ckernel(sizeof(extra_type));
+    self->get_child_ckernel(sizeof(extra_type))->destroy();
   }
 };
 
@@ -215,7 +215,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
 
   static void destruct(ckernel_prefix *self)
   {
-    self->destroy_child_ckernel(sizeof(extra_type));
+    self->get_child_ckernel(sizeof(extra_type))->destroy();
   }
 };
 
@@ -236,7 +236,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
   strided_or_var_to_strided_expr_kernel_extra<N> *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->alloc_ck<strided_or_var_to_strided_expr_kernel_extra<N>>(
-              ckb_offset);
+                ckb_offset);
   e->base.template set_expr_function<
       strided_or_var_to_strided_expr_kernel_extra<N>>(kernreq);
   e->base.destructor =
@@ -449,7 +449,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
 
   static void destruct(ckernel_prefix *self)
   {
-    self->destroy_child_ckernel(sizeof(extra_type));
+    self->get_child_ckernel(sizeof(extra_type))->destroy();
   }
 };
 
