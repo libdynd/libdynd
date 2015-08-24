@@ -13,7 +13,7 @@ using namespace dynd;
 
 void kernels::destroy_trivial_parent_ckernel(ckernel_prefix *self)
 {
-  self->get_child_ckernel(sizeof(ckernel_prefix))->destroy();
+  self->get_child(sizeof(ckernel_prefix))->destroy();
 }
 
 namespace {
@@ -27,12 +27,12 @@ struct constant_value_assignment_ck
   ~constant_value_assignment_ck()
   {
     // Destroy the child ckernel
-    get_child_ckernel()->destroy();
+    get_child()->destroy();
   }
 
   void single(char *dst, char *const *DYND_UNUSED(src))
   {
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_single_t child_fn = child->get_function<expr_single_t>();
     child_fn(child, dst, const_cast<char *const *>(&m_constant_data));
   }
@@ -40,7 +40,7 @@ struct constant_value_assignment_ck
   void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                const intptr_t *DYND_UNUSED(src_stride), size_t count)
   {
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     intptr_t zero_stride = 0;
     child_fn(child, dst, dst_stride,

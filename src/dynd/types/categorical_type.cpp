@@ -77,7 +77,7 @@ struct categorical_to_other_kernel
 
   void single(char *dst, char *const *src)
   {
-    ckernel_prefix *echild = this->get_child_ckernel();
+    ckernel_prefix *echild = this->get_child();
     expr_single_t opchild = echild->get_function<expr_single_t>();
 
     uint32_t value = *reinterpret_cast<const UIntType *>(src[0]);
@@ -92,7 +92,7 @@ struct categorical_to_other_kernel
     if (e->src_cat_tp != NULL) {
       base_type_decref(e->src_cat_tp);
     }
-    self->get_child_ckernel(sizeof(extra_type))->destroy();
+    self->get_child(sizeof(extra_type))->destroy();
   }
 };
 

@@ -156,8 +156,8 @@ struct buffered_kernel_extra {
       free(buffer_arrmeta);
     }
     // Destruct the child kernels
-    self->get_child_ckernel(e->first_kernel_offset)->destroy();
-    self->get_child_ckernel(e->second_kernel_offset)->destroy();
+    self->get_child(e->first_kernel_offset)->destroy();
+    self->get_child(e->second_kernel_offset)->destroy();
   }
 };
 } // anonymous namespace
@@ -180,7 +180,7 @@ size_t dynd::make_expression_assignment_kernel(
       } else {
         // Chain case, buffer one segment of the chain
         const ndt::type &buffer_tp = static_cast<const ndt::base_expr_type *>(
-                                         opdt.extended())->get_value_type();
+            opdt.extended())->get_value_type();
         buffered_kernel_extra *e =
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                 ->alloc_ck<buffered_kernel_extra>(ckb_offset);
@@ -256,7 +256,7 @@ size_t dynd::make_expression_assignment_kernel(
       } else {
         // Chain case, buffer one segment of the chain
         const ndt::type &buffer_tp = static_cast<const ndt::base_expr_type *>(
-                                         opdt.extended())->get_value_type();
+            opdt.extended())->get_value_type();
         buffered_kernel_extra *e =
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                 ->alloc_ck<buffered_kernel_extra>(ckb_offset);

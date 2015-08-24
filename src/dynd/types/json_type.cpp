@@ -208,7 +208,7 @@ struct string_to_json_ck : nd::base_kernel<string_to_json_ck, 1> {
   ~string_to_json_ck()
   {
     // Destroy the child ckernel
-    get_child_ckernel()->destroy();
+    get_child()->destroy();
   }
 
   void single(char *dst, char *const *src)
@@ -217,7 +217,7 @@ struct string_to_json_ck : nd::base_kernel<string_to_json_ck, 1> {
         reinterpret_cast<const json_type_arrmeta *>(m_dst_arrmeta);
     json_type_data *out_d = reinterpret_cast<json_type_data *>(dst);
     // First copy it as a string
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_single_t child_fn = child->get_function<expr_single_t>();
     child_fn(child, dst, src);
     // Then validate that it's correct JSON

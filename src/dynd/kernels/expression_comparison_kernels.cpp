@@ -130,12 +130,12 @@ struct buffered_kernel_extra {
       }
       // Destruct the kernel for the buffer
       if (b.kernel_offset != 0) {
-        self->get_child_ckernel(b.kernel_offset)->destroy();
+        self->get_child(b.kernel_offset)->destroy();
       }
     }
 
     // Destruct the comparison kernel
-    self->get_child_ckernel(e->cmp_kernel_offset)->destroy();
+    self->get_child(e->cmp_kernel_offset)->destroy();
   }
 };
 } // anonymous namespace

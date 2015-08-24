@@ -277,12 +277,12 @@ struct struct_property_getter_ck
 
   ~struct_property_getter_ck()
   {
-    get_child_ckernel()->destroy();
+    get_child()->destroy();
   }
 
   void single(char *dst, char *const *src)
   {
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_single_t child_fn = child->get_function<expr_single_t>();
     char *src_copy = src[0] + m_field_offset;
     child_fn(child, dst, &src_copy);
@@ -291,7 +291,7 @@ struct struct_property_getter_ck
   void strided(char *dst, intptr_t dst_stride, char *const *src,
                const intptr_t *src_stride, size_t count)
   {
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     char *src_copy = src[0] + m_field_offset;
     child_fn(child, dst, dst_stride, &src_copy, src_stride, count);

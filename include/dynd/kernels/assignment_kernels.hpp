@@ -2266,11 +2266,11 @@ namespace nd {
       ~assignment_kernel()
       {
         // src_is_avail
-        this->get_child_ckernel()->destroy();
+        this->get_child()->destroy();
         // dst_assign_na
-        this->get_child_ckernel(m_dst_assign_na_offset)->destroy();
+        this->get_child(m_dst_assign_na_offset)->destroy();
         // value_assign
-        this->get_child_ckernel(m_value_assign_offset)->destroy();
+        this->get_child(m_value_assign_offset)->destroy();
       }
 
       void single(char *dst, char *const *src)
@@ -2278,7 +2278,7 @@ namespace nd {
         // Check whether the value is available
         // TODO: Would be nice to do this as a predicate
         //       instead of having to go through a dst pointer
-        ckernel_prefix *src_is_avail = this->get_child_ckernel();
+        ckernel_prefix *src_is_avail = this->get_child();
         expr_single_t src_is_avail_fn =
             src_is_avail->get_function<expr_single_t>();
         bool1 avail = bool1(false);
@@ -2286,14 +2286,14 @@ namespace nd {
         if (avail) {
           // It's available, copy using value assignment
           ckernel_prefix *value_assign =
-              this->get_child_ckernel(m_value_assign_offset);
+              this->get_child(m_value_assign_offset);
           expr_single_t value_assign_fn =
               value_assign->get_function<expr_single_t>();
           value_assign_fn(value_assign, dst, src);
         } else {
           // It's not available, assign an NA
           ckernel_prefix *dst_assign_na =
-              this->get_child_ckernel(m_dst_assign_na_offset);
+              this->get_child(m_dst_assign_na_offset);
           expr_single_t dst_assign_na_fn =
               dst_assign_na->get_function<expr_single_t>();
           dst_assign_na_fn(dst_assign_na, dst, NULL);
@@ -2304,15 +2304,15 @@ namespace nd {
                    const intptr_t *src_stride, size_t count)
       {
         // Three child ckernels
-        ckernel_prefix *src_is_avail = this->get_child_ckernel();
+        ckernel_prefix *src_is_avail = this->get_child();
         expr_strided_t src_is_avail_fn =
             src_is_avail->get_function<expr_strided_t>();
         ckernel_prefix *value_assign =
-            this->get_child_ckernel(m_value_assign_offset);
+            this->get_child(m_value_assign_offset);
         expr_strided_t value_assign_fn =
             value_assign->get_function<expr_strided_t>();
         ckernel_prefix *dst_assign_na =
-            this->get_child_ckernel(m_dst_assign_na_offset);
+            this->get_child(m_dst_assign_na_offset);
         expr_strided_t dst_assign_na_fn =
             dst_assign_na->get_function<expr_strided_t>();
         // Process in chunks using the dynd default buffer size
@@ -2449,9 +2449,9 @@ namespace nd {
       ~string_to_option_tp_ck()
       {
         // value_assign
-        get_child_ckernel()->destroy();
+        get_child()->destroy();
         // dst_assign_na
-        get_child_ckernel(m_dst_assign_na_offset)->destroy();
+        get_child(m_dst_assign_na_offset)->destroy();
       }
 
       void single(char *dst, char *const *src)
@@ -2461,13 +2461,13 @@ namespace nd {
         if (parse::matches_option_type_na_token(std->begin, std->end)) {
           // It's not available, assign an NA
           ckernel_prefix *dst_assign_na =
-              get_child_ckernel(m_dst_assign_na_offset);
+              get_child(m_dst_assign_na_offset);
           expr_single_t dst_assign_na_fn =
               dst_assign_na->get_function<expr_single_t>();
           dst_assign_na_fn(dst_assign_na, dst, NULL);
         } else {
           // It's available, copy using value assignment
-          ckernel_prefix *value_assign = get_child_ckernel();
+          ckernel_prefix *value_assign = get_child();
           expr_single_t value_assign_fn =
               value_assign->get_function<expr_single_t>();
           value_assign_fn(value_assign, dst, src);
@@ -2599,17 +2599,17 @@ namespace nd {
     ~option_to_value_ck()
     {
       // src_is_avail
-      get_child_ckernel()->destroy();
+      get_child()->destroy();
       // value_assign
-      get_child_ckernel(m_value_assign_offset)->destroy();
+      get_child(m_value_assign_offset)->destroy();
     }
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *src_is_avail = get_child_ckernel();
+      ckernel_prefix *src_is_avail = get_child();
       expr_single_t src_is_avail_fn =
           src_is_avail->get_function<expr_single_t>();
-      ckernel_prefix *value_assign = get_child_ckernel(m_value_assign_offset);
+      ckernel_prefix *value_assign = get_child(m_value_assign_offset);
       expr_single_t value_assign_fn =
           value_assign->get_function<expr_single_t>();
       // Make sure it's not an NA
@@ -2627,10 +2627,10 @@ namespace nd {
                  const intptr_t *src_stride, size_t count)
     {
       // Two child ckernels
-      ckernel_prefix *src_is_avail = get_child_ckernel();
+      ckernel_prefix *src_is_avail = get_child();
       expr_strided_t src_is_avail_fn =
           src_is_avail->get_function<expr_strided_t>();
-      ckernel_prefix *value_assign = get_child_ckernel(m_value_assign_offset);
+      ckernel_prefix *value_assign = get_child(m_value_assign_offset);
       expr_strided_t value_assign_fn =
           value_assign->get_function<expr_strided_t>();
       // Process in chunks using the dynd default buffer size
@@ -2992,7 +2992,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *child = this->get_child_ckernel();
+      ckernel_prefix *child = this->get_child();
       expr_single_t single = child->get_function<expr_single_t>();
 
       single(this->dst, src, child);
@@ -3033,7 +3033,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *child = this->get_child_ckernel();
+      ckernel_prefix *child = this->get_child();
       expr_single_t single = child->get_function<expr_single_t>();
 
       cuda_throw_if_not_success(
@@ -3186,7 +3186,7 @@ namespace nd {
                         char *const *src, const intptr_t *src_stride,
                         size_t count)
     {
-      ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
+      ckernel_prefix *echild = self->get_child(sizeof(ckernel_prefix));
       expr_single_t opchild = echild->get_function<expr_single_t>();
       char *src_copy[N];
       for (int j = 0; j < N; ++j) {
@@ -3208,7 +3208,7 @@ namespace nd {
                         char *const *DYND_UNUSED(src),
                         const intptr_t *DYND_UNUSED(src_stride), size_t count)
     {
-      ckernel_prefix *echild = self->get_child_ckernel(sizeof(ckernel_prefix));
+      ckernel_prefix *echild = self->get_child(sizeof(ckernel_prefix));
       expr_single_t opchild = echild->get_function<expr_single_t>();
       for (size_t i = 0; i != count; ++i) {
         opchild(echild, dst, NULL);
@@ -3228,7 +3228,7 @@ namespace nd {
     {
       intptr_t nsrc = reinterpret_cast<self_type *>(self)->nsrc;
       shortvector<char *> src_copy(nsrc, src);
-      ckernel_prefix *child = self->get_child_ckernel(sizeof(self_type));
+      ckernel_prefix *child = self->get_child(sizeof(self_type));
       expr_single_t child_fn = child->get_function<expr_single_t>();
       for (size_t i = 0; i != count; ++i) {
         child_fn(child, dst, src_copy.get());
@@ -3241,7 +3241,7 @@ namespace nd {
 
     static void destruct(ckernel_prefix *self)
     {
-      self->get_child_ckernel(sizeof(self_type))->destroy();
+      self->get_child(sizeof(self_type))->destroy();
     }
   };
 

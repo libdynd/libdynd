@@ -27,13 +27,13 @@ struct broadcast_to_var_assign_ck
 
   ~broadcast_to_var_assign_ck()
   {
-    get_child_ckernel()->destroy();
+    get_child()->destroy();
   }
 
   void single(char *dst, char *const *src)
   {
     var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     if (dst_d->begin == NULL) {
       if (m_dst_md->offset != 0) {
@@ -107,14 +107,14 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
 
   ~var_assign_ck()
   {
-    get_child_ckernel()->destroy();
+    get_child()->destroy();
   }
 
   void single(char *dst, char *const *src)
   {
     var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
     var_dim_type_data *src_d = reinterpret_cast<var_dim_type_data *>(src[0]);
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     if (dst_d->begin == NULL) {
       if (m_dst_md->offset != 0) {
@@ -225,13 +225,13 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
 
   ~strided_to_var_assign_ck()
   {
-    get_child_ckernel(sizeof(self_type))->destroy();
+    get_child(sizeof(self_type))->destroy();
   }
 
   void single(char *dst, char *const *src)
   {
     var_dim_type_data *dst_d = reinterpret_cast<var_dim_type_data *>(dst);
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     if (dst_d->begin == NULL) {
       if (m_dst_md->offset != 0) {
@@ -320,13 +320,13 @@ struct var_to_strided_assign_ck : nd::base_kernel<var_to_strided_assign_ck, 1> {
 
   ~var_to_strided_assign_ck()
   {
-    get_child_ckernel()->destroy();
+    get_child()->destroy();
   }
 
   void single(char *dst, char *const *src)
   {
     var_dim_type_data *src_d = reinterpret_cast<var_dim_type_data *>(src[0]);
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_strided_t child_fn = child->get_function<expr_strided_t>();
     if (src_d->begin == NULL) {
       throw runtime_error("Cannot assign an uninitialized dynd var "

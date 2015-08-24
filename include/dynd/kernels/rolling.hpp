@@ -23,9 +23,9 @@ namespace nd {
       ~strided_rolling_ck()
       {
         // The NA filler
-        get_child_ckernel()->destroy();
+        get_child()->destroy();
         // The window op
-        get_child_ckernel(m_window_op_offset)->destroy();
+        get_child(m_window_op_offset)->destroy();
       }
 
       void single(char *dst, char *const *src);
@@ -41,9 +41,9 @@ namespace nd {
       ~var_rolling_ck()
       {
         // The NA filler
-        get_child_ckernel()->destroy();
+        get_child()->destroy();
         // The window op
-        get_child_ckernel(m_window_op_offset)->destroy();
+        get_child(m_window_op_offset)->destroy();
       }
 
       void single(char *dst, char *const *src);

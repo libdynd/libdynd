@@ -139,7 +139,7 @@ struct ckernel_prefix {
    * Returns the pointer to a child ckernel at the provided
    * offset.
    */
-  DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child_ckernel(intptr_t offset)
+  DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset)
   {
     return reinterpret_cast<ckernel_prefix *>(
         reinterpret_cast<char *>(this) + ckernel_prefix::align_offset(offset));

@@ -275,12 +275,12 @@ namespace nd {
 
       DYND_CUDA_HOST_DEVICE ~elwise_ck()
       {
-        this->get_child_ckernel()->destroy();
+        this->get_child()->destroy();
       }
 
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
       {
-        ckernel_prefix *child = this->get_child_ckernel();
+        ckernel_prefix *child = this->get_child();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         opchild(child, dst, m_dst_stride, src, m_src_stride, m_size);
@@ -291,7 +291,7 @@ namespace nd {
                                          const intptr_t *src_stride,
                                          size_t count)
       {
-        ckernel_prefix *child = this->get_child_ckernel();
+        ckernel_prefix *child = this->get_child();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         char *src_loop[N];
@@ -408,12 +408,12 @@ namespace nd {
 
       DYND_CUDA_HOST_DEVICE ~elwise_ck()
       {
-        this->get_child_ckernel()->destroy();
+        this->get_child()->destroy();
       }
 
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
       {
-        ckernel_prefix *child = this->get_child_ckernel();
+        ckernel_prefix *child = this->get_child();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
         opchild(child, dst, m_dst_stride, src, NULL, m_size);
       }
@@ -422,7 +422,7 @@ namespace nd {
       strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
               const intptr_t *DYND_UNUSED(src_stride), size_t count)
       {
-        ckernel_prefix *child = this->get_child_ckernel();
+        ckernel_prefix *child = this->get_child();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         for (size_t i = 0; i < count; i += 1) {
@@ -512,12 +512,12 @@ namespace nd {
 
       ~elwise_ck()
       {
-        this->get_child_ckernel()->destroy();
+        this->get_child()->destroy();
       }
 
       void single(char *dst, char *const *src)
       {
-        ckernel_prefix *child = this->get_child_ckernel();
+        ckernel_prefix *child = this->get_child();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         // Broadcast all the src 'var' dimensions to dst
@@ -667,12 +667,12 @@ namespace nd {
 
       ~elwise_ck()
       {
-        this->get_child_ckernel()->destroy();
+        this->get_child()->destroy();
       }
 
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
-        ckernel_prefix *child = this->get_child_ckernel();
+        ckernel_prefix *child = this->get_child();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         // Broadcast all the src 'var' dimensions to dst
@@ -772,12 +772,12 @@ namespace nd {
 
       ~elwise_ck()
       {
-        this->get_child_ckernel()->destroy();
+        this->get_child()->destroy();
       }
 
       void single(char *dst, char *const *src)
       {
-        ckernel_prefix *child = this->get_child_ckernel();
+        ckernel_prefix *child = this->get_child();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         var_dim_type_data *dst_vddd =
@@ -1007,12 +1007,12 @@ namespace nd {
 
       ~elwise_ck()
       {
-        this->get_child_ckernel()->destroy();
+        this->get_child()->destroy();
       }
 
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
-        ckernel_prefix *child = this->get_child_ckernel();
+        ckernel_prefix *child = this->get_child();
         expr_strided_t opchild = child->get_function<expr_strided_t>();
 
         var_dim_type_data *dst_vddd =

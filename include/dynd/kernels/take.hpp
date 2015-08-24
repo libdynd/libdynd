@@ -18,7 +18,7 @@ namespace nd {
 
     ~masked_take_ck()
     {
-      get_child_ckernel()->destroy();
+      get_child()->destroy();
     }
 
     void single(char *dst, char *const *src);
@@ -41,7 +41,7 @@ namespace nd {
 
     ~indexed_take_ck()
     {
-      get_child_ckernel()->destroy();
+      get_child()->destroy();
     }
 
     void single(char *dst, char *const *src);

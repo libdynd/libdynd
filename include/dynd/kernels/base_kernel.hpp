@@ -39,15 +39,10 @@ namespace nd {
     }
 
     /**  Returns the child ckernel immediately following this one. */
-    ckernel_prefix *get_child_ckernel()
+    DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset =
+                                                        sizeof(SelfType))
     {
-      return ckernel_prefix::get_child_ckernel(sizeof(SelfType));
-    }
-
-    /** Returns the pointer to a child ckernel at the provided offset.  */
-    DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child_ckernel(intptr_t offset)
-    {
-      return ckernel_prefix::get_child_ckernel(offset);
+      return ckernel_prefix::get_child(offset);
     }
 
     template <typename CKBT>

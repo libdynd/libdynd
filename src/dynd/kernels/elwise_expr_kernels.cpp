@@ -31,7 +31,7 @@ struct strided_expr_kernel_extra {
   static void single(ckernel_prefix *extra, char *dst, char *const *src)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    ckernel_prefix *echild = e->base.get_child(sizeof(extra_type));
     expr_strided_t opchild = echild->get_function<expr_strided_t>();
     opchild(echild, dst, e->dst_stride, src, e->src_stride, e->size);
   }
@@ -41,7 +41,7 @@ struct strided_expr_kernel_extra {
                       size_t count)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    ckernel_prefix *echild = e->base.get_child(sizeof(extra_type));
     expr_strided_t opchild = echild->get_function<expr_strided_t>();
     intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride;
     const intptr_t *inner_src_stride = e->src_stride;
@@ -59,7 +59,7 @@ struct strided_expr_kernel_extra {
 
   static void destruct(ckernel_prefix *self)
   {
-    self->get_child_ckernel(sizeof(extra_type))->destroy();
+    self->get_child(sizeof(extra_type))->destroy();
   }
 };
 
@@ -171,7 +171,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
   static void single(ckernel_prefix *extra, char *dst, char *const *src)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    ckernel_prefix *echild = e->base.get_child(sizeof(extra_type));
     expr_strided_t opchild = echild->get_function<expr_strided_t>();
     // Broadcast all the src 'var' dimensions to dst
     intptr_t dim_size = e->size;
@@ -215,7 +215,7 @@ struct strided_or_var_to_strided_expr_kernel_extra {
 
   static void destruct(ckernel_prefix *self)
   {
-    self->get_child_ckernel(sizeof(extra_type))->destroy();
+    self->get_child(sizeof(extra_type))->destroy();
   }
 };
 
@@ -343,7 +343,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
   static void single(ckernel_prefix *extra, char *dst, char *const *src)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild = e->base.get_child_ckernel(sizeof(extra_type));
+    ckernel_prefix *echild = e->base.get_child(sizeof(extra_type));
     expr_strided_t opchild = echild->get_function<expr_strided_t>();
     var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
     char *modified_dst;
@@ -449,7 +449,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
 
   static void destruct(ckernel_prefix *self)
   {
-    self->get_child_ckernel(sizeof(extra_type))->destroy();
+    self->get_child(sizeof(extra_type))->destroy();
   }
 };
 
