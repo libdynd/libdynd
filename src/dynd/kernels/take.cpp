@@ -13,7 +13,7 @@ using namespace dynd;
 
 void nd::masked_take_ck::single(char *dst, char *const *src)
 {
-  ckernel_prefix *child = get_child_ckernel();
+  ckernel_prefix *child = get_child();
   expr_strided_t child_fn = child->get_function<expr_strided_t>();
   char *src0 = src[0];
   char *mask = src[1];
@@ -117,7 +117,7 @@ intptr_t nd::masked_take_ck::instantiate(
 
 void nd::indexed_take_ck::single(char *dst, char *const *src)
 {
-  ckernel_prefix *child = get_child_ckernel();
+  ckernel_prefix *child = get_child();
   expr_single_t child_fn = child->get_function<expr_single_t>();
   char *src0 = src[0];
   const char *index = src[1];

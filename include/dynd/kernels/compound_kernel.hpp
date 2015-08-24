@@ -18,12 +18,12 @@ namespace nd {
     struct left_compound_kernel : base_kernel<left_compound_kernel, 1> {
       ~left_compound_kernel()
       {
-        get_child_ckernel()->destroy();
+        get_child()->destroy();
       }
 
       void single(char *dst, char *const *src)
       {
-        ckernel_prefix *child = get_child_ckernel();
+        ckernel_prefix *child = get_child();
         expr_single_t single = child->get_function<expr_single_t>();
         char *src_binary[2] = {dst, src[0]};
         single(child, dst, src_binary);
@@ -32,7 +32,7 @@ namespace nd {
       void strided(char *dst, intptr_t dst_stride, char *const *src,
                    const intptr_t *src_stride, size_t count)
       {
-        ckernel_prefix *child = get_child_ckernel();
+        ckernel_prefix *child = get_child();
         expr_strided_t childop = child->get_function<expr_strided_t>();
         char *src_binary[2] = {dst, src[0]};
         const intptr_t src_binary_stride[2] = {dst_stride, src_stride[0]};
@@ -66,12 +66,12 @@ namespace nd {
     struct right_compound_kernel : base_kernel<right_compound_kernel, 1> {
       ~right_compound_kernel()
       {
-        get_child_ckernel()->destroy();
+        get_child()->destroy();
       }
 
       void single(char *dst, char *const *src)
       {
-        ckernel_prefix *child = get_child_ckernel();
+        ckernel_prefix *child = get_child();
         expr_single_t childop = child->get_function<expr_single_t>();
         char *src_binary[2] = {src[0], dst};
         childop(child, dst, src_binary);
@@ -80,7 +80,7 @@ namespace nd {
       void strided(char *dst, intptr_t dst_stride, char *const *src,
                    const intptr_t *src_stride, size_t count)
       {
-        ckernel_prefix *child = get_child_ckernel();
+        ckernel_prefix *child = get_child();
         expr_strided_t childop = child->get_function<expr_strided_t>();
         char *src_binary[2] = {src[0], dst};
         const intptr_t src_binary_stride[2] = {src_stride[0], dst_stride};

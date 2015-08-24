@@ -23,7 +23,7 @@ struct take_by_pointer_outer_ck : nd::base_kernel<take_by_pointer_outer_ck, 2> {
 
   void single(char *dst, char *const *src)
   {
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_single_t child_fn = child->get_function<expr_single_t>();
 
     char *src_copy[2] = {src[0], src[1]};
@@ -48,7 +48,7 @@ struct take_by_pointer_ck : nd::base_kernel<take_by_pointer_ck, 2> {
 
   void single(char *dst, char *const *src)
   {
-    ckernel_prefix *child = get_child_ckernel();
+    ckernel_prefix *child = get_child();
     expr_single_t child_fn = child->get_function<expr_single_t>();
 
     intptr_t i = apply_single_index(*reinterpret_cast<const intptr_t *>(src[1]),

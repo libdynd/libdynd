@@ -250,7 +250,7 @@ struct groupby_to_value_assign_kernel
 
     // Loop through both by_values and data_values,
     // copying the data to the right place in the output
-    ckernel_prefix *echild = this->get_child_ckernel();
+    ckernel_prefix *echild = this->get_child();
     expr_single_t opchild = echild->get_function<expr_single_t>();
     intptr_t dvit_dim_size, dvit_stride;
     ndt::type dvit_el_tp;
@@ -280,7 +280,7 @@ struct groupby_to_value_assign_kernel
     if (e->src_groupby_tp != NULL) {
       base_type_decref(e->src_groupby_tp);
     }
-    self->get_child_ckernel(sizeof(extra_type))->destroy();
+    self->get_child(sizeof(extra_type))->destroy();
   }
 };
 } // anonymous namespace

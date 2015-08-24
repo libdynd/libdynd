@@ -18,12 +18,11 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *sum_kernel = get_child_ckernel();
+      ckernel_prefix *sum_kernel = get_child();
       expr_single_t sum = sum_kernel->get_function<expr_single_t>();
       sum(sum_kernel, dst, src);
 
-      ckernel_prefix *compound_div_kernel =
-          get_child_ckernel(compound_div_offset);
+      ckernel_prefix *compound_div_kernel = get_child(compound_div_offset);
       expr_single_t compound_div =
           compound_div_kernel->get_function<expr_single_t>();
       char *child_src[1] = {reinterpret_cast<char *>(&count)};

@@ -29,7 +29,7 @@ struct tuple_unary_op_ck : nd::base_kernel<tuple_unary_op_ck, 1> {
   ~tuple_unary_op_ck()
   {
     for (size_t i = 0; i < m_fields.size(); ++i) {
-      get_child_ckernel(m_fields[i].child_kernel_offset)->destroy();
+      get_child(m_fields[i].child_kernel_offset)->destroy();
     }
   }
 
@@ -42,7 +42,7 @@ struct tuple_unary_op_ck : nd::base_kernel<tuple_unary_op_ck, 1> {
 
     for (intptr_t i = 0; i < field_count; ++i) {
       const tuple_unary_op_item &item = fi[i];
-      child = get_child_ckernel(item.child_kernel_offset);
+      child = get_child(item.child_kernel_offset);
       child_fn = child->get_function<expr_single_t>();
       char *child_src = src[0] + item.src_data_offset;
       child_fn(child, dst + item.dst_data_offset, &child_src);

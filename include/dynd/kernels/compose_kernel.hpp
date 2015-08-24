@@ -46,9 +46,9 @@ namespace nd {
       ~compose_kernel()
       {
         // The first child ckernel
-        get_child_ckernel()->destroy();
+        get_child()->destroy();
         // The second child ckernel
-        get_child_ckernel(second_offset)->destroy();
+        get_child(second_offset)->destroy();
       }
 
       void single(char *dst, char *const *src)
@@ -57,10 +57,10 @@ namespace nd {
         array buffer = empty(buffer_tp);
         char *buffer_data = buffer.get_readwrite_originptr();
 
-        ckernel_prefix *first = get_child_ckernel();
+        ckernel_prefix *first = get_child();
         expr_single_t first_func = first->get_function<expr_single_t>();
 
-        ckernel_prefix *second = get_child_ckernel(second_offset);
+        ckernel_prefix *second = get_child(second_offset);
         expr_single_t second_func = second->get_function<expr_single_t>();
 
         first_func(first, buffer_data, src);
@@ -77,10 +77,10 @@ namespace nd {
             reinterpret_cast<const fixed_dim_type_arrmeta *>(
                 buffer.get_arrmeta())->stride;
 
-        ckernel_prefix *first = get_child_ckernel();
+        ckernel_prefix *first = get_child();
         expr_strided_t first_func = first->get_function<expr_strided_t>();
 
-        ckernel_prefix *second = get_child_ckernel(second_offset);
+        ckernel_prefix *second = get_child(second_offset);
         expr_strided_t second_func = second->get_function<expr_strided_t>();
 
         char *src0 = src[0];

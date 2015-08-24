@@ -45,7 +45,7 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        ckernel_prefix *child = self_type::get_child_ckernel();
+        ckernel_prefix *child = self_type::get_child();
         expr_single_t child_fn = child->get_function<expr_single_t>();
 
         char *src_copy[N];
