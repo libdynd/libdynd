@@ -11,16 +11,8 @@
 namespace dynd {
 namespace nd {
 
-  template <typename...>
-  struct kernel_prefix_wrapper;
-
-  template <typename PrefixType>
-  struct kernel_prefix_wrapper<PrefixType> : PrefixType {
-  };
-
   template <typename SelfType, typename PrefixType>
-  struct kernel_prefix_wrapper<SelfType,
-                               PrefixType> : kernel_prefix_wrapper<PrefixType> {
+  struct kernel_prefix_wrapper : PrefixType {
     DYND_CUDA_HOST_DEVICE static SelfType *get_self(ckernel_prefix *rawself)
     {
       return reinterpret_cast<SelfType *>(rawself);
@@ -169,7 +161,7 @@ namespace nd {
    * as the reduction ckernel, more is known, in which case
    * CKP may be overriden.
    */
-  template <typename T, int... N>
+  template <typename SelfType, int... N>
   struct base_kernel;
 
 /**
@@ -185,7 +177,6 @@ namespace nd {
   template <typename SelfType>                                                 \
   struct base_kernel<SelfType> : kernel_prefix_wrapper<SelfType,               \
                                                        ckernel_prefix> {       \
-    typedef SelfType self_type;                                                \
     typedef kernel_prefix_wrapper<SelfType, ckernel_prefix> parent_type;       \
                                                                                \
     /** Initializes just the ckernel_prefix function member. */                \
@@ -214,7 +205,7 @@ namespace nd {
     __VA_ARGS__ static void single_wrapper(ckernel_prefix *rawself, char *dst, \
                                            char *const *src)                   \
     {                                                                          \
-      return parent_type::get_self(rawself)->single(dst, src);                 \
+      return SelfType::get_self(rawself)->single(dst, src);                    \
     }                                                                          \
                                                                                \
     __VA_ARGS__ static void strided_wrapper(ckernel_prefix *rawself,           \
@@ -223,22 +214,19 @@ namespace nd {
                                             const intptr_t *src_stride,        \
                                             size_t count)                      \
     {                                                                          \
-      return parent_type::get_self(rawself)                                    \
+      return SelfType::get_self(rawself)                                       \
           ->strided(dst, dst_stride, src, src_stride, count);                  \
     }                                                                          \
   };                                                                           \
                                                                                \
   template <typename SelfType>                                                 \
   struct base_kernel<SelfType, 0> : base_kernel<SelfType> {                    \
-    typedef SelfType self_type;                                                \
-    typedef base_kernel<SelfType> parent_type;                                 \
-                                                                               \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
                              char *const *DYND_UNUSED(src),                    \
                              const intptr_t *DYND_UNUSED(src_stride),          \
                              size_t count)                                     \
     {                                                                          \
-      SelfType *self = parent_type::get_self(this);                            \
+      SelfType *self = SelfType::get_self(this);                               \
       for (size_t i = 0; i != count; ++i) {                                    \
         self->single(dst, NULL);                                               \
         dst += dst_stride;                                                     \
@@ -250,13 +238,10 @@ namespace nd {
   struct base_kernel<SelfType, N> : base_kernel<SelfType> {                    \
     static_assert(N > 0, "N must be greater or equal to 0");                   \
                                                                                \
-    typedef SelfType self_type;                                                \
-    typedef base_kernel<SelfType> parent_type;                                 \
-                                                                               \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *src, \
                              const intptr_t *src_stride, size_t count)         \
     {                                                                          \
-      self_type *self = parent_type::get_self(this);                           \
+      SelfType *self = SelfType::get_self(this);                               \
       char *src_copy[N];                                                       \
       memcpy(src_copy, src, sizeof(src_copy));                                 \
       for (size_t i = 0; i != count; ++i) {                                    \
@@ -272,14 +257,6 @@ namespace nd {
   BASE_KERNEL(kernel_request_host);
 
 #undef BASE_KERNEL
-
-  typedef void *(*make_t)(void *, kernel_request_t, intptr_t &);
-
-  template <typename T>
-  void *make(void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset)
-  {
-    return T::make(ckb, kernreq, inout_ckb_offset);
-  }
 
 } // namespace dynd::nd
 

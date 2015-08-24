@@ -225,7 +225,7 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
 
   ~strided_to_var_assign_ck()
   {
-    get_child(sizeof(self_type))->destroy();
+    get_child()->destroy();
   }
 
   void single(char *dst, char *const *src)
