@@ -21,27 +21,32 @@ using namespace dynd;
  * kernel_request_strided type of kernel.
  */
 template <int N>
-struct strided_expr_kernel_extra {
+struct strided_expr_kernel_extra
+    : nd::base_kernel<strided_expr_kernel_extra<N>, N> {
   typedef strided_expr_kernel_extra extra_type;
 
-  ckernel_prefix base;
   intptr_t size;
   intptr_t dst_stride, src_stride[N];
 
-  static void single(ckernel_prefix *extra, char *dst, char *const *src)
+  ~strided_expr_kernel_extra()
+  {
+    this->get_child()->destroy();
+  }
+
+  static void single_wrapper(ckernel_prefix *extra, char *dst, char *const *src)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild = e->base.get_child(sizeof(extra_type));
+    ckernel_prefix *echild = e->get_child(sizeof(extra_type));
     expr_strided_t opchild = echild->get_function<expr_strided_t>();
     opchild(echild, dst, e->dst_stride, src, e->src_stride, e->size);
   }
 
-  static void strided(ckernel_prefix *extra, char *dst, intptr_t dst_stride,
-                      char *const *src, const intptr_t *src_stride,
-                      size_t count)
+  static void strided_wrapper(ckernel_prefix *extra, char *dst,
+                              intptr_t dst_stride, char *const *src,
+                              const intptr_t *src_stride, size_t count)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild = e->base.get_child(sizeof(extra_type));
+    ckernel_prefix *echild = e->get_child(sizeof(extra_type));
     expr_strided_t opchild = echild->get_function<expr_strided_t>();
     intptr_t inner_size = e->size, inner_dst_stride = e->dst_stride;
     const intptr_t *inner_src_stride = e->src_stride;
@@ -55,11 +60,6 @@ struct strided_expr_kernel_extra {
         src_loop[j] += src_stride[j];
       }
     }
-  }
-
-  static void destruct(ckernel_prefix *self)
-  {
-    self->get_child(sizeof(extra_type))->destroy();
   }
 };
 
@@ -78,10 +78,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   ndt::type src_child_dt[N];
 
   strided_expr_kernel_extra<N> *e =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<strided_expr_kernel_extra<N>>(ckb_offset);
-  e->base.template set_expr_function<strided_expr_kernel_extra<N>>(kernreq);
-  e->base.destructor = strided_expr_kernel_extra<N>::destruct;
+      strided_expr_kernel_extra<N>::make(ckb, kernreq, ckb_offset);
   // The dst strided parameters
   if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride,
                              &dst_child_dt, &dst_child_arrmeta)) {
@@ -160,62 +157,46 @@ inline static size_t make_elwise_strided_dimension_expr_kernel(
  * kernel_request_strided type of kernel.
  */
 template <int N>
-struct strided_or_var_to_strided_expr_kernel_extra {
+struct strided_or_var_to_strided_expr_kernel_extra
+    : nd::base_kernel<strided_or_var_to_strided_expr_kernel_extra<N>, N> {
   typedef strided_or_var_to_strided_expr_kernel_extra extra_type;
 
-  ckernel_prefix base;
   intptr_t size;
   intptr_t dst_stride, src_stride[N], src_offset[N];
   bool is_src_var[N];
 
-  static void single(ckernel_prefix *extra, char *dst, char *const *src)
+  ~strided_or_var_to_strided_expr_kernel_extra()
   {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    ckernel_prefix *echild = e->base.get_child(sizeof(extra_type));
+    this->get_child()->destroy();
+  }
+
+  void single(char *dst, char *const *src)
+  {
+    ckernel_prefix *echild = this->get_child();
     expr_strided_t opchild = echild->get_function<expr_strided_t>();
     // Broadcast all the src 'var' dimensions to dst
-    intptr_t dim_size = e->size;
+    intptr_t dim_size = size;
     char *modified_src[N];
     intptr_t modified_src_stride[N];
     for (int i = 0; i < N; ++i) {
-      if (e->is_src_var[i]) {
+      if (is_src_var[i]) {
         var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
-        modified_src[i] = vddd->begin + e->src_offset[i];
+        modified_src[i] = vddd->begin + src_offset[i];
         if (vddd->size == 1) {
           modified_src_stride[i] = 0;
         } else if (vddd->size == static_cast<size_t>(dim_size)) {
-          modified_src_stride[i] = e->src_stride[i];
+          modified_src_stride[i] = src_stride[i];
         } else {
           throw broadcast_error(dim_size, vddd->size, "strided dim", "var dim");
         }
       } else {
         // strided dimensions were fully broadcast in the kernel factory
         modified_src[i] = src[i];
-        modified_src_stride[i] = e->src_stride[i];
+        modified_src_stride[i] = src_stride[i];
       }
     }
-    opchild(echild, dst, e->dst_stride, modified_src, modified_src_stride,
+    opchild(echild, dst, dst_stride, modified_src, modified_src_stride,
             dim_size);
-  }
-
-  static void strided(ckernel_prefix *extra, char *dst, intptr_t dst_stride,
-                      char *const *src, const intptr_t *src_stride,
-                      size_t count)
-  {
-    char *src_loop[N];
-    memcpy(src_loop, src, sizeof(src_loop));
-    for (size_t i = 0; i != count; ++i) {
-      single(extra, dst, src_loop);
-      dst += dst_stride;
-      for (int j = 0; j != N; ++j) {
-        src_loop[j] += src_stride[j];
-      }
-    }
-  }
-
-  static void destruct(ckernel_prefix *self)
-  {
-    self->get_child(sizeof(extra_type))->destroy();
   }
 };
 
@@ -237,10 +218,8 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->alloc_ck<strided_or_var_to_strided_expr_kernel_extra<N>>(
                 ckb_offset);
-  e->base.template set_expr_function<
-      strided_or_var_to_strided_expr_kernel_extra<N>>(kernreq);
-  e->base.destructor =
-      &strided_or_var_to_strided_expr_kernel_extra<N>::destruct;
+  strided_or_var_to_strided_expr_kernel_extra<N>::make(ckb, kernreq,
+                                                       ckb_offset);
   // The dst strided parameters
   if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride,
                              &dst_child_dt, &dst_child_arrmeta)) {
@@ -331,7 +310,8 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
  * kernel_request_strided type of kernel.
  */
 template <int N>
-struct strided_or_var_to_var_expr_kernel_extra {
+struct strided_or_var_to_var_expr_kernel_extra
+    : nd::base_kernel<strided_or_var_to_var_expr_kernel_extra<N>, N> {
   typedef strided_or_var_to_var_expr_kernel_extra extra_type;
 
   ckernel_prefix base;
@@ -340,7 +320,7 @@ struct strided_or_var_to_var_expr_kernel_extra {
   intptr_t dst_stride, dst_offset, src_stride[N], src_offset[N];
   bool is_src_var[N];
 
-  static void single(ckernel_prefix *extra, char *dst, char *const *src)
+  static void single_wrapper(ckernel_prefix *extra, char *dst, char *const *src)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     ckernel_prefix *echild = e->base.get_child(sizeof(extra_type));
@@ -432,14 +412,14 @@ struct strided_or_var_to_var_expr_kernel_extra {
             modified_src_stride, dim_size);
   }
 
-  static void strided(ckernel_prefix *extra, char *dst, intptr_t dst_stride,
-                      char *const *src, const intptr_t *src_stride,
-                      size_t count)
+  static void strided_wrapper(ckernel_prefix *extra, char *dst,
+                              intptr_t dst_stride, char *const *src,
+                              const intptr_t *src_stride, size_t count)
   {
     char *src_loop[N];
     memcpy(src_loop, src, sizeof(src_loop));
     for (size_t i = 0; i != count; ++i) {
-      single(extra, dst, src_loop);
+      single_wrapper(extra, dst, src_loop);
       dst += dst_stride;
       for (int j = 0; j != N; ++j) {
         src_loop[j] += src_stride[j];
@@ -468,11 +448,8 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   ndt::type src_child_dt[N];
 
   strided_or_var_to_var_expr_kernel_extra<N> *e =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<strided_or_var_to_var_expr_kernel_extra<N>>(ckb_offset);
-  e->base.template set_expr_function<
-      strided_or_var_to_var_expr_kernel_extra<N>>(kernreq);
-  e->base.destructor = &strided_or_var_to_var_expr_kernel_extra<N>::destruct;
+      strided_or_var_to_var_expr_kernel_extra<N>::make(ckb, kernreq,
+                                                       ckb_offset);
   // The dst var parameters
   const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
   const var_dim_type_arrmeta *dst_md =

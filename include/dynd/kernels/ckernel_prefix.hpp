@@ -104,26 +104,6 @@ struct ckernel_prefix {
     function = reinterpret_cast<void *>(fnptr);
   }
 
-  DYND_CUDA_HOST_DEVICE void set_expr_function(kernel_request_t kernreq,
-                                               expr_single_t single,
-                                               expr_strided_t strided)
-  {
-    if (kernreq == kernel_request_single) {
-      function = reinterpret_cast<void *>(single);
-    } else if (kernreq == kernel_request_strided) {
-      function = reinterpret_cast<void *>(strided);
-    } else {
-      DYND_HOST_THROW(std::runtime_error, "unrecognized dynd kernel request " +
-                                              std::to_string(kernreq));
-    }
-  }
-
-  template <class T>
-  void set_expr_function(kernel_request_t kernreq)
-  {
-    set_expr_function(kernreq, &T::single, &T::strided);
-  }
-
   /**
    * Calls the destructor of the ckernel if it is
    * non-NULL.
