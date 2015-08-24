@@ -87,35 +87,18 @@ namespace nd {
     static SelfType *make(void *ckb, kernel_request_t kernreq,
                           intptr_t &inout_ckb_offset, A &&... args);
 
-    /** Initializes just the ckernel_prefix function member. */
-    void init_kernfunc(kernel_request_t kernreq)
-    {
-      switch (kernreq) {
-      case kernel_request_single:
-        this->template set_function<expr_single_t>(&SelfType::single_wrapper);
-        break;
-      case kernel_request_strided:
-        this->template set_function<expr_strided_t>(&SelfType::strided_wrapper);
-        break;
-      default:
-        DYND_HOST_THROW(std::invalid_argument,
-                        "expr ckernel init: unrecognized ckernel request " +
-                            std::to_string(kernreq));
-      }
-    }
-
     /**                                                                        \
      * Initializes an instance of this ckernel in-place according to the       \
      * kernel request. This calls the constructor in-place, and initializes    \
      * the base function and destructor.                                       \
      */
     template <typename... A>
-    static SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq,
-                          A &&... args)
+    static SelfType *init(ckernel_prefix *rawself,
+                          kernel_request_t DYND_UNUSED(kernreq), A &&... args)
     {
       /* Alignment requirement of the type. */
-      static_assert((size_t)scalar_align_of<SelfType>::value <=
-                        (size_t)scalar_align_of<uint64_t>::value,
+      static_assert(static_cast<size_t>(scalar_align_of<SelfType>::value) <=
+                        static_cast<size_t>(scalar_align_of<uint64_t>::value),
                     "ckernel types require alignment <= 64 bits");
 
       /* Call the constructor in-place. */
@@ -126,8 +109,7 @@ namespace nd {
                         "internal ckernel error: struct layout is not valid");
       }
       self->destructor = &SelfType::destruct;
-      /* A child class must implement this to fill in self->base.function. */
-      self->init_kernfunc(kernreq);
+
       return self;
     }
 
@@ -187,7 +169,7 @@ namespace nd {
    * as the reduction ckernel, more is known, in which case
    * CKP may be overriden.
    */
-  template <typename T, int N>
+  template <typename T, int... N>
   struct base_kernel;
 
 /**
@@ -200,10 +182,34 @@ namespace nd {
  * with a single and strided kernel function.
  */
 #define BASE_KERNEL(KERNREQ, ...)                                              \
-  template <typename T>                                                        \
-  struct base_kernel<T, -1> : kernel_prefix_wrapper<T, ckernel_prefix> {       \
-    typedef T self_type;                                                       \
-    typedef kernel_prefix_wrapper<T, ckernel_prefix> parent_type;              \
+  template <typename SelfType>                                                 \
+  struct base_kernel<SelfType> : kernel_prefix_wrapper<SelfType,               \
+                                                       ckernel_prefix> {       \
+    typedef SelfType self_type;                                                \
+    typedef kernel_prefix_wrapper<SelfType, ckernel_prefix> parent_type;       \
+                                                                               \
+    /** Initializes just the ckernel_prefix function member. */                \
+    template <typename... A>                                                   \
+    static SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq,   \
+                          A &&... args)                                        \
+    {                                                                          \
+      SelfType *self =                                                         \
+          parent_type::init(rawself, kernreq, std::forward<A>(args)...);       \
+      switch (kernreq) {                                                       \
+      case kernel_request_single:                                              \
+        self->function = reinterpret_cast<void *>(&SelfType::single_wrapper);  \
+        break;                                                                 \
+      case kernel_request_strided:                                             \
+        self->function = reinterpret_cast<void *>(&SelfType::strided_wrapper); \
+        break;                                                                 \
+      default:                                                                 \
+        DYND_HOST_THROW(std::invalid_argument,                                 \
+                        "expr ckernel init: unrecognized ckernel request " +   \
+                            std::to_string(kernreq));                          \
+      }                                                                        \
+                                                                               \
+      return self;                                                             \
+    }                                                                          \
                                                                                \
     __VA_ARGS__ static void single_wrapper(ckernel_prefix *rawself, char *dst, \
                                            char *const *src)                   \
@@ -222,17 +228,17 @@ namespace nd {
     }                                                                          \
   };                                                                           \
                                                                                \
-  template <typename T>                                                        \
-  struct base_kernel<T, 0> : base_kernel<T, -1> {                              \
-    typedef T self_type;                                                       \
-    typedef base_kernel<T, -1> parent_type;                                    \
+  template <typename SelfType>                                                 \
+  struct base_kernel<SelfType, 0> : base_kernel<SelfType> {                    \
+    typedef SelfType self_type;                                                \
+    typedef base_kernel<SelfType> parent_type;                                 \
                                                                                \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride,                   \
                              char *const *DYND_UNUSED(src),                    \
                              const intptr_t *DYND_UNUSED(src_stride),          \
                              size_t count)                                     \
     {                                                                          \
-      self_type *self = parent_type::get_self(this);                           \
+      SelfType *self = parent_type::get_self(this);                            \
       for (size_t i = 0; i != count; ++i) {                                    \
         self->single(dst, NULL);                                               \
         dst += dst_stride;                                                     \
@@ -240,10 +246,12 @@ namespace nd {
     }                                                                          \
   };                                                                           \
                                                                                \
-  template <typename T, int N>                                                 \
-  struct base_kernel : base_kernel<T, -1> {                                    \
-    typedef T self_type;                                                       \
-    typedef base_kernel<T, -1> parent_type;                                    \
+  template <typename SelfType, int N>                                          \
+  struct base_kernel<SelfType, N> : base_kernel<SelfType> {                    \
+    static_assert(N > 0, "N must be greater or equal to 0");                   \
+                                                                               \
+    typedef SelfType self_type;                                                \
+    typedef base_kernel<SelfType> parent_type;                                 \
                                                                                \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *src, \
                              const intptr_t *src_stride, size_t count)         \
@@ -262,60 +270,6 @@ namespace nd {
   };
 
   BASE_KERNEL(kernel_request_host);
-
-#ifdef __CUDACC__
-
-  BASE_KERNEL(kernel_request_cuda_device, __device__);
-
-  template <typename T, typename CKP>
-  template <typename... A>
-  typename base_kernel<T, kernel_request_cuda_device, -1, CKP>::self_type *
-  base_kernel<T, kernel_request_cuda_device, -1, CKP>::make(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_cuda_device:
-      return self_type::make(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
-  }
-
-#endif
-
-#ifdef DYND_CUDA
-
-  BASE_KERNEL(kernel_request_cuda_host_device, DYND_CUDA_HOST_DEVICE);
-
-  template <typename T, typename CKP>
-  template <typename... A>
-  typename base_kernel<T, kernel_request_cuda_host_device, -1, CKP>::self_type *
-  base_kernel<T, kernel_request_cuda_host_device, -1, CKP>::make(
-      void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
-      A &&... args)
-  {
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_host:
-      return self_type::make(
-          reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-          kernreq, inout_ckb_offset, std::forward<A>(args)...);
-#ifdef __CUDACC__
-    case kernel_request_cuda_device:
-      return self_type::make(
-          reinterpret_cast<ckernel_builder<kernel_request_cuda_device> *>(ckb),
-          kernreq & ~kernel_request_cuda_device, inout_ckb_offset,
-          std::forward<A>(args)...);
-#endif
-    default:
-      throw std::invalid_argument("unrecognized ckernel request");
-    }
-  }
-
-#endif
 
 #undef BASE_KERNEL
 

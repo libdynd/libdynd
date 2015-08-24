@@ -135,6 +135,19 @@ struct ckernel_prefix {
     }
   }
 
+  DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+  {
+    (*reinterpret_cast<expr_single_t>(function))(this, dst, src);
+  }
+
+  DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
+                                     char *const *src,
+                                     const intptr_t *src_stride, size_t count)
+  {
+    (*reinterpret_cast<expr_strided_t>(function))(this, dst, dst_stride, src,
+                                                  src_stride, count);
+  }
+
   /**
    * Returns the pointer to a child ckernel at the provided
    * offset.
