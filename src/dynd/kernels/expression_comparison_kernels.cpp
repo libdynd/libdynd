@@ -152,7 +152,7 @@ size_t dynd::make_expression_comparison_kernel(void *ckb, intptr_t ckb_offset,
   buffered_kernel_extra *e =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->alloc_ck<buffered_kernel_extra>(ckb_offset);
-  e->base.set_function<expr_single_t>(&buffered_kernel_extra::kernel);
+  e->base.function = reinterpret_cast<void *>(&buffered_kernel_extra::kernel);
   e->base.destructor = &buffered_kernel_extra::destruct;
   // Initialize the information for buffering the operands
   if (src0_dt.get_kind() == expr_kind) {

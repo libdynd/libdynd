@@ -26,7 +26,10 @@ static nd::array property_complex_conj(const nd::array &n)
   return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "conj"));
 }
 
-static size_t complex_array_properties_size() { return 3; }
+static size_t complex_array_properties_size()
+{
+  return 3;
+}
 
 static const pair<string, gfunc::callable> *complex_array_properties()
 {
@@ -185,18 +188,20 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-                          ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
+      ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   switch (builtin_type_id) {
   case complex_float32_type_id:
     switch (src_elwise_property_index) {
     case 0:
-      e->set_function<expr_single_t>(&get_property_kernel_complex_float32_real);
+      e->function =
+          reinterpret_cast<void *>(&get_property_kernel_complex_float32_real);
       return ckb_offset;
     case 1:
-      e->set_function<expr_single_t>(&get_property_kernel_complex_float32_imag);
+      e->function =
+          reinterpret_cast<void *>(&get_property_kernel_complex_float32_imag);
       return ckb_offset;
     case 2:
-      e->set_function<expr_single_t>(
+      e->function = reinterpret_cast<void *>(
           &get_or_set_property_kernel_complex_float32_conj);
       return ckb_offset;
     default:
@@ -206,13 +211,15 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(
   case complex_float64_type_id:
     switch (src_elwise_property_index) {
     case 0:
-      e->set_function<expr_single_t>(&get_property_kernel_complex_float64_real);
+      e->function =
+          reinterpret_cast<void *>(&get_property_kernel_complex_float64_real);
       return ckb_offset;
     case 1:
-      e->set_function<expr_single_t>(&get_property_kernel_complex_float64_imag);
+      e->function =
+          reinterpret_cast<void *>(&get_property_kernel_complex_float64_imag);
       return ckb_offset;
     case 2:
-      e->set_function<expr_single_t>(
+      e->function = reinterpret_cast<void *>(
           &get_or_set_property_kernel_complex_float64_conj);
       return ckb_offset;
     default:
@@ -237,12 +244,12 @@ size_t dynd::make_builtin_type_elwise_property_setter_kernel(
   ckb_offset =
       make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
   ckernel_prefix *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-                          ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
+      ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   switch (builtin_type_id) {
   case complex_float32_type_id:
     switch (dst_elwise_property_index) {
     case 2:
-      e->set_function<expr_single_t>(
+      e->function = reinterpret_cast<void *>(
           &get_or_set_property_kernel_complex_float32_conj);
       return ckb_offset;
     default:
@@ -252,7 +259,7 @@ size_t dynd::make_builtin_type_elwise_property_setter_kernel(
   case complex_float64_type_id:
     switch (dst_elwise_property_index) {
     case 2:
-      e->set_function<expr_single_t>(
+      e->function = reinterpret_cast<void *>(
           &get_or_set_property_kernel_complex_float64_conj);
       return ckb_offset;
     default:

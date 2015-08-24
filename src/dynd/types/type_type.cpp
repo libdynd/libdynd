@@ -246,9 +246,9 @@ size_t ndt::type_type::make_comparison_kernel(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->alloc_ck<ckernel_prefix>(ckb_offset);
       if (comptype == comparison_type_equal) {
-        e->set_function<expr_single_t>(equal_comparison);
+        e->function = reinterpret_cast<void *>(equal_comparison);
       } else if (comptype == comparison_type_not_equal) {
-        e->set_function<expr_single_t>(not_equal_comparison);
+        e->function = reinterpret_cast<void *>(not_equal_comparison);
       } else {
         throw not_comparable_error(src0_dt, src1_dt, comptype);
       }

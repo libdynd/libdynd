@@ -262,8 +262,8 @@ struct expr_type_offset_applier_general_extra
     for (size_t i = 0; i != src_count; ++i) {
       src_modified[i] = src[i] + offsets[i];
     }
-    ckernel_prefix *echild = this->get_child(
-        sizeof(extra_type) + src_count * sizeof(size_t));
+    ckernel_prefix *echild =
+        this->get_child(sizeof(extra_type) + src_count * sizeof(size_t));
     expr_single_t opchild = echild->get_function<expr_single_t>();
     opchild(echild, dst, src_modified.get());
   }
@@ -327,7 +327,7 @@ static size_t make_src_deref_ckernel(void *ckb, intptr_t ckb_offset)
   ckernel_prefix *self =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->alloc_ck<ckernel_prefix>(ckb_offset);
-  self->set_function<expr_single_t>(&src_deref_single);
+  self->function = reinterpret_cast<void *>(&src_deref_single);
   self->destructor = &kernels::destroy_trivial_parent_ckernel;
   return ckb_offset;
 }

@@ -162,7 +162,7 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->get_at<tuple_compare_sorting_less_matching_arrmeta_kernel>(
                     root_ckb_offset);
-      e->base.set_function<expr_single_t>(
+      e->base.function = reinterpret_cast<void *>(
           &tuple_compare_sorting_less_matching_arrmeta_kernel::sorting_less);
       e->base.destructor =
           &tuple_compare_sorting_less_matching_arrmeta_kernel::destruct;
@@ -201,7 +201,7 @@ size_t dynd::make_tuple_comparison_kernel(void *ckb, intptr_t ckb_offset,
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->get_at<tuple_compare_sorting_less_diff_arrmeta_kernel>(
                     root_ckb_offset);
-      e->base.set_function<expr_single_t>(
+      e->base.function = reinterpret_cast<void *>(
           &tuple_compare_sorting_less_diff_arrmeta_kernel::sorting_less);
       e->base.destructor =
           &tuple_compare_sorting_less_diff_arrmeta_kernel::destruct;

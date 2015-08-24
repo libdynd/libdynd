@@ -53,7 +53,7 @@ namespace nd {
       template <typename T>
       void set_first_call_function(T fnptr)
       {
-        set_function<T>(fnptr);
+        function = reinterpret_cast<void *>(fnptr);
       }
 
       expr_strided_t get_followup_call_function() const
@@ -111,8 +111,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         // The first call at the "dst" address
         expr_single_t opchild_first_call =
             echild->get_first_call_function<expr_single_t>();
@@ -131,8 +130,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_followup_call =
             echild->get_followup_call_function();
         expr_single_t opchild_first_call =
@@ -178,8 +176,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_followup_call =
             echild->get_followup_call_function();
         intptr_t inner_size = e->size;
@@ -260,8 +257,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_first_call =
             echild->get_first_call_function<expr_strided_t>();
         opchild_first_call(echild, dst, e->dst_stride, src, &e->src_stride,
@@ -274,8 +270,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_first_call =
             echild->get_first_call_function<expr_strided_t>();
         expr_strided_t opchild_followup_call =
@@ -316,8 +311,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_followup_call =
             echild->get_followup_call_function();
         intptr_t inner_size = e->size;
@@ -437,8 +431,7 @@ namespace nd {
                                           char *const *src)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         // The first call to initialize the "dst" value
@@ -457,8 +450,7 @@ namespace nd {
                                 const intptr_t *src_stride, size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         expr_single_t opchild_dst_init =
@@ -508,8 +500,7 @@ namespace nd {
                                            size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         expr_single_t opchild_ident =
@@ -551,8 +542,7 @@ namespace nd {
                                    const intptr_t *src_stride, size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         // No initialization, all reduction
         expr_strided_t opchild_reduce =
             echild_reduce->get_function<expr_strided_t>();
@@ -743,8 +733,7 @@ namespace nd {
         self_type *e = reinterpret_cast<self_type *>(extra);
         ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         expr_strided_t opchild_ident =
             echild_ident->get_function<expr_strided_t>();
         expr_strided_t opchild_reduce =
@@ -769,8 +758,7 @@ namespace nd {
         self_type *e = reinterpret_cast<self_type *>(extra);
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         expr_strided_t opchild_dst_init =
             echild_dst_init->get_function<expr_strided_t>();
         expr_strided_t opchild_reduce =
@@ -812,8 +800,7 @@ namespace nd {
         self_type *e = reinterpret_cast<self_type *>(extra);
         ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         expr_strided_t opchild_ident =
             echild_ident->get_function<expr_strided_t>();
         expr_strided_t opchild_reduce =
@@ -855,8 +842,7 @@ namespace nd {
                                    const intptr_t *src_stride, size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         // No initialization, all reduction
         expr_strided_t opchild_reduce =
             echild_reduce->get_function<expr_strided_t>();

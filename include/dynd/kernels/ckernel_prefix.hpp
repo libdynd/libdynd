@@ -98,12 +98,6 @@ struct ckernel_prefix {
     return reinterpret_cast<T>(function);
   }
 
-  template <typename T>
-  DYND_CUDA_HOST_DEVICE void set_function(T fnptr)
-  {
-    function = reinterpret_cast<void *>(fnptr);
-  }
-
   /**
    * Calls the destructor of the ckernel if it is
    * non-NULL.

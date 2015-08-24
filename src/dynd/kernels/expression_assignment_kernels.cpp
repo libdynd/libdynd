@@ -35,10 +35,10 @@ struct buffered_kernel_extra {
     size_t element_count = 1;
     switch (kernreq) {
     case kernel_request_single:
-      base.set_function<expr_single_t>(&single);
+      base.function = reinterpret_cast<void *>(&single);
       break;
     case kernel_request_strided:
-      base.set_function<expr_strided_t>(&strided);
+      base.function = reinterpret_cast<void *>(&strided);
       element_count = DYND_BUFFER_CHUNK_SIZE;
       break;
     default: {
