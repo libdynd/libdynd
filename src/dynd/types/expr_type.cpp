@@ -243,7 +243,7 @@ struct expr_type_offset_applier_extra
 
   static void destruct(ckernel_prefix *self)
   {
-    self->destroy_child_ckernel(sizeof(extra_type));
+    self->get_child_ckernel(sizeof(extra_type))->destroy();
   }
 };
 
@@ -271,8 +271,8 @@ struct expr_type_offset_applier_general_extra
   static void destruct(ckernel_prefix *self)
   {
     extra_type *e = reinterpret_cast<extra_type *>(self);
-    self->destroy_child_ckernel(sizeof(extra_type) +
-                                e->src_count * sizeof(size_t));
+    self->get_child_ckernel(sizeof(extra_type) + e->src_count * sizeof(size_t))
+        ->destroy();
   }
 };
 } // anonymous namespace

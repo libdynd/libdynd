@@ -48,7 +48,7 @@ namespace nd {
         // The first child ckernel
         get_child_ckernel()->destroy();
         // The second child ckernel
-        destroy_child_ckernel(second_offset);
+        get_child_ckernel(second_offset)->destroy();
       }
 
       void single(char *dst, char *const *src)

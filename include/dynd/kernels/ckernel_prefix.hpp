@@ -145,18 +145,6 @@ struct ckernel_prefix {
         reinterpret_cast<char *>(this) + ckernel_prefix::align_offset(offset));
   }
 
-  /**
-   * If the provided offset is non-zero, destroys
-   * a ckernel at the given offset from `this`.
-   */
-  DYND_CUDA_HOST_DEVICE void destroy_child_ckernel(size_t offset)
-  {
-    if (offset != 0) {
-      ckernel_prefix *child = get_child_ckernel(offset);
-      child->destroy();
-    }
-  }
-
   static ckernel_prefix *init(ckernel_prefix *self,
                               kernel_request_t DYND_UNUSED(kernreq), void *func)
   {

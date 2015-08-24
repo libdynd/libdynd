@@ -280,7 +280,7 @@ struct groupby_to_value_assign_kernel
     if (e->src_groupby_tp != NULL) {
       base_type_decref(e->src_groupby_tp);
     }
-    self->destroy_child_ckernel(sizeof(extra_type));
+    self->get_child_ckernel(sizeof(extra_type))->destroy();
   }
 };
 } // anonymous namespace

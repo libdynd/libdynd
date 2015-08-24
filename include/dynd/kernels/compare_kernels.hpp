@@ -722,7 +722,7 @@ namespace nd {
       const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
       size_t field_count = e->field_count;
       for (size_t i = 0; i != field_count; ++i) {
-        self->destroy_child_ckernel(kernel_offsets[i]);
+        self->get_child_ckernel(kernel_offsets[i])->destroy();
       }
     }
 
@@ -1009,7 +1009,7 @@ namespace nd {
       const size_t *kernel_offsets = reinterpret_cast<const size_t *>(e + 1);
       size_t field_count = e->field_count;
       for (size_t i = 0; i != field_count; ++i) {
-        self->destroy_child_ckernel(kernel_offsets[i]);
+        self->get_child_ckernel(kernel_offsets[i])->destroy();
       }
     }
 

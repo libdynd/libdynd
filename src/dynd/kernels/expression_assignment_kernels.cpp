@@ -156,8 +156,8 @@ struct buffered_kernel_extra {
       free(buffer_arrmeta);
     }
     // Destruct the child kernels
-    self->destroy_child_ckernel(e->first_kernel_offset);
-    self->destroy_child_ckernel(e->second_kernel_offset);
+    self->get_child_ckernel(e->first_kernel_offset)->destroy();
+    self->get_child_ckernel(e->second_kernel_offset)->destroy();
   }
 };
 } // anonymous namespace
