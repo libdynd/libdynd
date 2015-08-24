@@ -92,10 +92,10 @@ namespace nd {
     {
       switch (kernreq) {
       case kernel_request_single:
-        this->template set_function<expr_single_t>(&SelfType::single_wrapper);
+        this->function = reinterpret_cast<void *>(&SelfType::single_wrapper);
         break;
       case kernel_request_strided:
-        this->template set_function<expr_strided_t>(&SelfType::strided_wrapper);
+        this->function = reinterpret_cast<void *>(&SelfType::strided_wrapper);
         break;
       default:
         DYND_HOST_THROW(std::invalid_argument,
