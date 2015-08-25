@@ -253,9 +253,16 @@ namespace nd {
        * the final dimension before the accumulation operation.
        */
       static intptr_t instantiate(char *DYND_UNUSED(static_data), void *ckb,
-                                  intptr_t ckb_offset, intptr_t src_stride,
-                                  intptr_t src_size, kernel_request_t kernreq)
+                                  intptr_t ckb_offset, const ndt::type *src_tp,
+                                  const char *const *src_arrmeta,
+                                  kernel_request_t kernreq)
       {
+        intptr_t src_size =
+            src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+        intptr_t src_stride =
+            src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(
+                src_arrmeta[0]);
+
         make(ckb, kernreq, ckb_offset, src_size, src_stride);
         return ckb_offset;
       }
@@ -374,9 +381,16 @@ namespace nd {
        * the final dimension before the accumulation operation.
        */
       static size_t instantiate(void *ckb, intptr_t ckb_offset,
-                                intptr_t dst_stride, intptr_t src_stride,
-                                intptr_t src_size, kernel_request_t kernreq)
+                                intptr_t dst_stride, const ndt::type *src_tp,
+                                const char *const *src_arrmeta,
+                                kernel_request_t kernreq)
       {
+        intptr_t src_size =
+            src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+        intptr_t src_stride =
+            src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(
+                src_arrmeta[0]);
+
         make(ckb, kernreq, ckb_offset, src_size, dst_stride, src_stride);
         return ckb_offset;
       }
@@ -566,22 +580,6 @@ namespace nd {
         }
       }
 
-      /*
-            static size_t
-            instantiate(static_data_type *static_data, data_type *data, void
-         *ckb,
-                        intptr_t ckb_offset, intptr_t dst_stride, intptr_t
-         src_stride,
-                        intptr_t src_size, const ndt::type &dst_tp,
-                        const char *dst_arrmeta, const ndt::type *src_tp,
-                        const char *src_arrmeta, kernel_request_t kernreq,
-                        const eval::eval_context *ectx, intptr_t
-         DYND_UNUSED(nkwd),
-                        const array *DYND_UNUSED(kwds),
-                        const std::map<std::string, ndt::type>
-         &DYND_UNUSED(tp_vars))
-      */
-
       /**
        * Adds a ckernel layer for processing one dimension of the reduction.
        * This is for a strided dimension which is being reduced, and is
@@ -589,13 +587,32 @@ namespace nd {
        */
       static size_t
       instantiate(static_data_type *static_data, data_type *data, void *ckb,
-                  intptr_t ckb_offset, intptr_t src_stride, intptr_t src_size,
-                  const ndt::type &dst_tp, const char *dst_arrmeta,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                  intptr_t ckb_offset, const ndt::type &dst_tp,
+                  const char *dst_arrmeta, const ndt::type *src_init_tp,
+                  const char *const *src_arrmeta, kernel_request_t kernreq,
+                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                  const array *DYND_UNUSED(kwds),
                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
+        ndt::type src_tp[1];
+
+        intptr_t src_size, src_stride;
+        if (src_init_tp[0].is_scalar()) {
+          src_tp[0] = src_init_tp[0];
+          src_size = 1;
+          src_stride = 0;
+        } else {
+          src_tp[0] = src_init_tp[0]
+                          .extended<ndt::fixed_dim_type>()
+                          ->get_element_type();
+          src_size = src_init_tp[0]
+                         .extended<ndt::fixed_dim_type>()
+                         ->get_fixed_dim_size();
+          src_stride =
+              src_init_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(
+                  src_arrmeta[0]);
+        }
+
         callable_type_data *elwise_reduction = static_data->child.get();
         const ndt::callable_type *elwise_reduction_tp =
             static_data->child.get_type();
@@ -906,10 +923,11 @@ namespace nd {
         const ndt::type &src_child_tp =
             src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
 
-        intptr_t src_size = src_tp[0].get_size(NULL);
+        intptr_t src_size =
+            src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         intptr_t src_stride =
-            src_child_tp.extended<ndt::fixed_dim_type>()->get_fixed_stride(
-                src_arrmeta[0] + sizeof(size_stride_t));
+            src_tp[0].extended<ndt::fixed_dim_type>()->get_fixed_stride(
+                src_arrmeta[0]);
 
         callable_type_data *elwise_reduction = static_data->child.get();
         const ndt::callable_type *elwise_reduction_tp =
@@ -1101,10 +1119,6 @@ namespace nd {
                   intptr_t nkwd, const array *kwds,
                   const std::map<std::string, ndt::type> &tp_vars)
       {
-        callable &elwise_reduction = static_data->child;
-        const ndt::callable_type *elwise_reduction_tp =
-            elwise_reduction.get_type();
-
         if (data->reduce_ndim == 0) {
           if (data->ndim == 0) {
             // If there are no dimensions to reduce, it's
@@ -1118,7 +1132,7 @@ namespace nd {
               // Create the kernel which copies the identity and then
               // does one reduction
               return strided_inner_reduction_kernel_extra::instantiate(
-                  static_data, data, ckb, ckb_offset, 0, 1, dst_tp, dst_arrmeta,
+                  static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta,
                   src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
             }
           }
@@ -1142,26 +1156,12 @@ namespace nd {
               "not yet supported");
         }
 
-        ndt::type dst_el_tp = elwise_reduction_tp->get_return_type();
-        ndt::type src_el_tp = elwise_reduction_tp->get_pos_type(0);
-
-        // This is the number of dimensions being processed by the reduction
-        if (static_cast<intptr_t>(data->ndim) !=
-            src_tp->get_ndim() - src_el_tp.get_ndim()) {
-          std::stringstream ss;
-          ss << "make_lifted_reduction_ckernel: wrong number of reduction "
-                "dimensions, ";
-          ss << "requested " << data->ndim << ", but types have ";
-          ss << (src_tp[0].get_ndim() - src_el_tp.get_ndim());
-          ss << " lifting from " << src_el_tp << " to " << src_tp;
-          throw std::runtime_error(ss.str());
-        }
-
         ndt::type dst_i_tp = dst_tp, src_i_tp = src_tp[0];
         const char *src_i_arrmeta = src_arrmeta[0];
         for (intptr_t i = 0, j = 0; i < static_cast<intptr_t>(data->ndim);
              ++i) {
           intptr_t dst_stride, dst_size, src_stride, src_size;
+          const char *src_i_init_arrmeta[1] = {src_i_arrmeta};
           ndt::type src_i_init_tp = src_i_tp;
           // Get the striding parameters for the source dimension
           if (!src_i_tp.get_as_strided(src_i_arrmeta, &src_size, &src_stride,
@@ -1212,16 +1212,16 @@ namespace nd {
               ckb_offset =
                   initial_reduction_kernel<fixed_dim_type_id>::instantiate(
                       reinterpret_cast<char *>(static_data), ckb, ckb_offset,
-                      src_stride, src_size, kernreq);
+                      &src_i_init_tp, src_i_init_arrmeta, kernreq);
               // The next request should be single, as that's the kind of
               // ckernel the 'first_call' should be in this case
               kernreq = kernel_request_single;
             } else {
               // The innermost dimension being reduced
               return strided_inner_reduction_kernel_extra::instantiate(
-                  static_data, data, ckb, ckb_offset, src_stride, src_size,
-                  dst_i_tp, dst_arrmeta, &src_i_tp, src_arrmeta, kernreq, ectx,
-                  nkwd, kwds, tp_vars);
+                  static_data, data, ckb, ckb_offset, dst_i_tp, dst_arrmeta,
+                  &src_i_init_tp, src_i_init_arrmeta, kernreq, ectx, nkwd, kwds,
+                  tp_vars);
             }
             ++j;
           } else {
@@ -1244,7 +1244,8 @@ namespace nd {
             if (static_cast<size_t>(i) < data->ndim - 1) {
               // An initial dimension being broadcast
               ckb_offset = strided_initial_broadcast_kernel_extra::instantiate(
-                  ckb, ckb_offset, dst_stride, src_stride, src_size, kernreq);
+                  ckb, ckb_offset, dst_stride, &src_i_init_tp,
+                  src_i_init_arrmeta, kernreq);
               // The next request should be strided, as that's the kind of
               // ckernel the 'first_call' should be in this case
               kernreq = kernel_request_strided;
@@ -1252,8 +1253,8 @@ namespace nd {
               // The innermost dimension being broadcast
               return strided_inner_broadcast_kernel::instantiate(
                   static_data, data, ckb, ckb_offset, dst_stride, dst_i_tp,
-                  dst_arrmeta, &src_i_init_tp, src_arrmeta, kernreq, ectx, 0,
-                  kwds, tp_vars);
+                  dst_arrmeta, &src_i_init_tp, src_i_init_arrmeta, kernreq,
+                  ectx, 0, kwds, tp_vars);
             }
           }
         }
