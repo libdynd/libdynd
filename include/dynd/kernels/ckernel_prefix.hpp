@@ -75,8 +75,8 @@ kernel_request_t without_memory(kernel_request_t kernreq) {
 struct ckernel_prefix {
   typedef void (*destructor_fn_t)(ckernel_prefix *);
 
+  void (*destructor)(ckernel_prefix *self);
   void *function;
-  destructor_fn_t destructor;
 
   /**
    * Aligns an offset as required by ckernels.
@@ -96,32 +96,6 @@ struct ckernel_prefix {
   DYND_CUDA_HOST_DEVICE T get_function() const
   {
     return reinterpret_cast<T>(function);
-  }
-
-  template <typename T>
-  DYND_CUDA_HOST_DEVICE void set_function(T fnptr)
-  {
-    function = reinterpret_cast<void *>(fnptr);
-  }
-
-  DYND_CUDA_HOST_DEVICE void set_expr_function(kernel_request_t kernreq,
-                                               expr_single_t single,
-                                               expr_strided_t strided)
-  {
-    if (kernreq == kernel_request_single) {
-      function = reinterpret_cast<void *>(single);
-    } else if (kernreq == kernel_request_strided) {
-      function = reinterpret_cast<void *>(strided);
-    } else {
-      DYND_HOST_THROW(std::runtime_error, "unrecognized dynd kernel request " +
-                                              std::to_string(kernreq));
-    }
-  }
-
-  template <class T>
-  void set_expr_function(kernel_request_t kernreq)
-  {
-    set_expr_function(kernreq, &T::single, &T::strided);
   }
 
   /**

@@ -151,7 +151,9 @@ public:
   {
   }
 
-  virtual ~date_strftime_kernel_generator() {}
+  virtual ~date_strftime_kernel_generator()
+  {
+  }
 
   size_t make_expr_kernel(void *ckb, intptr_t ckb_offset,
                           const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -182,12 +184,12 @@ public:
             ->alloc_ck<date_strftime_kernel_extra>(ckb_offset);
     switch (kernreq) {
     case kernel_request_single:
-      e->base.set_function<expr_single_t>(
-          &date_strftime_kernel_extra::single_unary);
+      e->base.function =
+          reinterpret_cast<void *>(&date_strftime_kernel_extra::single_unary);
       break;
     case kernel_request_strided:
-      e->base.set_function<expr_strided_t>(
-          &date_strftime_kernel_extra::strided_unary);
+      e->base.function =
+          reinterpret_cast<void *>(&date_strftime_kernel_extra::strided_unary);
       break;
     default: {
       stringstream ss;
@@ -309,7 +311,9 @@ public:
   {
   }
 
-  virtual ~date_replace_kernel_generator() {}
+  virtual ~date_replace_kernel_generator()
+  {
+  }
 
   size_t make_expr_kernel(void *ckb, intptr_t ckb_offset,
                           const ndt::type &dst_tp, const char *dst_arrmeta,
@@ -340,12 +344,12 @@ public:
             ->alloc_ck<date_replace_kernel_extra>(ckb_offset);
     switch (kernreq) {
     case kernel_request_single:
-      e->base.set_function<expr_single_t>(
-          &date_replace_kernel_extra::single_unary);
+      e->base.function =
+          reinterpret_cast<void *>(&date_replace_kernel_extra::single_unary);
       break;
     case kernel_request_strided:
-      e->base.set_function<expr_strided_t>(
-          &date_replace_kernel_extra::strided_unary);
+      e->base.function =
+          reinterpret_cast<void *>(&date_replace_kernel_extra::strided_unary);
       break;
     default: {
       stringstream ss;

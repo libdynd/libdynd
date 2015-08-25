@@ -29,42 +29,42 @@ struct ascii_utf8_fixed_string_compare_kernel {
   static void less(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = strncmp(src[0], src[1], stringsize) < 0;
   }
 
   static void less_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = strncmp(src[0], src[1], stringsize) <= 0;
   }
 
   static void equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = strncmp(src[0], src[1], stringsize) == 0;
   }
 
   static void not_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = strncmp(src[0], src[1], stringsize) != 0;
   }
 
   static void greater_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = strncmp(src[0], src[1], stringsize) >= 0;
   }
 
   static void greater(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = strncmp(src[0], src[1], stringsize) > 0;
   }
 };
@@ -73,7 +73,7 @@ struct utf16_fixed_string_compare_kernel {
   static void less(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = lexicographical_compare(
         reinterpret_cast<const uint16_t *>(src[0]),
         reinterpret_cast<const uint16_t *>(src[0]) + stringsize,
@@ -84,19 +84,19 @@ struct utf16_fixed_string_compare_kernel {
   static void less_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) =
         !lexicographical_compare(
-            reinterpret_cast<const uint16_t *>(src[1]),
-            reinterpret_cast<const uint16_t *>(src[1]) + stringsize,
-            reinterpret_cast<const uint16_t *>(src[0]),
-            reinterpret_cast<const uint16_t *>(src[0]) + stringsize);
+             reinterpret_cast<const uint16_t *>(src[1]),
+             reinterpret_cast<const uint16_t *>(src[1]) + stringsize,
+             reinterpret_cast<const uint16_t *>(src[0]),
+             reinterpret_cast<const uint16_t *>(src[0]) + stringsize);
   }
 
   static void equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t string_size = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                             extra)->string_size;
+        extra)->string_size;
     const uint16_t *lhs = reinterpret_cast<const uint16_t *>(src[0]);
     const uint16_t *rhs = reinterpret_cast<const uint16_t *>(src[1]);
     for (size_t i = 0; i != string_size; ++i, ++lhs, ++rhs) {
@@ -111,7 +111,7 @@ struct utf16_fixed_string_compare_kernel {
   static void not_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t string_size = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                             extra)->string_size;
+        extra)->string_size;
     const uint16_t *lhs = reinterpret_cast<const uint16_t *>(src[0]);
     const uint16_t *rhs = reinterpret_cast<const uint16_t *>(src[1]);
     for (size_t i = 0; i != string_size; ++i, ++lhs, ++rhs) {
@@ -126,19 +126,19 @@ struct utf16_fixed_string_compare_kernel {
   static void greater_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) =
         !lexicographical_compare(
-            reinterpret_cast<const uint16_t *>(src[0]),
-            reinterpret_cast<const uint16_t *>(src[0]) + stringsize,
-            reinterpret_cast<const uint16_t *>(src[1]),
-            reinterpret_cast<const uint16_t *>(src[1]) + stringsize);
+             reinterpret_cast<const uint16_t *>(src[0]),
+             reinterpret_cast<const uint16_t *>(src[0]) + stringsize,
+             reinterpret_cast<const uint16_t *>(src[1]),
+             reinterpret_cast<const uint16_t *>(src[1]) + stringsize);
   }
 
   static void greater(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = lexicographical_compare(
         reinterpret_cast<const uint16_t *>(src[1]),
         reinterpret_cast<const uint16_t *>(src[1]) + stringsize,
@@ -151,7 +151,7 @@ struct utf32_fixed_string_compare_kernel {
   static void less(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = lexicographical_compare(
         reinterpret_cast<const uint32_t *>(src[0]),
         reinterpret_cast<const uint32_t *>(src[0]) + stringsize,
@@ -162,19 +162,19 @@ struct utf32_fixed_string_compare_kernel {
   static void less_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) =
         !lexicographical_compare(
-            reinterpret_cast<const uint32_t *>(src[1]),
-            reinterpret_cast<const uint32_t *>(src[1]) + stringsize,
-            reinterpret_cast<const uint32_t *>(src[0]),
-            reinterpret_cast<const uint32_t *>(src[0]) + stringsize);
+             reinterpret_cast<const uint32_t *>(src[1]),
+             reinterpret_cast<const uint32_t *>(src[1]) + stringsize,
+             reinterpret_cast<const uint32_t *>(src[0]),
+             reinterpret_cast<const uint32_t *>(src[0]) + stringsize);
   }
 
   static void equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t string_size = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                             extra)->string_size;
+        extra)->string_size;
     const uint32_t *lhs = reinterpret_cast<const uint32_t *>(src[0]);
     const uint32_t *rhs = reinterpret_cast<const uint32_t *>(src[1]);
     for (size_t i = 0; i != string_size; ++i, ++lhs, ++rhs) {
@@ -189,7 +189,7 @@ struct utf32_fixed_string_compare_kernel {
   static void not_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t string_size = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                             extra)->string_size;
+        extra)->string_size;
     const uint32_t *lhs = reinterpret_cast<const uint32_t *>(src[0]);
     const uint32_t *rhs = reinterpret_cast<const uint32_t *>(src[1]);
     for (size_t i = 0; i != string_size; ++i, ++lhs, ++rhs) {
@@ -204,19 +204,19 @@ struct utf32_fixed_string_compare_kernel {
   static void greater_equal(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) =
         !lexicographical_compare(
-            reinterpret_cast<const uint32_t *>(src[0]),
-            reinterpret_cast<const uint32_t *>(src[0]) + stringsize,
-            reinterpret_cast<const uint32_t *>(src[1]),
-            reinterpret_cast<const uint32_t *>(src[1]) + stringsize);
+             reinterpret_cast<const uint32_t *>(src[0]),
+             reinterpret_cast<const uint32_t *>(src[0]) + stringsize,
+             reinterpret_cast<const uint32_t *>(src[1]),
+             reinterpret_cast<const uint32_t *>(src[1]) + stringsize);
   }
 
   static void greater(ckernel_prefix *extra, char *dst, char *const *src)
   {
     size_t stringsize = reinterpret_cast<fixed_string_compare_kernel_extra *>(
-                            extra)->string_size;
+        extra)->string_size;
     *reinterpret_cast<int *>(dst) = lexicographical_compare(
         reinterpret_cast<const uint32_t *>(src[1]),
         reinterpret_cast<const uint32_t *>(src[1]) + stringsize,
@@ -251,7 +251,7 @@ size_t dynd::make_fixed_string_comparison_kernel(
     fixed_string_compare_kernel_extra *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->alloc_ck<fixed_string_compare_kernel_extra>(ckb_offset);
-    e->base.set_function<expr_single_t>(
+    e->base.function = reinterpret_cast<void *>(
         fixed_string_comparisons_table[lookup[encoding]][comptype]);
     e->string_size = string_size;
     return ckb_offset;
@@ -377,7 +377,7 @@ size_t dynd::make_string_comparison_kernel(
     ckernel_prefix *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->alloc_ck<ckernel_prefix>(ckb_offset);
-    e->set_function<expr_single_t>(
+    e->function = reinterpret_cast<void *>(
         string_comparisons_table[lookup[encoding]][comptype]);
     return ckb_offset;
   } else {

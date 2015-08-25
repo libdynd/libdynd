@@ -108,10 +108,10 @@ public:
                         ckb)->alloc_ck<extra_type>(ckb_offset);
     switch (kernreq) {
     case kernel_request_single:
-      e->base().set_function(m_op_pair.single);
+      e->base().function = reinterpret_cast<void *>(m_op_pair.single);
       break;
     case kernel_request_strided:
-      e->base().set_function(m_op_pair.strided);
+      e->base().function = reinterpret_cast<void *>(m_op_pair.strided);
       break;
     default: {
       stringstream ss;

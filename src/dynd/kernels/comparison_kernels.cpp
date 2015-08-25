@@ -35,8 +35,8 @@ size_t dynd::make_comparison_kernel(void *ckb, intptr_t ckb_offset,
   }
 }
 
-static expr_single_t compare_kernel_table[builtin_type_id_count -
-                                          2][builtin_type_id_count - 2][7] = {
+static expr_single_t compare_kernel_table
+    [builtin_type_id_count - 2][builtin_type_id_count - 2][7] = {
 #define INNER_LEVEL(src0_type, src1_type)                                      \
   {                                                                            \
     &single_comparison_builtin<src0_type, src1_type>::sorting_less,            \
@@ -61,14 +61,14 @@ static expr_single_t compare_kernel_table[builtin_type_id_count -
         INNER_LEVEL(src0_type, dynd::complex<float>),                          \
         INNER_LEVEL(src0_type, dynd::complex<double>)                          \
   }
-
-    SRC0_TYPE_LEVEL(bool1), SRC0_TYPE_LEVEL(int8), SRC0_TYPE_LEVEL(int16),
-    SRC0_TYPE_LEVEL(int32), SRC0_TYPE_LEVEL(int64), SRC0_TYPE_LEVEL(int128),
-    SRC0_TYPE_LEVEL(uint8), SRC0_TYPE_LEVEL(uint16), SRC0_TYPE_LEVEL(uint32),
-    SRC0_TYPE_LEVEL(uint64), SRC0_TYPE_LEVEL(uint128), SRC0_TYPE_LEVEL(float16),
-    SRC0_TYPE_LEVEL(float32), SRC0_TYPE_LEVEL(float64),
-    SRC0_TYPE_LEVEL(float128), SRC0_TYPE_LEVEL(dynd::complex<float>),
-    SRC0_TYPE_LEVEL(dynd::complex<double>)
+        SRC0_TYPE_LEVEL(bool1), SRC0_TYPE_LEVEL(int8), SRC0_TYPE_LEVEL(int16),
+        SRC0_TYPE_LEVEL(int32), SRC0_TYPE_LEVEL(int64), SRC0_TYPE_LEVEL(int128),
+        SRC0_TYPE_LEVEL(uint8), SRC0_TYPE_LEVEL(uint16),
+        SRC0_TYPE_LEVEL(uint32), SRC0_TYPE_LEVEL(uint64),
+        SRC0_TYPE_LEVEL(uint128), SRC0_TYPE_LEVEL(float16),
+        SRC0_TYPE_LEVEL(float32), SRC0_TYPE_LEVEL(float64),
+        SRC0_TYPE_LEVEL(float128), SRC0_TYPE_LEVEL(dynd::complex<float>),
+        SRC0_TYPE_LEVEL(dynd::complex<double>)
 #undef SRC0_TYPE_LEVEL
 #undef INNER_LEVEL
 };
@@ -86,10 +86,9 @@ size_t dynd::make_builtin_type_comparison_kernel(void *ckb, intptr_t ckb_offset,
     ckernel_prefix *result =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->alloc_ck<ckernel_prefix>(ckb_offset);
-    result->set_function<expr_single_t>(
-        compare_kernel_table[src0_type_id -
-                             bool_type_id][src1_type_id -
-                                           bool_type_id][comptype]);
+    result->function = reinterpret_cast<void *>(
+        compare_kernel_table[src0_type_id - bool_type_id]
+                            [src1_type_id - bool_type_id][comptype]);
     return ckb_offset;
   } else {
     throw not_comparable_error(ndt::type(src0_type_id), ndt::type(src1_type_id),

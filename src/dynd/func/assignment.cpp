@@ -128,15 +128,16 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb,
       ckernel_prefix *e =
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->alloc_ck<ckernel_prefix>(ckb_offset);
-      e->set_function<expr_strided_t>(wrap_single_as_strided_fixedcount[nsrc]);
+      e->function =
+          reinterpret_cast<void *>(wrap_single_as_strided_fixedcount[nsrc]);
       e->destructor = &simple_wrapper_kernel_destruct;
       return ckb_offset;
     } else {
       nd::wrap_single_as_strided_ck *e =
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
               ->alloc_ck<nd::wrap_single_as_strided_ck>(ckb_offset);
-      e->base.set_function<expr_strided_t>(
-          &nd::wrap_single_as_strided_ck::strided);
+      e->base.function =
+          reinterpret_cast<void *>(&nd::wrap_single_as_strided_ck::strided);
       e->base.destructor = &nd::wrap_single_as_strided_ck::destruct;
       e->nsrc = nsrc;
       return ckb_offset;

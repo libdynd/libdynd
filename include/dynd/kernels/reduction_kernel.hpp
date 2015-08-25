@@ -53,7 +53,7 @@ namespace nd {
       template <typename T>
       void set_first_call_function(T fnptr)
       {
-        set_function<T>(fnptr);
+        function = reinterpret_cast<void *>(fnptr);
       }
 
       expr_strided_t get_followup_call_function() const
@@ -69,8 +69,32 @@ namespace nd {
 
     template <typename SelfType>
     struct base_reduction_kernel
-        : kernel_prefix_wrapper<SelfType, reduction_ckernel_prefix> {
-      typedef SelfType self_type;
+        : kernel_prefix_wrapper<reduction_ckernel_prefix, SelfType> {
+      typedef kernel_prefix_wrapper<reduction_ckernel_prefix, SelfType>
+      wrapper_type;
+
+      template <typename... A>
+      static SelfType *init(reduction_ckernel_prefix *prefix,
+                            kernel_request_t kernreq, A &&... args)
+      {
+        SelfType *self =
+            wrapper_type::init(prefix, kernreq, std::forward<A>(args)...);
+        // Get the function pointer for the first_call
+        if (kernreq == kernel_request_single) {
+          prefix->set_first_call_function(&SelfType::single_first);
+        } else if (kernreq == kernel_request_strided) {
+          prefix->set_first_call_function(&SelfType::strided_first);
+        } else {
+          std::stringstream ss;
+          ss << "make_lifted_reduction_ckernel: unrecognized request "
+             << (int)kernreq;
+          throw std::runtime_error(ss.str());
+        }
+        // The function pointer for followup accumulation calls
+        prefix->set_followup_call_function(&SelfType::strided_followup);
+
+        return self;
+      }
     };
 
     /**
@@ -111,8 +135,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         // The first call at the "dst" address
         expr_single_t opchild_first_call =
             echild->get_first_call_function<expr_single_t>();
@@ -131,8 +154,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_followup_call =
             echild->get_followup_call_function();
         expr_single_t opchild_first_call =
@@ -158,7 +180,8 @@ namespace nd {
             src0 += src0_stride;
           }
         } else {
-          // With a non-zero stride, each iteration of the outer loop is "first"
+          // With a non-zero stride, each iteration of the outer loop is
+          // "first"
           for (size_t i = 0; i != count; ++i) {
             opchild_first_call(echild, dst, &src0);
             if (inner_size > 1) {
@@ -178,8 +201,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_followup_call =
             echild->get_followup_call_function();
         intptr_t inner_size = e->size;
@@ -203,24 +225,7 @@ namespace nd {
                                   intptr_t ckb_offset, intptr_t src_stride,
                                   intptr_t src_size, kernel_request_t kernreq)
       {
-        initial_reduction_kernel *e =
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-                ->alloc_ck<initial_reduction_kernel>(ckb_offset);
-        e->destructor = &initial_reduction_kernel::destruct;
-        // Get the function pointer for the first_call
-        if (kernreq == kernel_request_single) {
-          e->set_first_call_function(&initial_reduction_kernel::single_first);
-        } else if (kernreq == kernel_request_strided) {
-          e->set_first_call_function(&initial_reduction_kernel::strided_first);
-        } else {
-          std::stringstream ss;
-          ss << "make_lifted_reduction_ckernel: unrecognized request "
-             << (int)kernreq;
-          throw std::runtime_error(ss.str());
-        }
-        // The function pointer for followup accumulation calls
-        e->set_followup_call_function(
-            &initial_reduction_kernel::strided_followup);
+        initial_reduction_kernel *e = make(ckb, kernreq, ckb_offset);
         // The striding parameters
         e->src_stride = src_stride;
         e->size = src_size;
@@ -260,8 +265,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_first_call =
             echild->get_first_call_function<expr_strided_t>();
         opchild_first_call(echild, dst, e->dst_stride, src, &e->src_stride,
@@ -274,8 +278,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_first_call =
             echild->get_first_call_function<expr_strided_t>();
         expr_strided_t opchild_followup_call =
@@ -300,7 +303,8 @@ namespace nd {
             src0 += src0_stride;
           }
         } else {
-          // With a non-zero stride, each iteration of the outer loop is "first"
+          // With a non-zero stride, each iteration of the outer loop is
+          // "first"
           for (size_t i = 0; i != count; ++i) {
             opchild_first_call(echild, dst, inner_dst_stride, &src0,
                                &inner_src_stride, inner_size);
@@ -316,8 +320,7 @@ namespace nd {
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
         reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(
-                e->get_child());
+            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
         expr_strided_t opchild_followup_call =
             echild->get_followup_call_function();
         intptr_t inner_size = e->size;
@@ -342,32 +345,8 @@ namespace nd {
                                 intptr_t dst_stride, intptr_t src_stride,
                                 intptr_t src_size, kernel_request_t kernreq)
       {
-        nd::functional::strided_initial_broadcast_kernel_extra *e =
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-                ->alloc_ck<
-                      nd::functional::strided_initial_broadcast_kernel_extra>(
-                      ckb_offset);
-        e->destructor =
-            &nd::functional::strided_initial_broadcast_kernel_extra::destruct;
-        // Get the function pointer for the first_call
-        if (kernreq == kernel_request_single) {
-          e->set_first_call_function(
-              &nd::functional::strided_initial_broadcast_kernel_extra::
-                   single_first);
-        } else if (kernreq == kernel_request_strided) {
-          e->set_first_call_function(
-              &nd::functional::strided_initial_broadcast_kernel_extra::
-                   strided_first);
-        } else {
-          std::stringstream ss;
-          ss << "make_lifted_reduction_ckernel: unrecognized request "
-             << (int)kernreq;
-          throw std::runtime_error(ss.str());
-        }
-        // The function pointer for followup accumulation calls
-        e->set_followup_call_function(
-            &nd::functional::strided_initial_broadcast_kernel_extra::
-                 strided_followup);
+        strided_initial_broadcast_kernel_extra *e =
+            make(ckb, kernreq, ckb_offset);
         // The striding parameters
         e->dst_stride = dst_stride;
         e->src_stride = src_stride;
@@ -437,8 +416,7 @@ namespace nd {
                                           char *const *src)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         // The first call to initialize the "dst" value
@@ -457,8 +435,7 @@ namespace nd {
                                 const intptr_t *src_stride, size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         expr_single_t opchild_dst_init =
@@ -508,8 +485,7 @@ namespace nd {
                                            size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
         expr_single_t opchild_ident =
@@ -551,8 +527,7 @@ namespace nd {
                                    const intptr_t *src_stride, size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         // No initialization, all reduction
         expr_strided_t opchild_reduce =
             echild_reduce->get_function<expr_strided_t>();
@@ -593,7 +568,8 @@ namespace nd {
                       ckb_offset);
         e->destructor =
             &nd::functional::strided_inner_reduction_kernel_extra::destruct;
-        // Cannot have both a dst_initialization kernel and a reduction identity
+        // Cannot have both a dst_initialization kernel and a reduction
+        // identity
         if (identity.is_null()) {
           // Get the function pointer for the first_call, for the case with
           // no reduction identity
@@ -651,7 +627,8 @@ namespace nd {
             elwise_reduction_tp->get_npos() != 2) {
           std::stringstream ss;
           ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
-          ss << "funcproto must be unary or a binary expr with all equal types";
+          ss << "funcproto must be unary or a binary expr with all equal "
+                "types";
           throw std::runtime_error(ss.str());
         }
         ckb_offset = elwise_reduction->instantiate(
@@ -680,13 +657,6 @@ namespace nd {
         return ckb_offset;
       }
     };
-
-    //    base_kernel<SelfType, PrefixType>
-    //    base_strided_kernel
-
-    //    base_strided_kernel
-
-    //    base_strided_kernel
 
     /**
      * STRIDED INNER BROADCAST DIMENSION
@@ -743,8 +713,7 @@ namespace nd {
         self_type *e = reinterpret_cast<self_type *>(extra);
         ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         expr_strided_t opchild_ident =
             echild_ident->get_function<expr_strided_t>();
         expr_strided_t opchild_reduce =
@@ -769,8 +738,7 @@ namespace nd {
         self_type *e = reinterpret_cast<self_type *>(extra);
         ckernel_prefix *echild_dst_init = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         expr_strided_t opchild_dst_init =
             echild_dst_init->get_function<expr_strided_t>();
         expr_strided_t opchild_reduce =
@@ -812,8 +780,7 @@ namespace nd {
         self_type *e = reinterpret_cast<self_type *>(extra);
         ckernel_prefix *echild_ident = reinterpret_cast<ckernel_prefix *>(
             reinterpret_cast<char *>(extra) + e->dst_init_kernel_offset);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         expr_strided_t opchild_ident =
             echild_ident->get_function<expr_strided_t>();
         expr_strided_t opchild_reduce =
@@ -855,8 +822,7 @@ namespace nd {
                                    const intptr_t *src_stride, size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        ckernel_prefix *echild_reduce =
-            extra->get_child(sizeof(self_type));
+        ckernel_prefix *echild_reduce = extra->get_child(sizeof(self_type));
         // No initialization, all reduction
         expr_strided_t opchild_reduce =
             echild_reduce->get_function<expr_strided_t>();
@@ -876,7 +842,8 @@ namespace nd {
       /*
             static intptr_t
             instantiate(char *_static_data, size_t DYND_UNUSED(data_size),
-                        char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                        char *DYND_UNUSED(data), void *ckb, intptr_t
+         ckb_offset,
                         const ndt::type &dst_tp, const char *dst_arrmeta,
                         intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                         const char *const *src_arrmeta, kernel_request_t
@@ -912,7 +879,8 @@ namespace nd {
                       ckb_offset);
         e->destructor =
             &nd::functional::strided_inner_broadcast_kernel::destruct;
-        // Cannot have both a dst_initialization kernel and a reduction identity
+        // Cannot have both a dst_initialization kernel and a reduction
+        // identity
         if (identity.is_null()) {
           // Get the function pointer for the first_call, for the case with
           // no reduction identity
@@ -968,7 +936,8 @@ namespace nd {
             elwise_reduction_tp->get_npos() != 2) {
           std::stringstream ss;
           ss << "make_lifted_reduction_ckernel: elwise reduction ckernel ";
-          ss << "funcproto must be unary or a binary expr with all equal types";
+          ss << "funcproto must be unary or a binary expr with all equal "
+                "types";
           throw std::runtime_error(ss.str());
         }
         if (elwise_reduction_tp->get_return_type() != dst_tp) {

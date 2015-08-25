@@ -11,17 +11,11 @@
 namespace dynd {
 namespace nd {
 
-  template <typename SelfType, typename PrefixType>
+  template <typename PrefixType, typename SelfType>
   struct kernel_prefix_wrapper : PrefixType {
-    DYND_CUDA_HOST_DEVICE static SelfType *get_self(ckernel_prefix *rawself)
+    DYND_CUDA_HOST_DEVICE static SelfType *get_self(PrefixType *rawself)
     {
       return reinterpret_cast<SelfType *>(rawself);
-    }
-
-    DYND_CUDA_HOST_DEVICE static const SelfType *
-    get_self(const ckernel_prefix *rawself)
-    {
-      return reinterpret_cast<const SelfType *>(rawself);
     }
 
     template <typename CKBT>
@@ -69,8 +63,7 @@ namespace nd {
       intptr_t ckb_offset = inout_ckb_offset;
       inc_ckb_offset<SelfType>(inout_ckb_offset);
       ckb->reserve(inout_ckb_offset);
-      ckernel_prefix *rawself =
-          ckb->template get_at<ckernel_prefix>(ckb_offset);
+      PrefixType *rawself = ckb->template get_at<PrefixType>(ckb_offset);
       return ckb->template init<SelfType>(rawself, kernreq,
                                           std::forward<A>(args)...);
     }
@@ -85,14 +78,9 @@ namespace nd {
      * the base function and destructor.                                       \
      */
     template <typename... A>
-    static SelfType *init(ckernel_prefix *rawself,
+    static SelfType *init(PrefixType *rawself,
                           kernel_request_t DYND_UNUSED(kernreq), A &&... args)
     {
-      /* Alignment requirement of the type. */
-      static_assert(static_cast<size_t>(scalar_align_of<SelfType>::value) <=
-                        static_cast<size_t>(scalar_align_of<uint64_t>::value),
-                    "ckernel types require alignment <= 64 bits");
-
       /* Call the constructor in-place. */
       SelfType *self = new (rawself) SelfType(args...);
       /* Double check that the C++ struct layout is as we expect. */
@@ -109,12 +97,9 @@ namespace nd {
      * The ckernel destructor function, which is placed in
      * the ckernel_prefix destructor.
      */
-    static void destruct(ckernel_prefix *rawself)
+    static void destruct(ckernel_prefix *self)
     {
-      SelfType *self = get_self(rawself);
-      /* If there are any child kernels, a child class must implement */
-      /* this to destroy them. */
-      self->~SelfType();
+      reinterpret_cast<SelfType *>(self)->~SelfType();
     }
 
     static intptr_t instantiate(
@@ -133,9 +118,9 @@ namespace nd {
     }
   };
 
-  template <typename SelfType, typename PrefixType>
+  template <typename PrefixType, typename SelfType>
   template <typename... A>
-  SelfType *kernel_prefix_wrapper<SelfType, PrefixType>::make(
+  SelfType *kernel_prefix_wrapper<PrefixType, SelfType>::make(
       void *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset,
       A &&... args)
   {
@@ -175,9 +160,9 @@ namespace nd {
  */
 #define BASE_KERNEL(KERNREQ, ...)                                              \
   template <typename SelfType>                                                 \
-  struct base_kernel<SelfType> : kernel_prefix_wrapper<SelfType,               \
-                                                       ckernel_prefix> {       \
-    typedef kernel_prefix_wrapper<SelfType, ckernel_prefix> parent_type;       \
+  struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix,         \
+                                                       SelfType> {             \
+    typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;       \
                                                                                \
     /** Initializes just the ckernel_prefix function member. */                \
     template <typename... A>                                                   \

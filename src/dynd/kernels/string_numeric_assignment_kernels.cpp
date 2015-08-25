@@ -467,7 +467,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(
     string_to_builtin_kernel *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->alloc_ck<string_to_builtin_kernel>(ckb_offset);
-    e->base.set_function<expr_single_t>(
+    e->base.function = reinterpret_cast<void *>(
         static_string_to_builtin_kernels[dst_type_id - bool_type_id]);
     e->base.destructor = &string_to_builtin_kernel::destruct;
     // The kernel data owns this reference
@@ -540,7 +540,8 @@ size_t dynd::make_builtin_to_string_assignment_kernel(
     builtin_to_string_kernel_extra *e =
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->alloc_ck<builtin_to_string_kernel_extra>(ckb_offset);
-    e->base.set_function<expr_single_t>(builtin_to_string_kernel_extra::single);
+    e->base.function =
+        reinterpret_cast<void *>(builtin_to_string_kernel_extra::single);
     e->base.destructor = builtin_to_string_kernel_extra::destruct;
     // The kernel data owns this reference
     e->dst_string_tp = static_cast<const ndt::base_string_type *>(
