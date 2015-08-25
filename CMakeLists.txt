@@ -293,6 +293,7 @@ set(libdynd_SRC
     src/dynd/func/compose.cpp
     src/dynd/func/compound.cpp
     src/dynd/func/copy.cpp
+    src/dynd/func/constant.cpp
     src/dynd/func/elwise.cpp
     src/dynd/func/fft.cpp
     src/dynd/func/reduction.cpp
@@ -317,6 +318,7 @@ set(libdynd_SRC
     include/dynd/func/comparison.hpp
     include/dynd/func/compose.hpp
     include/dynd/func/compound.hpp
+    include/dynd/func/constant.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/fft.hpp
     include/dynd/func/apply.hpp
@@ -348,7 +350,6 @@ set(libdynd_SRC
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_builder.cpp
-    src/dynd/kernels/ckernel_common_functions.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy.cpp
@@ -391,6 +392,7 @@ set(libdynd_SRC
     include/dynd/kernels/compose_kernel.hpp
     include/dynd/kernels/compound_kernel.hpp
     include/dynd/kernels/copy.hpp
+    include/dynd/kernels/constant_kernel.hpp
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/date_adapter_kernels.hpp
     include/dynd/kernels/datetime_adapter_kernels.hpp

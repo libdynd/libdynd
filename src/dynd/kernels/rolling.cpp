@@ -103,9 +103,10 @@ intptr_t nd::functional::rolling_ck::instantiate(
   }
   self->m_window_size = static_data->window_size;
   // Create the NA-filling child ckernel
-  ckb_offset = kernels::make_constant_value_assignment_ckernel(
-      ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
-      numeric_limits<double>::quiet_NaN(), kernel_request_strided, ectx);
+  // TODO: Need to fix this
+//  ckb_offset = kernels::make_constant_value_assignment_ckernel(
+  //    ckb, ckb_offset, dst_el_tp, dst_el_arrmeta,
+    //  numeric_limits<double>::quiet_NaN(), kernel_request_strided, ectx);
   // Re-retrieve the self pointer, because it may be at a new memory location
   // now
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)

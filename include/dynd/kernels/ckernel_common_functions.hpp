@@ -17,7 +17,7 @@ namespace kernels {
  * A function to destroy a ckernel which doesn't have
  * any extra data, and has a single child kernel.
  */
-void destroy_trivial_parent_ckernel(ckernel_prefix *ckp);
+//void destroy_trivial_parent_ckernel(ckernel_prefix *ckp);
 
 /**
  * An expr single ckernel function which adapts a child
@@ -54,16 +54,6 @@ void expr_as_unary_adapter_strided_ckernel(
                 char *dst, intptr_t dst_stride,
                 const char *src, intptr_t src_stride,
                 size_t count, ckernel_prefix *ckp);
-
-/**
- * Makes a ckernel that ignores the src values, and writes
- * constant values to the output.
- *
- */
-size_t make_constant_value_assignment_ckernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const nd::array &constant,
-    kernel_request_t kernreq, const eval::eval_context *ectx);
 
 /**
  * Adds an adapter ckernel which wraps a child expr ckernel
