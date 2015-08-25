@@ -90,7 +90,7 @@ struct ckernel_prefix {
    * Call to get the kernel function pointer, whose type
    * must be known by the context.
    *
-   *      kdp->get_function<expr_single_t>() 
+   *      kdp->get_function<expr_single_t>()
    */
   template <typename T>
   DYND_CUDA_HOST_DEVICE T get_function() const
