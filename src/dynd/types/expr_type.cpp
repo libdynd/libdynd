@@ -322,13 +322,18 @@ static void src_deref_single(ckernel_prefix *self, char *dst, char *const *src)
   child_fn(child, dst, reinterpret_cast<char *const *>(*src));
 }
 
+static void src_deref_destruct(ckernel_prefix *self)
+{
+  self->get_child(sizeof(ckernel_prefix))->destroy();
+}
+
 static size_t make_src_deref_ckernel(void *ckb, intptr_t ckb_offset)
 {
   ckernel_prefix *self =
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
           ->alloc_ck<ckernel_prefix>(ckb_offset);
   self->function = reinterpret_cast<void *>(&src_deref_single);
-  self->destructor = &kernels::destroy_trivial_parent_ckernel;
+  self->destructor = &src_deref_destruct;
   return ckb_offset;
 }
 

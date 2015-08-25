@@ -14,12 +14,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct reduction_kernel_prefix {
-      void *init_func;
-      void *func;
-    };
-
-    struct reduction_ckernel_prefix : ckernel_prefix {
+    struct reduction_kernel_prefix : ckernel_prefix {
       struct static_data_type {
         callable child;
         callable_property properties;
@@ -65,25 +60,49 @@ namespace nd {
       {
         followup_call_function = fnptr;
       }
+
+      void single_first(char *dst, char *const *src)
+      {
+        (*reinterpret_cast<expr_single_t>(function))(this, dst, src);
+      }
+
+      void strided_first(char *dst, intptr_t dst_stride, char *const *src,
+                         const intptr_t *src_stride, size_t count)
+      {
+        (*reinterpret_cast<expr_strided_t>(function))(this, dst, dst_stride,
+                                                      src, src_stride, count);
+      }
+
+      void strided_followup(char *dst, intptr_t dst_stride, char *const *src,
+                            const intptr_t *src_stride, size_t count)
+      {
+        (*reinterpret_cast<expr_strided_t>(followup_call_function))(
+            this, dst, dst_stride, src, src_stride, count);
+      }
     };
 
     template <typename SelfType>
     struct base_reduction_kernel
-        : kernel_prefix_wrapper<reduction_ckernel_prefix, SelfType> {
-      typedef kernel_prefix_wrapper<reduction_ckernel_prefix, SelfType>
+        : kernel_prefix_wrapper<reduction_kernel_prefix, SelfType> {
+      typedef kernel_prefix_wrapper<reduction_kernel_prefix, SelfType>
       wrapper_type;
 
+      reduction_kernel_prefix *get_reduction_child()
+      {
+        return reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
+      }
+
       template <typename... A>
-      static SelfType *init(reduction_ckernel_prefix *prefix,
+      static SelfType *init(reduction_kernel_prefix *prefix,
                             kernel_request_t kernreq, A &&... args)
       {
         SelfType *self =
             wrapper_type::init(prefix, kernreq, std::forward<A>(args)...);
         // Get the function pointer for the first_call
         if (kernreq == kernel_request_single) {
-          prefix->set_first_call_function(&SelfType::single_first);
+          prefix->set_first_call_function(&SelfType::single_first_wrapper);
         } else if (kernreq == kernel_request_strided) {
-          prefix->set_first_call_function(&SelfType::strided_first);
+          prefix->set_first_call_function(&SelfType::strided_first_wrapper);
         } else {
           std::stringstream ss;
           ss << "make_lifted_reduction_ckernel: unrecognized request "
@@ -91,9 +110,36 @@ namespace nd {
           throw std::runtime_error(ss.str());
         }
         // The function pointer for followup accumulation calls
-        prefix->set_followup_call_function(&SelfType::strided_followup);
+        prefix->set_followup_call_function(&SelfType::strided_followup_wrapper);
 
         return self;
+      }
+
+      static void single_first_wrapper(ckernel_prefix *self, char *dst,
+                                       char *const *src)
+      {
+        return reinterpret_cast<SelfType *>(self)->single_first(dst, src);
+      }
+
+      static void strided_first_wrapper(ckernel_prefix *self, char *dst,
+                                        intptr_t dst_stride, char *const *src,
+                                        const intptr_t *src_stride,
+                                        size_t count)
+
+      {
+        return reinterpret_cast<SelfType *>(self)
+            ->strided_first(dst, dst_stride, src, src_stride, count);
+      }
+
+      static void strided_followup_wrapper(ckernel_prefix *self, char *dst,
+                                           intptr_t dst_stride,
+                                           char *const *src,
+                                           const intptr_t *src_stride,
+                                           size_t count)
+
+      {
+        return reinterpret_cast<SelfType *>(self)
+            ->strided_followup(dst, dst_stride, src, src_stride, count);
       }
     };
 
@@ -125,69 +171,60 @@ namespace nd {
       intptr_t size;
       intptr_t src_stride;
 
+      initial_reduction_kernel(std::intptr_t size, std::intptr_t src_stride)
+          : size(size), src_stride(src_stride)
+      {
+      }
+
       ~initial_reduction_kernel()
       {
         get_child()->destroy();
       }
 
-      static void single_first(ckernel_prefix *extra, char *dst,
-                               char *const *src)
+      void single_first(char *dst, char *const *src)
       {
-        self_type *e = reinterpret_cast<self_type *>(extra);
-        reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
+        reduction_kernel_prefix *child = get_reduction_child();
         // The first call at the "dst" address
-        expr_single_t opchild_first_call =
-            echild->get_first_call_function<expr_single_t>();
-        opchild_first_call(echild, dst, src);
-        if (e->size > 1) {
+        child->single_first(dst, src);
+        if (size > 1) {
           // All the followup calls at the "dst" address
-          expr_strided_t opchild = echild->get_followup_call_function();
-          char *src_second = src[0] + e->src_stride;
-          opchild(echild, dst, 0, &src_second, &e->src_stride, e->size - 1);
+          char *src_second = src[0] + src_stride;
+          child->strided_followup(dst, 0, &src_second, &src_stride, size - 1);
         }
       }
 
-      static void strided_first(ckernel_prefix *extra, char *dst,
-                                intptr_t dst_stride, char *const *src,
-                                const intptr_t *src_stride, size_t count)
+      void strided_first(char *dst, intptr_t dst_stride, char *const *src,
+                         const intptr_t *src_stride, size_t count)
       {
-        self_type *e = reinterpret_cast<self_type *>(extra);
-        reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
-        expr_strided_t opchild_followup_call =
-            echild->get_followup_call_function();
-        expr_single_t opchild_first_call =
-            echild->get_first_call_function<expr_single_t>();
-        intptr_t inner_size = e->size;
-        intptr_t inner_src_stride = e->src_stride;
+        reduction_kernel_prefix *child = get_reduction_child();
+        intptr_t inner_size = size;
+        intptr_t inner_src_stride = this->src_stride;
         char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         if (dst_stride == 0) {
           // With a zero stride, we have one "first", followed by many
-          // "followup"
-          // calls
-          opchild_first_call(echild, dst, &src0);
+          // "followup" calls
+          child->single_first(dst, &src0);
           if (inner_size > 1) {
             char *inner_src_second = src0 + inner_src_stride;
-            opchild_followup_call(echild, dst, 0, &inner_src_second,
-                                  &inner_src_stride, inner_size - 1);
+            child->strided_followup(dst, 0, &inner_src_second,
+                                    &inner_src_stride, inner_size - 1);
           }
           src0 += src0_stride;
           for (intptr_t i = 1; i < (intptr_t)count; ++i) {
-            opchild_followup_call(echild, dst, 0, &src0, &inner_src_stride,
-                                  inner_size);
+            child->strided_followup(dst, 0, &src0, &inner_src_stride,
+                                    inner_size);
             src0 += src0_stride;
           }
         } else {
           // With a non-zero stride, each iteration of the outer loop is
           // "first"
           for (size_t i = 0; i != count; ++i) {
-            opchild_first_call(echild, dst, &src0);
+            child->single_first(dst, &src0);
             if (inner_size > 1) {
               char *inner_src_second = src0 + inner_src_stride;
-              opchild_followup_call(echild, dst, 0, &inner_src_second,
-                                    &inner_src_stride, inner_size - 1);
+              child->strided_followup(dst, 0, &inner_src_second,
+                                      &inner_src_stride, inner_size - 1);
             }
             dst += dst_stride;
             src0 += src0_stride;
@@ -195,22 +232,14 @@ namespace nd {
         }
       }
 
-      static void strided_followup(ckernel_prefix *extra, char *dst,
-                                   intptr_t dst_stride, char *const *src,
-                                   const intptr_t *src_stride, size_t count)
+      void strided_followup(char *dst, intptr_t dst_stride, char *const *src,
+                            const intptr_t *src_stride, size_t count)
       {
-        self_type *e = reinterpret_cast<self_type *>(extra);
-        reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
-        expr_strided_t opchild_followup_call =
-            echild->get_followup_call_function();
-        intptr_t inner_size = e->size;
-        intptr_t inner_src_stride = e->src_stride;
+        reduction_kernel_prefix *child = get_reduction_child();
         char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-          opchild_followup_call(echild, dst, 0, &src0, &inner_src_stride,
-                                inner_size);
+          child->strided_followup(dst, 0, &src0, &this->src_stride, size);
           dst += dst_stride;
           src0 += src0_stride;
         }
@@ -225,10 +254,7 @@ namespace nd {
                                   intptr_t ckb_offset, intptr_t src_stride,
                                   intptr_t src_size, kernel_request_t kernreq)
       {
-        initial_reduction_kernel *e = make(ckb, kernreq, ckb_offset);
-        // The striding parameters
-        e->src_stride = src_stride;
-        e->size = src_size;
+        make(ckb, kernreq, ckb_offset, src_size, src_stride);
         return ckb_offset;
       }
     };
@@ -255,30 +281,32 @@ namespace nd {
       intptr_t size;
       intptr_t dst_stride, src_stride;
 
+      strided_initial_broadcast_kernel_extra(std::intptr_t size,
+                                             std::intptr_t dst_stride,
+                                             std::intptr_t src_stride)
+          : size(size), dst_stride(dst_stride), src_stride(src_stride)
+      {
+      }
+
       ~strided_initial_broadcast_kernel_extra()
       {
         get_child()->destroy();
       }
 
-      static void single_first(ckernel_prefix *extra, char *dst,
-                               char *const *src)
+      void single_first(char *dst, char *const *src)
       {
-        self_type *e = reinterpret_cast<self_type *>(extra);
-        reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
-        expr_strided_t opchild_first_call =
-            echild->get_first_call_function<expr_strided_t>();
-        opchild_first_call(echild, dst, e->dst_stride, src, &e->src_stride,
-                           e->size);
+        reduction_kernel_prefix *child = get_reduction_child();
+        child->strided_first(dst, dst_stride, src, &src_stride, size);
       }
 
-      static void strided_first(ckernel_prefix *extra, char *dst,
-                                intptr_t dst_stride, char *const *src,
-                                const intptr_t *src_stride, size_t count)
+      static void strided_first_wrapper(ckernel_prefix *extra, char *dst,
+                                        intptr_t dst_stride, char *const *src,
+                                        const intptr_t *src_stride,
+                                        size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
+        reduction_kernel_prefix *echild =
+            reinterpret_cast<reduction_kernel_prefix *>(e->get_child());
         expr_strided_t opchild_first_call =
             echild->get_first_call_function<expr_strided_t>();
         expr_strided_t opchild_followup_call =
@@ -314,13 +342,15 @@ namespace nd {
         }
       }
 
-      static void strided_followup(ckernel_prefix *extra, char *dst,
-                                   intptr_t dst_stride, char *const *src,
-                                   const intptr_t *src_stride, size_t count)
+      static void strided_followup_wrapper(ckernel_prefix *extra, char *dst,
+                                           intptr_t dst_stride,
+                                           char *const *src,
+                                           const intptr_t *src_stride,
+                                           size_t count)
       {
         self_type *e = reinterpret_cast<self_type *>(extra);
-        reduction_ckernel_prefix *echild =
-            reinterpret_cast<reduction_ckernel_prefix *>(e->get_child());
+        reduction_kernel_prefix *echild =
+            reinterpret_cast<reduction_kernel_prefix *>(e->get_child());
         expr_strided_t opchild_followup_call =
             echild->get_followup_call_function();
         intptr_t inner_size = e->size;
@@ -345,12 +375,7 @@ namespace nd {
                                 intptr_t dst_stride, intptr_t src_stride,
                                 intptr_t src_size, kernel_request_t kernreq)
       {
-        strided_initial_broadcast_kernel_extra *e =
-            make(ckb, kernreq, ckb_offset);
-        // The striding parameters
-        e->dst_stride = dst_stride;
-        e->src_stride = src_stride;
-        e->size = src_size;
+        make(ckb, kernreq, ckb_offset, src_size, dst_stride, src_stride);
         return ckb_offset;
       }
     };
@@ -981,7 +1006,7 @@ namespace nd {
       }
     };
 
-    struct reduction_kernel : reduction_ckernel_prefix {
+    struct reduction_kernel : reduction_kernel_prefix {
       static void data_init(static_data_type *static_data,
                             std::size_t DYND_UNUSED(data_size), data_type *data,
                             const ndt::type &dst_tp, intptr_t nsrc,
