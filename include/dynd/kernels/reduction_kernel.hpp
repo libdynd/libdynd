@@ -10,6 +10,7 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/gfunc/call_callable.hpp>
 #include <dynd/func/constant.hpp>
+#include <dynd/kernels/constant_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -476,8 +477,7 @@ namespace nd {
             echild_ident->get_function<expr_single_t>();
         expr_strided_t opchild_reduce =
             echild_reduce->get_function<expr_strided_t>();
-        opchild_ident(echild_ident, dst,
-                      const_cast<char *const *>(&e->ident_data));
+        opchild_ident(echild_ident, dst, src);
         // All the followup calls to accumulate at the "dst" address
         opchild_reduce(echild_reduce, dst, 0, src, &e->src_stride, e->size);
       }
@@ -607,8 +607,8 @@ namespace nd {
                   const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                   const ndt::type *src_init_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
-                  intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+                  intptr_t nkwd, const array *kwds,
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         ndt::type src_tp[1];
 
@@ -722,10 +722,10 @@ namespace nd {
               ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
               kernel_request_single, ectx);
         } else {
-
-          ckb_offset = make_assignment_kernel(
-              ckb, ckb_offset, dst_tp, dst_arrmeta, identity.get_type(),
-              identity.get_arrmeta(), kernel_request_single, ectx);
+          ckb_offset = functional::constant_kernel::instantiate(
+              reinterpret_cast<char *>(const_cast<nd::array *>(&identity)), 0,
+              NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, src_tp,
+              src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
         }
 
         return ckb_offset;
@@ -931,11 +931,11 @@ namespace nd {
       instantiate(static_data_type *static_data,
                   std::size_t DYND_UNUSED(data_size), data_type *data,
                   void *ckb, intptr_t ckb_offset, const ndt::type &dst_i_tp,
-                  const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                  const char *dst_arrmeta, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta,
                   kernel_request_t kernreq, const eval::eval_context *ectx,
-                  intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+                  intptr_t nkwd, const array *kwds,
+                  const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::type &src_child_tp =
             src_tp[0].extended<ndt::base_dim_type>()->get_element_type();
@@ -952,8 +952,6 @@ namespace nd {
                 dst_arrmeta);
 
         callable_type_data *elwise_reduction = static_data->child.get();
-        const ndt::callable_type *elwise_reduction_tp =
-            static_data->child.get_type();
         const array &identity = data->identity;
 
         intptr_t root_ckb_offset = ckb_offset;
@@ -1016,9 +1014,8 @@ namespace nd {
 
         ckb_offset = elwise_reduction->instantiate(
             elwise_reduction->static_data, 0, NULL, ckb, ckb_offset, dst_tp,
-            dst_arrmeta, elwise_reduction_tp->get_npos(), &src_child_tp,
-            src_arrmeta, kernel_request_strided, ectx, 0, NULL,
-            std::map<std::string, ndt::type>());
+            dst_arrmeta, nsrc, &src_child_tp, src_arrmeta,
+            kernel_request_strided, ectx, nkwd - 3, kwds + 3, tp_vars);
         // Make sure there's capacity for the next ckernel
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
             ->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -1032,9 +1029,10 @@ namespace nd {
               ckb, ckb_offset, dst_tp, dst_arrmeta, src_child_tp,
               src_arrmeta[0], kernel_request_strided, ectx);
         } else {
-          ckb_offset = make_assignment_kernel(
-              ckb, ckb_offset, dst_tp, dst_arrmeta, identity.get_type(),
-              identity.get_arrmeta(), kernel_request_strided, ectx);
+          ckb_offset = functional::constant_kernel::instantiate(
+              reinterpret_cast<char *>(const_cast<nd::array *>(&identity)), 0,
+              NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+              src_arrmeta, kernel_request_strided, ectx, nkwd, kwds, tp_vars);
         }
 
         return ckb_offset;
