@@ -24,25 +24,19 @@ nd::callable nd::functional::reduction(const callable &child)
   case 1:
     break;
   case 2:
-    return reduction((child.get_flags() | right_associative)
-                         ? left_compound(child)
-                         : right_compound(child));
+    return reduction((child.get_flags() | right_associative) ? left_compound(child) : right_compound(child));
   default: {
     stringstream ss;
-    ss << "'child' must be a unary callable, but its signature is "
-       << child.get_array_type();
+    ss << "'child' must be a unary callable, but its signature is " << child.get_array_type();
     throw invalid_argument(ss.str());
   }
   }
 
-  return callable::make<reduction_kernel>(
-      ndt::callable_type::make(
-          ndt::ellipsis_dim_type::make_if_not_variadic(child.get_ret_type()),
-          {ndt::ellipsis_dim_type::make_if_not_variadic(child.get_arg_type(0))},
-          {"axes", "identity", "keepdims"},
-          {ndt::option_type::make(ndt::type("Fixed * int32")),
-           ndt::option_type::make(child.get_ret_type()),
-           ndt::option_type::make(ndt::type::make<bool1>())}),
-      reduction_kernel::static_data_type(child),
-      sizeof(reduction_kernel::data_type));
+  return callable::make<reduction_virtual_kernel>(
+      ndt::callable_type::make(ndt::ellipsis_dim_type::make_if_not_variadic(child.get_ret_type()),
+                               {ndt::ellipsis_dim_type::make_if_not_variadic(child.get_arg_type(0))},
+                               {"axes", "identity", "keepdims"}, {ndt::option_type::make(ndt::type("Fixed * int32")),
+                                                                  ndt::option_type::make(child.get_ret_type()),
+                                                                  ndt::option_type::make(ndt::type::make<bool1>())}),
+      reduction_virtual_kernel::static_data_type(child), sizeof(reduction_virtual_kernel::data_type));
 }
