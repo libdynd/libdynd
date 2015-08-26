@@ -10,7 +10,7 @@ if [ `uname` == Linux ]; then
 elif [ `uname` == Darwin ]; then
     export CC="$PREFIX/bin/gcc"
     export CXX="$PREFIX/bin/g++"
-    CPPFLAGS="-stdlib=libc++"
+#    CPPFLAGS="-stdlib=libc++"
     EXTRAOPTIONS="-DCMAKE_OSX_DEPLOYMENT_TARGET=10.9"
     MACOSX_DEPLOYMENT_TARGET=10.9
 else
