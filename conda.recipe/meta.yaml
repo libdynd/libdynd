@@ -8,9 +8,9 @@ build:
 requirements:
   build:
     - cmake [unix]
-    - gcc >=4.8
+    - gcc >=4.8 [linux]
   run:
-    - libgcc >=4.8
+    - libgcc >=4.8 [linux]
 
 test:
   commands:
