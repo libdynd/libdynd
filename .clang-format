@@ -6,4 +6,4 @@ BreakBeforeBraces: Stroustrup
 Cpp11BracedListStyle: true
 NamespaceIndentation: Inner
 AlwaysBreakTemplateDeclarations: true
-
+ColumnLimit: 120
