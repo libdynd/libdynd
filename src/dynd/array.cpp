@@ -1145,7 +1145,7 @@ bool nd::array::equals_exact(const array &rhs) const
           ndt::type tp[2] = {iter.get_uniform_dtype<0>(),
                              iter.get_uniform_dtype<1>()};
           const char *arrmeta[2] = {iter.arrmeta<0>(), iter.arrmeta<1>()};
-          ndt::type dst_tp = ndt::type::make<int>();
+          ndt::type dst_tp = ndt::type::make<bool1>();
           if ((*not_equal::get().get())(
                   dst_tp, 2, tp, arrmeta, const_cast<char *const *>(src), 0,
                   NULL, std::map<std::string, ndt::type>()).as<bool>()) {
