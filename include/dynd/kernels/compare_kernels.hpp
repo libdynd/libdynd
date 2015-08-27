@@ -605,7 +605,7 @@ namespace nd {
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];
         child_src[1] = src[1] + src1_data_offsets[i];
-        int child_dst;
+        bool1 child_dst;
         opchild(echild, reinterpret_cast<char *>(&child_dst), child_src);
         if (!child_dst) {
           *reinterpret_cast<bool1 *>(dst) = false;
@@ -853,7 +853,7 @@ namespace nd {
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];
         child_src[1] = src[1] + src1_data_offsets[i];
-        int child_dst;
+        bool1 child_dst;
         opchild(echild, reinterpret_cast<char *>(&child_dst), child_src);
         if (child_dst) {
           *reinterpret_cast<bool1 *>(dst) = true;
