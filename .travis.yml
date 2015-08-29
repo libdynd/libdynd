@@ -52,7 +52,7 @@ matrix:
       before_install:
         - export CC=clang
         - export CXX=clang++
-        - wget http://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh -O miniconda.sh
+        - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
         - bash miniconda.sh -b
         - export PATH=$HOME/miniconda/bin:$PATH
         - conda install cython
