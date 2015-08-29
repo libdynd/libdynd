@@ -63,7 +63,8 @@ matrix:
       env: DYND_FFTW=OFF VERBOSE=1
       python: 2.7
       before_install:
-        - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
+        - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
+        - bash miniconda.sh -b
     - compiler: gcc
       env: VALGRIND=ON DYND_FFTW=OFF
       addons:
