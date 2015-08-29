@@ -50,6 +50,11 @@ matrix:
           - $HOME/.cache/pip
           - $HOME/dynd-python/build
       before_install:
+        - echo $TRAVIS_JOB_NUMBER
+        - echo $TRAVIS_JOB_ID
+        - echo $TRAVIS_COMMIT
+        - echo $TRAVIS_BUILD_ID
+        - echo $TRAVIS_BUILD_NUMBER
         - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
         - bash miniconda.sh -b
         - export PATH=$HOME/miniconda/bin:$PATH
