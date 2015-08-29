@@ -65,6 +65,15 @@ matrix:
       before_install:
         - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
         - bash Miniconda-latest-MacOSX-x86_64.sh -b
+        - export PATH=$HOME/miniconda/bin:$PATH
+        - conda install --yes conda-build jinja2
+        - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
+        - conda install --yes cython numpy setuptools
+      script:
+        - export TOKEN=iz-20d586ab-7ed7-4b11-b0c6-d63ac91288b4
+        - conda build conda.recipe
+      after_success:
+        - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
     - compiler: gcc
       env: VALGRIND=ON DYND_FFTW=OFF
       addons:
