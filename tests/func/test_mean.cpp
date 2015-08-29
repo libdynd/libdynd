@@ -16,6 +16,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(Mean, 1D)
 {
   EXPECT_ARRAY_EQ(0.0, nd::mean(nd::array{0.0}));
@@ -37,3 +38,4 @@ TEST(Mean, 2D)
 }
 
 #endif
+*/
