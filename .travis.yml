@@ -64,7 +64,7 @@ matrix:
   #      - mkdir dynd-python/libraries
  #       - mv libdynd dynd-python/libraries/libdynd
 #        - cd dynd-python
-      script:
+      before_script:
         - conda build conda.recipe
       #  - python -c "import numpy; print numpy.__version__"
        # - python setup.py install
