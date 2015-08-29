@@ -4,6 +4,9 @@ package:
 
 build:
   number: 1
+  script_env:
+    - CC
+    - CXX
 
 requirements:
   build:
