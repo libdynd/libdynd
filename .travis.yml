@@ -35,7 +35,6 @@ matrix:
         - python -c "import dynd; dynd.test(exit=True)"
     - language: python
       env: DYND_FFTW=OFF VERBOSE=1
-#      compiler: clang
       python: 2.7
       addons:
         apt:
@@ -45,10 +44,6 @@ matrix:
           packages:
           - g++-4.7
           - cmake
-      cache:
-        directories:
-          - $HOME/.cache/pip
-          - $HOME/dynd-python/build
       before_install:
         - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
         - bash miniconda.sh -b
