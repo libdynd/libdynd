@@ -33,7 +33,7 @@ matrix:
         - python setup.py install
         - cd ..
         - python -c "import dynd; dynd.test(exit=True)"
-    - language: python
+    - language: objective-c
       env: DYND_FFTW=OFF VERBOSE=1
       compiler: clang
       python: 2.7
@@ -50,11 +50,6 @@ matrix:
           - $HOME/.cache/pip
           - $HOME/dynd-python/build
       before_install:
-        - echo $TRAVIS_JOB_NUMBER
-        - echo $TRAVIS_JOB_ID
-        - echo $TRAVIS_COMMIT
-        - echo $TRAVIS_BUILD_ID
-        - echo $TRAVIS_BUILD_NUMBER
         - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
         - bash miniconda.sh -b
         - export PATH=$HOME/miniconda/bin:$PATH
