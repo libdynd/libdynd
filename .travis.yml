@@ -50,8 +50,8 @@ matrix:
           - $HOME/.cache/pip
           - $HOME/dynd-python/build
       before_install:
-        - export CC=clang
-        - export CXX=clang++
+        - export CC="gcc-4.7"
+        - export CXX="g++-4.7"
         - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
         - bash miniconda.sh -b
         - export PATH=$HOME/miniconda/bin:$PATH
