@@ -59,6 +59,11 @@ matrix:
         - conda build conda.recipe
       after_success:
         - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
+    - language: objective-c
+      env: DYND_FFTW=OFF VERBOSE=1
+      python: 2.7
+      before_install:
+        - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
     - compiler: gcc
       env: VALGRIND=ON DYND_FFTW=OFF
       addons:
