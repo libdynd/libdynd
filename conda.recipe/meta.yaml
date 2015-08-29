@@ -9,12 +9,12 @@ build:
     - CXX
     - TRAVIS_BUILD_NUMBER
 
-requirements:
-  build:
-    - cmake [unix]
-    - gcc >=4.8
-  run:
-    - libgcc >=4.8
+#requirements:
+ # build:
+#    - cmake [unix]
+#    - gcc >=4.8
+#  run:
+#    - libgcc >=4.8
 
 test:
   commands:
