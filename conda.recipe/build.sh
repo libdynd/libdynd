@@ -5,8 +5,8 @@ cd $RECIPE_DIR
 
 echo Setting the compiler...
 if [ `uname` == Linux ]; then
-    export CC="$PREFIX/bin/gcc"
-    export CXX="$PREFIX/bin/g++"
+#    export CC="$PREFIX/bin/gcc"
+ #   export CXX="$PREFIX/bin/g++"
 elif [ `uname` == Darwin ]; then
     export CC="$PREFIX/bin/gcc"
     export CXX="$PREFIX/bin/g++"
