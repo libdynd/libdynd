@@ -3,7 +3,7 @@ package:
   version: 0.7.0
 
 build:
-  number: 1
+  number: {{environ.get('TRAVIS_PULL_REQUEST', 0)}}
   script_env:
     - CC
     - CXX
