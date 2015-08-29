@@ -3,7 +3,7 @@ sudo: false
 matrix:
   include:
     - language: python
-      env: DYND_FFTW=OFF VERBOSE=1 CONDA=0
+      env: DYND_FFTW=OFF VERBOSE=1
       compiler: clang
       python: 2.7
       addons:
@@ -34,7 +34,7 @@ matrix:
         - cd ..
         - python -c "import dynd; dynd.test(exit=True)"
     - language: python
-      env: DYND_FFTW=OFF VERBOSE=1 CONDA=1
+      env: DYND_FFTW=OFF VERBOSE=1
       compiler: clang
       python: 2.7
       addons:
@@ -137,7 +137,6 @@ cache:
     - $HOME/libdynd/build
 
 before_script:
-  - if [ $CONDA == 1 ]; then exit 0; fi
   - mkdir build
   - pushd build
   - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=ON ..
