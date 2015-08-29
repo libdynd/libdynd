@@ -33,9 +33,9 @@ matrix:
         - python setup.py install
         - cd ..
         - python -c "import dynd; dynd.test(exit=True)"
-    - language: objective-c
+    - language: python
       env: DYND_FFTW=OFF VERBOSE=1
-      compiler: clang
+#      compiler: clang
       python: 2.7
       addons:
         apt:
