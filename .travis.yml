@@ -53,6 +53,7 @@ matrix:
         - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
         - bash miniconda.sh -b
         - export PATH=$HOME/miniconda/bin:$PATH
+        - if [ $TRAVIS_BRANCH == "master" ]; then conda config --set anaconda_upload yes; fi
         - conda install --yes conda-build
         - conda install --yes cython numpy setuptools
       before_script:
