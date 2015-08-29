@@ -99,20 +99,14 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast)
                                                            kwds("axes", nd::array(initializer_list<int>{0}))));
 }
 
-/*
 TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
 {
-  nd::callable f = nd::functional::reduction(
-      nd::functional::apply([](double x, double y) { return x + y; }));
+  nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
 
-  EXPECT_ARRAY_EQ(
-      (initializer_list<initializer_list<double>>{
-          {1.5 - 2.25, 2.0 + 7.0, 7.0 + 2.125}}),
-      f(initializer_list<initializer_list<double>>{{1.5, 2.0, 7.0},
-                                                   {-2.25, 7.0, 2.125}},
-        kwds("axes", nd::array(initializer_list<int>{0}), "keepdims", true)));
+  EXPECT_ARRAY_EQ((initializer_list<initializer_list<double>>{{1.5 - 2.25, 2.0 + 7.0, 7.0 + 2.125}}),
+                  f(initializer_list<initializer_list<double>>{{1.5, 2.0, 7.0}, {-2.25, 7.0, 2.125}},
+                    kwds("axes", nd::array(initializer_list<int>{0}), "keepdims", true)));
 }
-*/
 
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
 {

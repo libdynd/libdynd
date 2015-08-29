@@ -109,7 +109,7 @@ else()
         endif()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=20 -Wno-type-limits")
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20 -g")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
     endif()
 endif()
 
