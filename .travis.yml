@@ -154,7 +154,7 @@ script:
   - ./tests/test_libdynd
 
 after_success:
-  - echo 'Success'
+  - if [ $TRAVIS_BRANCH == "master" ]; then echo 'Success'; fi
 
 notifications:
   email: false
