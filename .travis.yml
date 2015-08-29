@@ -62,7 +62,7 @@ matrix:
       script:
         - export TOKEN=iz-20d586ab-7ed7-4b11-b0c6-d63ac91288b4
         - conda build conda.recipe
-        - if [ $TRAVIS_BRANCH == "master" ]; then anaconda -t ${TOKEN} upload $(conda build --output conda.recipe); fi
+        - if [ $TRAVIS_BRANCH == "master" ]; then anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd; fi
       after_success:
         - if [ $TRAVIS_BRANCH == "master" ]; then echo 'Success'; fi
     - compiler: gcc
