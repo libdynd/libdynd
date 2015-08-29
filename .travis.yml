@@ -54,7 +54,7 @@ matrix:
         - bash miniconda.sh -b
         - export PATH=$HOME/miniconda/bin:$PATH
         - conda install --yes conda-build
-        - if [ $TRAVIS_BRANCH == "master" ]; then conda install --yes anaconda-client; fi
+        - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then conda install --yes anaconda-client; fi
         - conda install --yes cython numpy setuptools
       before_script:
         - export CC="gcc-4.7"
