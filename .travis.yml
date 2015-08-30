@@ -58,8 +58,8 @@ matrix:
     - conda build conda.recipe
     after_success:
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd
-      --channel dev; fi
+      anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user
+      dynd --channel dev; fi
   - language: objective-c
     osx_image: xcode6.4
     env: DYND_FFTW=OFF VERBOSE=1
@@ -79,8 +79,8 @@ matrix:
     - conda build conda.recipe
     after_success:
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd
-      --channel dev; fi
+      anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user
+      dynd --channel dev; fi
   - compiler: gcc
     env: VALGRIND=ON DYND_FFTW=OFF
     addons:
@@ -165,7 +165,6 @@ notifications:
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
   on_success: change
   on_failure: always
-  
 env:
   global:
-    secure: eKO/WC2eUeFRMkqnxrdXW4m3Jk5tfnoIag6lepruhyvabYwkxQ97Mod6/nyMet7JrtZMDyoZCG2yPt1AWMre2IJxLgFCA7wbHiO2/elTGfbO7SDHkloW6Gx3Hx7x5AdRtOAv8ovQc1WcIBYttR8/reQsy7P1GWsAd2btgDQq9+M=
+    secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
