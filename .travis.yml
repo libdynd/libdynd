@@ -1,166 +1,170 @@
 sudo: false
-
 matrix:
   include:
-    - language: python
-      env: DYND_FFTW=OFF VERBOSE=1
-      compiler: clang
-      python: 2.7
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          - kalakris-cmake
-          packages:
-          - g++-4.7
-          - cmake
-      cache:
-        directories:
-          - $HOME/.cache/pip
-          - $HOME/dynd-python/build
-      before_install:
-        - export CC=clang
-        - export CXX=clang++
-        - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
-      before_script:
-        - cd ..
-        - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
-        - mkdir dynd-python/libraries
-        - mv libdynd dynd-python/libraries/libdynd
-        - cd dynd-python
-      script:
-        - python -c "import numpy; print numpy.__version__"
-        - python setup.py install
-        - cd ..
-        - python -c "import dynd; dynd.test(exit=True)"
-    - language: python
-      env: DYND_FFTW=OFF VERBOSE=1
-      python: 2.7
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          - kalakris-cmake
-          packages:
-          - g++-4.7
-          - cmake
-      before_install:
-        - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
-        - bash miniconda.sh -b
-        - export PATH=$HOME/miniconda/bin:$PATH
-        - conda install --yes conda-build jinja2
-        - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
-      before_script:
-        - export CC="gcc-4.7"
-        - export CXX="g++-4.7"
-      script:
-        - export TOKEN=iz-20d586ab-7ed7-4b11-b0c6-d63ac91288b4
-        - conda build conda.recipe
-      after_success:
-        - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
-    - language: objective-c
-      osx_image: xcode6.4
-      env: DYND_FFTW=OFF VERBOSE=1
-      python: 2.7
-      before_install:
-        - export CC=clang
-        - export CXX=clang++
-        - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
-        - bash Miniconda-latest-MacOSX-x86_64.sh -b
-        - export PATH=$HOME/miniconda/bin:$PATH
-        - conda install --yes conda-build jinja2
-        - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
-      before_script:
-        - export TOKEN=iz-20d586ab-7ed7-4b11-b0c6-d63ac91288b4
-      script:
-        - conda build conda.recipe
-      after_success:
-        - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
-    - compiler: gcc
-      env: VALGRIND=ON DYND_FFTW=OFF
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          - kalakris-cmake
-          packages:
-          - gcc-4.7
-          - g++-4.7
-          - cmake
-          - valgrind
-      before_install:
-        - export CC="gcc-4.7"
-        - export CXX="g++-4.7"
-    - compiler: gcc
-      env: DYND_FFTW=ON
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          - kalakris-cmake
-          packages:
-          - gcc-4.7
-          - g++-4.7
-          - cmake
-          - libfftw3-dev
-      before_install:
-        - export CC="gcc-4.7"
-        - export CXX="g++-4.7"
-    - compiler: clang
-      env: VALGRIND=ON DYND_FFTW=OFF
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          - kalakris-cmake
-          packages:
-          - g++-4.7
-          - cmake
-          - valgrind
-      script:
-        - make || exit 1
-        - ./tests/test_libdynd
-        - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
-    - compiler: clang
-      env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          - kalakris-cmake
-          packages:
-          - g++-4.7
-          - cmake
-          - libfftw3-dev
-    - compiler: clang
-      env: DYND_FFTW=ON
-      addons:
-        apt:
-          sources:
-          - ubuntu-toolchain-r-test
-          - kalakris-cmake
-          packages:
-          - g++-4.7
-          - cmake
-          - libfftw3-dev
-
+  - language: python
+    env: DYND_FFTW=OFF VERBOSE=1
+    compiler: clang
+    python: 2.7
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - kalakris-cmake
+        packages:
+        - g++-4.7
+        - cmake
+    cache:
+      directories:
+      - $HOME/.cache/pip
+      - $HOME/dynd-python/build
+    before_install:
+    - export CC=clang
+    - export CXX=clang++
+    - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
+    before_script:
+    - cd ..
+    - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
+    - mkdir dynd-python/libraries
+    - mv libdynd dynd-python/libraries/libdynd
+    - cd dynd-python
+    script:
+    - python -c "import numpy; print numpy.__version__"
+    - python setup.py install
+    - cd ..
+    - python -c "import dynd; dynd.test(exit=True)"
+  - language: python
+    env: DYND_FFTW=OFF VERBOSE=1
+    python: 2.7
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - kalakris-cmake
+        packages:
+        - g++-4.7
+        - cmake
+    before_install:
+    - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
+    - bash miniconda.sh -b
+    - export PATH=$HOME/miniconda/bin:$PATH
+    - conda install --yes conda-build jinja2
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      conda install --yes anaconda-client; fi
+    before_script:
+    - export CC="gcc-4.7"
+    - export CXX="g++-4.7"
+    script:
+    - export TOKEN=iz-20d586ab-7ed7-4b11-b0c6-d63ac91288b4
+    - conda build conda.recipe
+    after_success:
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd
+      --channel dev; fi
+  - language: objective-c
+    osx_image: xcode6.4
+    env: DYND_FFTW=OFF VERBOSE=1
+    python: 2.7
+    before_install:
+    - export CC=clang
+    - export CXX=clang++
+    - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
+    - bash Miniconda-latest-MacOSX-x86_64.sh -b
+    - export PATH=$HOME/miniconda/bin:$PATH
+    - conda install --yes conda-build jinja2
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      conda install --yes anaconda-client; fi
+    before_script:
+    - export TOKEN=iz-20d586ab-7ed7-4b11-b0c6-d63ac91288b4
+    script:
+    - conda build conda.recipe
+    after_success:
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd
+      --channel dev; fi
+  - compiler: gcc
+    env: VALGRIND=ON DYND_FFTW=OFF
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - kalakris-cmake
+        packages:
+        - gcc-4.7
+        - g++-4.7
+        - cmake
+        - valgrind
+    before_install:
+    - export CC="gcc-4.7"
+    - export CXX="g++-4.7"
+  - compiler: gcc
+    env: DYND_FFTW=ON
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - kalakris-cmake
+        packages:
+        - gcc-4.7
+        - g++-4.7
+        - cmake
+        - libfftw3-dev
+    before_install:
+    - export CC="gcc-4.7"
+    - export CXX="g++-4.7"
+  - compiler: clang
+    env: VALGRIND=ON DYND_FFTW=OFF
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - kalakris-cmake
+        packages:
+        - g++-4.7
+        - cmake
+        - valgrind
+    script:
+    - make || exit 1
+    - ./tests/test_libdynd
+    - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123
+      ./tests/test_libdynd
+  - compiler: clang
+    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - kalakris-cmake
+        packages:
+        - g++-4.7
+        - cmake
+        - libfftw3-dev
+  - compiler: clang
+    env: DYND_FFTW=ON
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        - kalakris-cmake
+        packages:
+        - g++-4.7
+        - cmake
+        - libfftw3-dev
 language: cpp
-
 cache:
   directories:
-    - $HOME/libdynd/build
-
+  - $HOME/libdynd/build
 before_script:
-  - mkdir build
-  - pushd build
-  - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=ON ..
-
+- mkdir build
+- pushd build
+- cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=ON ..
 script:
-  - make || exit 1
-  - ./tests/test_libdynd
-
+- make || exit 1
+- ./tests/test_libdynd
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
-  on_success: "change"
-  on_failure: "always"
+  on_success: change
+  on_failure: always
+env:
+  matrix:
+    secure: eKO/WC2eUeFRMkqnxrdXW4m3Jk5tfnoIag6lepruhyvabYwkxQ97Mod6/nyMet7JrtZMDyoZCG2yPt1AWMre2IJxLgFCA7wbHiO2/elTGfbO7SDHkloW6Gx3Hx7x5AdRtOAv8ovQc1WcIBYttR8/reQsy7P1GWsAd2btgDQq9+M=
