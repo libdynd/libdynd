@@ -60,10 +60,11 @@ matrix:
       after_success:
         - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
     - language: objective-c
+      osx_image: xcode6.4
       env: DYND_FFTW=OFF VERBOSE=1
       python: 2.7
       before_install:
-        - brew install llvm --with-clang --with-asan 
+#        - brew install llvm --with-clang --with-asan 
         - export CC=clang
         - export CXX=clang++
         - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
