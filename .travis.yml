@@ -24,12 +24,12 @@ matrix:
     - export CXX="g++-4.7"
     script:
       - make || exit 1
-      - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
+      - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
       - make || exit 1
-      - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
+      - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
     env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
   - compiler: gcc
