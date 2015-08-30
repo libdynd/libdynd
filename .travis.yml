@@ -64,7 +64,7 @@ matrix:
       python: 2.7
       before_install:
         - export CC=clang
-        - export CXX=clang++
+        - export CXX="clang++ -stdlib=libc++"
         - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
         - bash Miniconda-latest-MacOSX-x86_64.sh -b
         - export PATH=$HOME/miniconda/bin:$PATH
