@@ -1,18 +1,27 @@
 sudo: false
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - kalakris-cmake
+    packages:
+      - gcc-4.7
+      - g++-4.7
+      - cmake
+      - valgrind
+      - libfftw3-dev
+
+cache:
+  directories:
+    - $HOME/libdynd/build
+
 matrix:
   include:
   - language: python
     env: DYND_FFTW=OFF VERBOSE=1
     compiler: clang
     python: 2.7
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
-        packages:
-        - g++-4.7
-        - cmake
     cache:
       directories:
       - $HOME/.cache/pip
@@ -33,19 +42,8 @@ matrix:
     - cd ..
     - python -c "import dynd; dynd.test(exit=True)"
   - language: python
-    branches:
-      only:
-        - master
     env: DYND_FFTW=OFF VERBOSE=1
     python: 2.7
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
-        packages:
-        - g++-4.7
-        - cmake
     before_install:
     - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
     - bash miniconda.sh -b
@@ -64,6 +62,7 @@ matrix:
     osx_image: xcode6.4
     env: DYND_FFTW=OFF VERBOSE=1
     python: 2.7
+    addons:
     before_script:
     before_install:
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
@@ -79,52 +78,19 @@ matrix:
       dynd --channel dev; fi
   - compiler: gcc
     env: VALGRIND=ON DYND_FFTW=ON
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
-        packages:
-        - gcc-4.7
-        - g++-4.7
-        - cmake
-        - valgrind
-        - libfftw3-dev
     before_install:
     - export CC="gcc-4.7"
     - export CXX="g++-4.7"
   - compiler: clang
     env: VALGRIND=ON DYND_FFTW=OFF
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
-        packages:
-        - g++-4.7
-        - cmake
-        - valgrind
     script:
-    - make || exit 1
-    - ./tests/test_libdynd
-    - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123
-      ./tests/test_libdynd
+      - make || exit 1
+      - ./tests/test_libdynd
+      - valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
     env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
-        packages:
-        - g++-4.7
-        - cmake
-        - libfftw3-dev
 
 language: cpp
-cache:
-  directories:
-  - $HOME/libdynd/build
 before_script:
 - mkdir build
 - pushd build
