@@ -33,6 +33,9 @@ matrix:
     - cd ..
     - python -c "import dynd; dynd.test(exit=True)"
   - language: python
+    branches:
+      only:
+        - master
     env: DYND_FFTW=OFF VERBOSE=1
     python: 2.7
     addons:
