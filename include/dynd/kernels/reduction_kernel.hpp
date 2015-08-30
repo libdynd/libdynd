@@ -776,8 +776,8 @@ namespace nd {
         callable &child = reinterpret_cast<static_data_type *>(static_data)->child;
         ckb_offset = child.get()->instantiate(
             child.get()->static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
-            (reinterpret_cast<data_type *>(data)->stored_ndim == 0) ? kernreq : kernel_request_strided, ectx, nkwd - 3,
-            kwds + 3, tp_vars);
+            (reinterpret_cast<data_type *>(data)->stored_ndim == 0) ? kernel_request_single  : kernel_request_strided,
+            ectx, nkwd - 3, kwds + 3, tp_vars);
 
         reinterpret_cast<data_type *>(data)->init_offset = ckb_offset;
 
