@@ -17,12 +17,14 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(Reduction, BuiltinSum_Lift0D_NoIdentity)
 {
   nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
 
   EXPECT_ARRAY_EQ(1.25, f(1.25));
 }
+*/
 
 /*
 TEST(Reduction, BuiltinSum_Lift0D_WithIdentity)
