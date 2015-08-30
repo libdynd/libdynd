@@ -58,7 +58,7 @@ matrix:
   - language: objective-c
     osx_image: xcode6.4
     compiler: clang
-    env: CONDA
+    env: OSX CONDA
     addons:
     before_script:
     before_install:
