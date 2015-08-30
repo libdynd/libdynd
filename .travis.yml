@@ -63,6 +63,8 @@ matrix:
       env: DYND_FFTW=OFF VERBOSE=1
       python: 2.7
       before_install:
+        - export CC=clang
+        - export CXX=clang++
         - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
         - bash Miniconda-latest-MacOSX-x86_64.sh -b
         - export PATH=$HOME/miniconda/bin:$PATH
