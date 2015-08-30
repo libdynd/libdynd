@@ -63,6 +63,7 @@ matrix:
     osx_image: xcode6.4
     env: DYND_FFTW=OFF VERBOSE=1
     python: 2.7
+    before_script:
     before_install:
     - export CC=clang
     - export CXX=clang++
