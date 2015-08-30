@@ -40,7 +40,8 @@ matrix:
     - python setup.py install
     - cd ..
     - python -c "import dynd; dynd.test(exit=True)"
-  - env: CONDA
+  - compiler: gcc
+    env: CONDA
     before_install:
       - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
       - bash miniconda.sh -b
@@ -55,11 +56,9 @@ matrix:
     after_success:
       - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
   - language: objective-c
-    os:
-      - osx
     osx_image: xcode6.4
-    env: CONDA
     compiler: clang
+    env: CONDA
     addons:
     before_script:
     before_install:
