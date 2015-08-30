@@ -5,16 +5,8 @@ package:
 build:
   number: {{environ.get('TRAVIS_BUILD_NUMBER', 0)}}
   script_env:
-    - CC
-    - CXX
-    - TRAVIS_BUILD_NUMBER
-
-#requirements:
- # build:
-#    - cmake [unix]
-#    - gcc >=4.8
-#  run:
-#    - libgcc >=4.8
+    - CC [linux]
+    - CXX [linux]
 
 test:
   commands:
@@ -23,4 +15,3 @@ test:
 about:
   home: https://github.com/libdynd/libdynd
   license: BSD
-
