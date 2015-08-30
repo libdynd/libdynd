@@ -11,49 +11,57 @@ addons:
       - cmake
       - valgrind
       - libfftw3-dev
+
 cache:
   directories:
     - $HOME/libdynd/build
 
 matrix:
   include:
-    - language: python
-      env: DYND_FFTW=OFF VERBOSE=1
-      compiler: clang
-      python: 2.7
-      cache:
-      directories:
-        - $HOME/.cache/pip
-        - $HOME/dynd-python/build
-      before_install:
-        - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
-      before_script:
-        - cd ..
-        - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
-        - mkdir dynd-python/libraries
-        - mv libdynd dynd-python/libraries/libdynd
-        - cd dynd-python
-      script:
-        - python -c "import numpy; print numpy.__version__"
-        - python setup.py install
-        - cd ..
-        - python -c "import dynd; dynd.test(exit=True)"
   - language: python
+    env: DYND_FFTW=OFF VERBOSE=1
+    compiler: clang
+    python: 2.7
+    cache:
+      directories:
+      - $HOME/.cache/pip
+      - $HOME/dynd-python/build
     before_install:
-      - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
-      - bash miniconda.sh -b
-      - export PATH=$HOME/miniconda/bin:$PATH
-      - conda install --yes conda-build jinja2
-      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
+    - export CC=clang
+    - export CXX=clang++
+    - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
     before_script:
-      - export CC="gcc-4.7"
-      - export CXX="g++-4.7"
+    - cd ..
+    - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
+    - mkdir dynd-python/libraries
+    - mv libdynd dynd-python/libraries/libdynd
+    - cd dynd-python
     script:
-      - conda build conda.recipe
+    - python -c "import numpy; print numpy.__version__"
+    - python setup.py install
+    - cd ..
+    - python -c "import dynd; dynd.test(exit=True)"
+  - language: python
+    env: DYND_FFTW=OFF VERBOSE=1
+    python: 2.7
+    before_install:
+    - wget http://repo.continuum.io/miniconda/Miniconda-3.7.0-Linux-x86_64.sh -O miniconda.sh
+    - bash miniconda.sh -b
+    - export PATH=$HOME/miniconda/bin:$PATH
+    - conda install --yes conda-build jinja2
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      conda install --yes anaconda-client; fi
+    before_script:
+    - export CC="gcc-4.7"
+    - export CXX="g++-4.7"
+    script:
+    - conda build conda.recipe
     after_success:
-      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
   - language: objective-c
     osx_image: xcode6.4
+    env: DYND_FFTW=OFF VERBOSE=1
+    python: 2.7
     addons:
     before_script:
     before_install:
@@ -65,7 +73,9 @@ matrix:
     script:
     - conda build conda.recipe
     after_success:
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user
+      dynd --channel dev; fi
   - compiler: gcc
     env: VALGRIND=ON DYND_FFTW=ON
     before_install:
