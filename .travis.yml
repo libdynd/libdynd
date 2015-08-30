@@ -75,7 +75,7 @@ matrix:
       anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user
       dynd --channel dev; fi
   - compiler: gcc
-    env: VALGRIND=ON DYND_FFTW=OFF
+    env: VALGRIND=ON DYND_FFTW=ON
     addons:
       apt:
         sources:
@@ -86,20 +86,6 @@ matrix:
         - g++-4.7
         - cmake
         - valgrind
-    before_install:
-    - export CC="gcc-4.7"
-    - export CXX="g++-4.7"
-  - compiler: gcc
-    env: DYND_FFTW=ON
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
-        packages:
-        - gcc-4.7
-        - g++-4.7
-        - cmake
         - libfftw3-dev
     before_install:
     - export CC="gcc-4.7"
