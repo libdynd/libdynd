@@ -58,7 +58,7 @@ matrix:
     - conda build conda.recipe
     after_success:
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd
+      anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd
       --channel dev; fi
   - language: objective-c
     osx_image: xcode6.4
@@ -79,7 +79,7 @@ matrix:
     - conda build conda.recipe
     after_success:
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      anaconda -t ${TOKEN} upload $(conda build --output conda.recipe) --user dynd
+      anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd
       --channel dev; fi
   - compiler: gcc
     env: VALGRIND=ON DYND_FFTW=OFF
