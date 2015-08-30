@@ -165,6 +165,7 @@ notifications:
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
   on_success: change
   on_failure: always
+  
 env:
-  matrix:
+  global:
     secure: eKO/WC2eUeFRMkqnxrdXW4m3Jk5tfnoIag6lepruhyvabYwkxQ97Mod6/nyMet7JrtZMDyoZCG2yPt1AWMre2IJxLgFCA7wbHiO2/elTGfbO7SDHkloW6Gx3Hx7x5AdRtOAv8ovQc1WcIBYttR8/reQsy7P1GWsAd2btgDQq9+M=
