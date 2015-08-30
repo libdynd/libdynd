@@ -56,23 +56,18 @@ matrix:
     script:
     - conda build conda.recipe
     after_success:
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user
-      dynd --channel dev; fi
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda -t ${ANACONDA_TOKEN} upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
   - language: objective-c
     osx_image: xcode6.4
     env: DYND_FFTW=OFF VERBOSE=1
     python: 2.7
     before_script:
     before_install:
-    - export CC=clang
-    - export CXX=clang++
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
     - bash Miniconda-latest-MacOSX-x86_64.sh -b
     - export PATH=$HOME/miniconda/bin:$PATH
     - conda install --yes conda-build jinja2
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      conda install --yes anaconda-client; fi
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     script:
     - conda build conda.recipe
     after_success:
