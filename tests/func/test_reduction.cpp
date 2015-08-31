@@ -110,6 +110,18 @@ TEST(Reduction, BuiltinSum_Lift2D_StridedStrided_ReduceBroadcast_KeepDim)
                     kwds("axes", nd::array(initializer_list<int>{0}), "keepdims", true)));
 }
 
+TEST(Reduction, BuiltinSum_Lift2D_VarFixed_ReduceReduce)
+{
+  nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
+
+  nd::array a = nd::empty("3 * var * float64");
+  a(0).vals() = {1, 2};
+  a(1).vals() = {3, 4, 5};
+  a(2).vals() = {6, 7, 8, 9};
+
+  EXPECT_ARRAY_EQ(45.0, f(a));
+}
+
 TEST(Reduction, BuiltinSum_Lift3D_StridedStridedStrided_ReduceReduceReduce)
 {
   nd::callable f = nd::functional::reduction(nd::functional::apply([](double x, double y) { return x + y; }));
