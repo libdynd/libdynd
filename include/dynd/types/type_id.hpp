@@ -98,8 +98,8 @@ enum type_id_t {
 
   // A pointer type
   pointer_type_id,
-  // A reference type
-  ref_type_id,
+  // A dynamic array type
+  array_type_id,
 
   // blockref primitive types
   bytes_type_id,

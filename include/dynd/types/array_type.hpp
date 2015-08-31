@@ -10,13 +10,13 @@
 namespace dynd {
 namespace ndt {
 
-  class ref_type : public base_expr_type {
+  class array_type : public base_expr_type {
     type m_value_tp;
 
   public:
-    ref_type(const type &value_tp);
+    array_type(const type &value_tp);
 
-    virtual ~ref_type();
+    virtual ~array_type();
 
     const type &get_operand_type() const
     {
@@ -50,7 +50,7 @@ namespace ndt {
 
     static type make(const type &value_tp)
     {
-      return type(new ref_type(value_tp), false);
+      return type(new array_type(value_tp), false);
     }
   };
 

@@ -126,6 +126,7 @@ set(libdynd_SRC
     # Types
     src/dynd/types/adapt_type.cpp
     src/dynd/types/any_kind_type.cpp
+    src/dynd/types/array_type.cpp
     src/dynd/types/base_bytes_type.cpp
     src/dynd/types/base_type.cpp
     src/dynd/types/base_expr_type.cpp
@@ -185,7 +186,6 @@ set(libdynd_SRC
     src/dynd/types/typevar_constructed_type.cpp
     src/dynd/types/typevar_dim_type.cpp
     src/dynd/types/pow_dimsym_type.cpp
-    src/dynd/types/ref_type.cpp
     src/dynd/types/scalar_kind_type.cpp
     src/dynd/types/typevar_type.cpp
     src/dynd/types/unary_expr_type.cpp
@@ -194,6 +194,7 @@ set(libdynd_SRC
     src/dynd/types/void_pointer_type.cpp
     include/dynd/types/adapt_type.hpp
     include/dynd/types/any_kind_type.hpp
+    include/dynd/types/array_type.hpp
     include/dynd/types/callable_type.hpp
     include/dynd/types/base_bytes_type.hpp
     include/dynd/types/base_type.hpp
@@ -240,7 +241,6 @@ set(libdynd_SRC
     include/dynd/types/pointer_type.hpp
     include/dynd/types/pow_dimsym_type.hpp
     include/dynd/types/property_type.hpp
-    include/dynd/types/ref_type.hpp
     include/dynd/types/scalar_kind_type.hpp
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp

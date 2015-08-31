@@ -786,7 +786,7 @@ nd::array nd::array::storage() const
 
 nd::array &nd::array::underlying()
 {
-  if (get_type().get_type_id() == ref_type_id) {
+  if (get_type().get_type_id() == array_type_id) {
     return *reinterpret_cast<array *>(get_data());
   }
 
@@ -795,7 +795,7 @@ nd::array &nd::array::underlying()
 
 const nd::array &nd::array::underlying() const
 {
-  if (get_type().get_type_id() == ref_type_id) {
+  if (get_type().get_type_id() == array_type_id) {
     return *reinterpret_cast<const array *>(get_data());
   }
 

@@ -22,6 +22,7 @@ endif()
 set(tests_SRC
     dynd_assertions.hpp
     types/test_align_type.cpp
+    types/test_array_type.cpp
     types/test_bytes_type.cpp
     types/test_byteswap_type.cpp
     types/test_c_contiguous_type.cpp
@@ -45,7 +46,6 @@ set(tests_SRC
     types/test_json_type.cpp
     types/test_option_type.cpp
     types/test_pointer_type.cpp
-    types/test_ref_type.cpp
     types/test_scalar_kind_type.cpp
     types/test_string_type.cpp
     types/test_struct_type.cpp
