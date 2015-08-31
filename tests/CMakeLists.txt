@@ -21,12 +21,6 @@ endif()
 
 set(tests_SRC
     dynd_assertions.hpp
-    pp/test_pp_arithmetic.cpp
-    pp/test_pp_comparison.cpp
-    pp/test_pp_if.cpp
-    pp/test_pp_list.cpp
-    pp/test_pp_logical.cpp
-    pp/test_pp_token.cpp
     types/test_align_type.cpp
     types/test_bytes_type.cpp
     types/test_byteswap_type.cpp
