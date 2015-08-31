@@ -585,9 +585,6 @@ size_t dynd::make_elwise_dimension_expr_kernel(
       // TODO
     }
     break;
-  case offset_dim_type_id:
-    // TODO
-    break;
   default:
     break;
   }
