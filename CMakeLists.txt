@@ -13,14 +13,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(LIB_SUFFIX "" CACHE STRING
     "Typically an empty string or 64. Controls installation to lib or lib64")
 
-# -DDYND_SRC_MAX, the maximum number of src parameters that functor callables will support
-SET(DYND_SRC_MAX 4 CACHE STRING
-    "Build a libdynd library with functor callables that support the specified maximum number of arguments")
-# TODO: Check that the preprocessor can handle this number
-# -DDYND_ARG_MAX, the maximum number of arguments that functor callables must support,
-# which is DYND_SRC_MAX + ?reference_dst
-MATH(EXPR DYND_ARG_MAX "${DYND_SRC_MAX} + 1")
-
 # Only add these options if this is the top level CMakeLists.txt
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
@@ -131,15 +123,6 @@ string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
 set(libdynd_SRC
-    # Preprocessor
-    include/dynd/pp/arithmetic.hpp
-    include/dynd/pp/comparison.hpp
-    include/dynd/pp/if.hpp
-    include/dynd/pp/list.hpp
-    include/dynd/pp/logical.hpp
-    include/dynd/pp/meta.hpp
-    include/dynd/pp/token.hpp
-    ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
     # Types
     src/dynd/types/adapt_type.cpp
     src/dynd/types/any_kind_type.cpp
@@ -532,7 +515,6 @@ source_group("Kernels Source" REGULAR_EXPRESSION "src/dynd/kernels/.*cpp")
 source_group("Kernels Headers" REGULAR_EXPRESSION "include/dynd/kernels/.*hpp")
 source_group("MemBlock Source" REGULAR_EXPRESSION "src/dynd/memblock/.*cpp")
 source_group("MemBlock Headers" REGULAR_EXPRESSION "include/dynd/memblock/.*hpp")
-source_group("PP Headers" REGULAR_EXPRESSION "include/dynd/pp/.*hpp")
 source_group("Internal Headers" REGULAR_EXPRESSION "src/dynd/.*hpp")
 
 #set_source_files_properties(include/dynd/kernels/compare_kernels.hpp PROPERTIES COMPILE_FLAGS -Wno-sign-compare)
@@ -644,19 +626,6 @@ endif()
 # Add preprocessor definitions from CMake
 configure_file("include/dynd/cmake_config.hpp.in"
                "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp")
-
-# Special build targets that generate part of the library
-execute_process(COMMAND ${CMAKE_COMMAND}
-                -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
-add_executable(ppgen include/dynd/pp/gen.cpp)
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
-        DEPENDS include/dynd/pp/gen.cpp
-        COMMAND ppgen 16 3 ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp)
-add_custom_target(libdynd_gen DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp)
-# Make libdynd depend on libdynd_gen to make sure gen.hpp is there when it builds
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/include/dynd/pp/gen.hpp
-                            PROPERTIES GENERATED true)
-add_dependencies(libdynd libdynd_gen)
 
 # Copy the headers from cephes that need to be installed with libdynd
 file(COPY thirdparty/cephes/rename.h

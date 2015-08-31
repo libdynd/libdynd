@@ -11,7 +11,6 @@
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/gfunc/make_callable.hpp>
 #include <dynd/func/apply.hpp>
-#include <dynd/pp/list.hpp>
 
 #include <algorithm>
 

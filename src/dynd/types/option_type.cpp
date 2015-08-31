@@ -11,7 +11,6 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/pp/list.hpp>
 #include <dynd/parser_util.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/math.hpp>
