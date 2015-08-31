@@ -499,53 +499,54 @@ namespace nd {
     template <>
     struct reduction_kernel<var_dim_type_id, false,
                             true> : base_reduction_kernel<reduction_kernel<var_dim_type_id, false, true>> {
-      std::intptr_t src0_element_stride;
-      std::intptr_t src0_element_stride_first;
-
+      intptr_t src0_inner_stride;
+      intptr_t src0_inner_stride_first;
       intptr_t init_offset;
 
-      reduction_kernel(std::intptr_t src0_element_stride, bool with_identity = false)
-          : src0_element_stride(src0_element_stride)
+      reduction_kernel(std::intptr_t src0_inner_stride, bool with_identity = false)
+          : src0_inner_stride(src0_inner_stride)
       {
         if (with_identity) {
-          src0_element_stride_first = 0;
+          src0_inner_stride_first = 0;
         } else {
-          src0_element_stride_first = src0_element_stride;
+          src0_inner_stride_first = src0_inner_stride;
         }
       }
 
       ~reduction_kernel()
       {
+        get_child(init_offset)->destroy();
+        get_child()->destroy();
       }
 
       void single_first(char *dst, char *const *src)
       {
-        std::size_t size = reinterpret_cast<var_dim_type_data *>(src[0])->size;
-        if (src0_element_stride_first != 0) {
-          --size;
+        size_t inner_size = reinterpret_cast<ndt::var_dim_type::data_type *>(src[0])->size;
+        if (src0_inner_stride_first != 0) {
+          --inner_size;
         }
 
-        char *src0_data = reinterpret_cast<var_dim_type_data *>(src[0])->begin;
+        char *src0_data = reinterpret_cast<ndt::var_dim_type::data_type *>(src[0])->begin;
         get_child(init_offset)->single(dst, &src0_data);
-        src0_data += src0_element_stride_first;
+        src0_data += src0_inner_stride_first;
 
-        get_child()->strided(dst, 0, &src0_data, &src0_element_stride, size);
+        get_child()->strided(dst, 0, &src0_data, &src0_inner_stride, inner_size);
       }
 
       void strided_first(char *DYND_UNUSED(dst), intptr_t DYND_UNUSED(dst_stride), char *const *DYND_UNUSED(src),
                          const intptr_t *DYND_UNUSED(src_stride), size_t DYND_UNUSED(count))
       {
-        std::cout << "strided_first" << std::endl;
+        throw std::runtime_error("strided_first is not supported for variable-sized dimensions");
       }
 
-      void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
+      void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t size)
       {
-        ckernel_prefix *reduce_child = get_child();
+        ckernel_prefix *child = get_child();
 
         char *src0 = src[0];
-        for (std::size_t i = 0; i != count; ++i) {
-          reduce_child->strided(dst, 0, &reinterpret_cast<var_dim_type_data *>(src0)->begin, &src0_element_stride,
-                                reinterpret_cast<var_dim_type_data *>(src0)->size);
+        for (size_t i = 0; i != size; ++i) {
+          child->strided(dst, 0, &reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->begin, &src0_inner_stride,
+                         reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->size);
           dst += dst_stride;
           src0 += src_stride[0];
         }
@@ -557,8 +558,6 @@ namespace nd {
                                   const eval::eval_context *ectx, intptr_t nkwd, const array *kwds,
                                   const std::map<std::string, ndt::type> &tp_vars)
       {
-        std::cout << "var_dim instantiate" << std::endl;
-
         const ndt::type &src0_element_tp = src_tp[0].extended<ndt::var_dim_type>()->get_element_type();
         const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(var_dim_type_arrmeta);
 
