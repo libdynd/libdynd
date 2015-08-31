@@ -236,9 +236,6 @@ namespace nd {
             // TODO
           }
           break;
-        case offset_dim_type_id:
-          // TODO
-          break;
         default:
           break;
         }

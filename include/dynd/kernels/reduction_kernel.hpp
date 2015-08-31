@@ -850,7 +850,7 @@ namespace nd {
                                                    const eval::eval_context *ectx, intptr_t nkwd, const array *kwds,
                                                    const std::map<std::string, ndt::type> &tp_vars)
     {
-      static const callable_instantiate_t instantiate[2][2][2] = {
+      static const callable_instantiate_t table[2][2][2] = {
           {{reduction_kernel<fixed_dim_type_id, false, false>::instantiate,
             reduction_kernel<fixed_dim_type_id, false, true>::instantiate},
            {reduction_kernel<fixed_dim_type_id, true, false>::instantiate,
@@ -874,11 +874,10 @@ namespace nd {
             ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
 
-      return instantiate
-          [src_tp[0].get_type_id() == var_dim_type_id][reinterpret_cast<data_type *>(data)->is_broadcast()]
-          [reinterpret_cast<data_type *>(data)->is_inner()](static_data, data_size, reinterpret_cast<char *>(data), ckb,
-                                                            ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
-                                                            kernreq, ectx, nkwd, kwds, tp_vars);
+      return table[src_tp[0].get_type_id() - fixed_dim_type_id][reinterpret_cast<data_type *>(data)->is_broadcast()]
+                  [reinterpret_cast<data_type *>(data)->is_inner()](static_data, data_size, data, ckb, ckb_offset,
+                                                                    dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                                                                    kernreq, ectx, nkwd, kwds, tp_vars);
     }
 
   } // namespace dynd::nd::functional

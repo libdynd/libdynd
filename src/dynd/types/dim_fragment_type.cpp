@@ -37,9 +37,6 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
             dtp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
       }
       break;
-    case offset_dim_type_id:
-      out_tagged_dims[i] = -2;
-      break;
     case var_dim_type_id:
       out_tagged_dims[i] = -1;
       break;
@@ -74,11 +71,6 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
         } else if (tagged_dim != dim_size && dim_size != 1) {
           return false;
         }
-      }
-      break;
-    case offset_dim_type_id:
-      if (tagged_dim < 0) {
-        out_tagged_dims[i] = -2;
       }
       break;
     case var_dim_type_id:
