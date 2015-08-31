@@ -875,7 +875,7 @@ namespace nd {
       }
 
       return instantiate
-          [src_tp[0].get_type_id() == var_dim_type_id][reinterpret_cast<data_type *>(data)->is_broadcast()]
+          [src_tp[0].get_type_id() - fixed_dim_type_id][reinterpret_cast<data_type *>(data)->is_broadcast()]
           [reinterpret_cast<data_type *>(data)->is_inner()](static_data, data_size, reinterpret_cast<char *>(data), ckb,
                                                             ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                                             kernreq, ectx, nkwd, kwds, tp_vars);
