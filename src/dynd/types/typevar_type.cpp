@@ -217,5 +217,5 @@ nd::array ndt::make_typevar_range(const char *name, intptr_t count)
     result_ptr[i] = typevar_type::make(s);
     s[s.size() - 1]++;
   }
-  return move(result);
+  return result;
 }
