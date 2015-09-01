@@ -19,7 +19,7 @@ namespace dynd {
  * a child ckernel can use without building a full-blown
  * reference counted nd::array object.
  */
-class arrmeta_holder {
+class DYND_API arrmeta_holder {
     /** This memory holds one ndt::type, followed by its array arrmeta */
     void *m_arrmeta;
 

@@ -16,8 +16,8 @@ namespace nd {
    * beginval + (k-1) * stepval} where the next value in the sequence would hit
    * or cross endval.
    */
-  nd::array range(const ndt::type &scalar_tp, const void *beginval,
-                  const void *endval, const void *stepval);
+  DYND_API nd::array range(const ndt::type &scalar_tp, const void *beginval,
+                           const void *endval, const void *stepval);
 
   /**
    * Version of range templated for C++ scalar types.
@@ -60,8 +60,8 @@ namespace nd {
    * \param count  The size of the result's first dimension.
    * \param tp  The required dtype of the output.
    */
-  nd::array linspace(const nd::array &start, const nd::array &stop,
-                     intptr_t count, const ndt::type &tp);
+  DYND_API nd::array linspace(const nd::array &start, const nd::array &stop,
+                              intptr_t count, const ndt::type &tp);
 
   /**
    * Most general linspace function, creates an array of length 'count',
@@ -73,8 +73,8 @@ namespace nd {
    * \param stop  The value placed at index count-1 of the result.
    * \param count  The size of the result's first dimension.
    */
-  nd::array linspace(const nd::array &start, const nd::array &stop,
-                     intptr_t count);
+  DYND_API nd::array linspace(const nd::array &start, const nd::array &stop,
+                              intptr_t count);
 
   /**
    * Creates a one-dimensional array of 'count' values, evenly spaced
@@ -82,8 +82,8 @@ namespace nd {
    *
    * The only built-in types supported are float and double.
    */
-  nd::array linspace(const ndt::type &dt, const void *startval,
-                     const void *stopval, intptr_t count);
+  DYND_API nd::array linspace(const ndt::type &dt, const void *startval,
+                              const void *stopval, intptr_t count);
 
   inline nd::array linspace(float start, float stop, intptr_t count = 50)
   {
