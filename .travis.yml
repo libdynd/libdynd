@@ -46,12 +46,13 @@ matrix:
       - export CXX="g++-4.7"
     script:
       - conda build conda.recipe
-    after_success:
-      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
+    after_script:
       - declare exitCode
       - $(npm bin)/travis-after-all
       - exitCode=$?
       - if [ $exitCode -eq 0 ]; then echo "all passed"; fi
+    after_success:
+      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
   - language: objective-c
     osx_image: xcode6.4
     compiler: clang
