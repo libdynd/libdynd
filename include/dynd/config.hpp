@@ -43,8 +43,6 @@
 #define DYND_ISSPACE std::isspace
 #define DYND_TOLOWER std::tolower
 
-#define DYND_API
-
 #elif defined(__GNUC__)
 
 // Hack trying to work around gcc isfinite problems
@@ -58,8 +56,6 @@
 
 #define DYND_ISSPACE isspace
 #define DYND_TOLOWER tolower
-
-#define DYND_API
 
 #elif defined(_MSC_VER)
 
@@ -118,15 +114,22 @@ public:
   }
 };
 
+#endif // elif defined(_MSC_VER)
+
+// Symbol visibility macros
+#if defined(_WIN32) || defined(__CYGWIN__)
 #if defined(DYND_EXPORT)
 // Building the library
 #define DYND_API __declspec(dllexport)
 #else
 // Importing the library
 #define DYND_API __declspec(dllimport)
-#endif
-
-#endif // end of compiler vendor checks
+#endif // defined(DYND_EXPORT)
+#define DYND_INTERNAL
+#else
+#define DYND_API
+#define DYND_INTERNAL __attribute__ ((visibility ("hidden")))
+#endif // End symbol visibility macros.
 
 #ifdef __CUDACC__
 #define DYND_CUDA_HOST_DEVICE __host__ __device__
