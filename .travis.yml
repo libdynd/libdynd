@@ -48,7 +48,7 @@ matrix:
       - conda build conda.recipe
     after_script:
       - declare exitCode
-      - $(npm bin)/travis-after-all
+      - curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.3.0/lib/travis-after-all.js | node
       - exitCode=$?
       - if [ $exitCode -eq 0 ]; then echo "all passed"; fi
     after_success:
