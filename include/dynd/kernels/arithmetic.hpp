@@ -83,6 +83,58 @@ namespace nd {
     }
   };
 
+  template<type_id_t I0>
+  struct subtract_kernel<I0, int128_type_id> : base_kernel<subtract_kernel<I0, int128_type_id>, 2> {
+    typedef subtract_kernel self_type;
+    typedef typename type_of<I0>::type A0;
+    typedef int128 A1;
+    typedef std::common_type<A0, A1> R;
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<R *>(dst) =
+          (R)*reinterpret_cast<A0 *>(src[0]) - (R)*reinterpret_cast<A1 *>(src[1]);
+    }
+  };
+
+  template<type_id_t I0>
+  struct subtract_kernel<I0, uint128_type_id> : base_kernel<subtract_kernel<I0, uint128_type_id>, 2> {
+    typedef subtract_kernel self_type;
+    typedef typename type_of<I0>::type A0;
+    typedef uint128 A1;
+    typedef std::common_type<A0, A1> R;
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<R *>(dst) =
+          (R)*reinterpret_cast<A0 *>(src[0]) - (R)*reinterpret_cast<A1 *>(src[1]);
+    }
+  };
+
+  template<type_id_t I0>
+  struct multiply_kernel<I0, int128_type_id> : base_kernel<multiply_kernel<I0, int128_type_id>, 2> {
+    typedef multiply_kernel self_type;
+    typedef typename type_of<I0>::type A0;
+    typedef int128 A1;
+    typedef std::common_type<A0, A1> R;
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<R *>(dst) =
+          (R)*reinterpret_cast<A0 *>(src[0]) * (R)*reinterpret_cast<A1 *>(src[1]);
+    }
+  };
+
+  template<type_id_t I0>
+  struct multiply_kernel<I0, uint128_type_id> : base_kernel<multiply_kernel<I0, uint128_type_id>, 2> {
+    typedef multiply_kernel self_type;
+    typedef typename type_of<I0>::type A0;
+    typedef uint128 A1;
+    typedef std::common_type<A0, A1> R;
+    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<R *>(dst) =
+          (R)*reinterpret_cast<A0 *>(src[0]) * (R)*reinterpret_cast<A1 *>(src[1]);
+    }
+  };
+
 } // namespace dynd::nd
 
 namespace ndt {
@@ -173,6 +225,74 @@ namespace ndt {
     typedef typename dynd::type_of<Src0TypeID>::type A0;
     typedef typename dynd::type_of<Src1TypeID>::type A1;
     typedef decltype(std::declval<A0>() / std::declval<A1>()) R;
+
+    static type make()
+    {
+      std::map<std::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::type::make<A0>();
+      tp_vars["A1"] = ndt::type::make<A1>();
+      tp_vars["R"] = ndt::type::make<R>();
+
+      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+    }
+  };
+
+  template<type_id_t Src0TypeID>
+  struct type::equivalent<nd::subtract_kernel<Src0TypeID, int128_type_id>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef typename dynd::type_of<int128_type_id>::type A1;
+    typedef std::common_type<A0, A1> R;
+
+    static type make()
+    {
+      std::map<std::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::type::make<A0>();
+      tp_vars["A1"] = ndt::type::make<A1>();
+      tp_vars["R"] = ndt::type::make<R>();
+
+      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+    }
+  };
+
+  template<type_id_t Src0TypeID>
+  struct type::equivalent<nd::subtract_kernel<Src0TypeID, uint128_type_id>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef typename dynd::type_of<uint128_type_id>::type A1;
+    typedef std::common_type<A0, A1> R;
+
+    static type make()
+    {
+      std::map<std::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::type::make<A0>();
+      tp_vars["A1"] = ndt::type::make<A1>();
+      tp_vars["R"] = ndt::type::make<R>();
+
+      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+    }
+  };
+
+  template <type_id_t Src0TypeID>
+  struct type::equivalent<nd::multiply_kernel<Src0TypeID, int128_type_id>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef typename dynd::type_of<int128_type_id>::type A1;
+    typedef std::common_type<A0, A1> R;
+
+    static type make()
+    {
+      std::map<std::string, ndt::type> tp_vars;
+      tp_vars["A0"] = ndt::type::make<A0>();
+      tp_vars["A1"] = ndt::type::make<A1>();
+      tp_vars["R"] = ndt::type::make<R>();
+
+      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+    }
+  };
+
+  template <type_id_t Src0TypeID>
+  struct type::equivalent<nd::multiply_kernel<Src0TypeID, uint128_type_id>> {
+    typedef typename dynd::type_of<Src0TypeID>::type A0;
+    typedef typename dynd::type_of<uint128_type_id>::type A1;
+    typedef std::common_type<A0, A1> R;
 
     static type make()
     {
