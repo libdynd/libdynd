@@ -178,6 +178,11 @@ public:
 
   //  DYND_CUDA_HOST_DEVICE inline int128 operator/(uint32_t rhs) const;
 
+  DYND_CUDA_HOST_DEVICE inline int128 &operator*(int128 DYND_UNUSED(rhs)) const
+  {
+    throw std::runtime_error("operator* is not implemented for int128");
+  }
+
   DYND_CUDA_HOST_DEVICE int128 &operator/=(int128 DYND_UNUSED(rhs))
   {
     throw std::runtime_error("operator/= is not implemented for int128");
