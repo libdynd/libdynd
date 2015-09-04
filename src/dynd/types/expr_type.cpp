@@ -234,7 +234,9 @@ struct expr_type_offset_applier_extra
   {
     char *src_modified[N];
     for (int i = 0; i < N; ++i) {
+      DYND_IGNORE_MAYBE_UNINITIALIZED
       src_modified[i] = src[i] + offsets[i];
+      DYND_END_IGNORE_MAYBE_UNINITIALIZED
     }
     ckernel_prefix *echild = this->get_child();
     expr_single_t opchild = echild->get_function<expr_single_t>();

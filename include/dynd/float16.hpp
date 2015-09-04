@@ -114,7 +114,9 @@ public:
 
   DYND_CUDA_HOST_DEVICE explicit operator int16() const
   {
+    DYND_IGNORE_MAYBE_UNINITIALIZED
     return static_cast<int16>(halfbits_to_float(m_bits));
+    DYND_END_IGNORE_MAYBE_UNINITIALIZED
   }
 
   DYND_CUDA_HOST_DEVICE explicit operator int32() const
@@ -153,7 +155,9 @@ public:
 
   DYND_CUDA_HOST_DEVICE operator float32() const
   {
+    DYND_IGNORE_MAYBE_UNINITIALIZED
     return halfbits_to_float(m_bits);
+    DYND_END_IGNORE_MAYBE_UNINITIALIZED
   }
 
   DYND_CUDA_HOST_DEVICE explicit operator float64() const
