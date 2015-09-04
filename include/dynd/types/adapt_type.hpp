@@ -13,7 +13,7 @@
 namespace dynd {
 namespace ndt {
 
-  class adapt_type : public base_expr_type {
+  class DYND_API adapt_type : public base_expr_type {
     type m_value_type, m_operand_type;
     std::string m_op;
     nd::callable m_forward, m_reverse;

@@ -2417,7 +2417,7 @@ namespace nd {
       }
     };
 
-    struct string_to_option_bool_ck
+    struct DYND_API string_to_option_bool_ck
         : nd::base_kernel<string_to_option_bool_ck, 1> {
       assign_error_mode m_errmode;
 
@@ -2429,7 +2429,7 @@ namespace nd {
       }
     };
 
-    struct string_to_option_number_ck
+    struct DYND_API string_to_option_number_ck
         : nd::base_kernel<string_to_option_number_ck, 1> {
       type_id_t m_tid;
       assign_error_mode m_errmode;
@@ -2443,7 +2443,7 @@ namespace nd {
       }
     };
 
-    struct string_to_option_tp_ck : nd::base_kernel<string_to_option_tp_ck, 1> {
+    struct DYND_API string_to_option_tp_ck : nd::base_kernel<string_to_option_tp_ck, 1> {
       intptr_t m_dst_assign_na_offset;
 
       ~string_to_option_tp_ck()
@@ -2592,7 +2592,7 @@ namespace nd {
   /**
    * A ckernel which assigns option[S] to T.
    */
-  struct option_to_value_ck : nd::base_kernel<option_to_value_ck, 1> {
+  struct DYND_API option_to_value_ck : nd::base_kernel<option_to_value_ck, 1> {
     // The default child is the src_is_avail ckernel
     size_t m_value_assign_offset;
 
@@ -2975,7 +2975,7 @@ namespace nd {
 
 #ifdef DYND_CUDA
 
-  struct cuda_host_to_device_assign_ck
+  struct DYND_API cuda_host_to_device_assign_ck
       : nd::expr_ck<cuda_host_to_device_assign_ck, kernel_request_host, 1> {
     size_t data_size;
     char *dst;
@@ -3001,7 +3001,7 @@ namespace nd {
     }
   };
 
-  struct cuda_host_to_device_copy_ck
+  struct DYND_API cuda_host_to_device_copy_ck
       : nd::expr_ck<cuda_host_to_device_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
@@ -3016,7 +3016,7 @@ namespace nd {
     }
   };
 
-  struct cuda_device_to_host_assign_ck
+  struct DYND_API cuda_device_to_host_assign_ck
       : nd::expr_ck<cuda_device_to_host_assign_ck, kernel_request_host, 1> {
     size_t data_size;
     char *src;
@@ -3042,7 +3042,7 @@ namespace nd {
     }
   };
 
-  struct cuda_device_to_host_copy_ck
+  struct DYND_API cuda_device_to_host_copy_ck
       : nd::expr_ck<cuda_device_to_host_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
@@ -3057,7 +3057,7 @@ namespace nd {
     }
   };
 
-  struct cuda_device_to_device_copy_ck
+  struct DYND_API cuda_device_to_device_copy_ck
       : nd::expr_ck<cuda_device_to_device_copy_ck, kernel_request_host, 1> {
     size_t data_size;
 
@@ -3155,7 +3155,7 @@ namespace nd {
     }
   };
 
-  struct unaligned_copy_ck : base_kernel<unaligned_copy_ck, 1> {
+  struct DYND_API DYND_API unaligned_copy_ck : base_kernel<unaligned_copy_ck, 1> {
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size)
@@ -3217,7 +3217,7 @@ namespace nd {
     }
   };
 
-  struct wrap_single_as_strided_ck {
+  struct DYND_API wrap_single_as_strided_ck {
     typedef wrap_single_as_strided_ck self_type;
     ckernel_prefix base;
     intptr_t nsrc;

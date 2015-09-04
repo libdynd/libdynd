@@ -11,7 +11,7 @@
 namespace dynd {
 namespace ndt {
 
-  class time_type : public base_type {
+  class DYND_API time_type : public base_type {
     datetime_tz_t m_timezone;
 
   public:

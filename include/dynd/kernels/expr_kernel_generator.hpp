@@ -16,9 +16,9 @@ namespace dynd {
 namespace ndt {
     class type;
 } // namespace ndt
-class expr_kernel_generator;
+class DYND_API expr_kernel_generator;
 
-struct expr_operation_pair {
+struct DYND_API expr_operation_pair {
     expr_single_t single;
     expr_strided_t strided;
 };
@@ -27,7 +27,7 @@ struct expr_operation_pair {
  * This is the memory structure for an object which
  * can generate an expression kernel.
  */
-class expr_kernel_generator {
+class DYND_API expr_kernel_generator {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
     bool m_elwise;

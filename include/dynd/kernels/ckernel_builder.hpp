@@ -272,7 +272,7 @@ public:
 
 #ifdef __CUDACC__
 
-void cuda_throw_if_not_success(cudaError_t);
+DYND_API void cuda_throw_if_not_success(cudaError_t);
 
 template <typename self_type, typename... A>
 __global__ void cuda_device_init(ckernel_prefix *rawself,
@@ -281,7 +281,7 @@ __global__ void cuda_device_init(ckernel_prefix *rawself,
   self_type::init(rawself, kernreq, args...);
 }
 
-__global__ void cuda_device_destroy(ckernel_prefix *self);
+DYND_INTERNAL __global__ void cuda_device_destroy(ckernel_prefix *self);
 
 template <>
 class

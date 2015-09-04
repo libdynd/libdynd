@@ -89,28 +89,29 @@ namespace nd {
       available.push_back(j);
     }
 
-    void
+    DYND_API void
     fill_missing_values(const ndt::type *tp, char *arrmeta,
                         const uintptr_t *arrmeta_offsets, char *data,
                         const uintptr_t *data_offsets,
                         std::vector<nd::array> &DYND_UNUSED(kwds_as_vector),
                         const std::vector<intptr_t> &missing);
 
-    void check_narg(const ndt::callable_type *af_tp, intptr_t npos);
+    DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t npos);
 
-    void check_arg(const ndt::callable_type *af_tp, intptr_t i,
-                   const ndt::type &actual_tp, const char *actual_arrmeta,
-                   std::map<std::string, ndt::type> &tp_vars);
-
-    void check_nkwd(const ndt::callable_type *af_tp,
-                    const std::vector<intptr_t> &available,
-                    const std::vector<intptr_t> &missing);
-
-    void validate_kwd_types(const ndt::callable_type *af_tp,
-                            std::vector<ndt::type> &kwd_tp,
-                            const std::vector<intptr_t> &available,
-                            const std::vector<intptr_t> &missing,
+    DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i,
+                            const ndt::type &actual_tp,
+                            const char *actual_arrmeta,
                             std::map<std::string, ndt::type> &tp_vars);
+
+    DYND_API void check_nkwd(const ndt::callable_type *af_tp,
+                             const std::vector<intptr_t> &available,
+                             const std::vector<intptr_t> &missing);
+
+    DYND_API void validate_kwd_types(const ndt::callable_type *af_tp,
+                                     std::vector<ndt::type> &kwd_tp,
+                                     const std::vector<intptr_t> &available,
+                                     const std::vector<intptr_t> &missing,
+                                     std::map<std::string, ndt::type> &tp_vars);
 
     inline char *data_of(array &value)
     {
@@ -786,7 +787,7 @@ namespace nd {
    * Holds a single instance of an callable in an nd::array,
    * providing some more direct convenient interface.
    */
-  class callable {
+  class DYND_API callable {
     nd::array m_value;
 
   public:
@@ -1302,7 +1303,7 @@ nd::callable make_callable_from_assignment(const ndt::type &dst_tp,
  * \param tp  The type of the source.
  * \param propname  The name of the property.
  */
-nd::callable make_callable_from_property(const ndt::type &tp,
-                                         const std::string &propname);
+DYND_API nd::callable make_callable_from_property(const ndt::type &tp,
+                                                  const std::string &propname);
 
 } // namespace dynd

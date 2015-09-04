@@ -24,7 +24,7 @@ struct time_hmst;
  *
  * \returns  True if the parse is successful, false otherwise.
  */
-bool string_to_time(const char *begin, const char *end, time_hmst &out_hmst,
+bool DYND_API string_to_time(const char *begin, const char *end, time_hmst &out_hmst,
                     const char *&out_tz_begin, const char *&out_tz_end);
 
 namespace parse {
@@ -43,7 +43,7 @@ namespace parse {
      *
      * \returns  True if a time zone was parsed successfully, false otherwise.
      */
-    bool parse_timezone(const char *&begin, const char *end,
+    DYND_API bool parse_timezone(const char *&begin, const char *end,
                         const char *&out_tz_begin, const char *&out_tz_end);
 
     /**
@@ -60,7 +60,7 @@ namespace parse {
      *
      * \returns  True if a time was parsed successfully, false otherwise.
      */
-    bool parse_time(const char *&begin, const char *end, time_hmst &out_hmst,
+    DYND_API bool parse_time(const char *&begin, const char *end, time_hmst &out_hmst,
                     const char *&out_tz_begin, const char *&out_tz_end);
 
     /**
@@ -73,7 +73,7 @@ namespace parse {
      *
      * \returns  True if a time was parsed successfully, false otherwise.
      */
-    bool parse_time_no_tz(const char *&begin, const char *end,
+    DYND_API bool parse_time_no_tz(const char *&begin, const char *end,
                           time_hmst &out_hmst);
 
     /**
@@ -81,7 +81,7 @@ namespace parse {
      * the provided hour appropriately. If the AM/PM is incompatible with the
      * hour value, sets the hour value to -1.
      */
-    bool parse_time_ampm(const char *&begin, const char *end, int& inout_hour);
+    DYND_API bool parse_time_ampm(const char *&begin, const char *end, int& inout_hour);
 
 } // namespace parse
 

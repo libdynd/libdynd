@@ -15,7 +15,7 @@
 namespace dynd {
 namespace ndt {
 
-  class typevar_dim_type : public base_dim_type {
+  class DYND_API typevar_dim_type : public base_dim_type {
     std::string m_name;
 
   public:

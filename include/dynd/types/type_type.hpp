@@ -10,7 +10,7 @@
 
 namespace dynd {
 
-struct type_type_data {
+struct DYND_API type_type_data {
   const ndt::base_type *tp;
 };
 
@@ -20,7 +20,7 @@ namespace ndt {
    * A dynd type whose nd::array instances themselves contain
    * dynd types.
    */
-  class type_type : public base_type {
+  class DYND_API type_type : public base_type {
     type m_pattern_tp;
 
   public:

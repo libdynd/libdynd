@@ -11,7 +11,7 @@
 
 namespace dynd {
 
-struct bytes_type_arrmeta {
+struct DYND_API bytes_type_arrmeta {
   /**
    * A reference to the memory block which contains the byte's data.
    * NOTE: This is identical to string_type_arrmeta, by design. Maybe
@@ -20,7 +20,7 @@ struct bytes_type_arrmeta {
   memory_block_data *blockref;
 };
 
-struct bytes_type_data {
+struct DYND_API bytes_type_data {
   char *begin;
   char *end;
 };
@@ -31,7 +31,7 @@ namespace ndt {
    * The bytes type uses memory_block references to store
    * arbitrarily sized runs of bytes.
    */
-  class bytes_type : public base_bytes_type {
+  class DYND_API bytes_type : public base_bytes_type {
     size_t m_alignment;
 
   public:

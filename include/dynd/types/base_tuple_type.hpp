@@ -17,7 +17,7 @@ namespace ndt {
    * Base class for all tuple and struct types. If a type has kind tuple_kind or
    * struct_kind, it must be a subclass of base_tuple_type.
    */
-  class base_tuple_type : public base_type {
+  class DYND_API base_tuple_type : public base_type {
   protected:
     /**
      * The number of values in m_field_types and m_arrmeta_offsets.

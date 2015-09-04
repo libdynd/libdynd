@@ -29,7 +29,7 @@ enum datetime_tz_t {
     // tz_other
 };
 
-struct datetime_struct {
+struct DYND_API datetime_struct {
     date_ymd ymd;
     time_hmst hmst;
 

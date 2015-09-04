@@ -14,7 +14,7 @@
 namespace dynd {
 
 namespace nd {
-    class string;
+    class DYND_API string;
 };
 
 enum string_encoding_t {
@@ -98,31 +98,31 @@ typedef uint32_t (*next_unicode_codepoint_t)(const char *&it, const char *end);
  */
 typedef void (*append_unicode_codepoint_t)(uint32_t cp, char *&it, char *end);
 
-next_unicode_codepoint_t get_next_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
-append_unicode_codepoint_t get_append_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
+DYND_API next_unicode_codepoint_t get_next_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
+DYND_API append_unicode_codepoint_t get_append_unicode_codepoint_function(string_encoding_t encoding, assign_error_mode errmode);
 
 /**
  * Converts a string buffer provided as a range of bytes into a std::string as UTF8.
  */
-std::string string_range_as_utf8_string(string_encoding_t encoding, const char *begin, const char *end, assign_error_mode errmode);
+DYND_API std::string string_range_as_utf8_string(string_encoding_t encoding, const char *begin, const char *end, assign_error_mode errmode);
 
 /**
  * Prints the given code point to the output stream, escaping it as necessary.
  */
-void print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp,
-                                     bool single_quote);
+DYND_API void print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp,
+                                              bool single_quote);
 
 /**
  * Prints the utf8 string, escaping as necessary.
  */
-void print_escaped_utf8_string(std::ostream &o, const char *str_begin,
-                               const char *str_end, bool single_quote = false);
+DYND_API void print_escaped_utf8_string(std::ostream &o, const char *str_begin,
+                                        const char *str_end, bool single_quote = false);
 
 /**
  * Prints the utf8 string, escaping as necessary.
  */
-void print_escaped_utf8_string(std::ostream &o, const nd::string &str,
-                               bool single_quote = false);
+DYND_API void print_escaped_utf8_string(std::ostream &o, const nd::string &str,
+                                        bool single_quote = false);
 
 /**
  * Prints the utf8 string, escaping as necessary.
@@ -135,13 +135,13 @@ inline void print_escaped_utf8_string(std::ostream &o, const std::string &str,
 }
 
 
-void append_utf8_codepoint(uint32_t cp, std::string& out_str);
+DYND_API void append_utf8_codepoint(uint32_t cp, std::string& out_str);
 
 /**
  * Returns the char type corresponding to the encoding. For fixed-sized
  * encodings, this is "char_type[encoding]", and for variable-sized
  * encodings, this is "bytes[1]" or "bytes[2,2]".
  */
-ndt::type char_type_of_encoding(string_encoding_t encoding);
+DYND_API ndt::type char_type_of_encoding(string_encoding_t encoding);
 
 } // namespace dynd

@@ -28,9 +28,9 @@ namespace nd {
      *
      * \returns  The ckb_offset where the child ckernel should be placed.
      */
-    callable left_compound(const callable &child);
+    DYND_API callable left_compound(const callable &child);
 
-    callable right_compound(const callable &child);
+    DYND_API callable right_compound(const callable &child);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

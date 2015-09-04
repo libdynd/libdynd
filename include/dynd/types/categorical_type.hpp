@@ -20,7 +20,7 @@ struct assign_to_same_category_type;
 namespace dynd {
 namespace ndt {
 
-  class categorical_type : public base_type {
+  class DYND_API categorical_type : public base_type {
     // The data type of the category
     type m_category_tp;
     // The integer type used for storage
@@ -118,7 +118,7 @@ namespace ndt {
     }
   };
 
-  type factor_categorical(const nd::array &values);
+  DYND_API type factor_categorical(const nd::array &values);
 
 } // namespace dynd::ndt
 } // namespace dynd

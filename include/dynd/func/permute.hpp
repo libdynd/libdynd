@@ -190,7 +190,8 @@ namespace kernels {
 namespace nd {
   namespace functional {
 
-    callable permute(const callable &child, const std::vector<intptr_t> &perm);
+    DYND_API callable permute(const callable &child,
+                              const std::vector<intptr_t> &perm);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

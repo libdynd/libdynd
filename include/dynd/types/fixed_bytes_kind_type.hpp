@@ -11,7 +11,7 @@
 namespace dynd {
 namespace ndt {
 
-  class fixed_bytes_kind_type : public base_bytes_type {
+  class DYND_API fixed_bytes_kind_type : public base_bytes_type {
   public:
     fixed_bytes_kind_type();
 

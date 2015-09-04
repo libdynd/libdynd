@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  class categorical_kind_type : public base_type {
+  class DYND_API categorical_kind_type : public base_type {
   public:
     categorical_kind_type();
 

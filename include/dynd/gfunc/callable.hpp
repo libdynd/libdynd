@@ -23,7 +23,7 @@ typedef array_preamble *(*callable_function_t)(const array_preamble *params, voi
 /**
  * Object that provides a dynd-based parameter passing mechanism
  */
-class callable {
+class DYND_API callable {
     /** Type for the parameters, must be a cstruct type */
     ndt::type m_parameters_type;
     callable_function_t m_function;
@@ -80,7 +80,7 @@ public:
     inline const ndt::type& get_parameters_type() const {
         return m_parameters_type;
     }
-    
+
     inline void *get_extra() const {
         return m_extra;
     }

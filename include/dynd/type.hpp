@@ -64,23 +64,23 @@ inline bool offset_is_aligned(size_t offset, size_t alignment)
 }
 
 /** Prints a single scalar of a builtin type to the stream */
-void print_builtin_scalar(type_id_t type_id, std::ostream &o, const char *data);
+void DYND_API print_builtin_scalar(type_id_t type_id, std::ostream &o, const char *data);
 
 /** Special iterdata which broadcasts to any number of additional dimensions */
-struct iterdata_broadcasting_terminator {
+struct DYND_API iterdata_broadcasting_terminator {
   iterdata_common common;
   char *data;
 };
-char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata,
-                                            intptr_t level);
-char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata,
-                                           intptr_t level, intptr_t i);
-char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata,
-                                             char *data, intptr_t level);
+DYND_API char *iterdata_broadcasting_terminator_incr(iterdata_common *iterdata,
+                                                     intptr_t level);
+DYND_API char *iterdata_broadcasting_terminator_adv(iterdata_common *iterdata,
+                                                    intptr_t level, intptr_t i);
+DYND_API char *iterdata_broadcasting_terminator_reset(iterdata_common *iterdata,
+                                                      char *data, intptr_t level);
 
 // Forward declaration of nd::array and nd::strided_vals
 namespace nd {
-  class array;
+  class DYND_API array;
 } // namespace dynd::nd
 
 namespace ndt {
@@ -90,8 +90,8 @@ namespace ndt {
 
   } // namespace dynd::ndt::detail
 
-  type make_pointer_type(const type &target_tp);
-  type make_fixed_dim(size_t dim_size, const type &element_tp);
+  DYND_API type make_pointer_type(const type &target_tp);
+  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 
   /**
    * This class represents a data type.
@@ -106,7 +106,7 @@ namespace ndt {
    * which case this is entirely a value type with no allocated memory.
    *
    */
-  class type {
+  class DYND_API type {
     static type instances[DYND_TYPE_ID_MAX + 1];
 
     const base_type *m_extended;
@@ -605,7 +605,7 @@ namespace ndt {
      *
      * \param scalar_type  The scalar type to convert all scalars to.
      */
-    type with_replaced_scalar_types(const type &scalar_type) const;
+    DYND_API type with_replaced_scalar_types(const type &scalar_type) const;
 
     /**
      * Replaces the data type of the this type with the provided one.
@@ -614,20 +614,20 @@ namespace ndt {
      * \param replace_ndim  The number of array dimensions to include in
      *                      the data type which is replaced.
      */
-    type with_replaced_dtype(const type &replacement_tp,
-                             intptr_t replace_ndim = 0) const;
+    DYND_API type with_replaced_dtype(const type &replacement_tp,
+                                      intptr_t replace_ndim = 0) const;
 
     /**
      * Returns this type without the leading memory type, if there is one.
      */
-    type without_memory_type() const;
+    DYND_API type without_memory_type() const;
 
     /**
      * Returns this type with a new strided dimension.
      *
      * \param i  The axis of the new strided dimension.
      */
-    type with_new_axis(intptr_t i, intptr_t new_ndim = 1) const;
+    DYND_API type with_new_axis(intptr_t i, intptr_t new_ndim = 1) const;
 
     /**
      * Returns a modified type with all expression types replaced with
@@ -708,9 +708,9 @@ namespace ndt {
       return get_dtype(include_ndim, const_cast<char **>(inout_arrmeta));
     }
 
-    intptr_t get_dim_size(const char *arrmeta, const char *data) const;
+    DYND_API intptr_t get_dim_size(const char *arrmeta, const char *data) const;
 
-    intptr_t get_size(const char *arrmeta) const;
+    DYND_API intptr_t get_size(const char *arrmeta) const;
 
     type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
                                intptr_t total_ndim = 0) const
@@ -773,9 +773,9 @@ namespace ndt {
      *
      * \returns  True if it is a strided array type, false otherwise.
      */
-    bool get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
-                        intptr_t *out_stride, ndt::type *out_el_tp,
-                        const char **out_el_arrmeta) const;
+    DYND_API bool get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
+                                 intptr_t *out_stride, ndt::type *out_el_tp,
+                                 const char **out_el_arrmeta) const;
 
     /**
      * If the type is a multidimensional strided dimension type, where the
@@ -791,10 +791,10 @@ namespace ndt {
      *
      * \returns  True if it is a strided array type, false otherwise.
      */
-    bool get_as_strided(const char *arrmeta, intptr_t ndim,
-                        const size_stride_t **out_size_stride,
-                        ndt::type *out_el_tp,
-                        const char **out_el_arrmeta) const;
+    DYND_API bool get_as_strided(const char *arrmeta, intptr_t ndim,
+                                 const size_stride_t **out_size_stride,
+                                 ndt::type *out_el_tp,
+                                 const char **out_el_arrmeta) const;
 
     /** The size of the data required for uniform iteration */
     size_t get_iterdata_size(intptr_t ndim) const
@@ -886,8 +886,8 @@ namespace ndt {
      * \param data      pointer to the data element to print
      * \param arrmeta  pointer to the nd::array arrmeta for the data element
      */
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    DYND_API void print_data(std::ostream &o, const char *arrmeta,
+                             const char *data) const;
 
     std::string str() const
     {
@@ -1167,7 +1167,8 @@ namespace ndt {
    * \param shape  The shape of the array type to create.
    * \param dtype  The data type of each array element.
    */
-  type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype);
+  DYND_API type make_type(intptr_t ndim, const intptr_t *shape,
+                          const ndt::type &dtype);
 
   /**
    * Constructs an array type from a shape and
@@ -1200,8 +1201,8 @@ namespace ndt {
    *                     is encountered, it is untouched, so the caller
    *                     should initialize it to false.
    */
-  type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
-                 bool &out_any_var);
+  DYND_API type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype,
+                          bool &out_any_var);
 
   /**
    * Returns the type of an array constructed from a value.
@@ -1218,9 +1219,9 @@ namespace ndt {
     return make_fixed_dim(value.size(), type::make<T>());
   }
 
-  type type_of(const nd::array &val);
+  DYND_API type type_of(const nd::array &val);
 
-  type type_of(const nd::callable &val);
+  DYND_API type type_of(const nd::callable &val);
 
   /**
    * Returns the type to use for packing this specific value. The value
@@ -1250,9 +1251,9 @@ namespace ndt {
     }
   }
 
-  type get_forward_type(const nd::array &val);
+  DYND_API type get_forward_type(const nd::array &val);
 
-  type get_forward_type(const nd::callable &val);
+  DYND_API type get_forward_type(const nd::callable &val);
 
   /**
    * A static array of the builtin types and void.
@@ -1267,21 +1268,22 @@ namespace ndt {
 } // namespace ndt
 
 /** Prints raw bytes as hexadecimal */
-void hexadecimal_print(std::ostream &o, char value);
-void hexadecimal_print(std::ostream &o, unsigned char value);
-void hexadecimal_print(std::ostream &o, unsigned short value);
-void hexadecimal_print(std::ostream &o, unsigned int value);
-void hexadecimal_print(std::ostream &o, unsigned long value);
-void hexadecimal_print(std::ostream &o, unsigned long long value);
-void hexadecimal_print(std::ostream &o, const char *data,
-                       intptr_t element_size);
-void hexadecimal_print_summarized(std::ostream &o, const char *data,
-                                  intptr_t element_size, intptr_t summary_size);
+DYND_API void hexadecimal_print(std::ostream &o, char value);
+DYND_API void hexadecimal_print(std::ostream &o, unsigned char value);
+DYND_API void hexadecimal_print(std::ostream &o, unsigned short value);
+DYND_API void hexadecimal_print(std::ostream &o, unsigned int value);
+DYND_API void hexadecimal_print(std::ostream &o, unsigned long value);
+DYND_API void hexadecimal_print(std::ostream &o, unsigned long long value);
+DYND_API void hexadecimal_print(std::ostream &o, const char *data,
+                                intptr_t element_size);
+DYND_API void hexadecimal_print_summarized(std::ostream &o, const char *data,
+                                           intptr_t element_size,
+                                           intptr_t summary_size);
 
-void strided_array_summarized(std::ostream &o, const ndt::type &tp,
-                              const char *arrmeta, const char *data,
-                              intptr_t dim_size, intptr_t stride);
-void print_indented(std::ostream &o, const std::string &indent,
-                    const std::string &s, bool skipfirstline = false);
+DYND_API void strided_array_summarized(std::ostream &o, const ndt::type &tp,
+                                       const char *arrmeta, const char *data,
+                                       intptr_t dim_size, intptr_t stride);
+DYND_API void print_indented(std::ostream &o, const std::string &indent,
+                             const std::string &s, bool skipfirstline = false);
 
 } // namespace dynd

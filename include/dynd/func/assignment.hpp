@@ -83,13 +83,13 @@ namespace nd {
  * \returns  The offset within 'ckb' immediately after the
  *           created kernel.
  */
-intptr_t
+DYND_API intptr_t
 make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                        const char *dst_arrmeta, const ndt::type &src_tp,
                        const char *src_arrmeta, kernel_request_t kernreq,
                        const eval::eval_context *ectx);
 
-inline intptr_t
+DYND_API inline intptr_t
 make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
                        const char *dst_arrmeta, const ndt::type *src_tp,
                        const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -109,10 +109,11 @@ make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
  * \param data_alignment  The alignment of the data being assigned.
  * \param kernreq  What kind of kernel must be placed in 'ckb'.
  */
-size_t make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                             size_t data_size,
-                                             size_t data_alignment,
-                                             kernel_request_t kernreq);
+DYND_API size_t
+make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offset,
+                                      size_t data_size,
+                                      size_t data_alignment,
+                                      kernel_request_t kernreq);
 
 /**
  * Creates an assignment kernel from the src to the dst built in
@@ -125,11 +126,12 @@ size_t make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offset,
  * \param kernreq  What kind of kernel must be placed in 'ckb'.
  * \param errmode  The error mode to use for assignments.
  */
-size_t make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                           type_id_t dst_type_id,
-                                           type_id_t src_type_id,
-                                           kernel_request_t kernreq,
-                                           assign_error_mode errmode);
+DYND_API size_t
+make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
+                                    type_id_t dst_type_id,
+                                    type_id_t src_type_id,
+                                    kernel_request_t kernreq,
+                                    assign_error_mode errmode);
 
 /**
  * When kernreq != kernel_request_single, adds an adapter to
@@ -142,9 +144,10 @@ size_t make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset,
  *                      ckb, ckb_offset, kernreq);
  *      // Proceed to create 'single' kernel...
  */
-size_t make_kernreq_to_single_kernel_adapter(void *ckb, intptr_t ckb_offset,
-                                             int nsrc,
-                                             kernel_request_t kernreq);
+DYND_API size_t
+make_kernreq_to_single_kernel_adapter(void *ckb, intptr_t ckb_offset,
+                                      int nsrc,
+                                      kernel_request_t kernreq);
 
 #ifdef DYND_CUDA
 /**
@@ -162,11 +165,11 @@ size_t make_kernreq_to_single_kernel_adapter(void *ckb, intptr_t ckb_offset,
  * \param data_alignment  The alignment of the data being assigned.
  * \param kernreq  What kind of kernel must be placed in 'ckb'.
  */
-size_t make_cuda_pod_typed_data_assignment_kernel(
+DYND_API size_t make_cuda_pod_typed_data_assignment_kernel(
     void *ckb, intptr_t ckb_offset, bool dst_device, bool src_device,
     size_t data_size, size_t data_alignment, kernel_request_t kernreq);
 
-intptr_t make_cuda_device_builtin_type_assignment_kernel(
+DYND_API intptr_t make_cuda_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
@@ -174,7 +177,7 @@ intptr_t make_cuda_device_builtin_type_assignment_kernel(
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<std::string, ndt::type> &tp_vars);
 
-intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
+DYND_API intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
@@ -182,7 +185,7 @@ intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
     const eval::eval_context *ectx, const nd::array &kwds,
     const std::map<std::string, ndt::type> &tp_vars);
 
-intptr_t make_cuda_from_device_builtin_type_assignment_kernel(
+DYND_API intptr_t make_cuda_from_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data,
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,

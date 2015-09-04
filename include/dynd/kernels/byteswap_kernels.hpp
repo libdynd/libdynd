@@ -42,7 +42,7 @@ inline uint64_t byteswap_value(uint64_t value) {
  * Creates an assignment kernel which does a byteswap
  * of the specified data size.
  */
-size_t make_byteswap_assignment_function(
+DYND_API size_t make_byteswap_assignment_function(
                 void *ckb, intptr_t ckb_offset,
                 intptr_t data_size, intptr_t data_alignment,
                 kernel_request_t kernreq);
@@ -51,7 +51,7 @@ size_t make_byteswap_assignment_function(
  * Creates an assignment kernel which does a byteswap
  * of the specified data size.
  */
-size_t make_pairwise_byteswap_assignment_function(
+DYND_API size_t make_pairwise_byteswap_assignment_function(
                 void *ckb, intptr_t ckb_offset,
                 intptr_t data_size, intptr_t data_alignment,
                 kernel_request_t kernreq);

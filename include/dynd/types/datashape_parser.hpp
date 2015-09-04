@@ -19,7 +19,7 @@ namespace dynd {
  * \param datashape_begin  The start of the buffer containing the datashape.
  * \param datashape_end    The end of the buffer containing the datashape.
  */
-ndt::type type_from_datashape(const char *datashape_begin, const char *datashape_end);
+DYND_API ndt::type type_from_datashape(const char *datashape_begin, const char *datashape_end);
 
 inline ndt::type type_from_datashape(const std::string& datashape)
 {

@@ -23,7 +23,7 @@ namespace nd {
   class array;
 } // namespace nd
 
-class dynd_exception : public std::exception {
+class DYND_API dynd_exception : public std::exception {
 protected:
   std::string m_message, m_what;
 
@@ -42,7 +42,7 @@ public:
 /**
  * An exception for various kinds of broadcast errors.
  */
-class broadcast_error : public dynd_exception {
+class DYND_API broadcast_error : public dynd_exception {
 public:
   broadcast_error(const std::string &m);
 
@@ -83,7 +83,7 @@ public:
 /**
  * An exception for an index out of bounds
  */
-class too_many_indices : public dynd_exception {
+class DYND_API too_many_indices : public dynd_exception {
 public:
   /**
    * An exception for when too many indices are provided in
@@ -94,7 +94,7 @@ public:
   virtual ~too_many_indices() throw() {}
 };
 
-class index_out_of_bounds : public dynd_exception {
+class DYND_API index_out_of_bounds : public dynd_exception {
 public:
   /**
    * An exception for when 'i' isn't within bounds for
@@ -109,7 +109,7 @@ public:
   virtual ~index_out_of_bounds() throw() {}
 };
 
-class axis_out_of_bounds : public dynd_exception {
+class DYND_API axis_out_of_bounds : public dynd_exception {
 public:
   /**
    * An exception for when 'i' isn't a valid axis
@@ -123,7 +123,7 @@ public:
 /**
  * An exception for a range out of bounds.
  */
-class irange_out_of_bounds : public dynd_exception {
+class DYND_API irange_out_of_bounds : public dynd_exception {
 public:
   /**
    * An exception for when 'i' isn't within bounds for
@@ -141,7 +141,7 @@ public:
 /**
  * An exception for errors related to types.
  */
-class type_error : public dynd_exception {
+class DYND_API type_error : public dynd_exception {
 public:
   type_error(const char *exception_name, const std::string &msg)
       : dynd_exception(exception_name, msg)
@@ -155,7 +155,7 @@ public:
 /**
  * An exception for an invalid type ID.
  */
-class invalid_type_id : public type_error {
+class DYND_API invalid_type_id : public type_error {
 public:
   invalid_type_id(int type_id);
 
@@ -165,7 +165,7 @@ public:
 /**
  * An exception for when input can't be decoded
  */
-class string_decode_error : public dynd_exception {
+class DYND_API string_decode_error : public dynd_exception {
   std::string m_bytes;
   string_encoding_t m_encoding;
 
@@ -184,7 +184,7 @@ public:
  * An exception for when a codepoint can't encode to
  * the destination.
  */
-class string_encode_error : public dynd_exception {
+class DYND_API string_encode_error : public dynd_exception {
   uint32_t m_cp;
   string_encoding_t m_encoding;
 
@@ -202,7 +202,7 @@ public:
  * An exception for when two dynd types cannot be compared
  * a particular comparison operator.
  */
-class not_comparable_error : public dynd_exception {
+class DYND_API not_comparable_error : public dynd_exception {
 public:
   not_comparable_error(const ndt::type &lhs, const ndt::type &rhs,
                        comparison_type_t comptype);
@@ -215,7 +215,7 @@ public:
 /**
  * An exception for errors from the CUDA runtime.
  */
-class cuda_runtime_error : public std::runtime_error {
+class DYND_API cuda_runtime_error : public std::runtime_error {
   cudaError_t m_error;
 
 public:

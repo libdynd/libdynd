@@ -28,7 +28,7 @@ namespace ndt {
     class type;
 } // namespace ndt
 
-struct time_hmst {
+struct DYND_API time_hmst {
     int8_t hour;
     int8_t minute;
     int8_t second;

@@ -13,7 +13,7 @@
 namespace dynd {
 namespace nd {
 
-  struct mean_kernel : base_kernel<mean_kernel, 1> {
+  struct DYND_API mean_kernel : base_kernel<mean_kernel, 1> {
     std::intptr_t compound_div_offset;
     int64 count;
 

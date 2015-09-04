@@ -7,7 +7,7 @@
 
 namespace dynd {
 
-struct start_stop_t {
+struct DYND_API start_stop_t {
     intptr_t start;
     intptr_t stop;
 };

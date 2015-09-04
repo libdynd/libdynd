@@ -10,7 +10,7 @@
 namespace dynd {
 
 // A boolean class that is just one byte
-class bool1 {
+class DYND_API bool1 {
   char m_value;
 
 public:

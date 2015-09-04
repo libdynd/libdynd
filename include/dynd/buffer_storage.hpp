@@ -17,7 +17,7 @@ namespace dynd {
  *
  * NOTE: If the array is not of type "N * T" and default
  *       initialized by nd::empty, undefined behavior will result.
- * 
+ *
  */
 inline void reset_strided_buffer_array(const nd::array& buf)
 {
@@ -37,7 +37,7 @@ inline void reset_strided_buffer_array(const nd::array& buf)
   }
 }
 
-class buffer_storage {
+class DYND_API buffer_storage {
   char *m_storage;
   char *m_arrmeta;
   ndt::type m_type;

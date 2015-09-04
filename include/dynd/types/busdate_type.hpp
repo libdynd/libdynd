@@ -29,7 +29,7 @@ enum busdate_roll_t {
 
 namespace ndt {
 
-  class busdate_type : public base_type {
+  class DYND_API busdate_type : public base_type {
     /** Strategy for handling dates that are not business dates */
     busdate_roll_t m_roll;
     /** Which days of the week are work days vs weekend */

@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct neighborhood_data {
+    struct DYND_API neighborhood_data {
       callable op;
       start_stop_t *start_stop;
 

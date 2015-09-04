@@ -81,7 +81,7 @@ typedef void (*type_transform_fn_t)(const ndt::type &dt,
                                     bool &out_was_transformed);
 
 // Common preamble of all iterdata instances
-struct iterdata_common {
+struct DYND_API iterdata_common {
   // This increments the iterator at the requested level
   iterdata_increment_fn_t incr;
   // This advances the iterator at the requested level by the requested amount
@@ -92,7 +92,7 @@ struct iterdata_common {
 
 namespace ndt {
 
-  struct base_type_members {
+  struct DYND_API base_type_members {
     typedef uint32_t flags_type;
 
     /** The type id (type_id_t is the enum) */
@@ -138,7 +138,7 @@ namespace ndt {
    * as a smart pointer to base_type, which special handling for the builtin
    *types.
    */
-  class base_type {
+  class DYND_API base_type {
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
 
@@ -877,7 +877,7 @@ namespace ndt {
  * strided array, its arrmeta always begins with an array
  * of ``size_stride_t`` with length ``tp.get_strided_ndim()``.
  */
-struct size_stride_t {
+struct DYND_API size_stride_t {
   intptr_t dim_size;
   intptr_t stride;
 };

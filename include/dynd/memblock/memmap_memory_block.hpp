@@ -30,10 +30,10 @@ namespace dynd {
  *             negative, in which case it is interpreted as an offset from the
  *             end of the file.
  */
-memory_block_ptr make_memmap_memory_block(const std::string& filename,
+DYND_API memory_block_ptr make_memmap_memory_block(const std::string& filename,
     uint32_t access, char **out_pointer, intptr_t *out_size,
     intptr_t begin = 0, intptr_t end = std::numeric_limits<intptr_t>::max());
 
-void memmap_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
+DYND_API void memmap_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd

@@ -16,7 +16,7 @@ typedef string_type_data json_type_data;
 
 namespace ndt {
 
-  class json_type : public base_string_type {
+  class DYND_API json_type : public base_string_type {
   public:
     json_type();
 

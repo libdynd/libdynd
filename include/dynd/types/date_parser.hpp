@@ -31,7 +31,7 @@ namespace dynd {
  *
  * \returns  True if the parse is successful, false otherwise.
  */
-bool string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
+DYND_API bool string_to_date(const char *begin, const char *end, date_ymd &out_ymd,
                     date_parse_order_t ambig, int century_window,
                     assign_error_mode errmode);
 
@@ -58,7 +58,7 @@ namespace parse {
      *
      * \returns  True if a date was parsed successfully, false otherwise.
      */
-    bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
+    DYND_API bool parse_date(const char *&begin, const char *end, date_ymd &out_ymd,
                     date_parse_order_t ambig, int century_window);
 
     /**
@@ -71,7 +71,7 @@ namespace parse {
      * \param out_ymd  If true is returned, this has been filled with the parsed
      *                 date.
      */
-    bool parse_iso8601_dashes_date(const char *&begin, const char *end,
+    DYND_API bool parse_iso8601_dashes_date(const char *&begin, const char *end,
                                    date_ymd &out_ymd);
 
     /**
@@ -83,7 +83,7 @@ namespace parse {
      * \param out_month  If true is returned, this has been filled with the parsed
      *                   month.
      */
-    bool parse_str_month_no_ws(const char *&begin, const char *end, int &out_month);
+    DYND_API bool parse_str_month_no_ws(const char *&begin, const char *end, int &out_month);
 
     /**
      * Parses a string month: Jan == 1, Dec == 12. Accepts a period after month
@@ -95,7 +95,7 @@ namespace parse {
      * \param out_month  If true is returned, this has been filled with the parsed
      *                   month.
      */
-    bool parse_str_month_punct_no_ws(const char *&begin, const char *end, int &out_month);
+    DYND_API bool parse_str_month_punct_no_ws(const char *&begin, const char *end, int &out_month);
 
     /**
      * Parses a string weekday: Mon == 0, Sun == 6.
@@ -106,7 +106,7 @@ namespace parse {
      * \param out_weekday  If true is returned, this has been filled with the parsed
      *                   weekday.
      */
-    bool parse_str_weekday_no_ws(const char *&begin, const char *end,
+    DYND_API bool parse_str_weekday_no_ws(const char *&begin, const char *end,
                            int &out_weekday);
 
 } // namespace parse

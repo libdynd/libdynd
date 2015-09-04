@@ -12,7 +12,7 @@
 
 namespace dynd {
 
-class float128 {
+class DYND_API float128 {
 public:
 #if defined(DYND_BIG_ENDIAN)
   uint64_t m_hi, m_lo;

@@ -14,7 +14,7 @@ namespace dynd {
 
 // AuxDataBase is the same as NpyAuxData, see the numpy doc link
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#auxiliary-data-with-object-semantics
-struct AuxDataBase;
+struct DYND_API AuxDataBase;
 
 // Function pointers for freeing or cloning auxiliary data
 // IMPORTANT NOTE: These are C-ABI functions, they should
@@ -22,14 +22,14 @@ struct AuxDataBase;
 typedef void (*auxdata_free_function_t) (AuxDataBase *);
 typedef AuxDataBase *(*auxdata_clone_function_t) (const AuxDataBase *);
 
-struct AuxDataBase {
+struct DYND_API AuxDataBase {
     /** Mandatory free and clone functions */
     auxdata_free_function_t free;
     auxdata_clone_function_t clone;
     void *reserved0, *reserved1; /* for future expansion */
 };
 
-class auxiliary_data;
+class DYND_API auxiliary_data;
 
 template<typename T>
 void make_auxiliary_data(auxiliary_data& out_created);
@@ -123,7 +123,7 @@ namespace detail {
  *  - If the 0th bit is not set, it is managed with the AuxDataBase
  *    free and clone functions.
  */
-class auxiliary_data {
+class DYND_API auxiliary_data {
     uintptr_t m_auxdata;
 
     // Non-copyable

@@ -17,7 +17,7 @@ namespace dynd {
  * These functions are static and should not be modified
  * after initialization.
  */
-struct lowlevel_api_t {
+struct DYND_API lowlevel_api_t {
   uintptr_t version;
   // Reference counting primitives for memory blocks (including nd::arrays)
   void (*memory_block_incref)(memory_block_data *mbd);

@@ -34,7 +34,7 @@ struct datetime_struct;
  *
  * \returns  True if the parse is successful, false otherwise.
  */
-bool string_to_datetime(const char *begin, const char *end,
+DYND_API bool string_to_datetime(const char *begin, const char *end,
                         date_parse_order_t ambig, int century_window,
                         assign_error_mode errmode, datetime_struct &out_dt,
                         const char *&out_tz_begin, const char *&out_tz_end);
@@ -63,7 +63,7 @@ namespace parse {
      *
      * \returns  True if a datetime was parsed successfully, false otherwise.
      */
-    bool parse_datetime(const char *&begin, const char *end,
+    DYND_API bool parse_datetime(const char *&begin, const char *end,
                         date_parse_order_t ambig, int century_window,
                         datetime_struct &out_dt, const char *&out_tz_begin,
                         const char *&out_tz_end);

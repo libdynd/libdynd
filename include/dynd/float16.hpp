@@ -19,15 +19,15 @@
 namespace dynd {
 
 // Bit-level conversions
-DYND_CUDA_HOST_DEVICE uint16_t float_to_halfbits(float value);
+DYND_CUDA_HOST_DEVICE DYND_API uint16_t float_to_halfbits(float value);
 
-DYND_CUDA_HOST_DEVICE uint16_t double_to_halfbits(double value);
+DYND_CUDA_HOST_DEVICE DYND_API uint16_t double_to_halfbits(double value);
 
-DYND_CUDA_HOST_DEVICE float halfbits_to_float(uint16_t value);
+DYND_CUDA_HOST_DEVICE DYND_API float halfbits_to_float(uint16_t value);
 
-DYND_CUDA_HOST_DEVICE double halfbits_to_double(uint16_t value);
+DYND_CUDA_HOST_DEVICE DYND_API double halfbits_to_double(uint16_t value);
 
-class float16 {
+class DYND_API float16 {
   uint16_t m_bits;
 
 public:

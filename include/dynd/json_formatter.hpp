@@ -16,6 +16,6 @@ namespace dynd {
  * \param struct_as_list  If true, formats struct objects as lists, otherwise
  *                        formats them as objects/dicts.
  */
-nd::array format_json(const nd::array &a, bool struct_as_list = false);
+DYND_API nd::array format_json(const nd::array &a, bool struct_as_list = false);
 
 } // namespace dynd

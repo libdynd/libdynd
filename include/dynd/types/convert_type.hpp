@@ -19,7 +19,7 @@
 namespace dynd {
 namespace ndt {
 
-  class convert_type : public base_expr_type {
+  class DYND_API convert_type : public base_expr_type {
     type m_value_type, m_operand_type;
 
   public:

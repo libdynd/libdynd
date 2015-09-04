@@ -157,7 +157,7 @@ inline callable_property operator|(callable_property a, callable_property b)
  * operation and a strided operation, or constructing
  * with different array arrmeta.
  */
-struct callable_type_data {
+struct DYND_API callable_type_data {
   char *static_data;
   std::size_t data_size;
   callable_data_init_t data_init;
@@ -249,7 +249,7 @@ static_assert((sizeof(callable_type_data) & 7) == 0,
 
 namespace ndt {
 
-  class callable_type : public base_type {
+  class DYND_API callable_type : public base_type {
     type m_return_type;
     // Always a tuple type containing the types for positional args
     type m_pos_tuple;
@@ -512,7 +512,7 @@ namespace ndt {
     }
   };
 
-  type make_generic_funcproto(intptr_t nargs);
+  DYND_API type make_generic_funcproto(intptr_t nargs);
 
 } // namespace dynd::ndt
 } // namespace dynd

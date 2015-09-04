@@ -12,9 +12,9 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    callable outer(const callable &child);
+    DYND_API callable outer(const callable &child);
 
-    ndt::type outer_make_type(const ndt::callable_type *child_tp);
+    DYND_API ndt::type outer_make_type(const ndt::callable_type *child_tp);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

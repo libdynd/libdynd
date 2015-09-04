@@ -10,7 +10,7 @@
 namespace dynd {
 namespace ndt {
 
-  class array_type : public base_expr_type {
+  class DYND_API array_type : public base_expr_type {
     type m_value_tp;
 
   public:

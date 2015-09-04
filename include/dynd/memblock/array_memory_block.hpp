@@ -18,7 +18,7 @@ namespace dynd {
  * arrmeta after this structure is determined by the m_type
  * object.
  */
-struct array_preamble {
+struct DYND_API array_preamble {
     memory_block_data m_memblockdata;
     /**
      * m_type is overloaded - for builtin scalar types, it
@@ -64,7 +64,7 @@ struct array_preamble {
  *
  * The created object is uninitialized.
  */
-memory_block_ptr make_array_memory_block(size_t arrmeta_size);
+DYND_API memory_block_ptr make_array_memory_block(size_t arrmeta_size);
 
 /**
  * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta),
@@ -72,9 +72,10 @@ memory_block_ptr make_array_memory_block(size_t arrmeta_size);
  *
  * The created object is uninitialized.
  */
-memory_block_ptr make_array_memory_block(size_t arrmeta_size, size_t extra_size,
-                                         size_t extra_alignment,
-                                         char **out_extra_ptr);
+DYND_API memory_block_ptr make_array_memory_block(size_t arrmeta_size,
+                                                  size_t extra_size,
+                                                  size_t extra_alignment,
+                                                  char **out_extra_ptr);
 
 /**
  * Makes a shallow copy of the nd::array memory block. In the copy, only the
@@ -82,9 +83,9 @@ memory_block_ptr make_array_memory_block(size_t arrmeta_size, size_t extra_size,
  * references are swapped to point at the original nd::array memory block, as they
  * are a signal that the data was embedded in the same memory allocation.
  */
-memory_block_ptr shallow_copy_array_memory_block(const memory_block_ptr& ndo);
+DYND_API memory_block_ptr shallow_copy_array_memory_block(const memory_block_ptr& ndo);
 
-void array_memory_block_debug_print(const memory_block_data *memblock,
+DYND_API void array_memory_block_debug_print(const memory_block_data *memblock,
                                     std::ostream &o, const std::string &indent);
 
 } // namespace dynd

@@ -36,7 +36,7 @@ namespace dynd {
  *
  * TODO: Should negative indices be supported with the meaning as in Python?
  */
-class irange {
+class DYND_API irange {
     intptr_t m_start, m_finish, m_step;
 public:
     inline /*DYND_CONSTEXPR*/ irange()

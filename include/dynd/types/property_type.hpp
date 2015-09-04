@@ -11,7 +11,7 @@
 namespace dynd {
 namespace ndt {
 
-  class property_type : public base_expr_type {
+  class DYND_API property_type : public base_expr_type {
     type m_value_tp, m_operand_tp;
     bool m_readable, m_writable;
     // If this is true, the property is actually on

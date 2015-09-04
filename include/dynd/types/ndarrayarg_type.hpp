@@ -18,7 +18,7 @@ namespace ndt {
    * nd::array type which would necessitate the addition
    * of cycle collection.
    */
-  class ndarrayarg_type : public base_type {
+  class DYND_API ndarrayarg_type : public base_type {
   public:
     ndarrayarg_type()
         : base_type(ndarrayarg_type_id, dynamic_kind,

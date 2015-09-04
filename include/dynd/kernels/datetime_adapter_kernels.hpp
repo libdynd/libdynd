@@ -12,10 +12,10 @@ namespace dynd {
 /**
  * Makes callables which adapt to/from a datetime.
  */
-bool make_datetime_adapter_callable(const ndt::type &value_tp,
-                                    const ndt::type &operand_tp,
-                                    const nd::string &op,
-                                    nd::callable &out_forward,
-                                    nd::callable &out_reverse);
+DYND_API bool make_datetime_adapter_callable(const ndt::type &value_tp,
+                                             const ndt::type &operand_tp,
+                                             const nd::string &op,
+                                             nd::callable &out_forward,
+                                             nd::callable &out_reverse);
 
 } // namespace dynd

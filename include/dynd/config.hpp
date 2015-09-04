@@ -31,6 +31,21 @@
 /** The number of elements to process at once when doing chunking/buffering */
 #define DYND_BUFFER_CHUNK_SIZE 128
 
+// Symbol visibility macros
+#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(DYND_EXPORT)
+// Building the library
+#define DYND_API __declspec(dllexport)
+#else
+// Importing the library
+#define DYND_API __declspec(dllimport)
+#endif // defined(DYND_EXPORT)
+#define DYND_INTERNAL
+#else
+#define DYND_API
+#define DYND_INTERNAL __attribute__ ((visibility ("hidden")))
+#endif // End symbol visibility macros.
+
 #ifdef __clang__
 
 #if __has_feature(cxx_constexpr)
@@ -91,7 +106,7 @@
 
 // Some C library calls will abort if given bad format strings, etc
 // This RAII class temporarily disables that
-class disable_invalid_parameter_handler {
+class DYND_API disable_invalid_parameter_handler {
   _invalid_parameter_handler m_saved;
 
   disable_invalid_parameter_handler(const disable_invalid_parameter_handler &);
@@ -114,22 +129,7 @@ public:
   }
 };
 
-#endif // elif defined(_MSC_VER)
-
-// Symbol visibility macros
-#if defined(_WIN32) || defined(__CYGWIN__)
-#if defined(DYND_EXPORT)
-// Building the library
-#define DYND_API __declspec(dllexport)
-#else
-// Importing the library
-#define DYND_API __declspec(dllimport)
-#endif // defined(DYND_EXPORT)
-#define DYND_INTERNAL
-#else
-#define DYND_API
-#define DYND_INTERNAL __attribute__ ((visibility ("hidden")))
-#endif // End symbol visibility macros.
+#endif // end of compiler vendor checks
 
 #ifdef __CUDACC__
 #define DYND_CUDA_HOST_DEVICE __host__ __device__

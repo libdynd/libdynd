@@ -31,7 +31,7 @@ namespace dynd { namespace parse {
  *        return sbs.succeed();
  *    }
  */
-class saved_begin_state {
+class DYND_API saved_begin_state {
     const char *&m_begin;
     const char *m_saved_begin;
     bool m_succeeded;
@@ -67,7 +67,7 @@ public:
 /**
  * An error message thrown when a parse error is encountered.
  */
-class parse_error : public std::invalid_argument {
+class DYND_API parse_error : public std::invalid_argument {
     const char *m_position;
 public:
     parse_error(const char *position, const std::string& message)
@@ -321,22 +321,23 @@ bool parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
  * output string as UTF-8. Typically used with the
  * ``parse_doublequote_string_no_ws`` function.
  */
-void unescape_string(const char *strbegin, const char *strend,
-                     std::string &out);
+DYND_API void unescape_string(const char *strbegin, const char *strend,
+                              std::string &out);
 
 /**
  * Without skipping whitespace, parses a range of bytes following
  * the JSON number grammar, returning its range of bytes.
  */
-bool parse_json_number_no_ws(const char *&rbegin, const char *end,
-                             const char *&out_nbegin, const char *&out_nend);
+DYND_API bool parse_json_number_no_ws(const char *&rbegin, const char *end,
+                                      const char *&out_nbegin,
+                                      const char *&out_nend);
 
 /**
  * Does an exact comparison of a byte range to a string literal.
  */
 template <int N>
 inline bool compare_range_to_literal(const char *begin, const char *end,
-                        const char (&token)[N])
+                                     const char (&token)[N])
 {
     return (end - begin) == N - 1 &&
         !memcmp(begin, token, N - 1);
@@ -400,7 +401,8 @@ inline bool parse_unsigned_int_no_ws(const char *&rbegin, const char *end,
  *         // Couldn't match month as an integer
  *     }
  */
-bool parse_2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+DYND_API bool parse_2digit_int_no_ws(const char *&rbegin, const char *end,
+                                     int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with one or two digits.
@@ -416,7 +418,8 @@ bool parse_2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
  *         // Couldn't match day
  *     }
  */
-bool parse_1or2digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+DYND_API bool parse_1or2digit_int_no_ws(const char *&rbegin, const char *end,
+                                        int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with exactly four digits.
@@ -431,7 +434,8 @@ bool parse_1or2digit_int_no_ws(const char *&rbegin, const char *end, int &out_va
  *         // Couldn't match year
  *     }
  */
-bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+DYND_API bool parse_4digit_int_no_ws(const char *&rbegin, const char *end,
+                                     int &out_val);
 
 /**
  * Without skipping whitespace, parses an integer with exactly six digits.
@@ -446,49 +450,54 @@ bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
  *         // Couldn't match year
  *     }
  */
-bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
+DYND_API bool parse_6digit_int_no_ws(const char *&rbegin, const char *end,
+                                     int &out_val);
 
 /**
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc) into a uint64, setting the output over flow or
  * bad parse flags if there are problems.
  */
-uint64_t checked_string_to_uint64(const char *begin, const char *end,
-                                  bool &out_overflow, bool &out_badparse);
+DYND_API uint64_t checked_string_to_uint64(const char *begin, const char *end,
+                                           bool &out_overflow,
+                                           bool &out_badparse);
 
 /**
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc) into a uint128, setting the output over flow or
  * bad parse flags if there are problems.
  */
-uint128 checked_string_to_uint128(const char *begin, const char *end,
-                                         bool &out_overflow, bool &out_badparse);
+DYND_API uint128 checked_string_to_uint128(const char *begin, const char *end,
+                                           bool &out_overflow,
+                                           bool &out_badparse);
 
 /**
  * Converts a string containing only an integer (no leading or
  * trailing space, etc) into an intptr_t, raising an exception if
  * there are problems.
  */
-intptr_t checked_string_to_intptr(const char *begin, const char *end);
+DYND_API intptr_t checked_string_to_intptr(const char *begin, const char *end);
 
 /**
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc) into a uint64, ignoring any problems.
  */
-uint64_t unchecked_string_to_uint64(const char *begin, const char *end);
+DYND_API uint64_t unchecked_string_to_uint64(const char *begin,
+                                             const char *end);
 
 /**
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc) into a uint128, ignoring any problems.
  */
-uint128 unchecked_string_to_uint128(const char *begin, const char *end);
+DYND_API uint128 unchecked_string_to_uint128(const char *begin,
+                                             const char *end);
 
 /**
  * Converts a string containing only a floating point number into
  * a float64/C double.
  */
-double checked_string_to_float64(const char *begin, const char *end,
-                                assign_error_mode errmode);
+DYND_API double checked_string_to_float64(const char *begin, const char *end,
+                                          assign_error_mode errmode);
 
 /**
  * Converts a string containing a number (no leading or trailing space)
@@ -502,8 +511,9 @@ double checked_string_to_float64(const char *begin, const char *end,
  * \param option  If true, treat it as option[Num] instead of just Num.
  * \param errmode  The error handling mode.
  */
-void string_to_number(char *out, type_id_t tid, const char *begin,
-                      const char *end, bool option, assign_error_mode errmode);
+DYND_API void string_to_number(char *out, type_id_t tid, const char *begin,
+                               const char *end, bool option,
+                               assign_error_mode errmode);
 
 /**
  * Converts a string containing an boolean (no leading or trailing space)
@@ -516,14 +526,14 @@ void string_to_number(char *out, type_id_t tid, const char *begin,
  * \param option  If true, treat it as option[int] instead of just int.
  * \param errmode  The error handling mode.
  */
-void string_to_bool(char *out_bool, const char *begin, const char *end,
-                    bool option, assign_error_mode errmode);
+DYND_API void string_to_bool(char *out_bool, const char *begin, const char *end,
+                             bool option, assign_error_mode errmode);
 
 /**
  * Returns true if the string provided matches an option[T] missing value token,
  * such as "", "NA", "NULL", "null", "None".
  */
-bool matches_option_type_na_token(const char *begin, const char *end);
+DYND_API bool matches_option_type_na_token(const char *begin, const char *end);
 
 /**
  * A helper class for matching a bunch of names and getting an integer.
@@ -544,7 +554,7 @@ bool matches_option_type_na_token(const char *begin, const char *end);
  *         named_value("wed", 2),
  *     }
  */
-struct named_value {
+struct DYND_API named_value {
     const char *name;
     int value;
     DYND_CONSTEXPR named_value(const char *name_, int value_)

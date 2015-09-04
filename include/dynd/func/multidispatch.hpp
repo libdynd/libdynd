@@ -45,7 +45,7 @@ namespace nd {
      * \param naf  The number of callables provided.
      * \param af  The array of input callables, sized ``naf``.
      */
-    callable old_multidispatch(intptr_t naf, const callable *af);
+    DYND_API callable old_multidispatch(intptr_t naf, const callable *af);
 
     inline callable
     old_multidispatch(const std::initializer_list<callable> &children)

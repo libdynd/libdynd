@@ -11,7 +11,7 @@
 namespace dynd {
 namespace nd {
 
-  struct masked_take_ck : base_kernel<masked_take_ck, 2> {
+  struct DYND_API masked_take_ck : base_kernel<masked_take_ck, 2> {
     ndt::type m_dst_tp;
     const char *m_dst_meta;
     intptr_t m_dim_size, m_src0_stride, m_mask_stride;
@@ -35,7 +35,7 @@ namespace nd {
    * CKernel which does an indexed take operation. The child ckernel
    * should be a single unary operation.
    */
-  struct indexed_take_ck : base_kernel<indexed_take_ck, 2> {
+  struct DYND_API indexed_take_ck : base_kernel<indexed_take_ck, 2> {
     intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
     intptr_t m_src0_dim_size, m_src0_stride;
 
@@ -54,7 +54,7 @@ namespace nd {
         const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
   };
 
-  struct take_ck : base_virtual_kernel<take_ck> {
+  struct DYND_API take_ck : base_virtual_kernel<take_ck> {
     static void
     resolve_dst_type(char *static_data, size_t data_size, char *data,
                      ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,

@@ -18,8 +18,8 @@ namespace dynd {
  *
  * The initial capacity can be set if a good estimate is known.
  */
-memory_block_ptr make_zeroinit_memory_block(intptr_t initial_capacity_bytes = 2048);
+DYND_API memory_block_ptr make_zeroinit_memory_block(intptr_t initial_capacity_bytes = 2048);
 
-void zeroinit_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
+DYND_API void zeroinit_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
 
 } // namespace dynd

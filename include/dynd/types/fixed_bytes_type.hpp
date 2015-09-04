@@ -13,7 +13,7 @@
 namespace dynd {
 namespace ndt {
 
-  class fixed_bytes_type : public base_bytes_type {
+  class DYND_API fixed_bytes_type : public base_bytes_type {
   public:
     fixed_bytes_type(intptr_t element_size, intptr_t alignment);
 

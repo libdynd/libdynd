@@ -12,7 +12,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct constant_kernel : base_kernel<constant_kernel> {
+    struct DYND_API constant_kernel : base_kernel<constant_kernel> {
       static const std::size_t data_size = 0;
 
       char *data;

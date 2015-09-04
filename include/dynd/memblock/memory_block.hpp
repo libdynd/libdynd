@@ -36,7 +36,7 @@ enum memory_block_type_t {
     memmap_memory_block_type
 };
 
-std::ostream& operator<<(std::ostream& o, memory_block_type_t mbt);
+DYND_API std::ostream& operator<<(std::ostream& o, memory_block_type_t mbt);
 
 /**
  * This is the data that goes at the start of every memory block, including
@@ -44,7 +44,7 @@ std::ostream& operator<<(std::ostream& o, memory_block_type_t mbt);
  * of memory block types, of which 'external' is presently the only
  * extensible ones.
  */
-struct memory_block_data {
+struct DYND_API memory_block_data {
     atomic_refcount m_use_count;
     /** A memory_block_type_t enum value */
     uint32_t m_type;
@@ -60,7 +60,7 @@ struct memory_block_data {
  * This is a struct of function pointers for allocating and
  * resizing POD data within a memory_block that supports it.
  */
-struct memory_block_pod_allocator_api {
+struct DYND_API memory_block_pod_allocator_api {
     /**
      * Allocates the requested amount of memory from the memory_block, returning
      * a pointer pair.
@@ -102,7 +102,7 @@ struct memory_block_pod_allocator_api {
  * object data (of types with a destructor) within a
  * memory_block that supports it.
  */
-struct memory_block_objectarray_allocator_api {
+struct DYND_API memory_block_objectarray_allocator_api {
     /**
      * Allocates the requested amount of memory from the memory_block, returning
      * a pointer.
@@ -132,13 +132,13 @@ struct memory_block_objectarray_allocator_api {
  * Returns a pointer to a static POD memory allocator API,
  * for the type of the memory block.
  */
-memory_block_pod_allocator_api *get_memory_block_pod_allocator_api(memory_block_data *memblock);
+DYND_API memory_block_pod_allocator_api *get_memory_block_pod_allocator_api(memory_block_data *memblock);
 
 /**
  * Returns a pointer to a static objectarray memory allocator API,
  * for the type of the memory block.
  */
-memory_block_objectarray_allocator_api *get_memory_block_objectarray_allocator_api(memory_block_data *memblock);
+DYND_API memory_block_objectarray_allocator_api *get_memory_block_objectarray_allocator_api(memory_block_data *memblock);
 
 
 
@@ -148,7 +148,7 @@ namespace detail {
      * by memory_block_decref when the reference count
      * reaches zero.
      */
-    void memory_block_free(memory_block_data *memblock);
+    DYND_API void memory_block_free(memory_block_data *memblock);
 } // namespace detail
 
 /**
@@ -176,13 +176,13 @@ inline void memory_block_decref(memory_block_data *memblock)
 /**
  * Does a debug dump of the memory block.
  */
-void memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent = "");
+DYND_API void memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent = "");
 
 /**
  * A smart pointer to a memory_block object. Very similar
  * to boost::intrusive_ptr<memory_block_data>.
  */
-class memory_block_ptr {
+class DYND_API memory_block_ptr {
     memory_block_data *m_memblock;
 public:
     /** Default constructor */

@@ -16,7 +16,7 @@ namespace dynd {
 // fixed_dim (redundantly) uses the same arrmeta as strided_dim
 typedef size_stride_t fixed_dim_type_arrmeta;
 
-struct fixed_dim_type_iterdata {
+struct DYND_API fixed_dim_type_iterdata {
   iterdata_common common;
   char *data;
   intptr_t stride;
@@ -24,7 +24,7 @@ struct fixed_dim_type_iterdata {
 
 namespace ndt {
 
-  class fixed_dim_type : public base_dim_type {
+  class DYND_API fixed_dim_type : public base_dim_type {
     intptr_t m_dim_size;
     std::vector<std::pair<std::string, gfunc::callable>> m_array_properties,
         m_array_functions;
@@ -180,9 +180,9 @@ namespace ndt {
     return *reinterpret_cast<T *>(a.get_readwrite_originptr() + i * md->stride);
   }
 
-  type make_fixed_dim(size_t dim_size, const type &element_tp);
+  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 
-  type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &dtp);
+  DYND_API type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &dtp);
 
   inline type make_fixed_dim(size_t dim_size, const type &element_tp,
                              intptr_t ndim)

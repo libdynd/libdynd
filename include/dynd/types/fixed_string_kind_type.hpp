@@ -11,7 +11,7 @@
 namespace dynd {
 namespace ndt {
 
-  class fixed_string_kind_type : public base_string_type {
+  class DYND_API fixed_string_kind_type : public base_string_type {
   public:
     fixed_string_kind_type();
 
