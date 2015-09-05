@@ -1,67 +1,10 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.11)
 project (benchmark)
 
+option(BENCHMARK_ENABLE_TESTING "Enable testing of the benchmark library." ON)
+option(BENCHMARK_ENABLE_LTO "Enable link time optimisation of the benchmark library." OFF)
 # Make sure we can import out CMake functions
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-# Import and build Google Test
-include(ExternalProject)
-set_directory_properties(properties EP_PREFIX "${CMAKE_BINARY_DIR}/third_party")
-ExternalProject_Add(googletest
-  URL "https://googletest.googlecode.com/files/gtest-1.7.0.zip"
-  URL_MD5 2d6ec8ccdf5c46b05ba54a9fd1d130d7
-  SOURCE_DIR "${CMAKE_BINARY_DIR}/third_party/gtest"
-  CMAKE_ARGS "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
-  INSTALL_COMMAND "")
-ExternalProject_Get_Property(googletest source_dir)
-include_directories(${source_dir}/include)
-ExternalProject_Get_Property(googletest binary_dir)
-link_directories(${binary_dir})
-
-# Enable the latest C++ standard possible
-include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag(--std=c++14 HAVE_FLAG_CXX_14)
-check_cxx_compiler_flag(--std=c++11 HAVE_FLAG_CXX_11)
-check_cxx_compiler_flag(--std=c++0x HAVE_FLAG_CXX_0X)
-if (HAVE_FLAG_CXX_14)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14")
-elseif (HAVE_FLAG_CXX_11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
-elseif (HAVE_FLAG_CXX_0X)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x")
-endif()
-
-# Turn compiler warnings up to 11
-include(AddCXXCompilerFlag)
-add_cxx_compiler_flag(-Wall)
-add_cxx_compiler_flag(-Wshadow)
-add_cxx_compiler_flag(-Werror)
-add_cxx_compiler_flag(-pedantic-errors)
-#add_cxx_compiler_flag(-Wzero-as-null-pointer-constant)
-
-# Release flags
-add_cxx_compiler_flag(-fno-strict-aliasing RELEASE)
-
-# Add a debug definition so we can make decisions in the compilation
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-
-# Set OS
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  add_definitions(-DOS_MACOSX)
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  add_definitions(-DOS_LINUX)
-endif()
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  add_definitions(-DOS_WINDOWS)
-endif()
-
-# Set CPU
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86")
-  add_definitions(-DARCH_X86)
-endif()
 
 # Read the git tags to determine the project version
 include(GetGitVersion)
@@ -75,17 +18,90 @@ message("-- Version: ${VERSION}")
 set(GENERIC_LIB_VERSION ${VERSION})
 string(SUBSTRING ${VERSION} 0 1 GENERIC_LIB_SOVERSION)
 
-# C++ feature checks
+# Import our CMake modules
+include(CheckCXXCompilerFlag)
+include(AddCXXCompilerFlag)
 include(CXXFeatureCheck)
+
+# Try and enable C++11. Don't use C++14 because it doesn't work in some
+# configurations.
+add_cxx_compiler_flag(-std=c++11)
+if (NOT HAVE_CXX_FLAG_STD_CXX11)
+  add_cxx_compiler_flag(-std=c++0x)
+endif()
+
+# Turn compiler warnings up to 11
+add_cxx_compiler_flag(-Wall)
+add_cxx_compiler_flag(-Wextra)
+add_cxx_compiler_flag(-Wshadow)
+add_cxx_compiler_flag(-Werror RELEASE)
+add_cxx_compiler_flag(-pedantic)
+add_cxx_compiler_flag(-pedantic-errors)
+add_cxx_compiler_flag(-Wshorten-64-to-32)
+add_cxx_compiler_flag(-Wfloat-equal)
+add_cxx_compiler_flag(-Wzero-as-null-pointer-constant)
+add_cxx_compiler_flag(-fstrict-aliasing)
+if (HAVE_CXX_FLAG_FSTRICT_ALIASING)
+  add_cxx_compiler_flag(-Wstrict-aliasing)
+endif()
+add_cxx_compiler_flag(-Wthread-safety)
+if (HAVE_WTHREAD_SAFETY)
+  add_definitions(-DHAVE_WTHREAD_SAFETY)
+  cxx_feature_check(THREAD_SAFETY_ATTRIBUTES)
+endif()
+
+# Link time optimisation
+if (BENCHMARK_ENABLE_LTO)
+  add_cxx_compiler_flag(-flto)
+  if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    find_program(GCC_AR gcc-ar)
+    if (GCC_AR)
+      set(CMAKE_AR ${GCC_AR})
+    endif()
+    find_program(GCC_RANLIB gcc-ranlib)
+    if (GCC_RANLIB)
+      set(CMAKE_RANLIB ${GCC_RANLIB})
+    endif()
+  endif()
+endif()
+
+# Coverage build type
+set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING
+  "Flags used by the C++ compiler during coverage builds."
+  FORCE)
+set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+  "${CMAKE_EXE_LINKER_FLAGS_DEBUG}" CACHE STRING
+  "Flags used for linking binaries during coverage builds."
+  FORCE)
+set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+  "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
+  "Flags used by the shared libraries linker during coverage builds."
+  FORCE)
+mark_as_advanced(
+  CMAKE_CXX_FLAGS_COVERAGE
+  CMAKE_EXE_LINKER_FLAGS_COVERAGE
+  CMAKE_SHARED_LINKER_FLAGS_COVERAGE)
+set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
+  "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel Coverage."
+  FORCE)
+add_cxx_compiler_flag(--coverage COVERAGE)
+
+# C++ feature checks
 cxx_feature_check(STD_REGEX)
 cxx_feature_check(GNU_POSIX_REGEX)
 cxx_feature_check(POSIX_REGEX)
+cxx_feature_check(STEADY_CLOCK)
+
+# Ensure we have pthreads
+find_package(Threads REQUIRED)
 
 # Set up directories
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # Build the targets
-enable_testing()
 add_subdirectory(src)
-add_subdirectory(test)
+
+if (BENCHMARK_ENABLE_TESTING)
+  enable_testing()
+  add_subdirectory(test)
+endif()

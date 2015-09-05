@@ -1,4 +1,4 @@
-// Copyright 2014 Google Inc. All rights reserved.
+// Copyright 2015 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ bool Regex::Init(const std::string& spec, std::string* error) {
   int ec = regcomp(&re_, spec.c_str(), REG_EXTENDED | REG_NOSUB);
   if (ec != 0) {
     if (error) {
-      size_t needed = regerror(ec, &re_, NULL, 0);
+      size_t needed = regerror(ec, &re_, nullptr, 0);
       char* errbuf = new char[needed];
       regerror(ec, &re_, errbuf, needed);
 
@@ -53,7 +53,7 @@ bool Regex::Match(const std::string& str) {
     return false;
   }
 
-  return regexec(&re_, str.c_str(), 0, NULL, 0) == 0;
+  return regexec(&re_, str.c_str(), 0, nullptr, 0) == 0;
 }
 
 }  // end namespace benchmark

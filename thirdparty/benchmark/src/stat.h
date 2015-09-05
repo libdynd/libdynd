@@ -1,21 +1,24 @@
 #ifndef BENCHMARK_STAT_H_
 #define BENCHMARK_STAT_H_
 
-#include <math.h>
-#include <iostream>
+#include <cmath>
 #include <limits>
+#include <ostream>
+#include <type_traits>
+
 
 namespace benchmark {
+
 template <typename VType, typename NumType>
 class Stat1;
 
 template <typename VType, typename NumType>
 class Stat1MinMax;
 
-typedef Stat1<float, float> Stat1_f;
-typedef Stat1<double, double> Stat1_d;
-typedef Stat1MinMax<float, float> Stat1MinMax_f;
-typedef Stat1MinMax<double, double> Stat1MinMax_d;
+typedef Stat1<float, int64_t> Stat1_f;
+typedef Stat1<double, int64_t> Stat1_d;
+typedef Stat1MinMax<float, int64_t> Stat1MinMax_f;
+typedef Stat1MinMax<double, int64_t> Stat1MinMax_d;
 
 template <typename VType>
 class Vector2;
@@ -103,7 +106,7 @@ class Stat1 {
   NumType numSamples() const { return numsamples_; }
 
   // Return the sum of this sample set
-  VType sum() const { return sum_; }
+  VType Sum() const { return sum_; }
 
   // Return the mean of this sample set
   VType Mean() const {
@@ -132,6 +135,9 @@ class Stat1 {
   }
 
  private:
+  static_assert(std::is_integral<NumType>::value &&
+                !std::is_same<NumType, bool>::value,
+                "NumType must be an integral type that is not bool.");
   // Let i be the index of the samples provided (using +=)
   // and weight[i],value[i] be the data of sample #i
   // then the variables have the following meaning:
@@ -267,9 +273,9 @@ class Stat1MinMax : public Stat1<VType, NumType> {
   Self operator*(const VType &k) const { return Self(*this) *= k; }
 
   // Return the maximal value in this sample set
-  VType max() const { return max_; }
+  VType Max() const { return max_; }
   // Return the minimal value in this sample set
-  VType min() const { return min_; }
+  VType Min() const { return min_; }
 
  private:
   // The - operation makes no sense with Min/Max

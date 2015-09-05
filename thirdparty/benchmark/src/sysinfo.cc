@@ -1,4 +1,4 @@
-// Copyright 2014 Google Inc. All rights reserved.
+// Copyright 2015 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,25 +13,36 @@
 // limitations under the License.
 
 #include "sysinfo.h"
+#include "internal_macros.h"
 
-#include <errno.h>
+#ifdef OS_WINDOWS
+#include <Shlwapi.h>
+#include <Windows.h>
+#else
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/resource.h>
-#include <sys/types.h>
+#include <sys/types.h> // this header must be included before 'sys/sysctl.h' to avoid compilation error on FreeBSD
 #include <sys/sysctl.h>
 #include <sys/time.h>
 #include <unistd.h>
+#endif
 
+#include <cerrno>
+#include <cstdio>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <limits>
 #include <mutex>
 
+#include "arraysize.h"
 #include "check.h"
 #include "cycleclock.h"
+#include "internal_macros.h"
+#include "log.h"
 #include "sleep.h"
+#include "string_util.h"
 
 namespace benchmark {
 namespace {
@@ -55,7 +66,7 @@ int64_t EstimateCyclesPerSecond() {
 #if defined OS_LINUX || defined OS_CYGWIN
 // Helper function for reading an int from a file. Returns true if successful
 // and the memory location pointed to by value is set to the value read.
-bool ReadIntFromFile(const char* file, int* value) {
+bool ReadIntFromFile(const char* file, long* value) {
   bool ret = false;
   int fd = open(file, O_RDONLY);
   if (fd != -1) {
@@ -63,7 +74,7 @@ bool ReadIntFromFile(const char* file, int* value) {
     char* err;
     memset(line, '\0', sizeof(line));
     CHECK(read(fd, line, sizeof(line) - 1));
-    const int temp_value = strtol(line, &err, 10);
+    const long temp_value = strtol(line, &err, 10);
     if (line[0] != '\0' && (*err == '\n' || *err == '\0')) {
       *value = temp_value;
       ret = true;
@@ -78,7 +89,7 @@ void InitializeSystemInfo() {
 #if defined OS_LINUX || defined OS_CYGWIN
   char line[1024];
   char* err;
-  int freq;
+  long freq;
 
   bool saw_mhz = false;
 
@@ -120,28 +131,28 @@ void InitializeSystemInfo() {
 
   double bogo_clock = 1.0;
   bool saw_bogo = false;
-  int max_cpu_id = 0;
+  long max_cpu_id = 0;
   int num_cpus = 0;
   line[0] = line[1] = '\0';
-  int chars_read = 0;
+  size_t chars_read = 0;
   do {  // we'll exit when the last read didn't read anything
     // Move the next line to the beginning of the buffer
-    const int oldlinelen = strlen(line);
+    const size_t oldlinelen = strlen(line);
     if (sizeof(line) == oldlinelen + 1)  // oldlinelen took up entire line
       line[0] = '\0';
     else  // still other lines left to save
       memmove(line, line + oldlinelen + 1, sizeof(line) - (oldlinelen + 1));
     // Terminate the new line, reading more if we can't find the newline
     char* newline = strchr(line, '\n');
-    if (newline == NULL) {
-      const int linelen = strlen(line);
-      const int bytes_to_read = sizeof(line) - 1 - linelen;
+    if (newline == nullptr) {
+      const size_t linelen = strlen(line);
+      const size_t bytes_to_read = sizeof(line) - 1 - linelen;
       CHECK(bytes_to_read > 0);  // because the memmove recovered >=1 bytes
       chars_read = read(fd, line + linelen, bytes_to_read);
       line[linelen + chars_read] = '\0';
       newline = strchr(line, '\n');
     }
-    if (newline != NULL) *newline = '\0';
+    if (newline != nullptr) *newline = '\0';
 
     // When parsing the "cpu MHz" and "bogomips" (fallback) entries, we only
     // accept postive values. Some environments (virtual machines) report zero,
@@ -164,7 +175,7 @@ void InitializeSystemInfo() {
       num_cpus++;  // count up every time we see an "processor :" entry
       const char* freqstr = strchr(line, ':');
       if (freqstr) {
-        const int cpu_id = strtol(freqstr + 1, &err, 10);
+        const long cpu_id = strtol(freqstr + 1, &err, 10);
         if (freqstr[1] != '\0' && *err == '\0' && max_cpu_id < cpu_id)
           max_cpu_id = cpu_id;
       }
@@ -212,7 +223,7 @@ void InitializeSystemInfo() {
 #endif
   size_t sz = sizeof(hz);
   const char* sysctl_path = "machdep.tsc_freq";
-  if (sysctlbyname(sysctl_path, &hz, &sz, NULL, 0) != 0) {
+  if (sysctlbyname(sysctl_path, &hz, &sz, nullptr, 0) != 0) {
     fprintf(stderr, "Unable to determine clock rate from sysctl: %s: %s\n",
             sysctl_path, strerror(errno));
     cpuinfo_cycles_per_second = EstimateCyclesPerSecond();
@@ -222,7 +233,6 @@ void InitializeSystemInfo() {
 // TODO: also figure out cpuinfo_num_cpus
 
 #elif defined OS_WINDOWS
-#pragma comment(lib, "shlwapi.lib")  // for SHGetValue()
   // In NT, read MHz from the registry. If we fail to do so or we're in win9x
   // then make a crude estimate.
   OSVERSIONINFO os;
@@ -232,8 +242,8 @@ void InitializeSystemInfo() {
       SUCCEEDED(
           SHGetValueA(HKEY_LOCAL_MACHINE,
                       "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
-                      "~MHz", NULL, &data, &data_size)))
-    cpuinfo_cycles_per_second = (int64)data * (int64)(1000 * 1000);  // was mhz
+                      "~MHz", nullptr, &data, &data_size)))
+    cpuinfo_cycles_per_second = (int64_t)data * (int64_t)(1000 * 1000);  // was mhz
   else
     cpuinfo_cycles_per_second = EstimateCyclesPerSecond();
 // TODO: also figure out cpuinfo_num_cpus
@@ -257,7 +267,7 @@ void InitializeSystemInfo() {
   int num_cpus = 0;
   size_t size = sizeof(num_cpus);
   int numcpus_name[] = {CTL_HW, HW_NCPU};
-  if (::sysctl(numcpus_name, arraysize(numcpus_name), &num_cpus, &size, 0, 0) ==
+  if (::sysctl(numcpus_name, arraysize(numcpus_name), &num_cpus, &size, nullptr, 0) ==
           0 &&
       (size == sizeof(num_cpus)))
     cpuinfo_num_cpus = num_cpus;
@@ -269,9 +279,9 @@ void InitializeSystemInfo() {
 }
 }  // end namespace
 
-#ifndef OS_WINDOWS
 // getrusage() based implementation of MyCPUUsage
 static double MyCPUUsageRUsage() {
+#ifndef OS_WINDOWS
   struct rusage ru;
   if (getrusage(RUSAGE_SELF, &ru) == 0) {
     return (static_cast<double>(ru.ru_utime.tv_sec) +
@@ -281,8 +291,25 @@ static double MyCPUUsageRUsage() {
   } else {
     return 0.0;
   }
+#else
+  HANDLE proc = GetCurrentProcess();
+  FILETIME creation_time;
+  FILETIME exit_time;
+  FILETIME kernel_time;
+  FILETIME user_time;
+  ULARGE_INTEGER kernel;
+  ULARGE_INTEGER user;
+  GetProcessTimes(proc, &creation_time, &exit_time, &kernel_time, &user_time);
+  kernel.HighPart = kernel_time.dwHighDateTime;
+  kernel.LowPart = kernel_time.dwLowDateTime;
+  user.HighPart = user_time.dwHighDateTime;
+  user.LowPart = user_time.dwLowDateTime;
+  return (static_cast<double>(kernel.QuadPart) +
+          static_cast<double>(user.QuadPart)) / 1.0E-7;
+#endif  // OS_WINDOWS
 }
 
+#ifndef OS_WINDOWS
 static bool MyCPUUsageCPUTimeNsLocked(double* cputime) {
   static int cputime_fd = -1;
   if (cputime_fd == -1) {
@@ -299,7 +326,7 @@ static bool MyCPUUsageCPUTimeNsLocked(double* cputime) {
     cputime_fd = -1;
     return false;
   }
-  unsigned long long result = strtoull(buff, NULL, 0);
+  unsigned long long result = strtoull(buff, nullptr, 0);
   if (result == (std::numeric_limits<unsigned long long>::max)()) {
     close(cputime_fd);
     cputime_fd = -1;
@@ -308,8 +335,10 @@ static bool MyCPUUsageCPUTimeNsLocked(double* cputime) {
   *cputime = static_cast<double>(result) / 1e9;
   return true;
 }
+#endif  // OS_WINDOWS
 
 double MyCPUUsage() {
+#ifndef OS_WINDOWS
   {
     std::lock_guard<std::mutex> l(cputimens_mutex);
     static bool use_cputime_ns = true;
@@ -319,14 +348,16 @@ double MyCPUUsage() {
         return value;
       }
       // Once MyCPUUsageCPUTimeNsLocked fails once fall back to getrusage().
-      std::cout << "Reading /proc/self/cputime_ns failed. Using getrusage().\n";
+      VLOG(1) << "Reading /proc/self/cputime_ns failed. Using getrusage().\n";
       use_cputime_ns = false;
     }
   }
+#endif  // OS_WINDOWS
   return MyCPUUsageRUsage();
 }
 
 double ChildrenCPUUsage() {
+#ifndef OS_WINDOWS
   struct rusage ru;
   if (getrusage(RUSAGE_CHILDREN, &ru) == 0) {
     return (static_cast<double>(ru.ru_utime.tv_sec) +
@@ -336,8 +367,11 @@ double ChildrenCPUUsage() {
   } else {
     return 0.0;
   }
-}
+#else
+  // TODO: Not sure what this even means on Windows
+  return 0.0;
 #endif  // OS_WINDOWS
+}
 
 double CyclesPerSecond(void) {
   std::call_once(cpuinfo_init, InitializeSystemInfo);
@@ -348,4 +382,32 @@ int NumCPUs(void) {
   std::call_once(cpuinfo_init, InitializeSystemInfo);
   return cpuinfo_num_cpus;
 }
+
+// The ""'s catch people who don't pass in a literal for "str"
+#define strliterallen(str) (sizeof("" str "") - 1)
+
+// Must use a string literal for prefix.
+#define memprefix(str, len, prefix)                       \
+  ((((len) >= strliterallen(prefix)) &&                   \
+    std::memcmp(str, prefix, strliterallen(prefix)) == 0) \
+       ? str + strliterallen(prefix)                      \
+       : nullptr)
+
+bool CpuScalingEnabled() {
+  // On Linux, the CPUfreq subsystem exposes CPU information as files on the
+  // local file system. If reading the exported files fails, then we may not be
+  // running on Linux, so we silently ignore all the read errors.
+  for (int cpu = 0, num_cpus = NumCPUs(); cpu < num_cpus; ++cpu) {
+    std::string governor_file = StrCat("/sys/devices/system/cpu/cpu", cpu,
+                                       "/cpufreq/scaling_governor");
+    FILE* file = fopen(governor_file.c_str(), "r");
+    if (!file) break;
+    char buff[16];
+    size_t bytes_read = fread(buff, 1, sizeof(buff), file);
+    fclose(file);
+    if (memprefix(buff, bytes_read, "performance") == nullptr) return true;
+  }
+  return false;
+}
+
 }  // end namespace benchmark

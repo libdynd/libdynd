@@ -6,8 +6,8 @@ addons:
       - ubuntu-toolchain-r-test
       - kalakris-cmake
     packages:
-      - gcc-4.7
-      - g++-4.7
+      - gcc-4.8
+      - g++-4.8
       - cmake
       - valgrind
       - libfftw3-dev
@@ -20,8 +20,8 @@ matrix:
   - compiler: gcc
     env: VALGRIND DYND_FFTW=ON
     before_install:
-    - export CC="gcc-4.7"
-    - export CXX="g++-4.7"
+    - export CC="gcc-4.8"
+    - export CXX="g++-4.8"
     script:
       - make || exit 1
       - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
@@ -42,8 +42,8 @@ matrix:
       - conda install --yes conda-build jinja2
       - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     before_script:
-      - export CC="gcc-4.7"
-      - export CXX="g++-4.7"
+      - export CC="gcc-4.8"
+      - export CXX="g++-4.8"
     script:
       - conda build conda.recipe
 #    after_script:
