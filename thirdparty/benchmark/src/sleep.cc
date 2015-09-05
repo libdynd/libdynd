@@ -1,4 +1,4 @@
-// Copyright 2014 Google Inc. All rights reserved.
+// Copyright 2015 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,18 +14,24 @@
 
 #include "sleep.h"
 
-#include <time.h>
-#include <errno.h>
+#include <cerrno>
+#include <ctime>
+
+#include "internal_macros.h"
+
+#ifdef OS_WINDOWS
+#include <Windows.h>
+#endif
 
 namespace benchmark {
 #ifdef OS_WINDOWS
-// Window's _sleep takes milliseconds argument.
-void SleepForMilliseconds(int milliseconds) { _sleep(milliseconds); }
+// Window's Sleep takes milliseconds argument.
+void SleepForMilliseconds(int milliseconds) { Sleep(milliseconds); }
 void SleepForSeconds(double seconds) {
   SleepForMilliseconds(static_cast<int>(kNumMillisPerSecond * seconds));
 }
 #else   // OS_WINDOWS
-void SleepForMicroseconds(int64_t microseconds) {
+void SleepForMicroseconds(int microseconds) {
   struct timespec sleep_time;
   sleep_time.tv_sec = microseconds / kNumMicrosPerSecond;
   sleep_time.tv_nsec = (microseconds % kNumMicrosPerSecond) * kNumNanosPerMicro;
@@ -34,11 +40,11 @@ void SleepForMicroseconds(int64_t microseconds) {
 }
 
 void SleepForMilliseconds(int milliseconds) {
-  SleepForMicroseconds(static_cast<int64_t>(milliseconds) * kNumMicrosPerMilli);
+  SleepForMicroseconds(static_cast<int>(milliseconds) * kNumMicrosPerMilli);
 }
 
 void SleepForSeconds(double seconds) {
-  SleepForMicroseconds(static_cast<int64_t>(seconds * kNumMicrosPerSecond));
+  SleepForMicroseconds(static_cast<int>(seconds * kNumMicrosPerSecond));
 }
 #endif  // OS_WINDOWS
 }  // end namespace benchmark

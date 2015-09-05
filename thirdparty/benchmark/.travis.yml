@@ -1,46 +1,41 @@
+language: cpp
+
+# NOTE: The COMPILER variable is unused. It simply makes the display on
+# travis-ci.org more readable.
 matrix:
-  include:
-    - os: linux
-      env: SUITE=tests    BUILD_TYPE=Debug   STD=c++0x
-    - os: linux
-      env: SUITE=tests    BUILD_TYPE=Debug   STD=c++11
-    - os: linux
-      env: SUITE=tests    BUILD_TYPE=Release STD=c++0x
-    - os: linux
-      env: SUITE=tests    BUILD_TYPE=Release STD=c++11
-    - os: linux
-      env: SUITE=examples BUILD_TYPE=Debug   STD=c++0x
-    - os: linux
-      env: SUITE=examples BUILD_TYPE=Debug   STD=c++11
-    - os: linux
-      env: SUITE=examples BUILD_TYPE=Release STD=c++0x
-    - os: linux
-      env: SUITE=examples BUILD_TYPE=Release STD=c++11
-    - os: osx
-      env: SUITE=tests    BUILD_TYPE=Debug   STD=c++11
-    - os: osx
-      env: SUITE=tests    BUILD_TYPE=Release STD=c++11
-    - os: osx
-      env: SUITE=examples BUILD_TYPE=Debug   STD=c++11
-    - os: osx
-      env: SUITE=examples BUILD_TYPE=Release STD=c++11
+    include:
+        - compiler: gcc
+          env: COMPILER=g++-4.6     STD=c++0x BUILD_TYPE=Coverage
+        - compiler: gcc
+          env: COMPILER=g++-4.6     STD=c++0x BUILD_TYPE=Debug
+        - compiler: gcc
+          env: COMPILER=g++-4.6     STD=c++0x BUILD_TYPE=Release
+        - compiler: gcc
+          env: COMPILER=g++-4.8     STD=c++11 BUILD_TYPE=Debug
+        - compiler: gcc
+          env: COMPILER=g++-4.8     STD=c++11 BUILD_TYPE=Release
+        - compiler: clang
+          env: COMPILER=clang++-3.6 STD=c++11 BUILD_TYPE=Debug
+        - compiler: clang
+          env: COMPILER=clang++-3.6 STD=c++11 BUILD_TYPE=Release
 
-language:
-    - cpp
-
-before_install:
-    - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$STD" = "c++11" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-    - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$STD" = "c++11" ]; then sudo apt-get update -qq; fi
+before_script:
+    - source .travis-setup.sh
+    - mkdir build && cd build
 
 install:
-    - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$STD" = "c++11" ]; then sudo apt-get install -qq gcc-4.8 g++-4.8; fi
-    - if [ "$TRAVIS_OS_NAME" = "linux" ] && [ "$STD" = "c++11" ]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90; fi
-    
-before_script:
-    - mkdir build && cd build
+  - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
+      PATH=~/.local/bin:${PATH};
+      pip install --user --upgrade pip;
+      pip install --user cpp-coveralls;
+    fi
 
 script:
     - cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DCMAKE_CXX_FLAGS="-std=${STD}"
     - make
-    - if [ "$SUITE" = "tests" ]; then ./test/re_test; fi
-    - if [ "$SUITE" = "examples" ]; then ./test/benchmark_test; fi
+    - make CTEST_OUTPUT_ON_FAILURE=1 test
+
+after_success:
+  - if [ "${BUILD_TYPE}" == "Coverage" -a "${TRAVIS_OS_NAME}" == "linux" ]; then
+      coveralls --include src --include include --gcov-options '\-lp' --root .. --build-root .;
+    fi

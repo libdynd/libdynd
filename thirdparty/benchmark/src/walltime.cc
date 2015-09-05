@@ -1,4 +1,4 @@
-// Copyright 2014 Google Inc. All rights reserved.
+// Copyright 2015 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,140 +14,223 @@
 
 #include "walltime.h"
 
-#include <stdio.h>
-#include <string.h>
 #include <sys/time.h>
-#include <time.h>
+
+#include <cstdio>
+#include <cstdint>
+#include <cstring>
+#include <ctime>
 
 #include <atomic>
+#include <chrono>
 #include <limits>
+#include <type_traits>
 
+#include "arraysize.h"
 #include "check.h"
 #include "cycleclock.h"
+#include "log.h"
 #include "sysinfo.h"
 
 namespace benchmark {
 namespace walltime {
+
 namespace {
-const double kMaxErrorInterval = 100e-6;
 
-std::atomic<bool> initialized(false);
-WallTime base_walltime = 0.0;
-int64_t base_cycletime = 0;
-int64_t cycles_per_second;
-double seconds_per_cycle;
-uint32_t last_adjust_time = 0;
-std::atomic<int32_t> drift_adjust(0);
-int64_t max_interval_cycles = 0;
+#if defined(HAVE_STEADY_CLOCK)
+template <bool HighResIsSteady = std::chrono::high_resolution_clock::is_steady>
+struct ChooseSteadyClock {
+    typedef std::chrono::high_resolution_clock type;
+};
 
-// Helper routines to load/store a float from an AtomicWord. Required because
-// g++ < 4.7 doesn't support std::atomic<float> correctly. I cannot wait to get
-// rid of this horror show.
-inline void SetDrift(float f) {
-  int32_t w;
-  memcpy(&w, &f, sizeof(f));
-  std::atomic_store(&drift_adjust, w);
-}
+template <>
+struct ChooseSteadyClock<false> {
+    typedef std::chrono::steady_clock type;
+};
+#endif
 
-inline float GetDrift() {
-  float f;
-  int32_t w = std::atomic_load(&drift_adjust);
-  memcpy(&f, &w, sizeof(f));
-  return f;
-}
+struct ChooseClockType {
+#if defined(HAVE_STEADY_CLOCK)
+  typedef typename ChooseSteadyClock<>::type type;
+#else
+  typedef std::chrono::high_resolution_clock type;
+#endif
+};
 
-static_assert(sizeof(float) <= sizeof(int32_t),
-              "type sizes don't allow the drift_adjust hack");
+class WallTimeImp
+{
+public:
+  WallTime Now();
 
-WallTime Slow() {
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  return tv.tv_sec + tv.tv_usec * 1e-6;
-}
-
-bool SplitTimezone(WallTime value, bool local, struct tm* t,
-                   double* subsecond) {
-  memset(t, 0, sizeof(*t));
-  if ((value < 0) || (value > std::numeric_limits<time_t>::max())) {
-    *subsecond = 0.0;
-    return false;
+  static WallTimeImp& GetWallTimeImp() {
+    static WallTimeImp imp;
+#if __cplusplus >= 201103L
+    static_assert(std::is_trivially_destructible<WallTimeImp>::value,
+                  "WallTimeImp must be trivially destructible to prevent "
+                  "issues with static destruction");
+#endif
+    return imp;
   }
-  const time_t whole_time = static_cast<time_t>(value);
-  *subsecond = value - whole_time;
-  if (local)
-    localtime_r(&whole_time, t);
-  else
-    gmtime_r(&whole_time, t);
-  return true;
-}
-}  // end namespace
 
-// This routine should be invoked to initialize walltime.
-// It is not intended for general purpose use.
-void Initialize() {
-  CHECK(!std::atomic_load(&initialized));
-  cycles_per_second = static_cast<int64_t>(CyclesPerSecond());
-  CHECK(cycles_per_second != 0);
-  seconds_per_cycle = 1.0 / cycles_per_second;
-  max_interval_cycles =
-      static_cast<int64_t>(cycles_per_second * kMaxErrorInterval);
-  do {
-    base_cycletime = cycleclock::Now();
-    base_walltime = Slow();
-  } while (cycleclock::Now() - base_cycletime > max_interval_cycles);
-  // We are now sure that "base_walltime" and "base_cycletime" were produced
-  // within kMaxErrorInterval of one another.
+private:
+  WallTimeImp();
+  // Helper routines to load/store a float from an AtomicWord. Required because
+  // g++ < 4.7 doesn't support std::atomic<float> correctly. I cannot wait to
+  // get rid of this horror show.
+  void SetDrift(float f) {
+    int32_t w;
+    memcpy(&w, &f, sizeof(f));
+    std::atomic_store(&drift_adjust_, w);
+  }
 
-  SetDrift(0.0);
-  last_adjust_time = static_cast<uint32_t>(uint64_t(base_cycletime) >> 32);
-  std::atomic_store(&initialized, true);
-}
+  float GetDrift() const {
+    float f;
+    int32_t w = std::atomic_load(&drift_adjust_);
+    memcpy(&f, &w, sizeof(f));
+    return f;
+  }
 
-WallTime Now() {
-  if (!std::atomic_load(&initialized)) return Slow();
+  WallTime Slow() const {
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    return tv.tv_sec + tv.tv_usec * 1e-6;
+  }
 
+private:
+  static_assert(sizeof(float) <= sizeof(int32_t),
+               "type sizes don't allow the drift_adjust hack");
+
+  static constexpr double kMaxErrorInterval = 100e-6;
+
+  WallTime base_walltime_;
+  int64_t base_cycletime_;
+  int64_t cycles_per_second_;
+  double seconds_per_cycle_;
+  uint32_t last_adjust_time_;
+  std::atomic<int32_t> drift_adjust_;
+  int64_t max_interval_cycles_;
+
+  BENCHMARK_DISALLOW_COPY_AND_ASSIGN(WallTimeImp);
+};
+
+
+WallTime WallTimeImp::Now() {
   WallTime now = 0.0;
   WallTime result = 0.0;
   int64_t ct = 0;
   uint32_t top_bits = 0;
   do {
     ct = cycleclock::Now();
-    int64_t cycle_delta = ct - base_cycletime;
-    result = base_walltime + cycle_delta * seconds_per_cycle;
+    int64_t cycle_delta = ct - base_cycletime_;
+    result = base_walltime_ + cycle_delta * seconds_per_cycle_;
 
     top_bits = static_cast<uint32_t>(uint64_t(ct) >> 32);
     // Recompute drift no more often than every 2^32 cycles.
     // I.e., @2GHz, ~ every two seconds
-    if (top_bits == last_adjust_time) {  // don't need to recompute drift
+    if (top_bits == last_adjust_time_) {  // don't need to recompute drift
       return result + GetDrift();
     }
 
     now = Slow();
-  } while (cycleclock::Now() - ct > max_interval_cycles);
+  } while (cycleclock::Now() - ct > max_interval_cycles_);
   // We are now sure that "now" and "result" were produced within
   // kMaxErrorInterval of one another.
 
   SetDrift(now - result);
-  last_adjust_time = top_bits;
+  last_adjust_time_ = top_bits;
   return now;
 }
 
-std::string Print(WallTime time, const char* format, bool local,
-                  int* remainder_us) {
-  char storage[32];
-  struct tm split;
-  double subsecond;
-  if (!SplitTimezone(time, local, &split, &subsecond)) {
-    snprintf(storage, sizeof(storage), "Invalid time: %f", time);
-  } else {
-    if (remainder_us != NULL) {
-      *remainder_us = static_cast<int>((subsecond * 1000000) + 0.5);
-      if (*remainder_us > 999999) *remainder_us = 999999;
-      if (*remainder_us < 0) *remainder_us = 0;
+
+WallTimeImp::WallTimeImp()
+    : base_walltime_(0.0), base_cycletime_(0),
+      cycles_per_second_(0), seconds_per_cycle_(0.0),
+      last_adjust_time_(0), drift_adjust_(0),
+      max_interval_cycles_(0) {
+  cycles_per_second_ = static_cast<int64_t>(CyclesPerSecond());
+  CHECK(cycles_per_second_ != 0);
+  seconds_per_cycle_ = 1.0 / cycles_per_second_;
+  max_interval_cycles_ =
+      static_cast<int64_t>(cycles_per_second_ * kMaxErrorInterval);
+  do {
+    base_cycletime_ = cycleclock::Now();
+    base_walltime_ = Slow();
+  } while (cycleclock::Now() - base_cycletime_ > max_interval_cycles_);
+  // We are now sure that "base_walltime" and "base_cycletime" were produced
+  // within kMaxErrorInterval of one another.
+
+  SetDrift(0.0);
+  last_adjust_time_ = static_cast<uint32_t>(uint64_t(base_cycletime_) >> 32);
+}
+
+WallTime CPUWalltimeNow() {
+  static WallTimeImp& imp = WallTimeImp::GetWallTimeImp();
+  return imp.Now();
+}
+
+WallTime ChronoWalltimeNow() {
+  typedef ChooseClockType::type Clock;
+  typedef std::chrono::duration<WallTime, std::chrono::seconds::period>
+          FPSeconds;
+  static_assert(std::chrono::treat_as_floating_point<WallTime>::value,
+                "This type must be treated as a floating point type.");
+  auto now = Clock::now().time_since_epoch();
+  return std::chrono::duration_cast<FPSeconds>(now).count();
+}
+
+bool UseCpuCycleClock() {
+    bool useWallTime = !CpuScalingEnabled();
+    if (useWallTime) {
+        VLOG(1) << "Using the CPU cycle clock to provide walltime::Now().\n";
+    } else {
+        VLOG(1) << "Using std::chrono to provide walltime::Now().\n";
     }
-    strftime(storage, sizeof(storage), format, &split);
+    return useWallTime;
+}
+
+
+} // end anonymous namespace
+
+// WallTimeImp doesn't work when CPU Scaling is enabled. If CPU Scaling is
+// enabled at the start of the program then std::chrono::system_clock is used
+// instead.
+WallTime Now()
+{
+  static bool useCPUClock = UseCpuCycleClock();
+  if (useCPUClock) {
+    return CPUWalltimeNow();
+  } else {
+    return ChronoWalltimeNow();
   }
+}
+
+}  // end namespace walltime
+
+
+namespace {
+
+std::string DateTimeString(bool local) {
+  typedef std::chrono::system_clock Clock;
+  std::time_t now = Clock::to_time_t(Clock::now());
+  char storage[128];
+
+  std::tm timeinfo;
+  std::memset(&timeinfo, 0, sizeof(std::tm));
+  if (local) {
+    localtime_r(&now, &timeinfo);
+  } else {
+    gmtime_r(&now, &timeinfo);
+  }
+  std::size_t written = std::strftime(storage, sizeof(storage), "%F %T", &timeinfo);
+  CHECK(written < arraysize(storage));
+  ((void)written); // prevent unused variable in optimized mode.
   return std::string(storage);
 }
-}  // end namespace walltime
+
+} // end namespace
+
+std::string LocalDateTimeString() {
+  return DateTimeString(true);
+}
+
 }  // end namespace benchmark

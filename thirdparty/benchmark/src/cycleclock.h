@@ -21,7 +21,10 @@
 #ifndef BENCHMARK_CYCLECLOCK_H_
 #define BENCHMARK_CYCLECLOCK_H_
 
-#include <stdint.h>
+#include <cstdint>
+
+#include "benchmark/macros.h"
+#include "internal_macros.h"
 
 #if defined(OS_MACOSX)
 #include <mach/mach_time.h>
@@ -39,8 +42,6 @@ extern "C" uint64_t __rdtsc();
 #endif
 #include <sys/time.h>
 
-#include "benchmark/macros.h"
-
 namespace benchmark {
 // NOTE: only i386 and x86_64 have been well tested.
 // PPC, sparc, alpha, and ia64 are based on
@@ -49,7 +50,7 @@ namespace benchmark {
 //    https://setisvn.ssl.berkeley.edu/svn/lib/fftw-3.0.1/kernel/cycle.h
 namespace cycleclock {
 // This should return the number of cycles since power-on.  Thread-safe.
-inline ATTRIBUTE_ALWAYS_INLINE int64_t Now() {
+inline BENCHMARK_ALWAYS_INLINE int64_t Now() {
 #if defined(OS_MACOSX)
   // this goes at the top because we need ALL Macs, regardless of
   // architecture, to return the number of "mach time units" that
@@ -112,13 +113,13 @@ inline ATTRIBUTE_ALWAYS_INLINE int64_t Now() {
   }
 #endif
   struct timeval tv;
-  gettimeofday(&tv, NULL);
+  gettimeofday(&tv, nullptr);
   return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
 #elif defined(__mips__)
   // mips apparently only allows rdtsc for superusers, so we fall
   // back to gettimeofday.  It's possible clock_gettime would be better.
   struct timeval tv;
-  gettimeofday(&tv, NULL);
+  gettimeofday(&tv, nullptr);
   return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
 #else
 // The soft failover to a generic implementation is automatic only for ARM.

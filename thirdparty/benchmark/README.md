@@ -1,6 +1,8 @@
 benchmark
 =========
 [![Build Status](https://travis-ci.org/google/benchmark.svg?branch=master)](https://travis-ci.org/google/benchmark)
+[![Build status](https://ci.appveyor.com/api/projects/status/u0qsyp7t1tk7cpxs/branch/master?svg=true)](https://ci.appveyor.com/project/google/benchmark/branch/master)
+[![Coverage Status](https://coveralls.io/repos/google/benchmark/badge.svg)](https://coveralls.io/r/google/benchmark)
 
 A library to support the benchmarking of functions, similar to unit-tests.
 
@@ -27,17 +29,7 @@ static void BM_StringCopy(benchmark::State& state) {
 }
 BENCHMARK(BM_StringCopy);
 
-// Augment the main() program to invoke benchmarks if specified
-// via the --benchmarks command line flag.  E.g.,
-//       my_unittest --benchmark_filter=all
-//       my_unittest --benchmark_filter=BM_StringCreation
-//       my_unittest --benchmark_filter=String
-//       my_unittest --benchmark_filter='Copy|Creation'
-int main(int argc, const char* argv[]) {
-  benchmark::Initialize(&argc, argv);
-  benchmark::RunSpecifiedBenchmarks();
-  return 0;
-}
+BENCHMARK_MAIN();
 ```
 
 Sometimes a family of microbenchmarks can be implemented with
@@ -78,7 +70,7 @@ static void BM_SetInsert(benchmark::State& state) {
     state.PauseTiming();
     std::set<int> data = ConstructRandomSet(state.range_x());
     state.ResumeTiming();
-    for (int j = 0; j < state.rangeY; ++j)
+    for (int j = 0; j < state.range_y(); ++j)
       data.insert(RandomNumber());
   }
 }
@@ -140,6 +132,18 @@ template <class Q> int BM_Sequential(benchmark::State& state) {
 BENCHMARK_TEMPLATE(BM_Sequential, WaitQueue<int>)->Range(1<<0, 1<<10);
 ```
 
+Three macros are provided for adding benchmark templates.
+
+```c++
+#if __cplusplus >= 201103L // C++11 and greater.
+#define BENCHMARK_TEMPLATE(func, ...) // Takes any number of parameters.
+#else // C++ < C++11
+#define BENCHMARK_TEMPLATE(func, arg1)
+#endif
+#define BENCHMARK_TEMPLATE1(func, arg1)
+#define BENCHMARK_TEMPLATE2(func, arg1, arg2)
+```
+
 In a multithreaded test, it is guaranteed that none of the threads will start
 until all have called KeepRunning, and all will have finished before KeepRunning
 returns false. As such, any global setup or teardown you want to do can be
@@ -158,6 +162,119 @@ static void BM_MultiThreaded(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_MultiThreaded)->Threads(2);
+
+To prevent a value or expression from being optimized away by the compiler
+the `benchmark::DoNotOptimize(...)` function can be used.
+
+```c++
+static void BM_test(benchmark::State& state) {
+  while (state.KeepRunning()) {
+      int x = 0;
+      for (int i=0; i < 64; ++i) {
+        benchmark::DoNotOptimize(x += i);
+      }
+  }
+}
+```
+
+Benchmark Fixtures
+------------------
+Fixture tests are created by
+first defining a type that derives from ::benchmark::Fixture and then
+creating/registering the tests using the following macros:
+
+* `BENCHMARK_F(ClassName, Method)`
+* `BENCHMARK_DEFINE_F(ClassName, Method)`
+* `BENCHMARK_REGISTER_F(ClassName, Method)`
+
+For Example:
+
+```c++
+class MyFixture : public benchmark::Fixture {};
+
+BENCHMARK_F(MyFixture, FooTest)(benchmark::State& st) {
+   while (st.KeepRunning()) {
+     ...
+  }
+}
+
+BENCHMARK_DEFINE_F(MyFixture, BarTest)(benchmark::State& st) {
+   while (st.KeepRunning()) {
+     ...
+  }
+}
+/* BarTest is NOT registered */
+BENCHMARK_REGISTER_F(MyFixture, BarTest)->Threads(2);
+/* BarTest is now registered */
+```
+
+Output Formats
+--------------
+The library supports multiple output formats. Use the
+`--benchmark_format=<tabular|json>` flag to set the format type. `tabular` is
+the default format.
+
+The Tabular format is intended to be a human readable format. By default
+the format generates color output. Context is output on stderr and the 
+tabular data on stdout. Example tabular output looks like:
+```
+Benchmark                               Time(ns)    CPU(ns) Iterations
+----------------------------------------------------------------------
+BM_SetInsert/1024/1                        28928      29349      23853  133.097kB/s   33.2742k items/s
+BM_SetInsert/1024/8                        32065      32913      21375  949.487kB/s   237.372k items/s
+BM_SetInsert/1024/10                       33157      33648      21431  1.13369MB/s   290.225k items/s
+```
+
+The JSON format outputs human readable json split into two top level attributes.
+The `context` attribute contains information about the run in general, including
+information about the CPU and the date.
+The `benchmarks` attribute contains a list of ever benchmark run. Example json
+output looks like:
+```
+{
+  "context": {
+    "date": "2015/03/17-18:40:25",
+    "num_cpus": 40,
+    "mhz_per_cpu": 2801,
+    "cpu_scaling_enabled": false,
+    "build_type": "debug"
+  },
+  "benchmarks": [
+    {
+      "name": "BM_SetInsert/1024/1",
+      "iterations": 94877,
+      "real_time": 29275,
+      "cpu_time": 29836,
+      "bytes_per_second": 134066,
+      "items_per_second": 33516
+    },
+    {
+      "name": "BM_SetInsert/1024/8",
+      "iterations": 21609,
+      "real_time": 32317,
+      "cpu_time": 32429,
+      "bytes_per_second": 986770,
+      "items_per_second": 246693
+    },
+    {
+      "name": "BM_SetInsert/1024/10",
+      "iterations": 21393,
+      "real_time": 32724,
+      "cpu_time": 33355,
+      "bytes_per_second": 1199226,
+      "items_per_second": 299807
+    }
+  ]
+}
+```
+
+The CSV format outputs comma-separated values. The `context` is output on stderr
+and the CSV itself on stdout. Example CSV output looks like:
+```
+name,iterations,real_time,cpu_time,bytes_per_second,items_per_second,label
+"BM_SetInsert/1024/1",65465,17890.7,8407.45,475768,118942,
+"BM_SetInsert/1024/8",116606,18810.1,9766.64,3.27646e+06,819115,
+"BM_SetInsert/1024/10",106365,17238.4,8421.53,4.74973e+06,1.18743e+06,
 ```
 
 Linking against the library

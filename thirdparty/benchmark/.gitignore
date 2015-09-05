@@ -1,24 +1,46 @@
 *.a
 *.so
 *.so.?*
+*.dll
+*.exe
 *.dylib
 *.cmake
 !/cmake/*.cmake
 *~
-/test/benchmark_test
-/test/re_test
+*.pyc
+__pycache__
+
+# lcov
+*.lcov
+/lcov
+
+# cmake files.
 /Testing
 CMakeCache.txt
 CMakeFiles/
-Makefile
-bin/
 cmake_install.cmake
+
+# makefiles.
+Makefile
+
+# in-source build.
+bin/
 lib/
+/test/*_test
+
+# exuberant ctags.
 tags
+
+# YouCompleteMe configuration.
 .ycm_extra_conf.pyc
 
+# ninja generated files.
 .ninja_deps
 .ninja_log
 build.ninja
 install_manifest.txt
 rules.ninja
+
+# out-of-source build top-level folders.
+build/
+_build/
