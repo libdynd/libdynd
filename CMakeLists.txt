@@ -92,10 +92,11 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         message(FATAL_ERROR "Only MSVC 2013 (Version 18.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
     endif ()
 else()
+    # Bring back -Werror
     if(WIN32)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers -DDYND_EXPORT")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers -fPIC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC")
     endif()
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.7)
@@ -121,6 +122,8 @@ configure_file(
 string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
 string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
+
+add_subdirectory(plugin)
 
 set(libdynd_SRC
     # Types
@@ -586,6 +589,14 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
+
+add_dependencies(libdynd_OBJ plugin)
+
+#-load ../../Debug+Asserts/lib/libPrintFunctionNames.so -plugin print-fns
+
+# -cc1 -load /home/irwin/git/libdynd/build/plugin/libplugin.so
+set_target_properties(libdynd_OBJ PROPERTIES
+  COMPILE_FLAGS "-Xclang -load -Xclang /home/irwin/git/libdynd/build/plugin/libplugin.so -Xclang -plugin -Xclang print-fns")
 
 if (DYND_SHARED_LIB)
     set_property(
