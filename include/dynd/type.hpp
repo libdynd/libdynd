@@ -605,7 +605,7 @@ namespace ndt {
      *
      * \param scalar_type  The scalar type to convert all scalars to.
      */
-    DYND_API type with_replaced_scalar_types(const type &scalar_type) const;
+    type with_replaced_scalar_types(const type &scalar_type) const;
 
     /**
      * Replaces the data type of the this type with the provided one.
@@ -614,20 +614,20 @@ namespace ndt {
      * \param replace_ndim  The number of array dimensions to include in
      *                      the data type which is replaced.
      */
-    DYND_API type with_replaced_dtype(const type &replacement_tp,
+    type with_replaced_dtype(const type &replacement_tp,
                                       intptr_t replace_ndim = 0) const;
 
     /**
      * Returns this type without the leading memory type, if there is one.
      */
-    DYND_API type without_memory_type() const;
+    type without_memory_type() const;
 
     /**
      * Returns this type with a new strided dimension.
      *
      * \param i  The axis of the new strided dimension.
      */
-    DYND_API type with_new_axis(intptr_t i, intptr_t new_ndim = 1) const;
+    type with_new_axis(intptr_t i, intptr_t new_ndim = 1) const;
 
     /**
      * Returns a modified type with all expression types replaced with
@@ -708,9 +708,9 @@ namespace ndt {
       return get_dtype(include_ndim, const_cast<char **>(inout_arrmeta));
     }
 
-    DYND_API intptr_t get_dim_size(const char *arrmeta, const char *data) const;
+    intptr_t get_dim_size(const char *arrmeta, const char *data) const;
 
-    DYND_API intptr_t get_size(const char *arrmeta) const;
+    intptr_t get_size(const char *arrmeta) const;
 
     type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
                                intptr_t total_ndim = 0) const
@@ -773,7 +773,7 @@ namespace ndt {
      *
      * \returns  True if it is a strided array type, false otherwise.
      */
-    DYND_API bool get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
+    bool get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
                                  intptr_t *out_stride, ndt::type *out_el_tp,
                                  const char **out_el_arrmeta) const;
 
@@ -791,7 +791,7 @@ namespace ndt {
      *
      * \returns  True if it is a strided array type, false otherwise.
      */
-    DYND_API bool get_as_strided(const char *arrmeta, intptr_t ndim,
+    bool get_as_strided(const char *arrmeta, intptr_t ndim,
                                  const size_stride_t **out_size_stride,
                                  ndt::type *out_el_tp,
                                  const char **out_el_arrmeta) const;
@@ -886,7 +886,7 @@ namespace ndt {
      * \param data      pointer to the data element to print
      * \param arrmeta  pointer to the nd::array arrmeta for the data element
      */
-    DYND_API void print_data(std::ostream &o, const char *arrmeta,
+    void print_data(std::ostream &o, const char *arrmeta,
                              const char *data) const;
 
     std::string str() const

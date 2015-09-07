@@ -59,7 +59,7 @@ namespace nd {
      * The nd::array class is a wrapper around an array_memory_block, which
      * contains arrmeta as described by the type.
      */
-    DYND_API memory_block_ptr m_memblock;
+    memory_block_ptr m_memblock;
 
     // Don't allow implicit construction from a raw pointer
     array(const void *);
