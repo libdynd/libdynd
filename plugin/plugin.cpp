@@ -19,10 +19,51 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Sema/Sema.h"
 #include "llvm/Support/raw_ostream.h"
+#include <iostream>
+
+
+#include <clang/AST/CXXInheritance.h>
 
 using namespace clang;
 
 namespace {
+
+bool callback(const CXXRecordDecl *BaseDeclaration, void *)
+{
+  //  std::cout << "BaseDeclaration->getQualifiedNameAsString() = " << BaseDeclaration->getQualifiedNameAsString()
+  //          << std::endl;
+  //  std::cout << (BaseDeclaration->getNameAsString() != "ckernel_prefix") << std::endl;
+  return BaseDeclaration->getNameAsString() == "ckernel_prefix";
+}
+
+class Visitor : public RecursiveASTVisitor<Visitor> {
+public:
+  /*
+    bool VisitNamedDecl(clang::NamedDecl *NamedDecl)
+    {
+      llvm::outs() << "Found " << NamedDecl->getQualifiedNameAsString() << "\n";
+      return true;
+    }
+  */
+
+  bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
+  {
+    //    std::cout << "Declaration->getQualifiedNameAsString() = " << Declaration->getQualifiedNameAsString() <<
+    // std::endl;
+    if (Declaration->hasDefinition()) {
+      CXXBasePaths p;
+      if (!Declaration->lookupInBases(callback, NULL, p)) {
+        std::cout << "Declaration->getQualifiedNameAsString() = " << Declaration->getQualifiedNameAsString()
+                  << std::endl;
+
+        //        std::cout << "Success!" << std::endl;
+        //        llvm::outs() << Declaration->getQualifiedNameAsString() << "\n";
+      }
+    }
+
+    return true;
+  }
+};
 
 class PrintFunctionsConsumer : public ASTConsumer {
   CompilerInstance &Instance;
@@ -34,50 +75,34 @@ public:
   {
   }
 
-  bool HandleTopLevelDecl(DeclGroupRef DG) override
+  void HandleTranslationUnit(ASTContext &Context) override
   {
-    for (DeclGroupRef::iterator i = DG.begin(), e = DG.end(); i != e; ++i) {
-      const Decl *D = *i;
-      if (const NamedDecl *ND = dyn_cast<NamedDecl>(D))
-        llvm::errs() << "top-level-decl: \"" << ND->getNameAsString() << "\"\n";
-    }
 
-    return true;
-  }
+    Visitor V;
+    V.TraverseDecl(Context.getTranslationUnitDecl());
+    //    llvm::errs() << "top-level-decl: \"" << ND->getNameAsString() << "\"\n";
 
-  void HandleTranslationUnit(ASTContext &context) override
-  {
-    if (!Instance.getLangOpts().DelayedTemplateParsing)
-      return;
+    /*
+        struct Visitor : public RecursiveASTVisitor<Visitor> {
+          const std::set<std::string> &ParsedTemplates;
+          Visitor(const std::set<std::string> &ParsedTemplates) : ParsedTemplates(ParsedTemplates)
+          {
+          }
+          bool VisitFunctionDecl(FunctionDecl *FD)
+          {
+            if (FD->isLateTemplateParsed() && ParsedTemplates.count(FD->getNameAsString()))
+              LateParsedDecls.insert(FD);
+            return true;
+          }
 
-    // This demonstrates how to force instantiation of some templates in
-    // -fdelayed-template-parsing mode. (Note: Doing this unconditionally for
-    // all templates is similar to not using -fdelayed-template-parsig in the
-    // first place.)
-    // The advantage of doing this in HandleTranslationUnit() is that all
-    // codegen (when using -add-plugin) is completely finished and this can't
-    // affect the compiler output.
-    struct Visitor : public RecursiveASTVisitor<Visitor> {
-      const std::set<std::string> &ParsedTemplates;
-      Visitor(const std::set<std::string> &ParsedTemplates) : ParsedTemplates(ParsedTemplates)
-      {
-      }
-      bool VisitFunctionDecl(FunctionDecl *FD)
-      {
-        if (FD->isLateTemplateParsed() && ParsedTemplates.count(FD->getNameAsString()))
-          LateParsedDecls.insert(FD);
-        return true;
-      }
+          std::set<FunctionDecl *> LateParsedDecls;
+        } v(ParsedTemplates);
+    */
 
-      std::set<FunctionDecl *> LateParsedDecls;
-    } v(ParsedTemplates);
-    v.TraverseDecl(context.getTranslationUnitDecl());
-    clang::Sema &sema = Instance.getSema();
-    for (const FunctionDecl *FD : v.LateParsedDecls) {
-      clang::LateParsedTemplate *LPT = sema.LateParsedTemplateMap.lookup(FD);
-      sema.LateTemplateParser(sema.OpaqueParser, *LPT);
-      llvm::errs() << "late-parsed-decl: \"" << FD->getNameAsString() << "\"\n";
-    }
+    //  v.TraverseDecl(context.getTranslationUnitDecl());
+    //    clang::Sema &sema = Instance.getSema();
+    //    for (const FunctionDecl *FD : v.LateParsedDecls) {
+    //  }
   }
 };
 
