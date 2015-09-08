@@ -33,6 +33,9 @@
 
 // Symbol visibility macros
 #if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_MSC_VER)
+#pragma warning( disable : 4251 )
+#endif
 #if defined(DYND_EXPORT)
 // Building the library
 #define DYND_API __declspec(dllexport)
