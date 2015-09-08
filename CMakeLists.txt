@@ -595,8 +595,9 @@ add_dependencies(libdynd_OBJ plugin)
 #-load ../../Debug+Asserts/lib/libPrintFunctionNames.so -plugin print-fns
 
 # -cc1 -load /home/irwin/git/libdynd/build/plugin/libplugin.so
+# -Xclang -plugin -Xclang print-fns
 set_target_properties(libdynd_OBJ PROPERTIES
-  COMPILE_FLAGS "-Xclang -load -Xclang /home/irwin/git/libdynd/build/plugin/libplugin.so -Xclang -plugin -Xclang print-fns")
+  COMPILE_FLAGS "-Xclang -load -Xclang /home/irwin/git/libdynd/build/plugin/libplugin.so")
 
 if (DYND_SHARED_LIB)
     set_property(

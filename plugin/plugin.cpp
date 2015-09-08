@@ -20,13 +20,23 @@
 #include "clang/Sema/Sema.h"
 #include "llvm/Support/raw_ostream.h"
 #include <iostream>
-
+#include <clang/CodeGen/CodeGenAction.h>
 
 #include <clang/AST/CXXInheritance.h>
+#include "llvm/Pass.h"
+#include "llvm/IR/LegacyPassManager.h"
 
+#include <clang/Frontend/TextDiagnosticPrinter.h>
+#include <llvm/IR/Module.h>
+
+#include <llvm/IR/LLVMContext.h>
+
+#include <clang/CodeGen/ModuleBuilder.h>
+#include "llvm/Transforms/IPO/PassManagerBuilder.h"
+#include "llvm/IR/Constants.h"
+
+using namespace std;
 using namespace clang;
-
-namespace {
 
 bool callback(const CXXRecordDecl *BaseDeclaration, void *)
 {
@@ -46,18 +56,64 @@ public:
     }
   */
 
-  bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
-  {
-    //    std::cout << "Declaration->getQualifiedNameAsString() = " << Declaration->getQualifiedNameAsString() <<
-    // std::endl;
-    if (Declaration->hasDefinition()) {
-      CXXBasePaths p;
-      if (!Declaration->lookupInBases(callback, NULL, p)) {
-        std::cout << "Declaration->getQualifiedNameAsString() = " << Declaration->getQualifiedNameAsString()
-                  << std::endl;
+  /*
+    bool VisitCXXRecordDecl(Call *Declaration)
+    {
+      //    std::cout << "Declaration->getQualifiedNameAsString() = " << Declaration->getQualifiedNameAsString() <<
+      // std::endl;
+      if (Declaration->hasDefinition()) {
+        CXXBasePaths p;
+        if (!Declaration->lookupInBases(callback, NULL, p)) {
+          std::cout << "Declaration->getQualifiedNameAsString() = " << Declaration->getQualifiedNameAsString()
+                    << std::endl;
 
-        //        std::cout << "Success!" << std::endl;
-        //        llvm::outs() << Declaration->getQualifiedNameAsString() << "\n";
+          //        std::cout << "Success!" << std::endl;
+          //        llvm::outs() << Declaration->getQualifiedNameAsString() << "\n";
+        }
+      }
+
+      return true;
+    }
+  */
+
+  /*
+    bool VisitCallExpr(CallExpr *Expr)
+    {
+      FunctionDecl *Callee = Expr->getDirectCallee();
+
+      if (Callee != NULL) {
+  //      std::cout << Callee->getQualifiedNameAsString() << std::endl;
+        if (Callee->getQualifiedNameAsString() == "dynd::nd::callable::make") {
+          const TemplateArgumentList *List = Callee->getTemplateSpecializationArgs();
+          const TemplateArgument &A = List->get(0);
+
+          switch (A.getKind()) {
+          case 1:
+            //      std::cout << A.getAsType().getAsString() << std::endl;
+            break;
+          default:
+            //          std::cout << "Kind = " << A.getKind() << std::endl;
+            break;
+          }
+        } else if (Callee->getQualifiedNameAsString() == "dynd::nd::callable::make_all") {
+                std::cout << Callee->getQualifiedNameAsString() << std::endl;
+        }
+      }
+      return true;
+    }
+  */
+
+  bool VisitFunctionTemplateDecl(FunctionTemplateDecl *Func)
+  {
+    //    std::exit(-1);
+    //    std::cout << "visiting" << std::endl;
+    if (Func->getQualifiedNameAsString() == "dynd::nd::callable::make") {
+      for (const clang::FunctionDecl *Spec : Func->specializations()) {
+        const TemplateArgumentList *List = Spec->getTemplateSpecializationArgs();
+        const TemplateArgument &A = List->get(0);
+        if (A.getKind() == 1) {
+          //        std::cout << A.getAsType().getAsString() << std::endl;
+        }
       }
     }
 
@@ -80,31 +136,107 @@ public:
 
     Visitor V;
     V.TraverseDecl(Context.getTranslationUnitDecl());
-    //    llvm::errs() << "top-level-decl: \"" << ND->getNameAsString() << "\"\n";
+
+    clang::IntrusiveRefCntPtr<clang::DiagnosticOptions> DiagOpts = new clang::DiagnosticOptions();
+    clang::TextDiagnosticPrinter *DiagClient = new clang::TextDiagnosticPrinter(llvm::errs(), &*DiagOpts);
+
+    clang::IntrusiveRefCntPtr<clang::DiagnosticIDs> DiagID(new clang::DiagnosticIDs());
+    clang::DiagnosticsEngine Diags(DiagID, &*DiagOpts, DiagClient);
+
+    //    CodeGenerator *gen =
+    //  CreateLLVMCodeGen(Diags, "", Instance.getCodeGenOpts(), Instance.getTargetOpts(), llvm::getGlobalContext());
+    // llvm::Module *module = gen->GetModule();
+
+    //    std::cout << "here" << std::endl;
+    //  module->dump();
+    //    llvm::Function *func = module->getFunction("func");
+
+    //  func->dump();
+
+    //  clang::CodeGenAction *Act = new clang::EmitLLVMOnlyAction(&llvm::getGlobalContext());
+    //    Instance.ExecuteAction(*Act);
 
     /*
-        struct Visitor : public RecursiveASTVisitor<Visitor> {
-          const std::set<std::string> &ParsedTemplates;
-          Visitor(const std::set<std::string> &ParsedTemplates) : ParsedTemplates(ParsedTemplates)
-          {
-          }
-          bool VisitFunctionDecl(FunctionDecl *FD)
-          {
-            if (FD->isLateTemplateParsed() && ParsedTemplates.count(FD->getNameAsString()))
-              LateParsedDecls.insert(FD);
-            return true;
-          }
+        string inputFile = "/home/irwin/Desktop/test.c";
 
-          std::set<FunctionDecl *> LateParsedDecls;
-        } v(ParsedTemplates);
+
+        const char *args[] = {inputFile.c_str()};
+        int nargs = sizeof(args) / sizeof(args[0]);
+        std::unique_ptr<clang::CompilerInvocation> CI(new clang::CompilerInvocation);
+        clang::CompilerInvocation::CreateFromArgs(*CI, args, args + nargs, Diags);
+        //  CI->setLangDefaults(clang::IK_CXX, clang::LangStandard::lang_unspecified);
     */
 
-    //  v.TraverseDecl(context.getTranslationUnitDecl());
-    //    clang::Sema &sema = Instance.getSema();
-    //    for (const FunctionDecl *FD : v.LateParsedDecls) {
-    //  }
+    /*
+
+        std::unique_ptr<llvm::Module> module = Act->takeModule();
+        llvm::Function *func = module->getFunction("func");
+
+        func->dump();
+    */
   }
 };
+
+struct Hello : public llvm::FunctionPass {
+  static char ID;
+
+  Hello() : FunctionPass(ID)
+  {
+  }
+
+  /*
+    const char *getPassName() const
+    {
+      return "Hello";
+    }
+  */
+
+  /*
+    bool runOnFunction(llvm::Function &F) override
+    {
+      llvm::errs() << "Hello: ";
+      llvm::errs().write_escaped(F.getName()) << '\n';
+      return true;
+    }
+  */
+  bool doInitialization(llvm::Module &M) override
+  {
+    using namespace llvm;
+
+    auto global_annos = M.getNamedGlobal("llvm.global.annotations");
+    if (global_annos) {
+      auto a = cast<ConstantArray>(global_annos->getOperand(0));
+      for (int i = 0; i < a->getNumOperands(); i++) {
+        auto e = cast<ConstantStruct>(a->getOperand(i));
+
+        if (auto fn = dyn_cast<Function>(e->getOperand(0)->getOperand(0))) {
+          auto anno = cast<ConstantDataArray>(cast<GlobalVariable>(e->getOperand(1)->getOperand(0))->getOperand(0))
+                          ->getAsCString();
+          fn->addFnAttr(anno); // <-- add function annotation here
+        }
+      }
+    }
+    return true;
+  }
+
+  bool runOnFunction(llvm::Function &F) override
+  {
+    if (F.hasFnAttribute("ir")) {
+      llvm::outs() << F.getName() << " has my attribute!\n";
+    }
+
+    //    auto global_annos = M.getNamedGlobal("llvm.global.annotations");
+
+    return true;
+  }
+};
+
+char Hello::ID = 0;
+
+static void registerMyPass(const llvm::PassManagerBuilder &, llvm::legacy::PassManagerBase &PM)
+{
+  PM.add(new Hello());
+}
 
 class PrintFunctionNamesAction : public PluginASTAction {
   std::set<std::string> ParsedTemplates;
@@ -144,7 +276,16 @@ protected:
   {
     ros << "Help for PrintFunctionNames plugin goes here\n";
   }
-};
-}
 
-static FrontendPluginRegistry::Add<PrintFunctionNamesAction> X("print-fns", "print function names");
+public:
+  PrintFunctionNamesAction()
+  {
+    llvm::PassManagerBuilder::addGlobalExtension(llvm::PassManagerBuilder::EP_EarlyAsPossible, registerMyPass);
+  }
+};
+
+// static llvm::RegisterPass<Hello> Y("print-fns", "Hello World Pass", true, true);
+
+static llvm::RegisterStandardPasses RegisterMyPass(llvm::PassManagerBuilder::EP_EarlyAsPossible, registerMyPass);
+
+// static FrontendPluginRegistry::Add<PrintFunctionNamesAction> X("print-fns", "print function names");
