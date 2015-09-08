@@ -590,6 +590,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 
+#add_dependencies(libdynd_OBJ )
 add_dependencies(libdynd_OBJ plugin)
 
 #-load ../../Debug+Asserts/lib/libPrintFunctionNames.so -plugin print-fns

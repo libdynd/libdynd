@@ -147,6 +147,8 @@ namespace nd {
   struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix, SelfType> {                                     \
     typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;                                               \
                                                                                                                        \
+    static int single_ir;                                                                                              \
+                                                                                                                       \
     /** Initializes just the ckernel_prefix function member. */                                                        \
     template <typename... A>                                                                                           \
     static SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)                             \
@@ -163,6 +165,8 @@ namespace nd {
         DYND_HOST_THROW(std::invalid_argument,                                                                         \
                         "expr ckernel init: unrecognized ckernel request " + std::to_string(kernreq));                 \
       }                                                                                                                \
+                                                                                                                       \
+      std::cout << single_ir << std::endl;                                                                             \
                                                                                                                        \
       return self;                                                                                                     \
     }                                                                                                                  \
@@ -213,6 +217,9 @@ namespace nd {
   };
 
   BASE_KERNEL(kernel_request_host);
+
+  template <typename SelfType>
+  int base_kernel<SelfType>::single_ir = 0;
 
 #undef BASE_KERNEL
 
