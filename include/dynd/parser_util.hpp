@@ -66,8 +66,10 @@ public:
 
 /**
  * An error message thrown when a parse error is encountered.
+ * All methods must be inlined since this class is not exported as a part
+ * of the dll on Windows.
  */
-class DYND_API parse_error : public std::invalid_argument {
+class parse_error : public std::invalid_argument {
     const char *m_position;
 public:
     parse_error(const char *position, const std::string& message)
