@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <iostream>
+#include <dynd/visibility.hpp>
 
 namespace dynd {
 

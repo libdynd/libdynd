@@ -493,6 +493,7 @@ set(libdynd_SRC
     include/dynd/string_encodings.hpp
     include/dynd/uint128.hpp
     include/dynd/view.hpp
+    include/dynd/visibility.hpp
     include/dynd/with.hpp
     )
 

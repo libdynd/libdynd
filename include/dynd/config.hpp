@@ -18,6 +18,8 @@
 #include <type_traits>
 #include <utility>
 
+#include <dynd/visibility.hpp>
+
 #ifdef __NVCC__
 #ifndef DYND_CUDA
 #define DYND_CUDA
@@ -30,24 +32,6 @@
 
 /** The number of elements to process at once when doing chunking/buffering */
 #define DYND_BUFFER_CHUNK_SIZE 128
-
-// Symbol visibility macros
-#if defined(_WIN32) || defined(__CYGWIN__)
-#if defined(_MSC_VER)
-#pragma warning( disable : 4251 )
-#endif
-#if defined(DYND_EXPORT)
-// Building the library
-#define DYND_API __declspec(dllexport)
-#else
-// Importing the library
-#define DYND_API __declspec(dllimport)
-#endif // defined(DYND_EXPORT)
-#define DYND_INTERNAL
-#else
-#define DYND_API
-#define DYND_INTERNAL __attribute__ ((visibility ("hidden")))
-#endif // End symbol visibility macros.
 
 #ifdef __clang__
 

@@ -6,6 +6,7 @@
 #pragma once
 
 #include <iostream>
+#include <dynd/visibility.hpp>
 
 namespace dynd {
 
