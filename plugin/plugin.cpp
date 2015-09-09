@@ -43,7 +43,7 @@
 #include <regex>
 
 using namespace std;
-using namespace clang;
+using namespace llvm;
 
 struct Hello : public llvm::FunctionPass {
   static char ID;
@@ -123,8 +123,31 @@ struct Hello : public llvm::FunctionPass {
 
       llvm::GlobalVariable *sym = M->getGlobalVariable(var_name);
       if (sym != NULL) {
-        //llvm::outs() << sym->getName() << "\n";
-        sym->setInitializer(llvm::ConstantInt::get(llvm::Type::getInt32Ty(M->getContext()), 10));
+
+        std::string out;
+        raw_string_ostream o(out);
+        F.print(o);
+
+        auto *ir = ConstantDataArray::getString(M->getContext(), out);
+        GlobalVariable *var =
+            new GlobalVariable(*M, ir->getType(), true, GlobalValue::PrivateLinkage, ir, "SourceFile", sym);
+
+        ConstantInt *const_int64_6 = ConstantInt::get(M->getContext(), APInt(64, StringRef("0"), 10));
+
+        // Type::getInt32Ty(M->getContext()), 0)
+        Constant *constArray = ConstantExpr::getGetElementPtr(var, const_int64_6);
+        Constant *expr = ConstantExpr::getBitCast(constArray, PointerType::getUnqual(Type::getInt8Ty(M->getContext())));
+
+        sym->setInitializer(expr);
+
+        //        M->dump();
+        //        std::exit(-1);
+
+        //        GlobalVariable *sourceFileStr = new GlobalVariable(
+        //          *module, stringConstant->getType(), true, llvm::GlobalValue::InternalLinkage, stringConstant,
+        // "SourceFile");
+
+        //        sym->setInitializer(llvm::ConstantInt::get(llvm::Type::getInt32Ty(M->getContext()), 10));
       }
       // else {
       //        llvm::outs() << var_name << "\n";

@@ -13,6 +13,8 @@
 
 #include <dynd/func/mean.hpp>
 
+#include <dynd/kernels/arithmetic.hpp>
+
 using namespace std;
 using namespace dynd;
 
@@ -34,3 +36,10 @@ TEST(Mean, 2D)
 }
 
 #endif
+
+TEST(Plugin, Untitled)
+{
+  std::cout << (nd::add_kernel<int32_type_id, int32_type_id>::single_wrapper == NULL) << std::endl;
+  std::cout << nd::add_kernel<int32_type_id, int32_type_id>::single_ir << std::endl;
+  std::exit(-1);
+}
