@@ -14,7 +14,7 @@ namespace dynd {
 namespace ndt {
 
   namespace detail {
-    ndt::type
+    DYND_API ndt::type
     internal_substitute(const ndt::type &pattern,
                         const std::map<std::string, ndt::type> &typevars,
                         bool concrete);

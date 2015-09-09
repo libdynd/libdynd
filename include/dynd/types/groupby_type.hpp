@@ -10,10 +10,10 @@
 
 namespace dynd {
 
-struct groupby_type_arrmeta {
+struct DYND_API groupby_type_arrmeta {
 };
 
-struct groupby_type_data {
+struct DYND_API groupby_type_data {
   const char *data_values_pointer;
   const char *by_values_pointer;
 };
@@ -26,7 +26,7 @@ namespace ndt {
    * array whose rows are the groups as specified by a categorical
    * type.
    */
-  class groupby_type : public base_expr_type {
+  class DYND_API groupby_type : public base_expr_type {
     type m_value_type, m_operand_type, m_groups_type;
 
   public:

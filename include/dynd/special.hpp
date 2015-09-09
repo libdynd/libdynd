@@ -11,10 +11,10 @@
 
 namespace dynd {
 
-double factorial(int n);
-double factorial2(int n);
+DYND_API double factorial(int n);
+DYND_API double factorial2(int n);
 
-double factorial_ratio(int m, int n);
+DYND_API double factorial_ratio(int m, int n);
 
 inline double gamma(double x) {
     return cephes_Gamma(x);
@@ -58,7 +58,7 @@ inline double sph_bessel_j0(double x) {
     return std::sin(x) / x;
 }
 
-double sph_bessel_j(double nu, double x);
+DYND_API double sph_bessel_j(double nu, double x);
 
 inline double riccati_bessel_j(double nu, double x) {
     return std::sqrt(dynd::_pi_by_2<double>() * x) * bessel_j(nu + 0.5, x);
@@ -116,10 +116,10 @@ inline double struve_h(double nu, double x) {
     return cephes_struve(nu, x);
 }
 
-double legendre_p_next(int l, double x, double pls1, double pl);
-double legendre_p(int l, double x);
+DYND_API double legendre_p_next(int l, double x, double pls1, double pl);
+DYND_API double legendre_p(int l, double x);
 
-double assoc_legendre_p_next(int l, int m, double x, double pl, double pls1);
-double assoc_legendre_p(int l, int m, double x);
+DYND_API double assoc_legendre_p_next(int l, int m, double x, double pl, double pls1);
+DYND_API double assoc_legendre_p(int l, int m, double x);
 
 } // namespace dynd

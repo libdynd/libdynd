@@ -16,7 +16,7 @@ namespace ndt {
    * has kind dim_kind, it must be a subclass of
    * base_dim_type.
    */
-  class base_dim_type : public base_type {
+  class DYND_API base_dim_type : public base_type {
   protected:
     type m_element_tp;
     size_t m_element_arrmeta_offset;

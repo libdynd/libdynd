@@ -16,7 +16,7 @@
 namespace dynd {
 namespace ndt {
 
-  class kind_sym_type : public base_type {
+  class DYND_API kind_sym_type : public base_type {
     type_kind_t m_kind;
 
   public:

@@ -247,12 +247,12 @@ namespace nd {
 
 template <typename VariadicType,
           template <type_id_t, type_id_t, VariadicType...> class T>
-struct bind {
+struct DYND_API bind {
   template <type_id_t TypeID0, type_id_t TypeID1>
   using type = T<TypeID0, TypeID1>;
 };
 
-class expr_kernel_generator;
+class DYND_API expr_kernel_generator;
 
 /**
  * Evaluates any expression types in the array of
@@ -260,7 +260,7 @@ class expr_kernel_generator;
  * types on to the handler to build the rest of the
  * kernel.
  */
-size_t make_expression_type_expr_kernel(
+DYND_API size_t make_expression_type_expr_kernel(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
     const char *dst_arrmeta, size_t src_count, const ndt::type *src_dt,
     const char **src_arrmeta, kernel_request_t kernreq,

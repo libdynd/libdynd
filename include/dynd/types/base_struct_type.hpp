@@ -20,7 +20,7 @@ namespace ndt {
    * This class uses the base_tuple_type for the definition
    * of the field types, and adds field names to that.
    */
-  class base_struct_type : public base_tuple_type {
+  class DYND_API base_struct_type : public base_tuple_type {
   protected:
     nd::array m_field_names;
 

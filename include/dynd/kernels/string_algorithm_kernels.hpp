@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-// Implement a number of string algorithms. Note that the initial 
+// Implement a number of string algorithms. Note that the initial
 
 #pragma once
 
@@ -18,7 +18,7 @@ namespace dynd { namespace kernels {
  *
  * (string, string, ...) -> string
  */
-struct string_concatenation_kernel {
+struct DYND_API string_concatenation_kernel {
     typedef string_concatenation_kernel extra_type;
 
     ckernel_prefix m_base;
@@ -52,7 +52,7 @@ struct string_concatenation_kernel {
  *
  * (string, string) -> intp
  */
-struct string_find_kernel {
+struct DYND_API string_find_kernel {
     typedef string_find_kernel extra_type;
 
     ckernel_prefix m_base;

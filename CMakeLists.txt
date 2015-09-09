@@ -86,7 +86,7 @@ endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # -WX: Treat warnings as errors
     # -bigobj: Allow lots of symbols (assignment_kernels.cpp and assignment_kernels.cu need this flag)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503 -DDYND_EXPORT")
 
     if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 18)
         message(FATAL_ERROR "Only MSVC 2013 (Version 18.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
@@ -493,6 +493,7 @@ set(libdynd_SRC
     include/dynd/string_encodings.hpp
     include/dynd/uint128.hpp
     include/dynd/view.hpp
+    include/dynd/visibility.hpp
     include/dynd/with.hpp
     )
 
@@ -587,6 +588,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 
 if (DYND_SHARED_LIB)
+    set_property(
+        TARGET libdynd_OBJ
+        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
+        )
+
     if (DYND_CUDA)
         cuda_add_library(libdynd SHARED ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
     else()
@@ -596,6 +602,10 @@ if (DYND_SHARED_LIB)
         PROPERTIES
         OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
+        )
+    set_property(
+        TARGET libdynd
+        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
         )
 else()
     if (DYND_CUDA)

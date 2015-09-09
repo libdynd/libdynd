@@ -15,7 +15,7 @@ namespace nd {
      * Makes a ckernel that ignores the src values, and writes
      * constant values to the output.
      */
-    callable constant(const array &val);
+    DYND_API callable constant(const array &val);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

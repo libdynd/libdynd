@@ -16,7 +16,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct reduction_kernel_prefix : ckernel_prefix {
+    struct DYND_API reduction_kernel_prefix : ckernel_prefix {
       // This function pointer is for all the calls of the function
       // on a given destination data address after the "first call".
       expr_strided_t followup_call_function;
@@ -59,7 +59,7 @@ namespace nd {
       }
     };
 
-    struct reduction_virtual_kernel : base_virtual_kernel<reduction_virtual_kernel> {
+    struct DYND_API reduction_virtual_kernel : base_virtual_kernel<reduction_virtual_kernel> {
       struct static_data_type {
         callable child;
 

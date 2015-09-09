@@ -29,7 +29,7 @@ namespace nd {
    *            or symbolic, in which case the output will have a type which
    *            matches successfully against `tp`.
    */
-  nd::array asarray(const nd::array &a, const ndt::type &tp);
+  DYND_API nd::array asarray(const nd::array &a, const ndt::type &tp);
 
 } // namespace nd
 } // namespace dynd

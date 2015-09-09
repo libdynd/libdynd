@@ -26,7 +26,7 @@ enum {
 
 namespace ndt {
 
-  class dim_fragment_type : public base_dim_type {
+  class DYND_API dim_fragment_type : public base_dim_type {
     dimvector m_tagged_dims;
 
   public:

@@ -17,7 +17,7 @@
 namespace dynd {
 namespace ndt {
 
-  class struct_type : public base_struct_type {
+  class DYND_API struct_type : public base_struct_type {
     std::vector<std::pair<std::string, gfunc::callable>> m_array_properties;
 
     void create_array_properties();
@@ -100,6 +100,6 @@ namespace ndt {
 /**
  * Concatenates the fields of two structs together into one.
  */
-nd::array struct_concat(nd::array lhs, nd::array rhs);
+DYND_API nd::array struct_concat(nd::array lhs, nd::array rhs);
 
 } // namespace dynd

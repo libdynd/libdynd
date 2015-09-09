@@ -282,8 +282,8 @@ enum {
   type_flags_value_inherited = type_flag_symbolic | type_flag_variadic
 };
 
-std::ostream &operator<<(std::ostream &o, type_kind_t kind);
-std::ostream &operator<<(std::ostream &o, type_id_t tid);
+DYND_API std::ostream &operator<<(std::ostream &o, type_kind_t kind);
+DYND_API std::ostream &operator<<(std::ostream &o, type_id_t tid);
 
 enum {
   /** A mask within which all the built-in type ids are guaranteed to fit */

@@ -13,7 +13,7 @@
 namespace dynd {
 namespace ndt {
 
-  class date_type : public base_type {
+  class DYND_API date_type : public base_type {
   public:
     date_type();
 

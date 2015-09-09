@@ -11,7 +11,7 @@
 namespace dynd {
 namespace ndt {
 
-  class c_contiguous_type : public base_type {
+  class DYND_API c_contiguous_type : public base_type {
     type m_child_tp;
 
   public:

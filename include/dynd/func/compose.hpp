@@ -15,8 +15,8 @@ namespace nd {
      * Returns an callable which composes the two callables together.
      * The buffer used to connect them is made out of the provided ``buf_tp``.
      */
-    callable compose(const callable &first, const callable &second,
-                     const ndt::type &buf_tp = ndt::type());
+    DYND_API callable compose(const callable &first, const callable &second,
+                              const ndt::type &buf_tp = ndt::type());
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

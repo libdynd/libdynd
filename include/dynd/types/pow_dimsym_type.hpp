@@ -15,7 +15,7 @@
 namespace dynd {
 namespace ndt {
 
-  class pow_dimsym_type : public base_dim_type {
+  class DYND_API pow_dimsym_type : public base_dim_type {
     type m_base_tp;
     std::string m_exponent;
 

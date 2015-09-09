@@ -14,7 +14,7 @@
 namespace dynd {
 namespace ndt {
 
-  class typevar_constructed_type : public base_type {
+  class DYND_API typevar_constructed_type : public base_type {
     std::string m_name;
     type m_arg;
 

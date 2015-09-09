@@ -13,7 +13,7 @@ namespace dynd { namespace nd {
  * This is a container for an nd::array which must always be
  * an immutable "string", or NULL.
  */
-class string {
+class DYND_API string {
     nd::array m_value;
 
 public:

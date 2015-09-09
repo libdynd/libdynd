@@ -26,7 +26,7 @@ std::ostream &operator<<(std::ostream &o, datetime_unit_t unit);
 
 namespace ndt {
 
-  class datetime_type : public base_type {
+  class DYND_API datetime_type : public base_type {
     datetime_tz_t m_timezone;
 
   public:

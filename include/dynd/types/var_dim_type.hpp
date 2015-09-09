@@ -13,7 +13,7 @@
 
 namespace dynd {
 
-struct var_dim_type_arrmeta {
+struct DYND_API var_dim_type_arrmeta {
   /**
    * A reference to the memory block which contains the array's data.
    */
@@ -23,14 +23,14 @@ struct var_dim_type_arrmeta {
   intptr_t offset;
 };
 
-struct var_dim_type_data {
+struct DYND_API var_dim_type_data {
   char *begin;
   size_t size;
 };
 
 namespace ndt {
 
-  class var_dim_type : public base_dim_type {
+  class DYND_API var_dim_type : public base_dim_type {
     std::vector<std::pair<std::string, gfunc::callable>> m_array_properties, m_array_functions;
 
   public:
@@ -139,7 +139,7 @@ namespace ndt {
    *              is written to.
    * \param count  The number of elements to start off with.
    */
-  void var_dim_element_initialize(const type &tp, const char *arrmeta, char *data, intptr_t count);
+  DYND_API void var_dim_element_initialize(const type &tp, const char *arrmeta, char *data, intptr_t count);
 
   /**
    * A helper function for resizing the allocated space in a var dim
@@ -154,7 +154,7 @@ namespace ndt {
    *              is written to.
    * \param count  The number of elements to resize to.
    */
-  void var_dim_element_resize(const type &tp, const char *arrmeta, char *data, intptr_t count);
+  DYND_API void var_dim_element_resize(const type &tp, const char *arrmeta, char *data, intptr_t count);
 
 } // namespace dynd::ndt
 } // namespace dynd

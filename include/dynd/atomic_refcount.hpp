@@ -35,7 +35,7 @@ extern "C" long __cdecl _InterlockedDecrement( long volatile * );
 #pragma intrinsic(_InterlockedDecrement)
 
 namespace dynd {
-    class atomic_refcount {
+    class DYND_API atomic_refcount {
         int32_t m_refcount;
 
         atomic_refcount(const atomic_refcount&);
@@ -74,7 +74,7 @@ namespace dynd {
 //  atomic_count for g++ on 486+/AMD64
 
 namespace dynd {
-    class atomic_refcount {
+    class DYND_API atomic_refcount {
         int32_t m_refcount;
 
         atomic_refcount(const atomic_refcount&);

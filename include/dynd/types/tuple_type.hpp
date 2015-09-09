@@ -17,7 +17,7 @@
 namespace dynd {
 namespace ndt {
 
-  class tuple_type : public base_tuple_type {
+  class DYND_API tuple_type : public base_tuple_type {
     std::vector<std::pair<std::string, gfunc::callable>> m_array_properties;
 
   protected:
@@ -84,7 +84,7 @@ namespace ndt {
     }
   };
 
-  nd::array pack(intptr_t field_count, const nd::array *field_vals);
+  DYND_API nd::array pack(intptr_t field_count, const nd::array *field_vals);
 
 } // namespace dynd::ndt
 } // namespace dynd

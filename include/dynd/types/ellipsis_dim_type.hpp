@@ -17,7 +17,7 @@ namespace ndt {
 
   type make_ellipsis_dim(const std::string &name, const type &element_type);
 
-  class ellipsis_dim_type : public base_dim_type {
+  class DYND_API ellipsis_dim_type : public base_dim_type {
     // m_name is either NULL or an immutable array of type "string"
     std::string m_name;
 

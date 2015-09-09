@@ -16,7 +16,7 @@
 namespace dynd {
 namespace ndt {
 
-  class void_pointer_type : public base_type {
+  class DYND_API void_pointer_type : public base_type {
   public:
     void_pointer_type()
         : base_type(void_pointer_type_id, void_kind, sizeof(void *),

@@ -25,7 +25,7 @@ namespace dynd { namespace iter {
  * \param data_end  One past the end of the data buffer.
  * \param ref  A blockref which owns the string's data.
  */
-void make_string_iter(
+DYND_API void make_string_iter(
     dim_iter *out_di, string_encoding_t iter_encoding,
     string_encoding_t data_encoding,
     const char *data_begin, const char *data_end,

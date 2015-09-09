@@ -25,9 +25,9 @@ struct is_eval_context {
   static const bool value = false;
 };
 
-struct eval_context {
+struct DYND_API eval_context {
     // If the compiler supports atomics, use them for access
-    // to the evaluation context settings, 
+    // to the evaluation context settings,
 #ifdef DYND_USE_STD_ATOMIC
     // Default error mode for computations
     std::atomic<assign_error_mode> errmode;

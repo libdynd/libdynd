@@ -27,7 +27,7 @@ namespace dynd {
 
 namespace ndt {
 
-  class option_type : public base_type {
+  class DYND_API option_type : public base_type {
     type m_value_tp;
 
   public:

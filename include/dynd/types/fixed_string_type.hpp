@@ -17,7 +17,7 @@
 namespace dynd {
 namespace ndt {
 
-  class fixed_string_type : public base_string_type {
+  class DYND_API fixed_string_type : public base_string_type {
     intptr_t m_stringsize;
     string_encoding_t m_encoding;
 

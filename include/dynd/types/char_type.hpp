@@ -17,7 +17,7 @@
 namespace dynd {
 namespace ndt {
 
-  class char_type : public base_type {
+  class DYND_API char_type : public base_type {
     // This encoding can be ascii, latin1, ucs2, or utf32.
     // Not a variable-sized encoding.
     string_encoding_t m_encoding;

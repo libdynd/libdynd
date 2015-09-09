@@ -23,7 +23,7 @@ namespace nd {
 
 namespace ndt {
 
-  class fixed_dim_kind_type : public base_dim_type {
+  class DYND_API fixed_dim_kind_type : public base_dim_type {
   public:
     fixed_dim_kind_type(const type &element_tp);
 
@@ -109,7 +109,7 @@ namespace ndt {
     }
   };
 
-  type make_fixed_dim_kind(const type &element_tp);
+  DYND_API type make_fixed_dim_kind(const type &element_tp);
 
   inline type make_fixed_dim_kind(const type &uniform_tp, intptr_t ndim)
   {

@@ -72,7 +72,7 @@ kernel_request_t without_memory(kernel_request_t kernreq) {
  * concurrency requirements to be valid. See the
  * document
  */
-struct ckernel_prefix {
+struct DYND_API ckernel_prefix {
   typedef void (*destructor_fn_t)(ckernel_prefix *);
 
   void (*destructor)(ckernel_prefix *self);

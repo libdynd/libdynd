@@ -30,7 +30,7 @@ namespace dynd {
  * \param kernreq  What kind of ckernel to create (single, strided).
  * \param ectx  The evaluation context.
  */
-intptr_t make_tuple_unary_op_ckernel(
+DYND_API intptr_t make_tuple_unary_op_ckernel(
     const callable_type_data *af, const ndt::callable_type *af_tp, void *ckb,
     intptr_t ckb_offset, intptr_t field_count, const uintptr_t *dst_offsets,
     const ndt::type *dst_tp, const char *const *dst_arrmeta,
@@ -58,7 +58,7 @@ intptr_t make_tuple_unary_op_ckernel(
  * \param kernreq  What kind of ckernel to create (single, strided).
  * \param ectx  The evaluation context.
  */
-intptr_t make_tuple_unary_op_ckernel(
+DYND_API intptr_t make_tuple_unary_op_ckernel(
     const callable_type_data *const *af, const ndt::callable_type *const *af_tp,
     void *ckb, intptr_t ckb_offset, intptr_t field_count,
     const uintptr_t *dst_offsets, const ndt::type *dst_tp,
@@ -72,7 +72,7 @@ intptr_t make_tuple_unary_op_ckernel(
  * \param val_tup_tp  The struct-kind type of both source and destination
  *                    values.
  */
-size_t make_tuple_identical_assignment_kernel(void *ckb, intptr_t ckb_offset,
+DYND_API size_t make_tuple_identical_assignment_kernel(void *ckb, intptr_t ckb_offset,
                                               const ndt::type &val_tup_tp,
                                               const char *dst_arrmeta,
                                               const char *src_arrmeta,
@@ -87,7 +87,7 @@ size_t make_tuple_identical_assignment_kernel(void *ckb, intptr_t ckb_offset,
  * \param dst_tuple_tp  The tuple/struct-kind dtype of the destination.
  * \param src_tuple_tp  The tuple/struct-kind dtype of the source.
  */
-size_t make_tuple_assignment_kernel(void *ckb, intptr_t ckb_offset,
+DYND_API size_t make_tuple_assignment_kernel(void *ckb, intptr_t ckb_offset,
                                     const ndt::type &dst_tuple_tp,
                                     const char *dst_arrmeta,
                                     const ndt::type &src_tuple_tp,
@@ -99,7 +99,7 @@ size_t make_tuple_assignment_kernel(void *ckb, intptr_t ckb_offset,
  * Gets a kernel which broadcasts the source value to all the fields
  * of the destination tuple/struct.
  */
-size_t make_broadcast_to_tuple_assignment_kernel(
+DYND_API size_t make_broadcast_to_tuple_assignment_kernel(
     void *ckb, intptr_t ckb_offset, const ndt::type &dst_tuple_tp,
     const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
     kernel_request_t kernreq, const eval::eval_context *ectx);

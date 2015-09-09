@@ -21,7 +21,7 @@ namespace nd {
      *                   appropriately with `dst_tp` and `src_tp`.
      * \param window_size  The size of the rolling window.
      */
-    callable rolling(const callable &window_op, intptr_t window_size);
+    DYND_API callable rolling(const callable &window_op, intptr_t window_size);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

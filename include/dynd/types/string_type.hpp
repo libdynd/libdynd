@@ -15,7 +15,7 @@
 
 namespace dynd {
 
-struct string_type_arrmeta {
+struct DYND_API string_type_arrmeta {
   /**
    * A reference to the memory block which contains the string's data.
    * NOTE: This is identical to bytes_type_arrmeta, by design. Maybe
@@ -24,14 +24,14 @@ struct string_type_arrmeta {
   memory_block_data *blockref;
 };
 
-struct string_type_data {
+struct DYND_API string_type_data {
   char *begin;
   char *end;
 };
 
 namespace ndt {
 
-  class string_type : public base_string_type {
+  class DYND_API string_type : public base_string_type {
     string_encoding_t m_encoding;
 
   public:

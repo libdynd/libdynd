@@ -13,8 +13,9 @@ namespace dynd {
 /**
  * Makes callables which adapt to/from a date.
  */
-bool make_date_adapter_callable(const ndt::type &operand_tp,
-                                const nd::string &op, nd::callable &out_forward,
-                                nd::callable &out_reverse);
+bool DYND_API make_date_adapter_callable(const ndt::type &operand_tp,
+                                         const nd::string &op,
+                                         nd::callable &out_forward,
+                                         nd::callable &out_reverse);
 
 } // namespace dynd

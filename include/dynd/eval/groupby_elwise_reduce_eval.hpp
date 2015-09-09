@@ -14,7 +14,7 @@ namespace dynd { namespace eval {
 /**
  * Applies the unary kernel to the input strided array node.
  */
-ndarray_node_ptr evaluate_groupby_elwise_reduce(ndarray_node *node, const eval::eval_context *ectx,
+DYND_API ndarray_node_ptr evaluate_groupby_elwise_reduce(ndarray_node *node, const eval::eval_context *ectx,
                                 bool copy, uint32_t access_flags);
 
 }} // namespace dynd::eval

@@ -18,7 +18,7 @@ namespace dynd { namespace nd {
  * \param arr  The array to view as another type.
  * \param tp  The type to view the array as.
  */
-array view(const array& arr, const ndt::type& tp);
+DYND_API array view(const array& arr, const ndt::type& tp);
 
 /**
  * Convenience form of nd::view that takes a string

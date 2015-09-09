@@ -17,7 +17,7 @@ namespace dynd {
  * \param string_size  The number of characters (1, 2, or 4-bytes each) in the string.
  * \param encoding  The encoding of the string.
  */
-size_t make_fixed_string_comparison_kernel(
+DYND_API size_t make_fixed_string_comparison_kernel(
                 void *ckb, intptr_t ckb_offset,
                 size_t string_size, string_encoding_t encoding,
                 comparison_type_t comptype,
@@ -28,7 +28,7 @@ size_t make_fixed_string_comparison_kernel(
  *
  * \param encoding  The encoding of the string.
  */
-size_t make_string_comparison_kernel(
+DYND_API size_t make_string_comparison_kernel(
                 void *ckb, intptr_t ckb_offset,
                 string_encoding_t encoding,
                 comparison_type_t comptype,
@@ -38,7 +38,7 @@ size_t make_string_comparison_kernel(
  * Makes a kernel which compares two strings of any type.
  *
  */
-size_t make_general_string_comparison_kernel(
+DYND_API size_t make_general_string_comparison_kernel(
                 void *ckb, intptr_t ckb_offset,
                 const ndt::type& src0_dt, const char *src0_arrmeta,
                 const ndt::type& src1_dt, const char *src1_arrmeta,

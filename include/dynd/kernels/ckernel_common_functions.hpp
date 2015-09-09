@@ -23,7 +23,7 @@ namespace kernels {
  * An expr single ckernel function which adapts a child
  * unary single ckernel.
  */
-void unary_as_expr_adapter_single_ckernel(
+DYND_API void unary_as_expr_adapter_single_ckernel(
                 char *dst, const char * const *src,
                 ckernel_prefix *ckp);
 
@@ -31,7 +31,7 @@ void unary_as_expr_adapter_single_ckernel(
  * An expr strided ckernel function which adapts a child
  * unary strided ckernel.
  */
-void unary_as_expr_adapter_strided_ckernel(
+DYND_API void unary_as_expr_adapter_strided_ckernel(
                 char *dst, intptr_t dst_stride,
                 const char * const *src, const intptr_t *src_stride,
                 size_t count, ckernel_prefix *ckp);
@@ -41,7 +41,7 @@ void unary_as_expr_adapter_strided_ckernel(
  * expr single ckernel. The child expr single ckernel
  * must itself be unary as well.
  */
-void expr_as_unary_adapter_single_ckernel(
+DYND_API void expr_as_unary_adapter_single_ckernel(
                 char *dst, const char *src,
                 ckernel_prefix *ckp);
 
@@ -50,7 +50,7 @@ void expr_as_unary_adapter_single_ckernel(
  * expr strided ckernel. The child expr single ckernel
  * must itself be unary as well.
  */
-void expr_as_unary_adapter_strided_ckernel(
+DYND_API void expr_as_unary_adapter_strided_ckernel(
                 char *dst, intptr_t dst_stride,
                 const char *src, intptr_t src_stride,
                 size_t count, ckernel_prefix *ckp);
@@ -62,7 +62,7 @@ void expr_as_unary_adapter_strided_ckernel(
  *
  * \returns  The ckb_offset where the child ckernel should be placed.
  */
-intptr_t wrap_expr_as_unary_ckernel(void *ckb,
+DYND_API intptr_t wrap_expr_as_unary_ckernel(void *ckb,
                                     intptr_t ckb_offset,
                                     kernel_request_t kernreq);
 

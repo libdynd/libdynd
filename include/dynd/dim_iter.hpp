@@ -10,7 +10,7 @@
 
 namespace dynd {
 
-struct dim_iter;
+struct DYND_API dim_iter;
 
 enum dim_iter_flags {
     dim_iter_restartable = 0x001,
@@ -21,7 +21,7 @@ enum dim_iter_flags {
 /**
  * Table of functions for a `dim_iter` instance.
  */
-struct dim_iter_vtable {
+struct DYND_API dim_iter_vtable {
     /** Destructor */
     void (*destructor)(dim_iter *self);
     /** Function to advance the iterator. Return 1 if elements are availabe, 0 otherwise */
@@ -39,7 +39,7 @@ struct dim_iter_vtable {
  *
  * This iterator iterates in one dimension, with some capabilities flags.
  */
-struct dim_iter {
+struct DYND_API dim_iter {
     /** The table of functions*/
     const dim_iter_vtable *vtable;
     /** Pointer to the data. May be inside the array, or a temporary buffer */
@@ -100,7 +100,7 @@ struct dim_iter {
  * \param stride  The stride between elements.
  * \param ref  A reference which holds the memory.
  */
-void make_strided_dim_iter(
+void DYND_API make_strided_dim_iter(
     dim_iter *out_di,
     const ndt::type& tp, const char *arrmeta,
     const char *data_ptr, intptr_t size, intptr_t stride,
@@ -123,7 +123,7 @@ void make_strided_dim_iter(
  * \param buffer_max_mem  The maximum amount of memory to use for the temporary buffer.
  * \param ectx  The evaluation context.
  */
-void make_buffered_strided_dim_iter(
+void DYND_API make_buffered_strided_dim_iter(
     dim_iter *out_di,
     const ndt::type& val_tp,
     const ndt::type& mem_tp, const char *mem_arrmeta,

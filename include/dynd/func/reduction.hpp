@@ -51,7 +51,7 @@ namespace nd {
      * \param reduction_identity  If not a NULL nd::array, this is the identity
      *                            value for the accumulator.
      */
-    callable reduction(const callable &child);
+    DYND_API callable reduction(const callable &child);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

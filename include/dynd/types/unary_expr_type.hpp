@@ -24,7 +24,7 @@ namespace ndt {
    *    with other elementwise expression types such as
    *    type conversion, byte swapping, etc.
    */
-  class unary_expr_type : public base_expr_type {
+  class DYND_API unary_expr_type : public base_expr_type {
     type m_value_type, m_operand_type;
     const expr_kernel_generator *m_kgen;
 

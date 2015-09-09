@@ -11,7 +11,7 @@ namespace dynd {
 
 #ifdef DYND_CUDA
 
-class cuda_device_type : public base_memory_type {
+class DYND_API cuda_device_type : public base_memory_type {
 public:
     cuda_device_type(const ndt::type& element_tp);
 
@@ -37,7 +37,7 @@ public:
         const nd::array &kwds) const;
 };
 
-size_t get_cuda_device_data_alignment(const ndt::type& tp);
+DYND_API size_t get_cuda_device_data_alignment(const ndt::type& tp);
 
 namespace ndt {
     inline ndt::type make_cuda_device(const ndt::type& element_tp) {

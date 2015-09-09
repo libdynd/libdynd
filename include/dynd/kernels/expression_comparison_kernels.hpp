@@ -14,7 +14,7 @@ namespace dynd {
  * at least one of src0_dt and src1_dt is an
  * expr_kind type.
  */
-size_t make_expression_comparison_kernel(
+DYND_API size_t make_expression_comparison_kernel(
                 void *ckb, intptr_t ckb_offset,
                 const ndt::type& src0_dt, const char *src0_arrmeta,
                 const ndt::type& src1_dt, const char *src1_arrmeta,

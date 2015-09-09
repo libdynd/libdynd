@@ -12,6 +12,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
+    // All methods are inlined, so this does not need to be declared DYND_API.
     struct constant_kernel : base_kernel<constant_kernel> {
       static const std::size_t data_size = 0;
 

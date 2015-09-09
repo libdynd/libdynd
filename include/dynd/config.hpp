@@ -18,6 +18,8 @@
 #include <type_traits>
 #include <utility>
 
+#include <dynd/visibility.hpp>
+
 #ifdef __NVCC__
 #ifndef DYND_CUDA
 #define DYND_CUDA
@@ -98,7 +100,7 @@
 
 // Some C library calls will abort if given bad format strings, etc
 // This RAII class temporarily disables that
-class disable_invalid_parameter_handler {
+class DYND_API disable_invalid_parameter_handler {
   _invalid_parameter_handler m_saved;
 
   disable_invalid_parameter_handler(const disable_invalid_parameter_handler &);

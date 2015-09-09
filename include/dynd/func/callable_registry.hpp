@@ -15,16 +15,16 @@ namespace func {
    * NOTE: The internal representation will change, this
    *       function will change.
    */
-  std::map<nd::string, nd::callable> &get_regfunctions();
+  DYND_API std::map<nd::string, nd::callable> &get_regfunctions();
 
   /**
     * Looks up a named callable from the registry.
     */
-  nd::callable get_regfunction(const nd::string &name);
+  DYND_API nd::callable get_regfunction(const nd::string &name);
   /**
     * Sets a named callable in the registry.
     */
-  void set_regfunction(const nd::string &name, const nd::callable &af);
+  DYND_API void set_regfunction(const nd::string &name, const nd::callable &af);
 
 } // namespace func
 } // namespace dynd

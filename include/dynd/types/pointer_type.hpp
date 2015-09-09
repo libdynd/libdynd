@@ -20,7 +20,7 @@
 
 namespace dynd {
 
-struct pointer_type_arrmeta {
+struct DYND_API pointer_type_arrmeta {
   /**
    * A reference to the memory block which contains the data.
    */
@@ -31,7 +31,7 @@ struct pointer_type_arrmeta {
 
 namespace ndt {
 
-  class pointer_type : public base_expr_type {
+  class DYND_API pointer_type : public base_expr_type {
     type m_target_tp;
 
   public:
