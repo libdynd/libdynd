@@ -6,7 +6,6 @@
 #pragma once
 
 #include <string>
-#include <stdexcept>
 #include <vector>
 
 #include <dynd/irange.hpp>
@@ -23,7 +22,7 @@ namespace nd {
   class array;
 } // namespace nd
 
-class DYND_API dynd_exception : public std::exception {
+class DYND_API dynd_exception {
 protected:
   std::string m_message, m_what;
 
