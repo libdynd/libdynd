@@ -18,7 +18,8 @@ namespace nd {
      * A kernel for chaining two other kernels, using temporary buffers
      * dynamically allocated on the heap.
      */
-    struct DYND_API compose_kernel : base_kernel<compose_kernel, 1> {
+    // All methods are inlined, so this does not need to be declared DYND_API.
+    struct compose_kernel : base_kernel<compose_kernel, 1> {
       struct static_data {
         callable first;
         callable second;

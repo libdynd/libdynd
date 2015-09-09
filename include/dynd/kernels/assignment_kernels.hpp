@@ -3155,7 +3155,8 @@ namespace nd {
     }
   };
 
-  struct DYND_API unaligned_copy_ck : base_kernel<unaligned_copy_ck, 1> {
+  // All methods are inlined, so this can be public without declaring it DYND_API
+  struct unaligned_copy_ck : base_kernel<unaligned_copy_ck, 1> {
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size)

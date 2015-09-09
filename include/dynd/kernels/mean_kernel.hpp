@@ -13,7 +13,8 @@
 namespace dynd {
 namespace nd {
 
-  struct DYND_API mean_kernel : base_kernel<mean_kernel, 1> {
+  // All methods are inlined, so this does not need to be declared DYND_API.
+  struct mean_kernel : base_kernel<mean_kernel, 1> {
     std::intptr_t compound_div_offset;
     int64 count;
 
