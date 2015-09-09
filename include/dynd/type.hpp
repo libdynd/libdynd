@@ -90,8 +90,8 @@ namespace ndt {
 
   } // namespace dynd::ndt::detail
 
-  type make_pointer_type(const type &target_tp);
-  type make_fixed_dim(size_t dim_size, const type &element_tp);
+  DYND_API type make_pointer_type(const type &target_tp);
+  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 
   /**
    * This class represents a data type.

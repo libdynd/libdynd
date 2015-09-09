@@ -6,7 +6,6 @@
 #pragma once
 
 #include <string>
-#include <stdexcept>
 #include <vector>
 
 #include <dynd/irange.hpp>
@@ -28,7 +27,6 @@ protected:
   std::string m_message, m_what;
 
 public:
-  dynd_exception() noexcept {}
   dynd_exception(const char *exception_name, const std::string &msg)
       : m_message(msg), m_what(std::string() + exception_name + ": " + msg)
   {
