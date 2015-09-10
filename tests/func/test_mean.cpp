@@ -40,12 +40,12 @@ TEST(Mean, 2D)
 
 TEST(Plugin, Untitled)
 {
-  nd::callable f = nd::functional::apply([](int x, int y) { return x + y; });
-  // nd::callable f = nd::add::children[int32_type_id][int32_type_id];
+  // nd::callable f = nd::functional::apply([](int x, int y) { return x + y; });
+  nd::callable f = nd::add::children[int32_type_id][int32_type_id];
 
   std::cout << f(1, 2) << std::endl;
   std::cout << (f.get_single().func == NULL) << std::endl;
   std::cout << (f.get_single().ir == NULL) << std::endl;
-  std::cout << f.get_single().ir << std::endl;
+  std::cout << std::string(const_cast<char *>(f.get_single().ir)) << std::endl;
   std::exit(-1);
 }

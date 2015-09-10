@@ -147,7 +147,7 @@ namespace nd {
   struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix, SelfType> {                                     \
     typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;                                               \
                                                                                                                        \
-    static const volatile char *single_ir;                                                                             \
+    static __attribute__((used)) volatile char *single_ir;                                                             \
                                                                                                                        \
     /** Initializes just the ckernel_prefix function member. */                                                        \
     template <typename... A>                                                                                           \
@@ -218,7 +218,7 @@ namespace nd {
   BASE_KERNEL(kernel_request_host);
 
   template <typename SelfType>
-  const volatile char *base_kernel<SelfType>::single_ir;
+  volatile char *base_kernel<SelfType>::single_ir;
 
 #undef BASE_KERNEL
 

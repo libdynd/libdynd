@@ -19,17 +19,17 @@
 using namespace std;
 using namespace llvm;
 
-struct Hello : public llvm::FunctionPass {
+struct Late : public llvm::FunctionPass {
   static char ID;
   //  ofstream myfile;
 
-  Hello() : FunctionPass(ID)
+  Late() : FunctionPass(ID)
   {
   }
 
   const char *getPassName() const
   {
-    return "Helloxy";
+    return "Late";
   }
 
   /*
@@ -66,10 +66,12 @@ struct Hello : public llvm::FunctionPass {
 
   bool doInitialization(llvm::Module &M) override
   {
-    auto global_used = M.getNamedGlobal("llvm.compiler.used");
-    if (global_used) {
-      global_used->dump();
-    }
+    std::cout << "Late" << std::endl;
+
+    //  auto global_used = M.getNamedGlobal("llvm.used");
+    // if (global_used) {
+    // global_used->dump();
+    //}
 
     auto global_annos = M.getNamedGlobal("llvm.global.annotations");
     if (global_annos) {
@@ -89,24 +91,15 @@ struct Hello : public llvm::FunctionPass {
   }
 
   // _ZN4dynd2nd11base_kernelINS0_10functional17apply_callable_ckIZN20Plugin_Untitled_Test8TestBodyEvE3$_0iNS_13type_sequenceIJiiEEENS_16integer_sequenceImJLm0ELm1EEEENS6_IJEEENS8_ImJEEEEEJEE14single_wrapperEPNS_14ckernel_prefixEPcPKSG_
-  // _ZN4dynd2nd11base_kernelINS0_10functional17apply_callable_ckIP10test_classINS_7complexIdEEEvNS_13type_sequenceIJS6_S6_EEENS_16integer_sequenceImJLm0ELm1EEEENS9_IJEEENSB_ImJEEEEEJEE14single_wrapperEPNS_14ckernel_prefixEPcPKSJ_
 
   // linkonce_odr instead of internal
   bool runOnFunction(llvm::Function &F) override
   {
-    //    std::string s = "_ZN4dynd2nd11base_kernelINS0_10functional17apply_callable_ckIPFvRdiEvNS_13type_sequenceIJS4_"
-    //                  "iEEENS_16integer_sequenceImJLm0ELm1EEEENS7_IJEEENS9_ImJEEEEEJEE14single_wrapperEPNS_14ckernel_"
-    //                "prefixEPcPKSH_";
-    //  if (F.getName() == s) {
-    //  Module *M = F.getParent();
-    //    M->dump();
-    //}
-
     std::string tail = "::single_wrapper(dynd::ckernel_prefix*, char*, char* const*)";
 
     if (F.hasFnAttribute("ir")) {
       const auto &name = F.getName();
-      //      llvm::outs() << "F = " << name << "\n";
+      llvm::outs() << "F = " << name << "\n";
       //      F.dump();
 
       std::string var_name = name.drop_back(name.size() - name.rfind("14single_wrapper"));
@@ -114,10 +107,14 @@ struct Hello : public llvm::FunctionPass {
 
       Module *M = F.getParent();
 
+      //      for (auto &GV : M->globals()) {
+      //      llvm::outs() << GV.getName() << "\n";
+      //  }
+
       GlobalVariable *sym = M->getGlobalVariable(var_name, true);
-//      llvm::outs() << name << "\n";
+      //      llvm::outs() << name << "\n";
       if (sym != NULL) {
-        //  llvm::outs() << sym->getName() << "\n";
+        //        llvm::outs() << sym->getName() << "\n";
 
         std::string S;
         raw_string_ostream O(S);
@@ -141,11 +138,89 @@ struct Hello : public llvm::FunctionPass {
   }
 };
 
-char Hello::ID = 0;
+char Late::ID = 0;
 
 // EP_EarlyAsPossible
 // EP_OptimizerLast
 
+struct Early : public FunctionPass {
+  static char ID;
+
+  Early() : FunctionPass(ID)
+  {
+  }
+
+  const char *getPassName() const
+  {
+    return "Early";
+  }
+
+  bool doInitialization(llvm::Module &M) override
+  {
+    std::cout << "Early" << std::endl;
+
+    /*
+        auto global_used = M.getNamedGlobal("llvm.used");
+        if (global_used) {
+          global_used->dump();
+        }
+    */
+
+    for (auto &GV : M.globals()) {
+      llvm::outs() << GV.getName() << "\n";
+    }
+
+    return false;
+  }
+
+  bool runOnFunction(Function &F) override
+  {
+    return false;
+  }
+};
+
+char Early::ID = 0;
+
+struct Late2 : public FunctionPass {
+  static char ID;
+
+  Late2() : FunctionPass(ID)
+  {
+  }
+
+  const char *getPassName() const
+  {
+    return "Late2";
+  }
+
+  bool doInitialization(Module &M) override
+  {
+
+    //    if (M.getName() == "/home/irwin/git/libdynd/tests/func/test_mean.cpp") {
+    //    M.dump();
+    //  std::exit(-1);
+    //}
+    return false;
+  }
+
+  bool runOnFunction(Function &F) override
+  {
+    return false;
+  }
+};
+
+char Late2::ID = 0;
+
+static RegisterStandardPasses RegisterMyPass(PassManagerBuilder::EP_EarlyAsPossible,
+                                             [](const PassManagerBuilder &,
+                                                legacy::PassManagerBase &PM) { PM.add(new Early()); });
+
 static RegisterStandardPasses RegisterMyPass2(PassManagerBuilder::EP_OptimizerLast,
                                               [](const PassManagerBuilder &,
-                                                 legacy::PassManagerBase &PM) { PM.add(new Hello()); });
+                                                 legacy::PassManagerBase &PM) { PM.add(new Late()); });
+
+/*
+static RegisterStandardPasses RegisterMyPass3(PassManagerBuilder::EP_OptimizerLast,
+                                              [](const PassManagerBuilder &,
+                                                 legacy::PassManagerBase &PM) { PM.add(new Late2()); });
+*/
