@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 #include <dynd/irange.hpp>
 #include <dynd/string_encodings.hpp>
@@ -22,7 +23,7 @@ namespace nd {
   class array;
 } // namespace nd
 
-class DYND_API dynd_exception {
+class DYND_API dynd_exception : public std::exception {
 protected:
   std::string m_message, m_what;
 
