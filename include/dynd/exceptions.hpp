@@ -23,11 +23,14 @@ namespace nd {
   class array;
 } // namespace nd
 
-class DYND_API dynd_exception : public std::exception {
+// Avoid subclassing std::exception to not have
+// to export std::exception across dll boundaries.
+class DYND_API dynd_exception {
 protected:
   std::string m_message, m_what;
 
 public:
+  dynd_exception() {}
   dynd_exception(const char *exception_name, const std::string &msg)
       : m_message(msg), m_what(std::string() + exception_name + ": " + msg)
   {
