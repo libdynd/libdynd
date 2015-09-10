@@ -34,25 +34,17 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
               const nd::array *DYND_UNUSED(kwds),
               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
   {
-    try
-    {
-      assign_error_mode errmode =
-          *reinterpret_cast<assign_error_mode *>(static_data);
-      if (errmode == ectx->errmode) {
-        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      src_tp[0], src_arrmeta[0], kernreq, ectx);
-      } else {
-        eval::eval_context ectx_tmp(*ectx);
-        ectx_tmp.errmode = errmode;
-        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      src_tp[0], src_arrmeta[0], kernreq,
-                                      &ectx_tmp);
-      }
-    }
-    catch (const std::exception &e)
-    {
-      cout << "exception: " << e.what() << endl;
-      throw;
+    assign_error_mode errmode =
+      *reinterpret_cast<assign_error_mode *>(static_data);
+    if (errmode == ectx->errmode) {
+      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                    src_tp[0], src_arrmeta[0], kernreq, ectx);
+    } else {
+      eval::eval_context ectx_tmp(*ectx);
+      ectx_tmp.errmode = errmode;
+      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                    src_tp[0], src_arrmeta[0], kernreq,
+                                    &ectx_tmp);
     }
   }
 };
