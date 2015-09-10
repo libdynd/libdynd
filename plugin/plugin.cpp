@@ -1,46 +1,20 @@
-//===- PrintFunctionNames.cpp ---------------------------------------------===//
 //
-//                     The LLVM Compiler Infrastructure
+// Copyright (C) 2011-15 DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
 //
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-//
-//===----------------------------------------------------------------------===//
-//
-// Example clang plugin which simply prints the names of all the top-level decls
-// in the input file.
-//
-//===----------------------------------------------------------------------===//
-
-#include "clang/Frontend/FrontendPluginRegistry.h"
-#include "clang/AST/AST.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Sema/Sema.h"
-#include "llvm/Support/raw_ostream.h"
-#include <iostream>
-#include <clang/CodeGen/CodeGenAction.h>
 
 #include <iostream>
 #include <fstream>
 
-#include <clang/AST/CXXInheritance.h>
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Pass.h"
 #include "llvm/IR/LegacyPassManager.h"
-
-#include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <llvm/IR/Module.h>
-
 #include <llvm/IR/LLVMContext.h>
-
 #include <llvm/IR/ValueSymbolTable.h>
-#include <clang/CodeGen/ModuleBuilder.h>
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/IR/Constants.h"
-
-#include <cxxabi.h>
-#include <regex>
+#include <llvm/IR/Dominators.h>
 
 using namespace std;
 using namespace llvm;
@@ -55,7 +29,7 @@ struct Hello : public llvm::FunctionPass {
 
   const char *getPassName() const
   {
-    return "Hello";
+    return "Helloxy";
   }
 
   /*
@@ -67,9 +41,35 @@ struct Hello : public llvm::FunctionPass {
     }
   */
 
+  /*
+  define internal void
+  @"_ZN4dynd2nd11base_kernelINS0_10functional17apply_callable_ckIZN20Plugin_Untitled_Test8TestBodyEvE3$_0iNS_13type_sequenceIJiiEEENS_16integer_sequenceImJLm0ELm1EEEENS6_IJEEENS8_ImJEEEEEJEE14single_wrapperEPNS_14ckernel_prefixEPcPKSG_"(%"struct.dynd::ckernel_prefix"*
+  %rawself, i8* %dst, i8** %src) #7 align 2 {
+    %1 = alloca %"struct.dynd::ckernel_prefix"*, align 8
+    %2 = alloca i8*, align 8
+    %3 = alloca i8**, align 8
+    store %"struct.dynd::ckernel_prefix"* %rawself, %"struct.dynd::ckernel_prefix"** %1, align 8
+    store i8* %dst, i8** %2, align 8
+    store i8** %src, i8*** %3, align 8
+    %4 = load %"struct.dynd::ckernel_prefix"** %1, align 8
+    %5 = call %"struct.dynd::nd::functional::apply_callable_ck"*
+  @"_ZN4dynd2nd21kernel_prefix_wrapperINS_14ckernel_prefixENS0_10functional17apply_callable_ckIZN20Plugin_Untitled_Test8TestBodyEvE3$_0iNS_13type_sequenceIJiiEEENS_16integer_sequenceImJLm0ELm1EEEENS7_IJEEENS9_ImJEEEEEE8get_selfEPS2_"(%"struct.dynd::ckernel_prefix"*
+  %4)
+    %6 = load i8** %2, align 8
+    %7 = load i8*** %3, align 8
+    call void
+  @"_ZN4dynd2nd10functional17apply_callable_ckIZN20Plugin_Untitled_Test8TestBodyEvE3$_0iNS_13type_sequenceIJiiEEENS_16integer_sequenceImJLm0ELm1EEEENS5_IJEEENS7_ImJEEEE6singleEPcPKSC_"(%"struct.dynd::nd::functional::apply_callable_ck"*
+  %5, i8* %6, i8** %7)
+    ret void
+  }
+  */
+
   bool doInitialization(llvm::Module &M) override
   {
-    using namespace llvm;
+    auto global_used = M.getNamedGlobal("llvm.compiler.used");
+    if (global_used) {
+      global_used->dump();
+    }
 
     auto global_annos = M.getNamedGlobal("llvm.global.annotations");
     if (global_annos) {
@@ -77,7 +77,7 @@ struct Hello : public llvm::FunctionPass {
       for (int i = 0; i < a->getNumOperands(); i++) {
         auto e = cast<ConstantStruct>(a->getOperand(i));
 
-        if (auto fn = dyn_cast<Function>(e->getOperand(0)->getOperand(0))) {
+        if (Function *fn = dyn_cast<Function>(e->getOperand(0)->getOperand(0))) {
           auto anno = cast<ConstantDataArray>(cast<GlobalVariable>(e->getOperand(1)->getOperand(0))->getOperand(0))
                           ->getAsCString();
           fn->addFnAttr(anno); // <-- add function annotation here
@@ -85,52 +85,47 @@ struct Hello : public llvm::FunctionPass {
       }
     }
 
-    //    myfile.open("src/dynd/kernels/example.cpp", std::ios_base::app);
-
     return true;
   }
 
+  // _ZN4dynd2nd11base_kernelINS0_10functional17apply_callable_ckIZN20Plugin_Untitled_Test8TestBodyEvE3$_0iNS_13type_sequenceIJiiEEENS_16integer_sequenceImJLm0ELm1EEEENS6_IJEEENS8_ImJEEEEEJEE14single_wrapperEPNS_14ckernel_prefixEPcPKSG_
+  // _ZN4dynd2nd11base_kernelINS0_10functional17apply_callable_ckIP10test_classINS_7complexIdEEEvNS_13type_sequenceIJS6_S6_EEENS_16integer_sequenceImJLm0ELm1EEEENS9_IJEEENSB_ImJEEEEEJEE14single_wrapperEPNS_14ckernel_prefixEPcPKSJ_
+
+  // linkonce_odr instead of internal
   bool runOnFunction(llvm::Function &F) override
   {
+    //    std::string s = "_ZN4dynd2nd11base_kernelINS0_10functional17apply_callable_ckIPFvRdiEvNS_13type_sequenceIJS4_"
+    //                  "iEEENS_16integer_sequenceImJLm0ELm1EEEENS7_IJEEENS9_ImJEEEEEJEE14single_wrapperEPNS_14ckernel_"
+    //                "prefixEPcPKSH_";
+    //  if (F.getName() == s) {
+    //  Module *M = F.getParent();
+    //    M->dump();
+    //}
+
     std::string tail = "::single_wrapper(dynd::ckernel_prefix*, char*, char* const*)";
 
     if (F.hasFnAttribute("ir")) {
       const auto &name = F.getName();
+      //      llvm::outs() << "F = " << name << "\n";
+      //      F.dump();
+
       std::string var_name = name.drop_back(name.size() - name.rfind("14single_wrapper"));
       var_name = var_name + "9single_irE";
 
-      llvm::Module *M = F.getParent();
-      //      auto *var = M->getNamedAlias(var_name);
-      //    if (var != NULL) {
-      //    std::exit(-1);
-      //}
+      Module *M = F.getParent();
 
-      //      std::cout << var->hasInitializer() << std::endl;
-      //      var->setInitializer(llvm::ConstantInt::get(llvm::Type::getInt32Ty(M->getContext()), 10));
-
-      //      new llvm::GlobalVariable(M, PointerTy_0, true, GlobalValue::CommonLinkage, 0, var_name);
-
-      //      M->dump();
-      //      for (auto &g : M->getGlobalList()) {
-      //      llvm::outs() << g.getName() << "\n";
-      //    if (g.getName().rfind("single_ir") != llvm::StringRef::npos) {
-      //  llvm::outs() << g.getName() << "\n";
-      //  }
-
-      //        llvm::outs() << g.getName() << "\n";
-      //  g.dump();
-      //      }
-
-      llvm::GlobalVariable *sym = M->getGlobalVariable(var_name);
+      GlobalVariable *sym = M->getGlobalVariable(var_name, true);
+//      llvm::outs() << name << "\n";
       if (sym != NULL) {
+        //  llvm::outs() << sym->getName() << "\n";
 
-        std::string out;
-        raw_string_ostream o(out);
-        F.print(o);
+        std::string S;
+        raw_string_ostream O(S);
+        F.print(O);
 
-        auto *ir = ConstantDataArray::getString(M->getContext(), out);
+        auto *ir = ConstantDataArray::getString(M->getContext(), O.str());
         GlobalVariable *var =
-            new GlobalVariable(*M, ir->getType(), true, GlobalValue::PrivateLinkage, ir, "SourceFile", sym);
+            new GlobalVariable(*M, ir->getType(), true, GlobalValue::InternalLinkage, ir, "SourceFile");
 
         ConstantInt *const_int64_6 = ConstantInt::get(M->getContext(), APInt(64, StringRef("0"), 10));
 
@@ -139,26 +134,8 @@ struct Hello : public llvm::FunctionPass {
         Constant *expr = ConstantExpr::getBitCast(constArray, PointerType::getUnqual(Type::getInt8Ty(M->getContext())));
 
         sym->setInitializer(expr);
-
-        //        M->dump();
-        //        std::exit(-1);
-
-        //        GlobalVariable *sourceFileStr = new GlobalVariable(
-        //          *module, stringConstant->getType(), true, llvm::GlobalValue::InternalLinkage, stringConstant,
-        // "SourceFile");
-
-        //        sym->setInitializer(llvm::ConstantInt::get(llvm::Type::getInt32Ty(M->getContext()), 10));
       }
-      // else {
-      //        llvm::outs() << var_name << "\n";
-      //      std::exit(-1);
-      //  }
-      //      myfile << out << "::ir = 3;" << endl;
-
-      //      free(out);
     }
-
-    //    auto global_annos = M.getNamedGlobal("llvm.global.annotations");
 
     return true;
   }
@@ -166,11 +143,9 @@ struct Hello : public llvm::FunctionPass {
 
 char Hello::ID = 0;
 
-static void registerMyPass(const llvm::PassManagerBuilder &, llvm::legacy::PassManagerBase &PM)
-{
-  PM.add(new Hello());
-}
+// EP_EarlyAsPossible
+// EP_OptimizerLast
 
-// static llvm::RegisterPass<Hello> Y("print-fns", "Hello World Pass", true, true);
-
-static llvm::RegisterStandardPasses RegisterMyPass(llvm::PassManagerBuilder::EP_EarlyAsPossible, registerMyPass);
+static RegisterStandardPasses RegisterMyPass2(PassManagerBuilder::EP_OptimizerLast,
+                                              [](const PassManagerBuilder &,
+                                                 legacy::PassManagerBase &PM) { PM.add(new Hello()); });

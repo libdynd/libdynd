@@ -13,7 +13,8 @@
 
 #include <dynd/func/mean.hpp>
 
-#include <dynd/kernels/arithmetic.hpp>
+#include <dynd/func/apply.hpp>
+#include <dynd/func/arithmetic.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -39,7 +40,12 @@ TEST(Mean, 2D)
 
 TEST(Plugin, Untitled)
 {
-  std::cout << (nd::add_kernel<int32_type_id, int32_type_id>::single_wrapper == NULL) << std::endl;
-  std::cout << nd::add_kernel<int32_type_id, int32_type_id>::single_ir << std::endl;
+  nd::callable f = nd::functional::apply([](int x, int y) { return x + y; });
+  // nd::callable f = nd::add::children[int32_type_id][int32_type_id];
+
+  std::cout << f(1, 2) << std::endl;
+  std::cout << (f.get_single().func == NULL) << std::endl;
+  std::cout << (f.get_single().ir == NULL) << std::endl;
+  std::cout << f.get_single().ir << std::endl;
   std::exit(-1);
 }

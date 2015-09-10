@@ -143,6 +143,8 @@ else()
     set(LINK_LIBS ${LINK_LIBS} libdynd)
 endif()
 
+set_source_files_properties(${tests_SRC} PROPERTIES OBJECT_DEPENDS plugin)
+
 if(WIN32)
     target_link_libraries(test_libdynd
         ${LINK_LIBS}
@@ -157,8 +159,8 @@ elseif(APPLE)
    #     )
 else()
     set_target_properties(test_libdynd PROPERTIES
-        COMPILE_FLAGS "-pthread -Xclang -load -Xclang /home/irwin/git/libdynd/build/plugin/libplugin.so")
     #-Wno-unnamed-type-template-args
+        COMPILE_FLAGS "-pthread -Xclang -load -Xclang /home/irwin/git/libdynd/build/plugin/libplugin.so")
 
     target_link_libraries(test_libdynd
         ${LINK_LIBS}

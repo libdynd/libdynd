@@ -26,10 +26,8 @@ inline T floordiv(T a, T b)
 /**
  * Matches netcdf date metadata like "hours since 2001-1-1T03:00".
  */
-static bool parse_datetime_since(const char *begin, const char *end,
-                                 int64_t &out_epoch_datetime,
-                                 int64_t &out_unit_factor,
-                                 int64_t &out_unit_divisor)
+static bool parse_datetime_since(const char *begin, const char *end, int64_t &out_epoch_datetime,
+                                 int64_t &out_unit_factor, int64_t &out_unit_divisor)
 {
   if (parse::parse_token(begin, end, "hours")) {
     out_unit_factor = DYND_TICKS_PER_HOUR;
@@ -50,10 +48,8 @@ static bool parse_datetime_since(const char *begin, const char *end,
     return false;
   }
   // The tokens supported by netcdf, as from the udunits libarary
-  if (!parse::parse_token(begin, end, "since") &&
-      !parse::parse_token(begin, end, "after") &&
-      !parse::parse_token(begin, end, "from") &&
-      !parse::parse_token(begin, end, "ref") &&
+  if (!parse::parse_token(begin, end, "since") && !parse::parse_token(begin, end, "after") &&
+      !parse::parse_token(begin, end, "from") && !parse::parse_token(begin, end, "ref") &&
       !parse::parse_token(begin, end, '@')) {
     return false;
   }
@@ -62,8 +58,7 @@ static bool parse_datetime_since(const char *begin, const char *end,
   }
   datetime_struct epoch;
   const char *tz_begin = NULL, *tz_end = NULL;
-  if (!parse::parse_datetime(begin, end, date_parse_no_ambig, 0, epoch,
-                             tz_begin, tz_end)) {
+  if (!parse::parse_datetime(begin, end, date_parse_no_ambig, 0, epoch, tz_begin, tz_end)) {
     int year;
     if (parse::parse_date(begin, end, epoch.ymd, date_parse_no_ambig, 0)) {
       epoch.hmst.set_to_zero();
@@ -77,8 +72,7 @@ static bool parse_datetime_since(const char *begin, const char *end,
     }
   }
   // TODO: Apply TZ to make the epoch UTC
-  if (tz_begin != tz_end &&
-      !parse::compare_range_to_literal(tz_begin, tz_end, "UTC") &&
+  if (tz_begin != tz_end && !parse::compare_range_to_literal(tz_begin, tz_end, "UTC") &&
       !parse::compare_range_to_literal(tz_begin, tz_end, "GMT")) {
     return false;
   }
@@ -89,30 +83,24 @@ static bool parse_datetime_since(const char *begin, const char *end,
 
 namespace {
 template <class Tsrc, class Tdst>
-struct int_multiply_and_offset_ck
-    : nd::base_kernel<int_multiply_and_offset_ck<Tsrc, Tdst>, 1> {
+struct int_multiply_and_offset_ck : nd::base_kernel<int_multiply_and_offset_ck<Tsrc, Tdst>, 1> {
   pair<Tdst, Tdst> m_factor_offset;
 
   void single(char *dst, char *const *src)
   {
     Tsrc value = *reinterpret_cast<Tsrc *>(src[0]);
-    *reinterpret_cast<Tdst *>(dst) =
-        value != std::numeric_limits<Tsrc>::min()
-            ? m_factor_offset.first * static_cast<Tdst>(value) +
-                  m_factor_offset.second
-            : std::numeric_limits<Tdst>::min();
+    *reinterpret_cast<Tdst *>(dst) = value != std::numeric_limits<Tsrc>::min()
+                                         ? m_factor_offset.first * static_cast<Tdst>(value) + m_factor_offset.second
+                                         : std::numeric_limits<Tdst>::min();
   }
 };
 
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_multiply_and_offset_callable(
-    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *DYND_UNUSED(src_tp),
-    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-    const nd::array *DYND_UNUSED(kwds),
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef int_multiply_and_offset_ck<Tsrc, Tdst> self_type;
@@ -122,17 +110,14 @@ static intptr_t instantiate_int_multiply_and_offset_callable(
 }
 
 template <class Tsrc, class Tdst>
-nd::callable make_int_multiply_and_offset_callable(Tdst factor, Tdst offset,
-                                                   const ndt::type &func_proto)
+nd::callable make_int_multiply_and_offset_callable(Tdst factor, Tdst offset, const ndt::type &func_proto)
 {
-  return nd::callable(
-      func_proto, make_pair(factor, offset), 0, NULL, NULL,
-      &instantiate_int_multiply_and_offset_callable<Tsrc, Tdst>);
+  return nd::callable(func_proto, single_t(), make_pair(factor, offset), 0, NULL, NULL,
+                      &instantiate_int_multiply_and_offset_callable<Tsrc, Tdst>);
 }
 
 template <class Tsrc, class Tdst>
-struct int_offset_and_divide_ck
-    : nd::base_kernel<int_offset_and_divide_ck<Tsrc, Tdst>, 1> {
+struct int_offset_and_divide_ck : nd::base_kernel<int_offset_and_divide_ck<Tsrc, Tdst>, 1> {
   pair<Tdst, Tdst> m_offset_divisor;
 
   void single(char *dst, char *const *src)
@@ -149,13 +134,10 @@ struct int_offset_and_divide_ck
 
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_offset_and_divide_callable(
-    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *DYND_UNUSED(src_tp),
-    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-    const nd::array *DYND_UNUSED(kwds),
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef int_offset_and_divide_ck<Tsrc, Tdst> self_type;
@@ -165,27 +147,22 @@ static intptr_t instantiate_int_offset_and_divide_callable(
 }
 
 template <class Tsrc, class Tdst>
-nd::callable make_int_offset_and_divide_callable(Tdst offset, Tdst divisor,
-                                                 const ndt::type &func_proto)
+nd::callable make_int_offset_and_divide_callable(Tdst offset, Tdst divisor, const ndt::type &func_proto)
 {
-  return nd::callable(func_proto, make_pair(offset, divisor), 0, NULL, NULL,
+  return nd::callable(func_proto, single_t(), make_pair(offset, divisor), 0, NULL, NULL,
                       &instantiate_int_offset_and_divide_callable<Tsrc, Tdst>);
 }
 
 } // anonymous namespace
 
-bool dynd::make_datetime_adapter_callable(const ndt::type &value_tp,
-                                          const ndt::type &operand_tp,
-                                          const nd::string &op,
-                                          nd::callable &out_forward,
-                                          nd::callable &out_reverse)
+bool dynd::make_datetime_adapter_callable(const ndt::type &value_tp, const ndt::type &operand_tp, const nd::string &op,
+                                          nd::callable &out_forward, nd::callable &out_reverse)
 {
   int64_t epoch_datetime, unit_factor = 1, unit_divisor = 1;
   if (value_tp.get_type_id() != datetime_type_id) {
     return false;
   }
-  if (parse_datetime_since(op.begin(), op.end(), epoch_datetime, unit_factor,
-                           unit_divisor)) {
+  if (parse_datetime_since(op.begin(), op.end(), epoch_datetime, unit_factor, unit_divisor)) {
     switch (operand_tp.get_type_id()) {
     case int64_type_id:
       if (unit_divisor > 1) {
@@ -199,11 +176,9 @@ bool dynd::make_datetime_adapter_callable(const ndt::type &value_tp,
             ndt::callable_type::make(ndt::type::make<int64_t>(), value_tp));
       } else {
         out_forward = make_int_multiply_and_offset_callable<int64_t, int64_t>(
-            unit_factor, epoch_datetime,
-            ndt::callable_type::make(value_tp, ndt::type::make<int64_t>()));
+            unit_factor, epoch_datetime, ndt::callable_type::make(value_tp, ndt::type::make<int64_t>()));
         out_reverse = make_int_offset_and_divide_callable<int64_t, int64_t>(
-            -epoch_datetime, unit_factor,
-            ndt::callable_type::make(ndt::type::make<int64_t>(), value_tp));
+            -epoch_datetime, unit_factor, ndt::callable_type::make(ndt::type::make<int64_t>(), value_tp));
       }
       return true;
     default:

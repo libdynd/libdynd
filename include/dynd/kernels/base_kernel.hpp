@@ -147,7 +147,7 @@ namespace nd {
   struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix, SelfType> {                                     \
     typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;                                               \
                                                                                                                        \
-    static char *single_ir;                                                                                            \
+    static const volatile char *single_ir;                                                                             \
                                                                                                                        \
     /** Initializes just the ckernel_prefix function member. */                                                        \
     template <typename... A>                                                                                           \
@@ -169,8 +169,8 @@ namespace nd {
       std::cout << (single_ir == NULL) << std::endl;                                                                   \
       return self;                                                                                                     \
     }                                                                                                                  \
-    __attribute__((annotate("ir"))) __VA_ARGS__ static void single_wrapper(ckernel_prefix *rawself, char *dst,         \
-                                                                           char *const *src)                           \
+    __attribute__((annotate("ir"), used)) __VA_ARGS__ static void single_wrapper(ckernel_prefix *rawself, char *dst,   \
+                                                                                 char *const *src)                     \
     {                                                                                                                  \
       return SelfType::get_self(rawself)->single(dst, src);                                                            \
     }                                                                                                                  \
@@ -218,7 +218,7 @@ namespace nd {
   BASE_KERNEL(kernel_request_host);
 
   template <typename SelfType>
-  char *base_kernel<SelfType>::single_ir;
+  const volatile char *base_kernel<SelfType>::single_ir;
 
 #undef BASE_KERNEL
 

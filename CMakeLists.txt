@@ -590,13 +590,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 
-#add_dependencies(libdynd_OBJ )
 add_dependencies(libdynd_OBJ plugin)
-
-#-load ../../Debug+Asserts/lib/libPrintFunctionNames.so -plugin print-fns
-
-# -cc1 -load /home/irwin/git/libdynd/build/plugin/libplugin.so
-# -Xclang -plugin -Xclang print-fns
+set_source_files_properties(${libdynd_SRC} PROPERTIES OBJECT_DEPENDS plugin)
 set_target_properties(libdynd_OBJ PROPERTIES
   COMPILE_FLAGS "-Xclang -load -Xclang /home/irwin/git/libdynd/build/plugin/libplugin.so")
 
