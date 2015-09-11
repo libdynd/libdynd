@@ -94,14 +94,14 @@ endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # -WX: Treat warnings as errors
     # -bigobj: Allow lots of symbols (assignment_kernels.cpp and assignment_kernels.cu need this flag)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503 -DDYND_EXPORT")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503")
 
     if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 18)
         message(FATAL_ERROR "Only MSVC 2013 (Version 18.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
     endif ()
 else()
     if(WIN32)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers -DDYND_EXPORT")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Wno-ignored-attributes -Werror")
     endif()
@@ -593,6 +593,11 @@ endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
+set_property(
+    DIRECTORY ${CMAKE_SOURCE_DIR}
+    PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
+)
+
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 
 if(DYND_LLVM)
@@ -605,11 +610,6 @@ if(DYND_LLVM)
 endif()
 
 if (DYND_SHARED_LIB)
-    set_property(
-        TARGET libdynd_OBJ
-        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
-        )
-
     if (DYND_CUDA)
         cuda_add_library(libdynd SHARED ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
     else()
@@ -619,10 +619,6 @@ if (DYND_SHARED_LIB)
         PROPERTIES
         OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
-        )
-    set_property(
-        TARGET libdynd
-        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
         )
 else()
     if (DYND_CUDA)
