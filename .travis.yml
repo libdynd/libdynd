@@ -23,12 +23,12 @@ matrix:
     - export CC="gcc-4.8"
     - export CXX="g++-4.8"
     script:
-      - make || exit 1
+      - make -j5 || exit 1
       - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
-      - make || exit 1
+      - make -j5 || exit 1
       - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
     env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
@@ -99,7 +99,7 @@ before_script:
 - pushd build
 - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=ON ..
 script:
-- make || exit 1
+- make -j5 || exit 1
 - ./tests/test_libdynd
 notifications:
   email: false
