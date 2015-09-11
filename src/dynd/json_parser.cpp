@@ -515,6 +515,9 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta,
     catch (const std::exception &e) {
       throw json_parse_error(rbegin, e.what(), tp);
     }
+    catch (const dynd::dynd_exception &e) {
+      throw json_parse_error(rbegin, e.what(), tp);
+    }
   } else {
     throw json_parse_error(rbegin, "expected a number", tp);
   }
@@ -554,6 +557,9 @@ static void parse_string_json(const ndt::type &tp, const char *arrmeta,
       }
     }
     catch (const std::exception &e) {
+      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+    }
+    catch (const dynd::dynd_exception &e) {
       throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
     }
   } else {
@@ -603,6 +609,9 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta,
     catch (const std::exception &e) {
       throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
     }
+    catch (const dynd::dynd_exception &e) {
+      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+    }
   } else {
     throw json_parse_error(begin, "expected a string", tp);
   }
@@ -640,6 +649,9 @@ static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta),
       *reinterpret_cast<ndt::type *>(out_data) = ndt::type(strbegin, strend);
     }
     catch (const std::exception &e) {
+      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+    }
+    catch (const dynd::dynd_exception &e) {
       throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
     }
   } else {
@@ -696,6 +708,9 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta,
           return;
         }
         catch (const exception &e) {
+          throw json_parse_error(saved_begin, e.what(), tp);
+        }
+        catch (const dynd::dynd_exception &e) {
           throw json_parse_error(saved_begin, e.what(), tp);
         }
       } else if (value_tp.get_kind() == bool_kind) {

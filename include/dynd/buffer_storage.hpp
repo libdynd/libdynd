@@ -56,7 +56,7 @@ class DYND_API buffer_storage {
           m_arrmeta = new char[metasize];
           m_type.extended()->arrmeta_default_construct(m_arrmeta, true);
         }
-        catch (const std::exception &) {
+        catch (...) {
           delete[] m_storage;
           delete[] m_arrmeta;
           throw;

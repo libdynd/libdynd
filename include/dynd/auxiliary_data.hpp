@@ -105,7 +105,7 @@ namespace detail {
         const auxiliary_data_holder<T> *adh = reinterpret_cast<const auxiliary_data_holder<T> *>(auxdata);
         try {
             return reinterpret_cast<AuxDataBase *>(new auxiliary_data_holder<T>(*adh));
-        } catch(const std::exception&) {
+        } catch(...) {
             return 0;
         }
     }
