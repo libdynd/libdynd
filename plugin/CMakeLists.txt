@@ -4,22 +4,21 @@
 #
 
 cmake_minimum_required(VERSION 2.8.11)
-project(plugin)
+project(libdynd_plugin)
 
 find_package(LLVM REQUIRED CONFIG)
 
-
 add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
-link_directories(${LLVM_INSTALL_PREFIX}/lib /usr/lib/llvm-3.6/lib)
 
 add_library(plugin SHARED
-    plugin.cpp
+    dynd.cpp
 )
 
-  target_link_libraries(plugin 
-    clangAST
-    clangBasic
-    clangFrontend
-    LLVMSupport
-    )
+#    set_target_properties(libdynd_plugin
+#        PROPERTIES
+##        OUTPUT_NAME "dynd"
+  #      PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
+  #      )
+
+#set_target_properties(libdynd_plugin PROPERTIES OUTPUT_NAME "dynd.so")

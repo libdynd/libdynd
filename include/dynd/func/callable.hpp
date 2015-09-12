@@ -94,11 +94,9 @@ namespace nd {
     void fill_missing_values(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
                              const uintptr_t *data_offsets, std::vector<nd::array> &DYND_UNUSED(kwds_as_vector),
                              const std::vector<intptr_t> &missing);
->>>>>>> Commit of progress so far
 
     DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t npos);
 
-<<<<<<< HEAD
     DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i,
                             const ndt::type &actual_tp,
                             const char *actual_arrmeta,
@@ -113,17 +111,6 @@ namespace nd {
                                      const std::vector<intptr_t> &available,
                                      const std::vector<intptr_t> &missing,
                                      std::map<std::string, ndt::type> &tp_vars);
-=======
-    void check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp, const char *actual_arrmeta,
-                   std::map<std::string, ndt::type> &tp_vars);
-
-    void check_nkwd(const ndt::callable_type *af_tp, const std::vector<intptr_t> &available,
-                    const std::vector<intptr_t> &missing);
-
-    void validate_kwd_types(const ndt::callable_type *af_tp, std::vector<ndt::type> &kwd_tp,
-                            const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing,
-                            std::map<std::string, ndt::type> &tp_vars);
->>>>>>> Commit of progress so far
 
     inline char *data_of(array &value)
     {
@@ -604,6 +591,12 @@ namespace nd {
     DYND_GET(static_data_free, callable_static_data_free_t, NULL);
 
     template <typename KernelType>
+    single_t get_single()
+    {
+      return single_t(&KernelType::single_wrapper, KernelType::single_ir);
+    }
+
+    template <typename KernelType>
     typename std::enable_if<std::is_same<decltype(&KernelType::instantiate), callable_instantiate_t>::value,
                             callable_instantiate_t>::type
     get_instantiate()
@@ -942,10 +935,9 @@ namespace nd {
         ndt::type::has_equivalent<KernelType>::value &&detail::has_data_size<KernelType>::value, callable>::type
     make()
     {
-      return callable(ndt::type::equivalent<KernelType>::make(),
-                      single_t(&KernelType::single_wrapper, KernelType::single_ir), KernelType::data_size,
-                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                      detail::get_instantiate<KernelType>());
+      return callable(ndt::type::equivalent<KernelType>::make(), detail::get_single<KernelType>(),
+                      KernelType::data_size, detail::get_data_init<KernelType>(),
+                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -953,10 +945,10 @@ namespace nd {
         ndt::type::has_equivalent<KernelType>::value &&detail::has_data_size<KernelType>::value, callable>::type
     make(StaticDataType &&static_data)
     {
-      return callable(
-          ndt::type::equivalent<KernelType>::make(), single_t(&KernelType::single_wrapper, KernelType::single_ir),
-          std::forward<StaticDataType>(static_data), KernelType::data_size, detail::get_data_init<KernelType>(),
-          detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
+      return callable(ndt::type::equivalent<KernelType>::make(), detail::get_single<KernelType>(),
+                      std::forward<StaticDataType>(static_data), KernelType::data_size,
+                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
+                      detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>
@@ -964,8 +956,7 @@ namespace nd {
         ndt::type::has_equivalent<KernelType>::value && !detail::has_data_size<KernelType>::value, callable>::type
     make(std::size_t data_size)
     {
-      return callable(ndt::type::equivalent<KernelType>::make(),
-                      single_t(&KernelType::single_wrapper, KernelType::single_ir), data_size,
+      return callable(ndt::type::equivalent<KernelType>::make(), detail::get_single<KernelType>(), data_size,
                       detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
                       detail::get_instantiate<KernelType>());
     }
@@ -975,8 +966,7 @@ namespace nd {
         ndt::type::has_equivalent<KernelType>::value && !detail::has_data_size<KernelType>::value, callable>::type
     make(StaticDataType &&static_data, std::size_t data_size)
     {
-      return callable(ndt::type::equivalent<KernelType>::make(),
-                      single_t(&KernelType::single_wrapper, KernelType::single_ir),
+      return callable(ndt::type::equivalent<KernelType>::make(), detail::get_single<KernelType>(),
                       std::forward<StaticDataType>(static_data), data_size, detail::get_data_init<KernelType>(),
                       detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
@@ -986,7 +976,7 @@ namespace nd {
         !ndt::type::has_equivalent<KernelType>::value && detail::has_data_size<KernelType>::value, callable>::type
     make(const ndt::type &self_tp)
     {
-      return callable(self_tp, single_t(&KernelType::single_wrapper, KernelType::single_ir), KernelType::data_size,
+      return callable(self_tp, detail::get_single<KernelType>(), KernelType::data_size,
                       detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
                       detail::get_instantiate<KernelType>());
     }
@@ -996,10 +986,9 @@ namespace nd {
         !ndt::type::has_equivalent<KernelType>::value && detail::has_data_size<KernelType>::value, callable>::type
     make(const ndt::type &self_tp, StaticDataType &&static_data)
     {
-      return callable(self_tp, single_t(&KernelType::single_wrapper, KernelType::single_ir),
-                      std::forward<StaticDataType>(static_data), KernelType::data_size,
-                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                      detail::get_instantiate<KernelType>());
+      return callable(self_tp, detail::get_single<KernelType>(), std::forward<StaticDataType>(static_data),
+                      KernelType::data_size, detail::get_data_init<KernelType>(),
+                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>
@@ -1007,9 +996,8 @@ namespace nd {
         !ndt::type::has_equivalent<KernelType>::value && !detail::has_data_size<KernelType>::value, callable>::type
     make(const ndt::type &self_tp, std::size_t data_size)
     {
-      return callable(self_tp, single_t(&KernelType::single_wrapper, KernelType::single_ir), data_size,
-                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                      detail::get_instantiate<KernelType>());
+      return callable(self_tp, detail::get_single<KernelType>(), data_size, detail::get_data_init<KernelType>(),
+                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -1017,9 +1005,9 @@ namespace nd {
         !ndt::type::has_equivalent<KernelType>::value && !detail::has_data_size<KernelType>::value, callable>::type
     make(const ndt::type &self_tp, StaticDataType &&static_data, std::size_t data_size)
     {
-      return callable(self_tp, single_t(&KernelType::single_wrapper, KernelType::single_ir),
-                      std::forward<StaticDataType>(static_data), data_size, detail::get_data_init<KernelType>(),
-                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
+      return callable(self_tp, detail::get_single<KernelType>(), std::forward<StaticDataType>(static_data), data_size,
+                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
+                      detail::get_instantiate<KernelType>());
     }
 
     template <template <int> class CKT, typename T>
@@ -1161,11 +1149,7 @@ nd::callable make_callable_from_assignment(const ndt::type &dst_tp, const ndt::t
  * \param tp  The type of the source.
  * \param propname  The name of the property.
  */
-<<<<<<< HEAD
 DYND_API nd::callable make_callable_from_property(const ndt::type &tp,
                                                   const std::string &propname);
-=======
-nd::callable make_callable_from_property(const ndt::type &tp, const std::string &propname);
->>>>>>> Commit of progress so far
 
 } // namespace dynd

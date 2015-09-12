@@ -27,9 +27,9 @@ namespace nd {
    */
   template <typename T>
   struct base_virtual_kernel {
-    static char *single_ir;
+    static const char *single_ir;
 
-    static void single_wrapper(ckernel_prefix *, char *dst, char *const *src)
+    static void single_wrapper(ckernel_prefix *DYND_UNUSED(self), char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
     {
     }
 
@@ -43,7 +43,7 @@ namespace nd {
   };
 
   template <typename SelfType>
-  char *base_virtual_kernel<SelfType>::single_ir = NULL;
+  const char *base_virtual_kernel<SelfType>::single_ir = NULL;
 
 } // namespace dynd::nd
 } // namespace dynd

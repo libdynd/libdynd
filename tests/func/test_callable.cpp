@@ -26,13 +26,10 @@ using namespace dynd;
 
 TEST(Callable, SingleStridedConstructor)
 {
-  nd::callable f(
-      ndt::type("(int32) -> int32"),
-      [](ckernel_prefix *DYND_UNUSED(self), char * dst, char * const * src) {
-        *reinterpret_cast<int32 *>(dst) =
-            *reinterpret_cast<int32 *>(src[0]) + 5;
-      },
-      0);
+  nd::callable f(ndt::type("(int32) -> int32"),
+                 [](ckernel_prefix *DYND_UNUSED(self), char * dst,
+                    char * const * src) { *reinterpret_cast<int32 *>(dst) = *reinterpret_cast<int32 *>(src[0]) + 5; },
+                 0);
 
   EXPECT_EQ(8, f(3));
 }
@@ -40,9 +37,8 @@ TEST(Callable, SingleStridedConstructor)
 TEST(Callable, Assignment)
 {
   // Create an callable for converting string to int
-  nd::callable af = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
-      assign_error_default);
+  nd::callable af =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
@@ -52,33 +48,30 @@ TEST(Callable, Assignment)
 
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
-  af.get()->instantiate(
-      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
-      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
-      src_arrmeta, kernel_request_single, &eval::default_eval_context, 0, NULL,
-      std::map<std::string, ndt::type>());
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context, 0, NULL,
+                        std::map<std::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
   const char *str_in_ptr = str_in;
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  usngo(ckb.get(), reinterpret_cast<char *>(&int_out),
-        const_cast<char **>(&str_in_ptr));
+  usngo(ckb.get(), reinterpret_cast<char *>(&int_out), const_cast<char **>(&str_in_ptr));
   EXPECT_EQ(3251, int_out);
 
   // Instantiate a strided ckernel
   ckb.reset();
-  af.get()->instantiate(
-      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
-      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
-      src_arrmeta, kernel_request_strided, &eval::default_eval_context, 0, NULL,
-      std::map<std::string, ndt::type>());
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        kernel_request_strided, &eval::default_eval_context, 0, NULL,
+                        std::map<std::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   const char *strs_in_ptr = strs_in[0];
   expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
   intptr_t strs_in_stride = sizeof(strs_in[0]);
-  ustro(ckb.get(), reinterpret_cast<char *>(&ints_out), sizeof(int),
-        const_cast<char **>(&strs_in_ptr), &strs_in_stride, 3);
+  ustro(ckb.get(), reinterpret_cast<char *>(&ints_out), sizeof(int), const_cast<char **>(&strs_in_ptr), &strs_in_stride,
+        3);
   EXPECT_EQ(123, ints_out[0]);
   EXPECT_EQ(4567, ints_out[1]);
   EXPECT_EQ(891029, ints_out[2]);
@@ -100,8 +93,7 @@ TEST(Callable, Construction)
   nd::callable af2 = nd::functional::apply([](int x, int y) { return x - y; });
   EXPECT_EQ(-4, af2(3, 7).as<int>());
 
-  nd::callable af3 =
-      nd::functional::apply([](int x, int y) { return x - y; }, "y");
+  nd::callable af3 = nd::functional::apply([](int x, int y) { return x - y; }, "y");
   EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
 }
 
@@ -147,23 +139,16 @@ TEST(Callable, DynamicCall)
   nd::array values[3] = {7, 2.5, 5};
   const char *names[3] = {"x", "y", "z"};
 
-  af = nd::functional::apply([](int x, double y,
-                                int z) { return 2 * x - y + 3 * z; });
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });
   EXPECT_EQ(26.5, af(3, values).as<double>());
 
-  af = nd::functional::apply([](int x, double y,
-                                int z) { return 2 * x - y + 3 * z; },
-                             "z");
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
   EXPECT_EQ(26.5, af(2, values, kwds(1, names + 2, values + 2)).as<double>());
 
-  af = nd::functional::apply([](int x, double y,
-                                int z) { return 2 * x - y + 3 * z; },
-                             "y", "z");
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
   EXPECT_EQ(26.5, af(1, values, kwds(2, names + 1, values + 1)).as<double>());
 
-  af = nd::functional::apply([](int x, double y,
-                                int z) { return 2 * x - y + 3 * z; },
-                             "x", "y", "z");
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
   EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
 }
 
@@ -173,48 +158,32 @@ TEST(Callable, DecomposedDynamicCall)
 
   ndt::type ret_tp;
   nd::array values[3] = {7, 2.5, 5};
-  ndt::type types[3] = {values[0].get_type(), values[1].get_type(),
-                        values[2].get_type()};
-  const char *const arrmetas[3] = {values[0].get_arrmeta(),
-                                   values[1].get_arrmeta(),
-                                   values[2].get_arrmeta()};
-  char *const datas[3] = {values[0].get_ndo()->m_data_pointer,
-                          values[1].get_ndo()->m_data_pointer,
+  ndt::type types[3] = {values[0].get_type(), values[1].get_type(), values[2].get_type()};
+  const char *const arrmetas[3] = {values[0].get_arrmeta(), values[1].get_arrmeta(), values[2].get_arrmeta()};
+  char *const datas[3] = {values[0].get_ndo()->m_data_pointer, values[1].get_ndo()->m_data_pointer,
                           values[2].get_ndo()->m_data_pointer};
-//  const char *names[3] = {"x", "y", "z"};
+  //  const char *names[3] = {"x", "y", "z"};
 
-  af = nd::functional::apply([](int x, double y,
-                                int z) { return 2 * x - y + 3 * z; });
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });
   ret_tp = af.get_ret_type();
-  EXPECT_EQ(26.5, (*af.get())(ret_tp, 3, types, arrmetas, datas, 0, NULL,
-                              map<string, ndt::type>()).as<double>());
+  EXPECT_EQ(26.5, (*af.get())(ret_tp, 3, types, arrmetas, datas, 0, NULL, map<string, ndt::type>()).as<double>());
 
-  af = nd::functional::apply([](int x, double y,
-                                int z) { return 2 * x - y + 3 * z; },
-                             "z");
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
   ret_tp = af.get_ret_type();
-  EXPECT_EQ(26.5, (*af.get())(ret_tp, 2, types, arrmetas, datas, 1, values + 2,
-                              map<string, ndt::type>()).as<double>());
+  EXPECT_EQ(26.5, (*af.get())(ret_tp, 2, types, arrmetas, datas, 1, values + 2, map<string, ndt::type>()).as<double>());
 
-  af = nd::functional::apply([](int x, double y,
-                                int z) { return 2 * x - y + 3 * z; },
-                             "y", "z");
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
   ret_tp = af.get_ret_type();
-  EXPECT_EQ(26.5, (*af.get())(ret_tp, 1, types, arrmetas, datas, 2, values + 1,
-                              map<string, ndt::type>()).as<double>());
+  EXPECT_EQ(26.5, (*af.get())(ret_tp, 1, types, arrmetas, datas, 2, values + 1, map<string, ndt::type>()).as<double>());
 
-  af = nd::functional::apply([](int x, double y,
-                                int z) { return 2 * x - y + 3 * z; },
-                             "x", "y", "z");
+  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
   ret_tp = af.get_ret_type();
-  EXPECT_EQ(26.5, (*af.get())(ret_tp, 0, NULL, NULL, NULL, 3, values,
-                              map<string, ndt::type>()).as<double>());
+  EXPECT_EQ(26.5, (*af.get())(ret_tp, 0, NULL, NULL, NULL, 3, values, map<string, ndt::type>()).as<double>());
 }
 
 TEST(Callable, KeywordParsing)
 {
-  nd::callable af0 =
-      nd::functional::apply([](int x, int y) { return x + y; }, "y");
+  nd::callable af0 = nd::functional::apply([](int x, int y) { return x + y; }, "y");
   EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
   EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
   EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);
@@ -255,8 +224,8 @@ TEST(Callable, Option)
 TEST(Callable, Assignment_CallInterface)
 {
   // Test with the unary operation prototype
-  nd::callable af = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
+  nd::callable af =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
 
   // Call it through the call() interface
   nd::array b = af("12345678");
@@ -268,8 +237,7 @@ TEST(Callable, Assignment_CallInterface)
   EXPECT_THROW(af(false), invalid_argument);
 
   // Test with the expr operation prototype
-  af = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
+  af = make_callable_from_assignment(ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
 
   // Call it through the call() interface
   b = af("12345678");
@@ -294,26 +262,23 @@ TEST(Callable, Property)
 
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
-  af.get()->instantiate(
-      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
-      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
-      src_arrmeta, kernel_request_single, &eval::default_eval_context, 0, NULL,
-      std::map<std::string, ndt::type>());
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context, 0, NULL,
+                        std::map<std::string, ndt::type>());
   int int_out = 0;
   int date_in = date_ymd::to_days(2013, 12, 30);
   const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  usngo(ckb.get(), reinterpret_cast<char *>(&int_out),
-        const_cast<char **>(&date_in_ptr));
+  usngo(ckb.get(), reinterpret_cast<char *>(&int_out), const_cast<char **>(&date_in_ptr));
   EXPECT_EQ(2013, int_out);
 }
 
 TEST(Callable, AssignmentAsExpr)
 {
   // Create an callable for converting string to int
-  nd::callable af = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
-      assign_error_default);
+  nd::callable af =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
   ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
@@ -323,11 +288,10 @@ TEST(Callable, AssignmentAsExpr)
 
   // Instantiate a single ckernel
   ckernel_builder<kernel_request_host> ckb;
-  af.get()->instantiate(
-      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
-      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
-      src_arrmeta, kernel_request_single, &eval::default_eval_context, 0, NULL,
-      std::map<std::string, ndt::type>());
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        kernel_request_single, &eval::default_eval_context, 0, NULL,
+                        std::map<std::string, ndt::type>());
   int int_out = 0;
   char str_in[16] = "3251";
   char *str_in_ptr = str_in;
@@ -337,21 +301,28 @@ TEST(Callable, AssignmentAsExpr)
 
   // Instantiate a strided ckernel
   ckb.reset();
-  af.get()->instantiate(
-      af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(),
-      NULL, af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(),
-      src_arrmeta, kernel_request_strided, &eval::default_eval_context, 0, NULL,
-      std::map<std::string, ndt::type>());
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
+                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
+                        kernel_request_strided, &eval::default_eval_context, 0, NULL,
+                        std::map<std::string, ndt::type>());
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   char *strs_in_ptr = strs_in[0];
   intptr_t strs_in_stride = 16;
   expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
-  ustro(ckb.get(), reinterpret_cast<char *>(&ints_out), sizeof(int),
-        &strs_in_ptr, &strs_in_stride, 3);
+  ustro(ckb.get(), reinterpret_cast<char *>(&ints_out), sizeof(int), &strs_in_ptr, &strs_in_stride, 3);
   EXPECT_EQ(123, ints_out[0]);
   EXPECT_EQ(4567, ints_out[1]);
   EXPECT_EQ(891029, ints_out[2]);
+}
+
+TEST(Callable, LLVM)
+{
+  nd::callable f = nd::functional::apply([](int x, int y) { return x + y; });
+  // nd::callable f = nd::add::children[int32_type_id][int32_type_id];
+
+  std::cout << f.get_single().ir << std::endl;
+  std::exit(-1);
 }
 
 /*

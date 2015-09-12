@@ -160,7 +160,7 @@ elseif(APPLE)
 else()
     set_target_properties(test_libdynd PROPERTIES
     #-Wno-unnamed-type-template-args
-        COMPILE_FLAGS "-pthread -Xclang -load -Xclang /home/irwin/git/libdynd/build/plugin/libplugin.so")
+        COMPILE_FLAGS "-pthread -Xclang -load -Xclang plugin/libplugin.so")
 
     target_link_libraries(test_libdynd
         ${LINK_LIBS}

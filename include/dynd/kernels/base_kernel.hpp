@@ -147,7 +147,7 @@ namespace nd {
   struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix, SelfType> {                                     \
     typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;                                               \
                                                                                                                        \
-    static __attribute__((used)) volatile char *single_ir;                                                             \
+    static const volatile char *DYND_USED(single_ir);                                                                  \
                                                                                                                        \
     /** Initializes just the ckernel_prefix function member. */                                                        \
     template <typename... A>                                                                                           \
@@ -166,11 +166,10 @@ namespace nd {
                         "expr ckernel init: unrecognized ckernel request " + std::to_string(kernreq));                 \
       }                                                                                                                \
                                                                                                                        \
-      std::cout << (single_ir == NULL) << std::endl;                                                                   \
       return self;                                                                                                     \
     }                                                                                                                  \
-    __attribute__((annotate("ir"), used)) __VA_ARGS__ static void single_wrapper(ckernel_prefix *rawself, char *dst,   \
-                                                                                 char *const *src)                     \
+                                                                                                                       \
+    __VA_ARGS__ static void DYND_EMIT_LLVM(single_wrapper)(ckernel_prefix *rawself, char *dst, char *const *src)       \
     {                                                                                                                  \
       return SelfType::get_self(rawself)->single(dst, src);                                                            \
     }                                                                                                                  \
@@ -181,6 +180,9 @@ namespace nd {
       return SelfType::get_self(rawself)->strided(dst, dst_stride, src, src_stride, count);                            \
     }                                                                                                                  \
   };                                                                                                                   \
+                                                                                                                       \
+  template <typename SelfType>                                                                                         \
+  const volatile char *DYND_USED(base_kernel<SelfType>::single_ir) = NULL;                                             \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType, 0> : base_kernel<SelfType> {                                                            \
@@ -217,9 +219,6 @@ namespace nd {
 
   BASE_KERNEL(kernel_request_host);
 
-  template <typename SelfType>
-  volatile char *base_kernel<SelfType>::single_ir;
-
 #undef BASE_KERNEL
 
 } // namespace dynd::nd
@@ -238,15 +237,9 @@ class DYND_API expr_kernel_generator;
  * types on to the handler to build the rest of the
  * kernel.
  */
-<< << << < HEAD DYND_API size_t
-    make_expression_type_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                     size_t src_count, const ndt::type *src_dt, const char **src_arrmeta,
-                                     kernel_request_t kernreq, const eval::eval_context *ectx,
-                                     const expr_kernel_generator *handler);
-== == == = size_t make_expression_type_expr_kernel(
-             void * ckb, intptr_t ckb_offset, const ndt::type & dst_tp, const char * dst_arrmeta, size_t src_count,
-             const ndt::type * src_dt, const char * *src_arrmeta, kernel_request_t kernreq,
-             const eval::eval_context * ectx, const expr_kernel_generator * handler);
->>>>>>> Adding progress so far
+DYND_API size_t make_expression_type_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                                                 const char *dst_arrmeta, size_t src_count, const ndt::type *src_dt,
+                                                 const char **src_arrmeta, kernel_request_t kernreq,
+                                                 const eval::eval_context *ectx, const expr_kernel_generator *handler);
 
 } // namespace dynd

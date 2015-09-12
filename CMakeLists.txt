@@ -92,11 +92,10 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         message(FATAL_ERROR "Only MSVC 2013 (Version 18.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
     endif ()
 else()
-    # Bring back -Werror
     if(WIN32)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers -DDYND_EXPORT")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Wno-ignored-attributes")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Wno-ignored-attributes -Werror")
     endif()
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.7)
@@ -593,7 +592,7 @@ add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 add_dependencies(libdynd_OBJ plugin)
 set_source_files_properties(${libdynd_SRC} PROPERTIES OBJECT_DEPENDS plugin)
 set_target_properties(libdynd_OBJ PROPERTIES
-  COMPILE_FLAGS "-Xclang -load -Xclang /home/irwin/git/libdynd/build/plugin/libplugin.so")
+  COMPILE_FLAGS "-Xclang -load -Xclang plugin/libplugin.so")
 
 if (DYND_SHARED_LIB)
     set_property(

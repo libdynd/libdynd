@@ -21,8 +21,7 @@ using namespace dynd;
  * kernel_request_strided type of kernel.
  */
 template <int N>
-struct strided_expr_kernel_extra
-    : nd::base_kernel<strided_expr_kernel_extra<N>, N> {
+struct strided_expr_kernel_extra : nd::base_kernel<strided_expr_kernel_extra<N>, N> {
   typedef strided_expr_kernel_extra extra_type;
 
   intptr_t size;
@@ -41,8 +40,7 @@ struct strided_expr_kernel_extra
     opchild(echild, dst, e->dst_stride, src, e->src_stride, e->size);
   }
 
-  static void strided_wrapper(ckernel_prefix *extra, char *dst,
-                              intptr_t dst_stride, char *const *src,
+  static void strided_wrapper(ckernel_prefix *extra, char *dst, intptr_t dst_stride, char *const *src,
                               const intptr_t *src_stride, size_t count)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -53,8 +51,7 @@ struct strided_expr_kernel_extra
     char *src_loop[N];
     memcpy(src_loop, src, sizeof(src_loop));
     for (size_t i = 0; i != count; ++i) {
-      opchild(echild, dst, inner_dst_stride, src_loop, inner_src_stride,
-              inner_size);
+      opchild(echild, dst, inner_dst_stride, src_loop, inner_src_stride, inner_size);
       dst += dst_stride;
       for (int j = 0; j != N; ++j) {
         src_loop[j] += src_stride[j];
@@ -64,12 +61,11 @@ struct strided_expr_kernel_extra
 };
 
 template <int N>
-static size_t make_elwise_strided_dimension_expr_kernel_for_N(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, size_t DYND_UNUSED(src_count),
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
-    const expr_kernel_generator *elwise_handler)
+static size_t make_elwise_strided_dimension_expr_kernel_for_N(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                                                              const char *dst_arrmeta, size_t DYND_UNUSED(src_count),
+                                                              const ndt::type *src_tp, const char *const *src_arrmeta,
+                                                              kernel_request_t kernreq, const eval::eval_context *ectx,
+                                                              const expr_kernel_generator *elwise_handler)
 {
   intptr_t undim = dst_tp.get_ndim();
   const char *dst_child_arrmeta;
@@ -77,11 +73,9 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
   ndt::type dst_child_dt;
   ndt::type src_child_dt[N];
 
-  strided_expr_kernel_extra<N> *e =
-      strided_expr_kernel_extra<N>::make(ckb, kernreq, ckb_offset);
+  strided_expr_kernel_extra<N> *e = strided_expr_kernel_extra<N>::make(ckb, kernreq, ckb_offset);
   // The dst strided parameters
-  if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride,
-                             &dst_child_dt, &dst_child_arrmeta)) {
+  if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride, &dst_child_dt, &dst_child_arrmeta)) {
     throw type_error("make_elwise_strided_dimension_expr_kernel: dst was not "
                      "strided as expected");
   }
@@ -93,8 +87,7 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
       e->src_stride[i] = 0;
       src_child_arrmeta[i] = src_arrmeta[i];
       src_child_dt[i] = src_tp[i];
-    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size,
-                                        &e->src_stride[i], &src_child_dt[i],
+    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size, &e->src_stride[i], &src_child_dt[i],
                                         &src_child_arrmeta[i])) {
       // Check for a broadcasting error
       if (src_size != 1 && e->size != src_size) {
@@ -105,42 +98,35 @@ static size_t make_elwise_strided_dimension_expr_kernel_for_N(
                        "not strided as expected");
     }
   }
-  return elwise_handler->make_expr_kernel(
-      ckb, ckb_offset, dst_child_dt, dst_child_arrmeta, N, src_child_dt,
-      src_child_arrmeta, kernel_request_strided, ectx);
+  return elwise_handler->make_expr_kernel(ckb, ckb_offset, dst_child_dt, dst_child_arrmeta, N, src_child_dt,
+                                          src_child_arrmeta, kernel_request_strided, ectx);
 }
 
-inline static size_t make_elwise_strided_dimension_expr_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, size_t src_count, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const expr_kernel_generator *elwise_handler)
+inline static size_t make_elwise_strided_dimension_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                                                               const char *dst_arrmeta, size_t src_count,
+                                                               const ndt::type *src_tp, const char *const *src_arrmeta,
+                                                               kernel_request_t kernreq, const eval::eval_context *ectx,
+                                                               const expr_kernel_generator *elwise_handler)
 {
   switch (src_count) {
   case 1:
-    return make_elwise_strided_dimension_expr_kernel_for_N<1>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+    return make_elwise_strided_dimension_expr_kernel_for_N<1>(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
+                                                              src_arrmeta, kernreq, ectx, elwise_handler);
   case 2:
-    return make_elwise_strided_dimension_expr_kernel_for_N<2>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+    return make_elwise_strided_dimension_expr_kernel_for_N<2>(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
+                                                              src_arrmeta, kernreq, ectx, elwise_handler);
   case 3:
-    return make_elwise_strided_dimension_expr_kernel_for_N<3>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+    return make_elwise_strided_dimension_expr_kernel_for_N<3>(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
+                                                              src_arrmeta, kernreq, ectx, elwise_handler);
   case 4:
-    return make_elwise_strided_dimension_expr_kernel_for_N<4>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+    return make_elwise_strided_dimension_expr_kernel_for_N<4>(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
+                                                              src_arrmeta, kernreq, ectx, elwise_handler);
   case 5:
-    return make_elwise_strided_dimension_expr_kernel_for_N<5>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+    return make_elwise_strided_dimension_expr_kernel_for_N<5>(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
+                                                              src_arrmeta, kernreq, ectx, elwise_handler);
   case 6:
-    return make_elwise_strided_dimension_expr_kernel_for_N<6>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+    return make_elwise_strided_dimension_expr_kernel_for_N<6>(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
+                                                              src_arrmeta, kernreq, ectx, elwise_handler);
   default:
     throw runtime_error("make_elwise_strided_dimension_expr_kernel with "
                         "src_count > 6 not implemented yet");
@@ -195,17 +181,14 @@ struct strided_or_var_to_strided_expr_kernel_extra
         modified_src_stride[i] = src_stride[i];
       }
     }
-    opchild(echild, dst, dst_stride, modified_src, modified_src_stride,
-            dim_size);
+    opchild(echild, dst, dst_stride, modified_src, modified_src_stride, dim_size);
   }
 };
 
 template <int N>
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, size_t DYND_UNUSED(src_count),
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, size_t DYND_UNUSED(src_count),
+    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx,
     const expr_kernel_generator *elwise_handler)
 {
   intptr_t undim = dst_tp.get_ndim();
@@ -214,15 +197,11 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
   ndt::type dst_child_dt;
   ndt::type src_child_dt[N];
 
-  strided_or_var_to_strided_expr_kernel_extra<N> *e =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<strided_or_var_to_strided_expr_kernel_extra<N>>(
-                ckb_offset);
-  strided_or_var_to_strided_expr_kernel_extra<N>::make(ckb, kernreq,
-                                                       ckb_offset);
+  strided_or_var_to_strided_expr_kernel_extra<N> *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(
+      ckb)->alloc_ck<strided_or_var_to_strided_expr_kernel_extra<N>>(ckb_offset);
+  strided_or_var_to_strided_expr_kernel_extra<N>::make(ckb, kernreq, ckb_offset);
   // The dst strided parameters
-  if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride,
-                             &dst_child_dt, &dst_child_arrmeta)) {
+  if (!dst_tp.get_as_strided(dst_arrmeta, &e->size, &e->dst_stride, &dst_child_dt, &dst_child_arrmeta)) {
     throw type_error("make_elwise_strided_dimension_expr_kernel: dst was not "
                      "strided as expected");
   }
@@ -237,8 +216,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
       e->is_src_var[i] = false;
       src_child_arrmeta[i] = src_arrmeta[i];
       src_child_dt[i] = src_tp[i];
-    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size,
-                                        &e->src_stride[i], &src_child_dt[i],
+    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size, &e->src_stride[i], &src_child_dt[i],
                                         &src_child_arrmeta[i])) {
       // Check for a broadcasting error
       if (src_size != 1 && e->size != src_size) {
@@ -247,10 +225,8 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
       e->src_offset[i] = 0;
       e->is_src_var[i] = false;
     } else {
-      const ndt::var_dim_type *vdd =
-          static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
-      const var_dim_type_arrmeta *src_md =
-          reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[i]);
+      const ndt::var_dim_type *vdd = static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
+      const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[i]);
       e->src_stride[i] = src_md->stride;
       e->src_offset[i] = src_md->offset;
       e->is_src_var[i] = true;
@@ -258,42 +234,34 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N(
       src_child_dt[i] = vdd->get_element_type();
     }
   }
-  return elwise_handler->make_expr_kernel(
-      ckb, ckb_offset, dst_child_dt, dst_child_arrmeta, N, src_child_dt,
-      src_child_arrmeta, kernel_request_strided, ectx);
+  return elwise_handler->make_expr_kernel(ckb, ckb_offset, dst_child_dt, dst_child_arrmeta, N, src_child_dt,
+                                          src_child_arrmeta, kernel_request_strided, ectx);
 }
 
 static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, size_t src_count, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const expr_kernel_generator *elwise_handler)
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, size_t src_count,
+    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx,
+    const expr_kernel_generator *elwise_handler)
 {
   switch (src_count) {
   case 1:
     return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<1>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 2:
     return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<2>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 3:
     return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<3>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 4:
     return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<4>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 5:
     return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<5>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 6:
     return make_elwise_strided_or_var_to_strided_dimension_expr_kernel_for_N<6>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   default:
     throw runtime_error("make_elwise_strided_or_var_to_strided_dimension_expr_"
                         "kernel with src_count > 6 not implemented yet");
@@ -310,8 +278,7 @@ static size_t make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
  * kernel_request_strided type of kernel.
  */
 template <int N>
-struct strided_or_var_to_var_expr_kernel_extra
-    : nd::base_kernel<strided_or_var_to_var_expr_kernel_extra<N>, N> {
+struct strided_or_var_to_var_expr_kernel_extra : nd::base_kernel<strided_or_var_to_var_expr_kernel_extra<N>, N> {
   typedef strided_or_var_to_var_expr_kernel_extra extra_type;
 
   ckernel_prefix base;
@@ -338,8 +305,7 @@ struct strided_or_var_to_var_expr_kernel_extra
       dim_size = dst_vddd->size;
       for (int i = 0; i < N; ++i) {
         if (e->is_src_var[i]) {
-          var_dim_type_data *vddd =
-              reinterpret_cast<var_dim_type_data *>(src[i]);
+          var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
           modified_src[i] = vddd->begin + e->src_offset[i];
           if (vddd->size == 1) {
             modified_src_stride[i] = 0;
@@ -363,8 +329,7 @@ struct strided_or_var_to_var_expr_kernel_extra
       dim_size = 1;
       for (int i = 0; i < N; ++i) {
         if (e->is_src_var[i]) {
-          const var_dim_type_data *vddd =
-              reinterpret_cast<var_dim_type_data *>(src[i]);
+          const var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
           modified_src[i] = vddd->begin + e->src_offset[i];
           if (vddd->size == 1) {
             modified_src_stride[i] = 0;
@@ -385,20 +350,16 @@ struct strided_or_var_to_var_expr_kernel_extra
       // Allocate the output
       memory_block_data *memblock = e->dst_memblock;
       if (memblock->m_type == objectarray_memory_block_type) {
-        memory_block_objectarray_allocator_api *allocator =
-            get_memory_block_objectarray_allocator_api(memblock);
+        memory_block_objectarray_allocator_api *allocator = get_memory_block_objectarray_allocator_api(memblock);
 
         // Allocate the output array data
         dst_vddd->begin = allocator->allocate(memblock, dim_size);
       } else {
-        memory_block_pod_allocator_api *allocator =
-            get_memory_block_pod_allocator_api(memblock);
+        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
         // Allocate the output array data
         char *dst_end = NULL;
-        allocator->allocate(memblock, dim_size * e->dst_stride,
-                            e->dst_target_alignment, &dst_vddd->begin,
-                            &dst_end);
+        allocator->allocate(memblock, dim_size * e->dst_stride, e->dst_target_alignment, &dst_vddd->begin, &dst_end);
       }
       modified_dst = dst_vddd->begin;
       dst_vddd->size = dim_size;
@@ -408,12 +369,10 @@ struct strided_or_var_to_var_expr_kernel_extra
         modified_dst_stride = e->dst_stride;
       }
     }
-    opchild(echild, modified_dst, modified_dst_stride, modified_src,
-            modified_src_stride, dim_size);
+    opchild(echild, modified_dst, modified_dst_stride, modified_src, modified_src_stride, dim_size);
   }
 
-  static void strided_wrapper(ckernel_prefix *extra, char *dst,
-                              intptr_t dst_stride, char *const *src,
+  static void strided_wrapper(ckernel_prefix *extra, char *dst, intptr_t dst_stride, char *const *src,
                               const intptr_t *src_stride, size_t count)
   {
     char *src_loop[N];
@@ -435,10 +394,8 @@ struct strided_or_var_to_var_expr_kernel_extra
 
 template <int N>
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, size_t DYND_UNUSED(src_count),
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx,
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, size_t DYND_UNUSED(src_count),
+    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx,
     const expr_kernel_generator *elwise_handler)
 {
   intptr_t undim = dst_tp.get_ndim();
@@ -448,12 +405,10 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   ndt::type src_child_dt[N];
 
   strided_or_var_to_var_expr_kernel_extra<N> *e =
-      strided_or_var_to_var_expr_kernel_extra<N>::make(ckb, kernreq,
-                                                       ckb_offset);
+      strided_or_var_to_var_expr_kernel_extra<N>::make(ckb, kernreq, ckb_offset);
   // The dst var parameters
   const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
-  const var_dim_type_arrmeta *dst_md =
-      reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
+  const var_dim_type_arrmeta *dst_md = reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
   e->dst_memblock = dst_md->blockref;
   e->dst_stride = dst_md->stride;
   e->dst_offset = dst_md->offset;
@@ -471,8 +426,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
       e->is_src_var[i] = false;
       src_child_arrmeta[i] = src_arrmeta[i];
       src_child_dt[i] = src_tp[i];
-    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size,
-                                        &e->src_stride[i], &src_child_dt[i],
+    } else if (src_tp[i].get_as_strided(src_arrmeta[i], &src_size, &e->src_stride[i], &src_child_dt[i],
                                         &src_child_arrmeta[i])) {
       // Check for a broadcasting error (the strided dimension size must be 1,
       // otherwise the destination should be strided, not var)
@@ -482,10 +436,8 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
       e->src_offset[i] = 0;
       e->is_src_var[i] = false;
     } else {
-      const ndt::var_dim_type *vdd =
-          static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
-      const var_dim_type_arrmeta *src_md =
-          reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[i]);
+      const ndt::var_dim_type *vdd = static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
+      const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[i]);
       e->src_stride[i] = src_md->stride;
       e->src_offset[i] = src_md->offset;
       e->is_src_var[i] = true;
@@ -493,53 +445,45 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
       src_child_dt[i] = vdd->get_element_type();
     }
   }
-  return elwise_handler->make_expr_kernel(
-      ckb, ckb_offset, dst_child_dt, dst_child_arrmeta, N, src_child_dt,
-      src_child_arrmeta, kernel_request_strided, ectx);
+  return elwise_handler->make_expr_kernel(ckb, ckb_offset, dst_child_dt, dst_child_arrmeta, N, src_child_dt,
+                                          src_child_arrmeta, kernel_request_strided, ectx);
 }
 
 static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, size_t src_count, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const expr_kernel_generator *elwise_handler)
+    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, size_t src_count,
+    const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx,
+    const expr_kernel_generator *elwise_handler)
 {
   switch (src_count) {
   case 1:
     return make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N<1>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 2:
     return make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N<2>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 3:
     return make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N<3>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 4:
     return make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N<4>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 5:
     return make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N<5>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   case 6:
     return make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N<6>(
-        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-        kernreq, ectx, elwise_handler);
+        ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
   default:
     throw runtime_error("make_elwise_strided_or_var_to_var_dimension_expr_"
                         "kernel with src_count > 6 not implemented yet");
   }
 }
 
-size_t dynd::make_elwise_dimension_expr_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, size_t src_count, const ndt::type *src_tp,
-    const char *const *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx, const expr_kernel_generator *elwise_handler)
+size_t dynd::make_elwise_dimension_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                                               const char *dst_arrmeta, size_t src_count, const ndt::type *src_tp,
+                                               const char *const *src_arrmeta, kernel_request_t kernreq,
+                                               const eval::eval_context *ectx,
+                                               const expr_kernel_generator *elwise_handler)
 {
   // Do a pass through the src types to classify them
   bool src_all_strided = true, src_all_strided_or_var = true;
@@ -565,13 +509,11 @@ size_t dynd::make_elwise_dimension_expr_kernel(
   switch (dst_tp.get_type_id()) {
   case fixed_dim_type_id:
     if (src_all_strided) {
-      return make_elwise_strided_dimension_expr_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-          kernreq, ectx, elwise_handler);
+      return make_elwise_strided_dimension_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp,
+                                                       src_arrmeta, kernreq, ectx, elwise_handler);
     } else if (src_all_strided_or_var) {
       return make_elwise_strided_or_var_to_strided_dimension_expr_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-          kernreq, ectx, elwise_handler);
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
     } else {
       // TODO
     }
@@ -579,8 +521,7 @@ size_t dynd::make_elwise_dimension_expr_kernel(
   case var_dim_type_id:
     if (src_all_strided_or_var) {
       return make_elwise_strided_or_var_to_var_dimension_expr_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-          kernreq, ectx, elwise_handler);
+          ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta, kernreq, ectx, elwise_handler);
     } else {
       // TODO
     }
