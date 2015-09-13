@@ -102,7 +102,7 @@ language: cpp
 before_script:
 - mkdir build
 - pushd build
-- cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=ON ..
+- cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=OFF ..
 script:
 - make -j5 || exit 1
 - ./tests/test_libdynd
