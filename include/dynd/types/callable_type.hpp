@@ -29,20 +29,17 @@ namespace dynd {
  * \param src_tp  An array of the source types.
  * \param kwds    An array of the.
  */
-typedef void (*callable_data_init_t)(
-    char *static_data, size_t data_size, char *data, const ndt::type &dst_tp,
-    intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+typedef void (*callable_data_init_t)(char *static_data, size_t data_size, char *data, const ndt::type &dst_tp,
+                                     intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const nd::array *kwds,
+                                     const std::map<std::string, ndt::type> &tp_vars);
 
 template <typename DataInitType>
 struct data_init_traits;
 
 template <typename StaticDataType, typename DataType>
-struct data_init_traits<
-    void (*)(StaticDataType *static_data, size_t data_size, DataType *data,
-             const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-             intptr_t nkwd, const nd::array *kwds,
-             const std::map<std::string, ndt::type> &tp_vars)> {
+struct data_init_traits<void (*)(StaticDataType *static_data, size_t data_size, DataType *data, const ndt::type &dst_tp,
+                                 intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const nd::array *kwds,
+                                 const std::map<std::string, ndt::type> &tp_vars)> {
   typedef StaticDataType static_data_type;
   typedef DataType data_type;
 };
@@ -57,19 +54,17 @@ struct data_init_traits<
  * \param nsrc  The number of source parameters.
  * \param src_tp  An array of the source types.
  */
-typedef void (*callable_resolve_dst_type_t)(
-    char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
-    intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+typedef void (*callable_resolve_dst_type_t)(char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
+                                            intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                                            const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
 template <typename DataInitType>
 struct resolve_dst_type_traits;
 
 template <typename StaticDataType, typename DataType>
-struct resolve_dst_type_traits<void (*)(
-    StaticDataType *static_data, size_t data_size, DataType *data,
-    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+struct resolve_dst_type_traits<void (*)(StaticDataType *static_data, size_t data_size, DataType *data,
+                                        ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                                        const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)> {
   typedef StaticDataType static_data_type;
   typedef DataType data_type;
 };
@@ -106,23 +101,21 @@ struct resolve_dst_type_traits<void (*)(
  *
  * \returns  The offset into ``ckb`` immediately after the instantiated ckernel.
  */
-typedef intptr_t (*callable_instantiate_t)(
-    char *static_data, size_t data_size, char *data, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
-    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+typedef intptr_t (*callable_instantiate_t)(char *static_data, size_t data_size, char *data, void *ckb,
+                                           intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                           intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                                           kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
+                                           const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
 template <typename InstantiateType>
 struct instantiate_traits;
 
 template <typename StaticDataType, typename DataType>
-struct instantiate_traits<intptr_t (*)(
-    StaticDataType *static_data, size_t data_size, DataType *data, void *ckb,
-    intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-    intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
-    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)> {
+struct instantiate_traits<intptr_t (*)(StaticDataType *static_data, size_t data_size, DataType *data, void *ckb,
+                                       intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                       intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                                       kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
+                                       const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)> {
   typedef StaticDataType static_data_type;
   typedef DataType data_type;
 };
@@ -142,9 +135,19 @@ enum callable_property {
 
 inline callable_property operator|(callable_property a, callable_property b)
 {
-  return static_cast<callable_property>(static_cast<int>(a) |
-                                        static_cast<int>(b));
+  return static_cast<callable_property>(static_cast<int>(a) | static_cast<int>(b));
 }
+
+struct single_t {
+  volatile expr_single_t func;
+  const char *ir;
+
+  single_t() = default;
+
+  single_t(volatile expr_single_t func, const volatile char *ir) : func(func), ir(const_cast<const char *>(ir))
+  {
+  }
+};
 
 /**
  * This is a struct designed for interoperability at
@@ -158,6 +161,7 @@ inline callable_property operator|(callable_property a, callable_property b)
  * with different array arrmeta.
  */
 struct DYND_API callable_type_data {
+  single_t single;
   char *static_data;
   std::size_t data_size;
   callable_data_init_t data_init;
@@ -166,47 +170,38 @@ struct DYND_API callable_type_data {
   callable_static_data_free_t static_data_free;
 
   callable_type_data()
-      : static_data(NULL), data_size(0), data_init(NULL),
-        resolve_dst_type(NULL), instantiate(NULL), static_data_free(NULL)
-  {
-  }
-
-  callable_type_data(expr_single_t single, expr_strided_t strided)
-      : data_size(0), data_init(NULL), resolve_dst_type(NULL),
-        instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
-  {
-    typedef void *static_data_type[2];
-    static_assert(scalar_align_of<static_data_type>::value <=
-                      scalar_align_of<std::uint64_t>::value,
-                  "static data requires stronger alignment");
-
-    this->static_data = new char[sizeof(static_data_type)];
-    new (static_data) static_data_type{reinterpret_cast<void *>(single),
-                                       reinterpret_cast<void *>(strided)};
-  }
-
-  callable_type_data(std::size_t data_size, callable_data_init_t data_init,
-                     callable_resolve_dst_type_t resolve_dst_type,
-                     callable_instantiate_t instantiate)
-      : static_data(NULL), data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
+      : static_data(NULL), data_size(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL),
         static_data_free(NULL)
   {
   }
 
+  callable_type_data(expr_single_t single, expr_strided_t strided)
+      : data_size(0), data_init(NULL), resolve_dst_type(NULL), instantiate(&ckernel_prefix::instantiate),
+        static_data_free(NULL)
+  {
+    typedef void *static_data_type[2];
+    static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
+                  "static data requires stronger alignment");
+
+    this->static_data = new char[sizeof(static_data_type)];
+    new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
+  }
+
+  callable_type_data(single_t single, std::size_t data_size, callable_data_init_t data_init,
+                     callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
+      : single(single), static_data(NULL), data_size(data_size), data_init(data_init),
+        resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
+  {
+  }
+
   template <typename T>
-  callable_type_data(T &&static_data, std::size_t data_size,
-                     callable_data_init_t data_init,
-                     callable_resolve_dst_type_t resolve_dst_type,
-                     callable_instantiate_t instantiate)
-      : data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        static_data_free(
-            &static_data_destroy<typename std::remove_reference<T>::type>)
+  callable_type_data(single_t single, T &&static_data, std::size_t data_size, callable_data_init_t data_init,
+                     callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
+      : single(single), data_size(data_size), data_init(data_init), resolve_dst_type(resolve_dst_type),
+        instantiate(instantiate), static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
   {
     typedef typename std::remove_reference<T>::type static_data_type;
-    static_assert(scalar_align_of<static_data_type>::value <=
-                      scalar_align_of<std::uint64_t>::value,
+    static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
                   "static data requires stronger alignment");
 
     this->static_data = new char[sizeof(static_data_type)];
@@ -225,17 +220,13 @@ struct DYND_API callable_type_data {
     delete[] static_data;
   }
 
-  nd::array operator()(ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, const char *const *src_arrmeta,
-                       char *const *src_data, intptr_t nkwd,
-                       const nd::array *kwds,
+  nd::array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                       char *const *src_data, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars);
 
-  void operator()(const ndt::type &dst_tp, const char *dst_arrmeta,
-                  char *dst_data, intptr_t nsrc, const ndt::type *src_tp,
-                  const char *const *src_arrmeta, char *const *src_data,
-                  intptr_t nkwd, const nd::array *kwds,
-                  const std::map<std::string, ndt::type> &tp_vars);
+  void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
+                  const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
   template <typename StaticDataType>
   static void static_data_destroy(char *static_data)
@@ -244,8 +235,7 @@ struct DYND_API callable_type_data {
   }
 };
 
-static_assert((sizeof(callable_type_data) & 7) == 0,
-              "callable_type_data must have size divisible by 8");
+static_assert((sizeof(callable_type_data) & 7) == 0, "callable_type_data must have size divisible by 8");
 
 namespace ndt {
 
@@ -262,8 +252,7 @@ namespace ndt {
     struct get_pos_types_kernel;
 
   public:
-    callable_type(const type &ret_type, const type &pos_types,
-                  const type &kwd_types);
+    callable_type(const type &ret_type, const type &pos_types, const type &kwd_types);
 
     virtual ~callable_type()
     {
@@ -374,26 +363,19 @@ namespace ndt {
       return m_opt_kwd_indices.size();
     }
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
-    void transform_child_types(type_transform_fn_t transform_fn,
-                               intptr_t arrmeta_offset, void *extra,
-                               type &out_transformed_tp,
-                               bool &out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
+                               type &out_transformed_tp, bool &out_was_transformed) const;
     type get_canonical_type() const;
 
-    type apply_linear_index(intptr_t nindices, const irange *indices,
-                            size_t current_i, const type &root_tp,
+    type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
-                                const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta,
-                                memory_block_data *embedded_reference,
-                                size_t current_i, const type &root_tp,
-                                bool leading_dimension, char **inout_data,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
+                                char *out_arrmeta, memory_block_data *embedded_reference, size_t current_i,
+                                const type &root_tp, bool leading_dimension, char **inout_data,
                                 memory_block_data **inout_dataref) const;
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
@@ -408,39 +390,30 @@ namespace ndt {
     void arrmeta_destruct(char *arrmeta) const;
 
     void data_destruct(const char *arrmeta, char *data) const;
-    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
-                               size_t count) const;
+    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                    const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta,
-                                    kernel_request_t kernreq,
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                     const eval::eval_context *ectx) const;
 
-    bool match(const char *arrmeta, const type &candidate_tp,
-               const char *candidate_arrmeta,
+    bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    void get_dynamic_type_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
-    void get_dynamic_array_functions(
-        const std::pair<std::string, gfunc::callable> **out_functions,
-        size_t *out_count) const;
+    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                     size_t *out_count) const;
+    void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                                     size_t *out_count) const;
 
     /** Makes an callable type with both positional and keyword arguments */
-    static type make(const type &ret_tp, const type &tuple_tp,
-                     const type &struct_tp)
+    static type make(const type &ret_tp, const type &tuple_tp, const type &struct_tp)
     {
       return type(new callable_type(ret_tp, tuple_tp, struct_tp), false);
     }
 
     /** Makes an callable type with both positional and keyword arguments */
-    static type make(const type &ret_tp, const nd::array &pos_tp,
-                     const nd::array &kwd_names, const nd::array &kwd_tp)
+    static type make(const type &ret_tp, const nd::array &pos_tp, const nd::array &kwd_names, const nd::array &kwd_tp)
     {
-      return make(ret_tp, tuple_type::make(pos_tp),
-                  struct_type::make(kwd_names, kwd_tp));
+      return make(ret_tp, tuple_type::make(pos_tp), struct_type::make(kwd_names, kwd_tp));
     }
 
     /** Makes an callable type with just positional arguments */
@@ -450,9 +423,7 @@ namespace ndt {
         return make(ret_tp, tuple_type::make({tuple_tp}), struct_type::make());
       }
 
-      return make(ret_tp, tuple_tp,
-                  struct_type::make(
-                      tuple_tp.extended<base_tuple_type>()->is_variadic()));
+      return make(ret_tp, tuple_tp, struct_type::make(tuple_tp.extended<base_tuple_type>()->is_variadic()));
     }
 
     /** Makes an callable type with just positional arguments */
@@ -486,9 +457,8 @@ namespace ndt {
     template <typename T>
     static type make(T &&name)
     {
-      return callable_type::make(
-          type::make<R>(), tuple_type::make(),
-          struct_type::make({std::forward<T>(name)}, {type::make<A0>()}));
+      return callable_type::make(type::make<R>(), tuple_type::make(),
+                                 struct_type::make({std::forward<T>(name)}, {type::make<A0>()}));
     }
   };
 
@@ -496,8 +466,7 @@ namespace ndt {
   struct type::equivalent<R(A0, A...)> {
     static type make()
     {
-      return callable_type::make(type::make<R>(),
-                                 {type::make<A0>(), type::make<A>()...});
+      return callable_type::make(type::make<R>(), {type::make<A0>(), type::make<A>()...});
     }
 
     template <typename... T>
@@ -505,10 +474,8 @@ namespace ndt {
     {
       type tp[1 + sizeof...(A)] = {type::make<A0>(), type::make<A>()...};
 
-      return callable_type::make(
-          type::make<R>(), nd::array(tp, 1 + sizeof...(A) - sizeof...(T)),
-          {names...},
-          nd::array(tp + (1 + sizeof...(A) - sizeof...(T)), sizeof...(T)));
+      return callable_type::make(type::make<R>(), nd::array(tp, 1 + sizeof...(A) - sizeof...(T)), {names...},
+                                 nd::array(tp + (1 + sizeof...(A) - sizeof...(T)), sizeof...(T)));
     }
   };
 

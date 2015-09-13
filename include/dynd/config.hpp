@@ -45,6 +45,9 @@
 #define DYND_ISSPACE std::isspace
 #define DYND_TOLOWER std::tolower
 
+#define DYND_USED(NAME) NAME __attribute__((used))
+#define DYND_EMIT_LLVM(NAME) __attribute__((annotate("emit_llvm"))) NAME
+
 #elif defined(__GNUC__)
 
 // Hack trying to work around gcc isfinite problems
@@ -53,13 +56,13 @@
 #endif
 
 #define DYND_IGNORE_UNUSED(NAME) NAME __attribute__((unused))
+#define DYND_USED(NAME) NAME
+#define DYND_EMIT_LLVM(NAME) NAME
 
 // Ignore erroneous maybe-uninitizlized
 // warnings on a given line or code block.
-#define DYND_IGNORE_MAYBE_UNINITIALIZED                                        \
-  _Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-#define DYND_END_IGNORE_MAYBE_UNINITIALIZED                                    \
-  _Pragma("GCC diagnostic pop")  
+#define DYND_IGNORE_MAYBE_UNINITIALIZED _Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+#define DYND_END_IGNORE_MAYBE_UNINITIALIZED _Pragma("GCC diagnostic pop")
 
 #define DYND_CONSTEXPR constexpr
 
@@ -70,6 +73,8 @@
 
 #define DYND_ISSPACE isspace
 #define DYND_TOLOWER tolower
+#define DYND_USED(NAME) NAME
+#define DYND_EMIT_LLVM(NAME) NAME
 
 #include <float.h>
 
@@ -104,11 +109,9 @@ class DYND_API disable_invalid_parameter_handler {
   _invalid_parameter_handler m_saved;
 
   disable_invalid_parameter_handler(const disable_invalid_parameter_handler &);
-  disable_invalid_parameter_handler &
-  operator=(const disable_invalid_parameter_handler &);
+  disable_invalid_parameter_handler &operator=(const disable_invalid_parameter_handler &);
 
-  static void nop_parameter_handler(const wchar_t *, const wchar_t *,
-                                    const wchar_t *, unsigned int, uintptr_t)
+  static void nop_parameter_handler(const wchar_t *, const wchar_t *, const wchar_t *, unsigned int, uintptr_t)
   {
   }
 
@@ -154,24 +157,19 @@ inline void DYND_MEMCPY(char *dst, const char *src, intptr_t count)
 namespace dynd {
 
 template <typename T, typename U, typename V>
-struct is_common_type_of
-    : std::conditional<
-          std::is_same<T, typename std::common_type<U, V>::type>::value,
-          std::true_type, std::false_type>::type {
+struct is_common_type_of : std::conditional<std::is_same<T, typename std::common_type<U, V>::type>::value,
+                                            std::true_type, std::false_type>::type {
 };
 
-template <bool Value, template <typename...> class T,
-          template <typename...> class U, typename... As>
+template <bool Value, template <typename...> class T, template <typename...> class U, typename... As>
 struct conditional_make;
 
-template <template <typename...> class T, template <typename...> class U,
-          typename... As>
+template <template <typename...> class T, template <typename...> class U, typename... As>
 struct conditional_make<true, T, U, As...> {
   typedef T<As...> type;
 };
 
-template <template <typename...> class T, template <typename...> class U,
-          typename... As>
+template <template <typename...> class T, template <typename...> class U, typename... As>
 struct conditional_make<false, T, U, As...> {
   typedef U<As...> type;
 };
@@ -179,9 +177,7 @@ struct conditional_make<false, T, U, As...> {
 template <typename T>
 struct is_function_pointer {
   static const bool value =
-      std::is_pointer<T>::value
-          ? std::is_function<typename std::remove_pointer<T>::type>::value
-          : false;
+      std::is_pointer<T>::value ? std::is_function<typename std::remove_pointer<T>::type>::value : false;
 };
 
 template <typename ValueType>
@@ -247,8 +243,7 @@ struct all_char_string_params<T0> {
 };
 template <typename... T, typename T0>
 struct all_char_string_params<T0, T...> {
-  static const bool value =
-      is_char_string_param<T0>::value && all_char_string_params<T...>::value;
+  static const bool value = is_char_string_param<T0>::value && all_char_string_params<T...>::value;
 };
 
 #ifdef _MSC_VER
@@ -279,8 +274,7 @@ struct remove_all_pointers {
 
 template <typename T>
 struct remove_all_pointers<T *> {
-  typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type
-  type;
+  typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
 };
 
 template <typename T, typename U>
@@ -370,52 +364,38 @@ struct integer_proxy<integer_sequence<T, I0, I...>> {
   template <typename R, typename A0, typename A1, typename A2>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2)
   {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
-                     std::forward<A2>(a2)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
-                    std::forward<A2>(a2))...);
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2)),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2))...);
   }
   template <typename R, typename A0, typename A1, typename A2, typename A3>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3)
   {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
-                     std::forward<A2>(a2), std::forward<A3>(a3)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
-                    std::forward<A2>(a2), std::forward<A3>(a3))...);
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3)),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3))...);
   }
-  template <typename R, typename A0, typename A1, typename A2, typename A3,
-            typename A4>
+  template <typename R, typename A0, typename A1, typename A2, typename A3, typename A4>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4)
   {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
-                     std::forward<A2>(a2), std::forward<A3>(a3),
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
                      std::forward<A4>(a4)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
-                    std::forward<A2>(a2), std::forward<A3>(a3),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
                     std::forward<A4>(a4))...);
   }
-  template <typename R, typename A0, typename A1, typename A2, typename A3,
-            typename A4, typename A5>
+  template <typename R, typename A0, typename A1, typename A2, typename A3, typename A4, typename A5>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5)
   {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
-                     std::forward<A2>(a2), std::forward<A3>(a3),
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
                      std::forward<A4>(a4), std::forward<A5>(a5)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
-                    std::forward<A2>(a2), std::forward<A3>(a3),
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
                     std::forward<A4>(a4), std::forward<A5>(a5))...);
   }
-  template <typename R, typename A0, typename A1, typename A2, typename A3,
-            typename A4, typename A5, typename A6>
+  template <typename R, typename A0, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
   static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5, A6 &&a6)
   {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1),
-                     std::forward<A2>(a2), std::forward<A3>(a3),
+    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
                      std::forward<A4>(a4), std::forward<A5>(a5)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1),
-                    std::forward<A2>(a2), std::forward<A3>(a3),
-                    std::forward<A4>(a4), std::forward<A5>(a5),
-                    std::forward<A6>(a6))...);
+             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
+                    std::forward<A4>(a4), std::forward<A5>(a5), std::forward<A6>(a6))...);
   }
 #endif
 
@@ -423,8 +403,7 @@ struct integer_proxy<integer_sequence<T, I0, I...>> {
   static void for_each(F f, A &&... a)
   {
     f.template on_each<I0, U...>(std::forward<A>(a)...);
-    integer_proxy<integer_sequence<T, I...>>::template for_each<U...>(
-        f, std::forward<A>(a)...);
+    integer_proxy<integer_sequence<T, I...>>::template for_each<U...>(f, std::forward<A>(a)...);
   }
 };
 
@@ -604,8 +583,7 @@ https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-st
 #define DYND_END_IGNORE_MAYBE_UNINITIALIZED
 #endif
 
-#define DYND_INC_IF_NOT_NULL(POINTER, OFFSET)                                  \
-  ((POINTER == NULL) ? NULL : (POINTER + OFFSET))
+#define DYND_INC_IF_NOT_NULL(POINTER, OFFSET) ((POINTER == NULL) ? NULL : (POINTER + OFFSET))
 
 namespace dynd {
 // These are defined in git_version.cpp, generated from
@@ -626,57 +604,54 @@ extern const char dynd_version_string[];
 
 // This doesn't work if there are multiple methods enabled via a template
 // parameter, need to fix that
-#define DYND_HAS(NAME)                                                         \
-  template <typename...>                                                       \
-  class has_##NAME;                                                            \
-                                                                               \
-  template <typename T>                                                        \
-  class has_##NAME<T> {                                                        \
-    template <typename U,                                                      \
-              typename = typename std::enable_if<                              \
-                  !std::is_member_pointer<decltype(&U::NAME)>::value>::type>   \
-    static std::true_type test(int);                                           \
-                                                                               \
-    template <typename>                                                        \
-    static std::false_type test(...);                                          \
-                                                                               \
-  public:                                                                      \
-    static const bool value = decltype(test<T>(0))::value;                     \
-  };                                                                           \
-                                                                               \
-  template <typename T, typename StaticMemberType>                             \
-  class has_##NAME<T, StaticMemberType> {                                      \
-    template <                                                                 \
-        typename U,                                                            \
-        typename = typename std::enable_if<                                    \
-            !std::is_member_pointer<decltype(&U::NAME)>::value &&              \
-            std::is_same<decltype(U::NAME), StaticMemberType>::value>::type>   \
-    static std::true_type test(int);                                           \
-                                                                               \
-    template <typename>                                                        \
-    static std::false_type test(...);                                          \
-                                                                               \
-  public:                                                                      \
-    static const bool value = decltype(test<T>(0))::value;                     \
+#define DYND_HAS(NAME)                                                                                                 \
+  template <typename...>                                                                                               \
+  class has_##NAME;                                                                                                    \
+                                                                                                                       \
+  template <typename T>                                                                                                \
+  class has_##NAME<T> {                                                                                                \
+    template <typename U,                                                                                              \
+              typename = typename std::enable_if<!std::is_member_pointer<decltype(&U::NAME)>::value>::type>            \
+    static std::true_type test(int);                                                                                   \
+                                                                                                                       \
+    template <typename>                                                                                                \
+    static std::false_type test(...);                                                                                  \
+                                                                                                                       \
+  public:                                                                                                              \
+    static const bool value = decltype(test<T>(0))::value;                                                             \
+  };                                                                                                                   \
+                                                                                                                       \
+  template <typename T, typename StaticMemberType>                                                                     \
+  class has_##NAME<T, StaticMemberType> {                                                                              \
+    template <typename U,                                                                                              \
+              typename = typename std::enable_if<!std::is_member_pointer<decltype(&U::NAME)>::value &&                 \
+                                                 std::is_same<decltype(U::NAME), StaticMemberType>::value>::type>      \
+    static std::true_type test(int);                                                                                   \
+                                                                                                                       \
+    template <typename>                                                                                                \
+    static std::false_type test(...);                                                                                  \
+                                                                                                                       \
+  public:                                                                                                              \
+    static const bool value = decltype(test<T>(0))::value;                                                             \
   }
 
-#define DYND_GET(NAME, TYPE, DEFAULT_VALUE)                                    \
-  template <typename T, bool ReturnDefaultValue>                               \
-  typename std::enable_if<ReturnDefaultValue, TYPE>::type get_##NAME()         \
-  {                                                                            \
-    return DEFAULT_VALUE;                                                      \
-  }                                                                            \
-                                                                               \
-  template <typename T, bool ReturnDefaultValue>                               \
-  typename std::enable_if<!ReturnDefaultValue, TYPE>::type get_##NAME()        \
-  {                                                                            \
-    return T::NAME;                                                            \
-  }                                                                            \
-                                                                               \
-  template <typename T>                                                        \
-  TYPE get_##NAME()                                                            \
-  {                                                                            \
-    return get_##NAME<T, !has_##NAME<T>::value>();                             \
+#define DYND_GET(NAME, TYPE, DEFAULT_VALUE)                                                                            \
+  template <typename T, bool ReturnDefaultValue>                                                                       \
+  typename std::enable_if<ReturnDefaultValue, TYPE>::type get_##NAME()                                                 \
+  {                                                                                                                    \
+    return DEFAULT_VALUE;                                                                                              \
+  }                                                                                                                    \
+                                                                                                                       \
+  template <typename T, bool ReturnDefaultValue>                                                                       \
+  typename std::enable_if<!ReturnDefaultValue, TYPE>::type get_##NAME()                                                \
+  {                                                                                                                    \
+    return T::NAME;                                                                                                    \
+  }                                                                                                                    \
+                                                                                                                       \
+  template <typename T>                                                                                                \
+  TYPE get_##NAME()                                                                                                    \
+  {                                                                                                                    \
+    return get_##NAME<T, !has_##NAME<T>::value>();                                                                     \
   }
 
 namespace dynd {
@@ -744,20 +719,15 @@ struct is_complex : std::false_type {
 };
 
 template <typename T>
-struct is_arithmetic
-    : std::integral_constant<bool, is_integral<T>::value ||
-                                       is_floating_point<T>::value> {
+struct is_arithmetic : std::integral_constant<bool, is_integral<T>::value || is_floating_point<T>::value> {
 };
 
 template <typename T>
-struct is_numeric : std::integral_constant<bool, is_arithmetic<T>::value ||
-                                                     is_complex<T>::value> {
+struct is_numeric : std::integral_constant<bool, is_arithmetic<T>::value || is_complex<T>::value> {
 };
 
 template <typename T, typename U>
-struct is_mixed_arithmetic
-    : std::integral_constant<
-          bool, is_arithmetic<T>::value &&is_arithmetic<U>::value> {
+struct is_mixed_arithmetic : std::integral_constant<bool, is_arithmetic<T>::value &&is_arithmetic<U>::value> {
 };
 
 template <typename T>
@@ -775,30 +745,24 @@ using not_t = std::integral_constant<bool, !T::value>;
 
 // Checks whether T is not the common type of T and U
 template <typename T, typename U>
-struct is_lcast_arithmetic
-    : not_t<typename conditional_make<
-          is_arithmetic<T>::value &&is_arithmetic<U>::value, is_common_type_of,
-          true_t, T, T, U>::type> {
+struct is_lcast_arithmetic : not_t<typename conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value,
+                                                             is_common_type_of, true_t, T, T, U>::type> {
 };
 
 // Checks whether U is not the common type of T and U
 template <typename T, typename U>
-struct is_rcast_arithmetic
-    : not_t<typename conditional_make<
-          is_arithmetic<T>::value &&is_arithmetic<U>::value, is_common_type_of,
-          true_t, U, T, U>::type> {
+struct is_rcast_arithmetic : not_t<typename conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value,
+                                                             is_common_type_of, true_t, U, T, U>::type> {
 };
 
 template <typename T>
 struct is_signed {
-  static const bool value =
-      std::is_signed<T>::value || std::is_same<T, int128>::value;
+  static const bool value = std::is_signed<T>::value || std::is_same<T, int128>::value;
 };
 
 template <typename T>
 struct is_unsigned {
-  static const bool value =
-      std::is_unsigned<T>::value || std::is_same<T, uint128>::value;
+  static const bool value = std::is_unsigned<T>::value || std::is_same<T, uint128>::value;
 };
 
 template <typename T>
@@ -820,22 +784,16 @@ namespace dynd {
 
 template <typename T, typename U>
 struct operator_if_only_lcast_arithmetic
-    : std::enable_if<
-          !std::is_same<T, U>::value &&
-              !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-              is_lcast_arithmetic<T, U>::value &&
-              !is_rcast_arithmetic<T, U>::value,
-          U> {
+    : std::enable_if<!std::is_same<T, U>::value && !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+                         is_lcast_arithmetic<T, U>::value && !is_rcast_arithmetic<T, U>::value,
+                     U> {
 };
 
 template <typename T, typename U>
 struct operator_if_only_rcast_arithmetic
-    : std::enable_if<
-          !std::is_same<T, U>::value &&
-              !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-              !is_lcast_arithmetic<T, U>::value &&
-              is_rcast_arithmetic<T, U>::value,
-          T> {
+    : std::enable_if<!std::is_same<T, U>::value && !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+                         !is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
+                     T> {
 };
 
 template <typename... T>
@@ -845,64 +803,53 @@ struct make_void {
 
 template <typename T, typename U>
 struct operator_if_lrcast_arithmetic
-    : std::enable_if<
-          !std::is_same<T, U>::value &&
-              !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
-              is_lcast_arithmetic<T, U>::value &&
-              is_rcast_arithmetic<T, U>::value,
-          typename conditional_make<
-              is_arithmetic<T>::value &&is_arithmetic<U>::value,
-              std::common_type, make_void, T, U>::type::type> {
+    : std::enable_if<!std::is_same<T, U>::value && !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
+                         is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
+                     typename conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value, std::common_type,
+                                               make_void, T, U>::type::type> {
 };
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_only_rcast_arithmetic<T, U>::type
-operator+(T lhs, U rhs)
+DYND_CUDA_HOST_DEVICE typename operator_if_only_rcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
 {
   return lhs + static_cast<T>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_only_lcast_arithmetic<T, U>::type
-operator+(T lhs, U rhs)
+DYND_CUDA_HOST_DEVICE typename operator_if_only_lcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
 {
   return static_cast<U>(lhs) + rhs;
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_lrcast_arithmetic<T, U>::type
-operator+(T lhs, U rhs)
+DYND_CUDA_HOST_DEVICE typename operator_if_lrcast_arithmetic<T, U>::type operator+(T lhs, U rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) +
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_only_rcast_arithmetic<T, U>::type
-operator/(T lhs, U rhs)
+DYND_CUDA_HOST_DEVICE typename operator_if_only_rcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
 {
   return lhs / static_cast<T>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_only_lcast_arithmetic<T, U>::type
-operator/(T lhs, U rhs)
+DYND_CUDA_HOST_DEVICE typename operator_if_only_lcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
 {
   return static_cast<U>(lhs) / rhs;
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename operator_if_lrcast_arithmetic<T, U>::type
-operator/(T lhs, U rhs)
+DYND_CUDA_HOST_DEVICE typename operator_if_lrcast_arithmetic<T, U>::type operator/(T lhs, U rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    is_mixed_arithmetic<T, U>::value,
-    complex<typename std::common_type<T, U>::type>>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<is_mixed_arithmetic<T, U>::value,
+                                              complex<typename std::common_type<T, U>::type>>::type
 operator/(complex<T> lhs, U rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
@@ -910,9 +857,8 @@ operator/(complex<T> lhs, U rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    is_mixed_arithmetic<T, U>::value,
-    complex<typename std::common_type<T, U>::type>>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<is_mixed_arithmetic<T, U>::value,
+                                              complex<typename std::common_type<T, U>::type>>::type
 operator/(T lhs, complex<U> rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
@@ -920,8 +866,7 @@ operator/(T lhs, complex<U> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_floating_point<T>::value &&is_integral<U>::value, T &>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value &&is_integral<U>::value, T &>::type
 operator/=(T &lhs, U rhs)
 {
   return lhs /= static_cast<T>(rhs);
@@ -931,26 +876,24 @@ operator/=(T &lhs, U rhs)
 
 #ifdef DYND_CUDA
 
-#define DYND_GET_CUDA_DEVICE_FUNC(NAME, FUNC)                                  \
-  template <typename func_type>                                                \
-  __global__ void NAME(void *res)                                              \
-  {                                                                            \
-    *reinterpret_cast<func_type *>(res) = static_cast<func_type>(&FUNC);       \
-  }                                                                            \
-                                                                               \
-  template <typename func_type>                                                \
-  func_type NAME()                                                             \
-  {                                                                            \
-    func_type func;                                                            \
-    func_type *cuda_device_func;                                               \
-    cuda_throw_if_not_success(                                                 \
-        cudaMalloc(&cuda_device_func, sizeof(func_type)));                     \
-    NAME<func_type> << <1, 1>>> (reinterpret_cast<void *>(cuda_device_func));  \
-    cuda_throw_if_not_success(cudaMemcpy(                                      \
-        &func, cuda_device_func, sizeof(func_type), cudaMemcpyDeviceToHost));  \
-    cuda_throw_if_not_success(cudaFree(cuda_device_func));                     \
-                                                                               \
-    return func;                                                               \
+#define DYND_GET_CUDA_DEVICE_FUNC(NAME, FUNC)                                                                          \
+  template <typename func_type>                                                                                        \
+  __global__ void NAME(void *res)                                                                                      \
+  {                                                                                                                    \
+    *reinterpret_cast<func_type *>(res) = static_cast<func_type>(&FUNC);                                               \
+  }                                                                                                                    \
+                                                                                                                       \
+  template <typename func_type>                                                                                        \
+  func_type NAME()                                                                                                     \
+  {                                                                                                                    \
+    func_type func;                                                                                                    \
+    func_type *cuda_device_func;                                                                                       \
+    cuda_throw_if_not_success(cudaMalloc(&cuda_device_func, sizeof(func_type)));                                       \
+    NAME<func_type> << <1, 1>>> (reinterpret_cast<void *>(cuda_device_func));                                          \
+    cuda_throw_if_not_success(cudaMemcpy(&func, cuda_device_func, sizeof(func_type), cudaMemcpyDeviceToHost));         \
+    cuda_throw_if_not_success(cudaFree(cuda_device_func));                                                             \
+                                                                                                                       \
+    return func;                                                                                                       \
   }
 
 #endif
@@ -1041,65 +984,56 @@ namespace detail {
 #ifdef __CUDACC__
 
   template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 0, intptr_t>::type
-  cuda_device_thread_id()
+  __device__ inline typename std::enable_if<I == 0, intptr_t>::type cuda_device_thread_id()
   {
     return blockIdx.x * blockDim.x + threadIdx.x;
   }
 
   template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 1, intptr_t>::type
-  cuda_device_thread_id()
+  __device__ inline typename std::enable_if<I == 1, intptr_t>::type cuda_device_thread_id()
   {
     return blockIdx.y * blockDim.y + threadIdx.y;
   }
 
   template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 2, intptr_t>::type
-  cuda_device_thread_id()
+  __device__ inline typename std::enable_if<I == 2, intptr_t>::type cuda_device_thread_id()
   {
     return blockIdx.z * blockDim.z + threadIdx.z;
   }
 
   template <intptr_t I>
-  __device__ inline typename std::enable_if<I == -1, intptr_t>::type
-  cuda_device_thread_id()
+  __device__ inline typename std::enable_if<I == -1, intptr_t>::type cuda_device_thread_id()
   {
     return 0;
   }
 
   template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 0, intptr_t>::type
-  cuda_device_thread_count()
+  __device__ inline typename std::enable_if<I == 0, intptr_t>::type cuda_device_thread_count()
   {
     return gridDim.x * blockDim.x;
   }
 
   template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 1, intptr_t>::type
-  cuda_device_thread_count()
+  __device__ inline typename std::enable_if<I == 1, intptr_t>::type cuda_device_thread_count()
   {
     return gridDim.y * blockDim.y;
   }
 
   template <intptr_t I>
-  __device__ inline typename std::enable_if<I == 2, intptr_t>::type
-  cuda_device_thread_count()
+  __device__ inline typename std::enable_if<I == 2, intptr_t>::type cuda_device_thread_count()
   {
     return gridDim.z * blockDim.z;
   }
 
   template <intptr_t I>
-  __device__ inline typename std::enable_if<I == -1, intptr_t>::type
-  cuda_device_thread_count()
+  __device__ inline typename std::enable_if<I == -1, intptr_t>::type cuda_device_thread_count()
   {
     return 1;
   }
 
   __device__ inline intptr_t cuda_device_thread_count()
   {
-    return cuda_device_thread_count<0>() * cuda_device_thread_count<1>() *
-           cuda_device_thread_count<2>();
+    return cuda_device_thread_count<0>() * cuda_device_thread_count<1>() * cuda_device_thread_count<2>();
   }
 
 #endif

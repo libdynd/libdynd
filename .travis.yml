@@ -5,6 +5,7 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
       - kalakris-cmake
+      - llvm-toolchain-precise-3.4
     packages:
       - gcc-4.8
       - g++-4.8
@@ -30,8 +31,8 @@ matrix:
     script:
       - make -j5 || exit 1
       - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
-  - compiler: clang
-    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
+#  - compiler: clang
+#    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
   - compiler: gcc
     env: CONDA
     before_install:
@@ -97,7 +98,7 @@ language: cpp
 before_script:
 - mkdir build
 - pushd build
-- cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=ON ..
+- cmake -DDYND_FFTW=${DYND_FFTW} ..
 script:
 - make -j5 || exit 1
 - ./tests/test_libdynd

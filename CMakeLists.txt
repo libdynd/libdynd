@@ -36,6 +36,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
     option(DYND_FFTW
         "Build a libdynd library with FFTW"
         OFF)
+# -DDYND_LLVM=ON/OFF, whether to build libdynd with or without LLVM support
+    option(DYND_LLVM
+        "Build a libdynd library with LLVM"
+        OFF)
 #
 # -DDYND_INSTALL_LIB=ON/OFF, whether to install libdynd into the
 #   CMAKE_INSTALL_PREFIX. Its main purpose is to allow dynd-python and
@@ -54,6 +58,10 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
         ON)
 #
 ################################################
+endif()
+
+if(DYND_LLVM)
+  find_package(LLVM CONFIG)
 endif()
 
 if(DYND_CUDA)
@@ -95,7 +103,7 @@ else()
     if(WIN32)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers -DDYND_EXPORT")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers -fPIC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Wno-ignored-attributes -Werror")
     endif()
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.7)
@@ -586,6 +594,15 @@ endif()
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
+
+if(DYND_LLVM)
+  if(LLVM_FOUND)
+    add_subdirectory(plugin)
+
+    add_dependencies(libdynd_OBJ dynd_plugin)
+    set_target_properties(libdynd_OBJ PROPERTIES COMPILE_FLAGS "-Xclang -load -Xclang plugin/libdynd_plugin.so")
+  endif()
+endif()
 
 if (DYND_SHARED_LIB)
     set_property(

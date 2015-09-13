@@ -18,8 +18,7 @@ using namespace dynd;
 /**
  * Matches netcdf date metadata like "days since 2001-1-1".
  */
-static bool parse_days_since(const char *begin, const char *end,
-                             int32_t &out_epoch_date)
+static bool parse_days_since(const char *begin, const char *end, int32_t &out_epoch_date)
 {
   if (!parse::parse_token(begin, end, "days")) {
     return false;
@@ -28,10 +27,8 @@ static bool parse_days_since(const char *begin, const char *end,
     return false;
   }
   // The tokens supported by netcdf, as from the udunits libarary
-  if (!parse::parse_token(begin, end, "since") &&
-      !parse::parse_token(begin, end, "after") &&
-      !parse::parse_token(begin, end, "from") &&
-      !parse::parse_token(begin, end, "ref") &&
+  if (!parse::parse_token(begin, end, "since") && !parse::parse_token(begin, end, "after") &&
+      !parse::parse_token(begin, end, "from") && !parse::parse_token(begin, end, "ref") &&
       !parse::parse_token(begin, end, '@')) {
     return false;
   }
@@ -62,21 +59,17 @@ struct int_offset_ck : nd::base_kernel<int_offset_ck<Tsrc, Tdst>, 1> {
   void single(char *dst, char *const *src)
   {
     Tsrc value = *reinterpret_cast<Tsrc *>(src[0]);
-    *reinterpret_cast<Tdst *>(dst) = value != std::numeric_limits<Tsrc>::min()
-                                         ? static_cast<Tdst>(value) + m_offset
-                                         : std::numeric_limits<Tdst>::min();
+    *reinterpret_cast<Tdst *>(dst) = value != std::numeric_limits<Tsrc>::min() ? static_cast<Tdst>(value) + m_offset
+                                                                               : std::numeric_limits<Tdst>::min();
   }
 };
 
 template <class Tsrc, class Tdst>
 static intptr_t instantiate_int_offset_callable(
-    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *DYND_UNUSED(src_tp),
-    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-    const nd::array *DYND_UNUSED(kwds),
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   typedef int_offset_ck<Tsrc, Tdst> self_type;
@@ -88,14 +81,11 @@ static intptr_t instantiate_int_offset_callable(
 template <class Tsrc, class Tdst>
 nd::callable make_int_offset_callable(Tdst offset, const ndt::type &func_proto)
 {
-  return nd::callable(func_proto, offset, 0, NULL, NULL,
-                      &instantiate_int_offset_callable<Tsrc, Tdst>);
+  return nd::callable(func_proto, single_t(), offset, 0, NULL, NULL, &instantiate_int_offset_callable<Tsrc, Tdst>);
 }
 } // anonymous namespace
 
-bool dynd::make_date_adapter_callable(const ndt::type &operand_tp,
-                                      const nd::string &op,
-                                      nd::callable &out_forward,
+bool dynd::make_date_adapter_callable(const ndt::type &operand_tp, const nd::string &op, nd::callable &out_forward,
                                       nd::callable &out_reverse)
 {
   int32_t epoch_date;
@@ -103,19 +93,15 @@ bool dynd::make_date_adapter_callable(const ndt::type &operand_tp,
     switch (operand_tp.get_type_id()) {
     case int32_type_id:
       out_forward = make_int_offset_callable<int32_t, int32_t>(
-          epoch_date, ndt::callable_type::make(ndt::date_type::make(),
-                                               ndt::type::make<int32_t>()));
+          epoch_date, ndt::callable_type::make(ndt::date_type::make(), ndt::type::make<int32_t>()));
       out_reverse = make_int_offset_callable<int32_t, int32_t>(
-          -epoch_date, ndt::callable_type::make(ndt::type::make<int32_t>(),
-                                                ndt::date_type::make()));
+          -epoch_date, ndt::callable_type::make(ndt::type::make<int32_t>(), ndt::date_type::make()));
       return true;
     case int64_type_id:
       out_forward = make_int_offset_callable<int64_t, int32_t>(
-          epoch_date, ndt::callable_type::make(ndt::date_type::make(),
-                                               ndt::type::make<int64_t>()));
+          epoch_date, ndt::callable_type::make(ndt::date_type::make(), ndt::type::make<int64_t>()));
       out_reverse = make_int_offset_callable<int32_t, int64_t>(
-          -epoch_date, ndt::callable_type::make(ndt::type::make<int64_t>(),
-                                                ndt::date_type::make()));
+          -epoch_date, ndt::callable_type::make(ndt::type::make<int64_t>(), ndt::date_type::make()));
       return true;
     default:
       return false;
