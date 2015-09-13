@@ -143,8 +143,6 @@ else()
     set(LINK_LIBS ${LINK_LIBS} libdynd)
 endif()
 
-set_source_files_properties(${tests_SRC} PROPERTIES OBJECT_DEPENDS plugin)
-
 if(WIN32)
     target_link_libraries(test_libdynd
         ${LINK_LIBS}
