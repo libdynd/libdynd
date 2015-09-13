@@ -6,8 +6,6 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(libdynd_plugin)
 
-find_package(LLVM REQUIRED CONFIG)
-
 add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
 

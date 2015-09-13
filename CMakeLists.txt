@@ -56,6 +56,8 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 ################################################
 endif()
 
+find_package(LLVM CONFIG)
+
 if(DYND_CUDA)
     set(DYND_CUDA_01 1)
 
@@ -121,8 +123,6 @@ configure_file(
 string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
 string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
-
-add_subdirectory(plugin)
 
 set(libdynd_SRC
     # Types
@@ -589,9 +589,12 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 
-add_dependencies(libdynd_OBJ dynd_plugin)
-set_target_properties(libdynd_OBJ PROPERTIES
-  COMPILE_FLAGS "-Xclang -load -Xclang plugin/libdynd_plugin.so")
+if(LLVM_FOUND)
+  add_subdirectory(plugin)
+
+  add_dependencies(libdynd_OBJ dynd_plugin)
+  set_target_properties(libdynd_OBJ PROPERTIES COMPILE_FLAGS "-Xclang -load -Xclang plugin/libdynd_plugin.so")
+endif()
 
 if (DYND_SHARED_LIB)
     set_property(

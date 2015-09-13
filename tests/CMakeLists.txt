@@ -158,9 +158,11 @@ elseif(APPLE)
   #      BUILD_WITH_INSTALL_RPATH TRUE
    #     )
 else()
+if(LLVM_FOUND)
     set_target_properties(test_libdynd PROPERTIES
     #-Wno-unnamed-type-template-args
         COMPILE_FLAGS "-pthread -Xclang -load -Xclang ${CMAKE_BINARY_DIR}/plugin/libdynd_plugin.so")
+endif()
 
     target_link_libraries(test_libdynd
         ${LINK_LIBS}
