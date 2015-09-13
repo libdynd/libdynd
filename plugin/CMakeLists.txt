@@ -11,14 +11,4 @@ find_package(LLVM REQUIRED CONFIG)
 add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
 
-add_library(plugin SHARED
-    dynd.cpp
-)
-
-#    set_target_properties(libdynd_plugin
-#        PROPERTIES
-##        OUTPUT_NAME "dynd"
-  #      PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
-  #      )
-
-#set_target_properties(libdynd_plugin PROPERTIES OUTPUT_NAME "dynd.so")
+add_library(dynd_plugin SHARED dynd.cpp)

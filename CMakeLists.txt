@@ -589,10 +589,9 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 
-add_dependencies(libdynd_OBJ plugin)
-set_source_files_properties(${libdynd_SRC} PROPERTIES OBJECT_DEPENDS plugin)
+add_dependencies(libdynd_OBJ dynd_plugin)
 set_target_properties(libdynd_OBJ PROPERTIES
-  COMPILE_FLAGS "-Xclang -load -Xclang plugin/libplugin.so")
+  COMPILE_FLAGS "-Xclang -load -Xclang plugin/libdynd_plugin.so")
 
 if (DYND_SHARED_LIB)
     set_property(
