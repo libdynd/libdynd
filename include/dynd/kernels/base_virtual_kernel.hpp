@@ -27,11 +27,13 @@ namespace nd {
    */
   template <typename T>
   struct base_virtual_kernel {
-    static const char *single_ir;
+    struct single_wrapper {
+      static void func(ckernel_prefix *DYND_UNUSED(self), char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
+      {
+      }
 
-    static void single_wrapper(ckernel_prefix *DYND_UNUSED(self), char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-    {
-    }
+      static const char *ir;
+    };
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                                  ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -43,7 +45,7 @@ namespace nd {
   };
 
   template <typename SelfType>
-  const char *base_virtual_kernel<SelfType>::single_ir = NULL;
+  const char *base_virtual_kernel<SelfType>::single_wrapper::ir = NULL;
 
 } // namespace dynd::nd
 } // namespace dynd

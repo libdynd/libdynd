@@ -581,7 +581,7 @@ namespace nd {
     template <typename KernelType>
     single_t get_single()
     {
-      return single_t(&KernelType::single_wrapper, KernelType::single_ir);
+      return single_t(&KernelType::single_wrapper::func, KernelType::single_wrapper::ir);
     }
 
     template <typename KernelType>

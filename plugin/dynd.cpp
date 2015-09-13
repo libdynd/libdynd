@@ -45,8 +45,8 @@ public:
     if (F.hasFnAttribute("emit_llvm")) {
       Module *M = F.getParent();
 
-      static Regex R("14single_wrapper.*$");
-      GlobalVariable *GV = M->getGlobalVariable(R.sub("9single_irE", F.getName()), true);
+      static Regex R("4func.*$");
+      GlobalVariable *GV = M->getGlobalVariable(R.sub("2irE", F.getName()), true);
       if (GV != NULL) {
         string S;
         raw_string_ostream SO(S);
