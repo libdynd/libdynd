@@ -5,6 +5,7 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
       - kalakris-cmake
+      - llvm-toolchain-precise-3.5
     packages:
       - gcc-4.8
       - g++-4.8
