@@ -162,6 +162,10 @@ if(LLVM_FOUND)
     set_target_properties(test_libdynd PROPERTIES
     #-Wno-unnamed-type-template-args
         COMPILE_FLAGS "-pthread -Xclang -load -Xclang ${CMAKE_BINARY_DIR}/plugin/libdynd_plugin.so")
+else()
+    set_target_properties(test_libdynd PROPERTIES
+    #-Wno-unnamed-type-template-args
+        COMPILE_FLAGS "-pthread")
 endif()
 
     target_link_libraries(test_libdynd
