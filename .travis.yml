@@ -31,7 +31,8 @@ matrix:
       - make -j5 || exit 1
       - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
-    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
+#    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
+    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address'
   - compiler: gcc
     env: CONDA
     before_install:
