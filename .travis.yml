@@ -34,7 +34,7 @@ matrix:
 #  - compiler: clang
 #    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
   - compiler: gcc
-    env: CONDA=""
+    env: CONDA=true
     before_install:
       - env
       - npm install --save-dev travis-after-all
@@ -53,7 +53,7 @@ matrix:
   - language: objective-c
     osx_image: xcode6.4
     compiler: clang
-    env: OSX CONDA=""
+    env: OSX CONDA=true
     addons:
     before_script:
     before_install:
