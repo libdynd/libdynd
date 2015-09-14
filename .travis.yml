@@ -88,7 +88,8 @@ matrix:
       - python setup.py install
       - cd ..
       - python -c "import dynd; dynd.test(exit=True)"
-    after_script:
+
+after_script:
       - |
 
         declare exitCode
