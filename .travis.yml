@@ -48,14 +48,17 @@ matrix:
     script:
       - conda build conda.recipe
     after_script:
-  - |
-      declare exitCode
-      curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
-      exitCode=$?
-      if [ $exitCode -eq 0 ]; then
-        echo "all passed"; 
-        # Here goes the code that needs to be executed if the build succeeded
-      fi
+      - |
+
+        declare exitCode
+
+        curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
+        exitCode=$?
+
+        if [ $exitCode -eq 0 ]; then
+          echo "all passed"; 
+          # Here goes the code that needs to be executed if the build succeeded
+        fi
     after_success:
       - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
   - language: objective-c
