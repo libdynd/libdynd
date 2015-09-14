@@ -533,10 +533,27 @@ namespace nd {
         get_child()->strided(dst, 0, &src0_data, &src0_inner_stride, inner_size);
       }
 
-      void strided_first(char *DYND_UNUSED(dst), intptr_t DYND_UNUSED(dst_stride), char *const *DYND_UNUSED(src),
-                         const intptr_t *DYND_UNUSED(src_stride), size_t DYND_UNUSED(count))
+      void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
-        throw std::runtime_error("strided_first is not supported for variable-sized dimensions");
+        ckernel_prefix *init_child = get_child(init_offset);
+        ckernel_prefix *reduction_child = get_child();
+
+        char *src0 = src[0];
+        for (size_t i = 0; i != count; ++i) {
+          char *src0_data = reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->begin;
+          init_child->single(dst, &src0_data);
+
+          size_t inner_size = reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->size;
+          if (src0_inner_stride_first != 0) {
+            --inner_size;
+          }
+
+          src0_data += src0_inner_stride_first;
+          reduction_child->strided(dst, 0, &src0_data, &src0_inner_stride,
+                                   reinterpret_cast<ndt::var_dim_type::data_type *>(src0)->size - 1);
+          dst += dst_stride;
+          src0 += src_stride[0];
+        }
       }
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t size)
