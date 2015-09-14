@@ -593,11 +593,6 @@ endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
-set_property(
-    DIRECTORY ${CMAKE_SOURCE_DIR}
-    PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
-)
-
 add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
 
 if(DYND_LLVM)
@@ -645,6 +640,11 @@ if (DYND_CUDA)
         PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
         )
 endif()
+
+set_property(
+    TARGET libdynd libdynd_OBJ
+    PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
+)
 
 # Add preprocessor definitions from CMake
 configure_file("include/dynd/cmake_config.hpp.in"
