@@ -96,6 +96,7 @@ script:
 - make -j5 || exit 1
 - ./tests/test_libdynd
 after_script:
+  - popd
   - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ $CONDA == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
   - |
 
