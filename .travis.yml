@@ -47,11 +47,11 @@ matrix:
       - export CXX="g++-4.8"
     script:
       - conda build conda.recipe
-#    after_script:
- #     - declare exitCode
-  #    - curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.3.0/lib/travis-after-all.js | node
-   #   - exitCode=$?
-    #  - if [ $exitCode -eq 0 ]; then echo "all passed"; fi
+    after_script:
+      - declare exitCode
+      - curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.3.0/lib/travis-after-all.js | node
+      - exitCode=$?
+      - if [ $exitCode -eq 0 ]; then echo "all passed"; fi
     after_success:
       - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
   - language: objective-c
