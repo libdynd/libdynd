@@ -36,13 +36,13 @@ matrix:
   - compiler: gcc
     env: CONDA
     before_install:
-      - env
       - npm install --save-dev travis-after-all
       - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
       - bash Miniconda-latest-Linux-x86_64.sh -b
+      - export CONDA=
       - export PATH=$HOME/miniconda/bin:$PATH
       - conda install --yes conda-build jinja2
-      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ -n "${CONDA+1}" ]; then conda install --yes anaconda-client; fi
+      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     before_script:
       - export CC="gcc-4.8"
       - export CXX="g++-4.8"
@@ -59,13 +59,14 @@ matrix:
     before_install:
       - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
       - bash Miniconda-latest-MacOSX-x86_64.sh -b
+      - export CONDA=
       - export PATH=$HOME/miniconda/bin:$PATH
       - conda install --yes conda-build jinja2
       - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     script:
       - conda build conda.recipe
     after_success:
-      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [-z "$CONDA"]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
+      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ -n "${CONDA+1}" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
   - language: python
     env: DYND_FFTW=OFF VERBOSE=1
     compiler: clang
