@@ -1,21 +1,19 @@
 sudo: false
-
 addons:
   apt:
     sources:
-      - ubuntu-toolchain-r-test
-      - kalakris-cmake
-      - llvm-toolchain-precise-3.4
+    - ubuntu-toolchain-r-test
+    - kalakris-cmake
+    - llvm-toolchain-precise-3.4
     packages:
-      - gcc-4.8
-      - g++-4.8
-      - cmake
-      - valgrind
-      - libfftw3-dev
+    - gcc-4.8
+    - g++-4.8
+    - cmake
+    - valgrind
+    - libfftw3-dev
 cache:
   directories:
-    - $HOME/libdynd/build
-
+  - $HOME/libdynd/build
 matrix:
   include:
   - compiler: gcc
@@ -24,69 +22,68 @@ matrix:
     - export CC="gcc-4.8"
     - export CXX="g++-4.8"
     script:
-      - make -j5 || exit 1
-      - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
+    - make -j5 || exit 1
+    - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
     script:
-      - make -j5 || exit 1
-      - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
-#  - compiler: clang
-#    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
+    - make -j5 || exit 1
+    - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: gcc
     env: CONDA=true
     before_install:
-      - env
-      - npm install --save-dev travis-after-all
-      - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-      - bash Miniconda-latest-Linux-x86_64.sh -b
-      - export PATH=$HOME/miniconda/bin:$PATH
-      - conda install --yes conda-build jinja2
-      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
+    - env
+    - npm install --save-dev travis-after-all
+    - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
+    - bash Miniconda-latest-Linux-x86_64.sh -b
+    - export PATH=$HOME/miniconda/bin:$PATH
+    - conda install --yes conda-build jinja2
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      conda install --yes anaconda-client; fi
     before_script:
-      - export CC="gcc-4.8"
-      - export CXX="g++-4.8"
+    - export CC="gcc-4.8"
+    - export CXX="g++-4.8"
     script:
-      - conda build conda.recipe
+    - conda build conda.recipe
   - language: objective-c
     osx_image: xcode6.4
     compiler: clang
     env: OSX CONDA=true
-    addons:
-    before_script:
+    addons: 
+    before_script: 
     before_install:
-      - env
-      - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
-      - bash Miniconda-latest-MacOSX-x86_64.sh -b
-      - export PATH=$HOME/miniconda/bin:$PATH
-      - conda install --yes conda-build jinja2
-      - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
+    - env
+    - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
+    - bash Miniconda-latest-MacOSX-x86_64.sh -b
+    - export PATH=$HOME/miniconda/bin:$PATH
+    - conda install --yes conda-build jinja2
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
+      conda install --yes anaconda-client; fi
     script:
-      - conda build conda.recipe
+    - conda build conda.recipe
   - language: python
     env: DYND_FFTW=OFF VERBOSE=1
     compiler: clang
     python: 2.7
     cache:
       directories:
-        - $HOME/.cache/pip
-        - $HOME/dynd-python/build
+      - $HOME/.cache/pip
+      - $HOME/dynd-python/build
     before_install:
-      - export CC=clang
-      - export CXX=clang++
-      - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
+    - export CC=clang
+    - export CXX=clang++
+    - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
     before_script:
-      - cd ..
-      - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
-      - mkdir dynd-python/libraries
-      - mv libdynd dynd-python/libraries/libdynd
-      - cd dynd-python
+    - cd ..
+    - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
+    - mkdir dynd-python/libraries
+    - mv libdynd dynd-python/libraries/libdynd
+    - cd dynd-python
     script:
-      - python -c "import numpy; print numpy.__version__"
-      - python setup.py install
-      - cd ..
-      - python -c "import dynd; dynd.test(exit=True)"
-
+    - python -c "import numpy; print numpy.__version__"
+    - python setup.py install
+    - cd ..
+    - python -c "import dynd; dynd.test(exit=True)"
 language: cpp
 before_script:
 - mkdir build
@@ -96,18 +93,28 @@ script:
 - make -j5 || exit 1
 - ./tests/test_libdynd
 after_script:
-  - popd
-  - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
-  - |
+- popd
+- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
+  == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
+  conda.recipe) --user dynd --channel dev; fi
+- ! '
 
-    declare exitCode
+  declare exitCode
 
-    curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
-    exitCode=$?
 
-    pwd
-    ls
-    if [ $exitCode -eq 0 ]; then ./trigger_python.sh $TRAVIS_TOKEN; fi
+  curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js
+  | node
+
+  exitCode=$?
+
+
+  pwd
+
+  ls
+
+  if [ $exitCode -eq 0 ]; then ./trigger_python.sh $TRAVIS_TOKEN; fi
+
+'
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
@@ -116,4 +123,4 @@ notifications:
 env:
   global:
     secure: hBfE2SDg1RY4jTPIhEecv9J7E6TPZKLMl2lVl5W+PDjRkjdN4GNfGttbOOerlFxuyDOS/3hOgN5HcIq/wamOSCLo7+QqDBd4m/Pk5z+BfBrT4lQc3oCLNxm9/+POxeAmzHVQvb1PkF7m1Ft8Zt+2HeCWfb9q6nlcRbMLfObBhjg=
-    secure: Qt/St9copUdPo4kej+9DtLDCzIAkDo/PDP0Ac244yF+8dRac3KhskRVVURNcCMonUeuqS5Dm5qcQl9b/L4P9Gkpn1aDKPHMp7pgTZHZLJ7VIHgFrSWo545mqV0fcYN+GLpaSqd8NwdUi5+1aHGWTtrw4BoIO4DSgV4eiIVEdRbA=
+    secure: KJZ5DWK3iAmthDnPaXz/S8aQFa6zVlD+CWCPXM+vgkiJQG5qgJfn5t2yy5n3mVyS0qZFd/LrFJ6ZqjUr/BKFDqGPBxESYIAOOgN+cXIEWxkeGFEHxOEK9QBS6aq6GBhyQlteWcqozYsG93oSVh+Xiv9tHl4m1mHXOHk2llQXy4g=
