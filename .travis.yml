@@ -107,7 +107,7 @@ after_script:
 
     pwd
     ls
-    if [ $exitCode -eq 0 ]; then ./trigger_python.sh; fi
+    if [ $exitCode -eq 0 ]; then ./trigger_python.sh $TRAVIS_TOKEN; fi
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
