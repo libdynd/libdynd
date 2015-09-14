@@ -34,12 +34,11 @@ matrix:
 #  - compiler: clang
 #    env: DYND_FFTW=ON CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer'
   - compiler: gcc
-    env: CONDA
+    env: CONDA=
     before_install:
       - npm install --save-dev travis-after-all
       - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
       - bash Miniconda-latest-Linux-x86_64.sh -b
-      - export CONDA=
       - export PATH=$HOME/miniconda/bin:$PATH
       - conda install --yes conda-build jinja2
       - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
@@ -53,13 +52,12 @@ matrix:
   - language: objective-c
     osx_image: xcode6.4
     compiler: clang
-    env: OSX CONDA
+    env: OSX CONDA=
     addons:
     before_script:
     before_install:
       - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
       - bash Miniconda-latest-MacOSX-x86_64.sh -b
-      - export CONDA=
       - export PATH=$HOME/miniconda/bin:$PATH
       - conda install --yes conda-build jinja2
       - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
