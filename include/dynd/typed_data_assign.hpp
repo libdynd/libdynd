@@ -21,7 +21,7 @@ namespace nd {
 
 namespace eval {
   struct DYND_API eval_context;
-  extern eval_context default_eval_context;
+  extern DYND_API eval_context default_eval_context;
 } // namespace eval
 
 /**

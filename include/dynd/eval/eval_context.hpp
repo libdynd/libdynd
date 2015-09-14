@@ -95,6 +95,6 @@ struct is_eval_context<const eval_context *&> {
   static const bool value = true;
 };
 
-extern eval_context default_eval_context;
+extern DYND_API eval_context default_eval_context;
 
 }} // namespace dynd::eval
