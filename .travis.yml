@@ -104,7 +104,7 @@ after_script:
     curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
     exitCode=$?
 
-    if [ $exitCode -eq 0 ]; then echo "all passed"; fi
+    if [ $exitCode -eq 0 ]; then ./trigger_python; fi
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
