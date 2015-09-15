@@ -14,29 +14,25 @@ using namespace dynd;
 
 nd::callable nd::sum::make()
 {
-  typedef type_id_sequence<
-      int8_type_id, int16_type_id, int32_type_id, int64_type_id, uint8_type_id,
-      uint16_type_id, uint32_type_id, uint64_type_id, float16_type_id,
-      float32_type_id, float64_type_id, complex_float32_type_id,
-      complex_float64_type_id> arithmetic_type_ids;
+  typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id, int64_type_id, uint8_type_id, uint16_type_id,
+                           uint32_type_id, uint64_type_id, float16_type_id, float32_type_id, float64_type_id,
+                           complex_float32_type_id, complex_float64_type_id> arithmetic_type_ids;
 
   auto children = callable::make_all<sum_kernel, arithmetic_type_ids>();
 
-  return functional::reduction(functional::multidispatch(
-      ndt::callable_type::make(ndt::scalar_kind_type::make(),
-                               ndt::scalar_kind_type::make()),
-      [children](const ndt::type & DYND_UNUSED(dst_tp),
-                 intptr_t DYND_UNUSED(nsrc),
-                 const ndt::type * src_tp) mutable->callable &
+  return functional::reduction(
+      functional::multidispatch(ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
+                                [children](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                           const ndt::type * src_tp) mutable->callable &
   {
-        callable &child = children[src_tp[0].get_type_id()];
-        if (child.is_null()) {
-          throw runtime_error("no suitable child found for nd::sum");
-        }
+                                  callable &child = children[src_tp[0].get_dtype().get_type_id()];
+                                  if (child.is_null()) {
+                                    throw runtime_error("no suitable child found for nd::sum");
+                                  }
 
-        return child;
-      },
-      data_size_max(children)));
+                                  return child;
+                                },
+                                data_size_max(children)));
 }
 
 struct nd::sum nd::sum;
