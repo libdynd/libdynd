@@ -80,13 +80,6 @@ list(APPEND CMAKE_MODULE_PATH
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-# Embedded libraries
-add_subdirectory(thirdparty/cephes)
-add_subdirectory(thirdparty/datetime)
-include_directories(thirdparty/datetime/include)
-
-set(DYND_LINK_LIBS cephes datetime)
-
 if(WIN32)
     set(DYND_BUILD_BENCHMARKS OFF)
 endif()
@@ -114,6 +107,13 @@ else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=20")
     endif()
 endif()
+
+# Embedded libraries
+add_subdirectory(thirdparty/cephes)
+add_subdirectory(thirdparty/datetime)
+include_directories(thirdparty/datetime/include)
+
+set(DYND_LINK_LIBS cephes datetime)
 
 # Get the git revision
 include(GetGitRevisionDescriptionDyND)
