@@ -1,3 +1,8 @@
+declare exitCode
+curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
+exitCode=$?
+#if [ $exitCode -eq 0 ]; then ./trigger_python.sh $TRAVIS_TOKEN; fi
+
 body='{
 "request": {
   "branch":"master"
