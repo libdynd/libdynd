@@ -1801,12 +1801,12 @@ namespace nd {
 
     template <>
     struct make_from_vec<ndt::type> {
-      static array make(const std::vector<ndt::type> &vec);
+      static DYND_API array make(const std::vector<ndt::type> &vec);
     };
 
     template <>
     struct make_from_vec<std::string> {
-      static array make(const std::vector<std::string> &vec);
+      static DYND_API array make(const std::vector<std::string> &vec);
     };
   } // namespace detail
 

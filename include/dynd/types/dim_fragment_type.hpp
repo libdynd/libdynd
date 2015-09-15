@@ -93,7 +93,7 @@ namespace ndt {
   }; // class dim_fragment_type
 
   /** Makes an empty dim fragment */
-  const type &make_dim_fragment();
+  DYND_API const type &make_dim_fragment();
 
   /** Makes a dim fragment out of the tagged dims provided */
   inline type make_dim_fragment(intptr_t ndim, const intptr_t *tagged_dims)

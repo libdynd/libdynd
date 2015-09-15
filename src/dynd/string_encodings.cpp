@@ -16,7 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-int dynd::string_encoding_char_size_table[6] = {
+DYND_API int dynd::string_encoding_char_size_table[6] = {
     // string_encoding_ascii
     1,
     // string_encoding_ucs_2
