@@ -1,14 +1,3 @@
-declare exitCode
-curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
-exitCode=$?
-
-if [ $exitCode -ne 0 ]; then exit 0; fi
-
-if [ $TRAVIS_BRANCH != "master" ] || [ $TRAVIS_PULL_REQUEST == "true" ]; then
-  echo "exit";
-  exit 0;
-fi
-
 body='{
 "request": {
   "branch":"master"
