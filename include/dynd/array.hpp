@@ -23,7 +23,7 @@
 namespace dynd {
 
 namespace ndt {
-  type make_fixed_dim(size_t dim_size, const type &element_tp);
+  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 } // namespace ndt;
 
 namespace nd {
@@ -1718,7 +1718,8 @@ namespace nd {
                 size);
   }
 
-  template <class T, int N>
+  // Temporarily removed due to conflicting dll linkage with earlier versions of this function.
+  /*template <class T, int N>
   nd::array array_rw(const T (&rhs)[N])
   {
     const int ndim = detail::ndim_from_array<T[N]>::value;
@@ -1731,7 +1732,7 @@ namespace nd {
     DYND_MEMCPY(result.get_ndo()->m_data_pointer,
                 reinterpret_cast<const void *>(&rhs), size);
     return result;
-  }
+}*/
 
   template <int N>
   nd::array::array(const ndt::type (&rhs)[N])
