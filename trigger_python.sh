@@ -4,6 +4,10 @@ exitCode=$?
 
 if [ $exitCode -ne 0 ]; then exit 0; fi
 
+if [ $TRAVIS_BRANCH != "master" ] || [ $TRAVIS_PULL_REQUEST != "false" ]; then
+  exit 0;
+fi
+
 body='{
 "request": {
   "branch":"master"
