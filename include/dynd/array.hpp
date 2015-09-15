@@ -46,7 +46,7 @@ namespace nd {
   };
 
   /** Stream printing function */
-  std::ostream &operator<<(std::ostream &o, const array &rhs);
+  DYND_API std::ostream &operator<<(std::ostream &o, const array &rhs);
 
   class array_vals;
   class array_vals_at;
@@ -856,7 +856,7 @@ namespace nd {
       }
     };
 
-    friend std::ostream &operator<<(std::ostream &o, const array &rhs);
+    friend DYND_API std::ostream &operator<<(std::ostream &o, const array &rhs);
     friend class array_vals;
     friend class array_vals_at;
   };
