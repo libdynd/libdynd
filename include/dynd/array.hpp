@@ -914,8 +914,8 @@ namespace nd {
   DYND_API nd::array array_rw(float value);
   DYND_API nd::array array_rw(double value);
   DYND_API nd::array array_rw(const float128 &value);
-  DYND_API nd::array array_rw(complex<float> value);
-  DYND_API nd::array array_rw(complex<double> value);
+  DYND_API nd::array array_rw(dynd::complex<float> value);
+  DYND_API nd::array array_rw(dynd::complex<double> value);
   DYND_API nd::array array_rw(std::complex<float> value);
   DYND_API nd::array array_rw(std::complex<double> value);
   DYND_API nd::array array_rw(const std::string &value);
@@ -928,12 +928,12 @@ namespace nd {
    * NOTE: Does NOT create a scalar of the provided type,
    *       use dynd::empty(type) for that!
    */
-  DYND_API nd::array array_rw(const ndt::type &dt);
+  DYND_API nd::array array_rw(const ndt::type &tp);
   /**
    * Constructs a readwrite array from a C-style array.
    */
   template <class T, int N>
-  DYND_API nd::array array_rw(const T (&rhs)[N]);
+  nd::array array_rw(const T (&rhs)[N]);
 
   /**
    * This is a helper class for dealing with value assignment and collapsing
@@ -1719,7 +1719,7 @@ namespace nd {
   }
 
   // Temporarily removed due to conflicting dll linkage with earlier versions of this function.
-  /*template <class T, int N>
+  template <class T, int N>
   nd::array array_rw(const T (&rhs)[N])
   {
     const int ndim = detail::ndim_from_array<T[N]>::value;
@@ -1732,7 +1732,7 @@ namespace nd {
     DYND_MEMCPY(result.get_ndo()->m_data_pointer,
                 reinterpret_cast<const void *>(&rhs), size);
     return result;
-}*/
+}
 
   template <int N>
   nd::array::array(const ndt::type (&rhs)[N])
