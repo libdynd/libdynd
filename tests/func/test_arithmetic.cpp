@@ -277,21 +277,14 @@ TEST(Arithmetic, CompoundDiv)
 */
 
 
-
 TEST(Arithmetic, OptionPlus)
 {
-  typedef nd::option_arithmetic_kernel<struct nd::add> goofball_kernel;
   nd::array NA = nd::empty(ndt::type("?int32"));
   nd::assign_na(NA);
-  nd::array a = nd::empty(ndt::type("3 * ?int32"));
-  a(0).vals() = NA;
-  a(1).vals() = 1.0;
-  a(2).vals() = 3.0;
-  std::cout << a << std::endl;
-  // EXPECT_ARRAY_EQ(a, +a);
-
-  std::cout << (a(0) + 3) << std::endl;
-  // std::cout << (a * 4) << std::endl;
+  EXPECT_FALSE(nd::is_avail(NA + 1));
+  EXPECT_FALSE(nd::is_avail(NA - 1));
+  EXPECT_FALSE(nd::is_avail(NA * 1));
+  EXPECT_FALSE(nd::is_avail(NA / 1));
 }
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,
