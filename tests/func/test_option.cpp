@@ -55,4 +55,8 @@ TEST(Option, IsAvailArray) {
     data = parse_json("2 * 3 * ?float64", "[[1.0, null, 3.0], [null, \"NaN\", 3.0]]");
     expected = parse_json("2 * 3 * bool", "[[true, false, true], [false, false, true]]");
     EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
+
+    data = parse_json("0 * ?int64", "[]");
+    expected = parse_json("0 * bool", "[]");
+    EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
 }
