@@ -47,6 +47,7 @@ namespace nd {
   struct option_arithmetic_kernel : base_kernel<option_arithmetic_kernel<FuncType>, 2> {
     static const size_t data_size = 0;
     intptr_t arith_offset;
+    intptr_t assign_na_offset;
 
     void single(char *dst, char *const *src)
     {
@@ -55,6 +56,8 @@ namespace nd {
       is_avail->single(reinterpret_cast<char*>(&child_dst), &src[0]);
       if (child_dst) {
         this->get_child(arith_offset)->single(dst, src);
+      } else {
+        this->get_child(assign_na_offset)->single(dst, nullptr);
       }
     }
 
@@ -115,6 +118,24 @@ namespace nd {
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1]};
       ckb_offset = arith.get()->instantiate(arith.get()->static_data, arith.get()->data_size,
+                                                    data,
+                                                    ckb,
+                                                    ckb_offset,
+                                                    dst_tp,
+                                                    dst_arrmeta,
+                                                    nsrc,
+                                                    child_src_tp,
+                                                    src_arrmeta,
+                                                    kernreq,
+                                                    ectx,
+                                                    nkwd,
+                                                    kwds,
+                                                    tp_vars);
+      self = option_arithmetic_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+                   option_arith_offset);
+      self->assign_na_offset = ckb_offset;
+      auto assign_na = nd::assign_na_decl::get();
+      ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data, assign_na.get()->data_size,
                                                     data,
                                                     ckb,
                                                     ckb_offset,
