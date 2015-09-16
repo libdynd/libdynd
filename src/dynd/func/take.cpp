@@ -9,7 +9,7 @@
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::take::make()
+DYND_API nd::callable nd::take::make()
 {
   // Masked take: (M * T, M * bool) -> var * T
   // Indexed take: (M * T, N * intptr) -> N * T
@@ -17,4 +17,4 @@ nd::callable nd::take::make()
   return callable::make<take_ck>(ndt::type("(Dims... * T, N * Ix) -> R * T"), 0);
 }
 
-struct nd::take nd::take;
+DYND_API struct nd::take nd::take;

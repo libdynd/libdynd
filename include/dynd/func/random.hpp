@@ -10,10 +10,10 @@ namespace dynd {
 namespace nd {
   namespace random {
 
-    extern struct uniform : declfunc<uniform> {
-      static callable children[DYND_TYPE_ID_MAX + 1];
+    extern DYND_API struct uniform : declfunc<uniform> {
+      static DYND_API callable children[DYND_TYPE_ID_MAX + 1];
 
-      static callable make();
+      static DYND_API callable make();
     } uniform;
 
   } // namespace dynd::nd::random

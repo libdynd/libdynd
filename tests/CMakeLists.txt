@@ -148,6 +148,13 @@ if(WIN32)
     target_link_libraries(test_libdynd
         ${LINK_LIBS}
         )
+    if(DYND_SHARED_LIB)
+        # Copy libdynd.dll to the directory containing test_libdynd so the tests
+        # can find it when they are run.
+        add_custom_command(TARGET test_libdynd POST_BUILD
+                           COMMAND ${CMAKE_COMMAND} -E copy_directory
+                           $<TARGET_FILE_DIR:libdynd> $<TARGET_FILE_DIR:test_libdynd>)
+    endif()
 elseif(APPLE)
     target_link_libraries(test_libdynd
         ${LINK_LIBS}

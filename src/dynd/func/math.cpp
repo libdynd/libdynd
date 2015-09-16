@@ -37,7 +37,7 @@ float myexp(float x) { return exp(x); }
 double myexp(double x) { return exp(x); }
 } // anonymous namespace
 
-nd::callable nd::cos::make()
+DYND_API nd::callable nd::cos::make()
 {
   /*
   #ifdef DYND_CUDA
@@ -64,7 +64,7 @@ nd::callable nd::cos::make()
       functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
-nd::callable nd::sin::make()
+DYND_API nd::callable nd::sin::make()
 {
   /*
   #ifdef DYND_CUDA
@@ -91,7 +91,7 @@ nd::callable nd::sin::make()
       functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
-nd::callable nd::tan::make()
+DYND_API nd::callable nd::tan::make()
 {
   /*
   #ifdef DYND_CUDA
@@ -118,7 +118,7 @@ nd::callable nd::tan::make()
       functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
-nd::callable nd::exp::make()
+DYND_API nd::callable nd::exp::make()
 {
   /*
   #ifdef DYND_CUDA
@@ -145,7 +145,7 @@ nd::callable nd::exp::make()
       functional::multidispatch(pattern_tp, children.begin(), children.end()));
 }
 
-struct nd::cos nd::cos;
-struct nd::sin nd::sin;
-struct nd::tan nd::tan;
-struct nd::exp nd::exp;
+DYND_API struct nd::cos nd::cos;
+DYND_API struct nd::sin nd::sin;
+DYND_API struct nd::tan nd::tan;
+DYND_API struct nd::exp nd::exp;

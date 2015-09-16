@@ -932,7 +932,7 @@ namespace ndt {
       return equivalent<A0>::make(std::forward<A0>(a0), std::forward<A>(a)...);
     }
 
-    friend std::ostream &operator<<(std::ostream &o, const type &rhs);
+    friend DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
   template <>
@@ -1263,7 +1263,7 @@ namespace ndt {
    */
   extern const type static_builtin_types[builtin_type_id_count];
 
-  std::ostream &operator<<(std::ostream &o, const type &rhs);
+  DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 
 } // namespace ndt
 

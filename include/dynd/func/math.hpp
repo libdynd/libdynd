@@ -10,20 +10,20 @@
 namespace dynd {
 namespace nd {
 
-  extern struct cos : declfunc<cos> {
-    static callable make();
+  extern DYND_API struct cos : declfunc<cos> {
+    static DYND_API callable make();
   } cos;
 
-  extern struct sin : declfunc<sin> {
-    static callable make();
+  extern DYND_API struct sin : declfunc<sin> {
+    static DYND_API callable make();
   } sin;
 
-  extern struct tan : declfunc<tan> {
-    static callable make();
+  extern DYND_API struct tan : declfunc<tan> {
+    static DYND_API callable make();
   } tan;
 
-  extern struct exp : declfunc<exp> {
-    static callable make();
+  extern DYND_API struct exp : declfunc<exp> {
+    static DYND_API callable make();
   } exp;
 
 } // namespace dynd::nd
