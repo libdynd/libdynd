@@ -100,20 +100,20 @@ namespace nd {
 
 #endif
 
-  extern struct fft : declfunc<fft> {
-    static callable make();
+  extern DYND_API struct fft : declfunc<fft> {
+    static DYND_API callable make();
   } fft;
 
-  extern struct ifft : declfunc<ifft> {
-    static callable make();
+  extern DYND_API struct ifft : declfunc<ifft> {
+    static DYND_API callable make();
   } ifft;
 
-  extern struct rfft : declfunc<rfft> {
-    static callable make();
+  extern DYND_API struct rfft : declfunc<rfft> {
+    static DYND_API callable make();
   } rfft;
 
-  extern struct irfft : declfunc<irfft> {
-    static callable make();
+  extern DYND_API struct irfft : declfunc<irfft> {
+    static DYND_API callable make();
   } irfft;
 
   /**

@@ -49,14 +49,14 @@ namespace nd {
   template <typename T>
   callable declop<T, 2>::default_child;
 
-  extern struct assign : declop<assign, 2> {
+  extern DYND_API struct assign : declop<assign, 2> {
     static callable &overload(const ndt::type &dst_tp, const ndt::type &src0_tp)
     {
       get();
       return children[dst_tp.get_type_id()][src0_tp.get_type_id()];
     }
 
-    static std::map<std::array<type_id_t, 2>, callable> make_children();
+    static DYND_API std::map<std::array<type_id_t, 2>, callable> make_children();
   } assign;
 
 } // namespace dynd::nd
