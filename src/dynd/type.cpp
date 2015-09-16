@@ -72,7 +72,7 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata,
   return data;
 }
 
-const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {
+const DYND_API ndt::type ndt::static_builtin_types[builtin_type_id_count] = {
     ndt::type(uninitialized_type_id),   ndt::type(bool_type_id),
     ndt::type(int8_type_id),            ndt::type(int16_type_id),
     ndt::type(int32_type_id),           ndt::type(int64_type_id),

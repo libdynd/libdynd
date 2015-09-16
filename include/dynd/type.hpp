@@ -1260,7 +1260,7 @@ namespace ndt {
    * static_builtin_types[type_id_of<int>::value] as a fast
    * way to get a const reference to its type.
    */
-  extern const type static_builtin_types[builtin_type_id_count];
+  extern DYND_API const type static_builtin_types[builtin_type_id_count];
 
   DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 
