@@ -12,7 +12,7 @@ namespace nd {
 
   extern struct is_avail : declfunc<is_avail> {
     static callable children[DYND_TYPE_ID_MAX + 1];
-    static callable default_child;
+    static callable dim_children[2];
 
     static callable &get_child(const ndt::type &value_tp)
     {
@@ -25,7 +25,6 @@ namespace nd {
 
   extern struct assign_na_decl : declfunc<assign_na_decl> {
     static callable children[DYND_TYPE_ID_MAX + 1];
-    static callable default_child;
 
     static callable &get_child(const ndt::type &value_tp)
     {
