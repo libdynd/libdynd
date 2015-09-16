@@ -243,7 +243,7 @@ std::map<nd::string, nd::callable> &func::get_regfunctions()
     registry["uniform"] = nd::random::uniform;
     registry["take"] = nd::take;
     registry["sum"] = nd::sum;
-    resistry["is_avail"] = nd::is_avail;
+    registry["is_avail"] = nd::is_avail;
   }
 
   return registry;
