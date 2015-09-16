@@ -26,10 +26,9 @@ configuration: Release
 build_script:
   - mkdir build
   - cd build
-  - if "%platform%"=="Win32" cmake .. -G "Visual Studio 12"
+  - if "%platform%"=="Win32" cmake -DDYND_SHARED_LIB=OFF .. -G "Visual Studio 12"
   - if "%platform%"=="x64" cmake .. -G "Visual Studio 12 Win64"
   - cmake --build . --config Release
 
 test_script:
   - .\tests\Release\test_libdynd.exe  --gtest_output=xml:../test_results.xml
-
