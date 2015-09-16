@@ -819,9 +819,9 @@ namespace ndt {
   }
 
   namespace detail {
-    extern uint8_t builtin_data_sizes[builtin_type_id_count];
-    extern uint8_t builtin_kinds[builtin_type_id_count];
-    extern uint8_t builtin_data_alignments[builtin_type_id_count];
+    extern DYND_API uint8_t builtin_data_sizes[builtin_type_id_count];
+    extern DYND_API uint8_t builtin_kinds[builtin_type_id_count];
+    extern DYND_API uint8_t builtin_data_alignments[builtin_type_id_count];
   } // namespace dynd::ndt::detail
 
   /**
