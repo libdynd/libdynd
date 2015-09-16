@@ -7,26 +7,15 @@
 #include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/kernels/is_avail_kernel.hpp>
 #include <dynd/math.hpp>
+#include <dynd/func/multidispatch.hpp>
+#include <dynd/func/call.hpp>
+#include <dynd/func/elwise.hpp>
 
 using namespace std;
 using namespace dynd;
 
-//      const callable self = functional::call<F>(ndt::type("(?Any) ->
-//      bool"));
-
-/*
-      for (type_id_t i0 : dim_type_ids::vals()) {
-        const ndt::type child_tp = ndt::callable::make(
-self.get_type()->get_return_type(),
-            {ndt::type(i0)});
-        children[i0] = functional::elwise(child_tp, self);
-      }
-
-      return functional::multidispatch(self.get_array_type(), children,
-                                       default_child);
-*/
-
 nd::callable nd::is_avail::children[DYND_TYPE_ID_MAX + 1];
+nd::callable nd::is_avail::dim_children[2];
 
 nd::callable nd::is_avail::make()
 {
@@ -41,9 +30,29 @@ nd::callable nd::is_avail::make()
     children[pair.first] = pair.second;
   }
 
-  // ...
+  callable self = functional::call<is_avail>(ndt::type("(Any) -> Any"));
 
-  return callable();
+  for (auto tp_id : {fixed_dim_type_id, var_dim_type_id}) {
+    dim_children[tp_id - fixed_dim_type_id] = functional::elwise(self);
+  }
+
+  return functional::multidispatch(
+      ndt::type("(Any) -> Any"),
+      [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+         const ndt::type *src_tp) -> callable & {
+        callable *child = nullptr;
+        if (src_tp[0].get_kind() == option_kind)
+          child = &children[src_tp[0].extended<ndt::option_type>()->get_value_type().get_type_id()];
+        else
+          child = &dim_children[src_tp[0].get_type_id() - fixed_dim_type_id];
+
+        if (child->is_null()) {
+          throw std::runtime_error("no child found");
+        }
+
+        return *child;
+      },
+      0);
 }
 
 // underlying_type<type_id>::type
