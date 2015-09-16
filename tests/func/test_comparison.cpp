@@ -29,3 +29,28 @@ TEST(Comparison, Simple)
     std::cout << (a > b) << std::endl;
 }
 */
+
+TEST(Comparison, OptionScalar)
+{
+  nd::array NA = nd::empty(ndt::type("?int32"));
+  nd::assign_na(NA);
+  EXPECT_FALSE(nd::is_avail(NA < 1));
+  EXPECT_FALSE(nd::is_avail(NA > 1));
+  EXPECT_FALSE(nd::is_avail(NA >= 1));
+  EXPECT_FALSE(nd::is_avail(NA <= 1));
+  EXPECT_FALSE(nd::is_avail(NA == 1));
+  EXPECT_FALSE(nd::is_avail(NA != 1));
+}
+
+
+/* TEST(Comparison, OptionOption) */
+/* { */
+/*   nd::array NA = nd::empty(ndt::type("?int32")); */
+/*   nd::assign_na(NA); */
+/*   EXPECT_FALSE(nd::is_avail(NA < NA)); */
+/*   EXPECT_FALSE(nd::is_avail(NA > NA)); */
+/*   EXPECT_FALSE(nd::is_avail(NA >= NA)); */
+/*   EXPECT_FALSE(nd::is_avail(NA <= NA)); */
+/*   EXPECT_FALSE(nd::is_avail(NA == NA)); */
+/*   EXPECT_FALSE(nd::is_avail(NA != NA)); */
+/* } */
