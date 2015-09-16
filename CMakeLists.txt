@@ -125,6 +125,16 @@ configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/dynd/git_version.cpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp" @ONLY)
 
+if(DYND_SHARED_LIB)
+    set(DYND_SHARED_LIB_VAL 1)
+else()
+    set(DYND_SHARED_LIB_VAL 0)
+endif()
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/dynd/visibility.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/visibility.hpp" @ONLY)
+
 # Extract the version number from the version string
 string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
 string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
@@ -501,7 +511,7 @@ set(libdynd_SRC
     include/dynd/string_encodings.hpp
     include/dynd/uint128.hpp
     include/dynd/view.hpp
-    include/dynd/visibility.hpp
+    ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/visibility.hpp
     include/dynd/with.hpp
     )
 

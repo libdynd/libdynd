@@ -11,7 +11,11 @@
 #define DYND_API __declspec(dllexport)
 #else
 // Importing the library
+#if @DYND_SHARED_LIB_VAL@
 #define DYND_API __declspec(dllimport)
+#else
+#define DYND_API
+#endif
 #endif // defined(DYND_EXPORT)
 #define DYND_INTERNAL
 #else
