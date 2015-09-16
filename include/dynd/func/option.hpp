@@ -25,6 +25,7 @@ namespace nd {
 
   extern struct assign_na_decl : declfunc<assign_na_decl> {
     static callable children[DYND_TYPE_ID_MAX + 1];
+    static callable dim_children[2];
 
     static callable &get_child(const ndt::type &value_tp)
     {
