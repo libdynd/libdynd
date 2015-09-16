@@ -8,4 +8,4 @@
 using namespace std;
 using namespace dynd;
 
-eval::eval_context dynd::eval::default_eval_context;
+DYND_API eval::eval_context dynd::eval::default_eval_context;

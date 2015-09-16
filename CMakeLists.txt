@@ -19,15 +19,9 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
 # Some options configurable from the CMAKE command execution
 #
 # -DDYND_SHARED_LIB=ON/OFF, whether to build a shared or a static library.
-    if(WIN32)
-        option(DYND_SHARED_LIB
-            "Build a libdynd shared library instead of a static library"
-            OFF)
-    else()
-        option(DYND_SHARED_LIB
-            "Build a libdynd shared library instead of a static library"
-            ON)
-    endif()
+    option(DYND_SHARED_LIB
+        "Build a libdynd shared library instead of a static library"
+        ON)
 # -DDYND_CUDA=ON/OFF, whether to build libdynd with or without the CUDA Toolkit
     option(DYND_CUDA
         "Build a libdynd library with CUDA"
@@ -80,13 +74,6 @@ list(APPEND CMAKE_MODULE_PATH
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-# Embedded libraries
-add_subdirectory(thirdparty/cephes)
-add_subdirectory(thirdparty/datetime)
-include_directories(thirdparty/datetime/include)
-
-set(DYND_LINK_LIBS cephes datetime)
-
 if(WIN32)
     set(DYND_BUILD_BENCHMARKS OFF)
 endif()
@@ -94,14 +81,14 @@ endif()
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     # -WX: Treat warnings as errors
     # -bigobj: Allow lots of symbols (assignment_kernels.cpp and assignment_kernels.cu need this flag)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503 -DDYND_EXPORT")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -WX -EHsc -bigobj -wd4503")
 
     if (${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 18)
         message(FATAL_ERROR "Only MSVC 2013 (Version 18.0) and later are supported by LibDyND. Found version ${CMAKE_CXX_COMPILER_VERSION}.")
     endif ()
 else()
     if(WIN32)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers -DDYND_EXPORT")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Werror -Wno-missing-field-initializers")
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -std=c++11 -fomit-frame-pointer -fstrict-aliasing -Wall -Wextra -Wno-missing-field-initializers -fPIC -Wno-ignored-attributes -Werror")
     endif()
@@ -115,6 +102,13 @@ else()
     endif()
 endif()
 
+# Embedded libraries
+add_subdirectory(thirdparty/cephes)
+add_subdirectory(thirdparty/datetime)
+include_directories(thirdparty/datetime/include)
+
+set(DYND_LINK_LIBS cephes datetime)
+
 # Get the git revision
 include(GetGitRevisionDescriptionDyND)
 get_git_head_revision("${CMAKE_CURRENT_SOURCE_DIR}" GIT_REFSPEC DYND_GIT_SHA1)
@@ -124,6 +118,16 @@ message(STATUS "DyND version: ${DYND_VERSION_STRING}")
 configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/dynd/git_version.cpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp" @ONLY)
+
+if(DYND_SHARED_LIB)
+    set(DYND_SHARED_LIB_VAL 1)
+else()
+    set(DYND_SHARED_LIB_VAL 0)
+endif()
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/dynd/visibility.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/include/dynd/visibility.hpp" @ONLY)
 
 # Extract the version number from the version string
 string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
@@ -501,7 +505,7 @@ set(libdynd_SRC
     include/dynd/string_encodings.hpp
     include/dynd/uint128.hpp
     include/dynd/view.hpp
-    include/dynd/visibility.hpp
+    ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/visibility.hpp
     include/dynd/with.hpp
     )
 
@@ -605,11 +609,6 @@ if(DYND_LLVM)
 endif()
 
 if (DYND_SHARED_LIB)
-    set_property(
-        TARGET libdynd_OBJ
-        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
-        )
-
     if (DYND_CUDA)
         cuda_add_library(libdynd SHARED ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
     else()
@@ -619,10 +618,6 @@ if (DYND_SHARED_LIB)
         PROPERTIES
         OUTPUT_NAME "dynd"
         PREFIX "${CMAKE_SHARED_LIBRARY_PREFIX}"
-        )
-    set_property(
-        TARGET libdynd
-        PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
         )
 else()
     if (DYND_CUDA)
@@ -649,6 +644,11 @@ if (DYND_CUDA)
         PREFIX "${CMAKE_STATIC_LIBRARY_PREFIX}"
         )
 endif()
+
+set_property(
+    TARGET libdynd libdynd_OBJ
+    PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
+)
 
 # Add preprocessor definitions from CMake
 configure_file("include/dynd/cmake_config.hpp.in"

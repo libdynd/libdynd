@@ -15,11 +15,11 @@
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::mean::make()
+DYND_API nd::callable nd::mean::make()
 {
   return callable::make<mean_kernel>(
       ndt::type(int64_type_id), nd::sum::get().get()->data_size +
                                     nd::compound_div::get().get()->data_size);
 }
 
-struct nd::mean nd::mean;
+DYND_API struct nd::mean nd::mean;

@@ -34,7 +34,7 @@ enum string_encoding_t {
  * A table of the individual character sizes for
  * the various encodings.
  */
-extern int string_encoding_char_size_table[6];
+extern DYND_API int string_encoding_char_size_table[6];
 
 /**
  * Returns true if the provided encoding uses a variable-length encoding

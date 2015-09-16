@@ -14,9 +14,9 @@ struct uniform_kernel_alias {
   using type = nd::random::uniform_kernel<DstTypeID, GeneratorType>;
 };
 
-nd::callable nd::random::uniform::children[DYND_TYPE_ID_MAX + 1];
+DYND_API nd::callable nd::random::uniform::children[DYND_TYPE_ID_MAX + 1];
 
-nd::callable nd::random::uniform::make()
+DYND_API nd::callable nd::random::uniform::make()
 {
   typedef type_id_sequence<int32_type_id, int64_type_id, uint32_type_id,
                            uint64_type_id, float32_type_id, float64_type_id,
@@ -45,7 +45,7 @@ nd::callable nd::random::uniform::make()
       0));
 }
 
-struct nd::random::uniform nd::random::uniform;
+DYND_API struct nd::random::uniform nd::random::uniform;
 
 /*
 

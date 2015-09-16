@@ -1128,7 +1128,7 @@ namespace nd {
  * \param src_tp  The type of the source.
  * \param errmode  The error mode to use for the assignment.
  */
-nd::callable make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp, assign_error_mode errmode);
+DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp, assign_error_mode errmode);
 
 /**
  * Creates an callable which does the assignment from

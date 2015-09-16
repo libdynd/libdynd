@@ -23,7 +23,7 @@
 namespace dynd {
 
 namespace ndt {
-  type make_fixed_dim(size_t dim_size, const type &element_tp);
+  DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 } // namespace ndt;
 
 namespace nd {
@@ -46,7 +46,7 @@ namespace nd {
   };
 
   /** Stream printing function */
-  std::ostream &operator<<(std::ostream &o, const array &rhs);
+  DYND_API std::ostream &operator<<(std::ostream &o, const array &rhs);
 
   class array_vals;
   class array_vals_at;
@@ -856,7 +856,7 @@ namespace nd {
       }
     };
 
-    friend std::ostream &operator<<(std::ostream &o, const array &rhs);
+    friend DYND_API std::ostream &operator<<(std::ostream &o, const array &rhs);
     friend class array_vals;
     friend class array_vals_at;
   };
@@ -914,8 +914,8 @@ namespace nd {
   DYND_API nd::array array_rw(float value);
   DYND_API nd::array array_rw(double value);
   DYND_API nd::array array_rw(const float128 &value);
-  DYND_API nd::array array_rw(complex<float> value);
-  DYND_API nd::array array_rw(complex<double> value);
+  DYND_API nd::array array_rw(dynd::complex<float> value);
+  DYND_API nd::array array_rw(dynd::complex<double> value);
   DYND_API nd::array array_rw(std::complex<float> value);
   DYND_API nd::array array_rw(std::complex<double> value);
   DYND_API nd::array array_rw(const std::string &value);
@@ -928,12 +928,12 @@ namespace nd {
    * NOTE: Does NOT create a scalar of the provided type,
    *       use dynd::empty(type) for that!
    */
-  DYND_API nd::array array_rw(const ndt::type &dt);
+  DYND_API nd::array array_rw(const ndt::type &tp);
   /**
    * Constructs a readwrite array from a C-style array.
    */
   template <class T, int N>
-  DYND_API nd::array array_rw(const T (&rhs)[N]);
+  nd::array array_rw(const T (&rhs)[N]);
 
   /**
    * This is a helper class for dealing with value assignment and collapsing
@@ -1718,6 +1718,7 @@ namespace nd {
                 size);
   }
 
+  // Temporarily removed due to conflicting dll linkage with earlier versions of this function.
   template <class T, int N>
   nd::array array_rw(const T (&rhs)[N])
   {
@@ -1731,7 +1732,7 @@ namespace nd {
     DYND_MEMCPY(result.get_ndo()->m_data_pointer,
                 reinterpret_cast<const void *>(&rhs), size);
     return result;
-  }
+}
 
   template <int N>
   nd::array::array(const ndt::type (&rhs)[N])
@@ -1800,12 +1801,12 @@ namespace nd {
 
     template <>
     struct make_from_vec<ndt::type> {
-      static array make(const std::vector<ndt::type> &vec);
+      static DYND_API array make(const std::vector<ndt::type> &vec);
     };
 
     template <>
     struct make_from_vec<std::string> {
-      static array make(const std::vector<std::string> &vec);
+      static DYND_API array make(const std::vector<std::string> &vec);
     };
   } // namespace detail
 
