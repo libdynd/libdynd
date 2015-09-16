@@ -65,7 +65,6 @@ TEST(Option, IsAvailArray) {
 TEST(Option, AssignNA) {
     nd::array x = nd::assign_na_decl(kwds("dst_tp", ndt::type("?int64")));
     EXPECT_FALSE(nd::is_avail(x).as<bool>());
-    std::exit(-1);
 }
 
 
