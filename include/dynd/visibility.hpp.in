@@ -13,8 +13,10 @@
 // Importing the library
 #if @DYND_SHARED_LIB_VAL@
 #define DYND_API __declspec(dllimport)
+#define DYND_USING_DLL
 #else
 #define DYND_API
+#define DYND_USING_STATIC_LIB
 #endif
 #endif // defined(DYND_EXPORT)
 #define DYND_INTERNAL
