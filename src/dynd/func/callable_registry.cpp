@@ -14,6 +14,7 @@
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/func/sum.hpp>
+#include <dynd/func/option.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -242,6 +243,7 @@ std::map<nd::string, nd::callable> &func::get_regfunctions()
     registry["uniform"] = nd::random::uniform;
     registry["take"] = nd::take;
     registry["sum"] = nd::sum;
+    resistry["is_avail"] = nd::is_avail;
   }
 
   return registry;
