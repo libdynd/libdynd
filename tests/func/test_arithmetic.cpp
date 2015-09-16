@@ -17,6 +17,9 @@
 #include <dynd/json_parser.hpp>
 #include <dynd/func/option.hpp>
 
+#include <dynd/types/option_type.hpp>
+#include <dynd/kernels/arithmetic.hpp>
+
 using namespace std;
 using namespace dynd;
 
@@ -274,74 +277,21 @@ TEST(Arithmetic, CompoundDiv)
 */
 
 
-struct goofball_kernel : nd::base_kernel<goofball_kernel, 2> {
-  static const size_t data_size = 0;
-
-  void single(char *dst, char *const *src)
-  {
-    auto is_avail = get_child();
-    is_avail->single(dst, src);
-    std::cout << *reinterpret_cast<bool1*>(dst) << std::endl;
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data),
-                              size_t DYND_UNUSED(data_size),
-                              char *data,
-                              void *ckb,
-                              intptr_t ckb_offset,
-                              const ndt::type &dst_tp,
-                              const char *dst_arrmeta,
-                              intptr_t nsrc,
-                              const ndt::type *src_tp,
-                              const char *const *src_arrmeta,
-                              kernel_request_t kernreq,
-                              const eval::eval_context *ectx,
-                              intptr_t nkwd,
-                              const nd::array *kwds,
-                              const std::map<std::string, ndt::type> &tp_vars)
-  {
-    make(ckb, kernreq, ckb_offset);
-
-    auto is_avail = nd::is_avail::make();
-    std::cout << nd::add::get() << std::endl;
-    return is_avail.get()->instantiate(is_avail.get()->static_data, is_avail.get()->data_size,
-                                                  data,
-                                                  ckb,
-                                                  ckb_offset,
-                                                  dst_tp,
-                                                  dst_arrmeta,
-                                                  nsrc,
-                                                  src_tp,
-                                                  src_arrmeta,
-                                                  kernreq,
-                                                  ectx,
-                                                  nkwd,
-                                                  kwds,
-                                                  tp_vars);
-  }
-};
-
-template<>
-struct ndt::type::equivalent<goofball_kernel> {
-  static ndt::type make() {
-    return ndt::type("(?int32, int32) -> bool");
-  }
-};
 
 TEST(Arithmetic, OptionPlus)
 {
-  nd::array a = nd::empty(ndt::type("?int32"));
-  nd::assign_na(a);
+  typedef nd::option_arithmetic_kernel<struct nd::add> goofball_kernel;
+  nd::array NA = nd::empty(ndt::type("?int32"));
+  nd::assign_na(NA);
+  nd::array a = nd::empty(ndt::type("3 * ?int32"));
+  a(0).vals() = NA;
+  a(1).vals() = 1.0;
+  a(2).vals() = 3.0;
   std::cout << a << std::endl;
-  // a(0).assign_na();
-  // a(0).vals() = 1.0;
-  // a(2).vals() = 3.0;
   // EXPECT_ARRAY_EQ(a, +a);
 
-  nd::callable f = nd::callable::make<goofball_kernel>();
-
-  f(a, 2);
-  std::exit(-1);
+  std::cout << (a(0) + 3) << std::endl;
+  // std::cout << (a * 4) << std::endl;
 }
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,

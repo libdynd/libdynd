@@ -111,6 +111,9 @@ namespace nd {
                0)) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
+      for (type_id_t i1 : numeric_type_ids()) {
+        children[option_type_id][i1] = callable::make<option_arithmetic_kernel<FuncType>>();
+      }
 
       callable self =
           functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
