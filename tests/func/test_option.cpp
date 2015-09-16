@@ -60,3 +60,20 @@ TEST(Option, IsAvailArray) {
     expected = parse_json("0 * bool", "[]");
     EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
 }
+
+
+TEST(Option, AssignNA) {
+    nd::array x = nd::assign_na_decl(kwds("dst_tp", ndt::type("?int64")));
+    EXPECT_FALSE(nd::is_avail(x).as<bool>());
+    std::exit(-1);
+}
+
+
+TEST(Option, AssignNAArray) {
+    nd::array a = nd::empty("3 * ?int64");
+    a(0).vals() = nd::assign_na_decl(kwds("dst_tp", ndt::type("?int64")));
+    a(1).vals() = 1.0;
+    a(2).vals() = 3.0;
+    nd::array expected = {false, true, true};
+    EXPECT_ARRAY_EQ(nd::is_avail(a), expected);
+}
