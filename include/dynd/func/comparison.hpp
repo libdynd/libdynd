@@ -89,14 +89,14 @@ namespace nd {
   callable comparison_operator<T, K, 2>::children[DYND_TYPE_ID_MAX + 1]
                                                  [DYND_TYPE_ID_MAX + 1];
 
-  extern struct less : comparison_operator<less, less_kernel, 2> {
+  extern DYND_API struct less : comparison_operator<less, less_kernel, 2> {
   } less;
 
-  extern struct less_equal
+  extern DYND_API struct less_equal
       : comparison_operator<less_equal, less_equal_kernel, 2> {
   } less_equal;
 
-  extern struct equal : comparison_operator<equal, equal_kernel, 2> {
+  extern DYND_API struct equal : comparison_operator<equal, equal_kernel, 2> {
     static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
       std::map<std::array<type_id_t, 2>, callable> children =
@@ -120,7 +120,7 @@ namespace nd {
     }
   } equal;
 
-  extern struct not_equal
+  extern DYND_API struct not_equal
       : comparison_operator<not_equal, not_equal_kernel, 2> {
     static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
@@ -143,11 +143,11 @@ namespace nd {
     }
   } not_equal;
 
-  extern struct greater_equal
+  extern DYND_API struct greater_equal
       : comparison_operator<greater_equal, greater_equal_kernel, 2> {
   } greater_equal;
 
-  extern struct greater : comparison_operator<greater, greater_kernel, 2> {
+  extern DYND_API struct greater : comparison_operator<greater, greater_kernel, 2> {
   } greater;
 
 } // namespace dynd::nd

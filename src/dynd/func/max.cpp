@@ -12,7 +12,7 @@
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::max::make()
+DYND_API nd::callable nd::max::make()
 {
   auto children = callable::make_all<max_kernel, arithmetic_type_ids>();
 
@@ -33,4 +33,4 @@ nd::callable nd::max::make()
       data_size_max(children)));
 }
 
-struct nd::max nd::max;
+DYND_API struct nd::max nd::max;

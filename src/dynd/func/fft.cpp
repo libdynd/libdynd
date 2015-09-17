@@ -10,7 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::fft::make()
+DYND_API nd::callable nd::fft::make()
 {
   std::vector<nd::callable> children;
 
@@ -38,7 +38,7 @@ nd::callable nd::fft::make()
 */
 }
 
-nd::callable nd::ifft::make()
+DYND_API nd::callable nd::ifft::make()
 {
   std::vector<nd::callable> children;
 
@@ -66,7 +66,7 @@ nd::callable nd::ifft::make()
 */
 }
 
-nd::callable nd::rfft::make()
+DYND_API nd::callable nd::rfft::make()
 {
 #ifdef DYND_FFTW
   return nd::callable::make<fftw_ck<fftw_complex, double>>(0);
@@ -75,7 +75,7 @@ nd::callable nd::rfft::make()
 #endif
 }
 
-nd::callable nd::irfft::make()
+DYND_API nd::callable nd::irfft::make()
 {
 #ifdef DYND_FFTW
   return nd::callable::make<fftw_ck<double, fftw_complex>>(0);
@@ -84,11 +84,11 @@ nd::callable nd::irfft::make()
 #endif
 }
 
-struct nd::fft nd::fft;
-struct nd::rfft nd::rfft;
+DYND_API struct nd::fft nd::fft;
+DYND_API struct nd::rfft nd::rfft;
 
-struct nd::ifft nd::ifft;
-struct nd::irfft nd::irfft;
+DYND_API struct nd::ifft nd::ifft;
+DYND_API struct nd::irfft nd::irfft;
 
 nd::array nd::fftshift(const nd::array &x)
 {

@@ -9,7 +9,7 @@
 using namespace std;
 using namespace dynd;
 
-map<array<type_id_t, 2>, nd::callable> nd::assign::make_children()
+DYND_API map<array<type_id_t, 2>, nd::callable> nd::assign::make_children()
 {
   typedef type_id_sequence<
       bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
@@ -24,7 +24,7 @@ map<array<type_id_t, 2>, nd::callable> nd::assign::make_children()
   return children2;
 }
 
-struct nd::assign nd::assign;
+DYND_API struct nd::assign nd::assign;
 
 size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb,
                                                    intptr_t ckb_offset,

@@ -144,7 +144,7 @@ struct take_by_pointer_virtual_ck
   }
 };
 
-nd::callable nd::take_by_pointer::make()
+DYND_API nd::callable nd::take_by_pointer::make()
 {
   return callable::make<take_by_pointer_virtual_ck>(
       ndt::callable_type::make(ndt::type("R * pointer[T]"),
@@ -152,4 +152,4 @@ nd::callable nd::take_by_pointer::make()
       0);
 }
 
-struct nd::take_by_pointer nd::take_by_pointer;
+DYND_API struct nd::take_by_pointer nd::take_by_pointer;

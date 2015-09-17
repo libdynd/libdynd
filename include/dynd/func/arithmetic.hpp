@@ -67,7 +67,7 @@ namespace nd {
   callable arithmetic_operator<FuncType, KernelType, 1>::children
       [DYND_TYPE_ID_MAX + 1];
 
-  extern struct plus : arithmetic_operator<plus, plus_kernel, 1> {
+  extern DYND_API struct plus : arithmetic_operator<plus, plus_kernel, 1> {
     static std::string what(const ndt::type &src0_type)
     {
       std::stringstream ss;
@@ -78,7 +78,7 @@ namespace nd {
     }
   } plus;
 
-  extern struct minus : arithmetic_operator<minus, minus_kernel, 1> {
+  extern DYND_API struct minus : arithmetic_operator<minus, minus_kernel, 1> {
     static std::string what(const ndt::type &src0_type)
     {
       std::stringstream ss;
@@ -152,7 +152,7 @@ namespace nd {
   callable arithmetic_operator<FuncType, KernelType, 2>::children
       [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
-  extern struct add : arithmetic_operator<add, add_kernel, 2> {
+  extern DYND_API struct add : arithmetic_operator<add, add_kernel, 2> {
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
     {
       std::stringstream ss;
@@ -162,7 +162,7 @@ namespace nd {
     }
   } add;
 
-  extern struct subtract : arithmetic_operator<subtract, subtract_kernel, 2> {
+  extern DYND_API struct subtract : arithmetic_operator<subtract, subtract_kernel, 2> {
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
     {
       std::stringstream ss;
@@ -172,7 +172,7 @@ namespace nd {
     }
   } subtract;
 
-  extern struct multiply : arithmetic_operator<multiply, multiply_kernel, 2> {
+  extern DYND_API struct multiply : arithmetic_operator<multiply, multiply_kernel, 2> {
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
     {
       std::stringstream ss;
@@ -182,7 +182,7 @@ namespace nd {
     }
   } multiply;
 
-  extern struct divide : arithmetic_operator<divide, divide_kernel, 2> {
+  extern DYND_API struct divide : arithmetic_operator<divide, divide_kernel, 2> {
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
     {
       std::stringstream ss;
@@ -244,11 +244,11 @@ namespace nd {
   callable compound_arithmetic_operator<FuncType, KernelType>::children
       [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
-  extern struct compound_add
+  extern DYND_API struct compound_add
       : compound_arithmetic_operator<compound_add, compound_add_kernel_t> {
   } compound_add;
 
-  extern struct compound_div
+  extern DYND_API struct compound_div
       : compound_arithmetic_operator<compound_div, compound_div_kernel_t> {
   } compound_div;
 
