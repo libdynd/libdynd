@@ -287,6 +287,20 @@ TEST(Arithmetic, OptionPlus)
   EXPECT_FALSE(nd::is_avail(NA / 1));
 }
 
+TEST(Arithmetic, OptionArray)
+{
+  nd::array data = parse_json("5 * ?int32", "[2, 0, 40, 3, 1]");
+    nd::array expected = nd::array{false, true, true, false, true};
+  std::cout << (data + 1) << std::endl;
+ // std::exit(-1);
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data < 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data > 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data >= 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data <= 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data == 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data != 1), expected); */
+}
+
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,
                            ScalarOnTheRight, ScalarOnTheLeft, ComplexScalar);
 

@@ -43,6 +43,21 @@ TEST(Comparison, OptionScalar)
 }
 
 
+TEST(Comparison, OptionArray)
+{
+  nd::array data = parse_json("5 * int32", "[2, 0, 40, 3, 1]");
+    nd::array expected = nd::array{false, true, true, false, true};
+  std::cout << (data < 1) << std::endl;
+ // std::exit(-1);
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data < 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data > 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data >= 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data <= 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data == 1), expected); */
+  /* EXPECT_ARRAY_EQ(nd::is_avail(data != 1), expected); */
+}
+
+
 /* TEST(Comparison, OptionOption) */
 /* { */
 /*   nd::array NA = nd::empty(ndt::type("?int32")); */
