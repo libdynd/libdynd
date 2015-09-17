@@ -46,8 +46,9 @@ namespace nd {
         }
       }
 
-      for (type_id_t i1 : numeric_type_ids()) {
-        children[{{option_type_id, i1}}] = callable::make<option_comparison_kernel<F>>();
+      for (type_id_t i : numeric_type_ids()) {
+        children[{{option_type_id, i}}] = callable::make<option_comparison_kernel<F, true, false>>();
+        children[{{i, option_type_id}}] = callable::make<option_comparison_kernel<F, false, true>>();
       }
 
       for (type_id_t dim_tp_id : dim_type_ids()) {
