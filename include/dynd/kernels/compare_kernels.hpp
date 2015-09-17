@@ -33,6 +33,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
+     std::cout << "less_kernel::single diff" << std::endl;
       *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) < static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -44,6 +45,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
+      std::cout << "less_kernel::single" << std::endl;
       *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<A0 *>(src[0]) < *reinterpret_cast<A0 *>(src[1]);
     }
   };
@@ -1261,7 +1263,14 @@ namespace nd {
       bool1 child_dst;
       is_avail->single(reinterpret_cast<char *>(&child_dst), &src[0]);
       if (child_dst) {
+        std::cout << "here" << std::endl;
+        std::cout << *(reinterpret_cast<int *>(src[0]) + 0) << std::endl;
+        std::cout << *(reinterpret_cast<int *>(src[0]) + 1) << std::endl;
+        std::cout << *(reinterpret_cast<int *>(src[0]) + 2) << std::endl;
+        std::cout << *(reinterpret_cast<int *>(src[0]) + 3) << std::endl;
+        std::cout << *(reinterpret_cast<int *>(src[0]) + 4) << std::endl;
         this->get_child(comp_offset)->single(dst, src);
+        std::cout << "here 2" << std::endl;
       } else {
         this->get_child(assign_na_offset)->single(dst, nullptr);
       }
@@ -1296,7 +1305,7 @@ namespace nd {
                                                     nsrc,
                                                     src_tp,
                                                     src_arrmeta,
-                                                    kernreq,
+                                                    kernel_request_single,
                                                     ectx,
                                                     nkwd,
                                                     kwds,
@@ -1312,12 +1321,12 @@ namespace nd {
                                                     data,
                                                     ckb,
                                                     ckb_offset,
-                                                    dst_tp,
+                                                    dst_tp.extended<ndt::option_type>()->get_value_type(),
                                                     dst_arrmeta,
                                                     nsrc,
                                                     child_src_tp,
                                                     src_arrmeta,
-                                                    kernreq,
+                                                    kernel_request_single,
                                                     ectx,
                                                     nkwd,
                                                     kwds,
@@ -1335,7 +1344,7 @@ namespace nd {
                                                     0,
                                                     nullptr,
                                                     nullptr,
-                                                    kernreq,
+                                                    kernel_request_single,
                                                     ectx,
                                                     nkwd,
                                                     kwds,
