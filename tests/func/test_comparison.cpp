@@ -40,21 +40,33 @@ TEST(Comparison, OptionScalar)
   EXPECT_FALSE(nd::is_avail(NA <= 1));
   EXPECT_FALSE(nd::is_avail(NA == 1));
   EXPECT_FALSE(nd::is_avail(NA != 1));
+
+  EXPECT_FALSE(nd::is_avail(1 < NA));
+  EXPECT_FALSE(nd::is_avail(1 > NA));
+  EXPECT_FALSE(nd::is_avail(1 >= NA));
+  EXPECT_FALSE(nd::is_avail(1 <= NA));
+  EXPECT_FALSE(nd::is_avail(1 == NA));
+  EXPECT_FALSE(nd::is_avail(1 != NA));
 }
 
 
 TEST(Comparison, OptionArray)
 {
-  nd::array data = parse_json("5 * int32", "[2, 0, 40, 3, 1]");
-    nd::array expected = nd::array{false, true, true, false, true};
-  std::cout << (data < 1) << std::endl;
- // std::exit(-1);
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data < 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data > 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data >= 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data <= 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data == 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data != 1), expected); */
+  nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
+  nd::array expected = nd::array{false, true, true, false, true};
+  EXPECT_ARRAY_EQ(nd::is_avail(data < 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data > 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data >= 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data <= 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data == 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data != 1), expected);
+
+  EXPECT_ARRAY_EQ(nd::is_avail(1 < data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 > data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 >= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 <= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 == data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 != data), expected);
 }
 
 

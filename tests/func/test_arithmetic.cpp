@@ -15,6 +15,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
+#include <dynd/func/take.hpp>
 #include <dynd/func/option.hpp>
 
 #include <dynd/types/option_type.hpp>
@@ -285,20 +286,52 @@ TEST(Arithmetic, OptionPlus)
   EXPECT_FALSE(nd::is_avail(NA - 1));
   EXPECT_FALSE(nd::is_avail(NA * 1));
   EXPECT_FALSE(nd::is_avail(NA / 1));
+
+  EXPECT_FALSE(nd::is_avail(1 + NA));
+  EXPECT_FALSE(nd::is_avail(1 - NA));
+  EXPECT_FALSE(nd::is_avail(1 * NA));
+  EXPECT_FALSE(nd::is_avail(1 / NA));
+
+  /* EXPECT_FALSE(nd::is_avail(NA + NA)); */
+  /* EXPECT_FALSE(nd::is_avail(NA - NA)); */
+  /* EXPECT_FALSE(nd::is_avail(NA * NA)); */
+  /* EXPECT_FALSE(nd::is_avail(NA / NA)); */
 }
 
-TEST(Arithmetic, OptionArray)
+TEST(Arithmetic, OptionArrayLHS)
 {
-  nd::array data = parse_json("5 * ?int32", "[2, 0, 40, 3, 1]");
-    nd::array expected = nd::array{false, true, true, false, true};
-  std::cout << (data + 1) << std::endl;
- // std::exit(-1);
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data < 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data > 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data >= 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data <= 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data == 1), expected); */
-  /* EXPECT_ARRAY_EQ(nd::is_avail(data != 1), expected); */
+  nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
+  nd::array expected = nd::array{false, true, true, false, true};
+  nd::array indices = {1L, 2L, 4L};
+  EXPECT_ARRAY_EQ(nd::is_avail(data + 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data - 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data * 2), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data / 1), expected);
+
+  auto add = nd::array{1, 41, 2}.ucast(ndt::type("?int32")).eval();
+  auto sub = nd::array{-1, 39, 0}.ucast(ndt::type("?int32")).eval();
+  auto mul = nd::array{0, 80, 2}.ucast(ndt::type("?int32")).eval();
+  auto div = nd::array{0, 40, 1}.ucast(ndt::type("?int32")).eval();
+
+  for (int i = 0; i < indices.get_dim_size(); ++i) {
+      auto ind = indices(i).as<int>();
+      EXPECT_EQ((data + 1)(ind).as<int>(), add(i).as<int>());
+      EXPECT_EQ((data - 1)(ind).as<int>(), sub(i).as<int>());
+      EXPECT_EQ((data * 2)(ind).as<int>(), mul(i).as<int>());
+      EXPECT_EQ((data / 1)(ind).as<int>(), div(i).as<int>());
+  }
+}
+
+TEST(Arithmetic, OptionArrayRHS)
+{
+  nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
+  nd::array expected = nd::array{false, true, true, false, true};
+  nd::array indices = {1L, 2L, 4L};
+
+  EXPECT_ARRAY_EQ(nd::is_avail(1 + data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 - data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 * data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 / data), expected);
 }
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,
