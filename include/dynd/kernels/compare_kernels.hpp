@@ -33,7 +33,6 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-     std::cout << "less_kernel::single diff" << std::endl;
       *reinterpret_cast<bool1 *>(dst) =
           static_cast<T>(*reinterpret_cast<A0 *>(src[0])) < static_cast<T>(*reinterpret_cast<A1 *>(src[1]));
     }
@@ -45,7 +44,6 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      std::cout << "less_kernel::single" << std::endl;
       *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<A0 *>(src[0]) < *reinterpret_cast<A0 *>(src[1]);
     }
   };
@@ -1449,15 +1447,19 @@ namespace nd {
   template<typename FuncType>
   struct option_comparison_kernel<FuncType, true, true> : base_kernel<option_comparison_kernel<FuncType, true, true>, 2> {
     static const size_t data_size = 0;
+    intptr_t is_avail_rhs_offset;
     intptr_t comp_offset;
     intptr_t assign_na_offset;
 
     void single(char *dst, char *const *src)
     {
-      auto is_avail = this->get_child();
-      bool1 child_dst;
-      is_avail->single(reinterpret_cast<char *>(&child_dst), &src[1]);
-      if (child_dst) {
+      auto is_avail_lhs = this->get_child();
+      auto is_avail_rhs = this->get_child(is_avail_rhs_offset);
+      bool1 child_dst_lhs;
+      bool1 child_dst_rhs;
+      is_avail_lhs->single(reinterpret_cast<char *>(&child_dst_lhs), &src[0]);
+      is_avail_rhs->single(reinterpret_cast<char *>(&child_dst_rhs), &src[1]);
+      if (child_dst_lhs && child_dst_rhs) {
         this->get_child(comp_offset)->single(dst, src);
       } else {
         this->get_child(assign_na_offset)->single(dst, nullptr);
@@ -1483,8 +1485,28 @@ namespace nd {
       intptr_t option_comp_offset = ckb_offset;
       option_comparison_kernel::make(ckb, kernreq, ckb_offset);
 
-      auto is_avail = is_avail::get();
-      ckb_offset = is_avail.get()->instantiate(is_avail.get()->static_data, is_avail.get()->data_size,
+      auto is_avail_lhs = is_avail::get();
+      ckb_offset = is_avail_lhs.get()->instantiate(is_avail_lhs.get()->static_data, is_avail_lhs.get()->data_size,
+                                                    data,
+                                                    ckb,
+                                                    ckb_offset,
+                                                    dst_tp,
+                                                    dst_arrmeta,
+                                                    nsrc,
+                                                    &src_tp[0],
+                                                    &src_arrmeta[0],
+                                                    kernel_request_single,
+                                                    ectx,
+                                                    nkwd,
+                                                    kwds,
+                                                    tp_vars);
+      option_comparison_kernel *self =
+          option_comparison_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+                   option_comp_offset);
+      self->is_avail_rhs_offset = ckb_offset - option_comp_offset;
+
+      auto is_avail_rhs = is_avail::get();
+      ckb_offset = is_avail_rhs.get()->instantiate(is_avail_rhs.get()->static_data, is_avail_rhs.get()->data_size,
                                                     data,
                                                     ckb,
                                                     ckb_offset,
@@ -1498,14 +1520,13 @@ namespace nd {
                                                     nkwd,
                                                     kwds,
                                                     tp_vars);
-      option_comparison_kernel *self =
-          option_comparison_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+      self = option_comparison_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                    option_comp_offset);
       self->comp_offset = ckb_offset - option_comp_offset;
       auto cmp = FuncType::get();
       const ndt::type child_src_tp[2] = {
-          src_tp[0],
-          src_tp[1].extended<ndt::option_type>()->get_value_type(),
+          src_tp[0].extended<ndt::option_type>()->get_value_type(),
+          src_tp[1].extended<ndt::option_type>()->get_value_type()
       };
       ckb_offset = cmp.get()->instantiate(cmp.get()->static_data, cmp.get()->data_size,
                                                     data,
