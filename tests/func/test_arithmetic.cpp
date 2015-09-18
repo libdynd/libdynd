@@ -292,10 +292,10 @@ TEST(Arithmetic, OptionPlus)
   EXPECT_FALSE(nd::is_avail(1 * NA));
   EXPECT_FALSE(nd::is_avail(1 / NA));
 
-  /* EXPECT_FALSE(nd::is_avail(NA + NA)); */
-  /* EXPECT_FALSE(nd::is_avail(NA - NA)); */
-  /* EXPECT_FALSE(nd::is_avail(NA * NA)); */
-  /* EXPECT_FALSE(nd::is_avail(NA / NA)); */
+  EXPECT_FALSE(nd::is_avail(NA + NA));
+  EXPECT_FALSE(nd::is_avail(NA - NA));
+  EXPECT_FALSE(nd::is_avail(NA * NA));
+  EXPECT_FALSE(nd::is_avail(NA / NA));
 }
 
 TEST(Arithmetic, OptionArrayLHS)
@@ -332,6 +332,44 @@ TEST(Arithmetic, OptionArrayRHS)
   EXPECT_ARRAY_EQ(nd::is_avail(1 - data), expected);
   EXPECT_ARRAY_EQ(nd::is_avail(1 * data), expected);
   EXPECT_ARRAY_EQ(nd::is_avail(1 / data), expected);
+
+  auto add = nd::array{0, 41, 2}.ucast(ndt::type("?int32")).eval();
+  auto sub = nd::array{2, -39, 0}.ucast(ndt::type("?int32")).eval();
+  auto mul = nd::array{-2, 80, 2}.ucast(ndt::type("?int32")).eval();
+  auto div = nd::array{-1, 0, 1}.ucast(ndt::type("?int32")).eval();
+
+  for (int i = 0; i < indices.get_dim_size(); ++i) {
+      auto ind = indices(i).as<int>();
+      EXPECT_EQ((1 + data)(ind).as<int>(), add(i).as<int>());
+      EXPECT_EQ((1 - data)(ind).as<int>(), sub(i).as<int>());
+      EXPECT_EQ((2 * data)(ind).as<int>(), mul(i).as<int>());
+      EXPECT_EQ((1 / data)(ind).as<int>(), div(i).as<int>());
+  }
+}
+
+TEST(Arithmetic, OptionArrayOption)
+{
+  nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
+  nd::array expected = nd::array{false, true, true, false, true};
+  nd::array indices = {1L, 2L, 4L};
+
+  EXPECT_ARRAY_EQ(nd::is_avail(data + data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data - data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data * data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data / data), expected);
+
+  auto add = nd::array{-2, 80, 2}.ucast(ndt::type("?int32")).eval();
+  auto sub = nd::array{0, 0, 0}.ucast(ndt::type("?int32")).eval();
+  auto mul = nd::array{1, 1600, 1}.ucast(ndt::type("?int32")).eval();
+  auto div = nd::array{1, 1, 1}.ucast(ndt::type("?int32")).eval();
+
+  for (int i = 0; i < indices.get_dim_size(); ++i) {
+      auto ind = indices(i).as<int>();
+      EXPECT_EQ((data + data)(ind).as<int>(), add(i).as<int>());
+      EXPECT_EQ((data - data)(ind).as<int>(), sub(i).as<int>());
+      EXPECT_EQ((data * data)(ind).as<int>(), mul(i).as<int>());
+      EXPECT_EQ((data / data)(ind).as<int>(), div(i).as<int>());
+  }
 }
 
 REGISTER_TYPED_TEST_CASE_P(Arithmetic, SimpleBroadcast, StridedScalarBroadcast,

@@ -47,6 +47,13 @@ TEST(Comparison, OptionScalar)
   EXPECT_FALSE(nd::is_avail(1 <= NA));
   EXPECT_FALSE(nd::is_avail(1 == NA));
   EXPECT_FALSE(nd::is_avail(1 != NA));
+
+  EXPECT_FALSE(nd::is_avail(NA < NA));
+  EXPECT_FALSE(nd::is_avail(NA > NA));
+  EXPECT_FALSE(nd::is_avail(NA >= NA));
+  EXPECT_FALSE(nd::is_avail(NA <= NA));
+  EXPECT_FALSE(nd::is_avail(NA == NA));
+  EXPECT_FALSE(nd::is_avail(NA != NA));
 }
 
 
@@ -67,17 +74,11 @@ TEST(Comparison, OptionArray)
   EXPECT_ARRAY_EQ(nd::is_avail(1 <= data), expected);
   EXPECT_ARRAY_EQ(nd::is_avail(1 == data), expected);
   EXPECT_ARRAY_EQ(nd::is_avail(1 != data), expected);
+
+  EXPECT_ARRAY_EQ(nd::is_avail(data < data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data > data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data >= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data <= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data == data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data != data), expected);
 }
-
-
-/* TEST(Comparison, OptionOption) */
-/* { */
-/*   nd::array NA = nd::empty(ndt::type("?int32")); */
-/*   nd::assign_na(NA); */
-/*   EXPECT_FALSE(nd::is_avail(NA < NA)); */
-/*   EXPECT_FALSE(nd::is_avail(NA > NA)); */
-/*   EXPECT_FALSE(nd::is_avail(NA >= NA)); */
-/*   EXPECT_FALSE(nd::is_avail(NA <= NA)); */
-/*   EXPECT_FALSE(nd::is_avail(NA == NA)); */
-/*   EXPECT_FALSE(nd::is_avail(NA != NA)); */
-/* } */
