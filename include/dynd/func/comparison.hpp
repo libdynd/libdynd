@@ -50,6 +50,7 @@ namespace nd {
         children[{{option_type_id, i}}] = callable::make<option_comparison_kernel<F, true, false>>();
         children[{{i, option_type_id}}] = callable::make<option_comparison_kernel<F, false, true>>();
       }
+      children[{{option_type_id, option_type_id}}] = callable::make<option_comparison_kernel<F, true, true>>();
 
       for (type_id_t dim_tp_id : dim_type_ids()) {
         children[{{dim_tp_id, option_type_id}}] = functional::elwise(self);
