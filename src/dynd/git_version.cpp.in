@@ -16,4 +16,3 @@ const char dynd_git_sha1[] = DYND_GIT_SHA1;
 const char dynd_version_string[] = DYND_VERSION_STRING;
 
 } // namespace dynd
-

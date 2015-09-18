@@ -8,42 +8,42 @@
 using namespace std;
 using namespace dynd;
 
-struct nd::plus nd::plus;
+DYND_API struct nd::plus nd::plus;
 
 nd::array nd::operator+(const array &a0)
 {
   return plus(a0);
 }
 
-struct nd::minus nd::minus;
+DYND_API struct nd::minus nd::minus;
 
 nd::array nd::operator-(const array &a0)
 {
   return minus(a0);
 }
 
-struct nd::add nd::add;
+DYND_API struct nd::add nd::add;
 
 nd::array nd::operator+(const array &a0, const array &a1)
 {
   return add(a0, a1);
 }
 
-struct nd::subtract nd::subtract;
+DYND_API struct nd::subtract nd::subtract;
 
 nd::array nd::operator-(const array &a0, const array &a1)
 {
   return subtract(a0, a1);
 }
 
-struct nd::multiply nd::multiply;
+DYND_API struct nd::multiply nd::multiply;
 
 nd::array nd::operator*(const array &a0, const array &a1)
 {
   return multiply(a0, a1);
 }
 
-struct nd::divide nd::divide;
+DYND_API struct nd::divide nd::divide;
 
 nd::array nd::operator/(const array &a0, const array &a1)
 {
@@ -60,9 +60,9 @@ nd::array &nd::array::operator+=(const array &rhs)
 }
 */
 
-struct nd::compound_add nd::compound_add;
+DYND_API struct nd::compound_add nd::compound_add;
 
-struct nd::compound_div nd::compound_div;
+DYND_API struct nd::compound_div nd::compound_div;
 
 nd::array &nd::array::operator/=(const array &rhs)
 {

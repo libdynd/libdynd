@@ -588,8 +588,8 @@ https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-st
 namespace dynd {
 // These are defined in git_version.cpp, generated from
 // git_version.cpp.in by the CMake build configuration.
-extern const char dynd_git_sha1[];
-extern const char dynd_version_string[];
+extern DYND_API const char dynd_git_sha1[];
+extern DYND_API const char dynd_version_string[];
 } // namespace dynd
 
 // Check endian: define DYND_BIG_ENDIAN if big endian, otherwise assume little

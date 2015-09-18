@@ -465,7 +465,7 @@ ndt::base_type::reverse_adapt_type(const type &DYND_UNUSED(value_tp),
 
 // Some information about the builtin types
 
-uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
+DYND_API uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
     0,                            sizeof(bool1),
     sizeof(int8),                 sizeof(int16),
     sizeof(int32),                sizeof(int64),
@@ -477,13 +477,13 @@ uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
     sizeof(dynd::complex<float>), sizeof(dynd::complex<double>),
     0};
 
-uint8_t ndt::detail::builtin_kinds[builtin_type_id_count] = {
+DYND_API uint8_t ndt::detail::builtin_kinds[builtin_type_id_count] = {
     void_kind, bool_kind,    sint_kind,    sint_kind, sint_kind,
     sint_kind, sint_kind,    uint_kind,    uint_kind, uint_kind,
     uint_kind, uint_kind,    real_kind,    real_kind, real_kind,
     real_kind, complex_kind, complex_kind, void_kind};
 
-uint8_t ndt::detail::builtin_data_alignments[builtin_type_id_count] = {
+DYND_API uint8_t ndt::detail::builtin_data_alignments[builtin_type_id_count] = {
     1,
     1,
     1,

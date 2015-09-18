@@ -8,42 +8,42 @@
 using namespace std;
 using namespace dynd;
 
-struct nd::less nd::less;
+DYND_API struct nd::less nd::less;
 
 nd::array nd::operator<(const array &a0, const array &a1)
 {
   return less(a0, a1);
 }
 
-struct nd::less_equal nd::less_equal;
+DYND_API struct nd::less_equal nd::less_equal;
 
 nd::array nd::operator<=(const array &a0, const array &a1)
 {
   return less_equal(a0, a1);
 }
 
-struct nd::equal nd::equal;
+DYND_API struct nd::equal nd::equal;
 
 nd::array nd::operator==(const array &a0, const array &a1)
 {
   return equal(a0, a1);
 }
 
-struct nd::not_equal nd::not_equal;
+DYND_API struct nd::not_equal nd::not_equal;
 
 nd::array nd::operator!=(const array &a0, const array &a1)
 {
   return not_equal(a0, a1);
 }
 
-struct nd::greater_equal nd::greater_equal;
+DYND_API struct nd::greater_equal nd::greater_equal;
 
 nd::array nd::operator>=(const array &a0, const array &a1)
 {
   return greater_equal(a0, a1);
 }
 
-struct nd::greater nd::greater;
+DYND_API struct nd::greater nd::greater;
 
 nd::array nd::operator>(const array &a0, const array &a1)
 {
