@@ -664,6 +664,7 @@ if(WIN32)
     set_target_properties(libdynd
         PROPERTIES
         PREFIX "lib"
+        IMPORT_PREFIX "lib"
         )
 elseif(APPLE)
     # The rpath stuff is confusing, and this is our attempt to get it right.
@@ -738,7 +739,7 @@ if (DYND_INSTALL_LIB)
     install(TARGETS libdynd
         RUNTIME DESTINATION lib${LIB_SUFFIX}
         LIBRARY DESTINATION lib${LIB_SUFFIX}
-        ARCHIVE DESTINATION lib${LIB_SUFFIX}/static)
+        ARCHIVE DESTINATION lib${LIB_SUFFIX}${DYND_STATIC_LIB_DIR})
     # Install the libdynddev binary
     if(DYND_CUDA)
         install(TARGETS libdynddev
