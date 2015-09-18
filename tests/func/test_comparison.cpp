@@ -29,3 +29,56 @@ TEST(Comparison, Simple)
     std::cout << (a > b) << std::endl;
 }
 */
+
+TEST(Comparison, OptionScalar)
+{
+  nd::array NA = nd::empty(ndt::type("?int32"));
+  nd::assign_na(NA);
+  EXPECT_FALSE(nd::is_avail(NA < 1));
+  EXPECT_FALSE(nd::is_avail(NA > 1));
+  EXPECT_FALSE(nd::is_avail(NA >= 1));
+  EXPECT_FALSE(nd::is_avail(NA <= 1));
+  EXPECT_FALSE(nd::is_avail(NA == 1));
+  EXPECT_FALSE(nd::is_avail(NA != 1));
+
+  EXPECT_FALSE(nd::is_avail(1 < NA));
+  EXPECT_FALSE(nd::is_avail(1 > NA));
+  EXPECT_FALSE(nd::is_avail(1 >= NA));
+  EXPECT_FALSE(nd::is_avail(1 <= NA));
+  EXPECT_FALSE(nd::is_avail(1 == NA));
+  EXPECT_FALSE(nd::is_avail(1 != NA));
+
+  EXPECT_FALSE(nd::is_avail(NA < NA));
+  EXPECT_FALSE(nd::is_avail(NA > NA));
+  EXPECT_FALSE(nd::is_avail(NA >= NA));
+  EXPECT_FALSE(nd::is_avail(NA <= NA));
+  EXPECT_FALSE(nd::is_avail(NA == NA));
+  EXPECT_FALSE(nd::is_avail(NA != NA));
+}
+
+
+TEST(Comparison, OptionArray)
+{
+  nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
+  nd::array expected = nd::array{false, true, true, false, true};
+  EXPECT_ARRAY_EQ(nd::is_avail(data < 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data > 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data >= 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data <= 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data == 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data != 1), expected);
+
+  EXPECT_ARRAY_EQ(nd::is_avail(1 < data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 > data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 >= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 <= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 == data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(1 != data), expected);
+
+  EXPECT_ARRAY_EQ(nd::is_avail(data < data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data > data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data >= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data <= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data == data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data != data), expected);
+}

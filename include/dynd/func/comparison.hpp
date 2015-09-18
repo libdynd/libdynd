@@ -8,6 +8,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/kernels/compare_kernels.hpp>
+#include <dynd/types/option_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -43,6 +44,17 @@ namespace nd {
               ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
+      }
+
+      for (type_id_t i : numeric_type_ids()) {
+        children[{{option_type_id, i}}] = callable::make<option_comparison_kernel<F, true, false>>();
+        children[{{i, option_type_id}}] = callable::make<option_comparison_kernel<F, false, true>>();
+      }
+      children[{{option_type_id, option_type_id}}] = callable::make<option_comparison_kernel<F, true, true>>();
+
+      for (type_id_t dim_tp_id : dim_type_ids()) {
+        children[{{dim_tp_id, option_type_id}}] = functional::elwise(self);
+        children[{{option_type_id, dim_tp_id}}] = functional::elwise(self);
       }
 
       for (type_id_t i0 : dim_type_ids()) {

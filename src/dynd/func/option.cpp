@@ -62,6 +62,7 @@ DYND_API nd::callable nd::is_avail::make()
 DYND_API struct nd::is_avail nd::is_avail;
 
 DYND_API nd::callable nd::assign_na_decl::children[DYND_TYPE_ID_MAX + 1];
+DYND_API nd::callable nd::assign_na_decl::dim_children[2];
 
 DYND_API nd::callable nd::assign_na_decl::make()
 {
@@ -76,9 +77,31 @@ DYND_API nd::callable nd::assign_na_decl::make()
     children[pair.first] = pair.second;
   }
 
-  // ...
+  auto t = ndt::type("() -> ?Any");
+  callable self = functional::call<assign_na_decl>(t);
 
-  return callable();
+  for (auto tp_id : {fixed_dim_type_id, var_dim_type_id}) {
+    dim_children[tp_id - fixed_dim_type_id] = functional::elwise(self);
+  }
+
+  return functional::multidispatch(
+      t,
+      [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+         const ndt::type *DYND_UNUSED(src_tp)) -> callable & {
+        callable *child = nullptr;
+        if (dst_tp.get_kind() == option_kind) {
+          child = &children[dst_tp.extended<ndt::option_type>()->get_value_type().get_type_id()];
+        }
+        else
+          child = &dim_children[dst_tp.get_type_id() - fixed_dim_type_id];
+
+        if (child->is_null()) {
+          throw std::runtime_error("no child found");
+        }
+
+        return *child;
+      },
+      0);
 }
 
 DYND_API struct nd::assign_na_decl nd::assign_na_decl;
