@@ -278,7 +278,7 @@ TEST(Arithmetic, CompoundDiv)
 */
 
 
-TEST(Arithmetic, OptionPlus)
+TEST(Arithmetic, OptionArithmeticInt32)
 {
   nd::array NA = nd::empty(ndt::type("?int32"));
   nd::assign_na(NA);
@@ -298,11 +298,32 @@ TEST(Arithmetic, OptionPlus)
   EXPECT_FALSE(nd::is_avail(NA / NA));
 }
 
-TEST(Arithmetic, OptionArrayLHS)
+TEST(Arithmetic, OptionArithmeticFloat64)
+{
+  nd::array NA = nd::empty(ndt::type("?float64"));
+  nd::assign_na(NA);
+  EXPECT_FALSE(nd::is_avail(NA + 1));
+  EXPECT_FALSE(nd::is_avail(NA - 1));
+  EXPECT_FALSE(nd::is_avail(NA * 1));
+  EXPECT_FALSE(nd::is_avail(NA / 1));
+
+  EXPECT_FALSE(nd::is_avail(1 + NA));
+  EXPECT_FALSE(nd::is_avail(1 - NA));
+  EXPECT_FALSE(nd::is_avail(1 * NA));
+  EXPECT_FALSE(nd::is_avail(1 / NA));
+
+  EXPECT_FALSE(nd::is_avail(NA + NA));
+  EXPECT_FALSE(nd::is_avail(NA - NA));
+  EXPECT_FALSE(nd::is_avail(NA * NA));
+  EXPECT_FALSE(nd::is_avail(NA / NA));
+}
+
+TEST(Arithmetic, OptionArrayLHSInt32)
 {
   nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
   nd::array expected = nd::array{false, true, true, false, true};
   nd::array indices = {1L, 2L, 4L};
+
   EXPECT_ARRAY_EQ(nd::is_avail(data + 1), expected);
   EXPECT_ARRAY_EQ(nd::is_avail(data - 1), expected);
   EXPECT_ARRAY_EQ(nd::is_avail(data * 2), expected);
@@ -319,6 +340,31 @@ TEST(Arithmetic, OptionArrayLHS)
       EXPECT_EQ((data - 1)(ind).as<int>(), sub(i).as<int>());
       EXPECT_EQ((data * 2)(ind).as<int>(), mul(i).as<int>());
       EXPECT_EQ((data / 1)(ind).as<int>(), div(i).as<int>());
+  }
+}
+
+TEST(Arithmetic, OptionArrayLHSFloat64)
+{
+  nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
+  nd::array expected = nd::array{false, true, true, false, true};
+  nd::array indices = {1L, 2L, 4L};
+
+  EXPECT_ARRAY_EQ(nd::is_avail(data + 1.0), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data - 1.0), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data * 2.0), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data / 1.0), expected);
+
+  auto add = nd::array{1.0, 41.0, 2.0}.ucast(ndt::type("?float64")).eval();
+  auto sub = nd::array{-1.0, 39.0, 0.0}.ucast(ndt::type("?float64")).eval();
+  auto mul = nd::array{0.0, 80.0, 2.0}.ucast(ndt::type("?float64")).eval();
+  auto div = nd::array{0.0, 40.0, 1.0}.ucast(ndt::type("?float64")).eval();
+
+  for (int i = 0; i < indices.get_dim_size(); ++i) {
+      auto ind = indices(i).as<int>();
+      EXPECT_EQ((data + 1.0)(ind).as<int>(), add(i).as<int>());
+      EXPECT_EQ((data - 1.0)(ind).as<int>(), sub(i).as<int>());
+      EXPECT_EQ((data * 2.0)(ind).as<int>(), mul(i).as<int>());
+      EXPECT_EQ((data / 1.0)(ind).as<int>(), div(i).as<int>());
   }
 }
 
@@ -347,7 +393,7 @@ TEST(Arithmetic, OptionArrayRHS)
   }
 }
 
-TEST(Arithmetic, OptionArrayOption)
+TEST(Arithmetic, OptionArrayOptionInt32)
 {
   nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
   nd::array expected = nd::array{false, true, true, false, true};
@@ -369,6 +415,58 @@ TEST(Arithmetic, OptionArrayOption)
       EXPECT_EQ((data - data)(ind).as<int>(), sub(i).as<int>());
       EXPECT_EQ((data * data)(ind).as<int>(), mul(i).as<int>());
       EXPECT_EQ((data / data)(ind).as<int>(), div(i).as<int>());
+  }
+}
+
+TEST(Arithmetic, OptionArrayOptionFloat64)
+{
+  nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
+  nd::array expected = nd::array{false, true, true, false, true};
+  nd::array indices = {1L, 2L, 4L};
+
+  EXPECT_ARRAY_EQ(nd::is_avail(data + data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data - data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data * data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data / data), expected);
+
+  auto add = nd::array{-2, 80, 2}.ucast(ndt::type("?int32")).eval();
+  auto sub = nd::array{0, 0, 0}.ucast(ndt::type("?int32")).eval();
+  auto mul = nd::array{1, 1600, 1}.ucast(ndt::type("?int32")).eval();
+  auto div = nd::array{1, 1, 1}.ucast(ndt::type("?int32")).eval();
+
+  auto float_data = data.ucast(ndt::type("?float64")).eval();
+  for (int i = 0; i < indices.get_dim_size(); ++i) {
+      auto ind = indices(i).as<int>();
+      EXPECT_EQ((data + float_data)(ind).as<double>(), add(i).as<double>());
+      EXPECT_EQ((data - float_data)(ind).as<double>(), sub(i).as<double>());
+      EXPECT_EQ((data * float_data)(ind).as<double>(), mul(i).as<double>());
+      EXPECT_EQ((data / float_data)(ind).as<double>(), div(i).as<double>());
+  }
+}
+
+TEST(Arithmetic, OptionArrayNotOptionFloat64)
+{
+  nd::array data = parse_json("5 * ?int32", "[null, -1, 40, null, 1]");
+  nd::array not_na_data = parse_json("5 * float64", "[2, -1, 40, 30, 1]");
+  nd::array expected = nd::array{false, true, true, false, true};
+  nd::array indices = {1L, 2L, 4L};
+
+  EXPECT_ARRAY_EQ(nd::is_avail(data + not_na_data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data - not_na_data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data * not_na_data), expected);
+  EXPECT_ARRAY_EQ(nd::is_avail(data / not_na_data), expected);
+
+  auto add = nd::array{-2, 80, 2}.ucast(ndt::type("?float64")).eval();
+  auto sub = nd::array{0, 0, 0}.ucast(ndt::type("?float64")).eval();
+  auto mul = nd::array{1, 1600, 1}.ucast(ndt::type("?float64")).eval();
+  auto div = nd::array{1, 1, 1}.ucast(ndt::type("?float64")).eval();
+
+  for (int i = 0; i < indices.get_dim_size(); ++i) {
+      auto ind = indices(i).as<int>();
+      EXPECT_EQ((data + data)(ind).as<double>(), add(i).as<double>());
+      EXPECT_EQ((data - data)(ind).as<double>(), sub(i).as<double>());
+      EXPECT_EQ((data * data)(ind).as<double>(), mul(i).as<double>());
+      EXPECT_EQ((data / data)(ind).as<double>(), div(i).as<double>());
   }
 }
 
