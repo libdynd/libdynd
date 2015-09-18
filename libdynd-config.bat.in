@@ -27,7 +27,7 @@ if NOT "%1"=="-version" goto notversion
 :notversion
 
 if NOT "%1"=="-cuda" goto notcuda
-    echo @DYND_CUDA@
+    echo "@DYND_CUDA@"
     exit /B 0
 :notcuda
 
