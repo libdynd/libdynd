@@ -769,6 +769,7 @@ namespace ndt {
 
     friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);
+    friend type make_dynamic_type(type_id_t tp_id);
   };
 
   /**
