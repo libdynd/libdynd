@@ -7,7 +7,7 @@
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/apply.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/gfunc/make_gcallable.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
 
 using namespace std;

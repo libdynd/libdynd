@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/kernels/fft.hpp>
+#include <dynd/kernels/fft_kernel.hpp>
 
 using namespace std;
 using namespace dynd;

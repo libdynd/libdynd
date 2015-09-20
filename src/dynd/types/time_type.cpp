@@ -9,7 +9,7 @@
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/gfunc/make_gcallable.hpp>
 #include <dynd/parser_util.hpp>
 
 using namespace std;

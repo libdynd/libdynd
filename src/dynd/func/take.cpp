@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/take.hpp>
-#include <dynd/kernels/take.hpp>
+#include <dynd/kernels/take_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
