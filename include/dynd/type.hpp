@@ -79,7 +79,7 @@ namespace nd {
 } // namespace dynd::nd
 
 namespace ndt {
-  typedef type (*type_make_t)(type_id_t tp_id, const nd::array &);
+  typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
   namespace detail {
 
@@ -116,8 +116,8 @@ namespace ndt {
      */
     static const base_type *validate_builtin_type_id(type_id_t type_id)
     {
-      // 0 <= type_id < builtin_type_id_count
-      if ((unsigned int)type_id < builtin_type_id_count) {
+      // 0 <= type_id < primitive_type_id_count
+      if ((unsigned int)type_id < primitive_type_id_count) {
         return reinterpret_cast<const base_type *>(type_id);
       }
 
@@ -896,7 +896,7 @@ namespace ndt {
       return equivalent<A0>::make(std::forward<A0>(a0), std::forward<A>(a)...);
     }
 
-    static type make(type_id_t tp_id);
+    static type make(type_id_t tp_id, const nd::array &args);
 
     friend DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
@@ -1167,12 +1167,13 @@ namespace ndt {
    */
   DYND_API type make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtype, bool &out_any_var);
 
-  DYND_API type_id_t register_type(type_make_t);
+  DYND_API type_id_t register_type(const std::string &name, type_make_t make);
 
   template <typename TypeType>
-  type_id_t register_type()
+  type_id_t register_type(const std::string &name)
   {
-    return register_type([](type_id_t tp_id, const nd::array &) { return type(new TypeType(tp_id), true); });
+    return register_type(name,
+                         [](type_id_t tp_id, const nd::array &args) { return type(new TypeType(tp_id, args), false); });
   }
 
   /**
@@ -1232,7 +1233,7 @@ namespace ndt {
    * static_builtin_types[type_id_of<int>::value] as a fast
    * way to get a const reference to its type.
    */
-  extern DYND_API const type static_builtin_types[builtin_type_id_count];
+  extern DYND_API const type static_builtin_types[primitive_type_id_count];
 
   DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 

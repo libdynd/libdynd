@@ -375,7 +375,7 @@ static void string_to_complex_float64_single(ckernel_prefix *DYND_UNUSED(self), 
   throw std::runtime_error("TODO: implement string_to_complex_float64_single");
 }
 
-static expr_single_t static_string_to_builtin_kernels[builtin_type_id_count - 2] = {
+static expr_single_t static_string_to_builtin_kernels[primitive_type_id_count - 2] = {
     &string_to_bool_single,            &string_to_int<int8_t>::single,    &string_to_int<int16_t>::single,
     &string_to_int<int32_t>::single,   &string_to_int<int64_t>::single,   &string_to_int128_single,
     &string_to_uint<uint8_t>::single,  &string_to_uint<uint16_t>::single, &string_to_uint<uint32_t>::single,
@@ -458,7 +458,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(void *ckb, intptr_t ckb_of
     throw runtime_error(ss.str());
   }
 
-  if (src_type_id >= 0 && src_type_id < builtin_type_id_count) {
+  if (src_type_id >= 0 && src_type_id < primitive_type_id_count) {
     ckb_offset = make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
     builtin_to_string_kernel_extra *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                                             ->alloc_ck<builtin_to_string_kernel_extra>(ckb_offset);

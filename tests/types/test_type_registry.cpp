@@ -10,12 +10,14 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/type.hpp>
+#include <dynd/array.hpp>
 
 using namespace std;
 using namespace dynd;
 
 struct custom_type : ndt::base_type {
-  custom_type(type_id_t tp_id) : base_type(tp_id, custom_kind, 0, 0, 0, 0, 0, 0)
+  custom_type(type_id_t tp_id, const nd::array &DYND_UNUSED(args))
+      : base_type(tp_id, custom_kind, 0, 1, type_flag_none, 0, 0, 0)
   {
   }
 
@@ -30,13 +32,11 @@ struct custom_type : ndt::base_type {
   }
 };
 
-TEST(TypeRegistry, Basic)
+TEST(Type, Registry)
 {
-  type_id_t tp_id = ndt::register_type<custom_type>();
-  std::cout << tp_id << std::endl;
+  type_id_t tp_id = ndt::register_type<custom_type>("quaternion");
 
-  ndt::type tp = ndt::type::make(tp_id);
-  std::cout << tp << std::endl;
-
-//  std::exit(-1);
+  const nd::array &a = nd::array();
+  ndt::type tp = ndt::type::make(tp_id, a);
+  EXPECT_EQ(tp_id, tp.get_type_id());
 }
