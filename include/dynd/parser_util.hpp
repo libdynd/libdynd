@@ -405,8 +405,10 @@ inline bool parse_unsigned_int_no_ws(const char *&rbegin, const char *end,
 inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin, const char *&out_strend)
 {
   const char *begin = rbegin;
+  const char *saved_begin = begin;
   parse_token(begin, end, '-');
   if (parse_unsigned_int_no_ws(begin, end, out_strbegin, out_strend)) {
+    out_strbegin = saved_begin;
     rbegin = begin;
     return true;
   }
