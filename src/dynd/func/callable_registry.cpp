@@ -14,6 +14,7 @@
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/func/sum.hpp>
+#include <dynd/func/option.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -251,7 +251,7 @@ namespace nd {
         const char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-          int32_t date = *reinterpret_cast<const int32_t *>(src);
+          int32_t date = *reinterpret_cast<const int32_t *>(src0);
           *dst = date != DYND_DATE_NA;
           dst += dst_stride;
           src0 += src0_stride;
@@ -300,10 +300,10 @@ namespace nd {
       void strided(char *dst, intptr_t dst_stride, char *const *src,
                    const intptr_t *src_stride, size_t count)
       {
-        const char *src0 = src[0];
+        char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
         for (size_t i = 0; i != count; ++i) {
-          int64_t v = **reinterpret_cast<int64_t *const *>(src);
+          int64_t v = *reinterpret_cast<int64_t *>(src0);
           *dst = v != DYND_DATETIME_NA;
           dst += dst_stride;
           src0 += src0_stride;

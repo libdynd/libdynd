@@ -28,28 +28,47 @@ TEST(Option, IsAvail) {
 
     x = parse_json("?time", "\"11:00:13\"");
     EXPECT_TRUE(nd::is_avail(x).as<bool>());
+
+    x = parse_json("?date", "\"2014-01-10\"");
+    EXPECT_TRUE(nd::is_avail(x).as<bool>());
 }
 
 
 TEST(Option, IsAvailArray) {
     nd::array data = parse_json("3 * ?int", "[0, null, 2]");
-    nd::array expected = parse_json("3 * bool", "[true, false, true]");
+    nd::array expected{true, false, true};
     EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
 
     data = parse_json("3 * ?int", "[null, null, null]");
-    expected = parse_json("3 * bool", "[false, false, false]");
+    expected = {false, false, false};
     EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
 
     data = parse_json("3 * ?datetime", "[null, null, null]");
-    expected = parse_json("3 * bool", "[false, false, false]");
+    expected = {false, false, false};
+    EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
+
+    data = parse_json("2 * ?date", "[\"2014-01-31\", null]");
+    expected = {true, false};
+    EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
+
+    data = parse_json("2 * ?date", "[null, \"2014-01-31\"]");
+    expected = {false, true};
+    EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
+
+    data = parse_json("2 * ?datetime", "[\"2014-01-31T12:13:14Z\", null]");
+    expected = {true, false};
+    EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
+
+    data = parse_json("2 * ?datetime", "[null, \"2014-01-31T12:13:14Z\"]");
+    expected = {false, true};
     EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
 
     data = parse_json("3 * ?time", "[\"11:12:11\", \"11:12:12\", \"11:12:13\"]");
-    expected = parse_json("3 * bool", "[true, true, true]");
+    expected = {true, true, true};
     EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
 
     data = parse_json("3 * ?void", "[null, null, null]");
-    expected = parse_json("3 * bool", "[false, false, false]");
+    expected = {false, false, false};
     EXPECT_ARRAY_EQ(nd::is_avail(data), expected);
 
     data = parse_json("2 * 3 * ?float64", "[[1.0, null, 3.0], [null, \"NaN\", 3.0]]");
