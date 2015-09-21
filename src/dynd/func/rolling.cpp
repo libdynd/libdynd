@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/rolling.hpp>
-#include <dynd/kernels/rolling.hpp>
+#include <dynd/kernels/rolling_kernel.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 
 using namespace std;

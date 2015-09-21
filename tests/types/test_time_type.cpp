@@ -15,7 +15,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/gfunc/call_callable.hpp>
+#include <dynd/gfunc/call_gcallable.hpp>
 
 using namespace std;
 using namespace dynd;

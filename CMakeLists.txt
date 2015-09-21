@@ -134,6 +134,8 @@ string(REPLACE "v" "" DYND_VERSION "${DYND_VERSION_STRING}")
 string(REPLACE "-" ";" DYND_VERSION "${DYND_VERSION}")
 list(GET DYND_VERSION 0 "${DYND_VERSION}")
 
+set(config_cpp src/dynd/config.cpp)
+
 set(libdynd_SRC
     # Types
     src/dynd/types/adapt_type.cpp
@@ -334,10 +336,10 @@ set(libdynd_SRC
     include/dynd/func/take.hpp
     include/dynd/func/take_by_pointer.hpp
     # GFunc
-    src/dynd/gfunc/callable.cpp
-    include/dynd/gfunc/callable.hpp
-    include/dynd/gfunc/call_callable.hpp
-    include/dynd/gfunc/make_callable.hpp
+    src/dynd/gfunc/gcallable.cpp
+    include/dynd/gfunc/gcallable.hpp
+    include/dynd/gfunc/call_gcallable.hpp
+    include/dynd/gfunc/make_gcallable.hpp
     # Iter
     src/dynd/iter/string_iter.cpp
     include/dynd/iter/string_iter.hpp
@@ -349,7 +351,7 @@ set(libdynd_SRC
     src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/compare_kernels.cpp
-    src/dynd/kernels/copy.cpp
+    src/dynd/kernels/copy_kernel.cpp
     src/dynd/kernels/date_adapter_kernels.cpp
     src/dynd/kernels/datetime_adapter_kernels.cpp
     src/dynd/kernels/date_expr_kernels.cpp
@@ -357,17 +359,17 @@ set(libdynd_SRC
     src/dynd/kernels/expr_kernel_generator.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
-    src/dynd/kernels/fft.cpp
+    src/dynd/kernels/fft_kernel.cpp
     src/dynd/kernels/multidispatch_kernel.cpp
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
-    src/dynd/kernels/rolling.cpp
+    src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_numeric_assignment_kernels.cpp
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
-    src/dynd/kernels/take.cpp
+    src/dynd/kernels/take_kernel.cpp
     src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_comparer_builtin.hpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
@@ -388,7 +390,7 @@ set(libdynd_SRC
     include/dynd/kernels/comparison_kernels.hpp
     include/dynd/kernels/compose_kernel.hpp
     include/dynd/kernels/compound_kernel.hpp
-    include/dynd/kernels/copy.hpp
+    include/dynd/kernels/copy_kernel.hpp
     include/dynd/kernels/constant_kernel.hpp
     include/dynd/kernels/cuda_launch.hpp
     include/dynd/kernels/date_adapter_kernels.hpp
@@ -399,20 +401,20 @@ set(libdynd_SRC
     include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
-    include/dynd/kernels/fft.hpp
+    include/dynd/kernels/fft_kernel.hpp
     include/dynd/kernels/is_avail_kernel.hpp
     include/dynd/kernels/multidispatch_kernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/outer.hpp
     include/dynd/kernels/pointer_assignment_kernels.hpp
     include/dynd/kernels/reduction_kernel.hpp
-    include/dynd/kernels/rolling.hpp
+    include/dynd/kernels/rolling_kernel.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
-    include/dynd/kernels/take.hpp
+    include/dynd/kernels/take_kernel.hpp
     include/dynd/kernels/tuple_assignment_kernels.hpp
     include/dynd/kernels/tuple_comparison_kernels.hpp
     include/dynd/kernels/uniform_kernel.hpp
@@ -442,7 +444,7 @@ set(libdynd_SRC
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
-    src/dynd/config.cpp
+    # src/dynd/config.cpp
     src/dynd/dim_iter.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
@@ -597,22 +599,23 @@ endif()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 
-add_library(libdynd_OBJ OBJECT ${libdynd_SRC})
+add_library(dynd_OBJ OBJECT ${libdynd_SRC})
 
 if(DYND_LLVM)
   if(LLVM_FOUND)
     add_subdirectory(plugin)
 
-    add_dependencies(libdynd_OBJ dynd_plugin)
-    set_target_properties(libdynd_OBJ PROPERTIES COMPILE_FLAGS "-Xclang -load -Xclang plugin/libdynd_plugin.so")
+    add_dependencies(dynd_OBJ dynd_plugin)
+    set_target_properties(dynd_OBJ PROPERTIES COMPILE_FLAGS "-Xclang -load -Xclang plugin/libdynd_plugin.so")
   endif()
 endif()
 
 if (DYND_SHARED_LIB)
     if (DYND_CUDA)
-        cuda_add_library(libdynd SHARED ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
+        cuda_add_library(libdynd SHARED ${config_cpp} ${libdynddev_SRC} $<TARGET_OBJECTS:dynd_OBJ>)
     else()
-        add_library(libdynd SHARED $<TARGET_OBJECTS:libdynd_OBJ>)
+        # xcode doesn't like when all cpp files are contained in an OBJECT library
+        add_library(libdynd SHARED ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ>)
     endif()
     set_target_properties(libdynd
         PROPERTIES
@@ -621,9 +624,9 @@ if (DYND_SHARED_LIB)
         )
 else()
     if (DYND_CUDA)
-        cuda_add_library(libdynd STATIC ${libdynddev_SRC} $<TARGET_OBJECTS:libdynd_OBJ>)
+        cuda_add_library(libdynd STATIC ${config_cpp} ${libdynddev_SRC} $<TARGET_OBJECTS:dynd_OBJ>)
     else()
-        add_library(libdynd STATIC $<TARGET_OBJECTS:libdynd_OBJ>)
+        add_library(libdynd STATIC ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ>)
     endif()
     set_target_properties(libdynd
         PROPERTIES
@@ -635,7 +638,7 @@ endif()
 if (DYND_CUDA)
     cuda_add_cufft_to_target(libdynd)
 
-    add_library(libdynddev STATIC $<TARGET_OBJECTS:libdynd_OBJ> ${libdynd_SEPARABLE_COMPILATION_OBJECTS})
+    add_library(libdynddev STATIC ${config_cpp} $<TARGET_OBJECTS:dynd_OBJ> ${libdynd_SEPARABLE_COMPILATION_OBJECTS})
     cuda_add_cufft_to_target(libdynddev)
     set_target_properties(libdynddev PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(libdynddev
@@ -646,7 +649,7 @@ if (DYND_CUDA)
 endif()
 
 set_property(
-    TARGET libdynd libdynd_OBJ
+    TARGET libdynd dynd_OBJ
     PROPERTY COMPILE_DEFINITIONS DYND_EXPORT
 )
 

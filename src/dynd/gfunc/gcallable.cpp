@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/gfunc/callable.hpp>
+#include <dynd/gfunc/gcallable.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 
 using namespace std;

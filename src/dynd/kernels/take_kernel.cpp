@@ -5,7 +5,7 @@
 
 #include <dynd/shape_tools.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/take.hpp>
+#include <dynd/kernels/take_kernel.hpp>
 #include <dynd/types/var_dim_type.hpp>
 
 using namespace std;

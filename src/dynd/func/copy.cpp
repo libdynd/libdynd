@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/copy.hpp>
-#include <dynd/kernels/copy.hpp>
+#include <dynd/kernels/copy_kernel.hpp>
 
 using namespace std;
 using namespace dynd;

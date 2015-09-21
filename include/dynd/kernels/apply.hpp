@@ -8,7 +8,7 @@
 #include <dynd/strided_vals.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/gfunc/call_callable.hpp>
+#include <dynd/gfunc/call_gcallable.hpp>
 
 namespace dynd {
 namespace detail {

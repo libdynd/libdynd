@@ -6,7 +6,7 @@
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/property_type.hpp>
-#include <dynd/gfunc/make_callable.hpp>
+#include <dynd/gfunc/make_gcallable.hpp>
 
 using namespace std;
 using namespace dynd;

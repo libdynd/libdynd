@@ -10,9 +10,9 @@
 
 #include "inc_gtest.hpp"
 
-#include <dynd/gfunc/callable.hpp>
-#include <dynd/gfunc/make_callable.hpp>
-#include <dynd/gfunc/call_callable.hpp>
+#include <dynd/gfunc/gcallable.hpp>
+#include <dynd/gfunc/make_gcallable.hpp>
+#include <dynd/gfunc/call_gcallable.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/struct_type.hpp>
 

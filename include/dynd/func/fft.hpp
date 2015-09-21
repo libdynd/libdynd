@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <dynd/kernels/fft.hpp>
+#include <dynd/kernels/fft_kernel.hpp>
 #include <dynd/func/callable.hpp>
 
 namespace dynd {

@@ -22,6 +22,6 @@ add_library(datetime STATIC ${datetime_SRC})
 
 # On some 64-bit unix platforms it appears to be necessary to
 # explicitly say -fPIC to make static linking work
-if(UNIX AND ${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+if(UNIX AND (${CMAKE_SIZEOF_VOID_P} MATCHES 8))
     set_target_properties(datetime PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
