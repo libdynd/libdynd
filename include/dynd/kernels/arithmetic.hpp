@@ -7,27 +7,29 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t I0>
-  struct plus_kernel : base_kernel<plus_kernel<I0>, 1> {
+  template <type_id_t I0, typename func_type, func_type f>
+  struct unary_kernel : base_kernel<unary_kernel<I0, func_type, f>, 1> {
     typedef typename type_of<I0>::type A0;
-    typedef decltype(+std::declval<A0>()) R;
-
+    typedef decltype(f(std::declval<A0>())) R;
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<R *>(dst) = +*reinterpret_cast<A0 *>(src[0]);
+      *reinterpret_cast<R *>(dst) = f(*reinterpret_cast<A0 *>(src[0]));
     }
   };
 
-  template <type_id_t I0>
-  struct minus_kernel : base_kernel<minus_kernel<I0>, 1> {
-    typedef typename type_of<I0>::type A0;
-    typedef decltype(-std::declval<A0>()) R;
+  template <typename T>
+  inline T inline_unary_plus(T val){ return +val; }
 
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<R *>(dst) = -*reinterpret_cast<A0 *>(src[0]);
-    }
-  };
+  template <type_id_t I0>
+  struct plus_kernel : unary_kernel<I0, decltype(inline_unary_plus<typename type_of<I0>::type>),
+                                    inline_unary_plus<typename type_of<I0>::type>> {};
+
+  template <typename T>
+  inline T inline_unary_minus(T val){ return -val; }
+
+  template <type_id_t I0>
+  struct minus_kernel : unary_kernel<I0, decltype(inline_unary_minus<typename type_of<I0>::type>),
+                                     inline_unary_minus<typename type_of<I0>::type>> {};
 
   template <type_id_t I0, type_id_t I1>
   struct add_kernel : base_kernel<add_kernel<I0, I1>, 2> {
