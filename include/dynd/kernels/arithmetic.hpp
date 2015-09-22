@@ -26,6 +26,8 @@ namespace nd {
 
   DYND_DeclUnaryOp(+, plus)
   DYND_DeclUnaryOp(-, minus)
+  DYND_DeclUnaryOp(!, logical_not)
+  DYND_DeclUnaryOp(~, bitwise_not)
 
 #undef DYND_DeclUnaryOp
 
@@ -54,6 +56,14 @@ namespace nd {
   DYND_DeclBinopKernel(-, subtract)
   DYND_DeclBinopKernel(*, multiply)
   DYND_DeclBinopKernel(/, divide)
+  DYND_DeclBinopKernel(%, mod)
+  DYND_DeclBinopKernel(&, bitwise_and)
+  DYND_DeclBinopKernel(&&, logical_and)
+  DYND_DeclBinopKernel(|, bitwise_or)
+  DYND_DeclBinopKernel(||, logical_or)
+  DYND_DeclBinopKernel(^, xor)
+  DYND_DeclBinopKernel(<<, left_shift)
+  DYND_DeclBinopKernel(>>, right_shift)
 
 #undef DYND_DeclBinopKernel
 
