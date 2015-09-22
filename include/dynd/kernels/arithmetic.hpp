@@ -7,22 +7,23 @@
 namespace dynd {
 namespace nd {
 
-  template <type_id_t I0, typename func_type, func_type f>
-  struct unary_kernel : base_kernel<unary_kernel<I0, func_type, f>, 1> {
-    typedef typename type_of<I0>::type A0;
-    typedef decltype(f(std::declval<A0>())) R;
+  template <type_id_t Src0TypeID, typename FuncType, FuncType F>
+  struct unary_operator_kernel : base_kernel<unary_operator_kernel<Src0TypeID, FuncType, F>, 1> {
+    typedef typename type_of<Src0TypeID>::type A0;
+    typedef decltype(F(std::declval<A0>())) R;
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<R *>(dst) = f(*reinterpret_cast<A0 *>(src[0]));
+      *reinterpret_cast<R *>(dst) = F(*reinterpret_cast<A0 *>(src[0]));
     }
   };
 
-#define DYND_DeclUnaryOp(OP, NAME)                                                                        \
-  template <typename T>                                                                                   \
-  inline decltype(OP std::declval<T>()) inline_ ## NAME(T val) { return OP val; }                         \
-  template <type_id_t I0>                                                                                 \
-  struct NAME ## _kernel : unary_kernel<I0, decltype(&inline_ ## NAME<typename type_of<I0>::type>),       \
-                                        &inline_ ## NAME<typename type_of<I0>::type>> {};                 \
+#define DYND_DeclUnaryOp(OP, NAME)                                                                                    \
+  template <typename T>                                                                                               \
+  inline decltype(OP std::declval<T>()) inline_ ## NAME(T val) { return OP val; }                                     \
+  template <type_id_t Src0TypeID>                                                                                     \
+  struct NAME ## _kernel : unary_operator_kernel<Src0TypeID, decltype(&inline_ ## NAME<typename                       \
+                                                                                       type_of<Src0TypeID>::type>),   \
+                                        &inline_ ## NAME<typename type_of<Src0TypeID>::type>> {};                     \
 
   DYND_DeclUnaryOp(+, plus)
   DYND_DeclUnaryOp(-, minus)
@@ -31,26 +32,28 @@ namespace nd {
 
 #undef DYND_DeclUnaryOp
 
-  template <type_id_t I0, type_id_t I1, typename func_type, func_type f>
-  struct binary_kernel : base_kernel<binary_kernel<I0, I1, func_type, f>, 2> {
-    typedef binary_kernel self_type;
-    typedef typename type_of<I0>::type A0;
-    typedef typename type_of<I1>::type A1;
-    typedef decltype(f(std::declval<A0>(), std::declval<A1>())) R;
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID, typename FuncType, FuncType F>
+  struct binary_operator_kernel : base_kernel<binary_operator_kernel<Src0TypeID, Src1TypeID, FuncType, F>, 2> {
+    //typedef binary_operator_kernel self_type;
+    typedef typename type_of<Src0TypeID>::type A0;
+    typedef typename type_of<Src1TypeID>::type A1;
+    typedef decltype(F(std::declval<A0>(), std::declval<A1>())) R;
 
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<R *>(dst) = f(*reinterpret_cast<A0 *>(src[0]), *reinterpret_cast<A1 *>(src[1]));
+      *reinterpret_cast<R *>(dst) = F(*reinterpret_cast<A0 *>(src[0]), *reinterpret_cast<A1 *>(src[1]));
     }
   };
 
 #define DYND_DeclBinopKernel(OP, NAME)                                                                                \
   template<typename T, typename U>                                                                                    \
   inline decltype(std::declval<T>() OP std::declval<U>()) inline_ ## NAME(T a, U b) { return a OP b; }                \
-  template<type_id_t I0, type_id_t I1>                                                                                \
-  struct NAME ## _kernel : binary_kernel<I0, I1, decltype(&inline_ ## NAME<typename type_of<I0>::type,                \
-                                                                          typename type_of<I1>::type>),               \
-                                         &inline_ ## NAME<typename type_of<I0>::type, typename type_of<I1>::type>> {};\
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
+  struct NAME ## _kernel : binary_operator_kernel<Src0TypeID, Src1TypeID,                                             \
+                                         decltype(&inline_ ## NAME<typename type_of<Src0TypeID>::type,                \
+                                                                   typename type_of<Src1TypeID>::type>),              \
+                                         &inline_ ## NAME<typename type_of<Src0TypeID>::type,                         \
+                                                          typename type_of<Src1TypeID>::type>> {};                    \
 
   DYND_DeclBinopKernel(+, add)
   DYND_DeclBinopKernel(-, subtract)
