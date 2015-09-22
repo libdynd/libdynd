@@ -17,17 +17,17 @@ namespace nd {
     }
   };
 
-#define DeclUnaryOp(OP, NAME)                                                                             \
+#define DYND_DeclUnaryOp(OP, NAME)                                                                        \
   template <typename T>                                                                                   \
   inline decltype(OP std::declval<T>()) inline_ ## NAME(T val) { return OP val; }                         \
   template <type_id_t I0>                                                                                 \
   struct NAME ## _kernel : unary_kernel<I0, decltype(inline_ ## NAME<typename type_of<I0>::type>),        \
                                         inline_ ## NAME<typename type_of<I0>::type>> {};                  \
 
-  DeclUnaryOp(+, plus)
-  DeclUnaryOp(-, minus)
+  DYND_DeclUnaryOp(+, plus)
+  DYND_DeclUnaryOp(-, minus)
 
-#undef DeclUnaryOp
+#undef DYND_DeclUnaryOp
 
   template <type_id_t I0, type_id_t I1, typename func_type, func_type f>
   struct binary_kernel : base_kernel<binary_kernel<I0, I1, func_type, f>, 2> {
@@ -42,20 +42,20 @@ namespace nd {
     }
   };
 
-#define DeclBinopKernel(OP, NAME)                                                                                      \
-template<typename T, typename U>                                                                                       \
-inline decltype(std::declval<T>() OP std::declval<U>()) inline_ ## NAME(T a, U b) { return a OP b; }                   \
-template<type_id_t I0, type_id_t I1>                                                                                   \
-struct NAME ## _kernel : binary_kernel<I0, I1, decltype(inline_ ## NAME<typename type_of<I0>::type,                    \
-                                                                   typename type_of<I1>::type>),                       \
-                                       inline_ ## NAME<typename type_of<I0>::type, typename type_of<I1>::type>> {};    \
+#define DYND_DeclBinopKernel(OP, NAME)                                                                                \
+  template<typename T, typename U>                                                                                    \
+  inline decltype(std::declval<T>() OP std::declval<U>()) inline_ ## NAME(T a, U b) { return a OP b; }                \
+  template<type_id_t I0, type_id_t I1>                                                                                \
+  struct NAME ## _kernel : binary_kernel<I0, I1, decltype(inline_ ## NAME<typename type_of<I0>::type,                 \
+                                                                          typename type_of<I1>::type>),               \
+                                         inline_ ## NAME<typename type_of<I0>::type, typename type_of<I1>::type>> {}; \
 
-DeclBinopKernel(+, add)
-DeclBinopKernel(-, subtract)
-DeclBinopKernel(*, multiply)
-DeclBinopKernel(/, divide)
+  DYND_DeclBinopKernel(+, add)
+  DYND_DeclBinopKernel(-, subtract)
+  DYND_DeclBinopKernel(*, multiply)
+  DYND_DeclBinopKernel(/, divide)
 
-#undef DeclBinopKernel
+#undef DYND_DeclBinopKernel
 
   template <typename FuncType, bool Src0IsOption, bool Src1IsOption>
   struct option_arithmetic_kernel;
