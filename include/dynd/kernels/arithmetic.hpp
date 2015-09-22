@@ -21,9 +21,9 @@ namespace nd {
   template <typename T>                                                                                               \
   inline decltype(OP std::declval<T>()) inline_ ## NAME(T val) { return OP val; }                                     \
   template <type_id_t Src0TypeID>                                                                                     \
-  struct NAME ## _kernel : unary_operator_kernel<Src0TypeID, decltype(&inline_ ## NAME<typename                       \
+  using NAME ## _kernel = unary_operator_kernel<Src0TypeID, decltype(&inline_ ## NAME<typename                        \
                                                                                        type_of<Src0TypeID>::type>),   \
-                                        &inline_ ## NAME<typename type_of<Src0TypeID>::type>> {};                     \
+                                        &inline_ ## NAME<typename type_of<Src0TypeID>::type>>;                        \
 
   DYND_DeclUnaryOp(+, plus)
   DYND_DeclUnaryOp(-, minus)
@@ -49,11 +49,11 @@ namespace nd {
   template<typename T, typename U>                                                                                    \
   inline decltype(std::declval<T>() OP std::declval<U>()) inline_ ## NAME(T a, U b) { return a OP b; }                \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  struct NAME ## _kernel : binary_operator_kernel<Src0TypeID, Src1TypeID,                                             \
+  using NAME ## _kernel = binary_operator_kernel<Src0TypeID, Src1TypeID,                                              \
                                          decltype(&inline_ ## NAME<typename type_of<Src0TypeID>::type,                \
                                                                    typename type_of<Src1TypeID>::type>),              \
                                          &inline_ ## NAME<typename type_of<Src0TypeID>::type,                         \
-                                                          typename type_of<Src1TypeID>::type>> {};                    \
+                                                          typename type_of<Src1TypeID>::type>>;                       \
 
   DYND_DeclBinopKernel(+, add)
   DYND_DeclBinopKernel(-, subtract)
