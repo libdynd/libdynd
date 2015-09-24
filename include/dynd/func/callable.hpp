@@ -114,7 +114,7 @@ namespace nd {
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
-      const char *m_arrmeta[sizeof...(A)];
+      char holder;
 
     public:
       args(A &&... a) : m_values(std::forward<A>(a)...)
@@ -153,7 +153,7 @@ namespace nd {
           check_narg(af_tp, sizeof...(A));
 
           typedef make_index_sequence<sizeof...(A)> I;
-          index_proxy<I>::for_each(*this, af_tp, src_tp, src_arrmeta, src_data, tp_vars);
+          for_each<I>(*this, af_tp, src_tp, src_arrmeta, src_data, tp_vars);
         }
       } validate_types;
     };
@@ -277,7 +277,7 @@ namespace nd {
         void operator()(typename as_<K, const char *>::type... names)
         {
           typedef make_index_sequence<sizeof...(K)> I;
-          index_proxy<I>::for_each(*this, names...);
+          for_each<I>(*this, names...);
         }
       } set_names;
 
@@ -302,7 +302,7 @@ namespace nd {
                         const std::vector<intptr_t> &available) const
         {
           typedef make_index_sequence<sizeof...(K)> I;
-          index_proxy<I>::for_each(*this, tp, arrmeta, arrmeta_offsets, data, data_offsets, kwds_as_vector, available);
+          for_each<I>(*this, tp, arrmeta, arrmeta_offsets, data, data_offsets, kwds_as_vector, available);
         }
       } fill_available_values;
 
@@ -329,7 +329,7 @@ namespace nd {
 
         template <size_t I>
         void on_each(const ndt::callable_type *af_tp, array &dst, bool &has_dst_tp, std::vector<ndt::type> &kwd_tp,
-                     std::vector<intptr_t> &available)
+                     std::vector<intptr_t> &available) const
         {
           check_name(af_tp, dst, self->m_names[I], std::get<I>(self->m_values), has_dst_tp, kwd_tp.data(), available);
         }
@@ -340,7 +340,7 @@ namespace nd {
           bool has_dst_tp = false;
 
           typedef make_index_sequence<sizeof...(K)> I;
-          index_proxy<I>::for_each(*this, af_tp, dst, has_dst_tp, tp, available);
+          for_each<I>(*this, af_tp, dst, has_dst_tp, tp, available);
 
           intptr_t nkwd = sizeof...(K);
           if (has_dst_tp) {
@@ -1128,7 +1128,8 @@ namespace nd {
  * \param src_tp  The type of the source.
  * \param errmode  The error mode to use for the assignment.
  */
-DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp, assign_error_mode errmode);
+DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
+                                                    assign_error_mode errmode);
 
 /**
  * Creates an callable which does the assignment from
