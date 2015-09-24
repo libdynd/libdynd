@@ -341,7 +341,7 @@ namespace nd {
 
 #undef APPLY_FUNCTION_CK
 
-    template <typename func_type, func_type func, int N>
+    template <typename func_type, func_type func, int N = arity_of<func_type>::value>
     using as_apply_function_ck =
         apply_function_ck<func_type, func, typename return_of<func_type>::type,
                           as_apply_arg_sequence<func_type, N>,

@@ -3,45 +3,55 @@
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/func/option.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/kernels/apply.hpp>
 
 namespace dynd {
 namespace nd {
 
-  template <type_id_t I0>
-  struct plus_kernel : base_kernel<plus_kernel<I0>, 1> {
-    typedef typename type_of<I0>::type A0;
-    typedef decltype(+std::declval<A0>()) R;
+#define DYND_DeclUnaryOp(OP, NAME)                                                                                    \
+  template <type_id_t Src0TypeID>                                                                                     \
+  struct inline_ ## NAME {                                                                                            \
+    typedef typename type_of<Src0TypeID>::type A;                                                                     \
+    typedef decltype( OP std::declval<A>()) R;                                                                        \
+    static inline R f(A a) { return OP a; }                                                                           \
+  };                                                                                                                  \
+  template <type_id_t Src0TypeID>                                                                                     \
+  struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&inline_ ## NAME <Src0TypeID>::f),               \
+                                                           &inline_ ## NAME <Src0TypeID>::f> {};                      \
 
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<R *>(dst) = +*reinterpret_cast<A0 *>(src[0]);
-    }
-  };
+  DYND_DeclUnaryOp(+, plus)
+  DYND_DeclUnaryOp(-, minus)
+  DYND_DeclUnaryOp(!, logical_not)
+  DYND_DeclUnaryOp(~, bitwise_not)
 
-  template <type_id_t I0>
-  struct minus_kernel : base_kernel<minus_kernel<I0>, 1> {
-    typedef typename type_of<I0>::type A0;
-    typedef decltype(-std::declval<A0>()) R;
+#undef DYND_DeclUnaryOp
 
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<R *>(dst) = -*reinterpret_cast<A0 *>(src[0]);
-    }
-  };
+#define DYND_DeclBinopKernel(OP, NAME)                                                                               \
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                               \
+  struct inline_ ## NAME {                                                                                           \
+    typedef typename type_of<Src0TypeID>::type A0;                                                                   \
+    typedef typename type_of<Src1TypeID>::type A1;                                                                   \
+    typedef decltype(std::declval<A0>() OP std::declval<A1>()) R;                                                    \
+    static inline R f(A0 a, A1 b) { return a OP b; }                                                                 \
+  };                                                                                                                 \
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                               \
+  struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&inline_ ## NAME <Src0TypeID, Src1TypeID>::f),  \
+                                                            &inline_ ## NAME <Src0TypeID, Src1TypeID>::f> {};        \
 
-  template <type_id_t I0, type_id_t I1>
-  struct add_kernel : base_kernel<add_kernel<I0, I1>, 2> {
-    typedef add_kernel self_type;
-    typedef typename type_of<I0>::type A0;
-    typedef typename type_of<I1>::type A1;
-    typedef decltype(std::declval<A0>() + std::declval<A1>()) R;
+  DYND_DeclBinopKernel(+, add)
+  DYND_DeclBinopKernel(-, subtract)
+  DYND_DeclBinopKernel(*, multiply)
+  DYND_DeclBinopKernel(/, divide)
+  DYND_DeclBinopKernel(%, mod)
+  DYND_DeclBinopKernel(&, bitwise_and)
+  DYND_DeclBinopKernel(&&, logical_and)
+  DYND_DeclBinopKernel(|, bitwise_or)
+  DYND_DeclBinopKernel(||, logical_or)
+  DYND_DeclBinopKernel(^, xor)
+  DYND_DeclBinopKernel(<<, left_shift)
+  DYND_DeclBinopKernel(>>, right_shift)
 
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<R *>(dst) =
-          *reinterpret_cast<A0 *>(src[0]) + *reinterpret_cast<A1 *>(src[1]);
-    }
-  };
+#undef DYND_DeclBinopKernel
 
   template <typename FuncType, bool Src0IsOption, bool Src1IsOption>
   struct option_arithmetic_kernel;
@@ -401,48 +411,6 @@ namespace nd {
                                                     kwds,
                                                     tp_vars);
       return ckb_offset;
-    }
-  };
-
-  template <type_id_t I0, type_id_t I1>
-  struct subtract_kernel : base_kernel<subtract_kernel<I0, I1>, 2> {
-    typedef subtract_kernel self_type;
-    typedef typename type_of<I0>::type A0;
-    typedef typename type_of<I1>::type A1;
-    typedef decltype(std::declval<A0>() - std::declval<A1>()) R;
-
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<R *>(dst) =
-          *reinterpret_cast<A0 *>(src[0]) - *reinterpret_cast<A1 *>(src[1]);
-    }
-  };
-
-  template <type_id_t I0, type_id_t I1>
-  struct multiply_kernel : base_kernel<multiply_kernel<I0, I1>, 2> {
-    typedef multiply_kernel self_type;
-    typedef typename type_of<I0>::type A0;
-    typedef typename type_of<I1>::type A1;
-    typedef decltype(std::declval<A0>() * std::declval<A1>()) R;
-
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<R *>(dst) =
-          *reinterpret_cast<A0 *>(src[0]) * *reinterpret_cast<A1 *>(src[1]);
-    }
-  };
-
-  template <type_id_t I0, type_id_t I1>
-  struct divide_kernel : base_kernel<divide_kernel<I0, I1>, 2> {
-    typedef divide_kernel self_type;
-    typedef typename type_of<I0>::type A0;
-    typedef typename type_of<I1>::type A1;
-    typedef decltype(std::declval<A0>() / std::declval<A1>()) R;
-
-    DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
-    {
-      *reinterpret_cast<R *>(dst) =
-          *reinterpret_cast<A0 *>(src[0]) / *reinterpret_cast<A1 *>(src[1]);
     }
   };
 
