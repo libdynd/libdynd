@@ -113,23 +113,10 @@ namespace nd {
     /** A holder class for the array arguments */
     template <typename... A>
     class args {
-      std::tuple<A...> m_values;
-
-    public:
-      args(A &&... a) : m_values(std::forward<A>(a)...)
-      {
-      }
-
-      std::size_t size() const
-      {
-        return sizeof...(A);
-      }
-
-      struct _validate_types {
+      struct init {
         template <size_t I>
-        void on_each(const args *self, const ndt::callable_type *af_tp, std::vector<ndt::type> &src_tp,
-                     std::vector<const char *> &src_arrmeta, std::vector<char *> &src_data,
-                     std::map<std::string, ndt::type> &tp_vars) const
+        void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
+                     char **src_data, std::map<std::string, ndt::type> &tp_vars) const
         {
           auto value = std::get<I>(self->m_values);
           const ndt::type &tp = ndt::type::make(value);
@@ -137,37 +124,75 @@ namespace nd {
 
           check_arg(af_tp, I, tp, arrmeta, tp_vars);
 
-          src_tp.push_back(tp);
-          src_arrmeta.push_back(arrmeta);
-          src_data.push_back(data_of(value));
+          src_tp[I] = tp;
+          src_arrmeta[I] = arrmeta;
+          src_data[I] = data_of(value);
         }
       };
 
-      void validate_types(const ndt::callable_type *af_tp, std::vector<ndt::type> &src_tp,
-                          std::vector<const char *> &src_arrmeta, std::vector<char *> &src_data,
-                          std::map<std::string, ndt::type> &tp_vars) const
+      std::tuple<A...> m_values;
+      ndt::type m_tp[sizeof...(A)];
+      const char *m_arrmeta[sizeof...(A)];
+      char *m_data[sizeof...(A)];
+
+    public:
+      args(const ndt::callable_type *self_tp, A &&... a) : m_values(std::forward<A>(a)...)
       {
-        check_narg(af_tp, sizeof...(A));
+        check_narg(self_tp, sizeof...(A));
+
+        std::map<std::string, ndt::type> tp_vars;
 
         typedef make_index_sequence<sizeof...(A)> I;
-        for_each<I>(_validate_types(), this, af_tp, src_tp, src_arrmeta, src_data, tp_vars);
+        for_each<I>(init(), this, self_tp, m_tp, m_arrmeta, m_data, tp_vars);
+      }
+
+      size_t size() const
+      {
+        return sizeof...(A);
+      }
+
+      const ndt::type *types() const
+      {
+        return m_tp;
+      }
+
+      const char *const *arrmeta() const
+      {
+        return m_arrmeta;
+      }
+
+      char *const *data() const
+      {
+        return m_data;
       }
     };
 
     template <>
     class args<> {
     public:
-      std::size_t size() const
+      args(const ndt::callable_type *self_tp)
+      {
+        check_narg(self_tp, 0);
+      }
+
+      size_t size() const
       {
         return 0;
       }
 
-      void validate_types(const ndt::callable_type *af_tp, std::vector<ndt::type> &DYND_UNUSED(src_tp),
-                          std::vector<const char *> &DYND_UNUSED(src_arrmeta),
-                          std::vector<char *> &DYND_UNUSED(src_data),
-                          std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars)) const
+      const ndt::type *types() const
       {
-        check_narg(af_tp, 0);
+        return NULL;
+      }
+
+      const char *const *arrmeta() const
+      {
+        return NULL;
+      }
+
+      char *const *data() const
+      {
+        return NULL;
       }
     };
 
@@ -176,34 +201,49 @@ namespace nd {
     class args<std::size_t, array *> {
       std::size_t m_size;
       array *m_values;
+      std::vector<ndt::type> m_tp;
+      std::vector<const char *> m_arrmeta;
+      std::vector<char *> m_data;
 
     public:
-      args(std::size_t size, array *values) : m_size(size), m_values(values)
+      args(const ndt::callable_type *self_tp, std::size_t size, array *values)
+          : m_size(size), m_values(values), m_tp(m_size), m_arrmeta(m_size), m_data(m_size)
       {
+        std::map<std::string, ndt::type> tp_vars;
+
+        check_narg(self_tp, m_size);
+
+        for (std::size_t i = 0; i < m_size; ++i) {
+          array &value = m_values[i];
+          const char *arrmeta = value.get_arrmeta();
+          const ndt::type &tp = value.get_type();
+
+          check_arg(self_tp, i, tp, arrmeta, tp_vars);
+
+          m_tp[i] = tp;
+          m_arrmeta[i] = arrmeta;
+          m_data[i] = data_of(value);
+        }
       }
 
-      std::size_t size() const
+      size_t size() const
       {
         return m_size;
       }
 
-      void validate_types(const ndt::callable_type *af_tp, std::vector<ndt::type> &src_tp,
-                          std::vector<const char *> &src_arrmeta, std::vector<char *> &src_data,
-                          std::map<std::string, ndt::type> &tp_vars) const
+      const ndt::type *types() const
       {
-        check_narg(af_tp, m_size);
+        return m_tp.data();
+      }
 
-        for (std::size_t i = 0; i < m_size; ++i) {
-          array &value = m_values[i];
-          const ndt::type &tp = value.get_type();
-          const char *arrmeta = value.get_arrmeta();
+      const char *const *arrmeta() const
+      {
+        return m_arrmeta.data();
+      }
 
-          check_arg(af_tp, i, tp, arrmeta, tp_vars);
-
-          src_tp.push_back(tp);
-          src_arrmeta.push_back(arrmeta);
-          src_data.push_back(data_of(value));
-        }
+      char *const *data() const
+      {
+        return m_data.data();
       }
     };
 
@@ -814,12 +854,6 @@ namespace nd {
       kwds.validate_names(self_tp, dst, kwd_tp, available, missing);
 
       std::map<std::string, ndt::type> tp_vars;
-      std::vector<ndt::type> arg_tp;
-      std::vector<const char *> arg_arrmeta;
-      std::vector<char *> arg_data;
-
-      // Validate the array arguments
-      args.validate_types(self_tp, arg_tp, arg_arrmeta, arg_data, tp_vars);
 
       // Validate the destination type, if it was provided
       if (!dst.is_null()) {
@@ -843,15 +877,13 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        return (*get())(dst_tp, arg_tp.size(), arg_tp.empty() ? NULL : arg_tp.data(),
-                        arg_arrmeta.empty() ? NULL : arg_arrmeta.data(), arg_data.empty() ? NULL : arg_data.data(),
-                        kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
+        return (*get())(dst_tp, args.size(), args.types(), args.arrmeta(), args.data(), kwds_as_vector.size(),
+                        kwds_as_vector.data(), tp_vars);
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst.get_arrmeta(), dst.get_readwrite_originptr(), arg_tp.size(),
-               arg_tp.empty() ? NULL : arg_tp.data(), arg_arrmeta.empty() ? NULL : arg_arrmeta.data(),
-               arg_data.empty() ? NULL : arg_data.data(), kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
+      (*get())(dst_tp, dst.get_arrmeta(), dst.get_readwrite_originptr(), args.size(), args.types(), args.arrmeta(),
+               args.data(), kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
       return dst;
     }
 
@@ -860,7 +892,7 @@ namespace nd {
      */
     nd::array operator()()
     {
-      return call(detail::args<>(), detail::kwds<>());
+      return call(detail::args<>(get_type()), detail::kwds<>());
     }
 
     /**
@@ -869,7 +901,7 @@ namespace nd {
     template <typename... K>
     array operator()(detail::kwds<K...> &&k)
     {
-      return call(detail::args<>(), std::forward<detail::kwds<K...>>(k));
+      return call(detail::args<>(get_type()), std::forward<detail::kwds<K...>>(k));
     }
 
     /**
@@ -880,11 +912,11 @@ namespace nd {
                             array>::type
     operator()(T &&... a)
     {
-      typedef make_index_sequence<sizeof...(T) - 1> I;
+      typedef make_index_sequence<sizeof...(T)> I;
       typedef typename instantiate<detail::args, typename to<type_sequence<typename as_array<T>::type...>,
                                                              sizeof...(T) - 1>::type>::type args_type;
 
-      args_type arr = index_proxy<I>::template make<args_type>(std::forward<T>(a)...);
+      args_type arr = index_proxy<I>::template make<args_type>(get_type(), std::forward<T>(a)...);
       return call(arr, dynd::get<sizeof...(T) - 1>(std::forward<T>(a)...));
     }
 
@@ -893,7 +925,8 @@ namespace nd {
         !std::is_convertible<A0 &&, std::size_t>::value || !std::is_convertible<A1 &&, array *>::value, array>::type
     operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
-      return call(detail::args<array, array>(array(std::forward<A0>(a0)), array(std::forward<A1>(a1))), kwds);
+      return call(detail::args<array, array>(get_type(), array(std::forward<A0>(a0)), array(std::forward<A1>(a1))),
+                  kwds);
     }
 
     template <typename A0, typename A1, typename... K>
@@ -901,7 +934,7 @@ namespace nd {
                             array>::type
     operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
-      return call(detail::args<std::size_t, array *>(std::forward<A0>(a0), std::forward<A1>(a1)), kwds);
+      return call(detail::args<std::size_t, array *>(get_type(), std::forward<A0>(a0), std::forward<A1>(a1)), kwds);
     }
 
     /**
