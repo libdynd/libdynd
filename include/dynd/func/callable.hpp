@@ -114,12 +114,10 @@ namespace nd {
     template <typename... A>
     class args {
       std::tuple<A...> m_values;
-      char holder;
 
     public:
       args(A &&... a) : m_values(std::forward<A>(a)...)
       {
-        validate_types.self = this;
       }
 
       std::size_t size() const
@@ -127,11 +125,9 @@ namespace nd {
         return sizeof...(A);
       }
 
-      struct {
-        args *self;
-
+      struct _validate_types {
         template <size_t I>
-        void on_each(const ndt::callable_type *af_tp, std::vector<ndt::type> &src_tp,
+        void on_each(const args *self, const ndt::callable_type *af_tp, std::vector<ndt::type> &src_tp,
                      std::vector<const char *> &src_arrmeta, std::vector<char *> &src_data,
                      std::map<std::string, ndt::type> &tp_vars) const
         {
@@ -145,17 +141,17 @@ namespace nd {
           src_arrmeta.push_back(arrmeta);
           src_data.push_back(data_of(value));
         }
+      };
 
-        void operator()(const ndt::callable_type *af_tp, std::vector<ndt::type> &src_tp,
-                        std::vector<const char *> &src_arrmeta, std::vector<char *> &src_data,
-                        std::map<std::string, ndt::type> &tp_vars) const
-        {
-          check_narg(af_tp, sizeof...(A));
+      void validate_types(const ndt::callable_type *af_tp, std::vector<ndt::type> &src_tp,
+                          std::vector<const char *> &src_arrmeta, std::vector<char *> &src_data,
+                          std::map<std::string, ndt::type> &tp_vars) const
+      {
+        check_narg(af_tp, sizeof...(A));
 
-          typedef make_index_sequence<sizeof...(A)> I;
-          for_each<I>(*this, af_tp, src_tp, src_arrmeta, src_data, tp_vars);
-        }
-      } validate_types;
+        typedef make_index_sequence<sizeof...(A)> I;
+        for_each<I>(_validate_types(), this, af_tp, src_tp, src_arrmeta, src_data, tp_vars);
+      }
     };
 
     template <>
