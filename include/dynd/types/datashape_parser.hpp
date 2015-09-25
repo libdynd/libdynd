@@ -37,4 +37,14 @@ inline ndt::type type_from_datashape(const char (&datashape)[N])
     return type_from_datashape(datashape, datashape + N - 1);
 }
 
+/**
+ * Low level parsing function for parsing the argument list passed to a datashape type constructor.
+ *
+ * Returns a NULL nd::array if there is no arg list, and an nd::array with datashape
+ *   "{pos: N * arg, kw: {name: arg, ...}}" otherwise.
+ */
+DYND_API nd::array parse_type_constr_args(const char *&rbegin, const char *end, std::map<std::string, ndt::type> &symtable);
+
+DYND_API nd::array parse_type_constr_args(const std::string &str);
+
 } // namespace dynd

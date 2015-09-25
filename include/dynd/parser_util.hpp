@@ -391,6 +391,31 @@ inline bool parse_unsigned_int_no_ws(const char *&rbegin, const char *end,
 }
 
 /**
+ * Without skipping whitespace, parses a signed integer.
+ *
+ * Example:
+ *     // Match a two digit month
+ *     const char *match_begin, *match_end;
+ *     if (parse_int_no_ws(begin, end, match_begin, match_end) {
+ *         // Convert to int, process
+ *     } else {
+ *         // Couldn't match unsigned integer
+ *     }
+ */
+inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin, const char *&out_strend)
+{
+  const char *begin = rbegin;
+  const char *saved_begin = begin;
+  parse_token(begin, end, '-');
+  if (parse_unsigned_int_no_ws(begin, end, out_strbegin, out_strend)) {
+    out_strbegin = saved_begin;
+    rbegin = begin;
+    return true;
+  }
+  return false;
+}
+
+/**
  * Without skipping whitespace, parses an integer with exactly two digits.
  * A leading zero is accepted.
  *
@@ -479,6 +504,13 @@ DYND_API uint128 checked_string_to_uint128(const char *begin, const char *end,
  * there are problems.
  */
 DYND_API intptr_t checked_string_to_intptr(const char *begin, const char *end);
+
+/**
+ * Converts a string containing only an integer (no leading or
+ * trailing space, etc) into an int64, raising an exception if
+ * there are problems.
+ */
+DYND_API int64_t checked_string_to_int64(const char *begin, const char *end);
 
 /**
  * Converts a string containing only an unsigned integer (no leading or

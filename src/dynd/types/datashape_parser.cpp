@@ -765,6 +765,251 @@ static ndt::type parse_array_parameters(const char *&rbegin, const char *end, ma
   return ndt::array_type::make(tp);
 }
 
+// datashape_list : datashape COMMA datashape_list RBRACKET
+//                | datashape RBRACKET
+static nd::array parse_datashape_list(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+{
+  const char *begin = rbegin;
+
+  vector<ndt::type> dlist;
+  ndt::type arg = parse_datashape(begin, end, symtable);
+  if (arg.is_null()) {
+    return nd::array();
+  }
+  dlist.push_back(arg);
+  for (;;) {
+    if (!parse_token_ds(begin, end, ',')) {
+      if (!parse_token_ds(begin, end, ']')) {
+        return nd::array();
+      } else {
+        break;
+      }
+    }
+    arg = parse_datashape(begin, end, symtable);
+    if (arg.is_null()) {
+      throw datashape_parse_error(begin, "Expected a dynd type or a terminating ']'");
+    }
+    dlist.push_back(arg);
+  }
+
+  rbegin = begin;
+  return dlist;
+}
+
+// integer_list : INTEGER COMMA integer_list RBRACKET
+//              | INTEGER RBRACKET
+static nd::array parse_integer_list(const char *&rbegin, const char *end)
+{
+  const char *begin = rbegin;
+
+  vector<int64_t> dlist;
+  const char *strbegin, *strend;
+  if (!parse::parse_int_no_ws(begin, end, strbegin, strend)) {
+    return nd::array();
+  }
+  dlist.push_back(parse::checked_string_to_int64(strbegin, strend));
+  for (;;) {
+    if (!parse_token_ds(begin, end, ',')) {
+      if (parse_token_ds(begin, end, ']')) {
+        rbegin = begin;
+        return dlist;
+      } else {
+        return nd::array();
+      }
+    }
+    parse::skip_whitespace_and_pound_comments(begin, end);
+    if (!parse::parse_int_no_ws(begin, end, strbegin, strend)) {
+      throw datashape_parse_error(begin, "Expected an integer or a terminating ']'");
+    }
+    dlist.push_back(parse::checked_string_to_int64(strbegin, strend));
+  }
+}
+
+// string_list : STRING COMMA string_list RBRACKET
+//             | STRING RBRACKET
+static nd::array parse_string_list(const char *&rbegin, const char *end)
+{
+  const char *begin = rbegin;
+
+  vector<string> dlist;
+  string str;
+  if (!parse_quoted_string(begin, end, str)) {
+    return nd::array();
+  }
+  dlist.push_back(str);
+  for (;;) {
+    if (!parse_token_ds(begin, end, ',')) {
+      if (!parse_token_ds(begin, end, ']')) {
+        return nd::array();
+      } else {
+        break;
+      }
+    }
+    if (!parse_quoted_string(begin, end, str)) {
+      throw datashape_parse_error(begin, "Expected a string");
+    }
+    dlist.push_back(str);
+  }
+
+  rbegin = begin;
+  return dlist;
+}
+
+// list_type_arg : LBRACKET RBRACKET
+//               | LBRACKET datashape_list
+//               | LBRACKET integer_list
+//               | LBRACKET string_list
+// type_arg : datashape
+//          | INTEGER
+//          | STRING
+//          | list_type_arg
+static nd::array parse_type_arg(const char *&rbegin, const char *end, map<string, ndt::type> &symtable) {
+  const char *begin = rbegin;
+
+  parse::skip_whitespace_and_pound_comments(begin, end);
+
+  const char *strbegin, *strend;
+  if (parse::parse_int_no_ws(begin, end, strbegin, strend)) {
+    rbegin = begin;
+    return parse::checked_string_to_int64(strbegin, strend);
+  }
+
+  string str;
+  if (parse_quoted_string(begin, end, str)) {
+    rbegin = begin;
+    return str;
+  }
+
+  if (parse::parse_token(begin, end, '[')) {
+    nd::array result;
+    result = parse_integer_list(begin, end);
+    if (result.is_null()) {
+      result = parse_string_list(begin, end);
+    }
+    if (result.is_null()) {
+      result = parse_datashape_list(begin, end, symtable);
+    }
+    if (result.is_null()) {
+      result = nd::empty(0, ndt::type::make<void>());
+    }
+    rbegin = begin;
+    return result;
+  }
+
+  ndt::type tp = parse_datashape(begin, end, symtable);
+  if (!tp.is_null()) {
+    rbegin = begin;
+    return tp;
+  }
+
+  return nd::array();
+}
+
+// type_arg_list : type_arg COMMA type_arg_list
+//               | type_kwarg_list
+//               | type_arg
+// type_kwarg_list : type_kwarg COMMA type_kwarg_list
+//                 | type_kwarg
+// type_kwarg : NAME_LOWER EQUAL type_arg
+// type_constr_args : LBRACKET type_arg_list RBRACKET
+nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<string, ndt::type> &symtable) {
+  nd::array result;
+
+  const char *begin = rbegin;
+  if (!parse_token_ds(begin, end, '[')) {
+    // Return an empty array if there is no leading bracket
+    return result;
+  }
+
+  if (parse_token_ds(begin, end, ']')) {
+    return nd::empty(ndt::tuple_type::make({ndt::tuple_type::make(), ndt::struct_type::make()}));
+  }
+
+  vector<nd::array> pos_args;
+  vector<nd::array> kw_args;
+  vector<string> kw_names;
+
+  const char *field_name_begin, *field_name_end;
+  bool done = false;
+
+  // First parse all the positional arguments
+  for (;;) {
+    parse::skip_whitespace_and_pound_comments(begin, end);
+    // Look ahead to see the ']' or whether there's a keyword argument
+    const char *saved_begin = begin;
+    if (parse::parse_name_no_ws(begin, end, field_name_begin, field_name_end) && parse_token_ds(begin, end, ':')) {
+      begin = saved_begin;
+      break;
+    }
+    begin = saved_begin;
+    // Parse one positional argument
+    nd::array arg = parse_type_arg(begin, end, symtable);
+    if (arg.is_null()) {
+      throw datashape_parse_error(saved_begin, "Expected a positional or keyword type argument");
+    }
+    pos_args.push_back(arg);
+    if (!parse_token_ds(begin, end, ',')) {
+      if (parse_token_ds(begin, end, ']')) {
+        done = true;
+      }
+      break;
+    }
+  }
+
+  // Now parse all the keyword arguments
+  if (!done) {
+    for (;;) {
+      const char *saved_begin = begin;
+      parse::skip_whitespace_and_pound_comments(begin, end);
+      if (!parse::parse_name_no_ws(begin, end, field_name_begin, field_name_end)) {
+        throw datashape_parse_error(saved_begin, "Expected a keyword name or terminating ']'");
+      }
+      if (!parse_token_ds(begin, end, ':')) {
+        throw datashape_parse_error(begin, "Expected ':' between keyword name and parameter");
+      }
+      nd::array arg = parse_type_arg(begin, end, symtable);
+      if (arg.is_null()) {
+        throw datashape_parse_error(begin, "Expected keyword argument value");
+      }
+      kw_args.push_back(arg);
+      kw_names.push_back(string(field_name_begin, field_name_end));
+      if (!parse_token_ds(begin, end, ',')) {
+        if (!parse_token_ds(begin, end, ']')) {
+          throw datashape_parse_error(begin, "Expected a ',' or ']'");
+        }
+        else {
+          break;
+        }
+      }
+    }
+  }
+
+  // Create type "((type0, ...), {kw0: kwtype0, ...})"
+  vector<ndt::type> pos_arg_types;
+  transform(pos_args.begin(), pos_args.end(), back_inserter(pos_arg_types),
+            [](const nd::array &a) { return a.get_type(); });
+
+  vector<ndt::type> kw_arg_types;
+  transform(kw_args.begin(), kw_args.end(), back_inserter(kw_arg_types),
+            [](const nd::array &a) { return a.get_type(); });
+
+  ndt::type result_tp =
+      ndt::tuple_type::make({ndt::tuple_type::make(pos_arg_types), ndt::struct_type::make(kw_names, kw_arg_types)});
+
+  result = nd::empty(result_tp);
+  nd::array pos = result(0);
+  for (size_t i = 0; i != pos_args.size(); ++i) {
+    pos.vals_at(i) = pos_args[i];
+  }
+  nd::array kw = result(1);
+  for (size_t i = 0; i != kw_args.size(); ++i) {
+    kw.vals_at(i) = kw_args[i];
+  }
+
+  rbegin = begin;
+  return result;
+}
+
 // record_item_bare : BARENAME COLON rhs_expression
 static bool parse_struct_item_bare(const char *&rbegin, const char *end, map<string, ndt::type> &symtable,
                                    string &out_field_name, ndt::type &out_field_type)
@@ -1408,4 +1653,40 @@ ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *dat
     ss << "^\n";
     throw runtime_error(ss.str());
   }
+}
+
+nd::array dynd::parse_type_constr_args(const std::string &str)
+{
+  nd::array result;
+  std::map<std::string, ndt::type> symtable;
+  if (!str.empty()) {
+    const char *begin = &str[0], *end = &str[0] + str.size();
+    try {
+      result = parse_type_constr_args(begin, end, symtable);
+    }
+    catch (const datashape_parse_error &e) {
+      stringstream ss;
+      string line_prev, line_cur;
+      int line, column;
+      get_error_line_column(&str[0], end, e.get_position(), line_prev, line_cur, line, column);
+      ss << "Error parsing datashape at line " << line << ", column " << column << "\n";
+      ss << "Message: " << e.get_message() << "\n";
+      if (line > 1) {
+        ss << line_prev << "\n";
+      }
+      ss << line_cur << "\n";
+      for (int i = 0; i < column - 1; ++i) {
+        ss << " ";
+      }
+      ss << "^\n";
+      throw runtime_error(ss.str());
+    }
+  }
+  if (result.is_null()) {
+    stringstream ss;
+    ss << "Cannot parse \"" << str << "\" as a dynd type";
+    throw runtime_error(ss.str());
+  }
+
+  return result;
 }
