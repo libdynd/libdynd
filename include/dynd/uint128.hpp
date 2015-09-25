@@ -418,6 +418,11 @@ DYND_CUDA_HOST_DEVICE inline bool operator<(unsigned long long lhs,
   return uint128(lhs) < rhs;
 }
 
+template<typename T, typename dynd::detail::enable_for<T, unsigned char, unsigned short, unsigned int, unsigned long, unsigned long long>::type = 0>
+DYND_CUDA_HOST_DEVICE inline void operator+=(uint128 DYND_UNUSED(lhs), T DYND_UNUSED(rhs)) {
+  throw std::runtime_error("operator += is not implemented for uint128");
+}
+
 DYND_API std::ostream &operator<<(std::ostream &out, const uint128 &val);
 
 } // namespace dynd
