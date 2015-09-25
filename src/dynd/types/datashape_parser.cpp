@@ -962,7 +962,7 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
       const char *saved_begin = begin;
       parse::skip_whitespace_and_pound_comments(begin, end);
       if (!parse::parse_name_no_ws(begin, end, field_name_begin, field_name_end)) {
-        throw datashape_parse_error(begin, "Expected a keyword name or terminating ']'");
+        throw datashape_parse_error(saved_begin, "Expected a keyword name or terminating ']'");
       }
       if (!parse_token_ds(begin, end, ':')) {
         throw datashape_parse_error(begin, "Expected ':' between keyword name and parameter");
