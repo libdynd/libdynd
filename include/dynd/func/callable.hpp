@@ -283,10 +283,10 @@ namespace nd {
       }
     };
 
-    template <typename... T>
+    template <template <typename...> class F, typename... T>
     struct bindx {
       template <typename... A>
-      using type = detail::args<T..., A...>;
+      using type = F<T..., A...>;
     };
 
     template <typename... A>
@@ -974,10 +974,10 @@ namespace nd {
     array operator()(A &&... a)
     {
       if (get()->kernreq == kernel_request_single) {
-        return _call<detail::bindx<char *>::type>(std::forward<A>(a)...);
+        return _call<detail::bindx<detail::args, char *>::type>(std::forward<A>(a)...);
       }
 
-      return _call<detail::bindx<char **>::type>(std::forward<A>(a)...);
+      return _call<detail::bindx<detail::args, char **>::type>(std::forward<A>(a)...);
     }
 
     template <typename KernelType>
