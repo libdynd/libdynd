@@ -858,8 +858,9 @@ namespace nd {
     }
 
     /** Implements the general call operator which returns an array */
-    template <typename A, typename... K>
-    array call(const A &args, const detail::kwds<K...> &kwds, std::map<std::string, ndt::type> &tp_vars)
+    template <typename... A, typename... K>
+    array call(const detail::args<A...> &args, const detail::kwds<K...> &kwds,
+               std::map<std::string, ndt::type> &tp_vars)
     {
       const ndt::callable_type *self_tp = get_type();
 
