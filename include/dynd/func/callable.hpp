@@ -190,14 +190,9 @@ namespace nd {
         return m_arrmeta;
       }
 
-      char *const *data() const
+      DataType const *data() const
       {
         return m_data;
-      }
-
-      static args make(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
-      {
-        return args(tp_vars, self_tp, std::forward<A>(a)...);
       }
     };
 
@@ -208,8 +203,6 @@ namespace nd {
       {
         check_narg(self_tp, 0);
       }
-
-      //      args(const args &other) = delete;
 
       size_t size() const
       {
@@ -226,14 +219,9 @@ namespace nd {
         return NULL;
       }
 
-      char *const *data() const
+      DataType const *data() const
       {
         return NULL;
-      }
-
-      static args make(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp)
-      {
-        return args(tp_vars, self_tp);
       }
     };
 
@@ -243,7 +231,7 @@ namespace nd {
       size_t m_size;
       std::vector<ndt::type> m_tp;
       std::vector<const char *> m_arrmeta;
-      std::vector<char *> m_data;
+      std::vector<DataType> m_data;
 
     public:
       args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size, array *values)
@@ -264,8 +252,6 @@ namespace nd {
         }
       }
 
-      //      args(const args &other) = delete;
-
       size_t size() const
       {
         return m_size;
@@ -281,17 +267,14 @@ namespace nd {
         return m_arrmeta.data();
       }
 
-      char *const *data() const
+      DataType const *data() const
       {
         return m_data.data();
       }
-
-      static args make(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size,
-                       array *values)
-      {
-        return args(tp_vars, self_tp, size, values);
-      }
     };
+
+    template <typename... A>
+    using args0 = detail::args<char *, A...>;
 
     /** A holder class for the keyword arguments */
     template <typename... K>
@@ -622,12 +605,6 @@ inline nd::detail::kwds<> kwds()
 
 namespace nd {
   namespace detail {
-
-    template <template <typename...> class Type, typename... T>
-    struct bind {
-      template <typename... A>
-      using type = Type<T..., A...>;
-    };
 
     DYND_HAS(data_size);
     DYND_HAS(data_init);
@@ -979,10 +956,10 @@ namespace nd {
     array operator()(T &&... t)
     {
       if (false) {
-        return operator()<detail::bind<detail::args, char *>::type>(std::forward<T>(t)...);
+        return operator()<detail::args0>(std::forward<T>(t)...);
       }
 
-      return operator()<detail::bind<detail::args, char *>::type>(std::forward<T>(t)...);
+      return operator()<detail::args0>(std::forward<T>(t)...);
     }
 
     template <typename KernelType>
