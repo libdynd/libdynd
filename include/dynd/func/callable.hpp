@@ -141,7 +141,7 @@ namespace nd {
     }
 
     /** A holder class for the array arguments */
-    template <typename... A>
+    template <typename DataType, typename... A>
     class args {
       struct init {
         template <size_t I>
@@ -201,8 +201,8 @@ namespace nd {
       }
     };
 
-    template <>
-    class args<> {
+    template <typename DataType>
+    class args<DataType> {
     public:
       args(std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars), const ndt::callable_type *self_tp)
       {
@@ -238,8 +238,8 @@ namespace nd {
     };
 
     /** A way to pass a run-time array of array arguments */
-    template <>
-    class args<size_t, array *> {
+    template <typename DataType>
+    class args<DataType, size_t, array *> {
       size_t m_size;
       std::vector<ndt::type> m_tp;
       std::vector<const char *> m_arrmeta;
@@ -623,6 +623,12 @@ inline nd::detail::kwds<> kwds()
 namespace nd {
   namespace detail {
 
+    template <template <typename...> class Type, typename... T>
+    struct bind {
+      template <typename... A>
+      using type = Type<T..., A...>;
+    };
+
     DYND_HAS(data_size);
     DYND_HAS(data_init);
     DYND_HAS(resolve_dst_type);
@@ -973,10 +979,10 @@ namespace nd {
     array operator()(T &&... t)
     {
       if (false) {
-        return operator()<detail::args>(std::forward<T>(t)...);
+        return operator()<detail::bind<detail::args, char *>::type>(std::forward<T>(t)...);
       }
 
-      return operator()<detail::args>(std::forward<T>(t)...);
+      return operator()<detail::bind<detail::args, char *>::type>(std::forward<T>(t)...);
     }
 
     template <typename KernelType>
