@@ -130,14 +130,24 @@ namespace nd {
                                      const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing,
                                      std::map<std::string, ndt::type> &tp_vars);
 
-    inline void data_of(char *&data, array &value)
+    inline void set_data(char *&data, array &value)
     {
       data = const_cast<char *>(value.get_readonly_originptr());
     }
 
-    inline void data_of(char *&data, const array &value)
+    inline void set_data(char *&data, const array &value)
     {
       data = const_cast<char *>(value.get_readonly_originptr());
+    }
+
+    inline void set_data(char **&data, array &)
+    {
+      data = NULL;
+    }
+
+    inline void set_data(char **&data, const array &)
+    {
+      data = NULL;
     }
 
     /** A holder class for the array arguments */
@@ -146,7 +156,7 @@ namespace nd {
       struct init {
         template <size_t I>
         void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
-                     char **src_data, std::map<std::string, ndt::type> &tp_vars) const
+                     DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
         {
           auto value = std::get<I>(self->m_values);
           const ndt::type &tp = ndt::type::make(value);
@@ -156,14 +166,14 @@ namespace nd {
 
           src_tp[I] = tp;
           src_arrmeta[I] = arrmeta;
-          data_of(src_data[I], value);
+          set_data(src_data[I], value);
         }
       };
 
       std::tuple<typename as_array<A>::type...> m_values;
       ndt::type m_tp[sizeof...(A)];
       const char *m_arrmeta[sizeof...(A)];
-      typename std::conditional<true, char *, char *>::type m_data[sizeof...(A)];
+      DataType m_data[sizeof...(A)];
 
     public:
       args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
@@ -248,7 +258,7 @@ namespace nd {
 
           m_tp[i] = tp;
           m_arrmeta[i] = arrmeta;
-          data_of(m_data[i], value);
+          set_data(m_data[i], value);
         }
       }
 
@@ -275,6 +285,9 @@ namespace nd {
 
     template <typename... A>
     using args0 = detail::args<char *, A...>;
+
+    template <typename... A>
+    using args1 = detail::args<char **, A...>;
 
     /** A holder class for the keyword arguments */
     template <typename... K>
@@ -923,8 +936,8 @@ namespace nd {
     }
 
     template <template <typename...> class ArgsType, typename A0, typename A1, typename... K>
-    typename std::enable_if<
-        !std::is_convertible<A0 &&, std::size_t>::value || !std::is_convertible<A1 &&, array *>::value, array>::type
+    typename std::enable_if<!std::is_convertible<A0 &&, size_t>::value || !std::is_convertible<A1 &&, array *>::value,
+                            array>::type
     _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       std::map<std::string, ndt::type> tp_vars;
@@ -933,7 +946,7 @@ namespace nd {
     }
 
     template <template <typename...> class ArgsType, typename A0, typename A1, typename... K>
-    typename std::enable_if<std::is_convertible<A0 &&, std::size_t>::value &&std::is_convertible<A1 &&, array *>::value,
+    typename std::enable_if<std::is_convertible<A0 &&, size_t>::value &&std::is_convertible<A1 &&, array *>::value,
                             array>::type
     _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
@@ -952,14 +965,14 @@ namespace nd {
       return _call<ArgsType>(std::forward<A>(a)..., kwds());
     }
 
-    template <typename... T>
-    array operator()(T &&... t)
+    template <typename... A>
+    array operator()(A &&... a)
     {
-      if (false) {
-        return _call<detail::args0>(std::forward<T>(t)...);
+      if (true) {
+        return _call<detail::args0>(std::forward<A>(a)...);
       }
 
-      return _call<detail::args0>(std::forward<T>(t)...);
+      return _call<detail::args1>(std::forward<A>(a)...);
     }
 
     template <typename KernelType>
