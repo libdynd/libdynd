@@ -161,6 +161,8 @@ struct single_t {
  * with different array arrmeta.
  */
 struct DYND_API callable_type_data {
+  char buffer[4];
+
   kernel_request_t kernreq;
   single_t single;
   char *static_data;
