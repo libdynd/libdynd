@@ -949,7 +949,7 @@ namespace nd {
     typename std::enable_if<!detail::is_kwds<typename back<type_sequence<A...>>::type>::value, array>::type
     _call(A &&... a)
     {
-      return (*this)(std::forward<A>(a)..., kwds());
+      return _call(std::forward<A>(a)..., kwds());
     }
 
     template <typename... T>
