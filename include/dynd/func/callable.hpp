@@ -283,6 +283,12 @@ namespace nd {
       }
     };
 
+    template <typename... T>
+    struct bindx {
+      template <typename... A>
+      using type = detail::args<T..., A...>;
+    };
+
     template <typename... A>
     using args0 = detail::args<char *, A...>;
 
@@ -888,7 +894,6 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        // can put args here
         return (*get())(dst_tp, args.size(), args.types(), args.arrmeta(), args.data(), kwds_as_vector.size(),
                         kwds_as_vector.data(), tp_vars);
       }
@@ -968,11 +973,11 @@ namespace nd {
     template <typename... A>
     array operator()(A &&... a)
     {
-      if (true) {
-        return _call<detail::args0>(std::forward<A>(a)...);
+      if (get()->kernreq == kernel_request_single) {
+        return _call<detail::bindx<char *>::type>(std::forward<A>(a)...);
       }
 
-      return _call<detail::args1>(std::forward<A>(a)...);
+      return _call<detail::bindx<char **>::type>(std::forward<A>(a)...);
     }
 
     template <typename KernelType>
