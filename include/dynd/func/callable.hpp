@@ -150,150 +150,11 @@ namespace nd {
       data = NULL;
     }
 
-    /** A holder class for the array arguments */
-    template <typename DataType, typename... A>
-    class args {
-      struct init {
-        template <size_t I>
-        void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
-                     DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
-        {
-          auto value = std::get<I>(self->m_values);
-          const ndt::type &tp = ndt::type::make(value);
-          const char *arrmeta = value.get_arrmeta();
-
-          check_arg(af_tp, I, tp, arrmeta, tp_vars);
-
-          src_tp[I] = tp;
-          src_arrmeta[I] = arrmeta;
-          set_data(src_data[I], value);
-        }
-      };
-
-      std::tuple<typename as_array<A>::type...> m_values;
-      ndt::type m_tp[sizeof...(A)];
-      const char *m_arrmeta[sizeof...(A)];
-      DataType m_data[sizeof...(A)];
-
-    public:
-      args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
-          : m_values(std::forward<A>(a)...)
-      {
-        check_narg(self_tp, sizeof...(A));
-
-        typedef make_index_sequence<sizeof...(A)> I;
-        for_each<I>(init(), this, self_tp, m_tp, m_arrmeta, m_data, tp_vars);
-      }
-
-      size_t size() const
-      {
-        return sizeof...(A);
-      }
-
-      const ndt::type *types() const
-      {
-        return m_tp;
-      }
-
-      const char *const *arrmeta() const
-      {
-        return m_arrmeta;
-      }
-
-      DataType const *data() const
-      {
-        return m_data;
-      }
-    };
-
-    template <typename DataType>
-    class args<DataType> {
-    public:
-      args(std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars), const ndt::callable_type *self_tp)
-      {
-        check_narg(self_tp, 0);
-      }
-
-      size_t size() const
-      {
-        return 0;
-      }
-
-      const ndt::type *types() const
-      {
-        return NULL;
-      }
-
-      const char *const *arrmeta() const
-      {
-        return NULL;
-      }
-
-      DataType const *data() const
-      {
-        return NULL;
-      }
-    };
-
-    /** A way to pass a run-time array of array arguments */
-    template <typename DataType>
-    class args<DataType, size_t, array *> {
-      size_t m_size;
-      std::vector<ndt::type> m_tp;
-      std::vector<const char *> m_arrmeta;
-      std::vector<DataType> m_data;
-
-    public:
-      args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size, array *values)
-          : m_size(size), m_tp(m_size), m_arrmeta(m_size), m_data(m_size)
-      {
-        check_narg(self_tp, m_size);
-
-        for (std::size_t i = 0; i < m_size; ++i) {
-          array &value = values[i];
-          const char *arrmeta = value.get_arrmeta();
-          const ndt::type &tp = value.get_type();
-
-          check_arg(self_tp, i, tp, arrmeta, tp_vars);
-
-          m_tp[i] = tp;
-          m_arrmeta[i] = arrmeta;
-          set_data(m_data[i], value);
-        }
-      }
-
-      size_t size() const
-      {
-        return m_size;
-      }
-
-      const ndt::type *types() const
-      {
-        return m_tp.data();
-      }
-
-      const char *const *arrmeta() const
-      {
-        return m_arrmeta.data();
-      }
-
-      DataType const *data() const
-      {
-        return m_data.data();
-      }
-    };
-
     template <template <typename...> class F, typename... T>
     struct bindx {
       template <typename... A>
       using type = F<T..., A...>;
     };
-
-    template <typename... A>
-    using args0 = detail::args<char *, A...>;
-
-    template <typename... A>
-    using args1 = detail::args<char **, A...>;
 
     /** A holder class for the keyword arguments */
     template <typename... K>
@@ -743,6 +604,9 @@ namespace nd {
    * providing some more direct convenient interface.
    */
   class DYND_API callable {
+    template <typename DataType, typename... A>
+    class args;
+
     nd::array m_value;
 
   public:
@@ -905,16 +769,6 @@ namespace nd {
     }
 
     /**
-     * operator()()
-     */
-    template <template <typename...> class ArgsType>
-    array _call()
-    {
-      std::map<std::string, ndt::type> tp_vars;
-      return call(ArgsType<>(tp_vars, get_type()), detail::kwds<>(), tp_vars);
-    }
-
-    /**
     * operator()(kwds<...>(...))
     */
     template <template <typename...> class ArgsType, typename... K>
@@ -960,24 +814,27 @@ namespace nd {
                   tp_vars);
     }
 
-    /**
-     * operator()(a0, a1, ..., an)
-     */
-    template <template <typename...> class ArgsType, typename... A>
-    typename std::enable_if<!detail::is_kwds<typename back<type_sequence<A...>>::type>::value, array>::type
-    _call(A &&... a)
+    template <typename... A>
+    typename std::enable_if<detail::is_kwds<typename back<type_sequence<A...>>::type>::value, array>::type
+    operator()(A &&... a)
     {
-      return _call<ArgsType>(std::forward<A>(a)..., kwds());
+      if (get()->kernreq == kernel_request_single) {
+        return _call<detail::bindx<args, char *>::type>(std::forward<A>(a)...);
+      }
+
+      return _call<detail::bindx<args, char **>::type>(std::forward<A>(a)...);
+    }
+
+    array operator()()
+    {
+      return (*this)(kwds());
     }
 
     template <typename... A>
-    array operator()(A &&... a)
+    typename std::enable_if<!detail::is_kwds<typename back<type_sequence<A...>>::type>::value, array>::type
+    operator()(A &&... a)
     {
-      if (get()->kernreq == kernel_request_single) {
-        return _call<detail::bindx<detail::args, char *>::type>(std::forward<A>(a)...);
-      }
-
-      return _call<detail::bindx<detail::args, char **>::type>(std::forward<A>(a)...);
+      return (*this)(std::forward<A>(a)..., kwds());
     }
 
     template <typename KernelType>
@@ -1102,6 +959,139 @@ namespace nd {
       for_each<typename outer<I0, I1, I...>::type>(detail::make_all<KernelType>(), callables, std::forward<A>(a)...);
 
       return callables;
+    }
+  };
+
+  template <typename DataType>
+  class callable::args<DataType> {
+  public:
+    args(std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars), const ndt::callable_type *self_tp)
+    {
+      detail::check_narg(self_tp, 0);
+    }
+
+    size_t size() const
+    {
+      return 0;
+    }
+
+    const ndt::type *types() const
+    {
+      return NULL;
+    }
+
+    const char *const *arrmeta() const
+    {
+      return NULL;
+    }
+
+    DataType const *data() const
+    {
+      return NULL;
+    }
+  };
+
+  /** A holder class for the array arguments */
+  template <typename DataType, typename... A>
+  class callable::args {
+    struct init {
+      template <size_t I>
+      void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
+                   DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
+      {
+        auto value = std::get<I>(self->m_values);
+        const ndt::type &tp = ndt::type::make(value);
+        const char *arrmeta = value.get_arrmeta();
+
+        detail::check_arg(af_tp, I, tp, arrmeta, tp_vars);
+
+        src_tp[I] = tp;
+        src_arrmeta[I] = arrmeta;
+        detail::set_data(src_data[I], value);
+      }
+    };
+
+    std::tuple<typename as_array<A>::type...> m_values;
+    ndt::type m_tp[sizeof...(A)];
+    const char *m_arrmeta[sizeof...(A)];
+    DataType m_data[sizeof...(A)];
+
+  public:
+    args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
+        : m_values(std::forward<A>(a)...)
+    {
+      detail::check_narg(self_tp, sizeof...(A));
+
+      typedef make_index_sequence<sizeof...(A)> I;
+      for_each<I>(init(), this, self_tp, m_tp, m_arrmeta, m_data, tp_vars);
+    }
+
+    size_t size() const
+    {
+      return sizeof...(A);
+    }
+
+    const ndt::type *types() const
+    {
+      return m_tp;
+    }
+
+    const char *const *arrmeta() const
+    {
+      return m_arrmeta;
+    }
+
+    DataType const *data() const
+    {
+      return m_data;
+    }
+  };
+
+  /** A way to pass a run-time array of array arguments */
+  template <typename DataType>
+  class callable::args<DataType, size_t, array *> {
+    size_t m_size;
+    std::vector<ndt::type> m_tp;
+    std::vector<const char *> m_arrmeta;
+    std::vector<DataType> m_data;
+
+  public:
+    args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size, array *values)
+        : m_size(size), m_tp(m_size), m_arrmeta(m_size), m_data(m_size)
+    {
+      detail::check_narg(self_tp, m_size);
+
+      for (std::size_t i = 0; i < m_size; ++i) {
+        array &value = values[i];
+        const char *arrmeta = value.get_arrmeta();
+        const ndt::type &tp = value.get_type();
+
+        detail::check_arg(self_tp, i, tp, arrmeta, tp_vars);
+
+        m_tp[i] = tp;
+        m_arrmeta[i] = arrmeta;
+        detail::set_data(m_data[i], value);
+      }
+    }
+
+    size_t size() const
+    {
+      return m_size;
+    }
+
+    const ndt::type *types() const
+    {
+      return m_tp.data();
+    }
+
+    const char *const *arrmeta() const
+    {
+      return m_arrmeta.data();
+    }
+
+    DataType const *data() const
+    {
+      return m_data.data();
     }
   };
 
