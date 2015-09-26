@@ -890,7 +890,7 @@ namespace nd {
      * operator()()
      */
     template <template <typename...> class ArgsType>
-    array operator()()
+    array _call()
     {
       std::map<std::string, ndt::type> tp_vars;
       return call(ArgsType<>(tp_vars, get_type()), detail::kwds<>(), tp_vars);
@@ -900,7 +900,7 @@ namespace nd {
     * operator()(kwds<...>(...))
     */
     template <template <typename...> class ArgsType, typename... K>
-    array operator()(detail::kwds<K...> &&k)
+    array _call(detail::kwds<K...> &&k)
     {
       std::map<std::string, ndt::type> tp_vars;
       return call(ArgsType<>(tp_vars, get_type()), std::forward<detail::kwds<K...>>(k), tp_vars);
@@ -912,7 +912,7 @@ namespace nd {
     template <template <typename...> class ArgsType, typename... T>
     typename std::enable_if<sizeof...(T) != 3 && detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
                             array>::type
-    operator()(T &&... a)
+    _call(T &&... a)
     {
       std::map<std::string, ndt::type> tp_vars;
 
@@ -925,7 +925,7 @@ namespace nd {
     template <template <typename...> class ArgsType, typename A0, typename A1, typename... K>
     typename std::enable_if<
         !std::is_convertible<A0 &&, std::size_t>::value || !std::is_convertible<A1 &&, array *>::value, array>::type
-    operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
+    _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       std::map<std::string, ndt::type> tp_vars;
       return call(ArgsType<array, array>(tp_vars, get_type(), array(std::forward<A0>(a0)), array(std::forward<A1>(a1))),
@@ -935,7 +935,7 @@ namespace nd {
     template <template <typename...> class ArgsType, typename A0, typename A1, typename... K>
     typename std::enable_if<std::is_convertible<A0 &&, std::size_t>::value &&std::is_convertible<A1 &&, array *>::value,
                             array>::type
-    operator()(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
+    _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       std::map<std::string, ndt::type> tp_vars;
       return call(ArgsType<size_t, array *>(tp_vars, get_type(), std::forward<A0>(a0), std::forward<A1>(a1)), kwds,
@@ -947,7 +947,7 @@ namespace nd {
      */
     template <template <typename...> class ArgsType, typename... A>
     typename std::enable_if<!detail::is_kwds<typename back<type_sequence<A...>>::type>::value, array>::type
-    operator()(A &&... a)
+    _call(A &&... a)
     {
       return (*this)(std::forward<A>(a)..., kwds());
     }
@@ -956,10 +956,10 @@ namespace nd {
     array operator()(T &&... t)
     {
       if (false) {
-        return operator()<detail::args0>(std::forward<T>(t)...);
+        return _call<detail::args0>(std::forward<T>(t)...);
       }
 
-      return operator()<detail::args0>(std::forward<T>(t)...);
+      return _call<detail::args0>(std::forward<T>(t)...);
     }
 
     template <typename KernelType>
