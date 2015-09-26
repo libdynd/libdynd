@@ -97,12 +97,12 @@ after_script:
 - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
   == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
   conda.recipe) --user dynd --channel dev; fi
-- ! '
-  declare exitCode;
-  curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
-  exitCode=$?
-  if [ $exitCode -eq 0 ]; then ./trigger_python.sh $TRAVIS_TOKEN; fi
-'
+#- ! '
+#  declare exitCode;
+#  curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
+#  exitCode=$?
+#  if [ $exitCode -eq 0 ]; then ./trigger_python.sh $TRAVIS_TOKEN; fi
+#'
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75

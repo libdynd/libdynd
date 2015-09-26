@@ -17,6 +17,36 @@
 #include <dynd/types/type_type.hpp>
 
 namespace dynd {
+
+/**
+ * TODO: This `as_array` metafunction should either go somewhere better (this
+ *       file is for callable), or be in a detail:: namespace.
+ */
+template <typename T>
+struct as_array {
+  typedef nd::array type;
+};
+
+template <>
+struct as_array<nd::array> {
+  typedef nd::array type;
+};
+
+template <>
+struct as_array<const nd::array> {
+  typedef const nd::array type;
+};
+
+template <>
+struct as_array<const nd::array &> {
+  typedef const nd::array &type;
+};
+
+template <>
+struct as_array<nd::array &> {
+  typedef nd::array &type;
+};
+
 namespace nd {
   namespace detail {
 
@@ -100,14 +130,14 @@ namespace nd {
                                      const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing,
                                      std::map<std::string, ndt::type> &tp_vars);
 
-    inline char *data_of(array &value)
+    inline void data_of(char *&data, array &value)
     {
-      return const_cast<char *>(value.get_readonly_originptr());
+      data = const_cast<char *>(value.get_readonly_originptr());
     }
 
-    inline char *data_of(const array &value)
+    inline void data_of(char *&data, const array &value)
     {
-      return const_cast<char *>(value.get_readonly_originptr());
+      data = const_cast<char *>(value.get_readonly_originptr());
     }
 
     /** A holder class for the array arguments */
@@ -126,14 +156,14 @@ namespace nd {
 
           src_tp[I] = tp;
           src_arrmeta[I] = arrmeta;
-          src_data[I] = data_of(value);
+          data_of(src_data[I], value);
         }
       };
 
-      std::tuple<A...> m_values;
+      std::tuple<typename as_array<A>::type...> m_values;
       ndt::type m_tp[sizeof...(A)];
       const char *m_arrmeta[sizeof...(A)];
-      char *m_data[sizeof...(A)];
+      typename std::conditional<true, char *, char *>::type m_data[sizeof...(A)];
 
     public:
       args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
@@ -144,8 +174,6 @@ namespace nd {
         typedef make_index_sequence<sizeof...(A)> I;
         for_each<I>(init(), this, self_tp, m_tp, m_arrmeta, m_data, tp_vars);
       }
-
-      //      args(const args &other) = delete;
 
       size_t size() const
       {
@@ -165,6 +193,11 @@ namespace nd {
       char *const *data() const
       {
         return m_data;
+      }
+
+      static args make(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
+      {
+        return args(tp_vars, self_tp, std::forward<A>(a)...);
       }
     };
 
@@ -197,6 +230,11 @@ namespace nd {
       {
         return NULL;
       }
+
+      static args make(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp)
+      {
+        return args(tp_vars, self_tp);
+      }
     };
 
     /** A way to pass a run-time array of array arguments */
@@ -222,7 +260,7 @@ namespace nd {
 
           m_tp[i] = tp;
           m_arrmeta[i] = arrmeta;
-          m_data[i] = data_of(value);
+          data_of(m_data[i], value);
         }
       }
 
@@ -246,6 +284,12 @@ namespace nd {
       char *const *data() const
       {
         return m_data.data();
+      }
+
+      static args make(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size,
+                       array *values)
+      {
+        return args(tp_vars, self_tp, size, values);
       }
     };
 
@@ -576,35 +620,6 @@ inline nd::detail::kwds<> kwds()
   return nd::detail::kwds<>();
 }
 
-/**
- * TODO: This `as_array` metafunction should either go somewhere better (this
- *       file is for callable), or be in a detail:: namespace.
- */
-template <typename T>
-struct as_array {
-  typedef nd::array type;
-};
-
-template <>
-struct as_array<nd::array> {
-  typedef nd::array type;
-};
-
-template <>
-struct as_array<const nd::array> {
-  typedef const nd::array type;
-};
-
-template <>
-struct as_array<const nd::array &> {
-  typedef const nd::array &type;
-};
-
-template <>
-struct as_array<nd::array &> {
-  typedef nd::array &type;
-};
-
 namespace nd {
   namespace detail {
 
@@ -843,8 +858,8 @@ namespace nd {
     }
 
     /** Implements the general call operator which returns an array */
-    template <typename A, typename K>
-    array call(const A &args, const K &kwds, std::map<std::string, ndt::type> &tp_vars)
+    template <typename A, typename... K>
+    array call(const A &args, const detail::kwds<K...> &kwds, std::map<std::string, ndt::type> &tp_vars)
     {
       const ndt::callable_type *self_tp = get_type();
 
@@ -877,6 +892,7 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
+        // can put args here
         return (*get())(dst_tp, args.size(), args.types(), args.arrmeta(), args.data(), kwds_as_vector.size(),
                         kwds_as_vector.data(), tp_vars);
       }
@@ -914,13 +930,13 @@ namespace nd {
                             array>::type
     operator()(T &&... a)
     {
-      typedef make_index_sequence<sizeof...(T) + 1> I;
-      typedef typename instantiate<detail::args, typename to<type_sequence<typename as_array<T>::type...>,
-                                                             sizeof...(T) - 1>::type>::type args_type;
-
       std::map<std::string, ndt::type> tp_vars;
-      args_type arr = index_proxy<I>::template make<args_type>(tp_vars, get_type(), std::forward<T>(a)...);
-      return call(arr, dynd::get<sizeof...(T) - 1>(std::forward<T>(a)...), tp_vars);
+
+      typedef typename instantiate<detail::args, typename to<type_sequence<T...>, sizeof...(T) - 1>::type>::type
+      args_type;
+      typedef make_index_sequence<sizeof...(T) + 1> I;
+      return call(index_proxy<I>::template make<args_type>(tp_vars, get_type(), std::forward<T>(a)...),
+                  dynd::get<sizeof...(T) - 1>(std::forward<T>(a)...), tp_vars);
     }
 
     template <typename A0, typename A1, typename... K>
@@ -953,6 +969,18 @@ namespace nd {
     {
       return (*this)(std::forward<A>(a)..., kwds());
     }
+
+    /*
+        template <typename... T>
+        array operator()(T &&... t)
+        {
+          if (false) {
+            return operator()<char **>(std::forward<T>(t)...);
+          }
+
+          return operator()<char *>(std::forward<T>(t)...);
+        }
+    */
 
     template <typename KernelType>
     static typename std::enable_if<
