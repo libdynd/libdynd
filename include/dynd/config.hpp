@@ -204,6 +204,16 @@ const ValueType &get_second_if_pair(const std::pair<KeyType, ValueType> &pair)
   return pair.second;
 }
 
+template <template <typename...> class T, typename U>
+struct is_instance {
+  static const bool value = false;
+};
+
+template <template <typename...> class T, typename... A>
+struct is_instance<T, T<A...>> {
+  static const bool value = true;
+};
+
 /**
  * Matches string literal arguments.
  */

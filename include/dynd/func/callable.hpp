@@ -394,31 +394,6 @@ namespace nd {
       }
     };
 
-    template <typename T>
-    struct is_kwds {
-      static const bool value = false;
-    };
-
-    template <typename... K>
-    struct is_kwds<nd::detail::kwds<K...>> {
-      static const bool value = true;
-    };
-
-    template <typename... K>
-    struct is_kwds<const nd::detail::kwds<K...>> {
-      static const bool value = true;
-    };
-
-    template <typename... K>
-    struct is_kwds<const nd::detail::kwds<K...> &> {
-      static const bool value = true;
-    };
-
-    template <typename... K>
-    struct is_kwds<nd::detail::kwds<K...> &> {
-      static const bool value = true;
-    };
-
     template <typename... T>
     struct is_variadic_kwds {
       enum {
@@ -607,7 +582,10 @@ namespace nd {
     template <typename DataType, typename... A>
     class args;
 
-    nd::array m_value;
+    template <typename... A>
+    struct has_kwds;
+
+    array m_value;
 
   public:
     callable() = default;
@@ -782,9 +760,7 @@ namespace nd {
      * operator()(a0, a1, ..., an, kwds<...>(...))
      */
     template <template <typename...> class ArgsType, typename... T>
-    typename std::enable_if<sizeof...(T) != 3 && detail::is_kwds<typename back<type_sequence<T...>>::type>::value,
-                            array>::type
-    _call(T &&... a)
+    typename std::enable_if<sizeof...(T) != 3, array>::type _call(T &&... a)
     {
       std::map<std::string, ndt::type> tp_vars;
 
@@ -815,8 +791,7 @@ namespace nd {
     }
 
     template <typename... A>
-    typename std::enable_if<detail::is_kwds<typename back<type_sequence<A...>>::type>::value, array>::type
-    operator()(A &&... a)
+    typename std::enable_if<has_kwds<A...>::value, array>::type operator()(A &&... a)
     {
       if (get()->kernreq == kernel_request_single) {
         return _call<detail::bindx<args, char *>::type>(std::forward<A>(a)...);
@@ -825,14 +800,8 @@ namespace nd {
       return _call<detail::bindx<args, char **>::type>(std::forward<A>(a)...);
     }
 
-    array operator()()
-    {
-      return (*this)(kwds());
-    }
-
     template <typename... A>
-    typename std::enable_if<!detail::is_kwds<typename back<type_sequence<A...>>::type>::value, array>::type
-    operator()(A &&... a)
+    typename std::enable_if<!has_kwds<A...>::value, array>::type operator()(A &&... a)
     {
       return (*this)(std::forward<A>(a)..., kwds());
     }
@@ -1093,6 +1062,16 @@ namespace nd {
     {
       return m_data.data();
     }
+  };
+
+  template <>
+  struct callable::has_kwds<> {
+    static const bool value = false;
+  };
+
+  template <typename A0, typename... A>
+  struct callable::has_kwds<A0, A...> {
+    static const bool value = is_instance<detail::kwds, typename std::decay<A0>::type>::value || has_kwds<A...>::value;
   };
 
   namespace detail {
