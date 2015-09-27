@@ -67,27 +67,20 @@ namespace nd {
   callable arithmetic_operator<FuncType, KernelType, 1>::children
       [DYND_TYPE_ID_MAX + 1];
 
-  extern DYND_API struct plus : arithmetic_operator<plus, plus_kernel, 1> {
-    static std::string what(const ndt::type &src0_type)
-    {
-      std::stringstream ss;
-      ss << "no viable overload for dynd::nd::plus with argument type \"";
-      ss << src0_type;
-      ss << "\"";
-      return ss.str();
-    }
-  } plus;
+#define DYND_DeclUnaryOpCallable(NAME)                                                               \
+  extern DYND_API struct NAME : arithmetic_operator<NAME, NAME ## _kernel, 1> {                      \
+    static std::string what(const ndt::type &src0_type)                                              \
+    {                                                                                                \
+      std::stringstream ss;                                                                          \
+      ss << "no viable overload for dynd::nd::" #NAME " with argument type \"" << src0_type << "\""; \
+      return ss.str();                                                                               \
+    }                                                                                                \
+  } NAME;                                                                                            \
 
-  extern DYND_API struct minus : arithmetic_operator<minus, minus_kernel, 1> {
-    static std::string what(const ndt::type &src0_type)
-    {
-      std::stringstream ss;
-      ss << "no viable overload for dynd::nd::minus with argument type \"";
-      ss << src0_type;
-      ss << "\"";
-      return ss.str();
-    }
-  } minus;
+  DYND_DeclUnaryOpCallable(plus)
+  DYND_DeclUnaryOpCallable(minus)
+
+#undef DYND_DeclUnaryOpCallable
 
   template <typename FuncType, template <type_id_t, type_id_t> class KernelType>
   struct arithmetic_operator<FuncType, KernelType, 2> : declfunc<FuncType> {
@@ -157,45 +150,23 @@ namespace nd {
   callable arithmetic_operator<FuncType, KernelType, 2>::children
       [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
-  extern DYND_API struct add : arithmetic_operator<add, add_kernel, 2> {
-    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
-    {
-      std::stringstream ss;
-      ss << "no viable overload for dynd::nd::add with argument types \""
-         << src0_tp << "\" and \"" << src1_tp << "\"";
-      return ss.str();
-    }
-  } add;
+#define DYND_DeclBinaryOpCallable(NAME)                                         \
+  extern DYND_API struct NAME : arithmetic_operator<NAME, NAME ## _kernel, 2> { \
+    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp) \
+    {                                                                           \
+      std::stringstream ss;                                                     \
+      ss << "no viable overload for dynd::nd::" #NAME " with argument types \"" \
+         << src0_tp << "\" and \"" << src1_tp << "\"";                          \
+      return ss.str();                                                          \
+    }                                                                           \
+  } NAME;                                                                       \
 
-  extern DYND_API struct subtract : arithmetic_operator<subtract, subtract_kernel, 2> {
-    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
-    {
-      std::stringstream ss;
-      ss << "no viable overload for dynd::nd::subtract with argument types \""
-         << src0_tp << "\" and \"" << src1_tp << "\"";
-      return ss.str();
-    }
-  } subtract;
+  DYND_DeclBinaryOpCallable(add)
+  DYND_DeclBinaryOpCallable(subtract)
+  DYND_DeclBinaryOpCallable(multiply)
+  DYND_DeclBinaryOpCallable(divide)
 
-  extern DYND_API struct multiply : arithmetic_operator<multiply, multiply_kernel, 2> {
-    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
-    {
-      std::stringstream ss;
-      ss << "no viable overload for dynd::nd::multiply with argument types \""
-         << src0_tp << "\" and \"" << src1_tp << "\"";
-      return ss.str();
-    }
-  } multiply;
-
-  extern DYND_API struct divide : arithmetic_operator<divide, divide_kernel, 2> {
-    static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)
-    {
-      std::stringstream ss;
-      ss << "no viable overload for dynd::nd::divide with argument types \""
-         << src0_tp << "\" and \"" << src1_tp << "\"";
-      return ss.str();
-    }
-  } divide;
+#undef DYND_DeclBinaryOpCallable
 
   template <typename FuncType, template <type_id_t, type_id_t> class KernelType>
   struct compound_arithmetic_operator : declfunc<FuncType> {
@@ -253,13 +224,13 @@ namespace nd {
   callable compound_arithmetic_operator<FuncType, KernelType>::children
       [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
-  extern DYND_API struct compound_add
-      : compound_arithmetic_operator<compound_add, compound_add_kernel_t> {
-  } compound_add;
+#define DYND_DeclCompoundOpCallable(NAME)                                                     \
+  extern DYND_API struct NAME : compound_arithmetic_operator<NAME, NAME ##_kernel_t> {} NAME; \
 
-  extern DYND_API struct compound_div
-      : compound_arithmetic_operator<compound_div, compound_div_kernel_t> {
-  } compound_div;
+  DYND_DeclCompoundOpCallable(compound_add)
+  DYND_DeclCompoundOpCallable(compound_div)
+
+#undef DYND_DeclCompoundOpCallable
 
 } // namespace dynd::nd
 } // namespace dynd

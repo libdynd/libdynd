@@ -8,60 +8,35 @@
 using namespace std;
 using namespace dynd;
 
-DYND_API struct nd::plus nd::plus;
+#define DYND_DefUnaryOpWithCallable(OP, NAME)                        \
+DYND_API struct nd:: NAME nd:: NAME;                                 \
+nd::array nd::operator OP(const array &a0) { return nd:: NAME(a0); } \
 
-nd::array nd::operator+(const array &a0)
-{
-  return plus(a0);
-}
+DYND_DefUnaryOpWithCallable(+, plus)
+DYND_DefUnaryOpWithCallable(-, minus)
 
-DYND_API struct nd::minus nd::minus;
+#undef DYND_DefUnaryOpWithCallable
 
-nd::array nd::operator-(const array &a0)
-{
-  return minus(a0);
-}
+#define DYND_DefBinaryOpWithCallable(OP, NAME)                                            \
+DYND_API struct nd:: NAME nd:: NAME;                                                      \
+nd::array nd::operator OP(const array &a0, const array &a1) { return nd:: NAME(a0, a1); } \
 
-DYND_API struct nd::add nd::add;
+DYND_DefBinaryOpWithCallable(+, add)
+DYND_DefBinaryOpWithCallable(-, subtract)
+DYND_DefBinaryOpWithCallable(*, multiply)
+DYND_DefBinaryOpWithCallable(/, divide)
 
-nd::array nd::operator+(const array &a0, const array &a1)
-{
-  return add(a0, a1);
-}
+#undef DYND_DefBinaryOpWithCallable
 
-DYND_API struct nd::subtract nd::subtract;
+#define DYND_DefCompoundOpWithArrfunc(OP, NAME)       \
+DYND_API struct nd:: NAME nd:: NAME;                  \
+nd::array &nd::array::operator OP(const array &rhs)   \
+{                                                     \
+  nd:: NAME(rhs, kwds("dst", *this));                 \
+  return *this;                                       \
+}                                                     \
 
-nd::array nd::operator-(const array &a0, const array &a1)
-{
-  return subtract(a0, a1);
-}
+DYND_DefCompoundOpWithArrfunc(+=, compound_add)
+DYND_DefCompoundOpWithArrfunc(/=, compound_div)
 
-DYND_API struct nd::multiply nd::multiply;
-
-nd::array nd::operator*(const array &a0, const array &a1)
-{
-  return multiply(a0, a1);
-}
-
-DYND_API struct nd::divide nd::divide;
-
-nd::array nd::operator/(const array &a0, const array &a1)
-{
-  return divide(a0, a1);
-}
-
-DYND_API struct nd::compound_add nd::compound_add;
-
-nd::array &nd::array::operator+=(const array &rhs)
-{
-  compound_add(rhs, kwds("dst", *this));
-  return *this;
-}
-
-DYND_API struct nd::compound_div nd::compound_div;
-
-nd::array &nd::array::operator/=(const array &rhs)
-{
-  compound_div(rhs, kwds("dst", *this));
-  return *this;
-}
+#undef DYND_DefCompoundOpWithArrfunc
