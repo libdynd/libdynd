@@ -26,10 +26,11 @@ namespace nd {
     {
     }
 
-    void metadata_single(char *dst_metadata, char **dst, char *const *src_metadata, char **const *src)
+    void metadata_single(char *DYND_UNUSED(dst_metadata), char **DYND_UNUSED(dst),
+                         char *const *DYND_UNUSED(src_metadata), char **const *DYND_UNUSED(src))
     {
-      std::memcpy(dst_metadata, src_metadata[0], metadata_size);
-      *dst = *src[0];
+      //      std::memcpy(dst_metadata, src_metadata[0], metadata_size);
+      //    *dst = *src[0];
 
       //      refcpy(dst, src[0]);
       //      incref(src[0]);
