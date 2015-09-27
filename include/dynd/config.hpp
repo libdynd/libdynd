@@ -641,6 +641,21 @@ T floor(T value)
   return std::floor(value);
 }
 
+namespace detail {
+  // Use these declarations before includeing bool1, int128, uint128, etc. so they are usable there.
+  // Helper to use for determining if a type is in a given list of unique types.
+  template<typename T, typename... Types>
+  struct TypeSetCheckInternal : std::is_same<T, Types>... {};
+
+  // Determine if a type is in a given list of unique types.
+  template<typename T, typename... Types>
+  struct TypeSetCheck : std::is_base_of<std::true_type, TypeSetCheckInternal<T, Types...>>::type {};
+
+  // Enable a given template only for a given list of unique types.
+  template<typename T, typename... Types>
+  struct enable_for : std::enable_if<TypeSetCheck<T, Types...>::value, int> {};
+} //namespace dynd::detail
+
 } // namespace dynd
 
 #include <dynd/bool1.hpp>
