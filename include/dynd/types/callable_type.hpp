@@ -161,6 +161,9 @@ struct single_t {
  * with different array arrmeta.
  */
 struct DYND_API callable_type_data {
+  char buffer[4];
+
+  kernel_request_t kernreq;
   single_t single;
   char *static_data;
   std::size_t data_size;
@@ -176,8 +179,8 @@ struct DYND_API callable_type_data {
   }
 
   callable_type_data(expr_single_t single, expr_strided_t strided)
-      : data_size(0), data_init(NULL), resolve_dst_type(NULL), instantiate(&ckernel_prefix::instantiate),
-        static_data_free(NULL)
+      : kernreq(kernel_request_single), data_size(0), data_init(NULL), resolve_dst_type(NULL),
+        instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
   {
     typedef void *static_data_type[2];
     static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
@@ -189,7 +192,7 @@ struct DYND_API callable_type_data {
 
   callable_type_data(single_t single, std::size_t data_size, callable_data_init_t data_init,
                      callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-      : single(single), static_data(NULL), data_size(data_size), data_init(data_init),
+      : kernreq(kernel_request_single), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
   {
   }
@@ -197,8 +200,9 @@ struct DYND_API callable_type_data {
   template <typename T>
   callable_type_data(single_t single, T &&static_data, std::size_t data_size, callable_data_init_t data_init,
                      callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-      : single(single), data_size(data_size), data_init(data_init), resolve_dst_type(resolve_dst_type),
-        instantiate(instantiate), static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
+      : kernreq(kernel_request_single), single(single), data_size(data_size), data_init(data_init),
+        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
+        static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
   {
     typedef typename std::remove_reference<T>::type static_data_type;
     static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
@@ -224,8 +228,16 @@ struct DYND_API callable_type_data {
                        char *const *src_data, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars);
 
+  nd::array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                       char **const *src_data, intptr_t nkwd, const nd::array *kwds,
+                       const std::map<std::string, ndt::type> &tp_vars);
+
   void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
                   const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
+                  const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+
+  void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
+                  const ndt::type *src_tp, const char *const *src_arrmeta, char **const *src_data, intptr_t nkwd,
                   const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
   template <typename StaticDataType>
