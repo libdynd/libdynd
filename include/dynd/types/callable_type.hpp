@@ -190,17 +190,18 @@ struct DYND_API callable_type_data {
     new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
   }
 
-  callable_type_data(single_t single, std::size_t data_size, callable_data_init_t data_init,
+  callable_type_data(kernel_request_t kernreq, single_t single, std::size_t data_size, callable_data_init_t data_init,
                      callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-      : kernreq(kernel_request_single), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
+      : kernreq(kernreq), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
   {
   }
 
   template <typename T>
-  callable_type_data(single_t single, T &&static_data, std::size_t data_size, callable_data_init_t data_init,
-                     callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-      : kernreq(kernel_request_single), single(single), data_size(data_size), data_init(data_init),
+  callable_type_data(kernel_request_t kernreq, single_t single, T &&static_data, std::size_t data_size,
+                     callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+                     callable_instantiate_t instantiate)
+      : kernreq(kernreq), single(single), data_size(data_size), data_init(data_init),
         resolve_dst_type(resolve_dst_type), instantiate(instantiate),
         static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
   {

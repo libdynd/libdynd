@@ -309,6 +309,7 @@ set(libdynd_SRC
     src/dynd/func/sum.cpp
     src/dynd/func/take.cpp
     src/dynd/func/take_by_pointer.cpp
+    src/dynd/func/view.cpp
     include/dynd/func/arithmetic.hpp
     include/dynd/func/callable.hpp
     include/dynd/func/callable_registry.hpp
@@ -335,6 +336,7 @@ set(libdynd_SRC
     include/dynd/func/sum.hpp
     include/dynd/func/take.hpp
     include/dynd/func/take_by_pointer.hpp
+    include/dynd/func/view.hpp
     # GFunc
     src/dynd/gfunc/gcallable.cpp
     include/dynd/gfunc/gcallable.hpp
@@ -419,6 +421,7 @@ set(libdynd_SRC
     include/dynd/kernels/tuple_comparison_kernels.hpp
     include/dynd/kernels/uniform_kernel.hpp
     include/dynd/kernels/var_dim_assignment_kernels.hpp
+    include/dynd/kernels/view_kernel.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp
     src/dynd/memblock/executable_memory_block_windows_x64.cpp
