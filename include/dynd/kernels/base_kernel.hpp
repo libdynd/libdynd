@@ -226,7 +226,7 @@ namespace nd {
 } // namespace dynd::nd
 
 template <typename VariadicType, template <type_id_t, type_id_t, VariadicType...> class T>
-struct DYND_API bind {
+struct DYND_API _bind {
   template <type_id_t TypeID0, type_id_t TypeID1>
   using type = T<TypeID0, TypeID1>;
 };

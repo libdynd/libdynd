@@ -150,12 +150,6 @@ namespace nd {
       data = NULL;
     }
 
-    template <template <typename...> class F, typename... T>
-    struct bindx {
-      template <typename... A>
-      using type = F<T..., A...>;
-    };
-
     /** A holder class for the keyword arguments */
     template <typename... K>
     class kwds;
@@ -794,10 +788,10 @@ namespace nd {
     typename std::enable_if<has_kwds<A...>::value, array>::type operator()(A &&... a)
     {
       if (get()->kernreq == kernel_request_single) {
-        return _call<detail::bindx<args, char *>::type>(std::forward<A>(a)...);
+        return _call<bind<args, char *>::type>(std::forward<A>(a)...);
       }
 
-      return _call<detail::bindx<args, char **>::type>(std::forward<A>(a)...);
+      return _call<bind<args, char **>::type>(std::forward<A>(a)...);
     }
 
     template <typename... A>
