@@ -10,10 +10,21 @@
 namespace dynd {
 namespace nd {
 
-  inline void incref(char **data)
+  inline void refcpy(char *dst, char *src)
   {
-    std::cout << (reinterpret_cast<decltype(array_preamble::data) *>(data)->ref == NULL) << std::endl;
-    //    memory_block_incref(reinterpret_cast<decltype(array_preamble::m_data) *>(data)->m_data_reference);
+    dst -= sizeof(array_preamble);
+    src -= sizeof(array_preamble);
+
+    if (reinterpret_cast<array_preamble *>(src)->data.ref == NULL) {
+      reinterpret_cast<array_preamble *>(dst)->data.ref = &reinterpret_cast<array_preamble *>(src)->m_memblockdata;
+    } else {
+      reinterpret_cast<array_preamble *>(dst)->data.ref = reinterpret_cast<array_preamble *>(src)->data.ref;
+    }
+  }
+
+  inline void incref(char *metadata)
+  {
+    memory_block_incref(reinterpret_cast<array_preamble *>(metadata - sizeof(array_preamble))->data.ref);
   }
 
   struct view_kernel : base_kernel<view_kernel> {
@@ -26,14 +37,13 @@ namespace nd {
     {
     }
 
-    void metadata_single(char *DYND_UNUSED(dst_metadata), char **DYND_UNUSED(dst),
-                         char *const *DYND_UNUSED(src_metadata), char **const *DYND_UNUSED(src))
+    void metadata_single(char *dst_metadata, char **dst, char *const *src_metadata, char **const *src)
     {
-      //      std::memcpy(dst_metadata, src_metadata[0], metadata_size);
-      //    *dst = *src[0];
+      std::memcpy(dst_metadata, src_metadata[0], metadata_size); // need to use the type virtual function instead of this
+      *dst = *src[0];
 
-      //      refcpy(dst, src[0]);
-      //      incref(src[0]);
+      refcpy(dst_metadata, src_metadata[0]);
+      incref(dst_metadata);
     }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),

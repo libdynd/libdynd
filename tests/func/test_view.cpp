@@ -19,6 +19,5 @@ using namespace dynd;
 TEST(View, Simple)
 {
   nd::array a = 3;
-  nd::view(a);
-//  EXPECT_ARRAY_EQ(3, nd::view(a));
+  EXPECT_ARRAY_EQ(3, nd::view(a));
 }

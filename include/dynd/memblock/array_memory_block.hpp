@@ -67,12 +67,6 @@ struct DYND_API array_preamble {
   }
 };
 
-inline void refcpy(char **dst, char **src)
-{
-  reinterpret_cast<decltype(array_preamble::data) *>(dst)->ref =
-      reinterpret_cast<decltype(array_preamble::data) *>(src)->ref;
-}
-
 /**
  * Creates a memory block for holding an nd::array (i.e. a container for nd::array arrmeta)
  *
