@@ -51,6 +51,18 @@ namespace nd {
   DYND_DeclBinopKernel(<<, left_shift)
   DYND_DeclBinopKernel(>>, right_shift)
 
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct inline_logical_xor {
+    typedef typename type_of<Src0TypeID>::type A0;
+    typedef typename type_of<Src1TypeID>::type A1;
+    typedef decltype((!std::declval<A0>())^(!std::declval<A1>())) R;
+    static inline R f(A0 a, A1 b) { return (!a) ^ (!b); }
+  };
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>
+  struct logical_xor_kernel : functional::as_apply_function_ck<
+                                              decltype(&inline_logical_xor<Src0TypeID, Src1TypeID>::f),
+                                              &inline_logical_xor<Src0TypeID, Src1TypeID>::f> {};
+
 #undef DYND_DeclBinopKernel
 
   template <typename FuncType, bool Src0IsOption, bool Src1IsOption>
