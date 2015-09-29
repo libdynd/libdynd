@@ -47,7 +47,7 @@ namespace nd {
   DYND_DeclBinopKernel(&&, logical_and)
   DYND_DeclBinopKernel(|, bitwise_or)
   DYND_DeclBinopKernel(||, logical_or)
-  DYND_DeclBinopKernel(^, xor)
+  DYND_DeclBinopKernel(^, bitwise_xor)
   DYND_DeclBinopKernel(<<, left_shift)
   DYND_DeclBinopKernel(>>, right_shift)
 
