@@ -35,7 +35,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool)
 
   // assignment to a bool scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<bool1>()));
-  const bool1 *ptr_a = (const bool1 *)a.get_ndo()->m_data_pointer;
+  const bool1 *ptr_a = (const bool1 *)a.get_ndo()->data.ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
   a.val_assign(TestFixture::Second::To(false));
@@ -57,17 +57,13 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool)
   */
   a.val_assign(TestFixture::Second::To(22), &ectx_nocheck);
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(2)), runtime_error);
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1)), runtime_error);
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5)), runtime_error);
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), &ectx_overflow),
-                 runtime_error);
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), &ectx_fractional),
-                 runtime_error);
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), &ectx_inexact),
-                 runtime_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), &ectx_overflow), runtime_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), &ectx_fractional), runtime_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.5), &ectx_inexact), runtime_error);
   }
 }
 
@@ -82,7 +78,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Int8)
 
   // Assignment to an int8_t scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<int8_t>()));
-  ptr_i8 = (const int8_t *)a.get_ndo()->m_data_pointer;
+  ptr_i8 = (const int8_t *)a.get_ndo()->data.ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_i8));
   a.val_assign(TestFixture::Second::To(false));
@@ -93,8 +89,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Int8)
   EXPECT_EQ(-128, TestFixture::First::Dereference(ptr_i8));
   a.val_assign(TestFixture::Second::To(127));
   EXPECT_EQ(127, TestFixture::First::Dereference(ptr_i8));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(-129)), overflow_error);
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(128)), overflow_error);
   }
@@ -102,17 +97,14 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Int8)
   EXPECT_EQ(5, TestFixture::First::Dereference(ptr_i8));
   a.val_assign(TestFixture::Second::To(-100.0f));
   EXPECT_EQ(-100, TestFixture::First::Dereference(ptr_i8));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(1.25)), runtime_error);
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(128.0)), overflow_error);
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(128.0), &ectx_inexact),
-                 runtime_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(128.0), &ectx_inexact), runtime_error);
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(1e30)), runtime_error);
     a.val_assign(TestFixture::Second::To(1.25), &ectx_overflow);
     EXPECT_EQ(1, TestFixture::First::Dereference(ptr_i8));
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(-129.0), &ectx_overflow),
-                 overflow_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(-129.0), &ectx_overflow), overflow_error);
   }
   a.val_assign(TestFixture::Second::To(1.25), &ectx_nocheck);
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_i8));
@@ -130,16 +122,14 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_UInt16)
 
   // Assignment to a uint16_t scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint16_t>()));
-  ptr_u16 = (const uint16_t *)a.get_ndo()->m_data_pointer;
+  ptr_u16 = (const uint16_t *)a.get_ndo()->data.ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_u16));
   a.val_assign(TestFixture::Second::To(false));
   EXPECT_EQ(0, TestFixture::First::Dereference(ptr_u16));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
     EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1)), overflow_error);
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1), &ectx_overflow),
-                 overflow_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1), &ectx_overflow), overflow_error);
   }
   a.val_assign(TestFixture::Second::To(-1), &ectx_nocheck);
   EXPECT_EQ(65535, TestFixture::First::Dereference(ptr_u16));
@@ -158,7 +148,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float32)
 
   // Assignment to a float scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<float>()));
-  ptr_f32 = (const float *)a.get_ndo()->m_data_pointer;
+  ptr_f32 = (const float *)a.get_ndo()->data.ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_f32));
   a.val_assign(TestFixture::Second::To(false));
@@ -173,18 +163,14 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float32)
   EXPECT_EQ(1.25, TestFixture::First::Dereference(ptr_f32));
   a.val_assign(TestFixture::Second::To(1 / 3.0));
   EXPECT_EQ((float)(1 / 3.0), TestFixture::First::Dereference(ptr_f32));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1 / 3.0), &ectx_inexact),
-                 runtime_error);
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1 / 3.0), &ectx_inexact), runtime_error);
   }
   // Float32 can't represent this value exactly
   a.val_assign(TestFixture::Second::To(33554433));
   EXPECT_EQ(33554432, TestFixture::First::Dereference(ptr_f32));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(33554433), &ectx_inexact),
-                 runtime_error);
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(33554433), &ectx_inexact), runtime_error);
   }
 }
 
@@ -197,7 +183,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float64)
 
   // Assignment to a double scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<double>()));
-  ptr_f64 = (const double *)a.get_ndo()->m_data_pointer;
+  ptr_f64 = (const double *)a.get_ndo()->data.ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_f64));
   a.val_assign(TestFixture::Second::To(false));
@@ -206,19 +192,15 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float64)
   EXPECT_EQ(1 / 3.0f, TestFixture::First::Dereference(ptr_f64));
   a.val_assign(TestFixture::Second::To(1 / 3.0));
   EXPECT_EQ(1 / 3.0, TestFixture::First::Dereference(ptr_f64));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
     a.val_assign(TestFixture::Second::To(33554433), &ectx_inexact);
     EXPECT_EQ(33554433, TestFixture::First::Dereference(ptr_f64));
   }
   // Float64 can't represent this integer value exactly
   a.val_assign(TestFixture::Second::To(36028797018963969LL));
   EXPECT_EQ(36028797018963968LL, TestFixture::First::Dereference(ptr_f64));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(36028797018963969LL),
-                              &ectx_inexact),
-                 runtime_error);
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(36028797018963969LL), &ectx_inexact), runtime_error);
   }
 }
 
@@ -229,7 +211,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64)
 
   // Assignment to a double scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint64_t>()));
-  ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
+  ptr_u64 = (const uint64_t *)a.get_ndo()->data.ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1u, TestFixture::First::Dereference(ptr_u64));
   a.val_assign(TestFixture::Second::To(false));
@@ -241,9 +223,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64)
   EXPECT_EQ(20000000000ULL, TestFixture::First::Dereference(ptr_u64));
 }
 
-#if !(                                                                         \
-    defined(_WIN32) &&                                                         \
-    !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
+#if !(defined(_WIN32) && !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
 
 TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers)
 {
@@ -254,7 +234,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers)
 
   // Assignment to a double scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint64_t>()));
-  ptr_u64 = (const uint64_t *)a.get_ndo()->m_data_pointer;
+  ptr_u64 = (const uint64_t *)a.get_ndo()->data.ptr;
   // Assign some values that don't fit in signed 64-bits
   a.val_assign(TestFixture::Second::To(13835058055282163712.f));
   EXPECT_EQ(13835058055282163712ULL, TestFixture::First::Dereference(ptr_u64));
@@ -275,46 +255,33 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float32)
   ectx_inexact.errmode = assign_error_inexact;
 
   // Assignment to a complex float scalar
-  a = nd::empty(
-      TestFixture::First::MakeType(ndt::type::make<dynd::complex<float>>()));
-  ptr_cf32 = (const dynd::complex<float> *)a.get_ndo()->m_data_pointer;
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<dynd::complex<float>>()));
+  ptr_cf32 = (const dynd::complex<float> *)a.get_ndo()->data.ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(dynd::complex<float>(1), TestFixture::First::Dereference(ptr_cf32));
   a.val_assign(TestFixture::Second::To(false));
   EXPECT_EQ(dynd::complex<float>(0), TestFixture::First::Dereference(ptr_cf32));
   a.val_assign(TestFixture::Second::To(1 / 3.0f));
-  EXPECT_EQ(dynd::complex<float>(1 / 3.0f),
-            TestFixture::First::Dereference(ptr_cf32));
+  EXPECT_EQ(dynd::complex<float>(1 / 3.0f), TestFixture::First::Dereference(ptr_cf32));
   a.val_assign(TestFixture::Second::To(1 / 3.0));
-  EXPECT_EQ(dynd::complex<float>(float(1 / 3.0)),
-            TestFixture::First::Dereference(ptr_cf32));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1 / 3.0), &ectx_inexact),
-                 runtime_error);
+  EXPECT_EQ(dynd::complex<float>(float(1 / 3.0)), TestFixture::First::Dereference(ptr_cf32));
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1 / 3.0), &ectx_inexact), runtime_error);
   }
   // Float32 can't represent this integer value exactly
   a.val_assign(TestFixture::Second::To(33554433));
   EXPECT_EQ(33554432., TestFixture::First::Dereference(ptr_cf32).real());
   EXPECT_EQ(0., TestFixture::First::Dereference(ptr_cf32).imag());
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(33554433), &ectx_inexact),
-                 runtime_error);
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(33554433), &ectx_inexact), runtime_error);
   }
 
   a.val_assign(TestFixture::Second::To(dynd::complex<float>(1.5f, 2.75f)));
-  EXPECT_EQ(dynd::complex<float>(1.5f, 2.75f),
-            TestFixture::First::Dereference(ptr_cf32));
-  a.val_assign(
-      TestFixture::Second::To(dynd::complex<double>(1 / 3.0, -1 / 7.0)));
-  EXPECT_EQ(dynd::complex<float>(float(1 / 3.0), float(-1 / 7.0)),
-            TestFixture::First::Dereference(ptr_cf32));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(
-                                  dynd::complex<double>(1 / 3.0, -1 / 7.0)),
-                              &ectx_inexact),
+  EXPECT_EQ(dynd::complex<float>(1.5f, 2.75f), TestFixture::First::Dereference(ptr_cf32));
+  a.val_assign(TestFixture::Second::To(dynd::complex<double>(1 / 3.0, -1 / 7.0)));
+  EXPECT_EQ(dynd::complex<float>(float(1 / 3.0), float(-1 / 7.0)), TestFixture::First::Dereference(ptr_cf32));
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(dynd::complex<double>(1 / 3.0, -1 / 7.0)), &ectx_inexact),
                  runtime_error);
   }
 }
@@ -327,57 +294,41 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64)
   ectx_inexact.errmode = assign_error_inexact;
 
   // Assignment to a complex float scalar
-  a = nd::empty(
-      TestFixture::First::MakeType(ndt::type::make<dynd::complex<double>>()));
-  ptr_cf64 = (const dynd::complex<double> *)a.get_ndo()->m_data_pointer;
+  a = nd::empty(TestFixture::First::MakeType(ndt::type::make<dynd::complex<double>>()));
+  ptr_cf64 = (const dynd::complex<double> *)a.get_ndo()->data.ptr;
   a.val_assign(TestFixture::Second::To(true));
-  EXPECT_EQ(dynd::complex<double>(1),
-            TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(1), TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(false));
-  EXPECT_EQ(dynd::complex<double>(0),
-            TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(0), TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(1 / 3.0f));
-  EXPECT_EQ(dynd::complex<double>(1 / 3.0f),
-            TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(1 / 3.0f), TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(1 / 3.0));
-  EXPECT_EQ(dynd::complex<double>(1 / 3.0),
-            TestFixture::First::Dereference(ptr_cf64));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+  EXPECT_EQ(dynd::complex<double>(1 / 3.0), TestFixture::First::Dereference(ptr_cf64));
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
     a.val_assign(TestFixture::Second::To(33554433), &ectx_inexact);
     EXPECT_EQ(33554433., TestFixture::First::Dereference(ptr_cf64).real());
     EXPECT_EQ(0., TestFixture::First::Dereference(ptr_cf64).imag());
   }
   // Float64 can't represent this integer value exactly
   a.val_assign(TestFixture::Second::To(36028797018963969LL));
-  EXPECT_EQ(36028797018963968LL,
-            TestFixture::First::Dereference(ptr_cf64).real());
+  EXPECT_EQ(36028797018963968LL, TestFixture::First::Dereference(ptr_cf64).real());
   EXPECT_EQ(0, TestFixture::First::Dereference(ptr_cf64).imag());
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(36028797018963969LL),
-                              &ectx_inexact),
-                 runtime_error);
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(36028797018963969LL), &ectx_inexact), runtime_error);
   }
 
   a.val_assign(TestFixture::Second::To(dynd::complex<float>(1.5f, 2.75f)));
-  EXPECT_EQ(dynd::complex<double>(1.5f, 2.75f),
-            TestFixture::First::Dereference(ptr_cf64));
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    a.val_assign(
-        TestFixture::Second::To(dynd::complex<double>(1 / 3.0, -1 / 7.0)),
-        &ectx_inexact);
-    EXPECT_EQ(dynd::complex<double>(1 / 3.0, -1 / 7.0),
-              TestFixture::First::Dereference(ptr_cf64));
+  EXPECT_EQ(dynd::complex<double>(1.5f, 2.75f), TestFixture::First::Dereference(ptr_cf64));
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    a.val_assign(TestFixture::Second::To(dynd::complex<double>(1 / 3.0, -1 / 7.0)), &ectx_inexact);
+    EXPECT_EQ(dynd::complex<double>(1 / 3.0, -1 / 7.0), TestFixture::First::Dereference(ptr_cf64));
   }
 }
 
 TYPED_TEST_P(ArrayAssign, BroadcastAssign)
 {
-  nd::array a = nd::empty(TestFixture::First::MakeType(ndt::make_fixed_dim(
-      2, ndt::make_fixed_dim(
-             3, ndt::make_fixed_dim(4, ndt::type::make<float>())))));
+  nd::array a = nd::empty(TestFixture::First::MakeType(
+      ndt::make_fixed_dim(2, ndt::make_fixed_dim(3, ndt::make_fixed_dim(4, ndt::type::make<float>())))));
   int v0[4] = {3, 4, 5, 6};
   nd::array b = TestFixture::Second::To(v0);
 
@@ -477,16 +428,11 @@ TYPED_TEST_P(ArrayAssign, Overflow)
   eval::eval_context ectx_overflow;
   ectx_overflow.errmode = assign_error_overflow;
 
-  if (!TestFixture::First::IsTypeID(cuda_device_type_id) &&
-      !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1e25), &ectx_overflow),
-                 runtime_error);
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1e25f), &ectx_overflow),
-                 runtime_error);
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1e25), &ectx_overflow),
-                 runtime_error);
-    EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1e25f), &ectx_overflow),
-                 runtime_error);
+  if (!TestFixture::First::IsTypeID(cuda_device_type_id) && !TestFixture::Second::IsTypeID(cuda_device_type_id)) {
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1e25), &ectx_overflow), runtime_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(1e25f), &ectx_overflow), runtime_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1e25), &ectx_overflow), runtime_error);
+    EXPECT_THROW(a.val_assign(TestFixture::Second::To(-1e25f), &ectx_overflow), runtime_error);
   }
 }
 
@@ -499,12 +445,10 @@ TEST(ArrayAssign, ChainedCastingRead)
   b = a.ucast<int>();
   b = b.ucast<float>();
   // Multiple cast_scalars operations should make a chained conversion type
-  EXPECT_EQ(
-      ndt::make_fixed_dim(
-          5, ndt::convert_type::make(ndt::type::make<float>(),
-                               ndt::convert_type::make(ndt::type::make<int>(),
-                                                 ndt::type::make<float>()))),
-      b.get_type());
+  EXPECT_EQ(ndt::make_fixed_dim(
+                5, ndt::convert_type::make(ndt::type::make<float>(),
+                                           ndt::convert_type::make(ndt::type::make<int>(), ndt::type::make<float>()))),
+            b.get_type());
 
   // Evaluating the values should truncate them to integers
   tmp_ectx.errmode = assign_error_overflow;
@@ -525,22 +469,19 @@ TEST(ArrayAssign, ChainedCastingRead)
   b = b.ucast<float>();
   b = b.ucast<int32_t>();
 
-  EXPECT_EQ(
-      ndt::make_fixed_dim(
-          5,
-          ndt::convert_type::make(
-              ndt::type::make<int32_t>(),
-              ndt::convert_type::make(
-                  ndt::type::make<float>(),
-                  ndt::convert_type::make(
-                      ndt::type::make<int64_t>(),
-                      ndt::convert_type::make(
-                          ndt::type::make<int16_t>(),
-                          ndt::convert_type::make(
-                              ndt::type::make<int32_t>(),
-                              ndt::convert_type::make(ndt::type::make<int16_t>(),
-                                                ndt::type::make<float>()))))))),
-      b.get_type());
+  EXPECT_EQ(ndt::make_fixed_dim(
+                5, ndt::convert_type::make(
+                       ndt::type::make<int32_t>(),
+                       ndt::convert_type::make(
+                           ndt::type::make<float>(),
+                           ndt::convert_type::make(
+                               ndt::type::make<int64_t>(),
+                               ndt::convert_type::make(
+                                   ndt::type::make<int16_t>(),
+                                   ndt::convert_type::make(ndt::type::make<int32_t>(),
+                                                           ndt::convert_type::make(ndt::type::make<int16_t>(),
+                                                                                   ndt::type::make<float>()))))))),
+            b.get_type());
   tmp_ectx.errmode = assign_error_overflow;
   b = b.eval(&tmp_ectx);
   EXPECT_EQ(ndt::type("5 * int32"), b.get_type());
@@ -651,32 +592,24 @@ TEST(ArrayAssign, ArrayValsAtType)
 
   a.vals_at(irange().by(2)) = 0;
   a.vals_at(irange(1, 4, 1).by(2)) = 1;
-  const int64_t *data =
-      reinterpret_cast<const int64_t *>(a.get_readonly_originptr());
+  const int64_t *data = reinterpret_cast<const int64_t *>(a.get_readonly_originptr());
   int64_t vals[] = {0, 1, 0, 1};
   for (int i = 0; i < 4; ++i) {
     EXPECT_EQ(vals[i], data[i]);
   }
 }
 
-#if !(                                                                         \
-    defined(_WIN32) &&                                                         \
-    !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
-REGISTER_TYPED_TEST_CASE_P(
-    ArrayAssign, ScalarAssignment_Bool, ScalarAssignment_Int8,
-    ScalarAssignment_UInt16, ScalarAssignment_Float32, ScalarAssignment_Float64,
-    ScalarAssignment_Uint64,
-    ScalarAssignment_Uint64_LargeNumbers, // This one is excluded on 32-bit
-                                          // windows
-    ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64,
-    BroadcastAssign, Overflow);
+#if !(defined(_WIN32) && !defined(_M_X64)) // TODO: How to mark as expected failures in googletest?
+REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool, ScalarAssignment_Int8, ScalarAssignment_UInt16,
+                           ScalarAssignment_Float32, ScalarAssignment_Float64, ScalarAssignment_Uint64,
+                           ScalarAssignment_Uint64_LargeNumbers, // This one is excluded on 32-bit
+                                                                 // windows
+                           ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign,
+                           Overflow);
 #else
-REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool,
-                           ScalarAssignment_Int8, ScalarAssignment_UInt16,
-                           ScalarAssignment_Float32, ScalarAssignment_Float64,
-                           ScalarAssignment_Uint64,
-                           ScalarAssignment_Complex_Float32,
-                           ScalarAssignment_Complex_Float64, BroadcastAssign,
+REGISTER_TYPED_TEST_CASE_P(ArrayAssign, ScalarAssignment_Bool, ScalarAssignment_Int8, ScalarAssignment_UInt16,
+                           ScalarAssignment_Float32, ScalarAssignment_Float64, ScalarAssignment_Uint64,
+                           ScalarAssignment_Complex_Float32, ScalarAssignment_Complex_Float64, BroadcastAssign,
                            Overflow);
 #endif
 

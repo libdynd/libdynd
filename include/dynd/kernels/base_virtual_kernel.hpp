@@ -27,6 +27,8 @@ namespace nd {
    */
   template <typename T>
   struct base_virtual_kernel {
+    static const bool has_metadata_single = false;
+
     struct single_wrapper {
       static void func(ckernel_prefix *DYND_UNUSED(self), char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {

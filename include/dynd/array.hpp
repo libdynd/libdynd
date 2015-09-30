@@ -146,8 +146,7 @@ namespace nd {
     array(const std::initializer_list<std::initializer_list<T>> &il);
     /** Constructs an array from a 3D initializer list */
     template <class T>
-    array(const std::initializer_list<
-        std::initializer_list<std::initializer_list<T>>> &il);
+    array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il);
 
     /** Constructs an array from a 1D const char * (string) initializer list */
     array(const std::initializer_list<const char *> &il);
@@ -167,16 +166,14 @@ namespace nd {
     }
     /** Assigns an array from a 2D initializer list */
     template <class T>
-    inline array
-    operator=(const std::initializer_list<std::initializer_list<T>> &il)
+    inline array operator=(const std::initializer_list<std::initializer_list<T>> &il)
     {
       array(il).swap(*this);
       return *this;
     }
     /** Assigns an array from a 3D initializer list */
     template <class T>
-    inline array operator=(const std::initializer_list<
-        std::initializer_list<std::initializer_list<T>>> &il)
+    inline array operator=(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il)
     {
       array(il).swap(*this);
       return *this;
@@ -188,25 +185,21 @@ namespace nd {
     template <class T>
     array(const std::vector<T> &vec);
 
-    explicit array(const memory_block_ptr &ndobj_memblock)
-        : m_memblock(ndobj_memblock)
+    explicit array(const memory_block_ptr &ndobj_memblock) : m_memblock(ndobj_memblock)
     {
       if (m_memblock.get()->m_type != array_memory_block_type) {
-        throw std::runtime_error(
-            "array can only be constructed from a memblock with array type");
+        throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
     }
 
-    explicit array(array_preamble *ndo, bool add_ref)
-        : m_memblock(&ndo->m_memblockdata, add_ref)
+    explicit array(array_preamble *ndo, bool add_ref) : m_memblock(&ndo->m_memblockdata, add_ref)
     {
     }
 
     void set(const memory_block_ptr &ndobj_memblock)
     {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
-        throw std::runtime_error(
-            "array can only be constructed from a memblock with array type");
+        throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
       m_memblock = ndobj_memblock;
     }
@@ -214,8 +207,7 @@ namespace nd {
     void set(memory_block_ptr &&ndobj_memblock)
     {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
-        throw std::runtime_error(
-            "array can only be constructed from a memblock with array type");
+        throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
       m_memblock = std::move(ndobj_memblock);
     }
@@ -286,16 +278,15 @@ namespace nd {
     char *get_readwrite_originptr() const
     {
       if (get_ndo()->m_flags & write_access_flag) {
-        return get_ndo()->m_data_pointer;
+        return get_ndo()->data.ptr;
       } else {
-        throw std::runtime_error(
-            "tried to write to a dynd array that is not writable");
+        throw std::runtime_error("tried to write to a dynd array that is not writable");
       }
     }
 
     const char *get_readonly_originptr() const
     {
-      return get_ndo()->m_data_pointer;
+      return get_ndo()->data.ptr;
     }
 
     char *get_data()
@@ -310,8 +301,7 @@ namespace nd {
 
     inline uint32_t get_access_flags() const
     {
-      return get_ndo()->m_flags &
-             (immutable_access_flag | read_access_flag | write_access_flag);
+      return get_ndo()->m_flags & (immutable_access_flag | read_access_flag | write_access_flag);
     }
 
     inline bool is_immutable() const
@@ -408,9 +398,7 @@ namespace nd {
     inline void get_shape(intptr_t *out_shape) const
     {
       if (!get_ndo()->is_builtin_type() && get_ndo()->m_type->get_ndim() > 0) {
-        get_ndo()->m_type->get_shape(get_ndo()->m_type->get_ndim(), 0,
-                                     out_shape, get_arrmeta(),
-                                     get_ndo()->m_data_pointer);
+        get_ndo()->m_type->get_shape(get_ndo()->m_type->get_ndim(), 0, out_shape, get_arrmeta(), get_ndo()->data.ptr);
       }
     }
 
@@ -419,7 +407,7 @@ namespace nd {
      */
     inline intptr_t get_dim_size() const
     {
-      return get_type().get_dim_size(get_arrmeta(), get_ndo()->m_data_pointer);
+      return get_type().get_dim_size(get_arrmeta(), get_ndo()->data.ptr);
     }
 
     /**
@@ -428,18 +416,15 @@ namespace nd {
     inline intptr_t get_dim_size(intptr_t i) const
     {
       if (0 <= i && i < get_type().get_strided_ndim()) {
-        const size_stride_t *ss =
-            reinterpret_cast<const size_stride_t *>(get_arrmeta());
+        const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(get_arrmeta());
         return ss[i].dim_size;
       } else if (0 <= i && i < get_ndim()) {
         dimvector shape(i + 1);
-        get_ndo()->m_type->get_shape(i + 1, 0, shape.get(), get_arrmeta(),
-                                     get_ndo()->m_data_pointer);
+        get_ndo()->m_type->get_shape(i + 1, 0, shape.get(), get_arrmeta(), get_ndo()->data.ptr);
         return shape[i];
       } else {
         std::stringstream ss;
-        ss << "Not enough dimensions in array, tried to access axis " << i
-           << " for type " << get_type();
+        ss << "Not enough dimensions in array, tried to access axis " << i << " for type " << get_type();
         throw std::invalid_argument(ss.str());
       }
     }
@@ -459,8 +444,8 @@ namespace nd {
 
     inline memory_block_ptr get_data_memblock() const
     {
-      if (get_ndo()->m_data_reference) {
-        return memory_block_ptr(get_ndo()->m_data_reference, true);
+      if (get_ndo()->data.ref) {
+        return memory_block_ptr(get_ndo()->data.ref, true);
       } else {
         return m_memblock;
       }
@@ -489,8 +474,7 @@ namespace nd {
      *
      * \param function_name  The name of the function.
      */
-    const gfunc::callable &
-    find_dynamic_function(const char *function_name) const;
+    const gfunc::callable &find_dynamic_function(const char *function_name) const;
 
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
      * use it */
@@ -513,14 +497,12 @@ namespace nd {
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
      * use it */
     template <class T0, class T1, class T2>
-    array f(const char *function_name, const T0 &p0, const T1 &p1,
-            const T2 &p2);
+    array f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2);
 
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
      * use it */
     template <class T0, class T1, class T2, class T3>
-    array f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2,
-            const T3 &p3);
+    array f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2, const T3 &p3);
 
     array &operator+=(const array &rhs);
     array &operator-=(const array &rhs);
@@ -553,29 +535,25 @@ namespace nd {
     /**
      * A helper for assigning to the values indexed in an array.
      */
-    array_vals_at vals_at(const irange &i0, const irange &i1,
-                          const irange &i2) const;
+    array_vals_at vals_at(const irange &i0, const irange &i1, const irange &i2) const;
 
     /**
      * A helper for assigning to the values indexed in an array.
      */
-    array_vals_at vals_at(const irange &i0, const irange &i1, const irange &i2,
-                          const irange &i3) const;
+    array_vals_at vals_at(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const;
 
     /**
      * Evaluates the array, attempting to do the minimum work
      * required. If the array is not ane expression, simply
      * returns it as is, otherwise evaluates into a new copy.
      */
-    array eval(const eval::eval_context *ectx =
-                   &eval::default_eval_context) const;
+    array eval(const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Evaluates the array into an immutable strided array, or
      * returns it untouched if it is already both immutable and strided.
      */
-    array eval_immutable(const eval::eval_context *ectx =
-                             &eval::default_eval_context) const;
+    array eval_immutable(const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Evaluates the array node into a newly allocated strided array,
@@ -584,9 +562,7 @@ namespace nd {
      * \param access_flags  The access flags for the result, default immutable.
      * \param ectx  The evaluation context
      */
-    array eval_copy(uint32_t access_flags = 0,
-                    const eval::eval_context *ectx =
-                        &eval::default_eval_context) const;
+    array eval_copy(uint32_t access_flags = 0, const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Returns a view of the array as bytes (for POD) or the storage type,
@@ -613,8 +589,7 @@ namespace nd {
      *                          use true, if you want to write values, typically
      *                          use false.
      */
-    array at_array(intptr_t nindices, const irange *indices,
-                   bool collapse_leading = true) const;
+    array at_array(intptr_t nindices, const irange *indices, bool collapse_leading = true) const;
 
     /**
      * The function call operator is used for indexing. Overloading
@@ -639,15 +614,13 @@ namespace nd {
       return at_array(3, i);
     }
     /** Indexing with four index values */
-    array operator()(const irange &i0, const irange &i1, const irange &i2,
-                     const irange &i3) const
+    array operator()(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const
     {
       irange i[4] = {i0, i1, i2, i3};
       return at_array(4, i);
     }
     /** Indexing with five index values */
-    array operator()(const irange &i0, const irange &i1, const irange &i2,
-                     const irange &i3, const irange &i4) const
+    array operator()(const irange &i0, const irange &i1, const irange &i2, const irange &i3, const irange &i4) const
     {
       irange i[5] = {i0, i1, i2, i3, i4};
       return at_array(5, i);
@@ -664,13 +637,10 @@ namespace nd {
     }
 
     /** Does a value-assignment from the rhs array. */
-    void val_assign(const array &rhs, const eval::eval_context *ectx =
-                                          &eval::default_eval_context) const;
+    void val_assign(const array &rhs, const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta,
-                    const char *rhs_data,
-                    const eval::eval_context *ectx =
-                        &eval::default_eval_context) const;
+    void val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
+                    const eval::eval_context *ectx = &eval::default_eval_context) const;
 
     /**
      * Casts the type of the array into the specified type.
@@ -785,8 +755,7 @@ namespace nd {
      * \param replace_ndim  The number of array dimensions to replace
      *                       in addition to the array data type.
      */
-    array replace_dtype(const ndt::type &replacement_tp,
-                        intptr_t replace_ndim = 0) const;
+    array replace_dtype(const ndt::type &replacement_tp, intptr_t replace_ndim = 0) const;
 
     /**
      * Inserts new fixed dimensions into the array.
@@ -821,8 +790,7 @@ namespace nd {
 
 #ifdef DYND_CUDA
     /** Returns a copy of this array in CUDA host memory. */
-    array to_cuda_host(unsigned int cuda_host_flags =
-                           cudaHostAllocDefault) const;
+    array to_cuda_host(unsigned int cuda_host_flags = cudaHostAllocDefault) const;
 
     /** Returns a copy of this array in CUDA global memory. */
     array to_cuda_device() const;
@@ -842,8 +810,7 @@ namespace nd {
 
     template <typename T>
     struct convert {
-      static_assert(ndt::type::is_layout_compatible<T>::value,
-                    "must be layout compatible");
+      static_assert(ndt::type::is_layout_compatible<T>::value, "must be layout compatible");
 
       static void from(char *DYND_UNUSED(metadata), char *data, const T &value)
       {
@@ -878,8 +845,7 @@ namespace ndt {
 namespace nd {
 
   DYND_API array as_struct();
-  DYND_API array as_struct(std::size_t size, const char **names,
-                           const array *values);
+  DYND_API array as_struct(std::size_t size, const char **names, const array *values);
 
   DYND_API array operator+(const array &a0);
   DYND_API array operator-(const array &a0);
@@ -967,8 +933,7 @@ namespace nd {
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template <class T>
-    typename std::enable_if<is_dynd_scalar<T>::value, array_vals &>::type
-    operator=(const T &rhs)
+    typename std::enable_if<is_dynd_scalar<T>::value, array_vals &>::type operator=(const T &rhs)
     {
       m_arr.val_assign(ndt::type::make<T>(), NULL, (const char *)&rhs);
       return *this;
@@ -983,8 +948,7 @@ namespace nd {
      * as would seem obvious.
      */
     template <class T>
-    typename std::enable_if<is_type_bool<T>::value, array_vals &>::type
-    operator=(const T &rhs)
+    typename std::enable_if<is_type_bool<T>::value, array_vals &>::type operator=(const T &rhs)
     {
       bool1 v(rhs);
       m_arr.val_assign(ndt::type::make<bool1>(), NULL, (const char *)&v);
@@ -1029,8 +993,7 @@ namespace nd {
 
     /** Does a value-assignment from the rhs C++ scalar. */
     template <class T>
-    typename std::enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type
-    operator=(const T &rhs)
+    typename std::enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type operator=(const T &rhs)
     {
       m_arr.val_assign(ndt::type::make<T>(), NULL, (const char *)&rhs);
       return *this;
@@ -1045,8 +1008,7 @@ namespace nd {
      * as would seem obvious.
      */
     template <class T>
-    typename std::enable_if<is_type_bool<T>::value, array_vals_at &>::type
-    operator=(const T &rhs)
+    typename std::enable_if<is_type_bool<T>::value, array_vals_at &>::type operator=(const T &rhs)
     {
       bool1 v(rhs);
       m_arr.val_assign(ndt::type::make<bool1>(), NULL, (const char *)&v);
@@ -1058,18 +1020,14 @@ namespace nd {
     friend class array;
     friend array_vals_at array::vals_at(const irange &) const;
     friend array_vals_at array::vals_at(const irange &, const irange &) const;
-    friend array_vals_at array::vals_at(const irange &, const irange &,
-                                        const irange &) const;
-    friend array_vals_at array::vals_at(const irange &, const irange &,
-                                        const irange &, const irange &) const;
+    friend array_vals_at array::vals_at(const irange &, const irange &, const irange &) const;
+    friend array_vals_at array::vals_at(const irange &, const irange &, const irange &, const irange &) const;
   };
 
   /** Makes a strided array with uninitialized data. If axis_perm is NULL, it is
    * C-order */
-  DYND_API array make_strided_array(const ndt::type &uniform_dtype,
-                                    intptr_t ndim, const intptr_t *shape,
-                                    int64_t access_flags =
-                                    read_access_flag | write_access_flag,
+  DYND_API array make_strided_array(const ndt::type &uniform_dtype, intptr_t ndim, const intptr_t *shape,
+                                    int64_t access_flags = read_access_flag | write_access_flag,
                                     const int *axis_perm = NULL);
 
   /**
@@ -1092,48 +1050,35 @@ namespace nd {
    *
    * \returns  The created array.
    */
-  DYND_API array make_strided_array_from_data(const ndt::type &uniform_dtype,
-                                              intptr_t ndim,
-                                              const intptr_t *shape,
-                                              const intptr_t *strides,
-                                              int64_t access_flags,
-                                              char *data_ptr,
-                                              const memory_block_ptr
-                                              &data_reference,
-                                              char **out_uniform_arrmeta =
-                                              NULL);
+  DYND_API array make_strided_array_from_data(const ndt::type &uniform_dtype, intptr_t ndim, const intptr_t *shape,
+                                              const intptr_t *strides, int64_t access_flags, char *data_ptr,
+                                              const memory_block_ptr &data_reference,
+                                              char **out_uniform_arrmeta = NULL);
 
   /** Makes a POD (plain old data) array with data initialized by the provided
    * pointer */
   DYND_API array make_pod_array(const ndt::type &pod_dt, const void *data);
 
   /** Makes an array of 'bytes' type from the data */
-  DYND_API array make_bytes_array(const char *data, size_t len,
-                                  size_t alignment = 1);
+  DYND_API array make_bytes_array(const char *data, size_t len, size_t alignment = 1);
 
-  DYND_API array make_string_array(const char *str, size_t len,
-                                   string_encoding_t encoding,
-                                   uint64_t access_flags);
+  DYND_API array make_string_array(const char *str, size_t len, string_encoding_t encoding, uint64_t access_flags);
   inline array make_ascii_array(const char *str, size_t len)
   {
-    return make_string_array(str, len, string_encoding_ascii,
-                             nd::default_access_flags);
+    return make_string_array(str, len, string_encoding_ascii, nd::default_access_flags);
   }
   inline array make_utf8_array(const char *str, size_t len)
   {
-    return make_string_array(str, len, string_encoding_utf_8,
-                             nd::default_access_flags);
+    return make_string_array(str, len, string_encoding_utf_8, nd::default_access_flags);
   }
   inline array make_utf16_array(const uint16_t *str, size_t len)
   {
-    return make_string_array(reinterpret_cast<const char *>(str),
-                             len * sizeof(uint16_t), string_encoding_utf_16,
+    return make_string_array(reinterpret_cast<const char *>(str), len * sizeof(uint16_t), string_encoding_utf_16,
                              nd::default_access_flags);
   }
   inline array make_utf32_array(const uint32_t *str, size_t len)
   {
-    return make_string_array(reinterpret_cast<const char *>(str),
-                             len * sizeof(uint32_t), string_encoding_utf_32,
+    return make_string_array(reinterpret_cast<const char *>(str), len * sizeof(uint32_t), string_encoding_utf_32,
                              nd::default_access_flags);
   }
 
@@ -1150,8 +1095,7 @@ namespace nd {
   template <int N>
   inline array make_utf8_array(const unsigned char (&static_string)[N])
   {
-    return make_utf8_array(reinterpret_cast<const char *>(&static_string[0]),
-                           N);
+    return make_utf8_array(reinterpret_cast<const char *>(&static_string[0]), N);
   }
   template <int N>
   inline array make_utf16_array(const uint16_t (&static_string)[N])
@@ -1172,10 +1116,8 @@ namespace nd {
    *
    * \returns  An array of type "N * string".
    */
-  DYND_API array make_strided_string_array(const char *const *cstr_array,
-                                           size_t array_size);
-  DYND_API array make_strided_string_array(const std::string **str_array,
-                                           size_t array_size);
+  DYND_API array make_strided_string_array(const char *const *cstr_array, size_t array_size);
+  DYND_API array make_strided_string_array(const std::string **str_array, size_t array_size);
 
   inline array_vals array::vals() const
   {
@@ -1193,15 +1135,13 @@ namespace nd {
     return array_vals_at(at_array(2, i, false));
   }
 
-  inline array_vals_at array::vals_at(const irange &i0, const irange &i1,
-                                      const irange &i2) const
+  inline array_vals_at array::vals_at(const irange &i0, const irange &i1, const irange &i2) const
   {
     irange i[3] = {i0, i1, i2};
     return array_vals_at(at_array(3, i, false));
   }
 
-  inline array_vals_at array::vals_at(const irange &i0, const irange &i1,
-                                      const irange &i2, const irange &i3) const
+  inline array_vals_at array::vals_at(const irange &i0, const irange &i1, const irange &i2, const irange &i3) const
   {
     irange i[4] = {i0, i1, i2, i3};
     return array_vals_at(at_array(4, i, false));
@@ -1282,16 +1222,13 @@ namespace nd {
    * type) and (intptr_t, const intptr_t *, type) can sometimes result in
    * unexpected overloads.
    */
-  inline array dtyped_empty(intptr_t ndim, const intptr_t *shape,
-                            const ndt::type &tp)
+  inline array dtyped_empty(intptr_t ndim, const intptr_t *shape, const ndt::type &tp)
   {
     if (ndim > 0) {
       intptr_t i = ndim - 1;
-      ndt::type rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], tp)
-                                    : ndt::var_dim_type::make(tp);
+      ndt::type rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], tp) : ndt::var_dim_type::make(tp);
       while (i-- > 0) {
-        rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], rtp)
-                            : ndt::var_dim_type::make(rtp);
+        rtp = shape[i] >= 0 ? ndt::make_fixed_dim(shape[i], rtp) : ndt::var_dim_type::make(rtp);
       }
       return empty(rtp);
     } else {
@@ -1302,8 +1239,7 @@ namespace nd {
   /**
    * A version of dtyped_empty that accepts a std::vector as the shape.
    */
-  inline array dtyped_empty(const std::vector<intptr_t> &shape,
-                            const ndt::type &tp)
+  inline array dtyped_empty(const std::vector<intptr_t> &shape, const ndt::type &tp)
   {
     return dtyped_empty(shape.size(), shape.empty() ? NULL : &shape[0], tp);
   }
@@ -1327,8 +1263,7 @@ namespace nd {
    */
   inline array empty(intptr_t dim0, const ndt::type &tp)
   {
-    return nd::empty(dim0 >= 0 ? ndt::make_fixed_dim(dim0, tp)
-                               : ndt::var_dim_type::make(tp));
+    return nd::empty(dim0 >= 0 ? ndt::make_fixed_dim(dim0, tp) : ndt::var_dim_type::make(tp));
   }
 
   /**
@@ -1350,10 +1285,8 @@ namespace nd {
    */
   inline array empty(intptr_t dim0, intptr_t dim1, const ndt::type &tp)
   {
-    ndt::type rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp)
-                                : ndt::var_dim_type::make(tp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp)
-                      : ndt::var_dim_type::make(rtp);
+    ndt::type rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, tp) : ndt::var_dim_type::make(tp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
     return nd::empty(rtp);
   }
 
@@ -1375,15 +1308,11 @@ namespace nd {
    * This type should be at least three dimensional, and is initialized
    * using the specified dimension sizes.
    */
-  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2,
-                     const ndt::type &tp)
+  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const ndt::type &tp)
   {
-    ndt::type rtp = (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp)
-                                : ndt::var_dim_type::make(tp);
-    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp)
-                      : ndt::var_dim_type::make(rtp);
-    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp)
-                      : ndt::var_dim_type::make(rtp);
+    ndt::type rtp = (dim2 >= 0) ? ndt::make_fixed_dim(dim2, tp) : ndt::var_dim_type::make(tp);
+    rtp = (dim1 >= 0) ? ndt::make_fixed_dim(dim1, rtp) : ndt::var_dim_type::make(rtp);
+    rtp = (dim0 >= 0) ? ndt::make_fixed_dim(dim0, rtp) : ndt::var_dim_type::make(rtp);
     return empty(rtp);
   }
 
@@ -1395,8 +1324,7 @@ namespace nd {
    *      array a = nd::empty(10, 10, 10, "int32");
    */
   template <int N>
-  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2,
-                     const char (&dshape)[N])
+  inline array empty(intptr_t dim0, intptr_t dim1, intptr_t dim2, const char (&dshape)[N])
   {
     return empty(dim0, dim1, dim2, ndt::type(dshape, dshape + N - 1));
   }
@@ -1437,8 +1365,7 @@ namespace nd {
    * dtype,
    * with ndim/shape pointer.
    */
-  inline array dtyped_zeros(intptr_t ndim, const intptr_t *shape,
-                            const ndt::type &tp)
+  inline array dtyped_zeros(intptr_t ndim, const intptr_t *shape, const ndt::type &tp)
   {
     nd::array res = dtyped_empty(ndim, shape, tp);
     res.val_assign(0);
@@ -1465,8 +1392,7 @@ namespace nd {
    * In this function, the type provided is the complete type of the array
    * result, not just its dtype.
    */
-  DYND_API array typed_ones(intptr_t ndim, const intptr_t *shape,
-                            const ndt::type &tp);
+  DYND_API array typed_ones(intptr_t ndim, const intptr_t *shape, const ndt::type &tp);
 
   /**
    * A version of typed_ones that accepts a std::vector as the shape.
@@ -1481,8 +1407,7 @@ namespace nd {
    * dtype,
    * with ndim/shape pointer.
    */
-  inline array dtyped_ones(intptr_t ndim, const intptr_t *shape,
-                           const ndt::type &tp)
+  inline array dtyped_ones(intptr_t ndim, const intptr_t *shape, const ndt::type &tp)
   {
     nd::array res = dtyped_empty(ndim, shape, tp);
     res.val_assign(1);
@@ -1561,18 +1486,15 @@ namespace nd {
     // Base case, an initializer list parameterized by a non-initializer list
     template <class T>
     struct initializer_list_shape<std::initializer_list<T>> {
-      static void compute(intptr_t *out_shape,
-                          const std::initializer_list<T> &il)
+      static void compute(intptr_t *out_shape, const std::initializer_list<T> &il)
       {
         out_shape[0] = il.size();
       }
-      static void validate(const intptr_t *shape,
-                           const std::initializer_list<T> &il)
+      static void validate(const intptr_t *shape, const std::initializer_list<T> &il)
       {
         if ((intptr_t)il.size() != shape[0]) {
-          throw std::runtime_error(
-              "initializer list for array is ragged, must be "
-              "nested in a regular fashion");
+          throw std::runtime_error("initializer list for array is ragged, must be "
+                                   "nested in a regular fashion");
         }
       }
       static void copy_data(T **dataptr, const std::initializer_list<T> &il)
@@ -1583,46 +1505,35 @@ namespace nd {
     };
     // Recursive case, an initializer list parameterized by an initializer list
     template <class T>
-    struct initializer_list_shape<
-        std::initializer_list<std::initializer_list<T>>> {
-      static void
-      compute(intptr_t *out_shape,
-              const std::initializer_list<std::initializer_list<T>> &il)
+    struct initializer_list_shape<std::initializer_list<std::initializer_list<T>>> {
+      static void compute(intptr_t *out_shape, const std::initializer_list<std::initializer_list<T>> &il)
       {
         out_shape[0] = il.size();
         if (out_shape[0] > 0) {
           // Recursively compute the rest of the shape
-          initializer_list_shape<std::initializer_list<T>>::compute(
-              out_shape + 1, *il.begin());
+          initializer_list_shape<std::initializer_list<T>>::compute(out_shape + 1, *il.begin());
           // Validate the shape for the nested initializer lists
           for (auto i = il.begin() + 1; i != il.end(); ++i) {
-            initializer_list_shape<std::initializer_list<T>>::validate(
-                out_shape + 1, *i);
+            initializer_list_shape<std::initializer_list<T>>::validate(out_shape + 1, *i);
           }
         }
       }
-      static void
-      validate(const intptr_t *shape,
-               const std::initializer_list<std::initializer_list<T>> &il)
+      static void validate(const intptr_t *shape, const std::initializer_list<std::initializer_list<T>> &il)
       {
         if ((intptr_t)il.size() != shape[0]) {
-          throw std::runtime_error(
-              "initializer list for array is ragged, must be "
-              "nested in a regular fashion");
+          throw std::runtime_error("initializer list for array is ragged, must be "
+                                   "nested in a regular fashion");
         }
         // Validate the shape for the nested initializer lists
         for (auto i = il.begin(); i != il.end(); ++i) {
-          initializer_list_shape<std::initializer_list<T>>::validate(shape + 1,
-                                                                     *i);
+          initializer_list_shape<std::initializer_list<T>>::validate(shape + 1, *i);
         }
       }
-      static void
-      copy_data(typename initializer_list_type<T>::type **dataptr,
-                const std::initializer_list<std::initializer_list<T>> &il)
+      static void copy_data(typename initializer_list_type<T>::type **dataptr,
+                            const std::initializer_list<std::initializer_list<T>> &il)
       {
         for (auto i = il.begin(); i != il.end(); ++i) {
-          initializer_list_shape<std::initializer_list<T>>::copy_data(dataptr,
-                                                                      *i);
+          initializer_list_shape<std::initializer_list<T>>::copy_data(dataptr, *i);
         }
       }
     };
@@ -1634,13 +1545,11 @@ namespace nd {
       : m_memblock()
   {
     intptr_t dim0 = il.size();
-    make_strided_array(ndt::type::make<T>(), 1, &dim0, nd::default_access_flags,
-                       NULL).swap(*this);
-    DYND_MEMCPY(get_ndo()->m_data_pointer, il.begin(), sizeof(T) * dim0);
+    make_strided_array(ndt::type::make<T>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
+    DYND_MEMCPY(get_ndo()->data.ptr, il.begin(), sizeof(T) * dim0);
   }
   template <class T>
-  dynd::nd::array::array(
-      const std::initializer_list<std::initializer_list<T>> &il)
+  dynd::nd::array::array(const std::initializer_list<std::initializer_list<T>> &il)
       : m_memblock()
   {
     typedef std::initializer_list<std::initializer_list<T>> S;
@@ -1648,53 +1557,44 @@ namespace nd {
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    make_strided_array(ndt::type::make<T>(), 2, shape, nd::default_access_flags,
-                       NULL).swap(*this);
-    T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
+    make_strided_array(ndt::type::make<T>(), 2, shape, nd::default_access_flags, NULL).swap(*this);
+    T *dataptr = reinterpret_cast<T *>(get_ndo()->data.ptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
   template <class T>
-  dynd::nd::array::array(const std::initializer_list<
-      std::initializer_list<std::initializer_list<T>>> &il)
+  dynd::nd::array::array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il)
       : m_memblock()
   {
-    typedef std::initializer_list<
-        std::initializer_list<std::initializer_list<T>>> S;
+    typedef std::initializer_list<std::initializer_list<std::initializer_list<T>>> S;
     intptr_t shape[3];
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    make_strided_array(ndt::type::make<T>(), 3, shape, nd::default_access_flags,
-                       NULL).swap(*this);
-    T *dataptr = reinterpret_cast<T *>(get_ndo()->m_data_pointer);
+    make_strided_array(ndt::type::make<T>(), 3, shape, nd::default_access_flags, NULL).swap(*this);
+    T *dataptr = reinterpret_cast<T *>(get_ndo()->data.ptr);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
 
-  inline dynd::nd::array::array(const std::initializer_list<const char *> &il)
-      : m_memblock()
+  inline dynd::nd::array::array(const std::initializer_list<const char *> &il) : m_memblock()
   {
     make_strided_string_array(il.begin(), il.size()).swap(*this);
   }
 
-  inline dynd::nd::array::array(const std::initializer_list<ndt::type> &il)
-      : m_memblock()
+  inline dynd::nd::array::array(const std::initializer_list<ndt::type> &il) : m_memblock()
   {
     intptr_t dim0 = il.size();
-    make_strided_array(ndt::make_type(), 1, &dim0, nd::default_access_flags,
-                       NULL).swap(*this);
-    auto data_ptr = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
+    make_strided_array(ndt::make_type(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
+    auto data_ptr = reinterpret_cast<ndt::type *>(get_ndo()->data.ptr);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
     }
   }
 
-  inline dynd::nd::array::array(const std::initializer_list<bool> &il)
-      : m_memblock()
+  inline dynd::nd::array::array(const std::initializer_list<bool> &il) : m_memblock()
   {
     intptr_t dim0 = il.size();
-    make_strided_array(ndt::type::make<bool>(), 1, &dim0,
-                       nd::default_access_flags, NULL).swap(*this);
-    auto data_ptr = reinterpret_cast<bool1 *>(get_ndo()->m_data_pointer);
+    make_strided_array(ndt::type::make<bool>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
+    auto data_ptr = reinterpret_cast<bool1 *>(get_ndo()->data.ptr);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
     }
@@ -1711,11 +1611,9 @@ namespace nd {
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    make_strided_array(
-        ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)),
-        ndim, shape, default_access_flags, NULL).swap(*this);
-    DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs),
-                size);
+    make_strided_array(ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)), ndim, shape,
+                       default_access_flags, NULL).swap(*this);
+    DYND_MEMCPY(get_ndo()->data.ptr, reinterpret_cast<const void *>(&rhs), size);
   }
 
   // Temporarily removed due to conflicting dll linkage with earlier versions of this function.
@@ -1726,20 +1624,18 @@ namespace nd {
     intptr_t shape[ndim];
     size_t size = detail::fill_shape<T[N]>::fill(shape);
 
-    nd::array result = make_strided_array(
-        ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)),
-        ndim, shape, readwrite_access_flags, NULL);
-    DYND_MEMCPY(result.get_ndo()->m_data_pointer,
-                reinterpret_cast<const void *>(&rhs), size);
+    nd::array result = make_strided_array(ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)), ndim,
+                                          shape, readwrite_access_flags, NULL);
+    DYND_MEMCPY(result.get_ndo()->data.ptr, reinterpret_cast<const void *>(&rhs), size);
     return result;
-}
+  }
 
   template <int N>
   nd::array::array(const ndt::type (&rhs)[N])
       : m_memblock()
   {
     nd::empty(N, ndt::make_type()).swap(*this);
-    ndt::type *out = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
+    ndt::type *out = reinterpret_cast<ndt::type *>(get_ndo()->data.ptr);
     for (int i = 0; i < N; ++i) {
       out[i] = rhs[i];
     }
@@ -1749,8 +1645,7 @@ namespace nd {
   template <int N>
   inline nd::array::array(const char (&rhs)[N])
   {
-    make_string_array(rhs, N, string_encoding_utf_8, nd::default_access_flags)
-        .swap(*this);
+    make_string_array(rhs, N, string_encoding_utf_8, nd::default_access_flags).swap(*this);
   }
 
   template <int N>
@@ -1769,14 +1664,13 @@ namespace nd {
   inline nd::array::array(const T *rhs, intptr_t dim_size)
   {
     nd::empty(dim_size, ndt::type::make<T>()).swap(*this);
-    DYND_MEMCPY(get_ndo()->m_data_pointer, reinterpret_cast<const void *>(&rhs),
-                dim_size * sizeof(T));
+    DYND_MEMCPY(get_ndo()->data.ptr, reinterpret_cast<const void *>(&rhs), dim_size * sizeof(T));
   }
 
   inline nd::array::array(const ndt::type *rhs, intptr_t dim_size)
   {
     nd::empty(dim_size, ndt::make_type()).swap(*this);
-    auto lhs = reinterpret_cast<ndt::type *>(get_ndo()->m_data_pointer);
+    auto lhs = reinterpret_cast<ndt::type *>(get_ndo()->data.ptr);
     for (intptr_t i = 0; i < dim_size; ++i) {
       lhs[i] = rhs[i];
     }
@@ -1786,14 +1680,11 @@ namespace nd {
   namespace detail {
     template <class T>
     struct make_from_vec {
-      inline static typename std::enable_if<is_dynd_scalar<T>::value,
-                                            array>::type
-      make(const std::vector<T> &vec)
+      inline static typename std::enable_if<is_dynd_scalar<T>::value, array>::type make(const std::vector<T> &vec)
       {
         array result = nd::empty(vec.size(), ndt::type::make<T>());
         if (!vec.empty()) {
-          DYND_MEMCPY(result.get_readwrite_originptr(), &vec[0],
-                      vec.size() * sizeof(T));
+          DYND_MEMCPY(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
         }
         return result;
       }
@@ -1821,18 +1712,15 @@ namespace nd {
   namespace detail {
     template <class T>
     struct array_as_helper {
-      inline static typename std::enable_if < is_dynd_scalar<T>::value ||
-          is_dynd_scalar_pointer<T>::value,
+      inline static typename std::enable_if < is_dynd_scalar<T>::value || is_dynd_scalar_pointer<T>::value,
           T > ::type as(const array &lhs, const eval::eval_context *ectx)
       {
         T result;
         if (!lhs.is_scalar()) {
-          throw std::runtime_error(
-              "can only convert arrays with 0 dimensions to scalars");
+          throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
         }
-        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result,
-                          lhs.get_type(), lhs.get_arrmeta(),
-                          lhs.get_ndo()->m_data_pointer, ectx);
+        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get_arrmeta(),
+                          lhs.get_ndo()->data.ptr, ectx);
         return result;
       }
     };
@@ -1845,8 +1733,7 @@ namespace nd {
       }
     };
 
-    DYND_API std::string array_as_string(const array &lhs,
-                                         assign_error_mode errmode);
+    DYND_API std::string array_as_string(const array &lhs, assign_error_mode errmode);
     DYND_API ndt::type array_as_type(const array &lhs);
 
     template <>
@@ -1859,8 +1746,7 @@ namespace nd {
 
     template <>
     struct array_as_helper<ndt::type> {
-      static ndt::type as(const array &lhs,
-                          const eval::eval_context *DYND_UNUSED(ectx))
+      static ndt::type as(const array &lhs, const eval::eval_context *DYND_UNUSED(ectx))
       {
         return array_as_type(lhs);
       }
@@ -1872,8 +1758,7 @@ namespace nd {
   template <class T>
   T array::as(assign_error_mode errmode) const
   {
-    if (errmode == assign_error_default ||
-        errmode == eval::default_eval_context.errmode) {
+    if (errmode == assign_error_default || errmode == eval::default_eval_context.errmode) {
       return detail::array_as_helper<T>::as(*this, &eval::default_eval_context);
     } else {
       eval::eval_context tmp_ectx(eval::default_eval_context);
@@ -1886,8 +1771,7 @@ namespace nd {
    * Given the type/arrmeta/data of an array (or sub-component of an array),
    * evaluates a new copy of it as the canonical type.
    */
-  DYND_API array eval_raw_copy(const ndt::type &dt, const char *arrmeta,
-                               const char *data);
+  DYND_API array eval_raw_copy(const ndt::type &dt, const char *arrmeta, const char *data);
 
   /**
    * Memory-maps a file with dynd type 'bytes'.
@@ -1900,8 +1784,7 @@ namespace nd {
    * \param access  The access permissions with which to open the file.
    */
   DYND_API array memmap(const std::string &filename, intptr_t begin = 0,
-                        intptr_t end = std::numeric_limits<intptr_t>::max(),
-                        uint32_t access = default_access_flags);
+                        intptr_t end = std::numeric_limits<intptr_t>::max(), uint32_t access = default_access_flags);
 
   /**
    * Performs a binary search of the first dimension of the array, which
@@ -1910,34 +1793,26 @@ namespace nd {
    *
    * \returns  The index of the found element, or -1 if not found.
    */
-  DYND_API intptr_t binary_search(const array &n, const char *arrmeta,
-                                  const char *data);
+  DYND_API intptr_t binary_search(const array &n, const char *arrmeta, const char *data);
 
-  DYND_API array groupby(const array &data_values, const array &by,
-                         const ndt::type &groups = ndt::type());
+  DYND_API array groupby(const array &data_values, const array &by, const ndt::type &groups = ndt::type());
 
-  DYND_API bool is_scalar_avail(const ndt::type &tp, const char *arrmeta,
-                                const char *data,
+  DYND_API bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data,
                                 const eval::eval_context *ectx);
 
   /**
    * Returns true if the array is a scalar whose value is available (not NA).
    */
-  inline bool is_scalar_avail(const array &arr, const eval::eval_context *ectx =
-                                                    &eval::default_eval_context)
+  inline bool is_scalar_avail(const array &arr, const eval::eval_context *ectx = &eval::default_eval_context)
   {
-    return is_scalar_avail(arr.get_type(), arr.get_arrmeta(),
-                           arr.get_readonly_originptr(), ectx);
+    return is_scalar_avail(arr.get_type(), arr.get_arrmeta(), arr.get_readonly_originptr(), ectx);
   }
 
-  DYND_API void assign_na(const ndt::type &tp, const char *arrmeta, char *data,
-                          const eval::eval_context *ectx);
+  DYND_API void assign_na(const ndt::type &tp, const char *arrmeta, char *data, const eval::eval_context *ectx);
 
-  inline void assign_na(array &out, const eval::eval_context *ectx =
-                                        &eval::default_eval_context)
+  inline void assign_na(array &out, const eval::eval_context *ectx = &eval::default_eval_context)
   {
-    assign_na(out.get_type(), out.get_arrmeta(), out.get_readwrite_originptr(),
-              ectx);
+    assign_na(out.get_type(), out.get_arrmeta(), out.get_readwrite_originptr(), ectx);
   }
 
   /**
@@ -1947,8 +1822,7 @@ namespace nd {
    * \param  field_count  The number of fields.
    * \param  field_values  The values of the fields.
    */
-  DYND_API array combine_into_tuple(size_t field_count,
-                                    const array *field_values);
+  DYND_API array combine_into_tuple(size_t field_count, const array *field_values);
 
   /**
    * Packs a value into memory allocated to store it via the ``make_type(val)``
@@ -1956,21 +1830,17 @@ namespace nd {
    * data element
    */
   template <typename T>
-  void forward_as_array(const ndt::type &DYND_UNUSED(tp),
-                        char *DYND_UNUSED(arrmeta), char *data, const T &val)
+  void forward_as_array(const ndt::type &DYND_UNUSED(tp), char *DYND_UNUSED(arrmeta), char *data, const T &val)
   {
     *reinterpret_cast<T *>(data) = val;
   }
 
-  DYND_API void forward_as_array(const ndt::type &tp, char *arrmeta,
-                                 char *out_data, const nd::array &val);
+  DYND_API void forward_as_array(const ndt::type &tp, char *arrmeta, char *out_data, const nd::array &val);
 
-  DYND_API void forward_as_array(const ndt::type &tp, char *arrmeta,
-                                 char *out_data, const nd::callable &val);
+  DYND_API void forward_as_array(const ndt::type &tp, char *arrmeta, char *out_data, const nd::callable &val);
 
   template <typename T>
-  void forward_as_array(const ndt::type &tp, char *arrmeta, char *data,
-                        const std::vector<T> &val)
+  void forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const std::vector<T> &val)
   {
     if (tp.get_type_id() == pointer_type_id) {
       forward_as_array(tp, arrmeta, data, array(val));

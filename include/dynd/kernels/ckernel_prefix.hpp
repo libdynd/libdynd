@@ -17,10 +17,10 @@ namespace dynd {
 
 struct ckernel_prefix;
 
-typedef void (*expr_single_t)(ckernel_prefix *self, char *dst,
-                              char *const *src);
-typedef void (*expr_strided_t)(ckernel_prefix *self, char *dst,
-                               intptr_t dst_stride, char *const *src,
+typedef void (*expr_single_t)(ckernel_prefix *self, char *dst, char *const *src);
+typedef void (*expr_metadata_single_t)(ckernel_prefix *self, char *dst_metadata, char **dst, char *const *src_metadata,
+                                       char **const *src);
+typedef void (*expr_strided_t)(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
                                const intptr_t *src_stride, size_t count);
 
 /**
@@ -40,6 +40,8 @@ enum {
 
   /** Kernel function expr_single_t, "(T1, T2, ...) -> R" */
   kernel_request_single = 0x00000008,
+  /** ... */
+  kernel_request_metadata_single = 0x00000020,
   /** Kernel function expr_strided_t, "(T1, T2, ...) -> R" */
   kernel_request_strided = 0x00000010,
 
@@ -48,8 +50,7 @@ enum {
 };
 typedef uint32_t kernel_request_t;
 
-inline kernel_request_t
-kernel_request_without_function(kernel_request_t kernreq)
+inline kernel_request_t kernel_request_without_function(kernel_request_t kernreq)
 {
   return kernreq & 0x00000007;
 }
@@ -114,12 +115,10 @@ struct DYND_API ckernel_prefix {
     (*reinterpret_cast<expr_single_t>(function))(this, dst, src);
   }
 
-  DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride,
-                                     char *const *src,
-                                     const intptr_t *src_stride, size_t count)
+  DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
+                                     size_t count)
   {
-    (*reinterpret_cast<expr_strided_t>(function))(this, dst, dst_stride, src,
-                                                  src_stride, count);
+    (*reinterpret_cast<expr_strided_t>(function))(this, dst, dst_stride, src, src_stride, count);
   }
 
   /**
@@ -128,12 +127,10 @@ struct DYND_API ckernel_prefix {
    */
   DYND_CUDA_HOST_DEVICE ckernel_prefix *get_child(intptr_t offset)
   {
-    return reinterpret_cast<ckernel_prefix *>(
-        reinterpret_cast<char *>(this) + ckernel_prefix::align_offset(offset));
+    return reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) + ckernel_prefix::align_offset(offset));
   }
 
-  static ckernel_prefix *init(ckernel_prefix *self,
-                              kernel_request_t DYND_UNUSED(kernreq), void *func)
+  static ckernel_prefix *init(ckernel_prefix *self, kernel_request_t DYND_UNUSED(kernreq), void *func)
   {
     self->function = func;
     self->destructor = NULL;
@@ -141,51 +138,39 @@ struct DYND_API ckernel_prefix {
   }
 
   template <typename CKBT>
-  static ckernel_prefix *make(CKBT *ckb, kernel_request_t kernreq,
-                              intptr_t &inout_ckb_offset, void *func);
+  static ckernel_prefix *make(CKBT *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset, void *func);
 
-  static intptr_t
-  instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-              char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-              const ndt::type &DYND_UNUSED(dst_tp),
-              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-              const ndt::type *DYND_UNUSED(src_tp),
-              const char *const *DYND_UNUSED(src_arrmeta),
-              kernel_request_t kernreq,
-              const eval::eval_context *DYND_UNUSED(ectx),
-              intptr_t DYND_UNUSED(nkwds), const nd::array *DYND_UNUSED(kwds),
-              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                              void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                              const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                              const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                              kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                              intptr_t DYND_UNUSED(nkwds), const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars));
 };
 
-template <template <kernel_request_t, typename...> class F,
-          kernel_request_t kernreq, typename T, bool flatten = false>
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T, bool flatten = false>
 struct ex_for_each;
 
-template <template <kernel_request_t, typename...> class F,
-          kernel_request_t kernreq, typename T0>
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T0>
 struct ex_for_each<F, kernreq, type_sequence<T0>, false> {
   typedef type_sequence<F<kernreq, T0>> type;
 };
 
-template <template <kernel_request_t, typename...> class F,
-          kernel_request_t kernreq, typename T0, typename... T>
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename T0, typename... T>
 struct ex_for_each<F, kernreq, type_sequence<T0, T...>, false> {
   typedef type_sequence<F<kernreq, T0>, F<kernreq, T>...> type;
 };
 
-template <template <kernel_request_t, typename...> class F,
-          kernel_request_t kernreq, typename... T0>
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename... T0>
 struct ex_for_each<F, kernreq, type_sequence<type_sequence<T0...>>, true> {
   typedef type_sequence<F<kernreq, T0...>> type;
 };
 
-template <template <kernel_request_t, typename...> class F,
-          kernel_request_t kernreq, typename... T0, typename... T>
-struct ex_for_each<F, kernreq, type_sequence<type_sequence<T0...>, T...>,
-                   true> {
+template <template <kernel_request_t, typename...> class F, kernel_request_t kernreq, typename... T0, typename... T>
+struct ex_for_each<F, kernreq, type_sequence<type_sequence<T0...>, T...>, true> {
   typedef typename join<type_sequence<F<kernreq, T0...>>,
-                        typename ex_for_each<F, kernreq, type_sequence<T...>,
-                                             true>::type>::type type;
+                        typename ex_for_each<F, kernreq, type_sequence<T...>, true>::type>::type type;
 };
 
 } // namespace dynd

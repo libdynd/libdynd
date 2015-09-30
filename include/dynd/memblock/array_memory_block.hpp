@@ -19,44 +19,52 @@ namespace dynd {
  * object.
  */
 struct DYND_API array_preamble {
-    memory_block_data m_memblockdata;
-    /**
-     * m_type is overloaded - for builtin scalar types, it
-     * simply contains the type id. If (m_type&~builtin_type_id_mask)
-     * is 0, its a builtin type.
-     */
-    const ndt::base_type *m_type;
-    char *m_data_pointer;
-    uint64_t m_flags;
-    memory_block_data *m_data_reference;
+  memory_block_data m_memblockdata;
 
-    /** Returns true if the type is builtin */
-    inline bool is_builtin_type() const {
-        return (reinterpret_cast<uintptr_t>(m_type)&(~builtin_type_id_mask)) == 0;
-    }
+  /**
+   * m_type is overloaded - for builtin scalar types, it
+   * simply contains the type id. If (m_type&~builtin_type_id_mask)
+   * is 0, its a builtin type.
+   */
+  const ndt::base_type *m_type;
+  uint64_t m_flags;
+  struct {
+    char *ptr;
+    memory_block_data *ref;
+  } data;
 
-    /** Should only be called if is_builtin_type() returns true */
-    inline type_id_t get_builtin_type_id() const {
-        return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(m_type));
-    }
+  /** Returns true if the type is builtin */
+  inline bool is_builtin_type() const
+  {
+    return (reinterpret_cast<uintptr_t>(m_type) & (~builtin_type_id_mask)) == 0;
+  }
 
-    inline type_id_t get_type_id() const {
-        if (is_builtin_type()) {
-            return get_builtin_type_id();
-        } else {
-            return m_type->get_type_id();
-        }
-    }
+  /** Should only be called if is_builtin_type() returns true */
+  inline type_id_t get_builtin_type_id() const
+  {
+    return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(m_type));
+  }
 
-    /** Return a pointer to the arrmeta, immediately after the preamble */
-    inline char *get_arrmeta() {
-        return reinterpret_cast<char *>(this + 1);
+  inline type_id_t get_type_id() const
+  {
+    if (is_builtin_type()) {
+      return get_builtin_type_id();
+    } else {
+      return m_type->get_type_id();
     }
+  }
 
-    /** Return a pointer to the arrmeta, immediately after the preamble */
-    inline const char *get_arrmeta() const {
-        return reinterpret_cast<const char *>(this + 1);
-    }
+  /** Return a pointer to the arrmeta, immediately after the preamble */
+  inline char *get_arrmeta()
+  {
+    return reinterpret_cast<char *>(this + 1);
+  }
+
+  /** Return a pointer to the arrmeta, immediately after the preamble */
+  inline const char *get_arrmeta() const
+  {
+    return reinterpret_cast<const char *>(this + 1);
+  }
 };
 
 /**
@@ -72,10 +80,8 @@ DYND_API memory_block_ptr make_array_memory_block(size_t arrmeta_size);
  *
  * The created object is uninitialized.
  */
-DYND_API memory_block_ptr make_array_memory_block(size_t arrmeta_size,
-                                                  size_t extra_size,
-                                                  size_t extra_alignment,
-                                                  char **out_extra_ptr);
+DYND_API memory_block_ptr
+make_array_memory_block(size_t arrmeta_size, size_t extra_size, size_t extra_alignment, char **out_extra_ptr);
 
 /**
  * Makes a shallow copy of the nd::array memory block. In the copy, only the
@@ -83,9 +89,9 @@ DYND_API memory_block_ptr make_array_memory_block(size_t arrmeta_size,
  * references are swapped to point at the original nd::array memory block, as they
  * are a signal that the data was embedded in the same memory allocation.
  */
-DYND_API memory_block_ptr shallow_copy_array_memory_block(const memory_block_ptr& ndo);
+DYND_API memory_block_ptr shallow_copy_array_memory_block(const memory_block_ptr &ndo);
 
-DYND_API void array_memory_block_debug_print(const memory_block_data *memblock,
-                                    std::ostream &o, const std::string &indent);
+DYND_API void array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
+                                             const std::string &indent);
 
 } // namespace dynd

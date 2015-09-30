@@ -548,12 +548,36 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
   return dst;
 }
 
-nd::array callable_type_data::
-operator()(ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-           const char *const *DYND_UNUSED(src_arrmeta), char **const *DYND_UNUSED(src_data), intptr_t DYND_UNUSED(nkwd),
-           const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                                         const char *const *src_arrmeta, char **const *src_data, intptr_t nkwd,
+                                         const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
-  throw std::runtime_error("view signature unimplemented");
+  // Allocate, then initialize, the data
+  std::unique_ptr<char[]> data(new char[data_size]);
+  if (data_size > 0) {
+    data_init(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  }
+
+  // Resolve the destination type
+  if (dst_tp.is_symbolic()) {
+    if (resolve_dst_type == NULL) {
+      throw std::runtime_error("dst_tp is symbolic, but resolve_dst_type is NULL");
+    }
+
+    resolve_dst_type(static_data, data_size, data.get(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+  }
+
+  // Allocate the destination array
+  nd::array dst = nd::empty(dst_tp);
+
+  // Generate and evaluate the ckernel
+  ckernel_builder<kernel_request_host> ckb;
+  instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.get_arrmeta(), nsrc, src_tp, src_arrmeta,
+              kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
+  expr_metadata_single_t fn = ckb.get()->get_function<expr_metadata_single_t>();
+  fn(ckb.get(), dst.get_arrmeta(), &dst.get_ndo()->data.ptr, const_cast<char *const *>(src_arrmeta), src_data);
+
+  return dst;
 }
 
 void callable_type_data::operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,

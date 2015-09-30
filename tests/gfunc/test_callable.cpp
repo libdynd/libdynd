@@ -19,14 +19,16 @@
 using namespace std;
 using namespace dynd;
 
-static int one_parameter(int x) { return 3 * x; }
+static int one_parameter(int x)
+{
+  return 3 * x;
+}
 
 TEST(GFuncCallable, OneParameter)
 {
   // Create the callable
   gfunc::callable c = gfunc::make_callable(&one_parameter, "x");
-  EXPECT_EQ(ndt::struct_type::make({"x"}, {ndt::type::make<int>()}),
-            c.get_parameters_type());
+  EXPECT_EQ(ndt::struct_type::make({"x"}, {ndt::type::make<int>()}), c.get_parameters_type());
 
   // Call it with the generic interface and see that it gave what we want
   nd::array a, r;
@@ -53,10 +55,8 @@ TEST(GFuncCallable, OneParameter)
 TEST(GFuncCallable, OneParameterWithDefault)
 {
   // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable_with_default(&one_parameter, "x", 12);
-  EXPECT_EQ(ndt::struct_type::make({"x"}, {ndt::type::make<int>()}),
-            c.get_parameters_type());
+  gfunc::callable c = gfunc::make_callable_with_default(&one_parameter, "x", 12);
+  EXPECT_EQ(ndt::struct_type::make({"x"}, {ndt::type::make<int>()}), c.get_parameters_type());
 
   // Call it through the C++ interface with and without a parameter
   EXPECT_EQ(3, c.call(1).as<int>());
@@ -66,14 +66,16 @@ TEST(GFuncCallable, OneParameterWithDefault)
   EXPECT_THROW(c.call(1, 2), runtime_error);
 }
 
-static double two_parameters(double a, long b) { return a * b; }
+static double two_parameters(double a, long b)
+{
+  return a * b;
+}
 
 TEST(GFuncCallable, TwoParameters)
 {
   // Create the callable
   gfunc::callable c = gfunc::make_callable(&two_parameters, "a", "b");
-  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(),
-                                                ndt::type::make<long>()}),
+  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(), ndt::type::make<long>()}),
             c.get_parameters_type());
 
   // Call it and see that it gave what we want
@@ -96,10 +98,8 @@ TEST(GFuncCallable, TwoParameters)
 TEST(GFuncCallable, TwoParametersWithOneDefault)
 {
   // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable_with_default(&two_parameters, "a", "b", 5);
-  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(),
-                                                ndt::type::make<long>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&two_parameters, "a", "b", 5);
+  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(), ndt::type::make<long>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with various numbers of parameters
@@ -114,10 +114,8 @@ TEST(GFuncCallable, TwoParametersWithOneDefault)
 TEST(GFuncCallable, TwoParametersWithTwoDefaults)
 {
   // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable_with_default(&two_parameters, "a", "b", 1.5, 7);
-  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(),
-                                                ndt::type::make<long>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&two_parameters, "a", "b", 1.5, 7);
+  EXPECT_EQ(ndt::struct_type::make({"a", "b"}, {ndt::type::make<double>(), ndt::type::make<long>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with and without a parameter
@@ -141,9 +139,8 @@ TEST(GFuncCallable, ThreeParameters)
 {
   // Create the callable
   gfunc::callable c = gfunc::make_callable(&three_parameters, "s", "a", "b");
-  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"}, {ndt::type::make<bool1>(),
-                                                     ndt::type::make<int>(),
-                                                     ndt::type::make<int>()}),
+  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"},
+                                   {ndt::type::make<bool1>(), ndt::type::make<int>(), ndt::type::make<int>()}),
             c.get_parameters_type());
 
   // Call it and see that it gave what we want
@@ -168,22 +165,16 @@ TEST(GFuncCallable, ThreeParameters)
 TEST(GFuncCallable, ThreeParametersWithOneDefault)
 {
   // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", 12);
-  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"}, {ndt::type::make<bool1>(),
-                                                     ndt::type::make<int>(),
-                                                     ndt::type::make<int>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", 12);
+  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"},
+                                   {ndt::type::make<bool1>(), ndt::type::make<int>(), ndt::type::make<int>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(dynd::complex<float>(3, 4),
-            c.call(true, 3, 4).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 5),
-            c.call(false, 5, 6).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(7, 12),
-            c.call(true, 7).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 5),
-            c.call(false, 5).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(3, 4), c.call(true, 3, 4).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(6, 5), c.call(false, 5, 6).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(7, 12), c.call(true, 7).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(12, 5), c.call(false, 5).as<dynd::complex<float>>());
   // Should throw with the wrong number of arguments
   EXPECT_THROW(c.call(), runtime_error);
   EXPECT_THROW(c.call(false), runtime_error);
@@ -193,26 +184,18 @@ TEST(GFuncCallable, ThreeParametersWithOneDefault)
 TEST(GFuncCallable, ThreeParametersWithTwoDefaults)
 {
   // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s",
-                                                        "a", "b", 6, 12);
-  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"}, {ndt::type::make<bool1>(),
-                                                     ndt::type::make<int>(),
-                                                     ndt::type::make<int>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", 6, 12);
+  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"},
+                                   {ndt::type::make<bool1>(), ndt::type::make<int>(), ndt::type::make<int>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(dynd::complex<float>(3, 4),
-            c.call(true, 3, 4).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 5),
-            c.call(false, 5, 6).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(7, 12),
-            c.call(true, 7).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 5),
-            c.call(false, 5).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 12),
-            c.call(true).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 6),
-            c.call(false).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(3, 4), c.call(true, 3, 4).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(6, 5), c.call(false, 5, 6).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(7, 12), c.call(true, 7).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(12, 5), c.call(false, 5).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(6, 12), c.call(true).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(12, 6), c.call(false).as<dynd::complex<float>>());
   // Should throw with the wrong number of arguments
   EXPECT_THROW(c.call(), runtime_error);
   EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
@@ -221,26 +204,18 @@ TEST(GFuncCallable, ThreeParametersWithTwoDefaults)
 TEST(GFuncCallable, ThreeParametersWithThreeDefaults)
 {
   // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s",
-                                                        "a", "b", false, 6, 12);
-  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"}, {ndt::type::make<bool1>(),
-                                                     ndt::type::make<int>(),
-                                                     ndt::type::make<int>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&three_parameters, "s", "a", "b", false, 6, 12);
+  EXPECT_EQ(ndt::struct_type::make({"s", "a", "b"},
+                                   {ndt::type::make<bool1>(), ndt::type::make<int>(), ndt::type::make<int>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with various numbers of parameters
-  EXPECT_EQ(dynd::complex<float>(3, 4),
-            c.call(true, 3, 4).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 5),
-            c.call(false, 5, 6).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(7, 12),
-            c.call(true, 7).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 5),
-            c.call(false, 5).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(6, 12),
-            c.call(true).as<dynd::complex<float>>());
-  EXPECT_EQ(dynd::complex<float>(12, 6),
-            c.call(false).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(3, 4), c.call(true, 3, 4).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(6, 5), c.call(false, 5, 6).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(7, 12), c.call(true, 7).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(12, 5), c.call(false, 5).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(6, 12), c.call(true).as<dynd::complex<float>>());
+  EXPECT_EQ(dynd::complex<float>(12, 6), c.call(false).as<dynd::complex<float>>());
   EXPECT_EQ(dynd::complex<float>(12, 6), c.call().as<dynd::complex<float>>());
   // Should throw with the wrong number of arguments
   EXPECT_THROW(c.call(false, 1.5, 2, 12), runtime_error);
@@ -254,12 +229,9 @@ static uint8_t four_parameters(int8_t x, int16_t y, double alpha, uint32_t z)
 TEST(GFuncCallable, FourParameters)
 {
   // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable(&four_parameters, "x", "y", "alpha", "z");
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
+  gfunc::callable c = gfunc::make_callable(&four_parameters, "x", "y", "alpha", "z");
+  EXPECT_EQ(ndt::struct_type::make({"x", "y", "alpha", "z"}, {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
+                                                              ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
             c.get_parameters_type());
 
   // Call it and see that it gave what we want
@@ -286,12 +258,9 @@ TEST(GFuncCallable, FourParameters)
 TEST(GFuncCallable, FourParametersWithOneDefault)
 {
   // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(
-      &four_parameters, "x", "y", "alpha", "z", 240u);
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&four_parameters, "x", "y", "alpha", "z", 240u);
+  EXPECT_EQ(ndt::struct_type::make({"x", "y", "alpha", "z"}, {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
+                                                              ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with various numbers of parameters
@@ -308,12 +277,9 @@ TEST(GFuncCallable, FourParametersWithOneDefault)
 TEST(GFuncCallable, FourParametersWithTwoDefaults)
 {
   // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(
-      &four_parameters, "x", "y", "alpha", "z", 0.75, 240u);
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&four_parameters, "x", "y", "alpha", "z", 0.75, 240u);
+  EXPECT_EQ(ndt::struct_type::make({"x", "y", "alpha", "z"}, {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
+                                                              ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with various numbers of parameters
@@ -330,12 +296,9 @@ TEST(GFuncCallable, FourParametersWithTwoDefaults)
 TEST(GFuncCallable, FourParametersWithThreeDefaults)
 {
   // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(
-      &four_parameters, "x", "y", "alpha", "z", 8, 0.75, 240u);
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&four_parameters, "x", "y", "alpha", "z", 8, 0.75, 240u);
+  EXPECT_EQ(ndt::struct_type::make({"x", "y", "alpha", "z"}, {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
+                                                              ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with various numbers of parameters
@@ -352,12 +315,9 @@ TEST(GFuncCallable, FourParametersWithThreeDefaults)
 TEST(GFuncCallable, FourParametersWithFourDefaults)
 {
   // Create the callable
-  gfunc::callable c = gfunc::make_callable_with_default(
-      &four_parameters, "x", "y", "alpha", "z", -8, 8, 0.75, 240u);
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y", "alpha", "z"},
-                {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
-                 ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
+  gfunc::callable c = gfunc::make_callable_with_default(&four_parameters, "x", "y", "alpha", "z", -8, 8, 0.75, 240u);
+  EXPECT_EQ(ndt::struct_type::make({"x", "y", "alpha", "z"}, {ndt::type::make<int8_t>(), ndt::type::make<int16_t>(),
+                                                              ndt::type::make<double>(), ndt::type::make<uint32_t>()}),
             c.get_parameters_type());
 
   // Call it through the C++ interface with various numbers of parameters
@@ -371,8 +331,7 @@ TEST(GFuncCallable, FourParametersWithFourDefaults)
   EXPECT_THROW(c.call(2, 5, 0.1, 3, 9), runtime_error);
 }
 
-static double five_parameters(float (&x)[3], uint16_t a1, uint32_t a2,
-                              uint64_t a3, double (&y)[3])
+static double five_parameters(float (&x)[3], uint16_t a1, uint32_t a2, uint64_t a3, double (&y)[3])
 {
   return x[0] * a1 * y[0] + x[1] * a2 * y[1] + x[2] * a3 * y[2];
 }
@@ -380,14 +339,11 @@ static double five_parameters(float (&x)[3], uint16_t a1, uint32_t a2,
 TEST(GFuncCallable, FiveParameters)
 {
   // Create the callable
-  gfunc::callable c =
-      gfunc::make_callable(&five_parameters, "x", "a1", "a2", "a3", "y");
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "a1", "a2", "a3", "y"},
-                {ndt::make_fixed_dim(3, ndt::type::make<float>()),
-                 ndt::type::make<uint16_t>(), ndt::type::make<uint32_t>(),
-                 ndt::type::make<uint64_t>(),
-                 ndt::make_fixed_dim(3, ndt::type::make<double>())}),
+  gfunc::callable c = gfunc::make_callable(&five_parameters, "x", "a1", "a2", "a3", "y");
+  EXPECT_EQ(ndt::struct_type::make({"x", "a1", "a2", "a3", "y"},
+                                   {ndt::make_fixed_dim(3, ndt::type::make<float>()), ndt::type::make<uint16_t>(),
+                                    ndt::type::make<uint32_t>(),                      ndt::type::make<uint64_t>(),
+                                    ndt::make_fixed_dim(3, ndt::type::make<double>())}),
             c.get_parameters_type());
 
   // Call it and see that it gave what we want
@@ -450,7 +406,7 @@ TEST(GFuncCallable, ArrayParam)
   a = nd::empty(c.get_parameters_type());
 
   tmp = nd::empty<int[2][3][1]>();
-  *(void **)a.get_ndo()->m_data_pointer = tmp.get_ndo();
+  *(void **)a.get_ndo()->data.ptr = tmp.get_ndo();
   r = c.call_generic(a);
   EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
   EXPECT_EQ(3, r.as<int>());
@@ -472,17 +428,15 @@ TEST(GFuncCallable, DTypeParam)
   a = nd::empty(c.get_parameters_type());
 
   // With a base_type
-  tmp = ndt::struct_type::make(
-      {"A", "B"},
-      {ndt::type::make<dynd::complex<float>>(), ndt::type::make<int8_t>()});
-  *(const void **)a.get_ndo()->m_data_pointer = tmp.extended();
+  tmp = ndt::struct_type::make({"A", "B"}, {ndt::type::make<dynd::complex<float>>(), ndt::type::make<int8_t>()});
+  *(const void **)a.get_ndo()->data.ptr = tmp.extended();
   r = c.call_generic(a);
   EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
   EXPECT_EQ(12u, r.as<size_t>());
 
   // With a builtin type
   tmp = ndt::type::make<uint64_t>();
-  *(void **)a.get_ndo()->m_data_pointer = (void *)tmp.get_type_id();
+  *(void **)a.get_ndo()->data.ptr = (void *)tmp.get_type_id();
   r = c.call_generic(a);
   EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
   EXPECT_EQ(8u, r.as<size_t>());

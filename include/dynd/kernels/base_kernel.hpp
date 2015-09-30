@@ -145,6 +145,7 @@ namespace nd {
 #define BASE_KERNEL(KERNREQ, ...)                                                                                      \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix, SelfType> {                                     \
+    static const bool has_metadata_single = false;                                                                     \
     typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;                                               \
                                                                                                                        \
     /** Initializes just the ckernel_prefix function member. */                                                        \
@@ -155,6 +156,9 @@ namespace nd {
       switch (kernreq) {                                                                                               \
       case kernel_request_single:                                                                                      \
         self->function = reinterpret_cast<void *>(&SelfType::single_wrapper::func);                                    \
+        break;                                                                                                         \
+      case kernel_request_metadata_single:                                                                             \
+        self->function = reinterpret_cast<void *>(&SelfType::metadata_single_wrapper::func);                           \
         break;                                                                                                         \
       case kernel_request_strided:                                                                                     \
         self->function = reinterpret_cast<void *>(&SelfType::strided_wrapper);                                         \
@@ -167,6 +171,11 @@ namespace nd {
       return self;                                                                                                     \
     }                                                                                                                  \
                                                                                                                        \
+    void metadata_single(char *DYND_UNUSED(dst_metadata), char **DYND_UNUSED(dst),                                     \
+                         char *const *DYND_UNUSED(src_metadata), char **const *DYND_UNUSED(src))                       \
+    {                                                                                                                  \
+    }                                                                                                                  \
+                                                                                                                       \
     struct single_wrapper {                                                                                            \
       __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self, char *dst, char *const *src)                  \
       {                                                                                                                \
@@ -174,6 +183,14 @@ namespace nd {
       }                                                                                                                \
                                                                                                                        \
       static const volatile char *DYND_USED(ir);                                                                       \
+    };                                                                                                                 \
+                                                                                                                       \
+    struct metadata_single_wrapper {                                                                                   \
+      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self, char *dst_metadata, char **dst,               \
+                                                   char *const *src_metadata, char **const *src)                       \
+      {                                                                                                                \
+        return SelfType::get_self(self)->metadata_single(dst_metadata, dst, src_metadata, src);                        \
+      }                                                                                                                \
     };                                                                                                                 \
                                                                                                                        \
     __VA_ARGS__ static void strided_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,    \
