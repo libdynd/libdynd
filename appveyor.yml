@@ -12,7 +12,7 @@ clone_depth: 1
 skip_tags: true
 
 # Operating system (build VM template)
-os: Windows Server 2012
+os: Visual Studio 2015
 
 matrix:
   fast_finish: true     # immediately finish build once one of the jobs fails.
@@ -26,8 +26,8 @@ configuration: Release
 build_script:
   - mkdir build
   - cd build
-  - if "%platform%"=="Win32" cmake -DDYND_SHARED_LIB=OFF .. -G "Visual Studio 12"
-  - if "%platform%"=="x64" cmake .. -G "Visual Studio 12 Win64"
+  - if "%platform%"=="Win32" cmake -DDYND_SHARED_LIB=OFF .. -G "Visual Studio 14 2015"
+  - if "%platform%"=="x64" cmake .. -G "Visual Studio 14 2015 Win64"
   - cmake --build . --config Release
 
 test_script:
