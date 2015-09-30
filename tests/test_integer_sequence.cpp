@@ -253,5 +253,7 @@ TYPED_TEST_P(IntegerSequence, Outer)
                     integer_sequence<TypeParam, 1, 3, 5, 7, 9>>>::value));
 }
 
+#ifndef _MSC_VER
 REGISTER_TYPED_TEST_CASE_P(IntegerSequence, ForEach, Outer);
 INSTANTIATE_TYPED_TEST_CASE_P(SizeType, IntegerSequence, size_t);
+#endif

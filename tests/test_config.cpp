@@ -16,7 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-struct empty_of_value {
+struct empty {
 };
 
 template <typename T>
@@ -45,7 +45,7 @@ TEST(Config, Has)
 {
   EXPECT_TRUE(has_value<value_wrapper<int>>::value);
   EXPECT_TRUE(has_value<value_wrapper<const char *>>::value);
-  EXPECT_FALSE(has_value<empty_of_value>::value);
+  EXPECT_FALSE(has_value<::empty>::value);
   EXPECT_FALSE(has_value<member_value_wrapper<int>>::value);
 
   EXPECT_TRUE((has_value<value_wrapper<int>, int>::value));
@@ -54,7 +54,7 @@ TEST(Config, Has)
   EXPECT_FALSE((has_value<value_wrapper<int>, const int &>::value));
   EXPECT_FALSE((has_value<value_wrapper<int>, bool>::value));
   EXPECT_FALSE((has_value<value_wrapper<bool>, int>::value));
-  EXPECT_FALSE((has_value<empty_of_value, int>::value));
+  EXPECT_FALSE((has_value<::empty, int>::value));
   EXPECT_FALSE((has_value<member_value_wrapper<int>, int>::value));
 
   EXPECT_TRUE((has_value<value_wrapper<char *>, char *>::value));
@@ -63,16 +63,12 @@ TEST(Config, Has)
   EXPECT_FALSE((has_value<value_wrapper<char *>, const char *&>::value));
   EXPECT_FALSE((has_value<value_wrapper<char *>, bool>::value));
   EXPECT_FALSE((has_value<value_wrapper<bool>, char *>::value));
-  EXPECT_FALSE((has_value<empty_of_value, char *>::value));
+  EXPECT_FALSE((has_value<::empty, char *>::value));
   EXPECT_FALSE((has_value<member_value_wrapper<char *>, char *>::value));
 
-  // This func stuff fails on Windows -- why?
-
-/*
   EXPECT_TRUE((has_func<func_wrapper, int()>::value));
   EXPECT_FALSE((has_func<func_wrapper, void()>::value));
   EXPECT_FALSE((has_func<func_wrapper, int>::value));
-  EXPECT_FALSE((has_func<empty, int()>::value));
+  EXPECT_FALSE((has_func<::empty, int()>::value));
   EXPECT_FALSE((has_func<member_func_wrapper, int()>::value));
-*/
 }
