@@ -76,8 +76,8 @@ The build system of this library is based on CMake. See
 the [build instructions](BUILD.md) for details about how
 to build the library.
 
-DyND requires a C++11 compiler, the minimum versions supported are gcc 4.7,
-MSVC 2013 Update 4, and Clang 3.4. The last release to support C++98 was DyND 0.6.6.
+DyND requires a C++11 compiler, the minimum versions supported are gcc 4.8,
+MSVC 2015, and Clang 3.4. The last release to support C++98 was DyND 0.6.6.
 An example improvement C++11 brings is a roughly factor of two compile time
 improvement and increased generality by using variadic templates instead of
 preprocessor metaprogramming. Many excellent projects such as [LLVM](http://llvm.org/)
