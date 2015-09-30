@@ -754,44 +754,44 @@ namespace nd {
     /**
     * operator()(kwds<...>(...))
     */
-    template <template <typename...> class ArgsType, typename... K>
+    template <template <typename...> class ArgsType, typename AT0, typename... K>
     array _call(detail::kwds<K...> &&k)
     {
       std::map<std::string, ndt::type> tp_vars;
-      return call(ArgsType<>(tp_vars, get_type()), std::forward<detail::kwds<K...>>(k), tp_vars);
+      return call(ArgsType<AT0>(tp_vars, get_type()), std::forward<detail::kwds<K...>>(k), tp_vars);
     }
 
     /**
      * operator()(a0, a1, ..., an, kwds<...>(...))
      */
-    template <template <typename...> class ArgsType, typename... T>
+    template <template <typename...> class ArgsType, typename AT0, typename... T>
     typename std::enable_if<sizeof...(T) != 3, array>::type _call(T &&... a)
     {
       std::map<std::string, ndt::type> tp_vars;
 
-      typedef typename instantiate<ArgsType, typename to<type_sequence<T...>, sizeof...(T) - 1>::type>::type args_type;
+      typedef typename instantiate<ArgsType, typename to<type_sequence<AT0, T...>, sizeof...(T)>::type>::type args_type;
       typedef make_index_sequence<sizeof...(T) + 1> I;
       return call(index_proxy<I>::template make<args_type>(tp_vars, get_type(), std::forward<T>(a)...),
                   dynd::get<sizeof...(T) - 1>(std::forward<T>(a)...), tp_vars);
     }
 
-    template <template <typename...> class ArgsType, typename A0, typename A1, typename... K>
+    template <template <typename...> class ArgsType, typename AT0, typename A0, typename A1, typename... K>
     typename std::enable_if<!std::is_convertible<A0 &&, size_t>::value || !std::is_convertible<A1 &&, array *>::value,
                             array>::type
     _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       std::map<std::string, ndt::type> tp_vars;
-      return call(ArgsType<array, array>(tp_vars, get_type(), array(std::forward<A0>(a0)), array(std::forward<A1>(a1))),
+      return call(ArgsType<AT0, array, array>(tp_vars, get_type(), array(std::forward<A0>(a0)), array(std::forward<A1>(a1))),
                   kwds, tp_vars);
     }
 
-    template <template <typename...> class ArgsType, typename A0, typename A1, typename... K>
-    typename std::enable_if<std::is_convertible<A0 &&, size_t>::value &&std::is_convertible<A1 &&, array *>::value,
+    template <template <typename...> class ArgsType, typename AT0, typename A0, typename A1, typename... K>
+    typename std::enable_if<std::is_convertible<A0 &&, size_t>::value && std::is_convertible<A1 &&, array *>::value,
                             array>::type
     _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       std::map<std::string, ndt::type> tp_vars;
-      return call(ArgsType<size_t, array *>(tp_vars, get_type(), std::forward<A0>(a0), std::forward<A1>(a1)), kwds,
+      return call(ArgsType<AT0, size_t, array *>(tp_vars, get_type(), std::forward<A0>(a0), std::forward<A1>(a1)), kwds,
                   tp_vars);
     }
 
@@ -799,10 +799,10 @@ namespace nd {
     typename std::enable_if<has_kwds<A...>::value, array>::type operator()(A &&... a)
     {
       if (get()->kernreq == kernel_request_single) {
-        return _call<bind<args, char *>::type>(std::forward<A>(a)...);
+        return _call<args, char *>(std::forward<A>(a)...);
       }
 
-      return _call<bind<args, char **>::type>(std::forward<A>(a)...);
+      return _call<args, char **>(std::forward<A>(a)...);
     }
 
     template <typename... A>

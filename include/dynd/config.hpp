@@ -204,12 +204,6 @@ const ValueType &get_second_if_pair(const std::pair<KeyType, ValueType> &pair)
   return pair.second;
 }
 
-template <template <typename...> class T, typename... U>
-struct bind {
-  template <typename... V>
-  using type = T<U..., V...>;
-};
-
 template <template <typename...> class T, typename U>
 struct is_instance {
   static const bool value = false;
