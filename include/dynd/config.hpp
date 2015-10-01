@@ -466,8 +466,6 @@ extern DYND_API const char dynd_version_string[];
 #endif
 #endif
 
-// This doesn't work if there are multiple methods enabled via a template
-// parameter, need to fix that
 #define DYND_HAS(NAME)                                                                                                 \
   template <typename...>                                                                                               \
   class has_##NAME;                                                                                                    \
@@ -490,6 +488,35 @@ extern DYND_API const char dynd_version_string[];
     template <typename U,                                                                                              \
               typename = typename std::enable_if<!std::is_member_pointer<decltype(&U::NAME)>::value &&                 \
                                                  std::is_same<decltype(U::NAME), StaticMemberType>::value>::type>      \
+    static std::true_type test(int);                                                                                   \
+                                                                                                                       \
+    template <typename>                                                                                                \
+    static std::false_type test(...);                                                                                  \
+                                                                                                                       \
+  public:                                                                                                              \
+    static const bool value = decltype(test<T>(0))::value;                                                             \
+  }
+
+#define DYND_HAS_MEMBER(NAME)                                                                                          \
+  template <typename...>                                                                                               \
+  class has_member_##NAME;                                                                                             \
+                                                                                                                       \
+  template <typename T>                                                                                                \
+  class has_member_##NAME<T> {                                                                                         \
+    template <typename U, typename = typename std::enable_if<std::is_member_pointer<decltype(&U::NAME)>::value>::type> \
+    static std::true_type test(int);                                                                                   \
+                                                                                                                       \
+    template <typename>                                                                                                \
+    static std::false_type test(...);                                                                                  \
+                                                                                                                       \
+  public:                                                                                                              \
+    static const bool value = decltype(test<T>(0))::value;                                                             \
+  };                                                                                                                   \
+                                                                                                                       \
+  template <typename T, typename MemberType>                                                                           \
+  class has_member_##NAME<T, MemberType> {                                                                             \
+    template <typename U, typename = typename std::enable_if<std::is_member_pointer<                                   \
+                              decltype(&U::NAME)>::value &&std::is_same<decltype(U::NAME), MemberType>::value>::type>  \
     static std::true_type test(int);                                                                                   \
                                                                                                                        \
     template <typename>                                                                                                \
@@ -638,17 +665,20 @@ T floor(T value)
 namespace detail {
   // Use these declarations before includeing bool1, int128, uint128, etc. so they are usable there.
   // Helper to use for determining if a type is in a given list of unique types.
-  template<typename T, typename... Types>
-  struct TypeSetCheckInternal : std::is_same<T, Types>... {};
+  template <typename T, typename... Types>
+  struct TypeSetCheckInternal : std::is_same<T, Types>... {
+  };
 
   // Determine if a type is in a given list of unique types.
-  template<typename T, typename... Types>
-  struct TypeSetCheck : std::is_base_of<std::true_type, TypeSetCheckInternal<T, Types...>>::type {};
+  template <typename T, typename... Types>
+  struct TypeSetCheck : std::is_base_of<std::true_type, TypeSetCheckInternal<T, Types...>>::type {
+  };
 
   // Enable a given template only for a given list of unique types.
-  template<typename T, typename... Types>
-  struct enable_for : std::enable_if<TypeSetCheck<T, Types...>::value, int> {};
-} //namespace dynd::detail
+  template <typename T, typename... Types>
+  struct enable_for : std::enable_if<TypeSetCheck<T, Types...>::value, int> {
+  };
+} // namespace dynd::detail
 
 } // namespace dynd
 
