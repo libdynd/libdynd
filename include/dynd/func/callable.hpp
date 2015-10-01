@@ -12,6 +12,7 @@
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/type_type.hpp>
@@ -464,13 +465,15 @@ namespace nd {
     DYND_GET(static_data_free, callable_static_data_free_t, NULL);
 
     template <typename KernelType>
-    kernel_request_t get_kernreq()
+    typename std::enable_if<!has_member_metadata_single<KernelType>::value, kernel_request_t>::type get_kernreq()
     {
-      if (KernelType::has_metadata_single) {
-        return kernel_request_metadata_single;
-      }
-
       return kernel_request_single;
+    }
+
+    template <typename KernelType>
+    typename std::enable_if<has_member_metadata_single<KernelType>::value, kernel_request_t>::type get_kernreq()
+    {
+      return kernel_request_metadata_single;
     }
 
     template <typename KernelType>
@@ -781,12 +784,13 @@ namespace nd {
     _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       std::map<std::string, ndt::type> tp_vars;
-      return call(ArgsType<AT0, array, array>(tp_vars, get_type(), array(std::forward<A0>(a0)), array(std::forward<A1>(a1))),
-                  kwds, tp_vars);
+      return call(
+          ArgsType<AT0, array, array>(tp_vars, get_type(), array(std::forward<A0>(a0)), array(std::forward<A1>(a1))),
+          kwds, tp_vars);
     }
 
     template <template <typename...> class ArgsType, typename AT0, typename A0, typename A1, typename... K>
-    typename std::enable_if<std::is_convertible<A0 &&, size_t>::value && std::is_convertible<A1 &&, array *>::value,
+    typename std::enable_if<std::is_convertible<A0 &&, size_t>::value &&std::is_convertible<A1 &&, array *>::value,
                             array>::type
     _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {

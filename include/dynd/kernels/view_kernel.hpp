@@ -28,7 +28,6 @@ namespace nd {
   }
 
   struct view_kernel : base_kernel<view_kernel> {
-    static const bool has_metadata_single = true;
     static const size_t data_size = 0;
 
     size_t metadata_size;
@@ -39,7 +38,8 @@ namespace nd {
 
     void metadata_single(char *dst_metadata, char **dst, char *const *src_metadata, char **const *src)
     {
-      std::memcpy(dst_metadata, src_metadata[0], metadata_size); // need to use the type virtual function instead of this
+      std::memcpy(dst_metadata, src_metadata[0],
+                  metadata_size); // need to use the type virtual function instead of this
       *dst = *src[0];
 
       refcpy(dst_metadata, src_metadata[0]);

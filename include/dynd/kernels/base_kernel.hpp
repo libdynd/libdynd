@@ -10,6 +10,25 @@
 
 namespace dynd {
 namespace nd {
+  namespace detail {
+
+    DYND_HAS_MEMBER(single);
+    DYND_HAS_MEMBER(metadata_single);
+
+    template <typename KernelType>
+    typename std::enable_if<has_member_metadata_single<KernelType>::value, expr_metadata_single_t>::type
+    get_metadata_single()
+    {
+      return KernelType::metadata_single_wrapper::func;
+    }
+
+    template <typename KernelType>
+    typename std::enable_if<!has_member_metadata_single<KernelType>::value, expr_metadata_single_t>::type
+    get_metadata_single()
+    {
+      return NULL;
+    }
+  }
 
   template <typename PrefixType, typename SelfType>
   struct kernel_prefix_wrapper : PrefixType {
@@ -145,7 +164,6 @@ namespace nd {
 #define BASE_KERNEL(KERNREQ, ...)                                                                                      \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix, SelfType> {                                     \
-    static const bool has_metadata_single = false;                                                                     \
     typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;                                               \
                                                                                                                        \
     /** Initializes just the ckernel_prefix function member. */                                                        \
@@ -158,7 +176,7 @@ namespace nd {
         self->function = reinterpret_cast<void *>(&SelfType::single_wrapper::func);                                    \
         break;                                                                                                         \
       case kernel_request_metadata_single:                                                                             \
-        self->function = reinterpret_cast<void *>(&SelfType::metadata_single_wrapper::func);                           \
+        self->function = reinterpret_cast<void *>(detail::get_metadata_single<SelfType>());                            \
         break;                                                                                                         \
       case kernel_request_strided:                                                                                     \
         self->function = reinterpret_cast<void *>(&SelfType::strided_wrapper);                                         \
@@ -169,11 +187,6 @@ namespace nd {
       }                                                                                                                \
                                                                                                                        \
       return self;                                                                                                     \
-    }                                                                                                                  \
-                                                                                                                       \
-    void metadata_single(char *DYND_UNUSED(dst_metadata), char **DYND_UNUSED(dst),                                     \
-                         char *const *DYND_UNUSED(src_metadata), char **const *DYND_UNUSED(src))                       \
-    {                                                                                                                  \
     }                                                                                                                  \
                                                                                                                        \
     struct single_wrapper {                                                                                            \
