@@ -395,7 +395,7 @@ struct static_options {
   ndt::option_type bt17;
   ndt::option_type bt18;
 
-  ndt::type static_builtins_instance[primitive_type_id_count];
+  ndt::type static_builtins_instance[builtin_type_id_count];
 
   static_options()
       : bt1(ndt::type((type_id_t)1)), bt2(ndt::type((type_id_t)2)),

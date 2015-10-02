@@ -442,7 +442,7 @@ struct static_pointer {
   ndt::pointer_type bt17;
   ndt::void_pointer_type bt18;
 
-  ndt::type static_builtins_instance[primitive_type_id_count];
+  ndt::type static_builtins_instance[builtin_type_id_count];
 
   static_pointer()
       : bt1(ndt::type((type_id_t)1)), bt2(ndt::type((type_id_t)2)), bt3(ndt::type((type_id_t)3)),

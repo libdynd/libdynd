@@ -116,8 +116,8 @@ namespace ndt {
      */
     static const base_type *validate_builtin_type_id(type_id_t type_id)
     {
-      // 0 <= type_id < primitive_type_id_count
-      if ((unsigned int)type_id < primitive_type_id_count) {
+      // 0 <= type_id < builtin_type_id_count
+      if ((unsigned int)type_id < builtin_type_id_count) {
         return reinterpret_cast<const base_type *>(type_id);
       }
 
@@ -1233,7 +1233,7 @@ namespace ndt {
    * static_builtin_types[type_id_of<int>::value] as a fast
    * way to get a const reference to its type.
    */
-  extern DYND_API const type static_builtin_types[primitive_type_id_count];
+  extern DYND_API const type static_builtin_types[builtin_type_id_count];
 
   DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 

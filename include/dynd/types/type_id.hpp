@@ -188,7 +188,7 @@ enum type_id_t {
   dim_fragment_type_id,
 
   // The number of built-in, atomic types (including uninitialized and void)
-  primitive_type_id_count = 19,
+  builtin_type_id_count = 19,
 
   // The number of types
   static_type_id_max = dim_fragment_type_id
@@ -295,7 +295,7 @@ namespace ndt {
 
 inline bool is_builtin_type(const ndt::base_type *dt)
 {
-  return reinterpret_cast<uintptr_t>(dt) < primitive_type_id_count;
+  return reinterpret_cast<uintptr_t>(dt) < builtin_type_id_count;
 }
 
 namespace detail {
