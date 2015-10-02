@@ -944,22 +944,6 @@ namespace nd {
       m_arr.val_assign(ndt::type::make<T>(), NULL, (const char *)&rhs);
       return *this;
     }
-    /**
-     * Does a value-assignment from the rhs C++ boolean scalar.
-     *
-     * By default, many things are convertible to bool, and this will cause
-     * screwed up assignments if we accept any such thing. Thus, we use
-     * enable_if to only allow bools here instead of just accepting "const
-     *bool&"
-     * as would seem obvious.
-     */
-    template <class T>
-    typename std::enable_if<is_type_bool<T>::value, array_vals &>::type operator=(const T &rhs)
-    {
-      bool1 v(rhs);
-      m_arr.val_assign(ndt::type::make<bool1>(), NULL, (const char *)&v);
-      return *this;
-    }
 
     // TODO: Could also do +=, -=, *=, etc.
 
@@ -1002,22 +986,6 @@ namespace nd {
     typename std::enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type operator=(const T &rhs)
     {
       m_arr.val_assign(ndt::type::make<T>(), NULL, (const char *)&rhs);
-      return *this;
-    }
-    /**
-     * Does a value-assignment from the rhs C++ boolean scalar.
-     *
-     * By default, many things are convertible to bool, and this will cause
-     * screwed up assignments if we accept any such thing. Thus, we use
-     * enable_if to only allow bools here instead of just accepting "const
-     *bool&"
-     * as would seem obvious.
-     */
-    template <class T>
-    typename std::enable_if<is_type_bool<T>::value, array_vals_at &>::type operator=(const T &rhs)
-    {
-      bool1 v(rhs);
-      m_arr.val_assign(ndt::type::make<bool1>(), NULL, (const char *)&v);
       return *this;
     }
 
