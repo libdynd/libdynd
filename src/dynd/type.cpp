@@ -41,47 +41,51 @@
 using namespace std;
 using namespace dynd;
 
-char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata,
-                                                  intptr_t DYND_UNUSED(level))
+namespace dynd {
+namespace ndt {
+  namespace registry {
+
+    static struct {
+      string name;
+      type_make_t func;
+    } data[DYND_TYPE_ID_MAX + 1];
+    static size_t size = dim_fragment_type_id + 1;
+
+  } // namespace dynd::ndt::registry
+} // namespace dynd::ndt
+} // namespace dynd
+
+char *dynd::iterdata_broadcasting_terminator_incr(iterdata_common *iterdata, intptr_t DYND_UNUSED(level))
 {
   // This repeats the same data over and over again, broadcasting additional
   // leftmost dimensions
-  iterdata_broadcasting_terminator *id =
-      reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
+  iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
   return id->data;
 }
 
-char *dynd::iterdata_broadcasting_terminator_adv(iterdata_common *iterdata,
-                                                 intptr_t DYND_UNUSED(level),
+char *dynd::iterdata_broadcasting_terminator_adv(iterdata_common *iterdata, intptr_t DYND_UNUSED(level),
                                                  intptr_t DYND_UNUSED(i))
 {
   // This repeats the same data over and over again, broadcasting additional
   // leftmost dimensions
-  iterdata_broadcasting_terminator *id =
-      reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
+  iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
   return id->data;
 }
 
-char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata,
-                                                   char *data,
-                                                   intptr_t DYND_UNUSED(level))
+char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, char *data, intptr_t DYND_UNUSED(level))
 {
-  iterdata_broadcasting_terminator *id =
-      reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
+  iterdata_broadcasting_terminator *id = reinterpret_cast<iterdata_broadcasting_terminator *>(iterdata);
   id->data = data;
   return data;
 }
 
 const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {
-    ndt::type(uninitialized_type_id),   ndt::type(bool_type_id),
-    ndt::type(int8_type_id),            ndt::type(int16_type_id),
-    ndt::type(int32_type_id),           ndt::type(int64_type_id),
-    ndt::type(int128_type_id),          ndt::type(uint8_type_id),
-    ndt::type(uint16_type_id),          ndt::type(uint32_type_id),
-    ndt::type(uint64_type_id),          ndt::type(uint128_type_id),
-    ndt::type(float16_type_id),         ndt::type(float32_type_id),
-    ndt::type(float64_type_id),         ndt::type(float128_type_id),
-    ndt::type(complex_float32_type_id), ndt::type(complex_float64_type_id),
+    ndt::type(uninitialized_type_id), ndt::type(bool_type_id),            ndt::type(int8_type_id),
+    ndt::type(int16_type_id),         ndt::type(int32_type_id),           ndt::type(int64_type_id),
+    ndt::type(int128_type_id),        ndt::type(uint8_type_id),           ndt::type(uint16_type_id),
+    ndt::type(uint32_type_id),        ndt::type(uint64_type_id),          ndt::type(uint128_type_id),
+    ndt::type(float16_type_id),       ndt::type(float32_type_id),         ndt::type(float64_type_id),
+    ndt::type(float128_type_id),      ndt::type(complex_float32_type_id), ndt::type(complex_float64_type_id),
     ndt::type(void_type_id)};
 
 ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
@@ -161,8 +165,7 @@ ndt::type ndt::type::at_array(int nindices, const irange *indices) const
   }
 }
 
-bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
-                      const char *candidate_arrmeta,
+bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta,
                       std::map<std::string, ndt::type> &tp_vars) const
 {
   // A type being matched against itself works for both type id and more
@@ -179,15 +182,13 @@ bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
   return extended()->match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
 }
 
-bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp,
-                      const char *candidate_arrmeta) const
+bool ndt::type::match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta) const
 {
   std::map<std::string, ndt::type> tp_vars;
   return match(arrmeta, candidate_tp, candidate_arrmeta, tp_vars);
 }
 
-bool ndt::type::match(const ndt::type &candidate_tp,
-                      std::map<std::string, ndt::type> &tp_vars) const
+bool ndt::type::match(const ndt::type &candidate_tp, std::map<std::string, ndt::type> &tp_vars) const
 {
   return match(NULL, candidate_tp, NULL, tp_vars);
 }
@@ -209,8 +210,7 @@ nd::array ndt::type::p(const char *property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return const_cast<nd::callable &>(properties[i].second)(
-              kwds("self", *this));
+          return const_cast<nd::callable &>(properties[i].second)(kwds("self", *this));
         }
       }
     }
@@ -232,8 +232,7 @@ nd::array ndt::type::p(const std::string &property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return const_cast<nd::callable &>(properties[i].second)(
-              kwds("self", *this));
+          return const_cast<nd::callable &>(properties[i].second)(kwds("self", *this));
         }
       }
     }
@@ -244,10 +243,8 @@ nd::array ndt::type::p(const std::string &property_name) const
   throw runtime_error(ss.str());
 }
 
-ndt::type ndt::type::apply_linear_index(intptr_t nindices,
-                                        const irange *indices, size_t current_i,
-                                        const ndt::type &root_tp,
-                                        bool leading_dimension) const
+ndt::type ndt::type::apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,
+                                        const ndt::type &root_tp, bool leading_dimension) const
 {
   if (is_builtin()) {
     if (nindices == 0) {
@@ -256,8 +253,7 @@ ndt::type ndt::type::apply_linear_index(intptr_t nindices,
       throw too_many_indices(*this, nindices + current_i, current_i);
     }
   } else {
-    return m_extended->apply_linear_index(nindices, indices, current_i, root_tp,
-                                          leading_dimension);
+    return m_extended->apply_linear_index(nindices, indices, current_i, root_tp, leading_dimension);
   }
 }
 
@@ -268,26 +264,20 @@ struct replace_scalar_type_extra {
   }
   const ndt::type &scalar_tp;
 };
-static void replace_scalar_types(const ndt::type &dt,
-                                 intptr_t DYND_UNUSED(arrmeta_offset),
-                                 void *extra, ndt::type &out_transformed_tp,
-                                 bool &out_was_transformed)
+static void replace_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
+                                 ndt::type &out_transformed_tp, bool &out_was_transformed)
 {
-  const replace_scalar_type_extra *e =
-      reinterpret_cast<const replace_scalar_type_extra *>(extra);
+  const replace_scalar_type_extra *e = reinterpret_cast<const replace_scalar_type_extra *>(extra);
   if (!dt.is_indexable()) {
     out_transformed_tp = ndt::convert_type::make(e->scalar_tp, dt);
     out_was_transformed = true;
   } else {
-    dt.extended()->transform_child_types(&replace_scalar_types, 0, extra,
-                                         out_transformed_tp,
-                                         out_was_transformed);
+    dt.extended()->transform_child_types(&replace_scalar_types, 0, extra, out_transformed_tp, out_was_transformed);
   }
 }
 } // anonymous namespace
 
-ndt::type
-ndt::type::with_replaced_scalar_types(const ndt::type &scalar_tp) const
+ndt::type ndt::type::with_replaced_scalar_types(const ndt::type &scalar_tp) const
 {
   ndt::type result;
   bool was_transformed;
@@ -305,25 +295,20 @@ struct replace_dtype_extra {
   const ndt::type &m_replacement_tp;
   intptr_t m_replace_ndim;
 };
-static void replace_dtype(const ndt::type &tp,
-                          intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
-                          ndt::type &out_transformed_tp,
-                          bool &out_was_transformed)
+static void replace_dtype(const ndt::type &tp, intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
+                          ndt::type &out_transformed_tp, bool &out_was_transformed)
 {
-  const replace_dtype_extra *e =
-      reinterpret_cast<const replace_dtype_extra *>(extra);
+  const replace_dtype_extra *e = reinterpret_cast<const replace_dtype_extra *>(extra);
   if (tp.get_ndim() == e->m_replace_ndim) {
     out_transformed_tp = e->m_replacement_tp;
     out_was_transformed = true;
   } else {
-    tp.extended()->transform_child_types(
-        &replace_dtype, 0, extra, out_transformed_tp, out_was_transformed);
+    tp.extended()->transform_child_types(&replace_dtype, 0, extra, out_transformed_tp, out_was_transformed);
   }
 }
 } // anonymous namespace
 
-ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp,
-                                         intptr_t replace_ndim) const
+ndt::type ndt::type::with_replaced_dtype(const ndt::type &replacement_tp, intptr_t replace_ndim) const
 {
   ndt::type result;
   bool was_transformed;
@@ -345,9 +330,7 @@ ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
 {
   ndt::type tp = without_memory_type();
 
-  tp = tp.with_replaced_dtype(
-      ndt::make_fixed_dim(1, tp.get_type_at_dimension(NULL, i), new_ndim),
-      tp.get_ndim() - i);
+  tp = tp.with_replaced_dtype(ndt::make_fixed_dim(1, tp.get_type_at_dimension(NULL, i), new_ndim), tp.get_ndim() - i);
   if (get_kind() == memory_kind) {
     tp = extended<base_memory_type>()->with_replaced_storage_type(tp);
   }
@@ -358,8 +341,7 @@ ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
 intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
 {
   if (get_kind() == dim_kind) {
-    return static_cast<const base_dim_type *>(m_extended)
-        ->get_dim_size(arrmeta, data);
+    return static_cast<const base_dim_type *>(m_extended)->get_dim_size(arrmeta, data);
   } else if (get_kind() == struct_kind) {
     return static_cast<const base_struct_type *>(m_extended)->get_field_count();
   } else if (get_ndim() > 0) {
@@ -384,15 +366,12 @@ intptr_t ndt::type::get_size(const char *arrmeta) const
   return extended<base_dim_type>()->get_size(arrmeta);
 }
 
-bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
-                               intptr_t *out_stride, ndt::type *out_el_tp,
+bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size, intptr_t *out_stride, ndt::type *out_el_tp,
                                const char **out_el_arrmeta) const
 {
   if (get_kind() == memory_kind) {
-    bool res = without_memory_type().get_as_strided(
-        arrmeta, out_dim_size, out_stride, out_el_tp, out_el_arrmeta);
-    *out_el_tp =
-        extended<base_memory_type>()->with_replaced_storage_type(*out_el_tp);
+    bool res = without_memory_type().get_as_strided(arrmeta, out_dim_size, out_stride, out_el_tp, out_el_arrmeta);
+    *out_el_tp = extended<base_memory_type>()->with_replaced_storage_type(*out_el_tp);
     return res;
   }
 
@@ -407,10 +386,8 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size,
   }
 }
 
-bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim,
-                               const size_stride_t **out_size_stride,
-                               ndt::type *out_el_tp,
-                               const char **out_el_arrmeta) const
+bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim, const size_stride_t **out_size_stride,
+                               ndt::type *out_el_tp, const char **out_el_arrmeta) const
 {
   if (get_strided_ndim() >= ndim) {
     *out_size_stride = reinterpret_cast<const size_stride_t *>(arrmeta);
@@ -430,8 +407,7 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
     // If they're trivially identical, quickly return true
     return true;
   }
-  if (get_data_size() != rhs.get_data_size() ||
-      get_arrmeta_size() != rhs.get_arrmeta_size()) {
+  if (get_data_size() != rhs.get_data_size() || get_arrmeta_size() != rhs.get_arrmeta_size()) {
     // The size of the data and arrmeta must be the same
     return false;
   }
@@ -460,29 +436,138 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
     }
   case fixed_dim_type_id:
     if (rhs.get_type_id() == fixed_dim_type_id) {
-      return extended<fixed_dim_type>()->get_fixed_dim_size() ==
-                 rhs.extended<fixed_dim_type>()->get_fixed_dim_size() &&
-             extended<fixed_dim_type>()
-                 ->get_element_type()
-                 .data_layout_compatible_with(
-                      rhs.extended<fixed_dim_type>()->get_element_type());
+      return extended<fixed_dim_type>()->get_fixed_dim_size() == rhs.extended<fixed_dim_type>()->get_fixed_dim_size() &&
+             extended<fixed_dim_type>()->get_element_type().data_layout_compatible_with(
+                 rhs.extended<fixed_dim_type>()->get_element_type());
     }
     break;
   case var_dim_type_id:
     // For var dimensions, it's data layout
     // compatible if the element is
     if (rhs.get_type_id() == var_dim_type_id) {
-      const base_dim_type *budd =
-          static_cast<const base_dim_type *>(extended());
+      const base_dim_type *budd = static_cast<const base_dim_type *>(extended());
       const base_dim_type *rhs_budd = rhs.extended<base_dim_type>();
-      return budd->get_element_type().data_layout_compatible_with(
-          rhs_budd->get_element_type());
+      return budd->get_element_type().data_layout_compatible_with(rhs_budd->get_element_type());
     }
     break;
   default:
     break;
   }
   return false;
+}
+
+std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
+{
+  switch (tid) {
+  case uninitialized_type_id:
+    return (o << "uninitialized");
+  case bool_type_id:
+    return (o << "bool");
+  case int8_type_id:
+    return (o << "int8");
+  case int16_type_id:
+    return (o << "int16");
+  case int32_type_id:
+    return (o << "int32");
+  case int64_type_id:
+    return (o << "int64");
+  case int128_type_id:
+    return (o << "int128");
+  case uint8_type_id:
+    return (o << "uint8");
+  case uint16_type_id:
+    return (o << "uint16");
+  case uint32_type_id:
+    return (o << "uint32");
+  case uint64_type_id:
+    return (o << "uint64");
+  case uint128_type_id:
+    return (o << "uint128");
+  case float16_type_id:
+    return (o << "float16");
+  case float32_type_id:
+    return (o << "float32");
+  case float64_type_id:
+    return (o << "float64");
+  case float128_type_id:
+    return (o << "float128");
+  case complex_float32_type_id:
+    return (o << "complex_float32");
+  case complex_float64_type_id:
+    return (o << "complex_float64");
+  case void_type_id:
+    return (o << "void");
+  case void_pointer_type_id:
+    return (o << "void_pointer");
+  case pointer_type_id:
+    return (o << "pointer");
+  case bytes_type_id:
+    return (o << "bytes");
+  case fixed_bytes_type_id:
+    return (o << "fixed_bytes");
+  case string_type_id:
+    return (o << "string");
+  case fixed_string_type_id:
+    return (o << "fixed_string");
+  case categorical_type_id:
+    return (o << "categorical");
+  case date_type_id:
+    return (o << "date");
+  case time_type_id:
+    return (o << "time");
+  case datetime_type_id:
+    return (o << "datetime");
+  case busdate_type_id:
+    return (o << "busdate");
+  case json_type_id:
+    return (o << "json");
+  case fixed_dim_type_id:
+    return (o << "fixed_dim");
+  case var_dim_type_id:
+    return (o << "var_dim");
+  case struct_type_id:
+    return (o << "struct");
+  case tuple_type_id:
+    return (o << "tuple");
+  case c_contiguous_type_id:
+    return (o << "C");
+  case option_type_id:
+    return (o << "option");
+  case ndarrayarg_type_id:
+    return (o << "ndarrayarg");
+  case kind_sym_type_id:
+    return (o << "kind_sym");
+  case int_sym_type_id:
+    return (o << "int_sym");
+  case convert_type_id:
+    return (o << "convert");
+  case byteswap_type_id:
+    return (o << "byteswap");
+  case view_type_id:
+    return (o << "view");
+  case property_type_id:
+    return (o << "property");
+  case expr_type_id:
+    return (o << "expr");
+  case unary_expr_type_id:
+    return (o << "unary_expr");
+  case groupby_type_id:
+    return (o << "groupby");
+  case type_type_id:
+    return (o << "type");
+  case callable_type_id:
+    return (o << "callable");
+  case typevar_type_id:
+    return (o << "typevar");
+  case typevar_constructed_type_id:
+    return (o << "typevar_constructed");
+  case typevar_dim_type_id:
+    return (o << "typevar_dim");
+  case ellipsis_dim_type_id:
+    return (o << "ellipsis_dim");
+  default:
+    return o << ndt::registry::data[tid].name;
+  }
 }
 
 std::ostream &dynd::ndt::operator<<(std::ostream &o, const ndt::type &rhs)
@@ -553,13 +638,11 @@ std::ostream &dynd::ndt::operator<<(std::ostream &o, const ndt::type &rhs)
   return o;
 }
 
-ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
-                         const ndt::type &dtp)
+ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtp)
 {
   if (ndim > 0) {
-    ndt::type result_tp = shape[ndim - 1] >= 0
-                              ? ndt::make_fixed_dim(shape[ndim - 1], dtp)
-                              : ndt::var_dim_type::make(dtp);
+    ndt::type result_tp =
+        shape[ndim - 1] >= 0 ? ndt::make_fixed_dim(shape[ndim - 1], dtp) : ndt::var_dim_type::make(dtp);
     for (intptr_t i = ndim - 2; i >= 0; --i) {
       if (shape[i] >= 0) {
         result_tp = ndt::make_fixed_dim(shape[i], result_tp);
@@ -573,8 +656,7 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
   }
 }
 
-ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
-                         const ndt::type &dtp, bool &out_any_var)
+ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &dtp, bool &out_any_var)
 {
   if (ndim > 0) {
     ndt::type result_tp = dtp;
@@ -590,6 +672,19 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape,
   } else {
     return dtp;
   }
+}
+
+type_id_t ndt::register_type(const string &name, type_make_t make)
+{
+  registry::data[registry::size].name = name;
+  registry::data[registry::size].func = make;
+
+  return static_cast<type_id_t>(registry::size++);
+}
+
+ndt::type ndt::type::make(type_id_t tp_id, const nd::array &args)
+{
+  return registry::data[tp_id].func(tp_id, args);
 }
 
 ndt::type ndt::type_of(const nd::array &value)
@@ -677,17 +772,14 @@ void dynd::hexadecimal_print(std::ostream &o, unsigned long long value)
   hexadecimal_print(o, static_cast<char>(value & 0xff));
 }
 
-void dynd::hexadecimal_print(std::ostream &o, const char *data,
-                             intptr_t element_size)
+void dynd::hexadecimal_print(std::ostream &o, const char *data, intptr_t element_size)
 {
   for (int i = 0; i < element_size; ++i, ++data) {
     hexadecimal_print(o, *data);
   }
 }
 
-void dynd::hexadecimal_print_summarized(std::ostream &o, const char *data,
-                                        intptr_t element_size,
-                                        intptr_t summary_size)
+void dynd::hexadecimal_print_summarized(std::ostream &o, const char *data, intptr_t element_size, intptr_t summary_size)
 {
   if (element_size * 2 <= summary_size) {
     hexadecimal_print(o, data, element_size);
@@ -706,15 +798,13 @@ static intptr_t line_count(const string &s)
   return 1 + count_if(s.begin(), s.end(), bind1st(equal_to<char>(), '\n'));
 }
 
-static void summarize_stats(const string &s, intptr_t &num_rows,
-                            intptr_t &max_num_cols)
+static void summarize_stats(const string &s, intptr_t &num_rows, intptr_t &max_num_cols)
 {
   num_rows += line_count(s);
   max_num_cols = max(max_num_cols, (intptr_t)s.size());
 }
 
-void dynd::print_indented(ostream &o, const string &indent, const string &s,
-                          bool skipfirstline)
+void dynd::print_indented(ostream &o, const string &indent, const string &s, bool skipfirstline)
 {
   const char *begin = s.data();
   const char *end = s.data() + s.size();
@@ -731,12 +821,10 @@ void dynd::print_indented(ostream &o, const string &indent, const string &s,
 }
 
 // TODO Move the magic numbers into parameters
-void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
-                                    const char *arrmeta, const char *data,
+void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
                                     intptr_t dim_size, intptr_t stride)
 {
-  const int leading_count = 7, trailing_count = 3, row_threshold = 10,
-            col_threshold = 30, packing_cols = 75;
+  const int leading_count = 7, trailing_count = 3, row_threshold = 10, col_threshold = 30, packing_cols = 75;
 
   vector<string> leading, trailing;
   intptr_t ilead = 0, itrail = dim_size - 1;
@@ -749,8 +837,7 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
     summarize_stats(leading.back(), num_rows, max_num_cols);
   }
   // Get trailing strings
-  for (itrail = max(dim_size - trailing_count, ilead + 1); itrail < dim_size;
-       ++itrail) {
+  for (itrail = max(dim_size - trailing_count, ilead + 1); itrail < dim_size; ++itrail) {
     stringstream ss;
     tp.print_data(ss, arrmeta, data + itrail * stride);
     trailing.push_back(ss.str());
@@ -759,11 +846,9 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
   itrail = dim_size - trailing.size() - 1;
 
   // Select between two printing strategies depending on what we got
-  if ((size_t)num_rows > (leading.size() + trailing.size()) ||
-      max_num_cols > col_threshold) {
+  if ((size_t)num_rows > (leading.size() + trailing.size()) || max_num_cols > col_threshold) {
     // Trim the leading/trailing vectors until we get to our threshold
-    while (num_rows > row_threshold &&
-           (trailing.size() > 1 || leading.size() > 1)) {
+    while (num_rows > row_threshold && (trailing.size() > 1 || leading.size() > 1)) {
       if (trailing.size() > 1) {
         num_rows -= line_count(trailing.front());
         trailing.erase(trailing.begin());
@@ -800,8 +885,7 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
   } else {
     // Pack the values in a regular grid
     // Keep getting more strings until we use up our column budget.
-    intptr_t total_cols =
-        (max_num_cols + 2) * (leading.size() + trailing.size());
+    intptr_t total_cols = (max_num_cols + 2) * (leading.size() + trailing.size());
     while (ilead <= itrail && total_cols < packing_cols * row_threshold) {
       if (ilead <= itrail) {
         stringstream ss;
@@ -827,12 +911,10 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
     } else {
       // Remove partial rows if the total size is not covered
       if (leading.size() > (size_t)per_row && leading.size() % per_row != 0) {
-        leading.erase(leading.begin() + (leading.size() / per_row) * per_row,
-                      leading.end());
+        leading.erase(leading.begin() + (leading.size() / per_row) * per_row, leading.end());
       }
       if (trailing.size() > (size_t)per_row && trailing.size() % per_row != 0) {
-        trailing.erase(trailing.begin(),
-                       trailing.begin() + trailing.size() % per_row);
+        trailing.erase(trailing.begin(), trailing.begin() + trailing.size() % per_row);
       }
     }
 
@@ -841,8 +923,7 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
     if (!i_size)
       o << '[';
     while (i < i_size) {
-      o << ((i == 0) ? "[" : " ") << setw(max_num_cols) << leading[i]
-        << setw(0);
+      o << ((i == 0) ? "[" : " ") << setw(max_num_cols) << leading[i] << setw(0);
       ++i;
       for (j = 1; j < per_row && i < i_size; ++j, ++i) {
         o << ", " << setw(max_num_cols) << leading[i] << setw(0);
@@ -870,8 +951,7 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp,
   }
 }
 
-void dynd::print_builtin_scalar(type_id_t type_id, std::ostream &o,
-                                const char *data)
+void dynd::print_builtin_scalar(type_id_t type_id, std::ostream &o, const char *data)
 {
   switch (type_id) {
   case bool_type_id:
@@ -930,14 +1010,12 @@ void dynd::print_builtin_scalar(type_id_t type_id, std::ostream &o,
     break;
   default:
     stringstream ss;
-    ss << "printing of dynd builtin type id " << type_id
-       << " isn't supported yet";
+    ss << "printing of dynd builtin type id " << type_id << " isn't supported yet";
     throw dynd::type_error(ss.str());
   }
 }
 
-void ndt::type::print_data(std::ostream &o, const char *arrmeta,
-                           const char *data) const
+void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
   if (is_builtin()) {
     print_builtin_scalar(get_type_id(), o, data);

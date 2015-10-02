@@ -132,7 +132,7 @@ enum type_id_t {
   // A variable-sized array dimension type
   var_dim_type_id,
   // A dimension made up of offsets
-//  offset_dim_type_id,
+  //  offset_dim_type_id,
 
   // A struct type with variable layout
   struct_type_id,
@@ -189,6 +189,9 @@ enum type_id_t {
 
   // The number of built-in, atomic types (including uninitialized and void)
   builtin_type_id_count = 19,
+
+  // The number of types
+  static_type_id_max = dim_fragment_type_id
 };
 #define DYND_BUILTIN_TYPE_ID_COUNT 19
 #define DYND_TYPE_ID_MAX 100
@@ -196,33 +199,29 @@ enum type_id_t {
 template <type_id_t... I>
 using type_id_sequence = integer_sequence<type_id_t, I...>;
 
-typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
-                         int64_type_id, int128_type_id> int_type_ids;
-typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id,
-                         uint64_type_id, uint128_type_id> uint_type_ids;
-typedef type_id_sequence<float16_type_id, float32_type_id, float64_type_id,
-                         float128_type_id> real_type_ids;
-typedef type_id_sequence<complex_float32_type_id, complex_float64_type_id>
-complex_type_ids;
-typedef type_id_sequence<
-    bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
-    int128_type_id, uint8_type_id, uint16_type_id, uint32_type_id,
-    uint64_type_id, uint128_type_id, float16_type_id, float32_type_id,
-    float64_type_id, float128_type_id, complex_float32_type_id,
-    complex_float64_type_id> arithmetic_type_ids;
-typedef type_id_sequence<
-    bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
-    int128_type_id, uint8_type_id, uint16_type_id, uint32_type_id,
-    uint64_type_id, uint128_type_id, float32_type_id, float64_type_id,
-    complex_float32_type_id, complex_float64_type_id> numeric_type_ids;
+typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id> int_type_ids;
+typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id> uint_type_ids;
+typedef type_id_sequence<float16_type_id, float32_type_id, float64_type_id, float128_type_id> real_type_ids;
+typedef type_id_sequence<complex_float32_type_id, complex_float64_type_id> complex_type_ids;
 
-typedef type_id_sequence<
-    uninitialized_type_id, bool_type_id, int8_type_id, int16_type_id,
-    int32_type_id, int64_type_id, int128_type_id, uint8_type_id, uint16_type_id,
-    uint32_type_id, uint64_type_id, uint128_type_id, float16_type_id,
-    float32_type_id, float64_type_id, float128_type_id, complex_float32_type_id,
-    complex_float64_type_id, void_type_id,
-    void_pointer_type_id> builtin_type_ids;
+typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
+                         uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
+                         float16_type_id, float32_type_id, float64_type_id, float128_type_id, complex_float32_type_id,
+                         complex_float64_type_id, void_type_id> primitive_type_ids;
+
+typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
+                         uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
+                         float16_type_id, float32_type_id, float64_type_id, float128_type_id, complex_float32_type_id,
+                         complex_float64_type_id> arithmetic_type_ids;
+typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
+                         uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
+                         float32_type_id, float64_type_id, complex_float32_type_id,
+                         complex_float64_type_id> numeric_type_ids;
+
+typedef type_id_sequence<uninitialized_type_id, bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
+                         int128_type_id, uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
+                         float16_type_id, float32_type_id, float64_type_id, float128_type_id, complex_float32_type_id,
+                         complex_float64_type_id, void_type_id, void_pointer_type_id> builtin_type_ids;
 typedef type_id_sequence<fixed_dim_type_id, var_dim_type_id> dim_type_ids;
 
 inline void validate_type_id(type_id_t tp_id)
@@ -274,9 +273,8 @@ enum axis_order_classification_t {
 enum {
   // These are the flags expression types should inherit
   // from their operand type
-  type_flags_operand_inherited =
-      type_flag_zeroinit | type_flag_blockref | type_flag_construct |
-      type_flag_destructor | type_flag_not_host_readable | type_flag_symbolic,
+  type_flags_operand_inherited = type_flag_zeroinit | type_flag_blockref | type_flag_construct | type_flag_destructor |
+                                 type_flag_not_host_readable | type_flag_symbolic,
   // These are the flags expression types should inherit
   // from their value type
   type_flags_value_inherited = type_flag_symbolic | type_flag_variadic
@@ -367,8 +365,7 @@ struct type_id_of<int> {
 
 template <>
 struct type_id_of<long> {
-  static const type_id_t value = static_cast<type_id_t>(
-      int8_type_id + detail::log2_x<sizeof(long)>::value);
+  static const type_id_t value = static_cast<type_id_t>(int8_type_id + detail::log2_x<sizeof(long)>::value);
 };
 
 template <>
@@ -398,8 +395,7 @@ struct type_id_of<unsigned int> {
 
 template <>
 struct type_id_of<unsigned long> {
-  static const type_id_t value = static_cast<type_id_t>(
-      uint8_type_id + detail::log2_x<sizeof(unsigned long)>::value);
+  static const type_id_t value = static_cast<type_id_t>(uint8_type_id + detail::log2_x<sizeof(unsigned long)>::value);
 };
 
 template <>
@@ -671,8 +667,7 @@ struct type_kind_of<option_type_id> {
 
 namespace detail {
 
-  template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t SrcTypeID,
-            type_kind_t SrcTypeKind>
+  template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t SrcTypeID, type_kind_t SrcTypeKind>
   struct is_lossless_assignable {
     static const bool value = false;
   };
@@ -704,23 +699,20 @@ namespace detail {
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
   struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, real_kind> {
-    static const bool value = (sizeof(typename type_of<DstTypeID>::type) / 2) >
-                              sizeof(typename type_of<SrcTypeID>::type);
+    static const bool value =
+        (sizeof(typename type_of<DstTypeID>::type) / 2) > sizeof(typename type_of<SrcTypeID>::type);
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID, type_kind_t TypeKind>
   struct is_lossless_assignable<DstTypeID, TypeKind, SrcTypeID, TypeKind> {
-    static const bool value = sizeof(typename type_of<DstTypeID>::type) >
-                              sizeof(typename type_of<SrcTypeID>::type);
+    static const bool value = sizeof(typename type_of<DstTypeID>::type) > sizeof(typename type_of<SrcTypeID>::type);
   };
 
 } // namespace dynd::detail
 
 template <type_id_t DstTypeID, type_id_t Src0TypeID>
-struct is_lossless_assignable
-    : detail::is_lossless_assignable<DstTypeID, type_kind_of<DstTypeID>::value,
-                                     Src0TypeID,
-                                     type_kind_of<Src0TypeID>::value> {
+struct is_lossless_assignable : detail::is_lossless_assignable<DstTypeID, type_kind_of<DstTypeID>::value, Src0TypeID,
+                                                               type_kind_of<Src0TypeID>::value> {
 };
 
 // Metaprogram for determining if a type is a valid C++ scalar
@@ -904,95 +896,4 @@ struct is_type_bool<bool> {
   };
 };
 
-namespace detail {
-
-  template <typename T, int N>
-  class array_by_type_id;
-
-  template <typename T>
-  class array_by_type_id<T, 1> {
-    T m_data[builtin_type_id_count];
-
-  public:
-    array_by_type_id(const std::initializer_list<std::pair<type_id_t, T>> &data)
-    {
-      for (const std::pair<type_id_t, T> &pair : data) {
-        m_data[pair.first] = pair.second;
-      }
-    }
-
-    T *data()
-    {
-      return m_data;
-    }
-    const T *data() const
-    {
-      return m_data;
-    }
-
-    T &at(type_id_t i)
-    {
-      return m_data[i];
-    }
-    const T &at(type_id_t i) const
-    {
-      return m_data[i];
-    }
-
-    T &operator()(type_id_t i)
-    {
-      return at(i);
-    }
-    const T &operator()(type_id_t i) const
-    {
-      return at(i);
-    }
-  };
-
-  template <typename T>
-  class array_by_type_id<T, 2> {
-    T m_data[builtin_type_id_count][builtin_type_id_count];
-
-  public:
-    array_by_type_id()
-    {
-    }
-
-    array_by_type_id(const std::initializer_list<
-        std::pair<std::pair<type_id_t, type_id_t>, T>> &data)
-    {
-      for (const std::pair<std::pair<type_id_t, type_id_t>, T> &pair : data) {
-        m_data[pair.first.first][pair.first.second] = pair.second;
-      }
-    }
-
-    T *data()
-    {
-      return m_data;
-    }
-    const T *data() const
-    {
-      return m_data;
-    }
-
-    T &at(type_id_t i, type_id_t j)
-    {
-      return m_data[i][j];
-    }
-    const T &at(type_id_t i, type_id_t j) const
-    {
-      return m_data[i][j];
-    }
-
-    T &operator()(type_id_t i, type_id_t j)
-    {
-      return at(i, j);
-    }
-    const T &operator()(type_id_t i, type_id_t j) const
-    {
-      return at(i, j);
-    }
-  };
-
-} // namespace dynd::detail
 } // namespace dynd
