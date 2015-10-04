@@ -255,9 +255,6 @@ namespace nd {
 
   template <typename ElementType>
   class fixed_dim : public wrap_if_exact_t<ElementType> {
-    typedef ElementType element_type;
-    typedef typename wrap_if_exact_t<ElementType>::data_type data_type;
-
     class iterator : public wrap_if_exact_t<ElementType>::iterator {
       intptr_t m_stride;
 
@@ -290,6 +287,9 @@ namespace nd {
     */
 
   public:
+    typedef ElementType element_type;
+    typedef typename wrap_if_exact_t<ElementType>::data_type data_type;
+
     fixed_dim(const char *metadata, char *data) : wrap_if_exact_t<ElementType>(metadata, data)
     {
     }

@@ -78,3 +78,14 @@ TEST(View, FixedDim)
   EXPECT_EQ(3, vals({3}));
   EXPECT_EQ(4, vals({4}));
 }
+
+TEST(View, FixedDimFixedDim)
+{
+  nd::array a = {{0, 1}, {2, 3}};
+
+  nd::fixed_dim<nd::fixed_dim<int>> vals = a.view<nd::fixed_dim<nd::fixed_dim<int>>>();
+  EXPECT_EQ(0, vals({0, 0}));
+  EXPECT_EQ(1, vals({0, 1}));
+  EXPECT_EQ(2, vals({1, 0}));
+  EXPECT_EQ(3, vals({1, 1}));
+}
