@@ -688,6 +688,12 @@ namespace nd {
       return view(ndt::type(rhs));
     }
 
+    template <typename Type>
+    Type view()
+    {
+      return Type(get_arrmeta(), get_readwrite_originptr());
+    }
+
     /**
      * Attempts to view the uniform type-level of the array as a
      * new dynd type, raising an error if it cannot be done.
