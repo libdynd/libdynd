@@ -90,6 +90,7 @@ TEST(View, FixedDimFixedDim)
   EXPECT_EQ(1, vals(0, 1));
   EXPECT_EQ(2, vals(1, 0));
   EXPECT_EQ(3, vals(1, 1));
+
   EXPECT_TRUE((std::is_same<fixed_dim<int>, decltype(vals(std::declval<intptr_t>()))>::value));
   EXPECT_EQ(0, vals(0)(0));
   EXPECT_EQ(1, vals(0)(1));
@@ -111,12 +112,24 @@ TEST(View, FixedDimFixedDimFixedDim)
   EXPECT_EQ(6, vals(1, 1, 0));
   EXPECT_EQ(7, vals(1, 1, 1));
 
-  //  auto vals0 = vals(0, 0);
-  //  EXPECT_EQ(0, vals0(0));
-  //  EXPECT_EQ(1, vals0(1));
-  /*
-      fixed_dim<int> vals1 = vals(1);
-      EXPECT_EQ(2, vals1(0));
-      EXPECT_EQ(3, vals1(1));
-    */
+  EXPECT_TRUE(
+      (std::is_same<fixed_dim<int>, decltype(vals(std::declval<intptr_t>(), std::declval<intptr_t>()))>::value));
+  EXPECT_EQ(0, vals(0, 0)(0));
+  EXPECT_EQ(1, vals(0, 0)(1));
+  EXPECT_EQ(2, vals(0, 1)(0));
+  EXPECT_EQ(3, vals(0, 1)(1));
+  EXPECT_EQ(4, vals(1, 0)(0));
+  EXPECT_EQ(5, vals(1, 0)(1));
+  EXPECT_EQ(6, vals(1, 1)(0));
+  EXPECT_EQ(7, vals(1, 1)(1));
+
+  EXPECT_TRUE((std::is_same<fixed_dim<fixed_dim<int>>, decltype(vals(std::declval<intptr_t>()))>::value));
+  EXPECT_EQ(0, vals(0)(0, 0));
+  EXPECT_EQ(1, vals(0)(0, 1));
+  EXPECT_EQ(2, vals(0)(1, 0));
+  EXPECT_EQ(3, vals(0)(1, 1));
+  EXPECT_EQ(4, vals(1)(0, 0));
+  EXPECT_EQ(5, vals(1)(0, 1));
+  EXPECT_EQ(6, vals(1)(1, 0));
+  EXPECT_EQ(7, vals(1)(1, 1));
 }
