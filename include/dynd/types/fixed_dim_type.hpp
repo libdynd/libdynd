@@ -189,45 +189,21 @@ namespace ndt {
 
 namespace detail {
 
+  template <typename ValueType, int NDim>
+  class scalar_iterator;
+
   template <typename ValueType>
   class scalar {
   protected:
-    class iterator {
-    protected:
-      char *m_data;
-
-    public:
-      iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data)
-      {
-      }
-
-      ValueType &operator*()
-      {
-        return *reinterpret_cast<ValueType *>(m_data);
-      }
-
-      const ValueType &operator*() const
-      {
-        return *reinterpret_cast<const ValueType *>(m_data);
-      }
-
-      bool operator==(const iterator &rhs) const
-      {
-        return m_data == rhs.m_data;
-      }
-
-      bool operator!=(const iterator &rhs) const
-      {
-        return m_data != rhs.m_data;
-      }
-    };
-
     const char *m_metadata;
     char *m_data;
 
   public:
     typedef ValueType data_type;
     static const intptr_t ndim = 0;
+
+    template <int NDim>
+    using iterator_type = scalar_iterator<ValueType, NDim>;
 
     scalar(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
     {
@@ -239,6 +215,32 @@ namespace detail {
     }
   };
 
+  template <typename ValueType>
+  class scalar_iterator<ValueType, 0> {
+  protected:
+    char *m_data;
+
+  public:
+    scalar_iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data)
+    {
+    }
+
+    ValueType &operator*()
+    {
+      return *reinterpret_cast<ValueType *>(m_data);
+    }
+
+    bool operator==(const scalar_iterator &rhs) const
+    {
+      return m_data == rhs.m_data;
+    }
+
+    bool operator!=(const scalar_iterator &rhs) const
+    {
+      return m_data != rhs.m_data;
+    }
+  };
+
   template <typename T>
   using identity_t = T;
 
@@ -246,32 +248,11 @@ namespace detail {
   using wrap_if_exact_t =
       typename conditional_make<std::is_fundamental<T>::value, detail::scalar, detail::identity_t, T>::type;
 
+  template <typename ElementType, int NDim>
+  class fixed_dim_iterator;
+
   template <typename ElementType>
   class fixed_dim : public ElementType {
-    class iterator : public ElementType::iterator {
-      intptr_t m_stride;
-
-    public:
-      iterator(const char *metadata, char *data)
-          : ElementType::iterator(metadata + sizeof(fixed_dim_type_arrmeta), data),
-            m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
-      {
-      }
-
-      iterator &operator++()
-      {
-        this->m_data += m_stride;
-        return *this;
-      }
-
-      iterator operator++(int)
-      {
-        iterator tmp(*this);
-        operator++();
-        return tmp;
-      }
-    };
-
   protected:
     fixed_dim operator()(const char *metadata, char *data)
     {
@@ -291,6 +272,9 @@ namespace detail {
     static const intptr_t ndim = ElementType::ndim + 1;
     typedef ElementType element_type;
 
+    template <int NDim>
+    using iterator_type = fixed_dim_iterator<ElementType, NDim>;
+
     fixed_dim(const char *metadata, char *data) : ElementType(metadata, data)
     {
     }
@@ -302,16 +286,71 @@ namespace detail {
       return (*this)(this->m_metadata, this->m_data, index...);
     }
 
-    iterator begin()
+    template <int NDim = 1>
+    iterator_type<NDim> begin()
     {
-      return iterator(this->m_metadata, this->m_data);
+      return iterator_type<NDim>(this->m_metadata, this->m_data);
     }
 
-    iterator end()
+    template <int NDim = 1>
+    iterator_type<NDim> end()
     {
-      return iterator(this->m_metadata,
-                      this->m_data + reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
+      return iterator_type<NDim>(this->m_metadata,
+                                 this->m_data +
+                                     reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
                                          reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
+    }
+  };
+
+  template <typename ElementType>
+  class fixed_dim_iterator<ElementType, 0> {
+  protected:
+    const char *m_metadata;
+    char *m_data;
+
+  public:
+    fixed_dim_iterator(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
+    {
+    }
+
+    fixed_dim<ElementType> operator*()
+    {
+      return fixed_dim<ElementType>(m_metadata, m_data);
+    }
+
+    bool operator==(const fixed_dim_iterator &rhs) const
+    {
+      return m_data == rhs.m_data;
+    }
+
+    bool operator!=(const fixed_dim_iterator &rhs) const
+    {
+      return m_data != rhs.m_data;
+    }
+  };
+
+  template <typename ElementType, int NDim>
+  class fixed_dim_iterator : public ElementType::template iterator_type<NDim - 1> {
+    intptr_t m_stride;
+
+  public:
+    fixed_dim_iterator(const char *metadata, char *data)
+        : ElementType::template iterator_type<NDim - 1>(metadata + sizeof(fixed_dim_type_arrmeta), data),
+          m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
+    {
+    }
+
+    fixed_dim_iterator &operator++()
+    {
+      this->m_data += m_stride;
+      return *this;
+    }
+
+    fixed_dim_iterator operator++(int)
+    {
+      fixed_dim_iterator tmp(*this);
+      operator++();
+      return tmp;
     }
   };
 
