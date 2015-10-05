@@ -190,7 +190,7 @@ namespace ndt {
 namespace detail {
 
   template <typename ValueType>
-  class exact {
+  class scalar {
   protected:
     class iterator {
     protected:
@@ -229,7 +229,7 @@ namespace detail {
     typedef ValueType data_type;
     static const intptr_t ndim = 0;
 
-    exact(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
+    scalar(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
     {
     }
 
@@ -238,100 +238,228 @@ namespace detail {
       return m_data;
     }
 
+    data_type &operator()(const char *DYND_UNUSED(metadata), char *data)
+    {
+      return *reinterpret_cast<data_type *>(data);
+    }
+
     static data_type &get(const char *DYND_UNUSED(metadata), char *data)
     {
       return *reinterpret_cast<data_type *>(data);
     }
   };
 
+  template <typename... T>
+  struct is_index;
+
+  template <typename T0>
+  struct is_index<T0> {
+    static const bool value = std::is_convertible<T0, intptr_t>::value;
+  };
+
+  template <typename T0, typename... T>
+  struct is_index<T0, T...> {
+    static const bool value = std::is_convertible<T0, intptr_t>::value && is_index<T...>::value;
+  };
+
   template <typename T>
   using identity_t = T;
 
-} // namespace dynd::detail
+  template <typename T>
+  using wrap_if_exact_t =
+      typename conditional_make<std::is_fundamental<T>::value, detail::scalar, detail::identity_t, T>::type;
 
-template <typename T>
-using wrap_if_exact_t =
-    typename conditional_make<std::is_fundamental<T>::value, detail::exact, detail::identity_t, T>::type;
+  template <typename T, int N = 1>
+  struct access;
 
-template <typename ElementType>
-class fixed_dim : public wrap_if_exact_t<ElementType> {
-  class iterator : public wrap_if_exact_t<ElementType>::iterator {
-    intptr_t m_stride;
+  template <typename T>
+  struct access<T, 1> {
+    typedef typename T::element_type type;
+  };
+
+  template <typename T, int N>
+  struct access {
+    typedef typename access<T, N - 1>::type::element_type type;
+  };
+
+  template <typename ElementType, int NDim>
+  class fixed_dim;
+
+  template <typename ElementType>
+  class fixed_dim<ElementType, 1> : public ElementType {
+    class iterator : public ElementType::iterator {
+      intptr_t m_stride;
+
+    public:
+      iterator(const char *metadata, char *data)
+          : ElementType::iterator(metadata + sizeof(fixed_dim_type_arrmeta), data),
+            m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
+      {
+      }
+
+      iterator &operator++()
+      {
+        this->m_data += m_stride;
+        return *this;
+      }
+
+      iterator operator++(int)
+      {
+        iterator tmp(*this);
+        operator++();
+        return tmp;
+      }
+    };
 
   public:
-    iterator(const char *metadata, char *data)
-        : wrap_if_exact_t<ElementType>::iterator(metadata + sizeof(fixed_dim_type_arrmeta), data),
-          m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
+    typedef typename ElementType::data_type element_type;
+    typedef typename ElementType::data_type data_type;
+    static const intptr_t ndim = 1;
+
+  protected:
+    template <typename Index0Type>
+    data_type &operator()(const char *metadata, char *data, Index0Type index0)
+    {
+      return ElementType::operator()(metadata + sizeof(fixed_dim_type_arrmeta),
+                                     data +
+                                         index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride);
+    }
+
+  public:
+    fixed_dim(const char *metadata, char *data) : ElementType(metadata, data)
     {
     }
 
-    iterator &operator++()
+    template <typename Index0Type>
+    static data_type &get(const char *metadata, char *data, Index0Type index0)
     {
-      this->m_data += m_stride;
-      return *this;
+      return ElementType::get(metadata + sizeof(fixed_dim_type_arrmeta),
+                              data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride);
     }
 
-    iterator operator++(int)
+    template <typename... IndexType>
+    typename std::enable_if<
+        is_index<IndexType...>::value && sizeof...(IndexType) <= ndim,
+        decltype(get(std::declval<const char *>(), std::declval<char *>(), std::declval<IndexType>()...))>::type
+    operator()(IndexType... index)
     {
-      iterator tmp(*this);
-      operator++();
-      return tmp;
+      return (*this)(this->m_metadata, this->m_data, index...);
+    }
+
+    iterator begin()
+    {
+      return iterator(this->m_metadata, this->m_data);
+    }
+
+    iterator end()
+    {
+      return iterator(this->m_metadata,
+                      this->m_data + reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
+                                         reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
     }
   };
 
-  /*
-      void operator()(char *data, size_t n, const intptr_t *i)
+  template <typename ElementType, int NDim>
+  class fixed_dim : public wrap_if_exact_t<ElementType> {
+    class iterator : public wrap_if_exact_t<ElementType>::iterator {
+      intptr_t m_stride;
+
+    public:
+      iterator(const char *metadata, char *data)
+          : wrap_if_exact_t<ElementType>::iterator(metadata + sizeof(fixed_dim_type_arrmeta), data),
+            m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
       {
-        wrap_if_exact_t<ElementType>::operator()(data, n - 1, i + 1);
       }
-  */
 
-public:
-  typedef ElementType element_type;
-  typedef typename wrap_if_exact_t<ElementType>::data_type data_type;
-  static const intptr_t ndim = wrap_if_exact_t<ElementType>::ndim + 1;
+      iterator &operator++()
+      {
+        this->m_data += m_stride;
+        return *this;
+      }
 
-  fixed_dim(const char *metadata, char *data) : wrap_if_exact_t<ElementType>(metadata, data)
-  {
-  }
+      iterator operator++(int)
+      {
+        iterator tmp(*this);
+        operator++();
+        return tmp;
+      }
+    };
 
-  template <typename Index0Type, typename... IndexType>
-  static typename std::enable_if<(ndim > 1) && sizeof...(IndexType) == 0, element_type>::type
-  get(const char *metadata, char *data, Index0Type index0, IndexType... DYND_UNUSED(index))
-  {
-    return element_type(metadata + sizeof(fixed_dim_type_arrmeta),
-                        data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride);
-  }
+    /*
+        void operator()(char *data, size_t n, const intptr_t *i)
+        {
+          wrap_if_exact_t<ElementType>::operator()(data, n - 1, i + 1);
+        }
+    */
 
-  template <typename Index0Type, typename... IndexType>
-  static typename std::enable_if<ndim == 1 || (sizeof...(IndexType) > 0), data_type &>::type
-  get(const char *metadata, char *data, Index0Type index0, IndexType... index)
-  {
-    return wrap_if_exact_t<ElementType>::get(
-        metadata + sizeof(fixed_dim_type_arrmeta),
-        data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride, index...);
-  }
+  public:
+    typedef ElementType element_type;
+    typedef typename wrap_if_exact_t<ElementType>::data_type data_type;
+    static const intptr_t ndim = NDim;
 
-  template <typename... IndexType>
-  typename std::enable_if<
-      sizeof...(IndexType) <= ndim,
-      decltype(get(std::declval<const char *>(), std::declval<char *>(), std::declval<IndexType>()...))>::type
-  operator()(IndexType... index)
-  {
-    return get(this->m_metadata, this->m_data, index...);
-  }
+  protected:
+    template <typename Index0Type>
+    element_type operator()(const char *metadata, char *data, Index0Type index0)
+    {
+      return element_type(metadata + sizeof(fixed_dim_type_arrmeta),
+                          data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride);
+    }
 
-  iterator begin()
-  {
-    return iterator(this->m_metadata, this->m_data);
-  }
+    template <typename Index0Type, typename Index1Type, typename... IndexType>
+    decltype(auto) operator()(const char *metadata, char *data, Index0Type index0, Index1Type index1,
+                              IndexType... index)
+    {
+      return ElementType::operator()(metadata + sizeof(fixed_dim_type_arrmeta),
+                                     data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride,
+                                     index1, index...);
+    }
 
-  iterator end()
-  {
-    return iterator(this->m_metadata,
-                    this->m_data + reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
-                                       reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
-  }
-};
+  public:
+    fixed_dim(const char *metadata, char *data) : ElementType(metadata, data)
+    {
+    }
+
+    template <typename Index0Type>
+    static element_type get(const char *metadata, char *data, Index0Type index0)
+    {
+      return element_type(metadata + sizeof(fixed_dim_type_arrmeta),
+                          data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride);
+    }
+
+    template <typename Index0Type, typename Index1Type, typename... IndexType>
+    static data_type &get(const char *metadata, char *data, Index0Type index0, Index1Type index1, IndexType... index)
+    {
+      return ElementType::get(metadata + sizeof(fixed_dim_type_arrmeta),
+                              data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride,
+                              index1, index...);
+    }
+
+    template <typename... IndexType>
+    typename std::enable_if<
+        is_index<IndexType...>::value && sizeof...(IndexType) <= ndim,
+        decltype(get(std::declval<const char *>(), std::declval<char *>(), std::declval<IndexType>()...))>::type
+    operator()(IndexType... index)
+    {
+      return (*this)(this->m_metadata, this->m_data, index...);
+    }
+
+    iterator begin()
+    {
+      return iterator(this->m_metadata, this->m_data);
+    }
+
+    iterator end()
+    {
+      return iterator(this->m_metadata,
+                      this->m_data + reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
+                                         reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
+    }
+  };
+
+} // namespace dynd::detail
+
+template <typename ElementType>
+using fixed_dim =
+    detail::fixed_dim<detail::wrap_if_exact_t<ElementType>, detail::wrap_if_exact_t<ElementType>::ndim + 1>;
 
 } // namespace dynd
