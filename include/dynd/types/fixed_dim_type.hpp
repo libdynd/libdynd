@@ -187,137 +187,151 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
-namespace nd {
-  namespace detail {
+namespace detail {
 
-    template <typename ValueType>
-    class exact {
+  template <typename ValueType>
+  class exact {
+  protected:
+    class iterator {
     protected:
-      class iterator {
-      protected:
-        char *m_data;
-
-      public:
-        iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data)
-        {
-        }
-
-        ValueType &operator*()
-        {
-          return *reinterpret_cast<ValueType *>(m_data);
-        }
-
-        const ValueType &operator*() const
-        {
-          return *reinterpret_cast<const ValueType *>(m_data);
-        }
-
-        bool operator==(const iterator &rhs) const
-        {
-          return m_data == rhs.m_data;
-        }
-
-        bool operator!=(const iterator &rhs) const
-        {
-          return m_data != rhs.m_data;
-        }
-      };
-
-      const char *m_metadata;
       char *m_data;
 
     public:
-      typedef ValueType data_type;
-
-      exact(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
+      iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data)
       {
       }
 
-      char *data()
+      ValueType &operator*()
       {
-        return m_data;
+        return *reinterpret_cast<ValueType *>(m_data);
       }
 
-      static data_type &get(const char *DYND_UNUSED(metadata), char *data, size_t, const intptr_t *)
+      const ValueType &operator*() const
       {
-        return *reinterpret_cast<data_type *>(data);
-      }
-    };
-
-    template <typename T>
-    using identity_t = T;
-
-  } // namespace dynd::nd::detail
-
-  template <typename T>
-  using wrap_if_exact_t =
-      typename conditional_make<std::is_fundamental<T>::value, detail::exact, detail::identity_t, T>::type;
-
-  template <typename ElementType>
-  class fixed_dim : public wrap_if_exact_t<ElementType> {
-    class iterator : public wrap_if_exact_t<ElementType>::iterator {
-      intptr_t m_stride;
-
-    public:
-      iterator(const char *metadata, char *data)
-          : wrap_if_exact_t<ElementType>::iterator(metadata + sizeof(fixed_dim_type_arrmeta), data),
-            m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
-      {
+        return *reinterpret_cast<const ValueType *>(m_data);
       }
 
-      iterator &operator++()
+      bool operator==(const iterator &rhs) const
       {
-        this->m_data += m_stride;
-        return *this;
+        return m_data == rhs.m_data;
       }
 
-      iterator operator++(int)
+      bool operator!=(const iterator &rhs) const
       {
-        iterator tmp(*this);
-        operator++();
-        return tmp;
+        return m_data != rhs.m_data;
       }
     };
 
-    /*
-        void operator()(char *data, size_t n, const intptr_t *i)
-        {
-          wrap_if_exact_t<ElementType>::operator()(data, n - 1, i + 1);
-        }
-    */
+    const char *m_metadata;
+    char *m_data;
 
   public:
-    typedef ElementType element_type;
-    typedef typename wrap_if_exact_t<ElementType>::data_type data_type;
+    typedef ValueType data_type;
+    static const intptr_t ndim = 0;
 
-    fixed_dim(const char *metadata, char *data) : wrap_if_exact_t<ElementType>(metadata, data)
+    exact(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
     {
     }
 
-    data_type &operator()(const std::initializer_list<intptr_t> &index)
+    char *data()
     {
-      return get(this->m_metadata, this->m_data, index.size(), index.begin());
+      return m_data;
     }
 
-    iterator begin()
+    static data_type &get(const char *DYND_UNUSED(metadata), char *data)
     {
-      return iterator(this->m_metadata, this->m_data);
-    }
-
-    iterator end()
-    {
-      return iterator(this->m_metadata,
-                      this->m_data + reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
-                                         reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
-    }
-
-    static data_type &get(const char *metadata, char *data, size_t n, const intptr_t *i)
-    {
-      return wrap_if_exact_t<ElementType>::get(
-          metadata + sizeof(fixed_dim_type_arrmeta),
-          data + i[0] * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride, n - 1, i + 1);
+      return *reinterpret_cast<data_type *>(data);
     }
   };
 
-} // namespace dynd::nd
+  template <typename T>
+  using identity_t = T;
+
+} // namespace dynd::detail
+
+template <typename T>
+using wrap_if_exact_t =
+    typename conditional_make<std::is_fundamental<T>::value, detail::exact, detail::identity_t, T>::type;
+
+template <typename ElementType>
+class fixed_dim : public wrap_if_exact_t<ElementType> {
+  class iterator : public wrap_if_exact_t<ElementType>::iterator {
+    intptr_t m_stride;
+
+  public:
+    iterator(const char *metadata, char *data)
+        : wrap_if_exact_t<ElementType>::iterator(metadata + sizeof(fixed_dim_type_arrmeta), data),
+          m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
+    {
+    }
+
+    iterator &operator++()
+    {
+      this->m_data += m_stride;
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+  };
+
+  /*
+      void operator()(char *data, size_t n, const intptr_t *i)
+      {
+        wrap_if_exact_t<ElementType>::operator()(data, n - 1, i + 1);
+      }
+  */
+
+public:
+  typedef ElementType element_type;
+  typedef typename wrap_if_exact_t<ElementType>::data_type data_type;
+  static const intptr_t ndim = wrap_if_exact_t<ElementType>::ndim + 1;
+
+  fixed_dim(const char *metadata, char *data) : wrap_if_exact_t<ElementType>(metadata, data)
+  {
+  }
+
+  template <typename Index0Type, typename... IndexType>
+  static typename std::enable_if<(ndim > 1) && sizeof...(IndexType) == 0, element_type>::type
+  get(const char *metadata, char *data, Index0Type index0, IndexType... DYND_UNUSED(index))
+  {
+    return element_type(metadata + sizeof(fixed_dim_type_arrmeta),
+                        data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride);
+  }
+
+  template <typename Index0Type, typename... IndexType>
+  static typename std::enable_if<ndim == 1 || (sizeof...(IndexType) > 0), data_type &>::type
+  get(const char *metadata, char *data, Index0Type index0, IndexType... index)
+  {
+    return wrap_if_exact_t<ElementType>::get(
+        metadata + sizeof(fixed_dim_type_arrmeta),
+        data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride, index...);
+  }
+
+  template <typename... IndexType>
+  typename std::enable_if<
+      sizeof...(IndexType) <= ndim,
+      decltype(get(std::declval<const char *>(), std::declval<char *>(), std::declval<IndexType>()...))>::type
+  operator()(IndexType... index)
+  {
+    return get(this->m_metadata, this->m_data, index...);
+  }
+
+  iterator begin()
+  {
+    return iterator(this->m_metadata, this->m_data);
+  }
+
+  iterator end()
+  {
+    return iterator(this->m_metadata,
+                    this->m_data + reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
+                                       reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
+  }
+};
+
 } // namespace dynd
