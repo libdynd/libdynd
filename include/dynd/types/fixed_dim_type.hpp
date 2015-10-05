@@ -190,10 +190,10 @@ namespace ndt {
 namespace detail {
 
   template <typename ValueType, int NDim>
-  class scalar_iterator;
+  class scalar_wrapper_iterator;
 
   template <typename ValueType>
-  class scalar {
+  class scalar_wrapper {
   protected:
     const char *m_metadata;
     char *m_data;
@@ -203,9 +203,9 @@ namespace detail {
     static const intptr_t ndim = 0;
 
     template <int NDim>
-    using iterator_type = scalar_iterator<ValueType, NDim>;
+    using iterator_type = scalar_wrapper_iterator<ValueType, NDim>;
 
-    scalar(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
+    scalar_wrapper(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
     {
     }
 
@@ -216,12 +216,12 @@ namespace detail {
   };
 
   template <typename ValueType>
-  class scalar_iterator<ValueType, 0> {
+  class scalar_wrapper_iterator<ValueType, 0> {
   protected:
     char *m_data;
 
   public:
-    scalar_iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data)
+    scalar_wrapper_iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data)
     {
     }
 
@@ -230,23 +230,16 @@ namespace detail {
       return *reinterpret_cast<ValueType *>(m_data);
     }
 
-    bool operator==(const scalar_iterator &rhs) const
+    bool operator==(const scalar_wrapper_iterator &rhs) const
     {
       return m_data == rhs.m_data;
     }
 
-    bool operator!=(const scalar_iterator &rhs) const
+    bool operator!=(const scalar_wrapper_iterator &rhs) const
     {
       return m_data != rhs.m_data;
     }
   };
-
-  template <typename T>
-  using identity_t = T;
-
-  template <typename T>
-  using wrap_if_exact_t =
-      typename conditional_make<std::is_fundamental<T>::value, detail::scalar, detail::identity_t, T>::type;
 
   template <typename ElementType, int NDim>
   class fixed_dim_iterator;
@@ -356,7 +349,14 @@ namespace detail {
 
 } // namespace dynd::detail
 
+template <typename T>
+using identity_t = T;
+
+template <typename T>
+using wrapper_t =
+    typename conditional_make<!std::is_fundamental<T>::value, identity_t, detail::scalar_wrapper, T>::type;
+
 template <typename ElementType>
-using fixed_dim = detail::fixed_dim<detail::wrap_if_exact_t<ElementType>>;
+using fixed_dim = detail::fixed_dim<wrapper_t<ElementType>>;
 
 } // namespace dynd
