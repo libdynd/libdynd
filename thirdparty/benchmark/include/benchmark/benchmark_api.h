@@ -143,7 +143,7 @@ BENCHMARK(BM_MultiThreaded)->Threads(4);
 #define BENCHMARK_BENCHMARK_API_H_
 
 #include <assert.h>
-#include <stddef.h>
+#include <cstddef>
 #include <stdint.h>
 
 #include "macros.h"

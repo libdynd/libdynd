@@ -52,7 +52,7 @@ matrix:
     before_script:
     - mkdir build
     - pushd build
-    - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+    - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DDYND_BUILD_BENCHMARKS=OFF ..
     script:
     - make -j5 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
