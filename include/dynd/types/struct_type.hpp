@@ -93,6 +93,8 @@ namespace ndt {
       return make(nd::empty(0, string_type::make()), nd::empty(0, make_type()),
                   variadic);
     }
+
+    static type make_union(const nd::array &);
   };
 
 } // namespace dynd::ndt

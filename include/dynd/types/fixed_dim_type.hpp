@@ -363,8 +363,9 @@ template <typename T>
 using identity_t = T;
 
 template <typename T>
-using wrapper_t =
-    typename conditional_make<!std::is_fundamental<T>::value, identity_t, detail::scalar_wrapper, T>::type;
+using wrapper_t = typename conditional_make<!std::is_fundamental<typename std::remove_cv<T>::type>::value &&
+                                                !std::is_same<typename std::remove_cv<T>::type, ndt::type>::value,
+                                            identity_t, detail::scalar_wrapper, T>::type;
 
 template <typename ElementType>
 using fixed_dim = detail::fixed_dim<wrapper_t<ElementType>>;

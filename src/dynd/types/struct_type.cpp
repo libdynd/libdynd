@@ -207,6 +207,16 @@ void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   }
 }
 
+ndt::type ndt::struct_type::make_union(const nd::array &tp)
+{
+  // vector of names, vector of types
+  for (auto &tp : const_cast<nd::array &>(tp).view<fixed_dim<const ndt::type>>()) {
+    std::cout << tp << std::endl;
+  }
+
+  return type();
+}
+
 /*
 static nd::array property_get_field_names(const ndt::type &tp)
 {
