@@ -36,16 +36,6 @@ matrix:
     - make -j5 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - kalakris-cmake
-        packages:
-        - gcc-4.9
-        - g++-4.9
-        - cmake
-        - valgrind
     env: VALGRIND DYND_FFTW=OFF
     before_script:
     - mkdir build
