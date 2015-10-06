@@ -103,12 +103,14 @@ TEST(View, FixedDimFixedDim)
   EXPECT_EQ(2, vals(1)(0));
   EXPECT_EQ(3, vals(1)(1));
 
-  int i = 0;
-  for (auto val : vals) {
-    EXPECT_EQ(vals(i)(0), val(0));
-    EXPECT_EQ(vals(i)(1), val(1));
-    ++i;
-  }
+  /*
+    int i = 0;
+    for (auto val : vals) {
+      EXPECT_EQ(vals(i)(0), val(0));
+      EXPECT_EQ(vals(i)(1), val(1));
+      ++i;
+    }
+  */
 }
 
 TEST(View, FixedDimFixedDimFixedDim)
@@ -146,12 +148,14 @@ TEST(View, FixedDimFixedDimFixedDim)
   EXPECT_EQ(6, vals(1)(1, 0));
   EXPECT_EQ(7, vals(1)(1, 1));
 
-  int i = 0;
-  for (auto val : vals) {
-    EXPECT_EQ(vals(i)(0, 0), val(0, 0));
-    EXPECT_EQ(vals(i)(0, 1), val(0, 1));
-    EXPECT_EQ(vals(i)(1, 0), val(1, 0));
-    EXPECT_EQ(vals(i)(1, 1), val(1, 1));
-    ++i;
-  }
+  /*
+    int i = 0;
+    for (auto val : vals) {
+      EXPECT_EQ(vals(i)(0, 0), val(0, 0));
+      EXPECT_EQ(vals(i)(0, 1), val(0, 1));
+      EXPECT_EQ(vals(i)(1, 0), val(1, 0));
+      EXPECT_EQ(vals(i)(1, 1), val(1, 1));
+      ++i;
+    }
+  */
 }
