@@ -203,7 +203,12 @@ namespace detail {
     static const intptr_t ndim = 0;
 
     template <int NDim>
-    using iterator_type = scalar_wrapper_iterator<ValueType, NDim>;
+    class iterator_type : public scalar_wrapper_iterator<ValueType, NDim> {
+    public:
+      iterator_type(const char *metadata, char *data) : scalar_wrapper_iterator<ValueType, NDim>(metadata, data)
+      {
+      }
+    };
 
     scalar_wrapper(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
     {
@@ -266,7 +271,12 @@ namespace detail {
     typedef ElementType element_type;
 
     template <int NDim>
-    using iterator_type = fixed_dim_iterator<ElementType, NDim>;
+    class iterator_type : public fixed_dim_iterator<ElementType, NDim> {
+    public:
+      iterator_type(const char *metadata, char *data) : fixed_dim_iterator<ElementType, NDim>(metadata, data)
+      {
+      }
+    };
 
     fixed_dim(const char *metadata, char *data) : ElementType(metadata, data)
     {
