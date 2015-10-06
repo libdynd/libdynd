@@ -40,7 +40,7 @@ matrix:
     before_script:
     - mkdir build
     - pushd build
-    - cmake -DDYND_FFTW=${DYND_FFTW} -DDYND_BUILD_BENCHMARKS=OFF ..
+    - cmake -DDYND_FFTW=${DYND_FFTW} ..
     script:
     - make -j5 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
