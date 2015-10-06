@@ -1,7 +1,7 @@
 #ifndef BENCHMARK_ARRAYSIZE_H_
 #define BENCHMARK_ARRAYSIZE_H_
 
-#include <cstddef>
+//#include <cstddef>
 
 #include "internal_macros.h"
 
