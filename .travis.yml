@@ -41,18 +41,18 @@ matrix:
         sources:
         - ubuntu-toolchain-r-test
         - kalakris-cmake
-        - llvm-toolchain-precise-3.7
+#        - llvm-toolchain-precise-3.7
         packages:
         - gcc-4.9
         - g++-4.9
-        - clang-3.7
+#        - clang-3.7
         - cmake
         - valgrind
     env: VALGRIND DYND_FFTW=OFF
     before_script:
     - mkdir build
     - pushd build
-    - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_C_COMPILER=clang-3.7 -DCMAKE_CXX_COMPILER=clang++-3.7 ..
+    - cmake -DDYND_FFTW=${DYND_FFTW} -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
     script:
     - make -j5 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
