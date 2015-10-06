@@ -26,8 +26,7 @@ namespace ndt {
 
   class DYND_API fixed_dim_type : public base_dim_type {
     intptr_t m_dim_size;
-    std::vector<std::pair<std::string, gfunc::callable>> m_array_properties,
-        m_array_functions;
+    std::vector<std::pair<std::string, gfunc::callable>> m_array_properties, m_array_functions;
 
   public:
     fixed_dim_type(intptr_t dim_size, const type &element_tp);
@@ -36,15 +35,17 @@ namespace ndt {
 
     size_t get_default_data_size() const;
 
-    intptr_t get_fixed_dim_size() const { return m_dim_size; }
+    intptr_t get_fixed_dim_size() const
+    {
+      return m_dim_size;
+    }
 
     intptr_t get_fixed_stride(const char *arrmeta) const
     {
       return reinterpret_cast<const size_stride_t *>(arrmeta)->stride;
     }
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
@@ -52,33 +53,23 @@ namespace ndt {
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
-    void transform_child_types(type_transform_fn_t transform_fn,
-                               intptr_t arrmeta_offset, void *extra,
-                               type &out_transformed_tp,
-                               bool &out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
+                               type &out_transformed_tp, bool &out_was_transformed) const;
     type get_canonical_type() const;
 
-    type apply_linear_index(intptr_t nindices, const irange *indices,
-                            size_t current_i, const type &root_tp,
+    type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
-    intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
-                                const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta,
-                                memory_block_data *embedded_reference,
-                                size_t current_i, const type &root_tp,
-                                bool leading_dimension, char **inout_data,
+    intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
+                                char *out_arrmeta, memory_block_data *embedded_reference, size_t current_i,
+                                const type &root_tp, bool leading_dimension, char **inout_data,
                                 memory_block_data **inout_dataref) const;
-    type at_single(intptr_t i0, const char **inout_arrmeta,
-                   const char **inout_data) const;
+    type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
-    type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
-                               intptr_t total_ndim = 0) const;
+    type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 
     intptr_t get_dim_size(const char *arrmeta, const char *data) const;
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                   const char *arrmeta, const char *data) const;
-    void get_strides(size_t i, intptr_t *out_strides,
-                     const char *arrmeta) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
+    void get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const;
 
     axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
@@ -92,31 +83,23 @@ namespace ndt {
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                             const std::string &indent) const;
-    size_t
-    arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                  memory_block_data *embedded_reference) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
+    size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
+                                         memory_block_data *embedded_reference) const;
 
     size_t get_iterdata_size(intptr_t ndim) const;
-    size_t iterdata_construct(iterdata_common *iterdata,
-                              const char **inout_arrmeta, intptr_t ndim,
-                              const intptr_t *shape,
-                              type &out_uniform_tp) const;
+    size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim,
+                              const intptr_t *shape, type &out_uniform_tp) const;
     size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
     void data_destruct(const char *arrmeta, char *data) const;
-    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
-                               size_t count) const;
+    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                    const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta,
-                                    kernel_request_t kernreq,
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                     const eval::eval_context *ectx) const;
 
-    void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback,
-                         void *callback_data) const;
+    void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback, void *callback_data) const;
 
     /**
      * Modifies arrmeta allocated using the arrmeta_default_construct function,
@@ -132,23 +115,17 @@ namespace ndt {
      * \param src_arrmeta  The arrmeta of the input nd::array whose stride
      *ordering is to be matched.
      */
-    void reorder_default_constructed_strides(char *dst_arrmeta,
-                                             const type &src_tp,
-                                             const char *src_arrmeta) const;
+    void reorder_default_constructed_strides(char *dst_arrmeta, const type &src_tp, const char *src_arrmeta) const;
 
-    bool match(const char *arrmeta, const type &candidate_tp,
-               const char *candidate_arrmeta,
+    bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    void get_dynamic_type_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
-    void get_dynamic_array_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
-        size_t *out_count) const;
-    void get_dynamic_array_functions(
-        const std::pair<std::string, gfunc::callable> **out_functions,
-        size_t *out_count) const;
+    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                     size_t *out_count) const;
+    void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                                      size_t *out_count) const;
+    void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                                     size_t *out_count) const;
 
     virtual type with_element_type(const type &element_tp) const;
   };
@@ -161,10 +138,8 @@ namespace ndt {
   template <typename T>
   inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i)
   {
-    const fixed_dim_type_arrmeta *md =
-        reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
-    return *reinterpret_cast<const T *>(a.get_readonly_originptr() +
-                                        i * md->stride);
+    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
+    return *reinterpret_cast<const T *>(a.get_readonly_originptr() + i * md->stride);
   }
 
   /**
@@ -175,8 +150,7 @@ namespace ndt {
   template <typename T>
   inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i)
   {
-    const fixed_dim_type_arrmeta *md =
-        reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
+    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
     return *reinterpret_cast<T *>(a.get_readwrite_originptr() + i * md->stride);
   }
 
@@ -184,8 +158,7 @@ namespace ndt {
 
   DYND_API type make_fixed_dim(intptr_t ndim, const intptr_t *shape, const type &dtp);
 
-  inline type make_fixed_dim(size_t dim_size, const type &element_tp,
-                             intptr_t ndim)
+  inline type make_fixed_dim(size_t dim_size, const type &element_tp, intptr_t ndim)
   {
     type result = element_tp;
     for (intptr_t i = 0; i < ndim; ++i) {
@@ -197,14 +170,203 @@ namespace ndt {
 
   template <typename T, int N>
   struct type::equivalent<T[N]> {
-    static type make() { return make_fixed_dim(N, type::make<T>()); }
+    static type make()
+    {
+      return make_fixed_dim(N, type::make<T>());
+    }
   };
 
   // Need to handle const properly
   template <typename T, int N>
   struct type::equivalent<const T[N]> {
-    static type make() { return type::make<T[N]>(); }
+    static type make()
+    {
+      return type::make<T[N]>();
+    }
   };
 
 } // namespace dynd::ndt
+
+namespace detail {
+
+  template <typename ValueType, int NDim>
+  class scalar_wrapper_iterator;
+
+  template <typename ValueType>
+  class scalar_wrapper {
+  protected:
+    const char *m_metadata;
+    char *m_data;
+
+  public:
+    typedef ValueType data_type;
+    static const intptr_t ndim = 0;
+
+    template <int NDim>
+    class iterator_type : public scalar_wrapper_iterator<ValueType, NDim> {
+    public:
+      iterator_type(const char *metadata, char *data) : scalar_wrapper_iterator<ValueType, NDim>(metadata, data)
+      {
+      }
+    };
+
+    scalar_wrapper(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
+    {
+    }
+
+    data_type &operator()(const char *DYND_UNUSED(metadata), char *data)
+    {
+      return *reinterpret_cast<data_type *>(data);
+    }
+  };
+
+  template <typename ValueType>
+  class scalar_wrapper_iterator<ValueType, 0> {
+  protected:
+    char *m_data;
+
+  public:
+    scalar_wrapper_iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data)
+    {
+    }
+
+    ValueType &operator*()
+    {
+      return *reinterpret_cast<ValueType *>(m_data);
+    }
+
+    bool operator==(const scalar_wrapper_iterator &rhs) const
+    {
+      return m_data == rhs.m_data;
+    }
+
+    bool operator!=(const scalar_wrapper_iterator &rhs) const
+    {
+      return m_data != rhs.m_data;
+    }
+  };
+
+  template <typename ElementType, int NDim>
+  class fixed_dim_iterator;
+
+  template <typename ElementType>
+  class fixed_dim : public ElementType {
+  protected:
+    fixed_dim operator()(const char *metadata, char *data)
+    {
+      return fixed_dim(metadata, data);
+    }
+
+    template <typename Index0Type, typename... IndexType>
+    decltype(auto) operator()(const char *metadata, char *data, Index0Type index0, IndexType... index)
+    {
+      return ElementType::operator()(metadata + sizeof(fixed_dim_type_arrmeta),
+                                     data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride,
+                                     index...);
+    }
+
+  public:
+    typedef typename ElementType::data_type data_type;
+    static const intptr_t ndim = ElementType::ndim + 1;
+    typedef ElementType element_type;
+
+    template <int NDim>
+    class iterator_type : public fixed_dim_iterator<ElementType, NDim> {
+    public:
+      iterator_type(const char *metadata, char *data) : fixed_dim_iterator<ElementType, NDim>(metadata, data)
+      {
+      }
+    };
+
+    fixed_dim(const char *metadata, char *data) : ElementType(metadata, data)
+    {
+    }
+
+    template <typename... IndexType>
+    decltype(auto) operator()(IndexType... index)
+    {
+      static_assert(sizeof...(IndexType) <= ndim, "too many indices");
+      return (*this)(this->m_metadata, this->m_data, index...);
+    }
+
+    template <int NDim = 1>
+    iterator_type<NDim> begin()
+    {
+      return iterator_type<NDim>(this->m_metadata, this->m_data);
+    }
+
+    template <int NDim = 1>
+    iterator_type<NDim> end()
+    {
+      return iterator_type<NDim>(this->m_metadata,
+                                 this->m_data +
+                                     reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
+                                         reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
+    }
+  };
+
+  template <typename ElementType>
+  class fixed_dim_iterator<ElementType, 0> {
+  protected:
+    const char *m_metadata;
+    char *m_data;
+
+  public:
+    fixed_dim_iterator(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
+    {
+    }
+
+    fixed_dim<ElementType> operator*()
+    {
+      return fixed_dim<ElementType>(m_metadata, m_data);
+    }
+
+    bool operator==(const fixed_dim_iterator &rhs) const
+    {
+      return m_data == rhs.m_data;
+    }
+
+    bool operator!=(const fixed_dim_iterator &rhs) const
+    {
+      return m_data != rhs.m_data;
+    }
+  };
+
+  template <typename ElementType, int NDim>
+  class fixed_dim_iterator : public ElementType::template iterator_type<NDim - 1> {
+    intptr_t m_stride;
+
+  public:
+    fixed_dim_iterator(const char *metadata, char *data)
+        : ElementType::template iterator_type<NDim - 1>(metadata + sizeof(fixed_dim_type_arrmeta), data),
+          m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
+    {
+    }
+
+    fixed_dim_iterator &operator++()
+    {
+      this->m_data += m_stride;
+      return *this;
+    }
+
+    fixed_dim_iterator operator++(int)
+    {
+      fixed_dim_iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+  };
+
+} // namespace dynd::detail
+
+template <typename T>
+using identity_t = T;
+
+template <typename T>
+using wrapper_t =
+    typename conditional_make<!std::is_fundamental<T>::value, identity_t, detail::scalar_wrapper, T>::type;
+
+template <typename ElementType>
+using fixed_dim = detail::fixed_dim<wrapper_t<ElementType>>;
+
 } // namespace dynd
