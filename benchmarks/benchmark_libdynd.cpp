@@ -15,7 +15,7 @@
 using namespace std;
 using namespace dynd;
 
-int main(int argc, const char *argv[])
+int main(int argc, char **argv)
 {
   libdynd_init();
   atexit(&libdynd_cleanup);

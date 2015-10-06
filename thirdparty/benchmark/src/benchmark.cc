@@ -15,11 +15,11 @@
 #include "benchmark/benchmark.h"
 #include "internal_macros.h"
 
-#include <sys/time.h>
 #ifndef OS_WINDOWS
+#include <sys/time.h>
 #include <sys/resource.h>
-#endif
 #include <unistd.h>
+#endif
 
 #include <cstdlib>
 #include <cstring>
@@ -101,7 +101,7 @@ bool IsZero(double n) {
 
 // For non-dense Range, intermediate values are powers of kRangeMultiplier.
 static const int kRangeMultiplier = 8;
-static const int kMaxIterations = 1000000000;
+static const size_t kMaxIterations = 1000000000;
 
 bool running_benchmark = false;
 
@@ -596,7 +596,7 @@ namespace {
 // Execute one thread of benchmark b for the specified number of iterations.
 // Adds the stats collected for the thread into *total.
 void RunInThread(const benchmark::internal::Benchmark::Instance* b,
-                 int iters, int thread_id,
+                 size_t iters, int thread_id,
                  ThreadStats* total) EXCLUDES(GetBenchmarkLock()) {
   State st(iters, b->has_arg1, b->arg1, b->has_arg2, b->arg2, thread_id);
   b->benchmark->Run(st);
@@ -613,7 +613,7 @@ void RunInThread(const benchmark::internal::Benchmark::Instance* b,
 
 void RunBenchmark(const benchmark::internal::Benchmark::Instance& b,
                   BenchmarkReporter* br) EXCLUDES(GetBenchmarkLock()) {
-  int iters = 1;
+  size_t iters = 1;
 
   std::vector<BenchmarkReporter::Run> reports;
 
@@ -863,7 +863,7 @@ void PrintUsageAndExit() {
   exit(0);
 }
 
-void ParseCommandLineFlags(int* argc, const char** argv) {
+void ParseCommandLineFlags(int* argc, char** argv) {
   using namespace benchmark;
   for (int i = 1; i < *argc; ++i) {
     if (
@@ -904,7 +904,7 @@ Benchmark* RegisterBenchmarkInternal(Benchmark* bench) {
 
 } // end namespace internal
 
-void Initialize(int* argc, const char** argv) {
+void Initialize(int* argc, char** argv) {
   internal::ParseCommandLineFlags(argc, argv);
   internal::SetLogLevel(FLAGS_v);
   // TODO remove this. It prints some output the first time it is called.
