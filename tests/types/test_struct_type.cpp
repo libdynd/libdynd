@@ -259,16 +259,6 @@ TEST(StructType, DifferentTypeAssign)
   EXPECT_EQ(8, b(1, 1).as<short>());
 }
 
-TEST(StructType, Union)
-{
-  ndt::type tp0("{x: int32, y: float64}");
-  ndt::type tp1("{x: int32}");
-
-  ndt::struct_type::make_union({tp0, tp1});
-
-  std::exit(-1);
-}
-
 TEST(StructType, SingleCompare)
 {
   nd::array a, b;
