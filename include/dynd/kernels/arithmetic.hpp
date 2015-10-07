@@ -11,9 +11,7 @@ namespace nd {
 #define DYND_DeclUnaryOp(OP, NAME)                                                                                    \
   template <type_id_t Src0TypeID>                                                                                     \
   struct inline_ ## NAME {                                                                                            \
-    typedef typename type_of<Src0TypeID>::type A;                                                                     \
-    typedef decltype( OP std::declval<A>()) R;                                                                        \
-    static inline R f(A a) { return OP a; }                                                                           \
+    static auto f(typename type_of<Src0TypeID>::type a) { return OP a; }                                              \
   };                                                                                                                  \
   template <type_id_t Src0TypeID>                                                                                     \
   struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&inline_ ## NAME <Src0TypeID>::f),               \
@@ -29,10 +27,7 @@ namespace nd {
 #define DYND_DeclBinopKernel(OP, NAME)                                                                               \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                               \
   struct inline_ ## NAME {                                                                                           \
-    typedef typename type_of<Src0TypeID>::type A0;                                                                   \
-    typedef typename type_of<Src1TypeID>::type A1;                                                                   \
-    typedef decltype(std::declval<A0>() OP std::declval<A1>()) R;                                                    \
-    static inline R f(A0 a, A1 b) { return a OP b; }                                                                 \
+    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }     \
   };                                                                                                                 \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                               \
   struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&inline_ ## NAME <Src0TypeID, Src1TypeID>::f),  \
@@ -53,10 +48,7 @@ namespace nd {
 
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct inline_logical_xor {
-    typedef typename type_of<Src0TypeID>::type A0;
-    typedef typename type_of<Src1TypeID>::type A1;
-    typedef decltype((!std::declval<A0>())^(!std::declval<A1>())) R;
-    static inline R f(A0 a, A1 b) { return (!a) ^ (!b); }
+    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return (!a) ^ (!b); }
   };
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct logical_xor_kernel : functional::as_apply_function_ck<
