@@ -30,10 +30,10 @@ namespace detail {                                                              
   template <type_id_t Src0TypeID>                                                                                     \
   struct inline_ ## NAME<Src0TypeID, false> {                                                                         \
     static char f(typename type_of<Src0TypeID>::type DYND_UNUSED(a)) {                                                \
-      throw std::runtime_error("Operator " #OP " does not have a known overload for given input types");              \
+      throw std::runtime_error("Operator " #OP " does not have a known overload for given input type.");              \
     }                                                                                                                 \
   };                                                                                                                  \
-  }                                                                                                                   \
+} /* namespace detail */                                                                                              \
   template <type_id_t Src0TypeID>                                                                                     \
   struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&detail::inline_ ## NAME <Src0TypeID>::f),       \
                                                            &detail::inline_ ## NAME <Src0TypeID>::f> {};              \
@@ -45,14 +45,35 @@ namespace detail {                                                              
 
 #undef DYND_DeclUnaryOp
 
-#define DYND_DeclBinopKernel(OP, NAME)                                                                               \
-  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                               \
-  struct inline_ ## NAME {                                                                                           \
-    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }     \
-  };                                                                                                                 \
-  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                               \
-  struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&inline_ ## NAME <Src0TypeID, Src1TypeID>::f),  \
-                                                            &inline_ ## NAME <Src0TypeID, Src1TypeID>::f> {};        \
+#define DYND_DeclBinopKernel(OP, NAME)                                                                                \
+namespace detail{                                                                                                     \
+  template<typename T, typename U>                                                                                    \
+  static auto NAME ## _isdef_test(int DYND_UNUSED(a)) ->                                                              \
+                                      sfinae_true<decltype(std::declval<T>() OP std::declval<U>())>;                  \
+  template<typename, typename>                                                                                        \
+  static auto NAME ## _isdef_test(long) -> std::false_type;                                                           \
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
+  struct isdef_ ## NAME : decltype(NAME ## _isdef_test<typename type_of<Src0TypeID>::type,                            \
+                                                       typename type_of<Src1TypeID>::type>(0)) {};                    \
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID,                                                                \
+           bool Defined = isdef_ ## NAME<Src0TypeID, Src1TypeID>::value>                                              \
+  struct inline_ ## NAME;                                                                                             \
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
+  struct inline_ ## NAME<Src0TypeID, Src1TypeID, true> {                                                              \
+    static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }      \
+  };                                                                                                                  \
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
+  struct inline_ ## NAME<Src0TypeID, Src1TypeID, false> {                                                             \
+    static char f(typename type_of<Src0TypeID>::type DYND_UNUSED(a),                                                  \
+                  typename type_of<Src1TypeID>::type DYND_UNUSED(b)) {                                                \
+      throw std::runtime_error("Operator " #OP " does not have a known overload for given input types.");             \
+    }                                                                                                                 \
+  };                                                                                                                  \
+} /* namespace detail */                                                                                              \
+  template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
+  struct NAME ## _kernel : functional::as_apply_function_ck<                                                          \
+                                       decltype(&detail::inline_ ## NAME <Src0TypeID, Src1TypeID>::f),                \
+                                       &detail::inline_ ## NAME <Src0TypeID, Src1TypeID>::f> {};                      \
 
   DYND_DeclBinopKernel(+, add)
   DYND_DeclBinopKernel(-, subtract)
