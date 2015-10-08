@@ -28,10 +28,6 @@ namespace nd {
 
     static callable make()
     {
-      typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id,
-                               int64_type_id, float32_type_id, float64_type_id,
-                               complex_float32_type_id,
-                               complex_float64_type_id> numeric_type_ids;
 
       const callable self =
           functional::call<FuncType>(ndt::type("(Any) -> Any"));
