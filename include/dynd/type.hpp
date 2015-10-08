@@ -559,6 +559,8 @@ namespace ndt {
       }
     }
 
+    ndt::type common_type(const ndt::type &other) const;
+
     /**
      * Returns true if the type contains a symbolic construct
      * like a type var.

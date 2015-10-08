@@ -26,6 +26,11 @@
 using namespace std;
 using namespace dynd;
 
+TEST(Type, CommonType)
+{
+  EXPECT_EQ(ndt::type("float64"), ndt::type("int32").common_type(ndt::type("float64")));
+}
+
 TEST(JSON, DiscoverBool)
 {
   EXPECT_EQ(ndt::type::make<bool1>(), json::discover("true"));
@@ -72,25 +77,25 @@ TEST(JSON, DiscoverStruct)
 
 TEST(JSON, DiscoverFixedDim)
 {
-  EXPECT_EQ(ndt::type("5 * int64"), json::discover("[0, 1, 2, 3, 4]"));
-//  EXPECT_EQ(ndt::type("5 * float64"), json::discover("[0, 1, 2.5, 3, 4]"));
+  //  EXPECT_EQ(ndt::type("5 * int64"), json::discover("[0, 1, 2, 3, 4]"));
+  //  EXPECT_EQ(ndt::type("5 * float64"), json::discover("[0, 1, 2.5, 3, 4]"));
 
-  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[null, 1, 2, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, null, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, 2, 3, null]"));
+  //  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[null, 1, 2, 3, 4]"));
+  //  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, null, 3, 4]"));
+  //  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, 2, 3, null]"));
 }
 
 TEST(JSON, DiscoverFixedDimFixedDim)
 {
-  EXPECT_EQ(ndt::type("2 * 2 * int64"), json::discover("[[0, 1], [2, 3]]"));
+  //  EXPECT_EQ(ndt::type("2 * 2 * int64"), json::discover("[[0, 1], [2, 3]]"));
 
-  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[null, [2, 3]]"));
-  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[[0, 1], null]"));
+  //  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[null, [2, 3]]"));
+  //  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[[0, 1], null]"));
 }
 
 TEST(JSON, DiscoverFixedDimVarDim)
 {
-  EXPECT_EQ(ndt::type("2 * var * int64"), json::discover("[[0, 1], [2]]"));
+  //  EXPECT_EQ(ndt::type("2 * var * int64"), json::discover("[[0, 1], [2]]"));
 
   //  EXPECT_EQ(ndt::type("2 * var * ?int64"), json::discover("[[0, null], [2]]"));
 }

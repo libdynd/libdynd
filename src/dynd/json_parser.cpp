@@ -945,58 +945,18 @@ static ndt::type discover_type(const char *&begin, const char *end)
       return ndt::tuple_type::make();
     }
 
-    // All the elements are the same -> fixed_dim_type
-    // All the elements are fixed_dim_type -> maybe fixed_dim_type[var_dim_type]
-
     std::vector<ndt::type> types;
-    //      bool all_same = true;
-
-    int i = -1;
-
     ndt::type common_tp = discover_type(begin, end);
-    bool has_null = common_tp.get_type_id() == option_type_id;
-    if (!has_null) {
-      i = 0;
-    }
     types.push_back(common_tp);
-    bool is_fixed_dim = true;
-    bool is_fixed_dim_var_dim = (i == -1) ? false : types[i].get_type_id() == fixed_dim_type_id;
     for (;;) {
       if (!parse_token(begin, end, ",")) {
         break;
       }
       const ndt::type &tp = discover_type(begin, end);
-
       types.push_back(tp);
-      if (types.back().get_type_id() == option_type_id) {
-        has_null = true;
-        continue;
-      }
-
-      if (i == -1) {
-        i = types.size() - 1;
-      } else {
-        is_fixed_dim &= tp == types[i];
-        is_fixed_dim_var_dim &=
-            tp.get_type_id() == fixed_dim_type_id && tp.extended<ndt::fixed_dim_type>()->get_element_type() ==
-                                                         types[i].extended<ndt::fixed_dim_type>()->get_element_type();
-      }
     }
-
     if (!parse_token(begin, end, "]")) {
       throw parse::parse_error(begin, "expected array separator ',' or terminator ']'");
-    }
-
-    if (is_fixed_dim) {
-      ndt::type element_tp = types[i];
-      if (has_null) {
-        element_tp = ndt::option_type::make(element_tp);
-      }
-      return ndt::make_fixed_dim(types.size(), element_tp);
-    }
-    if (is_fixed_dim_var_dim) {
-      return ndt::make_fixed_dim(types.size(),
-                                 ndt::var_dim_type::make(types[i].extended<ndt::fixed_dim_type>()->get_element_type()));
     }
     return ndt::tuple_type::make(types);
   }

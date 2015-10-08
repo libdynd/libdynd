@@ -1023,3 +1023,49 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
     extended()->print_data(o, arrmeta, data);
   }
 }
+
+namespace {
+
+class common_types {
+  struct init {
+    template <typename TypeIDSequence>
+    void on_each(ndt::type (&val)[builtin_type_id_count][builtin_type_id_count])
+    {
+      val[front<TypeIDSequence>::value][back<TypeIDSequence>::value] =
+          ndt::type::make<typename std::common_type<typename type_of<front<TypeIDSequence>::value>::type,
+                                                    typename type_of<back<TypeIDSequence>::value>::type>::type>();
+    }
+  };
+
+  ndt::type m_val[builtin_type_id_count][builtin_type_id_count];
+
+public:
+  common_types()
+  {
+    typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id> I;
+    for_each<typename outer<I, I>::type>(init(), m_val);
+  }
+
+  typedef ndt::type T[builtin_type_id_count][builtin_type_id_count];
+
+  operator T &()
+  {
+    return m_val;
+  }
+};
+
+} // unnamed namespace
+
+ndt::type ndt::type::common_type(const ndt::type &other) const
+{
+  if (m_extended == other.m_extended) {
+    return *this;
+  }
+
+  if (is_builtin() && other.is_builtin()) {
+    static const ndt::type(&common_tp)[builtin_type_id_count][builtin_type_id_count] = common_types();
+    return common_tp[get_type_id()][other.get_type_id()];
+  }
+
+  throw std::runtime_error("false");
+}
