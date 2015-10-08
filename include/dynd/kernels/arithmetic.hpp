@@ -8,14 +8,35 @@
 namespace dynd {
 namespace nd {
 
+namespace detail{
+  template<typename>
+  struct sfinae_true : std::true_type{};
+}
+
 #define DYND_DeclUnaryOp(OP, NAME)                                                                                    \
+namespace detail {                                                                                                    \
+  template<typename T>                                                                                                \
+  static auto NAME ## _isdef_test(int DYND_UNUSED(a)) -> sfinae_true<decltype(OP std::declval<T>())>;                 \
+  template<typename>                                                                                                  \
+  static auto NAME ## _isdef_test(long) -> std::false_type;                                                           \
+  template<type_id_t Src0TypeID>                                                                                      \
+  struct isdef_ ## NAME : decltype(NAME ## _isdef_test<typename type_of<Src0TypeID>::type>(0)) {};                    \
+  template <type_id_t Src0TypeID, bool Defined = isdef_ ## NAME<Src0TypeID>::value>                                   \
+  struct inline_ ## NAME;                                                                                             \
   template <type_id_t Src0TypeID>                                                                                     \
-  struct inline_ ## NAME {                                                                                            \
+  struct inline_ ## NAME<Src0TypeID, true> {                                                                          \
     static auto f(typename type_of<Src0TypeID>::type a) { return OP a; }                                              \
   };                                                                                                                  \
   template <type_id_t Src0TypeID>                                                                                     \
-  struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&inline_ ## NAME <Src0TypeID>::f),               \
-                                                           &inline_ ## NAME <Src0TypeID>::f> {};                      \
+  struct inline_ ## NAME<Src0TypeID, false> {                                                                         \
+    static char f(typename type_of<Src0TypeID>::type DYND_UNUSED(a)) {                                                \
+      throw std::runtime_error("Operator " #OP " does not have a known overload for given input types");              \
+    }                                                                                                                 \
+  };                                                                                                                  \
+  }                                                                                                                   \
+  template <type_id_t Src0TypeID>                                                                                     \
+  struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&detail::inline_ ## NAME <Src0TypeID>::f),       \
+                                                           &detail::inline_ ## NAME <Src0TypeID>::f> {};              \
 
   DYND_DeclUnaryOp(+, plus)
   DYND_DeclUnaryOp(-, minus)
