@@ -1024,48 +1024,29 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
-namespace {
-
-class common_types {
-  struct init {
-    template <typename TypeIDSequence>
-    void on_each(ndt::type (&val)[builtin_type_id_count][builtin_type_id_count])
-    {
-      val[front<TypeIDSequence>::value][back<TypeIDSequence>::value] =
-          ndt::type::make<typename std::common_type<typename type_of<front<TypeIDSequence>::value>::type,
-                                                    typename type_of<back<TypeIDSequence>::value>::type>::type>();
-    }
-  };
-
-  ndt::type m_val[builtin_type_id_count][builtin_type_id_count];
-
-public:
-  common_types()
+struct ndt::common_type::init {
+  template <typename TypeIDSequence>
+  void on_each(ndt::type (*(&children)[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX])(const ndt::type &, const ndt::type &))
   {
-    typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id> I;
-    for_each<typename outer<I, I>::type>(init(), m_val);
-  }
 
-  typedef ndt::type T[builtin_type_id_count][builtin_type_id_count];
-
-  operator T &()
-  {
-    return m_val;
+    children[front<TypeIDSequence>::value][back<TypeIDSequence>::value] = [](const ndt::type &DYND_UNUSED(tp0),
+                                                                             const ndt::type & DYND_UNUSED(tp1)) {
+      return ndt::type::make<
+          typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
+                                    typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
+    };
   }
 };
 
-} // unnamed namespace
-
-ndt::type ndt::type::common_type(const ndt::type &other) const
+ndt::common_type::common_type()
 {
-  if (m_extended == other.m_extended) {
-    return *this;
-  }
-
-  if (is_builtin() && other.is_builtin()) {
-    static const ndt::type(&common_tp)[builtin_type_id_count][builtin_type_id_count] = common_types();
-    return common_tp[get_type_id()][other.get_type_id()];
-  }
-
-  throw std::runtime_error("false");
+  typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id> I;
+  for_each<typename outer<I, I>::type>(init(), m_children);
 }
+
+ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp1) const
+{
+  return m_children[tp0.get_type_id()][tp1.get_type_id()](tp0, tp1);
+}
+
+DYND_API class ndt::common_type ndt::common_type;

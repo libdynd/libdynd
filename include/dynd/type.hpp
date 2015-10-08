@@ -559,8 +559,6 @@ namespace ndt {
       }
     }
 
-    ndt::type common_type(const ndt::type &other) const;
-
     /**
      * Returns true if the type contains a symbolic construct
      * like a type var.
@@ -1124,6 +1122,17 @@ namespace ndt {
       return type::make<T>(std::forward<A>(a)...);
     }
   };
+
+  DYND_API extern class common_type {
+    struct init;
+
+    ndt::type (*m_children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX])(const ndt::type &, const ndt::type &);
+
+  public:
+    common_type();
+
+    ndt::type operator()(const ndt::type &tp0, const ndt::type &tp1) const;
+  } common_type;
 
   /**
    * Constructs an array type from a shape and

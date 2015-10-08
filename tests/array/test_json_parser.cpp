@@ -28,7 +28,7 @@ using namespace dynd;
 
 TEST(Type, CommonType)
 {
-  EXPECT_EQ(ndt::type("float64"), ndt::type("int32").common_type(ndt::type("float64")));
+  EXPECT_EQ(ndt::type("float64"), ndt::common_type(ndt::type("int32"), ndt::type("float64")));
 }
 
 TEST(JSON, DiscoverBool)
