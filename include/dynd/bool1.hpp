@@ -32,6 +32,14 @@ public:
     return *this;
   }
 
+  DYND_CUDA_HOST_DEVICE inline bool1 operator+() const {
+    return *this;
+  }
+
+  DYND_CUDA_HOST_DEVICE inline bool1 operator-() const {
+    return *this;
+  }
+
   DYND_CUDA_HOST_DEVICE bool1 &operator+=(bool1 rhs)
   {
     m_value += rhs.m_value;
