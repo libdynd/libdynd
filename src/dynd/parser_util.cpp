@@ -983,7 +983,7 @@ int dynd::parse_int64(int64_t &res, const char *begin, const char *end)
   }
 
   uint64_t ures;
-  bool val = parse_uint64(ures, begin, end);
+  int val = parse_uint64(ures, begin, end);
 
   res = ures;
   if (negative) {
