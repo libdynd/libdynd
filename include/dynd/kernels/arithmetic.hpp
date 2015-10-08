@@ -13,27 +13,37 @@ namespace detail{
   struct sfinae_true : std::true_type{};
 }
 
+// Use expression SFINAE to conditionally define a kernel that performs the desired
+// operation for the given type or errors out if the operation is not available.
 #define DYND_DeclUnaryOp(OP, NAME)                                                                                    \
 namespace detail {                                                                                                    \
+                                                                                                                      \
   template<typename T>                                                                                                \
   static auto NAME ## _isdef_test(int DYND_UNUSED(a)) -> sfinae_true<decltype(OP std::declval<T>())>;                 \
+                                                                                                                      \
   template<typename>                                                                                                  \
   static auto NAME ## _isdef_test(long) -> std::false_type;                                                           \
+                                                                                                                      \
   template<type_id_t Src0TypeID>                                                                                      \
   struct isdef_ ## NAME : decltype(NAME ## _isdef_test<typename type_of<Src0TypeID>::type>(0)) {};                    \
+                                                                                                                      \
   template <type_id_t Src0TypeID, bool Defined = isdef_ ## NAME<Src0TypeID>::value>                                   \
   struct inline_ ## NAME;                                                                                             \
+                                                                                                                      \
   template <type_id_t Src0TypeID>                                                                                     \
   struct inline_ ## NAME<Src0TypeID, true> {                                                                          \
     static auto f(typename type_of<Src0TypeID>::type a) { return OP a; }                                              \
   };                                                                                                                  \
+                                                                                                                      \
   template <type_id_t Src0TypeID>                                                                                     \
   struct inline_ ## NAME<Src0TypeID, false> {                                                                         \
     static char f(typename type_of<Src0TypeID>::type DYND_UNUSED(a)) {                                                \
       throw std::runtime_error("Operator " #OP " does not have a known overload for given input type.");              \
     }                                                                                                                 \
   };                                                                                                                  \
+                                                                                                                      \
 } /* namespace detail */                                                                                              \
+                                                                                                                      \
   template <type_id_t Src0TypeID>                                                                                     \
   struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&detail::inline_ ## NAME <Src0TypeID>::f),       \
                                                            &detail::inline_ ## NAME <Src0TypeID>::f> {};              \
@@ -45,23 +55,31 @@ namespace detail {                                                              
 
 #undef DYND_DeclUnaryOp
 
+// Use expression SFINAE to conditionally define a kernel that performs the desired
+// operation for two given types or errors out if the operation is not available.
 #define DYND_DeclBinopKernel(OP, NAME)                                                                                \
 namespace detail{                                                                                                     \
+                                                                                                                      \
   template<typename T, typename U>                                                                                    \
   static auto NAME ## _isdef_test(int DYND_UNUSED(a)) ->                                                              \
                                       sfinae_true<decltype(std::declval<T>() OP std::declval<U>())>;                  \
+                                                                                                                      \
   template<typename, typename>                                                                                        \
   static auto NAME ## _isdef_test(long) -> std::false_type;                                                           \
+                                                                                                                      \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
   struct isdef_ ## NAME : decltype(NAME ## _isdef_test<typename type_of<Src0TypeID>::type,                            \
                                                        typename type_of<Src1TypeID>::type>(0)) {};                    \
+                                                                                                                      \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID,                                                                \
            bool Defined = isdef_ ## NAME<Src0TypeID, Src1TypeID>::value>                                              \
   struct inline_ ## NAME;                                                                                             \
+                                                                                                                      \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
   struct inline_ ## NAME<Src0TypeID, Src1TypeID, true> {                                                              \
     static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }      \
   };                                                                                                                  \
+                                                                                                                      \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
   struct inline_ ## NAME<Src0TypeID, Src1TypeID, false> {                                                             \
     static char f(typename type_of<Src0TypeID>::type DYND_UNUSED(a),                                                  \
@@ -69,7 +87,9 @@ namespace detail{                                                               
       throw std::runtime_error("Operator " #OP " does not have a known overload for given input types.");             \
     }                                                                                                                 \
   };                                                                                                                  \
+                                                                                                                      \
 } /* namespace detail */                                                                                              \
+                                                                                                                      \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
   struct NAME ## _kernel : functional::as_apply_function_ck<                                                          \
                                        decltype(&detail::inline_ ## NAME <Src0TypeID, Src1TypeID>::f),                \
