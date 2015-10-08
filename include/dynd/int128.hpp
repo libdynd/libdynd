@@ -78,6 +78,10 @@ public:
   DYND_CUDA_HOST_DEVICE int128(const float16 &value);
   DYND_CUDA_HOST_DEVICE int128(const float128 &value);
 
+  DYND_CUDA_HOST_DEVICE inline int128 operator+() const {
+    return *this;
+  }
+  
   DYND_CUDA_HOST_DEVICE inline bool operator==(const int128 &rhs) const
   {
     return m_lo == rhs.m_lo && m_hi == rhs.m_hi;
