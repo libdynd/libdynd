@@ -1126,7 +1126,7 @@ namespace ndt {
   DYND_API extern class common_type {
     struct init;
 
-    ndt::type (*m_children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX])(const ndt::type &, const ndt::type &);
+    static ndt::type (*children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX])(const ndt::type &, const ndt::type &);
 
   public:
     common_type();

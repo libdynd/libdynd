@@ -55,7 +55,7 @@ TEST(JSON, DiscoverFloat64)
 
 TEST(JSON, DiscoverString)
 {
-  EXPECT_ARRAY_EQ(ndt::type(string_type_id), json::discover("\"Hello, world!\""));
+  EXPECT_EQ(ndt::type(string_type_id), json::discover("\"Hello, world!\""));
 }
 
 TEST(JSON, DiscoverOption)
@@ -66,7 +66,7 @@ TEST(JSON, DiscoverOption)
 TEST(JSON, DiscoverTuple)
 {
   EXPECT_EQ(ndt::tuple_type::make(), json::discover("[]"));
-  EXPECT_EQ(ndt::type("(int64, float64)"), json::discover("[2, 3.14]"));
+  EXPECT_EQ(ndt::type("(int64, string)"), json::discover("[2, \"Hello, world!\"]"));
 }
 
 TEST(JSON, DiscoverStruct)
@@ -77,8 +77,8 @@ TEST(JSON, DiscoverStruct)
 
 TEST(JSON, DiscoverFixedDim)
 {
-  //  EXPECT_EQ(ndt::type("5 * int64"), json::discover("[0, 1, 2, 3, 4]"));
-  //  EXPECT_EQ(ndt::type("5 * float64"), json::discover("[0, 1, 2.5, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * int64"), json::discover("[0, 1, 2, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * float64"), json::discover("[0, 1, 2.5, 3, 4]"));
 
   //  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[null, 1, 2, 3, 4]"));
   //  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, null, 3, 4]"));
@@ -87,7 +87,7 @@ TEST(JSON, DiscoverFixedDim)
 
 TEST(JSON, DiscoverFixedDimFixedDim)
 {
-  //  EXPECT_EQ(ndt::type("2 * 2 * int64"), json::discover("[[0, 1], [2, 3]]"));
+  EXPECT_EQ(ndt::type("2 * 2 * int64"), json::discover("[[0, 1], [2, 3]]"));
 
   //  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[null, [2, 3]]"));
   //  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[[0, 1], null]"));
@@ -95,7 +95,10 @@ TEST(JSON, DiscoverFixedDimFixedDim)
 
 TEST(JSON, DiscoverFixedDimVarDim)
 {
-  //  EXPECT_EQ(ndt::type("2 * var * int64"), json::discover("[[0, 1], [2]]"));
+  EXPECT_EQ(ndt::type("2 * var * int64"), json::discover("[[0, 1], [2]]"));
+  EXPECT_EQ(ndt::type("2 * var * var * int64"), json::discover("[[[0, 1], [2]], [[3]]]"));
+
+  EXPECT_EQ(ndt::type("2 * var * float64"), json::discover("[[0.5, 1], [2]]"));
 
   //  EXPECT_EQ(ndt::type("2 * var * ?int64"), json::discover("[[0, null], [2]]"));
 }

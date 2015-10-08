@@ -953,12 +953,18 @@ static ndt::type discover_type(const char *&begin, const char *end)
         break;
       }
       const ndt::type &tp = discover_type(begin, end);
+      if (!common_tp.is_null()) {
+        common_tp = ndt::common_type(common_tp, tp);
+      }
       types.push_back(tp);
     }
     if (!parse_token(begin, end, "]")) {
       throw parse::parse_error(begin, "expected array separator ',' or terminator ']'");
     }
-    return ndt::tuple_type::make(types);
+    if (common_tp.is_null()) {
+      return ndt::tuple_type::make(types);
+    }
+    return ndt::make_fixed_dim(types.size(), common_tp);
   }
   case '"': {
     const char *strbegin, *strend;
