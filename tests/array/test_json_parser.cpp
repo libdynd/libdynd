@@ -28,19 +28,34 @@ using namespace dynd;
 
 TEST(JSON, DiscoverBool)
 {
-  EXPECT_ARRAY_EQ(ndt::type::make<bool1>(), json::discover("true"));
-  EXPECT_ARRAY_EQ(ndt::type::make<bool1>(), json::discover("false"));
+  EXPECT_EQ(ndt::type::make<bool1>(), json::discover("true"));
+  EXPECT_EQ(ndt::type::make<bool1>(), json::discover("false"));
+}
+
+TEST(JSON, DiscoverInt64)
+{
+  EXPECT_EQ(ndt::type::make<int64>(), json::discover("0"));
+  EXPECT_EQ(ndt::type::make<int64>(), json::discover("3"));
+  EXPECT_EQ(ndt::type::make<int64>(), json::discover("11"));
+
+  EXPECT_EQ(ndt::type::make<int64>(), json::discover("-1"));
+  EXPECT_EQ(ndt::type::make<int64>(), json::discover("-5"));
 }
 
 TEST(JSON, DiscoverFloat64)
 {
-  EXPECT_ARRAY_EQ(ndt::type::make<float64>(), json::discover("0.5"));
-  EXPECT_ARRAY_EQ(ndt::type::make<float64>(), json::discover("3.14"));
+  EXPECT_EQ(ndt::type::make<float64>(), json::discover("0.5"));
+  EXPECT_EQ(ndt::type::make<float64>(), json::discover("3.14"));
 }
 
 TEST(JSON, DiscoverString)
 {
   EXPECT_ARRAY_EQ(ndt::type(string_type_id), json::discover("\"Hello, world!\""));
+}
+
+TEST(JSON, DiscoverOption)
+{
+  EXPECT_EQ(ndt::type("?void"), json::discover("null"));
 }
 
 TEST(JSON, DiscoverTuple)
@@ -58,16 +73,26 @@ TEST(JSON, DiscoverStruct)
 TEST(JSON, DiscoverFixedDim)
 {
   EXPECT_EQ(ndt::type("5 * int64"), json::discover("[0, 1, 2, 3, 4]"));
+//  EXPECT_EQ(ndt::type("5 * float64"), json::discover("[0, 1, 2.5, 3, 4]"));
+
+  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[null, 1, 2, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, null, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, 2, 3, null]"));
 }
 
 TEST(JSON, DiscoverFixedDimFixedDim)
 {
   EXPECT_EQ(ndt::type("2 * 2 * int64"), json::discover("[[0, 1], [2, 3]]"));
+
+  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[null, [2, 3]]"));
+  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[[0, 1], null]"));
 }
 
 TEST(JSON, DiscoverFixedDimVarDim)
 {
   EXPECT_EQ(ndt::type("2 * var * int64"), json::discover("[[0, 1], [2]]"));
+
+  //  EXPECT_EQ(ndt::type("2 * var * ?int64"), json::discover("[[0, null], [2]]"));
 }
 
 TEST(JSONParser, BuiltinsFromBool)

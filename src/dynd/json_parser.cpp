@@ -902,20 +902,6 @@ DYND_API bool validate_float64(const char *begin, const char *end)
   return true;
 }
 
-DYND_API bool validate_int64(const char *begin, const char *end)
-{
-  try
-  {
-    parse::checked_string_to_int64(begin, end);
-  }
-  catch (...)
-  {
-    return false;
-  }
-
-  return true;
-}
-
 static ndt::type discover_type(const char *&begin, const char *end)
 {
   begin = skip_whitespace(begin, end);
@@ -959,33 +945,58 @@ static ndt::type discover_type(const char *&begin, const char *end)
       return ndt::tuple_type::make();
     }
 
+    // All the elements are the same -> fixed_dim_type
+    // All the elements are fixed_dim_type -> maybe fixed_dim_type[var_dim_type]
+
     std::vector<ndt::type> types;
     //      bool all_same = true;
 
-    const ndt::type &front_tp = discover_type(begin, end);
-    types.push_back(front_tp);
+    int i = -1;
+
+    ndt::type common_tp = discover_type(begin, end);
+    bool has_null = common_tp.get_type_id() == option_type_id;
+    if (!has_null) {
+      i = 0;
+    }
+    types.push_back(common_tp);
     bool is_fixed_dim = true;
-    bool is_fixed_dim_var_dim = front_tp.get_type_id() == fixed_dim_type_id;
+    bool is_fixed_dim_var_dim = (i == -1) ? false : types[i].get_type_id() == fixed_dim_type_id;
     for (;;) {
       if (!parse_token(begin, end, ",")) {
         break;
       }
-      const ndt::type &back_tp = discover_type(begin, end);
-      types.push_back(back_tp);
-      is_fixed_dim &= back_tp == front_tp;
-      is_fixed_dim_var_dim &= back_tp.get_type_id() == fixed_dim_type_id &&
-                              back_tp.extended<ndt::fixed_dim_type>()->get_element_type() ==
-                                  front_tp.extended<ndt::fixed_dim_type>()->get_element_type();
+      const ndt::type &tp = discover_type(begin, end);
+
+      types.push_back(tp);
+      if (types.back().get_type_id() == option_type_id) {
+        has_null = true;
+        continue;
+      }
+
+      if (i == -1) {
+        i = types.size() - 1;
+      } else {
+        is_fixed_dim &= tp == types[i];
+        is_fixed_dim_var_dim &=
+            tp.get_type_id() == fixed_dim_type_id && tp.extended<ndt::fixed_dim_type>()->get_element_type() ==
+                                                         types[i].extended<ndt::fixed_dim_type>()->get_element_type();
+      }
     }
+
     if (!parse_token(begin, end, "]")) {
       throw parse::parse_error(begin, "expected array separator ',' or terminator ']'");
     }
+
     if (is_fixed_dim) {
-      return ndt::make_fixed_dim(types.size(), front_tp);
+      ndt::type element_tp = types[i];
+      if (has_null) {
+        element_tp = ndt::option_type::make(element_tp);
+      }
+      return ndt::make_fixed_dim(types.size(), element_tp);
     }
     if (is_fixed_dim_var_dim) {
       return ndt::make_fixed_dim(types.size(),
-                                 ndt::var_dim_type::make(front_tp.extended<ndt::fixed_dim_type>()->get_element_type()));
+                                 ndt::var_dim_type::make(types[i].extended<ndt::fixed_dim_type>()->get_element_type()));
     }
     return ndt::tuple_type::make(types);
   }
@@ -1008,21 +1019,24 @@ static ndt::type discover_type(const char *&begin, const char *end)
     }
     return ndt::type::make<bool1>();
   case 'n':
-    if (!parse_token(begin, end, "null")) {
-      throw parse::parse_error(begin, "invalid json value");
+    if (parse_token(begin, end, "null")) {
+      return ndt::option_type::make(ndt::type::make<void>());
     }
-    return ndt::type();
+    throw parse::parse_error(begin, "invalid json value");
   default:
     if (c == '-' || ('0' <= c && c <= '9')) {
       const char *nbegin = NULL, *nend = NULL;
       if (!parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
         throw parse::parse_error(begin, "invalid number");
       }
-      if (validate_int64(nbegin, nend)) {
+      char val[8];
+      if (!parse_int64(*reinterpret_cast<int64_t *>(val), nbegin, nend)) {
         return ndt::type::make<int64>();
-      } else if (validate_float64(nbegin, nend)) {
-        return ndt::type::make<float64>();
       }
+      if (!parse_double(*reinterpret_cast<double *>(val), nbegin, nend)) {
+        return ndt::type::make<double>();
+      }
+      throw parse::parse_error(begin, "invalid json value");
     } else {
       throw parse::parse_error(begin, "invalid json value");
     }
