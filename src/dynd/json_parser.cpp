@@ -995,11 +995,12 @@ static ndt::type discover_type(const char *&begin, const char *end)
       if (!parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
         throw parse::parse_error(begin, "invalid number");
       }
-      char val[8];
-      if (!parse_int64(*reinterpret_cast<int64_t *>(val), nbegin, nend)) {
+      int64_t int_val;
+      if (!parse_int64(int_val, nbegin, nend)) {
         return ndt::type::make<int64>();
       }
-      if (!parse_double(*reinterpret_cast<double *>(val), nbegin, nend)) {
+      double float_val;
+      if (!parse_double(float_val, nbegin, nend)) {
         return ndt::type::make<double>();
       }
       throw parse::parse_error(begin, "invalid json value");
