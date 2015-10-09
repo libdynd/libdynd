@@ -431,21 +431,17 @@ namespace detail{                                                               
 
 namespace ndt {
 
-#define DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(OP, NAME)                  \
-  template <type_id_t Src0TypeID>                                      \
-  struct type::equivalent<nd::NAME ## _kernel<Src0TypeID>> {           \
-    typedef typename dynd::type_of<Src0TypeID>::type A0;               \
-    typedef decltype(OP std::declval<A0>()) R;                         \
-                                                                       \
-    static type make()                                                 \
-    {                                                                  \
-      std::map<std::string, ndt::type> tp_vars;                        \
-      tp_vars["A0"] = ndt::type::make<A0>();                           \
-      tp_vars["R"] = ndt::type::make<R>();                             \
-                                                                       \
-      return ndt::substitute(ndt::type("(A0) -> R"), tp_vars, true);   \
-    }                                                                  \
-  };                                                                   \
+#define DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(OP, NAME)                                   \
+  template <type_id_t Src0TypeID>                                                       \
+  struct type::equivalent<nd::NAME ## _kernel<Src0TypeID>> {                            \
+    typedef typename dynd::type_of<Src0TypeID>::type A0;                                \
+    typedef decltype(OP std::declval<A0>()) R;                                          \
+                                                                                        \
+    static type make()                                                                  \
+    {                                                                                   \
+      return ndt::callable_type::make(ndt::type::make<R>(), {ndt::type::make<A0>()});   \
+    }                                                                                   \
+  };                                                                                    \
 
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(+, plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
@@ -456,23 +452,18 @@ namespace ndt {
 
 #undef DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT
 
-#define DYND_DEF_BINARY_OP_KERNEL_EQUIVALENT(OP, NAME)                      \
-  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                     \
-  struct type::equivalent<nd::NAME ## _kernel<Src0TypeID, Src1TypeID>> {    \
-    typedef typename dynd::type_of<Src0TypeID>::type A0;                    \
-    typedef typename dynd::type_of<Src1TypeID>::type A1;                    \
-    typedef decltype(std::declval<A0>() OP std::declval<A1>()) R;           \
-                                                                            \
-    static type make()                                                      \
-    {                                                                       \
-      std::map<std::string, ndt::type> tp_vars;                             \
-      tp_vars["A0"] = ndt::type::make<A0>();                                \
-      tp_vars["A1"] = ndt::type::make<A1>();                                \
-      tp_vars["R"] = ndt::type::make<R>();                                  \
-                                                                            \
-      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);    \
-    }                                                                       \
-  };                                                                        \
+#define DYND_DEF_BINARY_OP_KERNEL_EQUIVALENT(OP, NAME)                                                          \
+  template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                         \
+  struct type::equivalent<nd::NAME ## _kernel<Src0TypeID, Src1TypeID>> {                                        \
+    typedef typename dynd::type_of<Src0TypeID>::type A0;                                                        \
+    typedef typename dynd::type_of<Src1TypeID>::type A1;                                                        \
+    typedef decltype(std::declval<A0>() OP std::declval<A1>()) R;                                               \
+                                                                                                                \
+    static type make()                                                                                          \
+    {                                                                                                           \
+      return ndt::callable_type::make(ndt::type::make<R>(), {ndt::type::make<A0>(), ndt::type::make<A1>()});    \
+    }                                                                                                           \
+  };                                                                                                            \
 
   DYND_DEF_BINARY_OP_KERNEL_EQUIVALENT(+, add)
   DYND_DEF_BINARY_OP_KERNEL_EQUIVALENT(-, subtract)
@@ -497,12 +488,7 @@ namespace ndt {
 
     static type make()
     {
-      std::map<std::string, ndt::type> tp_vars;
-      tp_vars["A0"] = ndt::type::make<A0>();
-      tp_vars["A1"] = ndt::type::make<A1>();
-      tp_vars["R"] = ndt::type::make<R>();
-
-      return ndt::substitute(ndt::type("(A0, A1) -> R"), tp_vars, true);
+      return ndt::callable_type::make(ndt::type::make<R>(), {ndt::type::make<A0>(), ndt::type::make<A1>()});
     }
   };
 
