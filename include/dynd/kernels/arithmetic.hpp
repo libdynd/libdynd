@@ -8,7 +8,7 @@
 namespace dynd {
 namespace nd {
 
-#define DYND_DeclUnaryOp(OP, NAME)                                                                                    \
+#define DYND_DEF_UNARY_OP_KERNEL(OP, NAME)                                                                            \
 namespace detail {                                                                                                    \
   template <type_id_t Src0TypeID>                                                                                     \
   struct inline_ ## NAME {                                                                                            \
@@ -20,16 +20,16 @@ namespace detail {                                                              
   struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&detail::inline_ ## NAME <Src0TypeID>::f),       \
                                                            &detail::inline_ ## NAME <Src0TypeID>::f> {};              \
 
-  DYND_DeclUnaryOp(+, plus)
+  DYND_DEF_UNARY_OP_KERNEL(+, plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
-  DYND_DeclUnaryOp(-, minus)
+  DYND_DEF_UNARY_OP_KERNEL(-, minus)
   DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
-  DYND_DeclUnaryOp(!, logical_not)
-  DYND_DeclUnaryOp(~, bitwise_not)
+  DYND_DEF_UNARY_OP_KERNEL(!, logical_not)
+  DYND_DEF_UNARY_OP_KERNEL(~, bitwise_not)
 
-#undef DYND_DeclUnaryOp
+#undef DYND_DEF_UNARY_OP_KERNEL
 
-#define DYND_DeclBinopKernel(OP, NAME)                                                                                \
+#define DYND_DEF_BINARY_OP_KERNEL(OP, NAME)                                                                           \
 namespace detail{                                                                                                     \
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
   struct inline_ ## NAME {                                                                                            \
@@ -42,18 +42,18 @@ namespace detail{                                                               
                                        decltype(&detail::inline_ ## NAME <Src0TypeID, Src1TypeID>::f),                \
                                        &detail::inline_ ## NAME <Src0TypeID, Src1TypeID>::f> {};                      \
 
-  DYND_DeclBinopKernel(+, add)
-  DYND_DeclBinopKernel(-, subtract)
-  DYND_DeclBinopKernel(*, multiply)
-  DYND_DeclBinopKernel(/, divide)
-  DYND_DeclBinopKernel(%, mod)
-  DYND_DeclBinopKernel(&, bitwise_and)
-  DYND_DeclBinopKernel(&&, logical_and)
-  DYND_DeclBinopKernel(|, bitwise_or)
-  DYND_DeclBinopKernel(||, logical_or)
-  DYND_DeclBinopKernel(^, bitwise_xor)
-  DYND_DeclBinopKernel(<<, left_shift)
-  DYND_DeclBinopKernel(>>, right_shift)
+  DYND_DEF_BINARY_OP_KERNEL(+, add)
+  DYND_DEF_BINARY_OP_KERNEL(-, subtract)
+  DYND_DEF_BINARY_OP_KERNEL(*, multiply)
+  DYND_DEF_BINARY_OP_KERNEL(/, divide)
+  DYND_DEF_BINARY_OP_KERNEL(%, mod)
+  DYND_DEF_BINARY_OP_KERNEL(&, bitwise_and)
+  DYND_DEF_BINARY_OP_KERNEL(&&, logical_and)
+  DYND_DEF_BINARY_OP_KERNEL(|, bitwise_or)
+  DYND_DEF_BINARY_OP_KERNEL(||, logical_or)
+  DYND_DEF_BINARY_OP_KERNEL(^, bitwise_xor)
+  DYND_DEF_BINARY_OP_KERNEL(<<, left_shift)
+  DYND_DEF_BINARY_OP_KERNEL(>>, right_shift)
 
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct inline_logical_xor {

@@ -14,11 +14,11 @@
 namespace dynd {
 namespace nd {
 
-  template <typename F, template <type_id_t...> class K, int N, typename TypeIDs>
+  template <typename F, template <type_id_t...> class K, int N, typename TypeIDSequence>
   struct arithmetic_operator;
 
-  template <typename FuncType, template <type_id_t> class KernelType, typename TypeIDs>
-  struct arithmetic_operator<FuncType, KernelType, 1, TypeIDs> : declfunc<FuncType> {
+  template <typename FuncType, template <type_id_t> class KernelType, typename TypeIDSequence>
+  struct arithmetic_operator<FuncType, KernelType, 1, TypeIDSequence> : declfunc<FuncType> {
     static callable children[DYND_TYPE_ID_MAX + 1];
 
     static callable &overload(const ndt::type &src0_tp)
@@ -33,7 +33,7 @@ namespace nd {
           functional::call<FuncType>(ndt::type("(Any) -> Any"));
 
       for (const std::pair<const type_id_t, callable> &pair :
-           callable::make_all<KernelType, TypeIDs>(0)) {
+           callable::make_all<KernelType, TypeIDSequence>(0)) {
         children[pair.first] = pair.second;
       }
 
@@ -59,11 +59,11 @@ namespace nd {
     }
   };
 
-  template <typename FuncType, template <type_id_t> class KernelType, typename TypeIDs>
-  callable arithmetic_operator<FuncType, KernelType, 1, TypeIDs>::children
+  template <typename FuncType, template <type_id_t> class KernelType, typename TypeIDSequence>
+  callable arithmetic_operator<FuncType, KernelType, 1, TypeIDSequence>::children
       [DYND_TYPE_ID_MAX + 1];
 
-#define DYND_DeclUnaryOpCallable(NAME, TYPES)                                                        \
+#define DYND_DEF_UNARY_OP_CALLABLE(NAME, TYPES)                                                      \
   extern DYND_API struct NAME : arithmetic_operator<NAME, NAME ## _kernel, 1, TYPES> {               \
     static std::string what(const ndt::type &src0_type)                                              \
     {                                                                                                \
@@ -73,13 +73,13 @@ namespace nd {
     }                                                                                                \
   } NAME;                                                                                            \
 
-  DYND_DeclUnaryOpCallable(plus, numeric_type_ids)
-  DYND_DeclUnaryOpCallable(minus, numeric_type_ids)
+  DYND_DEF_UNARY_OP_CALLABLE(plus, numeric_type_ids)
+  DYND_DEF_UNARY_OP_CALLABLE(minus, numeric_type_ids)
 
-#undef DYND_DeclUnaryOpCallable
+#undef DYND_DEF_UNARY_OP_CALLABLE
 
-  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDs>
-  struct arithmetic_operator<FuncType, KernelType, 2, TypeIDs> : declfunc<FuncType> {
+  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
+  struct arithmetic_operator<FuncType, KernelType, 2, TypeIDSequence> : declfunc<FuncType> {
     static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
     static callable &overload(const ndt::type &src0_tp,
@@ -91,11 +91,11 @@ namespace nd {
     static void fill()
     {
       for (const auto &pair :
-           callable::make_all<KernelType, TypeIDs, TypeIDs>(
+           callable::make_all<KernelType, TypeIDSequence, TypeIDSequence>(
                0)) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
-      for (type_id_t i : TypeIDs()) {
+      for (type_id_t i : TypeIDSequence()) {
         children[option_type_id][i] = callable::make<option_arithmetic_kernel<FuncType, true, false>>();
         children[i][option_type_id] = callable::make<option_arithmetic_kernel<FuncType, false, true>>();
       }
@@ -103,14 +103,14 @@ namespace nd {
 
       callable self =
           functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
-      for (type_id_t i0 : TypeIDs()) {
+      for (type_id_t i0 : TypeIDSequence()) {
         for (type_id_t i1 : dim_type_ids()) {
           children[i0][i1] = functional::elwise(self);
         }
       }
 
       for (type_id_t i0 : dim_type_ids()) {
-        typedef typename join<TypeIDs, dim_type_ids>::type broadcast_type_ids;
+        typedef typename join<TypeIDSequence, dim_type_ids>::type broadcast_type_ids;
         for (type_id_t i1 : broadcast_type_ids()) {
           children[i0][i1] = functional::elwise(self);
         }
@@ -137,11 +137,11 @@ namespace nd {
     }
   };
 
-  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDs>
-  callable arithmetic_operator<FuncType, KernelType, 2, TypeIDs>::children
+  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
+  callable arithmetic_operator<FuncType, KernelType, 2, TypeIDSequence>::children
       [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
-#define DYND_DeclBinaryOpCallable(NAME, TYPES)                                         \
+#define DYND_DEF_BINARY_OP_CALLABLE(NAME, TYPES)                                       \
   extern DYND_API struct NAME : arithmetic_operator<NAME, NAME ## _kernel, 2, TYPES> { \
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)        \
     {                                                                                  \
@@ -159,34 +159,34 @@ namespace detail {
                            complex_float64_type_id> binop_type_ids;
 }
 
-  DYND_DeclBinaryOpCallable(add, detail::binop_type_ids)
-  DYND_DeclBinaryOpCallable(subtract, detail::binop_type_ids)
-  DYND_DeclBinaryOpCallable(multiply, detail::binop_type_ids)
-  DYND_DeclBinaryOpCallable(divide, detail::binop_type_ids)
+  DYND_DEF_BINARY_OP_CALLABLE(add, detail::binop_type_ids)
+  DYND_DEF_BINARY_OP_CALLABLE(subtract, detail::binop_type_ids)
+  DYND_DEF_BINARY_OP_CALLABLE(multiply, detail::binop_type_ids)
+  DYND_DEF_BINARY_OP_CALLABLE(divide, detail::binop_type_ids)
 
-#undef DYND_DeclBinaryOpCallable
+#undef DYND_DEF_BINARY_OP_CALLABLE
 
-  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDs>
+  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
   struct compound_arithmetic_operator : declfunc<FuncType> {
     static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
     static void fill()
     {
-      for (const auto &pair : callable::make_all<KernelType, TypeIDs,
-                                                 TypeIDs>()) {
+      for (const auto &pair : callable::make_all<KernelType, TypeIDSequence,
+                                                 TypeIDSequence>()) {
         children[pair.first[0]][pair.first[1]] = pair.second;
       }
 
       callable self =
           functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
-      for (type_id_t i0 : TypeIDs()) {
+      for (type_id_t i0 : TypeIDSequence()) {
         for (type_id_t i1 : dim_type_ids()) {
           children[i0][i1] = functional::elwise(self);
         }
       }
 
       for (type_id_t i0 : dim_type_ids()) {
-        typedef typename join<TypeIDs, dim_type_ids>::type broadcast_type_ids;
+        typedef typename join<TypeIDSequence, dim_type_ids>::type broadcast_type_ids;
         for (type_id_t i1 : broadcast_type_ids()) {
           children[i0][i1] = functional::elwise(self);
         }
@@ -214,17 +214,17 @@ namespace detail {
     }
   };
 
-  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDs>
-  callable compound_arithmetic_operator<FuncType, KernelType, TypeIDs>::children
+  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
+  callable compound_arithmetic_operator<FuncType, KernelType, TypeIDSequence>::children
       [DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
-#define DYND_DeclCompoundOpCallable(NAME, TYPES)                                                     \
+#define DYND_DEF_COMPOUND_OP_CALLABLE(NAME, TYPES)                                                   \
   extern DYND_API struct NAME : compound_arithmetic_operator<NAME, NAME ##_kernel_t, TYPES> {} NAME; \
 
-  DYND_DeclCompoundOpCallable(compound_add, detail::binop_type_ids)
-  DYND_DeclCompoundOpCallable(compound_div, detail::binop_type_ids)
+  DYND_DEF_COMPOUND_OP_CALLABLE(compound_add, detail::binop_type_ids)
+  DYND_DEF_COMPOUND_OP_CALLABLE(compound_div, detail::binop_type_ids)
 
-#undef DYND_DeclCompoundOpCallable
+#undef DYND_DEF_COMPOUND_OP_CALLABLE
 
 } // namespace dynd::nd
 } // namespace dynd
