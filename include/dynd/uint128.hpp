@@ -100,18 +100,13 @@ public:
   }
 
   DYND_CUDA_HOST_DEVICE inline uint128 operator-() const {
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable: 4146)
-#endif
+  DYND_ALLOW_UNSIGNED_UNARY_MINUS
     if (this->m_lo != 0) {
       return uint128(!this->m_hi, -this->m_lo);
     } else {
       return uint128(-this->m_hi, 0);
     }
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
+  DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
   }
 
   DYND_CUDA_HOST_DEVICE inline bool operator!=(const uint128 &rhs) const

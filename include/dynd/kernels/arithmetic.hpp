@@ -49,7 +49,9 @@ namespace detail {                                                              
                                                            &detail::inline_ ## NAME <Src0TypeID>::f> {};              \
 
   DYND_DeclUnaryOp(+, plus)
+  DYND_ALLOW_UNSIGNED_UNARY_MINUS
   DYND_DeclUnaryOp(-, minus)
+  DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
   DYND_DeclUnaryOp(!, logical_not)
   DYND_DeclUnaryOp(~, bitwise_not)
 
@@ -501,7 +503,9 @@ namespace ndt {
   };                                                                   \
 
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(+, plus)
+  DYND_ALLOW_UNSIGNED_UNARY_MINUS
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(-, minus)
+  DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(!, logical_not)
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(~, bitwise_not)
 

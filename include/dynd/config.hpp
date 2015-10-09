@@ -48,6 +48,9 @@
 #define DYND_USED(NAME) NAME __attribute__((used))
 #define DYND_EMIT_LLVM(NAME) __attribute__((annotate("emit_llvm"))) NAME
 
+#define DYND_ALLOW_UNSIGNED_UNARY_MINUS
+#define DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
+
 #elif defined(__GNUC__)
 
 // Hack trying to work around gcc isfinite problems
@@ -69,12 +72,21 @@
 #define DYND_ISSPACE isspace
 #define DYND_TOLOWER tolower
 
+#define DYND_ALLOW_UNSIGNED_UNARY_MINUS
+#define DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
+
 #elif defined(_MSC_VER)
 
 #define DYND_ISSPACE isspace
 #define DYND_TOLOWER tolower
 #define DYND_USED(NAME) NAME
 #define DYND_EMIT_LLVM(NAME) NAME
+
+#define DYND_ALLOW_UNSIGNED_UNARY_MINUS     \
+__pragma(warning(push))                     \
+__pragma(warning(disable:4146))             \
+
+#define DYND_END_ALLOW_UNSIGNED_UNARY_MINUS __pragma(warning(pop))
 
 #include <float.h>
 
