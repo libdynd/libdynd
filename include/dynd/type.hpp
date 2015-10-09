@@ -1131,7 +1131,7 @@ namespace ndt {
   public:
     common_type();
 
-    ndt::type operator()(const ndt::type &tp0, const ndt::type &tp1) const;
+    DYND_API ndt::type operator()(const ndt::type &tp0, const ndt::type &tp1) const;
   } common_type;
 
   /**

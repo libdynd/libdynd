@@ -1070,4 +1070,4 @@ ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp
 
 ndt::type (*ndt::common_type::children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX])(const ndt::type &, const ndt::type &);
 
-DYND_API class ndt::common_type ndt::common_type;
+class ndt::common_type ndt::common_type;
