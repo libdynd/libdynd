@@ -965,3 +965,44 @@ bool parse::matches_option_type_na_token(const char *begin, const char *end)
 
   return false;
 }
+
+int dynd::parse_uint64(uint64_t &res, const char *begin, const char *end)
+{
+  bool out_overflow = false, out_badparse = false;
+  res = parse::checked_string_to_uint64(begin, end, out_overflow, out_badparse);
+
+  return out_overflow || out_badparse;
+}
+
+int dynd::parse_int64(int64_t &res, const char *begin, const char *end)
+{
+  bool negative = false;
+  if (begin < end && *begin == '-') {
+    negative = true;
+    ++begin;
+  }
+
+  uint64_t ures;
+  int val = parse_uint64(ures, begin, end);
+
+  res = ures;
+  if (negative) {
+    res = -res;
+  }
+
+  return val;
+}
+
+int dynd::parse_double(double &res, const char *begin, const char *end)
+{
+  try
+  {
+    res = parse::checked_string_to_float64(begin, end, assign_error_nocheck);
+  }
+  catch (...)
+  {
+    return 1;
+  }
+
+  return 0;
+}

@@ -173,6 +173,16 @@ struct front<integer_sequence<T, I0, I...>> {
   static const T value = I0;
 };
 
+template <typename T, T I0>
+struct back<integer_sequence<T, I0>> {
+  static const T value = I0;
+};
+
+template <typename T, T I0, T... I>
+struct back<integer_sequence<T, I0, I...>> {
+  static const T value = back<integer_sequence<T, I...>>::value;
+};
+
 template <typename T, T I0, T... I>
 struct from<integer_sequence<T, I0, I...>, 0> {
   typedef integer_sequence<T, I0, I...> type;
