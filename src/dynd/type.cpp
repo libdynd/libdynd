@@ -1042,6 +1042,18 @@ ndt::common_type::common_type()
   typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id> I;
   for_each<typename outer<I, I>::type>(init());
 
+  typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id, fixed_dim_type_id> J;
+
+  for (type_id_t tp_id : J()) {
+    children[option_type_id][tp_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
+      return option_type::make(ndt::common_type(tp0.extended<option_type>()->get_value_type(), tp1));
+    };
+    children[tp_id][option_type_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
+      return option_type::make(ndt::common_type(tp0, tp1.extended<option_type>()->get_value_type()));
+    };
+    children[any_kind_type_id][tp_id] = [](const ndt::type &DYND_UNUSED(tp0), const ndt::type & tp1) { return tp1; };
+    children[tp_id][any_kind_type_id] = [](const ndt::type &tp0, const ndt::type &DYND_UNUSED(tp1)) { return tp0; };
+  }
   children[fixed_dim_type_id][fixed_dim_type_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
     if (tp0.extended<fixed_dim_type>()->get_fixed_dim_size() != tp1.extended<fixed_dim_type>()->get_fixed_dim_size()) {
       return ndt::var_dim_type::make(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
@@ -1060,7 +1072,7 @@ ndt::common_type::common_type()
 
 ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp1) const
 {
-  auto child = children[tp0.get_type_id()][tp1.get_type_id()];
+  child_type child = children[tp0.get_type_id()][tp1.get_type_id()];
   if (child == NULL) {
     return type();
   }
@@ -1068,6 +1080,6 @@ ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp
   return child(tp0, tp1);
 }
 
-ndt::type (*ndt::common_type::children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX])(const ndt::type &, const ndt::type &);
+ndt::common_type::child_type ndt::common_type::children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX];
 
 class ndt::common_type ndt::common_type;

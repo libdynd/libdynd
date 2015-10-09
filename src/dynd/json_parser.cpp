@@ -986,7 +986,7 @@ static ndt::type discover_type(const char *&begin, const char *end)
     return ndt::type::make<bool1>();
   case 'n':
     if (parse_token(begin, end, "null")) {
-      return ndt::option_type::make(ndt::type::make<void>());
+      return ndt::option_type::make(ndt::type("Any"));
     }
     throw parse::parse_error(begin, "invalid json value");
   default:

@@ -1123,10 +1123,16 @@ namespace ndt {
     }
   };
 
+  /**
+    * Returns the common type of two types. For built-in types, this is analogous to
+    * std::common_type.
+    */
   DYND_API extern class common_type {
+    typedef type (*child_type)(const type &, const type &);
+
     struct init;
 
-    static ndt::type (*children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX])(const ndt::type &, const ndt::type &);
+    static child_type children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX];
 
   public:
     common_type();
