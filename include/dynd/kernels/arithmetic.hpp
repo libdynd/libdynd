@@ -55,14 +55,17 @@ namespace detail{                                                               
   DYND_DEF_BINARY_OP_KERNEL(<<, left_shift)
   DYND_DEF_BINARY_OP_KERNEL(>>, right_shift)
 
+namespace detail{
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct inline_logical_xor {
     static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return (!a) ^ (!b); }
   };
+} // namespace detail
+
   template<type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct logical_xor_kernel : functional::as_apply_function_ck<
-                                              decltype(&inline_logical_xor<Src0TypeID, Src1TypeID>::f),
-                                              &inline_logical_xor<Src0TypeID, Src1TypeID>::f> {};
+                                              decltype(&detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f),
+                                              &detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f> {};
 
 #undef DYND_DeclBinopKernel
 
