@@ -101,6 +101,7 @@ matrix:
     - export CXX=clang++-3.5
     - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
     before_script:
+    - pwd
     - cd ..
     - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
     - mkdir dynd-python/libraries
