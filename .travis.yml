@@ -31,8 +31,6 @@ matrix:
         - valgrind
         - libfftw3-dev
     before_install:
-    - npm install --save-dev travis-after-all
-    - pwd
     - export CC="gcc-5"
     - export CXX="g++-5"
     script:
@@ -46,15 +44,12 @@ matrix:
   - compiler: gcc
     env: CONDA=true
     before_install:
-    - npm install --save-dev travis-after-all
-    - pwd
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
     - bash Miniconda-latest-Linux-x86_64.sh -b
     - export PATH=$HOME/miniconda/bin:$PATH
     - conda install --yes conda-build jinja2
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     before_script:
-    - npm install --save-dev travis-after-all
     - export CC="gcc-4.9"
     - export CXX="g++-4.9"
     script:
@@ -66,8 +61,6 @@ matrix:
     addons:
     before_script:
     before_install:
-    - npm install --save-dev travis-after-all
-    - pwd
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
     - bash Miniconda-latest-MacOSX-x86_64.sh -b
     - export PATH=$HOME/miniconda/bin:$PATH
@@ -95,28 +88,23 @@ matrix:
       - $HOME/.cache/pip
       - $HOME/dynd-python/build
     before_install:
-    - npm install --save-dev travis-after-all
-    - pwd
     - export CC=clang-3.5
     - export CXX=clang++-3.5
     - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
     before_script:
-    - pushd ..
+    - cd ..
     - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
     - mkdir dynd-python/libraries
     - mv libdynd dynd-python/libraries/libdynd
-    - pushd dynd-python
+    - cd dynd-python
     script:
     - python -c "import numpy; print numpy.__version__"
     - python setup.py install
-    - popd
+    - cd ..
     - python -c "import dynd; dynd.test(exit=True)"
-    - pwd
 
 language: cpp
 before_install:
-- npm install --save-dev travis-after-all
-- pwd
 before_script:
 - mkdir build
 - pushd build
@@ -125,17 +113,15 @@ script:
 - make -j5 || exit 1
 - ./tests/test_libdynd
 after_script:
-- pwd
 - popd
-- pwd
 - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
-- |
-   declare exitCode;
-   $(npm bin)/travis-after-all
-   exitCode=$?
-   if [ $exitCode -eq 0 ]; then
-      echo 'Hello, world!'
-   fi
+#- |
+#   declare exitCode;
+#   curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.3/lib/travis-after-all.js | node
+#   exitCode=$?
+#   if [ $exitCode -eq 0 ]; then
+#      echo 'Hello, world!'
+#   fi
 
 #- ! '
 #  declare exitCode;
