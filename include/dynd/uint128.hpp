@@ -95,6 +95,20 @@ public:
     return m_hi == 0u && m_lo == rhs;
   }
 
+  DYND_CUDA_HOST_DEVICE inline uint128 operator+() const {
+    return *this;
+  }
+
+  DYND_CUDA_HOST_DEVICE inline uint128 operator-() const {
+  DYND_ALLOW_UNSIGNED_UNARY_MINUS
+    if (this->m_lo != 0) {
+      return uint128(!this->m_hi, -this->m_lo);
+    } else {
+      return uint128(-this->m_hi, 0);
+    }
+  DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
+  }
+
   DYND_CUDA_HOST_DEVICE inline bool operator!=(const uint128 &rhs) const
   {
     return m_hi != rhs.m_hi || m_lo != rhs.m_lo;
