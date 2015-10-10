@@ -14,6 +14,7 @@ addons:
 cache:
   directories:
   - $HOME/libdynd/build
+
 matrix:
   include:
   - compiler: gcc
@@ -50,6 +51,7 @@ matrix:
     - conda install --yes conda-build jinja2
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     before_script:
+    - npm install --save-dev travis-after-all
     - export CC="gcc-4.9"
     - export CXX="g++-4.9"
     script:
@@ -60,14 +62,14 @@ matrix:
     env: OSX CONDA=true
     addons:
     before_script:
+    - npm install --save-dev travis-after-all
     before_install:
     - env
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh
     - bash Miniconda-latest-MacOSX-x86_64.sh -b
     - export PATH=$HOME/miniconda/bin:$PATH
     - conda install --yes conda-build jinja2
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      conda install --yes anaconda-client; fi
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     script:
     - conda build conda.recipe
   - language: python
@@ -90,11 +92,11 @@ matrix:
       - $HOME/.cache/pip
       - $HOME/dynd-python/build
     before_install:
-    - npm install --save-dev travis-after-all
     - export CC=clang-3.5
     - export CXX=clang++-3.5
     - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
     before_script:
+    - npm install --save-dev travis-after-all
     - cd ..
     - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
     - mkdir dynd-python/libraries
@@ -105,8 +107,10 @@ matrix:
     - python setup.py install
     - cd ..
     - python -c "import dynd; dynd.test(exit=True)"
+
 language: cpp
 before_script:
+- npm install --save-dev travis-after-all
 - mkdir build
 - pushd build
 - cmake -DDYND_FFTW=${DYND_FFTW} ..
@@ -117,8 +121,6 @@ after_script:
 - popd
 - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
 
-
-# - npm install --save-dev travis-after-all
 #- ! '
 #  declare exitCode;
 #  exitCode=$?
