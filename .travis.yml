@@ -37,10 +37,6 @@ matrix:
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
   - compiler: clang
     env: VALGRIND DYND_FFTW=OFF
-    before_script:
-    - mkdir build
-    - pushd build
-    - cmake -DDYND_FFTW=${DYND_FFTW} ..
     script:
     - make -j5 || exit 1
     - valgrind --tool=memcheck --leak-check=yes --error-exitcode=123 ./tests/test_libdynd
@@ -52,8 +48,7 @@ matrix:
     - bash Miniconda-latest-Linux-x86_64.sh -b
     - export PATH=$HOME/miniconda/bin:$PATH
     - conda install --yes conda-build jinja2
-    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then
-      conda install --yes anaconda-client; fi
+    - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     before_script:
     - export CC="gcc-4.9"
     - export CXX="g++-4.9"
@@ -95,6 +90,7 @@ matrix:
       - $HOME/.cache/pip
       - $HOME/dynd-python/build
     before_install:
+    - npm install --save-dev travis-after-all
     - export CC=clang-3.5
     - export CXX=clang++-3.5
     - travis_retry pip install --install-option="--no-cython-compile" Cython==0.22
@@ -111,7 +107,6 @@ matrix:
     - python -c "import dynd; dynd.test(exit=True)"
 language: cpp
 before_script:
-- npm install --save-dev travis-after-all
 - mkdir build
 - pushd build
 - cmake -DDYND_FFTW=${DYND_FFTW} ..
@@ -121,6 +116,9 @@ script:
 after_script:
 - popd
 - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
+
+
+# - npm install --save-dev travis-after-all
 #- ! '
 #  declare exitCode;
 #  exitCode=$?
