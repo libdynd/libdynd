@@ -48,7 +48,6 @@ matrix:
     env: CONDA=true
     before_install:
     - env
-    - npm install --save-dev travis-after-all
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
     - bash Miniconda-latest-Linux-x86_64.sh -b
     - export PATH=$HOME/miniconda/bin:$PATH
@@ -112,6 +111,7 @@ matrix:
     - python -c "import dynd; dynd.test(exit=True)"
 language: cpp
 before_script:
+- npm install --save-dev travis-after-all
 - mkdir build
 - pushd build
 - cmake -DDYND_FFTW=${DYND_FFTW} ..
@@ -120,15 +120,15 @@ script:
 - ./tests/test_libdynd
 after_script:
 - popd
-- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false}
-  == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output
-  conda.recipe) --user dynd --channel dev; fi
+- if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
 #- ! '
 #  declare exitCode;
-#  curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
 #  exitCode=$?
 #  if [ $exitCode -eq 0 ]; then ./trigger_python.sh $TRAVIS_TOKEN; fi
 #'
+
+#  curl -sSL https://raw.githubusercontent.com/alrra/travis-after-all/1.4.1/lib/travis-after-all.js | node
+
 notifications:
   email: false
   flowdock: b08b3ba4fb86fa48121e90b5f67ccb75
