@@ -120,6 +120,13 @@ script:
 after_script:
 - popd
 - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
+- |
+   declare exitCode;
+   $(npm bin)/travis-after-all
+   exitCode=$?
+   if [ $exitCode -eq 0 ]; then
+      echo 'Hello, world!'
+   fi
 
 #- ! '
 #  declare exitCode;
