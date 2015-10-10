@@ -5,9 +5,9 @@ cd $RECIPE_DIR
 
 echo Setting the compiler flags...
 if [ `uname` == Linux ]; then
-    SHARED_LINKER_FLAGS = '-static-libstdc++'
+    SHARED_LINKER_FLAGS='-static-libstdc++'
 elif [ `uname` == Darwin ]; then
-    SHARED_LINKER_FLAGS = ''
+    SHARED_LINKER_FLAGS=''
 fi
 
 #elif [ `uname` == Darwin ]; then
