@@ -3,10 +3,13 @@ set -ex
 
 cd $RECIPE_DIR
 
-echo Setting the compiler...
-#if [ `uname` == Linux ]; then
-#    export CC="$PREFIX/bin/gcc"
- #   export CXX="$PREFIX/bin/g++"
+echo Setting the compiler flags...
+if [ `uname` == Linux ]; then
+    SHARED_LINKER_FLAGS='-static-libstdc++'
+elif [ `uname` == Darwin ]; then
+    SHARED_LINKER_FLAGS=''
+fi
+
 #elif [ `uname` == Darwin ]; then
  #   export CC="$PREFIX/bin/gcc"
   #  export CXX="$PREFIX/bin/g++"
@@ -26,6 +29,7 @@ pwd
 echo Configuring build with cmake...
 cmake \
     $EXTRAOPTIONS \
+    -DCMAKE_SHARED_LINKER_FLAGS=$SHARED_LINKER_FLAGS \
     -DDYND_INSTALL_LIB=ON \
     -DDYND_BUILD_BENCHMARKS=OFF \
     -DCMAKE_INSTALL_PREFIX=$PREFIX .. || exit 1
