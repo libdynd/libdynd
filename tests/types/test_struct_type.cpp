@@ -45,20 +45,20 @@ TEST(StructType, IOStream)
 
   tp = ndt::struct_type::make({"x"}, {ndt::type::make<float>()});
   ss << tp;
-  EXPECT_EQ("{x : float32}", ss.str());
+  EXPECT_EQ("{x: float32}", ss.str());
 
   ss.str("");
   ss.clear();
   tp = ndt::struct_type::make({"x", "y"}, {ndt::type::make<int32_t>(), ndt::type::make<int16_t>()});
   ss << tp;
-  EXPECT_EQ("{x : int32, y : int16}", ss.str());
+  EXPECT_EQ("{x: int32, y: int16}", ss.str());
 
   ss.str("");
   ss.clear();
   tp = ndt::struct_type::make({"x", "y", "Verbose Field!"},
                               {ndt::type::make<int32_t>(), ndt::type::make<int16_t>(), ndt::type::make<float>()});
   ss << tp;
-  EXPECT_EQ("{x : int32, y : int16, 'Verbose Field!' : float32}", ss.str());
+  EXPECT_EQ("{x: int32, y: int16, 'Verbose Field!': float32}", ss.str());
 }
 
 TEST(StructType, CreateOneField)
