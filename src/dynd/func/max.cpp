@@ -14,7 +14,7 @@ using namespace dynd;
 
 DYND_API nd::callable nd::max::make()
 {
-  auto children = callable::make_all<max_kernel, arithmetic_type_ids>();
+  auto children = callable::make_all<max_kernel, complex_type_ids>();
 
   return functional::reduction(functional::multidispatch(
       ndt::callable_type::make(ndt::scalar_kind_type::make(),
