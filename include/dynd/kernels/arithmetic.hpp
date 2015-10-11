@@ -18,7 +18,7 @@ namespace detail {                                                              
                                                                                                                       \
   template <type_id_t Src0TypeID>                                                                                     \
   struct NAME ## _kernel : functional::as_apply_function_ck<decltype(&detail::inline_ ## NAME <Src0TypeID>::f),       \
-                                                           &detail::inline_ ## NAME <Src0TypeID>::f> {};              \
+                                                            &detail::inline_ ## NAME <Src0TypeID>::f> {};             \
 
   DYND_DEF_UNARY_OP_KERNEL(+, plus)
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
@@ -437,12 +437,8 @@ namespace ndt {
 #define DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(NAME)                                                      \
   template <type_id_t Src0TypeID>                                                                      \
   struct type::equivalent<nd::NAME ## _kernel<Src0TypeID>> {                                           \
-    typedef typename dynd::type_of<Src0TypeID>::type A0;                                               \
-    typedef typename return_of<decltype(&dynd::nd::detail::inline_ ## NAME<Src0TypeID>::f)>::type R;   \
-                                                                                                       \
-    static type make()                                                                                 \
-    {                                                                                                  \
-      return ndt::callable_type::make(ndt::type::make<R>(), {ndt::type::make<A0>()});                  \
+    static type make() {                                                                               \
+      return ndt::type::make<decltype(dynd::nd::detail::inline_ ## NAME<Src0TypeID>::f)>();            \
     }                                                                                                  \
   };                                                                                                   \
 
@@ -458,13 +454,8 @@ namespace ndt {
 #define DYND_DEF_BINARY_OP_KERNEL_EQUIVALENT(NAME)                                                               \
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                          \
   struct type::equivalent<nd::NAME ## _kernel<Src0TypeID, Src1TypeID>> {                                         \
-    typedef typename dynd::type_of<Src0TypeID>::type A0;                                                         \
-    typedef typename dynd::type_of<Src1TypeID>::type A1;                                                         \
-    typedef typename return_of<decltype(&dynd::nd::detail::inline_ ## NAME<Src0TypeID, Src1TypeID>::f)>::type R; \
-                                                                                                                 \
-    static type make()                                                                                           \
-    {                                                                                                            \
-      return ndt::callable_type::make(ndt::type::make<R>(), {ndt::type::make<A0>(), ndt::type::make<A1>()});     \
+    static type make() {                                                                                         \
+      return ndt::type::make<decltype(dynd::nd::detail::inline_ ## NAME<Src0TypeID, Src1TypeID>::f)>();          \
     }                                                                                                            \
   };                                                                                                             \
 
@@ -485,13 +476,8 @@ namespace ndt {
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::logical_xor_kernel<Src0TypeID, Src1TypeID>> {
-    typedef typename dynd::type_of<Src0TypeID>::type A0;
-    typedef typename dynd::type_of<Src1TypeID>::type A1;
-    typedef typename return_of<decltype(&dynd::nd::detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f)>::type R;
-
-    static type make()
-    {
-      return ndt::callable_type::make(ndt::type::make<R>(), {ndt::type::make<A0>(), ndt::type::make<A1>()});
+    static type make() {
+      return ndt::type::make<decltype(&dynd::nd::detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f)>();
     }
   };
 
