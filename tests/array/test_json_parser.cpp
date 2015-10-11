@@ -28,81 +28,83 @@ using namespace dynd;
 
 TEST(JSON, DiscoverBool)
 {
-  EXPECT_EQ(ndt::type::make<bool1>(), json::discover("true"));
-  EXPECT_EQ(ndt::type::make<bool1>(), json::discover("false"));
+  EXPECT_EQ(ndt::type::make<bool1>(), ndt::json::discover("true"));
+  EXPECT_EQ(ndt::type::make<bool1>(), ndt::json::discover("false"));
 }
 
 TEST(JSON, DiscoverInt64)
 {
-  EXPECT_EQ(ndt::type::make<int64>(), json::discover("0"));
-  EXPECT_EQ(ndt::type::make<int64>(), json::discover("3"));
-  EXPECT_EQ(ndt::type::make<int64>(), json::discover("11"));
+  EXPECT_EQ(ndt::type::make<int64>(), ndt::json::discover("0"));
+  EXPECT_EQ(ndt::type::make<int64>(), ndt::json::discover("3"));
+  EXPECT_EQ(ndt::type::make<int64>(), ndt::json::discover("11"));
 
-  EXPECT_EQ(ndt::type::make<int64>(), json::discover("-1"));
-  EXPECT_EQ(ndt::type::make<int64>(), json::discover("-5"));
+  EXPECT_EQ(ndt::type::make<int64>(), ndt::json::discover("-1"));
+  EXPECT_EQ(ndt::type::make<int64>(), ndt::json::discover("-5"));
 }
 
 TEST(JSON, DiscoverFloat64)
 {
-  EXPECT_EQ(ndt::type::make<float64>(), json::discover("0.5"));
-  EXPECT_EQ(ndt::type::make<float64>(), json::discover("3.14"));
+  EXPECT_EQ(ndt::type::make<float64>(), ndt::json::discover("0.5"));
+  EXPECT_EQ(ndt::type::make<float64>(), ndt::json::discover("3.14"));
 }
 
 TEST(JSON, DiscoverString)
 {
-  EXPECT_EQ(ndt::type(string_type_id), json::discover("\"Hello, world!\""));
+  EXPECT_EQ(ndt::type(string_type_id), ndt::json::discover("\"Hello, world!\""));
 }
 
 TEST(JSON, DiscoverOption)
 {
-  EXPECT_EQ(ndt::type("?Any"), json::discover("null"));
+  EXPECT_EQ(ndt::type("?Any"), ndt::json::discover("null"));
 }
 
-TEST(JSON, DiscoverTuple)
+TEST(JSON, DiscoverArray)
 {
-  EXPECT_EQ(ndt::tuple_type::make(), json::discover("[]"));
-  EXPECT_EQ(ndt::type("(int64, string)"), json::discover("[2, \"Hello, world!\"]"));
+  EXPECT_EQ(ndt::type("()"), ndt::json::discover("[]"));
+
+  EXPECT_EQ(ndt::type("1 * int64"), ndt::json::discover("[0]"));
+  EXPECT_EQ(ndt::type("1 * string"), ndt::json::discover("[\"JSON\"]"));
+  EXPECT_EQ(ndt::type("1 * {x: int64, y: float64}"), ndt::json::discover("[{\"x\": 3, \"y\": 0.75}]"));
+  EXPECT_EQ(ndt::type("2 * int64"), ndt::json::discover("[11, -3]"));
+  EXPECT_EQ(ndt::type("5 * int64"), ndt::json::discover("[0, 1, 2, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * float64"), ndt::json::discover("[0, 1, 2.5, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * float64"), ndt::json::discover("[0.5, 1, 2, 3, 4]"));
+
+  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[null, 1, 2, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[0, 1, null, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[0, 1, 2, 3, null]"));
+  EXPECT_EQ(ndt::type("3 * ?float64"), ndt::json::discover("[null, -7, 3.3]"));
+
+  EXPECT_EQ(ndt::type("(int64, string)"), ndt::json::discover("[2, \"Hello, world!\"]"));
+
+  EXPECT_EQ(ndt::type("2 * 1 * int64"), ndt::json::discover("[[10], [7]]"));
+  EXPECT_EQ(ndt::type("1 * 2 * int64"), ndt::json::discover("[[10, 7]]"));
+  EXPECT_EQ(ndt::type("2 * 2 * int64"), ndt::json::discover("[[0, 1], [2, 3]]"));
+  EXPECT_EQ(ndt::type("2 * 3 * int64"), ndt::json::discover("[[0, 1, 11], [2, 3, -4]]"));
+
+  EXPECT_EQ(ndt::type("2 * ?2 * int64"), ndt::json::discover("[null, [2, 3]]"));
+  EXPECT_EQ(ndt::type("2 * ?3 * int64"), ndt::json::discover("[[0, -1, 1], null]"));
+  EXPECT_EQ(ndt::type("2 * ?2 * float64"), ndt::json::discover("[[0, 1.2], null]"));
+
+  EXPECT_EQ(ndt::type("2 * var * int64"), ndt::json::discover("[[0, 1], [2]]"));
+  EXPECT_EQ(ndt::type("2 * var * var * int64"), ndt::json::discover("[[[0, 1], [2]], [[3]]]"));
+
+  EXPECT_EQ(ndt::type("2 * var * 3 * int64"), ndt::json::discover("[[[0, 1, 4], [2, 5, 3]], [[3, 1, 2]]]"));
+
+  EXPECT_EQ(ndt::type("2 * var * float64"), ndt::json::discover("[[0.5, 1], [2]]"));
+  EXPECT_EQ(ndt::type("2 * var * ?float64"), ndt::json::discover("[[0.5, 1], [null]]"));
+
+  EXPECT_EQ(ndt::type("2 * var * ?int64"), ndt::json::discover("[[0, null], [2]]"));
 }
 
-TEST(JSON, DiscoverStruct)
+TEST(JSON, DiscoverObject)
 {
-  EXPECT_EQ(ndt::type("{a: int64}"), json::discover("{\"a\": 3}"));
-  EXPECT_EQ(ndt::type("{a: float64}"), json::discover("{\"a\": 3.14}"));
+  EXPECT_EQ(ndt::type("{}"), ndt::json::discover("{}"));
 
-  EXPECT_EQ(ndt::type("{x: float64, y: 3 * int64}"), json::discover("{\"x\": 3.14, \"y\": [1, 2, 3]}"));
-}
+  EXPECT_EQ(ndt::type("{a: int64}"), ndt::json::discover("{\"a\": 3}"));
+  EXPECT_EQ(ndt::type("{a: float64}"), ndt::json::discover("{\"a\": 3.14}"));
 
-TEST(JSON, DiscoverFixedDim)
-{
-  EXPECT_EQ(ndt::type("5 * int64"), json::discover("[0, 1, 2, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * float64"), json::discover("[0, 1, 2.5, 3, 4]"));
-
-  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[null, 1, 2, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, null, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * ?int64"), json::discover("[0, 1, 2, 3, null]"));
-}
-
-TEST(JSON, DiscoverFixedDimFixedDim)
-{
-  EXPECT_EQ(ndt::type("2 * 2 * int64"), json::discover("[[0, 1], [2, 3]]"));
-  EXPECT_EQ(ndt::type("2 * 1 * int64"), json::discover("[[10], [7]]"));
-  EXPECT_EQ(ndt::type("1 * 2 * int64"), json::discover("[[10, 7]]"));
-
-  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[null, [2, 3]]"));
-  EXPECT_EQ(ndt::type("2 * ?2 * int64"), json::discover("[[0, 1], null]"));
-}
-
-TEST(JSON, DiscoverFixedDimVarDim)
-{
-  EXPECT_EQ(ndt::type("2 * var * int64"), json::discover("[[0, 1], [2]]"));
-  EXPECT_EQ(ndt::type("2 * var * var * int64"), json::discover("[[[0, 1], [2]], [[3]]]"));
-
-  EXPECT_EQ(ndt::type("2 * var * 3 * int64"), json::discover("[[[0, 1, 4], [2, 5, 3]], [[3, 1, 2]]]"));
-
-  EXPECT_EQ(ndt::type("2 * var * float64"), json::discover("[[0.5, 1], [2]]"));
-  EXPECT_EQ(ndt::type("2 * var * ?float64"), json::discover("[[0.5, 1], [null]]"));
-
-  EXPECT_EQ(ndt::type("2 * var * ?int64"), json::discover("[[0, null], [2]]"));
+  EXPECT_EQ(ndt::type("{x: float64, y: 3 * int64}"), ndt::json::discover("{\"x\": 3.14, \"y\": [1, 2, 3]}"));
 }
 
 TEST(JSONParser, BuiltinsFromBool)

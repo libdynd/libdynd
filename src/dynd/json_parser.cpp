@@ -888,20 +888,6 @@ nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin, const ch
   return result;
 }
 
-DYND_API bool validate_float64(const char *begin, const char *end)
-{
-  try
-  {
-    parse::checked_string_to_float64(begin, end, assign_error_nocheck);
-  }
-  catch (...)
-  {
-    return false;
-  }
-
-  return true;
-}
-
 static ndt::type discover_type(const char *&begin, const char *end)
 {
   begin = skip_whitespace(begin, end);
@@ -911,40 +897,40 @@ static ndt::type discover_type(const char *&begin, const char *end)
   char c = *begin;
   switch (c) {
   // Object
-  case '{':
+  case '{': {
     ++begin;
-    if (!parse_token(begin, end, "}")) {
-      std::vector<std::string> names;
-      std::vector<ndt::type> types;
-      for (;;) {
-        const char *strbegin, *strend;
-        bool escaped;
-        begin = skip_whitespace(begin, end);
-        if (!parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-          throw parse::parse_error(begin, "expected string for name in object dict");
-        }
-        names.emplace_back(strbegin, strend - strbegin);
-        if (!parse_token(begin, end, ":")) {
-          throw parse::parse_error(begin, "expected ':' separating name from value in object dict");
-        }
-        types.push_back(discover_type(begin, end));
-        if (!parse_token(begin, end, ",")) {
-          break;
-        }
-      }
-      if (!parse_token(begin, end, "}")) {
-        throw parse::parse_error(begin, "expected object separator ',' or terminator '}'");
-      }
-      return ndt::struct_type::make(names, types);
+    if (parse_token(begin, end, "}")) {
+      return ndt::struct_type::make();
     }
-    break;
+    std::vector<std::string> names;
+    std::vector<ndt::type> types;
+    for (;;) {
+      const char *strbegin, *strend;
+      bool escaped;
+      begin = skip_whitespace(begin, end);
+      if (!parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+        throw parse::parse_error(begin, "expected string for name in object dict");
+      }
+      names.emplace_back(strbegin, strend - strbegin);
+      if (!parse_token(begin, end, ":")) {
+        throw parse::parse_error(begin, "expected ':' separating name from value in object dict");
+      }
+      types.push_back(discover_type(begin, end));
+      if (!parse_token(begin, end, ",")) {
+        break;
+      }
+    }
+    if (!parse_token(begin, end, "}")) {
+      throw parse::parse_error(begin, "expected object separator ',' or terminator '}'");
+    }
+    return ndt::struct_type::make(names, types);
+  }
   // Array
   case '[': {
     ++begin;
     if (parse_token(begin, end, "]")) {
       return ndt::tuple_type::make();
     }
-
     std::vector<ndt::type> types;
     ndt::type common_tp = discover_type(begin, end);
     types.push_back(common_tp);
@@ -974,16 +960,20 @@ static ndt::type discover_type(const char *&begin, const char *end)
     }
     return ndt::type(string_type_id);
   }
+  case 'T':
   case 't':
-    if (parse_token(begin, end, "true")) {
+    ++begin;
+    if (parse_token(begin, end, "rue")) {
       return ndt::type::make<bool1>();
     }
     throw parse::parse_error(begin, "invalid json value");
+  case 'F':
   case 'f':
-    if (!parse_token(begin, end, "false")) {
-      throw parse::parse_error(begin, "invalid json value");
+    ++begin;
+    if (parse_token(begin, end, "alse")) {
+      return ndt::type::make<bool1>();
     }
-    return ndt::type::make<bool1>();
+    throw parse::parse_error(begin, "invalid json value");
   case 'n':
     if (parse_token(begin, end, "null")) {
       return ndt::option_type::make(ndt::type("Any"));
@@ -1009,10 +999,10 @@ static ndt::type discover_type(const char *&begin, const char *end)
     }
   }
 
-  throw runtime_error("error");
+  throw runtime_error("json parsing error");
 }
 
-void json::discover(ndt::type &res, const char *json_begin, const char *json_end)
+void ndt::json::discover(ndt::type &res, const char *json_begin, const char *json_end)
 {
   try
   {

@@ -8,24 +8,26 @@
 #include <dynd/array.hpp>
 
 namespace dynd {
-namespace json {
+namespace ndt {
+  namespace json {
 
-  DYND_API void discover(ndt::type &res, const char *begin, const char *end);
+    DYND_API void discover(ndt::type &res, const char *begin, const char *end);
 
-  inline void discover(ndt::type &res, const std::string &str)
-  {
-    discover(res, str.data(), str.data() + str.size());
-  }
+    inline void discover(ndt::type &res, const std::string &str)
+    {
+      discover(res, str.data(), str.data() + str.size());
+    }
 
-  inline ndt::type discover(const std::string &str)
-  {
-    ndt::type res;
-    discover(res, str);
+    inline ndt::type discover(const std::string &str)
+    {
+      ndt::type res;
+      discover(res, str);
 
-    return res;
-  }
+      return res;
+    }
 
-} // namespace dynd::json
+  } // namespace dynd::ndt::json
+} // namespace dynd::ndt
 
 /**
  * Validates UTF-8 encoded JSON, throwing an exception if it

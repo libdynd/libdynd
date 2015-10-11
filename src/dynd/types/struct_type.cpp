@@ -60,7 +60,7 @@ void ndt::struct_type::print_type(std::ostream &o) const
     } else {
       print_escaped_utf8_string(o, fn.begin, fn.end, true);
     }
-    o << " : " << get_field_type(i);
+    o << ": " << get_field_type(i);
   }
   if (m_variadic) {
     o << ", ...}";
