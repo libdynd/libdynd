@@ -274,6 +274,10 @@ public:
 
   DYND_CUDA_HOST_DEVICE friend float16 float16_from_bits(uint16_t bits);
 
+  float16 operator+() const {
+    return *this;
+  }
+
   float16 operator-() const
   {
     return float16(-static_cast<float>(*this));
