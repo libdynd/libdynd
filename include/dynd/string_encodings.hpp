@@ -13,10 +13,6 @@
 
 namespace dynd {
 
-namespace nd {
-    class DYND_API string;
-};
-
 enum string_encoding_t {
     string_encoding_ascii,
     string_encoding_ucs_2,
