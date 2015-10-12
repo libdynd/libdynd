@@ -13,10 +13,6 @@
 
 namespace dynd {
 
-namespace nd {
-    class DYND_API string;
-};
-
 enum string_encoding_t {
     string_encoding_ascii,
     string_encoding_ucs_2,
@@ -117,12 +113,6 @@ DYND_API void print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp,
  */
 DYND_API void print_escaped_utf8_string(std::ostream &o, const char *str_begin,
                                         const char *str_end, bool single_quote = false);
-
-/**
- * Prints the utf8 string, escaping as necessary.
- */
-DYND_API void print_escaped_utf8_string(std::ostream &o, const nd::string &str,
-                                        bool single_quote = false);
 
 /**
  * Prints the utf8 string, escaping as necessary.

@@ -20,12 +20,14 @@ ndt::base_struct_type::base_struct_type(type_id_t type_id, const nd::array &fiel
                                         flags_type flags, bool layout_in_arrmeta, bool variadic)
     : base_tuple_type(type_id, field_types, flags, layout_in_arrmeta, variadic), m_field_names(field_names)
 {
-  if (!nd::ensure_immutable_contig<nd::string>(m_field_names)) {
+/*
+  if (!nd::ensure_immutable_contig<std::string>(m_field_names)) {
     stringstream ss;
     ss << "dynd struct field names requires an array of strings, got an "
           "array with type " << m_field_names.get_type();
     throw invalid_argument(ss.str());
   }
+*/
 
   // Make sure that the number of names matches
   intptr_t name_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.get_arrmeta())->dim_size;

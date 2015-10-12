@@ -155,14 +155,14 @@ nd::callable make_int_offset_and_divide_callable(Tdst offset, Tdst divisor, cons
 
 } // anonymous namespace
 
-bool dynd::make_datetime_adapter_callable(const ndt::type &value_tp, const ndt::type &operand_tp, const nd::string &op,
+bool dynd::make_datetime_adapter_callable(const ndt::type &value_tp, const ndt::type &operand_tp, const std::string &op,
                                           nd::callable &out_forward, nd::callable &out_reverse)
 {
   int64_t epoch_datetime, unit_factor = 1, unit_divisor = 1;
   if (value_tp.get_type_id() != datetime_type_id) {
     return false;
   }
-  if (parse_datetime_since(op.begin(), op.end(), epoch_datetime, unit_factor, unit_divisor)) {
+  if (parse_datetime_since(op.c_str(), op.c_str() + op.size(), epoch_datetime, unit_factor, unit_divisor)) {
     switch (operand_tp.get_type_id()) {
     case int64_type_id:
       if (unit_divisor > 1) {
