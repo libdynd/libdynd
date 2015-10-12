@@ -121,12 +121,6 @@ DYND_API void print_escaped_utf8_string(std::ostream &o, const char *str_begin,
 /**
  * Prints the utf8 string, escaping as necessary.
  */
-DYND_API void print_escaped_utf8_string(std::ostream &o, const nd::string &str,
-                                        bool single_quote = false);
-
-/**
- * Prints the utf8 string, escaping as necessary.
- */
 inline void print_escaped_utf8_string(std::ostream &o, const std::string &str,
                                       bool single_quote = false)
 {
