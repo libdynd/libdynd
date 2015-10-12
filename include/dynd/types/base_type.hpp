@@ -33,7 +33,6 @@ namespace ndt {
 // Forward definition from dynd/array.hpp
 namespace nd {
   class array;
-  class string;
   class callable;
 } // namsepace dynd::nd
 
