@@ -73,8 +73,8 @@ namespace nd {
     }                                                                                                \
   } NAME;                                                                                            \
 
-  DYND_DEF_UNARY_OP_CALLABLE(plus, complex_type_ids)
-  DYND_DEF_UNARY_OP_CALLABLE(minus, complex_type_ids)
+  DYND_DEF_UNARY_OP_CALLABLE(plus, arithmetic_type_ids)
+  DYND_DEF_UNARY_OP_CALLABLE(minus, arithmetic_type_ids)
 
 #undef DYND_DEF_UNARY_OP_CALLABLE
 
