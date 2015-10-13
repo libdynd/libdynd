@@ -22,7 +22,7 @@ broadcast_error::broadcast_error(const std::string& m)
 {
 }
 
-inline string broadcast_error_message(intptr_t dst_ndim, const intptr_t *dst_shape,
+inline std::string broadcast_error_message(intptr_t dst_ndim, const intptr_t *dst_shape,
                     intptr_t src_ndim, const intptr_t *src_shape)
 {
     stringstream ss;
@@ -41,7 +41,7 @@ broadcast_error::broadcast_error(intptr_t dst_ndim, const intptr_t *dst_shape,
 {
 }
 
-inline string broadcast_error_message(const nd::array& dst, const nd::array& src)
+inline std::string broadcast_error_message(const nd::array& dst, const nd::array& src)
 {
     vector<intptr_t> dst_shape = dst.get_shape(), src_shape = src.get_shape();
     stringstream ss;
@@ -60,7 +60,7 @@ broadcast_error::broadcast_error(const nd::array& dst, const nd::array& src)
 {
 }
 
-inline string broadcast_error_message(intptr_t ninputs, const nd::array* inputs)
+inline std::string broadcast_error_message(intptr_t ninputs, const nd::array* inputs)
 {
     stringstream ss;
 
@@ -83,7 +83,7 @@ broadcast_error::broadcast_error(intptr_t ninputs, const nd::array *inputs)
 {
 }
 
-inline string broadcast_error_message(const ndt::type& dst_tp, const char *dst_arrmeta,
+inline std::string broadcast_error_message(const ndt::type& dst_tp, const char *dst_arrmeta,
                 const ndt::type& src_tp, const char *src_arrmeta)
 {
     stringstream ss;
@@ -102,7 +102,7 @@ broadcast_error::broadcast_error(const ndt::type& dst_tp, const char *dst_arrmet
 {
 }
 
-inline string broadcast_error_message(const ndt::type& dst_tp, const char *dst_arrmeta,
+inline std::string broadcast_error_message(const ndt::type& dst_tp, const char *dst_arrmeta,
                 const char *src_name)
 {
     stringstream ss;
@@ -119,7 +119,7 @@ broadcast_error::broadcast_error(const ndt::type& dst_tp, const char *dst_arrmet
 {
 }
 
-inline string broadcast_error_message(intptr_t dst_size, intptr_t src_size,
+inline std::string broadcast_error_message(intptr_t dst_size, intptr_t src_size,
                 const char *dst_name, const char *src_name)
 {
     stringstream ss;
@@ -135,7 +135,7 @@ broadcast_error::broadcast_error(intptr_t dst_size, intptr_t src_size,
 {
 }
 
-inline string too_many_indices_message(const ndt::type& dt, intptr_t nindices, intptr_t ndim)
+inline std::string too_many_indices_message(const ndt::type& dt, intptr_t nindices, intptr_t ndim)
 {
     std::stringstream ss;
 
@@ -151,7 +151,7 @@ dynd::too_many_indices::too_many_indices(const ndt::type& dt, intptr_t nindices,
     //cout << "throwing too_many_indices\n";
 }
 
-inline string index_out_of_bounds_message(intptr_t i, size_t axis, intptr_t ndim, const intptr_t *shape)
+inline std::string index_out_of_bounds_message(intptr_t i, size_t axis, intptr_t ndim, const intptr_t *shape)
 {
     stringstream ss;
 
@@ -162,7 +162,7 @@ inline string index_out_of_bounds_message(intptr_t i, size_t axis, intptr_t ndim
     return ss.str();
 }
 
-inline string index_out_of_bounds_message(intptr_t i, intptr_t dimension_size)
+inline std::string index_out_of_bounds_message(intptr_t i, intptr_t dimension_size)
 {
     stringstream ss;
 
@@ -186,7 +186,7 @@ index_out_of_bounds::index_out_of_bounds(intptr_t i, intptr_t dimension_size)
 {
 }
 
-inline string axis_out_of_bounds_message(size_t i, intptr_t ndim)
+inline std::string axis_out_of_bounds_message(size_t i, intptr_t ndim)
 {
     stringstream ss;
 
@@ -222,7 +222,7 @@ inline void print_slice(std::ostream& o, const irange& i)
     }
 }
 
-inline string irange_out_of_bounds_message(const irange& i, size_t axis, intptr_t ndim, const intptr_t *shape)
+inline std::string irange_out_of_bounds_message(const irange& i, size_t axis, intptr_t ndim, const intptr_t *shape)
 {
     stringstream ss;
 
@@ -235,7 +235,7 @@ inline string irange_out_of_bounds_message(const irange& i, size_t axis, intptr_
     return ss.str();
 }
 
-inline string irange_out_of_bounds_message(const irange& i, intptr_t dimension_size)
+inline std::string irange_out_of_bounds_message(const irange& i, intptr_t dimension_size)
 {
     stringstream ss;
 
@@ -262,7 +262,7 @@ irange_out_of_bounds::irange_out_of_bounds(const irange& i, intptr_t dimension_s
 {
 }
 
-inline string invalid_type_id_message(int type_id)
+inline std::string invalid_type_id_message(int type_id)
 {
     stringstream ss;
 
@@ -277,7 +277,7 @@ invalid_type_id::invalid_type_id(int type_id)
     //cout << "throwing invalid_type_id\n";
 }
 
-inline string string_decode_error_message(const char *begin, const char *end, string_encoding_t encoding)
+inline std::string string_decode_error_message(const char *begin, const char *end, string_encoding_t encoding)
 {
     stringstream ss;
     ss << "encoded bytes ";
@@ -292,7 +292,7 @@ string_decode_error::string_decode_error(const char *begin, const char *end, str
 {
 }
 
-inline string string_encode_error_message(uint32_t cp, string_encoding_t encoding)
+inline std::string string_encode_error_message(uint32_t cp, string_encoding_t encoding)
 {
     stringstream ss;
     if (!utf8::internal::is_code_point_valid(cp)) {
@@ -314,7 +314,7 @@ string_encode_error::string_encode_error(uint32_t cp, string_encoding_t encoding
 {
 }
 
-inline string not_comparable_error_message(const ndt::type& lhs, const ndt::type& rhs,
+inline std::string not_comparable_error_message(const ndt::type& lhs, const ndt::type& rhs,
                 comparison_type_t comptype)
 {
     stringstream ss;
@@ -355,7 +355,7 @@ not_comparable_error::not_comparable_error(const ndt::type& lhs, const ndt::type
 
 #ifdef DYND_CUDA
 
-inline string cuda_runtime_error_message(cudaError_t error)
+inline std::string cuda_runtime_error_message(cudaError_t error)
 {
     return cudaGetErrorString(error);
 }

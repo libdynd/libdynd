@@ -29,6 +29,13 @@ struct DYND_API string {
   char *end;
 };
 
+inline bool operator>(const string &lhs, const string &rhs)
+{
+  return std::lexicographical_compare(
+      reinterpret_cast<const uint8_t *>(rhs.begin), reinterpret_cast<const uint8_t *>(rhs.end),
+      reinterpret_cast<const uint8_t *>(lhs.begin), reinterpret_cast<const uint8_t *>(lhs.end));
+}
+
 namespace ndt {
 
   class DYND_API string_type : public base_string_type {

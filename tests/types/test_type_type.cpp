@@ -46,7 +46,7 @@ TEST(DTypeDType, StringCasting) {
     a = a.eval();
     EXPECT_EQ(type_type_id, a.get_type().get_type_id());
     EXPECT_EQ(ndt::type::make<int32_t>(), a.as<ndt::type>());
-    EXPECT_EQ("int32", a.as<string>());
+    EXPECT_EQ("int32", a.as<std::string>());
 }
 
 TEST(DTypeDType, ScalarRefCount) {

@@ -70,7 +70,7 @@ namespace {
         /** Every memory block object needs this at the front */
         memory_block_data m_mbd;
         // Parameters used to construct the memory block
-        string m_filename;
+        std::string m_filename;
         uint32_t m_access;
         intptr_t m_begin, m_end;
         // Handle to the mapped memory
