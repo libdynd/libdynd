@@ -39,6 +39,11 @@ public:
 };
 } // anonymous namespace
 
+nd::array nd::json::parse(const ndt::type &tp, const std::string &str)
+{
+  return parse_json(tp, str.data());
+}
+
 static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const char *&begin, const char *&end)
 {
   // Check the type of 'json', and get pointers to the begin/end of a UTF-8
