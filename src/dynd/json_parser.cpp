@@ -39,6 +39,11 @@ public:
 };
 } // anonymous namespace
 
+nd::array nd::json::parse(const ndt::type &tp, const std::string &str)
+{
+  return parse_json(tp, str.data());
+}
+
 static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const char *&begin, const char *&end)
 {
   // Check the type of 'json', and get pointers to the begin/end of a UTF-8
@@ -327,11 +332,17 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
 
   for (intptr_t i = 0; i < field_count; ++i) {
     if (!populated_fields[i]) {
-      stringstream ss;
-      ss << "object dict does not contain the field ";
-      print_escaped_utf8_string(ss, fsd->get_field_name(i));
-      ss << " as required by the data type";
-      throw json_parse_error(skip_whitespace(saved_begin, end), ss.str(), tp);
+      const ndt::type &field_tp = fsd->get_field_type(i);
+      if (field_tp.get_type_id() == option_type_id) {
+        field_tp.extended<ndt::option_type>()->assign_na(arrmeta + arrmeta_offsets[i], out_data + data_offsets[i],
+                                                         &eval::default_eval_context);
+      } else {
+        stringstream ss;
+        ss << "object dict does not contain the field ";
+        print_escaped_utf8_string(ss, fsd->get_field_name(i));
+        ss << " as required by the data type";
+        throw json_parse_error(skip_whitespace(saved_begin, end), ss.str(), tp);
+      }
     }
   }
 

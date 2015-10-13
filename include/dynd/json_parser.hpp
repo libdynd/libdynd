@@ -29,6 +29,14 @@ namespace ndt {
   } // namespace dynd::ndt::json
 } // namespace dynd::ndt
 
+namespace nd {
+  namespace json {
+
+    DYND_API array parse(const ndt::type &tp, const std::string &str);
+
+  } // namespace dynd::nd::json
+} // namespace dynd::nd
+
 /**
  * Validates UTF-8 encoded JSON, throwing an exception if it
  * is not valid.
