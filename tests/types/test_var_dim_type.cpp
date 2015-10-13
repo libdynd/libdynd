@@ -206,13 +206,13 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarStruct)
 
   nd::array nlastname = n(irange(), irange(), 1);
   EXPECT_EQ(ndt::type("2 * var * string"), nlastname.get_type());
-  EXPECT_EQ("Abrams", nlastname(0, 0).as<string>());
-  EXPECT_EQ("Philips", nlastname(1, 0).as<string>());
+  EXPECT_EQ("Abrams", nlastname(0, 0).as<std::string>());
+  EXPECT_EQ("Philips", nlastname(1, 0).as<std::string>());
 
   nd::array ngender = n.p("gender");
   EXPECT_EQ(ndt::type("2 * var * fixed_string[1]"), ngender.get_type());
-  EXPECT_EQ("M", ngender(0, 0).as<string>());
-  EXPECT_EQ("F", ngender(1, 0).as<string>());
+  EXPECT_EQ("M", ngender(0, 0).as<std::string>());
+  EXPECT_EQ("F", ngender(1, 0).as<std::string>());
 }
 
 TEST(VarArrayDType, AccessCStructOfVar)

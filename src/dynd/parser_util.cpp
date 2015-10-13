@@ -563,7 +563,7 @@ double parse::checked_string_to_float64(const char *begin, const char *end, assi
 
   // TODO: use http://www.netlib.org/fp/dtoa.c
   char *end_ptr;
-  string s(begin, end);
+  std::string s(begin, end);
   double value = strtod(s.c_str(), &end_ptr);
   if (errmode != assign_error_nocheck && (size_t)(end_ptr - s.c_str()) != s.size()) {
     stringstream ss;

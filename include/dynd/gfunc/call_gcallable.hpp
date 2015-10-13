@@ -51,8 +51,7 @@ namespace gfunc {
         if (paramtype.get_type_id() == ndarrayarg_type_id) {
           *reinterpret_cast<const array_preamble **>(data) = value.get_ndo();
         } else {
-          typed_data_assign(paramtype, arrmeta, data, value.get_type(), value.get_arrmeta(),
-                            value.get_ndo()->data.ptr);
+          typed_data_assign(paramtype, arrmeta, data, value.get_type(), value.get_arrmeta(), value.get_ndo()->data.ptr);
         }
       }
     };
@@ -78,8 +77,8 @@ namespace gfunc {
         // Setting from a known-sized character string array
         if (paramtype.get_type_id() == string_type_id &&
             paramtype.extended<ndt::string_type>()->get_encoding() == string_encoding_utf_8) {
-          reinterpret_cast<string_type_data *>(data)->begin = const_cast<char *>(value);
-          reinterpret_cast<string_type_data *>(data)->end = const_cast<char *>(value + N - 1);
+          reinterpret_cast<string *>(data)->begin = const_cast<char *>(value);
+          reinterpret_cast<string *>(data)->end = const_cast<char *>(value + N - 1);
         } else {
           typed_data_assign(paramtype, arrmeta, data, ndt::fixed_string_type::make(N, string_encoding_utf_8), NULL,
                             value);
@@ -104,8 +103,7 @@ namespace gfunc {
           uintptr_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           uintptr_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
           typed_data_copy(fsdt->get_field_type(i), params.get_arrmeta() + arrmeta_offset,
-                          params.get_ndo()->data.ptr + data_offset,
-                          m_default_parameters.get_arrmeta() + arrmeta_offset,
+                          params.get_ndo()->data.ptr + data_offset, m_default_parameters.get_arrmeta() + arrmeta_offset,
                           m_default_parameters.get_ndo()->data.ptr + data_offset);
         }
       } else {
@@ -130,8 +128,7 @@ namespace gfunc {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
           typed_data_copy(fsdt->get_field_type(i), params.get_arrmeta() + arrmeta_offset,
-                          params.get_ndo()->data.ptr + data_offset,
-                          m_default_parameters.get_arrmeta() + arrmeta_offset,
+                          params.get_ndo()->data.ptr + data_offset, m_default_parameters.get_arrmeta() + arrmeta_offset,
                           m_default_parameters.get_ndo()->data.ptr + data_offset);
         }
       } else {
@@ -159,8 +156,7 @@ namespace gfunc {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
           typed_data_copy(fsdt->get_field_type(i), params.get_arrmeta() + arrmeta_offset,
-                          params.get_ndo()->data.ptr + data_offset,
-                          m_default_parameters.get_arrmeta() + arrmeta_offset,
+                          params.get_ndo()->data.ptr + data_offset, m_default_parameters.get_arrmeta() + arrmeta_offset,
                           m_default_parameters.get_ndo()->data.ptr + data_offset);
         }
       } else {
@@ -191,8 +187,7 @@ namespace gfunc {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
           typed_data_copy(fsdt->get_field_type(i), params.get_arrmeta() + arrmeta_offset,
-                          params.get_ndo()->data.ptr + data_offset,
-                          m_default_parameters.get_arrmeta() + arrmeta_offset,
+                          params.get_ndo()->data.ptr + data_offset, m_default_parameters.get_arrmeta() + arrmeta_offset,
                           m_default_parameters.get_ndo()->data.ptr + data_offset);
         }
       } else {
@@ -226,8 +221,7 @@ namespace gfunc {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
           typed_data_copy(fsdt->get_field_type(i), params.get_arrmeta() + arrmeta_offset,
-                          params.get_ndo()->data.ptr + data_offset,
-                          m_default_parameters.get_arrmeta() + arrmeta_offset,
+                          params.get_ndo()->data.ptr + data_offset, m_default_parameters.get_arrmeta() + arrmeta_offset,
                           m_default_parameters.get_ndo()->data.ptr + data_offset);
         }
       } else {
@@ -264,8 +258,7 @@ namespace gfunc {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.get_arrmeta())[i];
           typed_data_copy(fsdt->get_field_type(i), params.get_arrmeta() + arrmeta_offset,
-                          params.get_ndo()->data.ptr + data_offset,
-                          m_default_parameters.get_arrmeta() + arrmeta_offset,
+                          params.get_ndo()->data.ptr + data_offset, m_default_parameters.get_arrmeta() + arrmeta_offset,
                           m_default_parameters.get_ndo()->data.ptr + data_offset);
         }
       } else {

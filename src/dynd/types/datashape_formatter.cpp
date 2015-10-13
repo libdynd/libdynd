@@ -14,12 +14,10 @@
 using namespace std;
 using namespace dynd;
 
-static void format_datashape(std::ostream &o, const ndt::type &tp,
-                             const char *arrmeta, const char *data,
+static void format_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
                              const std::string &indent, bool multiline);
 
-static void format_struct_datashape(std::ostream &o, const ndt::type &tp,
-                                    const char *arrmeta, const char *data,
+static void format_struct_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
                                     const std::string &indent, bool multiline)
 {
   // The data requires arrmeta
@@ -39,10 +37,8 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp,
       o << indent << "  ";
     }
     o << bsd->get_field_name(i) << ": ";
-    format_datashape(o, bsd->get_field_type(i),
-                     arrmeta ? (arrmeta + arrmeta_offsets[i]) : NULL,
-                     data ? (data + data_offsets[i]) : NULL,
-                     multiline ? (indent + "  ") : indent, multiline);
+    format_datashape(o, bsd->get_field_type(i), arrmeta ? (arrmeta + arrmeta_offsets[i]) : NULL,
+                     data ? (data + data_offsets[i]) : NULL, multiline ? (indent + "  ") : indent, multiline);
     if (multiline) {
       o << ",\n";
     } else if (i != field_count - 1) {
@@ -52,8 +48,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp,
   o << indent << "}";
 }
 
-static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
-                                 const char *arrmeta, const char *data,
+static void format_dim_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
                                  const std::string &indent, bool multiline)
 {
   switch (tp.get_type_id()) {
@@ -61,8 +56,7 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
     if (tp.get_kind() == kind_kind) {
       // A symbolic type, so arrmeta/data can't exist
       o << "Fixed * ";
-      format_datashape(o, tp.extended<ndt::base_dim_type>()->get_element_type(),
-                       NULL, NULL, indent, multiline);
+      format_datashape(o, tp.extended<ndt::base_dim_type>()->get_element_type(), NULL, NULL, indent, multiline);
       break;
     }
     const ndt::fixed_dim_type *fad = tp.extended<ndt::fixed_dim_type>();
@@ -72,9 +66,8 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
     if (dim_size != 1) {
       data = NULL;
     }
-    format_datashape(o, fad->get_element_type(),
-                     arrmeta + (arrmeta ? sizeof(fixed_dim_type_arrmeta) : 0),
-                     data, indent, multiline);
+    format_datashape(o, fad->get_element_type(), arrmeta + (arrmeta ? sizeof(fixed_dim_type_arrmeta) : 0), data, indent,
+                     multiline);
     break;
   }
   case var_dim_type_id: {
@@ -83,28 +76,24 @@ static void format_dim_datashape(std::ostream &o, const ndt::type &tp,
     if (data == NULL || arrmeta == NULL) {
       o << "var * ";
     } else {
-      const var_dim_type_data *d =
-          reinterpret_cast<const var_dim_type_data *>(data);
+      const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
       if (d->begin == NULL) {
         o << "var * ";
       } else {
         o << d->size << " * ";
         if (d->size == 1) {
-          const var_dim_type_arrmeta *md =
-              reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+          const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
           child_data = d->begin + md->offset;
         }
       }
     }
-    format_datashape(o, vad->get_element_type(),
-                     arrmeta ? (arrmeta + sizeof(var_dim_type_arrmeta)) : NULL,
-                     child_data, indent, multiline);
+    format_datashape(o, vad->get_element_type(), arrmeta ? (arrmeta + sizeof(var_dim_type_arrmeta)) : NULL, child_data,
+                     indent, multiline);
     break;
   }
   default: {
     stringstream ss;
-    ss << "Datashape formatting for dynd type " << tp
-       << " is not yet implemented";
+    ss << "Datashape formatting for dynd type " << tp << " is not yet implemented";
     throw runtime_error(ss.str());
   }
   }
@@ -124,8 +113,7 @@ static void format_string_datashape(std::ostream &o, const ndt::type &tp)
   }
   default: {
     stringstream ss;
-    ss << "unrecognized string dynd type " << tp
-       << " while formatting datashape";
+    ss << "unrecognized string dynd type " << tp << " while formatting datashape";
     throw dynd::type_error(ss.str());
   }
   }
@@ -142,15 +130,13 @@ static void format_complex_datashape(std::ostream &o, const ndt::type &tp)
     break;
   default: {
     stringstream ss;
-    ss << "unrecognized string complex type " << tp
-       << " while formatting datashape";
+    ss << "unrecognized string complex type " << tp << " while formatting datashape";
     throw dynd::type_error(ss.str());
   }
   }
 }
 
-static void format_datashape(std::ostream &o, const ndt::type &tp,
-                             const char *arrmeta, const char *data,
+static void format_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data,
                              const std::string &indent, bool multiline)
 {
   switch (tp.get_kind()) {
@@ -175,29 +161,24 @@ static void format_datashape(std::ostream &o, const ndt::type &tp,
   }
 }
 
-void dynd::format_datashape(std::ostream &o, const ndt::type &tp,
-                            const char *arrmeta, const char *data,
-                            bool multiline)
+void dynd::format_datashape(std::ostream &o, const ndt::type &tp, const char *arrmeta, const char *data, bool multiline)
 {
   ::format_datashape(o, tp, arrmeta, data, "", multiline);
 }
 
-string dynd::format_datashape(const nd::array &a, const std::string &prefix,
-                              bool multiline)
+std::string dynd::format_datashape(const nd::array &a, const std::string &prefix, bool multiline)
 {
   stringstream ss;
   ss << prefix;
   if (!a.is_null()) {
-    ::format_datashape(ss, a.get_type(), a.get_arrmeta(),
-                       a.get_readonly_originptr(), "", multiline);
+    ::format_datashape(ss, a.get_type(), a.get_arrmeta(), a.get_readonly_originptr(), "", multiline);
   } else {
     ::format_datashape(ss, ndt::type(), NULL, NULL, "", multiline);
   }
   return ss.str();
 }
 
-string dynd::format_datashape(const ndt::type &tp, const std::string &prefix,
-                              bool multiline)
+std::string dynd::format_datashape(const ndt::type &tp, const std::string &prefix, bool multiline)
 {
   stringstream ss;
   ss << prefix;

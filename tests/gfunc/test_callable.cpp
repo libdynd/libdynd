@@ -442,7 +442,7 @@ TEST(GFuncCallable, DTypeParam)
   EXPECT_EQ(8u, r.as<size_t>());
 }
 
-static string string_return(int a, int b, int c)
+static std::string string_return(int a, int b, int c)
 {
   stringstream ss;
   ss << a << ", " << b << ", " << c;
@@ -463,5 +463,5 @@ TEST(GFuncCallable, StringReturn)
   a(2).val_assign(1000);
   r = c.call_generic(a);
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), r.get_type());
-  EXPECT_EQ("-10, 20, 1000", r.as<string>());
+  EXPECT_EQ("-10, 20, 1000", r.as<std::string>());
 }

@@ -169,8 +169,8 @@ namespace nd {
   struct string_less_kernel : base_kernel<string_less_kernel<T>, 2> {
     void single(char *dst, char *const *src)
     {
-      const string_type_data *da = reinterpret_cast<const string_type_data *>(src[0]);
-      const string_type_data *db = reinterpret_cast<const string_type_data *>(src[1]);
+      const string *da = reinterpret_cast<const string *>(src[0]);
+      const string *db = reinterpret_cast<const string *>(src[1]);
       *reinterpret_cast<bool1 *>(dst) =
           std::lexicographical_compare(reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end),
                                        reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end));
@@ -353,8 +353,8 @@ namespace nd {
   struct string_less_equal_kernel : base_kernel<string_less_equal_kernel<T>, 2> {
     void single(char *dst, char *const *src)
     {
-      const string_type_data *da = reinterpret_cast<const string_type_data *>(src[0]);
-      const string_type_data *db = reinterpret_cast<const string_type_data *>(src[1]);
+      const string *da = reinterpret_cast<const string *>(src[0]);
+      const string *db = reinterpret_cast<const string *>(src[1]);
       *reinterpret_cast<bool1 *>(dst) =
           !std::lexicographical_compare(reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end),
                                         reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end));
@@ -417,8 +417,8 @@ namespace nd {
   struct string_equal_kernel : base_kernel<string_equal_kernel<T>, 2> {
     void single(char *dst, char *const *src)
     {
-      const string_type_data *da = reinterpret_cast<const string_type_data *>(src[0]);
-      const string_type_data *db = reinterpret_cast<const string_type_data *>(src[1]);
+      const string *da = reinterpret_cast<const string *>(src[0]);
+      const string *db = reinterpret_cast<const string *>(src[1]);
       *reinterpret_cast<bool1 *>(dst) =
           (da->end - da->begin == db->end - db->begin) && memcmp(da->begin, db->begin, da->end - da->begin) == 0;
     }
@@ -793,8 +793,8 @@ namespace nd {
   struct string_not_equal_kernel : base_kernel<string_not_equal_kernel<T>, 2> {
     void single(char *dst, char *const *src)
     {
-      const string_type_data *da = reinterpret_cast<const string_type_data *>(src[0]);
-      const string_type_data *db = reinterpret_cast<const string_type_data *>(src[1]);
+      const string *da = reinterpret_cast<const string *>(src[0]);
+      const string *db = reinterpret_cast<const string *>(src[1]);
       *reinterpret_cast<bool1 *>(dst) =
           (da->end - da->begin != db->end - db->begin) || memcmp(da->begin, db->begin, da->end - da->begin) != 0;
     }
@@ -911,8 +911,8 @@ namespace nd {
   struct string_greater_equal_kernel : base_kernel<string_greater_equal_kernel<T>, 2> {
     void single(char *dst, char *const *src)
     {
-      const string_type_data *da = reinterpret_cast<const string_type_data *>(src[0]);
-      const string_type_data *db = reinterpret_cast<const string_type_data *>(src[1]);
+      const string *da = reinterpret_cast<const string *>(src[0]);
+      const string *db = reinterpret_cast<const string *>(src[1]);
       *reinterpret_cast<bool1 *>(dst) =
           !std::lexicographical_compare(reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end),
                                         reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end));
@@ -1095,8 +1095,8 @@ namespace nd {
   struct string_greater_kernel : base_kernel<string_greater_kernel<T>, 2> {
     void single(char *dst, char *const *src)
     {
-      const string_type_data *da = reinterpret_cast<const string_type_data *>(src[0]);
-      const string_type_data *db = reinterpret_cast<const string_type_data *>(src[1]);
+      const string *da = reinterpret_cast<const string *>(src[0]);
+      const string *db = reinterpret_cast<const string *>(src[1]);
       *reinterpret_cast<bool1 *>(dst) =
           std::lexicographical_compare(reinterpret_cast<const T *>(db->begin), reinterpret_cast<const T *>(db->end),
                                        reinterpret_cast<const T *>(da->begin), reinterpret_cast<const T *>(da->end));

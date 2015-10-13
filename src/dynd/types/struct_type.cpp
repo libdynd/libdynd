@@ -54,7 +54,7 @@ void ndt::struct_type::print_type(std::ostream &o) const
     if (i != 0) {
       o << ", ";
     }
-    const string_type_data &fn = get_field_name_raw(i);
+    const string &fn = get_field_name_raw(i);
     if (is_simple_identifier_name(fn.begin, fn.end)) {
       o.write(fn.begin, fn.end - fn.begin);
     } else {
@@ -199,7 +199,7 @@ void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
     const type &field_dt = get_field_type(i);
     if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
       o << indent << " field " << i << " (name ";
-      const string_type_data &fnr = get_field_name_raw(i);
+      const string &fnr = get_field_name_raw(i);
       o.write(fnr.begin, fnr.end - fnr.begin);
       o << ") arrmeta:\n";
       field_dt.extended()->arrmeta_debug_print(arrmeta + arrmeta_offsets[i], o, indent + "  ");
@@ -293,11 +293,13 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
     }
   };
 
-  static pair<string, nd::callable> type_properties[] = {
-      pair<string, nd::callable>("field_types", nd::callable::make<field_types_kernel>(type("(self: type) -> Any"))),
-      pair<string, nd::callable>("field_names", nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))),
-      pair<string, nd::callable>("arrmeta_offsets",
-                                 nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))), };
+  static pair<std::string, nd::callable> type_properties[] = {
+      pair<std::string, nd::callable>("field_types",
+                                      nd::callable::make<field_types_kernel>(type("(self: type) -> Any"))),
+      pair<std::string, nd::callable>("field_names",
+                                      nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))),
+      pair<std::string, nd::callable>("arrmeta_offsets",
+                                      nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))), };
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
@@ -311,7 +313,7 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
   intptr_t undim = n.get_ndim();
   ndt::type udt = n.get_dtype();
   if (udt.get_kind() == expr_kind) {
-    string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
+    std::string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
     return n.replace_dtype(ndt::property_type::make(udt, field_name, i)).release();
   } else {
     if (undim == 0) {

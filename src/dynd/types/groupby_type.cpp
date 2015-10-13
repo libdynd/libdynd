@@ -360,12 +360,11 @@ static nd::array property_ndo_get_groups(const nd::array &n)
   return gd->get_groups_type().p("categories");
 }
 
-void ndt::groupby_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
+void ndt::groupby_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                                                     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> groupby_array_properties[] = {
-      pair<string, gfunc::callable>(
+  static pair<std::string, gfunc::callable> groupby_array_properties[] = {
+      pair<std::string, gfunc::callable>(
           "groups", gfunc::make_callable(&property_ndo_get_groups, "self")), };
 
   *out_properties = groupby_array_properties;

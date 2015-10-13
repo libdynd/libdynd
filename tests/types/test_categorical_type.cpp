@@ -231,7 +231,7 @@ TEST(CategoricalType, ValuesLonger)
   }
   // Check that everything in 'a' is right
   for (int i = 0; i < a_count; ++i) {
-    EXPECT_EQ(a_vals[i], a(i).as<string>());
+    EXPECT_EQ(a_vals[i], a(i).as<std::string>());
     EXPECT_EQ(a_uints[i], a_view(i).as<uint32_t>());
   }
 }
@@ -247,24 +247,24 @@ TEST(CategoricalType, AssignFixedString)
 
   nd::array a = nd::empty(3, dt);
   a.val_assign(cat);
-  EXPECT_EQ("foo", a(0).as<string>());
-  EXPECT_EQ("bar", a(1).as<string>());
-  EXPECT_EQ("baz", a(2).as<string>());
+  EXPECT_EQ("foo", a(0).as<std::string>());
+  EXPECT_EQ("bar", a(1).as<std::string>());
+  EXPECT_EQ("baz", a(2).as<std::string>());
   a(0).vals() = cat(2);
-  EXPECT_EQ("baz", a(0).as<string>());
+  EXPECT_EQ("baz", a(0).as<std::string>());
 
   cat(0).vals() = "zzz";
   EXPECT_THROW(a(0).vals() = cat(0), std::runtime_error);
 
   nd::array tmp = nd::empty(3, cat.get_type().at(0));
   tmp.val_assign(a);
-  EXPECT_EQ("baz", tmp(0).as<string>());
-  EXPECT_EQ("bar", tmp(1).as<string>());
-  EXPECT_EQ("baz", tmp(2).as<string>());
+  EXPECT_EQ("baz", tmp(0).as<std::string>());
+  EXPECT_EQ("bar", tmp(1).as<std::string>());
+  EXPECT_EQ("baz", tmp(2).as<std::string>());
   tmp(0).vals() = a(1);
-  EXPECT_EQ("bar", tmp(0).as<string>());
+  EXPECT_EQ("bar", tmp(0).as<std::string>());
   tmp(0).vals() = "foo";
-  EXPECT_EQ("foo", tmp(0).as<string>());
+  EXPECT_EQ("foo", tmp(0).as<std::string>());
 }
 
 TEST(CategoricalType, AssignInt)
@@ -313,15 +313,15 @@ TEST(CategoricalType, AssignRange)
   d.val_assign(cat(1));
   a(7).vals() = cat(2);
 
-  EXPECT_EQ("foo", a(0).as<string>());
-  EXPECT_EQ("bar", a(1).as<string>());
-  EXPECT_EQ("baz", a(2).as<string>());
-  EXPECT_EQ("foo", a(3).as<string>());
-  EXPECT_EQ("foo", a(4).as<string>());
-  EXPECT_EQ("foo", a(5).as<string>());
-  EXPECT_EQ("bar", a(6).as<string>());
-  EXPECT_EQ("baz", a(7).as<string>());
-  EXPECT_EQ("bar", a(8).as<string>());
+  EXPECT_EQ("foo", a(0).as<std::string>());
+  EXPECT_EQ("bar", a(1).as<std::string>());
+  EXPECT_EQ("baz", a(2).as<std::string>());
+  EXPECT_EQ("foo", a(3).as<std::string>());
+  EXPECT_EQ("foo", a(4).as<std::string>());
+  EXPECT_EQ("foo", a(5).as<std::string>());
+  EXPECT_EQ("bar", a(6).as<std::string>());
+  EXPECT_EQ("baz", a(7).as<std::string>());
+  EXPECT_EQ("bar", a(8).as<std::string>());
 }
 
 /*

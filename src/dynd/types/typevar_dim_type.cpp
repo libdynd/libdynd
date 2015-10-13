@@ -11,16 +11,12 @@
 using namespace std;
 using namespace dynd;
 
-ndt::typevar_dim_type::typevar_dim_type(const std::string &name,
-                                        const type &element_type)
-    : base_dim_type(typevar_dim_type_id, pattern_kind, element_type, 0, 1, 0,
-                    type_flag_symbolic, false),
-      m_name(name)
+ndt::typevar_dim_type::typevar_dim_type(const std::string &name, const type &element_type)
+    : base_dim_type(typevar_dim_type_id, pattern_kind, element_type, 0, 1, 0, type_flag_symbolic, false), m_name(name)
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  } else if (!is_valid_typevar_name(m_name.c_str(),
-                                    m_name.c_str() + m_name.size())) {
+  } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
     print_escaped_utf8_string(ss, m_name);
@@ -29,15 +25,13 @@ ndt::typevar_dim_type::typevar_dim_type(const std::string &name,
   }
 }
 
-void
-ndt::typevar_dim_type::get_vars(std::unordered_set<std::string> &vars) const
+void ndt::typevar_dim_type::get_vars(std::unordered_set<std::string> &vars) const
 {
   vars.insert(m_name);
   m_element_tp.get_vars(vars);
 }
 
-void ndt::typevar_dim_type::print_data(std::ostream &DYND_UNUSED(o),
-                                       const char *DYND_UNUSED(arrmeta),
+void ndt::typevar_dim_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
                                        const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of typevar type");
@@ -49,15 +43,12 @@ void ndt::typevar_dim_type::print_type(std::ostream &o) const
   o << m_name << " * " << get_element_type();
 }
 
-intptr_t
-ndt::typevar_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
-                                    const char *DYND_UNUSED(data)) const
+intptr_t ndt::typevar_dim_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
   return -1;
 }
 
-bool ndt::typevar_dim_type::is_lossless_assignment(const type &dst_tp,
-                                                   const type &src_tp) const
+bool ndt::typevar_dim_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -82,8 +73,8 @@ bool ndt::typevar_dim_type::operator==(const base_type &rhs) const
   }
 }
 
-ndt::type ndt::typevar_dim_type::get_type_at_dimension(
-    char **DYND_UNUSED(inout_arrmeta), intptr_t i, intptr_t total_ndim) const
+ndt::type ndt::typevar_dim_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta), intptr_t i,
+                                                       intptr_t total_ndim) const
 {
   if (i == 0) {
     return type(this, true);
@@ -92,22 +83,21 @@ ndt::type ndt::typevar_dim_type::get_type_at_dimension(
   }
 }
 
-void ndt::typevar_dim_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
+void ndt::typevar_dim_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
+                                                      bool DYND_UNUSED(blockref_alloc)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-void ndt::typevar_dim_type::arrmeta_copy_construct(
-    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    memory_block_data *DYND_UNUSED(embedded_reference)) const
+void ndt::typevar_dim_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+                                                   memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-size_t ndt::typevar_dim_type::arrmeta_copy_construct_onedim(
-    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    memory_block_data *DYND_UNUSED(embedded_reference)) const
+size_t ndt::typevar_dim_type::arrmeta_copy_construct_onedim(char *DYND_UNUSED(dst_arrmeta),
+                                                            const char *DYND_UNUSED(src_arrmeta),
+                                                            memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
@@ -129,8 +119,7 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
   if (tv_type.is_null()) {
     // This typevar hasn't been seen yet
     tv_type = candidate_tp;
-    return m_element_tp.match(
-        arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
+    return m_element_tp.match(arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
   } else {
     // Make sure the type matches previous
     // instances of the type var
@@ -147,8 +136,7 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
     default:
       break;
     }
-    return m_element_tp.match(
-        arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
+    return m_element_tp.match(arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
   }
 }
 
@@ -164,46 +152,35 @@ static ndt::type property_get_element_type(ndt::type dt)
   return dt.extended<ndt::typevar_dim_type>()->get_element_type();
 }
 
-void ndt::typevar_dim_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::callable> **out_properties,
-    size_t *out_count) const
+void ndt::typevar_dim_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                                        size_t *out_count) const
 {
   struct name_kernel : nd::base_property_kernel<name_kernel> {
-    name_kernel(const ndt::type &tp, const ndt::type &dst_tp,
-                const char *dst_arrmeta)
+    name_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
         : base_property_kernel<name_kernel>(tp, dst_tp, dst_arrmeta)
     {
     }
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(
-          dst_tp, dst_arrmeta, dst,
-          static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name())
-              .get_arrmeta(),
-          static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name())
-              .get_readonly_originptr());
+      typed_data_copy(dst_tp, dst_arrmeta, dst,
+                      static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get_arrmeta(),
+                      static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get_readonly_originptr());
     }
 
-    static void resolve_dst_type(
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *data, ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
-        const dynd::nd::array *DYND_UNUSED(kwds),
-        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
+                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                 intptr_t DYND_UNUSED(nkwd), const dynd::nd::array *DYND_UNUSED(kwds),
+                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = static_cast<nd::array>(
-          tp.extended<typevar_dim_type>()->get_name()).get_type();
+      dst_tp = static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get_type();
     }
   };
 
-  static pair<string, nd::callable> type_properties[] = {
-      pair<string, nd::callable>(
-          "name", nd::callable::make<name_kernel>(type("(self: type) -> Any"))),
-      pair<string, nd::callable>(
-          "element_type",
-          nd::functional::apply(&property_get_element_type, "self"))};
+  static pair<std::string, nd::callable> type_properties[] = {
+      pair<std::string, nd::callable>("name", nd::callable::make<name_kernel>(type("(self: type) -> Any"))),
+      pair<std::string, nd::callable>("element_type", nd::functional::apply(&property_get_element_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);

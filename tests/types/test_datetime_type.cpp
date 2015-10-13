@@ -74,10 +74,10 @@ TEST(DatetimeType, ValueCreationAbstract) {
 
     // Parsing Zulu timezone as abstract works ok (throws away time zone)
     EXPECT_EQ("2000-01-01T03:00",
-              nd::array("2000-01-01T03:00Z").ucast(d).eval().as<string>());
+              nd::array("2000-01-01T03:00Z").ucast(d).eval().as<std::string>());
     // Parsing specified timezone as abstract works ok (throws away time zone)
     EXPECT_EQ("2000-01-01T03:00",
-              nd::array("2000-01-01T03:00+0300").ucast(d).eval().as<string>());
+              nd::array("2000-01-01T03:00+0300").ucast(d).eval().as<std::string>());
 
     // Parsing Zulu timezone as abstract with no error checking works though
 //    EXPECT_EQ((((1600-1970)*365 - (1972-1600)/4 + 3) * 1440LL + 15 * 60 + 45) * 60 * 10000000LL,
@@ -104,35 +104,35 @@ TEST(DatetimeType, ValueCreationUTC) {
 
 TEST(DatetimeType, ConvertToString) {
     EXPECT_EQ("2013-02-16T12:00",
-                    nd::array("2013-02-16T12").cast(ndt::type("datetime")).as<string>());
+                    nd::array("2013-02-16T12").cast(ndt::type("datetime")).as<std::string>());
     EXPECT_EQ("2013-02-16T12:00Z",
-                    nd::array("2013-02-16T12").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+                    nd::array("2013-02-16T12").cast(ndt::type("datetime[tz='UTC']")).as<std::string>());
 
     EXPECT_EQ("2013-02-16T12:13",
-                    nd::array("2013-02-16T12:13").cast(ndt::type("datetime")).as<string>());
+                    nd::array("2013-02-16T12:13").cast(ndt::type("datetime")).as<std::string>());
     EXPECT_EQ("2013-02-16T12:13Z",
-                    nd::array("2013-02-16T12:13Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13Z").cast(ndt::type("datetime[tz='UTC']")).as<std::string>());
 
     EXPECT_EQ("2013-02-16T12:13:19",
-                    nd::array("2013-02-16T12:13:19").cast(ndt::type("datetime")).as<string>());
+                    nd::array("2013-02-16T12:13:19").cast(ndt::type("datetime")).as<std::string>());
     EXPECT_EQ("2013-02-16T12:13:19Z",
-                    nd::array("2013-02-16T12:13:19Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13:19Z").cast(ndt::type("datetime[tz='UTC']")).as<std::string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012",
-                    nd::array("2013-02-16T12:13:19.012").cast(ndt::type("datetime")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012").cast(ndt::type("datetime")).as<std::string>());
     EXPECT_EQ("2013-02-16T12:13:19.012Z",
-                    nd::array("2013-02-16T12:13:19.012Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012Z").cast(ndt::type("datetime[tz='UTC']")).as<std::string>());
 
     EXPECT_EQ("2013-02-16T12:13:19.012345",
-                    nd::array("2013-02-16T12:13:19.012345").cast(ndt::type("datetime")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345").cast(ndt::type("datetime")).as<std::string>());
     EXPECT_EQ("2013-02-16T12:13:19.012345Z",
-                    nd::array("2013-02-16T12:13:19.012345Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13:19.012345Z").cast(ndt::type("datetime[tz='UTC']")).as<std::string>());
 
     // Ticks resolution (100*nanoseconds)
     EXPECT_EQ("2013-02-16T12:13:19.0123456",
-                    nd::array("2013-02-16T12:13:19.0123456").cast(ndt::type("datetime")).as<string>());
+                    nd::array("2013-02-16T12:13:19.0123456").cast(ndt::type("datetime")).as<std::string>());
     EXPECT_EQ("2013-02-16T12:13:19.0123456Z",
-                    nd::array("2013-02-16T12:13:19.0123456Z").cast(ndt::type("datetime[tz='UTC']")).as<string>());
+                    nd::array("2013-02-16T12:13:19.0123456Z").cast(ndt::type("datetime[tz='UTC']")).as<std::string>());
 }
 
 TEST(DatetimeType, AbstractTZToUTC) {
@@ -142,8 +142,8 @@ TEST(DatetimeType, AbstractTZToUTC) {
                              "[\"2013-01-15T12:30\", \"2010-03-12T11:15:59\"]");
     nd::array b = nd::empty("2 * datetime[tz='UTC']");
     b.vals() = a;
-    EXPECT_EQ("2013-01-15T12:30Z", b(0).as<string>());
-    EXPECT_EQ("2010-03-12T11:15:59Z", b(1).as<string>());
+    EXPECT_EQ("2013-01-15T12:30Z", b(0).as<std::string>());
+    EXPECT_EQ("2010-03-12T11:15:59Z", b(1).as<std::string>());
 
     // Assigning the other way is not ok by default, except in nocheck error
     // mode
@@ -152,7 +152,7 @@ TEST(DatetimeType, AbstractTZToUTC) {
     eval::eval_context ectx;
     ectx.errmode = assign_error_nocheck;
     a.val_assign(b(1), &ectx);
-    EXPECT_EQ("2010-03-12T11:15:59", a.as<string>());
+    EXPECT_EQ("2010-03-12T11:15:59", a.as<std::string>());
 }
 
 TEST(DatetimeType, Properties) {
@@ -174,21 +174,21 @@ TEST(DatetimeType, AdaptFromInt) {
 
     a = parse_json("3 * int64", "[31968000000, -999480000, 45296789]");
     b = a.adapt(ndt::datetime_type::make(), "milliseconds since 2000-01-01T00:00");
-    EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
-    EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
-    EXPECT_EQ("2000-01-01T12:34:56.789", b(2).as<string>());
+    EXPECT_EQ("2001-01-05T00:00", b(0).as<std::string>());
+    EXPECT_EQ("1999-12-20T10:22", b(1).as<std::string>());
+    EXPECT_EQ("2000-01-01T12:34:56.789", b(2).as<std::string>());
 
     a = parse_json("3 * int64", "[31968000000000, -999480000000, 45296789123]");
     b = a.adapt(ndt::datetime_type::make(), "microseconds since 2000-01-01");
-    EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
-    EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
-    EXPECT_EQ("2000-01-01T12:34:56.789123", b(2).as<string>());
+    EXPECT_EQ("2001-01-05T00:00", b(0).as<std::string>());
+    EXPECT_EQ("1999-12-20T10:22", b(1).as<std::string>());
+    EXPECT_EQ("2000-01-01T12:34:56.789123", b(2).as<std::string>());
 
     a = parse_json("3 * int64", "[31968000000000000, -999480000000000, 45296789123456]");
     b = a.adapt(ndt::datetime_type::make(), "nanoseconds since 2000");
-    EXPECT_EQ("2001-01-05T00:00", b(0).as<string>());
-    EXPECT_EQ("1999-12-20T10:22", b(1).as<string>());
-    EXPECT_EQ("2000-01-01T12:34:56.7891234", b(2).as<string>());
+    EXPECT_EQ("2001-01-05T00:00", b(0).as<std::string>());
+    EXPECT_EQ("1999-12-20T10:22", b(1).as<std::string>());
+    EXPECT_EQ("2000-01-01T12:34:56.7891234", b(2).as<std::string>());
 }
 
 TEST(DatetimeType, AdaptAsInt) {

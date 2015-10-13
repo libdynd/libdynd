@@ -61,7 +61,7 @@ int32_t date_ymd::to_days(int year, int month, int day)
 
 std::string date_ymd::to_str(int year, int month, int day)
 {
-  string s;
+  std::string s;
   if (is_valid(year, month, day)) {
     if (year >= 1 && year <= 9999) {
       // ISO 8601 date

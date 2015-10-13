@@ -19,13 +19,11 @@ using namespace std;
 using namespace dynd;
 
 ndt::fixed_dim_kind_type::fixed_dim_kind_type(const type &element_tp)
-    : base_dim_type(fixed_dim_type_id, kind_kind, element_tp, 0,
-                    element_tp.get_data_alignment(), sizeof(size_stride_t),
+    : base_dim_type(fixed_dim_type_id, kind_kind, element_tp, 0, element_tp.get_data_alignment(), sizeof(size_stride_t),
                     type_flag_symbolic, true)
 {
   // Propagate the inherited flags from the element
-  m_members.flags |= (element_tp.get_flags() & (type_flags_operand_inherited |
-                                                type_flags_value_inherited));
+  m_members.flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
 }
 
 ndt::fixed_dim_kind_type::~fixed_dim_kind_type()
@@ -39,8 +37,7 @@ size_t ndt::fixed_dim_kind_type::get_default_data_size() const
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_dim_kind_type::print_data(std::ostream &DYND_UNUSED(o),
-                                          const char *DYND_UNUSED(arrmeta),
+void ndt::fixed_dim_kind_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
                                           const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of symbolic fixed_dim type");
@@ -56,15 +53,14 @@ bool ndt::fixed_dim_kind_type::is_expression() const
   return m_element_tp.is_expression();
 }
 
-bool ndt::fixed_dim_kind_type::is_unique_data_owner(
-    const char *DYND_UNUSED(arrmeta)) const
+bool ndt::fixed_dim_kind_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
 {
   return false;
 }
 
-void ndt::fixed_dim_kind_type::transform_child_types(
-    type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
-    type &out_transformed_tp, bool &out_was_transformed) const
+void ndt::fixed_dim_kind_type::transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset,
+                                                     void *extra, type &out_transformed_tp,
+                                                     bool &out_was_transformed) const
 {
   type tmp_tp;
   bool was_transformed = false;
@@ -79,20 +75,17 @@ void ndt::fixed_dim_kind_type::transform_child_types(
 
 ndt::type ndt::fixed_dim_kind_type::get_canonical_type() const
 {
-  return type(new fixed_dim_kind_type(m_element_tp.get_canonical_type()),
-              false);
+  return type(new fixed_dim_kind_type(m_element_tp.get_canonical_type()), false);
 }
 
-ndt::type
-ndt::fixed_dim_kind_type::at_single(intptr_t DYND_UNUSED(i0),
-                                    const char **DYND_UNUSED(inout_arrmeta),
-                                    const char **DYND_UNUSED(inout_data)) const
+ndt::type ndt::fixed_dim_kind_type::at_single(intptr_t DYND_UNUSED(i0), const char **DYND_UNUSED(inout_arrmeta),
+                                              const char **DYND_UNUSED(inout_data)) const
 {
   return m_element_tp;
 }
 
-ndt::type ndt::fixed_dim_kind_type::get_type_at_dimension(
-    char **DYND_UNUSED(inout_arrmeta), intptr_t i, intptr_t total_ndim) const
+ndt::type ndt::fixed_dim_kind_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta), intptr_t i,
+                                                          intptr_t total_ndim) const
 {
   if (i == 0) {
     return type(this, true);
@@ -101,17 +94,13 @@ ndt::type ndt::fixed_dim_kind_type::get_type_at_dimension(
   }
 }
 
-intptr_t
-ndt::fixed_dim_kind_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
-                                       const char *DYND_UNUSED(data)) const
+intptr_t ndt::fixed_dim_kind_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
   return -1;
 }
 
-void ndt::fixed_dim_kind_type::get_shape(intptr_t ndim, intptr_t i,
-                                         intptr_t *out_shape,
-                                         const char *DYND_UNUSED(arrmeta),
-                                         const char *DYND_UNUSED(data)) const
+void ndt::fixed_dim_kind_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
+                                         const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
   out_shape[i] = -1;
 
@@ -127,8 +116,8 @@ void ndt::fixed_dim_kind_type::get_shape(intptr_t ndim, intptr_t i,
   }
 }
 
-bool ndt::fixed_dim_kind_type::is_lossless_assignment(
-    const type &DYND_UNUSED(dst_tp), const type &DYND_UNUSED(src_tp)) const
+bool ndt::fixed_dim_kind_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
+                                                      const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
@@ -142,98 +131,83 @@ bool ndt::fixed_dim_kind_type::operator==(const base_type &rhs) const
   } else if (rhs.get_kind() != kind_kind) {
     return false;
   } else {
-    const fixed_dim_kind_type *dt =
-        static_cast<const fixed_dim_kind_type *>(&rhs);
+    const fixed_dim_kind_type *dt = static_cast<const fixed_dim_kind_type *>(&rhs);
     return m_element_tp == dt->m_element_tp;
   }
 }
 
-void ndt::fixed_dim_kind_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
+void ndt::fixed_dim_kind_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
+                                                         bool DYND_UNUSED(blockref_alloc)) const
 {
   stringstream ss;
-  ss << "Cannot default construct arrmeta for symbolic type "
-     << type(this, true);
+  ss << "Cannot default construct arrmeta for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_dim_kind_type::arrmeta_copy_construct(
-    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    memory_block_data *DYND_UNUSED(embedded_reference)) const
-{
-  stringstream ss;
-  ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
-  throw runtime_error(ss.str());
-}
-
-size_t ndt::fixed_dim_kind_type::arrmeta_copy_construct_onedim(
-    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    memory_block_data *DYND_UNUSED(embedded_reference)) const
+void ndt::fixed_dim_kind_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
+                                                      const char *DYND_UNUSED(src_arrmeta),
+                                                      memory_block_data *DYND_UNUSED(embedded_reference)) const
 {
   stringstream ss;
   ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_dim_kind_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta))
-    const
+size_t ndt::fixed_dim_kind_type::arrmeta_copy_construct_onedim(char *DYND_UNUSED(dst_arrmeta),
+                                                               const char *DYND_UNUSED(src_arrmeta),
+                                                               memory_block_data *DYND_UNUSED(embedded_reference)) const
+{
+  stringstream ss;
+  ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
+  throw runtime_error(ss.str());
+}
+
+void ndt::fixed_dim_kind_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void ndt::fixed_dim_kind_type::arrmeta_finalize_buffers(
-    char *DYND_UNUSED(arrmeta)) const
+void ndt::fixed_dim_kind_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void
-ndt::fixed_dim_kind_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
+void ndt::fixed_dim_kind_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 {
 }
 
-void ndt::fixed_dim_kind_type::arrmeta_debug_print(
-    const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
-    const std::string &DYND_UNUSED(indent)) const
+void ndt::fixed_dim_kind_type::arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
+                                                   const std::string &DYND_UNUSED(indent)) const
 {
   stringstream ss;
   ss << "Cannot have arrmeta for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_dim_kind_type::data_destruct(const char *DYND_UNUSED(arrmeta),
-                                             char *DYND_UNUSED(data)) const
+void ndt::fixed_dim_kind_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const
 {
   stringstream ss;
   ss << "Cannot have data for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_dim_kind_type::data_destruct_strided(
-    const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data),
-    intptr_t DYND_UNUSED(stride), size_t DYND_UNUSED(count)) const
+void ndt::fixed_dim_kind_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data),
+                                                     intptr_t DYND_UNUSED(stride), size_t DYND_UNUSED(count)) const
 {
   stringstream ss;
   ss << "Cannot have data for symbolic type " << type(this, true);
   throw runtime_error(ss.str());
 }
 
-bool ndt::fixed_dim_kind_type::match(const char *arrmeta,
-                                     const type &candidate_tp,
-                                     const char *candidate_arrmeta,
+bool ndt::fixed_dim_kind_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                                      std::map<std::string, type> &tp_vars) const
 {
   switch (candidate_tp.get_type_id()) {
   case fixed_dim_type_id:
     if (candidate_tp.get_kind() == kind_kind) {
-      return m_element_tp.match(
-          arrmeta,
-          candidate_tp.extended<fixed_dim_kind_type>()->get_element_type(),
-          candidate_arrmeta, tp_vars);
+      return m_element_tp.match(arrmeta, candidate_tp.extended<fixed_dim_kind_type>()->get_element_type(),
+                                candidate_arrmeta, tp_vars);
     } else {
-      return m_element_tp.match(
-          arrmeta, candidate_tp.extended<fixed_dim_type>()->get_element_type(),
-          DYND_INC_IF_NOT_NULL(candidate_arrmeta,
-                               sizeof(fixed_dim_type_arrmeta)),
-          tp_vars);
+      return m_element_tp.match(arrmeta, candidate_tp.extended<fixed_dim_type>()->get_element_type(),
+                                DYND_INC_IF_NOT_NULL(candidate_arrmeta, sizeof(fixed_dim_type_arrmeta)), tp_vars);
     }
   case any_kind_type_id:
     return true;
@@ -247,41 +221,35 @@ static ndt::type get_element_type(ndt::type dt)
   return dt.extended<ndt::fixed_dim_kind_type>()->get_element_type();
 }
 
-void ndt::fixed_dim_kind_type::get_dynamic_type_properties(
-    const std::pair<std::string, nd::callable> **out_properties,
-    size_t *out_count) const
+void ndt::fixed_dim_kind_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                                           size_t *out_count) const
 {
-  static pair<string, nd::callable> fixed_dim_kind_type_properties[] = {
-      pair<string, nd::callable>(
-          "element_type", nd::functional::apply(&::get_element_type, "self"))};
+  static pair<std::string, nd::callable> fixed_dim_kind_type_properties[] = {
+      pair<std::string, nd::callable>("element_type", nd::functional::apply(&::get_element_type, "self"))};
 
   *out_properties = fixed_dim_kind_type_properties;
-  *out_count = sizeof(fixed_dim_kind_type_properties) /
-               sizeof(fixed_dim_kind_type_properties[0]);
+  *out_count = sizeof(fixed_dim_kind_type_properties) / sizeof(fixed_dim_kind_type_properties[0]);
 }
 
-void ndt::fixed_dim_kind_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
+void
+ndt::fixed_dim_kind_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                                                       size_t *out_count) const
 {
   if (m_element_tp.is_builtin()) {
-    get_builtin_type_dynamic_array_properties(m_element_tp.get_type_id(),
-                                              out_properties, out_count);
+    get_builtin_type_dynamic_array_properties(m_element_tp.get_type_id(), out_properties, out_count);
   } else {
-    m_element_tp.extended()->get_dynamic_array_properties(out_properties,
-                                                          out_count);
+    m_element_tp.extended()->get_dynamic_array_properties(out_properties, out_count);
   }
 }
 
-void ndt::fixed_dim_kind_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
+void
+ndt::fixed_dim_kind_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                                                      size_t *out_count) const
 {
   if (m_element_tp.is_builtin()) {
     // TODO
   } else {
-    m_element_tp.extended()->get_dynamic_array_functions(out_functions,
-                                                         out_count);
+    m_element_tp.extended()->get_dynamic_array_functions(out_functions, out_count);
   }
 }
 
@@ -311,15 +279,12 @@ struct static_strided_dims {
   ndt::type static_builtins_instance[builtin_type_id_count];
 
   static_strided_dims()
-      : bt1(ndt::type((type_id_t)1)), bt2(ndt::type((type_id_t)2)),
-        bt3(ndt::type((type_id_t)3)), bt4(ndt::type((type_id_t)4)),
-        bt5(ndt::type((type_id_t)5)), bt6(ndt::type((type_id_t)6)),
-        bt7(ndt::type((type_id_t)7)), bt8(ndt::type((type_id_t)8)),
-        bt9(ndt::type((type_id_t)9)), bt10(ndt::type((type_id_t)10)),
-        bt11(ndt::type((type_id_t)11)), bt12(ndt::type((type_id_t)12)),
-        bt13(ndt::type((type_id_t)13)), bt14(ndt::type((type_id_t)14)),
-        bt15(ndt::type((type_id_t)15)), bt16(ndt::type((type_id_t)16)),
-        bt17(ndt::type((type_id_t)17)), bt18(ndt::type((type_id_t)18))
+      : bt1(ndt::type((type_id_t)1)), bt2(ndt::type((type_id_t)2)), bt3(ndt::type((type_id_t)3)),
+        bt4(ndt::type((type_id_t)4)), bt5(ndt::type((type_id_t)5)), bt6(ndt::type((type_id_t)6)),
+        bt7(ndt::type((type_id_t)7)), bt8(ndt::type((type_id_t)8)), bt9(ndt::type((type_id_t)9)),
+        bt10(ndt::type((type_id_t)10)), bt11(ndt::type((type_id_t)11)), bt12(ndt::type((type_id_t)12)),
+        bt13(ndt::type((type_id_t)13)), bt14(ndt::type((type_id_t)14)), bt15(ndt::type((type_id_t)15)),
+        bt16(ndt::type((type_id_t)16)), bt17(ndt::type((type_id_t)17)), bt18(ndt::type((type_id_t)18))
   {
     static_builtins_instance[1] = ndt::type(&bt1, true);
     static_builtins_instance[2] = ndt::type(&bt2, true);

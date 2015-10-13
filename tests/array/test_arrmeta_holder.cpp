@@ -22,7 +22,7 @@ TEST(ArrMetaHolder, Basic) {
     // The string type requires a memory block allocated in its
     // arrmeta, so this test checks that the arrmeta_holder can
     // allocate and manage that.
-    string_type_data sarr[3];
+    dynd::string sarr[3];
     int iarr[3] = {-1234, 0, 999992};
     memset(sarr, 0, sizeof(sarr));
 
@@ -38,7 +38,7 @@ TEST(ArrMetaHolder, Basic) {
     typed_data_assign(smeta.get_type(), smeta.get(),
                       reinterpret_cast<char *>(sarr), imeta.get_type(),
                       imeta.get(), reinterpret_cast<const char *>(iarr));
-    EXPECT_EQ("-1234", string(sarr[0].begin, sarr[0].end));
-    EXPECT_EQ("0", string(sarr[1].begin, sarr[1].end));
-    EXPECT_EQ("999992", string(sarr[2].begin, sarr[2].end));
+    EXPECT_EQ("-1234", std::string(sarr[0].begin, sarr[0].end));
+    EXPECT_EQ("0", std::string(sarr[1].begin, sarr[1].end));
+    EXPECT_EQ("999992", std::string(sarr[2].begin, sarr[2].end));
 }

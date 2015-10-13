@@ -369,8 +369,8 @@ static ndt::type property_get_target_type(ndt::type tp)
 void ndt::pointer_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                     size_t *out_count) const
 {
-  static pair<string, nd::callable> type_properties[] = {
-      pair<string, nd::callable>("target_type", nd::functional::apply(&property_get_target_type, "self"))};
+  static pair<std::string, nd::callable> type_properties[] = {
+      pair<std::string, nd::callable>("target_type", nd::functional::apply(&property_get_target_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
@@ -412,8 +412,8 @@ static nd::array array_function_dereference(const nd::array &self)
 void ndt::pointer_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                                                     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> pointer_array_functions[] = {
-      pair<string, gfunc::callable>("dereference", gfunc::make_callable(&array_function_dereference, "self"))};
+  static pair<std::string, gfunc::callable> pointer_array_functions[] = {
+      pair<std::string, gfunc::callable>("dereference", gfunc::make_callable(&array_function_dereference, "self"))};
 
   *out_functions = pointer_array_functions;
   *out_count = sizeof(pointer_array_functions) / sizeof(pointer_array_functions[0]);

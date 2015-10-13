@@ -57,20 +57,16 @@ struct fixed_string_assign_ck : nd::base_kernel<fixed_string_assign_ck, 1> {
 };
 } // anonymous namespace
 
-size_t dynd::make_fixed_string_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                                 intptr_t dst_data_size,
-                                                 string_encoding_t dst_encoding,
-                                                 intptr_t src_data_size,
-                                                 string_encoding_t src_encoding,
-                                                 kernel_request_t kernreq,
+size_t dynd::make_fixed_string_assignment_kernel(void *ckb, intptr_t ckb_offset, intptr_t dst_data_size,
+                                                 string_encoding_t dst_encoding, intptr_t src_data_size,
+                                                 string_encoding_t src_encoding, kernel_request_t kernreq,
                                                  const eval::eval_context *ectx)
 {
   typedef fixed_string_assign_ck self_type;
   assign_error_mode errmode = ectx->errmode;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
-  self->m_append_fn =
-      get_append_unicode_codepoint_function(dst_encoding, errmode);
+  self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
   self->m_dst_data_size = dst_data_size;
   self->m_src_data_size = src_data_size;
   self->m_overflow_check = (errmode != assign_error_nocheck);
@@ -81,8 +77,7 @@ size_t dynd::make_fixed_string_assignment_kernel(void *ckb, intptr_t ckb_offset,
 // blockref string to blockref string assignment
 
 namespace {
-struct blockref_string_assign_ck
-    : nd::base_kernel<blockref_string_assign_ck, 1> {
+struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1> {
   string_encoding_t m_dst_encoding, m_src_encoding;
   next_unicode_codepoint_t m_next_fn;
   append_unicode_codepoint_t m_append_fn;
@@ -92,15 +87,13 @@ struct blockref_string_assign_ck
   {
     const string_type_arrmeta *dst_md = m_dst_arrmeta;
     const string_type_arrmeta *src_md = m_src_arrmeta;
-    string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
-    const string_type_data *src_d =
-        reinterpret_cast<const string_type_data *>(src[0]);
+    dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
+    const dynd::string *src_d = reinterpret_cast<const dynd::string *>(src[0]);
     intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
     intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
 
     if (dst_d->begin != NULL) {
-      throw runtime_error(
-          "Cannot assign to an already initialized dynd string");
+      throw runtime_error("Cannot assign to an already initialized dynd string");
     } else if (src_d->begin == NULL) {
       // Allow uninitialized -> uninitialized assignment as a special case, for
       // (future) missing data support
@@ -116,15 +109,12 @@ struct blockref_string_assign_ck
       append_unicode_codepoint_t append_fn = m_append_fn;
       uint32_t cp;
 
-      memory_block_pod_allocator_api *allocator =
-          get_memory_block_pod_allocator_api(dst_md->blockref);
+      memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
       // Allocate the initial output as the src number of characters + some
       // padding
       // TODO: Don't add padding if the output is not a multi-character encoding
-      allocator->allocate(dst_md->blockref,
-                          ((src_end - src_begin) / src_charsize + 16) *
-                              dst_charsize * 1124 / 1024,
+      allocator->allocate(dst_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
                           dst_charsize, &dst_begin, &dst_end);
 
       dst_current = dst_begin;
@@ -135,8 +125,7 @@ struct blockref_string_assign_ck
           append_fn(cp, dst_current, dst_end);
         } else {
           char *dst_begin_saved = dst_begin;
-          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin),
-                            &dst_begin, &dst_end);
+          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin), &dst_begin, &dst_end);
           dst_current = dst_begin + (dst_current - dst_begin_saved);
 
           append_fn(cp, dst_current, dst_end);
@@ -144,8 +133,7 @@ struct blockref_string_assign_ck
       }
 
       // Shrink-wrap the memory to just fit the string
-      allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin,
-                        &dst_end);
+      allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
       // Set the output
       dst_d->begin = dst_begin;
@@ -154,18 +142,16 @@ struct blockref_string_assign_ck
       // Copy the pointers from the source string
       *dst_d = *src_d;
     } else {
-      throw runtime_error(
-          "Attempted to reference source data when changing string encoding");
+      throw runtime_error("Attempted to reference source data when changing string encoding");
     }
   }
 };
 } // anonymous namespace
 
-size_t dynd::make_blockref_string_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-    string_encoding_t dst_encoding, const char *src_arrmeta,
-    string_encoding_t src_encoding, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+size_t dynd::make_blockref_string_assignment_kernel(void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+                                                    string_encoding_t dst_encoding, const char *src_arrmeta,
+                                                    string_encoding_t src_encoding, kernel_request_t kernreq,
+                                                    const eval::eval_context *ectx)
 {
   typedef blockref_string_assign_ck self_type;
   assign_error_mode errmode = ectx->errmode;
@@ -173,12 +159,9 @@ size_t dynd::make_blockref_string_assignment_kernel(
   self->m_dst_encoding = dst_encoding;
   self->m_src_encoding = src_encoding;
   self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
-  self->m_append_fn =
-      get_append_unicode_codepoint_function(dst_encoding, errmode);
-  self->m_dst_arrmeta =
-      reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
-  self->m_src_arrmeta =
-      reinterpret_cast<const string_type_arrmeta *>(src_arrmeta);
+  self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+  self->m_dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
+  self->m_src_arrmeta = reinterpret_cast<const string_type_arrmeta *>(src_arrmeta);
   return ckb_offset;
 }
 
@@ -186,8 +169,7 @@ size_t dynd::make_blockref_string_assignment_kernel(
 // fixed_string to blockref string assignment
 
 namespace {
-struct fixed_string_to_blockref_string_assign_ck
-    : nd::base_kernel<fixed_string_to_blockref_string_assign_ck, 1> {
+struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_to_blockref_string_assign_ck, 1> {
   string_encoding_t m_dst_encoding, m_src_encoding;
   intptr_t m_src_element_size;
   next_unicode_codepoint_t m_next_fn;
@@ -197,13 +179,12 @@ struct fixed_string_to_blockref_string_assign_ck
   void single(char *dst, char *const *src)
   {
     const string_type_arrmeta *dst_md = m_dst_arrmeta;
-    string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
+    dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
     intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
     intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
 
     if (dst_d->begin != NULL) {
-      throw runtime_error(
-          "Cannot assign to an already initialized dynd string");
+      throw runtime_error("Cannot assign to an already initialized dynd string");
     }
 
     char *dst_begin = NULL, *dst_current, *dst_end = NULL;
@@ -213,15 +194,12 @@ struct fixed_string_to_blockref_string_assign_ck
     append_unicode_codepoint_t append_fn = m_append_fn;
     uint32_t cp;
 
-    memory_block_pod_allocator_api *allocator =
-        get_memory_block_pod_allocator_api(dst_md->blockref);
+    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
     // Allocate the initial output as the src number of characters + some
     // padding
     // TODO: Don't add padding if the output is not a multi-character encoding
-    allocator->allocate(dst_md->blockref,
-                        ((src_end - src_begin) / src_charsize + 16) *
-                            dst_charsize * 1124 / 1024,
+    allocator->allocate(dst_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
                         dst_charsize, &dst_begin, &dst_end);
 
     dst_current = dst_begin;
@@ -233,8 +211,7 @@ struct fixed_string_to_blockref_string_assign_ck
           append_fn(cp, dst_current, dst_end);
         } else {
           char *dst_begin_saved = dst_begin;
-          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin),
-                            &dst_begin, &dst_end);
+          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin), &dst_begin, &dst_end);
           dst_current = dst_begin + (dst_current - dst_begin_saved);
 
           append_fn(cp, dst_current, dst_end);
@@ -245,8 +222,7 @@ struct fixed_string_to_blockref_string_assign_ck
     }
 
     // Shrink-wrap the memory to just fit the string
-    allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin,
-                      &dst_end);
+    allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
     // Set the output
     dst_d->begin = dst_begin;
@@ -256,10 +232,8 @@ struct fixed_string_to_blockref_string_assign_ck
 } // anonymous namespace
 
 size_t dynd::make_fixed_string_to_blockref_string_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-    string_encoding_t dst_encoding, intptr_t src_element_size,
-    string_encoding_t src_encoding, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta, string_encoding_t dst_encoding, intptr_t src_element_size,
+    string_encoding_t src_encoding, kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   typedef fixed_string_to_blockref_string_assign_ck self_type;
   assign_error_mode errmode = ectx->errmode;
@@ -268,10 +242,8 @@ size_t dynd::make_fixed_string_to_blockref_string_assignment_kernel(
   self->m_src_encoding = src_encoding;
   self->m_src_element_size = src_element_size;
   self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
-  self->m_append_fn =
-      get_append_unicode_codepoint_function(dst_encoding, errmode);
-  self->m_dst_arrmeta =
-      reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
+  self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
+  self->m_dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
   return ckb_offset;
 }
 
@@ -279,8 +251,7 @@ size_t dynd::make_fixed_string_to_blockref_string_assignment_kernel(
 // blockref string to fixed_string assignment
 
 namespace {
-struct blockref_string_to_fixed_string_assign_ck
-    : nd::base_kernel<blockref_string_to_fixed_string_assign_ck, 1> {
+struct blockref_string_to_fixed_string_assign_ck : nd::base_kernel<blockref_string_to_fixed_string_assign_ck, 1> {
   next_unicode_codepoint_t m_next_fn;
   append_unicode_codepoint_t m_append_fn;
   intptr_t m_dst_data_size, m_src_element_size;
@@ -289,8 +260,7 @@ struct blockref_string_to_fixed_string_assign_ck
   void single(char *dst, char *const *src)
   {
     char *dst_end = dst + m_dst_data_size;
-    const string_type_data *src_d =
-        reinterpret_cast<const string_type_data *>(src[0]);
+    const dynd::string *src_d = reinterpret_cast<const dynd::string *>(src[0]);
     const char *src_begin = src_d->begin;
     const char *src_end = src_d->end;
     next_unicode_codepoint_t next_fn = m_next_fn;
@@ -315,16 +285,14 @@ struct blockref_string_to_fixed_string_assign_ck
 } // anonymous namespace
 
 size_t dynd::make_blockref_string_to_fixed_string_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, intptr_t dst_data_size,
-    string_encoding_t dst_encoding, string_encoding_t src_encoding,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+    void *ckb, intptr_t ckb_offset, intptr_t dst_data_size, string_encoding_t dst_encoding,
+    string_encoding_t src_encoding, kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   typedef blockref_string_to_fixed_string_assign_ck self_type;
   assign_error_mode errmode = ectx->errmode;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_next_fn = get_next_unicode_codepoint_function(src_encoding, errmode);
-  self->m_append_fn =
-      get_append_unicode_codepoint_function(dst_encoding, errmode);
+  self->m_append_fn = get_append_unicode_codepoint_function(dst_encoding, errmode);
   self->m_dst_data_size = dst_data_size;
   self->m_overflow_check = (errmode != assign_error_nocheck);
   return ckb_offset;
@@ -342,23 +310,21 @@ struct date_to_string_ck : nd::base_kernel<date_to_string_ck, 1> {
   {
     stringstream ss;
     m_src_tp.extended()->print_data(ss, m_src_arrmeta, src[0]);
-    const ndt::base_string_type *bst =
-        static_cast<const ndt::base_string_type *>(m_dst_string_tp.extended());
+    const ndt::base_string_type *bst = static_cast<const ndt::base_string_type *>(m_dst_string_tp.extended());
     bst->set_from_utf8_string(m_dst_arrmeta, dst, ss.str(), &m_ectx);
   }
 };
 } // anonymous namespace
 
-size_t dynd::make_any_to_string_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+size_t dynd::make_any_to_string_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                                                  const char *dst_arrmeta, const ndt::type &src_tp,
+                                                  const char *src_arrmeta, kernel_request_t kernreq,
+                                                  const eval::eval_context *ectx)
 {
   typedef date_to_string_ck self_type;
   if (dst_tp.get_kind() != string_kind) {
     stringstream ss;
-    ss << "make_any_to_string_assignment_kernel: dest type " << dst_tp
-       << " is not a string type";
+    ss << "make_any_to_string_assignment_kernel: dest type " << dst_tp << " is not a string type";
     throw runtime_error(ss.str());
   }
 

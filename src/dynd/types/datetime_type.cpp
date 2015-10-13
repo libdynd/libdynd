@@ -32,8 +32,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::datetime_type::datetime_type(datetime_tz_t timezone)
-    : base_type(datetime_type_id, datetime_kind, 8,
-                scalar_align_of<int64_t>::value, type_flag_none, 0, 0, 0),
+    : base_type(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_none, 0, 0, 0),
       m_timezone(timezone)
 {
 }
@@ -42,17 +41,14 @@ ndt::datetime_type::~datetime_type()
 {
 }
 
-void ndt::datetime_type::set_cal(const char *DYND_UNUSED(arrmeta), char *data,
-                                 assign_error_mode errmode, int32_t year,
-                                 int32_t month, int32_t day, int32_t hour,
-                                 int32_t minute, int32_t second,
+void ndt::datetime_type::set_cal(const char *DYND_UNUSED(arrmeta), char *data, assign_error_mode errmode, int32_t year,
+                                 int32_t month, int32_t day, int32_t hour, int32_t minute, int32_t second,
                                  int32_t tick) const
 {
   if (errmode != assign_error_nocheck) {
     if (!date_ymd::is_valid(year, month, day)) {
       stringstream ss;
-      ss << "invalid input year/month/day " << year << "/" << month << "/"
-         << day;
+      ss << "invalid input year/month/day " << year << "/" << month << "/" << day;
       throw runtime_error(ss.str());
     }
     if (hour < 0 || hour >= 24) {
@@ -72,8 +68,7 @@ void ndt::datetime_type::set_cal(const char *DYND_UNUSED(arrmeta), char *data,
     }
     if (tick < 0 || tick >= 1000000000) {
       stringstream ss;
-      ss << "invalid input tick (100*nanosecond) " << tick << " for "
-         << type(this, true);
+      ss << "invalid input tick (100*nanosecond) " << tick << " for " << type(this, true);
       throw runtime_error(ss.str());
     }
   }
@@ -90,18 +85,15 @@ void ndt::datetime_type::set_cal(const char *DYND_UNUSED(arrmeta), char *data,
   *reinterpret_cast<int64_t *>(data) = dts.to_ticks();
 }
 
-void ndt::datetime_type::set_from_utf8_string(
-    const char *DYND_UNUSED(arrmeta), char *data, const char *utf8_begin,
-    const char *utf8_end, const eval::eval_context *ectx) const
+void ndt::datetime_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), char *data, const char *utf8_begin,
+                                              const char *utf8_end, const eval::eval_context *ectx) const
 {
   datetime_struct dts;
   const char *tz_begin = NULL, *tz_end = NULL;
-  dts.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order,
-                   ectx->century_window, ectx->errmode, tz_begin, tz_end);
+  dts.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order, ectx->century_window, ectx->errmode, tz_begin, tz_end);
   if (m_timezone != tz_abstract && tz_begin != tz_end) {
-    if (m_timezone == tz_utc &&
-        (parse::compare_range_to_literal(tz_begin, tz_end, "Z") ||
-         parse::compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
+    if (m_timezone == tz_utc && (parse::compare_range_to_literal(tz_begin, tz_end, "Z") ||
+                                 parse::compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
       // It's a UTC time to a UTC time zone
     } else {
       stringstream ss;
@@ -113,10 +105,8 @@ void ndt::datetime_type::set_from_utf8_string(
   *reinterpret_cast<int64_t *>(data) = dts.to_ticks();
 }
 
-void ndt::datetime_type::get_cal(const char *DYND_UNUSED(arrmeta),
-                                 const char *data, int32_t &out_year,
-                                 int32_t &out_month, int32_t &out_day,
-                                 int32_t &out_hour, int32_t &out_min,
+void ndt::datetime_type::get_cal(const char *DYND_UNUSED(arrmeta), const char *data, int32_t &out_year,
+                                 int32_t &out_month, int32_t &out_day, int32_t &out_hour, int32_t &out_min,
                                  int32_t &out_sec, int32_t &out_tick) const
 {
   datetime_struct dts;
@@ -130,9 +120,7 @@ void ndt::datetime_type::get_cal(const char *DYND_UNUSED(arrmeta),
   out_tick = dts.hmst.tick;
 }
 
-void ndt::datetime_type::print_data(std::ostream &o,
-                                    const char *DYND_UNUSED(arrmeta),
-                                    const char *data) const
+void ndt::datetime_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
   datetime_struct dts;
   dts.set_from_ticks(*reinterpret_cast<const int64_t *>(data));
@@ -160,8 +148,7 @@ void ndt::datetime_type::print_type(std::ostream &o) const
   }
 }
 
-bool ndt::datetime_type::is_lossless_assignment(const type &dst_tp,
-                                                const type &src_tp) const
+bool ndt::datetime_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -190,65 +177,54 @@ bool ndt::datetime_type::operator==(const base_type &rhs) const
   }
 }
 
-intptr_t ndt::datetime_type::make_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx) const
+intptr_t ndt::datetime_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
+                                                    const char *dst_arrmeta, const type &src_tp,
+                                                    const char *src_arrmeta, kernel_request_t kernreq,
+                                                    const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
     if (src_tp == dst_tp) {
-      return make_pod_typed_data_assignment_kernel(
-          ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
+      return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
     } else if (src_tp.get_type_id() == datetime_type_id) {
       if (src_tp.extended<datetime_type>()->get_timezone() == tz_abstract) {
         // TODO: If the destination timezone is not UTC, do an
         //       appropriate transformation
         if (get_timezone() == tz_utc) {
-          return make_pod_typed_data_assignment_kernel(
-              ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
+          return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
         }
       } else if (get_timezone() != tz_abstract) {
         // The value stored is independent of the time zone, so
         // a straight assignment is fine.
-        return make_pod_typed_data_assignment_kernel(
-            ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
+        return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
       } else if (ectx->errmode == assign_error_nocheck) {
         // TODO: If the source timezone is not UTC, do an appropriate
         //       transformation
         if (src_tp.extended<datetime_type>()->get_timezone() == tz_utc) {
-          return make_pod_typed_data_assignment_kernel(
-              ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
+          return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
         }
       }
     } else if (src_tp.get_kind() == string_kind) {
       // Assignment from strings
       typedef nd::assignment_kernel<datetime_type_id, string_type_id> self_type;
-      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
-                                    dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                    kernreq, ectx, 0, NULL,
-                                    std::map<std::string, ndt::type>());
+      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                    kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(
-          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta,
-          src_tp, src_arrmeta, kernreq, ectx);
+      return ::make_assignment_kernel(ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
+                                      src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
-      return src_tp.extended()->make_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx);
+      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                                                       kernreq, ectx);
     }
   } else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
       typedef nd::assignment_kernel<string_type_id, datetime_type_id> self_type;
-      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
-                                    dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                    kernreq, ectx, 0, NULL,
-                                    std::map<std::string, ndt::type>());
+      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                    kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      property_type::make(src_tp, "struct"),
+      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, property_type::make(src_tp, "struct"),
                                       src_arrmeta, kernreq, ectx);
     }
     // TODO
@@ -288,9 +264,8 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
 }
 */
 
-void ndt::datetime_type::get_dynamic_type_functions(
-    const std::pair<std::string, nd::callable> **out_functions,
-    size_t *out_count) const
+void ndt::datetime_type::get_dynamic_type_functions(const std::pair<std::string, nd::callable> **out_functions,
+                                                    size_t *out_count) const
 {
   //  static pair<string, nd::callable> datetime_type_functions[] = {
   /*
@@ -347,8 +322,7 @@ static nd::array property_ndo_get_second(const nd::array &n)
 
 static nd::array property_ndo_get_microsecond(const nd::array &n)
 {
-  return n.replace_dtype(
-      ndt::property_type::make(n.get_dtype(), "microsecond"));
+  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "microsecond"));
 }
 
 static nd::array property_ndo_get_tick(const nd::array &n)
@@ -356,30 +330,19 @@ static nd::array property_ndo_get_tick(const nd::array &n)
   return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "tick"));
 }
 
-void ndt::datetime_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
+void ndt::datetime_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                                                      size_t *out_count) const
 {
-  static pair<string, gfunc::callable> date_array_properties[] = {
-      pair<string, gfunc::callable>(
-          "date", gfunc::make_callable(&property_ndo_get_date, "self")),
-      pair<string, gfunc::callable>(
-          "year", gfunc::make_callable(&property_ndo_get_year, "self")),
-      pair<string, gfunc::callable>(
-          "month", gfunc::make_callable(&property_ndo_get_month, "self")),
-      pair<string, gfunc::callable>(
-          "day", gfunc::make_callable(&property_ndo_get_day, "self")),
-      pair<string, gfunc::callable>(
-          "hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
-      pair<string, gfunc::callable>(
-          "minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
-      pair<string, gfunc::callable>(
-          "second", gfunc::make_callable(&property_ndo_get_second, "self")),
-      pair<string, gfunc::callable>(
-          "microsecond",
-          gfunc::make_callable(&property_ndo_get_microsecond, "self")),
-      pair<string, gfunc::callable>(
-          "tick", gfunc::make_callable(&property_ndo_get_tick, "self")), };
+  static pair<std::string, gfunc::callable> date_array_properties[] = {
+      pair<std::string, gfunc::callable>("date", gfunc::make_callable(&property_ndo_get_date, "self")),
+      pair<std::string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
+      pair<std::string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
+      pair<std::string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self")),
+      pair<std::string, gfunc::callable>("hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
+      pair<std::string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
+      pair<std::string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
+      pair<std::string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
+      pair<std::string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self")), };
 
   *out_properties = date_array_properties;
   *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
@@ -392,28 +355,22 @@ static nd::array function_ndo_to_struct(const nd::array &n)
   return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
 }
 
-static nd::array function_ndo_strftime(const nd::array &n,
-                                       const std::string &format)
+static nd::array function_ndo_strftime(const nd::array &n, const std::string &format)
 {
   // TODO: Allow 'format' itself to be an array, with broadcasting, etc.
   if (format.empty()) {
     throw runtime_error("format string for strftime should not be empty");
   }
   return n.replace_dtype(
-      ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(),
-                                 make_strftime_kernelgen(format)));
+      ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(), make_strftime_kernelgen(format)));
 }
 
-void ndt::datetime_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
+void ndt::datetime_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                                                     size_t *out_count) const
 {
-  static pair<string, gfunc::callable> date_array_functions[] = {
-      pair<string, gfunc::callable>(
-          "to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-      pair<string, gfunc::callable>(
-          "strftime",
-          gfunc::make_callable(&function_ndo_strftime, "self", "format")), };
+  static pair<std::string, gfunc::callable> date_array_functions[] = {
+      pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
+      pair<std::string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")), };
 
   *out_functions = date_array_functions;
   *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
@@ -423,8 +380,7 @@ void ndt::datetime_type::get_dynamic_array_functions(
 
 namespace {
 
-struct datetime_get_struct_kernel
-    : nd::base_kernel<datetime_get_struct_kernel, 1> {
+struct datetime_get_struct_kernel : nd::base_kernel<datetime_get_struct_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_struct_kernel()
@@ -438,8 +394,7 @@ struct datetime_get_struct_kernel
   }
 };
 
-struct datetime_set_struct_kernel
-    : nd::base_kernel<datetime_set_struct_kernel, 1> {
+struct datetime_set_struct_kernel : nd::base_kernel<datetime_set_struct_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_set_struct_kernel()
@@ -529,8 +484,7 @@ struct datetime_get_year_kernel : nd::base_kernel<datetime_get_year_kernel, 1> {
   }
 };
 
-struct datetime_get_month_kernel
-    : nd::base_kernel<datetime_get_month_kernel, 1> {
+struct datetime_get_month_kernel : nd::base_kernel<datetime_get_month_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_month_kernel()
@@ -589,8 +543,7 @@ struct datetime_get_hour_kernel : nd::base_kernel<datetime_get_hour_kernel, 1> {
     const ndt::datetime_type *dd = datetime_tp;
     datetime_tz_t tz = dd->get_timezone();
     if (tz == tz_utc || tz == tz_abstract) {
-      int64_t hour =
-          **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_DAY;
+      int64_t hour = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_DAY;
       if (hour < 0) {
         hour += DYND_TICKS_PER_DAY;
       }
@@ -603,8 +556,7 @@ struct datetime_get_hour_kernel : nd::base_kernel<datetime_get_hour_kernel, 1> {
   }
 };
 
-struct datetime_get_minute_kernel
-    : nd::base_kernel<datetime_get_minute_kernel, 1> {
+struct datetime_get_minute_kernel : nd::base_kernel<datetime_get_minute_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_minute_kernel()
@@ -617,23 +569,20 @@ struct datetime_get_minute_kernel
     const ndt::datetime_type *dd = datetime_tp;
     datetime_tz_t tz = dd->get_timezone();
     if (tz == tz_utc || tz == tz_abstract) {
-      int64_t minute =
-          **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_HOUR;
+      int64_t minute = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_HOUR;
       if (minute < 0) {
         minute += DYND_TICKS_PER_HOUR;
       }
       minute /= DYND_TICKS_PER_MINUTE;
       *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(minute);
     } else {
-      throw runtime_error(
-          "datetime property access only implemented for UTC and "
-          "abstract timezones");
+      throw runtime_error("datetime property access only implemented for UTC and "
+                          "abstract timezones");
     }
   }
 };
 
-struct datetime_get_second_kernel
-    : nd::base_kernel<datetime_get_second_kernel, 1> {
+struct datetime_get_second_kernel : nd::base_kernel<datetime_get_second_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_second_kernel()
@@ -646,8 +595,7 @@ struct datetime_get_second_kernel
     const ndt::datetime_type *dd = datetime_tp;
     datetime_tz_t tz = dd->get_timezone();
     if (tz == tz_utc || tz == tz_abstract) {
-      int64_t second =
-          **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_MINUTE;
+      int64_t second = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_MINUTE;
       if (second < 0) {
         second += DYND_TICKS_PER_MINUTE;
       }
@@ -660,8 +608,7 @@ struct datetime_get_second_kernel
   }
 };
 
-struct datetime_get_microsecond_kernel
-    : nd::base_kernel<datetime_get_microsecond_kernel, 1> {
+struct datetime_get_microsecond_kernel : nd::base_kernel<datetime_get_microsecond_kernel, 1> {
   const ndt::datetime_type *datetime_tp;
 
   ~datetime_get_microsecond_kernel()
@@ -674,8 +621,7 @@ struct datetime_get_microsecond_kernel
     const ndt::datetime_type *dd = datetime_tp;
     datetime_tz_t tz = dd->get_timezone();
     if (tz == tz_utc || tz == tz_abstract) {
-      int64_t microsecond =
-          **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_SECOND;
+      int64_t microsecond = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_SECOND;
       if (microsecond < 0) {
         microsecond += DYND_TICKS_PER_SECOND;
       }
@@ -731,8 +677,7 @@ enum date_properties_t {
 };
 }
 
-size_t ndt::datetime_type::get_elwise_property_index(
-    const std::string &property_name) const
+size_t ndt::datetime_type::get_elwise_property_index(const std::string &property_name) const
 {
   if (property_name == "struct") {
     // A read/write property for accessing a datetime as a struct
@@ -759,14 +704,12 @@ size_t ndt::datetime_type::get_elwise_property_index(
     return datetimeprop_tick;
   } else {
     stringstream ss;
-    ss << "dynd type " << type(this, true)
-       << " does not have a kernel for property " << property_name;
+    ss << "dynd type " << type(this, true) << " does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());
   }
 }
 
-ndt::type ndt::datetime_type::get_elwise_property_type(size_t property_index,
-                                                       bool &out_readable,
+ndt::type ndt::datetime_type::get_elwise_property_type(size_t property_index, bool &out_readable,
                                                        bool &out_writable) const
 {
   switch (property_index) {
@@ -789,124 +732,92 @@ ndt::type ndt::datetime_type::get_elwise_property_type(size_t property_index,
   }
 }
 
-size_t ndt::datetime_type::make_elwise_property_getter_kernel(
-    void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta),
-    const char *DYND_UNUSED(src_arrmeta), size_t src_property_index,
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
+size_t ndt::datetime_type::make_elwise_property_getter_kernel(void *ckb, intptr_t ckb_offset,
+                                                              const char *DYND_UNUSED(dst_arrmeta),
+                                                              const char *DYND_UNUSED(src_arrmeta),
+                                                              size_t src_property_index, kernel_request_t kernreq,
+                                                              const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   switch (src_property_index) {
   case datetimeprop_struct: {
-    datetime_get_struct_kernel *e =
-        datetime_get_struct_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_struct_kernel *e = datetime_get_struct_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_date: {
-    datetime_get_date_kernel *e =
-        datetime_get_date_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_date_kernel *e = datetime_get_date_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_time: {
-    datetime_get_time_kernel *e =
-        datetime_get_time_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_time_kernel *e = datetime_get_time_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_year: {
-    datetime_get_year_kernel *e =
-        datetime_get_year_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_year_kernel *e = datetime_get_year_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_month: {
-    datetime_get_month_kernel *e =
-        datetime_get_month_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_month_kernel *e = datetime_get_month_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_day: {
-    datetime_get_day_kernel *e =
-        datetime_get_day_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_day_kernel *e = datetime_get_day_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_hour: {
-    datetime_get_hour_kernel *e =
-        datetime_get_hour_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_hour_kernel *e = datetime_get_hour_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_minute: {
-    datetime_get_minute_kernel *e =
-        datetime_get_minute_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_minute_kernel *e = datetime_get_minute_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_second: {
-    datetime_get_second_kernel *e =
-        datetime_get_second_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_second_kernel *e = datetime_get_second_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_microsecond: {
-    datetime_get_microsecond_kernel *e =
-        datetime_get_microsecond_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_microsecond_kernel *e = datetime_get_microsecond_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   case datetimeprop_tick: {
-    datetime_get_tick_kernel *e =
-        datetime_get_tick_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_get_tick_kernel *e = datetime_get_tick_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   default:
     stringstream ss;
-    ss << "dynd datetime type given an invalid property index"
-       << src_property_index;
+    ss << "dynd datetime type given an invalid property index" << src_property_index;
     throw runtime_error(ss.str());
   }
   return ckb_offset;
 }
 
 size_t ndt::datetime_type::make_elwise_property_setter_kernel(
-    void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta),
-    size_t dst_property_index, const char *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
+    void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
+    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   switch (dst_property_index) {
   case datetimeprop_struct: {
-    datetime_set_struct_kernel *e =
-        datetime_set_struct_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp =
-        static_cast<const datetime_type *>(type(this, true).release());
+    datetime_set_struct_kernel *e = datetime_set_struct_kernel::make(ckb, kernreq, ckb_offset);
+    e->datetime_tp = static_cast<const datetime_type *>(type(this, true).release());
   } break;
   default:
     stringstream ss;
-    ss << "dynd datetime type given an invalid property index"
-       << dst_property_index;
+    ss << "dynd datetime type given an invalid property index" << dst_property_index;
     throw runtime_error(ss.str());
   }
   return ckb_offset;
 }
 
-bool ndt::datetime_type::adapt_type(const type &operand_tp,
-                                    const std::string &op,
-                                    nd::callable &out_forward,
+bool ndt::datetime_type::adapt_type(const type &operand_tp, const std::string &op, nd::callable &out_forward,
                                     nd::callable &out_reverse) const
 {
-  return make_datetime_adapter_callable(type(this, true), operand_tp, op,
-                                        out_forward, out_reverse);
+  return make_datetime_adapter_callable(type(this, true), operand_tp, op, out_forward, out_reverse);
 }
 
-bool ndt::datetime_type::reverse_adapt_type(const type &value_tp,
-                                            const std::string &op,
-                                            nd::callable &out_forward,
+bool ndt::datetime_type::reverse_adapt_type(const type &value_tp, const std::string &op, nd::callable &out_forward,
                                             nd::callable &out_reverse) const
 {
   // Note that out_reverse and out_forward are swapped compared with
   // adapt_type
-  return make_datetime_adapter_callable(type(this, true), value_tp, op,
-                                        out_reverse, out_forward);
+  return make_datetime_adapter_callable(type(this, true), value_tp, op, out_reverse, out_forward);
 }

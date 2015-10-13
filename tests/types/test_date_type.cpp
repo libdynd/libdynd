@@ -296,19 +296,19 @@ TEST(DateType, StrFTime)
   a = nd::array("1955-03-13").ucast(d).eval();
 
   b = a.f("strftime", "%Y");
-  EXPECT_EQ("1955", b.as<string>());
+  EXPECT_EQ("1955", b.as<std::string>());
   b = a.f("strftime", "%m/%d/%y");
-  EXPECT_EQ("03/13/55", b.as<string>());
+  EXPECT_EQ("03/13/55", b.as<std::string>());
   b = a.f("strftime", "%Y and %j");
-  EXPECT_EQ("1955 and 072", b.as<string>());
+  EXPECT_EQ("1955 and 072", b.as<std::string>());
 
   const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
   a = nd::array(strs).ucast(d).eval();
 
   b = a.f("strftime", "%Y-%m-%d %j %U %w %W");
-  EXPECT_EQ("1931-12-12 346 49 6 49", b(0).as<string>());
-  EXPECT_EQ("2013-05-14 134 19 2 19", b(1).as<string>());
-  EXPECT_EQ("2012-12-25 360 52 2 52", b(2).as<string>());
+  EXPECT_EQ("1931-12-12 346 49 6 49", b(0).as<std::string>());
+  EXPECT_EQ("2013-05-14 134 19 2 19", b(1).as<std::string>());
+  EXPECT_EQ("2012-12-25 360 52 2 52", b(2).as<std::string>());
 }
 
 TEST(DateType, StrFTimeOfConvert)
@@ -322,9 +322,9 @@ TEST(DateType, StrFTimeOfConvert)
       a.get_type());
 
   nd::array b = a.f("strftime", "%Y %m %d");
-  EXPECT_EQ("1920 03 12", b(0).as<string>());
-  EXPECT_EQ("2013 01 01", b(1).as<string>());
-  EXPECT_EQ("2000 12 25", b(2).as<string>());
+  EXPECT_EQ("1920 03 12", b(0).as<std::string>());
+  EXPECT_EQ("2013 01 01", b(1).as<std::string>());
+  EXPECT_EQ("2000 12 25", b(2).as<std::string>());
 }
 
 TEST(DateType, StrFTimeOfMultiDim)
@@ -336,9 +336,9 @@ TEST(DateType, StrFTimeOfMultiDim)
   a.vals_at(1) = vals_1;
 
   a = a.f("strftime", "%d/%m/%Y");
-  EXPECT_EQ("12/03/1920", a(0, 0).as<string>());
-  EXPECT_EQ("01/01/2013", a(0, 1).as<string>());
-  EXPECT_EQ("25/12/2000", a(1, 0).as<string>());
+  EXPECT_EQ("12/03/1920", a(0, 0).as<std::string>());
+  EXPECT_EQ("01/01/2013", a(0, 1).as<std::string>());
+  EXPECT_EQ("25/12/2000", a(1, 0).as<std::string>());
 }
 
 #if defined(_MSC_VER)
@@ -372,12 +372,12 @@ TEST(DateType, Replace)
   nd::array a;
 
   a = nd::array("1955-03-13").ucast(d).eval();
-  EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());
-  EXPECT_EQ("2012-12-13", a.f("replace", 2012, 12).as<string>());
-  EXPECT_EQ("2012-12-15", a.f("replace", 2012, 12, 15).as<string>());
+  EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<std::string>());
+  EXPECT_EQ("2012-12-13", a.f("replace", 2012, 12).as<std::string>());
+  EXPECT_EQ("2012-12-15", a.f("replace", 2012, 12, 15).as<std::string>());
   // Custom extension, allow -1 indexing from the end for months and days
-  EXPECT_EQ("2012-12-30", a.f("replace", 2012, -1, 30).as<string>());
-  EXPECT_EQ("2012-05-31", a.f("replace", 2012, -8, -1).as<string>());
+  EXPECT_EQ("2012-12-30", a.f("replace", 2012, -1, 30).as<std::string>());
+  EXPECT_EQ("2012-05-31", a.f("replace", 2012, -8, -1).as<std::string>());
   // The C++ call interface doesn't let you skip arguments (yet, there is no
   // keyword argument mechanism),
   // so test this manually
@@ -389,19 +389,19 @@ TEST(DateType, Replace)
   param(2).vals() = 7;
   EXPECT_EQ(
       "1955-07-13",
-      a.find_dynamic_function("replace").call_generic(param).as<string>());
+      a.find_dynamic_function("replace").call_generic(param).as<std::string>());
   param(3).vals() = -1;
   EXPECT_EQ(
       "1955-07-31",
-      a.find_dynamic_function("replace").call_generic(param).as<string>());
+      a.find_dynamic_function("replace").call_generic(param).as<std::string>());
   param(2).vals() = 2;
   EXPECT_EQ(
       "1955-02-28",
-      a.find_dynamic_function("replace").call_generic(param).as<string>());
+      a.find_dynamic_function("replace").call_generic(param).as<std::string>());
   param(1).vals() = 2012;
   EXPECT_EQ(
       "2012-02-29",
-      a.find_dynamic_function("replace").call_generic(param).as<string>());
+      a.find_dynamic_function("replace").call_generic(param).as<std::string>());
   // Should throw an exception when no arguments or out of bounds arguments are
   // provided
   EXPECT_THROW(a.f("replace").eval(), runtime_error);
@@ -426,7 +426,7 @@ TEST(DateType, ReplaceOfConvert)
       ndt::convert_type::make(ndt::date_type::make(), ndt::string_type::make()),
       a.get_type());
   // Call replace on it
-  EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<string>());
+  EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<std::string>());
 }
 
 TEST(DateType, NumPyCompatibleProperty)
@@ -436,10 +436,10 @@ TEST(DateType, NumPyCompatibleProperty)
   nd::array a = nd::array_rw(vals64);
   nd::array a_date = a.adapt(ndt::date_type::make(), "days since 1970-01-01");
   // Reading from the 'int64 as date' view
-  EXPECT_EQ("1924-03-13", a_date(0).as<string>());
-  EXPECT_EQ("1970-01-01", a_date(1).as<string>());
-  EXPECT_EQ("2000-02-14", a_date(2).as<string>());
-  EXPECT_EQ("NA", a_date(3).as<string>());
+  EXPECT_EQ("1924-03-13", a_date(0).as<std::string>());
+  EXPECT_EQ("1970-01-01", a_date(1).as<std::string>());
+  EXPECT_EQ("2000-02-14", a_date(2).as<std::string>());
+  EXPECT_EQ("NA", a_date(3).as<std::string>());
 
   // Writing to the 'int64 as date' view
   a_date(0).vals() = "1975-01-30";
@@ -455,7 +455,7 @@ TEST(DateType, AdaptFromInt)
   // int32
   a = nd::array_rw(25);
   b = a.adapt(ndt::date_type::make(), "days since 2012-03-02");
-  EXPECT_EQ("2012-03-27", b.as<string>());
+  EXPECT_EQ("2012-03-27", b.as<std::string>());
   // This adapter works both ways
   b.vals() = "2012-03-01";
   EXPECT_EQ(-1, a.as<int>());
@@ -463,7 +463,7 @@ TEST(DateType, AdaptFromInt)
   // int64
   a = nd::array_rw(365LL);
   b = a.adapt(ndt::date_type::make(), "days since 1925-03-02");
-  EXPECT_EQ("1926-03-02", b.as<string>());
+  EXPECT_EQ("1926-03-02", b.as<std::string>());
   b.vals() = "1925-04-02";
   EXPECT_EQ(31, a.as<int>());
 
@@ -472,9 +472,9 @@ TEST(DateType, AdaptFromInt)
   int32_t i32_vals[] = {-5, 10, 0};
   a = nd::array_rw(i32_vals);
   b = a.adapt(ndt::date_type::make(), "days since 2100-1-1");
-  EXPECT_EQ("2099-12-27", b(0).as<string>());
-  EXPECT_EQ("2100-01-11", b(1).as<string>());
-  EXPECT_EQ("2100-01-01", b(2).as<string>());
+  EXPECT_EQ("2099-12-27", b(0).as<std::string>());
+  EXPECT_EQ("2100-01-11", b(1).as<std::string>());
+  EXPECT_EQ("2100-01-01", b(2).as<std::string>());
   b.vals() = s_vals;
   EXPECT_EQ(-365 * 100 - 25, a(0).as<int>());
   EXPECT_EQ(31, a(1).as<int>());

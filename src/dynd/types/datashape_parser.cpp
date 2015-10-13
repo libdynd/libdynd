@@ -78,11 +78,11 @@ public:
 // Simple recursive descent parser for a subset of the Blaze datashape grammar.
 // (Blaze grammar modified slightly to work this way)
 
-static ndt::type parse_datashape(const char *&begin, const char *end, map<string, ndt::type> &symtable);
+static ndt::type parse_datashape(const char *&begin, const char *end, map<std::string, ndt::type> &symtable);
 
-static const map<string, ndt::type> &builtin_types()
+static const map<std::string, ndt::type> &builtin_types()
 {
-  static map<string, ndt::type> bit;
+  static map<std::string, ndt::type> bit;
   if (bit.empty()) {
     bit["void"] = ndt::type::make<void>();
     bit["bool"] = ndt::type::make<bool1>();
@@ -164,20 +164,20 @@ static bool parse_name_or_number(const char *&rbegin, const char *end, const cha
   return false;
 }
 
-static string parse_number(const char *&rbegin, const char *end)
+static std::string parse_number(const char *&rbegin, const char *end)
 {
   const char *begin = rbegin;
   const char *result_begin, *result_end;
   // NUMBER
   parse::skip_whitespace_and_pound_comments(begin, end);
   if (!parse::parse_unsigned_int_no_ws(begin, end, result_begin, result_end)) {
-    return string();
+    return std::string();
   }
   rbegin = begin;
-  return string(result_begin, result_end);
+  return std::string(result_begin, result_end);
 }
 
-static bool parse_quoted_string(const char *&rbegin, const char *end, string &out_val)
+static bool parse_quoted_string(const char *&rbegin, const char *end, std::string &out_val)
 {
   const char *begin = rbegin;
   char beginning_quote = 0;
@@ -259,12 +259,12 @@ static bool parse_quoted_string(const char *&rbegin, const char *end, string &ou
 }
 
 // fixed_type : fixed[N] * rhs_expression
-static ndt::type parse_fixed_dim_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_fixed_dim_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
     const char *saved_begin = begin;
-    string dim_size_str = parse_number(begin, end);
+    std::string dim_size_str = parse_number(begin, end);
     if (dim_size_str.empty()) {
       throw datashape_parse_error(saved_begin, "expected dimension size");
     }
@@ -286,7 +286,7 @@ static ndt::type parse_fixed_dim_parameters(const char *&rbegin, const char *end
   }
 }
 
-static ndt::type parse_option_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_option_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (!parse_token_ds(begin, end, '[')) {
@@ -305,7 +305,7 @@ static ndt::type parse_option_parameters(const char *&rbegin, const char *end, m
   return ndt::option_type::make(tp);
 }
 
-static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (!parse_token_ds(begin, end, '[')) {
@@ -321,7 +321,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end, ma
   if (!parse_token_ds(begin, end, ',')) {
     throw datashape_parse_error(begin, "expected a ,");
   }
-  string adapt_op;
+  std::string adapt_op;
   ndt::type value_tp;
   if (!parse_quoted_string(begin, end, adapt_op)) {
     throw datashape_parse_error(begin, "expected an an adapt op");
@@ -336,7 +336,7 @@ static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end, ma
                                proto_tp.extended<ndt::callable_type>()->get_return_type(), adapt_op);
 }
 
-static string_encoding_t string_to_encoding(const char *error_begin, const string &estr)
+static string_encoding_t string_to_encoding(const char *error_begin, const std::string &estr)
 {
   if (estr == "A" || estr == "ascii" || estr == "us-ascii") {
     return string_encoding_ascii;
@@ -361,7 +361,7 @@ static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
     const char *saved_begin = begin;
-    string encoding_str;
+    std::string encoding_str;
     string_encoding_t encoding = string_encoding_utf_8;
     if (!parse_quoted_string(begin, end, encoding_str)) {
       throw datashape_parse_error(saved_begin, "expected a string encoding");
@@ -385,8 +385,8 @@ static ndt::type parse_fixed_string_parameters(const char *&rbegin, const char *
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
     const char *saved_begin = begin;
-    string value = parse_number(begin, end);
-    string encoding_str;
+    std::string value = parse_number(begin, end);
+    std::string encoding_str;
     string_encoding_t encoding = string_encoding_utf_8;
     int string_size = 0;
     if (!value.empty()) {
@@ -424,7 +424,7 @@ static ndt::type parse_char_parameters(const char *&rbegin, const char *end)
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
     const char *saved_begin = begin;
-    string encoding_str;
+    std::string encoding_str;
     if (!parse_quoted_string(begin, end, encoding_str)) {
       throw datashape_parse_error(saved_begin, "expected a string encoding");
     }
@@ -446,7 +446,7 @@ static ndt::type parse_char_parameters(const char *&rbegin, const char *end)
 
 // complex_type : complex[float_type]
 // This is called after 'complex' is already matched
-static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
@@ -475,7 +475,7 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, 
 
 // byteswap_type : byteswap[type]
 // This is called after 'byteswap' is already matched
-static ndt::type parse_byteswap_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_byteswap_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
@@ -504,7 +504,7 @@ static ndt::type parse_bytes_parameters(const char *&rbegin, const char *end)
       if (!parse_token_ds(begin, end, '=')) {
         throw datashape_parse_error(begin, "expected an =");
       }
-      string align_val = parse_number(begin, end);
+      std::string align_val = parse_number(begin, end);
       if (align_val.empty()) {
         throw datashape_parse_error(begin, "expected an integer");
       }
@@ -527,7 +527,7 @@ static ndt::type parse_fixed_bytes_parameters(const char *&rbegin, const char *e
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
-    string size_val = parse_number(begin, end);
+    std::string size_val = parse_number(begin, end);
     if (size_val.empty()) {
       throw datashape_parse_error(begin, "expected 'align' or an integer");
     }
@@ -545,7 +545,7 @@ static ndt::type parse_fixed_bytes_parameters(const char *&rbegin, const char *e
     if (!parse_token_ds(begin, end, '=')) {
       throw datashape_parse_error(begin, "expected an =");
     }
-    string align_val = parse_number(begin, end);
+    std::string align_val = parse_number(begin, end);
     if (align_val.empty()) {
       throw datashape_parse_error(begin, "expected an integer");
     }
@@ -560,7 +560,7 @@ static ndt::type parse_fixed_bytes_parameters(const char *&rbegin, const char *e
 
 // c_contiguous_type : C[child_type]
 // This is called after 'C' is already matched
-static ndt::type parse_c_contiguous_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_c_contiguous_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
@@ -580,7 +580,7 @@ static ndt::type parse_c_contiguous_parameters(const char *&rbegin, const char *
 
 // cuda_host_type : cuda_host[storage_type]
 // This is called after 'cuda_host' is already matched
-static ndt::type parse_cuda_host_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_cuda_host_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
@@ -606,7 +606,7 @@ static ndt::type parse_cuda_host_parameters(const char *&rbegin, const char *end
 
 // cuda_device_type : cuda_device[storage_type]
 // This is called after 'cuda_device' is already matched
-static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
@@ -637,7 +637,7 @@ static ndt::type parse_datetime_parameters(const char *&rbegin, const char *end)
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
     datetime_tz_t timezone = tz_abstract;
-    string unit_str;
+    std::string unit_str;
     const char *saved_begin = begin;
     // Parse the timezone
     if (!parse_token_ds(begin, end, "tz")) {
@@ -646,7 +646,7 @@ static ndt::type parse_datetime_parameters(const char *&rbegin, const char *end)
     if (!parse_token_ds(begin, end, '=')) {
       throw datashape_parse_error(begin, "expected '='");
     }
-    string timezone_str;
+    std::string timezone_str;
     saved_begin = begin;
     if (!parse_quoted_string(begin, end, timezone_str)) {
       throw datashape_parse_error(begin, "expected a time zone string");
@@ -676,7 +676,7 @@ static ndt::type parse_time_parameters(const char *&rbegin, const char *end)
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
     datetime_tz_t timezone = tz_abstract;
-    string unit_str;
+    std::string unit_str;
     const char *saved_begin = begin;
     // Parse the timezone
     if (!parse_token_ds(begin, end, "tz")) {
@@ -685,7 +685,7 @@ static ndt::type parse_time_parameters(const char *&rbegin, const char *end)
     if (!parse_token_ds(begin, end, '=')) {
       throw datashape_parse_error(begin, "expected '='");
     }
-    string timezone_str;
+    std::string timezone_str;
     saved_begin = begin;
     if (!parse_quoted_string(begin, end, timezone_str)) {
       throw datashape_parse_error(begin, "expected a time zone string");
@@ -708,7 +708,7 @@ static ndt::type parse_time_parameters(const char *&rbegin, const char *end)
   }
 }
 
-static ndt::type parse_unaligned_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_unaligned_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (!parse_token_ds(begin, end, '[')) {
@@ -727,7 +727,7 @@ static ndt::type parse_unaligned_parameters(const char *&rbegin, const char *end
   return ndt::make_unaligned(tp);
 }
 
-static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (!parse_token_ds(begin, end, '[')) {
@@ -746,7 +746,7 @@ static ndt::type parse_pointer_parameters(const char *&rbegin, const char *end, 
   return ndt::pointer_type::make(tp);
 }
 
-static ndt::type parse_array_parameters(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_array_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (!parse_token_ds(begin, end, '[')) {
@@ -767,7 +767,7 @@ static ndt::type parse_array_parameters(const char *&rbegin, const char *end, ma
 
 // datashape_list : datashape COMMA datashape_list RBRACKET
 //                | datashape RBRACKET
-static nd::array parse_datashape_list(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static nd::array parse_datashape_list(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
 
@@ -831,8 +831,8 @@ static nd::array parse_string_list(const char *&rbegin, const char *end)
 {
   const char *begin = rbegin;
 
-  vector<string> dlist;
-  string str;
+  vector<std::string> dlist;
+  std::string str;
   if (!parse_quoted_string(begin, end, str)) {
     return nd::array();
   }
@@ -863,7 +863,7 @@ static nd::array parse_string_list(const char *&rbegin, const char *end)
 //          | INTEGER
 //          | STRING
 //          | list_type_arg
-static nd::array parse_type_arg(const char *&rbegin, const char *end, map<string, ndt::type> &symtable) {
+static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
   const char *begin = rbegin;
 
   parse::skip_whitespace_and_pound_comments(begin, end);
@@ -874,7 +874,7 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<string
     return parse::checked_string_to_int64(strbegin, strend);
   }
 
-  string str;
+  std::string str;
   if (parse_quoted_string(begin, end, str)) {
     rbegin = begin;
     return str;
@@ -912,7 +912,7 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<string
 //                 | type_kwarg
 // type_kwarg : NAME_LOWER EQUAL type_arg
 // type_constr_args : LBRACKET type_arg_list RBRACKET
-nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<string, ndt::type> &symtable) {
+nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
   nd::array result;
 
   const char *begin = rbegin;
@@ -927,7 +927,7 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
 
   vector<nd::array> pos_args;
   vector<nd::array> kw_args;
-  vector<string> kw_names;
+  vector<std::string> kw_names;
 
   const char *field_name_begin, *field_name_end;
   bool done = false;
@@ -972,7 +972,7 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
         throw datashape_parse_error(begin, "Expected keyword argument value");
       }
       kw_args.push_back(arg);
-      kw_names.push_back(string(field_name_begin, field_name_end));
+      kw_names.push_back(std::string(field_name_begin, field_name_end));
       if (!parse_token_ds(begin, end, ',')) {
         if (!parse_token_ds(begin, end, ']')) {
           throw datashape_parse_error(begin, "Expected a ',' or ']'");
@@ -1011,8 +1011,8 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
 }
 
 // record_item_bare : BARENAME COLON rhs_expression
-static bool parse_struct_item_bare(const char *&rbegin, const char *end, map<string, ndt::type> &symtable,
-                                   string &out_field_name, ndt::type &out_field_type)
+static bool parse_struct_item_bare(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable,
+                                   std::string &out_field_name, ndt::type &out_field_type)
 {
   const char *begin = rbegin;
   const char *field_name_begin, *field_name_end;
@@ -1039,8 +1039,8 @@ static bool parse_struct_item_bare(const char *&rbegin, const char *end, map<str
 
 // struct_item_general : struct_item_bare |
 //                       QUOTEDNAME COLON rhs_expression
-static bool parse_struct_item_general(const char *&rbegin, const char *end, map<string, ndt::type> &symtable,
-                                      string &out_field_name, ndt::type &out_field_type)
+static bool parse_struct_item_general(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable,
+                                      std::string &out_field_name, ndt::type &out_field_type)
 {
   const char *begin = rbegin;
   const char *field_name_begin, *field_name_end;
@@ -1048,7 +1048,7 @@ static bool parse_struct_item_general(const char *&rbegin, const char *end, map<
   // denote if the data given
   //  to this function needed special handling due to quoting of the struct
   //  field names.
-  string quoted_out_val;
+  std::string quoted_out_val;
   bool quoted_name = false;
   parse::skip_whitespace_and_pound_comments(begin, end);
   if (parse::parse_name_no_ws(begin, end, field_name_begin, field_name_end)) {
@@ -1087,12 +1087,12 @@ static bool parse_struct_item_general(const char *&rbegin, const char *end, map<
 }
 
 // struct : LBRACE record_item record_item* RBRACE
-static ndt::type parse_struct(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_struct(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
-  vector<string> field_name_list;
+  vector<std::string> field_name_list;
   vector<ndt::type> field_type_list;
-  string field_name;
+  std::string field_name;
   ndt::type field_type;
   bool variadic = false;
 
@@ -1138,12 +1138,12 @@ static ndt::type parse_struct(const char *&rbegin, const char *end, map<string, 
 }
 
 // funcproto_kwds : record_item, record_item*
-static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
-  vector<string> field_name_list;
+  vector<std::string> field_name_list;
   vector<ndt::type> field_type_list;
-  string field_name;
+  std::string field_name;
   ndt::type field_type;
   bool variadic = false;
 
@@ -1183,7 +1183,7 @@ static ndt::type parse_funcproto_kwds(const char *&rbegin, const char *end, map<
 
 // tuple : LPAREN tuple_item tuple_item* RPAREN
 // funcproto : tuple -> type
-static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   vector<ndt::type> field_type_list;
@@ -1281,7 +1281,7 @@ static ndt::type parse_tuple_or_funcproto(const char *&rbegin, const char *end, 
 
 //    datashape_nooption : dim ASTERISK datashape
 //                       | dtype
-static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   ndt::type result;
   const char *begin = rbegin;
@@ -1444,9 +1444,9 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
         result = ndt::typevar_constructed_type::make(std::string(nbegin, nend), arg_tp);
       }
     } else {
-      string n(nbegin, nend);
-      const map<string, ndt::type> &bit = builtin_types();
-      map<string, ndt::type>::const_iterator i = bit.find(n);
+      std::string n(nbegin, nend);
+      const map<std::string, ndt::type> &bit = builtin_types();
+      map<std::string, ndt::type>::const_iterator i = bit.find(n);
       if (i != bit.end()) {
         result = i->second;
       } else {
@@ -1490,7 +1490,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
 // This is what parses a single datashape as an ndt::type
 //    datashape : datashape_nooption
 //              | QUESTIONMARK datashape_nooption
-static ndt::type parse_datashape(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_datashape(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   parse::skip_whitespace_and_pound_comments(begin, end);
@@ -1507,14 +1507,14 @@ static ndt::type parse_datashape(const char *&rbegin, const char *end, map<strin
   }
 }
 
-static ndt::type parse_stmt(const char *&rbegin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_stmt(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   // stmt : TYPE name EQUALS rhs_expression
   // NOTE that this doesn't support parameterized lhs_expression, this is subset
   // of Blaze datashape
   if (parse_token_ds(begin, end, "type")) {
-    const map<string, ndt::type> &bit = builtin_types();
+    const map<std::string, ndt::type> &bit = builtin_types();
     const char *saved_begin = begin;
     const char *tname_begin, *tname_end;
     if (!parse::skip_required_whitespace(begin, end)) {
@@ -1551,7 +1551,7 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<string, nd
     if (result.is_null()) {
       throw datashape_parse_error(begin, "expected a data type");
     }
-    string tname(tname_begin, tname_end);
+    std::string tname(tname_begin, tname_end);
     // ACTION: Put the parsed type in the symbol table
     if (bit.find(tname) != bit.end()) {
       parse::skip_whitespace_and_pound_comments(saved_begin, end);
@@ -1571,7 +1571,7 @@ static ndt::type parse_stmt(const char *&rbegin, const char *end, map<string, nd
 }
 
 // top : stmt stmt*
-static ndt::type parse_top(const char *&begin, const char *end, map<string, ndt::type> &symtable)
+static ndt::type parse_top(const char *&begin, const char *end, map<std::string, ndt::type> &symtable)
 {
   ndt::type result = parse_stmt(begin, end, symtable);
   if (result.is_null()) {
@@ -1608,10 +1608,10 @@ static void get_error_line_column(const char *begin, const char *end, const char
     // If no \n was found
     if (line_end == NULL) {
       out_column = int(position - begin + 1);
-      out_line_cur = string(begin, end);
+      out_line_cur = std::string(begin, end);
       return;
     } else {
-      out_line_cur = string(begin, line_end);
+      out_line_cur = std::string(begin, line_end);
       ++line_end;
       if (position < line_end) {
         out_column = int(position - begin + 1);
@@ -1630,7 +1630,7 @@ ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *dat
   try
   {
     // Symbol table for intermediate types declared in the datashape
-    map<string, ndt::type> symtable;
+    map<std::string, ndt::type> symtable;
     // Parse the datashape and construct the type
     const char *begin = datashape_begin, *end = datashape_end;
     return parse_top(begin, end, symtable);
@@ -1638,7 +1638,7 @@ ndt::type dynd::type_from_datashape(const char *datashape_begin, const char *dat
   catch (const datashape_parse_error &e)
   {
     stringstream ss;
-    string line_prev, line_cur;
+    std::string line_prev, line_cur;
     int line, column;
     get_error_line_column(datashape_begin, datashape_end, e.get_position(), line_prev, line_cur, line, column);
     ss << "Error parsing datashape at line " << line << ", column " << column << "\n";
@@ -1666,7 +1666,7 @@ nd::array dynd::parse_type_constr_args(const std::string &str)
     }
     catch (const datashape_parse_error &e) {
       stringstream ss;
-      string line_prev, line_cur;
+      std::string line_prev, line_cur;
       int line, column;
       get_error_line_column(&str[0], end, e.get_position(), line_prev, line_cur, line, column);
       ss << "Error parsing datashape at line " << line << ", column " << column << "\n";

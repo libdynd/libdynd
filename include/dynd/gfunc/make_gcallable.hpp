@@ -126,9 +126,9 @@ namespace gfunc {
     };
   };
   template <>
-  struct dcs_size_of<string_type_data> {
+  struct dcs_size_of<string> {
     enum {
-      value = sizeof(string_type_data)
+      value = sizeof(string)
     };
   };
   template <typename T, int N>
@@ -292,7 +292,7 @@ namespace gfunc {
   };
   template <>
   struct parameter_type_of<std::string> {
-    typedef string_type_data type;
+    typedef string type;
   };
 
   template <typename T>
@@ -424,7 +424,7 @@ namespace gfunc {
   struct unbox_param<std::string> {
     inline static std::string unbox(char *v)
     {
-      string_type_data *p = reinterpret_cast<string_type_data *>(v);
+      string *p = reinterpret_cast<string *>(v);
       return std::string(p->begin, p->end);
     }
   };

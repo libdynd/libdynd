@@ -141,7 +141,7 @@ struct string_to_type_kernel : nd::base_kernel<string_to_type_kernel, 1> {
 
   void single(char *dst, char *const *src)
   {
-    const string &s =
+    const std::string &s =
         src_string_dt->get_utf8_string(src_arrmeta, src[0], errmode);
     ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
   }

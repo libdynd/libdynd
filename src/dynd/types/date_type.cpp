@@ -32,8 +32,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::date_type::date_type()
-    : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value,
-                type_flag_none, 0, 0, 0)
+    : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_none, 0, 0, 0)
 {
 }
 
@@ -41,12 +40,10 @@ ndt::date_type::~date_type()
 {
 }
 
-void ndt::date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data,
-                             assign_error_mode errmode, int32_t year,
+void ndt::date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data, assign_error_mode errmode, int32_t year,
                              int32_t month, int32_t day) const
 {
-  if (errmode != assign_error_nocheck &&
-      !date_ymd::is_valid(year, month, day)) {
+  if (errmode != assign_error_nocheck && !date_ymd::is_valid(year, month, day)) {
     stringstream ss;
     ss << "invalid input year/month/day " << year << "/" << month << "/" << day;
     throw runtime_error(ss.str());
@@ -55,32 +52,26 @@ void ndt::date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data,
   *reinterpret_cast<int32_t *>(data) = date_ymd::to_days(year, month, day);
 }
 
-void ndt::date_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta),
-                                          char *data, const char *utf8_begin,
-                                          const char *utf8_end,
-                                          const eval::eval_context *ectx) const
+void ndt::date_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), char *data, const char *utf8_begin,
+                                          const char *utf8_end, const eval::eval_context *ectx) const
 {
   date_ymd ymd;
-  ymd.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order,
-                   ectx->century_window, ectx->errmode);
+  ymd.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order, ectx->century_window, ectx->errmode);
   *reinterpret_cast<int32_t *>(data) = ymd.to_days();
 }
 
-date_ymd ndt::date_type::get_ymd(const char *DYND_UNUSED(arrmeta),
-                                 const char *data) const
+date_ymd ndt::date_type::get_ymd(const char *DYND_UNUSED(arrmeta), const char *data) const
 {
   date_ymd ymd;
   ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
   return ymd;
 }
 
-void ndt::date_type::print_data(std::ostream &o,
-                                const char *DYND_UNUSED(arrmeta),
-                                const char *data) const
+void ndt::date_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
   date_ymd ymd;
   ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
-  string s = ymd.to_str();
+  std::string s = ymd.to_str();
   if (s.empty()) {
     o << "NA";
   } else {
@@ -93,8 +84,7 @@ void ndt::date_type::print_type(std::ostream &o) const
   o << "date";
 }
 
-bool ndt::date_type::is_lossless_assignment(const type &dst_tp,
-                                            const type &src_tp) const
+bool ndt::date_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
@@ -122,44 +112,35 @@ bool ndt::date_type::operator==(const base_type &rhs) const
   }
 }
 
-intptr_t ndt::date_type::make_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx) const
+intptr_t ndt::date_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
+                                                const char *dst_arrmeta, const type &src_tp, const char *src_arrmeta,
+                                                kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
     if (src_tp.get_type_id() == date_type_id) {
-      return make_pod_typed_data_assignment_kernel(
-          ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
+      return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
     } else if (src_tp.get_kind() == string_kind) {
       // Assignment from strings
       typedef nd::assignment_kernel<date_type_id, string_type_id> self_type;
-      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
-                                    dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                    kernreq, ectx, 0, NULL,
-                                    std::map<std::string, ndt::type>());
+      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                    kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(
-          ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta,
-          src_tp, src_arrmeta, kernreq, ectx);
+      return ::make_assignment_kernel(ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
+                                      src_arrmeta, kernreq, ectx);
     } else if (!src_tp.is_builtin()) {
-      return src_tp.extended()->make_assignment_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-          ectx);
+      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                                                       kernreq, ectx);
     }
   } else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
       typedef nd::assignment_kernel<string_type_id, date_type_id> self_type;
-      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp,
-                                    dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                    kernreq, ectx, 0, NULL,
-                                    std::map<std::string, ndt::type>());
+      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
+                                    kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      property_type::make(src_tp, "struct"),
+      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, property_type::make(src_tp, "struct"),
                                       src_arrmeta, kernreq, ectx);
     }
     // TODO
@@ -170,19 +151,16 @@ intptr_t ndt::date_type::make_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-size_t ndt::date_type::make_comparison_kernel(
-    void *ckb, intptr_t ckb_offset, const type &src0_tp,
-    const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
-    comparison_type_t comptype, const eval::eval_context *ectx) const
+size_t ndt::date_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_tp,
+                                              const char *src0_arrmeta, const type &src1_tp, const char *src1_arrmeta,
+                                              comparison_type_t comptype, const eval::eval_context *ectx) const
 {
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
-      return make_builtin_type_comparison_kernel(ckb, ckb_offset, int32_type_id,
-                                                 int32_type_id, comptype);
+      return make_builtin_type_comparison_kernel(ckb, ckb_offset, int32_type_id, int32_type_id, comptype);
     } else if (!src1_tp.is_builtin()) {
-      return src1_tp.extended()->make_comparison_kernel(
-          ckb, ckb_offset, src0_tp, src0_arrmeta, src1_tp, src1_arrmeta,
-          comptype, ectx);
+      return src1_tp.extended()->make_comparison_kernel(ckb, ckb_offset, src0_tp, src0_arrmeta, src1_tp, src1_arrmeta,
+                                                        comptype, ectx);
     }
   }
 
@@ -204,15 +182,13 @@ static int32_t date_from_ymd(int year, int month, int day)
   ymd.day = day;
   if (!ymd.is_valid()) {
     stringstream ss;
-    ss << "invalid year/month/day " << ymd.year << "/" << ymd.month << "/"
-       << ymd.day;
+    ss << "invalid year/month/day " << ymd.year << "/" << ymd.month << "/" << ymd.day;
     throw runtime_error(ss.str());
   }
   return ymd.to_days();
 }
 
-static int32_t fn_type_construct(ndt::type DYND_UNUSED(dt), int year, int month,
-                                 int day)
+static int32_t fn_type_construct(ndt::type DYND_UNUSED(dt), int year, int month, int day)
 {
   return date_from_ymd(year, month, day);
 }
@@ -232,16 +208,13 @@ nd::functional::elwise(nd::functional::apply(date_from_ymd));
 }
 */
 
-void ndt::date_type::get_dynamic_type_functions(
-    const std::pair<std::string, nd::callable> **out_functions,
-    size_t *out_count) const
+void ndt::date_type::get_dynamic_type_functions(const std::pair<std::string, nd::callable> **out_functions,
+                                                size_t *out_count) const
 {
   static pair<std::string, nd::callable> date_type_functions[] = {
-      pair<std::string, nd::callable>(
-          "today", nd::functional::apply(&fn_type_today, "self")),
-      pair<std::string, nd::callable>(
-          "__construct__", nd::functional::apply(&fn_type_construct, "self",
-                                                 "year", "month", "day")), };
+      pair<std::string, nd::callable>("today", nd::functional::apply(&fn_type_today, "self")),
+      pair<std::string, nd::callable>("__construct__",
+                                      nd::functional::apply(&fn_type_construct, "self", "year", "month", "day")), };
 
   *out_functions = date_type_functions;
   *out_count = sizeof(date_type_functions) / sizeof(date_type_functions[0]);
@@ -264,17 +237,13 @@ static nd::array property_ndo_get_day(const nd::array &n)
   return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "day"));
 }
 
-void ndt::date_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
+void ndt::date_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                                                  size_t *out_count) const
 {
-  static pair<string, gfunc::callable> date_array_properties[] = {
-      pair<string, gfunc::callable>(
-          "year", gfunc::make_callable(&property_ndo_get_year, "self")),
-      pair<string, gfunc::callable>(
-          "month", gfunc::make_callable(&property_ndo_get_month, "self")),
-      pair<string, gfunc::callable>(
-          "day", gfunc::make_callable(&property_ndo_get_day, "self"))};
+  static pair<std::string, gfunc::callable> date_array_properties[] = {
+      pair<std::string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
+      pair<std::string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
+      pair<std::string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self"))};
 
   *out_properties = date_array_properties;
   *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
@@ -287,16 +256,14 @@ static nd::array function_ndo_to_struct(const nd::array &n)
   return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
 }
 
-static nd::array function_ndo_strftime(const nd::array &n,
-                                       const std::string &format)
+static nd::array function_ndo_strftime(const nd::array &n, const std::string &format)
 {
   // TODO: Allow 'format' itself to be an array, with broadcasting, etc.
   if (format.empty()) {
     throw runtime_error("format string for strftime should not be empty");
   }
   return n.replace_dtype(
-      ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(),
-                                 make_strftime_kernelgen(format)));
+      ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(), make_strftime_kernelgen(format)));
 }
 
 static nd::array function_ndo_weekday(const nd::array &n)
@@ -304,40 +271,29 @@ static nd::array function_ndo_weekday(const nd::array &n)
   return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
 }
 
-static nd::array function_ndo_replace(const nd::array &n, int32_t year,
-                                      int32_t month, int32_t day)
+static nd::array function_ndo_replace(const nd::array &n, int32_t year, int32_t month, int32_t day)
 {
   // TODO: Allow 'year', 'month', and 'day' to be arrays, with broadcasting,
   // etc.
-  if (year == numeric_limits<int32_t>::max() &&
-      month == numeric_limits<int32_t>::max() &&
+  if (year == numeric_limits<int32_t>::max() && month == numeric_limits<int32_t>::max() &&
       day == numeric_limits<int32_t>::max()) {
-    throw std::runtime_error(
-        "no parameters provided to date.replace, should provide at least one");
+    throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
   }
   return n.replace_dtype(
-      ndt::unary_expr_type::make(ndt::date_type::make(), n.get_dtype(),
-                                 make_replace_kernelgen(year, month, day)));
+      ndt::unary_expr_type::make(ndt::date_type::make(), n.get_dtype(), make_replace_kernelgen(year, month, day)));
 }
 
-void ndt::date_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
+void ndt::date_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                                                 size_t *out_count) const
 {
-  static pair<string, gfunc::callable> date_array_functions[] = {
-      pair<string, gfunc::callable>(
-          "to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-      pair<string, gfunc::callable>(
-          "strftime",
-          gfunc::make_callable(&function_ndo_strftime, "self", "format")),
-      pair<string, gfunc::callable>(
-          "weekday", gfunc::make_callable(&function_ndo_weekday, "self")),
-      pair<string, gfunc::callable>(
-          "replace",
-          gfunc::make_callable_with_default(
-              &function_ndo_replace, "self", "year", "month", "day",
-              numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),
-              numeric_limits<int32_t>::max()))};
+  static pair<std::string, gfunc::callable> date_array_functions[] = {
+      pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
+      pair<std::string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
+      pair<std::string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self")),
+      pair<std::string, gfunc::callable>(
+          "replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
+                                                       numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),
+                                                       numeric_limits<int32_t>::max()))};
 
   *out_functions = date_array_functions;
   *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
@@ -415,8 +371,7 @@ enum date_properties_t {
 };
 }
 
-size_t ndt::date_type::get_elwise_property_index(
-    const std::string &property_name) const
+size_t ndt::date_type::get_elwise_property_index(const std::string &property_name) const
 {
   if (property_name == "year") {
     return dateprop_year;
@@ -431,15 +386,12 @@ size_t ndt::date_type::get_elwise_property_index(
     return dateprop_struct;
   } else {
     stringstream ss;
-    ss << "dynd date type does not have a kernel for property "
-       << property_name;
+    ss << "dynd date type does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());
   }
 }
 
-ndt::type ndt::date_type::get_elwise_property_type(size_t property_index,
-                                                   bool &out_readable,
-                                                   bool &out_writable) const
+ndt::type ndt::date_type::get_elwise_property_type(size_t property_index, bool &out_readable, bool &out_writable) const
 {
   switch (property_index) {
   case dateprop_year:
@@ -460,10 +412,11 @@ ndt::type ndt::date_type::get_elwise_property_type(size_t property_index,
   }
 }
 
-size_t ndt::date_type::make_elwise_property_getter_kernel(
-    void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta),
-    const char *DYND_UNUSED(src_arrmeta), size_t src_property_index,
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
+size_t ndt::date_type::make_elwise_property_getter_kernel(void *ckb, intptr_t ckb_offset,
+                                                          const char *DYND_UNUSED(dst_arrmeta),
+                                                          const char *DYND_UNUSED(src_arrmeta),
+                                                          size_t src_property_index, kernel_request_t kernreq,
+                                                          const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   switch (src_property_index) {
   case dateprop_year:
@@ -483,16 +436,14 @@ size_t ndt::date_type::make_elwise_property_getter_kernel(
     return ckb_offset;
   default:
     stringstream ss;
-    ss << "dynd date type given an invalid property index"
-       << src_property_index;
+    ss << "dynd date type given an invalid property index" << src_property_index;
     throw runtime_error(ss.str());
   }
 }
 
 size_t ndt::date_type::make_elwise_property_setter_kernel(
-    void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta),
-    size_t dst_property_index, const char *DYND_UNUSED(src_arrmeta),
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
+    void *ckb, intptr_t ckb_offset, const char *DYND_UNUSED(dst_arrmeta), size_t dst_property_index,
+    const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   switch (dst_property_index) {
   case dateprop_struct:
@@ -500,22 +451,18 @@ size_t ndt::date_type::make_elwise_property_setter_kernel(
     return ckb_offset;
   default:
     stringstream ss;
-    ss << "dynd date type given an invalid property index"
-       << dst_property_index;
+    ss << "dynd date type given an invalid property index" << dst_property_index;
     throw runtime_error(ss.str());
   }
 }
 
-bool ndt::date_type::adapt_type(const type &operand_tp, const std::string &op,
-                                nd::callable &out_forward,
+bool ndt::date_type::adapt_type(const type &operand_tp, const std::string &op, nd::callable &out_forward,
                                 nd::callable &out_reverse) const
 {
   return make_date_adapter_callable(operand_tp, op, out_forward, out_reverse);
 }
 
-bool ndt::date_type::reverse_adapt_type(const type &value_tp,
-                                        const std::string &op,
-                                        nd::callable &out_forward,
+bool ndt::date_type::reverse_adapt_type(const type &value_tp, const std::string &op, nd::callable &out_forward,
                                         nd::callable &out_reverse) const
 {
   // Note that out_reverse and out_forward are swapped compared with

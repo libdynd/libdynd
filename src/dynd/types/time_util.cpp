@@ -25,7 +25,7 @@ int64_t time_hmst::to_ticks(int hour, int minute, int second, int tick)
 
 std::string time_hmst::to_str(int hour, int minute, int second, int tick)
 {
-  string s;
+  std::string s;
   if (is_valid(hour, minute, second, tick)) {
     s.resize(2 + 1 + 2 + 1 + 2 + 1 + 7);
     s[0] = '0' + (hour / 10);
