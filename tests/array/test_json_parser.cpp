@@ -107,6 +107,21 @@ TEST(JSON, DiscoverObject)
   EXPECT_EQ(ndt::type("{x: float64, y: 3 * int64}"), ndt::json::discover("{\"x\": 3.14, \"y\": [1, 2, 3]}"));
 }
 
+TEST(JSON, ParserWithMissingValue)
+{
+  nd::array a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7}");
+  EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
+  EXPECT_TRUE(a.p("y").is_missing());
+
+  a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7, \"y\": 11.5}");
+  EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
+  EXPECT_ARRAY_VALS_EQ(a.p("y"), 11.5);
+
+  a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{}");
+  EXPECT_TRUE(a.p("x").is_missing());
+  EXPECT_TRUE(a.p("y").is_missing());
+}
+
 TEST(JSONParser, BuiltinsFromBool)
 {
   nd::array a;
