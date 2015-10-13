@@ -315,7 +315,7 @@ void ndt::json_type::make_string_iter(dim_iter *out_di,
                                       intptr_t buffer_max_mem,
                                       const eval::eval_context *ectx) const
 {
-  const string_type_data *d = reinterpret_cast<const string_type_data *>(data);
+  const string *d = reinterpret_cast<const string *>(data);
   memory_block_ptr dataref = ref;
   const string_type_arrmeta *md =
       reinterpret_cast<const string_type_arrmeta *>(arrmeta);

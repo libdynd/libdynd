@@ -121,7 +121,7 @@ void iter::make_string_iter(
             nd::array tmp = nd::empty(ndt::string_type::make(iter_encoding));
             string_type_arrmeta md;
             md.blockref = ref.get();
-            string_type_data d;
+            string d;
             d.begin = const_cast<char *>(data_begin);
             d.end = const_cast<char *>(data_end);
             tmp.val_assign(ndt::string_type::make(data_encoding),

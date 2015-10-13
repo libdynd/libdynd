@@ -46,7 +46,7 @@ namespace ndt {
   namespace registry {
 
     static struct {
-      string name;
+      std::string name;
       type_make_t func;
     } data[DYND_TYPE_ID_MAX + 1];
     static size_t size = dim_fragment_type_id + 1;
@@ -674,7 +674,7 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &
   }
 }
 
-type_id_t ndt::register_type(const string &name, type_make_t make)
+type_id_t ndt::register_type(const std::string &name, type_make_t make)
 {
   registry::data[registry::size].name = name;
   registry::data[registry::size].func = make;
@@ -793,18 +793,18 @@ void dynd::hexadecimal_print_summarized(std::ostream &o, const char *data, intpt
   }
 }
 
-static intptr_t line_count(const string &s)
+static intptr_t line_count(const std::string &s)
 {
   return 1 + count_if(s.begin(), s.end(), bind1st(equal_to<char>(), '\n'));
 }
 
-static void summarize_stats(const string &s, intptr_t &num_rows, intptr_t &max_num_cols)
+static void summarize_stats(const std::string &s, intptr_t &num_rows, intptr_t &max_num_cols)
 {
   num_rows += line_count(s);
   max_num_cols = max(max_num_cols, (intptr_t)s.size());
 }
 
-void dynd::print_indented(ostream &o, const string &indent, const string &s, bool skipfirstline)
+void dynd::print_indented(ostream &o, const std::string &indent, const std::string &s, bool skipfirstline)
 {
   const char *begin = s.data();
   const char *end = s.data() + s.size();
@@ -826,7 +826,7 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp, const 
 {
   const int leading_count = 7, trailing_count = 3, row_threshold = 10, col_threshold = 30, packing_cols = 75;
 
-  vector<string> leading, trailing;
+  vector<std::string> leading, trailing;
   intptr_t ilead = 0, itrail = dim_size - 1;
   intptr_t num_rows = 0, max_num_cols = 0;
   // Get leading strings

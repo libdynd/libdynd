@@ -20,14 +20,14 @@ ndt::base_struct_type::base_struct_type(type_id_t type_id, const nd::array &fiel
                                         flags_type flags, bool layout_in_arrmeta, bool variadic)
     : base_tuple_type(type_id, field_types, flags, layout_in_arrmeta, variadic), m_field_names(field_names)
 {
-/*
-  if (!nd::ensure_immutable_contig<std::string>(m_field_names)) {
-    stringstream ss;
-    ss << "dynd struct field names requires an array of strings, got an "
-          "array with type " << m_field_names.get_type();
-    throw invalid_argument(ss.str());
-  }
-*/
+  /*
+    if (!nd::ensure_immutable_contig<std::string>(m_field_names)) {
+      stringstream ss;
+      ss << "dynd struct field names requires an array of strings, got an "
+            "array with type " << m_field_names.get_type();
+      throw invalid_argument(ss.str());
+    }
+  */
 
   // Make sure that the number of names matches
   intptr_t name_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.get_arrmeta())->dim_size;
@@ -54,7 +54,7 @@ intptr_t ndt::base_struct_type::get_field_index(const char *field_name_begin, co
     const char *fn_ptr = m_field_names.get_readonly_originptr();
     intptr_t fn_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.get_arrmeta())->stride;
     for (intptr_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
-      const string_type_data *fn = reinterpret_cast<const string_type_data *>(fn_ptr);
+      const string *fn = reinterpret_cast<const string *>(fn_ptr);
       const char *begin = fn->begin, *end = fn->end;
       if ((size_t)(end - begin) == size && *begin == firstchar) {
         if (memcmp(fn->begin, field_name_begin, size) == 0) {
@@ -91,7 +91,7 @@ ndt::type ndt::base_struct_type::apply_linear_index(intptr_t nindices, const ira
       // Make an "N * string" array without copying the actual
       // string text data. TODO: encapsulate this into a function.
       char *data_ptr;
-      string_type_data *string_arr_ptr;
+      string *string_arr_ptr;
       type stp = string_type::make(string_encoding_utf_8);
       type tp = make_fixed_dim(dimension_size, stp);
       nd::array tmp_field_names(make_array_memory_block(
@@ -102,7 +102,7 @@ ndt::type ndt::base_struct_type::apply_linear_index(intptr_t nindices, const ira
       ndo->data.ptr = data_ptr;
       ndo->data.ref = NULL;
       ndo->m_flags = nd::default_access_flags;
-      string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
+      string_arr_ptr = reinterpret_cast<string *>(data_ptr);
       // Get the allocator for the output string type
       fixed_dim_type_arrmeta *md = reinterpret_cast<fixed_dim_type_arrmeta *>(tmp_field_names.get_arrmeta());
       md->dim_size = dimension_size;

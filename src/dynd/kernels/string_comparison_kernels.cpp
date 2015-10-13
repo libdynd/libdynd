@@ -275,10 +275,10 @@ struct string_compare_kernel {
   static void less(ckernel_prefix *DYND_UNUSED(self), char *dst,
                    char *const *src)
   {
-    const string_type_data *da =
-        reinterpret_cast<const string_type_data *>(src[0]);
-    const string_type_data *db =
-        reinterpret_cast<const string_type_data *>(src[1]);
+    const dynd::string *da =
+        reinterpret_cast<const dynd::string *>(src[0]);
+    const dynd::string *db =
+        reinterpret_cast<const dynd::string *>(src[1]);
     *reinterpret_cast<int *>(dst) =
         lexicographical_compare(reinterpret_cast<const T *>(da->begin),
                                 reinterpret_cast<const T *>(da->end),
@@ -289,10 +289,10 @@ struct string_compare_kernel {
   static void less_equal(ckernel_prefix *DYND_UNUSED(self), char *dst,
                          char *const *src)
   {
-    const string_type_data *da =
-        reinterpret_cast<const string_type_data *>(src[0]);
-    const string_type_data *db =
-        reinterpret_cast<const string_type_data *>(src[1]);
+    const dynd::string *da =
+        reinterpret_cast<const dynd::string *>(src[0]);
+    const dynd::string *db =
+        reinterpret_cast<const dynd::string *>(src[1]);
     *reinterpret_cast<int *>(dst) =
         !lexicographical_compare(reinterpret_cast<const T *>(db->begin),
                                  reinterpret_cast<const T *>(db->end),
@@ -303,10 +303,10 @@ struct string_compare_kernel {
   static void equal(ckernel_prefix *DYND_UNUSED(self), char *dst,
                     char *const *src)
   {
-    const string_type_data *da =
-        reinterpret_cast<const string_type_data *>(src[0]);
-    const string_type_data *db =
-        reinterpret_cast<const string_type_data *>(src[1]);
+    const dynd::string *da =
+        reinterpret_cast<const dynd::string *>(src[0]);
+    const dynd::string *db =
+        reinterpret_cast<const dynd::string *>(src[1]);
     *reinterpret_cast<int *>(dst) =
         (da->end - da->begin == db->end - db->begin) &&
         memcmp(da->begin, db->begin, da->end - da->begin) == 0;
@@ -315,10 +315,10 @@ struct string_compare_kernel {
   static void not_equal(ckernel_prefix *DYND_UNUSED(self), char *dst,
                         char *const *src)
   {
-    const string_type_data *da =
-        reinterpret_cast<const string_type_data *>(src[0]);
-    const string_type_data *db =
-        reinterpret_cast<const string_type_data *>(src[1]);
+    const dynd::string *da =
+        reinterpret_cast<const dynd::string *>(src[0]);
+    const dynd::string *db =
+        reinterpret_cast<const dynd::string *>(src[1]);
     *reinterpret_cast<int *>(dst) =
         (da->end - da->begin != db->end - db->begin) ||
         memcmp(da->begin, db->begin, da->end - da->begin) != 0;
@@ -327,10 +327,10 @@ struct string_compare_kernel {
   static void greater_equal(ckernel_prefix *DYND_UNUSED(self), char *dst,
                             char *const *src)
   {
-    const string_type_data *da =
-        reinterpret_cast<const string_type_data *>(src[0]);
-    const string_type_data *db =
-        reinterpret_cast<const string_type_data *>(src[1]);
+    const dynd::string *da =
+        reinterpret_cast<const dynd::string *>(src[0]);
+    const dynd::string *db =
+        reinterpret_cast<const dynd::string *>(src[1]);
     *reinterpret_cast<int *>(dst) =
         !lexicographical_compare(reinterpret_cast<const T *>(da->begin),
                                  reinterpret_cast<const T *>(da->end),
@@ -341,10 +341,10 @@ struct string_compare_kernel {
   static void greater(ckernel_prefix *DYND_UNUSED(self), char *dst,
                       char *const *src)
   {
-    const string_type_data *da =
-        reinterpret_cast<const string_type_data *>(src[0]);
-    const string_type_data *db =
-        reinterpret_cast<const string_type_data *>(src[1]);
+    const dynd::string *da =
+        reinterpret_cast<const dynd::string *>(src[0]);
+    const dynd::string *db =
+        reinterpret_cast<const dynd::string *>(src[1]);
     *reinterpret_cast<int *>(dst) =
         lexicographical_compare(reinterpret_cast<const T *>(db->begin),
                                 reinterpret_cast<const T *>(db->end),

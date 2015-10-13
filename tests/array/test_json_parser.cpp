@@ -222,18 +222,18 @@ TEST(JSONParser, OptionString)
 
   a = parse_json(ndt::type("?string"), "\"testing 1 2 3\"");
   EXPECT_EQ(ndt::type("?string"), a.get_type());
-  EXPECT_EQ("testing 1 2 3", a.as<string>());
+  EXPECT_EQ("testing 1 2 3", a.as<std::string>());
   a = parse_json(ndt::type("?string"), "\"null\"");
-  EXPECT_EQ("null", a.as<string>());
+  EXPECT_EQ("null", a.as<std::string>());
   a = parse_json(ndt::type("?string"), "\"NA\"");
-  EXPECT_EQ("NA", a.as<string>());
+  EXPECT_EQ("NA", a.as<std::string>());
   a = parse_json(ndt::type("?string"), "\"\"");
-  EXPECT_EQ("", a.as<string>());
+  EXPECT_EQ("", a.as<std::string>());
 
   a = parse_json(ndt::type("?string"), "null");
   EXPECT_EQ(ndt::type("?string"), a.get_type());
-  EXPECT_EQ(NULL, reinterpret_cast<const string_type_data *>(a.get_readonly_originptr())->begin);
-  EXPECT_THROW(a.as<string>(), overflow_error);
+  EXPECT_EQ(NULL, reinterpret_cast<const dynd::string *>(a.get_readonly_originptr())->begin);
+  EXPECT_THROW(a.as<std::string>(), overflow_error);
 
   a = parse_json("9 * ?string", "[null, \"123\", null, \"456\", \"0\", \"789\", null, null, null]");
   EXPECT_EQ(ndt::type("9 * option[string]"), a.get_type());
@@ -378,17 +378,17 @@ TEST(JSONParser, String)
 
   n = parse_json(ndt::string_type::make(string_encoding_utf_8), "\"testing one two three\"");
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), n.get_type());
-  EXPECT_EQ("testing one two three", n.as<string>());
+  EXPECT_EQ("testing one two three", n.as<std::string>());
   n = parse_json(ndt::string_type::make(string_encoding_utf_8), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), n.get_type());
-  EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<string>());
+  EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<std::string>());
 
   n = parse_json(ndt::string_type::make(string_encoding_utf_16), "\"testing one two three\"");
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), n.get_type());
-  EXPECT_EQ("testing one two three", n.as<string>());
+  EXPECT_EQ("testing one two three", n.as<std::string>());
   n = parse_json(ndt::string_type::make(string_encoding_utf_16), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), n.get_type());
-  EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<string>());
+  EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<std::string>());
 
   EXPECT_THROW(parse_json(ndt::string_type::make(string_encoding_utf_8), "false"), invalid_argument);
 }
@@ -461,8 +461,8 @@ TEST(JSONParser, Struct)
   EXPECT_EQ(sdt, n.get_type());
   EXPECT_EQ(24601, n(0).as<int>());
   EXPECT_EQ(3.75, n(1).as<double>());
-  EXPECT_EQ("Jean", n(2).as<string>());
-  EXPECT_EQ("2012-09-19", n(3).as<string>());
+  EXPECT_EQ("Jean", n(2).as<std::string>());
+  EXPECT_EQ("2012-09-19", n(3).as<std::string>());
 
   // Default parsing policy discards extra JSON fields
   n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,\"discarded\":[1,2,3],"
@@ -470,8 +470,8 @@ TEST(JSONParser, Struct)
   EXPECT_EQ(sdt, n.get_type());
   EXPECT_EQ(24601, n(0).as<int>());
   EXPECT_EQ(3.75, n(1).as<double>());
-  EXPECT_EQ("Jean", n(2).as<string>());
-  EXPECT_EQ("2012-09-19", n(3).as<string>());
+  EXPECT_EQ("Jean", n(2).as<std::string>());
+  EXPECT_EQ("2012-09-19", n(3).as<std::string>());
 
   // Every field must be populated, though
   EXPECT_THROW(parse_json(sdt, "{\"amount\":3.75,\"discarded\":[1,2,3],"
@@ -494,8 +494,8 @@ TEST(JSONParser, NestedStruct)
   EXPECT_EQ(1.0, n(0, 1).as<float>());
   EXPECT_EQ(1e10, n(0, 2).as<float>());
   EXPECT_EQ(10.5, n(1).as<double>());
-  EXPECT_EQ("Harvey", n(2, 0).as<string>());
-  EXPECT_EQ("1970-02-13", n(2, 1).as<string>());
+  EXPECT_EQ("Harvey", n(2, 0).as<std::string>());
+  EXPECT_EQ("1970-02-13", n(2, 1).as<std::string>());
 
   // Too many entries in "position"
   EXPECT_THROW(parse_json(sdt, "{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, "
@@ -529,14 +529,14 @@ TEST(JSONParser, ListOfStruct)
   EXPECT_EQ(1.0, n(0, 0, 1).as<float>());
   EXPECT_EQ(1e10, n(0, 0, 2).as<float>());
   EXPECT_EQ(10.5, n(0, 1).as<double>());
-  EXPECT_EQ("Harvey", n(0, 2, 0).as<string>());
-  EXPECT_EQ("1970-02-13", n(0, 2, 1).as<string>());
+  EXPECT_EQ("Harvey", n(0, 2, 0).as<std::string>());
+  EXPECT_EQ("1970-02-13", n(0, 2, 1).as<std::string>());
   EXPECT_EQ(1, n(1, 0, 0).as<float>());
   EXPECT_EQ(2, n(1, 0, 1).as<float>());
   EXPECT_EQ(3, n(1, 0, 2).as<float>());
   EXPECT_EQ(3.125, n(1, 1).as<double>());
-  EXPECT_EQ("Frank", n(1, 2, 0).as<string>());
-  EXPECT_EQ("2013-12-25", n(1, 2, 1).as<string>());
+  EXPECT_EQ("Frank", n(1, 2, 0).as<std::string>());
+  EXPECT_EQ("2013-12-25", n(1, 2, 1).as<std::string>());
 
   // Spurious '#' inserted
   EXPECT_THROW(parse_json(sdt, "[{\"data\":{\"name\":\"Harvey\", \"when\":\"1970-02-13\"}, \n"
@@ -553,7 +553,7 @@ TEST(JSONParser, JSONDType)
   // Parsing JSON with the output being just a json string
   n = parse_json("json", "{\"a\":3.14}");
   EXPECT_EQ(ndt::make_json(), n.get_type());
-  EXPECT_EQ("{\"a\":3.14}", n.as<string>());
+  EXPECT_EQ("{\"a\":3.14}", n.as<std::string>());
 
   // Parsing JSON with a piece of it being a json string
   n = parse_json("{a: json, b: int32, c: string}",
@@ -561,7 +561,7 @@ TEST(JSONParser, JSONDType)
   EXPECT_EQ(
       ndt::struct_type::make({"a", "b", "c"}, {ndt::make_json(), ndt::type::make<int32_t>(), ndt::string_type::make()}),
       n.get_type());
-  EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n(0).as<string>());
+  EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n(0).as<std::string>());
   EXPECT_EQ(12, n(1).as<int>());
-  EXPECT_EQ("testing string", n(2).as<string>());
+  EXPECT_EQ("testing string", n(2).as<std::string>());
 }

@@ -444,7 +444,7 @@ TEST(Array, StdVectorStringConstructor) {
     EXPECT_EQ(1u, a.get_strides().size());
     EXPECT_EQ((intptr_t)a.get_type().at(0).get_data_size(), a.get_strides()[0]);
     for (int i = 0; i < 5; ++i) {
-        EXPECT_EQ(v[i], a(i).as<string>());
+        EXPECT_EQ(v[i], a(i).as<std::string>());
     }
 }
 

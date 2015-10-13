@@ -80,27 +80,27 @@ TEST(TimeDType, ValueCreationAbstract) {
 
 TEST(TimeDType, ConvertToString) {
   EXPECT_EQ("00:00",
-            nd::array("00:00:00.000").cast(ndt::type("time")).as<string>());
+            nd::array("00:00:00.000").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("00:00",
-            nd::array("12:00:00.000 AM").cast(ndt::type("time")).as<string>());
+            nd::array("12:00:00.000 AM").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("12:00",
-            nd::array("12:00:00.000 PM").cast(ndt::type("time")).as<string>());
+            nd::array("12:00:00.000 PM").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("23:59:59.9999999",
-            nd::array("23:59:59.9999999").cast(ndt::type("time")).as<string>());
+            nd::array("23:59:59.9999999").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("00:00:01",
-            nd::array("00:00:01.000").cast(ndt::type("time")).as<string>());
+            nd::array("00:00:01.000").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("00:00:00.0000001",
-            nd::array("00:00:00.0000001").cast(ndt::type("time")).as<string>());
+            nd::array("00:00:00.0000001").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("12:34:56.7",
-            nd::array("12:34:56.700").cast(ndt::type("time")).as<string>());
+            nd::array("12:34:56.700").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("23:59:56.78",
-            nd::array("23:59:56.7800").cast(ndt::type("time")).as<string>());
+            nd::array("23:59:56.7800").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("23:59:59.789",
-            nd::array("23:59:59.78900").cast(ndt::type("time")).as<string>());
+            nd::array("23:59:59.78900").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("23:59:59.78901",
-            nd::array("23:59:59.789010").cast(ndt::type("time")).as<string>());
+            nd::array("23:59:59.789010").cast(ndt::type("time")).as<std::string>());
   EXPECT_EQ("12:34:56.7890123",
-            nd::array("12:34:56.7890123").cast(ndt::type("time")).as<string>());
+            nd::array("12:34:56.7890123").cast(ndt::type("time")).as<std::string>());
 }
 
 TEST(TimeDType, Properties) {

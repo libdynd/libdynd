@@ -268,7 +268,7 @@ nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t ar
   }
 
   char *data_ptr = NULL, *string_ptr;
-  string_type_data *string_arr_ptr;
+  string *string_arr_ptr;
   ndt::type stp = ndt::string_type::make(string_encoding_utf_8);
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(),
@@ -284,7 +284,7 @@ nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t ar
   fixed_dim_type_arrmeta *md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
   md->dim_size = array_size;
   md->stride = stp.get_data_size();
-  string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
+  string_arr_ptr = reinterpret_cast<string *>(data_ptr);
   string_ptr = data_ptr + array_size * stp.get_data_size();
   for (size_t i = 0; i < array_size; ++i) {
     size_t size = strlen(cstr_array[i]);
@@ -305,7 +305,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
   }
 
   char *data_ptr = NULL, *string_ptr;
-  string_type_data *string_arr_ptr;
+  string *string_arr_ptr;
   ndt::type stp = ndt::string_type::make(string_encoding_utf_8);
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(),
@@ -321,7 +321,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
   fixed_dim_type_arrmeta *md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
   md->dim_size = array_size;
   md->stride = stp.get_data_size();
-  string_arr_ptr = reinterpret_cast<string_type_data *>(data_ptr);
+  string_arr_ptr = reinterpret_cast<string *>(data_ptr);
   string_ptr = data_ptr + array_size * stp.get_data_size();
   for (size_t i = 0; i < array_size; ++i) {
     size_t size = str_array[i]->size();
@@ -614,9 +614,9 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
   // Make an array memory block which contains both the string pointers and
   // the string data
   array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
-                                       sizeof(string_type_data) * vec.size() + total_string_size,
+                                       sizeof(string) * vec.size() + total_string_size,
                                        dt.get_data_alignment(), &data_ptr));
-  char *string_ptr = data_ptr + sizeof(string_type_data) * vec.size();
+  char *string_ptr = data_ptr + sizeof(string) * vec.size();
   // The main array arrmeta
   array_preamble *preamble = result.get_ndo();
   preamble->data.ptr = data_ptr;
@@ -626,11 +626,11 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
   // The arrmeta for the fixed_dim and string parts of the type
   fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
   sa_md->dim_size = vec.size();
-  sa_md->stride = vec.empty() ? 0 : sizeof(string_type_data);
+  sa_md->stride = vec.empty() ? 0 : sizeof(string);
   string_type_arrmeta *s_md = reinterpret_cast<string_type_arrmeta *>(sa_md + 1);
   s_md->blockref = NULL;
   // The string pointers and data
-  string_type_data *data = reinterpret_cast<string_type_data *>(data_ptr);
+  string *data = reinterpret_cast<string *>(data_ptr);
   for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
     size_t size = vec[i].size();
     memcpy(string_ptr, vec[i].data(), size);

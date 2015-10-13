@@ -302,7 +302,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
       }
       intptr_t i;
       if (escaped) {
-        string name;
+        std::string name;
         parse::unescape_string(strbegin, strend, name);
         i = fsd->get_field_index(name);
       } else {
@@ -414,7 +414,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
     if (!escaped) {
       parse::string_to_bool(&value, nbegin, nend, option, ectx->errmode);
     } else {
-      string s;
+      std::string s;
       parse::unescape_string(nbegin, nend, s);
       parse::string_to_bool(&value, s.data(), s.data() + s.size(), option, ectx->errmode);
     }
@@ -456,7 +456,7 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta, char *ou
       if (!escaped) {
         parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend, option, ectx->errmode);
       } else {
-        string s;
+        std::string s;
         parse::unescape_string(nbegin, nend, s);
         parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend, option, ectx->errmode);
       }
@@ -499,7 +499,7 @@ static void parse_string_json(const ndt::type &tp, const char *arrmeta, char *ou
       if (!escaped) {
         bsd->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
       } else {
-        string val;
+        std::string val;
         parse::unescape_string(strbegin, strend, val);
         bsd->set_from_utf8_string(arrmeta, out_data, val, ectx);
       }
@@ -543,7 +543,7 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta, char *
     ss << "Unrecognized datetime type " << tp;
     throw runtime_error(ss.str());
   } else if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-    string val;
+    std::string val;
     if (escaped) {
       parse::unescape_string(strbegin, strend, val);
       strbegin = val.data();
@@ -586,7 +586,7 @@ static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta), ch
     ss << "Unrecognized type type \"" << tp << "\"";
     throw runtime_error(ss.str());
   } else if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-    string val;
+    std::string val;
     if (escaped) {
       parse::unescape_string(strbegin, strend, val);
       strbegin = val.data();
@@ -647,7 +647,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
           if (!escaped) {
             tp.extended()->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
           } else {
-            string val;
+            std::string val;
             parse::unescape_string(strbegin, strend, val);
             tp.extended()->set_from_utf8_string(arrmeta, out_data, val, ectx);
           }
@@ -766,10 +766,10 @@ static void get_error_line_column(const char *begin, const char *end, const char
     // If no \n was found
     if (line_end == NULL) {
       out_column = int(position - begin + 1);
-      out_line_cur = string(begin, end);
+      out_line_cur = std::string(begin, end);
       return;
     } else {
-      out_line_cur = string(begin, line_end);
+      out_line_cur = std::string(begin, line_end);
       ++line_end;
       if (position < line_end) {
         out_column = int(position - begin + 1);
@@ -829,7 +829,7 @@ void dynd::validate_json(const char *json_begin, const char *json_end)
   catch (const parse::parse_error &e)
   {
     stringstream ss;
-    string line_prev, line_cur;
+    std::string line_prev, line_cur;
     int line, column;
     get_error_line_column(json_begin, json_end, e.get_position(), line_prev, line_cur, line, column);
     ss << "Error validating JSON at line " << line << ", column " << column << "\n";
@@ -854,7 +854,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin, const char *json_e
   catch (const json_parse_error &e)
   {
     stringstream ss;
-    string line_prev, line_cur;
+    std::string line_prev, line_cur;
     int line, column;
     get_error_line_column(json_begin, json_end, e.get_position(), line_prev, line_cur, line, column);
     ss << "Error parsing JSON at line " << line << ", column " << column << "\n";
@@ -866,7 +866,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin, const char *json_e
   catch (const parse::parse_error &e)
   {
     stringstream ss;
-    string line_prev, line_cur;
+    std::string line_prev, line_cur;
     int line, column;
     get_error_line_column(json_begin, json_end, e.get_position(), line_prev, line_cur, line, column);
     ss << "Error parsing JSON at line " << line << ", column " << column << "\n";
@@ -1016,7 +1016,7 @@ void ndt::json::discover(ndt::type &res, const char *json_begin, const char *jso
   catch (const parse::parse_error &e)
   {
     stringstream ss;
-    string line_prev, line_cur;
+    std::string line_prev, line_cur;
     int line, column;
     get_error_line_column(json_begin, json_end, e.get_position(), line_prev, line_cur, line, column);
     ss << "Error validating JSON at line " << line << ", column " << column << "\n";

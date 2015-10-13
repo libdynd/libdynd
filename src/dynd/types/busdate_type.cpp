@@ -65,7 +65,7 @@ void ndt::busdate_type::print_data(std::ostream &o,
 {
   date_ymd ymd;
   ymd.set_from_days(*reinterpret_cast<const int32_t *>(data));
-  string s = ymd.to_str();
+  std::string s = ymd.to_str();
   if (s.empty()) {
     o << "NA";
   } else {

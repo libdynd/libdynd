@@ -271,7 +271,7 @@ namespace ndt {
     {
     }
 
-    const string_type_data &get_kwd_name_raw(intptr_t i) const
+    const string &get_kwd_name_raw(intptr_t i) const
     {
       return m_kwd_struct.extended<struct_type>()->get_field_name_raw(i);
     }

@@ -115,7 +115,7 @@ static void string_to_bool_single(ckernel_prefix *extra, char *dst, char *const 
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
-  string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, e->errmode);
 }
@@ -193,7 +193,7 @@ struct string_to_int {
   static void single(ckernel_prefix *extra, char *dst, char *const *src)
   {
     string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
-    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+    std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     bool negative = false;
     if (!s.empty() && s[0] == '-') {
@@ -226,7 +226,7 @@ struct string_to_uint {
   static void single(ckernel_prefix *extra, char *dst, char *const *src)
   {
     string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
-    string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+    std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     bool negative = false;
     if (!s.empty() && s[0] == '-') {
@@ -256,7 +256,7 @@ struct string_to_uint {
 static void string_to_int128_single(ckernel_prefix *extra, char *dst, char *const *src)
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
-  string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   bool negative = false;
   if (!s.empty() && s[0] == '-') {
@@ -284,7 +284,7 @@ static void string_to_int128_single(ckernel_prefix *extra, char *dst, char *cons
 static void string_to_uint128_single(ckernel_prefix *extra, char *dst, char *const *src)
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
-  string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   bool negative = false;
   if (!s.empty() && s[0] == '-') {
@@ -311,7 +311,7 @@ static void string_to_float32_single(ckernel_prefix *extra, char *dst, char *con
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
-  string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   double value = parse::checked_string_to_float64(s.data(), s.data() + s.size(), e->errmode);
   // Assign double -> float according to the error mode
@@ -344,7 +344,7 @@ static void string_to_float64_single(ckernel_prefix *extra, char *dst, char *con
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
-  string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   double value = parse::checked_string_to_float64(s.data(), s.data() + s.size(), e->errmode);
   *reinterpret_cast<double *>(dst) = value;
@@ -481,7 +481,7 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst, const
                                          const eval::eval_context *ectx)
 {
   ndt::type dt = ndt::string_type::make();
-  string_type_data d;
+  dynd::string d;
   string_type_arrmeta md;
   d.begin = const_cast<char *>(str_begin);
   d.end = const_cast<char *>(str_end);

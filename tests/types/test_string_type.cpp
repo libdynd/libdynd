@@ -74,19 +74,19 @@ TEST(StringType, ArrayCreation)
   // A C-style string literal
   a = "testing string construction";
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
-  EXPECT_EQ("testing string construction", a.as<string>());
+  EXPECT_EQ("testing string construction", a.as<std::string>());
 
   // A C-style char array variable
   const char carr[] = "string construction";
   a = carr;
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
-  EXPECT_EQ("string construction", a.as<string>());
+  EXPECT_EQ("string construction", a.as<std::string>());
 
   // A C-style char pointer variable
   const char *cptr = "construction";
   a = cptr;
   EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
-  EXPECT_EQ("construction", a.as<string>());
+  EXPECT_EQ("construction", a.as<std::string>());
 
   // An array of UTF8 strings
   const char *i0[5] = {"this", "is", "a", "test",
@@ -94,11 +94,11 @@ TEST(StringType, ArrayCreation)
   a = i0;
   EXPECT_EQ(ndt::type("5 * string"), a.get_type());
   EXPECT_EQ(a.get_shape()[0], 5);
-  EXPECT_EQ("this", a(0).as<string>());
-  EXPECT_EQ("is", a(1).as<string>());
-  EXPECT_EQ("a", a(2).as<string>());
-  EXPECT_EQ("test", a(3).as<string>());
-  EXPECT_EQ("of strings that are various sizes", a(4).as<string>());
+  EXPECT_EQ("this", a(0).as<std::string>());
+  EXPECT_EQ("is", a(1).as<std::string>());
+  EXPECT_EQ("a", a(2).as<std::string>());
+  EXPECT_EQ("test", a(3).as<std::string>());
+  EXPECT_EQ("of strings that are various sizes", a(4).as<std::string>());
 }
 
 TEST(StringType, Basic)

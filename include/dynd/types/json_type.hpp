@@ -12,7 +12,7 @@ namespace dynd {
 // The json type is stored as a string, but limited to
 // UTF-8 and is supposed to contain JSON data.
 typedef string_type_arrmeta json_type_arrmeta;
-typedef string_type_data json_type_data;
+typedef string json_type_data;
 
 namespace ndt {
 
@@ -22,16 +22,16 @@ namespace ndt {
 
     virtual ~json_type();
 
-    string_encoding_t get_encoding() const { return string_encoding_utf_8; }
+    string_encoding_t get_encoding() const
+    {
+      return string_encoding_utf_8;
+    }
 
-    void get_string_range(const char **out_begin, const char **out_end,
-                          const char *arrmeta, const char *data) const;
-    void set_from_utf8_string(const char *arrmeta, char *dst,
-                              const char *utf8_begin, const char *utf8_end,
+    void get_string_range(const char **out_begin, const char **out_end, const char *arrmeta, const char *data) const;
+    void set_from_utf8_string(const char *arrmeta, char *dst, const char *utf8_begin, const char *utf8_end,
                               const eval::eval_context *ectx) const;
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
@@ -48,19 +48,14 @@ namespace ndt {
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                             const std::string &indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                    const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta,
-                                    kernel_request_t kernreq,
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                     const eval::eval_context *ectx) const;
 
-    void make_string_iter(dim_iter *out_di, string_encoding_t encoding,
-                          const char *arrmeta, const char *data,
-                          const memory_block_ptr &ref, intptr_t buffer_max_mem,
-                          const eval::eval_context *ectx) const;
+    void make_string_iter(dim_iter *out_di, string_encoding_t encoding, const char *arrmeta, const char *data,
+                          const memory_block_ptr &ref, intptr_t buffer_max_mem, const eval::eval_context *ectx) const;
   };
 
   inline type make_json()

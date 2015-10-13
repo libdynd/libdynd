@@ -82,7 +82,7 @@ TEST(BytesDType, Assign) {
     b.vals() = a;
     c = b.view_scalars(ndt::string_type::make());
     EXPECT_EQ(c.get_type(), ndt::string_type::make());
-    EXPECT_EQ("testing", c.as<string>());
+    EXPECT_EQ("testing", c.as<std::string>());
 }
 
 TEST(BytesDType, Alignment) {

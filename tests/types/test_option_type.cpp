@@ -138,10 +138,10 @@ TEST(OptionType, Date)
 
   parse_json(a, "[null, \"2013-04-05\", \"NA\", \"\", \"Jan 3, 2020\"]");
   EXPECT_FALSE(nd::is_scalar_avail(a(0)));
-  EXPECT_EQ("2013-04-05", a(1).as<string>());
+  EXPECT_EQ("2013-04-05", a(1).as<std::string>());
   EXPECT_FALSE(nd::is_scalar_avail(a(2)));
   EXPECT_FALSE(nd::is_scalar_avail(a(3)));
-  EXPECT_EQ("2020-01-03", a(4).as<string>());
+  EXPECT_EQ("2020-01-03", a(4).as<std::string>());
   // Assigning an empty string assigns NA
   a.vals_at(1) = "";
   EXPECT_FALSE(nd::is_scalar_avail(a(1)));
@@ -155,10 +155,10 @@ TEST(OptionType, Time)
 
   parse_json(a, "[null, \"3:45\", \"NA\", \"\", \"05:17:33.1234 PM\"]");
   EXPECT_FALSE(nd::is_scalar_avail(a(0)));
-  EXPECT_EQ("03:45", a(1).as<string>());
+  EXPECT_EQ("03:45", a(1).as<std::string>());
   EXPECT_FALSE(nd::is_scalar_avail(a(2)));
   EXPECT_FALSE(nd::is_scalar_avail(a(3)));
-  EXPECT_EQ("17:17:33.1234", a(4).as<string>());
+  EXPECT_EQ("17:17:33.1234", a(4).as<std::string>());
   // Assigning an empty string assigns NA
   a.vals_at(1) = "";
   EXPECT_FALSE(nd::is_scalar_avail(a(1)));
@@ -173,10 +173,10 @@ TEST(OptionType, DateTime)
   parse_json(a, "[null, \"2013-04-05 3:45\", \"NA\", \"\","
                 " \"Jan 3, 2020 05:17:33.1234 PM\"]");
   EXPECT_FALSE(nd::is_scalar_avail(a(0)));
-  EXPECT_EQ("2013-04-05T03:45", a(1).as<string>());
+  EXPECT_EQ("2013-04-05T03:45", a(1).as<std::string>());
   EXPECT_FALSE(nd::is_scalar_avail(a(2)));
   EXPECT_FALSE(nd::is_scalar_avail(a(3)));
-  EXPECT_EQ("2020-01-03T17:17:33.1234", a(4).as<string>());
+  EXPECT_EQ("2020-01-03T17:17:33.1234", a(4).as<std::string>());
   // Assigning an empty string assigns NA
   a.vals_at(1) = "";
   EXPECT_FALSE(nd::is_scalar_avail(a(1)));
@@ -191,14 +191,14 @@ TEST(OptionType, String)
   parse_json(a, "[null, \"testing\", \"NA\", \"\","
                 " \"valid\"]");
   EXPECT_FALSE(nd::is_scalar_avail(a(0)));
-  EXPECT_EQ("testing", a(1).as<string>());
-  EXPECT_EQ("NA", a(2).as<string>());
-  EXPECT_EQ("", a(3).as<string>());
-  EXPECT_EQ("valid", a(4).as<string>());
+  EXPECT_EQ("testing", a(1).as<std::string>());
+  EXPECT_EQ("NA", a(2).as<std::string>());
+  EXPECT_EQ("", a(3).as<std::string>());
+  EXPECT_EQ("valid", a(4).as<std::string>());
 
   a = nd::empty("5 * ?string");
   a.vals_at(0) = "";
-  EXPECT_EQ("", a(0).as<string>());
+  EXPECT_EQ("", a(0).as<std::string>());
   a.vals_at(1) = "NA";
-  EXPECT_EQ("NA", a(1).as<string>());
+  EXPECT_EQ("NA", a(1).as<std::string>());
 }

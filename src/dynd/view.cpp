@@ -192,7 +192,7 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
     if (meta->blockref != NULL) {
       data_ref = meta->blockref;
     }
-    const string_type_data *str_ptr = reinterpret_cast<const string_type_data *>(data_ptr);
+    const dynd::string *str_ptr = reinterpret_cast<const dynd::string *>(data_ptr);
     data_ptr = str_ptr->begin;
     data_tp = ndt::type();
     data_dim_size = str_ptr->end - str_ptr->begin;

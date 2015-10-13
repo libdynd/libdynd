@@ -58,11 +58,11 @@ TEST(GroupByDType, BasicDeduceGroups)
   g = g.eval();
   EXPECT_EQ(2, g(0, irange()).get_shape()[0]);
   EXPECT_EQ(3, g(1, irange()).get_shape()[0]);
-  EXPECT_EQ("test", g(0, 0).as<string>());
-  EXPECT_EQ("now", g(0, 1).as<string>());
-  EXPECT_EQ("a", g(1, 0).as<string>());
-  EXPECT_EQ("is", g(1, 1).as<string>());
-  EXPECT_EQ("here", g(1, 2).as<string>());
+  EXPECT_EQ("test", g(0, 0).as<std::string>());
+  EXPECT_EQ("now", g(0, 1).as<std::string>());
+  EXPECT_EQ("a", g(1, 0).as<std::string>());
+  EXPECT_EQ("is", g(1, 1).as<std::string>());
+  EXPECT_EQ("here", g(1, 2).as<std::string>());
 }
 
 TEST(GroupByDType, MediumDeduceGroups)
@@ -138,11 +138,11 @@ TEST(GroupByDType, Struct)
   EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
   EXPECT_EQ(3, g(0, irange()).get_shape()[0]);
   EXPECT_EQ(2, g(1, irange()).get_shape()[0]);
-  EXPECT_EQ("Jennifer", g(0, 0).p("name").as<string>());
-  EXPECT_EQ("Louise", g(0, 1).p("name").as<string>());
-  EXPECT_EQ("Anne", g(0, 2).p("name").as<string>());
-  EXPECT_EQ("Paul", g(1, 0).p("name").as<string>());
-  EXPECT_EQ("Frank", g(1, 1).p("name").as<string>());
+  EXPECT_EQ("Jennifer", g(0, 0).p("name").as<std::string>());
+  EXPECT_EQ("Louise", g(0, 1).p("name").as<std::string>());
+  EXPECT_EQ("Anne", g(0, 2).p("name").as<std::string>());
+  EXPECT_EQ("Paul", g(1, 0).p("name").as<std::string>());
+  EXPECT_EQ("Frank", g(1, 1).p("name").as<std::string>());
   EXPECT_EQ(156.25f, g(0, 0).p("height").as<float>());
   EXPECT_EQ(164.75f, g(0, 1).p("height").as<float>());
   EXPECT_EQ(170.5f, g(0, 2).p("height").as<float>());
@@ -174,13 +174,13 @@ TEST(GroupByDType, StructSubset)
   EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
   EXPECT_EQ(3, g(0, irange()).get_shape()[0]);
   EXPECT_EQ(4, g(1, irange()).get_shape()[0]);
-  EXPECT_EQ("Jennifer", g(0, 0).p("firstname").as<string>());
-  EXPECT_EQ("Louise", g(0, 1).p("firstname").as<string>());
-  EXPECT_EQ("Anne", g(0, 2).p("firstname").as<string>());
-  EXPECT_EQ("Paul", g(1, 0).p("firstname").as<string>());
-  EXPECT_EQ("Frank", g(1, 1).p("firstname").as<string>());
-  EXPECT_EQ("Jake", g(1, 2).p("firstname").as<string>());
-  EXPECT_EQ("Arthur", g(1, 3).p("firstname").as<string>());
+  EXPECT_EQ("Jennifer", g(0, 0).p("firstname").as<std::string>());
+  EXPECT_EQ("Louise", g(0, 1).p("firstname").as<std::string>());
+  EXPECT_EQ("Anne", g(0, 2).p("firstname").as<std::string>());
+  EXPECT_EQ("Paul", g(1, 0).p("firstname").as<std::string>());
+  EXPECT_EQ("Frank", g(1, 1).p("firstname").as<std::string>());
+  EXPECT_EQ("Jake", g(1, 2).p("firstname").as<std::string>());
+  EXPECT_EQ("Arthur", g(1, 3).p("firstname").as<std::string>());
 
   // Group based on last name, gender
   g = nd::groupby(
@@ -198,16 +198,16 @@ TEST(GroupByDType, StructSubset)
                                                1, string_encoding_ascii)})),
             groups_list.get_type());
   EXPECT_EQ(5, groups_list.get_shape()[0]);
-  EXPECT_EQ("Friesen", groups_list(0, 0).as<string>());
-  EXPECT_EQ("F", groups_list(0, 1).as<string>());
-  EXPECT_EQ("Friesen", groups_list(1, 0).as<string>());
-  EXPECT_EQ("M", groups_list(1, 1).as<string>());
-  EXPECT_EQ("Klippenstein", groups_list(2, 0).as<string>());
-  EXPECT_EQ("M", groups_list(2, 1).as<string>());
-  EXPECT_EQ("Wiebe", groups_list(3, 0).as<string>());
-  EXPECT_EQ("F", groups_list(3, 1).as<string>());
-  EXPECT_EQ("Wiebe", groups_list(4, 0).as<string>());
-  EXPECT_EQ("M", groups_list(4, 1).as<string>());
+  EXPECT_EQ("Friesen", groups_list(0, 0).as<std::string>());
+  EXPECT_EQ("F", groups_list(0, 1).as<std::string>());
+  EXPECT_EQ("Friesen", groups_list(1, 0).as<std::string>());
+  EXPECT_EQ("M", groups_list(1, 1).as<std::string>());
+  EXPECT_EQ("Klippenstein", groups_list(2, 0).as<std::string>());
+  EXPECT_EQ("M", groups_list(2, 1).as<std::string>());
+  EXPECT_EQ("Wiebe", groups_list(3, 0).as<std::string>());
+  EXPECT_EQ("F", groups_list(3, 1).as<std::string>());
+  EXPECT_EQ("Wiebe", groups_list(4, 0).as<std::string>());
+  EXPECT_EQ("M", groups_list(4, 1).as<std::string>());
 */
 
   /*
@@ -220,13 +220,13 @@ TEST(GroupByDType, StructSubset)
       EXPECT_EQ(1, g(2, irange()).get_shape()[0]);
       EXPECT_EQ(1, g(3, irange()).get_shape()[0]);
       EXPECT_EQ(1, g(4, irange()).get_shape()[0]);
-      EXPECT_EQ("Jennifer",   g(0,0).p("firstname").as<string>());
-      EXPECT_EQ("Anne",       g(0,1).p("firstname").as<string>());
-      EXPECT_EQ("Jake",       g(1,0).p("firstname").as<string>());
-      EXPECT_EQ("Arthur",     g(1,1).p("firstname").as<string>());
-      EXPECT_EQ("Frank",      g(2,0).p("firstname").as<string>());
-      EXPECT_EQ("Louise",     g(3,0).p("firstname").as<string>());
-      EXPECT_EQ("Paul",       g(4,0).p("firstname").as<string>());
+      EXPECT_EQ("Jennifer",   g(0,0).p("firstname").as<std::string>());
+      EXPECT_EQ("Anne",       g(0,1).p("firstname").as<std::string>());
+      EXPECT_EQ("Jake",       g(1,0).p("firstname").as<std::string>());
+      EXPECT_EQ("Arthur",     g(1,1).p("firstname").as<std::string>());
+      EXPECT_EQ("Frank",      g(2,0).p("firstname").as<std::string>());
+      EXPECT_EQ("Louise",     g(3,0).p("firstname").as<std::string>());
+      EXPECT_EQ("Paul",       g(4,0).p("firstname").as<std::string>());
   */
 }
 
@@ -273,11 +273,11 @@ TEST(GroupByDType, StructUnsortedCats)
   EXPECT_EQ(2, g.at_array(0, NULL).get_shape()[0]);
   EXPECT_EQ(2, g(0, irange()).get_shape()[0]);
   EXPECT_EQ(3, g(1, irange()).get_shape()[0]);
-  EXPECT_EQ("Paul", g(0, 0).p("name").as<string>());
-  EXPECT_EQ("Frank", g(0, 1).p("name").as<string>());
-  EXPECT_EQ("Jennifer", g(1, 0).p("name").as<string>());
-  EXPECT_EQ("Louise", g(1, 1).p("name").as<string>());
-  EXPECT_EQ("Anne", g(1, 2).p("name").as<string>());
+  EXPECT_EQ("Paul", g(0, 0).p("name").as<std::string>());
+  EXPECT_EQ("Frank", g(0, 1).p("name").as<std::string>());
+  EXPECT_EQ("Jennifer", g(1, 0).p("name").as<std::string>());
+  EXPECT_EQ("Louise", g(1, 1).p("name").as<std::string>());
+  EXPECT_EQ("Anne", g(1, 2).p("name").as<std::string>());
   EXPECT_EQ(171.5f, g(0, 0).p("height").as<float>());
   EXPECT_EQ(177.0f, g(0, 1).p("height").as<float>());
   EXPECT_EQ(156.25f, g(1, 0).p("height").as<float>());

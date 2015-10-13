@@ -105,7 +105,7 @@ void ndt::callable_type::print_type(std::ostream &o) const
 
     // TODO: names should be validated on input, not just
     //       printed specially like in struct_type.
-    const string_type_data &an = get_kwd_name_raw(i);
+    const string &an = get_kwd_name_raw(i);
     if (is_simple_identifier_name(an.begin, an.end)) {
       o.write(an.begin, an.end - an.begin);
     } else {
@@ -415,13 +415,13 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
     }
   };
 
-  static pair<string, nd::callable> type_properties[] = {
-      pair<string, nd::callable>("pos_types",
-                                 nd::callable::make<pos_types_kernel>(type("(self: type) -> Fixed * type"))),
-      pair<string, nd::callable>("kwd_types",
-                                 nd::callable::make<kwd_types_kernel>(type("(self: type) -> Fixed * type"))),
-      pair<string, nd::callable>("kwd_names",
-                                 nd::callable::make<kwd_names_kernel>(type("(self: type) -> Fixed * Any"))),
+  static pair<std::string, nd::callable> type_properties[] = {
+      pair<std::string, nd::callable>("pos_types",
+                                      nd::callable::make<pos_types_kernel>(type("(self: type) -> Fixed * type"))),
+      pair<std::string, nd::callable>("kwd_types",
+                                      nd::callable::make<kwd_types_kernel>(type("(self: type) -> Fixed * type"))),
+      pair<std::string, nd::callable>("kwd_names",
+                                      nd::callable::make<kwd_names_kernel>(type("(self: type) -> Fixed * Any"))),
       /*
             pair<string, nd::callable>("kwd",
                                       nd::functional::apply(&property_get_kwd)),
@@ -432,7 +432,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
             pair<string, nd::callable>("kwd_names",
                                       nd::functional::apply(&property_get_kwd_names)),
       */
-      pair<string, nd::callable>("return_type", nd::functional::apply(&property_get_return_type, "self"))};
+      pair<std::string, nd::callable>("return_type", nd::functional::apply(&property_get_return_type, "self"))};
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
@@ -504,7 +504,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
 void ndt::callable_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                                                      size_t *out_count) const
 {
-  static pair<string, gfunc::callable> callable_array_functions[] = {pair<string, gfunc::callable>(
+  static pair<std::string, gfunc::callable> callable_array_functions[] = {pair<std::string, gfunc::callable>(
       "execute", gfunc::callable(type("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
                                       "p1:ndarrayarg,p2:ndarrayarg,"
                                       "p3:ndarrayarg,p4:ndarrayarg}"),

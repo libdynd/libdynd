@@ -56,7 +56,7 @@ struct date_strftime_kernel_extra {
     // parameter handler is installed.
     disable_invalid_parameter_handler raii;
 #endif
-    string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
+    dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
     memory_block_pod_allocator_api *allocator =
         get_memory_block_pod_allocator_api(dst_md->blockref);
 
@@ -105,7 +105,7 @@ struct date_strftime_kernel_extra {
     char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
     for (size_t i = 0; i != count; ++i) {
-      string_type_data *dst_d = reinterpret_cast<string_type_data *>(dst);
+      dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
       int32_t date = *reinterpret_cast<int32_t *>(src0);
       // Convert the date to a 'struct tm'
       date_ymd ymd;
@@ -143,10 +143,10 @@ struct date_strftime_kernel_extra {
 } // anonymous namespace
 
 class date_strftime_kernel_generator : public expr_kernel_generator {
-  string m_format;
+  std::string m_format;
 
 public:
-  date_strftime_kernel_generator(const string &format)
+  date_strftime_kernel_generator(const std::string &format)
       : expr_kernel_generator(true), m_format(format)
   {
   }

@@ -30,8 +30,8 @@ void kernels::string_concatenation_kernel::init(
 }
 
 inline void concat_one_string(
-                size_t nop, string_type_data *d,
-                const string_type_data * const *s,
+                size_t nop, dynd::string *d,
+                const dynd::string * const *s,
                 memory_block_pod_allocator_api *allocator,
                 memory_block_data *dst_blockref)
 {
@@ -58,8 +58,8 @@ void kernels::string_concatenation_kernel::single(
                 ckernel_prefix *extra)
 {
     const extra_type *e = reinterpret_cast<const extra_type *>(extra);
-    string_type_data *d = reinterpret_cast<string_type_data *>(dst);
-    const string_type_data * const *s = reinterpret_cast<const string_type_data * const *>(src);
+    dynd::string *d = reinterpret_cast<dynd::string *>(dst);
+    const dynd::string * const *s = reinterpret_cast<const dynd::string * const *>(src);
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(e->m_dst_blockref);
 
     concat_one_string(e->m_nop, d, s, allocator, e->m_dst_blockref);
@@ -75,10 +75,10 @@ void kernels::string_concatenation_kernel::strided(
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(e->m_dst_blockref);
 
     // Loop to concatenate all the strings3
-    shortvector<const char *> src_vec(nop, src); 
+    shortvector<const char *> src_vec(nop, src);
     for (size_t i = 0; i != count; ++i) {
-        string_type_data *d = reinterpret_cast<string_type_data *>(dst);
-        const string_type_data * const *s = reinterpret_cast<const string_type_data * const *>(src_vec.get());
+        dynd::string *d = reinterpret_cast<dynd::string *>(dst);
+        const dynd::string * const *s = reinterpret_cast<const dynd::string * const *>(src_vec.get());
         concat_one_string(nop, d, s, allocator, e->m_dst_blockref);
         dst += dst_stride;
         for (size_t op = 0; op < nop; ++op) {
