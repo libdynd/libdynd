@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <dynd/string.hpp>
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
@@ -22,11 +23,6 @@ struct DYND_API string_type_arrmeta {
    *       both should become a typedef to a common class?
    */
   memory_block_data *blockref;
-};
-
-struct DYND_API string {
-  char *begin;
-  char *end;
 };
 
 namespace ndt {

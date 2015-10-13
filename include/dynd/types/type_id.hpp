@@ -11,6 +11,8 @@
 #include <dynd/config.hpp>
 
 namespace dynd {
+struct string;
+
 namespace ndt {
   class type;
 }
@@ -526,6 +528,12 @@ template <>
 struct type_of<complex_float64_type_id> {
   typedef complex128 type;
 };
+
+template <>
+struct type_of<string_type_id> {
+  typedef string type;
+};
+
 template <>
 struct type_of<type_type_id> {
   typedef ndt::type type;

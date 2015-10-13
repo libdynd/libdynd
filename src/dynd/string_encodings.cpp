@@ -215,7 +215,7 @@ void noerror_append_utf8(uint32_t cp, char *&it, char *end)
   }
 }
 
-inline void string_append_utf8(uint32_t cp, string &s)
+inline void string_append_utf8(uint32_t cp, std::string &s)
 {
   char tmp[6];
   char *tmp_ptr = tmp, *tmp_ptr_end;
@@ -390,7 +390,7 @@ append_unicode_codepoint_t dynd::get_append_unicode_codepoint_function(string_en
 template <next_unicode_codepoint_t next_fn>
 std::string string_range_as_utf8_string_templ(const char *begin, const char *end)
 {
-  string result;
+  std::string result;
   uint32_t cp = 0;
   while (begin < end) {
     cp = next_fn(begin, end);
@@ -406,7 +406,7 @@ std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const 
   case string_encoding_ascii:
   case string_encoding_utf_8:
     // TODO: Validate the input string according to errmode
-    return string(begin, end);
+    return std::string(begin, end);
   case string_encoding_ucs_2:
     if (errmode == assign_error_nocheck) {
       return string_range_as_utf8_string_templ<&noerror_next_ucs2>(begin, end);

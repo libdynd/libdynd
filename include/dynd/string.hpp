@@ -5,6 +5,20 @@
 
 #pragma once
 
+#include <dynd/config.hpp>
+
 namespace dynd {
+
+struct DYND_API string {
+  char *begin;
+  char *end;
+};
+
+bool operator<(const string &lhs, const string &rhs);
+bool operator<=(const string &lhs, const string &rhs);
+bool operator==(const string &lhs, const string &rhs);
+bool operator!=(const string &lhs, const string &rhs);
+bool operator>=(const string &lhs, const string &rhs);
+bool operator>(const string &lhs, const string &rhs);
 
 } // namespace dynd
