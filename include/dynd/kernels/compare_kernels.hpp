@@ -165,18 +165,6 @@ namespace nd {
     }
   };
 
-  template <>
-  struct less_kernel<string_type_id, string_type_id> : base_kernel<less_kernel<string_type_id, string_type_id>, 2> {
-    void single(char *dst, char *const *src)
-    {
-      const string *da = reinterpret_cast<const string *>(src[0]);
-      const string *db = reinterpret_cast<const string *>(src[1]);
-      *reinterpret_cast<bool1 *>(dst) = std::lexicographical_compare(
-          reinterpret_cast<const uint8_t *>(da->begin), reinterpret_cast<const uint8_t *>(da->end),
-          reinterpret_cast<const uint8_t *>(db->begin), reinterpret_cast<const uint8_t *>(db->end));
-    }
-  };
-
   template <type_id_t I0, type_id_t I1>
   struct less_equal_kernel : base_comparison_kernel<less_equal_kernel<I0, I1>> {
     typedef typename type_of<I0>::type A0;
@@ -320,20 +308,6 @@ namespace nd {
     }
   };
 
-  template <>
-  struct less_equal_kernel<string_type_id,
-                           string_type_id> : base_kernel<less_equal_kernel<string_type_id, string_type_id>> {
-    void single(char *dst, char *const *src)
-    {
-      const string *da = reinterpret_cast<const string *>(src[0]);
-      const string *db = reinterpret_cast<const string *>(src[1]);
-      *reinterpret_cast<bool1 *>(dst) = !std::lexicographical_compare(reinterpret_cast<const uint8_t *>(db->begin),
-                                                                      reinterpret_cast<const uint8_t *>(db->end),
-                                                                      reinterpret_cast<const uint8_t *>(da->begin),
-                                                                      reinterpret_cast<const uint8_t *>(da->end));
-    }
-  };
-
   template <type_id_t I0, type_id_t I1>
   struct equal_kernel : base_comparison_kernel<equal_kernel<I0, I1>> {
     typedef typename type_of<I0>::type A0;
@@ -354,17 +328,6 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<A0 *>(src[0]) == *reinterpret_cast<A0 *>(src[1]);
-    }
-  };
-
-  template <>
-  struct equal_kernel<string_type_id, string_type_id> : base_kernel<equal_kernel<string_type_id, string_type_id>> {
-    void single(char *dst, char *const *src)
-    {
-      const string *da = reinterpret_cast<const string *>(src[0]);
-      const string *db = reinterpret_cast<const string *>(src[1]);
-      *reinterpret_cast<bool1 *>(dst) =
-          (da->end - da->begin == db->end - db->begin) && memcmp(da->begin, db->begin, da->end - da->begin) == 0;
     }
   };
 
@@ -705,18 +668,6 @@ namespace nd {
   };
 
   template <>
-  struct not_equal_kernel<string_type_id,
-                          string_type_id> : base_kernel<not_equal_kernel<string_type_id, string_type_id>> {
-    void single(char *dst, char *const *src)
-    {
-      const string *da = reinterpret_cast<const string *>(src[0]);
-      const string *db = reinterpret_cast<const string *>(src[1]);
-      *reinterpret_cast<bool1 *>(dst) =
-          (da->end - da->begin != db->end - db->begin) || memcmp(da->begin, db->begin, da->end - da->begin) != 0;
-    }
-  };
-
-  template <>
   struct not_equal_kernel<tuple_type_id,
                           tuple_type_id> : base_comparison_kernel<not_equal_kernel<tuple_type_id, tuple_type_id>> {
     typedef not_equal_kernel extra_type;
@@ -791,20 +742,6 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<A0 *>(src[0]) >= *reinterpret_cast<A0 *>(src[1]);
-    }
-  };
-
-  template <>
-  struct greater_equal_kernel<string_type_id,
-                              string_type_id> : base_kernel<greater_equal_kernel<string_type_id, string_type_id>> {
-    void single(char *dst, char *const *src)
-    {
-      const string *da = reinterpret_cast<const string *>(src[0]);
-      const string *db = reinterpret_cast<const string *>(src[1]);
-      *reinterpret_cast<bool1 *>(dst) = !std::lexicographical_compare(reinterpret_cast<const uint8_t *>(da->begin),
-                                                                      reinterpret_cast<const uint8_t *>(da->end),
-                                                                      reinterpret_cast<const uint8_t *>(db->begin),
-                                                                      reinterpret_cast<const uint8_t *>(db->end));
     }
   };
 
@@ -950,7 +887,6 @@ namespace nd {
       *reinterpret_cast<bool1 *>(dst) = *reinterpret_cast<A0 *>(src[0]) > *reinterpret_cast<A0 *>(src[1]);
     }
   };
-
 
   template <string_encoding_t E>
   struct fixed_string_greater_kernel;

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <dynd/string.hpp>
 #include <dynd/type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
@@ -23,18 +24,6 @@ struct DYND_API string_type_arrmeta {
    */
   memory_block_data *blockref;
 };
-
-struct DYND_API string {
-  char *begin;
-  char *end;
-};
-
-inline bool operator>(const string &lhs, const string &rhs)
-{
-  return std::lexicographical_compare(
-      reinterpret_cast<const uint8_t *>(rhs.begin), reinterpret_cast<const uint8_t *>(rhs.end),
-      reinterpret_cast<const uint8_t *>(lhs.begin), reinterpret_cast<const uint8_t *>(lhs.end));
-}
 
 namespace ndt {
 
