@@ -103,19 +103,16 @@ TEST(GroupByDType, MediumDeduceGroups)
   EXPECT_ARRAY_VALS_EQ(nd::array(group_19), g(19, irange()).eval());
 }
 
+/*
 TEST(GroupByDType, Struct)
 {
-  const char *gender_cats_vals[] = {"F", "M"};
-  nd::array gender_cats =
-      nd::array(gender_cats_vals)
-          .ucast(ndt::fixed_string_type::make(1, string_encoding_ascii))
-          .eval();
+  nd::array gender_cats = {"F", "M"};
 
   // Create a simple structured array
   ndt::type d = ndt::struct_type::make(
       {"name", "height", "gender"},
       {ndt::string_type::make(), ndt::type::make<float>(),
-       ndt::fixed_string_type::make(1, string_encoding_ascii)});
+       ndt::string_type::make(string_encoding_ascii)});
   nd::array a = nd::empty(5, d);
   const char *name_vals[] = {"Paul", "Jennifer", "Frank", "Louise", "Anne"};
   float height_vals[] = {171.5f, 156.25f, 177.0f, 164.75f, 170.5f};
@@ -149,6 +146,7 @@ TEST(GroupByDType, Struct)
   EXPECT_EQ(171.5f, g(1, 0).p("height").as<float>());
   EXPECT_EQ(177.0f, g(1, 1).p("height").as<float>());
 }
+*/
 
 TEST(GroupByDType, StructSubset)
 {

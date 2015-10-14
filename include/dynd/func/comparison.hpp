@@ -68,8 +68,6 @@ namespace nd {
 
       children[{{string_type_id, string_type_id}}] =
           callable::make<K<string_type_id, string_type_id>>(0);
-      children[{{fixed_string_type_id, fixed_string_type_id}}] =
-          callable::make<K<fixed_string_type_id, fixed_string_type_id>>(0);
 
       return children;
     }
