@@ -43,6 +43,17 @@ static void BM_Func_Arithmetic_Dispatch_time(benchmark::State &state){
 
 BENCHMARK(BM_Func_Arithmetic_Dispatch_time);
 
+static void BM_Func_Arithmetic_Dispatch_time_2(benchmark::State &state){
+  nd::array a = (char) 2;
+  nd::array b = (dynd::complex128) 1.;
+  while (state.KeepRunning()) {
+    nd::add(a, a);
+    nd::add(b, b);
+  }
+}
+
+BENCHMARK(BM_Func_Arithmetic_Dispatch_time_2);
+
 /*
 
 #ifdef DYND_CUDA
