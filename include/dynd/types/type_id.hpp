@@ -202,28 +202,13 @@ template <type_id_t... I>
 using type_id_sequence = integer_sequence<type_id_t, I...>;
 
 typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id> int_type_ids;
-typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id> uint_type_ids;
-typedef type_id_sequence<float16_type_id, float32_type_id, float64_type_id, float128_type_id> real_type_ids;
+typedef type_id_sequence<bool_type_id, uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id> uint_type_ids;
+typedef type_id_sequence<float16_type_id, float32_type_id, float64_type_id, float128_type_id> float_type_ids;
 typedef type_id_sequence<complex_float32_type_id, complex_float64_type_id> complex_type_ids;
 
-typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
-                         uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
-                         float16_type_id, float32_type_id, float64_type_id, float128_type_id, complex_float32_type_id,
-                         complex_float64_type_id, void_type_id> primitive_type_ids;
+typedef join<int_type_ids, uint_type_ids>::type integral_type_ids;
+typedef join<integral_type_ids, join<float_type_ids, complex_type_ids>::type>::type arithmetic_type_ids;
 
-typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
-                         uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
-                         float16_type_id, float32_type_id, float64_type_id, float128_type_id, complex_float32_type_id,
-                         complex_float64_type_id> arithmetic_type_ids;
-typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
-                         uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
-                         float32_type_id, float64_type_id, complex_float32_type_id,
-                         complex_float64_type_id> numeric_type_ids;
-
-typedef type_id_sequence<uninitialized_type_id, bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
-                         int128_type_id, uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
-                         float16_type_id, float32_type_id, float64_type_id, float128_type_id, complex_float32_type_id,
-                         complex_float64_type_id, void_type_id, void_pointer_type_id> builtin_type_ids;
 typedef type_id_sequence<fixed_dim_type_id, var_dim_type_id> dim_type_ids;
 
 inline void validate_type_id(type_id_t tp_id)

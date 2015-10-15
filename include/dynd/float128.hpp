@@ -270,6 +270,10 @@ public:
 
   */
 
+  float128 operator+() const {
+    return *this;
+  }
+
   float128 operator-() const
   {
     return float128(-static_cast<double>(*this));
