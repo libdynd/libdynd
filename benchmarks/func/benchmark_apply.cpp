@@ -36,7 +36,7 @@ BENCHMARK(BM_Func_Call);
 
 static void BM_Func_Apply_Function(benchmark::State &state)
 {
-  nd::arrfunc af = nd::functional::apply<decltype(&func), &func>();
+  nd::callable af = nd::functional::apply<decltype(&func), &func>();
 
   nd::array a = 10;
   nd::array b = 11;
@@ -50,7 +50,7 @@ BENCHMARK(BM_Func_Apply_Function);
 
 static void BM_Func_Apply_Callable(benchmark::State &state)
 {
-  nd::arrfunc af = nd::functional::apply(&func);
+  nd::callable af = nd::functional::apply(&func);
 
   nd::array a = 10;
   nd::array b = 11;

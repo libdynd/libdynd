@@ -10,10 +10,10 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/benchmark ${CMAKE_CURRENT_BINARY
 
 set(benchmarks_SRC
     benchmark_libdynd.cpp
-#    array/benchmark_empty.cpp
-#    func/benchmark_apply.cpp
+    array/benchmark_empty.cpp
+    func/benchmark_apply.cpp
     func/benchmark_arithmetic.cpp
- #   func/benchmark_random.cpp
+    func/benchmark_random.cpp
     )
 
 include_directories(
