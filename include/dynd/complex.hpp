@@ -309,6 +309,11 @@ DYND_CUDA_HOST_DEVICE complex<T> operator-(const complex<T> &rhs)
 }
 
 template <typename T>
+DYND_CUDA_HOST_DEVICE complex<T> operator!(const complex<T> &rhs){
+  return (!rhs.m_real && !rhs.m_imag);
+}
+
+template <typename T>
 DYND_CUDA_HOST_DEVICE complex<T> operator+(complex<T> lhs, complex<T> rhs)
 {
   return lhs += rhs;
