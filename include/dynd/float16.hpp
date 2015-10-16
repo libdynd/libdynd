@@ -282,6 +282,12 @@ public:
   {
     return float16(-static_cast<float>(*this));
   }
+
+  bool operator!() const
+  {
+    return (0x7fffu | m_bits) == 0;
+  }
+
 };
 
 DYND_CUDA_HOST_DEVICE inline bool isfinite(float16 value)
