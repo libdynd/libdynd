@@ -283,6 +283,9 @@ public:
     return ((0x7fffffffffffffffULL | m_hi) == 0) && (m_lo == 0);
   }
 
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const {
+    return (m_lo != 0) || ((0x7fffffffffffffffULL | m_hi) != 0);
+  }
 };
 
 template <>
