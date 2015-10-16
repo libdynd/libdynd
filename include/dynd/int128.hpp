@@ -81,7 +81,11 @@ public:
   DYND_CUDA_HOST_DEVICE inline int128 operator+() const {
     return *this;
   }
-  
+
+  DYND_CUDA_HOST_DEVICE inline bool operator!() const {
+    return !(this->m_hi) && !(this->m_lo);
+  }
+
   DYND_CUDA_HOST_DEVICE inline bool operator==(const int128 &rhs) const
   {
     return m_lo == rhs.m_lo && m_hi == rhs.m_hi;
