@@ -288,6 +288,10 @@ public:
     return (0x7fffu | m_bits) == 0;
   }
 
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const {
+    return 0x7ffu | m_bits;
+  }
+
 };
 
 DYND_CUDA_HOST_DEVICE inline bool isfinite(float16 value)
