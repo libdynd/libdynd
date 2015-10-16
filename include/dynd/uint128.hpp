@@ -109,6 +109,10 @@ public:
   DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
   }
 
+  DYND_CUDA_HOST_DEVICE inline bool operator!() const {
+    return (m_hi != 0) && (m_lo != 0);
+  }
+
   DYND_CUDA_HOST_DEVICE inline bool operator!=(const uint128 &rhs) const
   {
     return m_hi != rhs.m_hi || m_lo != rhs.m_lo;
