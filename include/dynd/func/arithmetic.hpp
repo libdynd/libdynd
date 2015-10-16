@@ -66,6 +66,7 @@ namespace nd {
 
   DYND_DEF_UNARY_OP_CALLABLE(plus, arithmetic_type_ids)
   DYND_DEF_UNARY_OP_CALLABLE(minus, arithmetic_type_ids)
+  DYND_DEF_UNARY_OP_CALLABLE(logical_not, arithmetic_type_ids)
 
 #undef DYND_DEF_UNARY_OP_CALLABLE
 

@@ -17,6 +17,7 @@ using namespace dynd;
 
 DYND_DEF_UNARY_OP_AND_CALLABLE(+, plus)
 DYND_DEF_UNARY_OP_AND_CALLABLE(-, minus)
+DYND_DEF_UNARY_OP_AND_CALLABLE(!, logical_not)
 
 #undef DYND_DEF_UNARY_OP_AND_CALLABLE
 
