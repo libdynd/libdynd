@@ -282,40 +282,40 @@ TEST(Arithmetic, OptionArithmeticInt32)
 {
   nd::array NA = nd::empty(ndt::type("?int32"));
   nd::assign_na(NA);
-  EXPECT_FALSE(nd::is_avail(NA + 1));
-  EXPECT_FALSE(nd::is_avail(NA - 1));
-  EXPECT_FALSE(nd::is_avail(NA * 1));
-  EXPECT_FALSE(nd::is_avail(NA / 1));
+  EXPECT_ALL_FALSE(nd::is_avail(NA + 1));
+  EXPECT_ALL_FALSE(nd::is_avail(NA - 1));
+  EXPECT_ALL_FALSE(nd::is_avail(NA * 1));
+  EXPECT_ALL_FALSE(nd::is_avail(NA / 1));
 
-  EXPECT_FALSE(nd::is_avail(1 + NA));
-  EXPECT_FALSE(nd::is_avail(1 - NA));
-  EXPECT_FALSE(nd::is_avail(1 * NA));
-  EXPECT_FALSE(nd::is_avail(1 / NA));
+  EXPECT_ALL_FALSE(nd::is_avail(1 + NA));
+  EXPECT_ALL_FALSE(nd::is_avail(1 - NA));
+  EXPECT_ALL_FALSE(nd::is_avail(1 * NA));
+  EXPECT_ALL_FALSE(nd::is_avail(1 / NA));
 
-  EXPECT_FALSE(nd::is_avail(NA + NA));
-  EXPECT_FALSE(nd::is_avail(NA - NA));
-  EXPECT_FALSE(nd::is_avail(NA * NA));
-  EXPECT_FALSE(nd::is_avail(NA / NA));
+  EXPECT_ALL_FALSE(nd::is_avail(NA + NA));
+  EXPECT_ALL_FALSE(nd::is_avail(NA - NA));
+  EXPECT_ALL_FALSE(nd::is_avail(NA * NA));
+  EXPECT_ALL_FALSE(nd::is_avail(NA / NA));
 }
 
 TEST(Arithmetic, OptionArithmeticFloat64)
 {
   nd::array NA = nd::empty(ndt::type("?float64"));
   nd::assign_na(NA);
-  EXPECT_FALSE(nd::is_avail(NA + 1));
-  EXPECT_FALSE(nd::is_avail(NA - 1));
-  EXPECT_FALSE(nd::is_avail(NA * 1));
-  EXPECT_FALSE(nd::is_avail(NA / 1));
+  EXPECT_ALL_FALSE(nd::is_avail(NA + 1));
+  EXPECT_ALL_FALSE(nd::is_avail(NA - 1));
+  EXPECT_ALL_FALSE(nd::is_avail(NA * 1));
+  EXPECT_ALL_FALSE(nd::is_avail(NA / 1));
 
-  EXPECT_FALSE(nd::is_avail(1 + NA));
-  EXPECT_FALSE(nd::is_avail(1 - NA));
-  EXPECT_FALSE(nd::is_avail(1 * NA));
-  EXPECT_FALSE(nd::is_avail(1 / NA));
+  EXPECT_ALL_FALSE(nd::is_avail(1 + NA));
+  EXPECT_ALL_FALSE(nd::is_avail(1 - NA));
+  EXPECT_ALL_FALSE(nd::is_avail(1 * NA));
+  EXPECT_ALL_FALSE(nd::is_avail(1 / NA));
 
-  EXPECT_FALSE(nd::is_avail(NA + NA));
-  EXPECT_FALSE(nd::is_avail(NA - NA));
-  EXPECT_FALSE(nd::is_avail(NA * NA));
-  EXPECT_FALSE(nd::is_avail(NA / NA));
+  EXPECT_ALL_FALSE(nd::is_avail(NA + NA));
+  EXPECT_ALL_FALSE(nd::is_avail(NA - NA));
+  EXPECT_ALL_FALSE(nd::is_avail(NA * NA));
+  EXPECT_ALL_FALSE(nd::is_avail(NA / NA));
 }
 
 TEST(Arithmetic, OptionArrayLHSInt32)
