@@ -14,6 +14,8 @@
 #include <dynd/func/arithmetic.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/func/sum.hpp>
+#include <dynd/func/min.hpp>
+#include <dynd/func/max.hpp>
 #include <dynd/func/option.hpp>
 
 using namespace std;
@@ -229,6 +231,8 @@ std::map<std::string, nd::callable> &func::get_regfunctions()
     registry["take"] = nd::take;
     registry["sum"] = nd::sum;
     registry["is_avail"] = nd::is_avail;
+    registry["min"] = nd::min;
+    registry["max"] = nd::max;
   }
 
   return registry;

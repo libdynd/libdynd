@@ -298,6 +298,7 @@ set(libdynd_SRC
     src/dynd/func/reduction.cpp
     src/dynd/func/math.cpp
     src/dynd/func/max.cpp
+    src/dynd/func/min.cpp
     src/dynd/func/mean.cpp
     src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood.cpp
@@ -326,6 +327,7 @@ set(libdynd_SRC
     include/dynd/func/math.hpp
     include/dynd/func/max.hpp
     include/dynd/func/mean.hpp
+    include/dynd/func/min.hpp
     include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood.hpp
     include/dynd/func/option.hpp
@@ -405,6 +407,8 @@ set(libdynd_SRC
     include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/fft_kernel.hpp
     include/dynd/kernels/is_avail_kernel.hpp
+    include/dynd/kernels/max_kernel.hpp
+    include/dynd/kernels/min_kernel.hpp
     include/dynd/kernels/multidispatch_kernel.hpp
     include/dynd/kernels/option_assignment_kernels.hpp
     include/dynd/kernels/outer.hpp
