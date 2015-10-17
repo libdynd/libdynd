@@ -22,7 +22,7 @@ using namespace dynd;
 TEST(CategoricalType, Create)
 {
   const char *a_vals[] = {"foo", "bar", "baz"};
-  nd::array a = nd::empty(3, ndt::string_type::make(string_encoding_ascii));
+  nd::array a = nd::empty(3, ndt::string_type::make());
   a.vals() = a_vals;
 
   ndt::type d;
@@ -71,7 +71,7 @@ TEST(CategoricalType, Convert)
   a.vals() = a_vals;
 
   ndt::type cd = ndt::categorical_type::make(a);
-  ndt::type sd = ndt::string_type::make(string_encoding_utf_8);
+  ndt::type sd = ndt::string_type::make();
 
   // String conversions report false, so that assignments encodings
   // get validated on assignment
@@ -87,11 +87,11 @@ TEST(CategoricalType, Convert)
 TEST(CategoricalType, Compare)
 {
   const char *a_vals[] = {"foo", "bar", "baz"};
-  nd::array a = nd::empty(3, ndt::string_type::make(string_encoding_ascii));
+  nd::array a = nd::empty(3, ndt::string_type::make());
   a.vals() = a_vals;
 
   const char *b_vals[] = {"foo", "bar"};
-  nd::array b = nd::empty(2, ndt::string_type::make(string_encoding_ascii));
+  nd::array b = nd::empty(2, ndt::string_type::make());
   b.vals() = b_vals;
 
   ndt::type da = ndt::categorical_type::make(a);
@@ -128,11 +128,11 @@ TEST(CategoricalType, Unique)
 TEST(CategoricalType, FactorFixedString)
 {
   const char *string_cats_vals[] = {"bar", "foo"};
-  nd::array string_cats = nd::empty(2, ndt::string_type::make(string_encoding_ascii));
+  nd::array string_cats = nd::empty(2, ndt::string_type::make());
   string_cats.vals() = string_cats_vals;
 
   const char *a_vals[] = {"foo", "bar", "foo"};
-  nd::array a = nd::empty(3, ndt::string_type::make(string_encoding_ascii));
+  nd::array a = nd::empty(3, ndt::string_type::make());
   a.vals() = a_vals;
 
   ndt::type da = ndt::factor_categorical(a);

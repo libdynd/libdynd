@@ -31,7 +31,7 @@ namespace ndt {
     string_encoding_t m_encoding;
 
   public:
-    string_type(string_encoding_t encoding);
+    string_type();
 
     virtual ~string_type();
 
@@ -85,14 +85,8 @@ namespace ndt {
     /** Returns type "string" */
     static const type &make()
     {
-      static const type string_tp(new string_type(string_encoding_utf_8), false);
+      static const type string_tp(new string_type(), false);
       return string_tp;
-    }
-
-    /** Returns type "string[<encoding>]" */
-    static type make(string_encoding_t encoding)
-    {
-      return type(new string_type(encoding), false);
     }
   };
 

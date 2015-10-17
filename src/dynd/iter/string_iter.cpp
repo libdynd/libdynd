@@ -118,13 +118,13 @@ void iter::make_string_iter(
         intptr_t bufsize = buffer_max_mem / charsize;
         if (!is_variable_length_string_encoding(iter_encoding) && datasize <= bufsize) {
             // If the whole input string fits in the output max buffer size, make a copy
-            nd::array tmp = nd::empty(ndt::string_type::make(iter_encoding));
+            nd::array tmp = nd::empty(ndt::string_type::make());
             string_type_arrmeta md;
             md.blockref = ref.get();
             string d;
             d.begin = const_cast<char *>(data_begin);
             d.end = const_cast<char *>(data_end);
-            tmp.val_assign(ndt::string_type::make(data_encoding),
+            tmp.val_assign(ndt::string_type::make(),
                            reinterpret_cast<const char *>(&md),
                            reinterpret_cast<const char *>(&d), ectx);
             tmp.get_type().extended<ndt::string_type>()->make_string_iter(

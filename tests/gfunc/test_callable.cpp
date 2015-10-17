@@ -462,6 +462,6 @@ TEST(GFuncCallable, StringReturn)
   a(1).val_assign(20);
   a(2).val_assign(1000);
   r = c.call_generic(a);
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), r.get_type());
+  EXPECT_EQ(ndt::string_type::make(), r.get_type());
   EXPECT_EQ("-10, 20, 1000", r.as<std::string>());
 }

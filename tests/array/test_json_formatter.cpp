@@ -59,10 +59,6 @@ TEST(JSONFormatter, String)
   EXPECT_EQ("\"testing string\"", format_json(a).as<std::string>());
   a = " \" \\ / \b \f \n \r \t ";
   EXPECT_EQ("\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \"", format_json(a).as<std::string>());
-  a = nd::array("testing string").ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
-  EXPECT_EQ("\"testing string\"", format_json(a).as<std::string>());
-  a = nd::array("testing string").ucast(ndt::string_type::make(string_encoding_utf_32)).eval();
-  EXPECT_EQ("\"testing string\"", format_json(a).as<std::string>());
 }
 
 TEST(JSONFormatter, JSON)

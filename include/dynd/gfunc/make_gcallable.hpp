@@ -336,7 +336,7 @@ namespace gfunc {
   struct make_parameter_type<std::string> {
     inline static ndt::type make()
     {
-      return ndt::string_type::make(string_encoding_utf_8);
+      return ndt::string_type::make();
     }
   };
 

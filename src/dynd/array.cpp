@@ -235,10 +235,10 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
   return result;
 }
 
-nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t encoding, uint64_t access_flags)
+nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t DYND_UNUSED(encoding), uint64_t access_flags)
 {
   char *data_ptr = NULL, *string_ptr;
-  ndt::type dt = ndt::string_type::make(encoding);
+  ndt::type dt = ndt::string_type::make();
   nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size() + len,
                                            dt.get_data_alignment(), &data_ptr));
   // Set the string extents
@@ -269,7 +269,7 @@ nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t ar
 
   char *data_ptr = NULL, *string_ptr;
   string *string_arr_ptr;
-  ndt::type stp = ndt::string_type::make(string_encoding_utf_8);
+  ndt::type stp = ndt::string_type::make();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(),
                                            array_size * stp.get_data_size() + total_string_length,
@@ -306,7 +306,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
 
   char *data_ptr = NULL, *string_ptr;
   string *string_arr_ptr;
-  ndt::type stp = ndt::string_type::make(string_encoding_utf_8);
+  ndt::type stp = ndt::string_type::make();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(),
                                            array_size * stp.get_data_size() + total_string_length,

@@ -391,21 +391,14 @@ TEST(JSONParser, String)
 {
   nd::array n;
 
-  n = parse_json(ndt::string_type::make(string_encoding_utf_8), "\"testing one two three\"");
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), n.get_type());
+  n = parse_json(ndt::string_type::make(), "\"testing one two three\"");
+  EXPECT_EQ(ndt::string_type::make(), n.get_type());
   EXPECT_EQ("testing one two three", n.as<std::string>());
-  n = parse_json(ndt::string_type::make(string_encoding_utf_8), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), n.get_type());
+  n = parse_json(ndt::string_type::make(), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
+  EXPECT_EQ(ndt::string_type::make(), n.get_type());
   EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<std::string>());
 
-  n = parse_json(ndt::string_type::make(string_encoding_utf_16), "\"testing one two three\"");
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), n.get_type());
-  EXPECT_EQ("testing one two three", n.as<std::string>());
-  n = parse_json(ndt::string_type::make(string_encoding_utf_16), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), n.get_type());
-  EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<std::string>());
-
-  EXPECT_THROW(parse_json(ndt::string_type::make(string_encoding_utf_8), "false"), invalid_argument);
+  EXPECT_THROW(parse_json(ndt::string_type::make(), "false"), invalid_argument);
 }
 
 TEST(JSONParser, ListBools)
