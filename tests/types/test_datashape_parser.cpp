@@ -51,10 +51,8 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::type::make<float128>(), ndt::type("float128"));
   EXPECT_EQ(ndt::type::make<dynd::complex<float>>(), ndt::type("complex64"));
   EXPECT_EQ(ndt::type::make<dynd::complex<double>>(), ndt::type("complex128"));
-  EXPECT_EQ(ndt::type::make<dynd::complex<float>>(),
-            ndt::type("complex[float32]"));
-  EXPECT_EQ(ndt::type::make<dynd::complex<double>>(),
-            ndt::type("complex[float64]"));
+  EXPECT_EQ(ndt::type::make<dynd::complex<float>>(), ndt::type("complex[float32]"));
+  EXPECT_EQ(ndt::type::make<dynd::complex<double>>(), ndt::type("complex[float64]"));
   EXPECT_EQ(ndt::make_json(), ndt::type("json"));
   EXPECT_EQ(ndt::date_type::make(), ndt::type("date"));
   EXPECT_EQ(ndt::time_type::make(), ndt::type("time"));
@@ -74,171 +72,135 @@ TEST(DataShapeParser, BasicThrow)
 TEST(DataShapeParser, StringAtoms)
 {
   // Default string
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), ndt::type("string"));
-  // String with encoding
-  EXPECT_EQ(ndt::string_type::make(string_encoding_ascii),
-            ndt::type("string['A']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_ascii),
-            ndt::type("string['ascii']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
-            ndt::type("string['U8']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
-            ndt::type("string['utf8']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
-            ndt::type("string['utf-8']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
-            ndt::type("string['U16']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
-            ndt::type("string['utf16']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
-            ndt::type("string['utf-16']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
-            ndt::type("string['U32']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
-            ndt::type("string['utf32']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
-            ndt::type("string['utf-32']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_ucs_2),
-            ndt::type("string['ucs2']"));
-  EXPECT_EQ(ndt::string_type::make(string_encoding_ucs_2),
-            ndt::type("string['ucs-2']"));
+  EXPECT_EQ(ndt::string_type::make(), ndt::type("string"));
   // String with size
-  EXPECT_EQ(ndt::fixed_string_type::make(1, string_encoding_utf_8),
-            ndt::type("fixed_string[1]"));
-  EXPECT_EQ(ndt::fixed_string_type::make(100, string_encoding_utf_8),
-            ndt::type("fixed_string[100]"));
+  EXPECT_EQ(ndt::fixed_string_type::make(1, string_encoding_utf_8), ndt::type("fixed_string[1]"));
+  EXPECT_EQ(ndt::fixed_string_type::make(100, string_encoding_utf_8), ndt::type("fixed_string[100]"));
   // String with size and encoding
-  EXPECT_EQ(ndt::fixed_string_type::make(1, string_encoding_ascii),
-            ndt::type("fixed_string[1, 'A']"));
-  EXPECT_EQ(ndt::fixed_string_type::make(10, string_encoding_utf_8),
-            ndt::type("fixed_string[10, 'U8']"));
-  EXPECT_EQ(ndt::fixed_string_type::make(1000, string_encoding_utf_16),
-            ndt::type("fixed_string[1000,'U16']"));
+  EXPECT_EQ(ndt::fixed_string_type::make(1, string_encoding_ascii), ndt::type("fixed_string[1, 'A']"));
+  EXPECT_EQ(ndt::fixed_string_type::make(10, string_encoding_utf_8), ndt::type("fixed_string[10, 'U8']"));
+  EXPECT_EQ(ndt::fixed_string_type::make(1000, string_encoding_utf_16), ndt::type("fixed_string[1000,'U16']"));
+
+  // String with encoding -- change to fixed_string or delete?
+  /*
+    EXPECT_EQ(ndt::string_type::make(string_encoding_ascii),
+              ndt::type("string['A']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_ascii),
+              ndt::type("string['ascii']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
+              ndt::type("string['U8']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
+              ndt::type("string['utf8']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8),
+              ndt::type("string['utf-8']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
+              ndt::type("string['U16']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
+              ndt::type("string['utf16']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16),
+              ndt::type("string['utf-16']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
+              ndt::type("string['U32']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
+              ndt::type("string['utf32']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32),
+              ndt::type("string['utf-32']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_ucs_2),
+              ndt::type("string['ucs2']"));
+    EXPECT_EQ(ndt::string_type::make(string_encoding_ucs_2),
+              ndt::type("string['ucs-2']"));
+  */
 }
 
 TEST(DataShapeParser, Unaligned)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::type::make<bool1>()),
-            ndt::type("Fixed * unaligned[bool]"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(
-                ndt::make_unaligned(ndt::type::make<float>()), 2),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::type::make<bool1>()), ndt::type("Fixed * unaligned[bool]"));
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_unaligned(ndt::type::make<float>()), 2),
             ndt::type("Fixed * Fixed * unaligned[float32]"));
-  EXPECT_EQ(ndt::struct_type::make(
-                {"x", "y"}, {ndt::make_unaligned(ndt::type::make<int32_t>()),
-                             ndt::make_unaligned(ndt::type::make<int64_t>())}),
+  EXPECT_EQ(ndt::struct_type::make({"x", "y"}, {ndt::make_unaligned(ndt::type::make<int32_t>()),
+                                                ndt::make_unaligned(ndt::type::make<int64_t>())}),
             ndt::type("{x : unaligned[int32], y : unaligned[int64]}"));
 }
 
 TEST(DataShapeParser, Option)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(
-                ndt::option_type::make(ndt::type::make<bool1>())),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(ndt::type::make<bool1>())),
             ndt::type("Fixed * option[bool]"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(
-                ndt::option_type::make(ndt::type::make<bool1>())),
-            ndt::type("Fixed * ?bool"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(
-                ndt::make_fixed_dim_kind(ndt::type::make<float>()))),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(ndt::type::make<bool1>())), ndt::type("Fixed * ?bool"));
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(ndt::make_fixed_dim_kind(ndt::type::make<float>()))),
             ndt::type("Fixed * option[Fixed * float32]"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(
-                ndt::make_fixed_dim_kind(ndt::type::make<float>()))),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(ndt::make_fixed_dim_kind(ndt::type::make<float>()))),
             ndt::type("Fixed * ?Fixed * float32"));
-  EXPECT_EQ(
-      ndt::struct_type::make(
-          {"x", "y"}, {ndt::option_type::make(ndt::type::make<int32_t>()),
-                       ndt::option_type::make(ndt::type::make<int64_t>())}),
-      ndt::type("{x : ?int32, y : ?int64}"));
+  EXPECT_EQ(ndt::struct_type::make({"x", "y"}, {ndt::option_type::make(ndt::type::make<int32_t>()),
+                                                ndt::option_type::make(ndt::type::make<int64_t>())}),
+            ndt::type("{x : ?int32, y : ?int64}"));
 }
 
 TEST(DataShapeParser, StridedDim)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::type::make<bool1>()),
-            ndt::type("Fixed * bool"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::type::make<float>(), 2),
-            ndt::type("Fixed * Fixed * float32"));
-  EXPECT_EQ(ndt::type("Fixed * Fixed * float32"),
-            ndt::type("Fixed**2 * float32"));
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::type::make<bool1>()), ndt::type("Fixed * bool"));
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::type::make<float>(), 2), ndt::type("Fixed * Fixed * float32"));
+  EXPECT_EQ(ndt::type("Fixed * Fixed * float32"), ndt::type("Fixed**2 * float32"));
 }
 
 TEST(DataShapeParser, FixedDim)
 {
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<bool1>()),
-            ndt::type("3 * bool"));
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<bool1>()),
-            ndt::type("fixed[3] * bool"));
-  EXPECT_EQ(
-      ndt::make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::type::make<float>())),
-      ndt::type("4 * 3 * float32"));
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<bool1>()), ndt::type("3 * bool"));
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<bool1>()), ndt::type("fixed[3] * bool"));
+  EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::type::make<float>())), ndt::type("4 * 3 * float32"));
   EXPECT_EQ(ndt::type("7 * 7 * 7 * float32"), ndt::type("7**3 * float32"));
 }
 
 TEST(DataShapeParser, CContiguous)
 {
-  EXPECT_EQ(ndt::c_contiguous_type::make(
-                ndt::make_fixed_dim(3, ndt::type::make<bool1>())),
-            ndt::type("C[3 * bool]"));
-  EXPECT_EQ(ndt::c_contiguous_type::make(make_fixed_dim(
-                4, ndt::make_fixed_dim(3, ndt::type::make<float>()))),
+  EXPECT_EQ(ndt::c_contiguous_type::make(ndt::make_fixed_dim(3, ndt::type::make<bool1>())), ndt::type("C[3 * bool]"));
+  EXPECT_EQ(ndt::c_contiguous_type::make(make_fixed_dim(4, ndt::make_fixed_dim(3, ndt::type::make<float>()))),
             ndt::type("C[4 * 3 * float32]"));
 }
 
 TEST(DataShapeParser, VarDim)
 {
-  EXPECT_EQ(ndt::var_dim_type::make(ndt::type::make<bool1>()),
-            ndt::type("var * bool"));
-  EXPECT_EQ(ndt::var_dim_type::make(
-                ndt::var_dim_type::make(ndt::type::make<float>())),
+  EXPECT_EQ(ndt::var_dim_type::make(ndt::type::make<bool1>()), ndt::type("var * bool"));
+  EXPECT_EQ(ndt::var_dim_type::make(ndt::var_dim_type::make(ndt::type::make<float>())),
             ndt::type("var * var * float32"));
-  EXPECT_EQ(ndt::type("var * var * var * var * var * float32"),
-            ndt::type("var**5 * float32"));
+  EXPECT_EQ(ndt::type("var * var * var * var * var * float32"), ndt::type("var**5 * float32"));
 }
 
 TEST(DataShapeParser, StridedFixedDim)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(
-                ndt::make_fixed_dim(3, ndt::type::make<float>())),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_fixed_dim(3, ndt::type::make<float>())),
             ndt::type("Fixed * 3 * float32"));
-  EXPECT_EQ(ndt::make_fixed_dim(
-                3, ndt::make_fixed_dim_kind(ndt::type::make<float>())),
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim_kind(ndt::type::make<float>())),
             ndt::type("3 * Fixed * float32"));
 }
 
 TEST(DataShapeParser, StridedVarFixedDim)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::var_dim_type::make(
-                ndt::make_fixed_dim(3, ndt::type::make<float>()))),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::var_dim_type::make(ndt::make_fixed_dim(3, ndt::type::make<float>()))),
             ndt::type("Fixed * var * 3 * float32"));
 }
 
 TEST(DataShapeParser, TypeVarConstructed)
 {
-  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("int32")),
-            ndt::type("T[int32]"));
-  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("10 * A")),
-            ndt::type("T[10 * A]"));
-  EXPECT_EQ(
-      ndt::typevar_constructed_type::make("T", ndt::type("Dims... * int32")),
-      ndt::type("T[Dims... * int32]"));
+  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("int32")), ndt::type("T[int32]"));
+  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("10 * A")), ndt::type("T[10 * A]"));
+  EXPECT_EQ(ndt::typevar_constructed_type::make("T", ndt::type("Dims... * int32")), ndt::type("T[Dims... * int32]"));
 }
 
 TEST(DataShapeParser, RecordOneField)
 {
-  EXPECT_EQ(ndt::struct_type::make({"val"}, {ndt::type::make<float>()}),
-            ndt::type("{ val : float32 }"));
-  EXPECT_EQ(ndt::struct_type::make({"val"}, {ndt::type::make<float>()}),
-            ndt::type("{ val : float32 , }"));
+  EXPECT_EQ(ndt::struct_type::make({"val"}, {ndt::type::make<float>()}), ndt::type("{ val : float32 }"));
+  EXPECT_EQ(ndt::struct_type::make({"val"}, {ndt::type::make<float>()}), ndt::type("{ val : float32 , }"));
 }
 
 TEST(DataShapeParser, RecordTwoFields)
 {
-  EXPECT_EQ(ndt::struct_type::make({"val", "id"}, {ndt::type::make<float>(),
-                                                   ndt::type::make<int64_t>()}),
+  EXPECT_EQ(ndt::struct_type::make({"val", "id"}, {ndt::type::make<float>(), ndt::type::make<int64_t>()}),
             ndt::type("{\n"
                       "    val: float32,\n"
                       "    id: int64\n"
                       "}\n"));
-  EXPECT_EQ(ndt::struct_type::make({"val", "id"}, {ndt::type::make<float>(),
-                                                   ndt::type::make<int64_t>()}),
+  EXPECT_EQ(ndt::struct_type::make({"val", "id"}, {ndt::type::make<float>(), ndt::type::make<int64_t>()}),
             ndt::type("{\n"
                       "    val: float32,\n"
                       "    id: int64,\n"
@@ -250,10 +212,8 @@ TEST(DataShapeParser, Callable)
   ndt::type tp;
 
   EXPECT_EQ(ndt::type::make<int(int, int)>(), ndt::type("(int, int) -> int"));
-  EXPECT_EQ(ndt::type::make<int(int, int)>("x"),
-            ndt::type("(int, x: int) -> int"));
-  EXPECT_EQ(ndt::type::make<int(int, int)>("x", "y"),
-            ndt::type("(x: int, y: int) -> int"));
+  EXPECT_EQ(ndt::type::make<int(int, int)>("x"), ndt::type("(int, x: int) -> int"));
+  EXPECT_EQ(ndt::type::make<int(int, int)>("x", "y"), ndt::type("(x: int, y: int) -> int"));
 
   tp = ndt::type("(N * S, func: (M * S) -> T) -> N * T");
   EXPECT_JSON_EQ_ARR("[\"N * S\"]", tp.p("pos_types"));
@@ -264,29 +224,35 @@ TEST(DataShapeParser, Callable)
 
 TEST(DataShapeParser, ErrorBasic)
 {
-  try {
+  try
+  {
     ndt::type("float65");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 1") != std::string::npos);
     EXPECT_TRUE(msg.find("unrecognized data type") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("float64+");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 8") != std::string::npos);
     EXPECT_TRUE(msg.find("unexpected token") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("3 * int32 * float64");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 5") != std::string::npos);
     EXPECT_TRUE(msg.find("unrecognized dimension type") != std::string::npos);
@@ -295,56 +261,46 @@ TEST(DataShapeParser, ErrorBasic)
 
 TEST(DataShapeParser, ErrorString)
 {
-  try {
+  try
+  {
     ndt::type("fixed_string[");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 14") != std::string::npos);
     EXPECT_TRUE(msg.find("expected a size integer") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("fixed_string[0]");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 14") != std::string::npos);
     EXPECT_TRUE(msg.find("string size cannot be zero") != std::string::npos);
   }
-  try {
-    ndt::type("string['badencoding']");
-    EXPECT_TRUE(false);
-  }
-  catch (const runtime_error &e) {
-    std::string msg = e.what();
-    EXPECT_TRUE(msg.find("line 1, column 8") != std::string::npos);
-    EXPECT_TRUE(msg.find("unrecognized string encoding") != std::string::npos);
-  }
-  try {
-    ndt::type("string['U8',]");
-    EXPECT_TRUE(false);
-  }
-  catch (const runtime_error &e) {
-    std::string msg = e.what();
-    EXPECT_TRUE(msg.find("line 1, column 12") != std::string::npos);
-    EXPECT_TRUE(msg.find("expected closing ']'") != std::string::npos);
-  }
-  try {
+  try
+  {
     ndt::type("fixed_string[3,'U8',10]");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 20") != std::string::npos);
     EXPECT_TRUE(msg.find("expected closing ']'") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("fixed_string[3,3]");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 1, column 16") != std::string::npos);
     EXPECT_TRUE(msg.find("expected a string encoding") != std::string::npos);
@@ -353,7 +309,8 @@ TEST(DataShapeParser, ErrorString)
 
 TEST(DataShapeParser, ErrorRecord)
 {
-  try {
+  try
+  {
     ndt::type("{\n"
               "   id: int64\n"
               "   name: string\n"
@@ -361,12 +318,14 @@ TEST(DataShapeParser, ErrorRecord)
               "}\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 13") != std::string::npos);
     EXPECT_TRUE(msg.find("expected ',' or '}'") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("{\n"
               "   id: int64,\n"
               "   name: string,\n"
@@ -374,12 +333,14 @@ TEST(DataShapeParser, ErrorRecord)
               "}\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 4, column 12") != std::string::npos);
     EXPECT_TRUE(msg.find("unrecognized data type") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("{\n"
               "   id: int64,\n"
               "   name: string,\n"
@@ -387,12 +348,14 @@ TEST(DataShapeParser, ErrorRecord)
               "}\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 4, column 11") != std::string::npos);
     EXPECT_TRUE(msg.find("expected a data type") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("{\n"
               "   id: int64,\n"
               "   name: string,\n"
@@ -400,12 +363,14 @@ TEST(DataShapeParser, ErrorRecord)
               "}\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 4, column 10") != std::string::npos);
     EXPECT_TRUE(msg.find("expected ':'") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("{\n"
               "   id: int64,\n"
               "   name: (3 * string,\n"
@@ -413,69 +378,79 @@ TEST(DataShapeParser, ErrorRecord)
               "}\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     // The name field works as a funcproto until it hits the '}' token
     EXPECT_TRUE(msg.find("line 4, column 20") != std::string::npos);
-    EXPECT_TRUE(msg.find("expected a kwd arg in callable prototype") !=
-                std::string::npos);
+    EXPECT_TRUE(msg.find("expected a kwd arg in callable prototype") != std::string::npos);
   }
 }
 
 TEST(DataShapeParser, ErrorTypeAlias)
 {
-  try {
+  try
+  {
     ndt::type("\n"
               "type 33 = int32\n"
               "2, int32\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 5") != std::string::npos);
     EXPECT_TRUE(msg.find("expected an identifier") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("\n"
               "type MyInt - int32\n"
               "2, MyInt\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 11") != std::string::npos);
     EXPECT_TRUE(msg.find("expected an '='") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("\n"
               "type MyInt = &\n"
               "2 * MyInt\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 13") != std::string::npos);
     EXPECT_TRUE(msg.find("expected a data type") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("\n"
               "type int32 = int64\n"
               "2 * int32\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 2, column 6") != std::string::npos);
     EXPECT_TRUE(msg.find("cannot redefine") != std::string::npos);
   }
-  try {
+  try
+  {
     ndt::type("\n"
               "type MyInt = int64\n"
               "type MyInt = int32\n"
               "2 * MyInt\n");
     EXPECT_TRUE(false);
   }
-  catch (const runtime_error &e) {
+  catch (const runtime_error &e)
+  {
     std::string msg = e.what();
     EXPECT_TRUE(msg.find("line 3, column 6") != std::string::npos);
     EXPECT_TRUE(msg.find("type name already defined") != std::string::npos);
@@ -484,90 +459,89 @@ TEST(DataShapeParser, ErrorTypeAlias)
 
 TEST(DataShapeParser, KivaLoanDataShape)
 {
-  const char *klds =
-      "type KivaLoan = {\n"
-      "    id: int64,\n"
-      "    name: string,\n"
-      "    description: {\n"
-      "        languages: var * fixed_string[2],\n"
-      "    #    texts: map(fixed_string[2], string),\n"
-      "    },\n"
-      "    status: string, # LoanStatusType,\n"
-      "    funded_amount: float64,\n"
-      "    #basket_amount: Option(float64),\n"
-      "    paid_amount: float64,\n"
-      "    image: {\n"
-      "        id: int64,\n"
-      "        template_id: int64,\n"
-      "    },\n"
-      "    #video: Option({\n"
-      "    #    id: int64,\n"
-      "    #    youtube_id: string,\n"
-      "    #}),\n"
-      "    activity: string,\n"
-      "    sector: string,\n"
-      "    use: string,\n"
-      "    # For 'delinquent', saw values \"null\" and \"true\" in brief "
-      "search, map null -> false on import?\n"
-      "    delinquent: bool,\n"
-      "    location: {\n"
-      "        country_code: fixed_string[2],\n"
-      "        country: string,\n"
-      "        town: string,\n"
-      "        geo: {\n"
-      "            level: string, # GeoLevelType\n"
-      "            pairs: string, # latlong\n"
-      "            type: string, # GeoTypeType\n"
-      "        }\n"
-      "    },\n"
-      "    partner_id: int64,\n"
-      "    #posted_date: datetime<seconds>,\n"
-      "    #planned_expiration_date: Option(datetime<seconds>),\n"
-      "    loan_amount: float64,\n"
-      "    #currency_exchange_loss_amount: Option(float64),\n"
-      "    borrowers: var * {\n"
-      "        first_name: string,\n"
-      "        last_name: string,\n"
-      "        gender: fixed_string[2], # GenderType\n"
-      "        pictured: bool,\n"
-      "    },\n"
-      "    terms: {\n"
-      "    #    disbursal_date: datetime<seconds>,\n"
-      "    #    disbursal_currency: Option(string),\n"
-      "        disbursal_amount: float64,\n"
-      "        loan_amount: float64,\n"
-      "        local_payments: var * {\n"
-      "    #        due_date: datetime<seconds>,\n"
-      "            amount: float64,\n"
-      "        },\n"
-      "        scheduled_payments: var * {\n"
-      "    #        due_date: datetime<seconds>,\n"
-      "            amount: float64,\n"
-      "        },\n"
-      "        loss_liability: {\n"
-      "    #        nonpayment: Categorical(string, [\"lender\", "
-      "\"partner\"]),\n"
-      "            currency_exchange: string,\n"
-      "    #        currency_exchange_coverage_rate: Option(float64),\n"
-      "        }\n"
-      "    },\n"
-      "    payments: var * {\n"
-      "        amount: float64,\n"
-      "        local_amount: float64,\n"
-      "    #    processed_date: datetime<seconds>,\n"
-      "    #    settlement_date: datetime<seconds>,\n"
-      "        rounded_local_amount: float64,\n"
-      "        currency_exchange_loss_amount: float64,\n"
-      "        payment_id: int64,\n"
-      "        comment: string,\n"
-      "    },\n"
-      "    #funded_date: datetime<seconds>,\n"
-      "    #paid_date: datetime<seconds>,\n"
-      "    journal_totals: {\n"
-      "        entries: int64,\n"
-      "        bulkEntries: int64,\n"
-      "    }\n"
-      "}\n";
+  const char *klds = "type KivaLoan = {\n"
+                     "    id: int64,\n"
+                     "    name: string,\n"
+                     "    description: {\n"
+                     "        languages: var * fixed_string[2],\n"
+                     "    #    texts: map(fixed_string[2], string),\n"
+                     "    },\n"
+                     "    status: string, # LoanStatusType,\n"
+                     "    funded_amount: float64,\n"
+                     "    #basket_amount: Option(float64),\n"
+                     "    paid_amount: float64,\n"
+                     "    image: {\n"
+                     "        id: int64,\n"
+                     "        template_id: int64,\n"
+                     "    },\n"
+                     "    #video: Option({\n"
+                     "    #    id: int64,\n"
+                     "    #    youtube_id: string,\n"
+                     "    #}),\n"
+                     "    activity: string,\n"
+                     "    sector: string,\n"
+                     "    use: string,\n"
+                     "    # For 'delinquent', saw values \"null\" and \"true\" in brief "
+                     "search, map null -> false on import?\n"
+                     "    delinquent: bool,\n"
+                     "    location: {\n"
+                     "        country_code: fixed_string[2],\n"
+                     "        country: string,\n"
+                     "        town: string,\n"
+                     "        geo: {\n"
+                     "            level: string, # GeoLevelType\n"
+                     "            pairs: string, # latlong\n"
+                     "            type: string, # GeoTypeType\n"
+                     "        }\n"
+                     "    },\n"
+                     "    partner_id: int64,\n"
+                     "    #posted_date: datetime<seconds>,\n"
+                     "    #planned_expiration_date: Option(datetime<seconds>),\n"
+                     "    loan_amount: float64,\n"
+                     "    #currency_exchange_loss_amount: Option(float64),\n"
+                     "    borrowers: var * {\n"
+                     "        first_name: string,\n"
+                     "        last_name: string,\n"
+                     "        gender: fixed_string[2], # GenderType\n"
+                     "        pictured: bool,\n"
+                     "    },\n"
+                     "    terms: {\n"
+                     "    #    disbursal_date: datetime<seconds>,\n"
+                     "    #    disbursal_currency: Option(string),\n"
+                     "        disbursal_amount: float64,\n"
+                     "        loan_amount: float64,\n"
+                     "        local_payments: var * {\n"
+                     "    #        due_date: datetime<seconds>,\n"
+                     "            amount: float64,\n"
+                     "        },\n"
+                     "        scheduled_payments: var * {\n"
+                     "    #        due_date: datetime<seconds>,\n"
+                     "            amount: float64,\n"
+                     "        },\n"
+                     "        loss_liability: {\n"
+                     "    #        nonpayment: Categorical(string, [\"lender\", "
+                     "\"partner\"]),\n"
+                     "            currency_exchange: string,\n"
+                     "    #        currency_exchange_coverage_rate: Option(float64),\n"
+                     "        }\n"
+                     "    },\n"
+                     "    payments: var * {\n"
+                     "        amount: float64,\n"
+                     "        local_amount: float64,\n"
+                     "    #    processed_date: datetime<seconds>,\n"
+                     "    #    settlement_date: datetime<seconds>,\n"
+                     "        rounded_local_amount: float64,\n"
+                     "        currency_exchange_loss_amount: float64,\n"
+                     "        payment_id: int64,\n"
+                     "        comment: string,\n"
+                     "    },\n"
+                     "    #funded_date: datetime<seconds>,\n"
+                     "    #paid_date: datetime<seconds>,\n"
+                     "    journal_totals: {\n"
+                     "        entries: int64,\n"
+                     "        bulkEntries: int64,\n"
+                     "    }\n"
+                     "}\n";
   ndt::type d = ndt::type(klds);
   EXPECT_EQ(struct_type_id, d.get_type_id());
 }
@@ -607,37 +581,32 @@ TEST(DataShapeParser, SpecialCharacterFields)
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"sepal length"},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"sepal length"}, {ndt::type::make<double>()}));
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ ' sepal length' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({" sepal length"},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({" sepal length"}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ 'sepal length ' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"sepal length "},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"sepal length "}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ ' sepal length ' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({" sepal length "},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({" sepal length "}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '   sepal         length   ' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"   sepal         length   "},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"   sepal         length   "}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -651,48 +620,42 @@ TEST(DataShapeParser, SpecialCharacterFields)
   // unmatched parens
   // multiple parens
   p_dt = ndt::type("{ 'unique key(foo)' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"unique key(foo)"},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"unique key(foo)"}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '(foo unique key' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"(foo unique key"},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"(foo unique key"}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '(foo unique key)' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"(foo unique key)"},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"(foo unique key)"}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ 'foo unique key)' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"foo unique key)"},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"foo unique key)"}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '( foo unique key' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"( foo unique key"},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"( foo unique key"}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '((((foouniquekey))())((' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"((((foouniquekey))())(("},
-                                         {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"((((foouniquekey))())(("}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -700,21 +663,17 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   // Quote tests. These can get a little tricky since the quotes must be
   // escaped, and the backslashes may have to be escaped as well
-  p_dt =
-      ndt::type("{ 'sepal \"\"\" length' : float64, 'sepal width' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(
-                      {"sepal \"\"\" length", "sepal width"},
-                      {ndt::type::make<double>(), ndt::type::make<double>()}));
+  p_dt = ndt::type("{ 'sepal \"\"\" length' : float64, 'sepal width' : float64 }");
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"sepal \"\"\" length", "sepal width"},
+                                         {ndt::type::make<double>(), ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
-  p_dt = ndt::type(
-      "{ 'sepal \\'\\'\\' length' : float64, 'sepal width' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(
-                      {"sepal ''' length", "sepal width"},
-                      {ndt::type::make<double>(), ndt::type::make<double>()}));
+  p_dt = ndt::type("{ 'sepal \\'\\'\\' length' : float64, 'sepal width' : float64 }");
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"sepal ''' length", "sepal width"},
+                                         {ndt::type::make<double>(), ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -722,19 +681,16 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   p_dt = ndt::type("{ ' sepal \\'\\'\\' length ' : float64, 'sepal "
                    "\" \\\" \\\\\\' width ' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(
-                      {" sepal ''' length ", "sepal \" \" \\' width "},
-                      {ndt::type::make<double>(), ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({" sepal ''' length ", "sepal \" \" \\' width "},
+                                         {ndt::type::make<double>(), ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
-  p_dt = ndt::type(
-      "{ 'sepal \\'\\'\\' length' : float64, 'sepal width' : float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make(
-                      {"sepal ''' length", "sepal width"},
-                      {ndt::type::make<double>(), ndt::type::make<double>()}));
+  p_dt = ndt::type("{ 'sepal \\'\\'\\' length' : float64, 'sepal width' : float64 }");
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"sepal ''' length", "sepal width"},
+                                         {ndt::type::make<double>(), ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -800,24 +756,21 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   // Testing forward slashes
   p_dt = ndt::type("{ '/usr/bin' : float64 }");
-  EXPECT_EQ(p_dt,
-            ndt::struct_type::make({"/usr/bin"}, {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"/usr/bin"}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{ '\\\\abcdef' : float64 }");
-  EXPECT_EQ(p_dt,
-            ndt::struct_type::make({"\\abcdef"}, {ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"\\abcdef"}, {ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
   EXPECT_EQ(p_dt, s_dt);
 
   p_dt = ndt::type("{'a field with spaces and \" \\\'': int}");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"a field with spaces and \" \'"},
-                                         {ndt::type::make<int>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"a field with spaces and \" \'"}, {ndt::type::make<int>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -825,10 +778,9 @@ TEST(DataShapeParser, SpecialCharacterFields)
 
   // Testing field names as numbers
   p_dt = ndt::type("{ '1234' : float64, '-1234':float64,'500=1234':float64 }");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"1234", "-1234", "500=1234"},
-                                         {ndt::type::make<double>(),
-                                          ndt::type::make<double>(),
-                                          ndt::type::make<double>()}));
+  EXPECT_EQ(p_dt,
+            ndt::struct_type::make({"1234", "-1234", "500=1234"},
+                                   {ndt::type::make<double>(), ndt::type::make<double>(), ndt::type::make<double>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -838,11 +790,8 @@ TEST(DataShapeParser, SpecialCharacterFields)
   // {,},[,],:,comma,...,>,=,*,<,>,-
   p_dt = ndt::type("{'field name[100]': int, 'field name [x]': int, "
                    "'field : {name-=foo} [0*<>...,]': int}");
-  EXPECT_EQ(p_dt, ndt::struct_type::make({"field name[100]", "field name [x]",
-                                          "field : {name-=foo} [0*<>...,]"},
-                                         {ndt::type::make<int>(),
-                                          ndt::type::make<int>(),
-                                          ndt::type::make<int>()}));
+  EXPECT_EQ(p_dt, ndt::struct_type::make({"field name[100]", "field name [x]", "field : {name-=foo} [0*<>...,]"},
+                                         {ndt::type::make<int>(), ndt::type::make<int>(), ndt::type::make<int>()}));
   ss << p_dt;
   s_dt = ndt::type(ss.str());
   ss.str("");
@@ -852,40 +801,40 @@ TEST(DataShapeParser, SpecialCharacterFields)
     If special names aren't enclosed in quotes, the parser should throw an
     exception.
    */
-  try {
+  try
+  {
     ndt::type d = ndt::type("{ bad name : int }");
     EXPECT_TRUE(false);
   }
-  catch (std::runtime_error &e) {
+  catch (std::runtime_error &e)
+  {
     std::string msg = e.what();
-    EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 6") !=
-                std::string::npos);
-    EXPECT_TRUE(msg.find("Message: expected ':' after record item name") !=
-                std::string::npos);
+    EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 6") != std::string::npos);
+    EXPECT_TRUE(msg.find("Message: expected ':' after record item name") != std::string::npos);
   }
 
-  try {
+  try
+  {
     ndt::type d = ndt::type("{ name(foo) : int }");
     EXPECT_TRUE(false);
   }
-  catch (std::runtime_error &e) {
+  catch (std::runtime_error &e)
+  {
     std::string msg = e.what();
-    EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 7") !=
-                std::string::npos);
-    EXPECT_TRUE(msg.find("Message: expected ':' after record item name") !=
-                std::string::npos);
+    EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 7") != std::string::npos);
+    EXPECT_TRUE(msg.find("Message: expected ':' after record item name") != std::string::npos);
   }
 
-  try {
+  try
+  {
     ndt::type d = ndt::type("{ name\' : int }");
     EXPECT_TRUE(false);
   }
-  catch (std::runtime_error &e) {
+  catch (std::runtime_error &e)
+  {
     std::string msg = e.what();
-    EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 7") !=
-                std::string::npos);
-    EXPECT_TRUE(msg.find("Message: expected ':' after record item name") !=
-                std::string::npos);
+    EXPECT_TRUE(msg.find("Error parsing datashape at line 1, column 7") != std::string::npos);
+    EXPECT_TRUE(msg.find("Message: expected ':' after record item name") != std::string::npos);
   }
 }
 

@@ -20,21 +20,11 @@
 using namespace std;
 using namespace dynd;
 
-ndt::string_type::string_type(string_encoding_t encoding)
+ndt::string_type::string_type()
     : base_string_type(string_type_id, sizeof(string), sizeof(const char *), type_flag_zeroinit | type_flag_blockref,
                        sizeof(string_type_arrmeta)),
-      m_encoding(encoding)
+      m_encoding(string_encoding_utf_8)
 {
-  switch (encoding) {
-  case string_encoding_ascii:
-  case string_encoding_ucs_2:
-  case string_encoding_utf_8:
-  case string_encoding_utf_16:
-  case string_encoding_utf_32:
-    break;
-  default:
-    throw runtime_error("Unrecognized string encoding in string type constructor");
-  }
 }
 
 ndt::string_type::~string_type()
@@ -109,11 +99,7 @@ void ndt::string_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrme
 
 void ndt::string_type::print_type(std::ostream &o) const
 {
-
   o << "string";
-  if (m_encoding != string_encoding_utf_8) {
-    o << "['" << m_encoding << "']";
-  }
 }
 
 bool ndt::string_type::is_unique_data_owner(const char *arrmeta) const
@@ -155,8 +141,7 @@ bool ndt::string_type::operator==(const base_type &rhs) const
   } else if (rhs.get_type_id() != string_type_id) {
     return false;
   } else {
-    const string_type *dt = static_cast<const string_type *>(&rhs);
-    return m_encoding == dt->m_encoding;
+    return true;
   }
 }
 

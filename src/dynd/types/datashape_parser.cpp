@@ -353,28 +353,11 @@ static string_encoding_t string_to_encoding(const char *error_begin, const std::
   }
 }
 
-// string_type : string |
-//               string['encoding']
+// string_type : string
 // This is called after 'string' is already matched
-static ndt::type parse_string_parameters(const char *&rbegin, const char *end)
+static ndt::type parse_string_parameters(const char *&DYND_UNUSED(rbegin), const char *DYND_UNUSED(end))
 {
-  const char *begin = rbegin;
-  if (parse_token_ds(begin, end, '[')) {
-    const char *saved_begin = begin;
-    std::string encoding_str;
-    string_encoding_t encoding = string_encoding_utf_8;
-    if (!parse_quoted_string(begin, end, encoding_str)) {
-      throw datashape_parse_error(saved_begin, "expected a string encoding");
-    }
-    encoding = string_to_encoding(saved_begin, encoding_str);
-    if (!parse_token_ds(begin, end, ']')) {
-      throw datashape_parse_error(begin, "expected closing ']'");
-    }
-    rbegin = begin;
-    return ndt::string_type::make(encoding);
-  } else {
-    return ndt::string_type::make(string_encoding_utf_8);
-  }
+  return ndt::string_type::make();
 }
 
 // fixed_string_type : fixed_string[NUMBER] |
@@ -560,7 +543,8 @@ static ndt::type parse_fixed_bytes_parameters(const char *&rbegin, const char *e
 
 // c_contiguous_type : C[child_type]
 // This is called after 'C' is already matched
-static ndt::type parse_c_contiguous_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
+static ndt::type parse_c_contiguous_parameters(const char *&rbegin, const char *end,
+                                               map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
@@ -606,7 +590,8 @@ static ndt::type parse_cuda_host_parameters(const char *&rbegin, const char *end
 
 // cuda_device_type : cuda_device[storage_type]
 // This is called after 'cuda_device' is already matched
-static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
+static ndt::type parse_cuda_device_parameters(const char *&rbegin, const char *end,
+                                              map<std::string, ndt::type> &symtable)
 {
   const char *begin = rbegin;
   if (parse_token_ds(begin, end, '[')) {
@@ -863,7 +848,8 @@ static nd::array parse_string_list(const char *&rbegin, const char *end)
 //          | INTEGER
 //          | STRING
 //          | list_type_arg
-static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
+static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
+{
   const char *begin = rbegin;
 
   parse::skip_whitespace_and_pound_comments(begin, end);
@@ -912,7 +898,8 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
 //                 | type_kwarg
 // type_kwarg : NAME_LOWER EQUAL type_arg
 // type_constr_args : LBRACKET type_arg_list RBRACKET
-nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable) {
+nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
+{
   nd::array result;
 
   const char *begin = rbegin;
@@ -976,8 +963,7 @@ nd::array dynd::parse_type_constr_args(const char *&rbegin, const char *end, map
       if (!parse_token_ds(begin, end, ',')) {
         if (!parse_token_ds(begin, end, ']')) {
           throw datashape_parse_error(begin, "Expected a ',' or ']'");
-        }
-        else {
+        } else {
           break;
         }
       }
@@ -1661,10 +1647,12 @@ nd::array dynd::parse_type_constr_args(const std::string &str)
   std::map<std::string, ndt::type> symtable;
   if (!str.empty()) {
     const char *begin = &str[0], *end = &str[0] + str.size();
-    try {
+    try
+    {
       result = parse_type_constr_args(begin, end, symtable);
     }
-    catch (const datashape_parse_error &e) {
+    catch (const datashape_parse_error &e)
+    {
       stringstream ss;
       std::string line_prev, line_cur;
       int line, column;

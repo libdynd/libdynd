@@ -25,7 +25,7 @@ TEST(StringType, Create)
   ndt::type d;
 
   // Strings with various encodings
-  d = ndt::string_type::make(string_encoding_utf_8);
+  d = ndt::string_type::make();
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -34,7 +34,7 @@ TEST(StringType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::string_type::make(string_encoding_utf_8);
+  d = ndt::string_type::make();
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -42,7 +42,7 @@ TEST(StringType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::string_type::make(string_encoding_ascii);
+  d = ndt::string_type::make();
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -50,7 +50,7 @@ TEST(StringType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::string_type::make(string_encoding_utf_16);
+  d = ndt::string_type::make();
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -58,7 +58,7 @@ TEST(StringType, Create)
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
 
-  d = ndt::string_type::make(string_encoding_utf_32);
+  d = ndt::string_type::make();
   EXPECT_EQ(string_type_id, d.get_type_id());
   EXPECT_EQ(string_kind, d.get_kind());
   EXPECT_EQ(sizeof(void *), d.get_data_alignment());
@@ -73,24 +73,23 @@ TEST(StringType, ArrayCreation)
 
   // A C-style string literal
   a = "testing string construction";
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
+  EXPECT_EQ(ndt::string_type::make(), a.get_type());
   EXPECT_EQ("testing string construction", a.as<std::string>());
 
   // A C-style char array variable
   const char carr[] = "string construction";
   a = carr;
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
+  EXPECT_EQ(ndt::string_type::make(), a.get_type());
   EXPECT_EQ("string construction", a.as<std::string>());
 
   // A C-style char pointer variable
   const char *cptr = "construction";
   a = cptr;
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
+  EXPECT_EQ(ndt::string_type::make(), a.get_type());
   EXPECT_EQ("construction", a.as<std::string>());
 
   // An array of UTF8 strings
-  const char *i0[5] = {"this", "is", "a", "test",
-                       "of strings that are various sizes"};
+  const char *i0[5] = {"this", "is", "a", "test", "of strings that are various sizes"};
   a = i0;
   EXPECT_EQ(ndt::type("5 * string"), a.get_type());
   EXPECT_EQ(a.get_shape()[0], 5);
@@ -107,45 +106,41 @@ TEST(StringType, Basic)
 
   // std::string goes in as a utf8 string
   a = std::string("abcdefg");
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), a.get_type());
+  EXPECT_EQ(ndt::string_type::make(), a.get_type());
   EXPECT_EQ(std::string("abcdefg"), a.as<std::string>());
   // Make it a fixed_string for this test
   a = a.ucast(ndt::fixed_string_type::make(7, string_encoding_utf_8)).eval();
 
   // Convert to a blockref string type with the same utf8 codec
-  b = a.ucast(ndt::string_type::make(string_encoding_utf_8));
-  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_8),
-                              ndt::fixed_string_type::make(7, string_encoding_utf_8)),
+  b = a.ucast(ndt::string_type::make());
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(), ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(), b.get_type());
   EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
   // Convert to a blockref string type with the utf16 codec
-  b = a.ucast(ndt::string_type::make(string_encoding_utf_16));
-  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_16),
-                              ndt::fixed_string_type::make(7, string_encoding_utf_8)),
+  b = a.ucast(ndt::string_type::make());
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(), ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(), b.get_type());
   EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
   // Convert to a blockref string type with the utf32 codec
-  b = a.ucast(ndt::string_type::make(string_encoding_utf_32));
-  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_utf_32),
-                              ndt::fixed_string_type::make(7, string_encoding_utf_8)),
+  b = a.ucast(ndt::string_type::make());
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(), ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_32), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(), b.get_type());
   EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 
   // Convert to a blockref string type with the ascii codec
-  b = a.ucast(ndt::string_type::make(string_encoding_ascii));
-  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(string_encoding_ascii),
-                              ndt::fixed_string_type::make(7, string_encoding_utf_8)),
+  b = a.ucast(ndt::string_type::make());
+  EXPECT_EQ(ndt::convert_type::make(ndt::string_type::make(), ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
-  EXPECT_EQ(ndt::string_type::make(string_encoding_ascii), b.get_type());
+  EXPECT_EQ(ndt::string_type::make(), b.get_type());
   EXPECT_EQ(std::string("abcdefg"), b.as<std::string>());
 }
 
@@ -156,31 +151,23 @@ TEST(StringType, AccessFlags)
   // Default construction from a string produces an immutable fixed_string
   a = std::string("testing one two three testing one two three four five "
                   "testing one two three four five six seven");
-  EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag,
-            (int)a.get_access_flags());
+  EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
   // Turn it into a fixed_string type for this test
   a = a.ucast(ndt::fixed_string_type::make(95, string_encoding_utf_8)).eval();
   EXPECT_EQ(ndt::fixed_string_type::make(95, string_encoding_utf_8), a.get_type());
 
   // Converting to a blockref string of the same encoding produces a reference
   // into the fixed_string value
-  b = a.ucast(ndt::string_type::make(string_encoding_utf_8)).eval();
-  EXPECT_EQ(nd::read_access_flag | nd::write_access_flag,
-            (int)b.get_access_flags());
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_8), b.get_type());
+  b = a.ucast(ndt::string_type::make()).eval();
+  EXPECT_EQ(nd::read_access_flag | nd::write_access_flag, (int)b.get_access_flags());
+  EXPECT_EQ(ndt::string_type::make(), b.get_type());
   // The data array for 'a' matches the referenced data for 'b' (TODO: Restore
   // this property)
   //    EXPECT_EQ(a.get_readonly_originptr(), reinterpret_cast<const char *
   //    const *>(b.get_readonly_originptr())[0]);
-
-  // Converting to a blockref string of a different encoding makes a new
-  // copy, so gets read write access
-  b = a.ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
-  EXPECT_EQ(nd::read_access_flag | nd::write_access_flag,
-            (int)b.get_access_flags());
-  EXPECT_EQ(ndt::string_type::make(string_encoding_utf_16), b.get_type());
 }
 
+/*
 TEST(StringType, Unicode)
 {
   static uint32_t utf32_string[] = {0x0000, 0x0001, 0x0020,  0x007f,  0x0080,
@@ -260,18 +247,12 @@ TEST(StringType, Unicode)
                                        x.get_readonly_originptr()),
                       sizeof(utf8_string)));
 }
+*/
 
 TEST(StringType, CanonicalDType)
 {
   // The canonical type of a string type is the same type
-  EXPECT_EQ((ndt::string_type::make(string_encoding_ascii)),
-            (ndt::string_type::make(string_encoding_ascii).get_canonical_type()));
-  EXPECT_EQ((ndt::string_type::make(string_encoding_utf_8)),
-            (ndt::string_type::make(string_encoding_utf_8).get_canonical_type()));
-  EXPECT_EQ((ndt::string_type::make(string_encoding_utf_16)),
-            (ndt::string_type::make(string_encoding_utf_16).get_canonical_type()));
-  EXPECT_EQ((ndt::string_type::make(string_encoding_utf_32)),
-            (ndt::string_type::make(string_encoding_utf_32).get_canonical_type()));
+  EXPECT_EQ((ndt::string_type::make()), (ndt::string_type::make().get_canonical_type()));
 }
 
 TEST(StringType, Storage)
@@ -280,12 +261,6 @@ TEST(StringType, Storage)
 
   a = "testing";
   EXPECT_EQ(ndt::bytes_type::make(1), a.storage().get_type());
-
-  a = a.ucast(ndt::string_type::make(string_encoding_utf_16)).eval();
-  EXPECT_EQ(ndt::bytes_type::make(2), a.storage().get_type());
-
-  a = a.ucast(ndt::string_type::make(string_encoding_utf_32)).eval();
-  EXPECT_EQ(ndt::bytes_type::make(4), a.storage().get_type());
 }
 
 TEST(StringType, EncodingSizes)
@@ -322,22 +297,16 @@ TEST(StringType, StringToBool)
   EXPECT_FALSE(nd::array("0 ").ucast<bool1>().as<bool>());
 
   // By default, conversion to bool is not permissive
-  EXPECT_THROW(nd::array(nd::array("").ucast<bool1>().eval()),
-               invalid_argument);
-  EXPECT_THROW(nd::array(nd::array("2").ucast<bool1>().eval()),
-               invalid_argument);
-  EXPECT_THROW(nd::array(nd::array("flase").ucast<bool1>().eval()),
-               invalid_argument);
+  EXPECT_THROW(nd::array(nd::array("").ucast<bool1>().eval()), invalid_argument);
+  EXPECT_THROW(nd::array(nd::array("2").ucast<bool1>().eval()), invalid_argument);
+  EXPECT_THROW(nd::array(nd::array("flase").ucast<bool1>().eval()), invalid_argument);
 
   // In "nocheck" mode, it's a bit more permissive
   eval::eval_context tmp_ectx;
   tmp_ectx.errmode = assign_error_nocheck;
-  EXPECT_FALSE(
-      nd::array(nd::array("").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
-  EXPECT_TRUE(
-      nd::array(nd::array("2").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
-  EXPECT_TRUE(
-      nd::array(nd::array("flase").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
+  EXPECT_FALSE(nd::array(nd::array("").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
+  EXPECT_TRUE(nd::array(nd::array("2").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
+  EXPECT_TRUE(nd::array(nd::array("flase").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
 }
 
 TEST(StringType, StringToInteger)
@@ -353,22 +322,15 @@ TEST(StringType, StringToInteger)
   EXPECT_THROW(nd::array("-32769").ucast<int16_t>().eval(), runtime_error);
   EXPECT_THROW(nd::array("32768").ucast<int16_t>().eval(), runtime_error);
 
-  EXPECT_EQ(-2147483648LL,
-            nd::array("-2147483648").ucast<int32_t>().as<int32_t>());
+  EXPECT_EQ(-2147483648LL, nd::array("-2147483648").ucast<int32_t>().as<int32_t>());
   EXPECT_EQ(2147483647, nd::array("2147483647").ucast<int32_t>().as<int32_t>());
-  EXPECT_THROW(nd::array(nd::array("-2147483649").ucast<int32_t>().eval()),
-               runtime_error);
-  EXPECT_THROW(nd::array(nd::array("2147483648").ucast<int32_t>().eval()),
-               runtime_error);
+  EXPECT_THROW(nd::array(nd::array("-2147483649").ucast<int32_t>().eval()), runtime_error);
+  EXPECT_THROW(nd::array(nd::array("2147483648").ucast<int32_t>().eval()), runtime_error);
 
-  EXPECT_EQ(-9223372036854775807LL - 1,
-            nd::array("-9223372036854775808").ucast<int64_t>().as<int64_t>());
-  EXPECT_EQ(9223372036854775807LL,
-            nd::array("9223372036854775807").ucast<int64_t>().as<int64_t>());
-  EXPECT_THROW(nd::array("-9223372036854775809").ucast<int64_t>().eval(),
-               runtime_error);
-  EXPECT_THROW(nd::array("9223372036854775808").ucast<int64_t>().eval(),
-               runtime_error);
+  EXPECT_EQ(-9223372036854775807LL - 1, nd::array("-9223372036854775808").ucast<int64_t>().as<int64_t>());
+  EXPECT_EQ(9223372036854775807LL, nd::array("9223372036854775807").ucast<int64_t>().as<int64_t>());
+  EXPECT_THROW(nd::array("-9223372036854775809").ucast<int64_t>().eval(), runtime_error);
+  EXPECT_THROW(nd::array("9223372036854775808").ucast<int64_t>().eval(), runtime_error);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint8_t>().as<uint8_t>());
   EXPECT_EQ(255u, nd::array("255").ucast<uint8_t>().as<uint8_t>());
@@ -381,17 +343,14 @@ TEST(StringType, StringToInteger)
   EXPECT_THROW(nd::array("65536").ucast<uint16_t>().eval(), runtime_error);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(4294967295ULL,
-            nd::array("4294967295").ucast<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(4294967295ULL, nd::array("4294967295").ucast<uint32_t>().as<uint32_t>());
   EXPECT_THROW(nd::array("-1").ucast<uint32_t>().eval(), runtime_error);
   EXPECT_THROW(nd::array("4294967296").ucast<uint32_t>().eval(), runtime_error);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(18446744073709551615ULL,
-            nd::array("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(18446744073709551615ULL, nd::array("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
   EXPECT_THROW(nd::array("-1").ucast<uint64_t>().eval(), runtime_error);
-  EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(),
-               runtime_error);
+  EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), runtime_error);
 
   EXPECT_THROW(nd::array("").ucast<uint64_t>().eval(), invalid_argument);
   EXPECT_THROW(nd::array("-").ucast<uint64_t>().eval(), invalid_argument);
@@ -400,124 +359,45 @@ TEST(StringType, StringToInteger)
 TEST(StringType, StringToFloat32SpecialValues)
 {
   // +NaN with default payload
-  EXPECT_EQ(
-      0x7fc00000u,
-      nd::array("NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(
-      0x7fc00000u,
-      nd::array("nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0x7fc00000u, nd::array("1.#QNAN")
-                             .ucast<float>()
-                             .view_scalars<uint32_t>()
-                             .as<uint32_t>());
+  EXPECT_EQ(0x7fc00000u, nd::array("NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0x7fc00000u, nd::array("nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0x7fc00000u, nd::array("1.#QNAN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
   // -NaN with default payload
-  EXPECT_EQ(
-      0xffc00000u,
-      nd::array("-NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(
-      0xffc00000u,
-      nd::array("-nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0xffc00000u, nd::array("-1.#IND")
-                             .ucast<float>()
-                             .view_scalars<uint32_t>()
-                             .as<uint32_t>());
+  EXPECT_EQ(0xffc00000u, nd::array("-NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0xffc00000u, nd::array("-nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0xffc00000u, nd::array("-1.#IND").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
   // +Inf
-  EXPECT_EQ(
-      0x7f800000u,
-      nd::array("Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(
-      0x7f800000u,
-      nd::array("inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0x7f800000u, nd::array("Infinity")
-                             .ucast<float>()
-                             .view_scalars<uint32_t>()
-                             .as<uint32_t>());
-  EXPECT_EQ(0x7f800000u, nd::array("1.#INF")
-                             .ucast<float>()
-                             .view_scalars<uint32_t>()
-                             .as<uint32_t>());
+  EXPECT_EQ(0x7f800000u, nd::array("Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0x7f800000u, nd::array("inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0x7f800000u, nd::array("Infinity").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0x7f800000u, nd::array("1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
   // -Inf
-  EXPECT_EQ(
-      0xff800000u,
-      nd::array("-Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(
-      0xff800000u,
-      nd::array("-inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0xff800000u, nd::array("-Infinity")
-                             .ucast<float>()
-                             .view_scalars<uint32_t>()
-                             .as<uint32_t>());
-  EXPECT_EQ(0xff800000u, nd::array("-1.#INF")
-                             .ucast<float>()
-                             .view_scalars<uint32_t>()
-                             .as<uint32_t>());
+  EXPECT_EQ(0xff800000u, nd::array("-Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0xff800000u, nd::array("-inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0xff800000u, nd::array("-Infinity").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
+  EXPECT_EQ(0xff800000u, nd::array("-1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
 }
 
 TEST(StringType, StringToFloat64SpecialValues)
 {
   // +NaN with default payload
-  EXPECT_EQ(
-      0x7ff8000000000000ULL,
-      nd::array("NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(
-      0x7ff8000000000000ULL,
-      nd::array("nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0x7ff8000000000000ULL, nd::array("1.#QNAN")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
+  EXPECT_EQ(0x7ff8000000000000ULL, nd::array("NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0x7ff8000000000000ULL, nd::array("nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0x7ff8000000000000ULL, nd::array("1.#QNAN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
   // -NaN with default payload
-  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-NaN")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
-  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-nan")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
-  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-1.#IND")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
+  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-1.#IND").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
   // +Inf
-  EXPECT_EQ(
-      0x7ff0000000000000ULL,
-      nd::array("Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(
-      0x7ff0000000000000ULL,
-      nd::array("inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("Infinity")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
-  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("1.#INF")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
+  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("Infinity").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
   // -Inf
-  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-Inf")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
-  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-inf")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
-  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-Infinity")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
-  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-1.#INF")
-                                       .ucast<double>()
-                                       .view_scalars<uint64_t>()
-                                       .as<uint64_t>());
-}
-
-TEST(StringType, StringEncodeError)
-{
-  nd::array a = parse_json("string", "\"\\uc548\\ub155\""), b;
-  EXPECT_THROW(a.ucast(ndt::string_type::make(string_encoding_ascii)).eval(),
-               string_encode_error);
+  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-Infinity").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
+  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
 }
 
 TEST(StringType, Comparisons)
@@ -653,15 +533,15 @@ static bool ascii_T_compare(const char *x, const T *y, intptr_t count)
   return true;
 }
 
+/*
 TEST(StringType, Iter)
 {
   const char *str = "This is a string for testing";
   nd::array a = str;
 
   dim_iter it;
-  static_cast<const ndt::base_string_type *>(a.get_dtype().extended())
-      ->make_string_iter(&it, string_encoding_utf_8, a.get_arrmeta(),
-                         a.get_readonly_originptr(), a.get_data_memblock());
+  static_cast<const ndt::base_string_type *>(a.get_dtype().extended())->make_string_iter(
+      &it, string_encoding_utf_8, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
   // With a short string like this, the entire string will be
   // provided in one go
   ASSERT_EQ(1, it.vtable->next(&it));
@@ -669,25 +549,22 @@ TEST(StringType, Iter)
   EXPECT_EQ(0, memcmp(str, it.data_ptr, it.data_elcount));
   it.destroy();
 
-  static_cast<const ndt::base_string_type *>(a.get_dtype().extended())
-      ->make_string_iter(&it, string_encoding_utf_16, a.get_arrmeta(),
-                         a.get_readonly_originptr(), a.get_data_memblock());
+  static_cast<const ndt::base_string_type *>(a.get_dtype().extended())->make_string_iter(
+      &it, string_encoding_utf_16, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
   // With a short string like this, the entire string will be
   // provided in one go
   ASSERT_EQ(1, it.vtable->next(&it));
   ASSERT_EQ((intptr_t)strlen(str), it.data_elcount);
-  EXPECT_TRUE(ascii_T_compare(
-      str, reinterpret_cast<const uint16_t *>(it.data_ptr), it.data_elcount));
+  EXPECT_TRUE(ascii_T_compare(str, reinterpret_cast<const uint16_t *>(it.data_ptr), it.data_elcount));
   it.destroy();
 
-  static_cast<const ndt::base_string_type *>(a.get_dtype().extended())
-      ->make_string_iter(&it, string_encoding_utf_32, a.get_arrmeta(),
-                         a.get_readonly_originptr(), a.get_data_memblock());
+  static_cast<const ndt::base_string_type *>(a.get_dtype().extended())->make_string_iter(
+      &it, string_encoding_utf_32, a.get_arrmeta(), a.get_readonly_originptr(), a.get_data_memblock());
   // With a short string like this, the entire string will be
   // provided in one go
   ASSERT_EQ(1, it.vtable->next(&it));
   ASSERT_EQ((intptr_t)strlen(str), it.data_elcount);
-  EXPECT_TRUE(ascii_T_compare(
-      str, reinterpret_cast<const uint32_t *>(it.data_ptr), it.data_elcount));
+  EXPECT_TRUE(ascii_T_compare(str, reinterpret_cast<const uint32_t *>(it.data_ptr), it.data_elcount));
   it.destroy();
 }
+*/
