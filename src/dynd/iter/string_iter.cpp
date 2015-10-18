@@ -122,8 +122,8 @@ void iter::make_string_iter(
             string_type_arrmeta md;
             md.blockref = ref.get();
             string d;
-            d.begin = const_cast<char *>(data_begin);
-            d.end = const_cast<char *>(data_end);
+            d.m_begin = const_cast<char *>(data_begin);
+            d.m_end = const_cast<char *>(data_end);
             tmp.val_assign(ndt::string_type::make(),
                            reinterpret_cast<const char *>(&md),
                            reinterpret_cast<const char *>(&d), ectx);

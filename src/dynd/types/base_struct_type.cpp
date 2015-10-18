@@ -55,9 +55,9 @@ intptr_t ndt::base_struct_type::get_field_index(const char *field_name_begin, co
     intptr_t fn_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.get_arrmeta())->stride;
     for (intptr_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
       const string *fn = reinterpret_cast<const string *>(fn_ptr);
-      const char *begin = fn->begin, *end = fn->end;
+      const char *begin = fn->begin(), *end = fn->end();
       if ((size_t)(end - begin) == size && *begin == firstchar) {
-        if (memcmp(fn->begin, field_name_begin, size) == 0) {
+        if (memcmp(fn->begin(), field_name_begin, size) == 0) {
           return i;
         }
       }

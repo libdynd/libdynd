@@ -77,8 +77,8 @@ namespace gfunc {
         // Setting from a known-sized character string array
         if (paramtype.get_type_id() == string_type_id &&
             paramtype.extended<ndt::string_type>()->get_encoding() == string_encoding_utf_8) {
-          reinterpret_cast<string *>(data)->begin = const_cast<char *>(value);
-          reinterpret_cast<string *>(data)->end = const_cast<char *>(value + N - 1);
+          reinterpret_cast<string *>(data)->m_begin = const_cast<char *>(value);
+          reinterpret_cast<string *>(data)->m_end = const_cast<char *>(value + N - 1);
         } else {
           typed_data_assign(paramtype, arrmeta, data, ndt::fixed_string_type::make(N, string_encoding_utf_8), NULL,
                             value);

@@ -92,9 +92,9 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
     intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
     intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
 
-    if (dst_d->begin != NULL) {
+    if (dst_d->begin() != NULL) {
       throw runtime_error("Cannot assign to an already initialized dynd string");
-    } else if (src_d->begin == NULL) {
+    } else if (src_d->begin() == NULL) {
       // Allow uninitialized -> uninitialized assignment as a special case, for
       // (future) missing data support
       return;
@@ -103,8 +103,8 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
     // If the blockrefs are different, require a copy operation
     if (dst_md->blockref != src_md->blockref) {
       char *dst_begin = NULL, *dst_current, *dst_end = NULL;
-      const char *src_begin = src_d->begin;
-      const char *src_end = src_d->end;
+      const char *src_begin = src_d->begin();
+      const char *src_end = src_d->end();
       next_unicode_codepoint_t next_fn = m_next_fn;
       append_unicode_codepoint_t append_fn = m_append_fn;
       uint32_t cp;
@@ -136,8 +136,8 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
       allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
       // Set the output
-      dst_d->begin = dst_begin;
-      dst_d->end = dst_end;
+      dst_d->m_begin = dst_begin;
+      dst_d->m_end = dst_end;
     } else if (m_dst_encoding == m_src_encoding) {
       // Copy the pointers from the source string
       *dst_d = *src_d;
@@ -183,7 +183,7 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
     intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
 
-    if (dst_d->begin != NULL) {
+    if (dst_d->m_begin != NULL) {
       throw runtime_error("Cannot assign to an already initialized dynd string");
     }
 
@@ -225,8 +225,8 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
     // Set the output
-    dst_d->begin = dst_begin;
-    dst_d->end = dst_end;
+    dst_d->m_begin = dst_begin;
+    dst_d->m_end = dst_end;
   }
 };
 } // anonymous namespace
@@ -261,8 +261,8 @@ struct blockref_string_to_fixed_string_assign_ck : nd::base_kernel<blockref_stri
   {
     char *dst_end = dst + m_dst_data_size;
     const dynd::string *src_d = reinterpret_cast<const dynd::string *>(src[0]);
-    const char *src_begin = src_d->begin;
-    const char *src_end = src_d->end;
+    const char *src_begin = src_d->begin();
+    const char *src_end = src_d->end();
     next_unicode_codepoint_t next_fn = m_next_fn;
     append_unicode_codepoint_t append_fn = m_append_fn;
     uint32_t cp;

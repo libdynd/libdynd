@@ -42,8 +42,9 @@ namespace ndt {
     const std::string get_field_name(intptr_t i) const
     {
       const string &std(get_field_name_raw(i));
-      return std::string(std.begin, std.end);
+      return std::string(std.begin(), std.end());
     }
+
     /**
      * Gets the field index for the given name. Returns -1 if
      * the struct doesn't have a field of the given name.

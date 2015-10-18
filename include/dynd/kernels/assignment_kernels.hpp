@@ -1965,7 +1965,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         const string *std = reinterpret_cast<string *>(src[0]);
-        parse::string_to_bool(dst, std->begin, std->end, true, m_errmode);
+        parse::string_to_bool(dst, std->begin(), std->end(), true, m_errmode);
       }
     };
 
@@ -1976,7 +1976,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         const string *std = reinterpret_cast<string *>(src[0]);
-        parse::string_to_number(dst, m_tid, std->begin, std->end, true, m_errmode);
+        parse::string_to_number(dst, m_tid, std->begin(), std->end(), true, m_errmode);
       }
     };
 
@@ -1994,7 +1994,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         const string *std = reinterpret_cast<string *>(src[0]);
-        if (parse::matches_option_type_na_token(std->begin, std->end)) {
+        if (parse::matches_option_type_na_token(std->begin(), std->end())) {
           // It's not available, assign an NA
           ckernel_prefix *dst_assign_na = get_child(m_dst_assign_na_offset);
           expr_single_t dst_assign_na_fn = dst_assign_na->get_function<expr_single_t>();

@@ -425,7 +425,7 @@ namespace gfunc {
     inline static std::string unbox(char *v)
     {
       string *p = reinterpret_cast<string *>(v);
-      return std::string(p->begin, p->end);
+      return std::string(p->begin(), p->end());
     }
   };
 

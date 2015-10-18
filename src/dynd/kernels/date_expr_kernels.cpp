@@ -62,14 +62,14 @@ struct date_strftime_kernel_extra {
 
     // Call strftime, growing the string buffer if needed so it fits
     size_t str_size = e->format_size + 16;
-    allocator->allocate(dst_md->blockref, str_size, 1, &dst_d->begin,
-                        &dst_d->end);
+    allocator->allocate(dst_md->blockref, str_size, 1, &dst_d->m_begin,
+                        &dst_d->m_end);
     for (int attempt = 0; attempt < 3; ++attempt) {
       // Force errno to zero
       errno = 0;
-      size_t len = strftime(dst_d->begin, str_size, e->format, &tm_val);
+      size_t len = strftime(dst_d->begin(), str_size, e->format, &tm_val);
       if (len > 0) {
-        allocator->resize(dst_md->blockref, len, &dst_d->begin, &dst_d->end);
+        allocator->resize(dst_md->blockref, len, &dst_d->m_begin, &dst_d->m_end);
         break;
       } else {
         if (errno != 0) {
@@ -79,8 +79,8 @@ struct date_strftime_kernel_extra {
           throw runtime_error(ss.str());
         }
         str_size *= 2;
-        allocator->resize(dst_md->blockref, str_size, &dst_d->begin,
-                          &dst_d->end);
+        allocator->resize(dst_md->blockref, str_size, &dst_d->m_begin,
+                          &dst_d->m_end);
       }
     }
   }
@@ -114,14 +114,14 @@ struct date_strftime_kernel_extra {
 
       // Call strftime, growing the string buffer if needed so it fits
       size_t str_size = format_size + 16;
-      allocator->allocate(dst_md->blockref, str_size, 1, &dst_d->begin,
-                          &dst_d->end);
+      allocator->allocate(dst_md->blockref, str_size, 1, &dst_d->m_begin,
+                          &dst_d->m_end);
       for (int attempt = 0; attempt < 3; ++attempt) {
         // Force errno to zero
         errno = 0;
-        size_t len = strftime(dst_d->begin, str_size, format, &tm_val);
+        size_t len = strftime(dst_d->begin(), str_size, format, &tm_val);
         if (len > 0) {
-          allocator->resize(dst_md->blockref, len, &dst_d->begin, &dst_d->end);
+          allocator->resize(dst_md->blockref, len, &dst_d->m_begin, &dst_d->m_end);
           break;
         } else {
           if (errno != 0) {
@@ -131,8 +131,8 @@ struct date_strftime_kernel_extra {
             throw runtime_error(ss.str());
           }
           str_size *= 2;
-          allocator->resize(dst_md->blockref, str_size, &dst_d->begin,
-                            &dst_d->end);
+          allocator->resize(dst_md->blockref, str_size, &dst_d->m_begin,
+                            &dst_d->m_end);
         }
       }
       dst += dst_stride;

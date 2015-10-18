@@ -28,22 +28,20 @@ struct DYND_API string_type_arrmeta {
 namespace ndt {
 
   class DYND_API string_type : public base_string_type {
-    string_encoding_t m_encoding;
-
   public:
     string_type();
 
     virtual ~string_type();
 
-    inline string_encoding_t get_encoding() const
+    string_encoding_t get_encoding() const
     {
-      return m_encoding;
+      return string_encoding_utf_8;
     }
 
     /** Alignment of the string data being pointed to. */
-    inline size_t get_target_alignment() const
+    size_t get_target_alignment() const
     {
-      return string_encoding_char_size_table[m_encoding];
+      return string_encoding_char_size_table[string_encoding_utf_8];
     }
 
     void get_string_range(const char **out_begin, const char **out_end, const char *arrmeta, const char *data) const;

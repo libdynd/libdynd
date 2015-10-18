@@ -106,10 +106,10 @@ void ndt::callable_type::print_type(std::ostream &o) const
     // TODO: names should be validated on input, not just
     //       printed specially like in struct_type.
     const string &an = get_kwd_name_raw(i);
-    if (is_simple_identifier_name(an.begin, an.end)) {
-      o.write(an.begin, an.end - an.begin);
+    if (is_simple_identifier_name(an.begin(), an.end())) {
+      o.write(an.begin(), an.end() - an.begin());
     } else {
-      print_escaped_utf8_string(o, an.begin, an.end, true);
+      print_escaped_utf8_string(o, an.begin(), an.end(), true);
     }
     o << ": " << get_kwd_type(i);
   }

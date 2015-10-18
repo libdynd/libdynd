@@ -55,10 +55,10 @@ void ndt::struct_type::print_type(std::ostream &o) const
       o << ", ";
     }
     const string &fn = get_field_name_raw(i);
-    if (is_simple_identifier_name(fn.begin, fn.end)) {
-      o.write(fn.begin, fn.end - fn.begin);
+    if (is_simple_identifier_name(fn.begin(), fn.end())) {
+      o.write(fn.begin(), fn.end() - fn.begin());
     } else {
-      print_escaped_utf8_string(o, fn.begin, fn.end, true);
+      print_escaped_utf8_string(o, fn.begin(), fn.end(), true);
     }
     o << ": " << get_field_type(i);
   }
@@ -200,7 +200,7 @@ void ndt::struct_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
     if (!field_dt.is_builtin() && field_dt.extended()->get_arrmeta_size() > 0) {
       o << indent << " field " << i << " (name ";
       const string &fnr = get_field_name_raw(i);
-      o.write(fnr.begin, fnr.end - fnr.begin);
+      o.write(fnr.begin(), fnr.end() - fnr.begin());
       o << ") arrmeta:\n";
       field_dt.extended()->arrmeta_debug_print(arrmeta + arrmeta_offsets[i], o, indent + "  ");
     }

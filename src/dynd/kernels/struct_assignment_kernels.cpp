@@ -65,7 +65,7 @@ size_t dynd::make_struct_assignment_kernel(void *ckb, intptr_t ckb_offset,
   // Match up the fields
   for (intptr_t i = 0; i != field_count; ++i) {
     const string &dst_name = dst_sd->get_field_name_raw(i);
-    intptr_t src_i = src_sd->get_field_index(dst_name.begin, dst_name.end);
+    intptr_t src_i = src_sd->get_field_index(dst_name.begin(), dst_name.end());
     if (src_i < 0) {
       stringstream ss;
       ss << "cannot assign dynd struct " << src_struct_tp << " to "
