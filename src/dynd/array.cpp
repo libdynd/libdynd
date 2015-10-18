@@ -218,8 +218,7 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
                                            dt.get_data_alignment(), &data_ptr));
   // Set the string extents
   bytes_data_ptr = inc_to_alignment(data_ptr + dt.get_data_size(), alignment);
-  ((char **)data_ptr)[0] = bytes_data_ptr;
-  ((char **)data_ptr)[1] = bytes_data_ptr + len;
+  reinterpret_cast<bytes *>(data_ptr)->assign(bytes_data_ptr, len);
   // Copy the string data
   memcpy(bytes_data_ptr, data, len);
   // Set the array arrmeta
@@ -244,8 +243,7 @@ nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t D
                                            dt.get_data_alignment(), &data_ptr));
   // Set the string extents
   string_ptr = data_ptr + dt.get_data_size();
-  ((char **)data_ptr)[0] = string_ptr;
-  ((char **)data_ptr)[1] = string_ptr + len;
+  reinterpret_cast<string *>(data_ptr)->assign(string_ptr, len);
   // Copy the string data
   memcpy(string_ptr, str, len);
   // Set the array arrmeta
@@ -1794,8 +1792,7 @@ nd::array nd::memmap(const std::string &filename, intptr_t begin, intptr_t end, 
   nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size(),
                                            dt.get_data_alignment(), &data_ptr));
   // Set the bytes extents
-  ((char **)data_ptr)[0] = mm_ptr;
-  ((char **)data_ptr)[1] = mm_ptr + mm_size;
+  reinterpret_cast<bytes *>(data_ptr)->assign(mm_ptr, mm_size);
   // Set the array arrmeta
   array_preamble *ndo = result.get_ndo();
   ndo->m_type = dt.release();

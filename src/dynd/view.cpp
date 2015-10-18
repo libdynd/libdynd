@@ -254,8 +254,7 @@ static nd::array view_as_bytes(const nd::array &arr, const ndt::type &tp)
   nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(), tp.get_data_size(),
                                            tp.get_data_alignment(), &result_data_ptr));
   // Set the bytes extents
-  ((char **)result_data_ptr)[0] = data_ptr;
-  ((char **)result_data_ptr)[1] = data_ptr + data_dim_size;
+  reinterpret_cast<bytes *>(result_data_ptr)->assign(data_ptr, data_dim_size);
   // Set the array arrmeta
   array_preamble *ndo = result.get_ndo();
   ndo->m_type = ndt::type(tp).release();

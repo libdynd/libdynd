@@ -11,34 +11,47 @@ namespace dynd {
 
 class DYND_API bytes {
 protected:
-  char *m_begin;
-  char *m_end;
+  char *m_data;
+  size_t m_size;
 
 public:
-  void assign(char *begin, size_t size)
+  bytes() : m_data(NULL), m_size(0)
   {
-    m_begin = begin;
-    m_end = m_begin + size;
+  }
+
+  bytes(char *data, size_t size) : m_data(data), m_size(size)
+  {
+  }
+
+  size_t size() const
+  {
+    return m_size;
+  }
+
+  void assign(char *data, size_t size)
+  {
+    m_data = data;
+    m_size = size;
   }
 
   char *begin()
   {
-    return m_begin;
+    return m_data;
   }
 
   const char *begin() const
   {
-    return m_begin;
+    return m_data;
   }
 
   char *end()
   {
-    return m_end;
+    return m_data + m_size;
   }
 
   const char *end() const
   {
-    return m_end;
+    return m_data + m_size;
   }
 };
 

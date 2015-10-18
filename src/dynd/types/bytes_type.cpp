@@ -16,8 +16,8 @@ using namespace std;
 using namespace dynd;
 
 ndt::bytes_type::bytes_type(size_t alignment)
-    : base_bytes_type(bytes_type_id, bytes_kind, sizeof(bytes_type_data), sizeof(const char *),
-                      type_flag_zeroinit | type_flag_blockref, sizeof(bytes_type_arrmeta)),
+    : base_bytes_type(bytes_type_id, bytes_kind, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_blockref,
+                      sizeof(bytes_type_arrmeta)),
       m_alignment(alignment)
 {
   if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
