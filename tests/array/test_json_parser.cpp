@@ -247,7 +247,7 @@ TEST(JSONParser, OptionString)
 
   a = parse_json(ndt::type("?string"), "null");
   EXPECT_EQ(ndt::type("?string"), a.get_type());
-  EXPECT_EQ(NULL, reinterpret_cast<const dynd::string *>(a.get_readonly_originptr())->begin);
+  EXPECT_EQ(NULL, reinterpret_cast<const dynd::string *>(a.get_readonly_originptr())->begin());
   EXPECT_THROW(a.as<std::string>(), overflow_error);
 
   a = parse_json("9 * ?string", "[null, \"123\", null, \"456\", \"0\", \"789\", null, null, null]");

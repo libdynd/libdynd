@@ -483,8 +483,8 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst, const
   ndt::type dt = ndt::string_type::make();
   dynd::string d;
   string_type_arrmeta md;
-  d.begin = const_cast<char *>(str_begin);
-  d.end = const_cast<char *>(str_end);
+  d.m_begin = const_cast<char *>(str_begin);
+  d.m_end = const_cast<char *>(str_end);
   md.blockref = NULL;
 
   ckernel_builder<kernel_request_host> k;

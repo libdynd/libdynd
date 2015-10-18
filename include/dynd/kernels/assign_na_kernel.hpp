@@ -205,7 +205,7 @@ namespace nd {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         string *std = reinterpret_cast<string *>(dst);
-        if (std->begin != NULL) {
+        if (std->begin() != NULL) {
           throw std::invalid_argument("Cannot assign an NA to a dynd string after "
                                       "it has been allocated");
         }
@@ -216,7 +216,7 @@ namespace nd {
       {
         for (size_t i = 0; i != count; ++i, dst += dst_stride) {
           string *std = reinterpret_cast<string *>(dst);
-          if (std->begin != NULL) {
+          if (std->begin() != NULL) {
             throw std::invalid_argument("Cannot assign an NA to a dynd string after "
                                         "it has been allocated");
           }

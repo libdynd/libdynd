@@ -193,7 +193,7 @@ static void format_json_dynamic(output_data &out, const ndt::type &dt, const cha
   if (dt.get_type_id() == json_type_id) {
     // Copy the JSON data directly
     const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
-    out.write(d->begin, d->end);
+    out.write(d->begin(), d->end());
   } else {
     stringstream ss;
     ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
@@ -258,7 +258,7 @@ static void format_json_struct(output_data &out, const ndt::type &dt, const char
     out.write('{');
     for (intptr_t i = 0; i < field_count; ++i) {
       const dynd::string &fname = bsd->get_field_name_raw(i);
-      format_json_encoded_string(out, fname.begin, fname.end, string_encoding_utf_8);
+      format_json_encoded_string(out, fname.begin(), fname.end(), string_encoding_utf_8);
       out.write(':');
       ::format_json(out, bsd->get_field_type(i), arrmeta + arrmeta_offsets[i], data + data_offsets[i]);
       if (i != field_count - 1) {
@@ -375,9 +375,9 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
 
   // Shrink the memory to fit, and set the pointers in the output
   string *d = reinterpret_cast<string *>(result.get_readwrite_originptr());
-  d->begin = out.out_begin;
-  d->end = out.out_capacity_end;
-  out.api->resize(out.blockref, out.out_end - out.out_begin, &d->begin, &d->end);
+  d->m_begin = out.out_begin;
+  d->m_end = out.out_capacity_end;
+  out.api->resize(out.blockref, out.out_end - out.out_begin, &d->m_begin, &d->m_end);
 
   // Finalize processing and mark the result as immutable
   result.get_type().extended()->arrmeta_finalize_buffers(result.get_arrmeta());

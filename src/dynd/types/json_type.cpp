@@ -38,8 +38,8 @@ void ndt::json_type::get_string_range(const char **out_begin,
                                       const char *DYND_UNUSED(arrmeta),
                                       const char *data) const
 {
-  *out_begin = reinterpret_cast<const json_type_data *>(data)->begin;
-  *out_end = reinterpret_cast<const json_type_data *>(data)->end;
+  *out_begin = reinterpret_cast<const json_type_data *>(data)->begin();
+  *out_end = reinterpret_cast<const json_type_data *>(data)->end();
 }
 
 void ndt::json_type::set_from_utf8_string(const char *arrmeta, char *dst,
@@ -59,10 +59,10 @@ void ndt::json_type::set_from_utf8_string(const char *arrmeta, char *dst,
       get_memory_block_pod_allocator_api(data_md->blockref);
 
   allocator->allocate(data_md->blockref, utf8_end - utf8_begin, 1,
-                      &reinterpret_cast<json_type_data *>(dst)->begin,
-                      &reinterpret_cast<json_type_data *>(dst)->end);
+                      &reinterpret_cast<json_type_data *>(dst)->m_begin,
+                      &reinterpret_cast<json_type_data *>(dst)->m_end);
 
-  memcpy(reinterpret_cast<json_type_data *>(dst)->begin, utf8_begin,
+  memcpy(reinterpret_cast<json_type_data *>(dst)->begin(), utf8_begin,
          utf8_end - utf8_begin);
 }
 
@@ -74,8 +74,8 @@ void ndt::json_type::print_data(std::ostream &o,
   next_unicode_codepoint_t next_fn;
   next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8,
                                                 assign_error_nocheck);
-  const char *begin = reinterpret_cast<const json_type_data *>(data)->begin;
-  const char *end = reinterpret_cast<const json_type_data *>(data)->end;
+  const char *begin = reinterpret_cast<const json_type_data *>(data)->begin();
+  const char *end = reinterpret_cast<const json_type_data *>(data)->end();
 
   // Print as an escaped string
   o << "\"";
@@ -224,16 +224,16 @@ struct string_to_json_ck : nd::base_kernel<string_to_json_ck, 1> {
     if (m_validate) {
       try
       {
-        validate_json(out_d->begin, out_d->end);
+        validate_json(out_d->begin(), out_d->end());
       }
       catch (const std::exception &)
       {
         // Free the memory allocated for the output json data
         memory_block_pod_allocator_api *allocator =
             get_memory_block_pod_allocator_api(md->blockref);
-        allocator->allocate(md->blockref, 0, 1, &out_d->begin, &out_d->end);
-        out_d->begin = NULL;
-        out_d->end = NULL;
+        allocator->allocate(md->blockref, 0, 1, &out_d->m_begin, &out_d->m_end);
+        out_d->m_begin = NULL;
+        out_d->m_end = NULL;
         throw;
       }
     }
@@ -322,6 +322,6 @@ void ndt::json_type::make_string_iter(dim_iter *out_di,
   if (md->blockref != NULL) {
     dataref = memory_block_ptr(md->blockref);
   }
-  iter::make_string_iter(out_di, encoding, string_encoding_utf_8, d->begin,
-                         d->end, dataref, buffer_max_mem, ectx);
+  iter::make_string_iter(out_di, encoding, string_encoding_utf_8, d->begin(),
+                         d->end(), dataref, buffer_max_mem, ectx);
 }

@@ -22,8 +22,7 @@ using namespace dynd;
 
 ndt::string_type::string_type()
     : base_string_type(string_type_id, sizeof(string), sizeof(const char *), type_flag_zeroinit | type_flag_blockref,
-                       sizeof(string_type_arrmeta)),
-      m_encoding(string_encoding_utf_8)
+                       sizeof(string_type_arrmeta))
 {
 }
 
@@ -34,8 +33,8 @@ ndt::string_type::~string_type()
 void ndt::string_type::get_string_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                         const char *data) const
 {
-  *out_begin = reinterpret_cast<const string *>(data)->begin;
-  *out_end = reinterpret_cast<const string *>(data)->end;
+  *out_begin = reinterpret_cast<const string *>(data)->begin();
+  *out_end = reinterpret_cast<const string *>(data)->end();
 }
 
 void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, const char *utf8_begin,
@@ -44,10 +43,10 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   const string_type_arrmeta *data_md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
   assign_error_mode errmode = ectx->errmode;
   const intptr_t src_charsize = 1;
-  intptr_t dst_charsize = string_encoding_char_size_table[m_encoding];
+  intptr_t dst_charsize = string_encoding_char_size_table[string_encoding_utf_8];
   char *dst_begin = NULL, *dst_current, *dst_end = NULL;
   next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
-  append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(m_encoding, errmode);
+  append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8, errmode);
   uint32_t cp;
 
   memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(data_md->blockref);
@@ -76,17 +75,17 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   allocator->resize(data_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
   // Set the output
-  reinterpret_cast<string *>(dst)->begin = dst_begin;
-  reinterpret_cast<string *>(dst)->end = dst_end;
+  reinterpret_cast<string *>(dst)->m_begin = dst_begin;
+  reinterpret_cast<string *>(dst)->m_end = dst_end;
 }
 
 void ndt::string_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
   uint32_t cp;
   next_unicode_codepoint_t next_fn;
-  next_fn = get_next_unicode_codepoint_function(m_encoding, assign_error_nocheck);
-  const char *begin = reinterpret_cast<const string *>(data)->begin;
-  const char *end = reinterpret_cast<const string *>(data)->end;
+  next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, assign_error_nocheck);
+  const char *begin = reinterpret_cast<const string *>(data)->begin();
+  const char *end = reinterpret_cast<const string *>(data)->end();
 
   // Print as an escaped string
   o << "\"";
@@ -248,7 +247,7 @@ size_t ndt::string_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, 
 {
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
-      return make_string_comparison_kernel(ckb, ckb_offset, m_encoding, comptype, ectx);
+      return make_string_comparison_kernel(ckb, ckb_offset, string_encoding_utf_8, comptype, ectx);
     } else if (src1_dt.get_kind() == string_kind) {
       return make_general_string_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
                                                    comptype, ectx);
@@ -271,5 +270,5 @@ void ndt::string_type::make_string_iter(dim_iter *out_di, string_encoding_t enco
   if (md->blockref != NULL) {
     dataref = memory_block_ptr(md->blockref);
   }
-  iter::make_string_iter(out_di, encoding, m_encoding, d->begin, d->end, dataref, buffer_max_mem, ectx);
+  iter::make_string_iter(out_di, encoding, string_encoding_utf_8, d->begin(), d->end(), dataref, buffer_max_mem, ectx);
 }

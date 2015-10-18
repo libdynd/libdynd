@@ -38,17 +38,17 @@ inline void concat_one_string(
     // Get the size of the concatenated string
     size_t size = 0;
     for (size_t i = 0; i != nop; ++i) {
-        size += (s[i]->end - s[i]->begin);
+        size += (s[i]->end() - s[i]->begin());
     }
     // Allocate the output
     size_t alignment = 1; // NOTE: This kernel is hardcoded for UTF-8, alignment 1
     allocator->allocate(dst_blockref, size, alignment,
-                    &d->begin, &d->end);
+                    &d->m_begin, &d->m_end);
     // Copy the string data
-    char *dst = d->begin;
+    char *dst = d->begin();
     for (size_t i = 0; i != nop; ++i) {
-        size_t op_size = (s[i]->end - s[i]->begin);
-        DYND_MEMCPY(dst, s[i]->begin, op_size);
+        size_t op_size = (s[i]->end() - s[i]->begin());
+        DYND_MEMCPY(dst, s[i]->begin(), op_size);
         dst += op_size;
     }
 }
