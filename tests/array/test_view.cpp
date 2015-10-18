@@ -70,8 +70,8 @@ TEST(View, AsBytes)
   EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
   // Confirm it's pointing to the right memory with the right size
   btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
-  EXPECT_EQ(a.get_readonly_originptr(), btd->begin);
-  EXPECT_EQ(4, btd->end - btd->begin);
+  EXPECT_EQ(a.get_readonly_originptr(), btd->begin());
+  EXPECT_EQ(4, btd->end() - btd->begin());
 
   // View a 1D array as bytes
   double a_data[2] = {1, 2};
@@ -83,8 +83,8 @@ TEST(View, AsBytes)
   EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
   // Confirm it's pointing to the right memory with the right size
   btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
-  EXPECT_EQ(a.get_readonly_originptr(), btd->begin);
-  EXPECT_EQ(2 * 8, btd->end - btd->begin);
+  EXPECT_EQ(a.get_readonly_originptr(), btd->begin());
+  EXPECT_EQ(2 * 8, btd->end() - btd->begin());
 
   // View a 2D array as bytes
   double a_data2[2][3] = {{1, 2, 3}, {1, 2, 5}};
@@ -96,8 +96,8 @@ TEST(View, AsBytes)
   EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
   // Confirm it's pointing to the right memory with the right size
   btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
-  EXPECT_EQ(a.get_readonly_originptr(), btd->begin);
-  EXPECT_EQ(2 * 3 * 8, btd->end - btd->begin);
+  EXPECT_EQ(a.get_readonly_originptr(), btd->begin());
+  EXPECT_EQ(2 * 3 * 8, btd->end() - btd->begin());
   EXPECT_THROW(nd::view(a(irange(), irange(0, 2)), ndt::bytes_type::make(1)), type_error);
 
   // View an array with var outer dimension
@@ -111,8 +111,8 @@ TEST(View, AsBytes)
   // Confirm it's pointing to the right memory with the right size
   const var_dim_type_data *vdt_data = reinterpret_cast<const var_dim_type_data *>(a.get_readonly_originptr());
   btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
-  EXPECT_EQ(vdt_data->begin, btd->begin);
-  EXPECT_EQ(2 * 3 * 2, btd->end - btd->begin);
+  EXPECT_EQ(vdt_data->begin, btd->begin());
+  EXPECT_EQ(2 * 3 * 2, btd->end() - btd->begin());
 }
 
 /*
@@ -155,7 +155,7 @@ TEST(View, FromBytes)
   } else {
     EXPECT_EQ(a.get_data_memblock().get(), b.get_ndo()->data.ref);
   }
-  EXPECT_EQ(btd->begin, b.get_readonly_originptr());
+  EXPECT_EQ(btd->begin(), b.get_readonly_originptr());
 
   float y[3] = {1.f, 2.5f, -1.25f};
   a = nd::make_bytes_array(reinterpret_cast<const char *>(&y), sizeof(y), 4);
@@ -171,7 +171,7 @@ TEST(View, FromBytes)
   } else {
     EXPECT_EQ(a.get_data_memblock().get(), b.get_ndo()->data.ref);
   }
-  EXPECT_EQ(btd->begin, b.get_readonly_originptr());
+  EXPECT_EQ(btd->begin(), b.get_readonly_originptr());
 }
 
 TEST(View, WeakerAlignment)
@@ -197,11 +197,11 @@ TEST(View, StringAsBytes)
   a = parse_json("string", "\"\\U00024B62\"");
   b = nd::view(a, "bytes");
   const bytes_type_data *btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
-  ASSERT_EQ(4, btd->end - btd->begin);
-  EXPECT_EQ('\xF0', btd->begin[0]);
-  EXPECT_EQ('\xA4', btd->begin[1]);
-  EXPECT_EQ('\xAD', btd->begin[2]);
-  EXPECT_EQ('\xA2', btd->begin[3]);
+  ASSERT_EQ(4, btd->end() - btd->begin());
+  EXPECT_EQ('\xF0', btd->begin()[0]);
+  EXPECT_EQ('\xA4', btd->begin()[1]);
+  EXPECT_EQ('\xAD', btd->begin()[2]);
+  EXPECT_EQ('\xA2', btd->begin()[3]);
 }
 
 TEST(View, NewAxis)

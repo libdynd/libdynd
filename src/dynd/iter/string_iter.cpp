@@ -111,7 +111,7 @@ void iter::make_string_iter(dim_iter *out_di, string_encoding_t iter_encoding, s
       string_type_arrmeta md;
       md.blockref = ref.get();
       string d;
-      d.assign(const_cast<char *>(data_begin), const_cast<char *>(data_end));
+      d.assign(const_cast<char *>(data_begin), data_end - data_begin);
       tmp.val_assign(ndt::string_type::make(), reinterpret_cast<const char *>(&md), reinterpret_cast<const char *>(&d),
                      ectx);
       tmp.get_type().extended<ndt::string_type>()->make_string_iter(out_di, iter_encoding, tmp.get_arrmeta(),

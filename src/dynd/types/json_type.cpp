@@ -53,7 +53,7 @@ void ndt::json_type::set_from_utf8_string(const char *arrmeta, char *dst, const 
 
   char *begin, *end;
   allocator->allocate(data_md->blockref, utf8_end - utf8_begin, 1, &begin, &end);
-  reinterpret_cast<json_type_data *>(dst)->assign(begin, end);
+  reinterpret_cast<json_type_data *>(dst)->assign(begin, end - begin);
 
   memcpy(reinterpret_cast<json_type_data *>(dst)->begin(), utf8_begin, utf8_end - utf8_begin);
 }
@@ -207,7 +207,7 @@ struct string_to_json_ck : nd::base_kernel<string_to_json_ck, 1> {
         memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
         char *begin, *end;
         allocator->allocate(md->blockref, 0, 1, &begin, &end);
-        out_d->assign(NULL, NULL);
+        out_d->assign(NULL, 0);
         throw;
       }
     }

@@ -75,7 +75,7 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   allocator->resize(data_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
   // Set the output
-  reinterpret_cast<string *>(dst)->assign(dst_begin, dst_end);
+  reinterpret_cast<string *>(dst)->assign(dst_begin, dst_end - dst_begin);
 }
 
 void ndt::string_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const

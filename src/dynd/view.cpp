@@ -284,8 +284,8 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
   } else {
     data_ref = arr.get_data_memblock();
   }
-  char *data_ptr = bytes_d->begin;
-  intptr_t data_size = bytes_d->end - data_ptr;
+  char *data_ptr = bytes_d->begin();
+  intptr_t data_size = bytes_d->end() - data_ptr;
 
   size_t tp_data_size = tp.get_data_size();
   if (tp_data_size > 0) {

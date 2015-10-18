@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/bytes.hpp>
 #include <dynd/type.hpp>
 #include <dynd/types/base_bytes_type.hpp>
 #include <dynd/typed_data_assign.hpp>
@@ -20,10 +21,7 @@ struct DYND_API bytes_type_arrmeta {
   memory_block_data *blockref;
 };
 
-struct DYND_API bytes_type_data {
-  char *begin;
-  char *end;
-};
+typedef bytes bytes_type_data;
 
 namespace ndt {
 
@@ -40,23 +38,22 @@ namespace ndt {
     virtual ~bytes_type();
 
     /** Alignment of the bytes data being pointed to. */
-    size_t get_target_alignment() const { return m_alignment; }
+    size_t get_target_alignment() const
+    {
+      return m_alignment;
+    }
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
-    void get_bytes_range(const char **out_begin, const char **out_end,
-                         const char *arrmeta, const char *data) const;
-    void set_bytes_data(const char *arrmeta, char *data,
-                        const char *bytes_begin, const char *bytes_end) const;
+    void get_bytes_range(const char **out_begin, const char **out_end, const char *arrmeta, const char *data) const;
+    void set_bytes_data(const char *arrmeta, char *data, const char *bytes_begin, const char *bytes_end) const;
 
     bool is_unique_data_owner(const char *arrmeta) const;
     type get_canonical_type() const;
 
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                   const char *arrmeta, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
@@ -68,18 +65,14 @@ namespace ndt {
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                             const std::string &indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                    const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta,
-                                    kernel_request_t kernreq,
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                     const eval::eval_context *ectx) const;
 
-    void get_dynamic_type_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
+    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                     size_t *out_count) const;
 
     static const type &make()
     {

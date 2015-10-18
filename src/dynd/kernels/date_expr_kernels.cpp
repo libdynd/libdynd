@@ -63,14 +63,14 @@ struct date_strftime_kernel_extra {
     size_t str_size = e->format_size + 16;
     char *begin, *end;
     allocator->allocate(dst_md->blockref, str_size, 1, &begin, &end);
-    dst_d->assign(begin, end);
+    dst_d->assign(begin, end - begin);
     for (int attempt = 0; attempt < 3; ++attempt) {
       // Force errno to zero
       errno = 0;
       size_t len = strftime(dst_d->begin(), str_size, e->format, &tm_val);
       if (len > 0) {
         allocator->resize(dst_md->blockref, len, &begin, &end);
-        dst_d->assign(begin, end);
+        dst_d->assign(begin, end - begin);
         break;
       } else {
         if (errno != 0) {
@@ -80,7 +80,7 @@ struct date_strftime_kernel_extra {
         }
         str_size *= 2;
         allocator->resize(dst_md->blockref, str_size, &begin, &end);
-        dst_d->assign(begin, end);
+        dst_d->assign(begin, end - begin);
       }
     }
   }
@@ -114,14 +114,14 @@ struct date_strftime_kernel_extra {
       size_t str_size = format_size + 16;
       char *begin, *end;
       allocator->allocate(dst_md->blockref, str_size, 1, &begin, &end);
-      dst_d->assign(begin, end);
+      dst_d->assign(begin, end - begin);
       for (int attempt = 0; attempt < 3; ++attempt) {
         // Force errno to zero
         errno = 0;
         size_t len = strftime(dst_d->begin(), str_size, format, &tm_val);
         if (len > 0) {
           allocator->resize(dst_md->blockref, len, &begin, &end);
-          dst_d->assign(begin, end);
+          dst_d->assign(begin, end - begin);
           break;
         } else {
           if (errno != 0) {
@@ -131,7 +131,7 @@ struct date_strftime_kernel_extra {
           }
           str_size *= 2;
           allocator->resize(dst_md->blockref, str_size, &begin, &end);
-          dst_d->assign(begin, end);
+          dst_d->assign(begin, end - begin);
         }
       }
       dst += dst_stride;
