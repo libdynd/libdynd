@@ -10,6 +10,14 @@
 namespace dynd {
 
 class DYND_API string : public bytes {
+public:
+  string()
+  {
+  }
+
+  string(char *data, size_t size) : bytes(data, size)
+  {
+  }
 };
 
 bool operator<(const string &lhs, const string &rhs);
