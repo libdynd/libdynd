@@ -10,11 +10,16 @@
 namespace dynd {
 
 class DYND_API string {
-public:
   char *m_begin;
   char *m_end;
 
 public:
+  void assign(char *begin, char *end)
+  {
+    m_begin = begin;
+    m_end = end;
+  }
+
   char *begin()
   {
     return m_begin;
