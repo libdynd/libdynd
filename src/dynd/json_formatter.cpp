@@ -378,7 +378,7 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
   char *begin = out.out_begin;
   char *end = out.out_capacity_end;
   out.api->resize(out.blockref, out.out_end - out.out_begin, &begin, &end);
-  d->assign(begin, end);
+  d->assign(begin, end - begin);
 
   // Finalize processing and mark the result as immutable
   result.get_type().extended()->arrmeta_finalize_buffers(result.get_arrmeta());

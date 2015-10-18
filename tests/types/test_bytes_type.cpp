@@ -93,7 +93,7 @@ TEST(BytesDType, Alignment) {
     a = nd::make_bytes_array(reinterpret_cast<const char *>(&data[0]), sizeof(data), 16);
     EXPECT_EQ(ndt::type("bytes[align=16]"), a.get_type());
     btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
-    EXPECT_TRUE(offset_is_aligned(reinterpret_cast<size_t>(btd->begin), 16));
+    EXPECT_TRUE(offset_is_aligned(reinterpret_cast<size_t>(btd->begin()), 16));
 }
 
 TEST(Bytes, Summary) {

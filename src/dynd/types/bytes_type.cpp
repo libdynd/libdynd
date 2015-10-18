@@ -34,8 +34,8 @@ ndt::bytes_type::~bytes_type()
 void ndt::bytes_type::get_bytes_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                       const char *data) const
 {
-  *out_begin = reinterpret_cast<const bytes_type_data *>(data)->begin;
-  *out_end = reinterpret_cast<const bytes_type_data *>(data)->end;
+  *out_begin = reinterpret_cast<const bytes_type_data *>(data)->begin();
+  *out_end = reinterpret_cast<const bytes_type_data *>(data)->end();
 }
 
 void ndt::bytes_type::set_bytes_data(const char *arrmeta, char *data, const char *bytes_begin,
@@ -47,15 +47,17 @@ void ndt::bytes_type::set_bytes_data(const char *arrmeta, char *data, const char
                         "have a pod memory block");
   }
   bytes_type_data *d = reinterpret_cast<bytes_type_data *>(data);
-  if (d->begin != NULL) {
+  if (d->begin() != NULL) {
     throw runtime_error("assigning to a bytes data element requires that it be "
                         "initialized to NULL");
   }
   memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
 
   // Allocate the output array data, then copy it
-  allocator->allocate(md->blockref, bytes_end - bytes_begin, get_target_alignment(), &d->begin, &d->end);
-  memcpy(d->begin, bytes_begin, bytes_end - bytes_begin);
+  char *begin, *end;
+  allocator->allocate(md->blockref, bytes_end - bytes_begin, get_target_alignment(), &begin, &end);
+  d->assign(begin, end - begin);
+  memcpy(d->begin(), bytes_begin, bytes_end - bytes_begin);
 }
 
 void ndt::bytes_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
@@ -96,7 +98,7 @@ void ndt::bytes_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, 
     out_shape[i] = -1;
   } else {
     const bytes_type_data *d = reinterpret_cast<const bytes_type_data *>(data);
-    out_shape[i] = d->end - d->begin;
+    out_shape[i] = d->end() - d->begin();
   }
   if (i + 1 < ndim) {
     stringstream ss;

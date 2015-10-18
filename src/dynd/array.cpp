@@ -290,7 +290,7 @@ nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t ar
   for (size_t i = 0; i < array_size; ++i) {
     size_t size = strlen(cstr_array[i]);
     memcpy(string_ptr, cstr_array[i], size);
-    string_arr_ptr->assign(string_ptr, string_ptr + size);
+    string_arr_ptr->assign(string_ptr, size);
     ++string_arr_ptr;
     string_ptr += size;
   }
@@ -326,7 +326,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
   for (size_t i = 0; i < array_size; ++i) {
     size_t size = str_array[i]->size();
     memcpy(string_ptr, str_array[i]->data(), size);
-    string_arr_ptr->assign(string_ptr, string_ptr + size);
+    string_arr_ptr->assign(string_ptr, size);
     ++string_arr_ptr;
     string_ptr += size;
   }
@@ -633,7 +633,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
   for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
     size_t size = vec[i].size();
     memcpy(string_ptr, vec[i].data(), size);
-    data[i].assign(string_ptr, string_ptr + size);
+    data[i].assign(string_ptr, size);
     string_ptr += size;
   }
   return result;

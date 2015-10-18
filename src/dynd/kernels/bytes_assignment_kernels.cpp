@@ -31,10 +31,10 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
     bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
     bytes_type_data *src_d = *reinterpret_cast<bytes_type_data *const *>(src);
 
-    if (dst_d->begin != NULL) {
+    if (dst_d->begin() != NULL) {
       throw runtime_error(
           "Cannot assign to an already initialized dynd string");
-    } else if (src_d->begin == NULL) {
+    } else if (src_d->begin() == NULL) {
       // Allow uninitialized -> uninitialized assignment as a special case, for
       // (future) missing data support
       return;
@@ -43,8 +43,8 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
     // If the blockrefs are different, require a copy operation
     if (dst_md->blockref != src_md->blockref) {
       char *dst_begin = NULL, *dst_end = NULL;
-      char *src_begin = src_d->begin;
-      char *src_end = src_d->end;
+      char *src_begin = src_d->begin();
+      char *src_end = src_d->end();
       memory_block_pod_allocator_api *allocator =
           get_memory_block_pod_allocator_api(dst_md->blockref);
 
@@ -53,8 +53,7 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
       memcpy(dst_begin, src_begin, src_end - src_begin);
 
       // Set the output
-      dst_d->begin = dst_begin;
-      dst_d->end = dst_end;
+      dst_d->assign(dst_begin, dst_end - dst_begin);
     } else if (dst_alignment <= src_alignment) {
       // Copy the pointers from the source bytes
       *dst_d = *src_d;
@@ -104,7 +103,7 @@ struct fixed_bytes_to_blockref_bytes_kernel
     char *src_end = src_begin + src_data_size;
     bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
 
-    if (dst_d->begin != NULL) {
+    if (dst_d->begin() != NULL) {
       throw runtime_error(
           "Cannot assign to an already initialized dynd string");
     }
@@ -117,8 +116,7 @@ struct fixed_bytes_to_blockref_bytes_kernel
     memcpy(dst_begin, src_begin, src_end - src_begin);
 
     // Set the output
-    dst_d->begin = dst_begin;
-    dst_d->end = dst_end;
+    dst_d->assign(dst_begin, dst_end - dst_begin);
   }
 };
 } // anonymous namespace
