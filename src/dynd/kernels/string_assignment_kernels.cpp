@@ -136,8 +136,7 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
       allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
       // Set the output
-      dst_d->m_begin = dst_begin;
-      dst_d->m_end = dst_end;
+      dst_d->assign(dst_begin, dst_end);
     } else if (m_dst_encoding == m_src_encoding) {
       // Copy the pointers from the source string
       *dst_d = *src_d;
@@ -183,7 +182,7 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
     intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
 
-    if (dst_d->m_begin != NULL) {
+    if (dst_d->begin() != NULL) {
       throw runtime_error("Cannot assign to an already initialized dynd string");
     }
 
@@ -225,8 +224,7 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
 
     // Set the output
-    dst_d->m_begin = dst_begin;
-    dst_d->m_end = dst_end;
+    dst_d->assign(dst_begin, dst_end);
   }
 };
 } // anonymous namespace

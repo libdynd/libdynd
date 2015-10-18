@@ -57,36 +57,35 @@ struct date_strftime_kernel_extra {
     disable_invalid_parameter_handler raii;
 #endif
     dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
-    memory_block_pod_allocator_api *allocator =
-        get_memory_block_pod_allocator_api(dst_md->blockref);
+    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
     // Call strftime, growing the string buffer if needed so it fits
     size_t str_size = e->format_size + 16;
-    allocator->allocate(dst_md->blockref, str_size, 1, &dst_d->m_begin,
-                        &dst_d->m_end);
+    char *begin, *end;
+    allocator->allocate(dst_md->blockref, str_size, 1, &begin, &end);
+    dst_d->assign(begin, end);
     for (int attempt = 0; attempt < 3; ++attempt) {
       // Force errno to zero
       errno = 0;
       size_t len = strftime(dst_d->begin(), str_size, e->format, &tm_val);
       if (len > 0) {
-        allocator->resize(dst_md->blockref, len, &dst_d->m_begin, &dst_d->m_end);
+        allocator->resize(dst_md->blockref, len, &begin, &end);
+        dst_d->assign(begin, end);
         break;
       } else {
         if (errno != 0) {
           stringstream ss;
-          ss << "error in strftime with format string \"" << e->format
-             << "\" to strftime";
+          ss << "error in strftime with format string \"" << e->format << "\" to strftime";
           throw runtime_error(ss.str());
         }
         str_size *= 2;
-        allocator->resize(dst_md->blockref, str_size, &dst_d->m_begin,
-                          &dst_d->m_end);
+        allocator->resize(dst_md->blockref, str_size, &begin, &end);
+        dst_d->assign(begin, end);
       }
     }
   }
 
-  static void strided_unary(ckernel_prefix *extra, char *dst,
-                            intptr_t dst_stride, char *const *src,
+  static void strided_unary(ckernel_prefix *extra, char *dst, intptr_t dst_stride, char *const *src,
                             const intptr_t *src_stride, size_t count)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
@@ -100,8 +99,7 @@ struct date_strftime_kernel_extra {
     // parameter handler is installed.
     disable_invalid_parameter_handler raii;
 #endif
-    memory_block_pod_allocator_api *allocator =
-        get_memory_block_pod_allocator_api(dst_md->blockref);
+    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
     char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
     for (size_t i = 0; i != count; ++i) {
@@ -114,25 +112,26 @@ struct date_strftime_kernel_extra {
 
       // Call strftime, growing the string buffer if needed so it fits
       size_t str_size = format_size + 16;
-      allocator->allocate(dst_md->blockref, str_size, 1, &dst_d->m_begin,
-                          &dst_d->m_end);
+      char *begin, *end;
+      allocator->allocate(dst_md->blockref, str_size, 1, &begin, &end);
+      dst_d->assign(begin, end);
       for (int attempt = 0; attempt < 3; ++attempt) {
         // Force errno to zero
         errno = 0;
         size_t len = strftime(dst_d->begin(), str_size, format, &tm_val);
         if (len > 0) {
-          allocator->resize(dst_md->blockref, len, &dst_d->m_begin, &dst_d->m_end);
+          allocator->resize(dst_md->blockref, len, &begin, &end);
+          dst_d->assign(begin, end);
           break;
         } else {
           if (errno != 0) {
             stringstream ss;
-            ss << "error in strftime with format string \"" << e->format
-               << "\" to strftime";
+            ss << "error in strftime with format string \"" << e->format << "\" to strftime";
             throw runtime_error(ss.str());
           }
           str_size *= 2;
-          allocator->resize(dst_md->blockref, str_size, &dst_d->m_begin,
-                            &dst_d->m_end);
+          allocator->resize(dst_md->blockref, str_size, &begin, &end);
+          dst_d->assign(begin, end);
         }
       }
       dst += dst_stride;
@@ -146,8 +145,7 @@ class date_strftime_kernel_generator : public expr_kernel_generator {
   std::string m_format;
 
 public:
-  date_strftime_kernel_generator(const std::string &format)
-      : expr_kernel_generator(true), m_format(format)
+  date_strftime_kernel_generator(const std::string &format) : expr_kernel_generator(true), m_format(format)
   {
   }
 
@@ -155,12 +153,9 @@ public:
   {
   }
 
-  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset,
-                          const ndt::type &dst_tp, const char *dst_arrmeta,
-                          size_t src_count, const ndt::type *src_tp,
-                          const char *const *src_arrmeta,
-                          kernel_request_t kernreq,
-                          const eval::eval_context *ectx) const
+  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                          size_t src_count, const ndt::type *src_tp, const char *const *src_arrmeta,
+                          kernel_request_t kernreq, const eval::eval_context *ectx) const
   {
     if (src_count != 1) {
       stringstream ss;
@@ -168,33 +163,27 @@ public:
       ss << "received " << src_count;
       throw runtime_error(ss.str());
     }
-    bool require_elwise = dst_tp.get_type_id() != string_type_id ||
-                          src_tp[0].get_type_id() != date_type_id;
+    bool require_elwise = dst_tp.get_type_id() != string_type_id || src_tp[0].get_type_id() != date_type_id;
     // If the types don't match the ones for this generator,
     // call the elementwise dimension handler to handle one dimension,
     // giving 'this' as the next kernel generator to call
     if (require_elwise) {
-      return make_elwise_dimension_expr_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-          kernreq, ectx, this);
+      return make_elwise_dimension_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+                                               kernreq, ectx, this);
     }
 
     date_strftime_kernel_extra *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck<date_strftime_kernel_extra>(ckb_offset);
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<date_strftime_kernel_extra>(ckb_offset);
     switch (kernreq) {
     case kernel_request_single:
-      e->base.function =
-          reinterpret_cast<void *>(&date_strftime_kernel_extra::single_unary);
+      e->base.function = reinterpret_cast<void *>(&date_strftime_kernel_extra::single_unary);
       break;
     case kernel_request_strided:
-      e->base.function =
-          reinterpret_cast<void *>(&date_strftime_kernel_extra::strided_unary);
+      e->base.function = reinterpret_cast<void *>(&date_strftime_kernel_extra::strided_unary);
       break;
     default: {
       stringstream ss;
-      ss << "date_strftime_kernel_generator: unrecognized request "
-         << (int)kernreq;
+      ss << "date_strftime_kernel_generator: unrecognized request " << (int)kernreq;
       throw runtime_error(ss.str());
     }
     }
@@ -263,8 +252,7 @@ struct date_replace_kernel_extra {
       if (day == numeric_limits<int32_t>::max()) {
         if (!ymd.is_valid()) {
           stringstream ss;
-          ss << "invalid replace resulting year/month/day " << year << "/"
-             << month << "/" << day;
+          ss << "invalid replace resulting year/month/day " << year << "/" << month << "/" << day;
           throw runtime_error(ss.str());
         }
       }
@@ -279,16 +267,14 @@ struct date_replace_kernel_extra {
         ymd.day = day + month_size + 1;
       } else {
         stringstream ss;
-        ss << "invalid day value " << day << " for year/month " << year << "/"
-           << month;
+        ss << "invalid day value " << day << " for year/month " << year << "/" << month;
         throw runtime_error(ss.str());
       }
     }
 
     *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
   }
-  static void strided_unary(ckernel_prefix *extra, char *dst,
-                            intptr_t dst_stride, char *const *src,
+  static void strided_unary(ckernel_prefix *extra, char *dst, intptr_t dst_stride, char *const *src,
                             const intptr_t *src_stride, size_t count)
   {
     const char *src0 = src[0];
@@ -315,12 +301,9 @@ public:
   {
   }
 
-  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset,
-                          const ndt::type &dst_tp, const char *dst_arrmeta,
-                          size_t src_count, const ndt::type *src_tp,
-                          const char *const *src_arrmeta,
-                          kernel_request_t kernreq,
-                          const eval::eval_context *ectx) const
+  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                          size_t src_count, const ndt::type *src_tp, const char *const *src_arrmeta,
+                          kernel_request_t kernreq, const eval::eval_context *ectx) const
   {
     if (src_count != 1) {
       stringstream ss;
@@ -328,33 +311,27 @@ public:
       ss << "received " << src_count;
       throw runtime_error(ss.str());
     }
-    bool require_elwise = dst_tp.get_type_id() != date_type_id ||
-                          src_tp[0].get_type_id() != date_type_id;
+    bool require_elwise = dst_tp.get_type_id() != date_type_id || src_tp[0].get_type_id() != date_type_id;
     // If the types don't match the ones for this generator,
     // call the elementwise dimension handler to handle one dimension,
     // giving 'this' as the next kernel generator to call
     if (require_elwise) {
-      return make_elwise_dimension_expr_kernel(
-          ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-          kernreq, ectx, this);
+      return make_elwise_dimension_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
+                                               kernreq, ectx, this);
     }
 
     date_replace_kernel_extra *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-            ->alloc_ck<date_replace_kernel_extra>(ckb_offset);
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<date_replace_kernel_extra>(ckb_offset);
     switch (kernreq) {
     case kernel_request_single:
-      e->base.function =
-          reinterpret_cast<void *>(&date_replace_kernel_extra::single_unary);
+      e->base.function = reinterpret_cast<void *>(&date_replace_kernel_extra::single_unary);
       break;
     case kernel_request_strided:
-      e->base.function =
-          reinterpret_cast<void *>(&date_replace_kernel_extra::strided_unary);
+      e->base.function = reinterpret_cast<void *>(&date_replace_kernel_extra::strided_unary);
       break;
     default: {
       stringstream ss;
-      ss << "date_replace_kernel_generator: unrecognized request "
-         << (int)kernreq;
+      ss << "date_replace_kernel_generator: unrecognized request " << (int)kernreq;
       throw runtime_error(ss.str());
     }
     }
@@ -380,8 +357,7 @@ public:
   }
 };
 
-expr_kernel_generator *dynd::make_replace_kernelgen(int32_t year, int32_t month,
-                                                    int32_t day)
+expr_kernel_generator *dynd::make_replace_kernelgen(int32_t year, int32_t month, int32_t day)
 {
   return new date_replace_kernel_generator(year, month, day);
 }
