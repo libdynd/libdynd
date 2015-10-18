@@ -29,11 +29,10 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
     const bytes_type_arrmeta *dst_md = dst_arrmeta;
     const bytes_type_arrmeta *src_md = src_arrmeta;
     bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
-    bytes_type_data *src_d = *reinterpret_cast<bytes_type_data *const *>(src);
+    bytes_type_data *src_d = reinterpret_cast<bytes_type_data *>(src[0]);
 
     if (dst_d->begin() != NULL) {
-      throw runtime_error(
-          "Cannot assign to an already initialized dynd string");
+      throw runtime_error("Cannot assign to an already initialized dynd string");
     } else if (src_d->begin() == NULL) {
       // Allow uninitialized -> uninitialized assignment as a special case, for
       // (future) missing data support
@@ -45,11 +44,9 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
       char *dst_begin = NULL, *dst_end = NULL;
       char *src_begin = src_d->begin();
       char *src_end = src_d->end();
-      memory_block_pod_allocator_api *allocator =
-          get_memory_block_pod_allocator_api(dst_md->blockref);
+      memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
-      allocator->allocate(dst_md->blockref, src_end - src_begin, dst_alignment,
-                          &dst_begin, &dst_end);
+      allocator->allocate(dst_md->blockref, src_end - src_begin, dst_alignment, &dst_begin, &dst_end);
       memcpy(dst_begin, src_begin, src_end - src_begin);
 
       // Set the output
@@ -58,21 +55,19 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
       // Copy the pointers from the source bytes
       *dst_d = *src_d;
     } else {
-      throw runtime_error(
-          "Attempted to reference source data when increasing bytes alignment");
+      throw runtime_error("Attempted to reference source data when increasing bytes alignment");
     }
   }
 };
 } // anonymous namespace
 
-size_t dynd::make_blockref_bytes_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, size_t dst_alignment,
-    const char *dst_arrmeta, size_t src_alignment, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
+size_t dynd::make_blockref_bytes_assignment_kernel(void *ckb, intptr_t ckb_offset, size_t dst_alignment,
+                                                   const char *dst_arrmeta, size_t src_alignment,
+                                                   const char *src_arrmeta, kernel_request_t kernreq,
+                                                   const eval::eval_context *DYND_UNUSED(ectx))
 {
   // Adapt the incoming request to a 'single' kernel
-  blockref_bytes_kernel *e =
-      blockref_bytes_kernel::make(ckb, kernreq, ckb_offset);
+  blockref_bytes_kernel *e = blockref_bytes_kernel::make(ckb, kernreq, ckb_offset);
   e->dst_alignment = dst_alignment;
   e->src_alignment = src_alignment;
   e->dst_arrmeta = reinterpret_cast<const bytes_type_arrmeta *>(dst_arrmeta);
@@ -84,8 +79,7 @@ size_t dynd::make_blockref_bytes_assignment_kernel(
 // fixed_bytes to blockref bytes assignment
 
 namespace {
-struct fixed_bytes_to_blockref_bytes_kernel
-    : nd::base_kernel<fixed_bytes_to_blockref_bytes_kernel, 1> {
+struct fixed_bytes_to_blockref_bytes_kernel : nd::base_kernel<fixed_bytes_to_blockref_bytes_kernel, 1> {
   size_t dst_alignment;
   intptr_t src_data_size;
   size_t src_alignment;
@@ -104,15 +98,12 @@ struct fixed_bytes_to_blockref_bytes_kernel
     bytes_type_data *dst_d = reinterpret_cast<bytes_type_data *>(dst);
 
     if (dst_d->begin() != NULL) {
-      throw runtime_error(
-          "Cannot assign to an already initialized dynd string");
+      throw runtime_error("Cannot assign to an already initialized dynd string");
     }
 
-    memory_block_pod_allocator_api *allocator =
-        get_memory_block_pod_allocator_api(dst_md->blockref);
+    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
-    allocator->allocate(dst_md->blockref, src_end - src_begin, dst_alignment,
-                        &dst_begin, &dst_end);
+    allocator->allocate(dst_md->blockref, src_end - src_begin, dst_alignment, &dst_begin, &dst_end);
     memcpy(dst_begin, src_begin, src_end - src_begin);
 
     // Set the output
@@ -121,14 +112,13 @@ struct fixed_bytes_to_blockref_bytes_kernel
 };
 } // anonymous namespace
 
-size_t dynd::make_fixed_bytes_to_blockref_bytes_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, size_t dst_alignment,
-    const char *dst_arrmeta, intptr_t src_data_size, size_t src_alignment,
-    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx))
+size_t dynd::make_fixed_bytes_to_blockref_bytes_assignment_kernel(void *ckb, intptr_t ckb_offset, size_t dst_alignment,
+                                                                  const char *dst_arrmeta, intptr_t src_data_size,
+                                                                  size_t src_alignment, kernel_request_t kernreq,
+                                                                  const eval::eval_context *DYND_UNUSED(ectx))
 {
   // Adapt the incoming request to a 'single' kernel
-  fixed_bytes_to_blockref_bytes_kernel *e =
-      fixed_bytes_to_blockref_bytes_kernel::make(ckb, kernreq, ckb_offset);
+  fixed_bytes_to_blockref_bytes_kernel *e = fixed_bytes_to_blockref_bytes_kernel::make(ckb, kernreq, ckb_offset);
   e->dst_alignment = dst_alignment;
   e->src_data_size = src_data_size;
   e->src_alignment = src_alignment;

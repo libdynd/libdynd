@@ -21,7 +21,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::string_type::string_type()
-    : base_string_type(string_type_id, sizeof(string), sizeof(const char *), type_flag_zeroinit | type_flag_blockref,
+    : base_string_type(string_type_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_blockref,
                        sizeof(string_type_arrmeta))
 {
 }
