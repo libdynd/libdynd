@@ -23,6 +23,16 @@ public:
   {
   }
 
+  char *data()
+  {
+    return m_data;
+  }
+
+  const char *data() const
+  {
+    return m_data;
+  }
+
   size_t size() const
   {
     return m_size;
@@ -52,6 +62,16 @@ public:
   const char *end() const
   {
     return m_data + m_size;
+  }
+
+  bool operator==(const bytes &rhs) const
+  {
+    return m_size == rhs.m_size && std::memcmp(m_data, rhs.m_data, m_size) == 0;
+  }
+
+  bool operator!=(const bytes &rhs) const
+  {
+    return m_size != rhs.m_size || std::memcmp(m_data, rhs.m_data, m_size) != 0;
   }
 };
 
