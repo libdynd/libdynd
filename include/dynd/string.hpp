@@ -18,13 +18,26 @@ public:
   string(char *data, size_t size) : bytes(data, size)
   {
   }
-};
 
-bool operator<(const string &lhs, const string &rhs);
-bool operator<=(const string &lhs, const string &rhs);
-bool operator==(const string &lhs, const string &rhs);
-bool operator!=(const string &lhs, const string &rhs);
-bool operator>=(const string &lhs, const string &rhs);
-bool operator>(const string &lhs, const string &rhs);
+  bool operator<(const string &rhs) const
+  {
+    return std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
+  }
+
+  bool operator<=(const string &rhs) const
+  {
+    return !std::lexicographical_compare(rhs.begin(), rhs.end(), begin(), end());
+  }
+
+  bool operator>=(const string &rhs) const
+  {
+    return !std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
+  }
+
+  bool operator>(const string &rhs) const
+  {
+    return std::lexicographical_compare(rhs.begin(), rhs.end(), begin(), end());
+  }
+};
 
 } // namespace dynd
