@@ -6,8 +6,8 @@ The DyND Library
 TravisCI: [![Build Status](https://api.travis-ci.org/libdynd/libdynd.svg?branch=master)](https://travis-ci.org/libdynd/libdynd) AppVeyor: [![Build status](https://ci.appveyor.com/api/projects/status/92o89tiw6wwliuxy/branch/master?svg=true)](https://ci.appveyor.com/project/libdynd/libdynd/branch/master)
 
 The core DyND developer team consists of
-[Mark Wiebe](https://github.com/mwiebe) and
-[Irwin Zaid](https://github.com/izaid). Much of the funding that made this
+[Mark Wiebe](https://github.com/mwiebe),
+[Irwin Zaid](https://github.com/izaid), and [Ian Henriksen](https://github.com/insertinterestingnamehere). Much of the funding that made this
 project possible came through [Continuum Analytics](http://continuum.io/)
 and [DARPA-BAA-12-38](https://www.fbo.gov/index?s=opportunity&mode=form&id=7a77846c73ffc5cb22f9295ffe6cdd55&tab=core&_cview=0),
 part of [XDATA](http://www.darpa.mil/Our_Work/I2O/Programs/XDATA.aspx).
