@@ -135,7 +135,7 @@ namespace nd {
   } greater;
 
   extern DYND_API struct total_order : declfunc<total_order> {
-    static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+    static DYND_API callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
 
     static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
     {
