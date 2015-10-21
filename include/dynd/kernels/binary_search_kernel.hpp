@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/func/comparison.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
@@ -54,21 +55,25 @@ namespace nd {
       *reinterpret_cast<intptr_t *>(dst) = -1;
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data, void *ckb,
+                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                                 const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                 const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                                const nd::array *DYND_UNUSED(kwds),
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+                                const nd::array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
     {
       make(ckb, kernreq, ckb_offset, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
            reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride);
 
       const char *n_arrmeta = src_arrmeta[0];
       ndt::type element_tp = src_tp[0].at_single(0, &n_arrmeta);
-      return make_comparison_kernel(ckb, ckb_offset, element_tp, n_arrmeta, element_tp, n_arrmeta,
-                                    comparison_type_sorting_less, ectx);
+
+      ndt::type child_src_tp[2] = {element_tp, element_tp};
+      const char *child_src_arrmeta[2] = {n_arrmeta, n_arrmeta};
+
+      return total_order::get().get()->instantiate(
+          total_order::get().get()->static_data, total_order::get().get()->data_size, data, ckb, ckb_offset,
+          ndt::type::make<int>(), NULL, 2, child_src_tp, child_src_arrmeta, kernreq, ectx, 0, NULL, tp_vars);
     }
   };
 

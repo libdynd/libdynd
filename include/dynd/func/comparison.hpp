@@ -134,7 +134,36 @@ namespace nd {
   extern DYND_API struct greater : comparison_operator<greater, greater_kernel, 2> {
   } greater;
 
-  extern DYND_API struct total_order : comparison_operator<total_order, total_order_kernel, 2> {
+  extern DYND_API struct total_order : declfunc<total_order> {
+    static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+
+    static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
+    {
+      return children[src0_type.get_type_id()][src1_type.get_type_id()];
+    }
+
+    static callable make()
+    {
+      children[fixed_string_type_id][fixed_string_type_id] =
+          callable::make<total_order_kernel<fixed_string_type_id, fixed_string_type_id>>();
+      children[string_type_id][string_type_id] = callable::make<total_order_kernel<string_type_id, string_type_id>>();
+      children[int32_type_id][int32_type_id] = callable::make<total_order_kernel<int32_type_id, int32_type_id>>();
+      children[bool_type_id][bool_type_id] = callable::make<total_order_kernel<bool_type_id, bool_type_id>>();
+
+      return functional::multidispatch(
+          ndt::type("(Any, Any) -> Any"),
+          [](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type * src_tp)->callable & {
+            std::cout << src_tp[0] << std::endl;
+            std::cout << src_tp[1] << std::endl;
+            callable &child = overload(src_tp[0], src_tp[1]);
+            if (child.is_null()) {
+              throw std::runtime_error("no child found");
+            }
+
+            return child;
+          },
+          0);
+    }
   } total_order;
 
 } // namespace dynd::nd
