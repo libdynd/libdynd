@@ -35,35 +35,39 @@ namespace ndt {
   public:
     categorical_type(const nd::array &categories, bool presorted = false);
 
-    virtual ~categorical_type() {}
+    virtual ~categorical_type()
+    {
+    }
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                   const char *arrmeta, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
 
     size_t get_category_count() const
     {
-      return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                 m_categories.get_arrmeta())->dim_size;
+      return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(m_categories.get_arrmeta())->dim_size;
     }
 
     /**
      * Returns the type of the category values.
      */
-    const type &get_category_type() const { return m_category_tp; }
+    const type &get_category_type() const
+    {
+      return m_category_tp;
+    }
 
     /**
      * Return the type of the underlying integer used
      * to index the category list.
      */
-    const type &get_storage_type() const { return m_storage_type; }
+    const type &get_storage_type() const
+    {
+      return m_storage_type;
+    }
 
-    uint32_t get_value_from_category(const char *category_arrmeta,
-                                     const char *category_data) const;
+    uint32_t get_value_from_category(const char *category_arrmeta, const char *category_data) const;
     uint32_t get_value_from_category(const nd::array &category) const;
 
     const char *get_category_data_from_value(uint32_t value) const
@@ -72,10 +76,8 @@ namespace ndt {
         throw std::runtime_error("category value is out of bounds");
       }
       return m_categories.get_readonly_originptr() +
-             unchecked_fixed_dim_get<intptr_t>(m_value_to_category_index,
-                                               value) *
-                 reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                     m_categories.get_arrmeta())->stride;
+             unchecked_fixed_dim_get<intptr_t>(m_value_to_category_index, value) *
+                 reinterpret_cast<const fixed_dim_type_arrmeta *>(m_categories.get_arrmeta())->stride;
     }
     /** Returns the arrmeta corresponding to data from
      * get_category_data_from_value */
@@ -92,21 +94,16 @@ namespace ndt {
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                 memory_block_data *embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                             const std::string &indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                    const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta,
-                                    kernel_request_t kernreq,
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                     const eval::eval_context *ectx) const;
 
-    void get_dynamic_array_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
-        size_t *out_count) const;
-    void get_dynamic_type_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
+    void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                                      size_t *out_count) const;
+    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                     size_t *out_count) const;
 
     friend struct assign_to_same_category_type;
     friend struct assign_from_same_category_type;

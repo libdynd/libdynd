@@ -10,8 +10,6 @@
 namespace dynd {
 namespace nd {
 
-  DYND_API intptr_t binary_search_old(const array &n, const char *arrmeta, const char *data);
-
   /**
    * Performs a binary search of the first dimension of the array, which
    * should be sorted.
