@@ -49,3 +49,5 @@ nd::array nd::operator>(const array &a0, const array &a1)
 {
   return greater(a0, a1);
 }
+
+DYND_API struct nd::total_order nd::total_order;

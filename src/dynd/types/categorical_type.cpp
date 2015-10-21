@@ -17,6 +17,7 @@
 #include <dynd/array_range.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
+#include <dynd/search.hpp>
 
 using namespace dynd;
 using namespace std;
@@ -330,7 +331,12 @@ void ndt::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_s
 
 uint32_t ndt::categorical_type::get_value_from_category(const char *category_arrmeta, const char *category_data) const
 {
-  intptr_t i = nd::binary_search(m_categories, category_arrmeta, category_data);
+  type dst_tp = type::make<intptr_t>();
+  type src_tp[2] = {m_categories.get_type(), m_category_tp};
+  const char *src_arrmeta[2] = {m_categories.get_arrmeta(), category_arrmeta};
+  char *src_data[2] = {const_cast<char *>(m_categories.get_readonly_originptr()), const_cast<char *>(category_data)};
+  intptr_t i = (*nd::binary_search::get().get())(dst_tp, 2, src_tp, src_arrmeta, src_data, 0, NULL,
+                                                 std::map<std::string, ndt::type>()).as<intptr_t>();
   if (i < 0) {
     stringstream ss;
     ss << "Unrecognized category value ";
@@ -344,14 +350,25 @@ uint32_t ndt::categorical_type::get_value_from_category(const char *category_arr
 
 uint32_t ndt::categorical_type::get_value_from_category(const nd::array &category) const
 {
+  nd::array c;
   if (category.get_type() == m_category_tp) {
     // If the type is right, get the category value directly
-    return get_value_from_category(category.get_arrmeta(), category.get_readonly_originptr());
+    c = category;
   } else {
     // Otherwise convert to the correct type, then get the category value
-    nd::array c = nd::empty(m_category_tp);
+    c = nd::empty(m_category_tp);
     c.val_assign(category);
-    return get_value_from_category(c.get_arrmeta(), c.get_readonly_originptr());
+  }
+
+  intptr_t i = nd::binary_search(m_categories, c).as<intptr_t>();
+  if (i < 0) {
+    stringstream ss;
+    ss << "Unrecognized category value ";
+    m_category_tp.print_data(ss, c.get_arrmeta(), c.get_data());
+    ss << " assigning to dynd type " << type(this, true);
+    throw std::runtime_error(ss.str());
+  } else {
+    return (uint32_t)unchecked_fixed_dim_get<intptr_t>(m_category_index_to_value, i);
   }
 }
 
