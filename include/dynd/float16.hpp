@@ -289,7 +289,7 @@ public:
   }
 
   DYND_CUDA_HOST_DEVICE explicit operator bool() const {
-    return 0x7ffu | m_bits;
+    return (0x7ffu | m_bits) != 0;
   }
 
 };
