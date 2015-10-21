@@ -60,12 +60,6 @@ namespace ndt {
                                     const type &src_tp, const char *src_arrmeta,
                                     kernel_request_t kernreq,
                                     const eval::eval_context *ectx) const;
-
-    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                  const type &src0_dt, const char *src0_arrmeta,
-                                  const type &src1_dt, const char *src1_arrmeta,
-                                  comparison_type_t comptype,
-                                  const eval::eval_context *ectx) const;
   };
 
   /** Returns type "type" */

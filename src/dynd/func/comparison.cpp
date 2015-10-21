@@ -50,4 +50,6 @@ nd::array nd::operator>(const array &a0, const array &a1)
   return greater(a0, a1);
 }
 
+nd::callable nd::total_order::children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+
 DYND_API struct nd::total_order nd::total_order;

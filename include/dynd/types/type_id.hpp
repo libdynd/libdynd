@@ -635,6 +635,11 @@ struct type_kind_of<pointer_type_id> {
 };
 
 template <>
+struct type_kind_of<fixed_string_type_id> {
+  static const type_kind_t value = string_kind;
+};
+
+template <>
 struct type_kind_of<string_type_id> {
   static const type_kind_t value = string_kind;
 };
