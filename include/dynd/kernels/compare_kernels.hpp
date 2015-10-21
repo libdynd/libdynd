@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/total_order_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
 #include <dynd/typed_data_assign.hpp>

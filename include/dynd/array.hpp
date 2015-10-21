@@ -1760,15 +1760,6 @@ namespace nd {
   DYND_API array memmap(const std::string &filename, intptr_t begin = 0,
                         intptr_t end = std::numeric_limits<intptr_t>::max(), uint32_t access = default_access_flags);
 
-  /**
-   * Performs a binary search of the first dimension of the array, which
-   * should be sorted. The data/arrmeta must correspond to the type
-   *n.get_type().at(0).
-   *
-   * \returns  The index of the found element, or -1 if not found.
-   */
-  DYND_API intptr_t binary_search(const array &n, const char *arrmeta, const char *data);
-
   DYND_API array groupby(const array &data_values, const array &by, const ndt::type &groups = ndt::type());
 
   DYND_API bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data,

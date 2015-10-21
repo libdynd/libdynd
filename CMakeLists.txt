@@ -456,6 +456,7 @@ set(libdynd_SRC
     src/dynd/float16.cpp
     src/dynd/float128.cpp
     src/dynd/int128.cpp
+    src/dynd/search.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
