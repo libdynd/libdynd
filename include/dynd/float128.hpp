@@ -155,28 +155,28 @@ public:
 #endif
   }
 
-  DYND_CUDA_HOST_DEVICE inline explicit float128(const bool &rhs)
+  DYND_CUDA_HOST_DEVICE explicit float128(const bool &rhs)
       : m_lo(0ULL), m_hi(rhs ? 0x3fff000000000000ULL : 0ULL)
   {
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool iszero() const
+  DYND_CUDA_HOST_DEVICE bool iszero() const
   {
     return (m_hi & 0x7fffffffffffffffULL) == 0 && m_lo == 0;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool signbit_() const
+  DYND_CUDA_HOST_DEVICE bool signbit_() const
   {
     return (m_hi & 0x8000000000000000ULL) != 0;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool isnan_() const
+  DYND_CUDA_HOST_DEVICE bool isnan_() const
   {
     return (m_hi & 0x7fff000000000000ULL) == 0x7fff000000000000ULL &&
            ((m_hi & 0x0000ffffffffffffULL) != 0ULL || m_lo != 0ULL);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool isinf_() const
+  DYND_CUDA_HOST_DEVICE bool isinf_() const
   {
     return (m_hi & 0x7fffffffffffffffULL) == 0x7fff000000000000ULL &&
            (m_lo == 0ULL);
@@ -189,7 +189,7 @@ public:
 
   /*
 
-    DYND_CUDA_HOST_DEVICE inline bool operator==(const float128 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator==(const float128 &rhs) const
     {
       // The equality cases are as follows:
       //   - If either value is NaN, never equal.
@@ -201,7 +201,7 @@ public:
                (m_lo | rhs.m_lo) == 0ULL));
     }
 
-    DYND_CUDA_HOST_DEVICE inline bool operator!=(const float128 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator!=(const float128 &rhs) const
     {
       return !operator==(rhs);
     }
@@ -248,22 +248,22 @@ public:
 
   /*
 
-    DYND_CUDA_HOST_DEVICE inline bool operator<(const float128 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator<(const float128 &rhs) const
     {
       return !isnan_() && !rhs.isnan_() && less_nonan(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE inline bool operator>(const float128 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator>(const float128 &rhs) const
     {
       return rhs.operator<(*this);
     }
 
-    DYND_CUDA_HOST_DEVICE inline bool operator<=(const float128 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator<=(const float128 &rhs) const
     {
       return !isnan_() && !rhs.isnan_() && less_equal_nonan(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE inline bool operator>=(const float128 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator>=(const float128 &rhs) const
     {
       return rhs.operator<=(*this);
     }

@@ -32,21 +32,21 @@ public:
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool1 operator+() const
+  DYND_CUDA_HOST_DEVICE bool1 operator+() const
   {
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool1 operator-() const
+  DYND_CUDA_HOST_DEVICE bool1 operator-() const
   {
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool1 operator!() const {
+  DYND_CUDA_HOST_DEVICE bool1 operator!() const {
     return bool1(m_value == 0);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool1 operator~() const {
+  DYND_CUDA_HOST_DEVICE bool1 operator~() const {
     return bool1(m_value == 0);
   }
 
