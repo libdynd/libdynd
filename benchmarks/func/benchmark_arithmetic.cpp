@@ -16,7 +16,7 @@
 using namespace std;
 using namespace dynd;
 
-static const int size = 100000; // 256 * 256
+static const int size = 10000; // 256 * 256
 
 static void BM_Func_Arithmetic_Add(benchmark::State &state)
 {
