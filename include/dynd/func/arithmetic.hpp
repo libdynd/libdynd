@@ -66,6 +66,8 @@ namespace nd {
 
   DYND_DEF_UNARY_OP_CALLABLE(plus, arithmetic_type_ids)
   DYND_DEF_UNARY_OP_CALLABLE(minus, arithmetic_type_ids)
+  DYND_DEF_UNARY_OP_CALLABLE(logical_not, arithmetic_type_ids)
+  DYND_DEF_UNARY_OP_CALLABLE(bitwise_not, integral_type_ids)
 
 #undef DYND_DEF_UNARY_OP_CALLABLE
 
@@ -136,14 +138,23 @@ namespace nd {
   } NAME;
 
   namespace detail {
-    typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id, int64_type_id, float32_type_id,
-                             float64_type_id, complex_float32_type_id, complex_float64_type_id> binop_type_ids;
+
+    typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, int8_type_id,
+                             int16_type_id, int32_type_id, int64_type_id, float32_type_id, float64_type_id,
+                             complex_float32_type_id, complex_float64_type_id> binop_type_ids;
+
+    typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, int8_type_id,
+                             int16_type_id, int32_type_id, int64_type_id, float32_type_id,
+                             float64_type_id> binop_real_type_ids;
+
   }
 
   DYND_DEF_BINARY_OP_CALLABLE(add, detail::binop_type_ids)
   DYND_DEF_BINARY_OP_CALLABLE(subtract, detail::binop_type_ids)
   DYND_DEF_BINARY_OP_CALLABLE(multiply, detail::binop_type_ids)
   DYND_DEF_BINARY_OP_CALLABLE(divide, detail::binop_type_ids)
+  DYND_DEF_BINARY_OP_CALLABLE(logical_and, detail::binop_real_type_ids)
+  DYND_DEF_BINARY_OP_CALLABLE(logical_or, detail::binop_real_type_ids)
 
 #undef DYND_DEF_BINARY_OP_CALLABLE
 

@@ -167,38 +167,38 @@ public:
 
   DYND_CUDA_HOST_DEVICE explicit operator float128() const;
 
-  DYND_CUDA_HOST_DEVICE inline uint16_t bits() const
+  DYND_CUDA_HOST_DEVICE uint16_t bits() const
   {
     return m_bits;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool iszero() const
+  DYND_CUDA_HOST_DEVICE bool iszero() const
   {
     return (m_bits & 0x7fff) == 0;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool signbit_() const
+  DYND_CUDA_HOST_DEVICE bool signbit_() const
   {
     return (m_bits & 0x8000u) != 0;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool isnan_() const
+  DYND_CUDA_HOST_DEVICE bool isnan_() const
   {
     return ((m_bits & 0x7c00u) == 0x7c00u) && ((m_bits & 0x03ffu) != 0x0000u);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool isinf_() const
+  DYND_CUDA_HOST_DEVICE bool isinf_() const
   {
     return ((m_bits & 0x7fffu) == 0x7c00u);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool isfinite_() const
+  DYND_CUDA_HOST_DEVICE bool isfinite_() const
   {
     return ((m_bits & 0x7c00u) != 0x7c00u);
   }
 
   /*
-    DYND_CUDA_HOST_DEVICE inline bool operator==(const float16 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator==(const float16 &rhs) const
     {
       // The equality cases are as follows:
       //   - If either value is NaN, never equal.
@@ -208,7 +208,7 @@ public:
              (m_bits == rhs.m_bits || ((m_bits | rhs.m_bits) & 0x7fff) == 0);
     }
 
-    DYND_CUDA_HOST_DEVICE inline bool operator!=(const float16 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator!=(const float16 &rhs) const
     {
       return !operator==(rhs);
     }
@@ -251,22 +251,22 @@ public:
   }
 
   /*
-    DYND_CUDA_HOST_DEVICE inline bool operator<(const float16 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator<(const float16 &rhs) const
     {
       return !isnan_() && !rhs.isnan_() && less_nonan(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE inline bool operator>(const float16 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator>(const float16 &rhs) const
     {
       return rhs.operator<(*this);
     }
 
-    DYND_CUDA_HOST_DEVICE inline bool operator<=(const float16 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator<=(const float16 &rhs) const
     {
       return !isnan_() && !rhs.isnan_() && less_equal_nonan(rhs);
     }
 
-    DYND_CUDA_HOST_DEVICE inline bool operator>=(const float16 &rhs) const
+    DYND_CUDA_HOST_DEVICE bool operator>=(const float16 &rhs) const
     {
       return rhs.operator<=(*this);
     }
@@ -282,6 +282,16 @@ public:
   {
     return float16(-static_cast<float>(*this));
   }
+
+  bool operator!() const
+  {
+    return (0x7fffu | m_bits) == 0;
+  }
+
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const {
+    return (0x7ffu | m_bits) != 0;
+  }
+
 };
 
 DYND_CUDA_HOST_DEVICE inline bool isfinite(float16 value)

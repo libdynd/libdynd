@@ -75,31 +75,31 @@ public:
   DYND_CUDA_HOST_DEVICE uint128(const float16 &value);
   DYND_CUDA_HOST_DEVICE uint128(const float128 &value);
 
-  DYND_CUDA_HOST_DEVICE inline bool operator==(const uint128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator==(const uint128 &rhs) const
   {
     return m_hi == rhs.m_hi && m_lo == rhs.m_lo;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator==(uint64_t rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator==(uint64_t rhs) const
   {
     return m_hi == 0 && m_lo == rhs;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator==(int rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator==(int rhs) const
   {
     return rhs >= 0 && m_hi == 0u && m_lo == static_cast<unsigned int>(rhs);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator==(unsigned int rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator==(unsigned int rhs) const
   {
     return m_hi == 0u && m_lo == rhs;
   }
 
-  DYND_CUDA_HOST_DEVICE inline uint128 operator+() const {
+  DYND_CUDA_HOST_DEVICE uint128 operator+() const {
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE inline uint128 operator-() const {
+  DYND_CUDA_HOST_DEVICE uint128 operator-() const {
   DYND_ALLOW_UNSIGNED_UNARY_MINUS
     if (this->m_lo != 0) {
       return uint128(!this->m_hi, -this->m_lo);
@@ -109,81 +109,89 @@ public:
   DYND_END_ALLOW_UNSIGNED_UNARY_MINUS
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator!=(const uint128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator!() const {
+    return (m_hi != 0) && (m_lo != 0);
+  }
+
+  DYND_CUDA_HOST_DEVICE uint128 operator~() const {
+    return uint128(~m_hi, ~m_lo);
+  }
+
+  DYND_CUDA_HOST_DEVICE bool operator!=(const uint128 &rhs) const
   {
     return m_hi != rhs.m_hi || m_lo != rhs.m_lo;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator!=(uint64_t rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator!=(uint64_t rhs) const
   {
     return m_hi != 0 || m_lo != rhs;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator!=(int rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator!=(int rhs) const
   {
     return rhs < 0 || m_hi != 0u || m_lo != static_cast<unsigned int>(rhs);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator!=(unsigned int rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator!=(unsigned int rhs) const
   {
     return m_hi != 0u || m_lo != rhs;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator<(float rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator<(float rhs) const
   {
     return double(*this) < rhs;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator<(double rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator<(double rhs) const
   {
     return double(*this) < rhs;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator<(const uint128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator<(const uint128 &rhs) const
   {
     return m_hi < rhs.m_hi || (m_hi == rhs.m_hi && m_lo < rhs.m_lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator<=(const uint128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator<=(const uint128 &rhs) const
   {
     return m_hi < rhs.m_hi || (m_hi == rhs.m_hi && m_lo <= rhs.m_lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator>(const uint128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator>(const uint128 &rhs) const
   {
     return rhs.operator<(*this);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator>=(const uint128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator>=(const uint128 &rhs) const
   {
     return rhs.operator<=(*this);
   }
 
-  DYND_CUDA_HOST_DEVICE inline uint128 operator+(const uint128 &rhs) const
+  DYND_CUDA_HOST_DEVICE uint128 operator+(const uint128 &rhs) const
   {
     uint64_t lo = m_lo + rhs.m_lo;
     return uint128(m_hi + rhs.m_hi + (lo < m_lo), lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline uint128 operator+(uint64_t rhs) const
+  DYND_CUDA_HOST_DEVICE uint128 operator+(uint64_t rhs) const
   {
     uint64_t lo = m_lo + rhs;
     return uint128(m_hi + (lo < m_lo), lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline uint128 operator+(uint32_t rhs) const
+  DYND_CUDA_HOST_DEVICE uint128 operator+(uint32_t rhs) const
   {
     uint64_t lo = m_lo + static_cast<uint64_t>(rhs);
     return uint128(m_hi + (lo < m_lo), lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline uint128 operator-(const uint128 &rhs) const
+  DYND_CUDA_HOST_DEVICE uint128 operator-(const uint128 &rhs) const
   {
     uint64_t lo = m_lo + ~rhs.m_lo + 1;
     return uint128(m_hi + ~rhs.m_hi + (lo < m_lo), lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline uint128 operator-(uint64_t rhs) const
+  DYND_CUDA_HOST_DEVICE uint128 operator-(uint64_t rhs) const
   {
     uint64_t lo = m_lo + ~rhs + 1;
     return uint128(m_hi + 0xffffffffffffffffULL + (lo < m_lo), lo);

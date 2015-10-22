@@ -19,10 +19,10 @@ public:
   uint64_t m_lo, m_hi;
 #endif
 
-  DYND_CUDA_HOST_DEVICE inline int128()
+  DYND_CUDA_HOST_DEVICE int128()
   {
   }
-  DYND_CUDA_HOST_DEVICE inline int128(uint64_t hi, uint64_t lo)
+  DYND_CUDA_HOST_DEVICE int128(uint64_t hi, uint64_t lo)
       : m_lo(lo), m_hi(hi)
   {
   }
@@ -78,70 +78,78 @@ public:
   DYND_CUDA_HOST_DEVICE int128(const float16 &value);
   DYND_CUDA_HOST_DEVICE int128(const float128 &value);
 
-  DYND_CUDA_HOST_DEVICE inline int128 operator+() const {
+  DYND_CUDA_HOST_DEVICE int128 operator+() const {
     return *this;
   }
-  
-  DYND_CUDA_HOST_DEVICE inline bool operator==(const int128 &rhs) const
+
+  DYND_CUDA_HOST_DEVICE bool operator!() const {
+    return !(this->m_hi) && !(this->m_lo);
+  }
+
+  DYND_CUDA_HOST_DEVICE int128 operator~() const {
+    return int128(~m_hi, ~m_lo);
+  }
+
+  DYND_CUDA_HOST_DEVICE bool operator==(const int128 &rhs) const
   {
     return m_lo == rhs.m_lo && m_hi == rhs.m_hi;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator==(int rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator==(int rhs) const
   {
     return static_cast<int64_t>(m_lo) == static_cast<int64_t>(rhs) &&
            m_hi == (rhs >= 0 ? 0ULL : 0xffffffffffffffffULL);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator!=(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator!=(const int128 &rhs) const
   {
     return m_lo != rhs.m_lo || m_hi != rhs.m_hi;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator!=(int rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator!=(int rhs) const
   {
     return static_cast<int64_t>(m_lo) != static_cast<int64_t>(rhs) ||
            m_hi != (rhs >= 0 ? 0ULL : 0xffffffffffffffffULL);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator<(float rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator<(float rhs) const
   {
     return double(*this) < rhs;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator<(double rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator<(double rhs) const
   {
     return double(*this) < rhs;
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator<(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator<(const int128 &rhs) const
   {
     return (int64_t)m_hi < (int64_t)rhs.m_hi ||
            (m_hi == rhs.m_hi && m_lo < rhs.m_lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator<=(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator<=(const int128 &rhs) const
   {
     return (int64_t)m_hi < (int64_t)rhs.m_hi ||
            (m_hi == rhs.m_hi && m_lo <= rhs.m_lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator>(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator>(const int128 &rhs) const
   {
     return rhs.operator<(*this);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool operator>=(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE bool operator>=(const int128 &rhs) const
   {
     return rhs.operator<=(*this);
   }
 
-  DYND_CUDA_HOST_DEVICE inline bool is_negative() const
+  DYND_CUDA_HOST_DEVICE bool is_negative() const
   {
     return (m_hi & 0x8000000000000000ULL) != 0;
   }
 
-  DYND_CUDA_HOST_DEVICE inline void negate()
+  DYND_CUDA_HOST_DEVICE void negate()
   {
     // twos complement negation, ~x + 1
     uint64_t lo = ~m_lo, hi = ~m_hi;
@@ -158,7 +166,7 @@ public:
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE inline int128 operator-() const
+  DYND_CUDA_HOST_DEVICE int128 operator-() const
   {
     // twos complement negation, ~x + 1
     uint64_t lo = ~m_lo, hi = ~m_hi;
@@ -166,21 +174,21 @@ public:
     return int128(hi + (lo_p1 < lo), lo_p1);
   }
 
-  DYND_CUDA_HOST_DEVICE inline int128 operator+(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE int128 operator+(const int128 &rhs) const
   {
     uint64_t lo = m_lo + rhs.m_lo;
     return int128(m_hi + rhs.m_hi + (lo < m_lo), lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline int128 operator-(const int128 &rhs) const
+  DYND_CUDA_HOST_DEVICE int128 operator-(const int128 &rhs) const
   {
     uint64_t lo = m_lo + ~rhs.m_lo + 1;
     return int128(m_hi + ~rhs.m_hi + (lo < m_lo), lo);
   }
 
-  DYND_CUDA_HOST_DEVICE inline int128 operator*(uint32_t rhs) const;
+  DYND_CUDA_HOST_DEVICE int128 operator*(uint32_t rhs) const;
 
-  //  DYND_CUDA_HOST_DEVICE inline int128 operator/(uint32_t rhs) const;
+  //  DYND_CUDA_HOST_DEVICE int128 operator/(uint32_t rhs) const;
 
   DYND_CUDA_HOST_DEVICE int128 &operator/=(int128 DYND_UNUSED(rhs))
   {
