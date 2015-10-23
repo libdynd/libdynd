@@ -23,7 +23,7 @@ DYND_API nd::callable nd::min::make()
   {
                                   callable &child = children[src_tp[0].get_type_id()];
                                   if (child.is_null()) {
-                                    throw runtime_error("no suitable child found for nd::sum");
+                                    throw runtime_error("no suitable child found for nd::min");
                                   }
 
                                   return child;
