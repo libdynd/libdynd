@@ -178,7 +178,6 @@ set(libdynd_SRC
     src/dynd/types/fixed_string_kind_type.cpp
     src/dynd/types/fixed_string_type.cpp
     src/dynd/types/callable_type.cpp
-    src/dynd/types/groupby_type.cpp
     src/dynd/types/int_kind_sym_type.cpp
     src/dynd/types/kind_sym_type.cpp
     src/dynd/types/ndarrayarg_type.cpp
@@ -245,7 +244,6 @@ set(libdynd_SRC
     include/dynd/types/fixed_bytes_type.hpp
     include/dynd/types/fixed_string_kind_type.hpp
     include/dynd/types/fixed_string_type.hpp
-    include/dynd/types/groupby_type.hpp
     include/dynd/types/int_kind_sym_type.hpp
     include/dynd/types/kind_sym_type.hpp
     include/dynd/types/ndarrayarg_type.hpp

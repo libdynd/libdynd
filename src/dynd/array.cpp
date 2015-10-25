@@ -27,7 +27,6 @@
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/types/groupby_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
@@ -1803,92 +1802,6 @@ nd::array nd::memmap(const std::string &filename, intptr_t begin, intptr_t end, 
   // about the memmapped memblock
   bytes_type_arrmeta *ndo_meta = reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
   ndo_meta->blockref = mm.release();
-  return result;
-}
-
-nd::array nd::groupby(const nd::array &data_values, const nd::array &by_values, const dynd::ndt::type &groups)
-{
-  if (data_values.get_ndim() == 0) {
-    throw runtime_error("'data' values provided to dynd groupby must have at "
-                        "least one dimension");
-  }
-  if (by_values.get_ndim() == 0) {
-    throw runtime_error("'by' values provided to dynd groupby must have at "
-                        "least one dimension");
-  }
-  if (data_values.get_dim_size() != by_values.get_dim_size()) {
-    stringstream ss;
-    ss << "'data' and 'by' values provided to dynd groupby have different "
-          "sizes, ";
-    ss << data_values.get_dim_size() << " and " << by_values.get_dim_size();
-    throw runtime_error(ss.str());
-  }
-
-  // If no groups type is specified, determine one from 'by'
-  ndt::type groups_final;
-  if (groups.get_type_id() == uninitialized_type_id) {
-    ndt::type by_dt = by_values.get_dtype();
-    if (by_dt.value_type().get_type_id() == categorical_type_id) {
-      // If 'by' already has a categorical type, use that
-      groups_final = by_dt.value_type();
-    } else {
-      // Otherwise make a categorical type from the values
-      groups_final = ndt::factor_categorical(by_values);
-    }
-  } else {
-    groups_final = groups;
-  }
-
-  // Make sure the 'by' values have the 'groups' type
-  array by_values_as_groups = by_values.ucast(groups_final);
-
-  ndt::type gbdt = ndt::make_groupby(data_values.get_type(), by_values_as_groups.get_type());
-  const ndt::groupby_type *gbdt_ext = gbdt.extended<ndt::groupby_type>();
-  char *data_ptr = NULL;
-
-  array result(make_array_memory_block(gbdt.extended()->get_arrmeta_size(), gbdt.extended()->get_data_size(),
-                                       gbdt.extended()->get_data_alignment(), &data_ptr));
-
-  // Set the arrmeta for the struct (which consists of two pointers)
-  intptr_t *struct_data_offsets = reinterpret_cast<intptr_t *>(result.get_arrmeta());
-  struct_data_offsets[0] = 0;
-  struct_data_offsets[1] = sizeof(void *);
-
-  // Set the arrmeta for the data values
-  pointer_type_arrmeta *pmeta;
-  pmeta = gbdt_ext->get_data_values_pointer_arrmeta(result.get_arrmeta());
-  pmeta->offset = 0;
-  pmeta->blockref =
-      data_values.get_ndo()->data.ref ? data_values.get_ndo()->data.ref : &data_values.get_ndo()->m_memblockdata;
-  memory_block_incref(pmeta->blockref);
-  data_values.get_type().extended()->arrmeta_copy_construct(
-      reinterpret_cast<char *>(pmeta + 1), data_values.get_arrmeta(), &data_values.get_ndo()->m_memblockdata);
-
-  // Set the arrmeta for the by values
-  pmeta = gbdt_ext->get_by_values_pointer_arrmeta(result.get_arrmeta());
-  pmeta->offset = 0;
-  pmeta->blockref = by_values_as_groups.get_ndo()->data.ref ? by_values_as_groups.get_ndo()->data.ref
-                                                            : &by_values_as_groups.get_ndo()->m_memblockdata;
-  memory_block_incref(pmeta->blockref);
-  by_values_as_groups.get_type().extended()->arrmeta_copy_construct(reinterpret_cast<char *>(pmeta + 1),
-                                                                    by_values_as_groups.get_arrmeta(),
-                                                                    &by_values_as_groups.get_ndo()->m_memblockdata);
-
-  // Set the pointers to the data and by values data
-  groupby_type_data *groupby_data_ptr = reinterpret_cast<groupby_type_data *>(data_ptr);
-  groupby_data_ptr->data_values_pointer = data_values.get_readonly_originptr();
-  groupby_data_ptr->by_values_pointer = by_values_as_groups.get_readonly_originptr();
-
-  // Set the array properties
-  result.get_ndo()->m_type = gbdt.release();
-  result.get_ndo()->data.ptr = data_ptr;
-  result.get_ndo()->data.ref = NULL;
-  result.get_ndo()->m_flags = read_access_flag;
-  // If the inputs are immutable, the result is too
-  if ((data_values.get_access_flags() & immutable_access_flag) != 0 &&
-      (by_values.get_access_flags() & immutable_access_flag) != 0) {
-    result.get_ndo()->m_flags |= immutable_access_flag;
-  }
   return result;
 }
 
