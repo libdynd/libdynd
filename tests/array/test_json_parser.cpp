@@ -20,7 +20,6 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/json_type.hpp>
 #include <dynd/types/option_type.hpp>
 
 using namespace std;
@@ -552,24 +551,4 @@ TEST(JSONParser, ListOfStruct)
                                "{\"position\":[1,2,3], \"amount\": 3.125#,\n"
                                "\"data\":{ \"when\":\"2013-12-25\", \"name\":\"Frank\"}}]"),
                invalid_argument);
-}
-
-TEST(JSONParser, JSONDType)
-{
-  nd::array n;
-
-  // Parsing JSON with the output being just a json string
-  n = parse_json("json", "{\"a\":3.14}");
-  EXPECT_EQ(ndt::make_json(), n.get_type());
-  EXPECT_EQ("{\"a\":3.14}", n.as<std::string>());
-
-  // Parsing JSON with a piece of it being a json string
-  n = parse_json("{a: json, b: int32, c: string}",
-                 "{\"c\": \"testing string\", \"a\": [3.1, {\"X\":2}, [1,2]], \"b\":12}");
-  EXPECT_EQ(
-      ndt::struct_type::make({"a", "b", "c"}, {ndt::make_json(), ndt::type::make<int32_t>(), ndt::string_type::make()}),
-      n.get_type());
-  EXPECT_EQ("[3.1, {\"X\":2}, [1,2]]", n(0).as<std::string>());
-  EXPECT_EQ(12, n(1).as<int>());
-  EXPECT_EQ("testing string", n(2).as<std::string>());
 }

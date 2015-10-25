@@ -6,7 +6,6 @@
 #include <dynd/json_formatter.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/json_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/base_struct_type.hpp>
@@ -187,20 +186,6 @@ static void format_json_option(output_data &out, const ndt::type &dt, const char
   }
 }
 
-static void format_json_dynamic(output_data &out, const ndt::type &dt, const char *DYND_UNUSED(arrmeta),
-                                const char *data)
-{
-  if (dt.get_type_id() == json_type_id) {
-    // Copy the JSON data directly
-    const json_type_data *d = reinterpret_cast<const json_type_data *>(data);
-    out.write(d->begin(), d->end());
-  } else {
-    stringstream ss;
-    ss << "Formatting dynd type " << dt << " as JSON is not implemented yet";
-    throw runtime_error(ss.str());
-  }
-}
-
 static void format_json_datetime(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
 {
   switch (dt.get_type_id()) {
@@ -338,9 +323,6 @@ static void format_json(output_data &out, const ndt::type &dt, const char *arrme
     break;
   case option_kind:
     format_json_option(out, dt, arrmeta, data);
-    break;
-  case dynamic_kind:
-    format_json_dynamic(out, dt, arrmeta, data);
     break;
   case dim_kind:
     format_json_dim(out, dt, arrmeta, data);

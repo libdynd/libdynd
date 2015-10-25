@@ -7,7 +7,6 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/types/base_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/json_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/date_type.hpp>
@@ -486,16 +485,6 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta, char *ou
   rbegin = begin;
 }
 
-static void parse_jsonstring_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&begin,
-                                  const char *end, const eval::eval_context *ectx)
-{
-  const char *saved_begin = skip_whitespace(begin, end);
-  skip_json_value(begin, end);
-  const ndt::base_string_type *bsd = tp.extended<ndt::base_string_type>();
-  // The skipped JSON value gets copied verbatim into the json string
-  bsd->set_from_utf8_string(arrmeta, out_data, saved_begin, begin, ectx);
-}
-
 static void parse_string_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&rbegin,
                               const char *end, const eval::eval_context *ectx)
 {
@@ -743,14 +732,6 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
   case option_kind:
     parse_option_json(tp, arrmeta, out_data, begin, end, ectx);
     return;
-  case dynamic_kind:
-    if (tp.get_type_id() == json_type_id) {
-      // The json type is a special string type that contains JSON directly
-      // Copy the JSON verbatim in this case.
-      parse_jsonstring_json(tp, arrmeta, out_data, begin, end, ectx);
-      return;
-    }
-    break;
   default:
     break;
   }

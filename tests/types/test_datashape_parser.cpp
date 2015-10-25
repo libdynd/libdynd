@@ -21,7 +21,6 @@
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/types/json_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/typevar_constructed_type.hpp>
@@ -53,7 +52,6 @@ TEST(DataShapeParser, Basic)
   EXPECT_EQ(ndt::type::make<dynd::complex<double>>(), ndt::type("complex128"));
   EXPECT_EQ(ndt::type::make<dynd::complex<float>>(), ndt::type("complex[float32]"));
   EXPECT_EQ(ndt::type::make<dynd::complex<double>>(), ndt::type("complex[float64]"));
-  EXPECT_EQ(ndt::make_json(), ndt::type("json"));
   EXPECT_EQ(ndt::date_type::make(), ndt::type("date"));
   EXPECT_EQ(ndt::time_type::make(), ndt::type("time"));
   EXPECT_EQ(ndt::datetime_type::make(), ndt::type("datetime"));

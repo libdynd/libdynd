@@ -16,7 +16,6 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/json_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -61,13 +60,6 @@ TEST(JSONFormatter, String)
   EXPECT_EQ("\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \"", format_json(a).as<std::string>());
 }
 
-TEST(JSONFormatter, JSON)
-{
-  nd::array a;
-  a = nd::array("[ 1, 3, 5] ").ucast(ndt::make_json());
-  EXPECT_EQ("[ 1, 3, 5] ", format_json(a).as<std::string>());
-}
-
 TEST(JSONFormatter, DateTime)
 {
   nd::array a;
@@ -77,18 +69,6 @@ TEST(JSONFormatter, DateTime)
   EXPECT_EQ("\"2013-12-15T13:14:22.19\"", format_json(a).as<std::string>());
   a = nd::array("2013-12-15T13:14:22.19").ucast(ndt::datetime_type::make(tz_utc));
   EXPECT_EQ("\"2013-12-15T13:14:22.19Z\"", format_json(a).as<std::string>());
-}
-
-TEST(JSONFormatter, Struct)
-{
-  nd::array a =
-      parse_json("{ a: int32, b: string, c: json }", "{ \"b\": \"testing\",  \"a\":    100,\n"
-                                                     "\"c\": [   {\"first\":true, \"second\":3}, null,\n \"test\"]  }");
-  EXPECT_EQ("{\"a\":100,\"b\":\"testing\","
-            "\"c\":[   {\"first\":true, \"second\":3}, null,\n \"test\"]}",
-            format_json(a).as<std::string>());
-  EXPECT_EQ("[100,\"testing\",[   {\"first\":true, \"second\":3}, null,\n \"test\"]]",
-            format_json(a, true).as<std::string>());
 }
 
 TEST(JSONFormatter, UniformDim)
