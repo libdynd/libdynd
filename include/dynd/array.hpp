@@ -1765,8 +1765,6 @@ namespace nd {
   DYND_API array memmap(const std::string &filename, intptr_t begin = 0,
                         intptr_t end = std::numeric_limits<intptr_t>::max(), uint32_t access = default_access_flags);
 
-  DYND_API array groupby(const array &data_values, const array &by, const ndt::type &groups = ndt::type());
-
   DYND_API bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data,
                                 const eval::eval_context *ectx);
 
