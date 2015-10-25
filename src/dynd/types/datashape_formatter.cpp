@@ -107,10 +107,6 @@ static void format_string_datashape(std::ostream &o, const ndt::type &tp)
     // data shape only has one kind of string
     o << "string";
     break;
-  case json_type_id: {
-    o << "json";
-    break;
-  }
   default: {
     stringstream ss;
     ss << "unrecognized string dynd type " << tp << " while formatting datashape";
