@@ -1388,11 +1388,9 @@ static void view_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_
       // Some special cases that have the same memory layouts
       switch (dt.get_type_id()) {
       case string_type_id:
-      case json_type_id:
       case bytes_type_id:
         switch (e->get_type_id()) {
         case string_type_id:
-        case json_type_id:
         case bytes_type_id:
           // All these types have the same data/arrmeta layout,
           // allow a view whenever the alignment allows it

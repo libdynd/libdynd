@@ -126,8 +126,6 @@ enum type_id_t {
   datetime_type_id,
   // A 32-bit date type limited to business days
   busdate_type_id,
-  // A UTF-8 encoded string type for holding JSON
-  json_type_id,
 
   // A fixed-sized strided array dimension type
   fixed_dim_type_id,

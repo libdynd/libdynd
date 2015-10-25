@@ -121,7 +121,6 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     time_type::make(),                                // time_type_id
     datetime_type::make(),                            // datetime_type_id
     type(),                                           // busdate_type_id
-    type(),                                           // json_type_id
     fixed_dim_kind_type::make(any_kind_type::make()), // fixed_dim_type_id
     var_dim_type::make(any_kind_type::make()),        // var_dim_type_id
     struct_type::make(true),                          // struct_type_id
@@ -424,11 +423,9 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
   switch (get_type_id()) {
   case string_type_id:
   case bytes_type_id:
-  case json_type_id:
     switch (rhs.get_type_id()) {
     case string_type_id:
     case bytes_type_id:
-    case json_type_id:
       // All of string, bytes, json are compatible
       return true;
     default:
@@ -519,8 +516,6 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "datetime");
   case busdate_type_id:
     return (o << "busdate");
-  case json_type_id:
-    return (o << "json");
   case fixed_dim_type_id:
     return (o << "fixed_dim");
   case var_dim_type_id:
