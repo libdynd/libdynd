@@ -20,7 +20,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/types/json_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/datetime_type.hpp>
@@ -107,7 +106,6 @@ static const map<std::string, ndt::type> &builtin_types()
     bit["complex64"] = ndt::type::make<dynd::complex<float>>();
     bit["complex128"] = ndt::type::make<dynd::complex<double>>();
     bit["complex"] = ndt::type::make<dynd::complex<double>>();
-    bit["json"] = ndt::make_json();
     bit["date"] = ndt::date_type::make();
     bit["time"] = ndt::time_type::make(tz_abstract);
     bit["datetime"] = ndt::datetime_type::make();
