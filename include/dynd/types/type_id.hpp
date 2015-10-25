@@ -161,7 +161,6 @@ enum type_id_t {
   // Advanced expression types
   expr_type_id,
   unary_expr_type_id,
-  groupby_type_id,
 
   // Instances of this type are themselves types
   type_type_id,

@@ -137,7 +137,6 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(),                                           // property_type_id
     type(),                                           // expr_type_id
     type(),                                           // unary_expr_type_id
-    type(),                                           // groupby_type_id
     make_type(),                                      // type_type_id
 };
 
@@ -546,8 +545,6 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "expr");
   case unary_expr_type_id:
     return (o << "unary_expr");
-  case groupby_type_id:
-    return (o << "groupby");
   case type_type_id:
     return (o << "type");
   case callable_type_id:
