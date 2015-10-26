@@ -23,4 +23,5 @@ TEST(Sort, 1D)
   nd::array a = {2, 1, 0};
   nd::sort(a);
   EXPECT_ARRAY_EQ((nd::array{0, 1, 2}), a);
+  // x
 }

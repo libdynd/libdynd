@@ -51,12 +51,16 @@ namespace nd {
 } // namespace dynd::nd
 } // namespace DyND
 
+namespace std {
+
 template <>
-struct std::iterator_traits<dynd::nd::sort_kernel::iterator> {
+struct iterator_traits<dynd::nd::sort_kernel::iterator> {
   typedef dynd::nd::sort_kernel::bytes value_type;
   typedef int difference_type;
   typedef random_access_iterator_tag iterator_category;
 };
+
+} // namespace std
 
 namespace dynd {
 namespace nd {
@@ -65,14 +69,13 @@ namespace nd {
   protected:
     char *m_data;
     size_t m_size;
-    bool dealloc;
 
   public:
-    bytes(char *data, size_t size) : m_data(data), m_size(size), dealloc(false)
+    bytes(char *data, size_t size) : m_data(data), m_size(size)
     {
     }
 
-    bytes(const bytes &other) : dealloc(true)
+    bytes(const bytes &other)
     {
       m_data = reinterpret_cast<char *>(malloc(other.m_size));
       m_size = other.m_size;
@@ -81,7 +84,7 @@ namespace nd {
 
     ~bytes()
     {
-      if (dealloc) {
+      if (m_data != NULL) {
         free(m_data);
       }
     }
@@ -120,6 +123,12 @@ namespace nd {
 
     iterator(const iterator &other) : bytes(other.m_data, other.m_size), m_stride(other.m_stride)
     {
+    }
+
+    ~iterator()
+    {
+      m_data = NULL;
+      m_size = 0;
     }
 
     intptr_t stride() const
