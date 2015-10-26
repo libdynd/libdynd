@@ -26,6 +26,11 @@ namespace nd {
     {
     }
 
+    ~sort_kernel()
+    {
+      get_child()->destroy();
+    }
+
     void single(char *DYND_UNUSED(dst), char *const *src)
     {
       ckernel_prefix *child = get_child();
