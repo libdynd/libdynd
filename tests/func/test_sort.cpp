@@ -19,6 +19,8 @@ using namespace dynd;
 
 TEST(Sort, 1D)
 {
-  std::cout << nd::sort(nd::array{1, 2, 3}) << std::endl;
-  std::exit(-1);
+  //  nd::array a = {19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+  nd::array a = {2, 1, 0};
+  nd::sort(a);
+  EXPECT_ARRAY_EQ((nd::array{0, 1, 2}), a);
 }

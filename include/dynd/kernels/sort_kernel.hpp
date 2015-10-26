@@ -8,125 +8,12 @@
 #include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
-class strided_iterator;
-}
-
-template <>
-struct std::iterator_traits<dynd::strided_iterator> {
-  typedef char *value_type;
-  typedef int difference_type;
-  typedef random_access_iterator_tag iterator_category;
-};
-
-namespace dynd {
-class strided_iterator {
-  char *m_data;
-
-public:
-  strided_iterator(const char *DYND_UNUSED(src)) : m_data(NULL)
-  {
-  }
-
-//  strided_iterator(const strided_iterator &) = delete;
-
-  operator char *()
-  {
-    return NULL;
-  }
-
-  strided_iterator &operator*()
-  {
-    return *this;
-  }
-
-  strided_iterator &operator++()
-  {
-    return *this;
-  }
-
-  strided_iterator &operator++(int)
-  {
-/*
-    strided_iterator tmp(*this);
-    operator++();
-    return tmp;
-*/
-    return *this;
-  }
-
-  strided_iterator &operator--()
-  {
-    return *this;
-  }
-
-  strided_iterator &operator--(int)
-  {
-/*
-    strided_iterator tmp(*this);
-    operator++();
-    return tmp;
-*/
-    return *this;
-  }
-
-  bool operator<(const strided_iterator &) const
-  {
-    return false;
-  }
-
-  bool operator==(const strided_iterator &) const
-  {
-    return false;
-  }
-
-  bool operator!=(const strided_iterator &) const
-  {
-    return false;
-  }
-
-  bool operator>(const strided_iterator &) const
-  {
-    return false;
-  }
-};
-
-strided_iterator operator+(const strided_iterator &, int)
-{
-  return strided_iterator(NULL);
-}
-
-int operator+(const strided_iterator &, const strided_iterator)
-{
-  return 0;
-}
-
-strided_iterator operator-(const strided_iterator &, int)
-{
-  return strided_iterator(NULL);
-}
-
-int operator-(const strided_iterator &, const strided_iterator)
-{
-  return 0;
-}
-
-} // namespace dynd
-
-namespace std {
-
-void iter_swap(dynd::strided_iterator, dynd::strided_iterator)
-{
-}
-
-} // namespace std
-
-template <typename T>
-struct XYZ {
-};
-
-namespace dynd {
 namespace nd {
+
   struct sort_kernel : base_kernel<sort_kernel, 1> {
+    class bytes;
+    class iterator;
+
     static const size_t data_size = 0;
 
     const intptr_t src0_size;
@@ -136,11 +23,7 @@ namespace nd {
     {
     }
 
-    void single(char *DYND_UNUSED(dst), char *const *src)
-    {
-      std::sort(strided_iterator(src[0]), strided_iterator(src[0] + src0_size),
-                [](const char *, const char *) { return false; });
-    }
+    void single(char *DYND_UNUSED(dst), char *const *src);
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                                  ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -166,6 +49,171 @@ namespace nd {
   };
 
 } // namespace dynd::nd
+} // namespace DyND
+
+template <>
+struct std::iterator_traits<dynd::nd::sort_kernel::iterator> {
+  typedef dynd::nd::sort_kernel::bytes value_type;
+  typedef int difference_type;
+  typedef random_access_iterator_tag iterator_category;
+};
+
+namespace dynd {
+namespace nd {
+
+  class sort_kernel::bytes {
+  protected:
+    char *m_data;
+    size_t m_size;
+    bool dealloc;
+
+  public:
+    bytes(char *data, size_t size) : m_data(data), m_size(size), dealloc(false)
+    {
+    }
+
+    bytes(const bytes &other) : dealloc(true)
+    {
+      m_data = reinterpret_cast<char *>(malloc(other.m_size));
+      m_size = other.m_size;
+      std::memcpy(m_data, other.m_data, other.m_size);
+    }
+
+    ~bytes()
+    {
+      if (dealloc) {
+        free(m_data);
+      }
+    }
+
+    char *data()
+    {
+      return m_data;
+    }
+
+    const char *data() const
+    {
+      return m_data;
+    }
+
+    size_t size() const
+    {
+      return m_size;
+    }
+
+    bytes &operator=(const bytes &rhs)
+    {
+      std::memcpy(m_data, rhs.m_data, rhs.m_size);
+      m_size = rhs.m_size;
+
+      return *this;
+    }
+  };
+
+  class sort_kernel::iterator : public bytes {
+    intptr_t m_stride;
+
+  public:
+    iterator(char *data, size_t size) : bytes(data, size), m_stride(sizeof(int))
+    {
+    }
+
+    iterator(const iterator &other) : bytes(other.m_data, other.m_size), m_stride(other.m_stride)
+    {
+    }
+
+    intptr_t stride() const
+    {
+      return m_stride;
+    }
+
+    bytes &operator*()
+    {
+      return *this;
+    }
+
+    iterator &operator++()
+    {
+      m_data += m_stride;
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    iterator &operator--()
+    {
+      m_data -= m_stride;
+      return *this;
+    }
+
+    iterator operator--(int)
+    {
+      iterator tmp(*this);
+      operator--();
+      return tmp;
+    }
+
+    bool operator<(const iterator &rhs) const
+    {
+      return m_data < rhs.m_data;
+    }
+
+    bool operator==(const iterator &rhs) const
+    {
+      return m_data == rhs.m_data;
+    }
+
+    bool operator!=(const iterator &rhs) const
+    {
+      return m_data != rhs.m_data;
+    }
+
+    bool operator>(const iterator &rhs) const
+    {
+      return m_data > rhs.m_data;
+    }
+
+    int operator-(iterator rhs)
+    {
+      return (m_data - rhs.m_data) / m_stride;
+    }
+  };
+
+  sort_kernel::iterator operator+(sort_kernel::iterator lhs, int rhs)
+  {
+    return sort_kernel::iterator(lhs.data() + rhs * lhs.stride(), lhs.size());
+  }
+
+  sort_kernel::iterator operator-(sort_kernel::iterator lhs, int rhs)
+  {
+    return sort_kernel::iterator(lhs.data() - rhs * lhs.stride(), lhs.size());
+  }
+
+  void swap(dynd::nd::sort_kernel::bytes &, dynd::nd::sort_kernel::bytes &)
+  {
+    std::cout << "called swap" << std::endl;
+  }
+
+  void sort_kernel::single(char *DYND_UNUSED(dst), char *const *src)
+  {
+    std::cout << "begin = " << reinterpret_cast<intptr_t>(src[0]) << std::endl;
+    std::cout << "end = " << reinterpret_cast<intptr_t>(src[0] + src0_size * sizeof(int)) << std::endl;
+
+    std::sort(iterator(src[0], sizeof(int)), iterator(src[0] + src0_size * sizeof(int), sizeof(int)),
+              [](const bytes &lhs, const bytes &rhs) {
+      std::cout << "comparing" << std::endl;
+      std::cout << "lhs = " << *reinterpret_cast<const int *>(lhs.data()) << std::endl;
+      std::cout << "rhs = " << *reinterpret_cast<const int *>(rhs.data()) << std::endl;
+      return *reinterpret_cast<const int *>(lhs.data()) < *reinterpret_cast<const int *>(rhs.data());
+    });
+  }
+
+} // namespace dynd::nd
 
 namespace ndt {
 
@@ -179,3 +227,17 @@ namespace ndt {
 
 } // namespace dynd::ndt
 } // namespace dynd
+
+namespace std {
+template <>
+void swap(dynd::nd::sort_kernel::bytes &, dynd::nd::sort_kernel::bytes &)
+{
+  std::cout << "called swap" << std::endl;
+}
+
+template <>
+void iter_swap(dynd::nd::sort_kernel::bytes &, dynd::nd::sort_kernel::bytes &)
+{
+  std::cout << "called iter_swap" << std::endl;
+}
+}
