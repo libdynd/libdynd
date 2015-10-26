@@ -82,6 +82,7 @@ set(tests_SRC
     func/test_registry.cpp
     func/test_rolling.cpp
     func/test_search.cpp
+    func/test_sort.cpp
     func/test_special.cpp
     func/test_sum.cpp
     func/test_take.cpp

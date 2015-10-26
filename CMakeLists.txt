@@ -411,6 +411,7 @@ set(libdynd_SRC
     include/dynd/kernels/pointer_assignment_kernels.hpp
     include/dynd/kernels/reduction_kernel.hpp
     include/dynd/kernels/rolling_kernel.hpp
+    include/dynd/kernels/sort_kernel.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_numeric_assignment_kernels.hpp
@@ -453,6 +454,7 @@ set(libdynd_SRC
     src/dynd/float128.cpp
     src/dynd/int128.cpp
     src/dynd/search.cpp
+    src/dynd/sort.cpp
     src/dynd/type.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
@@ -490,6 +492,7 @@ set(libdynd_SRC
     include/dynd/int128.hpp
     include/dynd/iterator.hpp
     include/dynd/math.hpp
+    include/dynd/sort.hpp
     include/dynd/type.hpp
     include/dynd/type_sequence.hpp
     include/dynd/typed_data_assign.hpp
