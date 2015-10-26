@@ -194,6 +194,11 @@ public:
     return m_data < rhs.m_data;
   }
 
+  bool operator<=(const bytes_iterator &rhs) const
+  {
+    return m_data <= rhs.m_data;
+  }
+
   bool operator==(const bytes_iterator &rhs) const
   {
     return m_data == rhs.m_data;
@@ -202,6 +207,11 @@ public:
   bool operator!=(const bytes_iterator &rhs) const
   {
     return m_data != rhs.m_data;
+  }
+
+  bool operator>=(const bytes_iterator &rhs) const
+  {
+    return m_data >= rhs.m_data;
   }
 
   bool operator>(const bytes_iterator &rhs) const

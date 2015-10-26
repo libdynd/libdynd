@@ -34,14 +34,6 @@ namespace nd {
       });
     }
 
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = src_tp[0];
-    }
-
     static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
                                 void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
@@ -66,7 +58,7 @@ namespace ndt {
   struct type::equivalent<nd::sort_kernel> {
     static type make()
     {
-      return callable_type::make(type("Fixed * Any"), {type("Fixed * Any")});
+      return callable_type::make(type::make<void>(), {type("Fixed * Scalar")});
     }
   };
 
