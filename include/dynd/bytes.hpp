@@ -75,6 +75,10 @@ public:
   }
 };
 
+/**
+  This is a temporary solution for interfacing with STL algorithms. This class will
+  hopefully soon merge with the bytes class above.
+*/
 class std_bytes {
 protected:
   char *m_data;
@@ -219,7 +223,7 @@ public:
     return m_data > rhs.m_data;
   }
 
-  int operator-(bytes_iterator rhs)
+  intptr_t operator-(bytes_iterator rhs)
   {
     return (m_data - rhs.m_data) / m_stride;
   }
@@ -242,7 +246,7 @@ namespace std {
 template <>
 struct iterator_traits<dynd::bytes_iterator> {
   typedef dynd::std_bytes value_type;
-  typedef int difference_type;
+  typedef intptr_t difference_type;
   typedef random_access_iterator_tag iterator_category;
 };
 

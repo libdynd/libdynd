@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/bytes.hpp>
+#include <dynd/func/comparison.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
@@ -27,26 +28,33 @@ namespace nd {
 
     void single(char *DYND_UNUSED(dst), char *const *src)
     {
+      ckernel_prefix *child = get_child();
       std::sort(bytes_iterator(src[0], src0_element_data_size, src0_stride),
                 bytes_iterator(src[0] + src0_size * src0_stride, src0_element_data_size, src0_stride),
-                [](const std_bytes &lhs, const std_bytes &rhs) {
-        return *reinterpret_cast<const int *>(lhs.data()) < *reinterpret_cast<const int *>(rhs.data());
+                [child](const std_bytes &lhs, const std_bytes &rhs) {
+        bool1 dst;
+        char *src[2] = {const_cast<char *>(lhs.data()), const_cast<char *>(rhs.data())};
+        child->single(reinterpret_cast<char *>(&dst), src);
+        return dst;
       });
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data, void *ckb,
+                                intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
                                 const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
                                 const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                                const nd::array *DYND_UNUSED(kwds),
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
+                                const std::map<std::string, ndt::type> &tp_vars)
     {
-      make(ckb, kernreq, ckb_offset, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
-           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride,
-           src_tp[0].template extended<ndt::fixed_dim_type>()->get_element_type().get_data_size());
+      const ndt::type &src0_element_tp = src_tp[0].template extended<ndt::fixed_dim_type>()->get_element_type();
 
-      return ckb_offset;
+      make(ckb, kernreq, ckb_offset, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
+           reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_tp.get_data_size());
+
+      const ndt::type child_src_tp[2] = {src0_element_tp, src0_element_tp};
+      return nd::less::get().get()->instantiate(nd::less::get().get()->static_data, nd::less::get().get()->data_size,
+                                                data, ckb, ckb_offset, ndt::type::make<bool>(), NULL, 2, child_src_tp,
+                                                NULL, kernel_request_single, ectx, nkwd, kwds, tp_vars);
     }
   };
 
