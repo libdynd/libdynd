@@ -55,7 +55,7 @@ void ndt::bytes_type::set_bytes_data(const char *arrmeta, char *data, const char
 
   // Allocate the output array data, then copy it
   char *begin, *end;
-  allocator->allocate(md->blockref, bytes_end - bytes_begin, get_target_alignment(), &begin, &end);
+  allocator->allocate(md->blockref, bytes_end - bytes_begin, &begin, &end);
   d->assign(begin, end - begin);
   memcpy(d->begin(), bytes_begin, bytes_end - bytes_begin);
 }

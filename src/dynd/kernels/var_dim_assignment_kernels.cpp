@@ -20,8 +20,7 @@ using namespace dynd;
 // broadcast to var array assignment
 
 namespace {
-struct broadcast_to_var_assign_ck
-    : nd::base_kernel<broadcast_to_var_assign_ck, 1> {
+struct broadcast_to_var_assign_ck : nd::base_kernel<broadcast_to_var_assign_ck, 1> {
   intptr_t m_dst_target_alignment;
   const var_dim_type_arrmeta *m_dst_md;
 
@@ -43,19 +42,16 @@ struct broadcast_to_var_assign_ck
       // If we're writing to an empty array, have to allocate the output
       memory_block_data *memblock = m_dst_md->blockref;
       if (memblock->m_type == objectarray_memory_block_type) {
-        memory_block_objectarray_allocator_api *allocator =
-            get_memory_block_objectarray_allocator_api(memblock);
+        memory_block_objectarray_allocator_api *allocator = get_memory_block_objectarray_allocator_api(memblock);
 
         // Allocate the output array data
         dst_d->begin = allocator->allocate(memblock, 1);
       } else {
-        memory_block_pod_allocator_api *allocator =
-            get_memory_block_pod_allocator_api(memblock);
+        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
         // Allocate the output array data
         char *dst_end = NULL;
-        allocator->allocate(memblock, m_dst_md->stride, m_dst_target_alignment,
-                            &dst_d->begin, &dst_end);
+        allocator->allocate(memblock, m_dst_md->stride, &dst_d->begin, &dst_end);
       }
       dst_d->size = 1;
       // Copy a single input to the newly allocated element
@@ -71,10 +67,10 @@ struct broadcast_to_var_assign_ck
 };
 } // anonymous namespace
 
-size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
-    const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+size_t dynd::make_broadcast_to_var_dim_assignment_kernel(void *ckb, intptr_t ckb_offset,
+                                                         const ndt::type &dst_var_dim_tp, const char *dst_arrmeta,
+                                                         const ndt::type &src_tp, const char *src_arrmeta,
+                                                         kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   typedef broadcast_to_var_assign_ck self_type;
   if (dst_var_dim_tp.get_type_id() != var_dim_type_id) {
@@ -83,18 +79,15 @@ size_t dynd::make_broadcast_to_var_dim_assignment_kernel(
           "destination type " << dst_var_dim_tp << " is not a var_dim";
     throw runtime_error(ss.str());
   }
-  const ndt::var_dim_type *dst_vad =
-      dst_var_dim_tp.extended<ndt::var_dim_type>();
-  const var_dim_type_arrmeta *dst_md =
-      reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
+  const ndt::var_dim_type *dst_vad = dst_var_dim_tp.extended<ndt::var_dim_type>();
+  const var_dim_type_arrmeta *dst_md = reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_dst_target_alignment = dst_vad->get_target_alignment();
   self->m_dst_md = dst_md;
   return ::make_assignment_kernel(ckb, ckb_offset, dst_vad->get_element_type(),
-                                  dst_arrmeta + sizeof(var_dim_type_arrmeta),
-                                  src_tp, src_arrmeta, kernel_request_strided,
-                                  ectx);
+                                  dst_arrmeta + sizeof(var_dim_type_arrmeta), src_tp, src_arrmeta,
+                                  kernel_request_strided, ectx);
 }
 
 /////////////////////////////////////////
@@ -129,19 +122,16 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
         // If we're writing to an empty array, have to allocate the output
         memory_block_data *memblock = m_dst_md->blockref;
         if (memblock->m_type == objectarray_memory_block_type) {
-          memory_block_objectarray_allocator_api *allocator =
-              get_memory_block_objectarray_allocator_api(memblock);
+          memory_block_objectarray_allocator_api *allocator = get_memory_block_objectarray_allocator_api(memblock);
 
           // Allocate the output array data
           dst_d->begin = allocator->allocate(memblock, dim_size);
         } else {
-          memory_block_pod_allocator_api *allocator =
-              get_memory_block_pod_allocator_api(memblock);
+          memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
           // Allocate the output array data
           char *dst_end = NULL;
-          allocator->allocate(memblock, dim_size * dst_stride,
-                              m_dst_target_alignment, &dst_d->begin, &dst_end);
+          allocator->allocate(memblock, dim_size * dst_stride, &dst_d->begin, &dst_end);
         }
         dst_d->size = dim_size;
         // Copy to the newly allocated element
@@ -155,8 +145,7 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
                             "var_dim to an initialized one");
       }
       intptr_t dst_dim_size = dst_d->size, src_dim_size = src_d->size;
-      intptr_t dst_stride = m_dst_md->stride,
-               src_stride = src_dim_size != 1 ? m_src_md->stride : 0;
+      intptr_t dst_stride = m_dst_md->stride, src_stride = src_dim_size != 1 ? m_src_md->stride : 0;
       // Check for a broadcasting error
       if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
         stringstream ss;
@@ -174,12 +163,9 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
 };
 } // anonymous namespace
 
-size_t dynd::make_var_dim_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                            const ndt::type &dst_var_dim_tp,
-                                            const char *dst_arrmeta,
-                                            const ndt::type &src_var_dim_tp,
-                                            const char *src_arrmeta,
-                                            kernel_request_t kernreq,
+size_t dynd::make_var_dim_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
+                                            const char *dst_arrmeta, const ndt::type &src_var_dim_tp,
+                                            const char *src_arrmeta, kernel_request_t kernreq,
                                             const eval::eval_context *ectx)
 {
   typedef var_assign_ck self_type;
@@ -195,23 +181,18 @@ size_t dynd::make_var_dim_assignment_kernel(void *ckb, intptr_t ckb_offset,
           "source type " << src_var_dim_tp << " is not a var_dim";
     throw runtime_error(ss.str());
   }
-  const ndt::var_dim_type *dst_vad =
-      dst_var_dim_tp.extended<ndt::var_dim_type>();
-  const ndt::var_dim_type *src_vad =
-      src_var_dim_tp.extended<ndt::var_dim_type>();
-  const var_dim_type_arrmeta *dst_md =
-      reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
-  const var_dim_type_arrmeta *src_md =
-      reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
+  const ndt::var_dim_type *dst_vad = dst_var_dim_tp.extended<ndt::var_dim_type>();
+  const ndt::var_dim_type *src_vad = src_var_dim_tp.extended<ndt::var_dim_type>();
+  const var_dim_type_arrmeta *dst_md = reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
+  const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
 
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_dst_target_alignment = dst_vad->get_target_alignment();
   self->m_dst_md = dst_md;
   self->m_src_md = src_md;
-  return ::make_assignment_kernel(
-      ckb, ckb_offset, dst_vad->get_element_type(),
-      dst_arrmeta + sizeof(var_dim_type_arrmeta), src_vad->get_element_type(),
-      src_arrmeta + sizeof(var_dim_type_arrmeta), kernel_request_strided, ectx);
+  return ::make_assignment_kernel(ckb, ckb_offset, dst_vad->get_element_type(),
+                                  dst_arrmeta + sizeof(var_dim_type_arrmeta), src_vad->get_element_type(),
+                                  src_arrmeta + sizeof(var_dim_type_arrmeta), kernel_request_strided, ectx);
 }
 
 /////////////////////////////////////////
@@ -243,19 +224,16 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
       // If we're writing to an empty array, have to allocate the output
       memory_block_data *memblock = m_dst_md->blockref;
       if (memblock->m_type == objectarray_memory_block_type) {
-        memory_block_objectarray_allocator_api *allocator =
-            get_memory_block_objectarray_allocator_api(memblock);
+        memory_block_objectarray_allocator_api *allocator = get_memory_block_objectarray_allocator_api(memblock);
 
         // Allocate the output array data
         dst_d->begin = allocator->allocate(memblock, dim_size);
       } else {
-        memory_block_pod_allocator_api *allocator =
-            get_memory_block_pod_allocator_api(memblock);
+        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
         // Allocate the output array data
         char *dst_end = NULL;
-        allocator->allocate(memblock, dim_size * dst_stride,
-                            m_dst_target_alignment, &dst_d->begin, &dst_end);
+        allocator->allocate(memblock, dim_size * dst_stride, &dst_d->begin, &dst_end);
       }
       dst_d->size = dim_size;
       // Copy to the newly allocated element
@@ -280,11 +258,11 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
 };
 } // anonymous namespace
 
-size_t dynd::make_strided_to_var_dim_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
-    const char *dst_arrmeta, intptr_t src_dim_size, intptr_t src_stride,
-    const ndt::type &src_el_tp, const char *src_el_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx)
+size_t dynd::make_strided_to_var_dim_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_var_dim_tp,
+                                                       const char *dst_arrmeta, intptr_t src_dim_size,
+                                                       intptr_t src_stride, const ndt::type &src_el_tp,
+                                                       const char *src_el_arrmeta, kernel_request_t kernreq,
+                                                       const eval::eval_context *ectx)
 {
   typedef strided_to_var_assign_ck self_type;
   if (dst_var_dim_tp.get_type_id() != var_dim_type_id) {
@@ -293,10 +271,8 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
           "type " << dst_var_dim_tp << " is not a var_dim";
     throw runtime_error(ss.str());
   }
-  const ndt::var_dim_type *dst_vad =
-      dst_var_dim_tp.extended<ndt::var_dim_type>();
-  const var_dim_type_arrmeta *dst_md =
-      reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
+  const ndt::var_dim_type *dst_vad = dst_var_dim_tp.extended<ndt::var_dim_type>();
+  const var_dim_type_arrmeta *dst_md = reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
 
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   self->m_dst_target_alignment = dst_vad->get_target_alignment();
@@ -305,8 +281,7 @@ size_t dynd::make_strided_to_var_dim_assignment_kernel(
   self->m_src_dim_size = src_dim_size;
 
   return ::make_assignment_kernel(ckb, ckb_offset, dst_vad->get_element_type(),
-                                  dst_arrmeta + sizeof(var_dim_type_arrmeta),
-                                  src_el_tp, src_el_arrmeta,
+                                  dst_arrmeta + sizeof(var_dim_type_arrmeta), src_el_tp, src_el_arrmeta,
                                   kernel_request_strided, ectx);
 }
 
@@ -334,8 +309,7 @@ struct var_to_strided_assign_ck : nd::base_kernel<var_to_strided_assign_ck, 1> {
     }
 
     intptr_t dst_dim_size = m_dst_dim_size, src_dim_size = src_d->size;
-    intptr_t dst_stride = m_dst_stride,
-             src_stride = src_dim_size != 1 ? m_src_md->stride : 0;
+    intptr_t dst_stride = m_dst_stride, src_stride = src_dim_size != 1 ? m_src_md->stride : 0;
     // Check for a broadcasting error
     if (src_dim_size != 1 && dst_dim_size != src_dim_size) {
       stringstream ss;
@@ -350,40 +324,32 @@ struct var_to_strided_assign_ck : nd::base_kernel<var_to_strided_assign_ck, 1> {
 };
 } // anonymous namespace
 
-size_t dynd::make_var_to_fixed_dim_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_strided_dim_tp,
-    const char *dst_arrmeta, const ndt::type &src_var_dim_tp,
-    const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx)
+size_t dynd::make_var_to_fixed_dim_assignment_kernel(void *ckb, intptr_t ckb_offset,
+                                                     const ndt::type &dst_strided_dim_tp, const char *dst_arrmeta,
+                                                     const ndt::type &src_var_dim_tp, const char *src_arrmeta,
+                                                     kernel_request_t kernreq, const eval::eval_context *ectx)
 {
   typedef var_to_strided_assign_ck self_type;
   if (src_var_dim_tp.get_type_id() != var_dim_type_id) {
     stringstream ss;
-    ss << "make_var_to_fixed_dim_assignment_kernel: provided source type "
-       << src_var_dim_tp << " is not a var_dim";
+    ss << "make_var_to_fixed_dim_assignment_kernel: provided source type " << src_var_dim_tp << " is not a var_dim";
     throw runtime_error(ss.str());
   }
-  const ndt::var_dim_type *src_vad =
-      src_var_dim_tp.extended<ndt::var_dim_type>();
-  const var_dim_type_arrmeta *src_md =
-      reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
+  const ndt::var_dim_type *src_vad = src_var_dim_tp.extended<ndt::var_dim_type>();
+  const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
 
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
   ndt::type dst_element_tp;
   const char *dst_element_arrmeta;
-  if (!dst_strided_dim_tp.get_as_strided(dst_arrmeta, &self->m_dst_dim_size,
-                                         &self->m_dst_stride, &dst_element_tp,
+  if (!dst_strided_dim_tp.get_as_strided(dst_arrmeta, &self->m_dst_dim_size, &self->m_dst_stride, &dst_element_tp,
                                          &dst_element_arrmeta)) {
     stringstream ss;
     ss << "make_var_to_fixed_dim_assignment_kernel: provided destination "
-          "type " << dst_strided_dim_tp
-       << " is not a strided_dim or fixed_array";
+          "type " << dst_strided_dim_tp << " is not a strided_dim or fixed_array";
     throw runtime_error(ss.str());
   }
 
   self->m_src_md = src_md;
-  return ::make_assignment_kernel(
-      ckb, ckb_offset, dst_element_tp, dst_element_arrmeta,
-      src_vad->get_element_type(), src_arrmeta + sizeof(var_dim_type_arrmeta),
-      kernel_request_strided, ectx);
+  return ::make_assignment_kernel(ckb, ckb_offset, dst_element_tp, dst_element_arrmeta, src_vad->get_element_type(),
+                                  src_arrmeta + sizeof(var_dim_type_arrmeta), kernel_request_strided, ectx);
 }

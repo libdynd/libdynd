@@ -73,8 +73,7 @@ namespace detail {
     delete emb;
   }
 
-  static void allocate(memory_block_data *self, intptr_t size_bytes, intptr_t DYND_UNUSED(alignment), char **out_begin,
-                       char **out_end)
+  static void allocate(memory_block_data *self, intptr_t size_bytes, char **out_begin, char **out_end)
   {
     //    cout << "allocating " << size_bytes << " of memory with alignment " << alignment << endl;
     // Allocate new POD memory of the requested size and alignment

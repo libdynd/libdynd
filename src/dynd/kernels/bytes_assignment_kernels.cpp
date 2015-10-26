@@ -46,7 +46,7 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
       char *src_end = src_d->end();
       memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
-      allocator->allocate(dst_md->blockref, src_end - src_begin, dst_alignment, &dst_begin, &dst_end);
+      allocator->allocate(dst_md->blockref, src_end - src_begin, &dst_begin, &dst_end);
       memcpy(dst_begin, src_begin, src_end - src_begin);
 
       // Set the output
@@ -103,7 +103,7 @@ struct fixed_bytes_to_blockref_bytes_kernel : nd::base_kernel<fixed_bytes_to_blo
 
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
-    allocator->allocate(dst_md->blockref, src_end - src_begin, dst_alignment, &dst_begin, &dst_end);
+    allocator->allocate(dst_md->blockref, src_end - src_begin, &dst_begin, &dst_end);
     memcpy(dst_begin, src_begin, src_end - src_begin);
 
     // Set the output

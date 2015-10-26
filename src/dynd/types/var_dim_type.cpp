@@ -375,7 +375,7 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
     if (flags & type_flag_destructor) {
       md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta, element_size).release();
     } else if (flags & type_flag_zeroinit) {
-      md->blockref = make_zeroinit_memory_block().release();
+      md->blockref = make_zeroinit_memory_block(m_element_tp).release();
     } else {
       md->blockref = make_pod_memory_block(m_element_tp).release();
     }
@@ -623,7 +623,6 @@ void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *
     ss << "internal error: expected a var_dim type, not " << tp;
     throw dynd::type_error(ss.str());
   }
-  const var_dim_type *vdt = tp.extended<var_dim_type>();
   const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
   var_dim_type_data *d = reinterpret_cast<var_dim_type_data *>(data);
   if (d->begin != NULL) {
@@ -648,7 +647,7 @@ void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *
 
     // Allocate the output array data
     char *dst_end = NULL;
-    allocator->allocate(memblock, count * md->stride, vdt->get_target_alignment(), &d->begin, &dst_end);
+    allocator->allocate(memblock, count * md->stride, &d->begin, &dst_end);
     d->size = count;
   } else {
     stringstream ss;

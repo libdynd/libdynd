@@ -115,7 +115,7 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
       // padding
       // TODO: Don't add padding if the output is not a multi-character encoding
       allocator->allocate(dst_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                          dst_charsize, &dst_begin, &dst_end);
+                         &dst_begin, &dst_end);
 
       dst_current = dst_begin;
       while (src_begin < src_end) {
@@ -199,7 +199,7 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     // padding
     // TODO: Don't add padding if the output is not a multi-character encoding
     allocator->allocate(dst_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                        dst_charsize, &dst_begin, &dst_end);
+                     &dst_begin, &dst_end);
 
     dst_current = dst_begin;
     while (src_begin < src_end) {

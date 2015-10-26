@@ -54,7 +54,7 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   // Allocate the initial output as the src number of characters + some padding
   // TODO: Don't add padding if the output is not a multi-character encoding
   allocator->allocate(data_md->blockref, ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                      dst_charsize, &dst_begin, &dst_end);
+                      &dst_begin, &dst_end);
 
   dst_current = dst_begin;
   while (utf8_begin < utf8_end) {
