@@ -229,12 +229,12 @@ public:
   }
 };
 
-inline bytes_iterator operator+(bytes_iterator lhs, int rhs)
+inline bytes_iterator operator+(bytes_iterator lhs, intptr_t rhs)
 {
   return bytes_iterator(lhs.data() + rhs * lhs.stride(), lhs.size(), lhs.stride());
 }
 
-inline bytes_iterator operator-(bytes_iterator lhs, int rhs)
+inline bytes_iterator operator-(bytes_iterator lhs, intptr_t rhs)
 {
   return bytes_iterator(lhs.data() - rhs * lhs.stride(), lhs.size(), lhs.stride());
 }
