@@ -194,11 +194,6 @@ namespace nd {
     return sort_kernel::iterator(lhs.data() - rhs * lhs.stride(), lhs.size());
   }
 
-  void swap(dynd::nd::sort_kernel::bytes &, dynd::nd::sort_kernel::bytes &)
-  {
-    std::cout << "called swap" << std::endl;
-  }
-
   void sort_kernel::single(char *DYND_UNUSED(dst), char *const *src)
   {
     std::cout << "begin = " << reinterpret_cast<intptr_t>(src[0]) << std::endl;
@@ -227,17 +222,3 @@ namespace ndt {
 
 } // namespace dynd::ndt
 } // namespace dynd
-
-namespace std {
-template <>
-void swap(dynd::nd::sort_kernel::bytes &, dynd::nd::sort_kernel::bytes &)
-{
-  std::cout << "called swap" << std::endl;
-}
-
-template <>
-void iter_swap(dynd::nd::sort_kernel::bytes &, dynd::nd::sort_kernel::bytes &)
-{
-  std::cout << "called iter_swap" << std::endl;
-}
-}
