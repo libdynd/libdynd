@@ -377,7 +377,7 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
     } else if (flags & type_flag_zeroinit) {
       md->blockref = make_zeroinit_memory_block().release();
     } else {
-      md->blockref = make_pod_memory_block().release();
+      md->blockref = make_pod_memory_block(m_element_tp).release();
     }
   }
   if (!m_element_tp.is_builtin()) {

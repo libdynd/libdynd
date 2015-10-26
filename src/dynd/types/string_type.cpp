@@ -21,8 +21,8 @@ using namespace std;
 using namespace dynd;
 
 ndt::string_type::string_type()
-    : base_string_type(string_type_id, sizeof(string), alignof(string),
-                       type_flag_zeroinit | type_flag_blockref | type_flag_destructor, sizeof(string_type_arrmeta))
+    : base_string_type(string_type_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_blockref,
+                       sizeof(string_type_arrmeta))
 {
 }
 
@@ -148,7 +148,7 @@ void ndt::string_type::arrmeta_default_construct(char *arrmeta, bool blockref_al
   // Simply allocate a POD memory block
   if (blockref_alloc) {
     string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
-    md->blockref = make_pod_memory_block().release();
+    md->blockref = make_pod_memory_block(make()).release();
   }
 }
 

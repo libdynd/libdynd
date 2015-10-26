@@ -167,7 +167,7 @@ void ndt::bytes_type::arrmeta_default_construct(char *arrmeta, bool blockref_all
   // Simply allocate a POD memory block
   if (blockref_alloc) {
     bytes_type_arrmeta *md = reinterpret_cast<bytes_type_arrmeta *>(arrmeta);
-    md->blockref = make_pod_memory_block().release();
+    md->blockref = make_pod_memory_block(make()).release();
   }
 }
 
