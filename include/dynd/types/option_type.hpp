@@ -42,15 +42,16 @@ namespace ndt {
 
     void get_vars(std::unordered_set<std::string> &vars) const;
 
-    const type &get_value_type() const { return m_value_tp.value_type(); }
+    const type &get_value_type() const
+    {
+      return m_value_tp.value_type();
+    }
 
     /** Assigns NA to one value */
-    void assign_na(const char *arrmeta, char *data,
-                   const eval::eval_context *ectx) const;
+    void assign_na(const char *arrmeta, char *data, const eval::eval_context *ectx) const;
 
     /** Returns true if the value is available */
-    bool is_avail(const char *arrmeta, const char *data,
-                  const eval::eval_context *ectx) const;
+    bool is_avail(const char *arrmeta, const char *data, const eval::eval_context *ectx) const;
 
     nd::callable &get_is_avail() const
     {
@@ -62,25 +63,20 @@ namespace ndt {
       return nd::assign_na_decl::get_child(m_value_tp);
     }
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;
-    void transform_child_types(type_transform_fn_t transform_fn,
-                               intptr_t arrmeta_offset, void *extra,
-                               type &out_transformed_tp,
-                               bool &out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
+                               type &out_transformed_tp, bool &out_was_transformed) const;
     type get_canonical_type() const;
 
-    void set_from_utf8_string(const char *arrmeta, char *data,
-                              const char *utf8_begin, const char *utf8_end,
+    void set_from_utf8_string(const char *arrmeta, char *data, const char *utf8_begin, const char *utf8_end,
                               const eval::eval_context *ectx) const;
 
-    type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
-                               intptr_t total_ndim = 0) const;
+    type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
@@ -92,22 +88,20 @@ namespace ndt {
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                             const std::string &indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                    const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta,
-                                    kernel_request_t kernreq,
+    void data_destruct(const char *arrmeta, char *data) const;
+    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
+
+    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
+                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                     const eval::eval_context *ectx) const;
 
-    bool match(const char *arrmeta, const type &candidate_tp,
-               const char *candidate_arrmeta,
+    bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    void get_dynamic_type_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
+    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                     size_t *out_count) const;
 
     static type make(const type &value_tp);
   };

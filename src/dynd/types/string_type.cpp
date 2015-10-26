@@ -21,8 +21,8 @@ using namespace std;
 using namespace dynd;
 
 ndt::string_type::string_type()
-    : base_string_type(string_type_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_blockref,
-                       sizeof(string_type_arrmeta))
+    : base_string_type(string_type_id, sizeof(string), alignof(string),
+                       type_flag_zeroinit | type_flag_blockref | type_flag_destructor, sizeof(string_type_arrmeta))
 {
 }
 
@@ -194,6 +194,15 @@ void ndt::string_type::arrmeta_destruct(char *arrmeta) const
   if (md->blockref) {
     memory_block_decref(md->blockref);
   }
+}
+
+void ndt::string_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const
+{
+}
+
+void ndt::string_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data),
+                                             intptr_t DYND_UNUSED(stride), size_t DYND_UNUSED(count)) const
+{
 }
 
 void ndt::string_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const
