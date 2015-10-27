@@ -245,7 +245,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
   memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
   intptr_t size = 0, allocated_size = 8;
   allocator->allocate(md->blockref, allocated_size, &out->begin);
-  out_end = out->begin + ((element_tp.get_type_id() == string_type_id | element_tp.get_type_id() == bytes_type_id)
+  out_end = out->begin + (((element_tp.get_type_id() == string_type_id) | (element_tp.get_type_id() == bytes_type_id))
                               ? allocated_size
                               : (allocated_size * stride));
 
