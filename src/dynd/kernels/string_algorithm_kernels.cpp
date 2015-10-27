@@ -36,9 +36,8 @@ inline void concat_one_string(size_t nop, dynd::string *d, const dynd::string *c
     size += (s[i]->end() - s[i]->begin());
   }
   // Allocate the output
-  size_t alignment = 1; // NOTE: This kernel is hardcoded for UTF-8, alignment 1
   char *begin, *end;
-  allocator->allocate(dst_blockref, size, alignment, &begin, &end);
+  allocator->allocate(dst_blockref, size, &begin, &end);
   d->assign(begin, end - begin);
   // Copy the string data
   char *dst = d->begin();

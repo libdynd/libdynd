@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 
+#include <dynd/type.hpp>
 #include <dynd/memblock/memory_block.hpp>
 
 namespace dynd {
@@ -18,8 +19,9 @@ namespace dynd {
  *
  * The initial capacity can be set if a good estimate is known.
  */
-DYND_API memory_block_ptr make_pod_memory_block(intptr_t initial_capacity_bytes = 2048);
+DYND_API memory_block_ptr make_pod_memory_block(const ndt::type &tp, intptr_t initial_capacity_bytes = 2048);
 
-DYND_API void pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream& o, const std::string& indent);
+DYND_API void pod_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o,
+                                           const std::string &indent);
 
 } // namespace dynd

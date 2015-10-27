@@ -277,6 +277,16 @@ void ndt::option_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o,
   }
 }
 
+void ndt::option_type::data_destruct(const char *arrmeta, char *data) const
+{
+  return m_value_tp.extended()->data_destruct(arrmeta, data);
+}
+
+void ndt::option_type::data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const
+{
+  return m_value_tp.extended()->data_destruct_strided(arrmeta, data, stride, count);
+}
+
 intptr_t ndt::option_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
                                                   const char *dst_arrmeta, const type &src_tp, const char *src_arrmeta,
                                                   kernel_request_t kernreq, const eval::eval_context *ectx) const

@@ -54,7 +54,7 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   // Allocate the initial output as the src number of characters + some padding
   // TODO: Don't add padding if the output is not a multi-character encoding
   allocator->allocate(data_md->blockref, ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                      dst_charsize, &dst_begin, &dst_end);
+                      &dst_begin, &dst_end);
 
   dst_current = dst_begin;
   while (utf8_begin < utf8_end) {
@@ -148,7 +148,7 @@ void ndt::string_type::arrmeta_default_construct(char *arrmeta, bool blockref_al
   // Simply allocate a POD memory block
   if (blockref_alloc) {
     string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
-    md->blockref = make_pod_memory_block().release();
+    md->blockref = make_pod_memory_block(make()).release();
   }
 }
 
@@ -194,6 +194,15 @@ void ndt::string_type::arrmeta_destruct(char *arrmeta) const
   if (md->blockref) {
     memory_block_decref(md->blockref);
   }
+}
+
+void ndt::string_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data)) const
+{
+}
+
+void ndt::string_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *DYND_UNUSED(data),
+                                             intptr_t DYND_UNUSED(stride), size_t DYND_UNUSED(count)) const
+{
 }
 
 void ndt::string_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const
