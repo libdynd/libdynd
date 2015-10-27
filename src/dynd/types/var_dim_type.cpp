@@ -646,7 +646,7 @@ void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
     // Allocate the output array data
-    allocator->allocate(memblock, count, &d->begin);
+    d->begin = allocator->allocate(memblock, count);
     d->size = count;
   } else {
     stringstream ss;

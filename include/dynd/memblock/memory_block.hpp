@@ -66,7 +66,7 @@ struct DYND_API memory_block_pod_allocator_api {
    *
    * Call this once per output variable.
    */
-  void (*allocate)(memory_block_data *self, size_t count, char **out_begin);
+  char *(*allocate)(memory_block_data *self, size_t count);
 
   /**
    * Resizes the most recently allocated memory in the memory block, updating

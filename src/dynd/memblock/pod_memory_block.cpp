@@ -85,7 +85,7 @@ namespace detail {
     delete emb;
   }
 
-  static void allocate(memory_block_data *self, size_t count, char **out_begin)
+  static char *allocate(memory_block_data *self, size_t count)
   {
     intptr_t size_bytes = count * reinterpret_cast<pod_memory_block *>(self)->data_size;
 
@@ -109,7 +109,7 @@ namespace detail {
     emb->m_memory_current = end;
 
     // Return the allocated memory
-    *out_begin = begin;
+    return begin;
     //    cout << "allocated at address " << (void *)begin << endl;
   }
 

@@ -50,7 +50,7 @@ struct broadcast_to_var_assign_ck : nd::base_kernel<broadcast_to_var_assign_ck, 
         memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
         // Allocate the output array data
-        allocator->allocate(memblock, m_dst_md->stride, &dst_d->begin);
+        dst_d->begin = allocator->allocate(memblock, m_dst_md->stride);
       }
       dst_d->size = 1;
       // Copy a single input to the newly allocated element
@@ -129,7 +129,7 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
           memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
           // Allocate the output array data
-          allocator->allocate(memblock, dim_size, &dst_d->begin);
+          dst_d->begin = allocator->allocate(memblock, dim_size);
         }
         dst_d->size = dim_size;
         // Copy to the newly allocated element
@@ -230,7 +230,7 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
         memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
         // Allocate the output array data
-        allocator->allocate(memblock, dim_size, &dst_d->begin);
+        dst_d->begin = allocator->allocate(memblock, dim_size);
       }
       dst_d->size = dim_size;
       // Copy to the newly allocated element
