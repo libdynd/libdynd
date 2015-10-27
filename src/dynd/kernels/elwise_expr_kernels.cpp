@@ -359,7 +359,8 @@ struct strided_or_var_to_var_expr_kernel_extra : nd::base_kernel<strided_or_var_
 
         // Allocate the output array data
         char *dst_end = NULL;
-        allocator->allocate(memblock, dim_size * e->dst_stride, &dst_vddd->begin, &dst_end);
+        allocator->allocate(memblock, dim_size * e->dst_stride, &dst_vddd->begin);
+        dst_end = dst_vddd->begin + dim_size * e->dst_stride;
       }
       modified_dst = dst_vddd->begin;
       dst_vddd->size = dim_size;

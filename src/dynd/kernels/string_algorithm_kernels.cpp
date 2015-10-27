@@ -37,7 +37,8 @@ inline void concat_one_string(size_t nop, dynd::string *d, const dynd::string *c
   }
   // Allocate the output
   char *begin, *end;
-  allocator->allocate(dst_blockref, size, &begin, &end);
+  allocator->allocate(dst_blockref, size, &begin);
+  end = begin + size;
   d->assign(begin, end - begin);
   // Copy the string data
   char *dst = d->begin();

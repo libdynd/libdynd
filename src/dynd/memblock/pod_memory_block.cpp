@@ -73,7 +73,7 @@ namespace detail {
     delete emb;
   }
 
-  static void allocate(memory_block_data *self, intptr_t size_bytes, char **out_begin, char **out_end)
+  static void allocate(memory_block_data *self, intptr_t size_bytes, char **out_begin)
   {
     //    cout << "allocating " << size_bytes << " of memory with alignment " << alignment << endl;
     // Allocate new POD memory of the requested size and alignment
@@ -96,7 +96,6 @@ namespace detail {
 
     // Return the allocated memory
     *out_begin = begin;
-    *out_end = end;
     //    cout << "allocated at address " << (void *)begin << endl;
   }
 
