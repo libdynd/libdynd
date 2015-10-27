@@ -51,7 +51,8 @@ struct broadcast_to_var_assign_ck : nd::base_kernel<broadcast_to_var_assign_ck, 
 
         // Allocate the output array data
         char *dst_end = NULL;
-        allocator->allocate(memblock, m_dst_md->stride, &dst_d->begin, &dst_end);
+        allocator->allocate(memblock, m_dst_md->stride, &dst_d->begin);
+        dst_end = dst_d->begin + m_dst_md->stride;
       }
       dst_d->size = 1;
       // Copy a single input to the newly allocated element
@@ -131,7 +132,8 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
 
           // Allocate the output array data
           char *dst_end = NULL;
-          allocator->allocate(memblock, dim_size * dst_stride, &dst_d->begin, &dst_end);
+          allocator->allocate(memblock, dim_size * dst_stride, &dst_d->begin);
+          dst_end = dst_d->begin + dim_size * dst_stride;
         }
         dst_d->size = dim_size;
         // Copy to the newly allocated element
@@ -233,7 +235,8 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
 
         // Allocate the output array data
         char *dst_end = NULL;
-        allocator->allocate(memblock, dim_size * dst_stride, &dst_d->begin, &dst_end);
+        allocator->allocate(memblock, dim_size * dst_stride, &dst_d->begin);
+        dst_end = dst_d->begin + dim_size * dst_stride;
       }
       dst_d->size = dim_size;
       // Copy to the newly allocated element

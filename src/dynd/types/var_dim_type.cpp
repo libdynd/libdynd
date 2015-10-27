@@ -647,7 +647,8 @@ void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *
 
     // Allocate the output array data
     char *dst_end = NULL;
-    allocator->allocate(memblock, count * md->stride, &d->begin, &dst_end);
+    allocator->allocate(memblock, count * md->stride, &d->begin);
+    dst_end = d->begin + count * md->stride;
     d->size = count;
   } else {
     stringstream ss;
