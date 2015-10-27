@@ -768,7 +768,7 @@ namespace nd {
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
             // Allocate the output array data
-            allocator->allocate(memblock, dim_size, &dst_vddd->begin);
+            dst_vddd->begin = allocator->allocate(memblock, dim_size);
           }
           modified_dst = dst_vddd->begin;
           dst_vddd->size = dim_size;
@@ -922,7 +922,7 @@ namespace nd {
             memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
             // Allocate the output array data
-            allocator->allocate(memblock, dim_size, &dst_vddd->begin);
+            dst_vddd->begin = allocator->allocate(memblock, dim_size);
           }
           modified_dst = dst_vddd->begin;
           dst_vddd->size = dim_size;

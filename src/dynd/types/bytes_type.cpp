@@ -54,9 +54,8 @@ void ndt::bytes_type::set_bytes_data(const char *arrmeta, char *data, const char
   memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
 
   // Allocate the output array data, then copy it
-  char *begin, *end;
-  allocator->allocate(md->blockref, bytes_end - bytes_begin, &begin);
-  end = begin + (bytes_end - bytes_begin);
+  char *begin = allocator->allocate(md->blockref, bytes_end - bytes_begin);
+  char *end = begin + (bytes_end - bytes_begin);
   d->assign(begin, end - begin);
   memcpy(d->begin(), bytes_begin, bytes_end - bytes_begin);
 }

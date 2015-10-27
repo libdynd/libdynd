@@ -44,7 +44,7 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   assign_error_mode errmode = ectx->errmode;
   const intptr_t src_charsize = 1;
   intptr_t dst_charsize = string_encoding_char_size_table[string_encoding_utf_8];
-  char *dst_begin = NULL, *dst_current, *dst_end = NULL;
+  char *dst_current;
   next_unicode_codepoint_t next_fn = get_next_unicode_codepoint_function(string_encoding_utf_8, errmode);
   append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8, errmode);
   uint32_t cp;
@@ -53,9 +53,9 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
 
   // Allocate the initial output as the src number of characters + some padding
   // TODO: Don't add padding if the output is not a multi-character encoding
-  allocator->allocate(data_md->blockref, ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                      &dst_begin);
-  dst_end = dst_begin + ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024;
+  char *dst_begin = allocator->allocate(data_md->blockref,
+                                        ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024);
+  char *dst_end = dst_begin + ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024;
 
   dst_current = dst_begin;
   while (utf8_begin < utf8_end) {

@@ -86,7 +86,7 @@ namespace detail {
     delete emb;
   }
 
-  static void allocate(memory_block_data *self, size_t count, char **out_begin)
+  static char *allocate(memory_block_data *self, size_t count)
   {
     intptr_t size_bytes = count * reinterpret_cast<zeroinit_memory_block *>(self)->data_size;
 
@@ -113,7 +113,7 @@ namespace detail {
     memset(begin, 0, end - begin);
 
     // Return the allocated memory
-    *out_begin = begin;
+    return begin;
     //    cout << "allocated at address " << (void *)begin << endl;
   }
 

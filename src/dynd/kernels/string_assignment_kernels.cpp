@@ -102,7 +102,7 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
 
     // If the blockrefs are different, require a copy operation
     if (dst_md->blockref != src_md->blockref) {
-      char *dst_begin = NULL, *dst_current, *dst_end = NULL;
+      char *dst_current;
       const char *src_begin = src_d->begin();
       const char *src_end = src_d->end();
       next_unicode_codepoint_t next_fn = m_next_fn;
@@ -114,9 +114,9 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
       // Allocate the initial output as the src number of characters + some
       // padding
       // TODO: Don't add padding if the output is not a multi-character encoding
-      allocator->allocate(dst_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                          &dst_begin);
-      dst_end = dst_begin + ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024;
+      char *dst_begin = allocator->allocate(dst_md->blockref,
+                                            ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024);
+      char *dst_end = dst_begin + ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024;
 
       dst_current = dst_begin;
       while (src_begin < src_end) {
@@ -187,7 +187,7 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
       throw runtime_error("Cannot assign to an already initialized dynd string");
     }
 
-    char *dst_begin = NULL, *dst_current, *dst_end = NULL;
+    char *dst_current;
     const char *src_begin = src[0];
     const char *src_end = src[0] + m_src_element_size;
     next_unicode_codepoint_t next_fn = m_next_fn;
@@ -199,9 +199,9 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     // Allocate the initial output as the src number of characters + some
     // padding
     // TODO: Don't add padding if the output is not a multi-character encoding
-    allocator->allocate(dst_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024,
-                        &dst_begin);
-    dst_end = dst_begin + ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024;
+    char *dst_begin =
+        allocator->allocate(dst_md->blockref, ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024);
+    char *dst_end = dst_begin + ((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024;
 
     dst_current = dst_begin;
     while (src_begin < src_end) {

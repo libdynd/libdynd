@@ -61,9 +61,8 @@ struct date_strftime_kernel_extra {
 
     // Call strftime, growing the string buffer if needed so it fits
     size_t str_size = e->format_size + 16;
-    char *begin, *end;
-    allocator->allocate(dst_md->blockref, str_size, &begin);
-    end = begin + str_size;
+    char *begin = allocator->allocate(dst_md->blockref, str_size);
+    char *end = begin + str_size;
     dst_d->assign(begin, end - begin);
     for (int attempt = 0; attempt < 3; ++attempt) {
       // Force errno to zero
@@ -113,9 +112,8 @@ struct date_strftime_kernel_extra {
 
       // Call strftime, growing the string buffer if needed so it fits
       size_t str_size = format_size + 16;
-      char *begin, *end;
-      allocator->allocate(dst_md->blockref, str_size, &begin);
-      end = begin + str_size;
+      char *begin = allocator->allocate(dst_md->blockref, str_size);
+      char *end = begin + str_size;
       dst_d->assign(begin, end - begin);
       for (int attempt = 0; attempt < 3; ++attempt) {
         // Force errno to zero
