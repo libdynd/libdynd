@@ -117,7 +117,7 @@ namespace detail {
     //    cout << "allocated at address " << (void *)begin << endl;
   }
 
-  static void resize(memory_block_data *self, char **inout_begin, size_t count)
+  static char *resize(memory_block_data *self, char *inout_begin, size_t count)
   {
     intptr_t size_bytes = count * reinterpret_cast<zeroinit_memory_block *>(self)->data_size;
 
@@ -128,7 +128,7 @@ namespace detail {
     //    cout << "memory state before " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " /
     // " << (void *)emb->m_memory_end << endl;
     char **inout_end = &emb->m_memory_current;
-    char *end = *inout_begin + size_bytes;
+    char *end = inout_begin + size_bytes;
     if (end <= emb->m_memory_end) {
       // If it fits, just adjust the current allocation point
       emb->m_memory_current = end;
@@ -139,23 +139,25 @@ namespace detail {
       *inout_end = end;
     } else {
       // If it doesn't fit, need to copy to newly malloc'd memory
-      char *old_current = *inout_begin, *old_end = *inout_end;
-      intptr_t old_size_bytes = *inout_end - *inout_begin;
+      char *old_current = inout_begin, *old_end = *inout_end;
+      intptr_t old_size_bytes = *inout_end - inout_begin;
       // Allocate memory to double the amount used so far, or the requested size, whichever is larger
       // NOTE: We're assuming malloc produces memory which has good enough alignment for anything
       emb->append_memory(max(emb->m_total_allocated_capacity, size_bytes));
-      memcpy(emb->m_memory_begin, *inout_begin, old_size_bytes);
+      memcpy(emb->m_memory_begin, inout_begin, old_size_bytes);
       end = emb->m_memory_begin + size_bytes;
       emb->m_memory_current = end;
       // Zero-initialize the newly allocated memory
       memset(emb->m_memory_begin + old_size_bytes, 0, size_bytes - old_size_bytes);
 
-      *inout_begin = emb->m_memory_begin;
+      inout_begin = emb->m_memory_begin;
       *inout_end = end;
       emb->m_total_allocated_capacity -= old_end - old_current;
     }
     //    cout << "memory state after " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " /
     // " << (void *)emb->m_memory_end << endl;
+
+    return inout_begin;
   }
 
   static void finalize(memory_block_data *self)

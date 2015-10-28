@@ -32,7 +32,7 @@ struct output_data {
       if (new_capacity < current_size + added_capacity) {
         new_capacity = current_size + added_capacity;
       }
-      api->resize(blockref, &out_begin, new_capacity);
+      out_begin = api->resize(blockref, out_begin, new_capacity);
       out_capacity_end = out_begin + new_capacity;
       out_end = out_begin + current_size;
     }
@@ -361,7 +361,7 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
   string *d = reinterpret_cast<string *>(result.get_readwrite_originptr());
   char *begin = out.out_begin;
   char *end = out.out_capacity_end;
-  out.api->resize(out.blockref, &begin, out.out_end - out.out_begin);
+  begin = out.api->resize(out.blockref, begin, out.out_end - out.out_begin);
   end = begin + (out.out_end - out.out_begin);
   d->assign(begin, end - begin);
 
