@@ -196,6 +196,7 @@ TEST(View, StringAsBytes)
 
   a = parse_json("string", "\"\\U00024B62\"");
   b = nd::view(a, "bytes");
+  std::cout << "done" << std::endl;
   const bytes_type_data *btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
   ASSERT_EQ(4, btd->end() - btd->begin());
   EXPECT_EQ('\xF0', btd->begin()[0]);
