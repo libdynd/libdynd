@@ -65,7 +65,7 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
       append_fn(cp, dst_current, dst_end);
     } else {
       char *dst_begin_saved = dst_begin;
-      allocator->resize(data_md->blockref, 2 * (dst_end - dst_begin), &dst_begin);
+      dst_begin = allocator->resize(data_md->blockref, dst_begin, 2 * (dst_end - dst_begin));
       dst_end = dst_begin + 2 * (dst_end - dst_begin);
       dst_current = dst_begin + (dst_current - dst_begin_saved);
 
@@ -74,7 +74,7 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   }
 
   // Shrink-wrap the memory to just fit the string
-  allocator->resize(data_md->blockref, dst_current - dst_begin, &dst_begin);
+  dst_begin = allocator->resize(data_md->blockref, dst_begin, dst_current - dst_begin);
   dst_end = dst_begin + (dst_current - dst_begin);
 
   // Set the output

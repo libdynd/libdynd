@@ -68,7 +68,7 @@ struct date_strftime_kernel_extra {
       errno = 0;
       size_t len = strftime(dst_d->begin(), str_size, e->format, &tm_val);
       if (len > 0) {
-        allocator->resize(dst_md->blockref, len, &begin);
+        begin = allocator->resize(dst_md->blockref, begin, len);
         dst_d->assign(begin, len);
         break;
       } else {
@@ -78,7 +78,7 @@ struct date_strftime_kernel_extra {
           throw runtime_error(ss.str());
         }
         str_size *= 2;
-        allocator->resize(dst_md->blockref, str_size, &begin);
+        begin = allocator->resize(dst_md->blockref, begin, str_size);
         dst_d->assign(begin, str_size);
       }
     }
@@ -119,7 +119,7 @@ struct date_strftime_kernel_extra {
         errno = 0;
         size_t len = strftime(dst_d->begin(), str_size, format, &tm_val);
         if (len > 0) {
-          allocator->resize(dst_md->blockref, len, &begin);
+          begin = allocator->resize(dst_md->blockref, begin, len);
           end = begin + len;
           dst_d->assign(begin, end - begin);
           break;
@@ -130,7 +130,7 @@ struct date_strftime_kernel_extra {
             throw runtime_error(ss.str());
           }
           str_size *= 2;
-          allocator->resize(dst_md->blockref, str_size, &begin);
+          begin = allocator->resize(dst_md->blockref, begin, str_size);
           end = begin + str_size;
           dst_d->assign(begin, end - begin);
         }
