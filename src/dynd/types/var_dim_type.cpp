@@ -685,7 +685,7 @@ void ndt::var_dim_element_resize(const type &tp, const char *arrmeta, char *data
     memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
 
     // Resize the output array data
-    allocator->resize(memblock, count * md->stride, &d->begin);
+    allocator->resize(memblock, &d->begin, count);
     d->size = count;
   } else {
     stringstream ss;

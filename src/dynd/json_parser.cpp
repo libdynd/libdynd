@@ -254,7 +254,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
       // Increase the allocated array size if necessary
       if (size == allocated_size) {
         allocated_size *= 2;
-        allocator->resize(md->blockref, allocated_size * stride, &out->begin);
+        allocator->resize(md->blockref, &out->begin, allocated_size);
       }
       ++size;
       out->size = size;
@@ -270,7 +270,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
   }
 
   // Shrink-wrap the memory to just fit the string
-  allocator->resize(md->blockref, size * stride, &out->begin);
+  allocator->resize(md->blockref, &out->begin, size);
   out->size = size;
 }
 

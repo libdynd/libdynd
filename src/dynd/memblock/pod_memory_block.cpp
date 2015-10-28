@@ -113,8 +113,10 @@ namespace detail {
     //    cout << "allocated at address " << (void *)begin << endl;
   }
 
-  static void resize(memory_block_data *self, intptr_t size_bytes, char **inout_begin)
+  static void resize(memory_block_data *self, char **inout_begin, size_t count)
   {
+    intptr_t size_bytes = count * reinterpret_cast<pod_memory_block *>(self)->data_size;
+
     // Resizes previously allocated POD memory to the requested size
     pod_memory_block *emb = reinterpret_cast<pod_memory_block *>(self);
     //    cout << "resizing memory " << (void *)*inout_begin << " / " << (void *)*inout_end << " from size " <<

@@ -126,7 +126,7 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
           append_fn(cp, dst_current, dst_end);
         } else {
           char *dst_begin_saved = dst_begin;
-          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin), &dst_begin);
+          allocator->resize(dst_md->blockref, &dst_begin, 2 * (dst_end - dst_begin));
           dst_end = dst_begin + 2 * (dst_end - dst_begin);
           dst_current = dst_begin + (dst_current - dst_begin_saved);
 
@@ -135,7 +135,7 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
       }
 
       // Shrink-wrap the memory to just fit the string
-      allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin);
+      allocator->resize(dst_md->blockref, &dst_begin, dst_current - dst_begin);
       dst_end = dst_begin + (dst_current - dst_begin);
 
       // Set the output
@@ -214,7 +214,7 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
           append_fn(cp, dst_current, dst_end);
         } else {
           char *dst_begin_saved = dst_begin;
-          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin), &dst_begin);
+          allocator->resize(dst_md->blockref, &dst_begin, 2 * (dst_end - dst_begin));
           dst_end = dst_begin + 2 * (dst_end - dst_begin);
           dst_current = dst_begin + (dst_current - dst_begin_saved);
 
@@ -226,7 +226,7 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     }
 
     // Shrink-wrap the memory to just fit the string
-    allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin);
+    allocator->resize(dst_md->blockref, &dst_begin, dst_current - dst_begin);
     dst_end = dst_begin + (dst_current - dst_begin);
 
     // Set the output
