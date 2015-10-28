@@ -78,7 +78,8 @@ struct DYND_API memory_block_pod_allocator_api {
    * Call this to grow the memory as needed, and to trim the memory to just
    * the needed size once that is determined.
    */
-  void (*resize)(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end);
+  void (*resize)(memory_block_data *self, intptr_t size_bytes, char **inout_begin);
+
   /**
    * Finalizes the memory block so it can no longer be used to allocate more
    * memory. This call may use something like realloc to try and shrink the

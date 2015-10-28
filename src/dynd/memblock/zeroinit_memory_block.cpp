@@ -117,7 +117,7 @@ namespace detail {
     //    cout << "allocated at address " << (void *)begin << endl;
   }
 
-  static void resize(memory_block_data *self, intptr_t size_bytes, char **inout_begin, char **inout_end)
+  static void resize(memory_block_data *self, intptr_t size_bytes, char **inout_begin)
   {
     // Resizes previously allocated POD memory to the requested size
     zeroinit_memory_block *emb = reinterpret_cast<zeroinit_memory_block *>(self);
@@ -125,10 +125,7 @@ namespace detail {
     // (*inout_end - *inout_begin) << " to " << size_bytes << endl;
     //    cout << "memory state before " << (void *)emb->m_memory_begin << " / " << (void *)emb->m_memory_current << " /
     // " << (void *)emb->m_memory_end << endl;
-    if (*inout_end != emb->m_memory_current) {
-      // Simple sanity check
-      throw runtime_error("zeroinit_memory_block resize must be called only using the most recently allocated memory");
-    }
+    char **inout_end = &emb->m_memory_current;
     char *end = *inout_begin + size_bytes;
     if (end <= emb->m_memory_end) {
       // If it fits, just adjust the current allocation point

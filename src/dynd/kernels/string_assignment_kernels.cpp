@@ -126,7 +126,8 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
           append_fn(cp, dst_current, dst_end);
         } else {
           char *dst_begin_saved = dst_begin;
-          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin), &dst_begin, &dst_end);
+          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin), &dst_begin);
+          dst_end = dst_begin + 2 * (dst_end - dst_begin);
           dst_current = dst_begin + (dst_current - dst_begin_saved);
 
           append_fn(cp, dst_current, dst_end);
@@ -134,7 +135,8 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
       }
 
       // Shrink-wrap the memory to just fit the string
-      allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
+      allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin);
+      dst_end = dst_begin + (dst_current - dst_begin);
 
       // Set the output
       dst_d->assign(dst_begin, dst_end - dst_begin);
@@ -212,7 +214,8 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
           append_fn(cp, dst_current, dst_end);
         } else {
           char *dst_begin_saved = dst_begin;
-          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin), &dst_begin, &dst_end);
+          allocator->resize(dst_md->blockref, 2 * (dst_end - dst_begin), &dst_begin);
+          dst_end = dst_begin + 2 * (dst_end - dst_begin);
           dst_current = dst_begin + (dst_current - dst_begin_saved);
 
           append_fn(cp, dst_current, dst_end);
@@ -223,7 +226,8 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     }
 
     // Shrink-wrap the memory to just fit the string
-    allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin, &dst_end);
+    allocator->resize(dst_md->blockref, dst_current - dst_begin, &dst_begin);
+    dst_end = dst_begin + (dst_current - dst_begin);
 
     // Set the output
     dst_d->assign(dst_begin, dst_end - dst_begin);

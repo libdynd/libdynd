@@ -244,10 +244,6 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
   memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
   intptr_t size = 0, allocated_size = 8;
   out->begin = allocator->allocate(md->blockref, allocated_size);
-  char *out_end =
-      out->begin + (((element_tp.get_type_id() == string_type_id) | (element_tp.get_type_id() == bytes_type_id))
-                        ? allocated_size
-                        : (allocated_size * stride));
 
   if (!parse_token(begin, end, "[")) {
     throw json_parse_error(begin, "expected array starting with '['", tp);
@@ -258,7 +254,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
       // Increase the allocated array size if necessary
       if (size == allocated_size) {
         allocated_size *= 2;
-        allocator->resize(md->blockref, allocated_size * stride, &out->begin, &out_end);
+        allocator->resize(md->blockref, allocated_size * stride, &out->begin);
       }
       ++size;
       out->size = size;
@@ -274,7 +270,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
   }
 
   // Shrink-wrap the memory to just fit the string
-  allocator->resize(md->blockref, size * stride, &out->begin, &out_end);
+  allocator->resize(md->blockref, size * stride, &out->begin);
   out->size = size;
 }
 
