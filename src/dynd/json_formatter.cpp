@@ -18,7 +18,7 @@ using namespace dynd;
 
 struct output_data {
   char *out_begin, *out_end, *out_capacity_end;
-  memory_block_pod_allocator_api *api;
+  memory_block_data::api *api;
   memory_block_data *blockref;
   bool struct_as_list;
 

@@ -49,7 +49,7 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8, errmode);
   uint32_t cp;
 
-  memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(data_md->blockref);
+  memory_block_data::api *allocator = get_memory_block_pod_allocator_api(data_md->blockref);
 
   // Allocate the initial output as the src number of characters + some padding
   // TODO: Don't add padding if the output is not a multi-character encoding
@@ -171,7 +171,7 @@ void ndt::string_type::arrmeta_reset_buffers(char *arrmeta) const
 {
   const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
   if (md->blockref != NULL && md->blockref->m_type == pod_memory_block_type) {
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref);
     allocator->reset(md->blockref);
   } else {
     throw runtime_error("can only reset the buffers of a dynd string "
@@ -184,7 +184,7 @@ void ndt::string_type::arrmeta_finalize_buffers(char *arrmeta) const
   string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
   if (md->blockref != NULL) {
     // Finalize the memory block
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref);
     if (allocator != NULL) {
       allocator->finalize(md->blockref);
     }

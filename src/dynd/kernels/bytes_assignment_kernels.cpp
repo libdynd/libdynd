@@ -43,7 +43,7 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
     if (dst_md->blockref != src_md->blockref) {
       char *src_begin = src_d->begin();
       char *src_end = src_d->end();
-      memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
+      memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
       char *dst_begin = allocator->allocate(dst_md->blockref, src_end - src_begin);
       char *dst_end = dst_begin + (src_end - src_begin);
@@ -99,7 +99,7 @@ struct fixed_bytes_to_blockref_bytes_kernel : nd::base_kernel<fixed_bytes_to_blo
       throw runtime_error("Cannot assign to an already initialized dynd string");
     }
 
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
+    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
     char *dst_begin = allocator->allocate(dst_md->blockref, src_end - src_begin);
     char *dst_end = dst_begin + (src_end - src_begin);

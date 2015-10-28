@@ -109,7 +109,7 @@ struct blockref_string_assign_ck : nd::base_kernel<blockref_string_assign_ck, 1>
       append_unicode_codepoint_t append_fn = m_append_fn;
       uint32_t cp;
 
-      memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
+      memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
       // Allocate the initial output as the src number of characters + some
       // padding
@@ -196,7 +196,7 @@ struct fixed_string_to_blockref_string_assign_ck : nd::base_kernel<fixed_string_
     append_unicode_codepoint_t append_fn = m_append_fn;
     uint32_t cp;
 
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
+    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
     // Allocate the initial output as the src number of characters + some
     // padding

@@ -146,7 +146,7 @@ static char *resize(memory_block_data *self, char *previous_allocated, size_t co
         mc->used_count = count;
     } else {
         // Adjust the used count (this may mean to grow it or shrink it)
-        if (count >= previous_count) { 
+        if (count >= previous_count) {
             mc->used_count += (count - previous_count);
         } else {
             // Call the destructor on the elements no longer used
@@ -174,7 +174,7 @@ static void finalize(memory_block_data *self)
 {
     // Finalizes POD memory so there are no more allocations
     objectarray_memory_block *emb = reinterpret_cast<objectarray_memory_block *>(self);
-    
+
     emb->m_finalized = true;
 }
 
@@ -182,7 +182,7 @@ static void reset(memory_block_data *self)
 {
     // Resets the POD memory so it can reuse it from the start
     objectarray_memory_block *emb = reinterpret_cast<objectarray_memory_block *>(self);
-   
+
     if (emb->m_memory_handles.size() > 1) {
         // If there are more than one allocated memory chunks,
         // throw them all away except the last
@@ -202,7 +202,7 @@ static void reset(memory_block_data *self)
     }
 }
 
-memory_block_objectarray_allocator_api objectarray_memory_block_allocator_api = {
+memory_block_data::api objectarray_memory_block_allocator_api = {
     &allocate,
     &resize,
     &finalize,
@@ -220,5 +220,5 @@ void dynd::objectarray_memory_block_debug_print(const memory_block_data *membloc
         o << indent << " allocated count: " << emb->m_total_allocated_count << "\n";
     } else {
         o << indent << " finalized count: " << emb->m_total_allocated_count << "\n";
-    } 
+    }
 }

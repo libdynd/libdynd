@@ -241,7 +241,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
 
   var_dim_type_data *out = reinterpret_cast<var_dim_type_data *>(out_data);
 
-  memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+  memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref);
   intptr_t size = 0, allocated_size = 8;
   out->begin = allocator->allocate(md->blockref, allocated_size);
 

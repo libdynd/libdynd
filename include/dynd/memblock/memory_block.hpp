@@ -45,6 +45,39 @@ DYND_API std::ostream &operator<<(std::ostream &o, memory_block_type_t mbt);
  * extensible ones.
  */
 struct DYND_API memory_block_data {
+  /**
+   * This is a struct of function pointers for allocating
+   * data within a memory_block.
+   */
+  struct DYND_API api {
+    /**
+     * Allocates the requested amount of memory from the memory_block, returning
+     * a pointer.
+     *
+     * Call this once per output variable.
+     */
+    char *(*allocate)(memory_block_data *self, size_t count);
+
+    /**
+     * Resizes the most recently allocated memory from the memory_block.
+     */
+    char *(*resize)(memory_block_data *self, char *previous_allocated, size_t count);
+
+    /**
+     * Finalizes the memory block so it can no longer be used to allocate more
+     * memory.
+     */
+    void (*finalize)(memory_block_data *self);
+
+    /**
+     * When a memory block is being used as a temporary buffer, resets it to
+     * a state throwing away existing used memory. This allows the same memory
+     * to be used for variable-sized data to be reused repeatedly in such
+     * a temporary buffer.
+     */
+    void (*reset)(memory_block_data *self);
+  };
+
   atomic_refcount m_use_count;
   /** A memory_block_type_t enum value */
   uint32_t m_type;
@@ -53,94 +86,24 @@ struct DYND_API memory_block_data {
   {
     // std::cout << "memblock " << (void *)this << " cre: " << this->m_use_count << std::endl;
   }
-};
-
-/**
- * This is a struct of function pointers for allocating and
- * resizing POD data within a memory_block that supports it.
- */
-struct DYND_API memory_block_pod_allocator_api {
-  /**
-   * Allocates the requested amount of memory from the memory_block, returning
-   * a pointer pair.
-   *
-   * Call this once per output variable.
-   */
-  char *(*allocate)(memory_block_data *self, size_t count);
 
   /**
-   * Resizes the most recently allocated memory in the memory block, updating
-   * the pointer pair. This may move the memory to a new location if necessary.
-   *
-   * The values in inout_begin and inout_end must have been created by a
-   * previous allocate() or resize() call.
-   *
-   * Call this to grow the memory as needed, and to trim the memory to just
-   * the needed size once that is determined.
+   * Returns a pointer to a memory allocator API for the type of the memory block.
    */
-  char *(*resize)(memory_block_data *self, char *inout_begin, size_t count);
-
-  /**
-   * Finalizes the memory block so it can no longer be used to allocate more
-   * memory. This call may use something like realloc to try and shrink the
-   * destination memory as much as possible.
-   * NOTE: realloc itself may move memory for any call to it, so cannot be used
-   *       (e.g. on OS X it was found that shrinking memory to 8 bytes caused it to
-   *       move, likely to a special small object heap).
-   */
-  void (*finalize)(memory_block_data *self);
-  /**
-   * When a memory block is being used as a temporary buffer, resets it to
-   * a state throwing away existing used memory. This allows the same memory
-   * to be used for variable-sized data to be reused repeatedly in such
-   * a temporary buffer.
-   */
-  void (*reset)(memory_block_data *self);
-};
-
-/**
- * This is a struct of function pointers for allocating
- * object data (of types with a destructor) within a
- * memory_block that supports it.
- */
-struct DYND_API memory_block_objectarray_allocator_api {
-  /**
-   * Allocates the requested amount of memory from the memory_block, returning
-   * a pointer.
-   *
-   * Call this once per output variable.
-   */
-  char *(*allocate)(memory_block_data *self, size_t count);
-  /**
-   * Resizes the most recently allocated memory from the memory_block.
-   */
-  char *(*resize)(memory_block_data *self, char *previous_allocated, size_t count);
-  /**
-   * Finalizes the memory block so it can no longer be used to allocate more
-   * memory.
-   */
-  void (*finalize)(memory_block_data *self);
-  /**
-   * When a memory block is being used as a temporary buffer, resets it to
-   * a state throwing away existing used memory. This allows the same memory
-   * to be used for variable-sized data to be reused repeatedly in such
-   * a temporary buffer.
-   */
-  void (*reset)(memory_block_data *self);
+  api *get_api();
 };
 
 /**
  * Returns a pointer to a static POD memory allocator API,
  * for the type of the memory block.
  */
-DYND_API memory_block_pod_allocator_api *get_memory_block_pod_allocator_api(memory_block_data *memblock);
+DYND_API memory_block_data::api *get_memory_block_pod_allocator_api(memory_block_data *memblock);
 
 /**
  * Returns a pointer to a static objectarray memory allocator API,
  * for the type of the memory block.
  */
-DYND_API memory_block_objectarray_allocator_api *
-get_memory_block_objectarray_allocator_api(memory_block_data *memblock);
+DYND_API memory_block_data::api *get_memory_block_objectarray_allocator_api(memory_block_data *memblock);
 
 namespace detail {
   /**
