@@ -227,7 +227,7 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
 
 static nd::array view_as_bytes(const nd::array &arr, const ndt::type &tp)
 {
-  if (arr.get_type().get_flags() & type_flag_destructor) {
+  if (arr.get_type().get_flags() & type_flag_destructor && (arr.get_dtype().get_type_id() != string_type_id)) {
     // Can't view arrays of object type
     return nd::array();
   }

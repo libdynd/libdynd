@@ -53,7 +53,7 @@ void kernels::string_concatenation_kernel::single(char *dst, char *const *src, c
   const extra_type *e = reinterpret_cast<const extra_type *>(extra);
   dynd::string *d = reinterpret_cast<dynd::string *>(dst);
   const dynd::string *const *s = reinterpret_cast<const dynd::string *const *>(src);
-  memory_block_data::api *allocator = get_memory_block_pod_allocator_api(e->m_dst_blockref);
+  memory_block_data::api *allocator = e->m_dst_blockref->get_api();
 
   concat_one_string(e->m_nop, d, s, allocator, e->m_dst_blockref);
 }
@@ -63,7 +63,7 @@ void kernels::string_concatenation_kernel::strided(char *dst, intptr_t dst_strid
 {
   const extra_type *e = reinterpret_cast<const extra_type *>(extra);
   size_t nop = e->m_nop;
-  memory_block_data::api *allocator = get_memory_block_pod_allocator_api(e->m_dst_blockref);
+  memory_block_data::api *allocator = e->m_dst_blockref->get_api();
 
   // Loop to concatenate all the strings3
   shortvector<const char *> src_vec(nop, src);

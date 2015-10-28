@@ -42,12 +42,12 @@ struct broadcast_to_var_assign_ck : nd::base_kernel<broadcast_to_var_assign_ck, 
       // If we're writing to an empty array, have to allocate the output
       memory_block_data *memblock = m_dst_md->blockref;
       if (memblock->m_type == objectarray_memory_block_type) {
-        memory_block_data::api *allocator = get_memory_block_objectarray_allocator_api(memblock);
+        memory_block_data::api *allocator = memblock->get_api();
 
         // Allocate the output array data
         dst_d->begin = allocator->allocate(memblock, 1);
       } else {
-        memory_block_data::api *allocator = get_memory_block_pod_allocator_api(memblock);
+        memory_block_data::api *allocator = memblock->get_api();
 
         // Allocate the output array data
         dst_d->begin = allocator->allocate(memblock, m_dst_md->stride);
@@ -121,12 +121,12 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
         // If we're writing to an empty array, have to allocate the output
         memory_block_data *memblock = m_dst_md->blockref;
         if (memblock->m_type == objectarray_memory_block_type) {
-          memory_block_data::api *allocator = get_memory_block_objectarray_allocator_api(memblock);
+          memory_block_data::api *allocator = memblock->get_api();
 
           // Allocate the output array data
           dst_d->begin = allocator->allocate(memblock, dim_size);
         } else {
-          memory_block_data::api *allocator = get_memory_block_pod_allocator_api(memblock);
+          memory_block_data::api *allocator = memblock->get_api();
 
           // Allocate the output array data
           dst_d->begin = allocator->allocate(memblock, dim_size);
@@ -222,12 +222,12 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
       // If we're writing to an empty array, have to allocate the output
       memory_block_data *memblock = m_dst_md->blockref;
       if (memblock->m_type == objectarray_memory_block_type) {
-        memory_block_data::api *allocator = get_memory_block_objectarray_allocator_api(memblock);
+        memory_block_data::api *allocator = memblock->get_api();
 
         // Allocate the output array data
         dst_d->begin = allocator->allocate(memblock, dim_size);
       } else {
-        memory_block_data::api *allocator = get_memory_block_pod_allocator_api(memblock);
+        memory_block_data::api *allocator = memblock->get_api();
 
         // Allocate the output array data
         dst_d->begin = allocator->allocate(memblock, dim_size);

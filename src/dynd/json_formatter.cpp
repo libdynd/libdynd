@@ -344,7 +344,7 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
   // Initialize the output with some memory
   output_data out;
   out.blockref = reinterpret_cast<const string_type_arrmeta *>(result.get_arrmeta())->blockref;
-  out.api = get_memory_block_pod_allocator_api(out.blockref);
+  out.api = out.blockref->get_api();
   out.out_begin = out.api->allocate(out.blockref, 1024);
   out.out_capacity_end = out.out_begin + 1024;
   out.out_end = out.out_begin;
