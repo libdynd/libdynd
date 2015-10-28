@@ -51,7 +51,7 @@ void ndt::bytes_type::set_bytes_data(const char *arrmeta, char *data, const char
     throw runtime_error("assigning to a bytes data element requires that it be "
                         "initialized to NULL");
   }
-  memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+  memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref);
 
   // Allocate the output array data, then copy it
   char *begin = allocator->allocate(md->blockref, bytes_end - bytes_begin);
@@ -193,7 +193,7 @@ void ndt::bytes_type::arrmeta_finalize_buffers(char *arrmeta) const
   bytes_type_arrmeta *md = reinterpret_cast<bytes_type_arrmeta *>(arrmeta);
   if (md->blockref != NULL) {
     // Finalize the memory block
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref);
     if (allocator != NULL) {
       allocator->finalize(md->blockref);
     }

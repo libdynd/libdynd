@@ -193,7 +193,7 @@ namespace detail {
     emb->m_total_allocated_capacity = emb->m_memory_end - emb->m_memory_begin;
   }
 
-  memory_block_pod_allocator_api zeroinit_memory_block_allocator_api = {&allocate, &resize, &finalize, &reset};
+  memory_block_data::api zeroinit_memory_block_allocator_api = {&allocate, &resize, &finalize, &reset};
 }
 } // namespace dynd::detail
 

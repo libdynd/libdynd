@@ -350,12 +350,12 @@ struct strided_or_var_to_var_expr_kernel_extra : nd::base_kernel<strided_or_var_
       // Allocate the output
       memory_block_data *memblock = e->dst_memblock;
       if (memblock->m_type == objectarray_memory_block_type) {
-        memory_block_objectarray_allocator_api *allocator = get_memory_block_objectarray_allocator_api(memblock);
+        memory_block_data::api *allocator = get_memory_block_objectarray_allocator_api(memblock);
 
         // Allocate the output array data
         dst_vddd->begin = allocator->allocate(memblock, dim_size);
       } else {
-        memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(memblock);
+        memory_block_data::api *allocator = get_memory_block_pod_allocator_api(memblock);
 
         // Allocate the output array data
         dst_vddd->begin = allocator->allocate(memblock, dim_size);

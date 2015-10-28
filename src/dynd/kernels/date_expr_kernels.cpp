@@ -57,7 +57,7 @@ struct date_strftime_kernel_extra {
     disable_invalid_parameter_handler raii;
 #endif
     dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
+    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
     // Call strftime, growing the string buffer if needed so it fits
     size_t str_size = e->format_size + 16;
@@ -98,7 +98,7 @@ struct date_strftime_kernel_extra {
     // parameter handler is installed.
     disable_invalid_parameter_handler raii;
 #endif
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
+    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
     char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
     for (size_t i = 0; i != count; ++i) {

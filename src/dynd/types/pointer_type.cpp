@@ -262,7 +262,7 @@ void ndt::pointer_type::arrmeta_finalize_buffers(char *arrmeta) const
   pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
   if (md->blockref != NULL) {
     // Finalize the memory block
-    memory_block_pod_allocator_api *allocator = get_memory_block_pod_allocator_api(md->blockref);
+    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref);
     if (allocator != NULL) {
       allocator->finalize(md->blockref);
     }
