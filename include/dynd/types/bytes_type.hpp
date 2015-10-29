@@ -12,15 +12,6 @@
 
 namespace dynd {
 
-struct DYND_API bytes_type_arrmeta {
-  /**
-   * A reference to the memory block which contains the byte's data.
-   * NOTE: This is identical to string_type_arrmeta, by design. Maybe
-   *       both should become a typedef to a common class?
-   */
-  memory_block_data *blockref;
-};
-
 typedef bytes bytes_type_data;
 
 namespace ndt {
@@ -58,14 +49,6 @@ namespace ndt {
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
     bool operator==(const base_type &rhs) const;
-
-    void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
-    void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                memory_block_data *embedded_reference) const;
-    void arrmeta_reset_buffers(char *arrmeta) const;
-    void arrmeta_finalize_buffers(char *arrmeta) const;
-    void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;

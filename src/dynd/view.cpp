@@ -271,6 +271,7 @@ static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::typ
 */
 }
 
+/*
 static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
 {
   if (tp.get_flags() & (type_flag_blockref | type_flag_destructor | type_flag_not_host_readable)) {
@@ -344,6 +345,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
   // No view could be produced
   return nd::array();
 }
+*/
 
 static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
 {
@@ -409,10 +411,11 @@ nd::array nd::view(const nd::array &arr, const ndt::type &tp)
     }
   } else if (arr.get_type().get_type_id() == bytes_type_id) {
     // If it's a request to view raw bytes as something else
-    nd::array result = view_from_bytes(arr, tp);
-    if (!result.is_null()) {
-      return result;
-    }
+//    nd::array result = view_from_bytes(arr, tp);
+//    if (!result.is_null()) {
+  //    return result;
+    //}
+    return nd::array();
   } else if (arr.get_ndim() == tp.get_ndim()) {
     // If the type is symbolic, e.g. has a "Fixed" symbolic dimension,
     // first substitute in the shape from the array

@@ -20,8 +20,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::string_type::string_type()
-    : base_string_type(string_type_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_destructor,
-                       sizeof(string_type_arrmeta))
+    : base_string_type(string_type_id, sizeof(string), alignof(string), type_flag_zeroinit | type_flag_destructor, 0)
 {
 }
 
@@ -136,59 +135,6 @@ bool ndt::string_type::operator==(const base_type &rhs) const
   }
 }
 
-void ndt::string_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
-{
-  // Simply allocate a POD memory block
-  if (blockref_alloc) {
-    string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
-    md->blockref = NULL;
-  }
-}
-
-void ndt::string_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                              memory_block_data *embedded_reference) const
-{
-  // Copy the blockref, switching it to the embedded_reference if necessary
-  const string_type_arrmeta *src_md = reinterpret_cast<const string_type_arrmeta *>(src_arrmeta);
-  string_type_arrmeta *dst_md = reinterpret_cast<string_type_arrmeta *>(dst_arrmeta);
-  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-  if (dst_md->blockref) {
-    memory_block_incref(dst_md->blockref);
-  }
-}
-
-void ndt::string_type::arrmeta_reset_buffers(char *arrmeta) const
-{
-  const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL && md->blockref->m_type == pod_memory_block_type) {
-    memory_block_data::api *allocator = md->blockref->get_api();
-    allocator->reset(md->blockref);
-  } else {
-    throw runtime_error("can only reset the buffers of a dynd string "
-                        "type if the memory block reference was constructed by default");
-  }
-}
-
-void ndt::string_type::arrmeta_finalize_buffers(char *arrmeta) const
-{
-  string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL) {
-    // Finalize the memory block
-    memory_block_data::api *allocator = md->blockref->get_api();
-    if (allocator != NULL) {
-      allocator->finalize(md->blockref);
-    }
-  }
-}
-
-void ndt::string_type::arrmeta_destruct(char *arrmeta) const
-{
-  string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
-  if (md->blockref) {
-    memory_block_decref(md->blockref);
-  }
-}
-
 void ndt::string_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
   reinterpret_cast<string *>(data)->~string();
@@ -201,13 +147,6 @@ void ndt::string_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), c
     reinterpret_cast<string *>(data)->~string();
     data += stride;
   }
-}
-
-void ndt::string_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const
-{
-  const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
-  o << indent << "string arrmeta\n";
-  memory_block_debug_print(md->blockref, o, indent + " ");
 }
 
 intptr_t ndt::string_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
