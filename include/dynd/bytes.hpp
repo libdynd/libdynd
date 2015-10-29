@@ -57,12 +57,6 @@ public:
     memcpy(m_data, data, m_size);
   }
 
-  void old_assign(char *data, size_t size)
-  {
-    m_data = data;
-    m_size = size;
-  }
-
   void resize(size_t size)
   {
     if (size > m_size) {

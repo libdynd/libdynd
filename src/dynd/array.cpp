@@ -1701,7 +1701,7 @@ nd::array nd::memmap(const std::string &filename, intptr_t begin, intptr_t end, 
   nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size(),
                                            dt.get_data_alignment(), &data_ptr));
   // Set the bytes extents
-  reinterpret_cast<bytes *>(data_ptr)->old_assign(mm_ptr, mm_size);
+  reinterpret_cast<bytes *>(data_ptr)->assign(mm_ptr, mm_size);
   // Set the array arrmeta
   array_preamble *ndo = result.get_ndo();
   ndo->m_type = dt.release();

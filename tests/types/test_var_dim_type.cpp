@@ -72,8 +72,7 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice)
 
   // Slicing does not collapse the leading dimension to a strided array (as it
   // used to)
-  EXPECT_EQ(ndt::var_dim_type::make(ndt::type::make<int>()),
-            n(irange()).get_type());
+  EXPECT_EQ(ndt::var_dim_type::make(ndt::type::make<int>()), n(irange()).get_type());
   /* TODO: var dim indexing needs more work
   EXPECT_EQ(ndt::make_fixed_dimsym(ndt::type::make<int>()),
   n(irange().by(-1)).get_type());
@@ -104,8 +103,7 @@ TEST(VarArrayDType, DTypeSubscriptSimpleSlice)
 
 TEST(VarArrayDType, DTypeSubscriptNested)
 {
-  nd::array n = parse_json("var * var * int32",
-                           "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
+  nd::array n = parse_json("var * var * int32", "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
   // Indexing with a zero-sized index does not convert the leading dim from var
   // to strided
@@ -162,8 +160,7 @@ TEST(VarArrayDType, DTypeSubscriptNested)
 
 TEST(VarArrayDType, DTypeSubscriptFixedVarNested)
 {
-  nd::array n =
-      parse_json("4 * var * int32", "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
+  nd::array n = parse_json("4 * var * int32", "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
 
   EXPECT_EQ(ndt::type("4 * var * int32"), n.get_type());
   EXPECT_EQ(ndt::type("var * int32"), n(0).get_type());
@@ -179,8 +176,7 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarNested)
 
 TEST(VarArrayDType, DTypeSubscriptStridedVarNested)
 {
-  nd::array n = parse_json("var * var * int32",
-                           "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
+  nd::array n = parse_json("var * var * int32", "[[2,4,6,8], [1,3,5,7,9], [], [-1,-2,-3]]");
   // View as a fixed dim type
   n = n.view("4 * var * int32");
 
@@ -196,15 +192,12 @@ TEST(VarArrayDType, DTypeSubscriptStridedVarNested)
 
 TEST(VarArrayDType, DTypeSubscriptFixedVarStruct)
 {
-  throw std::runtime_error("error");
-
-  nd::array n =
-      parse_json("2 * var * {first_name: string, last_name: string, "
-                 "gender: fixed_string[1], pictured: bool,}",
-                 "[[{\"first_name\":\"Frank\",\"last_name\":\"Abrams\","
-                 "\"gender\":\"M\",\"pictured\":true}],"
-                 "[{\"first_name\":\"Melissa\",\"last_name\":\"Philips\","
-                 "\"gender\":\"F\",\"pictured\":false}]]");
+  nd::array n = parse_json("2 * var * {first_name: string, last_name: string, "
+                           "gender: fixed_string[1], pictured: bool,}",
+                           "[[{\"first_name\":\"Frank\",\"last_name\":\"Abrams\","
+                           "\"gender\":\"M\",\"pictured\":true}],"
+                           "[{\"first_name\":\"Melissa\",\"last_name\":\"Philips\","
+                           "\"gender\":\"F\",\"pictured\":false}]]");
 
   nd::array nlastname = n(irange(), irange(), 1);
   EXPECT_EQ(ndt::type("2 * var * string"), nlastname.get_type());
@@ -220,9 +213,8 @@ TEST(VarArrayDType, DTypeSubscriptFixedVarStruct)
 TEST(VarArrayDType, AccessCStructOfVar)
 {
   // A slightly complicated case of property access/indexing
-  nd::array n = parse_json("var * {a: int32, b: var * int32}",
-                           "[{\"a\":10, \"b\":[1,2,3,4,5]},"
-                           " {\"a\":20, \"b\":[7,8,9]}]");
+  nd::array n = parse_json("var * {a: int32, b: var * int32}", "[{\"a\":10, \"b\":[1,2,3,4,5]},"
+                                                               " {\"a\":20, \"b\":[7,8,9]}]");
 
   EXPECT_EQ(ndt::type("var * {a: int32, b: var * int32}"), n.get_type());
 
@@ -254,8 +246,7 @@ TEST(VarArrayDType, AssignKernel)
   a = nd::empty(ndt::var_dim_type::make(ndt::type::make<int>()));
   b = 9.0;
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -269,8 +260,7 @@ TEST(VarArrayDType, AssignKernel)
   parse_json(a, "[3, 5, 7]");
   b = 9.0;
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -286,8 +276,7 @@ TEST(VarArrayDType, AssignKernel)
   b = parse_json("var * int32", "[3, 5, 7]");
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -304,8 +293,7 @@ TEST(VarArrayDType, AssignKernel)
   b = parse_json("var * int32", "[3, 5, 7]");
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -322,8 +310,7 @@ TEST(VarArrayDType, AssignKernel)
   b = parse_json("var * int32", "[9]");
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -339,8 +326,7 @@ TEST(VarArrayDType, AssignKernel)
   b = nd::empty(ndt::var_dim_type::make(ndt::type::make<int>()));
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -352,10 +338,8 @@ TEST(VarArrayDType, AssignKernel)
   a = 9.0;
   b = parse_json("var * int32", "[3, 5, 7]");
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(),
-                                      b.get_type(), b.get_arrmeta(),
-                                      kernel_request_single,
-                                      &eval::default_eval_context),
+  EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(),
+                                      kernel_request_single, &eval::default_eval_context),
                broadcast_error);
 
   // Error assignment initialized var array -> initialized var array
@@ -364,8 +348,7 @@ TEST(VarArrayDType, AssignKernel)
   b = parse_json("var * int32", "[9, 2]");
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -386,8 +369,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   b = vals_int;
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -404,8 +386,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   b = vals_int;
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -422,8 +403,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   b = vals_int;
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -436,8 +416,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   b = parse_json("var * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -453,8 +432,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   b = parse_json("var * int32", "[3, 5, 7, 9]");
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -467,8 +445,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   b = nd::empty(ndt::var_dim_type::make(ndt::type::make<int>()));
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -488,8 +465,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -506,8 +482,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -524,8 +499,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -538,8 +512,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   b = parse_json("var * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -555,8 +528,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   b = parse_json("var * int32", "[3, 5, 7, 9]");
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -569,8 +541,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   b = nd::empty(ndt::var_dim_type::make(ndt::type::make<int>()));
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(), b.get_arrmeta(), kernel_request_single,
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
@@ -580,26 +551,16 @@ TEST(VarArrayDType, AssignVarFixedKernel)
 
 TEST(VarDimDType, IsTypeSubarray)
 {
-  EXPECT_TRUE(
-      ndt::type("var * int32").is_type_subarray(ndt::type("var * int32")));
-  EXPECT_TRUE(
-      ndt::type("3 * var * int32").is_type_subarray(ndt::type("var * int32")));
-  EXPECT_TRUE(
-      ndt::type("var * var * int32").is_type_subarray(ndt::type("int32")));
-  EXPECT_TRUE(
-      ndt::type("var * int32").is_type_subarray(ndt::type::make<int32_t>()));
-  EXPECT_FALSE(
-      ndt::type::make<int32_t>().is_type_subarray(ndt::type("var * int32")));
-  EXPECT_FALSE(ndt::type("var * int32")
-                   .is_type_subarray(ndt::type("var * var * int32")));
-  EXPECT_FALSE(
-      ndt::type("var * int32").is_type_subarray(ndt::type("Fixed * int32")));
-  EXPECT_FALSE(
-      ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
-  EXPECT_FALSE(
-      ndt::type("Fixed * int32").is_type_subarray(ndt::type("var * int32")));
-  EXPECT_FALSE(
-      ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_TRUE(ndt::type("var * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_TRUE(ndt::type("3 * var * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_TRUE(ndt::type("var * var * int32").is_type_subarray(ndt::type("int32")));
+  EXPECT_TRUE(ndt::type("var * int32").is_type_subarray(ndt::type::make<int32_t>()));
+  EXPECT_FALSE(ndt::type::make<int32_t>().is_type_subarray(ndt::type("var * int32")));
+  EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("var * var * int32")));
+  EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("Fixed * int32")));
+  EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
+  EXPECT_FALSE(ndt::type("Fixed * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
 }
 
 TEST(VarArrayDType, AssignAfterCreated)

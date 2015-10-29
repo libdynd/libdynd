@@ -373,7 +373,8 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
   if (blockref_alloc) {
     base_type::flags_type flags = m_element_tp.get_flags();
     if (flags & type_flag_destructor) {
-      md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta, element_size).release();
+      md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta, element_size, 64,
+                                                   sizeof(var_dim_type_arrmeta)).release();
     } else if (flags & type_flag_zeroinit) {
       md->blockref = make_zeroinit_memory_block(m_element_tp).release();
     } else {
@@ -493,6 +494,26 @@ void ndt::var_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   memory_block_debug_print(md->blockref, o, indent + " ");
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(var_dim_type_arrmeta), o, indent + "  ");
+  }
+}
+
+void ndt::var_dim_type::data_destruct(const char *arrmeta, char *data) const
+{
+  m_element_tp.extended()->data_destruct_strided(arrmeta + sizeof(var_dim_type_arrmeta),
+                                                 reinterpret_cast<var_dim_type_data *>(data)->begin,
+                                                 reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta)->stride,
+                                                 reinterpret_cast<var_dim_type_data *>(data)->size);
+}
+
+void ndt::var_dim_type::data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const
+{
+  const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
+  arrmeta += sizeof(var_dim_type_arrmeta);
+  intptr_t child_stride = md->stride;
+  size_t child_size = reinterpret_cast<var_dim_type_data *>(data)->size;
+
+  for (size_t i = 0; i != count; ++i, data += stride) {
+    m_element_tp.extended()->data_destruct_strided(arrmeta, data, child_stride, child_size);
   }
 }
 
