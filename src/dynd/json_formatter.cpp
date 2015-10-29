@@ -17,9 +17,8 @@ using namespace std;
 using namespace dynd;
 
 struct output_data {
+  dynd::string out_string;
   char *out_begin, *out_end, *out_capacity_end;
-  memory_block_data::api *api;
-  memory_block_data *blockref;
   bool struct_as_list;
 
   void ensure_capacity(intptr_t added_capacity)
@@ -32,7 +31,8 @@ struct output_data {
       if (new_capacity < current_size + added_capacity) {
         new_capacity = current_size + added_capacity;
       }
-      out_begin = api->resize(blockref, out_begin, new_capacity);
+      out_string.resize(new_capacity);
+      out_begin = out_string.begin();
       out_capacity_end = out_begin + new_capacity;
       out_end = out_begin + current_size;
     }
@@ -343,10 +343,9 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
 
   // Initialize the output with some memory
   output_data out;
-  out.blockref = reinterpret_cast<const string_type_arrmeta *>(result.get_arrmeta())->blockref;
-  out.api = out.blockref->get_api();
-  out.out_begin = out.api->allocate(out.blockref, 1024);
-  out.out_capacity_end = out.out_begin + 1024;
+  out.out_string.resize(1024);
+  out.out_begin = out.out_string.begin();
+  out.out_capacity_end = out.out_string.end();
   out.out_end = out.out_begin;
   out.struct_as_list = struct_as_list;
 
@@ -359,11 +358,7 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
 
   // Shrink the memory to fit, and set the pointers in the output
   string *d = reinterpret_cast<string *>(result.get_readwrite_originptr());
-  char *begin = out.out_begin;
-  char *end = out.out_capacity_end;
-  begin = out.api->resize(out.blockref, begin, out.out_end - out.out_begin);
-  end = begin + (out.out_end - out.out_begin);
-  d->assign(begin, end - begin);
+  d->assign(out.out_string.data(), out.out_end - out.out_begin);
 
   // Finalize processing and mark the result as immutable
   result.get_type().extended()->arrmeta_finalize_buffers(result.get_arrmeta());

@@ -38,7 +38,7 @@ struct date_strftime_kernel_extra {
   ckernel_prefix base;
   size_t format_size;
   const char *format;
-  const string_type_arrmeta *dst_arrmeta;
+  const char *dst_arrmeta;
 
   static void single_unary(ckernel_prefix *extra, char *dst, char *const *src)
   {
@@ -180,7 +180,7 @@ public:
     // so we can point at data in the kernel generator
     e->format_size = m_format.size();
     e->format = m_format.c_str();
-    e->dst_arrmeta = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
+    e->dst_arrmeta = dst_arrmeta;
     return ckb_offset;
   }
 

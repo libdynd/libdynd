@@ -18,17 +18,14 @@ using namespace dynd;
 /////////////////////////////////////////////
 // String concatenation kernel
 
-void kernels::string_concatenation_kernel::init(size_t nop, const char *dst_arrmeta,
+void kernels::string_concatenation_kernel::init(size_t nop, const char *DYND_UNUSED(dst_arrmeta),
                                                 const char **DYND_UNUSED(src_arrmeta))
 {
-  const string_type_arrmeta *sdm = reinterpret_cast<const string_type_arrmeta *>(dst_arrmeta);
   m_nop = nop;
   // This is a borrowed reference
-  m_dst_blockref = sdm->blockref;
 }
 
-inline void concat_one_string(size_t nop, dynd::string *d, const dynd::string *const *s,
-                              memory_block_data::api *allocator, memory_block_data *dst_blockref)
+inline void concat_one_string(size_t nop, dynd::string *d, const dynd::string *const *s)
 {
   // Get the size of the concatenated string
   size_t size = 0;
@@ -36,9 +33,7 @@ inline void concat_one_string(size_t nop, dynd::string *d, const dynd::string *c
     size += (s[i]->end() - s[i]->begin());
   }
   // Allocate the output
-  char *begin = allocator->allocate(dst_blockref, size);
-  char *end = begin + size;
-  d->assign(begin, end - begin);
+  d->resize(size);
   // Copy the string data
   char *dst = d->begin();
   for (size_t i = 0; i != nop; ++i) {
@@ -53,9 +48,8 @@ void kernels::string_concatenation_kernel::single(char *dst, char *const *src, c
   const extra_type *e = reinterpret_cast<const extra_type *>(extra);
   dynd::string *d = reinterpret_cast<dynd::string *>(dst);
   const dynd::string *const *s = reinterpret_cast<const dynd::string *const *>(src);
-  memory_block_data::api *allocator = e->m_dst_blockref->get_api();
 
-  concat_one_string(e->m_nop, d, s, allocator, e->m_dst_blockref);
+  concat_one_string(e->m_nop, d, s);
 }
 
 void kernels::string_concatenation_kernel::strided(char *dst, intptr_t dst_stride, char *const *src,
@@ -63,14 +57,13 @@ void kernels::string_concatenation_kernel::strided(char *dst, intptr_t dst_strid
 {
   const extra_type *e = reinterpret_cast<const extra_type *>(extra);
   size_t nop = e->m_nop;
-  memory_block_data::api *allocator = e->m_dst_blockref->get_api();
 
   // Loop to concatenate all the strings3
   shortvector<const char *> src_vec(nop, src);
   for (size_t i = 0; i != count; ++i) {
     dynd::string *d = reinterpret_cast<dynd::string *>(dst);
     const dynd::string *const *s = reinterpret_cast<const dynd::string *const *>(src_vec.get());
-    concat_one_string(nop, d, s, allocator, e->m_dst_blockref);
+    concat_one_string(nop, d, s);
     dst += dst_stride;
     for (size_t op = 0; op < nop; ++op) {
       src_vec[op] += src_stride[op];
