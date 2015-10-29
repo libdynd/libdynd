@@ -43,14 +43,9 @@ struct blockref_bytes_kernel : nd::base_kernel<blockref_bytes_kernel, 1> {
     if (dst_md->blockref != src_md->blockref) {
       char *src_begin = src_d->begin();
       char *src_end = src_d->end();
-      memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
-
-      char *dst_begin = allocator->allocate(dst_md->blockref, src_end - src_begin);
-      char *dst_end = dst_begin + (src_end - src_begin);
-      memcpy(dst_begin, src_begin, src_end - src_begin);
 
       // Set the output
-      dst_d->assign(dst_begin, dst_end - dst_begin);
+      dst_d->assign(src_begin, src_end - src_begin);
     } else if (dst_alignment <= src_alignment) {
       // Copy the pointers from the source bytes
       *dst_d = *src_d;
@@ -88,7 +83,6 @@ struct fixed_bytes_to_blockref_bytes_kernel : nd::base_kernel<fixed_bytes_to_blo
   /** Does a single fixed-bytes copy */
   void single(char *dst, char *const *src)
   {
-    const bytes_type_arrmeta *dst_md = dst_arrmeta;
     // TODO: With some additional mechanism to track the source memory block,
     // could avoid copying the bytes data.
     char *src_begin = src[0];
@@ -99,14 +93,7 @@ struct fixed_bytes_to_blockref_bytes_kernel : nd::base_kernel<fixed_bytes_to_blo
       throw runtime_error("Cannot assign to an already initialized dynd string");
     }
 
-    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
-
-    char *dst_begin = allocator->allocate(dst_md->blockref, src_end - src_begin);
-    char *dst_end = dst_begin + (src_end - src_begin);
-    memcpy(dst_begin, src_begin, src_end - src_begin);
-
-    // Set the output
-    dst_d->assign(dst_begin, dst_end - dst_begin);
+    dst_d->assign(src_begin, src_end - src_begin);
   }
 };
 } // anonymous namespace

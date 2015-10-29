@@ -89,6 +89,9 @@ namespace ndt {
     size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
                                          memory_block_data *embedded_reference) const;
 
+    void data_destruct(const char *arrmeta, char *data) const;
+    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
+
     size_t get_iterdata_size(intptr_t ndim) const;
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim,
                               const intptr_t *shape, type &out_uniform_tp) const;

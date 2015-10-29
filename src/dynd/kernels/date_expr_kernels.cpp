@@ -43,7 +43,6 @@ struct date_strftime_kernel_extra {
   static void single_unary(ckernel_prefix *extra, char *dst, char *const *src)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    const string_type_arrmeta *dst_md = e->dst_arrmeta;
 
     struct tm tm_val;
     int32_t date = **reinterpret_cast<int32_t *const *>(src);
@@ -57,19 +56,16 @@ struct date_strftime_kernel_extra {
     disable_invalid_parameter_handler raii;
 #endif
     dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
-    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
 
     // Call strftime, growing the string buffer if needed so it fits
     size_t str_size = e->format_size + 16;
-    char *begin = allocator->allocate(dst_md->blockref, str_size);
-    dst_d->assign(begin, str_size);
+    dst_d->resize(str_size);
     for (int attempt = 0; attempt < 3; ++attempt) {
       // Force errno to zero
       errno = 0;
       size_t len = strftime(dst_d->begin(), str_size, e->format, &tm_val);
       if (len > 0) {
-        begin = allocator->resize(dst_md->blockref, begin, len);
-        dst_d->assign(begin, len);
+        dst_d->resize(len);
         break;
       } else {
         if (errno != 0) {
@@ -78,8 +74,7 @@ struct date_strftime_kernel_extra {
           throw runtime_error(ss.str());
         }
         str_size *= 2;
-        begin = allocator->resize(dst_md->blockref, begin, str_size);
-        dst_d->assign(begin, str_size);
+        dst_d->resize(str_size);
       }
     }
   }
@@ -90,7 +85,6 @@ struct date_strftime_kernel_extra {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
     size_t format_size = e->format_size;
     const char *format = e->format;
-    const string_type_arrmeta *dst_md = e->dst_arrmeta;
 
     struct tm tm_val;
 #ifdef _MSC_VER
@@ -98,7 +92,6 @@ struct date_strftime_kernel_extra {
     // parameter handler is installed.
     disable_invalid_parameter_handler raii;
 #endif
-    memory_block_data::api *allocator = get_memory_block_pod_allocator_api(dst_md->blockref);
     char *src0 = src[0];
     intptr_t src0_stride = src_stride[0];
     for (size_t i = 0; i != count; ++i) {
@@ -111,17 +104,13 @@ struct date_strftime_kernel_extra {
 
       // Call strftime, growing the string buffer if needed so it fits
       size_t str_size = format_size + 16;
-      char *begin = allocator->allocate(dst_md->blockref, str_size);
-      char *end = begin + str_size;
-      dst_d->assign(begin, end - begin);
+      dst_d->resize(str_size);
       for (int attempt = 0; attempt < 3; ++attempt) {
         // Force errno to zero
         errno = 0;
         size_t len = strftime(dst_d->begin(), str_size, format, &tm_val);
         if (len > 0) {
-          begin = allocator->resize(dst_md->blockref, begin, len);
-          end = begin + len;
-          dst_d->assign(begin, end - begin);
+          dst_d->resize(len);
           break;
         } else {
           if (errno != 0) {
@@ -130,9 +119,7 @@ struct date_strftime_kernel_extra {
             throw runtime_error(ss.str());
           }
           str_size *= 2;
-          begin = allocator->resize(dst_md->blockref, begin, str_size);
-          end = begin + str_size;
-          dst_d->assign(begin, end - begin);
+          dst_d->resize(str_size);
         }
       }
       dst += dst_stride;

@@ -227,6 +227,8 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
 
 static nd::array view_as_bytes(const nd::array &arr, const ndt::type &tp)
 {
+  throw std::runtime_error("view_as_bytes is not yet implemented");
+
   if (arr.get_type().get_flags() & type_flag_destructor && (arr.get_dtype().get_type_id() != string_type_id)) {
     // Can't view arrays of object type
     return nd::array();
@@ -254,7 +256,7 @@ static nd::array view_as_bytes(const nd::array &arr, const ndt::type &tp)
   nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(), tp.get_data_size(),
                                            tp.get_data_alignment(), &result_data_ptr));
   // Set the bytes extents
-  reinterpret_cast<bytes *>(result_data_ptr)->assign(data_ptr, data_dim_size);
+//  reinterpret_cast<bytes *>(result_data_ptr)->assign(data_ptr, data_dim_size);
   // Set the array arrmeta
   array_preamble *ndo = result.get_ndo();
   ndo->m_type = ndt::type(tp).release();

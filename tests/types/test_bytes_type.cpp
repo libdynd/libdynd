@@ -87,6 +87,9 @@ TEST(BytesDType, Assign)
   EXPECT_EQ("testing", c.as<std::string>());
 }
 
+/*
+  Variable-sized bytes no longer supports alignment.
+
 TEST(BytesDType, Alignment)
 {
   nd::array a;
@@ -98,6 +101,7 @@ TEST(BytesDType, Alignment)
   btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
   EXPECT_TRUE(offset_is_aligned(reinterpret_cast<size_t>(btd->begin()), 16));
 }
+*/
 
 TEST(Bytes, Summary)
 {

@@ -23,6 +23,7 @@ struct objectarray_memory_block {
   /** Every memory block object needs this at the front */
   memory_block_data m_mbd;
   ndt::type m_dt;
+  size_t arrmeta_size;
   const char *m_arrmeta;
   intptr_t m_stride;
   size_t m_total_allocated_count;
@@ -49,9 +50,10 @@ struct objectarray_memory_block {
     m_total_allocated_count += count;
   }
 
-  objectarray_memory_block(const ndt::type &dt, const char *arrmeta, intptr_t stride, intptr_t initial_count)
-      : m_mbd(1, objectarray_memory_block_type), m_dt(dt), m_arrmeta(arrmeta), m_stride(stride),
-        m_total_allocated_count(0), m_finalized(false), m_memory_handles()
+  objectarray_memory_block(const ndt::type &dt, size_t arrmeta_size, const char *arrmeta, intptr_t stride,
+                           intptr_t initial_count)
+      : m_mbd(1, objectarray_memory_block_type), m_dt(dt), arrmeta_size(arrmeta_size), m_arrmeta(arrmeta),
+        m_stride(stride), m_total_allocated_count(0), m_finalized(false), m_memory_handles()
   {
     if ((dt.get_flags() & type_flag_destructor) == 0) {
       stringstream ss;
@@ -66,17 +68,17 @@ struct objectarray_memory_block {
   {
     for (size_t i = 0, i_end = m_memory_handles.size(); i != i_end; ++i) {
       memory_chunk &mc = m_memory_handles[i];
-      m_dt.extended()->data_destruct_strided(m_arrmeta, mc.memory, m_stride, mc.used_count);
+      m_dt.extended()->data_destruct_strided(m_arrmeta + arrmeta_size, mc.memory, m_stride, mc.used_count);
       free(mc.memory);
     }
   }
 };
 } // anonymous namespace
 
-memory_block_ptr dynd::make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta, intptr_t stride,
-                                                     intptr_t initial_count)
+memory_block_ptr dynd::make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
+                                                     intptr_t stride, intptr_t initial_count, size_t arrmeta_size)
 {
-  objectarray_memory_block *pmb = new objectarray_memory_block(dt, arrmeta, stride, initial_count);
+  objectarray_memory_block *pmb = new objectarray_memory_block(dt, arrmeta_size, arrmeta, stride, initial_count);
   return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
@@ -147,7 +149,7 @@ namespace detail {
         mc->used_count += (count - previous_count);
       } else {
         // Call the destructor on the elements no longer used
-        emb->m_dt.extended()->data_destruct_strided(emb->m_arrmeta, previous_allocated + emb->m_stride * count,
+        emb->m_dt.extended()->data_destruct_strided(emb->m_arrmeta + emb->arrmeta_size, previous_allocated + emb->m_stride * count,
                                                     emb->m_stride, previous_count - count);
         mc->used_count -= (previous_count - count);
       }

@@ -61,18 +61,8 @@ struct pod_memory_block {
 
 memory_block_ptr dynd::make_pod_memory_block(const ndt::type &tp, intptr_t initial_capacity_bytes)
 {
-  // This is a temporary hack until the new bytes and string types are working
-  intptr_t data_size;
-  switch (tp.get_type_id()) {
-  case bytes_type_id:
-  case string_type_id:
-    data_size = 1;
-    break;
-  default:
-    data_size = tp.get_default_data_size();
-  }
-
-  pod_memory_block *pmb = new pod_memory_block(data_size, tp.get_data_alignment(), initial_capacity_bytes);
+  pod_memory_block *pmb =
+      new pod_memory_block(tp.get_default_data_size(), tp.get_data_alignment(), initial_capacity_bytes);
   return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
