@@ -481,14 +481,10 @@ void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst, const
                                          const eval::eval_context *ectx)
 {
   ndt::type dt = ndt::string_type::make();
-  dynd::string d;
-  string_type_arrmeta md;
-  d.assign(str_begin, str_end - str_begin);
-  md.blockref = NULL;
+  dynd::string d(str_begin, str_end - str_begin);
 
   ckernel_builder<kernel_request_host> k;
-  make_string_to_builtin_assignment_kernel(&k, 0, dst_type_id, dt, reinterpret_cast<const char *>(&md),
-                                           kernel_request_single, ectx);
+  make_string_to_builtin_assignment_kernel(&k, 0, dst_type_id, dt, NULL, kernel_request_single, ectx);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   char *src = reinterpret_cast<char *>(&d);
   fn(k.get(), dst, &src);

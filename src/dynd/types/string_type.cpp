@@ -103,12 +103,8 @@ void ndt::string_type::print_type(std::ostream &o) const
   o << "string";
 }
 
-bool ndt::string_type::is_unique_data_owner(const char *arrmeta) const
+bool ndt::string_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
 {
-  const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL && (md->blockref->m_use_count != 1 || md->blockref->m_type != pod_memory_block_type)) {
-    return false;
-  }
   return true;
 }
 

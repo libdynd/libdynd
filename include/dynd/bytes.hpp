@@ -19,7 +19,7 @@ public:
   {
   }
 
-  bytes(char *data, size_t size) : m_data(reinterpret_cast<char *>(malloc(size))), m_size(size)
+  bytes(const char *data, size_t size) : m_data(reinterpret_cast<char *>(malloc(size))), m_size(size)
   {
     memcpy(m_data, data, m_size);
   }
@@ -60,10 +60,11 @@ public:
   void resize(size_t size)
   {
     if (size > m_size) {
-      if (m_data != NULL) {
-        free(m_data);
+      if (m_data == NULL) {
+        m_data = reinterpret_cast<char *>(malloc(size * sizeof(char)));
+      } else {
+        m_data = reinterpret_cast<char *>(realloc(m_data, size * sizeof(char)));
       }
-      m_data = reinterpret_cast<char *>(malloc(size * sizeof(char)));
     }
 
     m_size = size;

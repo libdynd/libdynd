@@ -15,7 +15,7 @@ public:
   {
   }
 
-  string(char *data, size_t size) : bytes(data, size)
+  string(const char *data, size_t size) : bytes(data, size)
   {
   }
 

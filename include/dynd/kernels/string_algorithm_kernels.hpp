@@ -24,8 +24,6 @@ struct DYND_API string_concatenation_kernel {
     ckernel_prefix m_base;
     // The number of input operands
     size_t m_nop;
-    // The kernel borrows this reference from the dst arrmeta
-    memory_block_data *m_dst_blockref;
 
     ckernel_prefix& base() {
         return m_base;
