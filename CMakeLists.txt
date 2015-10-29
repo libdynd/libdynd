@@ -340,9 +340,6 @@ set(libdynd_SRC
     include/dynd/gfunc/gcallable.hpp
     include/dynd/gfunc/call_gcallable.hpp
     include/dynd/gfunc/make_gcallable.hpp
-    # Iter
-    src/dynd/iter/string_iter.cpp
-    include/dynd/iter/string_iter.hpp
     # Kernels
     src/dynd/kernels/base_kernel.cpp
     src/dynd/kernels/buffered_kernels.cpp
