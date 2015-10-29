@@ -211,50 +211,16 @@ nd::array nd::make_pod_array(const ndt::type &pod_dt, const void *data)
 
 nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
 {
-  char *data_ptr = NULL, *bytes_data_ptr;
-  ndt::type dt = ndt::bytes_type::make(alignment);
-  nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size() + len + alignment - 1,
-                                           dt.get_data_alignment(), &data_ptr));
-  // Set the string extents
-  bytes_data_ptr = inc_to_alignment(data_ptr + dt.get_data_size(), alignment);
-  reinterpret_cast<bytes *>(data_ptr)->assign(bytes_data_ptr, len);
-  // Copy the string data
-  memcpy(bytes_data_ptr, data, len);
-  // Set the array arrmeta
-  array_preamble *ndo = result.get_ndo();
-  ndo->m_type = dt.release();
-  ndo->data.ptr = data_ptr;
-  ndo->data.ref = NULL;
-  ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
-  // Set the bytes arrmeta, telling the system that the bytes data was embedded
-  // in the array memory
-  bytes_type_arrmeta *ndo_meta = reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
-  ndo_meta->blockref = NULL;
+  nd::array result = nd::empty(ndt::bytes_type::make(alignment));
+  reinterpret_cast<bytes *>(result.get_readwrite_originptr())->assign(data, len);
   return result;
 }
 
 nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t DYND_UNUSED(encoding),
-                                uint64_t access_flags)
+                                uint64_t DYND_UNUSED(access_flags))
 {
-  char *data_ptr = NULL, *string_ptr;
-  ndt::type dt = ndt::string_type::make();
-  nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size() + len,
-                                           dt.get_data_alignment(), &data_ptr));
-  // Set the string extents
-  string_ptr = data_ptr + dt.get_data_size();
-  reinterpret_cast<string *>(data_ptr)->assign(string_ptr, len);
-  // Copy the string data
-  memcpy(string_ptr, str, len);
-  // Set the array arrmeta
-  array_preamble *ndo = result.get_ndo();
-  ndo->m_type = dt.release();
-  ndo->data.ptr = data_ptr;
-  ndo->data.ref = NULL;
-  ndo->m_flags = access_flags;
-  // Set the string arrmeta, telling the system that the string data was
-  // embedded in the array memory
-  string_type_arrmeta *ndo_meta = reinterpret_cast<string_type_arrmeta *>(result.get_arrmeta());
-  ndo_meta->blockref = NULL;
+  nd::array result = empty(ndt::string_type::make());
+  reinterpret_cast<string *>(result.get_readwrite_originptr())->assign(str, len);
   return result;
 }
 
@@ -265,31 +231,14 @@ nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t ar
     total_string_length += strlen(cstr_array[i]);
   }
 
-  char *data_ptr = NULL, *string_ptr;
-  string *string_arr_ptr;
   ndt::type stp = ndt::string_type::make();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
-  nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(),
-                                           array_size * stp.get_data_size() + total_string_length,
-                                           tp.get_data_alignment(), &data_ptr));
-  // Set the array arrmeta
-  array_preamble *ndo = result.get_ndo();
-  ndo->m_type = tp.release();
-  ndo->data.ptr = data_ptr;
-  ndo->data.ref = NULL;
-  ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
-  // Get the allocator for the output string type
-  fixed_dim_type_arrmeta *md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
-  md->dim_size = array_size;
-  md->stride = stp.get_data_size();
-  string_arr_ptr = reinterpret_cast<string *>(data_ptr);
-  string_ptr = data_ptr + array_size * stp.get_data_size();
+  nd::array result = nd::empty(tp);
+  string *string_ptr = reinterpret_cast<string *>(result.get_readwrite_originptr());
   for (size_t i = 0; i < array_size; ++i) {
     size_t size = strlen(cstr_array[i]);
-    memcpy(string_ptr, cstr_array[i], size);
-    string_arr_ptr->assign(string_ptr, size);
-    ++string_arr_ptr;
-    string_ptr += size;
+    string_ptr->assign(cstr_array[i], size);
+    ++string_ptr;
   }
   return result;
 }
@@ -301,33 +250,15 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
     total_string_length += str_array[i]->size();
   }
 
-  char *data_ptr = NULL, *string_ptr;
-  string *string_arr_ptr;
   ndt::type stp = ndt::string_type::make();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
-  nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(),
-                                           array_size * stp.get_data_size() + total_string_length,
-                                           tp.get_data_alignment(), &data_ptr));
-  // Set the array arrmeta
-  array_preamble *ndo = result.get_ndo();
-  ndo->m_type = tp.release();
-  ndo->data.ptr = data_ptr;
-  ndo->data.ref = NULL;
-  ndo->m_flags = nd::read_access_flag | nd::immutable_access_flag;
-  // Get the allocator for the output string type
-  fixed_dim_type_arrmeta *md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
-  md->dim_size = array_size;
-  md->stride = stp.get_data_size();
-  string_arr_ptr = reinterpret_cast<string *>(data_ptr);
-  string_ptr = data_ptr + array_size * stp.get_data_size();
+  nd::array result = nd::empty(tp);
+  string *string_arr_ptr = reinterpret_cast<string *>(result.get_readwrite_originptr());
   for (size_t i = 0; i < array_size; ++i) {
     size_t size = str_array[i]->size();
-    memcpy(string_ptr, str_array[i]->data(), size);
-    string_arr_ptr->assign(string_ptr, size);
+    string_arr_ptr->assign(str_array[i]->data(), size);
     ++string_arr_ptr;
-    string_ptr += size;
   }
-  result.flag_as_immutable();
   return result;
 }
 
@@ -606,32 +537,13 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
   }
 
   ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::string_type::make());
-  char *data_ptr = NULL;
   // Make an array memory block which contains both the string pointers and
   // the string data
-  array result(make_array_memory_block(dt.extended()->get_arrmeta_size(),
-                                       sizeof(string) * vec.size() + total_string_size, dt.get_data_alignment(),
-                                       &data_ptr));
-  char *string_ptr = data_ptr + sizeof(string) * vec.size();
-  // The main array arrmeta
-  array_preamble *preamble = result.get_ndo();
-  preamble->data.ptr = data_ptr;
-  preamble->data.ref = NULL;
-  preamble->m_type = dt.release();
-  preamble->m_flags = read_access_flag | immutable_access_flag;
-  // The arrmeta for the fixed_dim and string parts of the type
-  fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get_arrmeta());
-  sa_md->dim_size = vec.size();
-  sa_md->stride = vec.empty() ? 0 : sizeof(string);
-  string_type_arrmeta *s_md = reinterpret_cast<string_type_arrmeta *>(sa_md + 1);
-  s_md->blockref = NULL;
-  // The string pointers and data
-  string *data = reinterpret_cast<string *>(data_ptr);
+  array result = nd::empty(dt);
+  string *data = reinterpret_cast<string *>(result.get_readwrite_originptr());
   for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
     size_t size = vec[i].size();
-    memcpy(string_ptr, vec[i].data(), size);
-    data[i].assign(string_ptr, size);
-    string_ptr += size;
+    data[i].assign(vec[i].data(), size);
   }
   return result;
 }
@@ -1789,7 +1701,7 @@ nd::array nd::memmap(const std::string &filename, intptr_t begin, intptr_t end, 
   nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size(),
                                            dt.get_data_alignment(), &data_ptr));
   // Set the bytes extents
-  reinterpret_cast<bytes *>(data_ptr)->assign(mm_ptr, mm_size);
+  reinterpret_cast<bytes *>(data_ptr)->old_assign(mm_ptr, mm_size);
   // Set the array arrmeta
   array_preamble *ndo = result.get_ndo();
   ndo->m_type = dt.release();

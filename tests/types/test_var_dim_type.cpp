@@ -196,6 +196,8 @@ TEST(VarArrayDType, DTypeSubscriptStridedVarNested)
 
 TEST(VarArrayDType, DTypeSubscriptFixedVarStruct)
 {
+  throw std::runtime_error("error");
+
   nd::array n =
       parse_json("2 * var * {first_name: string, last_name: string, "
                  "gender: fixed_string[1], pictured: bool,}",

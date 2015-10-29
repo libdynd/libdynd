@@ -57,6 +57,8 @@ TEST(View, Errors)
 
 TEST(View, AsBytes)
 {
+  throw std::runtime_error("error");
+
   nd::array a, b;
   const bytes_type_arrmeta *btd_meta;
   const bytes_type_data *btd;
@@ -192,6 +194,8 @@ TEST(View, WeakerAlignment)
 
 TEST(View, StringAsBytes)
 {
+  throw std::runtime_error("error");
+
   nd::array a, b;
 
   a = parse_json("string", "\"\\U00024B62\"");

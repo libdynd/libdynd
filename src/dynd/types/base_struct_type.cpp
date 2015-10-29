@@ -90,29 +90,11 @@ ndt::type ndt::base_struct_type::apply_linear_index(intptr_t nindices, const ira
 
       // Make an "N * string" array without copying the actual
       // string text data. TODO: encapsulate this into a function.
-      char *data_ptr;
       string *string_arr_ptr;
       type stp = string_type::make();
       type tp = make_fixed_dim(dimension_size, stp);
-      nd::array tmp_field_names(make_array_memory_block(
-          tp.extended()->get_arrmeta_size(), dimension_size * stp.get_data_size(), tp.get_data_alignment(), &data_ptr));
-      // Set the array arrmeta
-      array_preamble *ndo = tmp_field_names.get_ndo();
-      ndo->m_type = tp.release();
-      ndo->data.ptr = data_ptr;
-      ndo->data.ref = NULL;
-      ndo->m_flags = nd::default_access_flags;
-      string_arr_ptr = reinterpret_cast<string *>(data_ptr);
-      // Get the allocator for the output string type
-      fixed_dim_type_arrmeta *md = reinterpret_cast<fixed_dim_type_arrmeta *>(tmp_field_names.get_arrmeta());
-      md->dim_size = dimension_size;
-      md->stride = stp.get_data_size();
-      string_type_arrmeta *smd =
-          reinterpret_cast<string_type_arrmeta *>(tmp_field_names.get_arrmeta() + sizeof(fixed_dim_type_arrmeta));
-      const string_type_arrmeta *smd_orig =
-          reinterpret_cast<const string_type_arrmeta *>(m_field_names.get_arrmeta() + sizeof(fixed_dim_type_arrmeta));
-      smd->blockref = smd_orig->blockref ? smd_orig->blockref : m_field_names.get_memblock().get();
-      memory_block_incref(smd->blockref);
+      nd::array tmp_field_names = nd::empty(tp);
+      string_arr_ptr = reinterpret_cast<string *>(tmp_field_names.get_readwrite_originptr());
 
       for (intptr_t i = 0; i < dimension_size; ++i) {
         intptr_t idx = start_index + i * index_stride;

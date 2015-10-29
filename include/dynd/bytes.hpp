@@ -19,8 +19,21 @@ public:
   {
   }
 
-  bytes(char *data, size_t size) : m_data(data), m_size(size)
+  bytes(char *data, size_t size) : m_data(reinterpret_cast<char *>(malloc(size))), m_size(size)
   {
+    memcpy(m_data, data, m_size);
+  }
+
+  bytes(const bytes &) = delete;
+  bytes(bytes &&) = delete;
+
+  ~bytes()
+  {
+    if (m_data != NULL) {
+      free(m_data);
+      m_data = NULL;
+      m_size = 0;
+    }
   }
 
   char *data()
@@ -38,9 +51,27 @@ public:
     return m_size;
   }
 
-  void assign(char *data, size_t size)
+  void assign(const char *data, size_t size)
+  {
+    resize(size);
+    memcpy(m_data, data, m_size);
+  }
+
+  void old_assign(char *data, size_t size)
   {
     m_data = data;
+    m_size = size;
+  }
+
+  void resize(size_t size)
+  {
+    if (size > m_size) {
+      if (m_data != NULL) {
+        free(m_data);
+      }
+      m_data = reinterpret_cast<char *>(malloc(size * sizeof(char)));
+    }
+
     m_size = size;
   }
 
@@ -62,6 +93,12 @@ public:
   const char *end() const
   {
     return m_data + m_size;
+  }
+
+  bytes &operator=(const bytes &rhs)
+  {
+    assign(rhs.m_data, rhs.m_size);
+    return *this;
   }
 
   bool operator==(const bytes &rhs) const

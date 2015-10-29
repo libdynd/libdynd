@@ -290,6 +290,8 @@ TEST(DateType, FromStruct)
 
 TEST(DateType, StrFTime)
 {
+  throw std::runtime_error("error");
+
   ndt::type d = ndt::date_type::make(), ds;
   nd::array a, b;
 
@@ -313,6 +315,8 @@ TEST(DateType, StrFTime)
 
 TEST(DateType, StrFTimeOfConvert)
 {
+  throw std::runtime_error("error");
+
   // First create a date array which is still a convert expression type
   const char *vals[] = {"1920-03-12", "2013-01-01", "2000-12-25"};
   nd::array a = nd::array(vals).ucast(ndt::date_type::make());
@@ -329,6 +333,8 @@ TEST(DateType, StrFTimeOfConvert)
 
 TEST(DateType, StrFTimeOfMultiDim)
 {
+  throw std::runtime_error("error");
+
   const char *vals_0[] = {"1920-03-12", "2013-01-01"};
   const char *vals_1[] = {"2000-12-25"};
   nd::array a = nd::empty(2, -1, ndt::date_type::make());

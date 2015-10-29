@@ -26,6 +26,8 @@ static void write_string_file(const char *fn,
 }
 
 TEST(ArrayMemMap, SimpleString) {
+  throw std::runtime_error("error");
+
     // Create a file with a simple string
     const char *str = "This is a test of a string.";
     write_string_file("test.txt", str, strlen(str));

@@ -623,7 +623,6 @@ void ndt::categorical_type::get_dynamic_type_properties(const std::pair<std::str
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      std::cout << "(DEBUG)" << std::endl;
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<categorical_type>()->m_categories.get_arrmeta(),
                       tp.extended<categorical_type>()->m_categories.get_data());
     }

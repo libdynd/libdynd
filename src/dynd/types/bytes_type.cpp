@@ -16,8 +16,8 @@ using namespace std;
 using namespace dynd;
 
 ndt::bytes_type::bytes_type(size_t alignment)
-    : base_bytes_type(bytes_type_id, bytes_kind, sizeof(bytes), alignof(bytes), type_flag_zeroinit | type_flag_blockref,
-                      sizeof(bytes_type_arrmeta)),
+    : base_bytes_type(bytes_type_id, bytes_kind, sizeof(bytes), alignof(bytes),
+                      type_flag_zeroinit | type_flag_destructor, sizeof(bytes_type_arrmeta)),
       m_alignment(alignment)
 {
   if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
@@ -51,13 +51,9 @@ void ndt::bytes_type::set_bytes_data(const char *arrmeta, char *data, const char
     throw runtime_error("assigning to a bytes data element requires that it be "
                         "initialized to NULL");
   }
-  memory_block_data::api *allocator = md->blockref->get_api();
 
   // Allocate the output array data, then copy it
-  char *begin = allocator->allocate(md->blockref, bytes_end - bytes_begin);
-  char *end = begin + (bytes_end - bytes_begin);
-  d->assign(begin, end - begin);
-  memcpy(d->begin(), bytes_begin, bytes_end - bytes_begin);
+  d->assign(bytes_begin, bytes_end - bytes_begin);
 }
 
 void ndt::bytes_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
@@ -213,6 +209,20 @@ void ndt::bytes_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o, 
   const bytes_type_arrmeta *md = reinterpret_cast<const bytes_type_arrmeta *>(arrmeta);
   o << indent << "bytes arrmeta\n";
   memory_block_debug_print(md->blockref, o, indent + " ");
+}
+
+void ndt::bytes_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
+{
+  reinterpret_cast<bytes *>(data)->~bytes();
+}
+
+void ndt::bytes_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data, intptr_t stride,
+                                            size_t count) const
+{
+  for (size_t i = 0; i != count; ++i) {
+    reinterpret_cast<bytes *>(data)->~bytes();
+    data += stride;
+  }
 }
 
 void ndt::bytes_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,

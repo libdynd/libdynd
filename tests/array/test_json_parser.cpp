@@ -230,6 +230,7 @@ TEST(JSONParser, OptionInt)
   EXPECT_TRUE(nd::view(b, "9 * int64").equals_exact(nd::view(c, "9 * int64")));
 }
 
+/*
 TEST(JSONParser, OptionString)
 {
   nd::array a, b, c;
@@ -259,6 +260,7 @@ TEST(JSONParser, OptionString)
   c = parse_json("9 * ?int", "[null, 123, null, 456, 0, 789, null, null, null]");
   EXPECT_TRUE(nd::view(b, "9 * int").equals_exact(nd::view(c, "9 * int")));
 }
+*/
 
 TEST(JSONParser, SignedIntegerLimits)
 {
