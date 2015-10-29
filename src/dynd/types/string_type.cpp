@@ -36,10 +36,9 @@ void ndt::string_type::get_string_range(const char **out_begin, const char **out
   *out_end = reinterpret_cast<const string *>(data)->end();
 }
 
-void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, const char *utf8_begin,
+void ndt::string_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), char *dst, const char *utf8_begin,
                                             const char *utf8_end, const eval::eval_context *ectx) const
 {
-  const string_type_arrmeta *data_md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
   assign_error_mode errmode = ectx->errmode;
   const intptr_t src_charsize = 1;
   intptr_t dst_charsize = string_encoding_char_size_table[string_encoding_utf_8];
@@ -48,13 +47,12 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
   append_unicode_codepoint_t append_fn = get_append_unicode_codepoint_function(string_encoding_utf_8, errmode);
   uint32_t cp;
 
-  memory_block_data::api *allocator = data_md->blockref->get_api();
-
   // Allocate the initial output as the src number of characters + some padding
   // TODO: Don't add padding if the output is not a multi-character encoding
-  char *dst_begin = allocator->allocate(data_md->blockref,
-                                        ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024);
-  char *dst_end = dst_begin + ((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024;
+  string dst_d;
+  dst_d.resize(((utf8_end - utf8_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024);
+  char *dst_begin = dst_d.begin();
+  char *dst_end = dst_d.end();
 
   dst_current = dst_begin;
   while (utf8_begin < utf8_end) {
@@ -64,20 +62,17 @@ void ndt::string_type::set_from_utf8_string(const char *arrmeta, char *dst, cons
       append_fn(cp, dst_current, dst_end);
     } else {
       char *dst_begin_saved = dst_begin;
-      dst_begin = allocator->resize(data_md->blockref, dst_begin, 2 * (dst_end - dst_begin));
-      dst_end = dst_begin + 2 * (dst_end - dst_begin);
+      dst_d.resize(2 * dst_d.size());
+      dst_begin = dst_d.begin();
+      dst_end = dst_d.end();
       dst_current = dst_begin + (dst_current - dst_begin_saved);
 
       append_fn(cp, dst_current, dst_end);
     }
   }
 
-  // Shrink-wrap the memory to just fit the string
-  dst_begin = allocator->resize(data_md->blockref, dst_begin, dst_current - dst_begin);
-  dst_end = dst_begin + (dst_current - dst_begin);
-
   // Set the output
-  reinterpret_cast<string *>(dst)->assign(dst_begin, dst_end - dst_begin);
+  reinterpret_cast<string *>(dst)->assign(dst_d.begin(), dst_current - dst_begin);
 }
 
 void ndt::string_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
@@ -146,7 +141,7 @@ void ndt::string_type::arrmeta_default_construct(char *arrmeta, bool blockref_al
   // Simply allocate a POD memory block
   if (blockref_alloc) {
     string_type_arrmeta *md = reinterpret_cast<string_type_arrmeta *>(arrmeta);
-    md->blockref = make_pod_memory_block(make()).release();
+    md->blockref = NULL;
   }
 }
 
