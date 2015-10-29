@@ -78,6 +78,7 @@ static bool try_view(const ndt::type &tp, const char *arrmeta, const ndt::type &
   }
 }
 
+/*
 static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::type &data_tp, const char *&data_meta,
                               intptr_t &data_dim_size, intptr_t &data_stride)
 {
@@ -188,7 +189,6 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
       return;
     }
     // Look at the actual string data, not the pointer to it
-    const string_type_arrmeta *meta = reinterpret_cast<const string_type_arrmeta *>(data_meta);
     if (meta->blockref != NULL) {
       data_ref = meta->blockref;
     }
@@ -224,11 +224,13 @@ static void refine_bytes_view(memory_block_ptr &data_ref, char *&data_ptr, ndt::
   data_tp = ndt::type();
   data_dim_size = -1;
 }
+*/
 
-static nd::array view_as_bytes(const nd::array &arr, const ndt::type &tp)
+static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::type &DYND_UNUSED(tp))
 {
   throw std::runtime_error("view_as_bytes is not yet implemented");
 
+/*
   if (arr.get_type().get_flags() & type_flag_destructor && (arr.get_dtype().get_type_id() != string_type_id)) {
     // Can't view arrays of object type
     return nd::array();
@@ -264,9 +266,9 @@ static nd::array view_as_bytes(const nd::array &arr, const ndt::type &tp)
   ndo->data.ref = NULL;
   ndo->m_flags = arr.get_flags();
   // Set the bytes arrmeta
-  bytes_type_arrmeta *ndo_meta = reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
   ndo_meta->blockref = data_ref.release();
   return result;
+*/
 }
 
 static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)

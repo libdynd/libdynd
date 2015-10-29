@@ -12,7 +12,6 @@
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/iter/string_iter.hpp>
 #include <dynd/exceptions.hpp>
 
 #include <algorithm>
@@ -270,17 +269,4 @@ size_t ndt::string_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, 
   }
 
   throw not_comparable_error(src0_dt, src1_dt, comptype);
-}
-
-void ndt::string_type::make_string_iter(dim_iter *out_di, string_encoding_t encoding, const char *arrmeta,
-                                        const char *data, const memory_block_ptr &ref, intptr_t buffer_max_mem,
-                                        const eval::eval_context *ectx) const
-{
-  const string *d = reinterpret_cast<const string *>(data);
-  memory_block_ptr dataref = ref;
-  const string_type_arrmeta *md = reinterpret_cast<const string_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL) {
-    dataref = memory_block_ptr(md->blockref);
-  }
-  iter::make_string_iter(out_di, encoding, string_encoding_utf_8, d->begin(), d->end(), dataref, buffer_max_mem, ectx);
 }

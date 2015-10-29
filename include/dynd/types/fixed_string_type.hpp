@@ -74,11 +74,6 @@ namespace ndt {
                                   comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
 
-    void make_string_iter(dim_iter *out_di, string_encoding_t encoding,
-                          const char *arrmeta, const char *data,
-                          const memory_block_ptr &ref, intptr_t buffer_max_mem,
-                          const eval::eval_context *ectx) const;
-
     static type make(intptr_t stringsize,
                      string_encoding_t encoding = string_encoding_utf_8)
     {

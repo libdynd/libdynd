@@ -1685,34 +1685,40 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
                                       a.get_readwrite_originptr(), a.get_memblock(), NULL);
 }
 
-nd::array nd::memmap(const std::string &filename, intptr_t begin, intptr_t end, uint32_t access)
+nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNUSED(begin), intptr_t DYND_UNUSED(end),
+                     uint32_t DYND_UNUSED(access))
 {
-  if (access == 0) {
-    access = nd::default_access_flags;
-  }
+  throw std::runtime_error("nd::memmap is not yet implemented");
 
-  char *mm_ptr = NULL;
-  intptr_t mm_size = 0;
-  // Create a memory mapped memblock of the file
-  memory_block_ptr mm = make_memmap_memory_block(filename, access, &mm_ptr, &mm_size, begin, end);
-  // Create a bytes array referring to the data.
-  ndt::type dt = ndt::bytes_type::make(1);
-  char *data_ptr = 0;
-  nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size(),
-                                           dt.get_data_alignment(), &data_ptr));
-  // Set the bytes extents
-  reinterpret_cast<bytes *>(data_ptr)->assign(mm_ptr, mm_size);
-  // Set the array arrmeta
-  array_preamble *ndo = result.get_ndo();
-  ndo->m_type = dt.release();
-  ndo->data.ptr = data_ptr;
-  ndo->data.ref = NULL;
-  ndo->m_flags = access;
-  // Set the bytes arrmeta, telling the system
-  // about the memmapped memblock
-  bytes_type_arrmeta *ndo_meta = reinterpret_cast<bytes_type_arrmeta *>(result.get_arrmeta());
-  ndo_meta->blockref = mm.release();
-  return result;
+  /*
+    // ToDo: This was based on the variable-sized bytes type, which changed.
+
+    if (access == 0) {
+      access = nd::default_access_flags;
+    }
+
+    char *mm_ptr = NULL;
+    intptr_t mm_size = 0;
+    // Create a memory mapped memblock of the file
+    memory_block_ptr mm = make_memmap_memory_block(filename, access, &mm_ptr, &mm_size, begin, end);
+    // Create a bytes array referring to the data.
+    ndt::type dt = ndt::bytes_type::make(1);
+    char *data_ptr = 0;
+    nd::array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), dt.get_data_size(),
+                                             dt.get_data_alignment(), &data_ptr));
+    // Set the bytes extents
+    reinterpret_cast<bytes *>(data_ptr)->assign(mm_ptr, mm_size);
+    // Set the array arrmeta
+    array_preamble *ndo = result.get_ndo();
+    ndo->m_type = dt.release();
+    ndo->data.ptr = data_ptr;
+    ndo->data.ref = NULL;
+    ndo->m_flags = access;
+    // Set the bytes arrmeta, telling the system
+    // about the memmapped memblock
+    ndo_meta->blockref = mm.release();
+    return result;
+  */
 }
 
 bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data, const eval::eval_context *ectx)
