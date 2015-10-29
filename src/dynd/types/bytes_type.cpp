@@ -17,7 +17,7 @@ using namespace dynd;
 
 ndt::bytes_type::bytes_type(size_t alignment)
     : base_bytes_type(bytes_type_id, bytes_kind, sizeof(bytes), alignof(bytes),
-                      type_flag_zeroinit | type_flag_destructor, sizeof(bytes_type_arrmeta)),
+                      type_flag_zeroinit | type_flag_destructor, 0),
       m_alignment(alignment)
 {
   if (alignment != 1 && alignment != 2 && alignment != 4 && alignment != 8 && alignment != 16) {
@@ -38,14 +38,9 @@ void ndt::bytes_type::get_bytes_range(const char **out_begin, const char **out_e
   *out_end = reinterpret_cast<const bytes_type_data *>(data)->end();
 }
 
-void ndt::bytes_type::set_bytes_data(const char *arrmeta, char *data, const char *bytes_begin,
+void ndt::bytes_type::set_bytes_data(const char *DYND_UNUSED(arrmeta), char *data, const char *bytes_begin,
                                      const char *bytes_end) const
 {
-  const bytes_type_arrmeta *md = reinterpret_cast<const bytes_type_arrmeta *>(arrmeta);
-  if (md->blockref == NULL || md->blockref->m_type != pod_memory_block_type) {
-    throw runtime_error("assigning to a bytes data element requires that it "
-                        "have a pod memory block");
-  }
   bytes_type_data *d = reinterpret_cast<bytes_type_data *>(data);
   if (d->begin() != NULL) {
     throw runtime_error("assigning to a bytes data element requires that it be "
@@ -73,12 +68,8 @@ void ndt::bytes_type::print_type(std::ostream &o) const
   }
 }
 
-bool ndt::bytes_type::is_unique_data_owner(const char *arrmeta) const
+bool ndt::bytes_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
 {
-  const bytes_type_arrmeta *md = reinterpret_cast<const bytes_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL && (md->blockref->m_use_count != 1 || md->blockref->m_type != pod_memory_block_type)) {
-    return false;
-  }
   return true;
 }
 
@@ -156,59 +147,6 @@ bool ndt::bytes_type::operator==(const base_type &rhs) const
     const bytes_type *dt = static_cast<const bytes_type *>(&rhs);
     return m_alignment == dt->m_alignment;
   }
-}
-
-void ndt::bytes_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
-{
-  // Simply allocate a POD memory block
-  if (blockref_alloc) {
-    bytes_type_arrmeta *md = reinterpret_cast<bytes_type_arrmeta *>(arrmeta);
-    md->blockref = make_pod_memory_block(make()).release();
-  }
-}
-
-void ndt::bytes_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                             memory_block_data *embedded_reference) const
-{
-  // Copy the blockref, switching it to the embedded_reference if necessary
-  const bytes_type_arrmeta *src_md = reinterpret_cast<const bytes_type_arrmeta *>(src_arrmeta);
-  bytes_type_arrmeta *dst_md = reinterpret_cast<bytes_type_arrmeta *>(dst_arrmeta);
-  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-  if (dst_md->blockref) {
-    memory_block_incref(dst_md->blockref);
-  }
-}
-
-void ndt::bytes_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
-{
-  throw runtime_error("TODO implement bytes_type::arrmeta_reset_buffers");
-}
-
-void ndt::bytes_type::arrmeta_finalize_buffers(char *arrmeta) const
-{
-  bytes_type_arrmeta *md = reinterpret_cast<bytes_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL) {
-    // Finalize the memory block
-    memory_block_data::api *allocator = md->blockref->get_api();
-    if (allocator != NULL) {
-      allocator->finalize(md->blockref);
-    }
-  }
-}
-
-void ndt::bytes_type::arrmeta_destruct(char *arrmeta) const
-{
-  bytes_type_arrmeta *md = reinterpret_cast<bytes_type_arrmeta *>(arrmeta);
-  if (md->blockref) {
-    memory_block_decref(md->blockref);
-  }
-}
-
-void ndt::bytes_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const
-{
-  const bytes_type_arrmeta *md = reinterpret_cast<const bytes_type_arrmeta *>(arrmeta);
-  o << indent << "bytes arrmeta\n";
-  memory_block_debug_print(md->blockref, o, indent + " ");
 }
 
 void ndt::bytes_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
