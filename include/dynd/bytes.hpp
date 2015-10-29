@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <algorithm>
+
 #include <dynd/config.hpp>
 
 namespace dynd {
@@ -19,21 +21,21 @@ public:
   {
   }
 
-  bytes(const char *data, size_t size) : m_data(reinterpret_cast<char *>(malloc(size))), m_size(size)
+  bytes(const char *data, size_t size) : m_data(new char[size]), m_size(size)
   {
-    memcpy(m_data, data, m_size);
+    std::copy_n(data, m_size, m_data);
   }
 
-  bytes(const bytes &) = delete;
+  bytes(const bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
+  {
+    std::copy_n(other.m_data, m_size, m_data);
+  }
+
   bytes(bytes &&) = delete;
 
   ~bytes()
   {
-    if (m_data != NULL) {
-      free(m_data);
-      m_data = NULL;
-      m_size = 0;
-    }
+    delete[] m_data;
   }
 
   char *data()
@@ -51,23 +53,37 @@ public:
     return m_size;
   }
 
-  void assign(const char *data, size_t size)
+  bytes &assign(const char *data, size_t size)
   {
-    resize(size);
-    memcpy(m_data, data, m_size);
+    if (size != m_size) {
+      delete[] m_data;
+      m_data = new char[size];
+    }
+
+    std::copy_n(data, size, m_data);
+    m_size = size;
+
+    return *this;
+  }
+
+  void clear()
+  {
+    if (m_size != 0) {
+      delete[] m_data;
+      m_size = 0;
+    }
   }
 
   void resize(size_t size)
   {
-    if (size > m_size) {
-      if (m_data == NULL) {
-        m_data = reinterpret_cast<char *>(malloc(size * sizeof(char)));
-      } else {
-        m_data = reinterpret_cast<char *>(realloc(m_data, size * sizeof(char)));
-      }
-    }
+    if (size != m_size) {
+      char *data = new char[size];
+      std::copy_n(m_data, std::min(size, m_size), data);
+      delete[] m_data;
 
-    m_size = size;
+      m_data = data;
+      m_size = size;
+    }
   }
 
   char *begin()
@@ -92,8 +108,7 @@ public:
 
   bytes &operator=(const bytes &rhs)
   {
-    assign(rhs.m_data, rhs.m_size);
-    return *this;
+    return assign(rhs.m_data, rhs.m_size);
   }
 
   bool operator==(const bytes &rhs) const
