@@ -11,70 +11,20 @@
 
 namespace dynd {
 
-/**
-  This is a temporary solution for interfacing with STL algorithms. This class will
-  hopefully soon merge with the bytes class above.
-*/
-class std_bytes {
-public:
-  char *m_data;
-  size_t m_size;
-
-public:
-  std_bytes() = delete;
-
-  std_bytes(char *data, size_t size) : m_data(data), m_size(size)
-  {
-  }
-
-  std_bytes(const std_bytes &other)
-  {
-    m_data = reinterpret_cast<char *>(malloc(other.m_size));
-    m_size = other.m_size;
-    std::memcpy(m_data, other.m_data, other.m_size);
-  }
-
-  ~std_bytes()
-  {
-    if (m_data != NULL) {
-      free(m_data);
-    }
-  }
-
-  char *data()
-  {
-    return m_data;
-  }
-
-  const char *data() const
-  {
-    return m_data;
-  }
-
-  size_t size() const
-  {
-    return m_size;
-  }
-
-  std_bytes &operator=(const std_bytes &rhs)
-  {
-    std::memcpy(m_data, rhs.m_data, rhs.m_size);
-    m_size = rhs.m_size;
-
-    return *this;
-  }
-};
-
-class bytes_iterator : public std_bytes {
+class bytes_iterator : public bytes {
   intptr_t m_stride;
 
 public:
-  bytes_iterator(char *data, size_t size, intptr_t stride) : std_bytes(data, size), m_stride(stride)
+  bytes_iterator(char *data, size_t size, intptr_t stride) : m_stride(stride)
   {
+    m_data = data;
+    m_size = size;
   }
 
-  bytes_iterator(const bytes_iterator &other) : std_bytes(other.m_data, other.m_size), m_stride(other.m_stride)
+  bytes_iterator(const bytes_iterator &other) : m_stride(other.m_stride)
   {
+    m_data = other.m_data;
+    m_size = other.m_size;
   }
 
   ~bytes_iterator()
@@ -88,7 +38,7 @@ public:
     return m_stride;
   }
 
-  std_bytes &operator*()
+  bytes &operator*()
   {
     return *this;
   }
@@ -191,7 +141,7 @@ namespace std {
 
 template <>
 struct iterator_traits<dynd::bytes_iterator> {
-  typedef dynd::std_bytes value_type;
+  typedef dynd::bytes value_type;
   typedef intptr_t difference_type;
   typedef random_access_iterator_tag iterator_category;
 };
@@ -225,7 +175,7 @@ namespace nd {
       ckernel_prefix *child = get_child();
       std::sort(bytes_iterator(src[0], src0_element_data_size, src0_stride),
                 bytes_iterator(src[0] + src0_size * src0_stride, src0_element_data_size, src0_stride),
-                [child](const std_bytes &lhs, const std_bytes &rhs) {
+                [child](const bytes &lhs, const bytes &rhs) {
         bool1 dst;
         char *src[2] = {const_cast<char *>(lhs.data()), const_cast<char *>(rhs.data())};
         child->single(reinterpret_cast<char *>(&dst), src);

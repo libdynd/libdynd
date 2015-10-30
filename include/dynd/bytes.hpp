@@ -31,8 +31,6 @@ public:
     std::copy_n(other.m_data, m_size, m_data);
   }
 
-  bytes(bytes &&) = delete;
-
   ~bytes()
   {
     delete[] m_data;
