@@ -196,21 +196,6 @@ struct iterator_traits<dynd::bytes_iterator> {
   typedef random_access_iterator_tag iterator_category;
 };
 
-template <>
-void swap(dynd::std_bytes &lhs, dynd::std_bytes &rhs)
-{
-  char *tmp = new char[lhs.m_size];
-  size_t tmp_size = lhs.m_size;
-  memcpy(tmp, lhs.m_data, lhs.m_size);
-
-  memcpy(lhs.m_data, rhs.m_data, rhs.m_size);
-  lhs.m_size = rhs.m_size;
-
-  memcpy(rhs.m_data, tmp, tmp_size);
-
-  delete[] tmp;
-}
-
 } // namespace std
 
 namespace dynd {
