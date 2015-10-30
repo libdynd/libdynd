@@ -56,10 +56,10 @@ public:
     if (size != m_size) {
       delete[] m_data;
       m_data = new char[size];
+      m_size = size;
     }
 
-    std::copy_n(data, size, m_data);
-    m_size = size;
+    std::copy_n(data, m_size, m_data);
 
     return *this;
   }

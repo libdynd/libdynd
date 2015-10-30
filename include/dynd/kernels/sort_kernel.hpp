@@ -11,23 +11,23 @@
 
 namespace dynd {
 
-class bytes_iterator : public bytes {
+class strided_bytes : public bytes {
   intptr_t m_stride;
 
 public:
-  bytes_iterator(char *data, size_t size, intptr_t stride) : m_stride(stride)
+  strided_bytes(char *data, size_t size, intptr_t stride) : m_stride(stride)
   {
     m_data = data;
     m_size = size;
   }
 
-  bytes_iterator(const bytes_iterator &other) : m_stride(other.m_stride)
+  strided_bytes(const strided_bytes &other) : bytes(), m_stride(other.m_stride)
   {
     m_data = other.m_data;
     m_size = other.m_size;
   }
 
-  ~bytes_iterator()
+  ~strided_bytes()
   {
     m_data = NULL;
     m_size = 0;
@@ -43,80 +43,80 @@ public:
     return *this;
   }
 
-  bytes_iterator &operator++()
+  strided_bytes &operator++()
   {
     m_data += m_stride;
     return *this;
   }
 
-  bytes_iterator operator++(int)
+  strided_bytes operator++(int)
   {
-    bytes_iterator tmp(*this);
+    strided_bytes tmp(*this);
     operator++();
     return tmp;
   }
 
-  bytes_iterator &operator+=(int i)
+  strided_bytes &operator+=(int i)
   {
     m_data += i * m_stride;
     return *this;
   }
 
-  bytes_iterator &operator--()
+  strided_bytes &operator--()
   {
     m_data -= m_stride;
     return *this;
   }
 
-  bytes_iterator operator--(int)
+  strided_bytes operator--(int)
   {
-    bytes_iterator tmp(*this);
+    strided_bytes tmp(*this);
     operator--();
     return tmp;
   }
 
-  bytes_iterator &operator-=(int i)
+  strided_bytes &operator-=(int i)
   {
     m_data -= i * m_stride;
     return *this;
   }
 
-  bool operator<(const bytes_iterator &rhs) const
+  bool operator<(const strided_bytes &rhs) const
   {
     return m_data < rhs.m_data;
   }
 
-  bool operator<=(const bytes_iterator &rhs) const
+  bool operator<=(const strided_bytes &rhs) const
   {
     return m_data <= rhs.m_data;
   }
 
-  bool operator==(const bytes_iterator &rhs) const
+  bool operator==(const strided_bytes &rhs) const
   {
     return m_data == rhs.m_data;
   }
 
-  bool operator!=(const bytes_iterator &rhs) const
+  bool operator!=(const strided_bytes &rhs) const
   {
     return m_data != rhs.m_data;
   }
 
-  bool operator>=(const bytes_iterator &rhs) const
+  bool operator>=(const strided_bytes &rhs) const
   {
     return m_data >= rhs.m_data;
   }
 
-  bool operator>(const bytes_iterator &rhs) const
+  bool operator>(const strided_bytes &rhs) const
   {
     return m_data > rhs.m_data;
   }
 
-  intptr_t operator-(bytes_iterator rhs)
+  intptr_t operator-(strided_bytes rhs)
   {
     return (m_data - rhs.m_data) / m_stride;
   }
 
-  bytes_iterator &operator=(const bytes_iterator &other)
+  strided_bytes &operator=(const strided_bytes &other)
   {
     m_data = other.m_data;
     m_size = other.m_size;
@@ -125,14 +125,14 @@ public:
   }
 };
 
-inline bytes_iterator operator+(bytes_iterator lhs, intptr_t rhs)
+inline strided_bytes operator+(strided_bytes lhs, intptr_t rhs)
 {
-  return bytes_iterator(lhs.data() + rhs * lhs.stride(), lhs.size(), lhs.stride());
+  return strided_bytes(lhs.data() + rhs * lhs.stride(), lhs.size(), lhs.stride());
 }
 
-inline bytes_iterator operator-(bytes_iterator lhs, intptr_t rhs)
+inline strided_bytes operator-(strided_bytes lhs, intptr_t rhs)
 {
-  return bytes_iterator(lhs.data() - rhs * lhs.stride(), lhs.size(), lhs.stride());
+  return strided_bytes(lhs.data() - rhs * lhs.stride(), lhs.size(), lhs.stride());
 }
 
 } // namespace dynd
@@ -140,7 +140,7 @@ inline bytes_iterator operator-(bytes_iterator lhs, intptr_t rhs)
 namespace std {
 
 template <>
-struct iterator_traits<dynd::bytes_iterator> {
+struct iterator_traits<dynd::strided_bytes> {
   typedef dynd::bytes value_type;
   typedef intptr_t difference_type;
   typedef random_access_iterator_tag iterator_category;
@@ -152,8 +152,6 @@ namespace dynd {
 namespace nd {
 
   struct sort_kernel : base_kernel<sort_kernel, 1> {
-    class iterator;
-
     static const size_t data_size = 0;
 
     const intptr_t src0_size;
@@ -173,8 +171,8 @@ namespace nd {
     void single(char *DYND_UNUSED(dst), char *const *src)
     {
       ckernel_prefix *child = get_child();
-      std::sort(bytes_iterator(src[0], src0_element_data_size, src0_stride),
-                bytes_iterator(src[0] + src0_size * src0_stride, src0_element_data_size, src0_stride),
+      std::sort(strided_bytes(src[0], src0_element_data_size, src0_stride),
+                strided_bytes(src[0] + src0_size * src0_stride, src0_element_data_size, src0_stride),
                 [child](const bytes &lhs, const bytes &rhs) {
         bool1 dst;
         char *src[2] = {const_cast<char *>(lhs.data()), const_cast<char *>(rhs.data())};
