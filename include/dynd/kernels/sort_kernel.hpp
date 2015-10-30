@@ -16,11 +16,13 @@ namespace dynd {
   hopefully soon merge with the bytes class above.
 */
 class std_bytes {
-protected:
+public:
   char *m_data;
   size_t m_size;
 
 public:
+  std_bytes() = delete;
+
   std_bytes(char *data, size_t size) : m_data(data), m_size(size)
   {
   }
@@ -163,6 +165,14 @@ public:
   {
     return (m_data - rhs.m_data) / m_stride;
   }
+
+  bytes_iterator &operator=(const bytes_iterator &other)
+  {
+    m_data = other.m_data;
+    m_size = other.m_size;
+
+    return *this;
+  }
 };
 
 inline bytes_iterator operator+(bytes_iterator lhs, intptr_t rhs)
@@ -185,6 +195,21 @@ struct iterator_traits<dynd::bytes_iterator> {
   typedef intptr_t difference_type;
   typedef random_access_iterator_tag iterator_category;
 };
+
+template <>
+void swap(dynd::std_bytes &lhs, dynd::std_bytes &rhs)
+{
+  char *tmp = new char[lhs.m_size];
+  size_t tmp_size = lhs.m_size;
+  memcpy(tmp, lhs.m_data, lhs.m_size);
+
+  memcpy(lhs.m_data, rhs.m_data, rhs.m_size);
+  lhs.m_size = rhs.m_size;
+
+  memcpy(rhs.m_data, tmp, tmp_size);
+
+  delete[] tmp;
+}
 
 } // namespace std
 
