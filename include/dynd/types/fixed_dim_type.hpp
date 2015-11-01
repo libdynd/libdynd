@@ -7,6 +7,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
+#include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 #include <dynd/array.hpp>
@@ -20,6 +21,116 @@ struct DYND_API fixed_dim_type_iterdata {
   iterdata_common common;
   char *data;
   intptr_t stride;
+};
+
+template <typename ElementType, int NDim>
+class fixed_dim_iterator;
+
+template <typename ElementType>
+class fixed_dim : public as_t<ElementType> {
+protected:
+  fixed_dim operator()(const char *metadata, char *data)
+  {
+    return fixed_dim(metadata, data);
+  }
+
+  template <typename Index0Type, typename... IndexType>
+  decltype(auto) operator()(const char *metadata, char *data, Index0Type index0, IndexType... index)
+  {
+    return as_t<ElementType>::operator()(
+        metadata + sizeof(fixed_dim_type_arrmeta),
+        data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride, index...);
+  }
+
+public:
+  static const intptr_t ndim = as_t<ElementType>::ndim + 1;
+  typedef typename as_t<ElementType>::data_type data_type;
+
+  template <int NDim>
+  class iterator_type : public fixed_dim_iterator<ElementType, NDim> {
+  public:
+    iterator_type(const char *metadata, char *data) : fixed_dim_iterator<ElementType, NDim>(metadata, data)
+    {
+    }
+  };
+
+  fixed_dim(const char *metadata, char *data) : as_t<ElementType>(metadata, data)
+  {
+  }
+
+  template <typename... IndexType>
+  decltype(auto) operator()(IndexType... index)
+  {
+    static_assert(sizeof...(IndexType) <= ndim, "too many indices");
+    return (*this)(this->m_metadata, this->m_data, index...);
+  }
+
+  template <int NDim = 1>
+  iterator_type<NDim> begin()
+  {
+    return iterator_type<NDim>(this->m_metadata, this->m_data);
+  }
+
+  template <int NDim = 1>
+  iterator_type<NDim> end()
+  {
+    return iterator_type<NDim>(this->m_metadata,
+                               this->m_data +
+                                   reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
+                                       reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
+  }
+};
+
+template <typename ElementType>
+class fixed_dim_iterator<ElementType, 0> {
+protected:
+  const char *m_metadata;
+  char *m_data;
+
+public:
+  fixed_dim_iterator(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
+  {
+  }
+
+  fixed_dim<ElementType> operator*()
+  {
+    return fixed_dim<ElementType>(m_metadata, m_data);
+  }
+
+  bool operator==(const fixed_dim_iterator &rhs) const
+  {
+    return m_data == rhs.m_data;
+  }
+
+  bool operator!=(const fixed_dim_iterator &rhs) const
+  {
+    return m_data != rhs.m_data;
+  }
+};
+
+template <typename ElementType, int NDim>
+class fixed_dim_iterator : public as_t<ElementType>::template iterator_type<NDim - 1> {
+  intptr_t m_stride;
+
+public:
+  fixed_dim_iterator(const char *metadata, char *data)
+      : as_t<ElementType>::template iterator_type<NDim - 1>(metadata + sizeof(fixed_dim_type_arrmeta), data),
+        m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
+  {
+  }
+
+  fixed_dim_iterator &operator++()
+  {
+    this->m_data += m_stride;
+    return *this;
+  }
+
+  fixed_dim_iterator operator++(int)
+  {
+    fixed_dim_iterator tmp(*this);
+    operator++();
+    return tmp;
+  }
 };
 
 namespace ndt {
@@ -185,189 +296,13 @@ namespace ndt {
     }
   };
 
+  template <typename ElementType>
+  struct type::equivalent<fixed_dim<ElementType>> {
+    static type make()
+    {
+      return fixed_dim_kind_type::make(type::make<ElementType>());
+    }
+  };
+
 } // namespace dynd::ndt
-
-namespace detail {
-
-  template <typename ValueType, int NDim>
-  class scalar_wrapper_iterator;
-
-  template <typename ValueType>
-  class scalar_wrapper {
-  protected:
-    const char *m_metadata;
-    char *m_data;
-
-  public:
-    typedef ValueType data_type;
-    static const intptr_t ndim = 0;
-
-    template <int NDim>
-    class iterator_type : public scalar_wrapper_iterator<ValueType, NDim> {
-    public:
-      iterator_type(const char *metadata, char *data) : scalar_wrapper_iterator<ValueType, NDim>(metadata, data)
-      {
-      }
-    };
-
-    scalar_wrapper(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
-    {
-    }
-
-    data_type &operator()(const char *DYND_UNUSED(metadata), char *data)
-    {
-      return *reinterpret_cast<data_type *>(data);
-    }
-  };
-
-  template <typename ValueType>
-  class scalar_wrapper_iterator<ValueType, 0> {
-  protected:
-    char *m_data;
-
-  public:
-    scalar_wrapper_iterator(const char *DYND_UNUSED(metadata), char *data) : m_data(data)
-    {
-    }
-
-    ValueType &operator*()
-    {
-      return *reinterpret_cast<ValueType *>(m_data);
-    }
-
-    bool operator==(const scalar_wrapper_iterator &rhs) const
-    {
-      return m_data == rhs.m_data;
-    }
-
-    bool operator!=(const scalar_wrapper_iterator &rhs) const
-    {
-      return m_data != rhs.m_data;
-    }
-  };
-
-  template <typename ElementType, int NDim>
-  class fixed_dim_iterator;
-
-  template <typename ElementType>
-  class fixed_dim : public ElementType {
-  protected:
-    fixed_dim operator()(const char *metadata, char *data)
-    {
-      return fixed_dim(metadata, data);
-    }
-
-    template <typename Index0Type, typename... IndexType>
-    decltype(auto) operator()(const char *metadata, char *data, Index0Type index0, IndexType... index)
-    {
-      return ElementType::operator()(metadata + sizeof(fixed_dim_type_arrmeta),
-                                     data + index0 * reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride,
-                                     index...);
-    }
-
-  public:
-    typedef typename ElementType::data_type data_type;
-    static const intptr_t ndim = ElementType::ndim + 1;
-    typedef ElementType element_type;
-
-    template <int NDim>
-    class iterator_type : public fixed_dim_iterator<ElementType, NDim> {
-    public:
-      iterator_type(const char *metadata, char *data) : fixed_dim_iterator<ElementType, NDim>(metadata, data)
-      {
-      }
-    };
-
-    fixed_dim(const char *metadata, char *data) : ElementType(metadata, data)
-    {
-    }
-
-    template <typename... IndexType>
-    decltype(auto) operator()(IndexType... index)
-    {
-      static_assert(sizeof...(IndexType) <= ndim, "too many indices");
-      return (*this)(this->m_metadata, this->m_data, index...);
-    }
-
-    template <int NDim = 1>
-    iterator_type<NDim> begin()
-    {
-      return iterator_type<NDim>(this->m_metadata, this->m_data);
-    }
-
-    template <int NDim = 1>
-    iterator_type<NDim> end()
-    {
-      return iterator_type<NDim>(this->m_metadata,
-                                 this->m_data +
-                                     reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size *
-                                         reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->stride);
-    }
-  };
-
-  template <typename ElementType>
-  class fixed_dim_iterator<ElementType, 0> {
-  protected:
-    const char *m_metadata;
-    char *m_data;
-
-  public:
-    fixed_dim_iterator(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
-    {
-    }
-
-    fixed_dim<ElementType> operator*()
-    {
-      return fixed_dim<ElementType>(m_metadata, m_data);
-    }
-
-    bool operator==(const fixed_dim_iterator &rhs) const
-    {
-      return m_data == rhs.m_data;
-    }
-
-    bool operator!=(const fixed_dim_iterator &rhs) const
-    {
-      return m_data != rhs.m_data;
-    }
-  };
-
-  template <typename ElementType, int NDim>
-  class fixed_dim_iterator : public ElementType::template iterator_type<NDim - 1> {
-    intptr_t m_stride;
-
-  public:
-    fixed_dim_iterator(const char *metadata, char *data)
-        : ElementType::template iterator_type<NDim - 1>(metadata + sizeof(fixed_dim_type_arrmeta), data),
-          m_stride(reinterpret_cast<const fixed_dim_type_arrmeta *>(metadata)->stride)
-    {
-    }
-
-    fixed_dim_iterator &operator++()
-    {
-      this->m_data += m_stride;
-      return *this;
-    }
-
-    fixed_dim_iterator operator++(int)
-    {
-      fixed_dim_iterator tmp(*this);
-      operator++();
-      return tmp;
-    }
-  };
-
-} // namespace dynd::detail
-
-template <typename T>
-using identity_t = T;
-
-template <typename T>
-using wrapper_t = typename conditional_make<!std::is_fundamental<typename std::remove_cv<T>::type>::value &&
-                                                !std::is_same<typename std::remove_cv<T>::type, ndt::type>::value,
-                                            identity_t, detail::scalar_wrapper, T>::type;
-
-template <typename ElementType>
-using fixed_dim = detail::fixed_dim<wrapper_t<ElementType>>;
-
 } // namespace dynd
