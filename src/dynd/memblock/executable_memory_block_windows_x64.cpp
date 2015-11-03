@@ -75,10 +75,10 @@ struct executable_memory_block {
 };
 } // anonymous namespace
 
-instrusive_ptr<memory_block_data> dynd::make_executable_memory_block(intptr_t chunk_size_bytes)
+intrusive_ptr<memory_block_data> dynd::make_executable_memory_block(intptr_t chunk_size_bytes)
 {
   executable_memory_block *pmb = new executable_memory_block(chunk_size_bytes);
-  return instrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
+  return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
 namespace dynd {
