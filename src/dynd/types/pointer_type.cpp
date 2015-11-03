@@ -60,9 +60,8 @@ bool ndt::pointer_type::is_expression() const
 bool ndt::pointer_type::is_unique_data_owner(const char *arrmeta) const
 {
   const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(*arrmeta);
-  if (md->blockref != NULL &&
-      (md->blockref->m_use_count != 1 ||
-       (md->blockref->m_type != pod_memory_block_type && md->blockref->m_type != fixed_size_pod_memory_block_type))) {
+  if (md->blockref && (md->blockref->m_use_count != 1 || (md->blockref->m_type != pod_memory_block_type &&
+                                                          md->blockref->m_type != fixed_size_pod_memory_block_type))) {
     return false;
   }
   return true;
@@ -125,7 +124,6 @@ intptr_t ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange *
   pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
   // If there are no more indices, copy the rest verbatim
   out_md->blockref = md->blockref;
-  memory_block_incref(out_md->blockref);
   out_md->offset = md->offset;
   if (!m_target_tp.is_builtin()) {
     const pointer_type *pdt = result_tp.extended<pointer_type>();
@@ -240,10 +238,7 @@ void ndt::pointer_type::arrmeta_copy_construct(char *dst_arrmeta, const char *sr
   // Copy the blockref, switching it to the embedded_reference if necessary
   const pointer_type_arrmeta *src_md = reinterpret_cast<const pointer_type_arrmeta *>(src_arrmeta);
   pointer_type_arrmeta *dst_md = reinterpret_cast<pointer_type_arrmeta *>(dst_arrmeta);
-  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-  if (dst_md->blockref) {
-    memory_block_incref(dst_md->blockref);
-  }
+  dst_md->blockref = src_md->blockref ? src_md->blockref : intrusive_ptr<memory_block_data>(embedded_reference, true);
   dst_md->offset = src_md->offset;
   // Copy the target arrmeta
   if (!m_target_tp.is_builtin()) {
@@ -260,11 +255,11 @@ void ndt::pointer_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
 void ndt::pointer_type::arrmeta_finalize_buffers(char *arrmeta) const
 {
   pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL) {
+  if (md->blockref) {
     // Finalize the memory block
     memory_block_data::api *allocator = md->blockref->get_api();
     if (allocator != NULL) {
-      allocator->finalize(md->blockref);
+      allocator->finalize(md->blockref.get());
     }
   }
 }
@@ -273,7 +268,7 @@ void ndt::pointer_type::arrmeta_destruct(char *arrmeta) const
 {
   pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
   if (md->blockref) {
-    memory_block_decref(md->blockref);
+    memory_block_decref(md->blockref.get());
   }
   if (!m_target_tp.is_builtin()) {
     m_target_tp.extended()->arrmeta_destruct(arrmeta + sizeof(pointer_type_arrmeta));
@@ -285,7 +280,7 @@ void ndt::pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
   o << indent << "pointer arrmeta\n";
   o << indent << " offset: " << md->offset << "\n";
-  memory_block_debug_print(md->blockref, o, indent + " ");
+  memory_block_debug_print(md->blockref.get(), o, indent + " ");
   if (!m_target_tp.is_builtin()) {
     m_target_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(pointer_type_arrmeta), o, indent + " ");
   }
@@ -393,7 +388,7 @@ static nd::array array_function_dereference(const nd::array &self)
     dt = dt.extended<ndt::pointer_type>()->get_target_type();
     arrmeta += sizeof(pointer_type_arrmeta);
     data = *reinterpret_cast<char **>(data) + md->offset;
-    dataref = md->blockref;
+    dataref = md->blockref.get();
   }
 
   // Create an array without the pointers

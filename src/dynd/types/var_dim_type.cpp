@@ -210,7 +210,6 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
         // sliced<> type
         pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
         out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-        memory_block_incref(out_md->blockref);
         out_md->offset = indices->start() * md->stride;
         if (!m_element_tp.is_builtin()) {
           const pointer_type *result_etp = result_tp.extended<pointer_type>();

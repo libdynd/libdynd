@@ -24,7 +24,7 @@ struct DYND_API pointer_type_arrmeta {
   /**
    * A reference to the memory block which contains the data.
    */
-  memory_block_data *blockref;
+  intrusive_ptr<memory_block_data> blockref;
   /* Each pointed-to destination is offset by this amount */
   intptr_t offset;
 };

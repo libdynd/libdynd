@@ -1794,7 +1794,6 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     pmeta->offset = 0;
     pmeta->blockref = field_values[i].get_ndo()->data.ref ? field_values[i].get_ndo()->data.ref
                                                           : &field_values[i].get_ndo()->m_memblockdata;
-    memory_block_incref(pmeta->blockref);
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {
@@ -1820,7 +1819,6 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const 
     pointer_type_arrmeta *am = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
     // Insert the reference in the destination pointer's arrmeta
     am->blockref = val.get_data_memblock().get();
-    memory_block_incref(am->blockref);
     // Copy the rest of the arrmeta after the pointer's arrmeta
     const ndt::type &val_tp = val.get_type();
     if (val_tp.get_arrmeta_size() > 0) {
