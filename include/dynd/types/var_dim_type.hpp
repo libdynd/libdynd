@@ -17,7 +17,7 @@ struct DYND_API var_dim_type_arrmeta {
   /**
    * A reference to the memory block which contains the array's data.
    */
-  memory_block_data *blockref;
+  intrusive_ptr<memory_block_data> blockref;
   intptr_t stride;
   /* Each pointed-to destination is offset by this amount */
   intptr_t offset;
