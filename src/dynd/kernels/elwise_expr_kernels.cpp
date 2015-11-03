@@ -408,7 +408,7 @@ static size_t make_elwise_strided_or_var_to_var_dimension_expr_kernel_for_N(
   // The dst var parameters
   const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
   const var_dim_type_arrmeta *dst_md = reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
-  e->dst_memblock = dst_md->blockref;
+  e->dst_memblock = dst_md->blockref.get();
   e->dst_stride = dst_md->stride;
   e->dst_offset = dst_md->offset;
   e->dst_target_alignment = dst_vdd->get_target_alignment();

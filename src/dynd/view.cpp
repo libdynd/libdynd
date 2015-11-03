@@ -371,10 +371,10 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
     out_am->stride = in_am->stride;
     if ((intptr_t)in_dat->size == out_am->dim_size) {
       // Use the more specific data reference from the var arrmeta if possible
-      if (in_am->blockref != NULL) {
+      if (in_am->blockref) {
         memory_block_decref(result.get_ndo()->data.ref);
-        memory_block_incref(in_am->blockref);
-        result.get_ndo()->data.ref = in_am->blockref;
+        memory_block_incref(in_am->blockref.get());
+        result.get_ndo()->data.ref = in_am->blockref.get();
       }
       result.get_ndo()->data.ptr = in_dat->begin + in_am->offset;
       // Try to copy the rest of the arrmeta as a view

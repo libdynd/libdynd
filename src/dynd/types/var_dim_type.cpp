@@ -61,10 +61,9 @@ bool ndt::var_dim_type::is_expression() const
 bool ndt::var_dim_type::is_unique_data_owner(const char *arrmeta) const
 {
   const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL &&
-      (md->blockref->m_use_count != 1 ||
-       (md->blockref->m_type != pod_memory_block_type && md->blockref->m_type != zeroinit_memory_block_type &&
-        md->blockref->m_type != objectarray_memory_block_type))) {
+  if (md->blockref && (md->blockref->m_use_count != 1 || (md->blockref->m_type != pod_memory_block_type &&
+                                                          md->blockref->m_type != zeroinit_memory_block_type &&
+                                                          md->blockref->m_type != objectarray_memory_block_type))) {
     return false;
   }
   if (m_element_tp.is_builtin()) {
@@ -174,7 +173,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
         if (*inout_dataref) {
           memory_block_decref(*inout_dataref);
         }
-        *inout_dataref = md->blockref ? md->blockref : embedded_reference;
+        *inout_dataref = md->blockref ? md->blockref.get() : embedded_reference;
         memory_block_incref(*inout_dataref);
         // Then apply a 0-sized index to the element type
         if (!m_element_tp.is_builtin()) {
@@ -187,8 +186,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
       } else if (indices->is_nop()) {
         // If the indexing operation does nothing, then leave things unchanged
         var_dim_type_arrmeta *out_md = reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
-        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-        memory_block_incref(out_md->blockref);
+        out_md->blockref = md->blockref ? md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
         out_md->stride = md->stride;
         out_md->offset = md->offset;
         if (!m_element_tp.is_builtin()) {
@@ -209,7 +207,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
         // TODO: This is incorrect, but is here as a stopgap to be replaced by a
         // sliced<> type
         pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
-        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
+        out_md->blockref = md->blockref ? md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
         out_md->offset = indices->start() * md->stride;
         if (!m_element_tp.is_builtin()) {
           const pointer_type *result_etp = result_tp.extended<pointer_type>();
@@ -222,8 +220,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
       } else if (indices->is_nop()) {
         // If the indexing operation does nothing, then leave things unchanged
         var_dim_type_arrmeta *out_md = reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
-        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
-        memory_block_incref(out_md->blockref);
+        out_md->blockref = md->blockref ? md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
         out_md->stride = md->stride;
         out_md->offset = md->offset;
         if (!m_element_tp.is_builtin()) {
@@ -373,11 +370,11 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
     base_type::flags_type flags = m_element_tp.get_flags();
     if (flags & type_flag_destructor) {
       md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta, element_size, 64,
-                                                   sizeof(var_dim_type_arrmeta)).release();
+                                                   sizeof(var_dim_type_arrmeta));
     } else if (flags & type_flag_zeroinit) {
-      md->blockref = make_zeroinit_memory_block(m_element_tp).release();
+      md->blockref = make_zeroinit_memory_block(m_element_tp);
     } else {
-      md->blockref = make_pod_memory_block(m_element_tp).release();
+      md->blockref = make_pod_memory_block(m_element_tp);
     }
   }
   if (!m_element_tp.is_builtin()) {
@@ -392,10 +389,7 @@ void ndt::var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *sr
   var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
   dst_md->stride = src_md->stride;
   dst_md->offset = src_md->offset;
-  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-  if (dst_md->blockref) {
-    memory_block_incref(dst_md->blockref);
-  }
+  dst_md->blockref = src_md->blockref ? src_md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_copy_construct(dst_arrmeta + sizeof(var_dim_type_arrmeta),
                                                     src_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference);
@@ -409,10 +403,7 @@ size_t ndt::var_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const
   var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
   dst_md->stride = src_md->stride;
   dst_md->offset = src_md->offset;
-  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
-  if (dst_md->blockref) {
-    memory_block_incref(dst_md->blockref);
-  }
+  dst_md->blockref = src_md->blockref ? src_md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
   return sizeof(var_dim_type_arrmeta);
 }
 
@@ -424,15 +415,15 @@ void ndt::var_dim_type::arrmeta_reset_buffers(char *arrmeta) const
     m_element_tp.extended()->arrmeta_reset_buffers(arrmeta + sizeof(var_dim_type_arrmeta));
   }
 
-  if (md->blockref != NULL) {
+  if (md->blockref) {
     uint32_t br_type = md->blockref->m_type;
     if (br_type == zeroinit_memory_block_type || br_type == pod_memory_block_type) {
-      memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref);
-      allocator->reset(md->blockref);
+      memory_block_data::api *allocator = get_memory_block_pod_allocator_api(md->blockref.get());
+      allocator->reset(md->blockref.get());
       return;
     } else if (br_type == objectarray_memory_block_type) {
       memory_block_data::api *allocator = md->blockref->get_api();
-      allocator->reset(md->blockref);
+      allocator->reset(md->blockref.get());
       return;
     }
   }
@@ -440,7 +431,7 @@ void ndt::var_dim_type::arrmeta_reset_buffers(char *arrmeta) const
   stringstream ss;
   ss << "can only reset the buffers of a var_dim type ";
   ss << "if it was default-constructed. Its blockref is ";
-  if (md->blockref == NULL) {
+  if (!md->blockref) {
     ss << "NULL";
   } else {
     ss << "of the wrong type " << (memory_block_type_t)md->blockref->m_type;
@@ -457,17 +448,17 @@ void ndt::var_dim_type::arrmeta_finalize_buffers(char *arrmeta) const
 
   // Finalize the blockref buffer we own
   var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
-  if (md->blockref != NULL) {
+  if (md->blockref) {
     // Finalize the memory block
     if (m_element_tp.get_flags() & type_flag_destructor) {
       memory_block_data::api *allocator = md->blockref->get_api();
       if (allocator != NULL) {
-        allocator->finalize(md->blockref);
+        allocator->finalize(md->blockref.get());
       }
     } else {
       memory_block_data::api *allocator = md->blockref->get_api();
       if (allocator != NULL) {
-        allocator->finalize(md->blockref);
+        allocator->finalize(md->blockref.get());
       }
     }
   }
@@ -475,10 +466,7 @@ void ndt::var_dim_type::arrmeta_finalize_buffers(char *arrmeta) const
 
 void ndt::var_dim_type::arrmeta_destruct(char *arrmeta) const
 {
-  var_dim_type_arrmeta *md = reinterpret_cast<var_dim_type_arrmeta *>(arrmeta);
-  if (md->blockref) {
-    memory_block_decref(md->blockref);
-  }
+  reinterpret_cast<var_dim_type_arrmeta *>(arrmeta)->~var_dim_type_arrmeta();
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_destruct(arrmeta + sizeof(var_dim_type_arrmeta));
   }
@@ -490,7 +478,7 @@ void ndt::var_dim_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   o << indent << "var_dim arrmeta\n";
   o << indent << " stride: " << md->stride << "\n";
   o << indent << " offset: " << md->offset << "\n";
-  memory_block_debug_print(md->blockref, o, indent + " ");
+  memory_block_debug_print(md->blockref.get(), o, indent + " ");
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_debug_print(arrmeta + sizeof(var_dim_type_arrmeta), o, indent + "  ");
   }
@@ -653,8 +641,8 @@ void ndt::var_dim_element_initialize(const type &tp, const char *arrmeta, char *
                         "zero to initialize");
   }
   // Allocate the element
-  memory_block_data *memblock = md->blockref;
-  if (memblock == NULL) {
+  memory_block_data *memblock = md->blockref.get();
+  if (!memblock) {
     throw runtime_error("internal error: var_dim arrmeta has no memblock");
   } else if (memblock->m_type == objectarray_memory_block_type) {
     memory_block_data::api *allocator = memblock->get_api();
@@ -692,7 +680,7 @@ void ndt::var_dim_element_resize(const type &tp, const char *arrmeta, char *data
     return;
   }
   // Resize the element
-  memory_block_data *memblock = md->blockref;
+  memory_block_data *memblock = md->blockref.get();
   if (memblock == NULL) {
     throw runtime_error("internal error: var_dim arrmeta has no memblock");
   } else if (memblock->m_type == objectarray_memory_block_type) {

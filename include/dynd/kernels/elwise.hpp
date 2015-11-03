@@ -853,8 +853,8 @@ namespace nd {
           }
         }
 
-        self_type::make(ckb, kernreq, ckb_offset, dst_md->blockref, dst_vdd->get_target_alignment(), dst_md->stride,
-                        dst_md->offset, src_stride, src_offset, src_size, is_src_var);
+        self_type::make(ckb, kernreq, ckb_offset, dst_md->blockref.get(), dst_vdd->get_target_alignment(),
+                        dst_md->stride, dst_md->offset, src_stride, src_offset, src_size, is_src_var);
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
@@ -961,8 +961,8 @@ namespace nd {
 
         bool finished = dst_ndim == 1;
 
-        self_type::make(ckb, kernreq, ckb_offset, dst_md->blockref, dst_vdd->get_target_alignment(), dst_md->stride,
-                        dst_md->offset);
+        self_type::make(ckb, kernreq, ckb_offset, dst_md->blockref.get(), dst_vdd->get_target_alignment(),
+                        dst_md->stride, dst_md->offset);
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {

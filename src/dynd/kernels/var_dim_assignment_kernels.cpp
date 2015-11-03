@@ -40,7 +40,7 @@ struct broadcast_to_var_assign_ck : nd::base_kernel<broadcast_to_var_assign_ck, 
                             "which has a non-zero offset");
       }
       // If we're writing to an empty array, have to allocate the output
-      memory_block_data *memblock = m_dst_md->blockref;
+      memory_block_data *memblock = m_dst_md->blockref.get();
       if (memblock->m_type == objectarray_memory_block_type) {
         memory_block_data::api *allocator = memblock->get_api();
 
@@ -119,7 +119,7 @@ struct var_assign_ck : nd::base_kernel<var_assign_ck, 1> {
         intptr_t dim_size = src_d->size;
         intptr_t dst_stride = m_dst_md->stride, src_stride = m_src_md->stride;
         // If we're writing to an empty array, have to allocate the output
-        memory_block_data *memblock = m_dst_md->blockref;
+        memory_block_data *memblock = m_dst_md->blockref.get();
         if (memblock->m_type == objectarray_memory_block_type) {
           memory_block_data::api *allocator = memblock->get_api();
 
@@ -220,7 +220,7 @@ struct strided_to_var_assign_ck : nd::base_kernel<strided_to_var_assign_ck, 1> {
       intptr_t dim_size = m_src_dim_size;
       intptr_t dst_stride = m_dst_md->stride, src_stride = m_src_stride;
       // If we're writing to an empty array, have to allocate the output
-      memory_block_data *memblock = m_dst_md->blockref;
+      memory_block_data *memblock = m_dst_md->blockref.get();
       if (memblock->m_type == objectarray_memory_block_type) {
         memory_block_data::api *allocator = memblock->get_api();
 

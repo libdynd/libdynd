@@ -243,7 +243,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
 
   memory_block_data::api *allocator = md->blockref->get_api();
   intptr_t size = 0, allocated_size = 8;
-  out->begin = allocator->allocate(md->blockref, allocated_size);
+  out->begin = allocator->allocate(md->blockref.get(), allocated_size);
 
   if (!parse_token(begin, end, "[")) {
     throw json_parse_error(begin, "expected array starting with '['", tp);
@@ -254,7 +254,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
       // Increase the allocated array size if necessary
       if (size == allocated_size) {
         allocated_size *= 2;
-        out->begin = allocator->resize(md->blockref, out->begin, allocated_size);
+        out->begin = allocator->resize(md->blockref.get(), out->begin, allocated_size);
       }
       ++size;
       out->size = size;
@@ -270,7 +270,7 @@ static void parse_var_dim_json(const ndt::type &tp, const char *arrmeta, char *o
   }
 
   // Shrink-wrap the memory to just fit the string
-  out->begin = allocator->resize(md->blockref, out->begin, size);
+  out->begin = allocator->resize(md->blockref.get(), out->begin, size);
   out->size = size;
 }
 
