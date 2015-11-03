@@ -13,21 +13,21 @@ namespace dynd {
 struct DYND_API dim_iter;
 
 enum dim_iter_flags {
-    dim_iter_restartable = 0x001,
-    dim_iter_seekable = 0x002,
-    dim_iter_contiguous = 0x004
+  dim_iter_restartable = 0x001,
+  dim_iter_seekable = 0x002,
+  dim_iter_contiguous = 0x004
 };
 
 /**
  * Table of functions for a `dim_iter` instance.
  */
 struct DYND_API dim_iter_vtable {
-    /** Destructor */
-    void (*destructor)(dim_iter *self);
-    /** Function to advance the iterator. Return 1 if elements are availabe, 0 otherwise */
-    int (*next)(dim_iter *self);
-    /** Function to seek the iterator to an index */
-    void (*seek)(dim_iter *self, intptr_t i);
+  /** Destructor */
+  void (*destructor)(dim_iter *self);
+  /** Function to advance the iterator. Return 1 if elements are availabe, 0 otherwise */
+  int (*next)(dim_iter *self);
+  /** Function to seek the iterator to an index */
+  void (*seek)(dim_iter *self, intptr_t i);
 };
 
 /**
@@ -40,47 +40,48 @@ struct DYND_API dim_iter_vtable {
  * This iterator iterates in one dimension, with some capabilities flags.
  */
 struct DYND_API dim_iter {
-    /** The table of functions*/
-    const dim_iter_vtable *vtable;
-    /** Pointer to the data. May be inside the array, or a temporary buffer */
-    const char *data_ptr;
-    /** The number of elements available in the buffer */
-    intptr_t data_elcount;
-    /** The stride, measured in bytes, for advancing the data pointer */
-    intptr_t data_stride;
-    /**
-     * Flags about the iterator.
-     *   0x01 : dim_iter_restartable : can call seek(0) on the iterator
-     *   0x02 : dim_iter_seekable    : can call seek(N) on the iterator
-     *   0x04 : dim_iter_contiguous  : the stride of the iterator will always be contiguous
-     */
-    uint64_t flags;
-    /** The type of one element */
-    const ndt::base_type *eltype;
-    /** Array arrmeta that each element conforms to. */
-    const char *el_arrmeta;
-    /**
-     * Some space the creator of the iterator can use. If all additional data
-     * fits here, a memory allocation can be avoided, otherwise a dynamically
-     * allocated buffer can be referenced from here.
-     */
-    uintptr_t custom[8];
+  /** The table of functions*/
+  const dim_iter_vtable *vtable;
+  /** Pointer to the data. May be inside the array, or a temporary buffer */
+  const char *data_ptr;
+  /** The number of elements available in the buffer */
+  intptr_t data_elcount;
+  /** The stride, measured in bytes, for advancing the data pointer */
+  intptr_t data_stride;
+  /**
+   * Flags about the iterator.
+   *   0x01 : dim_iter_restartable : can call seek(0) on the iterator
+   *   0x02 : dim_iter_seekable    : can call seek(N) on the iterator
+   *   0x04 : dim_iter_contiguous  : the stride of the iterator will always be contiguous
+   */
+  uint64_t flags;
+  /** The type of one element */
+  const ndt::base_type *eltype;
+  /** Array arrmeta that each element conforms to. */
+  const char *el_arrmeta;
+  /**
+   * Some space the creator of the iterator can use. If all additional data
+   * fits here, a memory allocation can be avoided, otherwise a dynamically
+   * allocated buffer can be referenced from here.
+   */
+  uintptr_t custom[8];
 
-    dim_iter()
-        : vtable(NULL)
-    {
-    }
+  dim_iter() : vtable(NULL)
+  {
+  }
 
-    inline void destroy() {
-        if (vtable) {
-            vtable->destructor(this);
-            vtable = NULL;
-        }
+  inline void destroy()
+  {
+    if (vtable) {
+      vtable->destructor(this);
+      vtable = NULL;
     }
+  }
 
-    ~dim_iter() {
-        destroy();
-    }
+  ~dim_iter()
+  {
+    destroy();
+  }
 };
 
 /**
@@ -100,11 +101,8 @@ struct DYND_API dim_iter {
  * \param stride  The stride between elements.
  * \param ref  A reference which holds the memory.
  */
-void DYND_API make_strided_dim_iter(
-    dim_iter *out_di,
-    const ndt::type& tp, const char *arrmeta,
-    const char *data_ptr, intptr_t size, intptr_t stride,
-    const memory_block_ptr& ref);
+void DYND_API make_strided_dim_iter(dim_iter *out_di, const ndt::type &tp, const char *arrmeta, const char *data_ptr,
+                                    intptr_t size, intptr_t stride, const intrusive_ptr<memory_block_data> &ref);
 
 /**
  * Creates a dim_iter for a strided dimension, using buffering to
@@ -123,13 +121,11 @@ void DYND_API make_strided_dim_iter(
  * \param buffer_max_mem  The maximum amount of memory to use for the temporary buffer.
  * \param ectx  The evaluation context.
  */
-void DYND_API make_buffered_strided_dim_iter(
-    dim_iter *out_di,
-    const ndt::type& val_tp,
-    const ndt::type& mem_tp, const char *mem_arrmeta,
-    const char *data_ptr, intptr_t size, intptr_t stride,
-    const memory_block_ptr& ref, intptr_t buffer_max_mem = 65536,
-    const eval::eval_context *ectx = &eval::default_eval_context);
+void DYND_API make_buffered_strided_dim_iter(dim_iter *out_di, const ndt::type &val_tp, const ndt::type &mem_tp,
+                                             const char *mem_arrmeta, const char *data_ptr, intptr_t size,
+                                             intptr_t stride, const intrusive_ptr<memory_block_data> &ref,
+                                             intptr_t buffer_max_mem = 65536,
+                                             const eval::eval_context *ectx = &eval::default_eval_context);
 
 /**
  * Makes an iterator which is empty.
@@ -139,13 +135,9 @@ void DYND_API make_buffered_strided_dim_iter(
  * \param tp  The type of the elements being iterated.
  * \param arrmeta  The arrmeta corresponding to `tp`.
  */
-inline void make_empty_dim_iter(
-    dim_iter *out_di,
-    const ndt::type& tp,
-    const char *arrmeta)
+inline void make_empty_dim_iter(dim_iter *out_di, const ndt::type &tp, const char *arrmeta)
 {
-    make_strided_dim_iter(out_di, tp, arrmeta,
-        NULL, 0, 0, memory_block_ptr());
+  make_strided_dim_iter(out_di, tp, arrmeta, NULL, 0, 0, intrusive_ptr<memory_block_data>());
 }
 
 } // namespace dynd

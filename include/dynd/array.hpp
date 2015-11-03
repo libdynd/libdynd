@@ -59,7 +59,7 @@ namespace nd {
      * The nd::array class is a wrapper around an array_memory_block, which
      * contains arrmeta as described by the type.
      */
-    memory_block_ptr m_memblock;
+    intrusive_ptr<memory_block_data> m_memblock;
 
     // Don't allow implicit construction from a raw pointer
     array(const void *);
@@ -185,7 +185,7 @@ namespace nd {
     template <class T>
     array(const std::vector<T> &vec);
 
-    explicit array(const memory_block_ptr &ndobj_memblock) : m_memblock(ndobj_memblock)
+    explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock) : m_memblock(ndobj_memblock)
     {
       if (m_memblock.get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
@@ -196,7 +196,7 @@ namespace nd {
     {
     }
 
-    void set(const memory_block_ptr &ndobj_memblock)
+    void set(const intrusive_ptr<memory_block_data> &ndobj_memblock)
     {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
@@ -204,7 +204,7 @@ namespace nd {
       m_memblock = ndobj_memblock;
     }
 
-    void set(memory_block_ptr &&ndobj_memblock)
+    void set(intrusive_ptr<memory_block_data> &&ndobj_memblock)
     {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
@@ -246,7 +246,7 @@ namespace nd {
     }
 
     /** Low level access to the reference-counted memory */
-    inline memory_block_ptr get_memblock() const
+    inline intrusive_ptr<memory_block_data> get_memblock() const
     {
       return m_memblock;
     }
@@ -442,10 +442,10 @@ namespace nd {
       }
     }
 
-    inline memory_block_ptr get_data_memblock() const
+    inline intrusive_ptr<memory_block_data> get_data_memblock() const
     {
       if (get_ndo()->data.ref) {
-        return memory_block_ptr(get_ndo()->data.ref, true);
+        return intrusive_ptr<memory_block_data>(get_ndo()->data.ref, true);
       } else {
         return m_memblock;
       }
@@ -855,7 +855,7 @@ namespace nd {
 
   DYND_API array operator+(const array &a0);
   DYND_API array operator-(const array &a0);
-  DYND_API array operator!(const array &a0);
+  DYND_API array operator!(const array & a0);
   DYND_API array operator~(const array &a0);
 
   DYND_API array operator+(const array &op0, const array &op1);
@@ -1031,7 +1031,7 @@ namespace nd {
    */
   DYND_API array make_strided_array_from_data(const ndt::type &uniform_dtype, intptr_t ndim, const intptr_t *shape,
                                               const intptr_t *strides, int64_t access_flags, char *data_ptr,
-                                              const memory_block_ptr &data_reference,
+                                              const intrusive_ptr<memory_block_data> &data_reference,
                                               char **out_uniform_arrmeta = NULL);
 
   /** Makes a POD (plain old data) array with data initialized by the provided

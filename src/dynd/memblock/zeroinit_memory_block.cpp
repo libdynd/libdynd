@@ -59,7 +59,7 @@ struct zeroinit_memory_block {
 };
 } // anonymous namespace
 
-memory_block_ptr dynd::make_zeroinit_memory_block(const ndt::type &element_tp, intptr_t initial_capacity_bytes)
+intrusive_ptr<memory_block_data> dynd::make_zeroinit_memory_block(const ndt::type &element_tp, intptr_t initial_capacity_bytes)
 {
   // This is a temporary hack until the new bytes and string types are working
   size_t data_size;
@@ -74,7 +74,7 @@ memory_block_ptr dynd::make_zeroinit_memory_block(const ndt::type &element_tp, i
 
   zeroinit_memory_block *pmb =
       new zeroinit_memory_block(data_size, element_tp.get_data_alignment(), initial_capacity_bytes);
-  return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
+  return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
 namespace dynd {

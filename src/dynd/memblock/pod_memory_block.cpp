@@ -59,11 +59,11 @@ struct pod_memory_block {
 };
 } // anonymous namespace
 
-memory_block_ptr dynd::make_pod_memory_block(const ndt::type &tp, intptr_t initial_capacity_bytes)
+intrusive_ptr<memory_block_data> dynd::make_pod_memory_block(const ndt::type &tp, intptr_t initial_capacity_bytes)
 {
   pod_memory_block *pmb =
       new pod_memory_block(tp.get_default_data_size(), tp.get_data_alignment(), initial_capacity_bytes);
-  return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
+  return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
 namespace dynd {

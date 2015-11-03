@@ -41,11 +41,11 @@ void nd::array::swap(array &rhs)
 }
 
 template <class T>
-inline typename std::enable_if<is_dynd_scalar<T>::value, memory_block_ptr>::type
-make_builtin_scalar_array(const T &value, uint64_t flags)
+inline typename std::enable_if<is_dynd_scalar<T>::value, intrusive_ptr<memory_block_data>>::type make_builtin_scalar_array(const T &value,
+                                                                                                        uint64_t flags)
 {
   char *data_ptr = NULL;
-  memory_block_ptr result = make_array_memory_block(0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
+  intrusive_ptr<memory_block_data> result = make_array_memory_block(0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
   *reinterpret_cast<T *>(data_ptr) = value;
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
   ndo->m_type = reinterpret_cast<ndt::base_type *>(type_id_of<T>::value);
@@ -70,7 +70,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intp
     data_size = array_tp.extended()->get_default_data_size();
   }
 
-  memory_block_ptr result;
+  intrusive_ptr<memory_block_data> result;
   char *data_ptr = NULL;
   if (array_tp.get_kind() == memory_kind) {
     result = make_array_memory_block(array_tp.get_arrmeta_size());
@@ -137,7 +137,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intp
 
 nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t ndim, const intptr_t *shape,
                                            const intptr_t *strides, int64_t access_flags, char *data_ptr,
-                                           const memory_block_ptr &data_reference, char **out_uniform_arrmeta)
+                                           const intrusive_ptr<memory_block_data> &data_reference, char **out_uniform_arrmeta)
 {
   if (out_uniform_arrmeta == NULL && !uniform_tp.is_builtin() && uniform_tp.extended()->get_arrmeta_size() > 0) {
     stringstream ss;
@@ -148,7 +148,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   ndt::type array_type = ndt::make_fixed_dim(ndim, shape, uniform_tp);
 
   // Allocate the array arrmeta and data in one memory block
-  memory_block_ptr result = make_array_memory_block(array_type.get_arrmeta_size());
+  intrusive_ptr<memory_block_data> result = make_array_memory_block(array_type.get_arrmeta_size());
 
   // Fill in the preamble arrmeta
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
@@ -190,7 +190,7 @@ nd::array nd::make_pod_array(const ndt::type &pod_dt, const void *data)
 
   // Allocate the array arrmeta and data in one memory block
   char *data_ptr = NULL;
-  memory_block_ptr result = make_array_memory_block(0, size, pod_dt.get_data_alignment(), &data_ptr);
+  intrusive_ptr<memory_block_data> result = make_array_memory_block(0, size, pod_dt.get_data_alignment(), &data_ptr);
 
   // Fill in the preamble arrmeta
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
@@ -1531,7 +1531,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
         static_cast<intptr_t>(dynd::ndt::detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(tp.extended())]);
     intptr_t data_alignment =
         static_cast<intptr_t>(dynd::ndt::detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(tp.extended())]);
-    memory_block_ptr result(make_array_memory_block(0, data_size, data_alignment, &data_ptr));
+    intrusive_ptr<memory_block_data> result(make_array_memory_block(0, data_size, data_alignment, &data_ptr));
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     // It's a builtin type id, so no incref
     preamble->m_type = tp.extended();
@@ -1543,7 +1543,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     char *data_ptr = NULL;
     size_t arrmeta_size = tp.extended()->get_arrmeta_size();
     size_t data_size = tp.extended()->get_default_data_size();
-    memory_block_ptr result;
+    intrusive_ptr<memory_block_data> result;
     if (tp.get_kind() != memory_kind) {
       // Allocate memory the default way
       result = make_array_memory_block(arrmeta_size, data_size, tp.get_data_alignment(), &data_ptr);
@@ -1700,7 +1700,7 @@ nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNU
     char *mm_ptr = NULL;
     intptr_t mm_size = 0;
     // Create a memory mapped memblock of the file
-    memory_block_ptr mm = make_memmap_memory_block(filename, access, &mm_ptr, &mm_size, begin, end);
+    intrusive_ptr<memory_block_data> mm = make_memmap_memory_block(filename, access, &mm_ptr, &mm_size, begin, end);
     // Create a bytes array referring to the data.
     ndt::type dt = ndt::bytes_type::make(1);
     char *data_ptr = 0;
