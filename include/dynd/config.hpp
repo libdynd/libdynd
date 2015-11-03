@@ -265,6 +265,11 @@ public:
     return m_ptr->m_use_count;
   }
 
+  T **get_ptr() const
+  {
+    return const_cast<T **>(&m_ptr);
+  }
+
   explicit operator bool() const
   {
     return m_ptr != NULL;

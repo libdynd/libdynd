@@ -377,7 +377,7 @@ static nd::array array_function_dereference(const nd::array &self)
   ndt::type dt = self.get_type();
   const char *arrmeta = self.get_arrmeta();
   char *data = self.get_ndo()->data.ptr;
-  memory_block_data *dataref = self.get_ndo()->data.ref;
+  memory_block_data *dataref = self.get_ndo()->data.ref.get();
   if (dataref == NULL) {
     dataref = self.get_memblock().get();
   }
@@ -399,7 +399,6 @@ static nd::array array_function_dereference(const nd::array &self)
   result.get_ndo()->m_type = dt.release();
   result.get_ndo()->data.ptr = data;
   result.get_ndo()->data.ref = dataref;
-  memory_block_incref(result.get_ndo()->data.ref);
   result.get_ndo()->m_flags = flags;
   return result;
 }

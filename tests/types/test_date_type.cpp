@@ -433,7 +433,7 @@ TEST(DateType, NumPyCompatibleProperty)
 {
   int64_t vals64[] = {-16730, 0, 11001, numeric_limits<int64_t>::min()};
 
-  nd::array a = nd::array_rw(vals64);
+  nd::array a = nd::array(vals64);
   nd::array a_date = a.adapt(ndt::date_type::make(), "days since 1970-01-01");
   // Reading from the 'int64 as date' view
   EXPECT_EQ("1924-03-13", a_date(0).as<std::string>());

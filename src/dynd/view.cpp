@@ -353,12 +353,12 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   nd::array result(make_array_memory_block(tp.get_arrmeta_size()));
   // Copy the fields
   result.get_ndo()->data.ptr = arr.get_ndo()->data.ptr;
-  if (arr.get_ndo()->data.ref == NULL) {
+  if (!arr.get_ndo()->data.ref) {
     // Embedded data, need reference to the array
-    result.get_ndo()->data.ref = arr.get_memblock().release();
+    result.get_ndo()->data.ref = arr.get_memblock();
   } else {
     // Use the same data reference, avoid producing a chain
-    result.get_ndo()->data.ref = arr.get_data_memblock().release();
+    result.get_ndo()->data.ref = arr.get_data_memblock();
   }
   result.get_ndo()->m_type = ndt::type(tp).release();
   result.get_ndo()->m_flags = arr.get_ndo()->m_flags;
@@ -372,9 +372,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
     if ((intptr_t)in_dat->size == out_am->dim_size) {
       // Use the more specific data reference from the var arrmeta if possible
       if (in_am->blockref) {
-        memory_block_decref(result.get_ndo()->data.ref);
-        memory_block_incref(in_am->blockref.get());
-        result.get_ndo()->data.ref = in_am->blockref.get();
+        result.get_ndo()->data.ref = in_am->blockref;
       }
       result.get_ndo()->data.ptr = in_dat->begin + in_am->offset;
       // Try to copy the rest of the arrmeta as a view

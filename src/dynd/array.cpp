@@ -154,8 +154,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
   ndo->m_type = array_type.release();
   ndo->data.ptr = data_ptr;
-  ndo->data.ref = data_reference.get();
-  memory_block_incref(ndo->data.ref);
+  ndo->data.ref = data_reference;
   ndo->m_flags = access_flags;
 
   // Fill in the array arrmeta with the shape and strides
@@ -635,12 +634,11 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
       result.get_ndo()->data.ref = get_ndo()->data.ref;
     } else {
       // If the data reference is NULL, the data is embedded in the array itself
-      result.get_ndo()->data.ref = m_memblock.get();
+      result.get_ndo()->data.ref = m_memblock;
     }
-    memory_block_incref(result.get_ndo()->data.ref);
     intptr_t offset = get_ndo()->m_type->apply_linear_index(nindices, indices, get_arrmeta(), dt, result.get_arrmeta(),
                                                             m_memblock.get(), 0, this_dt, collapse_leading,
-                                                            &result.get_ndo()->data.ptr, &result.get_ndo()->data.ref);
+                                                            &result.get_ndo()->data.ptr, result.get_ndo()->data.ref.get_ptr());
     result.get_ndo()->data.ptr += offset;
     result.get_ndo()->m_flags = get_ndo()->m_flags;
     return result;
@@ -684,7 +682,7 @@ void nd::array::flag_as_immutable()
   if (m_memblock.get()->m_use_count != 1) {
     // More than one reference to the array itself
     ok = false;
-  } else if (get_ndo()->data.ref != NULL && (get_ndo()->data.ref->m_use_count != 1 ||
+  } else if (get_ndo()->data.ref && (get_ndo()->data.ref->m_use_count != 1 ||
                                              !(get_ndo()->data.ref->m_type == fixed_size_pod_memory_block_type ||
                                                get_ndo()->data.ref->m_type == pod_memory_block_type))) {
     // More than one reference to the array's data, or the reference is to
@@ -1261,10 +1259,10 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
   // This is taken from view_concrete in view.cpp
   nd::array res(make_array_memory_block(dst_tp.get_arrmeta_size()));
   res.get_ndo()->data.ptr = get_ndo()->data.ptr;
-  if (get_ndo()->data.ref == NULL) {
-    res.get_ndo()->data.ref = get_memblock().release();
+  if (!get_ndo()->data.ref) {
+    res.get_ndo()->data.ref = get_memblock();
   } else {
-    res.get_ndo()->data.ref = get_data_memblock().release();
+    res.get_ndo()->data.ref = get_data_memblock();
   }
   res.get_ndo()->m_type = ndt::type(dst_tp).release();
   res.get_ndo()->m_flags = get_ndo()->m_flags;
@@ -1373,7 +1371,6 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
       } else {
         result.get_ndo()->data.ref = m_memblock.get();
       }
-      memory_block_incref(result.get_ndo()->data.ref);
       result.get_ndo()->m_type = result_tp.release();
       result.get_ndo()->m_flags = get_ndo()->m_flags;
       // The result has one strided ndarray field
@@ -1447,14 +1444,14 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const
     }
     o << " data:\n";
     o << "   pointer: " << (void *)ndo->data.ptr << "\n";
-    o << "   reference: " << (void *)ndo->data.ref;
-    if (ndo->data.ref == NULL) {
+    o << "   reference: " << (void *)ndo->data.ref.get();
+    if (!ndo->data.ref) {
       o << " (embedded in array memory)\n";
     } else {
       o << "\n";
     }
-    if (ndo->data.ref != NULL) {
-      memory_block_debug_print(ndo->data.ref, o, "    ");
+    if (ndo->data.ref) {
+      memory_block_debug_print(ndo->data.ref.get(), o, "    ");
     }
   } else {
     o << indent << "NULL\n";
@@ -1793,7 +1790,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get_arrmeta() + arrmeta_offsets[i]);
     pmeta->offset = 0;
     pmeta->blockref = field_values[i].get_ndo()->data.ref ? field_values[i].get_ndo()->data.ref
-                                                          : &field_values[i].get_ndo()->m_memblockdata;
+                                                          : intrusive_ptr<memory_block_data>(&field_values[i].get_ndo()->m_memblockdata);
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {
