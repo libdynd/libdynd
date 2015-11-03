@@ -19,8 +19,7 @@ static void strided_dim_iter_destructor(dim_iter *self)
   // Free the reference of the element type
   base_type_xdecref(self->eltype);
   // Free the reference owning the data
-  memory_block_data *memblock =
-      reinterpret_cast<memory_block_data *>(self->custom[2]);
+  memory_block_data *memblock = reinterpret_cast<memory_block_data *>(self->custom[2]);
   if (memblock != NULL) {
     memory_block_decref(memblock);
   }
@@ -56,13 +55,11 @@ static void strided_dim_iter_seek(dim_iter *self, intptr_t i)
   }
 }
 
-static dim_iter_vtable strided_dim_iter_vt = {
-    strided_dim_iter_destructor, strided_dim_iter_next, strided_dim_iter_seek};
+static dim_iter_vtable strided_dim_iter_vt = {strided_dim_iter_destructor, strided_dim_iter_next,
+                                              strided_dim_iter_seek};
 
-void dynd::make_strided_dim_iter(dim_iter *out_di, const ndt::type &tp,
-                                 const char *arrmeta, const char *data_ptr,
-                                 intptr_t size, intptr_t stride,
-                                 const memory_block_ptr &ref)
+void dynd::make_strided_dim_iter(dim_iter *out_di, const ndt::type &tp, const char *arrmeta, const char *data_ptr,
+                                 intptr_t size, intptr_t stride, const intrusive_ptr<memory_block_data> &ref)
 {
   out_di->vtable = &strided_dim_iter_vt;
   out_di->data_ptr = NULL;
@@ -94,8 +91,7 @@ static void buffered_strided_dim_iter_destructor(dim_iter *self)
   // Free the reference of the element type
   base_type_xdecref(self->eltype);
   // Free the reference owning the temporary buffer
-  memory_block_data *memblock =
-      reinterpret_cast<memory_block_data *>(self->custom[2]);
+  memory_block_data *memblock = reinterpret_cast<memory_block_data *>(self->custom[2]);
   if (memblock != NULL) {
     memory_block_decref(memblock);
   }
@@ -111,16 +107,14 @@ static int buffered_strided_dim_iter_next(dim_iter *self)
   intptr_t i = static_cast<intptr_t>(self->custom[0]);
   intptr_t size = static_cast<intptr_t>(self->custom[1]);
   if (i < size) {
-    nd::array buf(memory_block_ptr(
-        reinterpret_cast<memory_block_data *>(self->custom[5]), true));
+    nd::array buf(intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(self->custom[5]), true));
     if (!buf.get_type().is_builtin()) {
       // For types with block references, need to reset the buffers each time
       // we fill buf with data.
       buf.get_type().extended()->arrmeta_reset_buffers(buf.get_arrmeta());
     }
     // Figure out how many elements we will buffer
-    intptr_t bufsize = reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                           buf.get_arrmeta())->dim_size;
+    intptr_t bufsize = reinterpret_cast<const fixed_dim_type_arrmeta *>(buf.get_arrmeta())->dim_size;
     if (i + bufsize > size) {
       bufsize = size - i;
     }
@@ -130,13 +124,11 @@ static int buffered_strided_dim_iter_next(dim_iter *self)
     const char *data_ptr = reinterpret_cast<const char *>(self->custom[2]);
     intptr_t stride = static_cast<intptr_t>(self->custom[3]);
     ckernel_builder<kernel_request_host> *ckb =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(
-            self->custom[4]);
+        reinterpret_cast<ckernel_builder<kernel_request_host> *>(self->custom[4]);
     ckernel_prefix *kdp = ckb->get();
     expr_strided_t fn = kdp->get_function<expr_strided_t>();
     const char *child_data_ptr = data_ptr + i * stride;
-    fn(kdp, buf.get_readwrite_originptr(), self->data_stride,
-       const_cast<char **>(&child_data_ptr), &stride, bufsize);
+    fn(kdp, buf.get_readwrite_originptr(), self->data_stride, const_cast<char **>(&child_data_ptr), &stride, bufsize);
     // Update the dim_iter's size
     self->data_elcount = bufsize;
     return 1;
@@ -154,20 +146,17 @@ static void buffered_strided_dim_iter_seek(dim_iter *self, intptr_t i)
   buffered_strided_dim_iter_next(self);
 }
 
-static dim_iter_vtable buffered_strided_dim_iter_vt = {
-    buffered_strided_dim_iter_destructor, buffered_strided_dim_iter_next,
-    buffered_strided_dim_iter_seek};
+static dim_iter_vtable buffered_strided_dim_iter_vt = {buffered_strided_dim_iter_destructor,
+                                                       buffered_strided_dim_iter_next, buffered_strided_dim_iter_seek};
 
-void dynd::make_buffered_strided_dim_iter(
-    dim_iter *out_di, const ndt::type &val_tp, const ndt::type &mem_tp,
-    const char *mem_arrmeta, const char *data_ptr, intptr_t size,
-    intptr_t stride, const memory_block_ptr &ref, intptr_t buffer_max_mem,
-    const eval::eval_context *ectx)
+void dynd::make_buffered_strided_dim_iter(dim_iter *out_di, const ndt::type &val_tp, const ndt::type &mem_tp,
+                                          const char *mem_arrmeta, const char *data_ptr, intptr_t size, intptr_t stride,
+                                          const intrusive_ptr<memory_block_data> &ref, intptr_t buffer_max_mem,
+                                          const eval::eval_context *ectx)
 {
   if (val_tp == mem_tp) {
     // If no buffering is needed, ust the straight strided iter
-    make_strided_dim_iter(out_di, mem_tp, mem_arrmeta, data_ptr, size, stride,
-                          ref);
+    make_strided_dim_iter(out_di, mem_tp, mem_arrmeta, data_ptr, size, stride, ref);
     return;
   }
   // Allocate the temporary buffer
@@ -177,8 +166,7 @@ void dynd::make_buffered_strided_dim_iter(
   dimvector buffer_shape(buffer_ndim);
   if (!mem_tp.is_builtin()) {
     // Get the shape from mem_tp/mem_meta
-    mem_tp.extended()->get_shape(buffer_ndim - 1, 0, buffer_shape.get() + 1,
-                                 mem_arrmeta, NULL);
+    mem_tp.extended()->get_shape(buffer_ndim - 1, 0, buffer_shape.get() + 1, mem_arrmeta, NULL);
     buffer_data_size = mem_tp.extended()->get_default_data_size();
   }
   buffer_elcount /= buffer_data_size;
@@ -190,27 +178,22 @@ void dynd::make_buffered_strided_dim_iter(
   if (buffer_ndim > 2 && val_tp.get_type_id() == fixed_dim_type_id) {
     // Reorder the strides to preserve F-order if it's a strided array
     val_tp.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(
-        buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), mem_tp,
-        mem_arrmeta);
+        buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), mem_tp, mem_arrmeta);
   }
-  intptr_t buffer_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                               buf.get_arrmeta())->stride;
+  intptr_t buffer_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(buf.get_arrmeta())->stride;
   // Make the ckernel that copies data to the buffer
   ckernel_builder<kernel_request_host> k;
-  make_assignment_kernel(&k, 0, val_tp,
-                         buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta),
-                         mem_tp, mem_arrmeta, kernel_request_strided, ectx);
+  make_assignment_kernel(&k, 0, val_tp, buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), mem_tp, mem_arrmeta,
+                         kernel_request_strided, ectx);
 
   if (buffer_elcount == size) {
     // If the buffer is big enough for all the data, just make a copy and
     // create a strided dim_iter around it.
     ckernel_prefix *kdp = k.get();
     expr_strided_t fn = kdp->get_function<expr_strided_t>();
-    fn(kdp, buf.get_readwrite_originptr(), buffer_stride,
-       const_cast<char **>(&data_ptr), &stride, size);
-    make_strided_dim_iter(
-        out_di, val_tp, buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta),
-        buf.get_readonly_originptr(), size, buffer_stride, buf.get_memblock());
+    fn(kdp, buf.get_readwrite_originptr(), buffer_stride, const_cast<char **>(&data_ptr), &stride, size);
+    make_strided_dim_iter(out_di, val_tp, buf.get_arrmeta() + sizeof(fixed_dim_type_arrmeta),
+                          buf.get_readonly_originptr(), size, buffer_stride, buf.get_memblock());
     return;
   }
   out_di->vtable = &buffered_strided_dim_iter_vt;
@@ -229,8 +212,7 @@ void dynd::make_buffered_strided_dim_iter(
   out_di->custom[1] = static_cast<uintptr_t>(size);
   out_di->custom[2] = reinterpret_cast<uintptr_t>(data_ptr);
   out_di->custom[3] = static_cast<uintptr_t>(stride);
-  ckernel_builder<kernel_request_host> *ckb =
-      new ckernel_builder<kernel_request_host>;
+  ckernel_builder<kernel_request_host> *ckb = new ckernel_builder<kernel_request_host>;
   k.swap(*ckb);
   out_di->custom[4] = reinterpret_cast<uintptr_t>(ckb);
   memory_block_incref(buf.get_memblock().get());

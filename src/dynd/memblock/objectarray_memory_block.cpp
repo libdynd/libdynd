@@ -75,11 +75,11 @@ struct objectarray_memory_block {
 };
 } // anonymous namespace
 
-memory_block_ptr dynd::make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta,
-                                                     intptr_t stride, intptr_t initial_count, size_t arrmeta_size)
+intrusive_ptr<memory_block_data> dynd::make_objectarray_memory_block(const ndt::type &dt, const char *arrmeta, intptr_t stride,
+                                                  intptr_t initial_count, size_t arrmeta_size)
 {
   objectarray_memory_block *pmb = new objectarray_memory_block(dt, arrmeta_size, arrmeta, stride, initial_count);
-  return memory_block_ptr(reinterpret_cast<memory_block_data *>(pmb), false);
+  return intrusive_ptr<memory_block_data>(reinterpret_cast<memory_block_data *>(pmb), false);
 }
 
 namespace dynd {
@@ -149,8 +149,9 @@ namespace detail {
         mc->used_count += (count - previous_count);
       } else {
         // Call the destructor on the elements no longer used
-        emb->m_dt.extended()->data_destruct_strided(emb->m_arrmeta + emb->arrmeta_size, previous_allocated + emb->m_stride * count,
-                                                    emb->m_stride, previous_count - count);
+        emb->m_dt.extended()->data_destruct_strided(emb->m_arrmeta + emb->arrmeta_size,
+                                                    previous_allocated + emb->m_stride * count, emb->m_stride,
+                                                    previous_count - count);
         mc->used_count -= (previous_count - count);
       }
     }

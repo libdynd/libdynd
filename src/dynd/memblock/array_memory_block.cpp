@@ -52,7 +52,7 @@ namespace detail {
 }
 } // namespace dynd::detail
 
-memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size)
+intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size)
 {
   char *result = (char *)malloc(sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size);
   if (result == 0) {
@@ -60,11 +60,11 @@ memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size)
   }
   // Zero out all the arrmeta to start
   memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + arrmeta_size);
-  return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
+  return intrusive_ptr<memory_block_data>(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size, size_t extra_size, size_t extra_alignment,
-                                               char **out_extra_ptr)
+intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size, size_t extra_size, size_t extra_alignment,
+                                            char **out_extra_ptr)
 {
   size_t extra_offset =
       inc_to_alignment(sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size, extra_alignment);
@@ -76,10 +76,10 @@ memory_block_ptr dynd::make_array_memory_block(size_t arrmeta_size, size_t extra
   memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + arrmeta_size);
   // Return a pointer to the extra allocated memory
   *out_extra_ptr = result + extra_offset;
-  return memory_block_ptr(new (result) memory_block_data(1, array_memory_block_type), false);
+  return intrusive_ptr<memory_block_data>(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr &ndo)
+intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const intrusive_ptr<memory_block_data> &ndo)
 {
   // Allocate the new memory block.
   const array_preamble *preamble = reinterpret_cast<const array_preamble *>(ndo.get());
@@ -87,7 +87,7 @@ memory_block_ptr dynd::shallow_copy_array_memory_block(const memory_block_ptr &n
   if (!preamble->is_builtin_type()) {
     arrmeta_size = preamble->m_type->get_arrmeta_size();
   }
-  memory_block_ptr result = make_array_memory_block(arrmeta_size);
+  intrusive_ptr<memory_block_data> result = make_array_memory_block(arrmeta_size);
   array_preamble *result_preamble = reinterpret_cast<array_preamble *>(result.get());
 
   // Clone the data pointer

@@ -82,9 +82,7 @@
 #define DYND_USED(NAME) NAME
 #define DYND_EMIT_LLVM(NAME) NAME
 
-#define DYND_ALLOW_UNSIGNED_UNARY_MINUS     \
-__pragma(warning(push))                     \
-__pragma(warning(disable:4146))             \
+#define DYND_ALLOW_UNSIGNED_UNARY_MINUS __pragma(warning(push)) __pragma(warning(disable : 4146))
 
 #define DYND_END_ALLOW_UNSIGNED_UNARY_MINUS __pragma(warning(pop))
 
@@ -214,6 +212,146 @@ template <typename KeyType, typename ValueType>
 const ValueType &get_second_if_pair(const std::pair<KeyType, ValueType> &pair)
 {
   return pair.second;
+}
+
+template <typename T>
+void memory_block_decref(T *ptr);
+
+/**
+ * A smart pointer, very similar to boost::intrusive_ptr.
+ */
+template <typename T>
+class DYND_API intrusive_ptr {
+  T *m_ptr;
+
+public:
+  /** Default constructor */
+  intrusive_ptr() : m_ptr(0)
+  {
+  }
+
+  /** Constructor from a raw pointer */
+  explicit intrusive_ptr(T *ptr, bool add_ref = true) : m_ptr(ptr)
+  {
+    if (m_ptr != 0 && add_ref) {
+      ++m_ptr->m_use_count;
+    }
+  }
+
+  /** Copy constructor */
+  intrusive_ptr(const intrusive_ptr &other) : m_ptr(other.m_ptr)
+  {
+    if (m_ptr != 0) {
+      ++m_ptr->m_use_count;
+    }
+  }
+
+  /** Move constructor */
+  intrusive_ptr(intrusive_ptr &&other) : m_ptr(other.m_ptr)
+  {
+    other.m_ptr = 0;
+  }
+
+  /** Destructor */
+  ~intrusive_ptr()
+  {
+    if (m_ptr != 0) {
+      memory_block_decref(m_ptr);
+    }
+  }
+
+  intptr_t use_count() const
+  {
+    return m_ptr->m_use_count;
+  }
+
+  explicit operator bool() const
+  {
+    return m_ptr != NULL;
+  }
+
+  T *operator->() const
+  {
+    return m_ptr;
+  }
+
+  /** Assignment */
+  intrusive_ptr &operator=(const intrusive_ptr &rhs)
+  {
+    if (m_ptr != 0) {
+      memory_block_decref(m_ptr);
+    }
+    if (rhs.m_ptr != 0) {
+      m_ptr = rhs.m_ptr;
+      ++m_ptr->m_use_count;
+    } else {
+      m_ptr = 0;
+    }
+    return *this;
+  }
+
+  /** Move assignment */
+  intrusive_ptr &operator=(intrusive_ptr &&rhs)
+  {
+    if (m_ptr != 0) {
+      memory_block_decref(m_ptr);
+    }
+    m_ptr = rhs.m_ptr;
+    rhs.m_ptr = 0;
+    return *this;
+  }
+
+  /** Assignment from raw memory_block pointer */
+  intrusive_ptr &operator=(T *rhs)
+  {
+    if (m_ptr != 0) {
+      memory_block_decref(m_ptr);
+    }
+    m_ptr = rhs;
+    if (rhs != 0) {
+      ++rhs->m_use_count;
+    }
+    return *this;
+  }
+
+  /** Returns true if there is only one reference to this memory block */
+  bool unique() const
+  {
+    return m_ptr->m_use_count <= 1;
+  }
+
+  /** Gets the raw memory_block_data pointer */
+  T *get() const
+  {
+    return m_ptr;
+  }
+
+  /** Gives away ownership of the reference count */
+  T *release()
+  {
+    T *result = m_ptr;
+    m_ptr = 0;
+    return result;
+  }
+
+  void swap(intrusive_ptr &rhs)
+  {
+    T *tmp = m_ptr;
+    m_ptr = rhs.m_ptr;
+    rhs.m_ptr = tmp;
+  }
+};
+
+template <typename T>
+bool operator==(const intrusive_ptr<T> &lhs, const intrusive_ptr<T> &rhs)
+{
+  return lhs.get() == rhs.get();
+}
+
+template <typename T>
+bool operator!=(const intrusive_ptr<T> &lhs, const intrusive_ptr<T> &rhs)
+{
+  return lhs.get() == rhs.get();
 }
 
 template <template <typename...> class T, typename U>
