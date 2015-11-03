@@ -30,7 +30,7 @@ struct DYND_API array_preamble {
   uint64_t m_flags;
   struct {
     char *ptr;
-    memory_block_data *ref;
+    intrusive_ptr<memory_block_data> ref;
   } data;
 
   /** Returns true if the type is builtin */

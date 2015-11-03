@@ -22,13 +22,13 @@ namespace detail {
 
     // Call the data destructor if necessary (i.e. the nd::array owns
     // the data memory, and the type has a data destructor)
-    if (preamble->data.ref == NULL && !preamble->is_builtin_type() &&
+    if (!preamble->data.ref && !preamble->is_builtin_type() &&
         (preamble->m_type->get_flags() & type_flag_destructor) != 0) {
       preamble->m_type->data_destruct(arrmeta, preamble->data.ptr);
     }
 
     // Free the ndobject data if it wasn't allocated together with the memory block
-    if (preamble->data.ref == NULL && !preamble->is_builtin_type() && !preamble->m_type->is_expression()) {
+    if (!preamble->data.ref && !preamble->is_builtin_type() && !preamble->m_type->is_expression()) {
       const ndt::type &dtp = preamble->m_type->get_type_at_dimension(NULL, preamble->m_type->get_ndim());
       if (dtp.get_kind() == memory_kind) {
         dtp.extended<ndt::base_memory_type>()->data_free(preamble->data.ptr);
@@ -42,8 +42,8 @@ namespace detail {
     }
 
     // Free the reference to the nd::array data
-    if (preamble->data.ref != NULL) {
-      memory_block_decref(preamble->data.ref);
+    if (preamble->data.ref) {
+      memory_block_decref(preamble->data.ref.get());
     }
 
     // Finally free the memory block itself
@@ -93,10 +93,9 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   // Clone the data pointer
   result_preamble->data.ptr = preamble->data.ptr;
   result_preamble->data.ref = preamble->data.ref;
-  if (result_preamble->data.ref == NULL) {
+  if (!result_preamble->data.ref) {
     result_preamble->data.ref = ndo.get();
   }
-  memory_block_incref(result_preamble->data.ref);
 
   // Copy the flags
   result_preamble->m_flags = preamble->m_flags;

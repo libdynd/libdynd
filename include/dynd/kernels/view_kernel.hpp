@@ -15,16 +15,11 @@ namespace nd {
     dst -= sizeof(array_preamble);
     src -= sizeof(array_preamble);
 
-    if (reinterpret_cast<array_preamble *>(src)->data.ref == NULL) {
+    if (!reinterpret_cast<array_preamble *>(src)->data.ref) {
       reinterpret_cast<array_preamble *>(dst)->data.ref = &reinterpret_cast<array_preamble *>(src)->m_memblockdata;
     } else {
       reinterpret_cast<array_preamble *>(dst)->data.ref = reinterpret_cast<array_preamble *>(src)->data.ref;
     }
-  }
-
-  inline void incref(char *metadata)
-  {
-    memory_block_incref(reinterpret_cast<array_preamble *>(metadata - sizeof(array_preamble))->data.ref);
   }
 
   struct view_kernel : base_kernel<view_kernel> {
@@ -43,7 +38,6 @@ namespace nd {
       *dst = *src[0];
 
       refcpy(dst_metadata, src_metadata[0]);
-      incref(dst_metadata);
     }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),

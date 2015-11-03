@@ -445,7 +445,7 @@ namespace nd {
     inline intrusive_ptr<memory_block_data> get_data_memblock() const
     {
       if (get_ndo()->data.ref) {
-        return intrusive_ptr<memory_block_data>(get_ndo()->data.ref, true);
+        return get_ndo()->data.ref;
       } else {
         return m_memblock;
       }
