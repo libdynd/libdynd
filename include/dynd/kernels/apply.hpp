@@ -127,8 +127,6 @@ namespace nd {
       apply_arg(const ndt::type &DYND_UNUSED(tp), const char *arrmeta, const nd::array *DYND_UNUSED(kwds))
           : value(arrmeta, NULL)
       {
-        std::cout << "apply_arg" << std::endl;
-        std::cout << reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta)->dim_size << std::endl;
       }
 
       fixed_dim<ElementType> &get(char *data)
