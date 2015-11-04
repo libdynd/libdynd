@@ -192,7 +192,7 @@ namespace nd {
       }
     }
 
-    explicit array(array_preamble *ndo, bool add_ref) : m_memblock(&ndo->m_memblockdata, add_ref)
+    explicit array(array_preamble *ndo, bool add_ref) : m_memblock(ndo, add_ref)
     {
     }
 

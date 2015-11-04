@@ -115,15 +115,6 @@ namespace detail {
 } // namespace detail
 
 /**
- * Increments the reference count of a memory block object.
- */
-inline void memory_block_incref(memory_block_data *memblock)
-{
-  // std::cout << "memblock " << (void *)memblock << " inc: " << memblock->m_use_count + 1 << std::endl;
-  ++memblock->m_use_count;
-}
-
-/**
  * Decrements the reference count of a memory block object,
  * freeing it if the count reaches zero.
  */

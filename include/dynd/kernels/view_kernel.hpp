@@ -16,7 +16,7 @@ namespace nd {
     src -= sizeof(array_preamble);
 
     if (!reinterpret_cast<array_preamble *>(src)->data.ref) {
-      reinterpret_cast<array_preamble *>(dst)->data.ref = &reinterpret_cast<array_preamble *>(src)->m_memblockdata;
+      reinterpret_cast<array_preamble *>(dst)->data.ref = reinterpret_cast<array_preamble *>(src);
     } else {
       reinterpret_cast<array_preamble *>(dst)->data.ref = reinterpret_cast<array_preamble *>(src)->data.ref;
     }
