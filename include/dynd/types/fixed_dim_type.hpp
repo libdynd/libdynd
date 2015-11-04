@@ -60,7 +60,7 @@ public:
 
   size_t size() const
   {
-    return reinterpret_cast<const fixed_dim_type_arrmeta *>(this->metadata)->dim_size;
+    return reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size;
   }
 
   void set_data(char *data)

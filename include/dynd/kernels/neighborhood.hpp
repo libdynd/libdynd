@@ -28,7 +28,7 @@ namespace nd {
 
       struct data_type {
         ndt::type child_src_tp;
-        size_stride_t child_src_arrmeta;
+        size_stride_t child_src_arrmeta[5];
 
         const ndt::type *src_tp;
         const char *src_arrmeta;
@@ -38,10 +38,14 @@ namespace nd {
         int *offset;
         std::shared_ptr<bool> out_of_bounds;
 
-        data_type(const ndt::type *src_tp, intptr_t ndim, intptr_t *shape, int *offset)
-            : src_tp(src_tp), src_arrmeta(NULL), ndim(ndim), shape(shape), offset(offset),
-              out_of_bounds(std::make_shared<bool>())
+        data_type(const ndt::type *src_tp, intptr_t ndim, int *shape, int *offset)
+            : src_tp(src_tp), src_arrmeta(NULL), ndim(ndim), offset(offset), out_of_bounds(std::make_shared<bool>())
         {
+          this->shape = new intptr_t[ndim];
+          for (int i = 0; i < ndim; ++i) {
+            this->shape[i] = shape[i];
+          }
+
           /*
                     child_src_arrmeta = new char[ndim * sizeof(size_stride_t)];
                     for (int i = 0; i < ndim; ++i) {
@@ -50,8 +54,22 @@ namespace nd {
                     }
           */
 
-          child_src_arrmeta.dim_size = shape[0];
-          child_src_arrmeta.stride = sizeof(int);
+          if (ndim == 1) {
+            child_src_arrmeta[0].dim_size = shape[0];
+            child_src_arrmeta[0].stride = sizeof(int);
+          } else if (ndim == 2) {
+            child_src_arrmeta[0].dim_size = shape[0];
+            child_src_arrmeta[0].stride = 4 * sizeof(int);
+            child_src_arrmeta[1].dim_size = shape[1];
+            child_src_arrmeta[1].stride = sizeof(int);
+          } else if (ndim == 3) {
+            child_src_arrmeta[0].dim_size = shape[0];
+            child_src_arrmeta[0].stride = 4 * 4 * sizeof(int);
+            child_src_arrmeta[1].dim_size = shape[1];
+            child_src_arrmeta[1].stride = 4 * sizeof(int);
+            child_src_arrmeta[2].dim_size = shape[2];
+            child_src_arrmeta[2].stride = sizeof(int);
+          }
         }
 
         ~data_type()
@@ -92,7 +110,7 @@ namespace nd {
 
         *out_of_bounds = true;
         while (i < counts[0]) {
-          boundary_child->single(dst, NULL);
+          boundary_child->single(dst, &src0);
           ++i;
           dst += dst_stride;
           src0 += src0_stride;
@@ -101,7 +119,7 @@ namespace nd {
         *out_of_bounds = old_out_of_bounds;
         while (i < counts[1]) {
           if (*out_of_bounds) {
-            boundary_child->single(dst, NULL);
+            boundary_child->single(dst, &src0);
           } else {
             child->single(dst, &src0);
           }
@@ -112,7 +130,7 @@ namespace nd {
 
         *out_of_bounds = true;
         while (i < counts[2]) {
-          boundary_child->single(dst, NULL);
+          boundary_child->single(dst, &src0);
           ++i;
           dst += dst_stride;
           src0 += src0_stride;
@@ -126,9 +144,8 @@ namespace nd {
                             intptr_t DYND_UNUSED(nkwd), const array *kwds,
                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        new (data)
-            data_type(src_tp, kwds[0].get_dim_size(), reinterpret_cast<intptr_t *>(kwds[0].get_readwrite_originptr()),
-                      kwds[1].is_missing() ? NULL : reinterpret_cast<int *>(kwds[1].get_readwrite_originptr()));
+        new (data) data_type(src_tp, kwds[0].get_dim_size(), reinterpret_cast<int *>(kwds[0].get_readwrite_originptr()),
+                             kwds[1].is_missing() ? NULL : reinterpret_cast<int *>(kwds[1].get_readwrite_originptr()));
 
         reinterpret_cast<data_type *>(data)->child_src_tp = ndt::substitute_shape(
             reinterpret_cast<callable *>(static_data)->get_arg_type(0), reinterpret_cast<data_type *>(data)->ndim,
@@ -176,7 +193,7 @@ namespace nd {
           const callable &boundary_child = reinterpret_cast<static_data_type *>(static_data)->boundary_child;
 
           const char *child_src_arrmeta =
-              reinterpret_cast<char *>(&reinterpret_cast<data_type *>(data)->child_src_arrmeta);
+              reinterpret_cast<char *>(reinterpret_cast<data_type *>(data)->child_src_arrmeta);
           ckb_offset = child.get()->instantiate(child.get()->static_data, child.get()->data_size, NULL, ckb, ckb_offset,
                                                 child_dst_tp, child_dst_arrmeta, nsrc,
                                                 &reinterpret_cast<data_type *>(data)->child_src_tp, &child_src_arrmeta,
@@ -198,6 +215,9 @@ namespace nd {
           child_src_tp[i] = src_tp[i].extended<ndt::fixed_dim_type>()->get_element_type();
           child_src_arrmeta[i] = src_arrmeta[i] + sizeof(fixed_dim_type_arrmeta);
         }
+
+        neighborhood_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
+                                      neighborhood_offset)->boundary_child_offset = sizeof(neighborhood_kernel);
 
         return instantiate(static_data, data_size, data, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta, nsrc,
                            child_src_tp, child_src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
