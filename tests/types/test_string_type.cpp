@@ -15,7 +15,6 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/gfunc/call_gcallable.hpp>
-#include <dynd/dim_iter.hpp>
 
 using namespace std;
 using namespace dynd;

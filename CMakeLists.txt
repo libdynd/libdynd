@@ -446,7 +446,6 @@ set(libdynd_SRC
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     # src/dynd/config.cpp
-    src/dynd/dim_iter.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
     src/dynd/int128.cpp
@@ -482,7 +481,6 @@ set(libdynd_SRC
     include/dynd/cling_all.hpp
     include/dynd/complex.hpp
     include/dynd/diagnostics.hpp
-    include/dynd/dim_iter.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/float16.hpp
     include/dynd/float128.hpp

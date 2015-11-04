@@ -33,10 +33,6 @@ namespace ndt {
 
     void get_string_range(const char **out_begin, const char **out_end, const char *arrmeta, const char *data) const;
 
-    void make_string_iter(dim_iter *out_di, string_encoding_t encoding, const char *arrmeta, const char *data,
-                          const intrusive_ptr<memory_block_data> &ref, intptr_t buffer_max_mem = 65536,
-                          const eval::eval_context *ectx = &eval::default_eval_context) const;
-
     bool operator==(const base_type &rhs) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;

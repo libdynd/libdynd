@@ -78,15 +78,6 @@ void ndt::fixed_string_kind_type::get_string_range(const char **DYND_UNUSED(out_
   throw runtime_error(ss.str());
 }
 
-void ndt::fixed_string_kind_type::make_string_iter(dim_iter *DYND_UNUSED(out_di),
-                                                   string_encoding_t DYND_UNUSED(encoding),
-                                                   const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data),
-                                                   const intrusive_ptr<memory_block_data> &DYND_UNUSED(ref),
-                                                   intptr_t DYND_UNUSED(buffer_max_mem),
-                                                   const eval::eval_context *DYND_UNUSED(ectx)) const
-{
-}
-
 bool ndt::fixed_string_kind_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
