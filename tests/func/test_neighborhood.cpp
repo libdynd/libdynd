@@ -19,59 +19,37 @@
 using namespace std;
 using namespace dynd;
 
-template <int N>
-int sum(const nd::strided_vals<int, N> &nh) {
-    typedef nd::strided_vals<int, N> nh_type;
+#define NA std::numeric_limits<int>::max()
 
-    int res = 0;
-    for (typename nh_type::iterator it = nh.begin(); it != nh.end(); ++it) {
-        res += *it;
-    }
+/*
+TEST(Neighborhood, Sum1D)
+{
+  nd::callable f = nd::functional::neighborhood(nd::functional::apply([](fixed_dim<int> vals) {
+                                                  int res = 0;
+                                                  for (auto val : vals) {
+                                                    res += val;
+                                                  }
+                                                  return res;
+                                                }),
+                                                nd::functional::apply([]() { return NA; }));
 
-    return res;
+  EXPECT_ARRAY_EQ((nd::array{3, 6, NA, NA}), f(nd::array{0, 1, 2, 3}, kwds("shape", nd::array{3})));
+
+  EXPECT_ARRAY_EQ((nd::array{NA, 3, 6, NA}),
+                  f(nd::array{0, 1, 2, 3}, kwds("shape", nd::array{3}, "offset", nd::array{-1})));
+
+  EXPECT_ARRAY_EQ((nd::array{15, 21, 27, 33, 39, NA, NA, NA, NA, NA}),
+                  f(nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, kwds("shape", nd::array{6})));
+
+  EXPECT_ARRAY_EQ((nd::array{NA, 15, 21, 27, 33, 39, NA, NA, NA, NA}),
+                  f(nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, kwds("shape", nd::array{6}, "offset", nd::array{-1})));
+
+  EXPECT_ARRAY_EQ((nd::array{NA, NA, 3, 6, 9, 12, 15, 18, 21, 24}),
+                  f(nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, kwds("shape", nd::array{3}, "offset", nd::array{-2})));
 }
+*/
 
-TEST(Neighborhood, Sum1D) {
-    nd::callable af = nd::functional::neighborhood(nd::functional::apply(&sum<1>), 1);
-    nd::array a;
-
-    a = parse_json("4 * int",
-        "[0, 1, 2, 3]");
-
-    EXPECT_JSON_EQ_ARR("[3, 6, 5, 3]",
-        af(a, kwds("shape", parse_json("1 * int", "[3]"))));
-
-    EXPECT_JSON_EQ_ARR("[1, 3, 6, 5]",
-        af(a, kwds("shape", parse_json("1 * int", "[3]"), "offset", parse_json("1 * int", "[-1]"))));
-
-    EXPECT_JSON_EQ_ARR("[3, 1, 2, 3]",
-        af(a, kwds("mask", parse_json("4 * bool", "[true, false, false, true]"))));
-
-    EXPECT_JSON_EQ_ARR("[3, 5, 3, 0]",
-        af(a, kwds("mask", parse_json("4 * bool", "[false, true, true, false]"))));
-
-    EXPECT_JSON_EQ_ARR("[2, 3, 1, 2]",
-        af(a, kwds("mask", parse_json("4 * bool", "[true, false, false, true]"), "offset", parse_json("1 * int", "[-1]"))));
-
-    EXPECT_JSON_EQ_ARR("[1, 3, 5, 3]",
-        af(a, kwds("mask", parse_json("4 * bool", "[false, true, true, false]"), "offset", parse_json("1 * int", "[-1]"))));
-
-    a = parse_json("10 * int",
-        "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]");
-
-    EXPECT_JSON_EQ_ARR("[15, 21, 27, 33, 39, 35, 30, 24, 17, 9]",
-        af(a, kwds("shape", parse_json("1 * int", "[6]"))));
-
-    EXPECT_JSON_EQ_ARR("[6, 9, 12, 15, 18, 21, 14, 16, 8, 9]",
-        af(a, kwds("mask", parse_json("6 * bool", "[true, false, true, false, true, false]"))));
-
-    EXPECT_JSON_EQ_ARR("[10, 15, 21, 27, 33, 39, 35, 30, 24, 17]",
-        af(a, kwds("shape", parse_json("1 * int", "[6]"), "offset", parse_json("1 * int", "[-1]"))));
-
-    EXPECT_JSON_EQ_ARR("[3, 5, 7, 9, 11, 13, 15, 17, 9, 0]",
-        af(a, kwds("mask", parse_json("6 * bool", "[false, false, true, true, false, false]"), "offset", parse_json("1 * int", "[-1]"))));
-}
-
+/*
 TEST(Neighborhood, Sum2D) {
     nd::callable af = nd::functional::neighborhood(nd::functional::apply(&sum<2>), 2);
     nd::array a;
@@ -83,13 +61,15 @@ TEST(Neighborhood, Sum2D) {
         af(a, kwds("shape", parse_json("2 * int", "[3, 3]"))));
 
     EXPECT_JSON_EQ_ARR("[[25, 30, 27, 7], [45, 50, 43, 11], [48, 52, 40, 15], [13, 14, 15, 0]]",
-        af(a, kwds("mask", parse_json("3 * 3 * bool", "[[false, true, false], [true, true, true], [false, true, false]]"))));
+        af(a, kwds("mask", parse_json("3 * 3 * bool", "[[false, true, false], [true, true, true], [false, true,
+false]]"))));
 
     EXPECT_JSON_EQ_ARR("[[10, 18, 24, 18], [27, 45, 54, 39], [51, 81, 90, 63], [42, 66, 72, 50]]",
         af(a, kwds("shape", parse_json("2 * int", "[3, 3]"), "offset", parse_json("2 * int", "[-1, -1]"))));
 
     EXPECT_JSON_EQ_ARR("[[5, 8, 12, 12], [17, 25, 30, 27], [33, 45, 50, 43], [33, 48, 52, 40]]",
-        af(a, kwds("mask", parse_json("3 * 3 * bool", "[[false, true, false], [true, true, true], [false, true, false]]"),
+        af(a, kwds("mask", parse_json("3 * 3 * bool", "[[false, true, false], [true, true, true], [false, true,
+false]]"),
         "offset", parse_json("2 * int", "[-1, -1]"))));
 
     a = parse_json("6 * 5 * int",
@@ -102,11 +82,13 @@ TEST(Neighborhood, Sum2D) {
 
     EXPECT_JSON_EQ_ARR("[[30, 35, 40, 25, 18], [55, 60, 65, 40, 28], [80, 85, 90, 55, 38],"
         "[105, 110, 115, 70, 48], [68, 71, 74, 52, 24], [52, 54, 56, 28, 29]]",
-        af(a, kwds("mask", parse_json("3 * 3 * bool", "[[true, false, true], [false, true, false], [true, false, true]]"))));
+        af(a, kwds("mask", parse_json("3 * 3 * bool", "[[true, false, true], [false, true, false], [true, false,
+true]]"))));
 
     EXPECT_JSON_EQ_ARR("[[69, 75, 81, 37, 19], [99, 105, 111, 47, 24], [129, 135, 141, 57, 29],"
         "[66, 69, 72, 0, 0], [49, 51, 53, 0, 0], [27, 28, 29, 0, 0]]",
-        af(a, kwds("mask", parse_json("4 * 3 * bool", "[[false, false, true], [false, false, true], [false, false, true], [true, true, true]]"))));
+        af(a, kwds("mask", parse_json("4 * 3 * bool", "[[false, false, true], [false, false, true], [false, false,
+true], [true, true, true]]"))));
 
     EXPECT_JSON_EQ_ARR("[[54, 78, 105, 90, 72], [102, 144, 190, 160, 126], [165, 230, 300, 250, 195],"
         "[240, 330, 425, 350, 270], [222, 304, 390, 320, 246], [189, 258, 330, 270, 207]]",
@@ -128,7 +110,7 @@ TEST(Neighborhood, Sum2D) {
     EXPECT_JSON_EQ_ARR("[[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [3, 4, 0, 0, 0],"
         "[14, 12, 4, 0, 0], [29, 22, 9, 0, 0], [44, 32, 14, 0, 0]]",
         af(a, kwds("mask", parse_json("2 * 3 * bool", "[[true, false, true], [false, true, false]]"),
-        "offset", parse_json("2 * int", "[-3, 2]"))));   
+        "offset", parse_json("2 * int", "[-3, 2]"))));
 }
 
 TEST(Neighborhood, Sum3D) {
@@ -151,7 +133,8 @@ TEST(Neighborhood, Sum3D) {
         "[[518, 532, 346, 195], [574, 588, 382, 215], [385, 394, 267, 133], [225, 230, 139, 94]],"
         "[[397, 406, 279, 133], [433, 442, 303, 145], [306, 312, 210, 106], [151, 154, 109, 47]],"
         "[[265, 270, 163, 110], [285, 290, 175, 118], [175, 178, 121, 59], [122, 124, 62, 63]]]",
-        af(a, kwds("mask", parse_json("3 * 3 * 3 * bool", "[[[true, false, true], [false, true, false], [true, false, true]],"
+        af(a, kwds("mask", parse_json("3 * 3 * 3 * bool", "[[[true, false, true], [false, true, false], [true, false,
+true]],"
         "[[false, true, false], [true, false, true], [false, true, false]],"
         "[[true, false, true], [false, true, false], [true, false, true]]]"))));
 
@@ -165,10 +148,13 @@ TEST(Neighborhood, Sum3D) {
         "[[111, 173, 182, 123], [185, 294, 308, 202], [221, 350, 364, 238], [159, 241, 250, 171]],"
         "[[207, 317, 326, 219], [329, 518, 532, 346], [365, 574, 588, 382], [255, 385, 394, 267]],"
         "[[170, 258, 264, 178], [267, 397, 406, 279], [291, 433, 442, 303], [202, 306, 312, 210]]]",
-        af(a, kwds("mask", parse_json("3 * 3 * 3 * bool", "[[[true, false, true], [false, true, false], [true, false, true]],"
+        af(a, kwds("mask", parse_json("3 * 3 * 3 * bool", "[[[true, false, true], [false, true, false], [true, false,
+true]],"
         "[[false, true, false], [true, false, true], [false, true, false]],"
-        "[[true, false, true], [false, true, false], [true, false, true]]]"), "offset", parse_json("3 * int", "[-1, -1, -1]"))));
+        "[[true, false, true], [false, true, false], [true, false, true]]]"), "offset", parse_json("3 * int", "[-1, -1,
+-1]"))));
 }
+*/
 
 /*
     Todo: Make this 3D test pass.

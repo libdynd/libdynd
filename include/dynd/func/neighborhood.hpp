@@ -23,7 +23,7 @@ namespace nd {
      *                         '(Fixed * Fixed * NH, Fixed * Fixed * MSK) ->
      *OUT',
      */
-    DYND_API callable neighborhood(const callable &neighborhood_op, intptr_t nh_ndim);
+    DYND_API callable neighborhood(const callable &child, const callable &boundary_child = callable());
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
