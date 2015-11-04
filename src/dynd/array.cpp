@@ -1271,7 +1271,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
   char *src_arrmeta = get_ndo()->get_arrmeta();
   char *dst_arrmeta = res.get_arrmeta();
   for (intptr_t j = 0; j < i; ++j) {
-    dst_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, NULL);
+    dst_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, intrusive_ptr<memory_block_data>());
     src_tp = src_tp.get_type_at_dimension(&src_arrmeta, 1);
     dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
   }

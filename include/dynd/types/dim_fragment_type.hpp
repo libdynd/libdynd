@@ -86,7 +86,7 @@ namespace ndt {
                                 const intrusive_ptr<memory_block_data> &embedded_reference) const;
     size_t
     arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                  memory_block_data *embedded_reference) const;
+                                  const intrusive_ptr<memory_block_data> &embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
     virtual type with_element_type(const type &element_tp) const;

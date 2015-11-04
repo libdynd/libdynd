@@ -97,7 +97,7 @@ void ndt::typevar_dim_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta
 
 size_t ndt::typevar_dim_type::arrmeta_copy_construct_onedim(char *DYND_UNUSED(dst_arrmeta),
                                                             const char *DYND_UNUSED(src_arrmeta),
-                                                            memory_block_data *DYND_UNUSED(embedded_reference)) const
+                                                            const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of typevar type");
 }

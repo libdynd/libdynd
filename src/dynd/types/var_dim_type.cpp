@@ -397,13 +397,13 @@ void ndt::var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *sr
 }
 
 size_t ndt::var_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                                        memory_block_data *embedded_reference) const
+                                                        const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
   var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
   dst_md->stride = src_md->stride;
   dst_md->offset = src_md->offset;
-  dst_md->blockref = src_md->blockref ? src_md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
+  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
   return sizeof(var_dim_type_arrmeta);
 }
 

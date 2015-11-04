@@ -196,7 +196,7 @@ namespace ndt {
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
     size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                         memory_block_data *embedded_reference) const;
+                                         const intrusive_ptr<memory_block_data> &embedded_reference) const;
 
     size_t get_iterdata_size(intptr_t ndim) const;
     size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim,
