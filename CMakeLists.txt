@@ -446,7 +446,6 @@ set(libdynd_SRC
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     # src/dynd/config.cpp
-    src/dynd/dim_iter.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
     src/dynd/int128.cpp
@@ -460,7 +459,6 @@ set(libdynd_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
-    src/dynd/lowlevel_api.cpp
     src/dynd/parser_util.cpp
     src/dynd/shape_tools.cpp
     src/dynd/special.cpp
@@ -482,7 +480,6 @@ set(libdynd_SRC
     include/dynd/cling_all.hpp
     include/dynd/complex.hpp
     include/dynd/diagnostics.hpp
-    include/dynd/dim_iter.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/float16.hpp
     include/dynd/float128.hpp
@@ -500,7 +497,6 @@ set(libdynd_SRC
     include/dynd/json_formatter.hpp
     include/dynd/json_parser.hpp
     include/dynd/irange.hpp
-    include/dynd/lowlevel_api.hpp
     include/dynd/parser_util.hpp
     include/dynd/platform_definitions.hpp
     include/dynd/shortvector.hpp

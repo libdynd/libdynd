@@ -7,7 +7,6 @@
 
 #include <dynd/types/base_type.hpp>
 #include <dynd/string_encodings.hpp>
-#include <dynd/dim_iter.hpp>
 
 namespace dynd {
 namespace ndt {
