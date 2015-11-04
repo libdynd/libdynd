@@ -111,9 +111,10 @@ ndt::type ndt::base_struct_type::apply_linear_index(intptr_t nindices, const ira
 
 intptr_t ndt::base_struct_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                    const type &result_tp, char *out_arrmeta,
-                                                   const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
-                                                   const type &root_tp, bool leading_dimension, char **inout_data,
-                                                   memory_block_data **inout_dataref) const
+                                                   const intrusive_ptr<memory_block_data> &embedded_reference,
+                                                   size_t current_i, const type &root_tp, bool leading_dimension,
+                                                   char **inout_data,
+                                                   intrusive_ptr<memory_block_data> &inout_dataref) const
 {
   if (nindices == 0) {
     // If there are no more indices, copy the arrmeta verbatim
@@ -139,13 +140,15 @@ intptr_t ndt::base_struct_type::apply_linear_index(intptr_t nindices, const iran
                                                      result_tp, out_arrmeta, embedded_reference, current_i + 1, root_tp,
                                                      true, inout_data, inout_dataref);
         } else {
+          intrusive_ptr<memory_block_data> tmp;
           offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, arrmeta + arrmeta_offsets[start_index],
                                                       result_tp, out_arrmeta, embedded_reference, current_i + 1,
-                                                      root_tp, false, NULL, NULL);
+                                                      root_tp, false, NULL, tmp);
         }
       }
       return offset;
     } else {
+      intrusive_ptr<memory_block_data> tmp;
       intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_arrmeta);
       const struct_type *result_e_dt = result_tp.extended<struct_type>();
       for (intptr_t i = 0; i < dimension_size; ++i) {
@@ -156,7 +159,7 @@ intptr_t ndt::base_struct_type::apply_linear_index(intptr_t nindices, const iran
           out_offsets[i] +=
               dt.extended()->apply_linear_index(nindices - 1, indices + 1, arrmeta + arrmeta_offsets[idx], dt,
                                                 out_arrmeta + result_e_dt->get_arrmeta_offset(i), embedded_reference,
-                                                current_i + 1, root_tp, false, NULL, NULL);
+                                                current_i + 1, root_tp, false, NULL, tmp);
         }
       }
       return 0;

@@ -65,7 +65,7 @@ namespace ndt {
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
                                 char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                 const type &root_tp, bool leading_dimension, char **inout_data,
-                                memory_block_data **inout_dataref) const;
+                                intrusive_ptr<memory_block_data> &inout_dataref) const;
 
     virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                        std::map<std::string, type> &tp_vars) const;

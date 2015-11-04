@@ -105,7 +105,7 @@ intptr_t ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *ind
                                             const intrusive_ptr<memory_block_data> &embedded_reference,
                                             size_t current_i, const type &root_tp, bool DYND_UNUSED(leading_dimension),
                                             char **DYND_UNUSED(inout_data),
-                                            memory_block_data **DYND_UNUSED(inout_dataref)) const
+                                            intrusive_ptr<memory_block_data> &DYND_UNUSED(inout_dataref)) const
 {
   if (m_kgen->is_elwise()) {
     intptr_t undim = get_ndim();
@@ -123,10 +123,11 @@ intptr_t ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *ind
         pd->arrmeta_copy_construct(out_arrmeta + out_arrmeta_offsets[i], arrmeta + arrmeta_offsets[i],
                                    embedded_reference);
       } else {
+        intrusive_ptr<memory_block_data> tmp;
         size_t index_offset = undim - field_undim;
         intptr_t offset = pd->apply_linear_index(
             nindices - index_offset, indices + index_offset, arrmeta + arrmeta_offsets[i], out_fsd->get_field_type(i),
-            out_arrmeta + out_arrmeta_offsets[i], embedded_reference, current_i, root_tp, false, NULL, NULL);
+            out_arrmeta + out_arrmeta_offsets[i], embedded_reference, current_i, root_tp, false, NULL, tmp);
         if (offset != 0) {
           throw runtime_error("internal error: expr_type::apply_linear_index"
                               " expected 0 offset from pointer_type::apply_linear_index");

@@ -173,7 +173,7 @@ namespace ndt {
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
                                 char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                 const type &root_tp, bool leading_dimension, char **inout_data,
-                                memory_block_data **inout_dataref) const;
+                                intrusive_ptr<memory_block_data> &inout_dataref) const;
     type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
     type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;

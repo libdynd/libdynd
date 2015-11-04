@@ -115,10 +115,10 @@ ndt::type ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange 
 
 intptr_t ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                const type &result_tp, char *out_arrmeta,
-                                               const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
-                                               const type &root_tp, bool DYND_UNUSED(leading_dimension),
-                                               char **DYND_UNUSED(inout_data),
-                                               memory_block_data **DYND_UNUSED(inout_dataref)) const
+                                               const intrusive_ptr<memory_block_data> &embedded_reference,
+                                               size_t current_i, const type &root_tp,
+                                               bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
+                                               intrusive_ptr<memory_block_data> &DYND_UNUSED(inout_dataref)) const
 {
   const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
   pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
@@ -126,11 +126,12 @@ intptr_t ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange *
   out_md->blockref = md->blockref;
   out_md->offset = md->offset;
   if (!m_target_tp.is_builtin()) {
+    intrusive_ptr<memory_block_data> tmp;
     const pointer_type *pdt = result_tp.extended<pointer_type>();
     // The indexing may cause a change to the arrmeta offset
     out_md->offset += m_target_tp.extended()->apply_linear_index(
         nindices, indices, arrmeta + sizeof(pointer_type_arrmeta), pdt->m_target_tp,
-        out_arrmeta + sizeof(pointer_type_arrmeta), embedded_reference, current_i, root_tp, false, NULL, NULL);
+        out_arrmeta + sizeof(pointer_type_arrmeta), embedded_reference, current_i, root_tp, false, NULL, tmp);
   }
   return 0;
 }
