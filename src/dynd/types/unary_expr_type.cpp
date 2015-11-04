@@ -65,7 +65,7 @@ intptr_t ndt::unary_expr_type::apply_linear_index(intptr_t nindices, const irang
                                                   const intrusive_ptr<memory_block_data> &embedded_reference,
                                                   size_t current_i, const type &DYND_UNUSED(root_tp),
                                                   bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
-                                                  memory_block_data **DYND_UNUSED(inout_dataref)) const
+                                                  intrusive_ptr<memory_block_data> &DYND_UNUSED(inout_dataref)) const
 {
   if (m_kgen->is_elwise()) {
     // Scalar behavior

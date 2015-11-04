@@ -123,9 +123,10 @@ ndt::type ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irang
 
 intptr_t ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                  const type &result_tp, char *out_arrmeta,
-                                                 const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
-                                                 const type &root_tp, bool leading_dimension, char **inout_data,
-                                                 memory_block_data **inout_dataref) const
+                                                 const intrusive_ptr<memory_block_data> &embedded_reference,
+                                                 size_t current_i, const type &root_tp, bool leading_dimension,
+                                                 char **inout_data,
+                                                 intrusive_ptr<memory_block_data> &inout_dataref) const
 {
   const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(arrmeta);
   fixed_dim_type_arrmeta *out_md = reinterpret_cast<fixed_dim_type_arrmeta *>(out_arrmeta);
@@ -139,6 +140,7 @@ intptr_t ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange
     apply_single_linear_index(*indices, m_dim_size, current_i, &root_tp, remove_dimension, start_index, index_stride,
                               dimension_size);
     if (remove_dimension) {
+      intrusive_ptr<memory_block_data> tmp;
       // Apply the strided offset and continue applying the index
       intptr_t offset = md->stride * start_index;
       if (!m_element_tp.is_builtin()) {
@@ -153,11 +155,12 @@ intptr_t ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange
         } else {
           offset += m_element_tp.extended()->apply_linear_index(
               nindices - 1, indices + 1, arrmeta + sizeof(fixed_dim_type_arrmeta), result_tp, out_arrmeta,
-              embedded_reference, current_i + 1, root_tp, false, NULL, NULL);
+              embedded_reference, current_i + 1, root_tp, false, NULL, tmp);
         }
       }
       return offset;
     } else {
+      intrusive_ptr<memory_block_data> tmp;
       // Produce the new offset data, stride, and size for the resulting array
       intptr_t offset = md->stride * start_index;
       out_md->stride = md->stride * index_stride;
@@ -167,7 +170,7 @@ intptr_t ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange
         offset += m_element_tp.extended()->apply_linear_index(
             nindices - 1, indices + 1, arrmeta + sizeof(fixed_dim_type_arrmeta), result_etp->get_element_type(),
             out_arrmeta + sizeof(fixed_dim_type_arrmeta), embedded_reference, current_i + 1, root_tp, false, NULL,
-            NULL);
+            tmp);
       }
       return offset;
     }
@@ -309,8 +312,9 @@ void ndt::fixed_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *
   }
 }
 
-size_t ndt::fixed_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                                          const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+size_t ndt::fixed_dim_type::arrmeta_copy_construct_onedim(
+    char *dst_arrmeta, const char *src_arrmeta,
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   const fixed_dim_type_arrmeta *src_md = reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
   fixed_dim_type_arrmeta *dst_md = reinterpret_cast<fixed_dim_type_arrmeta *>(dst_arrmeta);

@@ -54,7 +54,7 @@ intptr_t ndt::typevar_type::apply_linear_index(intptr_t DYND_UNUSED(nindices), c
                                                const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference),
                                                size_t DYND_UNUSED(current_i), const type &DYND_UNUSED(root_tp),
                                                bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
-                                               memory_block_data **DYND_UNUSED(inout_dataref)) const
+                                               intrusive_ptr<memory_block_data> &DYND_UNUSED(inout_dataref)) const
 {
   throw type_error("Cannot store data of typevar type");
 }

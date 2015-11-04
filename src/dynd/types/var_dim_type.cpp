@@ -151,9 +151,9 @@ ndt::type ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange 
 
 intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                const type &result_tp, char *out_arrmeta,
-                                               const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
-                                               const type &root_tp, bool leading_dimension, char **inout_data,
-                                               memory_block_data **inout_dataref) const
+                                               const intrusive_ptr<memory_block_data> &embedded_reference,
+                                               size_t current_i, const type &root_tp, bool leading_dimension,
+                                               char **inout_data, intrusive_ptr<memory_block_data> &inout_dataref) const
 {
   if (nindices == 0) {
     // If there are no more indices, copy the arrmeta verbatim
@@ -170,11 +170,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
       if (remove_dimension) {
         // First dereference to point at the actual element
         *inout_data = d->begin + md->offset + start_index * md->stride;
-        if (*inout_dataref) {
-          memory_block_decref(*inout_dataref);
-        }
-        *inout_dataref = md->blockref ? md->blockref.get() : embedded_reference.get();
-        memory_block_incref(*inout_dataref);
+        inout_dataref = md->blockref ? md->blockref : embedded_reference;
         // Then apply a 0-sized index to the element type
         if (!m_element_tp.is_builtin()) {
           return m_element_tp.extended()->apply_linear_index(
@@ -184,6 +180,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
           return 0;
         }
       } else if (indices->is_nop()) {
+        intrusive_ptr<memory_block_data> tmp;
         // If the indexing operation does nothing, then leave things unchanged
         var_dim_type_arrmeta *out_md = reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
         out_md->blockref = md->blockref ? md->blockref : embedded_reference;
@@ -193,7 +190,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
           const var_dim_type *vad = result_tp.extended<var_dim_type>();
           out_md->offset += m_element_tp.extended()->apply_linear_index(
               nindices - 1, indices + 1, arrmeta + sizeof(var_dim_type_arrmeta), vad->get_element_type(),
-              out_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference, current_i, root_tp, false, NULL, NULL);
+              out_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference, current_i, root_tp, false, NULL, tmp);
         }
         return 0;
       } else {
@@ -204,6 +201,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
       }
     } else {
       if (indices->step() == 0) {
+        intrusive_ptr<memory_block_data> tmp;
         // TODO: This is incorrect, but is here as a stopgap to be replaced by a
         // sliced<> type
         pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
@@ -213,11 +211,11 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
           const pointer_type *result_etp = result_tp.extended<pointer_type>();
           out_md->offset += m_element_tp.extended()->apply_linear_index(
               nindices - 1, indices + 1, arrmeta + sizeof(var_dim_type_arrmeta), result_etp->get_target_type(),
-              out_arrmeta + sizeof(pointer_type_arrmeta), embedded_reference, current_i + 1, root_tp, false, NULL,
-              NULL);
+              out_arrmeta + sizeof(pointer_type_arrmeta), embedded_reference, current_i + 1, root_tp, false, NULL, tmp);
         }
         return 0;
       } else if (indices->is_nop()) {
+        intrusive_ptr<memory_block_data> tmp;
         // If the indexing operation does nothing, then leave things unchanged
         var_dim_type_arrmeta *out_md = reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
         out_md->blockref = md->blockref ? md->blockref : embedded_reference;
@@ -227,7 +225,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
           const var_dim_type *vad = result_tp.extended<var_dim_type>();
           out_md->offset += m_element_tp.extended()->apply_linear_index(
               nindices - 1, indices + 1, arrmeta + sizeof(var_dim_type_arrmeta), vad->get_element_type(),
-              out_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference, current_i, root_tp, false, NULL, NULL);
+              out_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference, current_i, root_tp, false, NULL, tmp);
         }
         return 0;
       } else {
@@ -369,8 +367,8 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
   if (blockref_alloc) {
     base_type::flags_type flags = m_element_tp.get_flags();
     if (flags & type_flag_destructor) {
-      md->blockref = make_objectarray_memory_block(m_element_tp, arrmeta, element_size, 64,
-                                                   sizeof(var_dim_type_arrmeta));
+      md->blockref =
+          make_objectarray_memory_block(m_element_tp, arrmeta, element_size, 64, sizeof(var_dim_type_arrmeta));
     } else if (flags & type_flag_zeroinit) {
       md->blockref = make_zeroinit_memory_block(m_element_tp);
     } else {
@@ -396,8 +394,9 @@ void ndt::var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *sr
   }
 }
 
-size_t ndt::var_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                                        const intrusive_ptr<memory_block_data> &embedded_reference) const
+size_t
+ndt::var_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
+                                                 const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
   var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);

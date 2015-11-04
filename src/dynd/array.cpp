@@ -639,7 +639,7 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     }
     intptr_t offset = get_ndo()->m_type->apply_linear_index(
         nindices, indices, get_arrmeta(), dt, result.get_arrmeta(), m_memblock, 0, this_dt, collapse_leading,
-        &result.get_ndo()->data.ptr, result.get_ndo()->data.ref.get_ptr());
+        &result.get_ndo()->data.ptr, result.get_ndo()->data.ref);
     result.get_ndo()->data.ptr += offset;
     result.get_ndo()->m_flags = get_ndo()->m_flags;
     return result;
