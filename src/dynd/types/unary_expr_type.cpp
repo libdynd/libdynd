@@ -77,7 +77,7 @@ intptr_t ndt::unary_expr_type::apply_linear_index(
       // Copy any arrmeta verbatim
       if (get_arrmeta_size() > 0) {
         m_operand_type.extended()->arrmeta_copy_construct(out_arrmeta, arrmeta,
-                                                          embedded_reference);
+                                                          intrusive_ptr<memory_block_data>(embedded_reference));
       }
       return 0;
     } else {

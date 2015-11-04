@@ -102,7 +102,7 @@ namespace ndt {
                                            bool blockref_alloc) const;
     virtual void
     arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                           memory_block_data *embedded_reference) const;
+                           const intrusive_ptr<memory_block_data> &embedded_reference) const;
     virtual void arrmeta_destruct(char *arrmeta) const;
 
     virtual void data_alloc(char **data, size_t size) const = 0;

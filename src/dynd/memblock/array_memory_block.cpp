@@ -106,7 +106,7 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
     base_type_incref(preamble->m_type);
     preamble->m_type->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
                                              reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble),
-                                             ndo.get());
+                                             ndo);
   }
 
   return result;

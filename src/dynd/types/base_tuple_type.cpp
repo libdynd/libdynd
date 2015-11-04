@@ -195,7 +195,7 @@ intptr_t ndt::base_tuple_type::apply_linear_index(intptr_t nindices, const irang
 {
   if (nindices == 0) {
     // If there are no more indices, copy the arrmeta verbatim
-    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
+    arrmeta_copy_construct(out_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
     return 0;
   } else {
     const uintptr_t *offsets = get_data_offsets(arrmeta);
@@ -277,7 +277,7 @@ void ndt::base_tuple_type::arrmeta_default_construct(char *arrmeta, bool blockre
 }
 
 void ndt::base_tuple_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                                  memory_block_data *embedded_reference) const
+                                                  const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   uintptr_t *dst_data_offsets = get_arrmeta_data_offsets(dst_arrmeta);
   if (dst_data_offsets != 0) {

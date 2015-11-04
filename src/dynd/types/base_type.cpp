@@ -88,7 +88,7 @@ intptr_t ndt::base_type::apply_linear_index(intptr_t nindices, const irange *DYN
   // Default to scalar behavior
   if (nindices == 0) {
     // Copy any arrmeta verbatim
-    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
+    arrmeta_copy_construct(out_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
     return 0;
   } else {
     throw too_many_indices(type(this, true), current_i + nindices, current_i);
@@ -156,7 +156,7 @@ void ndt::base_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool 
 }
 
 void ndt::base_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                            memory_block_data *DYND_UNUSED(embedded_reference)) const
+                                            const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
 }
 

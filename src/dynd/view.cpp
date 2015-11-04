@@ -62,7 +62,7 @@ static bool try_view(const ndt::type &tp, const char *arrmeta, const ndt::type &
     if (tp == view_tp) {
       // require equal types otherwise
       if (tp.get_arrmeta_size() > 0) {
-        tp.extended()->arrmeta_copy_construct(view_arrmeta, arrmeta, embedded_reference);
+        tp.extended()->arrmeta_copy_construct(view_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
       }
       return true;
     } else if (tp.is_pod() && view_tp.is_pod() && tp.get_data_size() == view_tp.get_data_size() &&

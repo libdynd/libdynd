@@ -131,7 +131,7 @@ intptr_t ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange
   fixed_dim_type_arrmeta *out_md = reinterpret_cast<fixed_dim_type_arrmeta *>(out_arrmeta);
   if (nindices == 0) {
     // If there are no more indices, copy the rest verbatim
-    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
+    arrmeta_copy_construct(out_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
     return 0;
   } else {
     bool remove_dimension;
@@ -298,7 +298,7 @@ void ndt::fixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref
 }
 
 void ndt::fixed_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                                 memory_block_data *embedded_reference) const
+                                                 const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   const fixed_dim_type_arrmeta *src_md = reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
   fixed_dim_type_arrmeta *dst_md = reinterpret_cast<fixed_dim_type_arrmeta *>(dst_arrmeta);

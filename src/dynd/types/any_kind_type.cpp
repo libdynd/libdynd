@@ -117,7 +117,7 @@ void ndt::any_kind_type::arrmeta_default_construct(
 
 void ndt::any_kind_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    memory_block_data *DYND_UNUSED(embedded_reference)) const
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   stringstream ss;
   ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);

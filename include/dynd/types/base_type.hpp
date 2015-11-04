@@ -40,29 +40,25 @@ struct iterdata_common;
 
 /** This is the callback function type used by the base_type::foreach function
  */
-typedef void (*foreach_fn_t)(const ndt::type &dt, const char *arrmeta,
-                             char *data, void *callback_data);
+typedef void (*foreach_fn_t)(const ndt::type &dt, const char *arrmeta, char *data, void *callback_data);
 
 /**
  * This is the iteration increment function used by iterdata. It increments the
  * iterator at the specified level, resetting all the more inner levels to 0.
  */
-typedef char *(*iterdata_increment_fn_t)(iterdata_common *iterdata,
-                                         intptr_t level);
+typedef char *(*iterdata_increment_fn_t)(iterdata_common *iterdata, intptr_t level);
 /**
  * This is the iteration advance function used by iterdata. It advances the
  * iterator at the specified level by the specified amount, resetting all the
  * more inner levels to 0.
  */
-typedef char *(*iterdata_advance_fn_t)(iterdata_common *iterdata,
-                                       intptr_t level, intptr_t i);
+typedef char *(*iterdata_advance_fn_t)(iterdata_common *iterdata, intptr_t level, intptr_t i);
 /**
  * This is the reset function which is called when an outer dimension
  * increment resets all the lower dimensions to index 0. It returns
  * the data pointer for the next inner level of iteration.
  */
-typedef char *(*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data,
-                                     intptr_t ndim);
+typedef char *(*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data, intptr_t ndim);
 
 /**
  * This is a generic function which applies a transformation to a type.
@@ -74,10 +70,8 @@ typedef char *(*iterdata_reset_fn_t)(iterdata_common *iterdata, char *data,
  * should place a different type in 'out_transformed_type', then set
  * 'out_was_transformed' to true.
  */
-typedef void (*type_transform_fn_t)(const ndt::type &dt,
-                                    intptr_t arrmeta_offset, void *extra,
-                                    ndt::type &out_transformed_type,
-                                    bool &out_was_transformed);
+typedef void (*type_transform_fn_t)(const ndt::type &dt, intptr_t arrmeta_offset, void *extra,
+                                    ndt::type &out_transformed_type, bool &out_was_transformed);
 
 // Common preamble of all iterdata instances
 struct DYND_API iterdata_common {
@@ -114,12 +108,10 @@ namespace ndt {
      *  with no pointers, var dims, etc in between. */
     int8_t strided_ndim;
 
-    base_type_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_,
-                      flags_type flags_, size_t data_size_,
+    base_type_members(uint16_t type_id_, uint8_t kind_, uint8_t data_alignment_, flags_type flags_, size_t data_size_,
                       size_t arrmeta_size_, int8_t ndim_, int8_t strided_ndim_)
-        : type_id(type_id_), kind(kind_), data_alignment(data_alignment_),
-          flags(flags_), data_size(data_size_), arrmeta_size(arrmeta_size_),
-          ndim(ndim_), strided_ndim(strided_ndim_)
+        : type_id(type_id_), kind(kind_), data_alignment(data_alignment_), flags(flags_), data_size(data_size_),
+          arrmeta_size(arrmeta_size_), ndim(ndim_), strided_ndim(strided_ndim_)
     {
     }
   };
@@ -147,23 +139,18 @@ namespace ndt {
 
   protected:
     // Helper function for array dimension types
-    void get_scalar_properties_and_functions(
-        std::vector<std::pair<std::string, gfunc::callable>> &out_properties,
-        std::vector<std::pair<std::string, gfunc::callable>> &out_functions)
-        const;
+    void get_scalar_properties_and_functions(std::vector<std::pair<std::string, gfunc::callable>> &out_properties,
+                                             std::vector<std::pair<std::string, gfunc::callable>> &out_functions) const;
 
   public:
     typedef base_type_members::flags_type flags_type;
 
     /** Starts off the extended type instance with a use count of 1. */
-    inline base_type(type_id_t type_id, type_kind_t kind, size_t data_size,
-                     size_t alignment, flags_type flags, size_t arrmeta_size,
-                     size_t ndim, size_t strided_ndim)
+    inline base_type(type_id_t type_id, type_kind_t kind, size_t data_size, size_t alignment, flags_type flags,
+                     size_t arrmeta_size, size_t ndim, size_t strided_ndim)
         : m_use_count(1),
-          m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind),
-                    static_cast<uint8_t>(alignment), flags, data_size,
-                    arrmeta_size, static_cast<uint8_t>(ndim),
-                    static_cast<uint8_t>(strided_ndim))
+          m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind), static_cast<uint8_t>(alignment), flags,
+                    data_size, arrmeta_size, static_cast<uint8_t>(ndim), static_cast<uint8_t>(strided_ndim))
     {
     }
 
@@ -233,8 +220,7 @@ namespace ndt {
      * \param arrmeta  Pointer to the type arrmeta of the data element to print.
      * \param data  Pointer to the data element to print.
      */
-    virtual void print_data(std::ostream &o, const char *arrmeta,
-                            const char *data) const;
+    virtual void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     inline bool is_indexable() const
     {
@@ -288,10 +274,8 @@ namespace ndt {
      * \param out_was_transformed  Is set to true if a transformation was done,
      *                             is left alone otherwise.
      */
-    virtual void transform_child_types(type_transform_fn_t transform_fn,
-                                       intptr_t arrmeta_offset, void *extra,
-                                       ndt::type &out_transformed_type,
-                                       bool &out_was_transformed) const;
+    virtual void transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
+                                       ndt::type &out_transformed_type, bool &out_was_transformed) const;
 
     /**
      * Returns a modified type with all expression types replaced with
@@ -302,17 +286,13 @@ namespace ndt {
     virtual ndt::type get_canonical_type() const;
 
     /** Sets the value from a UTF8 string */
-    virtual void set_from_utf8_string(const char *arrmeta, char *data,
-                                      const char *utf8_begin,
-                                      const char *utf8_end,
+    virtual void set_from_utf8_string(const char *arrmeta, char *data, const char *utf8_begin, const char *utf8_end,
                                       const eval::eval_context *ectx) const;
     /** Copies a C++ std::string with a UTF8 encoding to a string element */
-    inline void set_from_utf8_string(const char *arrmeta, char *data,
-                                     const std::string &utf8_str,
+    inline void set_from_utf8_string(const char *arrmeta, char *data, const std::string &utf8_str,
                                      const eval::eval_context *ectx) const
     {
-      this->set_from_utf8_string(arrmeta, data, utf8_str.data(),
-                                 utf8_str.data() + utf8_str.size(), ectx);
+      this->set_from_utf8_string(arrmeta, data, utf8_str.data(), utf8_str.data() + utf8_str.size(), ectx);
     }
 
     /**
@@ -334,11 +314,8 @@ namespace ndt {
      *                           pointer part, so the result
      *                           doesn't contain that indirection.
      */
-    virtual ndt::type apply_linear_index(intptr_t nindices,
-                                         const irange *indices,
-                                         size_t current_i,
-                                         const ndt::type &root_tp,
-                                         bool leading_dimension) const;
+    virtual ndt::type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,
+                                         const ndt::type &root_tp, bool leading_dimension) const;
 
     /**
      * Indexes into an nd::array using the provided linear index, and a type and
@@ -389,13 +366,11 @@ namespace ndt {
      *
      * @return  An offset to apply to the data pointer(s).
      */
-    virtual intptr_t
-    apply_linear_index(intptr_t nindices, const irange *indices,
-                       const char *arrmeta, const ndt::type &result_type,
-                       char *out_arrmeta, memory_block_data *embedded_reference,
-                       size_t current_i, const ndt::type &root_tp,
-                       bool leading_dimension, char **inout_data,
-                       memory_block_data **inout_dataref) const;
+    virtual intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                                        const ndt::type &result_type, char *out_arrmeta,
+                                        memory_block_data *embedded_reference, size_t current_i,
+                                        const ndt::type &root_tp, bool leading_dimension, char **inout_data,
+                                        memory_block_data **inout_dataref) const;
 
     /**
      * The 'at' function is used for indexing. Indexing one dimension with
@@ -413,8 +388,7 @@ namespace ndt {
      *
      * \returns  The type that results from the indexing operation.
      */
-    virtual ndt::type at_single(intptr_t i0, const char **inout_arrmeta,
-                                const char **inout_data) const;
+    virtual ndt::type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
     /**
      * Retrieves the type starting at the requested dimension. This is
@@ -431,8 +405,7 @@ namespace ndt {
      *from the
      *                    type start, for producing error messages.
      */
-    virtual ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
-                                            intptr_t total_ndim = 0) const;
+    virtual ndt::type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 
     /**
      * Retrieves the shape of the type nd::array instance,
@@ -446,8 +419,7 @@ namespace ndt {
      *
      * The output must be pre-initialized to have 'ndim' elements.
      */
-    virtual void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                           const char *arrmeta, const char *data) const;
+    virtual void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
 
     /**
      * Retrieves the strides of the type nd::array instance,
@@ -457,8 +429,7 @@ namespace ndt {
      *
      * The output must be pre-initialized to have get_ndim() elements.
      */
-    virtual void get_strides(size_t i, intptr_t *out_strides,
-                             const char *arrmeta) const;
+    virtual void get_strides(size_t i, intptr_t *out_strides, const char *arrmeta) const;
 
     virtual bool is_c_contiguous(const char *arrmeta) const;
 
@@ -466,15 +437,13 @@ namespace ndt {
      * Classifies the order the axes occur in the memory
      * layout of the array.
      */
-    virtual axis_order_classification_t
-    classify_axis_order(const char *arrmeta) const;
+    virtual axis_order_classification_t classify_axis_order(const char *arrmeta) const;
 
     /**
      * Called by ::dynd::is_lossless_assignment, with (this ==
      * dst_tp->extended()).
      */
-    virtual bool is_lossless_assignment(const ndt::type &dst_tp,
-                                        const ndt::type &src_tp) const;
+    virtual bool is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_tp) const;
 
     virtual bool operator==(const base_type &rhs) const = 0;
 
@@ -496,8 +465,7 @@ namespace ndt {
      *                        the parent nd::array, and is useful for viewing
      *                        external memory with compatible layout.
      */
-    virtual void arrmeta_default_construct(char *arrmeta,
-                                           bool blockref_alloc) const;
+    virtual void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     /**
      * Constructs the nd::array arrmeta for this type, copying everything
      *exactly from
@@ -505,17 +473,14 @@ namespace ndt {
      *
      * \param dst_arrmeta  The new arrmeta memory which is constructed.
      * \param src_arrmeta   Existing arrmeta memory from which to copy.
-     * \param embedded_reference  For references which are NULL, add this
-     *reference in the output.
-     *                            A NULL means the data was embedded in the
-     *original nd::array, so
-     *                            when putting it in a new nd::array, need to
-     *hold a reference to
+     * \param embedded_reference  For references which are NULL, add this reference in the output.
+     *                            A NULL means the data was embedded in the original nd::array, so
+     *                            when putting it in a new nd::array, need to hold a reference to
      *                            that memory.
      */
-    virtual void
-    arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                           memory_block_data *embedded_reference) const;
+    virtual void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
+                                        const intrusive_ptr<memory_block_data> &embedded_reference) const;
+
     /** Destructs any references or other state contained in the nd::arrays'
      * arrmeta */
     virtual void arrmeta_destruct(char *arrmeta) const;
@@ -534,8 +499,7 @@ namespace ndt {
      */
     virtual void arrmeta_finalize_buffers(char *arrmeta) const;
     /** Debug print of the metdata */
-    virtual void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                                     const std::string &indent) const;
+    virtual void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
     /**
      * For types that have the flag type_flag_constructor set, this function
@@ -552,8 +516,7 @@ namespace ndt {
      * For types that have the flag type_flag_destructor set, this function
      * or the non-strided version is called to destruct data.
      */
-    virtual void data_destruct_strided(const char *arrmeta, char *data,
-                                       intptr_t stride, size_t count) const;
+    virtual void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
     /** The size of the data required for uniform iteration */
     virtual size_t get_iterdata_size(intptr_t ndim) const;
@@ -561,13 +524,10 @@ namespace ndt {
      * Constructs the iterdata for processing iteration at this level of the
      * datashape
      */
-    virtual size_t iterdata_construct(iterdata_common *iterdata,
-                                      const char **inout_arrmeta, intptr_t ndim,
-                                      const intptr_t *shape,
-                                      ndt::type &out_uniform_tp) const;
+    virtual size_t iterdata_construct(iterdata_common *iterdata, const char **inout_arrmeta, intptr_t ndim,
+                                      const intptr_t *shape, ndt::type &out_uniform_tp) const;
     /** Destructs any references or other state contained in the iterdata */
-    virtual size_t iterdata_destruct(iterdata_common *iterdata,
-                                     intptr_t ndim) const;
+    virtual size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
     /**
      * Creates an assignment kernel for one data value from the
@@ -582,12 +542,9 @@ namespace ndt {
      * \returns  The offset at the end of 'ckb' after adding this
      *           kernel.
      */
-    virtual intptr_t
-    make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                           const ndt::type &dst_tp, const char *dst_arrmeta,
-                           const ndt::type &src_tp, const char *src_arrmeta,
-                           kernel_request_t kernreq,
-                           const eval::eval_context *ectx) const;
+    virtual intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
+                                            const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
+                                            kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     /**
      * Creates a comparison kernel for one data value from one
@@ -602,16 +559,11 @@ namespace ndt {
      * \returns  The offset at the end of 'ckb' after adding this
      *           kernel.
      */
-    virtual size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                          const ndt::type &src0_dt,
-                                          const char *src0_arrmeta,
-                                          const ndt::type &src1_dt,
-                                          const char *src1_arrmeta,
-                                          comparison_type_t comptype,
-                                          const eval::eval_context *ectx) const;
+    virtual size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &src0_dt,
+                                          const char *src0_arrmeta, const ndt::type &src1_dt, const char *src1_arrmeta,
+                                          comparison_type_t comptype, const eval::eval_context *ectx) const;
 
-    virtual bool match(const char *arrmeta, const ndt::type &candidate_tp,
-                       const char *candidate_arrmeta,
+    virtual bool match(const char *arrmeta, const ndt::type &candidate_tp, const char *candidate_arrmeta,
                        std::map<std::string, ndt::type> &tp_vars) const;
 
     /**
@@ -626,28 +578,23 @@ namespace ndt {
      * \param callback  Callback function called for each subelement.
      * \param callback_data  Data provided to the callback function.
      */
-    virtual void foreach_leading(const char *arrmeta, char *data,
-                                 foreach_fn_t callback,
-                                 void *callback_data) const;
+    virtual void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback, void *callback_data) const;
 
-    virtual void
-    get_vars(std::unordered_set<std::string> &DYND_UNUSED(vars)) const
+    virtual void get_vars(std::unordered_set<std::string> &DYND_UNUSED(vars)) const
     {
     }
 
     /**
      * Additional dynamic properties exposed by the type as gfunc::callable.
      */
-    virtual void get_dynamic_type_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
+    virtual void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                             size_t *out_count) const;
 
     /**
      * Additional dynamic functions exposed by the type as gfunc::callable.
      */
-    virtual void get_dynamic_type_functions(
-        const std::pair<std::string, nd::callable> **out_functions,
-        size_t *out_count) const;
+    virtual void get_dynamic_type_functions(const std::pair<std::string, nd::callable> **out_functions,
+                                            size_t *out_count) const;
 
     /**
      * Additional dynamic properties exposed by any nd::array of this type as
@@ -659,9 +606,8 @@ namespace ndt {
      *type in an array type, not
      *       just strictly of the non-array data type.
      */
-    virtual void get_dynamic_array_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
-        size_t *out_count) const;
+    virtual void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                                              size_t *out_count) const;
 
     /**
      * Additional dynamic functions exposed by any nd::array of this type as
@@ -672,9 +618,8 @@ namespace ndt {
      *       they are the first non-array data type in an array type, not
      *       just strictly of the non-array data type.
      */
-    virtual void get_dynamic_array_functions(
-        const std::pair<std::string, gfunc::callable> **out_functions,
-        size_t *out_count) const;
+    virtual void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                                             size_t *out_count) const;
 
     /**
      * Returns the index for the element-wise property of the given name.
@@ -685,8 +630,7 @@ namespace ndt {
      *elwise_property
      *           functions.
      */
-    virtual size_t
-    get_elwise_property_index(const std::string &property_name) const;
+    virtual size_t get_elwise_property_index(const std::string &property_name) const;
 
     /**
      * Returns the type for the element-wise property of the given index.
@@ -700,8 +644,7 @@ namespace ndt {
      *
      * \returns  The type of the property.
      */
-    virtual ndt::type get_elwise_property_type(size_t elwise_property_index,
-                                               bool &out_readable,
+    virtual ndt::type get_elwise_property_type(size_t elwise_property_index, bool &out_readable,
                                                bool &out_writable) const;
 
     /**
@@ -717,10 +660,9 @@ namespace ndt {
      *get_elwise_property_index().
      * \param ectx  DyND evaluation context.
      */
-    virtual size_t make_elwise_property_getter_kernel(
-        void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-        const char *src_arrmeta, size_t src_elwise_property_index,
-        kernel_request_t kernreq, const eval::eval_context *ectx) const;
+    virtual size_t make_elwise_property_getter_kernel(void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+                                                      const char *src_arrmeta, size_t src_elwise_property_index,
+                                                      kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     /**
      * Returns a kernel to transform instances of the element-wise property
@@ -739,10 +681,9 @@ namespace ndt {
      * \param src_arrmeta  Arrmeta for the source property being read from.
      * \param ectx  DyND evaluation contrext.
      */
-    virtual size_t make_elwise_property_setter_kernel(
-        void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-        size_t dst_elwise_property_index, const char *src_arrmeta,
-        kernel_request_t kernreq, const eval::eval_context *ectx) const;
+    virtual size_t make_elwise_property_setter_kernel(void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+                                                      size_t dst_elwise_property_index, const char *src_arrmeta,
+                                                      kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
     /**
      * Produces forward and reverse callables for adapting the operand
@@ -751,8 +692,7 @@ namespace ndt {
      *
      * \returns  True if the adapt is ok, false otherwise.
      */
-    virtual bool adapt_type(const ndt::type &operand_tp, const std::string &op,
-                            nd::callable &out_forward,
+    virtual bool adapt_type(const ndt::type &operand_tp, const std::string &op, nd::callable &out_forward,
                             nd::callable &out_reverse) const;
     /**
      * Produces forward and reverse callables for adapting the current type
@@ -761,9 +701,7 @@ namespace ndt {
      *
      * \returns  True if the adapt is ok, false otherwise.
      */
-    virtual bool reverse_adapt_type(const ndt::type &value_tp,
-                                    const std::string &op,
-                                    nd::callable &out_forward,
+    virtual bool reverse_adapt_type(const ndt::type &value_tp, const std::string &op, nd::callable &out_forward,
                                     nd::callable &out_reverse) const;
 
     friend void base_type_incref(const base_type *ed);
@@ -832,8 +770,7 @@ namespace ndt {
   inline intptr_t get_base_type_data_size(const base_type *bt)
   {
     if (is_builtin_type(bt)) {
-      return static_cast<intptr_t>(
-          detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(bt)]);
+      return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(bt)]);
     } else {
       return bt->get_data_size();
     }
@@ -847,8 +784,7 @@ namespace ndt {
   inline type_kind_t get_base_type_kind(const base_type *bt)
   {
     if (is_builtin_type(bt)) {
-      return static_cast<type_kind_t>(
-          detail::builtin_kinds[reinterpret_cast<uintptr_t>(bt)]);
+      return static_cast<type_kind_t>(detail::builtin_kinds[reinterpret_cast<uintptr_t>(bt)]);
     } else {
       return bt->get_kind();
     }
@@ -862,8 +798,7 @@ namespace ndt {
   inline size_t get_base_type_alignment(const base_type *bt)
   {
     if (is_builtin_type(bt)) {
-      return static_cast<size_t>(
-          detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(bt)]);
+      return static_cast<size_t>(detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(bt)]);
     } else {
       return bt->get_data_alignment();
     }

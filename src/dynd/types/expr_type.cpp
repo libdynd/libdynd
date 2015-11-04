@@ -135,7 +135,7 @@ intptr_t ndt::expr_type::apply_linear_index(
       if (nindices + field_undim <= undim) {
         pd->arrmeta_copy_construct(out_arrmeta + out_arrmeta_offsets[i],
                                    arrmeta + arrmeta_offsets[i],
-                                   embedded_reference);
+                                   intrusive_ptr<memory_block_data>(embedded_reference));
       } else {
         size_t index_offset = undim - field_undim;
         intptr_t offset = pd->apply_linear_index(

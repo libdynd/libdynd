@@ -157,7 +157,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
 {
   if (nindices == 0) {
     // If there are no more indices, copy the arrmeta verbatim
-    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
+    arrmeta_copy_construct(out_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
     return 0;
   } else {
     const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
@@ -383,7 +383,7 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
 }
 
 void ndt::var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                               memory_block_data *embedded_reference) const
+                                               const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
   var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);

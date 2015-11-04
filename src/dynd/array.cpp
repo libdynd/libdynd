@@ -1281,7 +1281,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
     dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
   }
   if (!dst_tp.is_builtin()) {
-    dst_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, NULL);
+    dst_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, intrusive_ptr<memory_block_data>());
   }
 
   return res;
@@ -1795,7 +1795,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {
       field_dt.extended()->arrmeta_copy_construct(reinterpret_cast<char *>(pmeta + 1), field_values[i].get_arrmeta(),
-                                                  &field_values[i].get_ndo()->m_memblockdata);
+                                                  field_values[i].get_memblock());
     }
   }
 
@@ -1820,7 +1820,7 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const 
     const ndt::type &val_tp = val.get_type();
     if (val_tp.get_arrmeta_size() > 0) {
       val_tp.extended()->arrmeta_copy_construct(arrmeta + sizeof(pointer_type_arrmeta), val.get_arrmeta(),
-                                                val.get_memblock().get());
+                                                val.get_memblock());
     }
     // Copy the pointer
     *reinterpret_cast<char **>(data) = const_cast<char *>(val.get_readonly_originptr());
