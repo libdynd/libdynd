@@ -41,8 +41,8 @@ void nd::array::swap(array &rhs)
 }
 
 template <class T>
-inline typename std::enable_if<is_dynd_scalar<T>::value, intrusive_ptr<memory_block_data>>::type make_builtin_scalar_array(const T &value,
-                                                                                                        uint64_t flags)
+inline typename std::enable_if<is_dynd_scalar<T>::value, intrusive_ptr<memory_block_data>>::type
+make_builtin_scalar_array(const T &value, uint64_t flags)
 {
   char *data_ptr = NULL;
   intrusive_ptr<memory_block_data> result = make_array_memory_block(0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
@@ -137,7 +137,8 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intp
 
 nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t ndim, const intptr_t *shape,
                                            const intptr_t *strides, int64_t access_flags, char *data_ptr,
-                                           const intrusive_ptr<memory_block_data> &data_reference, char **out_uniform_arrmeta)
+                                           const intrusive_ptr<memory_block_data> &data_reference,
+                                           char **out_uniform_arrmeta)
 {
   if (out_uniform_arrmeta == NULL && !uniform_tp.is_builtin() && uniform_tp.extended()->get_arrmeta_size() > 0) {
     stringstream ss;
@@ -636,9 +637,9 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
       // If the data reference is NULL, the data is embedded in the array itself
       result.get_ndo()->data.ref = m_memblock;
     }
-    intptr_t offset = get_ndo()->m_type->apply_linear_index(nindices, indices, get_arrmeta(), dt, result.get_arrmeta(),
-                                                            m_memblock.get(), 0, this_dt, collapse_leading,
-                                                            &result.get_ndo()->data.ptr, result.get_ndo()->data.ref.get_ptr());
+    intptr_t offset = get_ndo()->m_type->apply_linear_index(
+        nindices, indices, get_arrmeta(), dt, result.get_arrmeta(), m_memblock, 0, this_dt, collapse_leading,
+        &result.get_ndo()->data.ptr, result.get_ndo()->data.ref.get_ptr());
     result.get_ndo()->data.ptr += offset;
     result.get_ndo()->m_flags = get_ndo()->m_flags;
     return result;
@@ -683,8 +684,8 @@ void nd::array::flag_as_immutable()
     // More than one reference to the array itself
     ok = false;
   } else if (get_ndo()->data.ref && (get_ndo()->data.ref->m_use_count != 1 ||
-                                             !(get_ndo()->data.ref->m_type == fixed_size_pod_memory_block_type ||
-                                               get_ndo()->data.ref->m_type == pod_memory_block_type))) {
+                                     !(get_ndo()->data.ref->m_type == fixed_size_pod_memory_block_type ||
+                                       get_ndo()->data.ref->m_type == pod_memory_block_type))) {
     // More than one reference to the array's data, or the reference is to
     // something
     // other than a memblock owning its data, such as an external memblock.
@@ -1789,8 +1790,8 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     pointer_type_arrmeta *pmeta;
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get_arrmeta() + arrmeta_offsets[i]);
     pmeta->offset = 0;
-    pmeta->blockref = field_values[i].get_ndo()->data.ref ? field_values[i].get_ndo()->data.ref
-                                                          : intrusive_ptr<memory_block_data>(&field_values[i].get_ndo()->m_memblockdata);
+    pmeta->blockref =
+        field_values[i].get_ndo()->data.ref ? field_values[i].get_ndo()->data.ref : field_values[i].get_memblock();
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {

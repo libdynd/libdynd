@@ -123,7 +123,7 @@ ndt::type ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irang
 
 intptr_t ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                  const type &result_tp, char *out_arrmeta,
-                                                 memory_block_data *embedded_reference, size_t current_i,
+                                                 const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                                  const type &root_tp, bool leading_dimension, char **inout_data,
                                                  memory_block_data **inout_dataref) const
 {
@@ -131,7 +131,7 @@ intptr_t ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange
   fixed_dim_type_arrmeta *out_md = reinterpret_cast<fixed_dim_type_arrmeta *>(out_arrmeta);
   if (nindices == 0) {
     // If there are no more indices, copy the rest verbatim
-    arrmeta_copy_construct(out_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
+    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
     return 0;
   } else {
     bool remove_dimension;

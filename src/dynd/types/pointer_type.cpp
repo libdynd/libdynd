@@ -115,7 +115,7 @@ ndt::type ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange 
 
 intptr_t ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                const type &result_tp, char *out_arrmeta,
-                                               memory_block_data *embedded_reference, size_t current_i,
+                                               const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                                const type &root_tp, bool DYND_UNUSED(leading_dimension),
                                                char **DYND_UNUSED(inout_data),
                                                memory_block_data **DYND_UNUSED(inout_dataref)) const
@@ -394,7 +394,7 @@ static nd::array array_function_dereference(const nd::array &self)
   // Create an array without the pointers
   nd::array result(make_array_memory_block(dt.get_arrmeta_size()));
   if (!dt.is_builtin()) {
-    dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, intrusive_ptr<memory_block_data>(&self.get_ndo()->m_memblockdata));
+    dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, self.get_memblock());
   }
   result.get_ndo()->m_type = dt.release();
   result.get_ndo()->data.ptr = data;

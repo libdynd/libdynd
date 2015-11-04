@@ -80,7 +80,7 @@ ndt::type ndt::base_type::apply_linear_index(intptr_t nindices, const irange *DY
 
 intptr_t ndt::base_type::apply_linear_index(intptr_t nindices, const irange *DYND_UNUSED(indices), const char *arrmeta,
                                             const type &DYND_UNUSED(result_tp), char *out_arrmeta,
-                                            memory_block_data *embedded_reference, size_t current_i,
+                                            const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                             const type &DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension),
                                             char **DYND_UNUSED(inout_data),
                                             memory_block_data **DYND_UNUSED(inout_dataref)) const
@@ -88,7 +88,7 @@ intptr_t ndt::base_type::apply_linear_index(intptr_t nindices, const irange *DYN
   // Default to scalar behavior
   if (nindices == 0) {
     // Copy any arrmeta verbatim
-    arrmeta_copy_construct(out_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
+    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
     return 0;
   } else {
     throw too_many_indices(type(this, true), current_i + nindices, current_i);
