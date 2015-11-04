@@ -1423,7 +1423,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const
   if (m_memblock.get()) {
     const array_preamble *ndo = get_ndo();
     o << " address: " << (void *)m_memblock.get() << "\n";
-    o << " refcount: " << ndo->m_memblockdata.m_use_count << "\n";
+    o << " refcount: " << ndo->m_use_count << "\n";
     o << " type:\n";
     o << "  pointer: " << (void *)ndo->m_type << "\n";
     o << "  type: " << get_type() << "\n";

@@ -18,9 +18,7 @@ namespace dynd {
  * arrmeta after this structure is determined by the m_type
  * object.
  */
-struct DYND_API array_preamble {
-  memory_block_data m_memblockdata;
-
+struct DYND_API array_preamble : memory_block_data {
   /**
    * m_type is overloaded - for builtin scalar types, it
    * simply contains the type id. If (m_type&~builtin_type_id_mask)
