@@ -30,7 +30,7 @@ using namespace dynd;
  * \returns If it worked, returns true, otherwise false.
  */
 static bool try_view(const ndt::type &tp, const char *arrmeta, const ndt::type &view_tp, char *view_arrmeta,
-                     dynd::memory_block_data *embedded_reference)
+                     const intrusive_ptr<memory_block_data> &embedded_reference)
 {
   switch (tp.get_type_id()) {
   case fixed_dim_type_id: {
@@ -230,45 +230,46 @@ static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::typ
 {
   throw std::runtime_error("view_as_bytes is not yet implemented");
 
-/*
-  if (arr.get_type().get_flags() & type_flag_destructor && (arr.get_dtype().get_type_id() != string_type_id)) {
-    // Can't view arrays of object type
-    return nd::array();
-  }
+  /*
+    if (arr.get_type().get_flags() & type_flag_destructor && (arr.get_dtype().get_type_id() != string_type_id)) {
+      // Can't view arrays of object type
+      return nd::array();
+    }
 
-  // Get the essential components of the array to analyze
-  memory_block_ptr data_ref = arr.get_data_memblock();
-  char *data_ptr = arr.get_ndo()->data.ptr;
-  ndt::type data_tp = arr.get_type();
-  const char *data_meta = arr.get_arrmeta();
-  intptr_t data_dim_size = -1, data_stride = 0;
-  // Repeatedly refine the data
-  while (data_tp.get_type_id() != uninitialized_type_id) {
-    refine_bytes_view(data_ref, data_ptr, data_tp, data_meta, data_dim_size, data_stride);
-  }
-  // Check that it worked, and that the resulting data pointer is aligned
-  if (data_dim_size < 0 ||
-      !offset_is_aligned(reinterpret_cast<size_t>(data_ptr), tp.extended<ndt::bytes_type>()->get_target_alignment())) {
-    // This signals we could not view the data as a
-    // contiguous chunk of bytes
-    return nd::array();
-  }
+    // Get the essential components of the array to analyze
+    memory_block_ptr data_ref = arr.get_data_memblock();
+    char *data_ptr = arr.get_ndo()->data.ptr;
+    ndt::type data_tp = arr.get_type();
+    const char *data_meta = arr.get_arrmeta();
+    intptr_t data_dim_size = -1, data_stride = 0;
+    // Repeatedly refine the data
+    while (data_tp.get_type_id() != uninitialized_type_id) {
+      refine_bytes_view(data_ref, data_ptr, data_tp, data_meta, data_dim_size, data_stride);
+    }
+    // Check that it worked, and that the resulting data pointer is aligned
+    if (data_dim_size < 0 ||
+        !offset_is_aligned(reinterpret_cast<size_t>(data_ptr), tp.extended<ndt::bytes_type>()->get_target_alignment()))
+  {
+      // This signals we could not view the data as a
+      // contiguous chunk of bytes
+      return nd::array();
+    }
 
-  char *result_data_ptr = NULL;
-  nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(), tp.get_data_size(),
-                                           tp.get_data_alignment(), &result_data_ptr));
-  // Set the bytes extents
-//  reinterpret_cast<bytes *>(result_data_ptr)->assign(data_ptr, data_dim_size);
-  // Set the array arrmeta
-  array_preamble *ndo = result.get_ndo();
-  ndo->m_type = ndt::type(tp).release();
-  ndo->data.ptr = result_data_ptr;
-  ndo->data.ref = NULL;
-  ndo->m_flags = arr.get_flags();
-  // Set the bytes arrmeta
-  ndo_meta->blockref = data_ref.release();
-  return result;
-*/
+    char *result_data_ptr = NULL;
+    nd::array result(make_array_memory_block(tp.extended()->get_arrmeta_size(), tp.get_data_size(),
+                                             tp.get_data_alignment(), &result_data_ptr));
+    // Set the bytes extents
+  //  reinterpret_cast<bytes *>(result_data_ptr)->assign(data_ptr, data_dim_size);
+    // Set the array arrmeta
+    array_preamble *ndo = result.get_ndo();
+    ndo->m_type = ndt::type(tp).release();
+    ndo->data.ptr = result_data_ptr;
+    ndo->data.ref = NULL;
+    ndo->m_flags = arr.get_flags();
+    // Set the bytes arrmeta
+    ndo_meta->blockref = data_ref.release();
+    return result;
+  */
 }
 
 /*
@@ -379,13 +380,13 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
       if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
                    arr.get_arrmeta() + sizeof(var_dim_type_arrmeta),
                    tp.extended<ndt::base_dim_type>()->get_element_type(),
-                   result.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), arr.get_memblock().get())) {
+                   result.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), arr.get_memblock())) {
         return result;
       }
     }
   }
   // Otherwise try to copy the arrmeta as a view
-  else if (try_view(arr.get_type(), arr.get_arrmeta(), tp, result.get_arrmeta(), arr.get_memblock().get())) {
+  else if (try_view(arr.get_type(), arr.get_arrmeta(), tp, result.get_arrmeta(), arr.get_memblock())) {
     // If it succeeded, return it
     return result;
   }
@@ -409,9 +410,9 @@ nd::array nd::view(const nd::array &arr, const ndt::type &tp)
     }
   } else if (arr.get_type().get_type_id() == bytes_type_id) {
     // If it's a request to view raw bytes as something else
-//    nd::array result = view_from_bytes(arr, tp);
-//    if (!result.is_null()) {
-  //    return result;
+    //    nd::array result = view_from_bytes(arr, tp);
+    //    if (!result.is_null()) {
+    //    return result;
     //}
     return nd::array();
   } else if (arr.get_ndim() == tp.get_ndim()) {

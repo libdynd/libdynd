@@ -151,13 +151,13 @@ ndt::type ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange 
 
 intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                const type &result_tp, char *out_arrmeta,
-                                               memory_block_data *embedded_reference, size_t current_i,
+                                               const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                                const type &root_tp, bool leading_dimension, char **inout_data,
                                                memory_block_data **inout_dataref) const
 {
   if (nindices == 0) {
     // If there are no more indices, copy the arrmeta verbatim
-    arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
+    arrmeta_copy_construct(out_arrmeta, arrmeta, intrusive_ptr<memory_block_data>(embedded_reference));
     return 0;
   } else {
     const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
@@ -173,7 +173,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
         if (*inout_dataref) {
           memory_block_decref(*inout_dataref);
         }
-        *inout_dataref = md->blockref ? md->blockref.get() : embedded_reference;
+        *inout_dataref = md->blockref ? md->blockref.get() : embedded_reference.get();
         memory_block_incref(*inout_dataref);
         // Then apply a 0-sized index to the element type
         if (!m_element_tp.is_builtin()) {
@@ -186,7 +186,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
       } else if (indices->is_nop()) {
         // If the indexing operation does nothing, then leave things unchanged
         var_dim_type_arrmeta *out_md = reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
-        out_md->blockref = md->blockref ? md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
+        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
         out_md->stride = md->stride;
         out_md->offset = md->offset;
         if (!m_element_tp.is_builtin()) {
@@ -207,7 +207,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
         // TODO: This is incorrect, but is here as a stopgap to be replaced by a
         // sliced<> type
         pointer_type_arrmeta *out_md = reinterpret_cast<pointer_type_arrmeta *>(out_arrmeta);
-        out_md->blockref = md->blockref ? md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
+        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
         out_md->offset = indices->start() * md->stride;
         if (!m_element_tp.is_builtin()) {
           const pointer_type *result_etp = result_tp.extended<pointer_type>();
@@ -220,7 +220,7 @@ intptr_t ndt::var_dim_type::apply_linear_index(intptr_t nindices, const irange *
       } else if (indices->is_nop()) {
         // If the indexing operation does nothing, then leave things unchanged
         var_dim_type_arrmeta *out_md = reinterpret_cast<var_dim_type_arrmeta *>(out_arrmeta);
-        out_md->blockref = md->blockref ? md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
+        out_md->blockref = md->blockref ? md->blockref : embedded_reference;
         out_md->stride = md->stride;
         out_md->offset = md->offset;
         if (!m_element_tp.is_builtin()) {
@@ -383,13 +383,13 @@ void ndt::var_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
 }
 
 void ndt::var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                               memory_block_data *embedded_reference) const
+                                               const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
   var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
   dst_md->stride = src_md->stride;
   dst_md->offset = src_md->offset;
-  dst_md->blockref = src_md->blockref ? src_md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
+  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_copy_construct(dst_arrmeta + sizeof(var_dim_type_arrmeta),
                                                     src_arrmeta + sizeof(var_dim_type_arrmeta), embedded_reference);
@@ -397,13 +397,13 @@ void ndt::var_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *sr
 }
 
 size_t ndt::var_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                                        memory_block_data *embedded_reference) const
+                                                        const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta);
   var_dim_type_arrmeta *dst_md = reinterpret_cast<var_dim_type_arrmeta *>(dst_arrmeta);
   dst_md->stride = src_md->stride;
   dst_md->offset = src_md->offset;
-  dst_md->blockref = src_md->blockref ? src_md->blockref : intrusive_ptr<memory_block_data>(embedded_reference);
+  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
   return sizeof(var_dim_type_arrmeta);
 }
 

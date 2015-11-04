@@ -52,7 +52,7 @@ ndt::type ndt::base_memory_type::apply_linear_index(intptr_t nindices, const ira
 
 intptr_t ndt::base_memory_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                    const type &result_type, char *out_arrmeta,
-                                                   memory_block_data *embedded_reference, size_t current_i,
+                                                   const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                                    const type &root_tp, bool leading_dimension, char **inout_data,
                                                    memory_block_data **inout_dataref) const
 {
@@ -117,7 +117,7 @@ void ndt::base_memory_type::arrmeta_default_construct(char *arrmeta, bool blockr
 }
 
 void ndt::base_memory_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                                   memory_block_data *embedded_reference) const
+                                                   const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   if (!m_element_tp.is_builtin()) {
     m_element_tp.extended()->arrmeta_copy_construct(dst_arrmeta + m_storage_arrmeta_offset,

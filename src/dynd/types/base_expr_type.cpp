@@ -32,7 +32,7 @@ void ndt::base_expr_type::arrmeta_default_construct(char *arrmeta,
 
 void ndt::base_expr_type::arrmeta_copy_construct(
     char *dst_arrmeta, const char *src_arrmeta,
-    memory_block_data *embedded_reference) const
+    const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   const type &dt = get_operand_type();
   if (!dt.is_builtin()) {

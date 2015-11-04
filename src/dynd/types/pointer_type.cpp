@@ -115,7 +115,7 @@ ndt::type ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange 
 
 intptr_t ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                const type &result_tp, char *out_arrmeta,
-                                               memory_block_data *embedded_reference, size_t current_i,
+                                               const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                                const type &root_tp, bool DYND_UNUSED(leading_dimension),
                                                char **DYND_UNUSED(inout_data),
                                                memory_block_data **DYND_UNUSED(inout_dataref)) const
@@ -233,12 +233,12 @@ void ndt::pointer_type::arrmeta_default_construct(char *arrmeta, bool blockref_a
 }
 
 void ndt::pointer_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                               memory_block_data *embedded_reference) const
+                                               const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   // Copy the blockref, switching it to the embedded_reference if necessary
   const pointer_type_arrmeta *src_md = reinterpret_cast<const pointer_type_arrmeta *>(src_arrmeta);
   pointer_type_arrmeta *dst_md = reinterpret_cast<pointer_type_arrmeta *>(dst_arrmeta);
-  dst_md->blockref = src_md->blockref ? src_md->blockref : intrusive_ptr<memory_block_data>(embedded_reference, true);
+  dst_md->blockref = src_md->blockref ? src_md->blockref : embedded_reference;
   dst_md->offset = src_md->offset;
   // Copy the target arrmeta
   if (!m_target_tp.is_builtin()) {
@@ -394,7 +394,7 @@ static nd::array array_function_dereference(const nd::array &self)
   // Create an array without the pointers
   nd::array result(make_array_memory_block(dt.get_arrmeta_size()));
   if (!dt.is_builtin()) {
-    dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, &self.get_ndo()->m_memblockdata);
+    dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, self.get_memblock());
   }
   result.get_ndo()->m_type = dt.release();
   result.get_ndo()->data.ptr = data;

@@ -123,7 +123,7 @@ ndt::type ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irang
 
 intptr_t ndt::fixed_dim_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                  const type &result_tp, char *out_arrmeta,
-                                                 memory_block_data *embedded_reference, size_t current_i,
+                                                 const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                                  const type &root_tp, bool leading_dimension, char **inout_data,
                                                  memory_block_data **inout_dataref) const
 {
@@ -298,7 +298,7 @@ void ndt::fixed_dim_type::arrmeta_default_construct(char *arrmeta, bool blockref
 }
 
 void ndt::fixed_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                                 memory_block_data *embedded_reference) const
+                                                 const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   const fixed_dim_type_arrmeta *src_md = reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
   fixed_dim_type_arrmeta *dst_md = reinterpret_cast<fixed_dim_type_arrmeta *>(dst_arrmeta);
@@ -310,7 +310,7 @@ void ndt::fixed_dim_type::arrmeta_copy_construct(char *dst_arrmeta, const char *
 }
 
 size_t ndt::fixed_dim_type::arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                                          memory_block_data *DYND_UNUSED(embedded_reference)) const
+                                                          const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   const fixed_dim_type_arrmeta *src_md = reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta);
   fixed_dim_type_arrmeta *dst_md = reinterpret_cast<fixed_dim_type_arrmeta *>(dst_arrmeta);

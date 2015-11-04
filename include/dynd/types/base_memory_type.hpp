@@ -67,7 +67,7 @@ namespace ndt {
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices,
                                 const char *arrmeta, const type &result_type,
                                 char *out_arrmeta,
-                                memory_block_data *embedded_reference,
+                                const intrusive_ptr<memory_block_data> &embedded_reference,
                                 size_t current_i, const type &root_tp,
                                 bool leading_dimension, char **inout_data,
                                 memory_block_data **inout_dataref) const;
@@ -102,7 +102,7 @@ namespace ndt {
                                            bool blockref_alloc) const;
     virtual void
     arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                           memory_block_data *embedded_reference) const;
+                           const intrusive_ptr<memory_block_data> &embedded_reference) const;
     virtual void arrmeta_destruct(char *arrmeta) const;
 
     virtual void data_alloc(char **data, size_t size) const = 0;

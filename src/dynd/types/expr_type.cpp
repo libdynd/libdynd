@@ -13,13 +13,10 @@
 using namespace std;
 using namespace dynd;
 
-ndt::expr_type::expr_type(const type &value_type, const type &operand_type,
-                          const expr_kernel_generator *kgen)
-    : base_expr_type(
-          expr_type_id, expr_kind, operand_type.get_data_size(),
-          operand_type.get_data_alignment(),
-          inherited_flags(value_type.get_flags(), operand_type.get_flags()),
-          operand_type.get_arrmeta_size(), value_type.get_ndim()),
+ndt::expr_type::expr_type(const type &value_type, const type &operand_type, const expr_kernel_generator *kgen)
+    : base_expr_type(expr_type_id, expr_kind, operand_type.get_data_size(), operand_type.get_data_alignment(),
+                     inherited_flags(value_type.get_flags(), operand_type.get_flags()), operand_type.get_arrmeta_size(),
+                     value_type.get_ndim()),
       m_value_type(value_type), m_operand_type(operand_type), m_kgen(kgen)
 {
   if (operand_type.get_type_id() != tuple_type_id) {
@@ -39,8 +36,7 @@ ndt::expr_type::expr_type(const type &value_type, const type &operand_type,
     const type &ft = fsd->get_field_type(i);
     if (ft.get_type_id() != pointer_type_id) {
       stringstream ss;
-      ss << "each field of the expr_type's operand must be a pointer, field "
-         << i;
+      ss << "each field of the expr_type's operand must be a pointer, field " << i;
       ss << " is " << ft;
       throw runtime_error(ss.str());
     }
@@ -52,12 +48,10 @@ ndt::expr_type::~expr_type()
   expr_kernel_generator_decref(m_kgen);
 }
 
-void ndt::expr_type::print_data(std::ostream &DYND_UNUSED(o),
-                                const char *DYND_UNUSED(arrmeta),
+void ndt::expr_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
                                 const char *DYND_UNUSED(data)) const
 {
-  throw runtime_error(
-      "internal error: expr_type::print_data isn't supposed to be called");
+  throw runtime_error("internal error: expr_type::print_data isn't supposed to be called");
 }
 
 void ndt::expr_type::print_type(std::ostream &o) const
@@ -67,8 +61,7 @@ void ndt::expr_type::print_type(std::ostream &o) const
   o << "expr<";
   o << m_value_type;
   for (size_t i = 0; i != field_count; ++i) {
-    const pointer_type *pd =
-        static_cast<const pointer_type *>(fsd->get_field_type(i).extended());
+    const pointer_type *pd = static_cast<const pointer_type *>(fsd->get_field_type(i).extended());
     o << ", op" << i << "=" << pd->get_target_type();
   }
   o << ", expr=";
@@ -76,18 +69,15 @@ void ndt::expr_type::print_type(std::ostream &o) const
   o << ">";
 }
 
-ndt::type
-ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
-                                   size_t current_i, const type &root_tp,
-                                   bool DYND_UNUSED(leading_dimension)) const
+ndt::type ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,
+                                             const type &root_tp, bool DYND_UNUSED(leading_dimension)) const
 {
   if (m_kgen->is_elwise()) {
     intptr_t undim = get_ndim();
     const tuple_type *fsd = m_operand_type.extended<tuple_type>();
     size_t field_count = fsd->get_field_count();
 
-    type result_value_dt = m_value_type.apply_linear_index(
-        nindices, indices, current_i, root_tp, true);
+    type result_value_dt = m_value_type.apply_linear_index(nindices, indices, current_i, root_tp, true);
     vector<type> result_src_dt(field_count);
     // Apply the portion of the indexing to each of the src operand types
     for (size_t i = 0; i != field_count; ++i) {
@@ -97,9 +87,8 @@ ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
         result_src_dt[i] = dt;
       } else {
         size_t index_offset = undim - field_undim;
-        result_src_dt[i] = dt.apply_linear_index(nindices - index_offset,
-                                                 indices + index_offset,
-                                                 current_i, root_tp, false);
+        result_src_dt[i] =
+            dt.apply_linear_index(nindices - index_offset, indices + index_offset, current_i, root_tp, false);
       }
     }
     type result_operand_type = ndt::tuple_type::make(result_src_dt);
@@ -111,20 +100,18 @@ ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *indices,
   }
 }
 
-intptr_t ndt::expr_type::apply_linear_index(
-    intptr_t nindices, const irange *indices, const char *arrmeta,
-    const type &result_tp, char *out_arrmeta,
-    memory_block_data *embedded_reference, size_t current_i,
-    const type &root_tp, bool DYND_UNUSED(leading_dimension),
-    char **DYND_UNUSED(inout_data),
-    memory_block_data **DYND_UNUSED(inout_dataref)) const
+intptr_t ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
+                                            const type &result_tp, char *out_arrmeta,
+                                            const intrusive_ptr<memory_block_data> &embedded_reference,
+                                            size_t current_i, const type &root_tp, bool DYND_UNUSED(leading_dimension),
+                                            char **DYND_UNUSED(inout_data),
+                                            memory_block_data **DYND_UNUSED(inout_dataref)) const
 {
   if (m_kgen->is_elwise()) {
     intptr_t undim = get_ndim();
     const expr_type *out_ed = result_tp.extended<expr_type>();
     const tuple_type *fsd = m_operand_type.extended<tuple_type>();
-    const tuple_type *out_fsd =
-        static_cast<const tuple_type *>(out_ed->m_operand_type.extended());
+    const tuple_type *out_fsd = static_cast<const tuple_type *>(out_ed->m_operand_type.extended());
     const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
     const size_t *out_arrmeta_offsets = out_fsd->get_arrmeta_offsets_raw();
     size_t field_count = fsd->get_field_count();
@@ -133,20 +120,16 @@ intptr_t ndt::expr_type::apply_linear_index(
       const pointer_type *pd = fsd->get_field_type(i).extended<pointer_type>();
       intptr_t field_undim = pd->get_ndim();
       if (nindices + field_undim <= undim) {
-        pd->arrmeta_copy_construct(out_arrmeta + out_arrmeta_offsets[i],
-                                   arrmeta + arrmeta_offsets[i],
+        pd->arrmeta_copy_construct(out_arrmeta + out_arrmeta_offsets[i], arrmeta + arrmeta_offsets[i],
                                    embedded_reference);
       } else {
         size_t index_offset = undim - field_undim;
         intptr_t offset = pd->apply_linear_index(
-            nindices - index_offset, indices + index_offset,
-            arrmeta + arrmeta_offsets[i], out_fsd->get_field_type(i),
-            out_arrmeta + out_arrmeta_offsets[i], embedded_reference, current_i,
-            root_tp, false, NULL, NULL);
+            nindices - index_offset, indices + index_offset, arrmeta + arrmeta_offsets[i], out_fsd->get_field_type(i),
+            out_arrmeta + out_arrmeta_offsets[i], embedded_reference, current_i, root_tp, false, NULL, NULL);
         if (offset != 0) {
-          throw runtime_error(
-              "internal error: expr_type::apply_linear_index"
-              " expected 0 offset from pointer_type::apply_linear_index");
+          throw runtime_error("internal error: expr_type::apply_linear_index"
+                              " expected 0 offset from pointer_type::apply_linear_index");
         }
       }
     }
@@ -157,8 +140,7 @@ intptr_t ndt::expr_type::apply_linear_index(
   }
 }
 
-void ndt::expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                               const char *arrmeta,
+void ndt::expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta,
                                const char *DYND_UNUSED(data)) const
 {
   intptr_t undim = get_ndim();
@@ -177,16 +159,13 @@ void ndt::expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
     const type &dt = fsd->get_field_type(fi);
     size_t field_undim = dt.get_ndim();
     if (field_undim > 0) {
-      dt.extended()->get_shape(field_undim, 0, shape.get(),
-                               arrmeta ? (arrmeta + arrmeta_offsets[fi]) : NULL,
-                               NULL);
+      dt.extended()->get_shape(field_undim, 0, shape.get(), arrmeta ? (arrmeta + arrmeta_offsets[fi]) : NULL, NULL);
       incremental_broadcast(undim, bcast_shape.get(), field_undim, shape.get());
     }
   }
 
   // Copy this shape to the output
-  memcpy(out_shape + i, bcast_shape.get(),
-         min(undim, ndim - i) * sizeof(intptr_t));
+  memcpy(out_shape + i, bcast_shape.get(), min(undim, ndim - i) * sizeof(intptr_t));
 
   // If more shape is requested, get it from the value type
   if (ndim - i > undim) {
@@ -201,9 +180,7 @@ void ndt::expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
   }
 }
 
-bool
-ndt::expr_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
-                                       const type &DYND_UNUSED(src_tp)) const
+bool ndt::expr_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp), const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
@@ -216,15 +193,13 @@ bool ndt::expr_type::operator==(const base_type &rhs) const
     return false;
   } else {
     const expr_type *dt = static_cast<const expr_type *>(&rhs);
-    return m_value_type == dt->m_value_type &&
-           m_operand_type == dt->m_operand_type && m_kgen == dt->m_kgen;
+    return m_value_type == dt->m_value_type && m_operand_type == dt->m_operand_type && m_kgen == dt->m_kgen;
   }
 }
 
 namespace {
 template <int N>
-struct expr_type_offset_applier_extra
-    : nd::base_kernel<expr_type_offset_applier_extra<N>, 1> {
+struct expr_type_offset_applier_extra : nd::base_kernel<expr_type_offset_applier_extra<N>, 1> {
   typedef expr_type_offset_applier_extra<N> extra_type;
 
   size_t offsets[N];
@@ -249,8 +224,7 @@ struct expr_type_offset_applier_extra
   }
 };
 
-struct expr_type_offset_applier_general_extra
-    : nd::base_kernel<expr_type_offset_applier_general_extra, 1> {
+struct expr_type_offset_applier_general_extra : nd::base_kernel<expr_type_offset_applier_general_extra, 1> {
   typedef expr_type_offset_applier_general_extra extra_type;
 
   size_t src_count;
@@ -264,8 +238,7 @@ struct expr_type_offset_applier_general_extra
     for (size_t i = 0; i != src_count; ++i) {
       src_modified[i] = src[i] + offsets[i];
     }
-    ckernel_prefix *echild =
-        this->get_child(sizeof(extra_type) + src_count * sizeof(size_t));
+    ckernel_prefix *echild = this->get_child(sizeof(extra_type) + src_count * sizeof(size_t));
     expr_single_t opchild = echild->get_function<expr_single_t>();
     opchild(echild, dst, src_modified.get());
   }
@@ -273,15 +246,12 @@ struct expr_type_offset_applier_general_extra
   static void destruct(ckernel_prefix *self)
   {
     extra_type *e = reinterpret_cast<extra_type *>(self);
-    self->get_child(sizeof(extra_type) + e->src_count * sizeof(size_t))
-        ->destroy();
+    self->get_child(sizeof(extra_type) + e->src_count * sizeof(size_t))->destroy();
   }
 };
 } // anonymous namespace
 
-static size_t make_expr_type_offset_applier(void *ckb, kernel_request_t kernreq,
-                                            intptr_t ckb_offset,
-                                            size_t src_count,
+static size_t make_expr_type_offset_applier(void *ckb, kernel_request_t kernreq, intptr_t ckb_offset, size_t src_count,
                                             const intptr_t *src_data_offsets)
 {
   // A few specializations with fixed size, and a general case version
@@ -289,26 +259,22 @@ static size_t make_expr_type_offset_applier(void *ckb, kernel_request_t kernreq,
   // unary_expr type
   switch (src_count) {
   case 2: {
-    expr_type_offset_applier_extra<2> *e =
-        expr_type_offset_applier_extra<2>::make(ckb, kernreq, ckb_offset);
+    expr_type_offset_applier_extra<2> *e = expr_type_offset_applier_extra<2>::make(ckb, kernreq, ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
     return ckb_offset;
   }
   case 3: {
-    expr_type_offset_applier_extra<3> *e =
-        expr_type_offset_applier_extra<3>::make(ckb, kernreq, ckb_offset);
+    expr_type_offset_applier_extra<3> *e = expr_type_offset_applier_extra<3>::make(ckb, kernreq, ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
     return ckb_offset;
   }
   case 4: {
-    expr_type_offset_applier_extra<4> *e =
-        expr_type_offset_applier_extra<4>::make(ckb, kernreq, ckb_offset);
+    expr_type_offset_applier_extra<4> *e = expr_type_offset_applier_extra<4>::make(ckb, kernreq, ckb_offset);
     memcpy(e->offsets, src_data_offsets, sizeof(e->offsets));
     return ckb_offset;
   }
   default: {
-    expr_type_offset_applier_general_extra *e =
-        expr_type_offset_applier_general_extra::make(ckb, kernreq, ckb_offset);
+    expr_type_offset_applier_general_extra *e = expr_type_offset_applier_general_extra::make(ckb, kernreq, ckb_offset);
     e->src_count = src_count;
     size_t *out_offsets = reinterpret_cast<size_t *>(e + 1);
     memcpy(out_offsets, src_data_offsets, src_count * sizeof(size_t));
@@ -332,17 +298,15 @@ static void src_deref_destruct(ckernel_prefix *self)
 static size_t make_src_deref_ckernel(void *ckb, intptr_t ckb_offset)
 {
   ckernel_prefix *self =
-      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
-          ->alloc_ck<ckernel_prefix>(ckb_offset);
+      reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<ckernel_prefix>(ckb_offset);
   self->function = reinterpret_cast<void *>(&src_deref_single);
   self->destructor = &src_deref_destruct;
   return ckb_offset;
 }
 
-size_t ndt::expr_type::make_operand_to_value_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-    const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx) const
+size_t ndt::expr_type::make_operand_to_value_assignment_kernel(void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+                                                               const char *src_arrmeta, kernel_request_t kernreq,
+                                                               const eval::eval_context *ectx) const
 {
   const tuple_type *fsd = m_operand_type.extended<tuple_type>();
 
@@ -355,14 +319,12 @@ size_t ndt::expr_type::make_operand_to_value_assignment_kernel(
 
   vector<type> src_dt(input_count);
   for (size_t i = 0; i != input_count; ++i) {
-    const pointer_type *pd =
-        static_cast<const pointer_type *>(fsd->get_field_type(i).extended());
+    const pointer_type *pd = static_cast<const pointer_type *>(fsd->get_field_type(i).extended());
     src_dt[i] = pd->get_target_type();
   }
   for (size_t i = 0; i != input_count; ++i) {
     const char *ptr_arrmeta = src_arrmeta + arrmeta_offsets[i];
-    intptr_t offset =
-        reinterpret_cast<const pointer_type_arrmeta *>(ptr_arrmeta)->offset;
+    intptr_t offset = reinterpret_cast<const pointer_type_arrmeta *>(ptr_arrmeta)->offset;
     if (offset != 0) {
       nonzero_offsets = true;
     }
@@ -372,45 +334,39 @@ size_t ndt::expr_type::make_operand_to_value_assignment_kernel(
   // If there were any non-zero pointer offsets, we need to add a kernel
   // adapter which applies those offsets.
   if (nonzero_offsets) {
-    ckb_offset = make_expr_type_offset_applier(
-        ckb, kernreq, ckb_offset, input_count, src_data_offsets.get());
+    ckb_offset = make_expr_type_offset_applier(ckb, kernreq, ckb_offset, input_count, src_data_offsets.get());
   }
-  return m_kgen->make_expr_kernel(
-      ckb, ckb_offset, m_value_type, dst_arrmeta, input_count, &src_dt[0],
-      src_arrmeta_array.get(), kernel_request_single, ectx);
+  return m_kgen->make_expr_kernel(ckb, ckb_offset, m_value_type, dst_arrmeta, input_count, &src_dt[0],
+                                  src_arrmeta_array.get(), kernel_request_single, ectx);
 }
 
-size_t ndt::expr_type::make_value_to_operand_assignment_kernel(
-    void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
-    const char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    kernel_request_t DYND_UNUSED(kernreq),
-    const eval::eval_context *DYND_UNUSED(ectx)) const
+size_t ndt::expr_type::make_value_to_operand_assignment_kernel(void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
+                                                               const char *DYND_UNUSED(dst_arrmeta),
+                                                               const char *DYND_UNUSED(src_arrmeta),
+                                                               kernel_request_t DYND_UNUSED(kernreq),
+                                                               const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   throw runtime_error("Cannot assign to a dynd expr object value");
 }
 
-ndt::type ndt::expr_type::with_replaced_storage_type(
-    const type &DYND_UNUSED(replacement_type)) const
+ndt::type ndt::expr_type::with_replaced_storage_type(const type &DYND_UNUSED(replacement_type)) const
 {
   throw runtime_error("TODO: implement expr_type::with_replaced_storage_type");
 }
 
-void ndt::expr_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
-    size_t *out_count) const
+void ndt::expr_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+                                                  size_t *out_count) const
 {
   const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {
     udt.extended()->get_dynamic_array_properties(out_properties, out_count);
   } else {
-    get_builtin_type_dynamic_array_properties(udt.get_type_id(), out_properties,
-                                              out_count);
+    get_builtin_type_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
   }
 }
 
-void ndt::expr_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **out_functions,
-    size_t *out_count) const
+void ndt::expr_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+                                                 size_t *out_count) const
 {
   const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {

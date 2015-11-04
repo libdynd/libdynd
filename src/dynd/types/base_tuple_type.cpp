@@ -189,7 +189,7 @@ ndt::type ndt::base_tuple_type::apply_linear_index(intptr_t nindices, const iran
 
 intptr_t ndt::base_tuple_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                   const type &result_tp, char *out_arrmeta,
-                                                  memory_block_data *embedded_reference, size_t current_i,
+                                                  const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                                   const type &root_tp, bool leading_dimension, char **inout_data,
                                                   memory_block_data **inout_dataref) const
 {
@@ -277,7 +277,7 @@ void ndt::base_tuple_type::arrmeta_default_construct(char *arrmeta, bool blockre
 }
 
 void ndt::base_tuple_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                                  memory_block_data *embedded_reference) const
+                                                  const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   uintptr_t *dst_data_offsets = get_arrmeta_data_offsets(dst_arrmeta);
   if (dst_data_offsets != 0) {

@@ -241,7 +241,7 @@ void ndt::option_type::arrmeta_default_construct(char *arrmeta, bool blockref_al
 }
 
 void ndt::option_type::arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                              memory_block_data *embedded_reference) const
+                                              const intrusive_ptr<memory_block_data> &embedded_reference) const
 {
   if (!m_value_tp.is_builtin()) {
     m_value_tp.extended()->arrmeta_copy_construct(dst_arrmeta, src_arrmeta, embedded_reference);

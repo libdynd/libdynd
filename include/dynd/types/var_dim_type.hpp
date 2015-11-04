@@ -62,7 +62,7 @@ namespace ndt {
     type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta, memory_block_data *embedded_reference, size_t current_i,
+                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
                                 const type &root_tp, bool leading_dimension, char **inout_data,
                                 memory_block_data **inout_dataref) const;
     type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
@@ -81,13 +81,13 @@ namespace ndt {
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
-                                memory_block_data *embedded_reference) const;
+                                const intrusive_ptr<memory_block_data> &embedded_reference) const;
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
     size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                         memory_block_data *embedded_reference) const;
+                                         const intrusive_ptr<memory_block_data> &embedded_reference) const;
 
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;

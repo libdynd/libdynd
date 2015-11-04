@@ -525,7 +525,7 @@ void ndt::categorical_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta)
 }
 
 void ndt::categorical_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                                   memory_block_data *DYND_UNUSED(embedded_reference)) const
+                                                   const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   // Data is stored as uint##, no arrmeta to process
 }

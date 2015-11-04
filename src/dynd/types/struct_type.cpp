@@ -428,14 +428,14 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
     const ndt::type &tp = res_field_tps[i];
     if (!tp.is_builtin()) {
       tp.extended()->arrmeta_copy_construct(res_arrmeta + res_arrmeta_offsets[i], lhs_arrmeta + lhs_arrmeta_offsets[i],
-                                            lhs.get_data_memblock().get());
+                                            lhs.get_data_memblock());
     }
   }
   for (intptr_t i = 0; i < rhs_n; ++i) {
     const ndt::type &tp = res_field_tps[i + lhs_n];
     if (!tp.is_builtin()) {
       tp.extended()->arrmeta_copy_construct(res_arrmeta + res_arrmeta_offsets[i + lhs_n],
-                                            rhs_arrmeta + rhs_arrmeta_offsets[i], rhs.get_data_memblock().get());
+                                            rhs_arrmeta + rhs_arrmeta_offsets[i], rhs.get_data_memblock());
     }
   }
 

@@ -57,11 +57,11 @@ namespace nd {
                   ->get_element_type()
                   .extended<ndt::base_dim_type>()
                   ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i],
-                                                  NULL);
+                                                  intrusive_ptr<memory_block_data>());
             } else {
               new_tp.extended<ndt::base_dim_type>()
                   ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i],
-                                                  NULL);
+                                                  intrusive_ptr<memory_block_data>());
             }
             old_tp = old_tp.get_type_at_dimension(
                 const_cast<char **>(src_arrmeta + i), 1);

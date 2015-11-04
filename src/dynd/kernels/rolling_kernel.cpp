@@ -124,7 +124,7 @@ intptr_t nd::functional::rolling_ck::instantiate(
   if (src_el_tp.get_arrmeta_size() > 0) {
     src_el_tp.extended()->arrmeta_copy_construct(
         self->m_src_winop_meta.get() + sizeof(fixed_dim_type_arrmeta),
-        src_el_arrmeta, NULL);
+        src_el_arrmeta, intrusive_ptr<memory_block_data>());
   }
 
   const char *src_winop_meta = self->m_src_winop_meta.get();

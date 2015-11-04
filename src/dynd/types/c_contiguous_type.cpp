@@ -60,7 +60,7 @@ ndt::type ndt::c_contiguous_type::apply_linear_index(
 intptr_t ndt::c_contiguous_type::apply_linear_index(
     intptr_t nindices, const irange *indices, const char *arrmeta,
     const type &result_type, char *out_arrmeta,
-    memory_block_data *embedded_reference, size_t current_i,
+    const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
     const type &root_tp, bool leading_dimension, char **inout_data,
     memory_block_data **inout_dataref) const
 {
@@ -128,7 +128,7 @@ void ndt::c_contiguous_type::arrmeta_default_construct(
 
 void ndt::c_contiguous_type::arrmeta_copy_construct(
     char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-    memory_block_data *DYND_UNUSED(embedded_reference)) const
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   stringstream ss;
   ss << "Cannot copy construct arrmeta for symbolic type " << type(this, true);
