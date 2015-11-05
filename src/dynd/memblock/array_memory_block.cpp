@@ -18,43 +18,17 @@ namespace detail {
   void free_array_memory_block(memory_block_data *memblock)
   {
     array_preamble *preamble = reinterpret_cast<array_preamble *>(memblock);
-    char *arrmeta = reinterpret_cast<char *>(preamble + 1);
-
-    // Call the data destructor if necessary (i.e. the nd::array owns
-    // the data memory, and the type has a data destructor)
-    if (!preamble->data.ref && !preamble->is_builtin_type() &&
-        (preamble->m_type->get_flags() & type_flag_destructor) != 0) {
-      preamble->m_type->data_destruct(arrmeta, preamble->data.ptr);
-    }
-
-    // Free the ndobject data if it wasn't allocated together with the memory block
-    if (!preamble->data.ref && !preamble->is_builtin_type() && !preamble->m_type->is_expression()) {
-      const ndt::type &dtp = preamble->m_type->get_type_at_dimension(NULL, preamble->m_type->get_ndim());
-      if (dtp.get_kind() == memory_kind) {
-        dtp.extended<ndt::base_memory_type>()->data_free(preamble->data.ptr);
-      }
-    }
-
-    // Free the references contained in the arrmeta
-    if (!preamble->is_builtin_type()) {
-      preamble->m_type->arrmeta_destruct(arrmeta);
-      base_type_decref(preamble->m_type);
-    }
-
-    // Free the reference to the nd::array data
-    if (preamble->data.ref) {
-      memory_block_decref(preamble->data.ref.get());
-    }
+    preamble->~array_preamble();
 
     // Finally free the memory block itself
-    free(reinterpret_cast<void *>(memblock));
+    delete[] reinterpret_cast<char *>(memblock);
   }
 }
 } // namespace dynd::detail
 
 intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size)
 {
-  char *result = (char *)malloc(sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size);
+  char *result = new char[sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size];
   if (result == 0) {
     throw bad_alloc();
   }
@@ -63,12 +37,12 @@ intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_si
   return intrusive_ptr<memory_block_data>(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
-intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size, size_t extra_size, size_t extra_alignment,
-                                            char **out_extra_ptr)
+intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size, size_t extra_size,
+                                                               size_t extra_alignment, char **out_extra_ptr)
 {
   size_t extra_offset =
       inc_to_alignment(sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size, extra_alignment);
-  char *result = (char *)malloc(extra_offset + extra_size);
+  char *result = new char[extra_offset + extra_size];
   if (result == 0) {
     throw bad_alloc();
   }
@@ -105,8 +79,7 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   if (!preamble->is_builtin_type()) {
     base_type_incref(preamble->m_type);
     preamble->m_type->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
-                                             reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble),
-                                             ndo);
+                                             reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo);
   }
 
   return result;
@@ -120,5 +93,30 @@ void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std
     o << indent << " type: " << tp << "\n";
   } else {
     o << indent << " uninitialized nd::array\n";
+  }
+}
+
+array_preamble::~array_preamble()
+{
+  char *arrmeta = reinterpret_cast<char *>(this + 1);
+
+  // Call the data destructor if necessary (i.e. the nd::array owns
+  // the data memory, and the type has a data destructor)
+  if (!data.ref && !is_builtin_type() && (m_type->get_flags() & type_flag_destructor) != 0) {
+    m_type->data_destruct(arrmeta, data.ptr);
+  }
+
+  // Free the ndobject data if it wasn't allocated together with the memory block
+  if (!data.ref && !is_builtin_type() && !m_type->is_expression()) {
+    const ndt::type &dtp = m_type->get_type_at_dimension(NULL, m_type->get_ndim());
+    if (dtp.get_kind() == memory_kind) {
+      dtp.extended<ndt::base_memory_type>()->data_free(data.ptr);
+    }
+  }
+
+  // Free the references contained in the arrmeta
+  if (!is_builtin_type()) {
+    m_type->arrmeta_destruct(arrmeta);
+    base_type_decref(m_type);
   }
 }

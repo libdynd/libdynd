@@ -31,6 +31,8 @@ struct DYND_API array_preamble : memory_block_data {
     intrusive_ptr<memory_block_data> ref;
   } data;
 
+  ~array_preamble();
+
   /** Returns true if the type is builtin */
   inline bool is_builtin_type() const
   {
