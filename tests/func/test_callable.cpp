@@ -160,7 +160,7 @@ TEST(Callable, DecomposedDynamicCall)
   nd::array values[3] = {7, 2.5, 5};
   ndt::type types[3] = {values[0].get_type(), values[1].get_type(), values[2].get_type()};
   const char *const arrmetas[3] = {values[0].get_arrmeta(), values[1].get_arrmeta(), values[2].get_arrmeta()};
-  char *const datas[3] = {values[0].get_ndo()->ptr, values[1].get_ndo()->ptr, values[2].get_ndo()->ptr};
+  char *const datas[3] = {values[0].get()->ptr, values[1].get()->ptr, values[2].get()->ptr};
   //  const char *names[3] = {"x", "y", "z"};
 
   af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });

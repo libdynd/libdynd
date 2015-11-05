@@ -463,7 +463,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
   nd::array args[max_args];
   for (nargs = 1; nargs < max_args; ++nargs) {
     // Stop at the first NULL arg (means it was default)
-    if (par_arrs[nargs].get_ndo() == NULL) {
+    if (par_arrs[nargs].get() == NULL) {
       break;
     } else {
       args[nargs - 1] = par_arrs[nargs];
@@ -575,7 +575,7 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
   instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.get_arrmeta(), nsrc, src_tp, src_arrmeta,
               kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
   expr_metadata_single_t fn = ckb.get()->get_function<expr_metadata_single_t>();
-  fn(ckb.get(), dst.get_arrmeta(), &dst.get_ndo()->ptr, const_cast<char *const *>(src_arrmeta), src_data);
+  fn(ckb.get(), dst.get_arrmeta(), &dst.get()->ptr, const_cast<char *const *>(src_arrmeta), src_data);
 
   return dst;
 }

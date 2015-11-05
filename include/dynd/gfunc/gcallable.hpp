@@ -98,7 +98,7 @@ public:
     }
 
     inline nd::array call_generic(const nd::array& n) const {
-        return nd::array(m_function(n.get_ndo(), m_extra), false);
+        return nd::array(m_function(n.get(), m_extra), false);
     }
 
     /** Calls the gfunc - #include <dynd/gfunc/call_callable.hpp> to use it */

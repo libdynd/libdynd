@@ -143,12 +143,12 @@ namespace nd {
 
     inline void set_data(char **&data, array &value)
     {
-      data = &value.get_ndo()->ptr;
+      data = &value.get()->ptr;
     }
 
     inline void set_data(char **&data, const array &value)
     {
-      data = &value.get_ndo()->ptr;
+      data = &value.get()->ptr;
     }
 
     /** A holder class for the keyword arguments */

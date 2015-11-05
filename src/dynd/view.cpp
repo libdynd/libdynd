@@ -238,7 +238,7 @@ static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::typ
 
     // Get the essential components of the array to analyze
     memory_block_ptr data_ref = arr.get_data_memblock();
-    char *data_ptr = arr.get_ndo()->ptr;
+    char *data_ptr = arr.get()->ptr;
     ndt::type data_tp = arr.get_type();
     const char *data_meta = arr.get_arrmeta();
     intptr_t data_dim_size = -1, data_stride = 0;
@@ -261,7 +261,7 @@ static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::typ
     // Set the bytes extents
   //  reinterpret_cast<bytes *>(result_data_ptr)->assign(data_ptr, data_dim_size);
     // Set the array arrmeta
-    array_preamble *ndo = result.get_ndo();
+    array_preamble *ndo = result.get();
     ndo->m_type = ndt::type(tp).release();
     ndo->ptr = result_data_ptr;
     ndo->ref = NULL;
@@ -282,7 +282,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
   }
 
   const bytes_type_arrmeta *bytes_meta = reinterpret_cast<const bytes_type_arrmeta *>(arr.get_arrmeta());
-  bytes_type_data *bytes_d = reinterpret_cast<bytes_type_data *>(arr.get_ndo()->ptr);
+  bytes_type_data *bytes_d = reinterpret_cast<bytes_type_data *>(arr.get()->ptr);
   memory_block_ptr data_ref;
   if (bytes_meta->blockref != NULL) {
     data_ref = bytes_meta->blockref;
@@ -300,10 +300,10 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       // Allocate a result array to attempt the view in it
       nd::array result(make_array_memory_block(tp.get_arrmeta_size()));
       // Initialize the fields
-      result.get_ndo()->ptr = data_ptr;
-      result.get_ndo()->ref = data_ref.release();
-      result.get_ndo()->type = ndt::type(tp).release();
-      result.get_ndo()->flags = arr.get_ndo()->flags;
+      result.get()->ptr = data_ptr;
+      result.get()->ref = data_ref.release();
+      result.get()->type = ndt::type(tp).release();
+      result.get()->flags = arr.get()->flags;
       if (tp.get_arrmeta_size() > 0) {
         tp.extended()->arrmeta_default_construct(result.get_arrmeta(), true);
       }
@@ -329,10 +329,10 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       // Allocate a result array to attempt the view in it
       nd::array result(make_array_memory_block(arr_tp.get_arrmeta_size()));
       // Initialize the fields
-      result.get_ndo()->ptr = data_ptr;
-      result.get_ndo()->ref = data_ref.release();
-      result.get_ndo()->type = ndt::type(arr_tp).release();
-      result.get_ndo()->flags = arr.get_ndo()->flags;
+      result.get()->ptr = data_ptr;
+      result.get()->ref = data_ref.release();
+      result.get()->type = ndt::type(arr_tp).release();
+      result.get()->flags = arr.get()->flags;
       if (el_tp.get_arrmeta_size() > 0) {
         el_tp.extended()->arrmeta_default_construct(result.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), true);
       }
@@ -353,16 +353,16 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   // Allocate a result array to attempt the view in it
   nd::array result(make_array_memory_block(tp.get_arrmeta_size()));
   // Copy the fields
-  result.get_ndo()->ptr = arr.get_ndo()->ptr;
-  if (!arr.get_ndo()->ref) {
+  result.get()->ptr = arr.get()->ptr;
+  if (!arr.get()->ref) {
     // Embedded data, need reference to the array
-    result.get_ndo()->ref = arr.get_memblock();
+    result.get()->ref = arr.get_memblock();
   } else {
     // Use the same data reference, avoid producing a chain
-    result.get_ndo()->ref = arr.get_data_memblock();
+    result.get()->ref = arr.get_data_memblock();
   }
-  result.get_ndo()->type = ndt::type(tp).release();
-  result.get_ndo()->flags = arr.get_ndo()->flags;
+  result.get()->type = ndt::type(tp).release();
+  result.get()->flags = arr.get()->flags;
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_type_id() == var_dim_type_id && tp.get_type_id() == fixed_dim_type_id) {
     const var_dim_type_arrmeta *in_am = reinterpret_cast<const var_dim_type_arrmeta *>(arr.get_arrmeta());
@@ -373,9 +373,9 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
     if ((intptr_t)in_dat->size == out_am->dim_size) {
       // Use the more specific data reference from the var arrmeta if possible
       if (in_am->blockref) {
-        result.get_ndo()->ref = in_am->blockref;
+        result.get()->ref = in_am->blockref;
       }
-      result.get_ndo()->ptr = in_dat->begin + in_am->offset;
+      result.get()->ptr = in_dat->begin + in_am->offset;
       // Try to copy the rest of the arrmeta as a view
       if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
                    arr.get_arrmeta() + sizeof(var_dim_type_arrmeta),

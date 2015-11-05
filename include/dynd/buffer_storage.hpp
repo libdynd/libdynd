@@ -25,9 +25,9 @@ inline void reset_strided_buffer_array(const nd::array& buf)
   ndt::base_type_members::flags_type flags = buf_tp.extended()->get_flags();
   if (flags &
       (type_flag_blockref | type_flag_zeroinit | type_flag_destructor)) {
-    char *buf_arrmeta = buf.get_ndo()->get_arrmeta();
+    char *buf_arrmeta = buf.get()->get_arrmeta();
     char *buf_data = buf.get_readwrite_originptr();
-    buf_tp.extended()->arrmeta_reset_buffers(buf.get_ndo()->get_arrmeta());
+    buf_tp.extended()->arrmeta_reset_buffers(buf.get()->get_arrmeta());
     fixed_dim_type_arrmeta *am =
         reinterpret_cast<fixed_dim_type_arrmeta *>(buf_arrmeta);
     if (flags & type_flag_destructor) {

@@ -385,7 +385,7 @@ TEST(DateType, Replace)
       a.find_dynamic_function("replace").get_default_parameters().eval_copy(
           nd::readwrite_access_flags);
   *reinterpret_cast<void **>(param(0).get_readwrite_originptr()) =
-      (void *)a.get_ndo();
+      (void *)a.get();
   param(2).vals() = 7;
   EXPECT_EQ(
       "1955-07-13",

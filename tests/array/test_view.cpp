@@ -29,18 +29,18 @@ TEST(View, SameType)
   nd::array b;
 
   b = nd::view(a, a.get_type());
-  EXPECT_EQ(a.get_ndo(), b.get_ndo());
+  EXPECT_EQ(a.get(), b.get());
 
   // Slicing with : keeps the same fixed dim type
   a = a(irange(), irange());
   EXPECT_EQ(ndt::type("5 * 3 * int32"), a.get_type());
   b = nd::view(a, a.get_type());
-  EXPECT_EQ(a.get_ndo(), b.get_ndo());
+  EXPECT_EQ(a.get(), b.get());
 
   // test also with a var dim and string type
   a = parse_json("3 * var * string", "[[\"this\", \"is\", \"for\"], [\"testing\"], []]");
   b = nd::view(a, a.get_type());
-  EXPECT_EQ(a.get_ndo(), b.get_ndo());
+  EXPECT_EQ(a.get(), b.get());
 }
 
 TEST(View, Errors)
@@ -158,9 +158,9 @@ TEST(View, FromBytes)
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
   btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
   if (btd_meta->blockref != NULL) {
-    EXPECT_EQ(btd_meta->blockref, b.get_ndo()->data.ref);
+    EXPECT_EQ(btd_meta->blockref, b.get()->data.ref);
   } else {
-    EXPECT_EQ(a.get_data_memblock().get(), b.get_ndo()->data.ref);
+    EXPECT_EQ(a.get_data_memblock().get(), b.get()->data.ref);
   }
   EXPECT_EQ(btd->begin(), b.get_readonly_originptr());
 
@@ -174,9 +174,9 @@ TEST(View, FromBytes)
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
   btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
   if (btd_meta->blockref != NULL) {
-    EXPECT_EQ(btd_meta->blockref, b.get_ndo()->data.ref);
+    EXPECT_EQ(btd_meta->blockref, b.get()->data.ref);
   } else {
-    EXPECT_EQ(a.get_data_memblock().get(), b.get_ndo()->data.ref);
+    EXPECT_EQ(a.get_data_memblock().get(), b.get()->data.ref);
   }
   EXPECT_EQ(btd->begin(), b.get_readonly_originptr());
 }
