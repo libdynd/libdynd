@@ -10,18 +10,6 @@
 namespace dynd {
 namespace nd {
 
-  inline void refcpy(char *dst, char *src)
-  {
-    dst -= sizeof(array_preamble);
-    src -= sizeof(array_preamble);
-
-    if (!reinterpret_cast<array_preamble *>(src)->data.ref) {
-      reinterpret_cast<array_preamble *>(dst)->data.ref = reinterpret_cast<array_preamble *>(src);
-    } else {
-      reinterpret_cast<array_preamble *>(dst)->data.ref = reinterpret_cast<array_preamble *>(src)->data.ref;
-    }
-  }
-
   struct view_kernel : base_kernel<view_kernel> {
     static const size_t data_size = 0;
 
@@ -33,11 +21,20 @@ namespace nd {
 
     void metadata_single(char *dst_metadata, char **dst, char *const *src_metadata, char **const *src)
     {
+      reinterpret_cast<array_preamble *>(dst_metadata - sizeof(array_preamble))->ref =
+          reinterpret_cast<array_preamble *>(src_metadata[0] - sizeof(array_preamble))->owner();
+
       std::memcpy(dst_metadata, src_metadata[0],
                   metadata_size); // need to use the type virtual function instead of this
       *dst = *src[0];
+    }
 
-      refcpy(dst_metadata, src_metadata[0]);
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      dst_tp = src_tp[0];
     }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
@@ -50,14 +47,6 @@ namespace nd {
     {
       make(ckb, kernreq, ckb_offset, src_tp[0].get_arrmeta_size());
       return ckb_offset;
-    }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      dst_tp = src_tp[0];
     }
   };
 
