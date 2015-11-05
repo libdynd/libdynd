@@ -15,34 +15,41 @@ namespace dynd {
 
 /**
  * This structure is the start of any nd::array arrmeta. The
- * arrmeta after this structure is determined by the m_type
+ * arrmeta after this structure is determined by the type
  * object.
  */
 struct DYND_API array_preamble : memory_block_data {
   /**
-   * m_type is overloaded - for builtin scalar types, it
-   * simply contains the type id. If (m_type&~builtin_type_id_mask)
+   * type is overloaded - for builtin scalar types, it
+   * simply contains the type id. If (type&~builtin_type_id_mask)
    * is 0, its a builtin type.
    */
-  const ndt::base_type *m_type;
-  uint64_t m_flags;
-  struct {
-    char *ptr;
-    intrusive_ptr<memory_block_data> ref;
-  } data;
+  const ndt::base_type *type;
+  uint64_t flags;
+  char *ptr;
+  intrusive_ptr<memory_block_data> ref;
 
   ~array_preamble();
+
+  memory_block_data *owner()
+  {
+    if (ref) {
+      return ref.get();
+    }
+
+    return this;
+  }
 
   /** Returns true if the type is builtin */
   inline bool is_builtin_type() const
   {
-    return (reinterpret_cast<uintptr_t>(m_type) & (~builtin_type_id_mask)) == 0;
+    return (reinterpret_cast<uintptr_t>(type) & (~builtin_type_id_mask)) == 0;
   }
 
   /** Should only be called if is_builtin_type() returns true */
   inline type_id_t get_builtin_type_id() const
   {
-    return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(m_type));
+    return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(type));
   }
 
   inline type_id_t get_type_id() const
@@ -50,7 +57,7 @@ struct DYND_API array_preamble : memory_block_data {
     if (is_builtin_type()) {
       return get_builtin_type_id();
     } else {
-      return m_type->get_type_id();
+      return type->get_type_id();
     }
   }
 

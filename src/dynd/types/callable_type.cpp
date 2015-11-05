@@ -575,7 +575,7 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
   instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.get_arrmeta(), nsrc, src_tp, src_arrmeta,
               kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
   expr_metadata_single_t fn = ckb.get()->get_function<expr_metadata_single_t>();
-  fn(ckb.get(), dst.get_arrmeta(), &dst.get_ndo()->data.ptr, const_cast<char *const *>(src_arrmeta), src_data);
+  fn(ckb.get(), dst.get_arrmeta(), &dst.get_ndo()->ptr, const_cast<char *const *>(src_arrmeta), src_data);
 
   return dst;
 }
@@ -605,4 +605,5 @@ void callable_type_data::operator()(const ndt::type &DYND_UNUSED(dst_tp), const 
                                     const nd::array *DYND_UNUSED(kwds),
                                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
+  throw std::runtime_error("view callables are not fully implemented yet");
 }

@@ -440,7 +440,7 @@ namespace gfunc {
       typedef typename parameter_type_of<P0>::type T0;
       static array_preamble *wrapper(const array_preamble *params, void *extra)
       {
-        char *p = params->data.ptr;
+        char *p = params->ptr;
         function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
         return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value)));
       }
@@ -458,7 +458,7 @@ namespace gfunc {
       typedef typename parameter_type_of<P1>::type T1;
       static array_preamble *wrapper(const array_preamble *params, void *extra)
       {
-        char *p = params->data.ptr;
+        char *p = params->ptr;
         function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
         return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
                                     unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value)));
@@ -479,7 +479,7 @@ namespace gfunc {
       typedef typename parameter_type_of<P2>::type T2;
       static array_preamble *wrapper(const array_preamble *params, void *extra)
       {
-        char *p = params->data.ptr;
+        char *p = params->ptr;
         function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
         return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
                                     unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value),
@@ -503,7 +503,7 @@ namespace gfunc {
       typedef typename parameter_type_of<P3>::type T3;
       static array_preamble *wrapper(const array_preamble *params, void *extra)
       {
-        char *p = params->data.ptr;
+        char *p = params->ptr;
         function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
         return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
                                     unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value),
@@ -533,7 +533,7 @@ namespace gfunc {
       typedef typename parameter_type_of<P4>::type T4;
       static array_preamble *wrapper(const array_preamble *params, void *extra)
       {
-        char *p = params->data.ptr;
+        char *p = params->ptr;
         function_pointer_t f = reinterpret_cast<function_pointer_t>(extra);
         return box_result<R>::box(f(unbox_param<P0>::unbox(p + dcs_offset_of<T0>::value),
                                     unbox_param<P1>::unbox(p + dcs_offset_of<T0, T1>::value),

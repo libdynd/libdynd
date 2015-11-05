@@ -35,7 +35,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Bool)
 
   // assignment to a bool scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<bool1>()));
-  const bool1 *ptr_a = (const bool1 *)a.get_ndo()->data.ptr;
+  const bool1 *ptr_a = (const bool1 *)a.get_ndo()->ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_TRUE(TestFixture::First::Dereference(ptr_a));
   a.val_assign(TestFixture::Second::To(false));
@@ -78,7 +78,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Int8)
 
   // Assignment to an int8_t scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<int8_t>()));
-  ptr_i8 = (const int8_t *)a.get_ndo()->data.ptr;
+  ptr_i8 = (const int8_t *)a.get_ndo()->ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_i8));
   a.val_assign(TestFixture::Second::To(false));
@@ -122,7 +122,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_UInt16)
 
   // Assignment to a uint16_t scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint16_t>()));
-  ptr_u16 = (const uint16_t *)a.get_ndo()->data.ptr;
+  ptr_u16 = (const uint16_t *)a.get_ndo()->ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_u16));
   a.val_assign(TestFixture::Second::To(false));
@@ -148,7 +148,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float32)
 
   // Assignment to a float scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<float>()));
-  ptr_f32 = (const float *)a.get_ndo()->data.ptr;
+  ptr_f32 = (const float *)a.get_ndo()->ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_f32));
   a.val_assign(TestFixture::Second::To(false));
@@ -183,7 +183,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Float64)
 
   // Assignment to a double scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<double>()));
-  ptr_f64 = (const double *)a.get_ndo()->data.ptr;
+  ptr_f64 = (const double *)a.get_ndo()->ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1, TestFixture::First::Dereference(ptr_f64));
   a.val_assign(TestFixture::Second::To(false));
@@ -211,7 +211,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64)
 
   // Assignment to a double scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint64_t>()));
-  ptr_u64 = (const uint64_t *)a.get_ndo()->data.ptr;
+  ptr_u64 = (const uint64_t *)a.get_ndo()->ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(1u, TestFixture::First::Dereference(ptr_u64));
   a.val_assign(TestFixture::Second::To(false));
@@ -234,7 +234,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Uint64_LargeNumbers)
 
   // Assignment to a double scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<uint64_t>()));
-  ptr_u64 = (const uint64_t *)a.get_ndo()->data.ptr;
+  ptr_u64 = (const uint64_t *)a.get_ndo()->ptr;
   // Assign some values that don't fit in signed 64-bits
   a.val_assign(TestFixture::Second::To(13835058055282163712.f));
   EXPECT_EQ(13835058055282163712ULL, TestFixture::First::Dereference(ptr_u64));
@@ -256,7 +256,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float32)
 
   // Assignment to a complex float scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<dynd::complex<float>>()));
-  ptr_cf32 = (const dynd::complex<float> *)a.get_ndo()->data.ptr;
+  ptr_cf32 = (const dynd::complex<float> *)a.get_ndo()->ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(dynd::complex<float>(1), TestFixture::First::Dereference(ptr_cf32));
   a.val_assign(TestFixture::Second::To(false));
@@ -295,7 +295,7 @@ TYPED_TEST_P(ArrayAssign, ScalarAssignment_Complex_Float64)
 
   // Assignment to a complex float scalar
   a = nd::empty(TestFixture::First::MakeType(ndt::type::make<dynd::complex<double>>()));
-  ptr_cf64 = (const dynd::complex<double> *)a.get_ndo()->data.ptr;
+  ptr_cf64 = (const dynd::complex<double> *)a.get_ndo()->ptr;
   a.val_assign(TestFixture::Second::To(true));
   EXPECT_EQ(dynd::complex<double>(1), TestFixture::First::Dereference(ptr_cf64));
   a.val_assign(TestFixture::Second::To(false));
