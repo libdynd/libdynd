@@ -65,16 +65,20 @@ namespace nd {
     array(const void *);
 
   public:
-    /** Constructs an array with no buffer (NULL state) */
+    /**
+      * Constructs an array with no data.
+      */
     array() = default;
 
-    /** Copy constructs an array */
-    array(const array &) = default;
     /**
-     * Move constructs an array (should be "= default", but MSVC 2013 does not
-     * support that)
+      * Copy constructs an array.
+      */
+    array(const array &other) = default;
+
+    /**
+     * Move constructs an array.
      */
-    array(array &&rhs) : m_memblock(std::move(rhs.m_memblock)) {};
+    array(array &&other) = default;
 
     /**
      * Constructs a zero-dimensional scalar from a C++ scalar.
@@ -218,22 +222,14 @@ namespace nd {
     void swap(array &rhs);
 
     /**
-     * Assignment operator (should be just "= default" in C++11).
-     * Copies with reference semantics.
+     * Assignment operator.
      */
-    inline array &operator=(const array &rhs)
-    {
-      m_memblock = rhs.m_memblock;
-      return *this;
-    }
+    array &operator=(const array &rhs) = default;
 
-    /** Move assignment operator (should be just "= default" in C++11) */
-    inline array &operator=(array &&rhs)
-    {
-      m_memblock = std::move(rhs.m_memblock);
-
-      return *this;
-    }
+    /**
+     * Move assignment operator.
+     */
+    array &operator=(array &&rhs) = default;
 
     /**
      * This function releases the memory block reference, setting the
