@@ -377,12 +377,12 @@ static nd::array array_function_dereference(const nd::array &self)
   // Follow the pointers to eliminate them
   ndt::type dt = self.get_type();
   const char *arrmeta = self.get_arrmeta();
-  char *data = self.get_ndo()->ptr;
-  memory_block_data *dataref = self.get_ndo()->ref.get();
+  char *data = self.get()->ptr;
+  memory_block_data *dataref = self.get()->ref.get();
   if (dataref == NULL) {
     dataref = self.get_memblock().get();
   }
-  uint64_t flags = self.get_ndo()->flags;
+  uint64_t flags = self.get()->flags;
 
   while (dt.get_type_id() == pointer_type_id) {
     const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
@@ -397,10 +397,10 @@ static nd::array array_function_dereference(const nd::array &self)
   if (!dt.is_builtin()) {
     dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, self.get_memblock());
   }
-  result.get_ndo()->type = dt.release();
-  result.get_ndo()->ptr = data;
-  result.get_ndo()->ref = dataref;
-  result.get_ndo()->flags = flags;
+  result.get()->type = dt.release();
+  result.get()->ptr = data;
+  result.get()->ref = dataref;
+  result.get()->flags = flags;
   return result;
 }
 

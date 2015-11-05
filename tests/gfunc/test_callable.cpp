@@ -406,7 +406,7 @@ TEST(GFuncCallable, ArrayParam)
   a = nd::empty(c.get_parameters_type());
 
   tmp = nd::empty<int[2][3][1]>();
-  *(void **)a.get_ndo()->ptr = tmp.get_ndo();
+  *(void **)a.get()->ptr = tmp.get();
   r = c.call_generic(a);
   EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
   EXPECT_EQ(3, r.as<int>());
@@ -429,14 +429,14 @@ TEST(GFuncCallable, DTypeParam)
 
   // With a base_type
   tmp = ndt::struct_type::make({"A", "B"}, {ndt::type::make<dynd::complex<float>>(), ndt::type::make<int8_t>()});
-  *(const void **)a.get_ndo()->ptr = tmp.extended();
+  *(const void **)a.get()->ptr = tmp.extended();
   r = c.call_generic(a);
   EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
   EXPECT_EQ(12u, r.as<size_t>());
 
   // With a builtin type
   tmp = ndt::type::make<uint64_t>();
-  *(void **)a.get_ndo()->ptr = (void *)tmp.get_type_id();
+  *(void **)a.get()->ptr = (void *)tmp.get_type_id();
   r = c.call_generic(a);
   EXPECT_EQ(ndt::type::make<size_t>(), r.get_type());
   EXPECT_EQ(8u, r.as<size_t>());

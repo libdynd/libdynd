@@ -22,24 +22,24 @@ TEST(AsArray, PassThrough) {
   nd::array a;
 
   a = 100;
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("int32")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("SInt")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Int")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("... * Int")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Any")).get_ndo());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("int32")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("SInt")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Int")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("... * Int")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Any")).get());
 
   a = {3.15, 2.2, 7.7};
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("3 * float64")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("3 * Real")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Fixed * float64")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Fixed * Real")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("... * float64")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("... * Real")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Any")).get_ndo());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("3 * float64")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("3 * Real")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Fixed * float64")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Fixed * Real")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("... * float64")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("... * Real")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Any")).get());
 
   a = {true, false, false, true};
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("4 * bool")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("4 * Bool")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Fixed * bool")).get_ndo());
-  EXPECT_EQ(a.get_ndo(), nd::asarray(a, ndt::type("Fixed * Bool")).get_ndo());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("4 * bool")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("4 * Bool")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Fixed * bool")).get());
+  EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Fixed * Bool")).get());
 }
