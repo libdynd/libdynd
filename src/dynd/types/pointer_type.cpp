@@ -380,7 +380,7 @@ static nd::array array_function_dereference(const nd::array &self)
   char *data = self.get()->ptr;
   memory_block_data *dataref = self.get()->ref.get();
   if (dataref == NULL) {
-    dataref = self.get_memblock().get();
+    dataref = self.get();
   }
   uint64_t flags = self.get()->flags;
 
@@ -395,7 +395,7 @@ static nd::array array_function_dereference(const nd::array &self)
   // Create an array without the pointers
   nd::array result(make_array_memory_block(dt.get_arrmeta_size()));
   if (!dt.is_builtin()) {
-    dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, self.get_memblock());
+    dt.extended()->arrmeta_copy_construct(result.get_arrmeta(), arrmeta, self);
   }
   result.get()->type = dt.release();
   result.get()->ptr = data;

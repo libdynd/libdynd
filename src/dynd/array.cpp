@@ -35,11 +35,6 @@
 using namespace std;
 using namespace dynd;
 
-void nd::array::swap(array &rhs)
-{
-  m_memblock.swap(rhs.m_memblock);
-}
-
 template <class T>
 inline typename std::enable_if<is_dynd_scalar<T>::value, intrusive_ptr<memory_block_data>>::type
 make_builtin_scalar_array(const T &value, uint64_t flags)
@@ -268,7 +263,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
  */
 static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::type &new_dt)
 {
-  nd::array result(shallow_copy_array_memory_block(n.get_memblock()));
+  nd::array result(shallow_copy_array_memory_block(n));
   array_preamble *preamble = result.get();
   // Swap in the type
   if (!preamble->is_builtin_type()) {
@@ -283,91 +278,113 @@ static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::t
 
 // Constructors from C++ scalars
 nd::array::array(bool1 value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(bool value)
-    : m_memblock(make_builtin_scalar_array(bool1(value), nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(bool1(value), nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(signed char value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(short value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(int value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(long value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(long long value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(const int128 &value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned char value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned short value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned int value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned long value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(unsigned long long value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(const uint128 &value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(float16 value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(float value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(double value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(const float128 &value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(dynd::complex<float> value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(dynd::complex<double> value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(std::complex<float> value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(std::complex<double> value)
-    : m_memblock(make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
 nd::array::array(const std::string &value)
@@ -635,11 +652,11 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
       result.get()->ref = get()->ref;
     } else {
       // If the data reference is NULL, the data is embedded in the array itself
-      result.get()->ref = m_memblock;
+      result.get()->ref = *this;
     }
-    intptr_t offset = get()->type->apply_linear_index(
-        nindices, indices, get_arrmeta(), dt, result.get_arrmeta(), m_memblock, 0, this_dt, collapse_leading,
-        &result.get()->ptr, result.get()->ref);
+    intptr_t offset =
+        get()->type->apply_linear_index(nindices, indices, get_arrmeta(), dt, result.get_arrmeta(), *this, 0, this_dt,
+                                        collapse_leading, &result.get()->ptr, result.get()->ref);
     result.get()->ptr += offset;
     result.get()->flags = get()->flags;
     return result;
@@ -680,12 +697,11 @@ void nd::array::flag_as_immutable()
 
   // Check that nobody else is peeking into our data
   bool ok = true;
-  if (m_memblock.get()->m_use_count != 1) {
+  if (intrusive_ptr<memory_block_data>::get()->m_use_count != 1) {
     // More than one reference to the array itself
     ok = false;
-  } else if (get()->ref && (get()->ref->m_use_count != 1 ||
-                                     !(get()->ref->m_type == fixed_size_pod_memory_block_type ||
-                                       get()->ref->m_type == pod_memory_block_type))) {
+  } else if (get()->ref && (get()->ref->m_use_count != 1 || !(get()->ref->m_type == fixed_size_pod_memory_block_type ||
+                                                              get()->ref->m_type == pod_memory_block_type))) {
     // More than one reference to the array's data, or the reference is to
     // something
     // other than a memblock owning its data, such as an external memblock.
@@ -1140,7 +1156,7 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
   // Make a shallow copy of the arrmeta. When we permute the type,
   // its arrmeta has identical structure, so we can fix it up
   // while we're transforming the type.
-  nd::array res(shallow_copy_array_memory_block(get_memblock()));
+  nd::array res(shallow_copy_array_memory_block(*this));
 
   ndt::type transformed_tp;
   bool was_transformed = false;
@@ -1261,7 +1277,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
   nd::array res(make_array_memory_block(dst_tp.get_arrmeta_size()));
   res.get()->ptr = get()->ptr;
   if (!get()->ref) {
-    res.get()->ref = get_memblock();
+    res.get()->ref = *this;
   } else {
     res.get()->ref = get_data_memblock();
   }
@@ -1271,7 +1287,8 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
   char *src_arrmeta = get()->get_arrmeta();
   char *dst_arrmeta = res.get_arrmeta();
   for (intptr_t j = 0; j < i; ++j) {
-    dst_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta, intrusive_ptr<memory_block_data>());
+    dst_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta,
+                                                                         intrusive_ptr<memory_block_data>());
     src_tp = src_tp.get_type_at_dimension(&src_arrmeta, 1);
     dst_tp = dst_tp.get_type_at_dimension(&dst_arrmeta, 1);
   }
@@ -1370,7 +1387,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
       if (get()->ref) {
         result.get()->ref = get()->ref;
       } else {
-        result.get()->ref = m_memblock.get();
+        result.get()->ref = intrusive_ptr<memory_block_data>::get();
       }
       result.get()->type = result_tp.release();
       result.get()->flags = get()->flags;
@@ -1420,9 +1437,9 @@ ndt::type nd::detail::array_as_type(const nd::array &lhs)
 void nd::array::debug_print(std::ostream &o, const std::string &indent) const
 {
   o << indent << "------ array\n";
-  if (m_memblock.get()) {
+  if (intrusive_ptr<memory_block_data>::get()) {
     const array_preamble *ndo = get();
-    o << " address: " << (void *)m_memblock.get() << "\n";
+    o << " address: " << (void *)intrusive_ptr<memory_block_data>::get() << "\n";
     o << " refcount: " << ndo->m_use_count << "\n";
     o << " type:\n";
     o << "  pointer: " << (void *)ndo->type << "\n";
@@ -1680,7 +1697,7 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
   }
 
   return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(),
-                                      a.get_readwrite_originptr(), a.get_memblock(), NULL);
+                                      a.get_readwrite_originptr(), a, NULL);
 }
 
 nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNUSED(begin), intptr_t DYND_UNUSED(end),
@@ -1790,13 +1807,12 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     pointer_type_arrmeta *pmeta;
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get_arrmeta() + arrmeta_offsets[i]);
     pmeta->offset = 0;
-    pmeta->blockref =
-        field_values[i].get()->ref ? field_values[i].get()->ref : field_values[i].get_memblock();
+    pmeta->blockref = field_values[i].get()->owner();
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {
       field_dt.extended()->arrmeta_copy_construct(reinterpret_cast<char *>(pmeta + 1), field_values[i].get_arrmeta(),
-                                                  field_values[i].get_memblock());
+                                                  field_values[i]);
     }
   }
 
@@ -1820,8 +1836,7 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const 
     // Copy the rest of the arrmeta after the pointer's arrmeta
     const ndt::type &val_tp = val.get_type();
     if (val_tp.get_arrmeta_size() > 0) {
-      val_tp.extended()->arrmeta_copy_construct(arrmeta + sizeof(pointer_type_arrmeta), val.get_arrmeta(),
-                                                val.get_memblock());
+      val_tp.extended()->arrmeta_copy_construct(arrmeta + sizeof(pointer_type_arrmeta), val.get_arrmeta(), val);
     }
     // Copy the pointer
     *reinterpret_cast<char **>(data) = const_cast<char *>(val.get_readonly_originptr());

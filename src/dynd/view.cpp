@@ -356,7 +356,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   result.get()->ptr = arr.get()->ptr;
   if (!arr.get()->ref) {
     // Embedded data, need reference to the array
-    result.get()->ref = arr.get_memblock();
+    result.get()->ref = arr;
   } else {
     // Use the same data reference, avoid producing a chain
     result.get()->ref = arr.get_data_memblock();
@@ -380,13 +380,13 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
       if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
                    arr.get_arrmeta() + sizeof(var_dim_type_arrmeta),
                    tp.extended<ndt::base_dim_type>()->get_element_type(),
-                   result.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), arr.get_memblock())) {
+                   result.get_arrmeta() + sizeof(fixed_dim_type_arrmeta), arr)) {
         return result;
       }
     }
   }
   // Otherwise try to copy the arrmeta as a view
-  else if (try_view(arr.get_type(), arr.get_arrmeta(), tp, result.get_arrmeta(), arr.get_memblock())) {
+  else if (try_view(arr.get_type(), arr.get_arrmeta(), tp, result.get_arrmeta(), arr)) {
     // If it succeeded, return it
     return result;
   }
