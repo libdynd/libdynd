@@ -54,13 +54,7 @@ namespace nd {
   /**
    * This is the primary multi-dimensional array class.
    */
-  class DYND_API array {
-    /**
-     * The nd::array class is a wrapper around an array_memory_block, which
-     * contains arrmeta as described by the type.
-     */
-    intrusive_ptr<memory_block_data> m_memblock;
-
+  class DYND_API array : public intrusive_ptr<memory_block_data> {
     // Don't allow implicit construction from a raw pointer
     array(const void *);
 
@@ -189,14 +183,15 @@ namespace nd {
     template <class T>
     array(const std::vector<T> &vec);
 
-    explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock) : m_memblock(ndobj_memblock)
+    explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock)
+        : intrusive_ptr<memory_block_data>(ndobj_memblock)
     {
-      if (m_memblock.get()->m_type != array_memory_block_type) {
+      if (intrusive_ptr<memory_block_data>::get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
     }
 
-    explicit array(array_preamble *ndo, bool add_ref) : m_memblock(ndo, add_ref)
+    explicit array(array_preamble *ndo, bool add_ref) : intrusive_ptr<memory_block_data>(ndo, add_ref)
     {
     }
 
@@ -205,7 +200,7 @@ namespace nd {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
-      m_memblock = ndobj_memblock;
+      intrusive_ptr<memory_block_data>::operator=(ndobj_memblock);
     }
 
     void set(intrusive_ptr<memory_block_data> &&ndobj_memblock)
@@ -213,7 +208,7 @@ namespace nd {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
-      m_memblock = std::move(ndobj_memblock);
+      intrusive_ptr<memory_block_data>::operator=(std::move(ndobj_memblock));
     }
 
     // TODO: Copy the initializer list mechanisms from ndarray
@@ -238,19 +233,13 @@ namespace nd {
      */
     array_preamble *release()
     {
-      return reinterpret_cast<array_preamble *>(m_memblock.release());
-    }
-
-    /** Low level access to the reference-counted memory */
-    inline intrusive_ptr<memory_block_data> get_memblock() const
-    {
-      return m_memblock;
+      return reinterpret_cast<array_preamble *>(intrusive_ptr<memory_block_data>::release());
     }
 
     /** Low level access to the array preamble */
     array_preamble *get() const
     {
-      return reinterpret_cast<array_preamble *>(m_memblock.get());
+      return reinterpret_cast<array_preamble *>(intrusive_ptr<memory_block_data>::get());
     }
 
     /** Low level access to the array arrmeta */
@@ -268,7 +257,7 @@ namespace nd {
     /** Returns true if the array is NULL */
     inline bool is_null() const
     {
-      return m_memblock.get() == NULL;
+      return intrusive_ptr<memory_block_data>::get() == NULL;
     }
 
     char *get_readwrite_originptr() const
@@ -443,7 +432,7 @@ namespace nd {
       if (get()->ref) {
         return get()->ref;
       } else {
-        return m_memblock;
+        return *this;
       }
     }
 
@@ -1517,7 +1506,6 @@ namespace nd {
   // Implementation of initializer list construction
   template <class T>
   dynd::nd::array::array(const std::initializer_list<T> &il)
-      : m_memblock()
   {
     intptr_t dim0 = il.size();
     make_strided_array(ndt::type::make<T>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
@@ -1525,7 +1513,6 @@ namespace nd {
   }
   template <class T>
   dynd::nd::array::array(const std::initializer_list<std::initializer_list<T>> &il)
-      : m_memblock()
   {
     typedef std::initializer_list<std::initializer_list<T>> S;
     intptr_t shape[2];
@@ -1538,7 +1525,6 @@ namespace nd {
   }
   template <class T>
   dynd::nd::array::array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il)
-      : m_memblock()
   {
     typedef std::initializer_list<std::initializer_list<std::initializer_list<T>>> S;
     intptr_t shape[3];
@@ -1550,12 +1536,12 @@ namespace nd {
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
 
-  inline dynd::nd::array::array(const std::initializer_list<const char *> &il) : m_memblock()
+  inline dynd::nd::array::array(const std::initializer_list<const char *> &il)
   {
     make_strided_string_array(il.begin(), il.size()).swap(*this);
   }
 
-  inline dynd::nd::array::array(const std::initializer_list<ndt::type> &il) : m_memblock()
+  inline dynd::nd::array::array(const std::initializer_list<ndt::type> &il)
   {
     intptr_t dim0 = il.size();
     make_strided_array(ndt::make_type(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
@@ -1565,7 +1551,7 @@ namespace nd {
     }
   }
 
-  inline dynd::nd::array::array(const std::initializer_list<bool> &il) : m_memblock()
+  inline dynd::nd::array::array(const std::initializer_list<bool> &il)
   {
     intptr_t dim0 = il.size();
     make_strided_array(ndt::type::make<bool>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
@@ -1580,7 +1566,6 @@ namespace nd {
 
   template <class T, int N>
   nd::array::array(const T (&rhs)[N])
-      : m_memblock()
   {
     const int ndim = detail::ndim_from_array<T[N]>::value;
     intptr_t shape[ndim];
@@ -1607,7 +1592,6 @@ namespace nd {
 
   template <int N>
   nd::array::array(const ndt::type (&rhs)[N])
-      : m_memblock()
   {
     nd::empty(N, ndt::make_type()).swap(*this);
     ndt::type *out = reinterpret_cast<ndt::type *>(get()->ptr);

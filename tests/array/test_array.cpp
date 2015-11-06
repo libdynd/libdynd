@@ -29,7 +29,7 @@ TEST(Array, NullConstructor) {
     nd::array a;
 
     // Default-constructed nd::array is NULL and will crash if access is attempted
-    EXPECT_EQ(NULL, a.get_memblock().get());
+    EXPECT_EQ(NULL, a.get());
 }
 
 TEST(Array, FromValueConstructor) {
