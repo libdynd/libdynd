@@ -103,16 +103,16 @@ void ndt::ellipsis_dim_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta
   throw type_error("Cannot store data of ellipsis type");
 }
 
-void ndt::ellipsis_dim_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta),
-                                                    const char *DYND_UNUSED(src_arrmeta),
-                                                    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+void ndt::ellipsis_dim_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of ellipsis type");
 }
 
-size_t ndt::ellipsis_dim_type::arrmeta_copy_construct_onedim(char *DYND_UNUSED(dst_arrmeta),
-                                                             const char *DYND_UNUSED(src_arrmeta),
-                                                             const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+size_t ndt::ellipsis_dim_type::arrmeta_copy_construct_onedim(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of ellipsis type");
 }
@@ -213,7 +213,7 @@ void ndt::ellipsis_dim_type::get_dynamic_type_properties(const std::pair<std::st
     {
       nd::array a = static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name());
       typed_data_copy(dst_tp, dst_arrmeta, dst,
-                      static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name()).get_arrmeta(), a.get_data());
+                      static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name()).metadata(), a.data());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,

@@ -89,15 +89,16 @@ void ndt::typevar_dim_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta)
   throw type_error("Cannot store data of typevar type");
 }
 
-void ndt::typevar_dim_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                                   const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+void ndt::typevar_dim_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
 
-size_t ndt::typevar_dim_type::arrmeta_copy_construct_onedim(char *DYND_UNUSED(dst_arrmeta),
-                                                            const char *DYND_UNUSED(src_arrmeta),
-                                                            const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+size_t ndt::typevar_dim_type::arrmeta_copy_construct_onedim(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
@@ -164,7 +165,7 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(const std::pair<std::str
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst,
-                      static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get_arrmeta(),
+                      static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).metadata(),
                       static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get_readonly_originptr());
     }
 

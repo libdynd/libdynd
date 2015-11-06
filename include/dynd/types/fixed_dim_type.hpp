@@ -259,7 +259,7 @@ namespace ndt {
   template <typename T>
   inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i)
   {
-    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
+    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.metadata());
     return *reinterpret_cast<const T *>(a.get_readonly_originptr() + i * md->stride);
   }
 
@@ -271,7 +271,7 @@ namespace ndt {
   template <typename T>
   inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i)
   {
-    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
+    const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.metadata());
     return *reinterpret_cast<T *>(a.get_readwrite_originptr() + i * md->stride);
   }
 

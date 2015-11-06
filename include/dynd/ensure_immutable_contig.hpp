@@ -15,18 +15,14 @@ namespace nd {
   namespace detail {
     template <typename T>
     struct ensure_immutable_contig {
-      inline static std::enable_if<is_dynd_scalar<T>::value, bool>
-      run(nd::array &a)
+      inline static std::enable_if<is_dynd_scalar<T>::value, bool> run(nd::array &a)
       {
         const ndt::type &tp = a.get_type();
         if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
           // It's immutable and "N * <something>"
-          const ndt::type &et =
-              tp.extended<ndt::fixed_dim_type>()->get_element_type();
-          const fixed_dim_type_arrmeta *md =
-              reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
-          if (et.get_type_id() == type_id_of<T>::value &&
-              (md->stride == 0 || md->stride == sizeof(T))) {
+          const ndt::type &et = tp.extended<ndt::fixed_dim_type>()->get_element_type();
+          const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.metadata());
+          if (et.get_type_id() == type_id_of<T>::value && (md->stride == 0 || md->stride == sizeof(T))) {
             // It also has the right type and is contiguous,
             // so no modification necessary.
             return true;
@@ -58,12 +54,9 @@ namespace nd {
         const ndt::type &tp = a.get_type();
         if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
           // It's immutable and "N * <something>"
-          const ndt::type &et =
-              tp.extended<ndt::fixed_dim_type>()->get_element_type();
-          const fixed_dim_type_arrmeta *md =
-              reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get_arrmeta());
-          if (et.get_type_id() == type_type_id &&
-              (md->stride == 0 || md->stride == sizeof(ndt::type))) {
+          const ndt::type &et = tp.extended<ndt::fixed_dim_type>()->get_element_type();
+          const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.metadata());
+          if (et.get_type_id() == type_type_id && (md->stride == 0 || md->stride == sizeof(ndt::type))) {
             // It also has the right type and is contiguous,
             // so no modification necessary.
             return true;

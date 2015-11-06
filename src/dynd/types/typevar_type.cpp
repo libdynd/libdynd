@@ -89,8 +89,9 @@ void ndt::typevar_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bo
   throw type_error("Cannot store data of typevar type");
 }
 
-void ndt::typevar_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                               const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+void
+ndt::typevar_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+                                          const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
@@ -142,7 +143,7 @@ void ndt::typevar_type::get_dynamic_type_properties(const std::pair<std::string,
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       const nd::array &a = tp.extended<typevar_type>()->get_name();
-      typed_data_assign(dst_tp, dst_arrmeta, dst, a.get_type(), a.get_arrmeta(), a.get_readonly_originptr(),
+      typed_data_assign(dst_tp, dst_arrmeta, dst, a.get_type(), a.metadata(), a.get_readonly_originptr(),
                         &eval::default_eval_context);
     }
 
