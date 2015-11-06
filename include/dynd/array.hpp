@@ -255,26 +255,21 @@ namespace nd {
       return get()->get_arrmeta();
     }
 
-    char *get_readwrite_originptr() const
-    {
-      if (get()->flags & write_access_flag) {
-        return get()->ptr;
-      } else {
-        throw std::runtime_error("tried to write to a dynd array that is not writable");
-      }
-    }
-
     const char *get_readonly_originptr() const
     {
       return get()->ptr;
     }
 
-    char *data()
+    char *data() const
     {
-      return get()->ptr;
+      if (get()->flags & write_access_flag) {
+        return get()->ptr;
+      }
+
+      throw std::runtime_error("tried to write to a dynd array that is not writable");
     }
 
-    const char *data() const
+    const char *cdata() const
     {
       return get()->ptr;
     }
@@ -666,7 +661,7 @@ namespace nd {
     template <typename Type>
     Type view()
     {
-      return Type(metadata(), get_readwrite_originptr());
+      return Type(metadata(), data());
     }
 
     /**
@@ -1633,7 +1628,7 @@ namespace nd {
       {
         array result = nd::empty(vec.size(), ndt::type::make<T>());
         if (!vec.empty()) {
-          DYND_MEMCPY(result.get_readwrite_originptr(), &vec[0], vec.size() * sizeof(T));
+          DYND_MEMCPY(result.data(), &vec[0], vec.size() * sizeof(T));
         }
         return result;
       }
@@ -1668,8 +1663,8 @@ namespace nd {
         if (!lhs.is_scalar()) {
           throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
         }
-        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.metadata(),
-                          lhs.get()->ptr, ectx);
+        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.metadata(), lhs.get()->ptr,
+                          ectx);
         return result;
       }
     };
@@ -1750,7 +1745,7 @@ namespace nd {
 
   inline void assign_na(array &out, const eval::eval_context *ectx = &eval::default_eval_context)
   {
-    assign_na(out.get_type(), out.metadata(), out.get_readwrite_originptr(), ectx);
+    assign_na(out.get_type(), out.metadata(), out.data(), ectx);
   }
 
   /**

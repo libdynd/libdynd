@@ -39,7 +39,7 @@ void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn, in
                                             type &out_transformed_tp, bool &out_was_transformed) const
 {
   nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
-  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
+  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
   bool was_transformed = false;
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
@@ -58,7 +58,7 @@ void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn, in
 ndt::type ndt::tuple_type::get_canonical_type() const
 {
   nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
-  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
+  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
     tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
@@ -178,7 +178,7 @@ void ndt::tuple_type::get_dynamic_type_properties(const std::pair<std::string, n
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_field_types.metadata(),
-                      tp.extended<tuple_type>()->m_field_types.data());
+                      tp.extended<tuple_type>()->m_field_types.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
@@ -200,7 +200,7 @@ void ndt::tuple_type::get_dynamic_type_properties(const std::pair<std::string, n
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_arrmeta_offsets.metadata(),
-                      tp.extended<tuple_type>()->m_arrmeta_offsets.data());
+                      tp.extended<tuple_type>()->m_arrmeta_offsets.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,

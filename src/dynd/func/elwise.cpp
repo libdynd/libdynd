@@ -19,7 +19,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp)
       dynd::nd::empty(param_count, ndt::make_type());
   std::string dimsname("Dims");
   ndt::type *pt =
-      reinterpret_cast<ndt::type *>(out_param_types.get_readwrite_originptr());
+      reinterpret_cast<ndt::type *>(out_param_types.data());
 
   for (intptr_t i = 0, i_end = child_tp->get_npos(); i != i_end; ++i) {
     if (param_types[i].get_kind() == memory_kind) {

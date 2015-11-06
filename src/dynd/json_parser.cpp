@@ -836,7 +836,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin, const char *json_e
   {
     const char *begin = json_begin, *end = json_end;
     ndt::type tp = out.get_type();
-    ::parse_json(tp, out.metadata(), out.get_readwrite_originptr(), begin, end, ectx);
+    ::parse_json(tp, out.metadata(), out.data(), begin, end, ectx);
     begin = skip_whitespace(begin, end);
     if (begin != end) {
       throw json_parse_error(begin, "unexpected trailing JSON text", tp);

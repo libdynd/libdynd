@@ -55,7 +55,7 @@ namespace nd {
       {
         // Allocate a temporary buffer on the heap
         array buffer = empty(buffer_tp);
-        char *buffer_data = buffer.get_readwrite_originptr();
+        char *buffer_data = buffer.data();
 
         ckernel_prefix *first = get_child();
         expr_single_t first_func = first->get_function<expr_single_t>();
@@ -71,7 +71,7 @@ namespace nd {
       {
         // Allocate a temporary buffer on the heap
         array buffer = empty(buffer_shape[0], buffer_tp);
-        char *buffer_data = buffer.get_readwrite_originptr();
+        char *buffer_data = buffer.data();
         intptr_t buffer_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(buffer.metadata())->stride;
 
         ckernel_prefix *first = get_child();

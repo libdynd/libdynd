@@ -70,7 +70,7 @@ class array_iter<1, 0> {
 public:
   array_iter(const nd::array &op0)
   {
-    init(op0.get_type(), op0.metadata(), op0.get_readwrite_originptr());
+    init(op0.get_type(), op0.metadata(), op0.data());
   }
 
   ~array_iter()
@@ -324,7 +324,7 @@ public:
   }
   array_iter(const nd::array &op0, const nd::array &op1)
   {
-    init(op0.get_type(), op0.metadata(), op0.get_readwrite_originptr(), op1.get_type(), op1.metadata(),
+    init(op0.get_type(), op0.metadata(), op0.data(), op1.get_type(), op1.metadata(),
          op1.get_readonly_originptr());
   }
 
@@ -559,7 +559,7 @@ public:
       m_arrmeta[0] = out_op0.metadata();
       m_array_tp[0]
           .iterdata_construct(m_iterdata[0], &m_arrmeta[0], m_iter_ndim[0], m_itershape.get(), m_uniform_tp[0]);
-      m_data[0] = m_iterdata[0]->reset(m_iterdata[0], out_op0.get_readwrite_originptr(), m_iter_ndim[0]);
+      m_data[0] = m_iterdata[0]->reset(m_iterdata[0], out_op0.data(), m_iter_ndim[0]);
       // The op iterdata
       for (int i = 1; i < 4; ++i) {
         iterdata_size = m_array_tp[i].get_broadcasted_iterdata_size(m_iter_ndim[i]);

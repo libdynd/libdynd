@@ -177,7 +177,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
   expr_single_t fn = k.get()->get_function<expr_single_t>();
 
   intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.metadata())->stride;
-  char *dst_ptr = categories.get_readwrite_originptr();
+  char *dst_ptr = categories.data();
   for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
     char *src = const_cast<char *>(*it);
     fn(k.get(), dst_ptr, &src);
@@ -394,7 +394,7 @@ nd::array ndt::categorical_type::get_categories() const
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   for (intptr_t i = 0; i < dim_size; ++i) {
     char *src = const_cast<char *>(get_category_data_from_value((uint32_t)i));
-    fn(k.get(), categories.get_readwrite_originptr() + i * stride, &src);
+    fn(k.get(), categories.data() + i * stride, &src);
   }
   return categories;
 }
@@ -625,7 +625,7 @@ void ndt::categorical_type::get_dynamic_type_properties(const std::pair<std::str
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<categorical_type>()->m_categories.metadata(),
-                      tp.extended<categorical_type>()->m_categories.data());
+                      tp.extended<categorical_type>()->m_categories.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,

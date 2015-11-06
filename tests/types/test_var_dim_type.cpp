@@ -250,7 +250,7 @@ TEST(VarArrayDType, AssignKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(1, a(irange()).get_shape()[0]);
   EXPECT_EQ(9, a(0).as<int>());
   k.reset();
@@ -264,7 +264,7 @@ TEST(VarArrayDType, AssignKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(9, a(0).as<int>());
   EXPECT_EQ(9, a(1).as<int>());
@@ -280,7 +280,7 @@ TEST(VarArrayDType, AssignKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
@@ -297,7 +297,7 @@ TEST(VarArrayDType, AssignKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
@@ -314,7 +314,7 @@ TEST(VarArrayDType, AssignKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(9, a(0).as<int>());
   EXPECT_EQ(9, a(1).as<int>());
@@ -330,7 +330,7 @@ TEST(VarArrayDType, AssignKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   // No error, a is still uninitialized
   k.reset();
 
@@ -352,7 +352,7 @@ TEST(VarArrayDType, AssignKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  EXPECT_THROW(fn(k.get(), a.get_readwrite_originptr(), &src), broadcast_error);
+  EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
 }
 
@@ -373,7 +373,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
@@ -390,7 +390,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
@@ -407,7 +407,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  EXPECT_THROW(fn(k.get(), a.get_readwrite_originptr(), &src), broadcast_error);
+  EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
 
   // Assignment initialized var array -> strided array
@@ -420,7 +420,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
   EXPECT_EQ(7, a(2).as<int>());
@@ -436,7 +436,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  EXPECT_THROW(fn(k.get(), a.get_readwrite_originptr(), &src), broadcast_error);
+  EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
 
   // Error assignment uninitialized var array -> strided array
@@ -449,7 +449,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  EXPECT_THROW(fn(k.get(), a.get_readwrite_originptr(), &src), runtime_error);
+  EXPECT_THROW(fn(k.get(), a.data(), &src), runtime_error);
   k.reset();
 }
 
@@ -469,7 +469,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
@@ -486,7 +486,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
@@ -503,7 +503,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  EXPECT_THROW(fn(k.get(), a.get_readwrite_originptr(), &src), broadcast_error);
+  EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
 
   // Assignment initialized var array -> fixed array
@@ -516,7 +516,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  fn(k.get(), a.get_readwrite_originptr(), &src);
+  fn(k.get(), a.data(), &src);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());
   EXPECT_EQ(7, a(2).as<int>());
@@ -532,7 +532,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  EXPECT_THROW(fn(k.get(), a.get_readwrite_originptr(), &src), broadcast_error);
+  EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
 
   // Error assignment uninitialized var array -> fixed array
@@ -545,7 +545,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
                          &eval::default_eval_context);
   fn = k.get()->get_function<expr_single_t>();
   src = const_cast<char *>(b.get_readonly_originptr());
-  EXPECT_THROW(fn(k.get(), a.get_readwrite_originptr(), &src), runtime_error);
+  EXPECT_THROW(fn(k.get(), a.data(), &src), runtime_error);
   k.reset();
 }
 

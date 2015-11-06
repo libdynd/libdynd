@@ -138,7 +138,7 @@ namespace nd {
 
     inline void set_data(char *&data, const array &value)
     {
-      data = const_cast<char *>(value.get_readonly_originptr());
+      data = const_cast<char *>(value.cdata());
     }
 
     inline void set_data(char **&data, array &value)
@@ -189,7 +189,7 @@ namespace nd {
 
         char *arrmeta = res.metadata();
         const uintptr_t *arrmeta_offsets = res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
-        char *data = res.get_readwrite_originptr();
+        char *data = res.data();
         const uintptr_t *data_offsets =
             res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.metadata());
 
@@ -306,8 +306,7 @@ namespace nd {
                                                     reinterpret_cast<uintptr_t *>(res.metadata()));
 
         fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), res.metadata(),
-                    res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw(),
-                    res.get_readwrite_originptr(),
+                    res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw(), res.data(),
                     res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.metadata()), kwds_as_vector,
                     available, missing);
 
@@ -380,8 +379,7 @@ namespace nd {
                                                     reinterpret_cast<uintptr_t *>(res.metadata()));
 
         fill_values(field_types, res.metadata(),
-                    res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw(),
-                    res.get_readwrite_originptr(),
+                    res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw(), res.data(),
                     res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.metadata()), kwds_as_vector,
                     available, missing);
 
@@ -599,7 +597,7 @@ namespace nd {
 
     callable(const ndt::type &self_tp, expr_single_t single, expr_strided_t strided) : m_value(empty(self_tp))
     {
-      new (m_value.get_readwrite_originptr()) callable_type_data(single, strided);
+      new (m_value.data()) callable_type_data(single, strided);
     }
 
     callable(const ndt::type &self_tp, kernel_request_t kernreq, single_t single, std::size_t data_size,
@@ -607,8 +605,7 @@ namespace nd {
              callable_instantiate_t instantiate)
         : m_value(empty(self_tp))
     {
-      new (m_value.get_readwrite_originptr())
-          callable_type_data(kernreq, single, data_size, data_init, resolve_dst_type, instantiate);
+      new (m_value.data()) callable_type_data(kernreq, single, data_size, data_init, resolve_dst_type, instantiate);
     }
 
     template <typename T>
@@ -617,8 +614,8 @@ namespace nd {
              callable_instantiate_t instantiate)
         : m_value(empty(self_tp))
     {
-      new (m_value.get_readwrite_originptr()) callable_type_data(kernreq, single, std::forward<T>(static_data),
-                                                                 data_size, data_init, resolve_dst_type, instantiate);
+      new (m_value.data()) callable_type_data(kernreq, single, std::forward<T>(static_data), data_size, data_init,
+                                              resolve_dst_type, instantiate);
     }
 
     callable(const callable &rhs) : m_value(rhs.m_value)
@@ -649,9 +646,9 @@ namespace nd {
 
     callable_type_data *get()
     {
-      return !m_value.is_null() ? const_cast<callable_type_data *>(
-                                      reinterpret_cast<const callable_type_data *>(m_value.get_readonly_originptr()))
-                                : NULL;
+      return !m_value.is_null()
+                 ? const_cast<callable_type_data *>(reinterpret_cast<const callable_type_data *>(m_value.data()))
+                 : NULL;
     }
 
     const callable_type_data *get() const
@@ -749,8 +746,8 @@ namespace nd {
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst.metadata(), dst.get_readwrite_originptr(), args.size(), args.types(), args.arrmeta(),
-               args.data(), kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
+      (*get())(dst_tp, dst.metadata(), dst.data(), args.size(), args.types(), args.arrmeta(), args.data(),
+               kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
       return dst;
     }
 

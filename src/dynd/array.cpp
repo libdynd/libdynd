@@ -207,7 +207,7 @@ nd::array nd::make_pod_array(const ndt::type &pod_dt, const void *data)
 nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
 {
   nd::array result = nd::empty(ndt::bytes_type::make(alignment));
-  reinterpret_cast<bytes *>(result.get_readwrite_originptr())->assign(data, len);
+  reinterpret_cast<bytes *>(result.data())->assign(data, len);
   return result;
 }
 
@@ -215,7 +215,7 @@ nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t D
                                 uint64_t DYND_UNUSED(access_flags))
 {
   nd::array result = empty(ndt::string_type::make());
-  reinterpret_cast<string *>(result.get_readwrite_originptr())->assign(str, len);
+  reinterpret_cast<string *>(result.data())->assign(str, len);
   return result;
 }
 
@@ -229,7 +229,7 @@ nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t ar
   ndt::type stp = ndt::string_type::make();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result = nd::empty(tp);
-  string *string_ptr = reinterpret_cast<string *>(result.get_readwrite_originptr());
+  string *string_ptr = reinterpret_cast<string *>(result.data());
   for (size_t i = 0; i < array_size; ++i) {
     size_t size = strlen(cstr_array[i]);
     string_ptr->assign(cstr_array[i], size);
@@ -248,7 +248,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
   ndt::type stp = ndt::string_type::make();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result = nd::empty(tp);
-  string *string_arr_ptr = reinterpret_cast<string *>(result.get_readwrite_originptr());
+  string *string_arr_ptr = reinterpret_cast<string *>(result.data());
   for (size_t i = 0; i < array_size; ++i) {
     size_t size = str_array[i]->size();
     string_arr_ptr->assign(str_array[i]->data(), size);
@@ -557,7 +557,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
   // Make an array memory block which contains both the string pointers and
   // the string data
   array result = nd::empty(dt);
-  string *data = reinterpret_cast<string *>(result.get_readwrite_originptr());
+  string *data = reinterpret_cast<string *>(result.data());
   for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
     size_t size = vec[i].size();
     data[i].assign(vec[i].data(), size);
@@ -622,7 +622,7 @@ nd::array &nd::array::underlying()
 const nd::array &nd::array::underlying() const
 {
   if (get_type().get_type_id() == array_type_id) {
-    return *reinterpret_cast<const array *>(data());
+    return *reinterpret_cast<const array *>(cdata());
   }
 
   return *this;
@@ -677,14 +677,13 @@ void nd::array::val_assign(const array &rhs, const eval::eval_context *ectx) con
     }
   */
 
-  typed_data_assign(get_type(), metadata(), get_readwrite_originptr(), rhs.get_type(), rhs.metadata(),
-                    rhs.get_readonly_originptr(), ectx);
+  typed_data_assign(get_type(), metadata(), data(), rhs.get_type(), rhs.metadata(), rhs.get_readonly_originptr(), ectx);
 }
 
 void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
                            const eval::eval_context *ectx) const
 {
-  typed_data_assign(get_type(), metadata(), get_readwrite_originptr(), rhs_dt, rhs_arrmeta, rhs_data, ectx);
+  typed_data_assign(get_type(), metadata(), data(), rhs_dt, rhs_arrmeta, rhs_data, ectx);
 }
 
 void nd::array::flag_as_immutable()
@@ -903,7 +902,7 @@ void nd::array::assign_na()
 {
   ndt::type tp = get_type();
   if (tp.get_type_id() == option_type_id) {
-    tp.extended<ndt::option_type>()->assign_na(metadata(), get_readwrite_originptr(), &eval::default_eval_context);
+    tp.extended<ndt::option_type>()->assign_na(metadata(), data(), &eval::default_eval_context);
   }
 }
 
@@ -1530,8 +1529,7 @@ nd::array nd::eval_raw_copy(const ndt::type &dt, const char *arrmeta, const char
     result = nd::empty(cdt);
   }
 
-  typed_data_assign(cdt, result.metadata(), result.get_readwrite_originptr(), dt, arrmeta, data,
-                    &eval::default_eval_context);
+  typed_data_assign(cdt, result.metadata(), result.data(), dt, arrmeta, data, &eval::default_eval_context);
 
   return result;
 }
@@ -1694,8 +1692,8 @@ nd::array nd::reshape(const nd::array &a, const nd::array &shape)
     shape_copy[i] = shape(i).as<intptr_t>();
   }
 
-  return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(),
-                                      a.get_readwrite_originptr(), a, NULL);
+  return make_strided_array_from_data(a.get_dtype(), ndim, shape_copy.get(), strides.get(), a.get_flags(), a.data(), a,
+                                      NULL);
 }
 
 nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNUSED(begin), intptr_t DYND_UNUSED(end),

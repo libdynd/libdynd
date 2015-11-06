@@ -272,7 +272,7 @@ namespace ndt {
   inline T &unchecked_fixed_dim_get_rw(const nd::array &a, intptr_t i)
   {
     const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.metadata());
-    return *reinterpret_cast<T *>(a.get_readwrite_originptr() + i * md->stride);
+    return *reinterpret_cast<T *>(a.data() + i * md->stride);
   }
 
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
