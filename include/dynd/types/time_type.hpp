@@ -15,7 +15,7 @@ namespace ndt {
     datetime_tz_t m_timezone;
 
   public:
-    time_type(datetime_tz_t timezone);
+    time_type(datetime_tz_t);
 
     virtual ~time_type();
 
@@ -93,10 +93,10 @@ namespace ndt {
       return time_tp;
     }
 
-    /** Returns type "time[tz=<timezone>]" */
-    static type make(datetime_tz_t timezone)
+    /** Returns type "time[tz=<t>]" */
+    static type make(datetime_tz_t t)
     {
-      return type(new time_type(timezone), false);
+      return type(new time_type(t), false);
     }
   };
 
