@@ -1282,7 +1282,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
   res.get()->type = ndt::type(dst_tp).release();
   res.get()->flags = get()->flags;
 
-  char *src_arrmeta = metadata();
+  char *src_arrmeta = const_cast<char *>(metadata());
   char *dst_arrmeta = res.metadata();
   for (intptr_t j = 0; j < i; ++j) {
     dst_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(dst_arrmeta, src_arrmeta,
