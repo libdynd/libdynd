@@ -114,18 +114,14 @@ namespace detail {
   DYND_API void memory_block_free(memory_block_data *memblock);
 } // namespace detail
 
-/**
- * Decrements the reference count of a memory block object,
- * freeing it if the count reaches zero.
- */
-inline void memory_block_decref(memory_block_data *memblock)
+inline atomic_refcount &intrusive_ptr_use_count(memory_block_data *ptr)
 {
-  // std::cout << "memblock " << (void *)memblock << " dec: " << memblock->m_use_count - 1 << std::endl;
-  // if (memblock->m_use_count == 1) {std::cout << "memblock " << (void *)memblock << " fre: " << memblock->m_use_count
-  // - 1 << std::endl;}
-  if (--memblock->m_use_count == 0) {
-    detail::memory_block_free(memblock);
-  }
+  return ptr->m_use_count;
+}
+
+inline void intrusive_ptr_delete(memory_block_data *ptr)
+{
+  detail::memory_block_free(ptr);
 }
 
 /**
