@@ -41,7 +41,7 @@ namespace nd {
 
   template <>
   struct min_kernel<complex_float32_type_id> : base_kernel<min_kernel<complex_float32_type_id>, 1> {
-    typedef typename type_of<complex_float32_type_id>::type src0_type;
+    typedef complex<float> src0_type;
     typedef src0_type dst_type;
 
     static const std::size_t data_size = 0;
@@ -54,7 +54,7 @@ namespace nd {
 
   template <>
   struct min_kernel<complex_float64_type_id> : base_kernel<min_kernel<complex_float64_type_id>, 1> {
-    typedef typename type_of<complex_float64_type_id>::type src0_type;
+    typedef complex<double> src0_type;
     typedef src0_type dst_type;
 
     static const std::size_t data_size = 0;
