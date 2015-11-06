@@ -28,26 +28,25 @@ namespace detail {
 
 intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size)
 {
-  char *result = new char[sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size];
+  char *result = new char[sizeof(array_preamble) + arrmeta_size];
   if (result == 0) {
     throw bad_alloc();
   }
   // Zero out all the arrmeta to start
-  memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + arrmeta_size);
+  memset(result, 0, sizeof(array_preamble) + arrmeta_size);
   return intrusive_ptr<memory_block_data>(new (result) memory_block_data(1, array_memory_block_type), false);
 }
 
 intrusive_ptr<memory_block_data> dynd::make_array_memory_block(size_t arrmeta_size, size_t extra_size,
                                                                size_t extra_alignment, char **out_extra_ptr)
 {
-  size_t extra_offset =
-      inc_to_alignment(sizeof(memory_block_data) + sizeof(array_preamble) + arrmeta_size, extra_alignment);
+  size_t extra_offset = inc_to_alignment(sizeof(array_preamble) + arrmeta_size, extra_alignment);
   char *result = new char[extra_offset + extra_size];
   if (result == 0) {
     throw bad_alloc();
   }
   // Zero out all the arrmeta to start
-  memset(result + sizeof(memory_block_data), 0, sizeof(array_preamble) + arrmeta_size);
+  memset(result, 0, sizeof(array_preamble) + arrmeta_size);
   // Return a pointer to the extra allocated memory
   *out_extra_ptr = result + extra_offset;
   return intrusive_ptr<memory_block_data>(new (result) memory_block_data(1, array_memory_block_type), false);
@@ -79,7 +78,7 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   if (!preamble->is_builtin_type()) {
     base_type_incref(preamble->type);
     preamble->type->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
-                                             reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo);
+                                           reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo);
   }
 
   return result;

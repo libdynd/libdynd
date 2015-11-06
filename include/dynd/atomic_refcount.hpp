@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-
 #ifdef DYND_USE_STD_ATOMIC
 #include <atomic>
 namespace dynd {

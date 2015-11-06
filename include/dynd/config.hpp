@@ -19,6 +19,7 @@
 #include <utility>
 
 #include <dynd/visibility.hpp>
+#include <dynd/atomic_refcount.hpp>
 
 #ifdef __NVCC__
 #ifndef DYND_CUDA
@@ -214,8 +215,13 @@ const ValueType &get_second_if_pair(const std::pair<KeyType, ValueType> &pair)
   return pair.second;
 }
 
+class atomic_refcount;
+
 template <typename T>
-void memory_block_decref(T *ptr);
+atomic_refcount &intrusive_ptr_use_count(T *ptr);
+
+template <typename T>
+void intrusive_ptr_delete(T *ptr);
 
 /**
  * A smart pointer, very similar to boost::intrusive_ptr.
@@ -234,7 +240,7 @@ public:
   explicit intrusive_ptr(T *ptr, bool add_ref = true) : m_ptr(ptr)
   {
     if (m_ptr != 0 && add_ref) {
-      ++m_ptr->m_use_count;
+      ++intrusive_ptr_use_count(m_ptr);
     }
   }
 
@@ -242,7 +248,7 @@ public:
   intrusive_ptr(const intrusive_ptr &other) : m_ptr(other.m_ptr)
   {
     if (m_ptr != 0) {
-      ++m_ptr->m_use_count;
+      ++intrusive_ptr_use_count(m_ptr);
     }
   }
 
@@ -256,13 +262,15 @@ public:
   ~intrusive_ptr()
   {
     if (m_ptr != 0) {
-      memory_block_decref(m_ptr);
+      if (--intrusive_ptr_use_count(m_ptr) == 0) {
+        intrusive_ptr_delete(m_ptr);
+      }
     }
   }
 
   intptr_t use_count() const
   {
-    return m_ptr->m_use_count;
+    return intrusive_ptr_use_count(m_ptr);
   }
 
   explicit operator bool() const
@@ -279,11 +287,13 @@ public:
   intrusive_ptr &operator=(const intrusive_ptr &rhs)
   {
     if (m_ptr != 0) {
-      memory_block_decref(m_ptr);
+      if (--intrusive_ptr_use_count(m_ptr) == 0) {
+        intrusive_ptr_delete(m_ptr);
+      }
     }
     if (rhs.m_ptr != 0) {
       m_ptr = rhs.m_ptr;
-      ++m_ptr->m_use_count;
+      ++intrusive_ptr_use_count(m_ptr);
     } else {
       m_ptr = 0;
     }
@@ -294,7 +304,9 @@ public:
   intrusive_ptr &operator=(intrusive_ptr &&rhs)
   {
     if (m_ptr != 0) {
-      memory_block_decref(m_ptr);
+      if (--intrusive_ptr_use_count(m_ptr) == 0) {
+        intrusive_ptr_delete(m_ptr);
+      }
     }
     m_ptr = rhs.m_ptr;
     rhs.m_ptr = 0;
@@ -305,11 +317,13 @@ public:
   intrusive_ptr &operator=(T *rhs)
   {
     if (m_ptr != 0) {
-      memory_block_decref(m_ptr);
+      if (--intrusive_ptr_use_count(m_ptr) == 0) {
+        intrusive_ptr_delete(m_ptr);
+      }
     }
     m_ptr = rhs;
     if (rhs != 0) {
-      ++rhs->m_use_count;
+      ++intrusive_ptr_use_count(rhs);
     }
     return *this;
   }
@@ -317,7 +331,7 @@ public:
   /** Returns true if there is only one reference to this memory block */
   bool unique() const
   {
-    return m_ptr->m_use_count <= 1;
+    return intrusive_ptr_use_count(m_ptr) <= 1;
   }
 
   /** Gets the raw memory_block_data pointer */

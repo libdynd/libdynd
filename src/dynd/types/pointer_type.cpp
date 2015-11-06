@@ -268,9 +268,7 @@ void ndt::pointer_type::arrmeta_finalize_buffers(char *arrmeta) const
 void ndt::pointer_type::arrmeta_destruct(char *arrmeta) const
 {
   pointer_type_arrmeta *md = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
-  if (md->blockref) {
-    memory_block_decref(md->blockref.get());
-  }
+  md->~pointer_type_arrmeta();
   if (!m_target_tp.is_builtin()) {
     m_target_tp.extended()->arrmeta_destruct(arrmeta + sizeof(pointer_type_arrmeta));
   }
