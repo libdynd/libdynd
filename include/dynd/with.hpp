@@ -18,12 +18,10 @@ namespace nd {
   template <typename T, typename F>
   void with_1d_stride(const nd::array &a, F &&f)
   {
-    static_assert(is_dynd_scalar<T>::value,
-                  "T must have the same representation in DyND and C++");
+    static_assert(is_dynd_scalar<T>::value, "T must have the same representation in DyND and C++");
     nd::array b = nd::asarray(a, ndt::type::make<T[]>());
-    auto ss = reinterpret_cast<const size_stride_t *>(b.get_arrmeta());
-    f(ss->dim_size, ss->stride / sizeof(T),
-      reinterpret_cast<const T *>(b.get_data()));
+    auto ss = reinterpret_cast<const size_stride_t *>(b.metadata());
+    f(ss->dim_size, ss->stride / sizeof(T), reinterpret_cast<const T *>(b.data()));
   }
 
 } // namespace nd

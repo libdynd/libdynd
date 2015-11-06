@@ -81,9 +81,7 @@ TEST(FixedDimType, Basic)
 TEST(FixedDimType, SimpleIndex)
 {
   nd::array a = parse_json("2 * 3 * int16", "[[1, 2, 3], [4, 5, 6]]");
-  ASSERT_EQ(ndt::make_fixed_dim(
-                2, ndt::make_fixed_dim(3, ndt::type::make<int16_t>())),
-            a.get_type());
+  ASSERT_EQ(ndt::make_fixed_dim(2, ndt::make_fixed_dim(3, ndt::type::make<int16_t>())), a.get_type());
 
   nd::array b;
 
@@ -113,8 +111,7 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed)
   a.vals() = 0;
   b = 9.0;
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.metadata(), b.get_type(), b.metadata(), kernel_request_single,
                          &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   char *src = const_cast<char *>(b.get_readonly_originptr());
@@ -135,8 +132,7 @@ TEST(FixedDimType, AssignKernel_FixedToFixed)
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(), b.get_type(),
-                         b.get_arrmeta(), kernel_request_single,
+  make_assignment_kernel(&k, 0, a.get_type(), a.metadata(), b.get_type(), b.metadata(), kernel_request_single,
                          &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
   char *src = const_cast<char *>(b.get_readonly_originptr());
@@ -155,35 +151,24 @@ TEST(FixedDimType, AssignKernel_FixedToScalarError)
   a = 9.0;
   b = parse_json("3 * int32", "[3, 5, 7]");
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-  EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_type(), a.get_arrmeta(),
-                                      b.get_type(), b.get_arrmeta(),
-                                      kernel_request_single,
-                                      &eval::default_eval_context),
+  EXPECT_THROW(make_assignment_kernel(&k, 0, a.get_type(), a.metadata(), b.get_type(), b.metadata(),
+                                      kernel_request_single, &eval::default_eval_context),
                broadcast_error);
 }
 
 TEST(FixedDimType, IsTypeSubarray)
 {
   EXPECT_TRUE(ndt::type("3 * int32").is_type_subarray(ndt::type("3 * int32")));
-  EXPECT_TRUE(
-      ndt::type("10 * int32").is_type_subarray(ndt::type("10 * int32")));
-  EXPECT_TRUE(
-      ndt::type("3 * 10 * int32").is_type_subarray(ndt::type("10 * int32")));
+  EXPECT_TRUE(ndt::type("10 * int32").is_type_subarray(ndt::type("10 * int32")));
+  EXPECT_TRUE(ndt::type("3 * 10 * int32").is_type_subarray(ndt::type("10 * int32")));
   EXPECT_TRUE(ndt::type("3 * 10 * int32").is_type_subarray(ndt::type("int32")));
-  EXPECT_TRUE(
-      ndt::type("5 * int32").is_type_subarray(ndt::type::make<int32_t>()));
-  EXPECT_FALSE(
-      ndt::type::make<int32_t>().is_type_subarray(ndt::type("5 * int32")));
-  EXPECT_FALSE(
-      ndt::type("10 * int32").is_type_subarray(ndt::type("3 * 10 * int32")));
-  EXPECT_FALSE(
-      ndt::type("3 * int32").is_type_subarray(ndt::type("Fixed * int32")));
-  EXPECT_FALSE(
-      ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
-  EXPECT_FALSE(
-      ndt::type("Fixed * int32").is_type_subarray(ndt::type("3 * int32")));
-  EXPECT_FALSE(
-      ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
+  EXPECT_TRUE(ndt::type("5 * int32").is_type_subarray(ndt::type::make<int32_t>()));
+  EXPECT_FALSE(ndt::type::make<int32_t>().is_type_subarray(ndt::type("5 * int32")));
+  EXPECT_FALSE(ndt::type("10 * int32").is_type_subarray(ndt::type("3 * 10 * int32")));
+  EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("Fixed * int32")));
+  EXPECT_FALSE(ndt::type("3 * int32").is_type_subarray(ndt::type("var * int32")));
+  EXPECT_FALSE(ndt::type("Fixed * int32").is_type_subarray(ndt::type("3 * int32")));
+  EXPECT_FALSE(ndt::type("var * int32").is_type_subarray(ndt::type("3 * int32")));
 }
 
 TEST(FixedDimType, FromCArray)
@@ -195,8 +180,7 @@ TEST(FixedDimType, FromCArray)
   EXPECT_EQ(ndt::type::make<int[2][1]>(), ndt::type("2 * 1 * int32"));
   EXPECT_EQ(ndt::type::make<int[1][2]>(), ndt::type("1 * 2 * int32"));
   EXPECT_EQ(ndt::type::make<int[3][3]>(), ndt::type("3 * 3 * int32"));
-  EXPECT_EQ(ndt::type::make<int[3][5][8][10]>(),
-            ndt::type("3 * 5 * 8 * 10 * int32"));
+  EXPECT_EQ(ndt::type::make<int[3][5][8][10]>(), ndt::type("3 * 5 * 8 * 10 * int32"));
 
   EXPECT_EQ(ndt::type::make<float>(), ndt::type("float32"));
   EXPECT_EQ(ndt::type::make<float[1]>(), ndt::type("1 * float32"));
@@ -205,6 +189,5 @@ TEST(FixedDimType, FromCArray)
   EXPECT_EQ(ndt::type::make<float[2][1]>(), ndt::type("2 * 1 * float32"));
   EXPECT_EQ(ndt::type::make<float[1][2]>(), ndt::type("1 * 2 * float32"));
   EXPECT_EQ(ndt::type::make<float[3][3]>(), ndt::type("3 * 3 * float32"));
-  EXPECT_EQ(ndt::type::make<float[3][5][8][10]>(),
-            ndt::type("3 * 5 * 8 * 10 * float32"));
+  EXPECT_EQ(ndt::type::make<float[3][5][8][10]>(), ndt::type("3 * 5 * 8 * 10 * float32"));
 }

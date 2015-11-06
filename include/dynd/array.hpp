@@ -212,16 +212,6 @@ namespace nd {
     }
 
     /**
-     * Assignment operator.
-     */
-    array &operator=(const array &rhs) = default;
-
-    /**
-     * Move assignment operator.
-     */
-    array &operator=(array &&rhs) = default;
-
-    /**
      * This function releases the memory block reference, setting the
      * array to NULL. The caller takes explicit ownership of the
      * reference.
@@ -231,28 +221,38 @@ namespace nd {
       return reinterpret_cast<array_preamble *>(intrusive_ptr<memory_block_data>::release());
     }
 
+    /**
+     * Assignment operator.
+     */
+    array &operator=(const array &rhs) = default;
+
+    /**
+     * Move assignment operator.
+     */
+    array &operator=(array &&rhs) = default;
+
     /** Low level access to the array preamble */
     array_preamble *get() const
     {
       return reinterpret_cast<array_preamble *>(intrusive_ptr<memory_block_data>::get());
     }
 
-    /** Low level access to the array arrmeta */
-    inline const char *get_arrmeta() const
-    {
-      return get()->get_arrmeta();
-    }
-
-    /** Low level access to the array arrmeta */
-    inline char *get_arrmeta()
-    {
-      return get()->get_arrmeta();
-    }
-
     /** Returns true if the array is NULL */
     inline bool is_null() const
     {
       return intrusive_ptr<memory_block_data>::get() == NULL;
+    }
+
+    /** Low level access to the array arrmeta */
+    char *metadata()
+    {
+      return get()->get_arrmeta();
+    }
+
+    /** Low level access to the array arrmeta */
+    const char *metadata() const
+    {
+      return get()->get_arrmeta();
     }
 
     char *get_readwrite_originptr() const
@@ -269,14 +269,14 @@ namespace nd {
       return get()->ptr;
     }
 
-    char *get_data()
+    char *data()
     {
-      return get_readwrite_originptr();
+      return get()->ptr;
     }
 
-    const char *get_data() const
+    const char *data() const
     {
-      return get_readonly_originptr();
+      return get()->ptr;
     }
 
     inline uint32_t get_access_flags() const
@@ -378,7 +378,7 @@ namespace nd {
     inline void get_shape(intptr_t *out_shape) const
     {
       if (!get()->is_builtin_type() && get()->type->get_ndim() > 0) {
-        get()->type->get_shape(get()->type->get_ndim(), 0, out_shape, get_arrmeta(), get()->ptr);
+        get()->type->get_shape(get()->type->get_ndim(), 0, out_shape, metadata(), get()->ptr);
       }
     }
 
@@ -387,7 +387,7 @@ namespace nd {
      */
     inline intptr_t get_dim_size() const
     {
-      return get_type().get_dim_size(get_arrmeta(), get()->ptr);
+      return get_type().get_dim_size(metadata(), get()->ptr);
     }
 
     /**
@@ -396,11 +396,11 @@ namespace nd {
     inline intptr_t get_dim_size(intptr_t i) const
     {
       if (0 <= i && i < get_type().get_strided_ndim()) {
-        const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(get_arrmeta());
+        const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(metadata());
         return ss[i].dim_size;
       } else if (0 <= i && i < get_ndim()) {
         dimvector shape(i + 1);
-        get()->type->get_shape(i + 1, 0, shape.get(), get_arrmeta(), get()->ptr);
+        get()->type->get_shape(i + 1, 0, shape.get(), metadata(), get()->ptr);
         return shape[i];
       } else {
         std::stringstream ss;
@@ -418,7 +418,7 @@ namespace nd {
     inline void get_strides(intptr_t *out_strides) const
     {
       if (!get()->is_builtin_type()) {
-        get()->type->get_strides(0, out_strides, get_arrmeta());
+        get()->type->get_strides(0, out_strides, metadata());
       }
     }
 
@@ -666,7 +666,7 @@ namespace nd {
     template <typename Type>
     Type view()
     {
-      return Type(get_arrmeta(), get_readwrite_originptr());
+      return Type(metadata(), get_readwrite_originptr());
     }
 
     /**
@@ -1668,7 +1668,7 @@ namespace nd {
         if (!lhs.is_scalar()) {
           throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
         }
-        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get_arrmeta(),
+        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.metadata(),
                           lhs.get()->ptr, ectx);
         return result;
       }
@@ -1743,14 +1743,14 @@ namespace nd {
    */
   inline bool is_scalar_avail(const array &arr, const eval::eval_context *ectx = &eval::default_eval_context)
   {
-    return is_scalar_avail(arr.get_type(), arr.get_arrmeta(), arr.get_readonly_originptr(), ectx);
+    return is_scalar_avail(arr.get_type(), arr.metadata(), arr.get_readonly_originptr(), ectx);
   }
 
   DYND_API void assign_na(const ndt::type &tp, const char *arrmeta, char *data, const eval::eval_context *ectx);
 
   inline void assign_na(array &out, const eval::eval_context *ectx = &eval::default_eval_context)
   {
-    assign_na(out.get_type(), out.get_arrmeta(), out.get_readwrite_originptr(), ectx);
+    assign_na(out.get_type(), out.metadata(), out.get_readwrite_originptr(), ectx);
   }
 
   /**

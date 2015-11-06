@@ -31,7 +31,7 @@ TEST(With1DStrided, ViewData)
     EXPECT_EQ(5, data[2 * stride]);
     EXPECT_EQ(7, data[3 * stride]);
     // This should have resulted in a view
-    EXPECT_EQ(a.get_data(), reinterpret_cast<const char *>(data));
+    EXPECT_EQ(a.data(), reinterpret_cast<const char *>(data));
   });
   // Every second element
   nd::with_1d_stride<int>(a(irange().by(2)), [&](intptr_t size, intptr_t stride, const int *data) {
@@ -40,7 +40,7 @@ TEST(With1DStrided, ViewData)
     EXPECT_EQ(1, data[0 * stride]);
     EXPECT_EQ(5, data[1 * stride]);
     // This should have resulted in a view
-    EXPECT_EQ(a.get_data(), reinterpret_cast<const char *>(data));
+    EXPECT_EQ(a.data(), reinterpret_cast<const char *>(data));
   });
 }
 
@@ -55,7 +55,7 @@ TEST(With1DStrided, ConvertData)
     EXPECT_EQ(3, data[1 * stride]);
     EXPECT_EQ(5, data[2 * stride]);
     EXPECT_EQ(7, data[3 * stride]);
-    EXPECT_NE(a.get_data(), reinterpret_cast<const char *>(data));
+    EXPECT_NE(a.data(), reinterpret_cast<const char *>(data));
   });
   // Every second element
   nd::with_1d_stride<int>(a(irange().by(2)), [&](intptr_t size, intptr_t stride, const int *data) {
@@ -63,7 +63,7 @@ TEST(With1DStrided, ConvertData)
     EXPECT_EQ(1, stride);
     EXPECT_EQ(1, data[0 * stride]);
     EXPECT_EQ(5, data[1 * stride]);
-    EXPECT_NE(a.get_data(), reinterpret_cast<const char *>(data));
+    EXPECT_NE(a.data(), reinterpret_cast<const char *>(data));
   });
 }
 

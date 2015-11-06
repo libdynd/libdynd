@@ -177,8 +177,8 @@ void ndt::tuple_type::get_dynamic_type_properties(const std::pair<std::string, n
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_field_types.get_arrmeta(),
-                      tp.extended<tuple_type>()->m_field_types.get_data());
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_field_types.metadata(),
+                      tp.extended<tuple_type>()->m_field_types.data());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
@@ -199,8 +199,8 @@ void ndt::tuple_type::get_dynamic_type_properties(const std::pair<std::string, n
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_arrmeta_offsets.get_arrmeta(),
-                      tp.extended<tuple_type>()->m_arrmeta_offsets.get_data());
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_arrmeta_offsets.metadata(),
+                      tp.extended<tuple_type>()->m_arrmeta_offsets.data());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,

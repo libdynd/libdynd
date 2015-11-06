@@ -30,7 +30,7 @@ ndt::base_struct_type::base_struct_type(type_id_t type_id, const nd::array &fiel
   */
 
   // Make sure that the number of names matches
-  intptr_t name_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.get_arrmeta())->dim_size;
+  intptr_t name_count = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.metadata())->dim_size;
   if (name_count != m_field_count) {
     stringstream ss;
     ss << "dynd struct type requires that the number of names, " << name_count << " matches the number of types, "
@@ -52,7 +52,7 @@ intptr_t ndt::base_struct_type::get_field_index(const char *field_name_begin, co
     char firstchar = *field_name_begin;
     intptr_t field_count = get_field_count();
     const char *fn_ptr = m_field_names.get_readonly_originptr();
-    intptr_t fn_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.get_arrmeta())->stride;
+    intptr_t fn_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.metadata())->stride;
     for (intptr_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
       const string *fn = reinterpret_cast<const string *>(fn_ptr);
       const char *begin = fn->begin(), *end = fn->end();

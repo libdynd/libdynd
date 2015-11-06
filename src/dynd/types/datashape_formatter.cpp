@@ -167,7 +167,7 @@ std::string dynd::format_datashape(const nd::array &a, const std::string &prefix
   stringstream ss;
   ss << prefix;
   if (!a.is_null()) {
-    ::format_datashape(ss, a.get_type(), a.get_arrmeta(), a.get_readonly_originptr(), "", multiline);
+    ::format_datashape(ss, a.get_type(), a.metadata(), a.get_readonly_originptr(), "", multiline);
   } else {
     ::format_datashape(ss, ndt::type(), NULL, NULL, "", multiline);
   }

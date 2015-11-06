@@ -185,13 +185,13 @@ namespace nd {
         array res = empty_shell(tp);
         ndt::struct_type::fill_default_data_offsets(res.get_dim_size(),
                                                     tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
-                                                    reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
+                                                    reinterpret_cast<uintptr_t *>(res.metadata()));
 
-        char *arrmeta = res.get_arrmeta();
+        char *arrmeta = res.metadata();
         const uintptr_t *arrmeta_offsets = res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
         char *data = res.get_readwrite_originptr();
         const uintptr_t *data_offsets =
-            res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.get_arrmeta());
+            res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.metadata());
 
         fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), arrmeta, arrmeta_offsets, data,
                     data_offsets, kwds_as_vector, available, missing);
@@ -303,13 +303,13 @@ namespace nd {
         array res = empty_shell(tp);
         ndt::struct_type::fill_default_data_offsets(res.get_dim_size(),
                                                     tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
-                                                    reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
+                                                    reinterpret_cast<uintptr_t *>(res.metadata()));
 
-        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), res.get_arrmeta(),
+        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), res.metadata(),
                     res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw(),
                     res.get_readwrite_originptr(),
-                    res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.get_arrmeta()),
-                    kwds_as_vector, available, missing);
+                    res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.metadata()), kwds_as_vector,
+                    available, missing);
 
         return res;
       }
@@ -377,13 +377,13 @@ namespace nd {
         auto field_count = tp.extended<ndt::base_struct_type>()->get_field_count();
         auto field_types = tp.extended<ndt::base_struct_type>()->get_field_types_raw();
         ndt::struct_type::fill_default_data_offsets(field_count, field_types,
-                                                    reinterpret_cast<uintptr_t *>(res.get_arrmeta()));
+                                                    reinterpret_cast<uintptr_t *>(res.metadata()));
 
-        fill_values(field_types, res.get_arrmeta(),
+        fill_values(field_types, res.metadata(),
                     res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw(),
                     res.get_readwrite_originptr(),
-                    res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.get_arrmeta()),
-                    kwds_as_vector, available, missing);
+                    res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.metadata()), kwds_as_vector,
+                    available, missing);
 
         return res;
       }
@@ -724,7 +724,7 @@ namespace nd {
 
       // Validate the destination type, if it was provided
       if (!dst.is_null()) {
-        if (!self_tp->get_return_type().match(NULL, dst.get_type(), dst.get_arrmeta(), tp_vars)) {
+        if (!self_tp->get_return_type().match(NULL, dst.get_type(), dst.metadata(), tp_vars)) {
           std::stringstream ss;
           ss << "provided \"dst\" type " << dst.get_type() << " does not match callable return type "
              << self_tp->get_return_type();
@@ -749,7 +749,7 @@ namespace nd {
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst.get_arrmeta(), dst.get_readwrite_originptr(), args.size(), args.types(), args.arrmeta(),
+      (*get())(dst_tp, dst.metadata(), dst.get_readwrite_originptr(), args.size(), args.types(), args.arrmeta(),
                args.data(), kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
       return dst;
     }
@@ -982,7 +982,7 @@ namespace nd {
       {
         auto value = std::get<I>(self->m_values);
         const ndt::type &tp = ndt::type::make(value);
-        const char *arrmeta = value.get_arrmeta();
+        const char *arrmeta = value.metadata();
 
         detail::check_arg(af_tp, I, tp, arrmeta, tp_vars);
 
@@ -1044,7 +1044,7 @@ namespace nd {
 
       for (std::size_t i = 0; i < m_size; ++i) {
         array &value = values[i];
-        const char *arrmeta = value.get_arrmeta();
+        const char *arrmeta = value.metadata();
         const ndt::type &tp = value.get_type();
 
         detail::check_arg(self_tp, i, tp, arrmeta, tp_vars);

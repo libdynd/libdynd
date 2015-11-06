@@ -25,8 +25,7 @@ namespace nd {
         callable second;
         ndt::type buffer_tp;
 
-        static_data(const callable &first, const callable &second,
-                    const ndt::type &buffer_tp)
+        static_data(const callable &first, const callable &second, const ndt::type &buffer_tp)
             : first(first), second(second), buffer_tp(buffer_tp)
         {
         }
@@ -68,15 +67,12 @@ namespace nd {
         second_func(second, dst, &buffer_data);
       }
 
-      void strided(char *dst, intptr_t dst_stride, char *const *src,
-                   const intptr_t *src_stride, size_t count)
+      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         // Allocate a temporary buffer on the heap
         array buffer = empty(buffer_shape[0], buffer_tp);
         char *buffer_data = buffer.get_readwrite_originptr();
-        intptr_t buffer_stride =
-            reinterpret_cast<const fixed_dim_type_arrmeta *>(
-                buffer.get_arrmeta())->stride;
+        intptr_t buffer_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(buffer.metadata())->stride;
 
         ckernel_prefix *first = get_child();
         expr_strided_t first_func = first->get_function<expr_strided_t>();
@@ -87,33 +83,25 @@ namespace nd {
         char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];
 
-        size_t chunk_size =
-            std::min(count, static_cast<size_t>(DYND_BUFFER_CHUNK_SIZE));
-        first_func(first, buffer_data, buffer_stride, &src0, src_stride,
-                   chunk_size);
-        second_func(second, dst, dst_stride, &buffer_data, &buffer_stride,
-                    chunk_size);
+        size_t chunk_size = std::min(count, static_cast<size_t>(DYND_BUFFER_CHUNK_SIZE));
+        first_func(first, buffer_data, buffer_stride, &src0, src_stride, chunk_size);
+        second_func(second, dst, dst_stride, &buffer_data, &buffer_stride, chunk_size);
         count -= chunk_size;
         while (count) {
           src0 += chunk_size * src0_stride;
           dst += chunk_size * dst_stride;
           reset_strided_buffer_array(buffer);
-          chunk_size =
-              std::min(count, static_cast<size_t>(DYND_BUFFER_CHUNK_SIZE));
-          first_func(first, buffer_data, buffer_stride, &src0, src_stride,
-                     chunk_size);
-          second_func(second, dst, dst_stride, &buffer_data, &buffer_stride,
-                      chunk_size);
+          chunk_size = std::min(count, static_cast<size_t>(DYND_BUFFER_CHUNK_SIZE));
+          first_func(first, buffer_data, buffer_stride, &src0, src_stride, chunk_size);
+          second_func(second, dst, dst_stride, &buffer_data, &buffer_stride, chunk_size);
           count -= chunk_size;
         }
       }
 
-      static void resolve_dst_type(
-          char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-          char *DYND_UNUSED(data), ndt::type &dst_tp,
-          intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-          intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-          const std::map<std::string, ndt::type> &tp_vars)
+      static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
+                                   char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                   const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+                                   const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &tp_vars)
       {
         dst_tp = ndt::substitute(dst_tp, tp_vars, true);
       }
@@ -124,41 +112,30 @@ namespace nd {
        * chained
        * callable.
        */
-      static intptr_t
-      instantiate(char *static_data, size_t data_size, char *data, void *ckb,
-                  intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  intptr_t nkwd, const nd::array *kwds,
-                  const std::map<std::string, ndt::type> &tp_vars)
+      static intptr_t instantiate(char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
       {
-        const struct static_data *static_data_x =
-            reinterpret_cast<struct static_data *>(static_data);
+        const struct static_data *static_data_x = reinterpret_cast<struct static_data *>(static_data);
 
-        callable_type_data *first =
-            const_cast<callable_type_data *>(static_data_x->first.get());
-        callable_type_data *second =
-            const_cast<callable_type_data *>(static_data_x->second.get());
+        callable_type_data *first = const_cast<callable_type_data *>(static_data_x->first.get());
+        callable_type_data *second = const_cast<callable_type_data *>(static_data_x->second.get());
 
         const ndt::type &buffer_tp = static_data_x->buffer_tp;
 
         intptr_t root_ckb_offset = ckb_offset;
-        compose_kernel *self =
-            make(ckb, kernreq, ckb_offset, static_data_x->buffer_tp);
-        ckb_offset = first->instantiate(
-            first->static_data, data_size, data, ckb, ckb_offset, buffer_tp,
-            self->buffer_arrmeta.get(), 1, src_tp, src_arrmeta, kernreq, ectx,
-            nkwd, kwds, tp_vars);
-        self = get_self(
-            reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-            root_ckb_offset);
+        compose_kernel *self = make(ckb, kernreq, ckb_offset, static_data_x->buffer_tp);
+        ckb_offset =
+            first->instantiate(first->static_data, data_size, data, ckb, ckb_offset, buffer_tp,
+                               self->buffer_arrmeta.get(), 1, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+        self = get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), root_ckb_offset);
         self->second_offset = ckb_offset - root_ckb_offset;
         const char *buffer_arrmeta = self->buffer_arrmeta.get();
-        return second->instantiate(
-            second->static_data, data_size - first->data_size,
-            data + first->data_size, ckb, ckb_offset, dst_tp, dst_arrmeta, 1,
-            &buffer_tp, &buffer_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+        return second->instantiate(second->static_data, data_size - first->data_size, data + first->data_size, ckb,
+                                   ckb_offset, dst_tp, dst_arrmeta, 1, &buffer_tp, &buffer_arrmeta, kernreq, ectx, nkwd,
+                                   kwds, tp_vars);
       }
     };
   } // namespace dynd::nd::functional

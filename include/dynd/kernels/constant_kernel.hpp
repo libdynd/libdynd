@@ -32,8 +32,7 @@ namespace nd {
         get_child()->single(dst, &data);
       }
 
-      void strided(char *dst, intptr_t dst_stride,
-                   char *const *DYND_UNUSED(src),
+      void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                    const intptr_t *DYND_UNUSED(src_stride), size_t count)
       {
         static std::intptr_t data_stride[1] = {0};
@@ -41,22 +40,18 @@ namespace nd {
         get_child()->strided(dst, dst_stride, &data, data_stride, count);
       }
 
-      static intptr_t instantiate(
-          char *static_data, size_t DYND_UNUSED(data_size),
-          char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-          const ndt::type &dst_tp, const char *dst_arrmeta,
-          intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-          const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-          const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-          const nd::array *DYND_UNUSED(kwds),
-          const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      static intptr_t instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         const array &val = *reinterpret_cast<array *>(static_data);
 
-        make(ckb, kernreq, ckb_offset,
-             const_cast<char *>(val.get_readonly_originptr()));
-        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                      dst_tp, val.get_arrmeta(), kernreq, ectx);
+        make(ckb, kernreq, ckb_offset, const_cast<char *>(val.get_readonly_originptr()));
+        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, dst_tp, val.metadata(), kernreq, ectx);
       }
     };
 
