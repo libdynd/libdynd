@@ -279,15 +279,15 @@ TEST(StructType, SingleCompare)
   // EXPECT_FALSE(a.op_sorting_less(b));
   // EXPECT_THROW((a < b), not_comparable_error);
   // EXPECT_THROW((a <= b), not_comparable_error);
-  EXPECT_TRUE(static_cast<bool>(a == b));
-  EXPECT_FALSE(static_cast<bool>(a != b));
+  EXPECT_TRUE((a == b).as<bool>());
+  EXPECT_FALSE((a != b).as<bool>());
   //  EXPECT_THROW((a >= b), not_comparable_error);
   //  EXPECT_THROW((a > b), not_comparable_error);
   //  EXPECT_FALSE(b.op_sorting_less(a));
   // EXPECT_THROW((b < a), not_comparable_error);
   // EXPECT_THROW((b <= a), not_comparable_error);
-  EXPECT_TRUE(static_cast<bool>(b == a));
-  EXPECT_FALSE(static_cast<bool>(b != a));
+  EXPECT_TRUE((b == a).as<bool>());
+  EXPECT_FALSE((b != a).as<bool>());
   // EXPECT_THROW((b >= a), not_comparable_error);
   // EXPECT_THROW((b > a), not_comparable_error);
 
@@ -301,15 +301,15 @@ TEST(StructType, SingleCompare)
   //   EXPECT_TRUE(a.op_sorting_less(b));
   // EXPECT_THROW((a < b), not_comparable_error);
   // EXPECT_THROW((a <= b), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(a == b));
-  EXPECT_TRUE(static_cast<bool>(a != b));
+  EXPECT_FALSE((a == b).as<bool>());
+  EXPECT_TRUE((a != b).as<bool>());
   //   EXPECT_THROW((a >= b), not_comparable_error);
   //  EXPECT_THROW((a > b), not_comparable_error);
   //    EXPECT_FALSE(b.op_sorting_less(a));
   // EXPECT_THROW((b < a), not_comparable_error);
   //  EXPECT_THROW((b <= a), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(b == a));
-  EXPECT_TRUE(static_cast<bool>(b != a));
+  EXPECT_FALSE((b == a).as<bool>());
+  EXPECT_TRUE((b != a).as<bool>());
   //    EXPECT_THROW((b >= a), not_comparable_error);
   //      EXPECT_THROW((b > a), not_comparable_error);
 
@@ -323,15 +323,15 @@ TEST(StructType, SingleCompare)
   //  EXPECT_TRUE(a.op_sorting_less(b));
   //      EXPECT_THROW((a < b), not_comparable_error);
   //    EXPECT_THROW((a <= b), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(a == b));
-  EXPECT_TRUE(static_cast<bool>(a != b));
+  EXPECT_FALSE((a == b).as<bool>());
+  EXPECT_TRUE((a != b).as<bool>());
   //      EXPECT_THROW((a >= b), not_comparable_error);
   //    EXPECT_THROW((a > b), not_comparable_error);
   //      EXPECT_FALSE(b.op_sorting_less(a));
   //    EXPECT_THROW((b < a), not_comparable_error);
   //  EXPECT_THROW((b <= a), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(b == a));
-  EXPECT_TRUE(static_cast<bool>(b != a));
+  EXPECT_FALSE((b == a).as<bool>());
+  EXPECT_TRUE((b != a).as<bool>());
   //    EXPECT_THROW((b >= a), not_comparable_error);
   //      EXPECT_THROW((b > a), not_comparable_error);
 
@@ -345,15 +345,15 @@ TEST(StructType, SingleCompare)
   //    EXPECT_TRUE(a.op_sorting_less(b));
   //  EXPECT_THROW((a < b), not_comparable_error);
   // EXPECT_THROW((a <= b), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(a == b));
-  EXPECT_TRUE(static_cast<bool>(a != b));
+  EXPECT_FALSE((a == b).as<bool>());
+  EXPECT_TRUE((a != b).as<bool>());
   //   EXPECT_THROW((a >= b), not_comparable_error);
   //  EXPECT_THROW((a > b), not_comparable_error);
   //    EXPECT_FALSE(b.op_sorting_less(a));
   // EXPECT_THROW((b < a), not_comparable_error);
   //  EXPECT_THROW((b <= a), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(b == a));
-  EXPECT_TRUE(static_cast<bool>(b != a));
+  EXPECT_FALSE((b == a).as<bool>());
+  EXPECT_TRUE((b != a).as<bool>());
   //    EXPECT_THROW((b >= a), not_comparable_error);
   //      EXPECT_THROW((b > a), not_comparable_error);
 }
@@ -388,15 +388,15 @@ TEST(StructType, SingleCompareDifferentArrmeta)
   // EXPECT_FALSE(a.op_sorting_less(b));
   //   EXPECT_THROW((a < b), not_comparable_error);
   // EXPECT_THROW((a <= b), not_comparable_error);
-  EXPECT_TRUE(static_cast<bool>(a == b));
-  EXPECT_FALSE(static_cast<bool>(a != b));
+  EXPECT_TRUE((a == b).as<bool>());
+  EXPECT_FALSE((a != b).as<bool>());
   //    EXPECT_THROW((a >= b), not_comparable_error);
   //  EXPECT_THROW((a > b), not_comparable_error);
   //   EXPECT_FALSE(b.op_sorting_less(a));
   //   EXPECT_THROW((b < a), not_comparable_error);
   // EXPECT_THROW((b <= a), not_comparable_error);
-  EXPECT_TRUE(static_cast<bool>(b == a));
-  EXPECT_FALSE(static_cast<bool>(b != a));
+  EXPECT_TRUE((b == a).as<bool>());
+  EXPECT_FALSE((b != a).as<bool>());
   //  EXPECT_THROW((b >= a), not_comparable_error);
   //    EXPECT_THROW((b > a), not_comparable_error);
 
@@ -410,15 +410,15 @@ TEST(StructType, SingleCompareDifferentArrmeta)
   //      EXPECT_TRUE(a.op_sorting_less(b));
   //    EXPECT_THROW((a < b), not_comparable_error);
   //  EXPECT_THROW((a <= b), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(a == b));
-  EXPECT_TRUE(static_cast<bool>(a != b));
+  EXPECT_FALSE((a == b).as<bool>());
+  EXPECT_TRUE((a != b).as<bool>());
   // EXPECT_THROW((a >= b), not_comparable_error);
   //   EXPECT_THROW((a > b), not_comparable_error);
   // EXPECT_FALSE(b.op_sorting_less(a));
   //    EXPECT_THROW((b < a), not_comparable_error);
   //  EXPECT_THROW((b <= a), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(b == a));
-  EXPECT_TRUE(static_cast<bool>(b != a));
+  EXPECT_FALSE((b == a).as<bool>());
+  EXPECT_TRUE((b != a).as<bool>());
   // EXPECT_THROW((b >= a), not_comparable_error);
   // EXPECT_THROW((b > a), not_comparable_error);
 
@@ -432,15 +432,15 @@ TEST(StructType, SingleCompareDifferentArrmeta)
   //      EXPECT_TRUE(a.op_sorting_less(b));
   //    EXPECT_THROW((a < b), not_comparable_error);
   //   EXPECT_THROW((a <= b), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(a == b));
-  EXPECT_TRUE(static_cast<bool>(a != b));
+  EXPECT_FALSE((a == b).as<bool>());
+  EXPECT_TRUE((a != b).as<bool>());
   // EXPECT_THROW((a >= b), not_comparable_error);
   // EXPECT_THROW((a > b), not_comparable_error);
   //   EXPECT_FALSE(b.op_sorting_less(a));
   // EXPECT_THROW((b < a), not_comparable_error);
   //   EXPECT_THROW((b <= a), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(b == a));
-  EXPECT_TRUE(static_cast<bool>(b != a));
+  EXPECT_FALSE((b == a).as<bool>());
+  EXPECT_TRUE((b != a).as<bool>());
   // EXPECT_THROW((b >= a), not_comparable_error);
   //  EXPECT_THROW((b > a), not_comparable_error);
 
@@ -454,15 +454,15 @@ TEST(StructType, SingleCompareDifferentArrmeta)
   //      EXPECT_TRUE(a.op_sorting_less(b));
   //    EXPECT_THROW((a < b), not_comparable_error);
   //  EXPECT_THROW((a <= b), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(a == b));
-  EXPECT_TRUE(static_cast<bool>(a != b));
+  EXPECT_FALSE((a == b).as<bool>());
+  EXPECT_TRUE((a != b).as<bool>());
   // EXPECT_THROW((a >= b), not_comparable_error);
   //    EXPECT_THROW((a > b), not_comparable_error);
   //   EXPECT_FALSE(b.op_sorting_less(a));
   //  EXPECT_THROW((b < a), not_comparable_error);
   // EXPECT_THROW((b <= a), not_comparable_error);
-  EXPECT_FALSE(static_cast<bool>(b == a));
-  EXPECT_TRUE(static_cast<bool>(b != a));
+  EXPECT_FALSE((b == a).as<bool>());
+  EXPECT_TRUE((b != a).as<bool>());
   //   EXPECT_THROW((b >= a), not_comparable_error);
   //     EXPECT_THROW((b > a), not_comparable_error);
 }

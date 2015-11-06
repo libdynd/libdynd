@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 
 #include <dynd/search.hpp>
 
@@ -19,7 +20,7 @@ using namespace dynd;
 
 TEST(Search, BinarySearch)
 {
-  EXPECT_EQ(1, nd::binary_search(nd::array{0, 1, 2}, 1));
-  EXPECT_EQ(1, nd::binary_search(nd::array{5, 3, 1}, 3));
-  EXPECT_EQ(-1, nd::binary_search(nd::array{5, 3, 1}, 10));
+  EXPECT_ARRAY_EQ(static_cast<int64_t>(1), nd::binary_search(nd::array{0, 1, 2}, 1));
+  EXPECT_ARRAY_EQ(static_cast<int64_t>(1), nd::binary_search(nd::array{5, 3, 1}, 3));
+  EXPECT_ARRAY_EQ(static_cast<int64_t>(-1), nd::binary_search(nd::array{5, 3, 1}, 10));
 }

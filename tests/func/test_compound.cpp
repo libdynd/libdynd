@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 
 #include <dynd/func/apply.hpp>
 #include <dynd/func/compound.hpp>
@@ -18,20 +19,18 @@ using namespace dynd;
 
 TEST(Functional, LeftCompound)
 {
-  nd::callable f = nd::functional::left_compound(
-      nd::functional::apply([](int x, int y) { return x + y; }));
+  nd::callable f = nd::functional::left_compound(nd::functional::apply([](int x, int y) { return x + y; }));
 
   nd::array y = nd::empty(ndt::type::make<int>());
   y.val_assign(3);
-  EXPECT_EQ(8, f(5, kwds("dst", y)));
+  EXPECT_ARRAY_EQ(8, f(5, kwds("dst", y)));
 }
 
 TEST(Functional, RightCompound)
 {
-  nd::callable f = nd::functional::right_compound(
-      nd::functional::apply([](int x, int y) { return x - y; }));
+  nd::callable f = nd::functional::right_compound(nd::functional::apply([](int x, int y) { return x - y; }));
 
   nd::array y = nd::empty(ndt::type::make<int>());
   y.val_assign(3);
-  EXPECT_EQ(2, f(5, kwds("dst", y)));
+  EXPECT_ARRAY_EQ(2, f(5, kwds("dst", y)));
 }
