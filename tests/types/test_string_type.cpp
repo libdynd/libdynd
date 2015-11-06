@@ -150,7 +150,7 @@ TEST(StringType, AccessFlags)
   // Default construction from a string produces an immutable fixed_string
   a = std::string("testing one two three testing one two three four five "
                   "testing one two three four five six seven");
-//  EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
+  //  EXPECT_EQ(nd::read_access_flag | nd::immutable_access_flag, (int)a.get_access_flags());
   // Turn it into a fixed_string type for this test
   a = a.ucast(ndt::fixed_string_type::make(95, string_encoding_utf_8)).eval();
   EXPECT_EQ(ndt::fixed_string_type::make(95, string_encoding_utf_8), a.get_type());
@@ -407,37 +407,37 @@ TEST(StringType, Comparisons)
   a = nd::array("abc");
   b = nd::array("abd");
   //    EXPECT_TRUE(a.op_sorting_less(b));
-  EXPECT_TRUE(static_cast<bool>(a < b));
-  EXPECT_TRUE(static_cast<bool>(a <= b));
-  EXPECT_FALSE(static_cast<bool>(a == b));
-  EXPECT_TRUE(static_cast<bool>(a != b));
-  EXPECT_FALSE(static_cast<bool>(a >= b));
-  EXPECT_FALSE(static_cast<bool>(a > b));
+  EXPECT_TRUE((a < b).as<bool>());
+  EXPECT_TRUE((a <= b).as<bool>());
+  EXPECT_FALSE((a == b).as<bool>());
+  EXPECT_TRUE((a != b).as<bool>());
+  EXPECT_FALSE((a >= b).as<bool>());
+  EXPECT_FALSE((a > b).as<bool>());
   //  EXPECT_FALSE(b.op_sorting_less(a));
-  EXPECT_FALSE(static_cast<bool>(b < a));
-  EXPECT_FALSE(static_cast<bool>(b <= a));
-  EXPECT_FALSE(static_cast<bool>(b == a));
-  EXPECT_TRUE(static_cast<bool>(b != a));
-  EXPECT_TRUE(static_cast<bool>(b >= a));
-  EXPECT_TRUE(static_cast<bool>(b > a));
+  EXPECT_FALSE((b < a).as<bool>());
+  EXPECT_FALSE((b <= a).as<bool>());
+  EXPECT_FALSE((b == a).as<bool>());
+  EXPECT_TRUE((b != a).as<bool>());
+  EXPECT_TRUE((b >= a).as<bool>());
+  EXPECT_TRUE((b > a).as<bool>());
 
   // Different sizes
   a = nd::array("abcd");
   b = nd::array("abcde");
   //  EXPECT_TRUE(a.op_sorting_less(b));
-  EXPECT_TRUE(static_cast<bool>(a < b));
-  EXPECT_TRUE(static_cast<bool>(a <= b));
-  EXPECT_FALSE(static_cast<bool>(a == b));
-  EXPECT_TRUE(static_cast<bool>(a != b));
-  EXPECT_FALSE(static_cast<bool>(a >= b));
-  EXPECT_FALSE(static_cast<bool>(a > b));
+  EXPECT_TRUE((a < b).as<bool>());
+  EXPECT_TRUE((a <= b).as<bool>());
+  EXPECT_FALSE((a == b).as<bool>());
+  EXPECT_TRUE((a != b).as<bool>());
+  EXPECT_FALSE((a >= b).as<bool>());
+  EXPECT_FALSE((a > b).as<bool>());
   //  EXPECT_FALSE(b.op_sorting_less(a));
-  EXPECT_FALSE(static_cast<bool>(b < a));
-  EXPECT_FALSE(static_cast<bool>(b <= a));
-  EXPECT_FALSE(static_cast<bool>(b == a));
-  EXPECT_TRUE(static_cast<bool>(b != a));
-  EXPECT_TRUE(static_cast<bool>(b >= a));
-  EXPECT_TRUE(static_cast<bool>(b > a));
+  EXPECT_FALSE((b < a).as<bool>());
+  EXPECT_FALSE((b <= a).as<bool>());
+  EXPECT_FALSE((b == a).as<bool>());
+  EXPECT_TRUE((b != a).as<bool>());
+  EXPECT_TRUE((b >= a).as<bool>());
+  EXPECT_TRUE((b > a).as<bool>());
 
   // Expression and different encodings
   /*

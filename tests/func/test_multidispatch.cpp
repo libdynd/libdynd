@@ -59,12 +59,12 @@ TEST(MultiDispatchCallable, ExactSignatures)
 
   nd::callable af = nd::functional::old_multidispatch(funcs.size(), &funcs[0]);
 
-  EXPECT_EQ(0, af(1, 1.f, 1.0).as<int>());
-  EXPECT_EQ(1, af(1, 1.0, 1.0).as<int>());
-  EXPECT_EQ(2, af(1, 1.f, 1.f).as<int>());
-  EXPECT_EQ(3, af(1.f, 1, 1).as<int>());
-  EXPECT_EQ(4, af((int16_t)1, 1.f, 1.0).as<int>());
-  EXPECT_EQ(5, af((int16_t)1, 1.f, 1.f).as<int>());
+  EXPECT_ARRAY_EQ(0, af(1, 1.f, 1.0).as<int>());
+  EXPECT_ARRAY_EQ(1, af(1, 1.0, 1.0).as<int>());
+  EXPECT_ARRAY_EQ(2, af(1, 1.f, 1.f).as<int>());
+  EXPECT_ARRAY_EQ(3, af(1.f, 1, 1).as<int>());
+  EXPECT_ARRAY_EQ(4, af((int16_t)1, 1.f, 1.0).as<int>());
+  EXPECT_ARRAY_EQ(5, af((int16_t)1, 1.f, 1.f).as<int>());
 }
 
 TEST(MultiDispatchCallable, PromoteToSignature)
@@ -134,17 +134,17 @@ TEST(Multidispatch, Unary)
   nd::callable func2 = nd::functional::apply([](float64) { return 2; });
 
   nd::callable func = nd::functional::multidispatch({func0, func1, func2});
-  EXPECT_EQ(0, func(int32()));
-  EXPECT_EQ(1, func(float32()));
-  EXPECT_EQ(2, func(float64()));
+  EXPECT_ARRAY_EQ(0, func(int32()));
+  EXPECT_ARRAY_EQ(1, func(float32()));
+  EXPECT_ARRAY_EQ(2, func(float64()));
   EXPECT_THROW(func(int64()), runtime_error);
   EXPECT_THROW(func(float16()), runtime_error);
 
   func = nd::functional::multidispatch(ndt::type("(Any) -> Any"),
                                        {func0, func1, func2});
-  EXPECT_EQ(0, func(int32()));
-  EXPECT_EQ(1, func(float32()));
-  EXPECT_EQ(2, func(float64()));
+  EXPECT_ARRAY_EQ(0, func(int32()));
+  EXPECT_ARRAY_EQ(1, func(float32()));
+  EXPECT_ARRAY_EQ(2, func(float64()));
   EXPECT_THROW(func(int64()), runtime_error);
   EXPECT_THROW(func(float16()), runtime_error);
 }
@@ -156,9 +156,9 @@ TEST(Multidispatch, UnaryWithPermutation)
   nd::callable func2 = nd::functional::apply([](float64) { return 2; });
 
   nd::callable func = nd::functional::multidispatch({func0, func1, func2}, {0});
-  EXPECT_EQ(0, func(int32()));
-  EXPECT_EQ(1, func(float32()));
-  EXPECT_EQ(2, func(float64()));
+  EXPECT_ARRAY_EQ(0, func(int32()));
+  EXPECT_ARRAY_EQ(1, func(float32()));
+  EXPECT_ARRAY_EQ(2, func(float64()));
   EXPECT_THROW(func(int64()), runtime_error);
   EXPECT_THROW(func(float16()), runtime_error);
 }
@@ -176,12 +176,12 @@ TEST(Multidispatch, Binary)
 
   nd::callable func =
       nd::functional::multidispatch({func0, func1, func2, func3, func4, func5});
-  EXPECT_EQ(0, func(int32(), int32()));
-  EXPECT_EQ(1, func(int32(), float32()));
-  EXPECT_EQ(2, func(int32(), float64()));
-  EXPECT_EQ(3, func(float32(), int32()));
-  EXPECT_EQ(4, func(float64(), float32()));
-  EXPECT_EQ(5, func(float64(), float64()));
+  EXPECT_ARRAY_EQ(0, func(int32(), int32()));
+  EXPECT_ARRAY_EQ(1, func(int32(), float32()));
+  EXPECT_ARRAY_EQ(2, func(int32(), float64()));
+  EXPECT_ARRAY_EQ(3, func(float32(), int32()));
+  EXPECT_ARRAY_EQ(4, func(float64(), float32()));
+  EXPECT_ARRAY_EQ(5, func(float64(), float64()));
   EXPECT_THROW(func(int32()), runtime_error);
   EXPECT_THROW(func(float32()), runtime_error);
   EXPECT_THROW(func(int64()), runtime_error);
@@ -189,12 +189,12 @@ TEST(Multidispatch, Binary)
   func =
       nd::functional::multidispatch(ndt::type("(Any, Any) -> Any"),
                                     {func0, func1, func2, func3, func4, func5});
-  EXPECT_EQ(0, func(int32(), int32()));
-  EXPECT_EQ(1, func(int32(), float32()));
-  EXPECT_EQ(2, func(int32(), float64()));
-  EXPECT_EQ(3, func(float32(), int32()));
-  EXPECT_EQ(4, func(float64(), float32()));
-  EXPECT_EQ(5, func(float64(), float64()));
+  EXPECT_ARRAY_EQ(0, func(int32(), int32()));
+  EXPECT_ARRAY_EQ(1, func(int32(), float32()));
+  EXPECT_ARRAY_EQ(2, func(int32(), float64()));
+  EXPECT_ARRAY_EQ(3, func(float32(), int32()));
+  EXPECT_ARRAY_EQ(4, func(float64(), float32()));
+  EXPECT_ARRAY_EQ(5, func(float64(), float64()));
 }
 
 TEST(Multidispatch, BinaryWithPermutation)
@@ -204,9 +204,9 @@ TEST(Multidispatch, BinaryWithPermutation)
   nd::callable func2 = nd::functional::apply([](int32, float64) { return 2; });
 
   nd::callable func = nd::functional::multidispatch({func0, func1, func2}, {1});
-  EXPECT_EQ(0, func(int32(), int32()));
-  EXPECT_EQ(1, func(int32(), float32()));
-  EXPECT_EQ(2, func(int32(), float64()));
+  EXPECT_ARRAY_EQ(0, func(int32(), int32()));
+  EXPECT_ARRAY_EQ(1, func(int32(), float32()));
+  EXPECT_ARRAY_EQ(2, func(int32(), float64()));
   EXPECT_THROW(func(int32(), int64()), runtime_error);
   EXPECT_THROW(func(int32(), float16()), runtime_error);
 }

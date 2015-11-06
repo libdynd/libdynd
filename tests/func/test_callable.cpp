@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "inc_gtest.hpp"
+#include "../dynd_assertions.hpp"
 
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
@@ -31,7 +32,7 @@ TEST(Callable, SingleStridedConstructor)
                     char * const * src) { *reinterpret_cast<int32 *>(dst) = *reinterpret_cast<int32 *>(src[0]) + 5; },
                  0);
 
-  EXPECT_EQ(8, f(3));
+  EXPECT_ARRAY_EQ(8, f(3));
 }
 
 TEST(Callable, Assignment)

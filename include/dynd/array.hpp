@@ -611,11 +611,6 @@ namespace nd {
       return at_array(1, &i0);
     }
 
-    explicit operator bool() const
-    {
-      return as<bool>();
-    }
-
     /** Does a value-assignment from the rhs array. */
     void val_assign(const array &rhs, const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
