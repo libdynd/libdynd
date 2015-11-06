@@ -211,11 +211,6 @@ namespace nd {
       intrusive_ptr<memory_block_data>::operator=(std::move(ndobj_memblock));
     }
 
-    // TODO: Copy the initializer list mechanisms from ndarray
-
-    /** Swap operation (should be "noexcept" in C++11) */
-    void swap(array &rhs);
-
     /**
      * Assignment operator.
      */

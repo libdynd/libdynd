@@ -35,11 +35,6 @@
 using namespace std;
 using namespace dynd;
 
-void nd::array::swap(array &rhs)
-{
-  intrusive_ptr<memory_block_data>::swap(rhs);
-}
-
 template <class T>
 inline typename std::enable_if<is_dynd_scalar<T>::value, intrusive_ptr<memory_block_data>>::type
 make_builtin_scalar_array(const T &value, uint64_t flags)
