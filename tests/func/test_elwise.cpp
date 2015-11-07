@@ -123,7 +123,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
       af.get_type()->get_npos(), &src_tp, src_arrmeta, kernel_request_single,
       &eval::default_eval_context, 0, NULL, std::map<std::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  usngo(ckb.get(), out.get_readwrite_originptr(), const_cast<char **>(&in_ptr));
+  usngo(ckb.get(), out.data(), const_cast<char **>(&in_ptr));
   EXPECT_EQ(5, out.get_shape()[0]);
   EXPECT_EQ(172, out(0).as<int>());
   EXPECT_EQ(-139, out(1).as<int>());
@@ -156,7 +156,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
                         &eval::default_eval_context, 0, NULL,
                         std::map<std::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  usngo(ckb.get(), out.get_readwrite_originptr(), const_cast<char **>(&in_ptr));
+  usngo(ckb.get(), out.data(), const_cast<char **>(&in_ptr));
   EXPECT_EQ(5, out.get_shape()[0]);
   EXPECT_EQ(172, out(0).as<int>());
   EXPECT_EQ(-139, out(1).as<int>());

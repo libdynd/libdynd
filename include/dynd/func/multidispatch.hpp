@@ -89,7 +89,7 @@ namespace nd {
           const ndt::type &ret_tp = child.get_ret_type();
           const array &arg_tp = child.get_arg_types();
 
-          children[dispatcher(ret_tp, arg_tp.get_dim_size(), reinterpret_cast<const ndt::type *>(arg_tp.data()))] =
+          children[dispatcher(ret_tp, arg_tp.get_dim_size(), reinterpret_cast<const ndt::type *>(arg_tp.cdata()))] =
               child;
           if (child.get()->data_size > data_size) {
             data_size = child.get()->data_size;

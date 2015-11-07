@@ -73,7 +73,7 @@ void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn, i
                                              type &out_transformed_tp, bool &out_was_transformed) const
 {
   nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
-  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
+  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
   bool was_transformed = false;
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
@@ -92,7 +92,7 @@ void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn, i
 ndt::type ndt::struct_type::get_canonical_type() const
 {
   nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
-  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
+  type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
     tmp_field_types_raw[i] = get_field_type(i).get_canonical_type();
@@ -236,7 +236,7 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_field_types.metadata(),
-                      tp.extended<struct_type>()->m_field_types.data());
+                      tp.extended<struct_type>()->m_field_types.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
@@ -258,7 +258,7 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_field_names.metadata(),
-                      tp.extended<struct_type>()->m_field_names.data());
+                      tp.extended<struct_type>()->m_field_names.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
@@ -280,7 +280,7 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_arrmeta_offsets.metadata(),
-                      tp.extended<struct_type>()->m_arrmeta_offsets.data());
+                      tp.extended<struct_type>()->m_arrmeta_offsets.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
@@ -445,7 +445,7 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   const uintptr_t *res_data_offsets = res_tp.extended<ndt::base_struct_type>()->get_data_offsets(res.metadata());
   const char *lhs_data = lhs.get_readonly_originptr();
   const char *rhs_data = rhs.get_readonly_originptr();
-  char *res_data = res.get_readwrite_originptr();
+  char *res_data = res.data();
   // Copy the data from the input arrays
   for (intptr_t i = 0; i < lhs_n; ++i) {
     const ndt::type &tp = res_field_tps[i];

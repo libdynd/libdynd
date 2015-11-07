@@ -357,7 +357,7 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
   }
 
   // Shrink the memory to fit, and set the pointers in the output
-  string *d = reinterpret_cast<string *>(result.get_readwrite_originptr());
+  string *d = reinterpret_cast<string *>(result.data());
   d->assign(out.out_string.data(), out.out_end - out.out_begin);
 
   // Finalize processing and mark the result as immutable

@@ -359,7 +359,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_pos_types().metadata(),
-                      tp.extended<callable_type>()->get_pos_types().data());
+                      tp.extended<callable_type>()->get_pos_types().cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
@@ -381,7 +381,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_kwd_types().metadata(),
-                      tp.extended<callable_type>()->get_kwd_types().data());
+                      tp.extended<callable_type>()->get_kwd_types().cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
@@ -403,7 +403,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_kwd_names().metadata(),
-                      tp.extended<callable_type>()->get_kwd_names().data());
+                      tp.extended<callable_type>()->get_kwd_names().cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
@@ -497,7 +497,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
   for (int i = 0; i < nargs - 1; ++i) {
     in_ptrs[i] = const_cast<char *>(args[i + 1].get_readonly_originptr());
   }
-  usngo(ckb.get(), args[0].get_readwrite_originptr(), in_ptrs);
+  usngo(ckb.get(), args[0].data(), in_ptrs);
   // Return void
   return nd::empty(ndt::type::make<void>()).release();
 }
@@ -544,7 +544,7 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
   instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.metadata(), nsrc, src_tp, src_arrmeta,
               kernel_request_single, &eval::default_eval_context, nkwd, kwds, tp_vars);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
-  fn(ckb.get(), dst.get_readwrite_originptr(), src_data);
+  fn(ckb.get(), dst.data(), src_data);
 
   return dst;
 }

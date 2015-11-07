@@ -86,7 +86,7 @@ ndt::type ndt::base_struct_type::apply_linear_index(intptr_t nindices, const ira
     } else {
       // Take the subset of the fields in-place
       nd::array tmp_field_types(nd::empty(dimension_size, make_type()));
-      type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
+      type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
       // Make an "N * string" array without copying the actual
       // string text data. TODO: encapsulate this into a function.
@@ -94,7 +94,7 @@ ndt::type ndt::base_struct_type::apply_linear_index(intptr_t nindices, const ira
       type stp = string_type::make();
       type tp = make_fixed_dim(dimension_size, stp);
       nd::array tmp_field_names = nd::empty(tp);
-      string_arr_ptr = reinterpret_cast<string *>(tmp_field_names.get_readwrite_originptr());
+      string_arr_ptr = reinterpret_cast<string *>(tmp_field_names.data());
 
       for (intptr_t i = 0; i < dimension_size; ++i) {
         intptr_t idx = start_index + i * index_stride;

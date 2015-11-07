@@ -26,7 +26,7 @@ inline void reset_strided_buffer_array(const nd::array& buf)
   if (flags &
       (type_flag_blockref | type_flag_zeroinit | type_flag_destructor)) {
     char *buf_arrmeta = buf.get()->get_arrmeta();
-    char *buf_data = buf.get_readwrite_originptr();
+    char *buf_data = buf.data();
     buf_tp.extended()->arrmeta_reset_buffers(buf.get()->get_arrmeta());
     fixed_dim_type_arrmeta *am =
         reinterpret_cast<fixed_dim_type_arrmeta *>(buf_arrmeta);

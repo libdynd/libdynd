@@ -35,7 +35,7 @@ ndt::base_tuple_type::base_tuple_type(type_id_t type_id, const nd::array &field_
   if (layout_in_arrmeta) {
     arrmeta_offset = get_field_count() * sizeof(size_t);
   }
-  uintptr_t *arrmeta_offsets = reinterpret_cast<uintptr_t *>(m_arrmeta_offsets.get_readwrite_originptr());
+  uintptr_t *arrmeta_offsets = reinterpret_cast<uintptr_t *>(m_arrmeta_offsets.data());
   m_members.data_alignment = 1;
   for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
     const type &ft = get_field_type(i);
@@ -173,7 +173,7 @@ ndt::type ndt::base_tuple_type::apply_linear_index(intptr_t nindices, const iran
     } else {
       // Take the subset of the fields in-place
       nd::array tmp_field_types(nd::empty(dimension_size, make_type()));
-      type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.get_readwrite_originptr());
+      type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
       for (intptr_t i = 0; i < dimension_size; ++i) {
         intptr_t idx = start_index + i * index_stride;

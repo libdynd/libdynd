@@ -38,7 +38,7 @@ substitute_type_array(const nd::array &type_array,
       reinterpret_cast<const ndt::type *>(type_array.get_readonly_originptr());
   nd::array tmp_field_types(nd::empty(field_count, ndt::make_type()));
   ndt::type *ftraw =
-      reinterpret_cast<ndt::type *>(tmp_field_types.get_readwrite_originptr());
+      reinterpret_cast<ndt::type *>(tmp_field_types.data());
   for (intptr_t i = 0; i < field_count; ++i) {
     ftraw[i] = ndt::substitute(field_types[i], typevars, concrete);
   }
