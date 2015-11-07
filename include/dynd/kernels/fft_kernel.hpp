@@ -50,64 +50,48 @@ namespace nd {
       typedef ::fftwf_plan type;
     };
 
-    fftwf_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                  int howmany_rank,
-                                  const fftw_iodim *howmany_dims,
-                                  fftwf_complex *in, fftwf_complex *out,
-                                  int sign, unsigned flags);
+    fftwf_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims, int howmany_rank, const fftw_iodim *howmany_dims,
+                                  fftwf_complex *in, fftwf_complex *out, int sign, unsigned flags);
 
-    ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                   int howmany_rank,
-                                   const fftw_iodim *howmany_dims,
-                                   fftw_complex *in, fftw_complex *out,
-                                   int sign, unsigned flags);
+    ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims, int howmany_rank, const fftw_iodim *howmany_dims,
+                                   fftw_complex *in, fftw_complex *out, int sign, unsigned flags);
 
-    inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                          int howmany_rank,
-                                          const fftw_iodim *howmany_dims,
-                                          double *in, fftw_complex *out,
-                                          int sign, unsigned flags)
+    inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims, int howmany_rank,
+                                          const fftw_iodim *howmany_dims, double *in, fftw_complex *out, int sign,
+                                          unsigned flags)
     {
       if (sign != 0) {
       }
 
-      return ::fftw_plan_guru_dft_r2c(rank, dims, howmany_rank, howmany_dims,
-                                      in, out, flags);
+      return ::fftw_plan_guru_dft_r2c(rank, dims, howmany_rank, howmany_dims, in, out, flags);
     }
 
-    inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                                          int howmany_rank,
-                                          const fftw_iodim *howmany_dims,
-                                          fftw_complex *in, double *out,
-                                          int sign, unsigned flags)
+    inline ::fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims, int howmany_rank,
+                                          const fftw_iodim *howmany_dims, fftw_complex *in, double *out, int sign,
+                                          unsigned flags)
     {
       if (sign != 0) {
       }
 
-      return ::fftw_plan_guru_dft_c2r(rank, dims, howmany_rank, howmany_dims,
-                                      in, out, flags);
+      return ::fftw_plan_guru_dft_c2r(rank, dims, howmany_rank, howmany_dims, in, out, flags);
     }
 
-    inline void fftw_execute_dft(const ::fftwf_plan plan, ::fftwf_complex *in,
-                                 ::fftwf_complex *out)
+    inline void fftw_execute_dft(const ::fftwf_plan plan, ::fftwf_complex *in, ::fftwf_complex *out)
     {
       ::fftwf_execute_dft(plan, in, out);
     }
 
-    inline void fftw_execute_dft(const ::fftw_plan plan, ::fftw_complex *in,
-                                 ::fftw_complex *out)
+    inline void fftw_execute_dft(const ::fftw_plan plan, ::fftw_complex *in, ::fftw_complex *out)
     {
       ::fftw_execute_dft(plan, in, out);
     }
 
-    inline void fftw_execute_dft(const ::fftw_plan plan, double *in,
-                                 ::fftw_complex *out)
+    inline void fftw_execute_dft(const ::fftw_plan plan, double *in, ::fftw_complex *out)
     {
       ::fftw_execute_dft_r2c(plan, in, out);
     }
 
-    inline void fftw_execute_dft(const ::fftw_plan plan, ::fftw_complex *in,
-                                 double *out)
+    inline void fftw_execute_dft(const ::fftw_plan plan, ::fftw_complex *in, double *out)
     {
       ::fftw_execute_dft_c2r(plan, in, out);
     }
@@ -135,19 +119,14 @@ namespace nd {
 
   template <typename fftw_dst_type, typename fftw_src_type, int sign = 0>
   struct fftw_ck : base_kernel<fftw_ck<fftw_dst_type, fftw_src_type, sign>, 1> {
-    typedef typename std::conditional<
-        std::is_same<fftw_dst_type, fftw_complex>::value, complex<double>,
-        typename std::conditional<
-            std::is_same<fftw_dst_type, fftwf_complex>::value, complex<float>,
-            fftw_dst_type>::type>::type dst_type;
-    typedef typename std::conditional<
-        std::is_same<fftw_src_type, fftw_complex>::value, complex<double>,
-        typename std::conditional<
-            std::is_same<fftw_src_type, fftwf_complex>::value, complex<float>,
-            fftw_src_type>::type>::type src_type;
+    typedef typename std::conditional<std::is_same<fftw_dst_type, fftw_complex>::value, complex<double>,
+                                      typename std::conditional<std::is_same<fftw_dst_type, fftwf_complex>::value,
+                                                                complex<float>, fftw_dst_type>::type>::type dst_type;
+    typedef typename std::conditional<std::is_same<fftw_src_type, fftw_complex>::value, complex<double>,
+                                      typename std::conditional<std::is_same<fftw_src_type, fftwf_complex>::value,
+                                                                complex<float>, fftw_src_type>::type>::type src_type;
 
-    typedef typename detail::fftw_plan<fftw_dst_type, fftw_src_type>::type
-    plan_type;
+    typedef typename detail::fftw_plan<fftw_dst_type, fftw_src_type>::type plan_type;
     typedef fftw_ck self_type;
 
     plan_type plan;
@@ -163,8 +142,7 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      detail::fftw_execute_dft(plan,
-                               *reinterpret_cast<fftw_src_type *const *>(src),
+      detail::fftw_execute_dft(plan, *reinterpret_cast<fftw_src_type *const *>(src),
                                reinterpret_cast<fftw_dst_type *>(dst));
     }
 
@@ -183,15 +161,12 @@ namespace nd {
         }
     */
 
-    static intptr_t
-    instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                const ndt::type &dst_tp, const char *dst_arrmeta,
-                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                const char *const *src_arrmeta, kernel_request_t kernreq,
-                const eval::eval_context *DYND_UNUSED(ectx),
-                intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                                intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       int flags;
       if (kwds[2].is_missing()) {
@@ -217,17 +192,14 @@ namespace nd {
         axes = nd::range(src_tp[0].get_ndim());
       }
 
-      const size_stride_t *src_size_stride =
-          reinterpret_cast<const size_stride_t *>(src_arrmeta[0]);
-      const size_stride_t *dst_size_stride =
-          reinterpret_cast<const size_stride_t *>(dst_arrmeta);
+      const size_stride_t *src_size_stride = reinterpret_cast<const size_stride_t *>(src_arrmeta[0]);
+      const size_stride_t *dst_size_stride = reinterpret_cast<const size_stride_t *>(dst_arrmeta);
 
       int rank = axes.get_dim_size();
       shortvector<fftw_iodim> dims(rank);
       for (intptr_t i = 0; i < rank; ++i) {
         intptr_t j = axes(i).as<intptr_t>();
-        dims[i].n = shape.is_missing() ? src_size_stride[j].dim_size
-                                       : shape(j).as<intptr_t>();
+        dims[i].n = shape.is_missing() ? src_size_stride[j].dim_size : shape(j).as<intptr_t>();
         dims[i].is = src_size_stride[j].stride / sizeof(fftw_src_type);
         dims[i].os = dst_size_stride[j].stride / sizeof(fftw_dst_type);
       }
@@ -237,8 +209,7 @@ namespace nd {
       for (intptr_t i = 0, j = 0, k = 0; i < howmany_rank; ++i, ++j) {
         for (; k < rank && j == axes(k).as<intptr_t>(); ++j, ++k) {
         }
-        howmany_dims[i].n = shape.is_missing() ? src_size_stride[j].dim_size
-                                               : shape(j).as<intptr_t>();
+        howmany_dims[i].n = shape.is_missing() ? src_size_stride[j].dim_size : shape(j).as<intptr_t>();
         howmany_dims[i].is = src_size_stride[j].stride / sizeof(fftw_src_type);
         howmany_dims[i].os = dst_size_stride[j].stride / sizeof(fftw_dst_type);
       }
@@ -246,47 +217,36 @@ namespace nd {
       nd::array src = nd::empty(src_tp[0]);
       nd::array dst = nd::empty(dst_tp);
 
-      fftw_ck::make(
-          ckb, kernreq, ckb_offset,
-          detail::fftw_plan_guru_dft(
-              rank, dims.get(), howmany_rank, howmany_dims.get(),
-              reinterpret_cast<fftw_src_type *>(src.get_readwrite_originptr()),
-              reinterpret_cast<fftw_dst_type *>(dst.get_readwrite_originptr()),
-              sign, flags));
+      fftw_ck::make(ckb, kernreq, ckb_offset,
+                    detail::fftw_plan_guru_dft(rank, dims.get(), howmany_rank, howmany_dims.get(),
+                                               reinterpret_cast<fftw_src_type *>(src.data()),
+                                               reinterpret_cast<fftw_dst_type *>(dst.data()), sign, flags));
 
       return ckb_offset;
     }
 
     template <bool real_to_complex>
     static typename std::enable_if<real_to_complex, void>::type
-    resolve_dst_type_(
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-        const nd::array *kwds,
-        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    resolve_dst_type_(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                      ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds[0];
 
       intptr_t ndim = src_tp[0].get_ndim();
       dimvector src_shape(ndim);
       src_tp[0].extended()->get_shape(ndim, 0, src_shape.get(), NULL, NULL);
-      src_shape[ndim - 1] = (shape.is_null() ? src_shape[ndim - 1]
-                                             : shape(ndim - 1).as<intptr_t>()) /
-                                2 +
-                            1;
-      dst_tp = ndt::make_fixed_dim(ndim, src_shape.get(),
-                                   ndt::type::make<complex<double>>());
+      src_shape[ndim - 1] = (shape.is_null() ? src_shape[ndim - 1] : shape(ndim - 1).as<intptr_t>()) / 2 + 1;
+      dst_tp = ndt::make_fixed_dim(ndim, src_shape.get(), ndt::type::make<complex<double>>());
     }
 
     template <bool real_to_complex>
     static typename std::enable_if<!real_to_complex, void>::type
-    resolve_dst_type_(
-        char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-        char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-        const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd),
-        const nd::array *kwds,
-        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    resolve_dst_type_(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                      ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                      intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                      const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       nd::array shape = kwds[0];
       if (shape.is_missing()) {
@@ -295,22 +255,17 @@ namespace nd {
         if (shape.get_type().get_type_id() == pointer_type_id) {
           shape = shape.f("dereference");
         }
-        dst_tp = ndt::make_fixed_dim(
-            shape.get_dim_size(),
-            reinterpret_cast<const intptr_t *>(shape.get_readonly_originptr()),
-            ndt::type::make<complex<double>>());
+        dst_tp = ndt::make_fixed_dim(shape.get_dim_size(), reinterpret_cast<const intptr_t *>(shape.data()),
+                                     ndt::type::make<complex<double>>());
       }
     }
 
-    static void
-    resolve_dst_type(char *static_data, size_t data_size, char *data,
-                     ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                     intptr_t nkwd, const nd::array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars)
+    static void resolve_dst_type(char *static_data, size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
+                                 const ndt::type *src_tp, intptr_t nkwd, const nd::array *kwds,
+                                 const std::map<std::string, ndt::type> &tp_vars)
     {
-      resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(
-          static_data, data_size, data, dst_tp, nsrc, src_tp, nkwd, kwds,
-          tp_vars);
+      resolve_dst_type_<std::is_same<fftw_src_type, double>::value>(static_data, data_size, data, dst_tp, nsrc, src_tp,
+                                                                    nkwd, kwds, tp_vars);
     }
   };
 
