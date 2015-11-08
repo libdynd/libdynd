@@ -216,7 +216,7 @@ nd::callable::callable(const nd::array &rhs)
     if (rhs.get_type().get_type_id() == callable_type_id) {
       const callable_type_data *af =
           reinterpret_cast<const callable_type_data *>(
-              rhs.get_readonly_originptr());
+              rhs.cdata());
       if (af->instantiate != NULL) {
         // It's valid: callable type, contains instantiate function.
         m_value = rhs;

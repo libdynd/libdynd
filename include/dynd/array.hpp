@@ -255,11 +255,6 @@ namespace nd {
       return get()->get_arrmeta();
     }
 
-    const char *get_readonly_originptr() const
-    {
-      return get()->ptr;
-    }
-
     char *data() const
     {
       if (get()->flags & write_access_flag) {
@@ -1738,7 +1733,7 @@ namespace nd {
    */
   inline bool is_scalar_avail(const array &arr, const eval::eval_context *ectx = &eval::default_eval_context)
   {
-    return is_scalar_avail(arr.get_type(), arr.metadata(), arr.get_readonly_originptr(), ectx);
+    return is_scalar_avail(arr.get_type(), arr.metadata(), arr.cdata(), ectx);
   }
 
   DYND_API void assign_na(const ndt::type &tp, const char *arrmeta, char *data, const eval::eval_context *ectx);

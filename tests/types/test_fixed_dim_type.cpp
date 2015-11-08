@@ -114,7 +114,7 @@ TEST(FixedDimType, AssignKernel_ScalarToFixed)
   make_assignment_kernel(&k, 0, a.get_type(), a.metadata(), b.get_type(), b.metadata(), kernel_request_single,
                          &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
-  char *src = const_cast<char *>(b.get_readonly_originptr());
+  char *src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   EXPECT_EQ(9, a(0).as<int>());
   EXPECT_EQ(9, a(1).as<int>());
@@ -135,7 +135,7 @@ TEST(FixedDimType, AssignKernel_FixedToFixed)
   make_assignment_kernel(&k, 0, a.get_type(), a.metadata(), b.get_type(), b.metadata(), kernel_request_single,
                          &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
-  char *src = const_cast<char *>(b.get_readonly_originptr());
+  char *src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   EXPECT_EQ(3, a(0).as<int>());
   EXPECT_EQ(5, a(1).as<int>());

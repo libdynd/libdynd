@@ -454,7 +454,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
 {
   // TODO: Remove the const_cast
   nd::array par(const_cast<array_preamble *>(params), true);
-  const nd::array *par_arrs = reinterpret_cast<const nd::array *>(par.get_readonly_originptr());
+  const nd::array *par_arrs = reinterpret_cast<const nd::array *>(par.cdata());
   if (par_arrs[0].get_type().get_type_id() != callable_type_id) {
     throw runtime_error("callable method '__call__' only works on individual "
                         "callable instances presently");
@@ -470,7 +470,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
       args[nargs - 1] = par_arrs[nargs];
     }
   }
-  const callable_type_data *af = reinterpret_cast<const callable_type_data *>(par_arrs[0].get_readonly_originptr());
+  const callable_type_data *af = reinterpret_cast<const callable_type_data *>(par_arrs[0].cdata());
   const ndt::callable_type *af_tp = par_arrs[0].get_type().extended<ndt::callable_type>();
   nargs -= 1;
   // Validate the number of arguments
@@ -495,7 +495,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   char *in_ptrs[max_args];
   for (int i = 0; i < nargs - 1; ++i) {
-    in_ptrs[i] = const_cast<char *>(args[i + 1].get_readonly_originptr());
+    in_ptrs[i] = const_cast<char *>(args[i + 1].cdata());
   }
   usngo(ckb.get(), args[0].data(), in_ptrs);
   // Return void

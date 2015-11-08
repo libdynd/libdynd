@@ -677,7 +677,7 @@ void nd::array::val_assign(const array &rhs, const eval::eval_context *ectx) con
     }
   */
 
-  typed_data_assign(get_type(), metadata(), data(), rhs.get_type(), rhs.metadata(), rhs.get_readonly_originptr(), ectx);
+  typed_data_assign(get_type(), metadata(), data(), rhs.get_type(), rhs.metadata(), rhs.cdata(), ectx);
 }
 
 void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
@@ -891,8 +891,7 @@ bool nd::array::is_missing() const
 {
   ndt::type tp = get_type();
   if (tp.get_type_id() == option_type_id) {
-    return !tp.extended<ndt::option_type>()->is_avail(metadata(), get_readonly_originptr(),
-                                                      &eval::default_eval_context);
+    return !tp.extended<ndt::option_type>()->is_avail(metadata(), cdata(), &eval::default_eval_context);
   }
 
   return false;
@@ -1428,7 +1427,7 @@ ndt::type nd::detail::array_as_type(const nd::array &lhs)
   if (temp.get_type().get_type_id() != type_type_id) {
     temp = temp.ucast(ndt::make_type()).eval();
   }
-  return ndt::type(reinterpret_cast<const type_type_data *>(temp.get_readonly_originptr())->tp, true);
+  return ndt::type(reinterpret_cast<const type_type_data *>(temp.cdata())->tp, true);
 }
 
 void nd::array::debug_print(std::ostream &o, const std::string &indent) const
@@ -1815,7 +1814,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   // Set the data pointers
   const char **dp = reinterpret_cast<const char **>(data_ptr);
   for (size_t i = 0; i != field_count; ++i) {
-    dp[i] = field_values[i].get_readonly_originptr();
+    dp[i] = field_values[i].cdata();
   }
   return result;
 }
@@ -1824,7 +1823,7 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const 
 {
 
   if (tp.is_builtin() || tp.get_type_id() == callable_type_id) {
-    memcpy(data, val.get_readonly_originptr(), tp.get_data_size());
+    memcpy(data, val.cdata(), tp.get_data_size());
   } else {
     pointer_type_arrmeta *am = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
     // Insert the reference in the destination pointer's arrmeta
@@ -1835,7 +1834,7 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const 
       val_tp.extended()->arrmeta_copy_construct(arrmeta + sizeof(pointer_type_arrmeta), val.metadata(), val);
     }
     // Copy the pointer
-    *reinterpret_cast<char **>(data) = const_cast<char *>(val.get_readonly_originptr());
+    *reinterpret_cast<char **>(data) = const_cast<char *>(val.cdata());
   }
 }
 

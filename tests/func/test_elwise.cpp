@@ -116,7 +116,7 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
   in(2).vals() = "12345";
   in(3).vals() = "-1111";
   in(4).vals() = "284";
-  const char *in_ptr = in.get_readonly_originptr();
+  const char *in_ptr = in.cdata();
   const char *src_arrmeta[1] = {in.metadata()};
   af.get()->instantiate(
       af.get()->static_data, 0, NULL, &ckb, 0, dst_tp, out.metadata(),
@@ -148,7 +148,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
   nd::array out = nd::empty("var * int32");
   const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
   in.vals() = in_vals;
-  const char *in_ptr = in.get_readonly_originptr();
+  const char *in_ptr = in.cdata();
   const char *src_arrmeta[1] = {in.metadata()};
   af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, out.get_type(),
                         out.metadata(), af.get_type()->get_npos(),

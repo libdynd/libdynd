@@ -75,7 +75,7 @@ namespace ndt {
       if (value >= get_category_count()) {
         throw std::runtime_error("category value is out of bounds");
       }
-      return m_categories.get_readonly_originptr() +
+      return m_categories.cdata() +
              unchecked_fixed_dim_get<intptr_t>(m_value_to_category_index, value) *
                  reinterpret_cast<const fixed_dim_type_arrmeta *>(m_categories.metadata())->stride;
     }

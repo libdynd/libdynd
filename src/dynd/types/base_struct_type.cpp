@@ -51,7 +51,7 @@ intptr_t ndt::base_struct_type::get_field_index(const char *field_name_begin, co
   if (size > 0) {
     char firstchar = *field_name_begin;
     intptr_t field_count = get_field_count();
-    const char *fn_ptr = m_field_names.get_readonly_originptr();
+    const char *fn_ptr = m_field_names.cdata();
     intptr_t fn_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(m_field_names.metadata())->stride;
     for (intptr_t i = 0; i != field_count; ++i, fn_ptr += fn_stride) {
       const string *fn = reinterpret_cast<const string *>(fn_ptr);

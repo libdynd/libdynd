@@ -46,7 +46,7 @@ void ndt::array_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmet
   if (a.is_null()) {
     o << "null";
   } else {
-    a.get_type().print_data(o, a.metadata(), a.get_readonly_originptr());
+    a.get_type().print_data(o, a.metadata(), a.cdata());
   }
 }
 

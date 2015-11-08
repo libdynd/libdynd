@@ -366,7 +366,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_type_id() == var_dim_type_id && tp.get_type_id() == fixed_dim_type_id) {
     const var_dim_type_arrmeta *in_am = reinterpret_cast<const var_dim_type_arrmeta *>(arr.metadata());
-    const var_dim_type_data *in_dat = reinterpret_cast<const var_dim_type_data *>(arr.get_readonly_originptr());
+    const var_dim_type_data *in_dat = reinterpret_cast<const var_dim_type_data *>(arr.cdata());
     fixed_dim_type_arrmeta *out_am = reinterpret_cast<fixed_dim_type_arrmeta *>(result.metadata());
     out_am->dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
     out_am->stride = in_am->stride;

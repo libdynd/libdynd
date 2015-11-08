@@ -142,16 +142,16 @@ TEST(JSONParser, BuiltinsFromBool)
   // Handling of NULL with option[bool]
   a = parse_json(ndt::option_type::make(ndt::type::make<bool1>()), "null");
   EXPECT_EQ(ndt::option_type::make(ndt::type::make<bool1>()), a.get_type());
-  EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
+  EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
   a = parse_json(ndt::option_type::make(ndt::type::make<bool1>()), "\"NULL\"");
   EXPECT_EQ(ndt::option_type::make(ndt::type::make<bool1>()), a.get_type());
-  EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
+  EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
   a = parse_json(ndt::option_type::make(ndt::type::make<bool1>()), "\"NA\"");
   EXPECT_EQ(ndt::option_type::make(ndt::type::make<bool1>()), a.get_type());
-  EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
+  EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
   a = parse_json(ndt::option_type::make(ndt::type::make<bool1>()), "\"\"");
   EXPECT_EQ(ndt::option_type::make(ndt::type::make<bool1>()), a.get_type());
-  EXPECT_EQ(DYND_BOOL_NA, *a.get_readonly_originptr());
+  EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
 
   // Handling of an NULL, invalid token, string with junk in it, empty string
   EXPECT_THROW(parse_json(ndt::type::make<bool1>(), "null"), invalid_argument);
@@ -216,7 +216,7 @@ TEST(JSONParser, OptionInt)
   EXPECT_EQ(123, a.as<int8_t>());
   a = parse_json(ndt::option_type::make(ndt::type::make<int8_t>()), "null");
   EXPECT_EQ(ndt::option_type::make(ndt::type::make<int8_t>()), a.get_type());
-  EXPECT_EQ(DYND_INT8_NA, *reinterpret_cast<const int8_t *>(a.get_readonly_originptr()));
+  EXPECT_EQ(DYND_INT8_NA, *reinterpret_cast<const int8_t *>(a.cdata()));
   EXPECT_THROW(a.as<int8_t>(), overflow_error);
 
   a = parse_json("9 * ?int32", "[null, 3, null, -1000, 1, 3, null, null, null]");
@@ -247,7 +247,7 @@ TEST(JSONParser, OptionString)
 
   a = parse_json(ndt::type("?string"), "null");
   EXPECT_EQ(ndt::type("?string"), a.get_type());
-  EXPECT_EQ(NULL, reinterpret_cast<const dynd::string *>(a.get_readonly_originptr())->begin());
+  EXPECT_EQ(NULL, reinterpret_cast<const dynd::string *>(a.cdata())->begin());
   EXPECT_THROW(a.as<std::string>(), overflow_error);
 
   a = parse_json("9 * ?string", "[null, \"123\", null, \"456\", \"0\", \"789\", null, null, null]");

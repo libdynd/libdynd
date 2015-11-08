@@ -443,8 +443,8 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   const uintptr_t *lhs_data_offsets = lhs_tp.extended<ndt::base_struct_type>()->get_data_offsets(lhs.metadata());
   const uintptr_t *rhs_data_offsets = rhs_tp.extended<ndt::base_struct_type>()->get_data_offsets(rhs.metadata());
   const uintptr_t *res_data_offsets = res_tp.extended<ndt::base_struct_type>()->get_data_offsets(res.metadata());
-  const char *lhs_data = lhs.get_readonly_originptr();
-  const char *rhs_data = rhs.get_readonly_originptr();
+  const char *lhs_data = lhs.cdata();
+  const char *rhs_data = rhs.cdata();
   char *res_data = res.data();
   // Copy the data from the input arrays
   for (intptr_t i = 0; i < lhs_n; ++i) {
