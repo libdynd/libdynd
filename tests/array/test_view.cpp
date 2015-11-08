@@ -72,8 +72,8 @@ TEST(View, AsBytes)
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
   EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
   // Confirm it's pointing to the right memory with the right size
-  btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
-  EXPECT_EQ(a.get_readonly_originptr(), btd->begin());
+  btd = reinterpret_cast<const bytes_type_data *>(b.cdata());
+  EXPECT_EQ(a.cdata(), btd->begin());
   EXPECT_EQ(4, btd->end() - btd->begin());
 
   // View a 1D array as bytes
@@ -85,8 +85,8 @@ TEST(View, AsBytes)
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
   EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
   // Confirm it's pointing to the right memory with the right size
-  btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
-  EXPECT_EQ(a.get_readonly_originptr(), btd->begin());
+  btd = reinterpret_cast<const bytes_type_data *>(b.cdata());
+  EXPECT_EQ(a.cdata(), btd->begin());
   EXPECT_EQ(2 * 8, btd->end() - btd->begin());
 
   // View a 2D array as bytes
@@ -98,8 +98,8 @@ TEST(View, AsBytes)
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(b.get_arrmeta());
   EXPECT_EQ(btd_meta->blockref, a.get_data_memblock().get());
   // Confirm it's pointing to the right memory with the right size
-  btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
-  EXPECT_EQ(a.get_readonly_originptr(), btd->begin());
+  btd = reinterpret_cast<const bytes_type_data *>(b.cdata());
+  EXPECT_EQ(a.cdata(), btd->begin());
   EXPECT_EQ(2 * 3 * 8, btd->end() - btd->begin());
   EXPECT_THROW(nd::view(a(irange(), irange(0, 2)), ndt::bytes_type::make(1)), type_error);
 
@@ -112,8 +112,8 @@ TEST(View, AsBytes)
   const var_dim_type_arrmeta *vdt_meta = reinterpret_cast<const var_dim_type_arrmeta *>(a.get_arrmeta());
   EXPECT_EQ(btd_meta->blockref, vdt_meta->blockref);
   // Confirm it's pointing to the right memory with the right size
-  const var_dim_type_data *vdt_data = reinterpret_cast<const var_dim_type_data *>(a.get_readonly_originptr());
-  btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
+  const var_dim_type_data *vdt_data = reinterpret_cast<const var_dim_type_data *>(a.cdata());
+  btd = reinterpret_cast<const bytes_type_data *>(b.cdata());
   EXPECT_EQ(vdt_data->begin, btd->begin());
   EXPECT_EQ(2 * 3 * 2, btd->end() - btd->begin());
 }
@@ -156,13 +156,13 @@ TEST(View, FromBytes)
   b = nd::view(a, ndt::type::make<double>());
   EXPECT_EQ(3.25, b.as<double>());
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
-  btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
+  btd = reinterpret_cast<const bytes_type_data *>(a.cdata());
   if (btd_meta->blockref != NULL) {
     EXPECT_EQ(btd_meta->blockref, b.get()->data.ref);
   } else {
     EXPECT_EQ(a.get_data_memblock().get(), b.get()->data.ref);
   }
-  EXPECT_EQ(btd->begin(), b.get_readonly_originptr());
+  EXPECT_EQ(btd->begin(), b.cdata());
 
   float y[3] = {1.f, 2.5f, -1.25f};
   a = nd::make_bytes_array(reinterpret_cast<const char *>(&y), sizeof(y), 4);
@@ -172,13 +172,13 @@ TEST(View, FromBytes)
   EXPECT_EQ(2.5f, b(1).as<float>());
   EXPECT_EQ(-1.25f, b(2).as<float>());
   btd_meta = reinterpret_cast<const bytes_type_arrmeta *>(a.get_arrmeta());
-  btd = reinterpret_cast<const bytes_type_data *>(a.get_readonly_originptr());
+  btd = reinterpret_cast<const bytes_type_data *>(a.cdata());
   if (btd_meta->blockref != NULL) {
     EXPECT_EQ(btd_meta->blockref, b.get()->data.ref);
   } else {
     EXPECT_EQ(a.get_data_memblock().get(), b.get()->data.ref);
   }
-  EXPECT_EQ(btd->begin(), b.get_readonly_originptr());
+  EXPECT_EQ(btd->begin(), b.cdata());
 }
 
 TEST(View, WeakerAlignment)
@@ -207,7 +207,7 @@ TEST(View, StringAsBytes)
 
   a = parse_json("string", "\"\\U00024B62\"");
   b = nd::view(a, "bytes");
-  const bytes_type_data *btd = reinterpret_cast<const bytes_type_data *>(b.get_readonly_originptr());
+  const bytes_type_data *btd = reinterpret_cast<const bytes_type_data *>(b.cdata());
   ASSERT_EQ(4, btd->end() - btd->begin());
   EXPECT_EQ('\xF0', btd->begin()[0]);
   EXPECT_EQ('\xA4', btd->begin()[1]);

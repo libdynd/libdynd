@@ -350,10 +350,10 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
   out.struct_as_list = struct_as_list;
 
   if (!n.get_type().is_expression()) {
-    ::format_json(out, n.get_type(), n.metadata(), n.get_readonly_originptr());
+    ::format_json(out, n.get_type(), n.metadata(), n.cdata());
   } else {
     nd::array tmp = n.eval();
-    ::format_json(out, tmp.get_type(), tmp.metadata(), tmp.get_readonly_originptr());
+    ::format_json(out, tmp.get_type(), tmp.metadata(), tmp.cdata());
   }
 
   // Shrink the memory to fit, and set the pointers in the output

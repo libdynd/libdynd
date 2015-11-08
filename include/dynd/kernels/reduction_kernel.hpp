@@ -109,7 +109,7 @@ namespace nd {
           data->axes = NULL;
         } else {
           data->naxis = kwds[0].get_dim_size();
-          data->axes = reinterpret_cast<const int *>(kwds[0].get_readonly_originptr());
+          data->axes = reinterpret_cast<const int *>(kwds[0].cdata());
         }
 
         if (kwds[2].is_missing()) {

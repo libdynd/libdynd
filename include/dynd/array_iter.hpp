@@ -175,7 +175,7 @@ public:
 
   array_iter(const nd::array &op0)
   {
-    init(op0.get_type(), op0.metadata(), op0.get_readonly_originptr(), 0);
+    init(op0.get_type(), op0.metadata(), op0.cdata(), 0);
   }
 
   ~array_iter()
@@ -324,8 +324,7 @@ public:
   }
   array_iter(const nd::array &op0, const nd::array &op1)
   {
-    init(op0.get_type(), op0.metadata(), op0.data(), op1.get_type(), op1.metadata(),
-         op1.get_readonly_originptr());
+    init(op0.get_type(), op0.metadata(), op0.data(), op1.get_type(), op1.metadata(), op1.cdata());
   }
 
   ~array_iter()

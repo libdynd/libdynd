@@ -335,7 +335,7 @@ TYPED_TEST_P(ArrayAssign, BroadcastAssign)
   // Broadcasts the 4-vector by a factor of 6,
   // converting the type
   a.val_assign(b);
-  const float *ptr_f = (const float *)a.get_readonly_originptr();
+  const float *ptr_f = (const float *)a.cdata();
   for (int i = 0; i < 6; ++i) {
     EXPECT_EQ(3, TestFixture::First::Dereference(ptr_f++));
     EXPECT_EQ(4, TestFixture::First::Dereference(ptr_f++));
@@ -349,7 +349,7 @@ TYPED_TEST_P(ArrayAssign, BroadcastAssign)
   // Broadcasts the 4-vector by a factor of 6,
   // doesn't convert the type
   a.val_assign(b);
-  ptr_f = (const float *)a.get_readonly_originptr();
+  ptr_f = (const float *)a.cdata();
   for (int i = 0; i < 6; ++i) {
     EXPECT_EQ(1.5, TestFixture::First::Dereference(ptr_f++));
     EXPECT_EQ(2.5, TestFixture::First::Dereference(ptr_f++));
@@ -363,7 +363,7 @@ TYPED_TEST_P(ArrayAssign, BroadcastAssign)
   // Broadcasts the (3,1)-array by a factor of 8,
   // converting the type
   a.val_assign(b);
-  ptr_f = (const float *)a.get_readonly_originptr();
+  ptr_f = (const float *)a.cdata();
   for (int i = 0; i < 2; ++i) {
     for (int j = 0; j < 4; ++j)
       EXPECT_EQ(1.5, TestFixture::First::Dereference(ptr_f++));
@@ -592,7 +592,7 @@ TEST(ArrayAssign, ArrayValsAtType)
 
   a.vals_at(irange().by(2)) = 0;
   a.vals_at(irange(1, 4, 1).by(2)) = 1;
-  const int64_t *data = reinterpret_cast<const int64_t *>(a.get_readonly_originptr());
+  const int64_t *data = reinterpret_cast<const int64_t *>(a.cdata());
   int64_t vals[] = {0, 1, 0, 1};
   for (int i = 0; i < 4; ++i) {
     EXPECT_EQ(vals[i], data[i]);

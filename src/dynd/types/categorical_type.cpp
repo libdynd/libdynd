@@ -237,7 +237,7 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     // categories to values
     for (size_t i = 0; i != (size_t)category_count; ++i) {
       unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, i) = i;
-      const char *category_value = categories.get_readonly_originptr() + i * categories_stride;
+      const char *category_value = categories.cdata() + i * categories_stride;
 
       if (uniques.find(category_value) == uniques.end()) {
         uniques.insert(category_value);
@@ -254,7 +254,7 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     //       there's no reason we should need a second sort.
     std::sort(&unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, 0),
               &unchecked_fixed_dim_get_rw<intptr_t>(m_category_index_to_value, category_count),
-              sorter(categories.get_readonly_originptr(), categories_stride, fn, k.get()));
+              sorter(categories.cdata(), categories_stride, fn, k.get()));
 
     // invert the m_category_index_to_value permutation
     for (intptr_t i = 0; i < category_count; ++i) {
@@ -334,7 +334,7 @@ uint32_t ndt::categorical_type::get_value_from_category(const char *category_arr
   type dst_tp = type::make<intptr_t>();
   type src_tp[2] = {m_categories.get_type(), m_category_tp};
   const char *src_arrmeta[2] = {m_categories.metadata(), category_arrmeta};
-  char *src_data[2] = {const_cast<char *>(m_categories.get_readonly_originptr()), const_cast<char *>(category_data)};
+  char *src_data[2] = {const_cast<char *>(m_categories.cdata()), const_cast<char *>(category_data)};
   intptr_t i = (*nd::binary_search::get().get())(dst_tp, 2, src_tp, src_arrmeta, src_data, 0, NULL,
                                                  std::map<std::string, ndt::type>()).as<intptr_t>();
   if (i < 0) {
@@ -562,7 +562,7 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   set<const char *, cmp> uniques(less);
 
   for (intptr_t i = 0; i < dim_size; ++i) {
-    const char *data = values_eval.get_readonly_originptr() + i * stride;
+    const char *data = values_eval.cdata() + i * stride;
     if (uniques.find(data) == uniques.end()) {
       uniques.insert(data);
     }

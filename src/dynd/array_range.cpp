@@ -205,7 +205,7 @@ nd::array dynd::nd::linspace(const nd::array &start, const nd::array &stop, intp
   nd::array stop_cleaned = stop.ucast(dt).eval();
 
   if (start_cleaned.is_scalar() && stop_cleaned.is_scalar()) {
-    return linspace(dt, start_cleaned.get_readonly_originptr(), stop_cleaned.get_readonly_originptr(), count);
+    return linspace(dt, start_cleaned.cdata(), stop_cleaned.cdata(), count);
   } else {
     throw runtime_error("dynd::linspace presently only supports scalar parameters");
   }

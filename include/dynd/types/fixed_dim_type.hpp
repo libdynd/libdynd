@@ -260,7 +260,7 @@ namespace ndt {
   inline const T &unchecked_fixed_dim_get(const nd::array &a, intptr_t i)
   {
     const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.metadata());
-    return *reinterpret_cast<const T *>(a.get_readonly_originptr() + i * md->stride);
+    return *reinterpret_cast<const T *>(a.cdata() + i * md->stride);
   }
 
   /**

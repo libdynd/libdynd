@@ -166,7 +166,7 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(const std::pair<std::str
     {
       typed_data_copy(dst_tp, dst_arrmeta, dst,
                       static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).metadata(),
-                      static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get_readonly_originptr());
+                      static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,

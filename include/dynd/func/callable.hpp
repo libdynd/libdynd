@@ -133,7 +133,7 @@ namespace nd {
 
     inline void set_data(char *&data, array &value)
     {
-      data = const_cast<char *>(value.get_readonly_originptr());
+      data = const_cast<char *>(value.cdata());
     }
 
     inline void set_data(char *&data, const array &value)
@@ -653,7 +653,7 @@ namespace nd {
 
     const callable_type_data *get() const
     {
-      return !m_value.is_null() ? reinterpret_cast<const callable_type_data *>(m_value.get_readonly_originptr()) : NULL;
+      return !m_value.is_null() ? reinterpret_cast<const callable_type_data *>(m_value.cdata()) : NULL;
     }
 
     std::size_t get_data_size() const
