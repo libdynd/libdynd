@@ -215,13 +215,14 @@ const ValueType &get_second_if_pair(const std::pair<KeyType, ValueType> &pair)
   return pair.second;
 }
 
-class atomic_refcount;
+template <typename T>
+long intrusive_ptr_use_count(T *ptr);
 
 template <typename T>
-atomic_refcount &intrusive_ptr_use_count(T *ptr);
+void intrusive_ptr_retain(T *ptr);
 
 template <typename T>
-void intrusive_ptr_delete(T *ptr);
+void intrusive_ptr_release(T *ptr);
 
 /**
  * A smart pointer, very similar to boost::intrusive_ptr.
@@ -240,7 +241,7 @@ public:
   explicit intrusive_ptr(T *ptr, bool add_ref = true) : m_ptr(ptr)
   {
     if (m_ptr != 0 && add_ref) {
-      ++intrusive_ptr_use_count(m_ptr);
+      intrusive_ptr_retain(m_ptr);
     }
   }
 
@@ -248,7 +249,7 @@ public:
   intrusive_ptr(const intrusive_ptr &other) : m_ptr(other.m_ptr)
   {
     if (m_ptr != 0) {
-      ++intrusive_ptr_use_count(m_ptr);
+      intrusive_ptr_retain(m_ptr);
     }
   }
 
@@ -262,9 +263,7 @@ public:
   ~intrusive_ptr()
   {
     if (m_ptr != 0) {
-      if (--intrusive_ptr_use_count(m_ptr) == 0) {
-        intrusive_ptr_delete(m_ptr);
-      }
+      intrusive_ptr_release(m_ptr);
     }
   }
 
@@ -287,13 +286,11 @@ public:
   intrusive_ptr &operator=(const intrusive_ptr &rhs)
   {
     if (m_ptr != 0) {
-      if (--intrusive_ptr_use_count(m_ptr) == 0) {
-        intrusive_ptr_delete(m_ptr);
-      }
+      intrusive_ptr_release(m_ptr);
     }
     if (rhs.m_ptr != 0) {
       m_ptr = rhs.m_ptr;
-      ++intrusive_ptr_use_count(m_ptr);
+      intrusive_ptr_retain(m_ptr);
     } else {
       m_ptr = 0;
     }
@@ -304,9 +301,7 @@ public:
   intrusive_ptr &operator=(intrusive_ptr &&rhs)
   {
     if (m_ptr != 0) {
-      if (--intrusive_ptr_use_count(m_ptr) == 0) {
-        intrusive_ptr_delete(m_ptr);
-      }
+      intrusive_ptr_release(m_ptr);
     }
     m_ptr = rhs.m_ptr;
     rhs.m_ptr = 0;
@@ -316,15 +311,15 @@ public:
   /** Assignment from raw memory_block pointer */
   intrusive_ptr &operator=(T *rhs)
   {
-    if (m_ptr != 0) {
-      if (--intrusive_ptr_use_count(m_ptr) == 0) {
-        intrusive_ptr_delete(m_ptr);
-      }
+    if (m_ptr != nullptr) {
+      intrusive_ptr_release(m_ptr);
     }
+
     m_ptr = rhs;
-    if (rhs != 0) {
-      ++intrusive_ptr_use_count(rhs);
+    if (m_ptr != nullptr) {
+      intrusive_ptr_retain(m_ptr);
     }
+
     return *this;
   }
 
