@@ -114,14 +114,21 @@ namespace detail {
   DYND_API void memory_block_free(memory_block_data *memblock);
 } // namespace detail
 
-inline atomic_refcount &intrusive_ptr_use_count(memory_block_data *ptr)
+inline long intrusive_ptr_use_count(memory_block_data *ptr)
 {
   return ptr->m_use_count;
 }
 
-inline void intrusive_ptr_delete(memory_block_data *ptr)
+inline void intrusive_ptr_retain(memory_block_data *ptr)
 {
-  detail::memory_block_free(ptr);
+  ++ptr->m_use_count;
+}
+
+inline void intrusive_ptr_release(memory_block_data *ptr)
+{
+  if (--ptr->m_use_count == 0) {
+    detail::memory_block_free(ptr);
+  }
 }
 
 /**
