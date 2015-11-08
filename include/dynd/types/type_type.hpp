@@ -10,9 +10,7 @@
 
 namespace dynd {
 
-struct DYND_API type_type_data {
-  const ndt::base_type *tp;
-};
+typedef ndt::type type_type_data;
 
 namespace ndt {
 

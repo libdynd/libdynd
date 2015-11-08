@@ -61,7 +61,7 @@ namespace gfunc {
       static void set(const ndt::type &paramtype, char *DYND_UNUSED(arrmeta), char *data, const ndt::type &value)
       {
         if (paramtype.get_type_id() == type_type_id) {
-          reinterpret_cast<type_type_data *>(data)->tp = ndt::type(value).release();
+          *reinterpret_cast<ndt::type *>(data) = value;
         } else {
           std::stringstream ss;
           ss << "cannot pass a dynd type as a parameter to dynd callable parameter of type " << paramtype;

@@ -15,13 +15,13 @@ using namespace std;
 using namespace dynd;
 
 ndt::type_type::type_type()
-    : base_type(type_type_id, type_kind, sizeof(const base_type *), sizeof(const base_type *),
+    : base_type(type_type_id, type_kind, sizeof(ndt::type), sizeof(ndt::type),
                 type_flag_zeroinit | type_flag_destructor, 0, 0, 0)
 {
 }
 
 ndt::type_type::type_type(const type &pattern_tp)
-    : base_type(type_type_id, type_kind, sizeof(const base_type *), sizeof(const base_type *),
+    : base_type(type_type_id, type_kind, sizeof(ndt::type), sizeof(ndt::type),
                 type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_pattern_tp(pattern_tp)
 {
@@ -36,14 +36,7 @@ ndt::type_type::~type_type()
 
 void ndt::type_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
-  const type_type_data *ddd = reinterpret_cast<const type_type_data *>(data);
-  // This tests avoids the atomic increment/decrement of
-  // always constructing a type object
-  if (is_builtin_type(ddd->tp)) {
-    o << type(ddd->tp, true);
-  } else {
-    ddd->tp->print_type(o);
-  }
+  o << *reinterpret_cast<const ndt::type *>(data);
 }
 
 void ndt::type_type::print_type(std::ostream &o) const
@@ -69,8 +62,9 @@ void ndt::type_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool 
 {
 }
 
-void ndt::type_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                            const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+void
+ndt::type_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+                                       const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
 }
 
@@ -88,20 +82,14 @@ void ndt::type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 
 void ndt::type_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
-  const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
-  if (!is_builtin_type(bd)) {
-    base_type_decref(bd);
-  }
+  reinterpret_cast<type *>(data)->~type();
 }
 
 void ndt::type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data, intptr_t stride,
                                            size_t count) const
 {
   for (size_t i = 0; i != count; ++i, data += stride) {
-    const base_type *bd = reinterpret_cast<type_type_data *>(data)->tp;
-    if (!is_builtin_type(bd)) {
-      base_type_decref(bd);
-    }
+    reinterpret_cast<type *>(data)->~type();
   }
 }
 
@@ -110,12 +98,7 @@ namespace {
 struct typed_data_assignment_kernel : nd::base_kernel<typed_data_assignment_kernel, 1> {
   void single(char *dst, char *const *src)
   {
-    // Free the destination reference
-    base_type_xdecref(reinterpret_cast<const type_type_data *>(dst)->tp);
-    // Copy the pointer and count the reference
-    const ndt::base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
-    reinterpret_cast<type_type_data *>(dst)->tp = bd;
-    base_type_xincref(bd);
+    *reinterpret_cast<ndt::type *>(dst) = *reinterpret_cast<ndt::type *>(src[0]);
   }
 };
 
@@ -132,7 +115,7 @@ struct string_to_type_kernel : nd::base_kernel<string_to_type_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     const std::string &s = src_string_dt->get_utf8_string(src_arrmeta, src[0], errmode);
-    ndt::type(s).swap(reinterpret_cast<type_type_data *>(dst)->tp);
+    ndt::type(s).swap(*reinterpret_cast<ndt::type *>(dst));
   }
 };
 
@@ -148,13 +131,8 @@ struct type_to_string_kernel : nd::base_kernel<type_to_string_kernel, 1> {
 
   void single(char *dst, char *const *src)
   {
-    const ndt::base_type *bd = (*reinterpret_cast<type_type_data *const *>(src))->tp;
     stringstream ss;
-    if (is_builtin_type(bd)) {
-      ss << ndt::type(bd, true);
-    } else {
-      bd->print_type(ss);
-    }
+    ss << *reinterpret_cast<ndt::type *>(src[0]);
     dst_string_dt->set_from_utf8_string(dst_arrmeta, dst, ss.str(), &ectx);
   }
 };

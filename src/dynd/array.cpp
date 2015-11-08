@@ -408,7 +408,7 @@ nd::array::array(const ndt::type &tp)
 {
   array temp(nd::empty(ndt::make_type()));
   temp.swap(*this);
-  ndt::type(tp).swap(reinterpret_cast<type_type_data *>(get()->ptr)->tp);
+  ndt::type(tp).swap(*reinterpret_cast<ndt::type *>(get()->ptr));
   get()->flags = nd::read_access_flag | nd::immutable_access_flag;
 }
 
@@ -517,7 +517,7 @@ nd::array nd::array_rw(const char *str, size_t size)
 nd::array nd::array_rw(const ndt::type &tp)
 {
   array temp = array(nd::empty(ndt::make_type()));
-  ndt::type(tp).swap(reinterpret_cast<type_type_data *>(temp.get()->ptr)->tp);
+  ndt::type(tp).swap(*reinterpret_cast<ndt::type *>(temp.get()->ptr));
   return temp;
 }
 
@@ -525,7 +525,7 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
 {
   ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_type());
   char *data_ptr = NULL;
-  array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), sizeof(type_type_data) * vec.size(),
+  array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), sizeof(ndt::type) * vec.size(),
                                        dt.get_data_alignment(), &data_ptr));
   // The main array arrmeta
   array_preamble *preamble = result.get();
@@ -536,11 +536,11 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
   // The arrmeta for the strided and type parts of the type
   fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.metadata());
   sa_md->dim_size = vec.size();
-  sa_md->stride = vec.empty() ? 0 : sizeof(type_type_data);
+  sa_md->stride = vec.empty() ? 0 : sizeof(ndt::type);
   // The data
-  type_type_data *data = reinterpret_cast<type_type_data *>(data_ptr);
+  ndt::type *data = reinterpret_cast<ndt::type *>(data_ptr);
   for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
-    data[i].tp = ndt::type(vec[i]).release();
+    new (data + i) ndt::type(vec[i]);
   }
   return result;
 }
@@ -1427,7 +1427,7 @@ ndt::type nd::detail::array_as_type(const nd::array &lhs)
   if (temp.get_type().get_type_id() != type_type_id) {
     temp = temp.ucast(ndt::make_type()).eval();
   }
-  return ndt::type(reinterpret_cast<const type_type_data *>(temp.cdata())->tp, true);
+  return *reinterpret_cast<const ndt::type *>(temp.cdata());
 }
 
 void nd::array::debug_print(std::ostream &o, const std::string &indent) const
