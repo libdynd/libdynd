@@ -69,6 +69,7 @@ DyND was also mentioned in a Blaze talk at
 * [SciPy June 2013 DyND Talk](https://www.youtube.com/watch?v=BduIKN5mgvU)
 * [SciPy July 2014 Blaze Talk](https://www.youtube.com/watch?v=9HPR-1PdZUk)
 * [EuroSciPy August 2014 DyND Lightning Talk](https://www.youtube.com/watch?v=VZ7enVMNB84#t=198)
+* [SciPy July 2015 DyND Talk](https://www.youtube.com/watch?v=ZSWcX6yaQrQ)
 
 Source Code Directory Layout
 ----------------------------
