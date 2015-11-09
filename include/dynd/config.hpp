@@ -494,12 +494,13 @@ struct integer_proxy<integer_sequence<T, I0, I...>> {
     size = dynd::integer_sequence<T, I0, I...>::size
   };
 
-#if !(defined(_MSC_VER) && (_MSC_VER == 1800))
+//#if !(defined(_MSC_VER) && (_MSC_VER == 1800))
   template <typename R, typename... A>
   static R make(A &&... a)
   {
     return R(get<I0>(std::forward<A>(a)...), get<I>(std::forward<A>(a)...)...);
   }
+/*
 #else
   // Workaround for MSVC 2013 compiler bug reported here:
   // https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-std-forward-a-a-fails-when-nested-with-another-unpacking
@@ -556,6 +557,7 @@ struct integer_proxy<integer_sequence<T, I0, I...>> {
                     std::forward<A4>(a4), std::forward<A5>(a5), std::forward<A6>(a6))...);
   }
 #endif
+*/
 };
 
 template <typename I>
