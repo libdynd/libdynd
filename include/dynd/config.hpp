@@ -191,30 +191,6 @@ struct is_function_pointer {
       std::is_pointer<T>::value ? std::is_function<typename std::remove_pointer<T>::type>::value : false;
 };
 
-template <typename ValueType>
-ValueType &get_second_if_pair(ValueType &pair)
-{
-  return pair;
-}
-
-template <typename KeyType, typename ValueType>
-ValueType &get_second_if_pair(std::pair<KeyType, ValueType> &pair)
-{
-  return pair.second;
-}
-
-template <typename ValueType>
-const ValueType &get_second_if_pair(const ValueType &pair)
-{
-  return pair;
-}
-
-template <typename KeyType, typename ValueType>
-const ValueType &get_second_if_pair(const std::pair<KeyType, ValueType> &pair)
-{
-  return pair.second;
-}
-
 template <typename T>
 long intrusive_ptr_use_count(T *ptr);
 
@@ -459,24 +435,27 @@ struct instantiate<C, type_sequence<T...>> {
   typedef C<T...> type;
 };
 
-template <typename I>
-struct integer_proxy;
+namespace detail {
 
-template <typename T, T... I>
-struct integer_proxy<integer_sequence<T, I...>> {
-  enum {
-    size = dynd::integer_sequence<T, I...>::size
+  template <typename SequenceType>
+  struct with;
+
+  template <typename T, T... I>
+  struct with<integer_sequence<T, I...>> {
+    template <typename ConstructibleType, typename... ArgTypes>
+    static ConstructibleType make(ArgTypes &&... args)
+    {
+      return ConstructibleType(get<I>(std::forward<ArgTypes>(args)...)...);
+    }
   };
 
-  template <typename R, typename... A>
-  static R make(A &&... a)
-  {
-    return R(get<I>(std::forward<A>(a)...)...);
-  }
-};
+} // namespace dynd::detail
 
-template <typename I>
-using index_proxy = integer_proxy<I>;
+template <typename SequenceType, typename ConstructibleType, typename... ArgTypes>
+ConstructibleType make_with(ArgTypes &&... args)
+{
+  return detail::with<SequenceType>::template make<ConstructibleType, ArgTypes...>(std::forward<ArgTypes>(args)...);
+}
 
 } // namespace dynd
 
