@@ -462,100 +462,17 @@ struct instantiate<C, type_sequence<T...>> {
 template <typename I>
 struct integer_proxy;
 
-template <typename T>
-struct integer_proxy<integer_sequence<T>> {
+template <typename T, T... I>
+struct integer_proxy<integer_sequence<T, I...>> {
   enum {
-    size = 0
-  };
-
-  template <typename R, typename... A>
-  static R make(A &&...)
-  {
-    return R();
-  }
-};
-
-template <typename T, T I0>
-struct integer_proxy<integer_sequence<T, I0>> {
-  enum {
-    size = 1
+    size = dynd::integer_sequence<T, I...>::size
   };
 
   template <typename R, typename... A>
   static R make(A &&... a)
   {
-    return R(get<I0>(std::forward<A>(a)...));
+    return R(get<I>(std::forward<A>(a)...)...);
   }
-};
-
-template <typename T, T I0, T... I>
-struct integer_proxy<integer_sequence<T, I0, I...>> {
-  enum {
-    size = dynd::integer_sequence<T, I0, I...>::size
-  };
-
-#if !(defined(_MSC_VER) && (_MSC_VER == 1800))
-  template <typename R, typename... A>
-  static R make(A &&... a)
-  {
-    return R(get<I0>(std::forward<A>(a)...), get<I>(std::forward<A>(a)...)...);
-  }
-#else
-  // Workaround for MSVC 2013 compiler bug reported here:
-  // https://connect.microsoft.com/VisualStudio/feedback/details/1045260/unpacking-std-forward-a-a-fails-when-nested-with-another-unpacking
-  template <typename R>
-  static R make()
-  {
-    return R();
-  }
-  template <typename R, typename A0>
-  static R make(A0 &&a0)
-  {
-    return R(get<I0>(std::forward<A0>(a0)));
-  }
-  template <typename R, typename A0, typename A1>
-  static R make(A0 &&a0, A1 &&a1)
-  {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1))...);
-  }
-  template <typename R, typename A0, typename A1, typename A2>
-  static R make(A0 &&a0, A1 &&a1, A2 &&a2)
-  {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2))...);
-  }
-  template <typename R, typename A0, typename A1, typename A2, typename A3>
-  static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3)
-  {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3))...);
-  }
-  template <typename R, typename A0, typename A1, typename A2, typename A3, typename A4>
-  static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4)
-  {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
-                     std::forward<A4>(a4)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
-                    std::forward<A4>(a4))...);
-  }
-  template <typename R, typename A0, typename A1, typename A2, typename A3, typename A4, typename A5>
-  static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5)
-  {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
-                     std::forward<A4>(a4), std::forward<A5>(a5)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
-                    std::forward<A4>(a4), std::forward<A5>(a5))...);
-  }
-  template <typename R, typename A0, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-  static R make(A0 &&a0, A1 &&a1, A2 &&a2, A3 &&a3, A4 &&a4, A5 &&a5, A6 &&a6)
-  {
-    return R(get<I0>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
-                     std::forward<A4>(a4), std::forward<A5>(a5)),
-             get<I>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3),
-                    std::forward<A4>(a4), std::forward<A5>(a5), std::forward<A6>(a6))...);
-  }
-#endif
 };
 
 template <typename I>
