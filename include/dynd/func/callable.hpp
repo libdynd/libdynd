@@ -408,47 +408,50 @@ namespace nd {
           nd::detail::kwds,
           typename dynd::take<type_sequence<T...>, make_index_sequence<1, sizeof...(T), 2>>::type>::type type;
     };
+  } // namespace dynd::nd::detail
+
+  /**
+   * A function to provide keyword arguments to an callable. The arguments
+   * must alternate between the keyword name and the argument value.
+   *
+   *   callable af = <some callable>;
+   *   af(arr1, arr2, kwds("firstkwarg", kwval1, "second", kwval2));
+   */
+  template <typename... T>
+  typename std::enable_if<detail::is_variadic_kwds<T...>::value, typename detail::as_kwds<T...>::type>::type
+  kwds(T &&... t)
+  {
+    // Sequence of even integers, for extracting the keyword names
+    typedef make_index_sequence<0, sizeof...(T), 2> I;
+    // Sequence of odd integers, for extracting the keyword values
+    typedef make_index_sequence<1, sizeof...(T), 2> J;
+
+    return make_with<typename join<I, J>::type, decltype(kwds(std::forward<T>(t)...))>(std::forward<T>(t)...);
   }
+
+  /**
+   * A special way to provide the keyword argument as an array of
+   * names and an array of nd::array values.
+   */
+  template <typename... T>
+  typename std::enable_if<!detail::is_variadic_kwds<T...>::value,
+                          detail::kwds<intptr_t, const char *const *, array *>>::type
+  kwds(T &&... t)
+  {
+    return detail::kwds<intptr_t, const char *const *, array *>(std::forward<T>(t)...);
+  }
+
+  /**
+   * Empty keyword args.
+   */
+  inline detail::kwds<> kwds()
+  {
+    return detail::kwds<>();
+  }
+
 } // namespace dynd::nd
 
-/**
- * A function to provide keyword arguments to an callable. The arguments
- * must alternate between the keyword name and the argument value.
- *
- *   callable af = <some callable>;
- *   af(arr1, arr2, kwds("firstkwarg", kwval1, "second", kwval2));
- */
-template <typename... T>
-typename std::enable_if<nd::detail::is_variadic_kwds<T...>::value, typename nd::detail::as_kwds<T...>::type>::type
-kwds(T &&... t)
-{
-  // Sequence of even integers, for extracting the keyword names
-  typedef make_index_sequence<0, sizeof...(T), 2> I;
-  // Sequence of odd integers, for extracting the keyword values
-  typedef make_index_sequence<1, sizeof...(T), 2> J;
-
-  return make_with<typename join<I, J>::type, decltype(kwds(std::forward<T>(t)...))>(std::forward<T>(t)...);
-}
-
-/**
- * A special way to provide the keyword argument as an array of
- * names and an array of nd::array values.
- */
-template <typename... T>
-typename std::enable_if<!nd::detail::is_variadic_kwds<T...>::value,
-                        nd::detail::kwds<intptr_t, const char *const *, nd::array *>>::type
-kwds(T &&... t)
-{
-  return nd::detail::kwds<intptr_t, const char *const *, nd::array *>(std::forward<T>(t)...);
-}
-
-/**
- * Empty keyword args.
- */
-inline nd::detail::kwds<> kwds()
-{
-  return nd::detail::kwds<>();
-}
+using nd::kwds;
 
 namespace nd {
   namespace detail {

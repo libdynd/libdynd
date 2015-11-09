@@ -191,30 +191,6 @@ struct is_function_pointer {
       std::is_pointer<T>::value ? std::is_function<typename std::remove_pointer<T>::type>::value : false;
 };
 
-template <typename ValueType>
-ValueType &get_second_if_pair(ValueType &pair)
-{
-  return pair;
-}
-
-template <typename KeyType, typename ValueType>
-ValueType &get_second_if_pair(std::pair<KeyType, ValueType> &pair)
-{
-  return pair.second;
-}
-
-template <typename ValueType>
-const ValueType &get_second_if_pair(const ValueType &pair)
-{
-  return pair;
-}
-
-template <typename KeyType, typename ValueType>
-const ValueType &get_second_if_pair(const std::pair<KeyType, ValueType> &pair)
-{
-  return pair.second;
-}
-
 template <typename T>
 long intrusive_ptr_use_count(T *ptr);
 
