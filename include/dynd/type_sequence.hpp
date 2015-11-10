@@ -78,18 +78,18 @@ namespace detail {
 
   template <typename T, T... I>
   struct i2a<integer_sequence<T, I...>> {
-    static constexpr std::array<T, sizeof...(I)> value{{I...}};
+    static std::array<T, sizeof...(I)> make()
+    {
+      return {{I...}};
+    }
   };
-
-  template <typename T, T... I>
-  constexpr std::array<T, sizeof...(I)> i2a<integer_sequence<T, I...>>::value;
 
 } // namespace dynd::detail
 
 template <typename SequenceType>
 decltype(auto) i2a()
 {
-  return detail::i2a<SequenceType>::value;
+  return detail::i2a<SequenceType>::make();
 }
 
 template <typename T, T... I>
