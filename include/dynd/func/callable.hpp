@@ -1104,7 +1104,7 @@ namespace nd {
       }
 
       template <typename TypeIDSequence, typename... A>
-      void on_each(std::map<std::array<type_id_t, TypeIDSequence::size>, callable> &callables, A &&... a) const
+      void on_each(std::map<std::array<type_id_t, TypeIDSequence::size()>, callable> &callables, A &&... a) const
       {
         callables[i2a<TypeIDSequence>()] =
             callable::make<typename apply<KernelType, TypeIDSequence>::type>(std::forward<A>(a)...);
