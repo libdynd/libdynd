@@ -149,12 +149,6 @@ namespace nd {
 namespace ndt {
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
-  namespace detail {
-
-    DYND_HAS(make);
-
-  } // namespace dynd::ndt::detail
-
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 
   /**
@@ -929,12 +923,11 @@ namespace ndt {
     }
 
     template <typename T>
-    struct equivalent {
-    };
+    struct equivalent;
 
     template <typename T>
     struct has_equivalent {
-      static const bool value = detail::has_make<equivalent<T>>::value;
+      static const bool value = std::is_destructible<equivalent<T>>::value;
     };
 
     /**

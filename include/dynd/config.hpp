@@ -391,27 +391,6 @@ struct all_char_string_params<T0, T...> {
   static const bool value = is_char_string_param<T0>::value && all_char_string_params<T...>::value;
 };
 
-#ifdef _MSC_VER
-
-// std::is_destructible is broken with MSVC 2013
-template <typename T>
-class is_destructible {
-  template <typename U>
-  static std::true_type test(decltype(std::declval<U>().~U()) *);
-
-  template <typename U>
-  static std::false_type test(...);
-
-public:
-  static const bool value = decltype(test<T>(0))::value;
-};
-
-#else
-
-using std::is_destructible;
-
-#endif
-
 template <typename T>
 struct remove_all_pointers {
   typedef T type;
