@@ -468,7 +468,7 @@ namespace ndt {
     }
 
     template <typename... T>
-    static type make(T &&... names)
+    static type make(const T &... names)
     {
       type tp[1 + sizeof...(A)] = {type::make<A0>(), type::make<A>()...};
 
