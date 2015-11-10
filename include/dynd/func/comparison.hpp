@@ -18,11 +18,11 @@ namespace nd {
 
   template <typename F, template <type_id_t, type_id_t> class K>
   struct comparison_operator<F, K, 2> : declfunc<F> {
-    static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+    static std::map<std::array<type_id_t, 2>, callable> children;
 
     static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
     {
-      return children[src0_type.get_type_id()][src1_type.get_type_id()];
+      return children[{{src0_type.get_type_id(), src1_type.get_type_id()}}];
     }
 
     static std::map<std::array<type_id_t, 2>, callable> make_children()
@@ -69,9 +69,7 @@ namespace nd {
 
     static callable make()
     {
-      for (const std::pair<std::array<type_id_t, 2>, callable> &pair : F::make_children()) {
-        children[pair.first[0]][pair.first[1]] = pair.second;
-      }
+      children = F::make_children();
 
       return functional::multidispatch(
           ndt::type("(Any, Any) -> Any"),
@@ -88,7 +86,7 @@ namespace nd {
   };
 
   template <typename T, template <type_id_t, type_id_t> class K>
-  callable comparison_operator<T, K, 2>::children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+  std::map<std::array<type_id_t, 2>, callable> comparison_operator<T, K, 2>::children;
 
   extern DYND_API struct less : comparison_operator<less, less_kernel, 2> {
   } less;
@@ -135,20 +133,21 @@ namespace nd {
   } greater;
 
   extern DYND_API struct total_order : declfunc<total_order> {
-    static DYND_API callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+    static std::map<std::array<type_id_t, 2>, callable> children;
 
     static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
     {
-      return children[src0_type.get_type_id()][src1_type.get_type_id()];
+      return children[{{src0_type.get_type_id(), src1_type.get_type_id()}}];
     }
 
     static callable make()
     {
-      children[fixed_string_type_id][fixed_string_type_id] =
+      children[{{fixed_string_type_id, fixed_string_type_id}}] =
           callable::make<total_order_kernel<fixed_string_type_id, fixed_string_type_id>>();
-      children[string_type_id][string_type_id] = callable::make<total_order_kernel<string_type_id, string_type_id>>();
-      children[int32_type_id][int32_type_id] = callable::make<total_order_kernel<int32_type_id, int32_type_id>>();
-      children[bool_type_id][bool_type_id] = callable::make<total_order_kernel<bool_type_id, bool_type_id>>();
+      children[{{string_type_id, string_type_id}}] =
+          callable::make<total_order_kernel<string_type_id, string_type_id>>();
+      children[{{int32_type_id, int32_type_id}}] = callable::make<total_order_kernel<int32_type_id, int32_type_id>>();
+      children[{{bool_type_id, bool_type_id}}] = callable::make<total_order_kernel<bool_type_id, bool_type_id>>();
 
       return functional::multidispatch(
           ndt::type("(Any, Any) -> Any"),
