@@ -230,7 +230,7 @@ struct DYND_API callable_type_data {
                        const std::map<std::string, ndt::type> &tp_vars);
 
   nd::array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                       char **const *src_data, intptr_t nkwd, const nd::array *kwds,
+                       nd::array *const *src_data, intptr_t nkwd, const nd::array *kwds,
                        const std::map<std::string, ndt::type> &tp_vars);
 
   void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
@@ -238,7 +238,7 @@ struct DYND_API callable_type_data {
                   const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
   void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta, char **const *src_data, intptr_t nkwd,
+                  const ndt::type *src_tp, const char *const *src_arrmeta, nd::array *const *src_data, intptr_t nkwd,
                   const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
 
   template <typename StaticDataType>

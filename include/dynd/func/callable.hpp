@@ -141,14 +141,14 @@ namespace nd {
       data = const_cast<char *>(value.cdata());
     }
 
-    inline void set_data(char **&data, array &value)
+    inline void set_data(array *&data, array &value)
     {
-      data = &value.get()->ptr;
+      data = &value;
     }
 
-    inline void set_data(char **&data, const array &value)
+    inline void set_data(array *&data, const array &value)
     {
-      data = &value.get()->ptr;
+      data = const_cast<array *>(&value);
     }
 
     /** A holder class for the keyword arguments */
@@ -805,7 +805,7 @@ namespace nd {
         return _call<args, char *>(std::forward<A>(a)...);
       }
 
-      return _call<args, char **>(std::forward<A>(a)...);
+      return _call<args, array *>(std::forward<A>(a)...);
     }
 
     template <typename... A>
@@ -979,7 +979,7 @@ namespace nd {
       void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
                    DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
       {
-        auto value = std::get<I>(self->m_values);
+        auto &value = std::get<I>(self->m_values);
         const ndt::type &tp = ndt::type::make<decltype(value)>(value);
         const char *arrmeta = value.metadata();
 

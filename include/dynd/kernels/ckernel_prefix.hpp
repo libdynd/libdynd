@@ -18,8 +18,7 @@ namespace dynd {
 struct ckernel_prefix;
 
 typedef void (*expr_single_t)(ckernel_prefix *self, char *dst, char *const *src);
-typedef void (*expr_metadata_single_t)(ckernel_prefix *self, char *dst_metadata, char **dst, char *const *src_metadata,
-                                       char **const *src);
+typedef void (*expr_metadata_single_t)(ckernel_prefix *self, nd::array *dst, nd::array *const *src);
 typedef void (*expr_strided_t)(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
                                const intptr_t *src_stride, size_t count);
 

@@ -19,14 +19,13 @@ namespace nd {
     {
     }
 
-    void metadata_single(char *dst_metadata, char **dst, char *const *src_metadata, char **const *src)
+    void metadata_single(array *dst, array *const *src)
     {
-      reinterpret_cast<array_preamble *>(dst_metadata - sizeof(array_preamble))->ref =
-          reinterpret_cast<array_preamble *>(src_metadata[0] - sizeof(array_preamble))->owner();
-
-      std::memcpy(dst_metadata, src_metadata[0],
+      std::memcpy(dst->metadata(), src[0]->metadata(),
                   metadata_size); // need to use the type virtual function instead of this
-      *dst = *src[0];
+      dst->get()->ptr = src[0]->get()->ptr;
+
+      dst->get()->ref = src[0]->get();
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
