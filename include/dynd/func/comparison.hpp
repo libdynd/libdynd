@@ -36,27 +36,27 @@ namespace nd {
 
       callable self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
-      for (type_id_t i0 : numeric_type_ids()) {
-        for (type_id_t i1 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<numeric_type_ids>()) {
+        for (type_id_t i1 : i2a<dim_type_ids>()) {
           const ndt::type child_tp = ndt::callable_type::make(ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
 
-      for (type_id_t i : numeric_type_ids()) {
+      for (type_id_t i : i2a<numeric_type_ids>()) {
         children[{{option_type_id, i}}] = callable::make<option_comparison_kernel<F, true, false>>();
         children[{{i, option_type_id}}] = callable::make<option_comparison_kernel<F, false, true>>();
       }
       children[{{option_type_id, option_type_id}}] = callable::make<option_comparison_kernel<F, true, true>>();
 
-      for (type_id_t dim_tp_id : dim_type_ids()) {
+      for (type_id_t dim_tp_id : i2a<dim_type_ids>()) {
         children[{{dim_tp_id, option_type_id}}] = functional::elwise(self);
         children[{{option_type_id, dim_tp_id}}] = functional::elwise(self);
       }
 
-      for (type_id_t i0 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<dim_type_ids>()) {
         typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
-        for (type_id_t i1 : type_ids()) {
+        for (type_id_t i1 : i2a<type_ids>()) {
           const ndt::type child_tp = ndt::callable_type::make(ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }

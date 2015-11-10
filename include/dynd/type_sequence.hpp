@@ -57,18 +57,6 @@ struct integer_sequence {
     size = sizeof...(I)
   };
   typedef T type;
-
-  static const std::array<T, sizeof...(I)> value;
-
-  decltype(value.begin()) begin() const
-  {
-    return value.begin();
-  }
-
-  decltype(value.end()) end() const
-  {
-    return value.end();
-  }
 };
 
 namespace detail {
@@ -78,22 +66,19 @@ namespace detail {
 
   template <typename T, T... I>
   struct i2a<integer_sequence<T, I...>> {
-    static std::array<T, sizeof...(I)> make()
-    {
-      return {{I...}};
-    }
+    static const std::array<T, sizeof...(I)> value;
   };
+
+  template <typename T, T... I>
+  const std::array<T, sizeof...(I)> i2a<integer_sequence<T, I...>>::value{{I...}};
 
 } // namespace dynd::detail
 
 template <typename SequenceType>
 decltype(auto) i2a()
 {
-  return detail::i2a<SequenceType>::make();
+  return detail::i2a<SequenceType>::value;
 }
-
-template <typename T, T... I>
-const std::array<T, sizeof...(I)> integer_sequence<T, I...>::value = {{I...}};
 
 template <typename T>
 struct is_integer_sequence {
