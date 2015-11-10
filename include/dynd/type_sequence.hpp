@@ -53,6 +53,11 @@ struct integer_sequence {
     size = sizeof...(I)
   };
   typedef T value_type;
+
+  static constexpr size_t size2()
+  {
+    return sizeof...(I);
+  }
 };
 
 namespace detail {
@@ -223,6 +228,11 @@ struct type_sequence {
   enum {
     size = sizeof...(T)
   };
+
+  static constexpr size_t size2()
+  {
+    return sizeof...(T);
+  }
 };
 
 template <typename T>
@@ -409,35 +419,11 @@ typename std::enable_if<S::size == 1 && is_type_sequence<S>::value, void>::type 
 }
 
 template <typename S, typename... A>
-typename std::enable_if<(S::size > 1), void>::type for_each(A &&... a)
+typename std::enable_if<(S::size2() > 1), void>::type for_each(A &&... a)
 {
   for_each<typename to<S, 1>::type>(std::forward<A>(a)...);
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
 }
-
-template <typename T>
-struct type_proxy;
-
-#if defined(_MSC_VER) && (_MSC_VER == 1800) && !defined(__CUDACC__)
-// Workaround empty case for MSVC 2013.
-template <>
-struct type_proxy<type_sequence<>> {
-  template <typename F, typename... A>
-  static typename std::result_of<F(A...)>::type apply(F f, A &&... a)
-  {
-    return f.apply(std::forward<A>(a)...);
-  }
-};
-#endif // _MSC_VER
-
-template <typename... T>
-struct type_proxy<type_sequence<T...>> {
-  template <typename F, typename... A>
-  static typename std::result_of<F(A...)>::type apply(F f, A &&... a)
-  {
-    return f.template apply<T...>(std::forward<A>(a)...);
-  }
-};
 
 namespace detail {
   template <size_t I, typename... A>
