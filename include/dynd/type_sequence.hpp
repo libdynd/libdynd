@@ -49,9 +49,12 @@ struct alternate;
 
 template <typename T, T... I>
 struct integer_sequence {
+  enum {
+    size = sizeof...(I)
+  };
   typedef T value_type;
 
-  static constexpr size_t size()
+  static constexpr size_t size2()
   {
     return sizeof...(I);
   }
@@ -73,7 +76,7 @@ namespace detail {
 } // namespace dynd::detail
 
 template <typename SequenceType>
-const std::array<typename SequenceType::value_type, SequenceType::size()> &i2a()
+const std::array<typename SequenceType::value_type, SequenceType::size> &i2a()
 {
   return detail::i2a<SequenceType>::value;
 }
@@ -222,7 +225,11 @@ struct to<integer_sequence<T, I0, I...>, J> {
 
 template <typename... T>
 struct type_sequence {
-  static constexpr size_t size()
+  enum {
+    size = sizeof...(T)
+  };
+
+  static constexpr size_t size2()
   {
     return sizeof...(T);
   }
@@ -400,19 +407,19 @@ struct outer<S0, S1, S...> {
 };
 
 template <typename S, typename A0, typename... A>
-typename std::enable_if<S::size() == 1 && is_integer_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a)
+typename std::enable_if<S::size == 1 && is_integer_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a)
 {
   a0.template on_each<front<S>::value>(std::forward<A>(a)...);
 }
 
 template <typename S, typename A0, typename... A>
-typename std::enable_if<S::size() == 1 && is_type_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a)
+typename std::enable_if<S::size == 1 && is_type_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a)
 {
   a0.template on_each<typename front<S>::type>(std::forward<A>(a)...);
 }
 
 template <typename S, typename... A>
-typename std::enable_if<(S::size() > 1), void>::type for_each(A &&... a)
+typename std::enable_if<(S::size > 1), void>::type for_each(A &&... a)
 {
   for_each<typename to<S, 1>::type>(std::forward<A>(a)...);
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
