@@ -49,14 +49,10 @@ struct alternate;
 
 template <typename T, T... I>
 struct integer_sequence {
-  //  static_assert(std::is_integral<T>::value,
-  //              "integer_sequence must be instantiated with an integral
-  //              type");
-
   enum {
     size = sizeof...(I)
   };
-  typedef T type;
+  typedef T value_type;
 };
 
 namespace detail {
@@ -75,7 +71,7 @@ namespace detail {
 } // namespace dynd::detail
 
 template <typename SequenceType>
-decltype(auto) i2a()
+const std::array<typename SequenceType::value_type, SequenceType::size> &i2a()
 {
   return detail::i2a<SequenceType>::value;
 }
