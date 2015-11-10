@@ -980,7 +980,7 @@ namespace nd {
                    DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
       {
         auto value = std::get<I>(self->m_values);
-        const ndt::type &tp = ndt::type::make(value);
+        const ndt::type &tp = ndt::type::make<decltype(value)>(value);
         const char *arrmeta = value.metadata();
 
         detail::check_arg(af_tp, I, tp, arrmeta, tp_vars);
