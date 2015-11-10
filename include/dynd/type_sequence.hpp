@@ -407,7 +407,7 @@ struct outer<S0, S1, S...> {
 };
 
 template <typename S, typename A0, typename... A>
-typename std::enable_if<S::size == 1 && is_integer_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a)
+typename std::enable_if<S::size2() == 1 && is_integer_sequence<S>::value, void>::type for_each(A0 &&a0, A &&... a)
 {
   a0.template on_each<front<S>::value>(std::forward<A>(a)...);
 }
