@@ -419,7 +419,7 @@ typename std::enable_if<S::size == 1 && is_type_sequence<S>::value, void>::type 
 }
 
 template <typename S, typename... A>
-typename std::enable_if<(S::size > 1), void>::type for_each(A &&... a)
+typename std::enable_if<(S::size2() > 1), void>::type for_each(A &&... a)
 {
   for_each<typename to<S, 1>::type>(std::forward<A>(a)...);
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
