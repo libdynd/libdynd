@@ -387,8 +387,8 @@ namespace ndt {
     type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
-                                const type &root_tp, bool leading_dimension, char **inout_data,
+                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference,
+                                size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
                                 intrusive_ptr<memory_block_data> &inout_dataref) const;
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
@@ -460,21 +460,6 @@ namespace ndt {
     }
   };
 
-  template <typename R, typename A0>
-  struct type::equivalent<R(A0)> {
-    static type make()
-    {
-      return callable_type::make(type::make<R>(), type::make<A0>());
-    }
-
-    template <typename T>
-    static type make(T &&name)
-    {
-      return callable_type::make(type::make<R>(), tuple_type::make(),
-                                 struct_type::make({std::forward<T>(name)}, {type::make<A0>()}));
-    }
-  };
-
   template <typename R, typename A0, typename... A>
   struct type::equivalent<R(A0, A...)> {
     static type make()
@@ -483,7 +468,7 @@ namespace ndt {
     }
 
     template <typename... T>
-    static type make(T &&... names)
+    static type make(const T &... names)
     {
       type tp[1 + sizeof...(A)] = {type::make<A0>(), type::make<A>()...};
 

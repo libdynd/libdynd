@@ -391,27 +391,6 @@ struct all_char_string_params<T0, T...> {
   static const bool value = is_char_string_param<T0>::value && all_char_string_params<T...>::value;
 };
 
-#ifdef _MSC_VER
-
-// std::is_destructible is broken with MSVC 2013
-template <typename T>
-class is_destructible {
-  template <typename U>
-  static std::true_type test(decltype(std::declval<U>().~U()) *);
-
-  template <typename U>
-  static std::false_type test(...);
-
-public:
-  static const bool value = decltype(test<T>(0))::value;
-};
-
-#else
-
-using std::is_destructible;
-
-#endif
-
 template <typename T>
 struct remove_all_pointers {
   typedef T type;
@@ -433,6 +412,75 @@ struct instantiate;
 template <template <typename...> class C, typename... T>
 struct instantiate<C, type_sequence<T...>> {
   typedef C<T...> type;
+};
+
+namespace detail {
+
+  template <typename func_type, typename... B>
+  struct funcproto {
+    typedef typename funcproto<decltype(&func_type::operator()), B...>::type type;
+  };
+
+  template <typename R, typename... A, typename... B>
+  struct funcproto<R(A...), B...> {
+    typedef R(type)(A..., B...);
+  };
+
+  template <typename R, typename... A, typename... B>
+  struct funcproto<R (*)(A...), B...> {
+    typedef typename funcproto<R(A...), B...>::type type;
+  };
+
+  template <typename T, typename R, typename... A, typename... B>
+  struct funcproto<R (T::*)(A...), B...> {
+    typedef typename funcproto<R(A...), B...>::type type;
+  };
+
+  template <typename T, typename R, typename... A, typename... B>
+  struct funcproto<R (T::*)(A...) const, B...> {
+    typedef typename funcproto<R(A...), B...>::type type;
+  };
+
+} // namespace dynd::detail
+
+template <typename func_type, typename... B>
+struct funcproto_of {
+  typedef typename detail::funcproto<func_type, B...>::type type;
+};
+
+template <typename func_type, typename... B>
+struct funcproto_of<func_type *, B...> {
+  typedef typename funcproto_of<func_type, B...>::type type;
+};
+
+template <typename func_type>
+struct return_of {
+  typedef typename return_of<typename funcproto_of<func_type>::type>::type type;
+};
+
+template <typename R, typename... A>
+struct return_of<R(A...)> {
+  typedef R type;
+};
+
+template <typename func_type>
+struct args_of {
+  typedef typename args_of<typename funcproto_of<func_type>::type>::type type;
+};
+
+template <typename R, typename... A>
+struct args_of<R(A...)> {
+  typedef type_sequence<A...> type;
+};
+
+template <typename func_type>
+struct arity_of {
+  static const size_t value = arity_of<typename funcproto_of<func_type>::type>::value;
+};
+
+template <typename R, typename... A>
+struct arity_of<R(A...)> {
+  static const size_t value = sizeof...(A);
 };
 
 namespace detail {
