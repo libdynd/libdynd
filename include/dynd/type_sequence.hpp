@@ -70,7 +70,7 @@ namespace detail {
   };
 
   template <typename T, T... I>
-  const std::array<T, sizeof...(I)> i2a<integer_sequence<T, I...>>::value{{I...}};
+  const std::array<T, sizeof...(I)> i2a<integer_sequence<T, I...>>::value = {{I...}};
 
 } // namespace dynd::detail
 
