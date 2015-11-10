@@ -18,11 +18,11 @@ namespace nd {
 
   template <typename F, template <type_id_t, type_id_t> class K>
   struct comparison_operator<F, K, 2> : declfunc<F> {
-    static callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+    static std::map<std::array<type_id_t, 2>, callable> children;
 
     static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
     {
-      return children[src0_type.get_type_id()][src1_type.get_type_id()];
+      return children[{{src0_type.get_type_id(), src1_type.get_type_id()}}];
     }
 
     static std::map<std::array<type_id_t, 2>, callable> make_children()
@@ -36,27 +36,27 @@ namespace nd {
 
       callable self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
 
-      for (type_id_t i0 : numeric_type_ids()) {
-        for (type_id_t i1 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<numeric_type_ids>()) {
+        for (type_id_t i1 : i2a<dim_type_ids>()) {
           const ndt::type child_tp = ndt::callable_type::make(ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
       }
 
-      for (type_id_t i : numeric_type_ids()) {
+      for (type_id_t i : i2a<numeric_type_ids>()) {
         children[{{option_type_id, i}}] = callable::make<option_comparison_kernel<F, true, false>>();
         children[{{i, option_type_id}}] = callable::make<option_comparison_kernel<F, false, true>>();
       }
       children[{{option_type_id, option_type_id}}] = callable::make<option_comparison_kernel<F, true, true>>();
 
-      for (type_id_t dim_tp_id : dim_type_ids()) {
+      for (type_id_t dim_tp_id : i2a<dim_type_ids>()) {
         children[{{dim_tp_id, option_type_id}}] = functional::elwise(self);
         children[{{option_type_id, dim_tp_id}}] = functional::elwise(self);
       }
 
-      for (type_id_t i0 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<dim_type_ids>()) {
         typedef join<numeric_type_ids, dim_type_ids>::type type_ids;
-        for (type_id_t i1 : type_ids()) {
+        for (type_id_t i1 : i2a<type_ids>()) {
           const ndt::type child_tp = ndt::callable_type::make(ndt::type("Any"), {ndt::type(i0), ndt::type(i1)});
           children[{{i0, i1}}] = functional::elwise(child_tp, self);
         }
@@ -69,9 +69,7 @@ namespace nd {
 
     static callable make()
     {
-      for (const std::pair<std::array<type_id_t, 2>, callable> &pair : F::make_children()) {
-        children[pair.first[0]][pair.first[1]] = pair.second;
-      }
+      children = F::make_children();
 
       return functional::multidispatch(
           ndt::type("(Any, Any) -> Any"),
@@ -88,7 +86,7 @@ namespace nd {
   };
 
   template <typename T, template <type_id_t, type_id_t> class K>
-  callable comparison_operator<T, K, 2>::children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+  std::map<std::array<type_id_t, 2>, callable> comparison_operator<T, K, 2>::children;
 
   extern DYND_API struct less : comparison_operator<less, less_kernel, 2> {
   } less;
@@ -135,20 +133,21 @@ namespace nd {
   } greater;
 
   extern DYND_API struct total_order : declfunc<total_order> {
-    static DYND_API callable children[DYND_TYPE_ID_MAX + 1][DYND_TYPE_ID_MAX + 1];
+    static DYND_API std::map<std::array<type_id_t, 2>, callable> children;
 
     static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
     {
-      return children[src0_type.get_type_id()][src1_type.get_type_id()];
+      return children[{{src0_type.get_type_id(), src1_type.get_type_id()}}];
     }
 
     static callable make()
     {
-      children[fixed_string_type_id][fixed_string_type_id] =
+      children[{{fixed_string_type_id, fixed_string_type_id}}] =
           callable::make<total_order_kernel<fixed_string_type_id, fixed_string_type_id>>();
-      children[string_type_id][string_type_id] = callable::make<total_order_kernel<string_type_id, string_type_id>>();
-      children[int32_type_id][int32_type_id] = callable::make<total_order_kernel<int32_type_id, int32_type_id>>();
-      children[bool_type_id][bool_type_id] = callable::make<total_order_kernel<bool_type_id, bool_type_id>>();
+      children[{{string_type_id, string_type_id}}] =
+          callable::make<total_order_kernel<string_type_id, string_type_id>>();
+      children[{{int32_type_id, int32_type_id}}] = callable::make<total_order_kernel<int32_type_id, int32_type_id>>();
+      children[{{bool_type_id, bool_type_id}}] = callable::make<total_order_kernel<bool_type_id, bool_type_id>>();
 
       return functional::multidispatch(
           ndt::type("(Any, Any) -> Any"),

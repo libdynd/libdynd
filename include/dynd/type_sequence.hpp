@@ -49,37 +49,32 @@ struct alternate;
 
 template <typename T, T... I>
 struct integer_sequence {
-  //  static_assert(std::is_integral<T>::value,
-  //              "integer_sequence must be instantiated with an integral
-  //              type");
-
   enum {
     size = sizeof...(I)
   };
-  typedef T type;
-
-  static const std::array<T, sizeof...(I)> value;
-
-  //{{I...}};
-
-  operator const std::array<T, size> &() const
-  {
-    return value;
-  }
-
-  decltype(value.begin()) begin() const
-  {
-    return value.begin();
-  }
-
-  decltype(value.end()) end() const
-  {
-    return value.end();
-  }
+  typedef T value_type;
 };
 
-template <typename T, T... I>
-const std::array<T, sizeof...(I)> integer_sequence<T, I...>::value = {{I...}};
+namespace detail {
+
+  template <typename SequenceType>
+  struct i2a;
+
+  template <typename T, T... I>
+  struct i2a<integer_sequence<T, I...>> {
+    static const std::array<T, sizeof...(I)> value;
+  };
+
+  template <typename T, T... I>
+  const std::array<T, sizeof...(I)> i2a<integer_sequence<T, I...>>::value = {{I...}};
+
+} // namespace dynd::detail
+
+template <typename SequenceType>
+const std::array<typename SequenceType::value_type, SequenceType::size> &i2a()
+{
+  return detail::i2a<SequenceType>::value;
+}
 
 template <typename T>
 struct is_integer_sequence {

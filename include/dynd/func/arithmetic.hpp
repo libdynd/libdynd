@@ -32,7 +32,7 @@ namespace nd {
 
       const callable self = functional::call<FuncType>(ndt::type("(Any) -> Any"));
 
-      for (type_id_t i0 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<dim_type_ids>()) {
         const ndt::type child_tp = ndt::callable_type::make(self.get_type()->get_return_type(), ndt::type(i0));
         children[i0] = functional::elwise(child_tp, self);
       }
@@ -84,22 +84,22 @@ namespace nd {
     {
       children = callable::make_all<KernelType, TypeIDSequence, TypeIDSequence>(0);
 
-      for (type_id_t i : TypeIDSequence()) {
+      for (type_id_t i : i2a<TypeIDSequence>()) {
         children[{{option_type_id, i}}] = callable::make<option_arithmetic_kernel<FuncType, true, false>>();
         children[{{i, option_type_id}}] = callable::make<option_arithmetic_kernel<FuncType, false, true>>();
       }
       children[{{option_type_id, option_type_id}}] = callable::make<option_arithmetic_kernel<FuncType, true, true>>();
 
       callable self = functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
-      for (type_id_t i0 : TypeIDSequence()) {
-        for (type_id_t i1 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<TypeIDSequence>()) {
+        for (type_id_t i1 : i2a<dim_type_ids>()) {
           children[{{i0, i1}}] = functional::elwise(self);
         }
       }
 
-      for (type_id_t i0 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<dim_type_ids>()) {
         typedef typename join<TypeIDSequence, dim_type_ids>::type broadcast_type_ids;
-        for (type_id_t i1 : broadcast_type_ids()) {
+        for (type_id_t i1 : i2a<broadcast_type_ids>()) {
           children[{{i0, i1}}] = functional::elwise(self);
         }
       }
@@ -139,14 +139,12 @@ namespace nd {
 
   namespace detail {
 
-    typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, int8_type_id,
-                             int16_type_id, int32_type_id, int64_type_id, float32_type_id, float64_type_id,
-                             complex_float32_type_id, complex_float64_type_id> binop_type_ids;
+    typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, int8_type_id, int16_type_id,
+                             int32_type_id, int64_type_id, float32_type_id, float64_type_id, complex_float32_type_id,
+                             complex_float64_type_id> binop_type_ids;
 
-    typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, int8_type_id,
-                             int16_type_id, int32_type_id, int64_type_id, float32_type_id,
-                             float64_type_id> binop_real_type_ids;
-
+    typedef type_id_sequence<uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, int8_type_id, int16_type_id,
+                             int32_type_id, int64_type_id, float32_type_id, float64_type_id> binop_real_type_ids;
   }
 
   DYND_DEF_BINARY_OP_CALLABLE(add, detail::binop_type_ids)
@@ -167,15 +165,15 @@ namespace nd {
       children = callable::make_all<KernelType, TypeIDSequence, TypeIDSequence>();
 
       callable self = functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
-      for (type_id_t i0 : TypeIDSequence()) {
-        for (type_id_t i1 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<TypeIDSequence>()) {
+        for (type_id_t i1 : i2a<dim_type_ids>()) {
           children[{{i0, i1}}] = functional::elwise(self);
         }
       }
 
-      for (type_id_t i0 : dim_type_ids()) {
+      for (type_id_t i0 : i2a<dim_type_ids>()) {
         typedef typename join<TypeIDSequence, dim_type_ids>::type broadcast_type_ids;
-        for (type_id_t i1 : broadcast_type_ids()) {
+        for (type_id_t i1 : i2a<broadcast_type_ids>()) {
           children[{{i0, i1}}] = functional::elwise(self);
         }
       }

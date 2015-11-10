@@ -1036,7 +1036,7 @@ ndt::common_type::common_type()
 
   typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id, fixed_dim_type_id> J;
 
-  for (type_id_t tp_id : J()) {
+  for (type_id_t tp_id : i2a<J>()) {
     children[option_type_id][tp_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
       return option_type::make(ndt::common_type(tp0.extended<option_type>()->get_value_type(), tp1));
     };
