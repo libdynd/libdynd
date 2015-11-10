@@ -923,7 +923,9 @@ namespace ndt {
     }
 
     template <typename T>
-    struct equivalent;
+    struct equivalent {
+      ~equivalent() = delete;
+    };
 
     template <typename T>
     struct has_equivalent {
