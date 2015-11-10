@@ -133,7 +133,7 @@ namespace nd {
   } greater;
 
   extern DYND_API struct total_order : declfunc<total_order> {
-    static std::map<std::array<type_id_t, 2>, callable> children;
+    static DYND_API std::map<std::array<type_id_t, 2>, callable> children;
 
     static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
     {
