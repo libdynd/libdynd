@@ -240,7 +240,7 @@ static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::typ
     memory_block_ptr data_ref = arr.get_data_memblock();
     char *data_ptr = arr.get()->data;
     ndt::type data_tp = arr.get_type();
-    const char *data_meta = arr.metadata();
+    const char *data_meta = arr.get()->metadata();
     intptr_t data_dim_size = -1, data_stride = 0;
     // Repeatedly refine the data
     while (data_tp.get_type_id() != uninitialized_type_id) {
@@ -281,7 +281,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
     return nd::array();
   }
 
-  const bytes_type_arrmeta *bytes_meta = reinterpret_cast<const bytes_type_arrmeta *>(arr.metadata());
+  const bytes_type_arrmeta *bytes_meta = reinterpret_cast<const bytes_type_arrmeta *>(arr.get()->metadata());
   bytes_type_data *bytes_d = reinterpret_cast<bytes_type_data *>(arr.get()->data);
   memory_block_ptr data_ref;
   if (bytes_meta->blockref != NULL) {
@@ -305,7 +305,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       result.get()->type = ndt::type(tp).release();
       result.get()->flags = arr.get()->flags;
       if (tp.get_arrmeta_size() > 0) {
-        tp.extended()->arrmeta_default_construct(result.metadata(), true);
+        tp.extended()->arrmeta_default_construct(result.get()->metadata(), true);
       }
       return result;
     }
@@ -334,9 +334,9 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       result.get()->type = ndt::type(arr_tp).release();
       result.get()->flags = arr.get()->flags;
       if (el_tp.get_arrmeta_size() > 0) {
-        el_tp.extended()->arrmeta_default_construct(result.metadata() + sizeof(fixed_dim_type_arrmeta), true);
+        el_tp.extended()->arrmeta_default_construct(result.get()->metadata() + sizeof(fixed_dim_type_arrmeta), true);
       }
-      fixed_dim_type_arrmeta *fixed_meta = reinterpret_cast<fixed_dim_type_arrmeta *>(result.metadata());
+      fixed_dim_type_arrmeta *fixed_meta = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
       fixed_meta->dim_size = dim_size;
       fixed_meta->stride = el_data_size;
       return result;
@@ -365,9 +365,9 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   result.get()->flags = arr.get()->flags;
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_type_id() == var_dim_type_id && tp.get_type_id() == fixed_dim_type_id) {
-    const var_dim_type_arrmeta *in_am = reinterpret_cast<const var_dim_type_arrmeta *>(arr.metadata());
+    const var_dim_type_arrmeta *in_am = reinterpret_cast<const var_dim_type_arrmeta *>(arr.get()->metadata());
     const var_dim_type_data *in_dat = reinterpret_cast<const var_dim_type_data *>(arr.cdata());
-    fixed_dim_type_arrmeta *out_am = reinterpret_cast<fixed_dim_type_arrmeta *>(result.metadata());
+    fixed_dim_type_arrmeta *out_am = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
     out_am->dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
     out_am->stride = in_am->stride;
     if ((intptr_t)in_dat->size == out_am->dim_size) {
@@ -378,15 +378,15 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
       result.get()->data = in_dat->begin + in_am->offset;
       // Try to copy the rest of the arrmeta as a view
       if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
-                   arr.metadata() + sizeof(var_dim_type_arrmeta),
+                   arr.get()->metadata() + sizeof(var_dim_type_arrmeta),
                    tp.extended<ndt::base_dim_type>()->get_element_type(),
-                   result.metadata() + sizeof(fixed_dim_type_arrmeta), arr)) {
+                   result.get()->metadata() + sizeof(fixed_dim_type_arrmeta), arr)) {
         return result;
       }
     }
   }
   // Otherwise try to copy the arrmeta as a view
-  else if (try_view(arr.get_type(), arr.metadata(), tp, result.metadata(), arr)) {
+  else if (try_view(arr.get_type(), arr.get()->metadata(), tp, result.get()->metadata(), arr)) {
     // If it succeeded, return it
     return result;
   }

@@ -235,7 +235,7 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_field_types.metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_field_types.get()->metadata(),
                       tp.extended<struct_type>()->m_field_types.cdata());
     }
 
@@ -257,7 +257,7 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_field_names.metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_field_names.get()->metadata(),
                       tp.extended<struct_type>()->m_field_names.cdata());
     }
 
@@ -279,7 +279,7 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_arrmeta_offsets.metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_arrmeta_offsets.get()->metadata(),
                       tp.extended<struct_type>()->m_arrmeta_offsets.cdata());
     }
 
@@ -415,14 +415,14 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
 
   // Initialize the default data offsets for the struct arrmeta
   ndt::struct_type::fill_default_data_offsets(res_n, res_tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
-                                              reinterpret_cast<uintptr_t *>(res.metadata()));
+                                              reinterpret_cast<uintptr_t *>(res.get()->metadata()));
   // Get information about the arrmeta layout of the input and res
   const uintptr_t *lhs_arrmeta_offsets = lhs_tp.extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
   const uintptr_t *rhs_arrmeta_offsets = rhs_tp.extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
   const uintptr_t *res_arrmeta_offsets = res_tp.extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
-  const char *lhs_arrmeta = lhs.metadata();
-  const char *rhs_arrmeta = rhs.metadata();
-  char *res_arrmeta = res.metadata();
+  const char *lhs_arrmeta = lhs.get()->metadata();
+  const char *rhs_arrmeta = rhs.get()->metadata();
+  char *res_arrmeta = res.get()->metadata();
   // Copy the arrmeta from the input arrays
   for (intptr_t i = 0; i < lhs_n; ++i) {
     const ndt::type &tp = res_field_tps[i];
@@ -440,9 +440,9 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   }
 
   // Get information about the data layout of the input and res
-  const uintptr_t *lhs_data_offsets = lhs_tp.extended<ndt::base_struct_type>()->get_data_offsets(lhs.metadata());
-  const uintptr_t *rhs_data_offsets = rhs_tp.extended<ndt::base_struct_type>()->get_data_offsets(rhs.metadata());
-  const uintptr_t *res_data_offsets = res_tp.extended<ndt::base_struct_type>()->get_data_offsets(res.metadata());
+  const uintptr_t *lhs_data_offsets = lhs_tp.extended<ndt::base_struct_type>()->get_data_offsets(lhs.get()->metadata());
+  const uintptr_t *rhs_data_offsets = rhs_tp.extended<ndt::base_struct_type>()->get_data_offsets(rhs.get()->metadata());
+  const uintptr_t *res_data_offsets = res_tp.extended<ndt::base_struct_type>()->get_data_offsets(res.get()->metadata());
   const char *lhs_data = lhs.cdata();
   const char *rhs_data = rhs.cdata();
   char *res_data = res.data();

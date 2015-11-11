@@ -41,7 +41,7 @@ namespace nd {
         if (mask.is_missing()) {
           m_vals.set_mask(NULL);
         } else {
-          m_vals.set_mask(mask.cdata(), reinterpret_cast<const size_stride_t *>(mask.metadata()));
+          m_vals.set_mask(mask.cdata(), reinterpret_cast<const size_stride_t *>(mask.get()->metadata()));
         }
       }
 

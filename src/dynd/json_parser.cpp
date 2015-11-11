@@ -56,14 +56,14 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const 
     case string_encoding_utf_8:
       out_tmp_ref = json.eval();
       // The data is already UTF-8, so use the buffer directly
-      sdt->get_string_range(&begin, &end, out_tmp_ref.metadata(), out_tmp_ref.cdata());
+      sdt->get_string_range(&begin, &end, out_tmp_ref.get()->metadata(), out_tmp_ref.cdata());
       break;
     default: {
       // The data needs to be converted to UTF-8 before parsing
       ndt::type utf8_tp = ndt::string_type::make();
       out_tmp_ref = json.ucast(utf8_tp).eval();
       sdt = static_cast<const ndt::base_string_type *>(utf8_tp.extended());
-      sdt->get_string_range(&begin, &end, out_tmp_ref.metadata(), out_tmp_ref.cdata());
+      sdt->get_string_range(&begin, &end, out_tmp_ref.get()->metadata(), out_tmp_ref.cdata());
       break;
     }
     }
@@ -72,7 +72,7 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const 
   case bytes_kind: {
     out_tmp_ref = json.eval();
     const ndt::base_bytes_type *bdt = json_type.extended<ndt::base_bytes_type>();
-    bdt->get_bytes_range(&begin, &end, out_tmp_ref.metadata(), out_tmp_ref.cdata());
+    bdt->get_bytes_range(&begin, &end, out_tmp_ref.get()->metadata(), out_tmp_ref.cdata());
     break;
   }
   default: {
@@ -836,7 +836,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin, const char *json_e
   {
     const char *begin = json_begin, *end = json_end;
     ndt::type tp = out.get_type();
-    ::parse_json(tp, out.metadata(), out.data(), begin, end, ectx);
+    ::parse_json(tp, out.get()->metadata(), out.data(), begin, end, ectx);
     begin = skip_whitespace(begin, end);
     if (begin != end) {
       throw json_parse_error(begin, "unexpected trailing JSON text", tp);
@@ -874,7 +874,7 @@ nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin, const ch
   result = nd::empty(tp);
   parse_json(result, json_begin, json_end, ectx);
   if (!tp.is_builtin()) {
-    tp.extended()->arrmeta_finalize_buffers(result.metadata());
+    tp.extended()->arrmeta_finalize_buffers(result.get()->metadata());
   }
   return result;
 }

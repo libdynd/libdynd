@@ -218,6 +218,6 @@ void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
                              const eval::eval_context *ectx)
 {
   typed_data_assign(dst_tp, dst_arrmeta, dst_data, src_arr.get_type(),
-                    src_arr.metadata(), src_arr.cdata(),
+                    src_arr.get()->metadata(), src_arr.cdata(),
                     ectx);
 }

@@ -374,7 +374,7 @@ static nd::array array_function_dereference(const nd::array &self)
 {
   // Follow the pointers to eliminate them
   ndt::type dt = self.get_type();
-  const char *arrmeta = self.metadata();
+  const char *arrmeta = self.get()->metadata();
   char *data = self.get()->data;
   memory_block_data *dataref = self.get()->ref.get();
   if (dataref == NULL) {
@@ -393,7 +393,7 @@ static nd::array array_function_dereference(const nd::array &self)
   // Create an array without the pointers
   nd::array result(make_array_memory_block(dt.get_arrmeta_size()));
   if (!dt.is_builtin()) {
-    dt.extended()->arrmeta_copy_construct(result.metadata(), arrmeta, self);
+    dt.extended()->arrmeta_copy_construct(result.get()->metadata(), arrmeta, self);
   }
   result.get()->type = dt.release();
   result.get()->data = data;

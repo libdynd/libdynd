@@ -44,7 +44,7 @@ TEST(CContiguousType, PatternMatch)
 
   nd::array a = nd::empty(ndt::type("10 * int32"));
   EXPECT_TRUE(
-      ndt::type("C[10 * int32]").match(NULL, a.get_type(), a.metadata()));
+      ndt::type("C[10 * int32]").match(NULL, a.get_type(), a.get()->metadata()));
 }
 
 /*
@@ -225,9 +225,9 @@ TEST(CFixedDimType, AssignKernel_ScalarToFixed) {
     a.vals() = 0;
     b = 9.0;
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.metadata(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
-                           b.metadata(), kernel_request_single,
+                           b.get()->metadata(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
     k(a.get_readwrite_originptr(), const_cast<char
 *>(b.get_readonly_originptr()));
@@ -246,9 +246,9 @@ TEST(CFixedDimType, AssignKernel_FixedToFixed) {
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.metadata(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
-                           b.metadata(), kernel_request_single,
+                           b.get()->metadata(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
     k(a.get_readwrite_originptr(), const_cast<char
 *>(b.get_readonly_originptr()));
@@ -266,8 +266,8 @@ TEST(CFixedDimType, AssignKernel_FixedToScalarError) {
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
     EXPECT_THROW(make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(),
-a.metadata(),
-                                        b.get_type(), b.metadata(),
+a.get()->metadata(),
+                                        b.get_type(), b.get()->metadata(),
                                         kernel_request_single,
                                         &eval::default_eval_context,
                                         nd::array()),
@@ -286,9 +286,9 @@ TEST(CFixedDimType, AssignCFixedToFixedKernel) {
     b = vals_int;
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.metadata(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
-                           b.metadata(), kernel_request_single,
+                           b.get()->metadata(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
     k(a.get_readwrite_originptr(), const_cast<char
 *>(b.get_readonly_originptr()));
@@ -303,9 +303,9 @@ b.get_type(),
     b = vals_int_single;
     EXPECT_EQ(cfixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.metadata(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
-                           b.metadata(), kernel_request_single,
+                           b.get()->metadata(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
     k(a.get_readwrite_originptr(), const_cast<char
 *>(b.get_readonly_originptr()));
@@ -320,9 +320,9 @@ b.get_type(),
     b = parse_json("cfixed[3] * int32", "[3, 5, 7]");
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.metadata(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
-                           b.metadata(), kernel_request_single,
+                           b.get()->metadata(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
     k(a.get_readwrite_originptr(), const_cast<char
 *>(b.get_readonly_originptr()));
@@ -337,9 +337,9 @@ b.get_type(),
     b = parse_json("cfixed[1] * int32", "[9]");
     EXPECT_EQ(fixed_dim_type_id, a.get_type().get_type_id());
     EXPECT_EQ(cfixed_dim_type_id, b.get_type().get_type_id());
-    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.metadata(),
+    make_assignment_kernel(NULL, NULL, &k, 0, a.get_type(), a.get()->metadata(),
 b.get_type(),
-                           b.metadata(), kernel_request_single,
+                           b.get()->metadata(), kernel_request_single,
                            &eval::default_eval_context, nd::array());
     k(a.get_readwrite_originptr(), const_cast<char
 *>(b.get_readonly_originptr()));

@@ -21,7 +21,7 @@ namespace nd {
         if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
           // It's immutable and "N * <something>"
           const ndt::type &et = tp.extended<ndt::fixed_dim_type>()->get_element_type();
-          const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.metadata());
+          const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get()->metadata());
           if (et.get_type_id() == type_id_of<T>::value && (md->stride == 0 || md->stride == sizeof(T))) {
             // It also has the right type and is contiguous,
             // so no modification necessary.
@@ -55,7 +55,7 @@ namespace nd {
         if (a.is_immutable() && tp.get_type_id() == fixed_dim_type_id) {
           // It's immutable and "N * <something>"
           const ndt::type &et = tp.extended<ndt::fixed_dim_type>()->get_element_type();
-          const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.metadata());
+          const fixed_dim_type_arrmeta *md = reinterpret_cast<const fixed_dim_type_arrmeta *>(a.get()->metadata());
           if (et.get_type_id() == type_type_id && (md->stride == 0 || md->stride == sizeof(ndt::type))) {
             // It also has the right type and is contiguous,
             // so no modification necessary.

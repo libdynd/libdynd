@@ -34,8 +34,8 @@ struct callable0 {
 TEST(Elwise, UnaryExpr_FixedDim)
 {
   // Create an callable for converting string to int
-  nd::callable af_base = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
+  nd::callable af_base =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
   // Lift the callable
   nd::callable af = nd::functional::elwise(af_base);
 
@@ -53,9 +53,8 @@ TEST(Elwise, UnaryExpr_FixedDim)
 TEST(Elwise, UnaryExpr_StridedDim)
 {
   // Create an callable for converting string to int
-  nd::callable af_base = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
-      assign_error_default);
+  nd::callable af_base =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Lift the callable
   nd::callable af = nd::functional::elwise(af_base);
 
@@ -75,9 +74,8 @@ TEST(Elwise, UnaryExpr_StridedDim)
 TEST(Elwise, UnaryExpr_VarDim)
 {
   // Create an callable for converting string to int
-  nd::callable af_base = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
-      assign_error_default);
+  nd::callable af_base =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Lift the callable
   nd::callable af = nd::functional::elwise(af_base);
 
@@ -98,9 +96,8 @@ TEST(Elwise, UnaryExpr_VarDim)
 TEST(Elwise, UnaryExpr_StridedToVarDim)
 {
   // Create an callable for converting string to int
-  nd::callable af_base = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
-      assign_error_default);
+  nd::callable af_base =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
   nd::callable af = nd::functional::elwise(af_base);
@@ -117,11 +114,10 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
   in(3).vals() = "-1111";
   in(4).vals() = "284";
   const char *in_ptr = in.cdata();
-  const char *src_arrmeta[1] = {in.metadata()};
-  af.get()->instantiate(
-      af.get()->static_data, 0, NULL, &ckb, 0, dst_tp, out.metadata(),
-      af.get_type()->get_npos(), &src_tp, src_arrmeta, kernel_request_single,
-      &eval::default_eval_context, 0, NULL, std::map<std::string, ndt::type>());
+  const char *src_arrmeta[1] = {in.get()->metadata()};
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, dst_tp, out.get()->metadata(),
+                        af.get_type()->get_npos(), &src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context, 0, NULL, std::map<std::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   usngo(ckb.get(), out.data(), const_cast<char **>(&in_ptr));
   EXPECT_EQ(5, out.get_shape()[0]);
@@ -135,9 +131,8 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
 TEST(Elwise, UnaryExpr_VarToVarDim)
 {
   // Create an callable for converting string to int
-  nd::callable af_base = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
-      assign_error_default);
+  nd::callable af_base =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
 
   // Lift the kernel to particular fixed dim arrays
   nd::callable af = nd::functional::elwise(af_base);
@@ -149,12 +144,10 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
   const char *in_vals[] = {"172", "-139", "12345", "-1111", "284"};
   in.vals() = in_vals;
   const char *in_ptr = in.cdata();
-  const char *src_arrmeta[1] = {in.metadata()};
-  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, out.get_type(),
-                        out.metadata(), af.get_type()->get_npos(),
-                        &in.get_type(), src_arrmeta, kernel_request_single,
-                        &eval::default_eval_context, 0, NULL,
-                        std::map<std::string, ndt::type>());
+  const char *src_arrmeta[1] = {in.get()->metadata()};
+  af.get()->instantiate(af.get()->static_data, 0, NULL, &ckb, 0, out.get_type(), out.get()->metadata(),
+                        af.get_type()->get_npos(), &in.get_type(), src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context, 0, NULL, std::map<std::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   usngo(ckb.get(), out.data(), const_cast<char **>(&in_ptr));
   EXPECT_EQ(5, out.get_shape()[0]);
@@ -168,9 +161,8 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
 TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
 {
   // Create an callable for converting string to int
-  nd::callable af_base = make_callable_from_assignment(
-      ndt::type::make<int>(), ndt::fixed_string_type::make(16),
-      assign_error_default);
+  nd::callable af_base =
+      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Lift the callable
   nd::callable af = nd::functional::elwise(af_base);
 

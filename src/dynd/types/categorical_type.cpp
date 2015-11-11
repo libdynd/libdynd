@@ -172,18 +172,18 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
 {
   nd::array categories = nd::empty(uniques.size(), element_tp);
   ckernel_builder<kernel_request_host> k;
-  make_assignment_kernel(&k, 0, element_tp, categories.metadata() + sizeof(fixed_dim_type_arrmeta), element_tp, arrmeta,
+  make_assignment_kernel(&k, 0, element_tp, categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta), element_tp, arrmeta,
                          kernel_request_single, &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
 
-  intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.metadata())->stride;
+  intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get()->metadata())->stride;
   char *dst_ptr = categories.data();
   for (set<const char *, cmp>::const_iterator it = uniques.begin(); it != uniques.end(); ++it) {
     char *src = const_cast<char *>(*it);
     fn(k.get(), dst_ptr, &src);
     dst_ptr += stride;
   }
-  categories.get_type().extended()->arrmeta_finalize_buffers(categories.metadata());
+  categories.get_type().extended()->arrmeta_finalize_buffers(categories.get()->metadata());
   categories.flag_as_immutable();
 
   return categories;
@@ -219,9 +219,9 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     }
 
     category_count = categories.get_dim_size();
-    intptr_t categories_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.metadata())->stride;
+    intptr_t categories_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get()->metadata())->stride;
 
-    const char *categories_element_arrmeta = categories.metadata() + sizeof(fixed_dim_type_arrmeta);
+    const char *categories_element_arrmeta = categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta);
     ckernel_builder<kernel_request_host> k;
     ::make_comparison_kernel(&k, 0, m_category_tp, categories_element_arrmeta, m_category_tp,
                              categories_element_arrmeta, comparison_type_sorting_less, &eval::default_eval_context);
@@ -304,7 +304,7 @@ void ndt::categorical_type::print_data(std::ostream &o, const char *DYND_UNUSED(
 void ndt::categorical_type::print_type(std::ostream &o) const
 {
   size_t category_count = get_category_count();
-  const char *arrmeta = m_categories.metadata() + sizeof(fixed_dim_type_arrmeta);
+  const char *arrmeta = m_categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta);
 
   o << "categorical[" << m_category_tp;
   o << ", [";
@@ -333,7 +333,7 @@ uint32_t ndt::categorical_type::get_value_from_category(const char *category_arr
 {
   type dst_tp = type::make<intptr_t>();
   type src_tp[2] = {m_categories.get_type(), m_category_tp};
-  const char *src_arrmeta[2] = {m_categories.metadata(), category_arrmeta};
+  const char *src_arrmeta[2] = {m_categories.get()->metadata(), category_arrmeta};
   char *src_data[2] = {const_cast<char *>(m_categories.cdata()), const_cast<char *>(category_data)};
   intptr_t i = (*nd::binary_search::get().get())(dst_tp, 2, src_tp, src_arrmeta, src_data, 0, NULL,
                                                  std::map<std::string, ndt::type>()).as<intptr_t>();
@@ -364,7 +364,7 @@ uint32_t ndt::categorical_type::get_value_from_category(const nd::array &categor
   if (i < 0) {
     stringstream ss;
     ss << "Unrecognized category value ";
-    m_category_tp.print_data(ss, c.metadata(), c.data());
+    m_category_tp.print_data(ss, c.get()->metadata(), c.data());
     ss << " assigning to dynd type " << type(this, true);
     throw std::runtime_error(ss.str());
   } else {
@@ -374,7 +374,7 @@ uint32_t ndt::categorical_type::get_value_from_category(const nd::array &categor
 
 const char *ndt::categorical_type::get_category_arrmeta() const
 {
-  const char *arrmeta = m_categories.metadata();
+  const char *arrmeta = m_categories.get()->metadata();
   m_categories.get_type().extended()->at_single(0, &arrmeta, NULL);
   return arrmeta;
 }
@@ -387,7 +387,7 @@ nd::array ndt::categorical_type::get_categories() const
   intptr_t dim_size, stride;
   type el_tp;
   const char *el_arrmeta;
-  categories.get_type().get_as_strided(categories.metadata(), &dim_size, &stride, &el_tp, &el_arrmeta);
+  categories.get_type().get_as_strided(categories.get()->metadata(), &dim_size, &stride, &el_tp, &el_arrmeta);
   ckernel_builder<kernel_request_host> k;
   ::make_assignment_kernel(&k, 0, m_category_tp, el_arrmeta, el_tp, get_category_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
@@ -551,7 +551,7 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   intptr_t dim_size, stride;
   type el_tp;
   const char *el_arrmeta;
-  values_eval.get_type().get_as_strided(values_eval.metadata(), &dim_size, &stride, &el_tp, &el_arrmeta);
+  values_eval.get_type().get_as_strided(values_eval.get()->metadata(), &dim_size, &stride, &el_tp, &el_arrmeta);
 
   ckernel_builder<kernel_request_host> k;
   ::make_comparison_kernel(&k, 0, el_tp, el_arrmeta, el_tp, el_arrmeta, comparison_type_sorting_less,
@@ -624,7 +624,7 @@ void ndt::categorical_type::get_dynamic_type_properties(const std::pair<std::str
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<categorical_type>()->m_categories.metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<categorical_type>()->m_categories.get()->metadata(),
                       tp.extended<categorical_type>()->m_categories.cdata());
     }
 

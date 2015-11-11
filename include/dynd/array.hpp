@@ -243,18 +243,6 @@ namespace nd {
       return intrusive_ptr<memory_block_data>::get() == NULL;
     }
 
-    /** Low level access to the array arrmeta */
-    char *metadata()
-    {
-      return get()->get_arrmeta();
-    }
-
-    /** Low level access to the array arrmeta */
-    const char *metadata() const
-    {
-      return get()->get_arrmeta();
-    }
-
     char *data() const
     {
       if (get()->flags & write_access_flag) {
@@ -368,7 +356,7 @@ namespace nd {
     inline void get_shape(intptr_t *out_shape) const
     {
       if (!get()->is_builtin_type() && get()->type->get_ndim() > 0) {
-        get()->type->get_shape(get()->type->get_ndim(), 0, out_shape, metadata(), get()->data);
+        get()->type->get_shape(get()->type->get_ndim(), 0, out_shape, get()->metadata(), get()->data);
       }
     }
 
@@ -377,7 +365,7 @@ namespace nd {
      */
     inline intptr_t get_dim_size() const
     {
-      return get_type().get_dim_size(metadata(), get()->data);
+      return get_type().get_dim_size(get()->metadata(), get()->data);
     }
 
     /**
@@ -386,11 +374,11 @@ namespace nd {
     inline intptr_t get_dim_size(intptr_t i) const
     {
       if (0 <= i && i < get_type().get_strided_ndim()) {
-        const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(metadata());
+        const size_stride_t *ss = reinterpret_cast<const size_stride_t *>(get()->metadata());
         return ss[i].dim_size;
       } else if (0 <= i && i < get_ndim()) {
         dimvector shape(i + 1);
-        get()->type->get_shape(i + 1, 0, shape.get(), metadata(), get()->data);
+        get()->type->get_shape(i + 1, 0, shape.get(), get()->metadata(), get()->data);
         return shape[i];
       } else {
         std::stringstream ss;
@@ -408,7 +396,7 @@ namespace nd {
     inline void get_strides(intptr_t *out_strides) const
     {
       if (!get()->is_builtin_type()) {
-        get()->type->get_strides(0, out_strides, metadata());
+        get()->type->get_strides(0, out_strides, get()->metadata());
       }
     }
 
@@ -656,7 +644,7 @@ namespace nd {
     template <typename Type>
     Type view()
     {
-      return Type(metadata(), data());
+      return Type(get()->metadata(), data());
     }
 
     /**
@@ -1658,7 +1646,7 @@ namespace nd {
         if (!lhs.is_scalar()) {
           throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
         }
-        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.metadata(), lhs.get()->data,
+        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get()->metadata(), lhs.get()->data,
                           ectx);
         return result;
       }
@@ -1733,14 +1721,14 @@ namespace nd {
    */
   inline bool is_scalar_avail(const array &arr, const eval::eval_context *ectx = &eval::default_eval_context)
   {
-    return is_scalar_avail(arr.get_type(), arr.metadata(), arr.cdata(), ectx);
+    return is_scalar_avail(arr.get_type(), arr.get()->metadata(), arr.cdata(), ectx);
   }
 
   DYND_API void assign_na(const ndt::type &tp, const char *arrmeta, char *data, const eval::eval_context *ectx);
 
   inline void assign_na(array &out, const eval::eval_context *ectx = &eval::default_eval_context)
   {
-    assign_na(out.get_type(), out.metadata(), out.data(), ectx);
+    assign_na(out.get_type(), out.get()->metadata(), out.data(), ectx);
   }
 
   /**
