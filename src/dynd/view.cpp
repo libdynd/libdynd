@@ -264,7 +264,7 @@ static nd::array view_as_bytes(const nd::array &DYND_UNUSED(arr), const ndt::typ
     array_preamble *ndo = result.get();
     ndo->m_type = ndt::type(tp).release();
     ndo->data = result_data_ptr;
-    ndo->ref = NULL;
+    ndo->owner = NULL;
     ndo->flags = arr.get_flags();
     // Set the bytes arrmeta
     ndo_meta->blockref = data_ref.release();
@@ -301,7 +301,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       nd::array result(make_array_memory_block(tp.get_arrmeta_size()));
       // Initialize the fields
       result.get()->data = data_ptr;
-      result.get()->ref = data_ref.release();
+      result.get()->owner = data_ref.release();
       result.get()->type = ndt::type(tp).release();
       result.get()->flags = arr.get()->flags;
       if (tp.get_arrmeta_size() > 0) {
@@ -330,7 +330,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       nd::array result(make_array_memory_block(arr_tp.get_arrmeta_size()));
       // Initialize the fields
       result.get()->data = data_ptr;
-      result.get()->ref = data_ref.release();
+      result.get()->owner = data_ref.release();
       result.get()->type = ndt::type(arr_tp).release();
       result.get()->flags = arr.get()->flags;
       if (el_tp.get_arrmeta_size() > 0) {
@@ -354,12 +354,12 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
   nd::array result(make_array_memory_block(tp.get_arrmeta_size()));
   // Copy the fields
   result.get()->data = arr.get()->data;
-  if (!arr.get()->ref) {
+  if (!arr.get()->owner) {
     // Embedded data, need reference to the array
-    result.get()->ref = arr;
+    result.get()->owner = arr;
   } else {
     // Use the same data reference, avoid producing a chain
-    result.get()->ref = arr.get_data_memblock();
+    result.get()->owner = arr.get_data_memblock();
   }
   result.get()->type = ndt::type(tp).release();
   result.get()->flags = arr.get()->flags;
@@ -373,7 +373,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
     if ((intptr_t)in_dat->size == out_am->dim_size) {
       // Use the more specific data reference from the var arrmeta if possible
       if (in_am->blockref) {
-        result.get()->ref = in_am->blockref;
+        result.get()->owner = in_am->blockref;
       }
       result.get()->data = in_dat->begin + in_am->offset;
       // Try to copy the rest of the arrmeta as a view

@@ -21,7 +21,7 @@ namespace nd {
       }
       dst->get()->data = src[0]->get()->data;
 
-      dst->get()->ref = src[0]->get()->ref ? src[0]->get()->ref : *src[0];
+      dst->get()->owner = src[0]->get()->owner ? src[0]->get()->owner : *src[0];
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
