@@ -483,6 +483,11 @@ struct arity_of<R(A...)> {
   static const size_t value = sizeof...(A);
 };
 
+template <typename func_type, int I>
+struct arg_at {
+  typedef typename at<typename args_of<func_type>::type, I>::type type;
+};
+
 namespace detail {
 
   template <typename SequenceType>
