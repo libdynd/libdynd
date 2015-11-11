@@ -308,7 +308,7 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
 static array_preamble *property_get_array_field(const array_preamble *params, void *extra)
 {
   // Get the nd::array 'self' parameter
-  nd::array n = nd::array(*(array_preamble **)params->ptr, true);
+  nd::array n = nd::array(*(array_preamble **)params->data, true);
   intptr_t i = reinterpret_cast<intptr_t>(extra);
   intptr_t undim = n.get_ndim();
   ndt::type udt = n.get_dtype();

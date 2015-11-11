@@ -440,7 +440,7 @@ public:
         m_arrmeta[i] = ops[i].metadata();
         m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i], &m_arrmeta[i], iter_ndim_i,
                                                      m_itershape.get() + (m_iter_ndim - iter_ndim_i), m_uniform_tp[i]);
-        m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get()->ptr, m_iter_ndim);
+        m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get()->data, m_iter_ndim);
       }
 
       for (intptr_t i = 0, i_end = m_iter_ndim; i != i_end; ++i) {
@@ -450,7 +450,7 @@ public:
       for (size_t i = 0; i < 2; ++i) {
         m_iterdata[i] = NULL;
         m_uniform_tp[i] = m_array_tp[i];
-        m_data[i] = ops[i].get()->ptr;
+        m_data[i] = ops[i].get()->data;
         m_arrmeta[i] = ops[i].metadata();
       }
     }
@@ -570,7 +570,7 @@ public:
         m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i], &m_arrmeta[i], m_iter_ndim[i],
                                                      m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[i]),
                                                      m_uniform_tp[i]);
-        m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get()->ptr, m_iter_ndim[0]);
+        m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get()->data, m_iter_ndim[0]);
       }
 
       for (intptr_t i = 0, i_end = m_iter_ndim[0]; i != i_end; ++i) {
@@ -580,7 +580,7 @@ public:
       for (size_t i = 0; i < 4; ++i) {
         m_iterdata[i] = NULL;
         m_uniform_tp[i] = m_array_tp[i];
-        m_data[i] = ops[i].get()->ptr;
+        m_data[i] = ops[i].get()->data;
         m_arrmeta[i] = ops[i].metadata();
       }
     }

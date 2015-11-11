@@ -26,7 +26,7 @@ struct DYND_API array_preamble : memory_block_data {
    */
   const ndt::base_type *type;
   uint64_t flags;
-  char *ptr;
+  char *data;
   intrusive_ptr<memory_block_data> ref;
 
   ~array_preamble();
