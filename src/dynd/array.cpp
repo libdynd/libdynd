@@ -1804,7 +1804,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     pointer_type_arrmeta *pmeta;
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get()->metadata() + arrmeta_offsets[i]);
     pmeta->offset = 0;
-    pmeta->blockref = field_values[i].get()->owner();
+    pmeta->blockref = field_values[i].get()->ref ? field_values[i].get()->ref : const_cast<array &>(field_values[i]);
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {

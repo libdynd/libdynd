@@ -31,15 +31,6 @@ struct DYND_API array_preamble : memory_block_data {
 
   ~array_preamble();
 
-  memory_block_data *owner()
-  {
-    if (ref) {
-      return ref.get();
-    }
-
-    return this;
-  }
-
   /** Returns true if the type is builtin */
   inline bool is_builtin_type() const
   {
