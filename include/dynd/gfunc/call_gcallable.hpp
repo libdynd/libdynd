@@ -51,7 +51,7 @@ namespace gfunc {
         if (paramtype.get_type_id() == ndarrayarg_type_id) {
           *reinterpret_cast<const array_preamble **>(data) = value.get();
         } else {
-          typed_data_assign(paramtype, arrmeta, data, value.get_type(), value.metadata(), value.get()->ptr);
+          typed_data_assign(paramtype, arrmeta, data, value.get_type(), value.metadata(), value.get()->data);
         }
       }
     };
@@ -101,9 +101,9 @@ namespace gfunc {
         for (intptr_t i = 0; i < parameter_count; ++i) {
           uintptr_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           uintptr_t data_offset = fsdt->get_data_offsets(params.metadata())[i];
-          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->ptr + data_offset,
+          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->data + data_offset,
                           m_default_parameters.metadata() + arrmeta_offset,
-                          m_default_parameters.get()->ptr + data_offset);
+                          m_default_parameters.get()->data + data_offset);
         }
       } else {
         std::stringstream ss;
@@ -126,9 +126,9 @@ namespace gfunc {
         for (intptr_t i = 1; i < parameter_count; ++i) {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.metadata())[i];
-          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->ptr + data_offset,
+          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->data + data_offset,
                           m_default_parameters.metadata() + arrmeta_offset,
-                          m_default_parameters.get()->ptr + data_offset);
+                          m_default_parameters.get()->data + data_offset);
         }
       } else {
         std::stringstream ss;
@@ -137,7 +137,7 @@ namespace gfunc {
       }
     }
     detail::callable_argument_setter<T>::set(fsdt->get_field_type(0), params.metadata() + fsdt->get_arrmeta_offset(0),
-                                             params.get()->ptr + fsdt->get_data_offsets(params.metadata())[0], p0);
+                                             params.get()->data + fsdt->get_data_offsets(params.metadata())[0], p0);
     return call_generic(params);
   }
 
@@ -153,9 +153,9 @@ namespace gfunc {
         for (intptr_t i = 2; i < parameter_count; ++i) {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.metadata())[i];
-          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->ptr + data_offset,
+          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->data + data_offset,
                           m_default_parameters.metadata() + arrmeta_offset,
-                          m_default_parameters.get()->ptr + data_offset);
+                          m_default_parameters.get()->data + data_offset);
         }
       } else {
         std::stringstream ss;
@@ -164,9 +164,9 @@ namespace gfunc {
       }
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_type(0), params.metadata() + fsdt->get_arrmeta_offset(0),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[0], p0);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[0], p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_type(1), params.metadata() + fsdt->get_arrmeta_offset(1),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[1], p1);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[1], p1);
     return call_generic(params);
   }
 
@@ -182,9 +182,9 @@ namespace gfunc {
         for (intptr_t i = 3; i < parameter_count; ++i) {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.metadata())[i];
-          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->ptr + data_offset,
+          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->data + data_offset,
                           m_default_parameters.metadata() + arrmeta_offset,
-                          m_default_parameters.get()->ptr + data_offset);
+                          m_default_parameters.get()->data + data_offset);
         }
       } else {
         std::stringstream ss;
@@ -193,11 +193,11 @@ namespace gfunc {
       }
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_type(0), params.metadata() + fsdt->get_arrmeta_offset(0),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[0], p0);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[0], p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_type(1), params.metadata() + fsdt->get_arrmeta_offset(1),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[1], p1);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[1], p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_type(2), params.metadata() + fsdt->get_arrmeta_offset(2),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[2], p2);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[2], p2);
     return call_generic(params);
   }
 
@@ -213,9 +213,9 @@ namespace gfunc {
         for (intptr_t i = 4; i < parameter_count; ++i) {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.metadata())[i];
-          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->ptr + data_offset,
+          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->data + data_offset,
                           m_default_parameters.metadata() + arrmeta_offset,
-                          m_default_parameters.get()->ptr + data_offset);
+                          m_default_parameters.get()->data + data_offset);
         }
       } else {
         std::stringstream ss;
@@ -224,13 +224,13 @@ namespace gfunc {
       }
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_type(0), params.metadata() + fsdt->get_arrmeta_offset(0),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[0], p0);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[0], p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_type(1), params.metadata() + fsdt->get_arrmeta_offset(1),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[1], p1);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[1], p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_type(2), params.metadata() + fsdt->get_arrmeta_offset(2),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[2], p2);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[2], p2);
     detail::callable_argument_setter<T3>::set(fsdt->get_field_type(3), params.metadata() + fsdt->get_arrmeta_offset(3),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[3], p3);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[3], p3);
     return call_generic(params);
   }
 
@@ -246,9 +246,9 @@ namespace gfunc {
         for (intptr_t i = 5; i < parameter_count; ++i) {
           size_t arrmeta_offset = fsdt->get_arrmeta_offset(i);
           size_t data_offset = fsdt->get_data_offsets(params.metadata())[i];
-          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->ptr + data_offset,
+          typed_data_copy(fsdt->get_field_type(i), params.metadata() + arrmeta_offset, params.get()->data + data_offset,
                           m_default_parameters.metadata() + arrmeta_offset,
-                          m_default_parameters.get()->ptr + data_offset);
+                          m_default_parameters.get()->data + data_offset);
         }
       } else {
         std::stringstream ss;
@@ -257,15 +257,15 @@ namespace gfunc {
       }
     }
     detail::callable_argument_setter<T0>::set(fsdt->get_field_type(0), params.metadata() + fsdt->get_arrmeta_offset(0),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[0], p0);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[0], p0);
     detail::callable_argument_setter<T1>::set(fsdt->get_field_type(1), params.metadata() + fsdt->get_arrmeta_offset(1),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[1], p1);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[1], p1);
     detail::callable_argument_setter<T2>::set(fsdt->get_field_type(2), params.metadata() + fsdt->get_arrmeta_offset(2),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[2], p2);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[2], p2);
     detail::callable_argument_setter<T3>::set(fsdt->get_field_type(3), params.metadata() + fsdt->get_arrmeta_offset(3),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[3], p3);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[3], p3);
     detail::callable_argument_setter<T4>::set(fsdt->get_field_type(4), params.metadata() + fsdt->get_arrmeta_offset(4),
-                                              params.get()->ptr + fsdt->get_data_offsets(params.metadata())[4], p4);
+                                              params.get()->data + fsdt->get_data_offsets(params.metadata())[4], p4);
     return call_generic(params);
   }
 

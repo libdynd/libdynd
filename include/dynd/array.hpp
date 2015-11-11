@@ -258,7 +258,7 @@ namespace nd {
     char *data() const
     {
       if (get()->flags & write_access_flag) {
-        return get()->ptr;
+        return get()->data;
       }
 
       throw std::runtime_error("tried to write to a dynd array that is not writable");
@@ -266,7 +266,7 @@ namespace nd {
 
     const char *cdata() const
     {
-      return get()->ptr;
+      return get()->data;
     }
 
     inline uint32_t get_access_flags() const
@@ -368,7 +368,7 @@ namespace nd {
     inline void get_shape(intptr_t *out_shape) const
     {
       if (!get()->is_builtin_type() && get()->type->get_ndim() > 0) {
-        get()->type->get_shape(get()->type->get_ndim(), 0, out_shape, metadata(), get()->ptr);
+        get()->type->get_shape(get()->type->get_ndim(), 0, out_shape, metadata(), get()->data);
       }
     }
 
@@ -377,7 +377,7 @@ namespace nd {
      */
     inline intptr_t get_dim_size() const
     {
-      return get_type().get_dim_size(metadata(), get()->ptr);
+      return get_type().get_dim_size(metadata(), get()->data);
     }
 
     /**
@@ -390,7 +390,7 @@ namespace nd {
         return ss[i].dim_size;
       } else if (0 <= i && i < get_ndim()) {
         dimvector shape(i + 1);
-        get()->type->get_shape(i + 1, 0, shape.get(), metadata(), get()->ptr);
+        get()->type->get_shape(i + 1, 0, shape.get(), metadata(), get()->data);
         return shape[i];
       } else {
         std::stringstream ss;
@@ -1489,7 +1489,7 @@ namespace nd {
   {
     intptr_t dim0 = il.size();
     make_strided_array(ndt::type::make<T>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
-    DYND_MEMCPY(get()->ptr, il.begin(), sizeof(T) * dim0);
+    DYND_MEMCPY(get()->data, il.begin(), sizeof(T) * dim0);
   }
   template <class T>
   dynd::nd::array::array(const std::initializer_list<std::initializer_list<T>> &il)
@@ -1500,7 +1500,7 @@ namespace nd {
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
     make_strided_array(ndt::type::make<T>(), 2, shape, nd::default_access_flags, NULL).swap(*this);
-    T *dataptr = reinterpret_cast<T *>(get()->ptr);
+    T *dataptr = reinterpret_cast<T *>(get()->data);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
   template <class T>
@@ -1512,7 +1512,7 @@ namespace nd {
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
     make_strided_array(ndt::type::make<T>(), 3, shape, nd::default_access_flags, NULL).swap(*this);
-    T *dataptr = reinterpret_cast<T *>(get()->ptr);
+    T *dataptr = reinterpret_cast<T *>(get()->data);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
 
@@ -1525,7 +1525,7 @@ namespace nd {
   {
     intptr_t dim0 = il.size();
     make_strided_array(ndt::make_type(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
-    auto data_ptr = reinterpret_cast<ndt::type *>(get()->ptr);
+    auto data_ptr = reinterpret_cast<ndt::type *>(get()->data);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
     }
@@ -1535,7 +1535,7 @@ namespace nd {
   {
     intptr_t dim0 = il.size();
     make_strided_array(ndt::type::make<bool>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
-    auto data_ptr = reinterpret_cast<bool1 *>(get()->ptr);
+    auto data_ptr = reinterpret_cast<bool1 *>(get()->data);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
     }
@@ -1553,7 +1553,7 @@ namespace nd {
 
     make_strided_array(ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)), ndim, shape,
                        default_access_flags, NULL).swap(*this);
-    DYND_MEMCPY(get()->ptr, reinterpret_cast<const void *>(&rhs), size);
+    DYND_MEMCPY(get()->data, reinterpret_cast<const void *>(&rhs), size);
   }
 
   // Temporarily removed due to conflicting dll linkage with earlier versions of this function.
@@ -1566,7 +1566,7 @@ namespace nd {
 
     nd::array result = make_strided_array(ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)), ndim,
                                           shape, readwrite_access_flags, NULL);
-    DYND_MEMCPY(result.get()->ptr, reinterpret_cast<const void *>(&rhs), size);
+    DYND_MEMCPY(result.get()->data, reinterpret_cast<const void *>(&rhs), size);
     return result;
   }
 
@@ -1574,7 +1574,7 @@ namespace nd {
   nd::array::array(const ndt::type (&rhs)[N])
   {
     nd::empty(N, ndt::make_type()).swap(*this);
-    ndt::type *out = reinterpret_cast<ndt::type *>(get()->ptr);
+    ndt::type *out = reinterpret_cast<ndt::type *>(get()->data);
     for (int i = 0; i < N; ++i) {
       out[i] = rhs[i];
     }
@@ -1603,13 +1603,13 @@ namespace nd {
   inline nd::array::array(const T *rhs, intptr_t dim_size)
   {
     nd::empty(dim_size, ndt::type::make<T>()).swap(*this);
-    DYND_MEMCPY(get()->ptr, reinterpret_cast<const void *>(&rhs), dim_size * sizeof(T));
+    DYND_MEMCPY(get()->data, reinterpret_cast<const void *>(&rhs), dim_size * sizeof(T));
   }
 
   inline nd::array::array(const ndt::type *rhs, intptr_t dim_size)
   {
     nd::empty(dim_size, ndt::make_type()).swap(*this);
-    auto lhs = reinterpret_cast<ndt::type *>(get()->ptr);
+    auto lhs = reinterpret_cast<ndt::type *>(get()->data);
     for (intptr_t i = 0; i < dim_size; ++i) {
       lhs[i] = rhs[i];
     }
@@ -1658,7 +1658,7 @@ namespace nd {
         if (!lhs.is_scalar()) {
           throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
         }
-        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.metadata(), lhs.get()->ptr,
+        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.metadata(), lhs.get()->data,
                           ectx);
         return result;
       }
