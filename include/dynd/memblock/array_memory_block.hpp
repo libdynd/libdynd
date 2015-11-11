@@ -27,18 +27,9 @@ struct DYND_API array_preamble : memory_block_data {
   const ndt::base_type *type;
   uint64_t flags;
   char *data;
-  intrusive_ptr<memory_block_data> ref;
+  intrusive_ptr<memory_block_data> owner;
 
   ~array_preamble();
-
-  memory_block_data *owner()
-  {
-    if (ref) {
-      return ref.get();
-    }
-
-    return this;
-  }
 
   /** Returns true if the type is builtin */
   inline bool is_builtin_type() const

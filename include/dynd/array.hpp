@@ -402,8 +402,8 @@ namespace nd {
 
     inline intrusive_ptr<memory_block_data> get_data_memblock() const
     {
-      if (get()->ref) {
-        return get()->ref;
+      if (get()->owner) {
+        return get()->owner;
       } else {
         return *this;
       }

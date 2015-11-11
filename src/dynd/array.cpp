@@ -45,7 +45,7 @@ make_builtin_scalar_array(const T &value, uint64_t flags)
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
   ndo->type = reinterpret_cast<ndt::base_type *>(type_id_of<T>::value);
   ndo->data = data_ptr;
-  ndo->ref = NULL;
+  ndo->owner = NULL;
   ndo->flags = flags;
   return result;
 }
@@ -87,7 +87,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intp
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
   ndo->type = array_tp.release();
   ndo->data = data_ptr;
-  ndo->ref = NULL;
+  ndo->owner = NULL;
   ndo->flags = access_flags;
 
   if (!any_variable_dims) {
@@ -150,7 +150,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
   ndo->type = array_type.release();
   ndo->data = data_ptr;
-  ndo->ref = data_reference;
+  ndo->owner = data_reference;
   ndo->flags = access_flags;
 
   // Fill in the array arrmeta with the shape and strides
@@ -196,7 +196,7 @@ nd::array nd::make_pod_array(const ndt::type &pod_dt, const void *data)
     base_type_incref(ndo->type);
   }
   ndo->data = data_ptr;
-  ndo->ref = NULL;
+  ndo->owner = NULL;
   ndo->flags = nd::read_access_flag | nd::immutable_access_flag;
 
   memcpy(data_ptr, data, size);
@@ -530,7 +530,7 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
   // The main array arrmeta
   array_preamble *preamble = result.get();
   preamble->data = data_ptr;
-  preamble->ref = NULL;
+  preamble->owner = NULL;
   preamble->type = dt.release();
   preamble->flags = read_access_flag | immutable_access_flag;
   // The arrmeta for the strided and type parts of the type
@@ -648,15 +648,15 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
       result.get()->type = reinterpret_cast<const ndt::base_type *>(dt.get_type_id());
     }
     result.get()->data = get()->data;
-    if (get()->ref) {
-      result.get()->ref = get()->ref;
+    if (get()->owner) {
+      result.get()->owner = get()->owner;
     } else {
       // If the data reference is NULL, the data is embedded in the array itself
-      result.get()->ref = *this;
+      result.get()->owner = *this;
     }
     intptr_t offset =
         get()->type->apply_linear_index(nindices, indices, get()->metadata(), dt, result.get()->metadata(), *this, 0,
-                                        this_dt, collapse_leading, &result.get()->data, result.get()->ref);
+                                        this_dt, collapse_leading, &result.get()->data, result.get()->owner);
     result.get()->data += offset;
     result.get()->flags = get()->flags;
     return result;
@@ -699,8 +699,9 @@ void nd::array::flag_as_immutable()
   if (intrusive_ptr<memory_block_data>::get()->m_use_count != 1) {
     // More than one reference to the array itself
     ok = false;
-  } else if (get()->ref && (get()->ref->m_use_count != 1 || !(get()->ref->m_type == fixed_size_pod_memory_block_type ||
-                                                              get()->ref->m_type == pod_memory_block_type))) {
+  } else if (get()->owner &&
+             (get()->owner->m_use_count != 1 || !(get()->owner->m_type == fixed_size_pod_memory_block_type ||
+                                                  get()->owner->m_type == pod_memory_block_type))) {
     // More than one reference to the array's data, or the reference is to
     // something
     // other than a memblock owning its data, such as an external memblock.
@@ -1274,10 +1275,10 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
   // This is taken from view_concrete in view.cpp
   nd::array res(make_array_memory_block(dst_tp.get_arrmeta_size()));
   res.get()->data = get()->data;
-  if (!get()->ref) {
-    res.get()->ref = *this;
+  if (!get()->owner) {
+    res.get()->owner = *this;
   } else {
-    res.get()->ref = get_data_memblock();
+    res.get()->owner = get_data_memblock();
   }
   res.get()->type = ndt::type(dst_tp).release();
   res.get()->flags = get()->flags;
@@ -1382,10 +1383,10 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
       array result(make_array_memory_block(result_tp.extended()->get_arrmeta_size()));
       // Copy all the array arrmeta fields
       result.get()->data = get()->data;
-      if (get()->ref) {
-        result.get()->ref = get()->ref;
+      if (get()->owner) {
+        result.get()->owner = get()->owner;
       } else {
-        result.get()->ref = intrusive_ptr<memory_block_data>::get();
+        result.get()->owner = intrusive_ptr<memory_block_data>::get();
       }
       result.get()->type = result_tp.release();
       result.get()->flags = get()->flags;
@@ -1460,14 +1461,14 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const
     }
     o << " data:\n";
     o << "   pointer: " << (void *)ndo->data << "\n";
-    o << "   reference: " << (void *)ndo->ref.get();
-    if (!ndo->ref) {
+    o << "   reference: " << (void *)ndo->owner.get();
+    if (!ndo->owner) {
       o << " (embedded in array memory)\n";
     } else {
       o << "\n";
     }
-    if (ndo->ref) {
-      memory_block_debug_print(ndo->ref.get(), o, "    ");
+    if (ndo->owner) {
+      memory_block_debug_print(ndo->owner.get(), o, "    ");
     }
   } else {
     o << indent << "NULL\n";
@@ -1548,7 +1549,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     // It's a builtin type id, so no incref
     preamble->type = tp.extended();
     preamble->data = data_ptr;
-    preamble->ref = NULL;
+    preamble->owner = NULL;
     preamble->flags = nd::read_access_flag | nd::write_access_flag;
     return nd::array(std::move(result));
   } else if (!tp.is_symbolic()) {
@@ -1576,7 +1577,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     preamble->type = ndt::type(tp).release();
     preamble->data = data_ptr;
-    preamble->ref = NULL;
+    preamble->owner = NULL;
     preamble->flags = nd::read_access_flag | nd::write_access_flag;
     return nd::array(std::move(result));
   } else {
@@ -1724,7 +1725,7 @@ nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNU
     array_preamble *ndo = result.get();
     ndo->type = dt.release();
     ndo->data = data_ptr;
-    ndo->ref = NULL;
+    ndo->owner = NULL;
     ndo->flags = access;
     // Set the bytes arrmeta, telling the system
     // about the memmapped memblock
@@ -1788,7 +1789,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   // Set the array properties
   result.get()->type = result_type.release();
   result.get()->data = data_ptr;
-  result.get()->ref = NULL;
+  result.get()->owner = NULL;
   result.get()->flags = flags;
 
   // Set the data offsets arrmeta for the tuple type. It's a bunch of pointer
@@ -1804,7 +1805,8 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
     pointer_type_arrmeta *pmeta;
     pmeta = reinterpret_cast<pointer_type_arrmeta *>(result.get()->metadata() + arrmeta_offsets[i]);
     pmeta->offset = 0;
-    pmeta->blockref = field_values[i].get()->owner();
+    pmeta->blockref =
+        field_values[i].get()->owner ? field_values[i].get()->owner : const_cast<array &>(field_values[i]);
 
     const ndt::type &field_dt = field_values[i].get_type();
     if (field_dt.get_arrmeta_size() > 0) {

@@ -65,9 +65,9 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
 
   // Clone the data pointer
   result_preamble->data = preamble->data;
-  result_preamble->ref = preamble->ref;
-  if (!result_preamble->ref) {
-    result_preamble->ref = ndo.get();
+  result_preamble->owner = preamble->owner;
+  if (!result_preamble->owner) {
+    result_preamble->owner = ndo.get();
   }
 
   // Copy the flags
@@ -101,12 +101,12 @@ array_preamble::~array_preamble()
 
   // Call the data destructor if necessary (i.e. the nd::array owns
   // the data memory, and the type has a data destructor)
-  if (!ref && !is_builtin_type() && (type->get_flags() & type_flag_destructor) != 0) {
+  if (!owner && !is_builtin_type() && (type->get_flags() & type_flag_destructor) != 0) {
     type->data_destruct(arrmeta, data);
   }
 
   // Free the ndobject data if it wasn't allocated together with the memory block
-  if (!ref && !is_builtin_type() && !type->is_expression()) {
+  if (!owner && !is_builtin_type() && !type->is_expression()) {
     const ndt::type &dtp = type->get_type_at_dimension(NULL, type->get_ndim());
     if (dtp.get_kind() == memory_kind) {
       dtp.extended<ndt::base_memory_type>()->data_free(data);
