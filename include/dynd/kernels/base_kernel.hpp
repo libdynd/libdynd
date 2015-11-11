@@ -15,15 +15,33 @@ namespace nd {
     DYND_HAS_MEMBER(single);
     DYND_HAS_MEMBER(metadata_single);
 
+    /*
+        template <typename KernelType>
+        typename std::enable_if<has_member_single<KernelType, void(char *, char *const *)>::value, expr_single_t>::type
+        get_single()
+        {
+          return KernelType::single_wrapper::func;
+        }
+
+        template <typename KernelType>
+        typename std::enable_if<!has_member_single<KernelType, void(char *, char *const *)>::value, expr_single_t>::type
+        get_single()
+        {
+          return NULL;
+        }
+    */
+
     template <typename KernelType>
-    typename std::enable_if<has_member_metadata_single<KernelType>::value, expr_metadata_single_t>::type
+    typename std::enable_if<has_member_metadata_single<KernelType, void(array *, array *const *)>::value,
+                            expr_metadata_single_t>::type
     get_metadata_single()
     {
       return KernelType::metadata_single_wrapper::func;
     }
 
     template <typename KernelType>
-    typename std::enable_if<!has_member_metadata_single<KernelType>::value, expr_metadata_single_t>::type
+    typename std::enable_if<!has_member_metadata_single<KernelType, void(array *, array *const *)>::value,
+                            expr_metadata_single_t>::type
     get_metadata_single()
     {
       return NULL;
@@ -173,7 +191,7 @@ namespace nd {
       SelfType *self = parent_type::init(rawself, kernreq, std::forward<A>(args)...);                                  \
       switch (kernreq) {                                                                                               \
       case kernel_request_single:                                                                                      \
-        self->function = reinterpret_cast<void *>(&SelfType::single_wrapper::func);                                    \
+        self->function = reinterpret_cast<void *>(SelfType::single_wrapper::func);                                     \
         break;                                                                                                         \
       case kernel_request_metadata_single:                                                                             \
         self->function = reinterpret_cast<void *>(detail::get_metadata_single<SelfType>());                            \
