@@ -618,8 +618,8 @@ extern DYND_API const char dynd_version_string[];
                                                                                                                        \
   template <typename T, typename MemberType>                                                                           \
   class has_member_##NAME<T, MemberType> {                                                                             \
-    template <typename U, typename = typename std::enable_if<std::is_member_pointer<                                   \
-                              decltype(&U::NAME)>::value &&std::is_same<decltype(U::NAME), MemberType>::value>::type>  \
+    template <typename U, typename = typename std::enable_if<std::is_member_pointer<decltype(                          \
+                              &U::NAME)>::value &&std::is_same<decltype(&U::NAME), MemberType T::*>::value>::type>     \
     static std::true_type test(int);                                                                                   \
                                                                                                                        \
     template <typename>                                                                                                \

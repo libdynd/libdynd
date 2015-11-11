@@ -9,21 +9,69 @@
 #include <dynd/types/callable_type.hpp>
 
 namespace dynd {
+
+template <typename func_type, int I>
+struct arg_at {
+  typedef typename at<typename args_of<func_type>::type, I>::type type;
+};
+
 namespace nd {
   namespace detail {
+
+    template <typename SelfType, bool NotImplemented>
+    struct single_wrapper;
+
+    template <typename SelfType>
+    struct single_wrapper<SelfType, true> {
+      static void DYND_EMIT_LLVM(func)(ckernel_prefix *DYND_UNUSED(self), char *DYND_UNUSED(dst),
+                                       char *const *DYND_UNUSED(src))
+      {
+        throw std::runtime_error("single is not implemented");
+      }
+
+      static const volatile char *DYND_USED(ir);
+    };
+
+    template <typename SelfType>
+    struct single_wrapper<SelfType, false> {
+      static void DYND_EMIT_LLVM(func)(ckernel_prefix *self, char *dst, char *const *src)
+      {
+        SelfType::get_self(self)->single(dst, src);
+      }
+
+      static const volatile char *DYND_USED(ir);
+    };
 
     DYND_HAS_MEMBER(single);
     DYND_HAS_MEMBER(metadata_single);
 
+    /*
+        template <typename KernelType>
+        typename std::enable_if<has_member_single<KernelType, void(char *, char *const *)>::value, expr_single_t>::type
+        get_single()
+        {
+          return KernelType::single_wrapper::func;
+        }
+
+        template <typename KernelType>
+        typename std::enable_if<!has_member_single<KernelType, void(char *, char *const *)>::value, expr_single_t>::type
+        get_single()
+        {
+          return NULL;
+        }
+    */
+
     template <typename KernelType>
-    typename std::enable_if<has_member_metadata_single<KernelType>::value, expr_metadata_single_t>::type
+    typename std::enable_if<has_member_single<KernelType, void(array *, array *const *)>::value,
+                            expr_metadata_single_t>::type
     get_metadata_single()
     {
-      return KernelType::metadata_single_wrapper::func;
+      return KernelType::single_wrapper::func;
     }
 
     template <typename KernelType>
-    typename std::enable_if<!has_member_metadata_single<KernelType>::value, expr_metadata_single_t>::type
+    typename std::enable_if<!has_member_single<KernelType, void(array *, array *const *)>::value,
+                            expr_metadata_single_t>::type
     get_metadata_single()
     {
       return NULL;
@@ -173,7 +221,7 @@ namespace nd {
       SelfType *self = parent_type::init(rawself, kernreq, std::forward<A>(args)...);                                  \
       switch (kernreq) {                                                                                               \
       case kernel_request_single:                                                                                      \
-        self->function = reinterpret_cast<void *>(&SelfType::single_wrapper::func);                                    \
+        self->function = reinterpret_cast<void *>(single_wrapper::func);                                               \
         break;                                                                                                         \
       case kernel_request_metadata_single:                                                                             \
         self->function = reinterpret_cast<void *>(detail::get_metadata_single<SelfType>());                            \
@@ -190,19 +238,14 @@ namespace nd {
     }                                                                                                                  \
                                                                                                                        \
     struct single_wrapper {                                                                                            \
-      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self, char *dst, char *const *src)                  \
+      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self,                                               \
+                                                   typename arg_at<decltype(&SelfType::single), 0>::type dst,          \
+                                                   typename arg_at<decltype(&SelfType::single), 1>::type src)          \
       {                                                                                                                \
-        return SelfType::get_self(self)->single(dst, src);                                                             \
+        SelfType::get_self(self)->single(dst, src);                                                                    \
       }                                                                                                                \
                                                                                                                        \
       static const volatile char *DYND_USED(ir);                                                                       \
-    };                                                                                                                 \
-                                                                                                                       \
-    struct metadata_single_wrapper {                                                                                   \
-      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self, array *dst, array *const *src)                \
-      {                                                                                                                \
-        return SelfType::get_self(self)->metadata_single(dst, src);                                                    \
-      }                                                                                                                \
     };                                                                                                                 \
                                                                                                                        \
     __VA_ARGS__ static void strided_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,    \

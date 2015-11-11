@@ -32,11 +32,17 @@ struct member_value_wrapper {
 DYND_HAS(value);
 
 struct func_wrapper {
-  static int func() { return 0; };
+  static int func()
+  {
+    return 0;
+  };
 };
 
 struct member_func_wrapper {
-  int func() { return 0; };
+  int func()
+  {
+    return 0;
+  };
 };
 
 DYND_HAS(func);
@@ -71,4 +77,12 @@ TEST(Config, Has)
   EXPECT_FALSE((has_func<func_wrapper, int>::value));
   EXPECT_FALSE((has_func<::empty, int()>::value));
   EXPECT_FALSE((has_func<member_func_wrapper, int()>::value));
+}
+
+DYND_HAS_MEMBER(func);
+
+TEST(Config, HasMember)
+{
+  EXPECT_TRUE((has_member_func<member_func_wrapper, int()>::value));
+  EXPECT_FALSE((has_member_func<func_wrapper, int()>::value));
 }
