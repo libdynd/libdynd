@@ -199,10 +199,9 @@ namespace nd {
     };                                                                                                                 \
                                                                                                                        \
     struct metadata_single_wrapper {                                                                                   \
-      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self, char *dst_metadata, char **dst,               \
-                                                   char *const *src_metadata, char **const *src)                       \
+      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self, array *dst, array *const *src)                \
       {                                                                                                                \
-        return SelfType::get_self(self)->metadata_single(dst_metadata, dst, src_metadata, src);                        \
+        return SelfType::get_self(self)->metadata_single(dst, src);                                                    \
       }                                                                                                                \
     };                                                                                                                 \
                                                                                                                        \

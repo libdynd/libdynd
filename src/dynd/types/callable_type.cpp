@@ -550,7 +550,7 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
 }
 
 nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                                         const char *const *src_arrmeta, char **const *src_data, intptr_t nkwd,
+                                         const char *const *src_arrmeta, nd::array *const *src_data, intptr_t nkwd,
                                          const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
@@ -576,7 +576,7 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
   instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.metadata(), nsrc, src_tp, src_arrmeta, kernreq,
               &eval::default_eval_context, nkwd, kwds, tp_vars);
   expr_metadata_single_t fn = ckb.get()->get_function<expr_metadata_single_t>();
-  fn(ckb.get(), dst.metadata(), &dst.get()->ptr, const_cast<char *const *>(src_arrmeta), src_data);
+  fn(ckb.get(), &dst, src_data);
 
   return dst;
 }
@@ -602,7 +602,7 @@ void callable_type_data::operator()(const ndt::type &dst_tp, const char *dst_arr
 void callable_type_data::operator()(const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                                     char *DYND_UNUSED(dst_data), intptr_t DYND_UNUSED(nsrc),
                                     const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                    char **const *DYND_UNUSED(src_data), intptr_t DYND_UNUSED(nkwd),
+                                    nd::array *const *DYND_UNUSED(src_data), intptr_t DYND_UNUSED(nkwd),
                                     const nd::array *DYND_UNUSED(kwds),
                                     const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
