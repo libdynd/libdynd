@@ -476,7 +476,7 @@ namespace nd {
     typename std::enable_if<has_member_single<KernelType, void(array *, array *const *)>::value, kernel_request_t>::type
     get_kernreq()
     {
-      return kernel_request_metadata_single;
+      return kernel_request_array;
     }
 
     template <typename KernelType>

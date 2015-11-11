@@ -40,7 +40,7 @@ enum {
   /** Kernel function expr_single_t, "(T1, T2, ...) -> R" */
   kernel_request_single = 0x00000008,
   /** ... */
-  kernel_request_metadata_single = 0x00000020,
+  kernel_request_array = 0x00000020,
   /** Kernel function expr_strided_t, "(T1, T2, ...) -> R" */
   kernel_request_strided = 0x00000010,
 
