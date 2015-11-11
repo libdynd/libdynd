@@ -13,19 +13,15 @@ namespace nd {
   struct view_kernel : base_kernel<view_kernel> {
     static const size_t data_size = 0;
 
-    size_t metadata_size;
-
-    view_kernel(size_t metadata_size) : metadata_size(metadata_size)
-    {
-    }
-
     void metadata_single(array *dst, array *const *src)
     {
-      std::memcpy(dst->metadata(), src[0]->metadata(),
-                  metadata_size); // need to use the type virtual function instead of this
+      const ndt::type &dst_tp = dst->get_type();
+      if (!dst_tp.is_builtin()) {
+        dst_tp.extended()->arrmeta_copy_construct(dst->metadata(), src[0]->metadata(), *src[0]);
+      }
       dst->get()->ptr = src[0]->get()->ptr;
 
-      dst->get()->ref = src[0]->get();
+      dst->get()->ref = src[0]->get()->owner();
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
@@ -34,18 +30,6 @@ namespace nd {
                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       dst_tp = src_tp[0];
-    }
-
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                                intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      make(ckb, kernreq, ckb_offset, src_tp[0].get_arrmeta_size());
-      return ckb_offset;
     }
   };
 
