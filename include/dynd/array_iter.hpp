@@ -70,7 +70,7 @@ class array_iter<1, 0> {
 public:
   array_iter(const nd::array &op0)
   {
-    init(op0.get_type(), op0.metadata(), op0.data());
+    init(op0.get_type(), op0.get()->metadata(), op0.data());
   }
 
   ~array_iter()
@@ -175,7 +175,7 @@ public:
 
   array_iter(const nd::array &op0)
   {
-    init(op0.get_type(), op0.metadata(), op0.cdata(), 0);
+    init(op0.get_type(), op0.get()->metadata(), op0.cdata(), 0);
   }
 
   ~array_iter()
@@ -324,7 +324,7 @@ public:
   }
   array_iter(const nd::array &op0, const nd::array &op1)
   {
-    init(op0.get_type(), op0.metadata(), op0.data(), op1.get_type(), op1.metadata(), op1.cdata());
+    init(op0.get_type(), op0.get()->metadata(), op0.data(), op1.get_type(), op1.get()->metadata(), op1.cdata());
   }
 
   ~array_iter()
@@ -437,7 +437,7 @@ public:
         if (!m_iterdata[i]) {
           throw std::bad_alloc();
         }
-        m_arrmeta[i] = ops[i].metadata();
+        m_arrmeta[i] = ops[i].get()->metadata();
         m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i], &m_arrmeta[i], iter_ndim_i,
                                                      m_itershape.get() + (m_iter_ndim - iter_ndim_i), m_uniform_tp[i]);
         m_data[i] = m_iterdata[i]->reset(m_iterdata[i], ops[i].get()->data, m_iter_ndim);
@@ -451,7 +451,7 @@ public:
         m_iterdata[i] = NULL;
         m_uniform_tp[i] = m_array_tp[i];
         m_data[i] = ops[i].get()->data;
-        m_arrmeta[i] = ops[i].metadata();
+        m_arrmeta[i] = ops[i].get()->metadata();
       }
     }
   }
@@ -555,7 +555,7 @@ public:
       if (!m_iterdata[0]) {
         throw std::bad_alloc();
       }
-      m_arrmeta[0] = out_op0.metadata();
+      m_arrmeta[0] = out_op0.get()->metadata();
       m_array_tp[0]
           .iterdata_construct(m_iterdata[0], &m_arrmeta[0], m_iter_ndim[0], m_itershape.get(), m_uniform_tp[0]);
       m_data[0] = m_iterdata[0]->reset(m_iterdata[0], out_op0.data(), m_iter_ndim[0]);
@@ -566,7 +566,7 @@ public:
         if (!m_iterdata[i]) {
           throw std::bad_alloc();
         }
-        m_arrmeta[i] = ops[i].metadata();
+        m_arrmeta[i] = ops[i].get()->metadata();
         m_array_tp[i].broadcasted_iterdata_construct(m_iterdata[i], &m_arrmeta[i], m_iter_ndim[i],
                                                      m_itershape.get() + (m_iter_ndim[0] - m_iter_ndim[i]),
                                                      m_uniform_tp[i]);
@@ -581,7 +581,7 @@ public:
         m_iterdata[i] = NULL;
         m_uniform_tp[i] = m_array_tp[i];
         m_data[i] = ops[i].get()->data;
-        m_arrmeta[i] = ops[i].metadata();
+        m_arrmeta[i] = ops[i].get()->metadata();
       }
     }
   }

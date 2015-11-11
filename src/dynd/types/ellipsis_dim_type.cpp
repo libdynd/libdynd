@@ -213,7 +213,7 @@ void ndt::ellipsis_dim_type::get_dynamic_type_properties(const std::pair<std::st
     {
       nd::array a = static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name());
       typed_data_copy(dst_tp, dst_arrmeta, dst,
-                      static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name()).metadata(), a.data());
+                      static_cast<nd::array>(tp.extended<ellipsis_dim_type>()->get_name()).get()->metadata(), a.data());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,

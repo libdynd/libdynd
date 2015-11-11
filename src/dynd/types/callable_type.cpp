@@ -358,7 +358,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_pos_types().metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_pos_types().get()->metadata(),
                       tp.extended<callable_type>()->get_pos_types().cdata());
     }
 
@@ -380,7 +380,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_kwd_types().metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_kwd_types().get()->metadata(),
                       tp.extended<callable_type>()->get_kwd_types().cdata());
     }
 
@@ -402,7 +402,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_kwd_names().metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_kwd_names().get()->metadata(),
                       tp.extended<callable_type>()->get_kwd_names().cdata());
     }
 
@@ -486,10 +486,10 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
   }
   const char *dynd_arrmeta[max_args];
   for (int i = 0; i < nargs - 1; ++i) {
-    dynd_arrmeta[i] = args[i + 1].metadata();
+    dynd_arrmeta[i] = args[i + 1].get()->metadata();
   }
   ckernel_builder<kernel_request_host> ckb;
-  af->instantiate(NULL, 0, NULL, &ckb, 0, args[0].get_type(), args[0].metadata(), nargs, src_tp, dynd_arrmeta,
+  af->instantiate(NULL, 0, NULL, &ckb, 0, args[0].get_type(), args[0].get()->metadata(), nargs, src_tp, dynd_arrmeta,
                   kernel_request_single, &eval::default_eval_context, 0, NULL, std::map<std::string, ndt::type>());
   // Call the ckernel
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
@@ -541,7 +541,7 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
 
   // Generate and evaluate the ckernel
   ckernel_builder<kernel_request_host> ckb;
-  instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.metadata(), nsrc, src_tp, src_arrmeta,
+  instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta,
               kernel_request_single, &eval::default_eval_context, nkwd, kwds, tp_vars);
   expr_single_t fn = ckb.get()->get_function<expr_single_t>();
   fn(ckb.get(), dst.data(), src_data);
@@ -573,7 +573,7 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
 
   // Generate and evaluate the ckernel
   ckernel_builder<kernel_request_host> ckb;
-  instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.metadata(), nsrc, src_tp, src_arrmeta, kernreq,
+  instantiate(static_data, data_size, data.get(), &ckb, 0, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta, kernreq,
               &eval::default_eval_context, nkwd, kwds, tp_vars);
   expr_metadata_single_t fn = ckb.get()->get_function<expr_metadata_single_t>();
   fn(ckb.get(), &dst, src_data);

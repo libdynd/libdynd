@@ -47,7 +47,7 @@ namespace ndt {
 
     size_t get_category_count() const
     {
-      return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(m_categories.metadata())->dim_size;
+      return (size_t) reinterpret_cast<const fixed_dim_type_arrmeta *>(m_categories.get()->metadata())->dim_size;
     }
 
     /**
@@ -77,7 +77,7 @@ namespace ndt {
       }
       return m_categories.cdata() +
              unchecked_fixed_dim_get<intptr_t>(m_value_to_category_index, value) *
-                 reinterpret_cast<const fixed_dim_type_arrmeta *>(m_categories.metadata())->stride;
+                 reinterpret_cast<const fixed_dim_type_arrmeta *>(m_categories.get()->metadata())->stride;
     }
     /** Returns the arrmeta corresponding to data from
      * get_category_data_from_value */

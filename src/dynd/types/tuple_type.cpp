@@ -177,7 +177,7 @@ void ndt::tuple_type::get_dynamic_type_properties(const std::pair<std::string, n
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_field_types.metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_field_types.get()->metadata(),
                       tp.extended<tuple_type>()->m_field_types.cdata());
     }
 
@@ -199,7 +199,7 @@ void ndt::tuple_type::get_dynamic_type_properties(const std::pair<std::string, n
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_arrmeta_offsets.metadata(),
+      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_arrmeta_offsets.get()->metadata(),
                       tp.extended<tuple_type>()->m_arrmeta_offsets.cdata());
     }
 

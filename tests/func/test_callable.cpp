@@ -160,7 +160,8 @@ TEST(Callable, DecomposedDynamicCall)
   ndt::type ret_tp;
   nd::array values[3] = {7, 2.5, 5};
   ndt::type types[3] = {values[0].get_type(), values[1].get_type(), values[2].get_type()};
-  const char *const arrmetas[3] = {values[0].metadata(), values[1].metadata(), values[2].metadata()};
+  const char *const arrmetas[3] = {values[0].get()->metadata(), values[1].get()->metadata(),
+                                   values[2].get()->metadata()};
   char *const datas[3] = {values[0].get()->data, values[1].get()->data, values[2].get()->data};
   //  const char *names[3] = {"x", "y", "z"};
 

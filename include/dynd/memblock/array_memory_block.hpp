@@ -62,13 +62,13 @@ struct DYND_API array_preamble : memory_block_data {
   }
 
   /** Return a pointer to the arrmeta, immediately after the preamble */
-  inline char *get_arrmeta()
+  inline char *metadata()
   {
     return reinterpret_cast<char *>(this + 1);
   }
 
   /** Return a pointer to the arrmeta, immediately after the preamble */
-  inline const char *get_arrmeta() const
+  inline const char *metadata() const
   {
     return reinterpret_cast<const char *>(this + 1);
   }

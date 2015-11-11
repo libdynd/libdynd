@@ -51,7 +51,7 @@ namespace nd {
         const array &val = *reinterpret_cast<array *>(static_data);
 
         make(ckb, kernreq, ckb_offset, const_cast<char *>(val.cdata()));
-        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, dst_tp, val.metadata(), kernreq, ectx);
+        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, dst_tp, val.get()->metadata(), kernreq, ectx);
       }
     };
 

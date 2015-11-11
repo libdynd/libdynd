@@ -17,7 +17,7 @@ namespace nd {
     {
       const ndt::type &dst_tp = dst->get_type();
       if (!dst_tp.is_builtin()) {
-        dst_tp.extended()->arrmeta_copy_construct(dst->metadata(), src[0]->metadata(), *src[0]);
+        dst_tp.extended()->arrmeta_copy_construct(dst->get()->metadata(), src[0]->get()->metadata(), *src[0]);
       }
       dst->get()->data = src[0]->get()->data;
 
