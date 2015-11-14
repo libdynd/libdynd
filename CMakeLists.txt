@@ -758,6 +758,14 @@ if (DYND_INSTALL_LIB)
     if(WIN32)
         install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config.bat"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
+        # Make sure the dll is installed into the bin directory so it can
+        # be on the path when installed as a conda package.
+        if(DYND_SHARED_LIB)
+            add_custom_command(TARGET libdynd POST_BUILD
+                               COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                               $<TARGET_FILE_DIR:libdynd>/libdynd.dll
+                               "${CMAKE_INSTALL_PREFIX}/bin")
+        endif()
     else()
         install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/libdynd-config"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
