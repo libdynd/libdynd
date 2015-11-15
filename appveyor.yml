@@ -24,11 +24,12 @@ platform:
 configuration: Release
 
 build_script:
-  - mkdir build
-  - cd build
-  - if "%platform%"=="Win32" cmake -DDYND_SHARED_LIB=OFF .. -G "Visual Studio 14 2015"
-  - if "%platform%"=="x64" cmake .. -G "Visual Studio 14 2015 Win64"
-  - cmake --build . --config Release
+  - ps: Start-FileDownload "https://repo.continuum.io/miniconda/Miniconda3-latest-Windows-$env:PYTHON_ARCH.exe" C:\Miniconda.exe; echo "Finished downloading miniconda"
+  - cmd: C:\Miniconda.exe /S /D=C:\Py
+  - SET PATH=C:\Py;C:\Py\Scripts;C:\Py\Library\bin;%PATH%
+  - conda config --set always_yes yes
+  - conda update conda
+  - conda install conda-build
+  - pip install git+git://github.com/conda/conda-build.git
+  - conda-build conda.recipe
 
-test_script:
-  - .\tests\Release\test_libdynd.exe  --gtest_output=xml:../test_results.xml
