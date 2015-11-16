@@ -7,7 +7,6 @@
 #include <cerrno>
 
 #include <dynd/kernels/date_expr_kernels.hpp>
-#include <dynd/kernels/elwise_expr_kernels.hpp>
 #include <dynd/types/string_type.hpp>
 #include <datetime_strings.h>
 
@@ -142,8 +141,8 @@ public:
   }
 
   size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                          size_t src_count, const ndt::type *src_tp, const char *const *src_arrmeta,
-                          kernel_request_t kernreq, const eval::eval_context *ectx) const
+                          size_t src_count, const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+                          kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
   {
     if (src_count != 1) {
       stringstream ss;
@@ -156,8 +155,7 @@ public:
     // call the elementwise dimension handler to handle one dimension,
     // giving 'this' as the next kernel generator to call
     if (require_elwise) {
-      return make_elwise_dimension_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-                                               kernreq, ectx, this);
+      throw std::runtime_error("make_elwise_dimension_expr_kernel is not implemented");
     }
 
     date_strftime_kernel_extra *e =
@@ -289,9 +287,9 @@ public:
   {
   }
 
-  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                          size_t src_count, const ndt::type *src_tp, const char *const *src_arrmeta,
-                          kernel_request_t kernreq, const eval::eval_context *ectx) const
+  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                          size_t src_count, const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
+                          kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
   {
     if (src_count != 1) {
       stringstream ss;
@@ -304,8 +302,7 @@ public:
     // call the elementwise dimension handler to handle one dimension,
     // giving 'this' as the next kernel generator to call
     if (require_elwise) {
-      return make_elwise_dimension_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-                                               kernreq, ectx, this);
+      throw std::runtime_error("make_elwise_dimension_expr_kernel is not implemented");
     }
 
     date_replace_kernel_extra *e =
