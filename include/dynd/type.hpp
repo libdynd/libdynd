@@ -189,9 +189,7 @@ namespace ndt {
 
   public:
     /** Constructor */
-    type() : m_extended(reinterpret_cast<const base_type *>(uninitialized_type_id))
-    {
-    }
+    type() = default;
 
     /**
      * Constructor from a base_type. This claims ownership of the 'extended'
@@ -201,30 +199,17 @@ namespace ndt {
     {
     }
 
-    /** Copy constructor (should be "= default" in C++11) */
-    type(const type &rhs) : m_extended(rhs.m_extended)
-    {
-    }
+    /** Copy constructor. */
+    type(const type &other) = default;
 
-    /** Assignment operator (should be "= default" in C++11) */
-    type &operator=(const type &rhs)
-    {
-      m_extended = rhs.m_extended;
-      return *this;
-    }
+    /** Assignment operator. */
+    type &operator=(const type &rhs) = default;
 
     /** Move constructor */
-    type(type &&rhs) : m_extended(rhs.m_extended)
-    {
-      rhs.m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
-    }
-    /** Move assignment operator */
-    type &operator=(type &&rhs)
-    {
-      m_extended = rhs.m_extended;
-      rhs.m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
-      return *this;
-    }
+    type(type &&rhs) = default;
+
+    /** Move assignment operator. */
+    type &operator=(type &&rhs) = default;
 
     /** Construct from a type ID */
     type(type_id_t tp_id) : type((validate_type_id(tp_id), instances[tp_id]))
@@ -245,9 +230,7 @@ namespace ndt {
      */
     const base_type *release()
     {
-      const base_type *result = m_extended.get();
-      m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
-      return result;
+      return m_extended.release();
     }
 
     void swap(type &rhs)
