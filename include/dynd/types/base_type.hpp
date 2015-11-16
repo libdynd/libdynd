@@ -130,6 +130,7 @@ namespace ndt {
    *types.
    */
   class DYND_API base_type {
+  public:
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
 
@@ -754,6 +755,21 @@ namespace ndt {
     if (!is_builtin_type(bd)) {
       base_type_decref(bd);
     }
+  }
+
+  inline void intrusive_ptr_retain(const base_type *ptr)
+  {
+    base_type_xincref(ptr);
+  }
+
+  inline void intrusive_ptr_release(const base_type *ptr)
+  {
+    base_type_xdecref(ptr);
+  }
+
+  inline long intrusive_ptr_use_count(const base_type *ptr)
+  {
+    return ptr->m_use_count;
   }
 
   namespace detail {
