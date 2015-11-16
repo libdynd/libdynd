@@ -164,10 +164,8 @@ namespace ndt {
    * which case this is entirely a value type with no allocated memory.
    *
    */
-  class DYND_API type {
+  class DYND_API type : public intrusive_ptr<const base_type> {
     static type instances[DYND_TYPE_ID_MAX + 1];
-
-    intrusive_ptr<const base_type> m_extended;
 
     /**
      * Validates that the given type ID is a proper ID and casts to
@@ -195,7 +193,7 @@ namespace ndt {
      * Constructor from a base_type. This claims ownership of the 'extended'
      * reference if incref is false, be careful!
      */
-    explicit type(const base_type *extended, bool incref) : m_extended(extended, incref)
+    explicit type(const base_type *extended, bool incref) : intrusive_ptr<const base_type>(extended, incref)
     {
     }
 
@@ -222,26 +220,9 @@ namespace ndt {
     /** Construct from a string representation */
     type(const char *rep_begin, const char *rep_end);
 
-    /**
-     * The type class operates as a smart pointer for dynamically
-     * allocated base_type instances, with raw storage of type id
-     * for the built-in types. This function gives away the held
-     * reference, leaving behind a void type.
-     */
-    const base_type *release()
-    {
-      return m_extended.release();
-    }
-
-    void swap(type &rhs)
-    {
-      std::swap(m_extended, rhs.m_extended);
-    }
-
     bool operator==(const type &rhs) const
     {
-      return m_extended == rhs.m_extended ||
-             (!is_builtin() && !rhs.is_builtin() && *(m_extended.get()) == *(rhs.m_extended.get()));
+      return m_ptr == rhs.m_ptr || (!is_builtin() && !rhs.is_builtin() && *m_ptr == *rhs.m_ptr);
     }
 
     bool operator!=(const type &rhs) const
@@ -251,17 +232,17 @@ namespace ndt {
 
     bool is_null() const
     {
-      return m_extended.get() == NULL;
+      return m_ptr == NULL;
     }
 
     /**
      * Returns true if this type is built in, which
-     * means the type id is encoded directly in the m_extended
+     * means the type id is encoded directly in the m_ptr
      * pointer.
      */
     bool is_builtin() const
     {
-      return is_builtin_type(m_extended.get());
+      return is_builtin_type(m_ptr);
     }
 
     /**
@@ -296,7 +277,7 @@ namespace ndt {
     type at_single(intptr_t i0, const char **inout_arrmeta = NULL, const char **inout_data = NULL) const
     {
       if (!is_builtin()) {
-        return m_extended->at_single(i0, inout_arrmeta, inout_data);
+        return m_ptr->at_single(i0, inout_arrmeta, inout_data);
       } else {
         throw too_many_indices(*this, 1, 0);
       }
@@ -394,11 +375,11 @@ namespace ndt {
     const type &value_type() const
     {
       // Only expr_kind types have different value_type
-      if (is_builtin() || m_extended->get_kind() != expr_kind) {
+      if (is_builtin() || m_ptr->get_kind() != expr_kind) {
         return *this;
       } else {
         // All chaining happens in the operand_type
-        return static_cast<const base_expr_type *>(m_extended.get())->get_value_type();
+        return static_cast<const base_expr_type *>(m_ptr)->get_value_type();
       }
     }
 
@@ -410,10 +391,10 @@ namespace ndt {
     const type &operand_type() const
     {
       // Only expr_kind types have different operand_type
-      if (is_builtin() || m_extended->get_kind() != expr_kind) {
+      if (is_builtin() || m_ptr->get_kind() != expr_kind) {
         return *this;
       } else {
-        return static_cast<const base_expr_type *>(m_extended.get())->get_operand_type();
+        return static_cast<const base_expr_type *>(m_ptr)->get_operand_type();
       }
     }
 
@@ -425,13 +406,13 @@ namespace ndt {
     const type &storage_type() const
     {
       // Only expr_kind types have different storage_type
-      if (is_builtin() || m_extended->get_kind() != expr_kind) {
+      if (is_builtin() || m_ptr->get_kind() != expr_kind) {
         return *this;
       } else {
         // Follow the operand type chain to get the storage type
-        const type *dt = &static_cast<const base_expr_type *>(m_extended.get())->get_operand_type();
+        const type *dt = &static_cast<const base_expr_type *>(m_ptr)->get_operand_type();
         while (dt->get_kind() == expr_kind) {
-          dt = &static_cast<const base_expr_type *>(dt->m_extended.get())->get_operand_type();
+          dt = &static_cast<const base_expr_type *>(dt->m_ptr)->get_operand_type();
         }
         return *dt;
       }
@@ -446,9 +427,9 @@ namespace ndt {
     type_id_t get_type_id() const
     {
       if (is_builtin()) {
-        return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_extended.get()));
+        return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr));
       } else {
-        return m_extended->get_type_id();
+        return m_ptr->get_type_id();
       }
     }
 
@@ -460,34 +441,34 @@ namespace ndt {
      */
     type_id_t unchecked_get_builtin_type_id() const
     {
-      return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_extended.get()));
+      return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr));
     }
 
     /** The 'kind' of the type (int, uint, float, etc) */
     type_kind_t get_kind() const
     {
-      return get_base_type_kind(m_extended.get());
+      return get_base_type_kind(m_ptr);
     }
 
     /** The alignment of the type */
     size_t get_data_alignment() const
     {
-      return get_base_type_alignment(m_extended.get());
+      return get_base_type_alignment(m_ptr);
     }
 
     /** The element size of the type */
     size_t get_data_size() const
     {
-      return get_base_type_data_size(m_extended.get());
+      return get_base_type_data_size(m_ptr);
     }
 
     /** The element size of the type when default-constructed */
     size_t get_default_data_size() const
     {
-      if (is_builtin_type(m_extended.get())) {
-        return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(m_extended.get())]);
+      if (is_builtin_type(m_ptr)) {
+        return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(m_ptr)]);
       } else {
-        return m_extended->get_default_data_size();
+        return m_ptr->get_default_data_size();
       }
     }
 
@@ -496,7 +477,7 @@ namespace ndt {
       if (is_builtin()) {
         return 0;
       } else {
-        return m_extended->get_arrmeta_size();
+        return m_ptr->get_arrmeta_size();
       }
     }
 
@@ -520,7 +501,7 @@ namespace ndt {
       if (is_builtin()) {
         return *this == subarray_tp;
       } else {
-        return m_extended->is_type_subarray(subarray_tp);
+        return m_ptr->is_type_subarray(subarray_tp);
       }
     }
 
@@ -533,8 +514,8 @@ namespace ndt {
       if (is_builtin()) {
         return true;
       } else {
-        return m_extended->get_data_size() > 0 &&
-               (m_extended->get_flags() & (type_flag_blockref | type_flag_destructor)) == 0;
+        return m_ptr->get_data_size() > 0 &&
+               (m_ptr->get_flags() & (type_flag_blockref | type_flag_destructor)) == 0;
       }
     }
 
@@ -544,17 +525,17 @@ namespace ndt {
         return true;
       }
 
-      return m_extended->is_c_contiguous(arrmeta);
+      return m_ptr->is_c_contiguous(arrmeta);
     }
 
     bool is_indexable() const
     {
-      return !is_builtin() && m_extended->is_indexable();
+      return !is_builtin() && m_ptr->is_indexable();
     }
 
     bool is_scalar() const
     {
-      return is_builtin() || m_extended->is_scalar();
+      return is_builtin() || m_ptr->is_scalar();
     }
 
 #ifdef DYND_CUDA
@@ -565,7 +546,7 @@ namespace ndt {
         return get_kind() == void_kind;
       }
 
-      return m_extended->get_type_id() == cuda_device_type_id;
+      return m_ptr->get_type_id() == cuda_device_type_id;
     }
 
 #endif
@@ -579,7 +560,7 @@ namespace ndt {
       if (is_builtin()) {
         return false;
       } else {
-        return m_extended->is_expression();
+        return m_ptr->is_expression();
       }
     }
 
@@ -589,7 +570,7 @@ namespace ndt {
      */
     bool is_symbolic() const
     {
-      return !is_builtin() && (m_extended->get_flags() & type_flag_symbolic);
+      return !is_builtin() && (m_ptr->get_flags() & type_flag_symbolic);
     }
 
     /**
@@ -598,7 +579,7 @@ namespace ndt {
      */
     bool is_variadic() const
     {
-      return !is_builtin() && (m_extended->get_flags() & type_flag_variadic);
+      return !is_builtin() && (m_ptr->get_flags() & type_flag_variadic);
     }
 
     /**
@@ -641,7 +622,7 @@ namespace ndt {
       if (is_builtin()) {
         return *this;
       } else {
-        return m_extended->get_canonical_type();
+        return m_ptr->get_canonical_type();
       }
     }
 
@@ -650,7 +631,7 @@ namespace ndt {
       if (is_builtin()) {
         return type_flag_none;
       } else {
-        return m_extended->get_flags();
+        return m_ptr->get_flags();
       }
     }
 
@@ -662,7 +643,7 @@ namespace ndt {
       if (is_builtin()) {
         return 0;
       } else {
-        return m_extended->get_ndim();
+        return m_ptr->get_ndim();
       }
     }
 
@@ -676,7 +657,7 @@ namespace ndt {
       if (is_builtin()) {
         return 0;
       } else {
-        return m_extended->get_strided_ndim();
+        return m_ptr->get_strided_ndim();
       }
     }
 
@@ -693,7 +674,7 @@ namespace ndt {
       if (ndim == include_ndim) {
         return *this;
       } else if (ndim > include_ndim) {
-        return m_extended->get_type_at_dimension(inout_arrmeta, ndim - include_ndim);
+        return m_ptr->get_type_at_dimension(inout_arrmeta, ndim - include_ndim);
       } else {
         std::stringstream ss;
         ss << "Cannot use " << include_ndim << " array ";
@@ -715,7 +696,7 @@ namespace ndt {
     type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const
     {
       if (!is_builtin()) {
-        return m_extended->get_type_at_dimension(inout_arrmeta, i, total_ndim);
+        return m_ptr->get_type_at_dimension(inout_arrmeta, i, total_ndim);
       } else if (i == 0) {
         return *this;
       } else {
@@ -726,7 +707,7 @@ namespace ndt {
     void get_vars(std::unordered_set<std::string> &vars) const
     {
       if (!is_builtin()) {
-        m_extended->get_vars(vars);
+        m_ptr->get_vars(vars);
       }
     }
 
@@ -746,7 +727,7 @@ namespace ndt {
      */
     const base_type *extended() const
     {
-      return m_extended.get();
+      return m_ptr;
     }
 
     /**
@@ -758,7 +739,7 @@ namespace ndt {
     const T *extended() const
     {
       // TODO: In debug mode, assert the type id
-      return static_cast<const T *>(m_extended.get());
+      return static_cast<const T *>(m_ptr);
     }
 
     /**
@@ -798,7 +779,7 @@ namespace ndt {
       if (is_builtin()) {
         return 0;
       } else {
-        return m_extended->get_iterdata_size(ndim);
+        return m_ptr->get_iterdata_size(ndim);
       }
     }
     /**
@@ -818,7 +799,7 @@ namespace ndt {
                             type &out_uniform_type) const
     {
       if (!is_builtin()) {
-        m_extended->iterdata_construct(iterdata, inout_arrmeta, ndim, shape, out_uniform_type);
+        m_ptr->iterdata_construct(iterdata, inout_arrmeta, ndim, shape, out_uniform_type);
       }
     }
 
@@ -826,7 +807,7 @@ namespace ndt {
     void iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const
     {
       if (!is_builtin()) {
-        m_extended->iterdata_destruct(iterdata, ndim);
+        m_ptr->iterdata_destruct(iterdata, ndim);
       }
     }
 
@@ -835,7 +816,7 @@ namespace ndt {
       if (is_builtin()) {
         return sizeof(iterdata_broadcasting_terminator);
       } else {
-        return m_extended->get_iterdata_size(ndim) + sizeof(iterdata_broadcasting_terminator);
+        return m_ptr->get_iterdata_size(ndim) + sizeof(iterdata_broadcasting_terminator);
       }
     }
 
@@ -859,7 +840,7 @@ namespace ndt {
       if (is_builtin()) {
         size = 0;
       } else {
-        size = m_extended->iterdata_construct(iterdata, inout_arrmeta, ndim, shape, out_uniform_tp);
+        size = m_ptr->iterdata_construct(iterdata, inout_arrmeta, ndim, shape, out_uniform_tp);
       }
       iterdata_broadcasting_terminator *id =
           reinterpret_cast<iterdata_broadcasting_terminator *>(reinterpret_cast<char *>(iterdata) + size);

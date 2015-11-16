@@ -10,7 +10,6 @@
 #include <dynd/types/expr_type.hpp>
 #include <dynd/kernels/string_algorithm_kernels.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
-#include <dynd/kernels/elwise_expr_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -81,9 +80,9 @@ public:
   {
   }
 
-  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                           size_t src_count, const ndt::type *src_tp, const char *const *src_arrmeta,
-                          kernel_request_t kernreq, const eval::eval_context *ectx) const
+                          kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
   {
     if (src_count != 2) {
       stringstream ss;
@@ -96,8 +95,7 @@ public:
       // call the elementwise dimension handler to handle one dimension
       // or handle input/output buffering, giving 'this' as the next
       // kernel generator to call
-      return make_elwise_dimension_expr_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_count, src_tp, src_arrmeta,
-                                               kernreq, ectx, this);
+      throw std::runtime_error("make_elwise_dimension_expr_kernel is not implemented");
     }
     // This is a leaf kernel, so no additional allocation is needed
     extra_type *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<extra_type>(ckb_offset);

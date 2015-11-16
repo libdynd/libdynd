@@ -140,12 +140,12 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     make_type(),                                      // type_type_id
 };
 
-ndt::type::type(const std::string &rep) : m_extended(NULL)
+ndt::type::type(const std::string &rep)
 {
   type_from_datashape(rep).swap(*this);
 }
 
-ndt::type::type(const char *rep_begin, const char *rep_end) : m_extended(NULL)
+ndt::type::type(const char *rep_begin, const char *rep_end)
 {
   type_from_datashape(rep_begin, rep_end).swap(*this);
 }
@@ -159,7 +159,7 @@ ndt::type ndt::type::at_array(int nindices, const irange *indices) const
       throw too_many_indices(*this, nindices, 0);
     }
   } else {
-    return m_extended->apply_linear_index(nindices, indices, 0, *this, true);
+    return m_ptr->apply_linear_index(nindices, indices, 0, *this, true);
   }
 }
 
@@ -251,7 +251,7 @@ ndt::type ndt::type::apply_linear_index(intptr_t nindices, const irange *indices
       throw too_many_indices(*this, nindices + current_i, current_i);
     }
   } else {
-    return m_extended->apply_linear_index(nindices, indices, current_i, root_tp, leading_dimension);
+    return m_ptr->apply_linear_index(nindices, indices, current_i, root_tp, leading_dimension);
   }
 }
 
@@ -339,12 +339,12 @@ ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
 intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
 {
   if (get_kind() == dim_kind) {
-    return static_cast<const base_dim_type *>(m_extended.get())->get_dim_size(arrmeta, data);
+    return static_cast<const base_dim_type *>(get())->get_dim_size(arrmeta, data);
   } else if (get_kind() == struct_kind) {
-    return static_cast<const base_struct_type *>(m_extended.get())->get_field_count();
+    return static_cast<const base_struct_type *>(get())->get_field_count();
   } else if (get_ndim() > 0) {
     intptr_t dim_size = -1;
-    m_extended->get_shape(1, 0, &dim_size, arrmeta, data);
+    get()->get_shape(1, 0, &dim_size, arrmeta, data);
     if (dim_size >= 0) {
       return dim_size;
     }

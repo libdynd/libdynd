@@ -205,6 +205,7 @@ void intrusive_ptr_release(T *ptr);
  */
 template <typename T>
 class DYND_API intrusive_ptr {
+protected:
   T *m_ptr;
 
 public:
