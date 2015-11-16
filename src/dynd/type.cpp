@@ -339,9 +339,9 @@ ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
 intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
 {
   if (get_kind() == dim_kind) {
-    return static_cast<const base_dim_type *>(m_extended)->get_dim_size(arrmeta, data);
+    return static_cast<const base_dim_type *>(m_extended.get())->get_dim_size(arrmeta, data);
   } else if (get_kind() == struct_kind) {
-    return static_cast<const base_struct_type *>(m_extended)->get_field_count();
+    return static_cast<const base_struct_type *>(m_extended.get())->get_field_count();
   } else if (get_ndim() > 0) {
     intptr_t dim_size = -1;
     m_extended->get_shape(1, 0, &dim_size, arrmeta, data);

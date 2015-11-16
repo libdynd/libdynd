@@ -167,7 +167,7 @@ namespace ndt {
   class DYND_API type {
     static type instances[DYND_TYPE_ID_MAX + 1];
 
-    const base_type *m_extended;
+    intrusive_ptr<const base_type> m_extended;
 
     /**
      * Validates that the given type ID is a proper ID and casts to
@@ -192,35 +192,27 @@ namespace ndt {
     type() : m_extended(reinterpret_cast<const base_type *>(uninitialized_type_id))
     {
     }
+
     /**
      * Constructor from a base_type. This claims ownership of the 'extended'
      * reference if incref is false, be careful!
      */
-    explicit type(const base_type *extended, bool incref) : m_extended(extended)
+    explicit type(const base_type *extended, bool incref) : m_extended(extended, incref)
     {
-      if (incref && !is_builtin_type(extended)) {
-        base_type_incref(m_extended);
-      }
     }
+
     /** Copy constructor (should be "= default" in C++11) */
     type(const type &rhs) : m_extended(rhs.m_extended)
     {
-      if (!is_builtin_type(m_extended)) {
-        base_type_incref(m_extended);
-      }
     }
+
     /** Assignment operator (should be "= default" in C++11) */
     type &operator=(const type &rhs)
     {
-      if (!is_builtin_type(m_extended)) {
-        base_type_decref(m_extended);
-      }
       m_extended = rhs.m_extended;
-      if (!is_builtin_type(m_extended)) {
-        base_type_incref(m_extended);
-      }
       return *this;
     }
+
     /** Move constructor */
     type(type &&rhs) : m_extended(rhs.m_extended)
     {
@@ -229,9 +221,6 @@ namespace ndt {
     /** Move assignment operator */
     type &operator=(type &&rhs)
     {
-      if (!is_builtin_type(m_extended)) {
-        base_type_decref(m_extended);
-      }
       m_extended = rhs.m_extended;
       rhs.m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
       return *this;
@@ -248,13 +237,6 @@ namespace ndt {
     /** Construct from a string representation */
     type(const char *rep_begin, const char *rep_end);
 
-    ~type()
-    {
-      if (!is_builtin()) {
-        base_type_decref(m_extended);
-      }
-    }
-
     /**
      * The type class operates as a smart pointer for dynamically
      * allocated base_type instances, with raw storage of type id
@@ -263,7 +245,7 @@ namespace ndt {
      */
     const base_type *release()
     {
-      const base_type *result = m_extended;
+      const base_type *result = m_extended.get();
       m_extended = reinterpret_cast<const base_type *>(uninitialized_type_id);
       return result;
     }
@@ -273,15 +255,12 @@ namespace ndt {
       std::swap(m_extended, rhs.m_extended);
     }
 
-    void swap(const base_type *&rhs)
-    {
-      std::swap(m_extended, rhs);
-    }
-
     bool operator==(const type &rhs) const
     {
-      return m_extended == rhs.m_extended || (!is_builtin() && !rhs.is_builtin() && *m_extended == *rhs.m_extended);
+      return m_extended == rhs.m_extended ||
+             (!is_builtin() && !rhs.is_builtin() && *(m_extended.get()) == *(rhs.m_extended.get()));
     }
+
     bool operator!=(const type &rhs) const
     {
       return !(operator==(rhs));
@@ -289,7 +268,7 @@ namespace ndt {
 
     bool is_null() const
     {
-      return m_extended == NULL;
+      return m_extended.get() == NULL;
     }
 
     /**
@@ -299,7 +278,7 @@ namespace ndt {
      */
     bool is_builtin() const
     {
-      return is_builtin_type(m_extended);
+      return is_builtin_type(m_extended.get());
     }
 
     /**
@@ -436,7 +415,7 @@ namespace ndt {
         return *this;
       } else {
         // All chaining happens in the operand_type
-        return static_cast<const base_expr_type *>(m_extended)->get_value_type();
+        return static_cast<const base_expr_type *>(m_extended.get())->get_value_type();
       }
     }
 
@@ -451,7 +430,7 @@ namespace ndt {
       if (is_builtin() || m_extended->get_kind() != expr_kind) {
         return *this;
       } else {
-        return static_cast<const base_expr_type *>(m_extended)->get_operand_type();
+        return static_cast<const base_expr_type *>(m_extended.get())->get_operand_type();
       }
     }
 
@@ -467,9 +446,9 @@ namespace ndt {
         return *this;
       } else {
         // Follow the operand type chain to get the storage type
-        const type *dt = &static_cast<const base_expr_type *>(m_extended)->get_operand_type();
+        const type *dt = &static_cast<const base_expr_type *>(m_extended.get())->get_operand_type();
         while (dt->get_kind() == expr_kind) {
-          dt = &static_cast<const base_expr_type *>(dt->m_extended)->get_operand_type();
+          dt = &static_cast<const base_expr_type *>(dt->m_extended.get())->get_operand_type();
         }
         return *dt;
       }
@@ -484,7 +463,7 @@ namespace ndt {
     type_id_t get_type_id() const
     {
       if (is_builtin()) {
-        return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_extended));
+        return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_extended.get()));
       } else {
         return m_extended->get_type_id();
       }
@@ -498,32 +477,32 @@ namespace ndt {
      */
     type_id_t unchecked_get_builtin_type_id() const
     {
-      return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_extended));
+      return static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_extended.get()));
     }
 
     /** The 'kind' of the type (int, uint, float, etc) */
     type_kind_t get_kind() const
     {
-      return get_base_type_kind(m_extended);
+      return get_base_type_kind(m_extended.get());
     }
 
     /** The alignment of the type */
     size_t get_data_alignment() const
     {
-      return get_base_type_alignment(m_extended);
+      return get_base_type_alignment(m_extended.get());
     }
 
     /** The element size of the type */
     size_t get_data_size() const
     {
-      return get_base_type_data_size(m_extended);
+      return get_base_type_data_size(m_extended.get());
     }
 
     /** The element size of the type when default-constructed */
     size_t get_default_data_size() const
     {
-      if (is_builtin_type(m_extended)) {
-        return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(m_extended)]);
+      if (is_builtin_type(m_extended.get())) {
+        return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(m_extended.get())]);
       } else {
         return m_extended->get_default_data_size();
       }
@@ -784,7 +763,7 @@ namespace ndt {
      */
     const base_type *extended() const
     {
-      return m_extended;
+      return m_extended.get();
     }
 
     /**
@@ -796,7 +775,7 @@ namespace ndt {
     const T *extended() const
     {
       // TODO: In debug mode, assert the type id
-      return static_cast<const T *>(m_extended);
+      return static_cast<const T *>(m_extended.get());
     }
 
     /**
@@ -1311,7 +1290,7 @@ namespace ndt {
 
   DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 
-} // namespace ndt
+} // namespace dynd::ndt
 
 /** Prints raw bytes as hexadecimal */
 DYND_API void hexadecimal_print(std::ostream &o, char value);
