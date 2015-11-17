@@ -24,7 +24,7 @@ struct DYND_API array_preamble : memory_block_data {
    * simply contains the type id. If (type&~builtin_type_id_mask)
    * is 0, its a builtin type.
    */
-  const ndt::base_type *type;
+  const ndt::base_type *tp;
   uint64_t flags;
   char *data;
   intrusive_ptr<memory_block_data> owner;
@@ -34,13 +34,13 @@ struct DYND_API array_preamble : memory_block_data {
   /** Returns true if the type is builtin */
   inline bool is_builtin_type() const
   {
-    return (reinterpret_cast<uintptr_t>(type) & (~builtin_type_id_mask)) == 0;
+    return (reinterpret_cast<uintptr_t>(tp) & (~builtin_type_id_mask)) == 0;
   }
 
   /** Should only be called if is_builtin_type() returns true */
   inline type_id_t get_builtin_type_id() const
   {
-    return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(type));
+    return static_cast<type_id_t>(reinterpret_cast<uintptr_t>(tp));
   }
 
   inline type_id_t get_type_id() const
@@ -48,7 +48,7 @@ struct DYND_API array_preamble : memory_block_data {
     if (is_builtin_type()) {
       return get_builtin_type_id();
     } else {
-      return type->get_type_id();
+      return tp->get_type_id();
     }
   }
 

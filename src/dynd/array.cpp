@@ -43,7 +43,7 @@ make_builtin_scalar_array(const T &value, uint64_t flags)
   intrusive_ptr<memory_block_data> result = make_array_memory_block(0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
   *reinterpret_cast<T *>(data_ptr) = value;
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-  ndo->type = reinterpret_cast<ndt::base_type *>(type_id_of<T>::value);
+  ndo->tp = reinterpret_cast<ndt::base_type *>(type_id_of<T>::value);
   ndo->data = data_ptr;
   ndo->owner = NULL;
   ndo->flags = flags;
@@ -85,7 +85,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intp
 
   // Fill in the preamble arrmeta
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-  ndo->type = array_tp.release();
+  ndo->tp = array_tp.release();
   ndo->data = data_ptr;
   ndo->owner = NULL;
   ndo->flags = access_flags;
@@ -124,7 +124,7 @@ nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intp
     }
     // Fill in the array arrmeta with strides and sizes
     char *meta = reinterpret_cast<char *>(ndo + 1);
-    ndo->type->arrmeta_default_construct(meta, true);
+    ndo->tp->arrmeta_default_construct(meta, true);
   }
 
   return array(result);
@@ -148,7 +148,7 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
 
   // Fill in the preamble arrmeta
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-  ndo->type = array_type.release();
+  ndo->tp = array_type.release();
   ndo->data = data_ptr;
   ndo->owner = data_reference;
   ndo->flags = access_flags;
@@ -190,10 +190,10 @@ nd::array nd::make_pod_array(const ndt::type &pod_dt, const void *data)
   // Fill in the preamble arrmeta
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
   if (pod_dt.is_builtin()) {
-    ndo->type = reinterpret_cast<const ndt::base_type *>(pod_dt.get_type_id());
+    ndo->tp = reinterpret_cast<const ndt::base_type *>(pod_dt.get_type_id());
   } else {
-    ndo->type = pod_dt.extended();
-    base_type_incref(ndo->type);
+    ndo->tp = pod_dt.extended();
+    base_type_incref(ndo->tp);
   }
   ndo->data = data_ptr;
   ndo->owner = NULL;
@@ -267,11 +267,11 @@ static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::t
   array_preamble *preamble = result.get();
   // Swap in the type
   if (!preamble->is_builtin_type()) {
-    base_type_decref(preamble->type);
+    base_type_decref(preamble->tp);
   }
-  preamble->type = new_dt.extended();
+  preamble->tp = new_dt.extended();
   if (!new_dt.is_builtin()) {
-    base_type_incref(preamble->type);
+    base_type_incref(preamble->tp);
   }
   return result;
 }
@@ -531,7 +531,7 @@ nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type
   array_preamble *preamble = result.get();
   preamble->data = data_ptr;
   preamble->owner = NULL;
-  preamble->type = dt.release();
+  preamble->tp = dt.release();
   preamble->flags = read_access_flag | immutable_access_flag;
   // The arrmeta for the strided and type parts of the type
   fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
@@ -636,16 +636,16 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
     }
     return *this;
   } else {
-    ndt::type this_dt(get()->type, true);
-    ndt::type dt = get()->type->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
+    ndt::type this_dt(get()->tp, true);
+    ndt::type dt = get()->tp->apply_linear_index(nindices, indices, 0, this_dt, collapse_leading);
     array result;
     if (!dt.is_builtin()) {
       result.set(make_array_memory_block(dt.extended()->get_arrmeta_size()));
-      result.get()->type = dt.extended();
-      base_type_incref(result.get()->type);
+      result.get()->tp = dt.extended();
+      base_type_incref(result.get()->tp);
     } else {
       result.set(make_array_memory_block(0));
-      result.get()->type = reinterpret_cast<const ndt::base_type *>(dt.get_type_id());
+      result.get()->tp = reinterpret_cast<const ndt::base_type *>(dt.get_type_id());
     }
     result.get()->data = get()->data;
     if (get()->owner) {
@@ -655,8 +655,8 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
       result.get()->owner = *this;
     }
     intptr_t offset =
-        get()->type->apply_linear_index(nindices, indices, get()->metadata(), dt, result.get()->metadata(), *this, 0,
-                                        this_dt, collapse_leading, &result.get()->data, result.get()->owner);
+        get()->tp->apply_linear_index(nindices, indices, get()->metadata(), dt, result.get()->metadata(), *this, 0,
+                                      this_dt, collapse_leading, &result.get()->data, result.get()->owner);
     result.get()->data += offset;
     result.get()->flags = get()->flags;
     return result;
@@ -706,14 +706,14 @@ void nd::array::flag_as_immutable()
     // something
     // other than a memblock owning its data, such as an external memblock.
     ok = false;
-  } else if (!get()->is_builtin_type() && !get()->type->is_unique_data_owner(get()->metadata())) {
+  } else if (!get()->is_builtin_type() && !get()->tp->is_unique_data_owner(get()->metadata())) {
     ok = false;
   }
 
   if (ok) {
     // Finalize any allocated data in the arrmeta
-    if (!is_builtin_type(get()->type)) {
-      get()->type->arrmeta_finalize_buffers(get()->metadata());
+    if (!is_builtin_type(get()->tp)) {
+      get()->tp->arrmeta_finalize_buffers(get()->metadata());
     }
     // Clear the write flag, and set the immutable flag
     get()->flags = (get()->flags & ~(uint64_t)write_access_flag) | immutable_access_flag;
@@ -1168,9 +1168,9 @@ nd::array nd::array::permute(intptr_t ndim, const intptr_t *axes) const
 
   // We can now substitute our transformed type into
   // the result array
-  base_type_decref(res.get()->type);
-  res.get()->type = transformed_tp.extended();
-  base_type_incref(res.get()->type);
+  base_type_decref(res.get()->tp);
+  res.get()->tp = transformed_tp.extended();
+  base_type_incref(res.get()->tp);
 
   return res;
 }
@@ -1280,7 +1280,7 @@ nd::array nd::array::new_axis(intptr_t i, intptr_t new_ndim) const
   } else {
     res.get()->owner = get_data_memblock();
   }
-  res.get()->type = ndt::type(dst_tp).release();
+  res.get()->tp = ndt::type(dst_tp).release();
   res.get()->flags = get()->flags;
 
   char *src_arrmeta = const_cast<char *>(get()->metadata());
@@ -1388,7 +1388,7 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
       } else {
         result.get()->owner = intrusive_ptr<memory_block_data>::get();
       }
-      result.get()->type = result_tp.release();
+      result.get()->tp = result_tp.release();
       result.get()->flags = get()->flags;
       // The result has one strided ndarray field
       fixed_dim_type_arrmeta *result_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
@@ -1441,7 +1441,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const
     o << " address: " << (void *)intrusive_ptr<memory_block_data>::get() << "\n";
     o << " refcount: " << ndo->m_use_count << "\n";
     o << " type:\n";
-    o << "  pointer: " << (void *)ndo->type << "\n";
+    o << "  pointer: " << (void *)ndo->tp << "\n";
     o << "  type: " << get_type() << "\n";
     if (!get_type().is_builtin()) {
       o << "  type refcount: " << get_type().extended()->get_use_count() << "\n";
@@ -1457,7 +1457,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const
     o << ")\n";
     if (!ndo->is_builtin_type()) {
       o << "  type-specific arrmeta:\n";
-      ndo->type->arrmeta_debug_print(get()->metadata(), o, indent + "   ");
+      ndo->tp->arrmeta_debug_print(get()->metadata(), o, indent + "   ");
     }
     o << " data:\n";
     o << "   pointer: " << (void *)ndo->data << "\n";
@@ -1485,7 +1485,7 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs)
       print_builtin_scalar(v.get()->get_builtin_type_id(), o, v.get()->data);
     } else {
       stringstream ss;
-      v.get()->type->print_data(ss, v.get()->metadata(), v.get()->data);
+      v.get()->tp->print_data(ss, v.get()->metadata(), v.get()->data);
       print_indented(o, "      ", ss.str(), true);
     }
     o << ",\n      type=\"" << rhs.get_type() << "\")";
@@ -1547,7 +1547,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
     intrusive_ptr<memory_block_data> result(make_array_memory_block(0, data_size, data_alignment, &data_ptr));
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
     // It's a builtin type id, so no incref
-    preamble->type = tp.extended();
+    preamble->tp = tp.extended();
     preamble->data = data_ptr;
     preamble->owner = NULL;
     preamble->flags = nd::read_access_flag | nd::write_access_flag;
@@ -1575,7 +1575,7 @@ nd::array nd::empty_shell(const ndt::type &tp)
       }
     }
     array_preamble *preamble = reinterpret_cast<array_preamble *>(result.get());
-    preamble->type = ndt::type(tp).release();
+    preamble->tp = ndt::type(tp).release();
     preamble->data = data_ptr;
     preamble->owner = NULL;
     preamble->flags = nd::read_access_flag | nd::write_access_flag;
@@ -1594,7 +1594,7 @@ nd::array nd::empty(const ndt::type &tp)
   // Construct the arrmeta with default settings
   if (tp.get_arrmeta_size() > 0) {
     array_preamble *preamble = res.get();
-    preamble->type->arrmeta_default_construct(reinterpret_cast<char *>(preamble + 1), true);
+    preamble->tp->arrmeta_default_construct(reinterpret_cast<char *>(preamble + 1), true);
   }
   return res;
 }
@@ -1623,7 +1623,7 @@ nd::array nd::empty_like(const nd::array &rhs)
   if (rhs.get()->is_builtin_type()) {
     dt = ndt::type(rhs.get()->get_builtin_type_id());
   } else {
-    dt = rhs.get()->type->get_canonical_type();
+    dt = rhs.get()->tp->get_canonical_type();
   }
 
   if (rhs.is_scalar()) {
@@ -1723,7 +1723,7 @@ nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNU
     reinterpret_cast<bytes *>(data_ptr)->assign(mm_ptr, mm_size);
     // Set the array arrmeta
     array_preamble *ndo = result.get();
-    ndo->type = dt.release();
+    ndo->tp = dt.release();
     ndo->data = data_ptr;
     ndo->owner = NULL;
     ndo->flags = access;
@@ -1787,7 +1787,7 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   array result(make_array_memory_block(fsd->get_arrmeta_size(), fsd->get_default_data_size(), fsd->get_data_alignment(),
                                        &data_ptr));
   // Set the array properties
-  result.get()->type = result_type.release();
+  result.get()->tp = result_type.release();
   result.get()->data = data_ptr;
   result.get()->owner = NULL;
   result.get()->flags = flags;
