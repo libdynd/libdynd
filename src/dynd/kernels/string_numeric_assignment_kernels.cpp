@@ -74,16 +74,14 @@ struct string_to_builtin_kernel {
   typedef string_to_builtin_kernel extra_type;
 
   ckernel_prefix base;
-  const ndt::base_string_type *src_string_tp;
+  ndt::type src_string_tp;
   assign_error_mode errmode;
   const char *src_arrmeta;
 
   static void destruct(ckernel_prefix *extra)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    if (e->src_string_tp) {
-      base_type_decref(e->src_string_tp);
-    }
+    e->src_string_tp.~type();
   }
 };
 } // anonymous namespace
@@ -115,7 +113,8 @@ static void string_to_bool_single(ckernel_prefix *extra, char *dst, char *const 
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
-  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = reinterpret_cast<const ndt::base_string_type *>(e->src_string_tp.extended())
+                      ->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, e->errmode);
 }
@@ -193,7 +192,8 @@ struct string_to_int {
   static void single(ckernel_prefix *extra, char *dst, char *const *src)
   {
     string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
-    std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+    std::string s = reinterpret_cast<const ndt::base_string_type *>(e->src_string_tp.extended())
+                        ->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     bool negative = false;
     if (!s.empty() && s[0] == '-') {
@@ -208,10 +208,9 @@ struct string_to_int {
       bool overflow = false, badparse = false;
       uint64_t value = parse::checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
       if (badparse) {
-        raise_string_cast_error(ndt::type::make<T>(), ndt::type(e->src_string_tp, true), e->src_arrmeta, src[0]);
+        raise_string_cast_error(ndt::type::make<T>(), e->src_string_tp, e->src_arrmeta, src[0]);
       } else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
-        raise_string_cast_overflow_error(ndt::type::make<T>(), ndt::type(e->src_string_tp, true), e->src_arrmeta,
-                                         src[0]);
+        raise_string_cast_overflow_error(ndt::type::make<T>(), e->src_string_tp, e->src_arrmeta, src[0]);
       }
       result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
     }
@@ -226,7 +225,8 @@ struct string_to_uint {
   static void single(ckernel_prefix *extra, char *dst, char *const *src)
   {
     string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
-    std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+    std::string s = reinterpret_cast<const ndt::base_string_type *>(e->src_string_tp.extended())
+                        ->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
     trim(s);
     bool negative = false;
     if (!s.empty() && s[0] == '-') {
@@ -241,10 +241,9 @@ struct string_to_uint {
       bool overflow = false, badparse = false;
       uint64_t value = parse::checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
       if (badparse) {
-        raise_string_cast_error(ndt::type::make<T>(), ndt::type(e->src_string_tp, true), e->src_arrmeta, src[0]);
+        raise_string_cast_error(ndt::type::make<T>(), e->src_string_tp, e->src_arrmeta, src[0]);
       } else if (overflow || (negative && value != 0) || overflow_check<T>::is_overflow(value)) {
-        raise_string_cast_overflow_error(ndt::type::make<T>(), ndt::type(e->src_string_tp, true), e->src_arrmeta,
-                                         src[0]);
+        raise_string_cast_overflow_error(ndt::type::make<T>(), e->src_string_tp, e->src_arrmeta, src[0]);
       }
       result = static_cast<T>(value);
     }
@@ -256,7 +255,8 @@ struct string_to_uint {
 static void string_to_int128_single(ckernel_prefix *extra, char *dst, char *const *src)
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
-  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = reinterpret_cast<const ndt::base_string_type *>(e->src_string_tp.extended())
+                      ->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   bool negative = false;
   if (!s.empty() && s[0] == '-') {
@@ -271,10 +271,9 @@ static void string_to_int128_single(ckernel_prefix *extra, char *dst, char *cons
     bool overflow = false, badparse = false;
     uint128 value = parse::checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
     if (badparse) {
-      raise_string_cast_error(ndt::type::make<int128>(), ndt::type(e->src_string_tp, true), e->src_arrmeta, src[0]);
+      raise_string_cast_error(ndt::type::make<int128>(), e->src_string_tp, e->src_arrmeta, src[0]);
     } else if (overflow || overflow_check<int128>::is_overflow(value, negative)) {
-      raise_string_cast_overflow_error(ndt::type::make<int128>(), ndt::type(e->src_string_tp, true), e->src_arrmeta,
-                                       src[0]);
+      raise_string_cast_overflow_error(ndt::type::make<int128>(), e->src_string_tp, e->src_arrmeta, src[0]);
     }
     result = negative ? -static_cast<int128>(value) : static_cast<int128>(value);
   }
@@ -284,7 +283,8 @@ static void string_to_int128_single(ckernel_prefix *extra, char *dst, char *cons
 static void string_to_uint128_single(ckernel_prefix *extra, char *dst, char *const *src)
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
-  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = reinterpret_cast<const ndt::base_string_type *>(e->src_string_tp.extended())
+                      ->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   bool negative = false;
   if (!s.empty() && s[0] == '-') {
@@ -298,10 +298,9 @@ static void string_to_uint128_single(ckernel_prefix *extra, char *dst, char *con
     bool overflow = false, badparse = false;
     result = parse::checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
     if (badparse) {
-      raise_string_cast_error(ndt::type::make<int128>(), ndt::type(e->src_string_tp, true), e->src_arrmeta, src[0]);
+      raise_string_cast_error(ndt::type::make<int128>(), e->src_string_tp, e->src_arrmeta, src[0]);
     } else if (overflow || (negative && result != 0)) {
-      raise_string_cast_overflow_error(ndt::type::make<uint128>(), ndt::type(e->src_string_tp, true), e->src_arrmeta,
-                                       src[0]);
+      raise_string_cast_overflow_error(ndt::type::make<uint128>(), e->src_string_tp, e->src_arrmeta, src[0]);
     }
   }
   *reinterpret_cast<uint128 *>(dst) = result;
@@ -311,7 +310,8 @@ static void string_to_float32_single(ckernel_prefix *extra, char *dst, char *con
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
-  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = reinterpret_cast<const ndt::base_string_type *>(e->src_string_tp.extended())
+                      ->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   double value = parse::checked_string_to_float64(s.data(), s.data() + s.size(), e->errmode);
   // Assign double -> float according to the error mode
@@ -344,7 +344,8 @@ static void string_to_float64_single(ckernel_prefix *extra, char *dst, char *con
 {
   string_to_builtin_kernel *e = reinterpret_cast<string_to_builtin_kernel *>(extra);
   // Get the string from the source
-  std::string s = e->src_string_tp->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
+  std::string s = reinterpret_cast<const ndt::base_string_type *>(e->src_string_tp.extended())
+                      ->get_utf8_string(e->src_arrmeta, src[0], e->errmode);
   trim(s);
   double value = parse::checked_string_to_float64(s.data(), s.data() + s.size(), e->errmode);
   *reinterpret_cast<double *>(dst) = value;
@@ -400,7 +401,7 @@ size_t dynd::make_string_to_builtin_assignment_kernel(void *ckb, intptr_t ckb_of
     e->base.function = reinterpret_cast<void *>(static_string_to_builtin_kernels[dst_type_id - bool_type_id]);
     e->base.destructor = &string_to_builtin_kernel::destruct;
     // The kernel data owns this reference
-    e->src_string_tp = static_cast<const ndt::base_string_type *>(ndt::type(src_string_tp).release());
+    e->src_string_tp = ndt::type(src_string_tp);
     e->errmode = ectx->errmode;
     e->src_arrmeta = src_arrmeta;
     return ckb_offset;

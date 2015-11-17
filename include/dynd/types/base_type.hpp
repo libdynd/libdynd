@@ -130,7 +130,6 @@ namespace ndt {
    *types.
    */
   class DYND_API base_type {
-  public:
     /** Embedded reference counting */
     mutable atomic_refcount m_use_count;
 
@@ -147,8 +146,8 @@ namespace ndt {
     typedef base_type_members::flags_type flags_type;
 
     /** Starts off the extended type instance with a use count of 1. */
-    inline base_type(type_id_t type_id, type_kind_t kind, size_t data_size, size_t alignment, flags_type flags,
-                     size_t arrmeta_size, size_t ndim, size_t strided_ndim)
+    base_type(type_id_t type_id, type_kind_t kind, size_t data_size, size_t alignment, flags_type flags,
+              size_t arrmeta_size, size_t ndim, size_t strided_ndim)
         : m_use_count(1),
           m_members(static_cast<uint16_t>(type_id), static_cast<uint8_t>(kind), static_cast<uint8_t>(alignment), flags,
                     data_size, arrmeta_size, static_cast<uint8_t>(ndim), static_cast<uint8_t>(strided_ndim))
@@ -707,6 +706,11 @@ namespace ndt {
 
     friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);
+
+    friend void intrusive_ptr_retain(const base_type *ptr);
+    friend void intrusive_ptr_release(const base_type *ptr);
+    friend long intrusive_ptr_use_count(const base_type *ptr);
+
     friend type make_dynamic_type(type_id_t tp_id);
   };
 
@@ -745,11 +749,6 @@ namespace ndt {
     }
   }
 
-  /**
-   * Checks if the type is builtin or not, and if not,
-   * decrements the reference count of the type,
-   * freeing it if the count reaches zero.
-   */
   inline void base_type_xdecref(const base_type *bd)
   {
     if (!is_builtin_type(bd)) {
@@ -762,9 +761,16 @@ namespace ndt {
     base_type_xincref(ptr);
   }
 
+  /**
+   * Checks if the type is builtin or not, and if not,
+   * decrements the reference count of the type,
+   * freeing it if the count reaches zero.
+   */
   inline void intrusive_ptr_release(const base_type *ptr)
   {
-    base_type_xdecref(ptr);
+    if (!is_builtin_type(ptr)) {
+      base_type_decref(ptr);
+    }
   }
 
   inline long intrusive_ptr_use_count(const base_type *ptr)

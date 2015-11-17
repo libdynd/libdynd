@@ -70,7 +70,7 @@ template <typename UIntType>
 struct categorical_to_other_kernel : nd::base_kernel<categorical_to_other_kernel<UIntType>, 1> {
   typedef categorical_to_other_kernel extra_type;
 
-  const ndt::categorical_type *src_cat_tp;
+  ndt::type src_cat_tp;
 
   void single(char *dst, char *const *src)
   {
@@ -78,16 +78,15 @@ struct categorical_to_other_kernel : nd::base_kernel<categorical_to_other_kernel
     expr_single_t opchild = echild->get_function<expr_single_t>();
 
     uint32_t value = *reinterpret_cast<const UIntType *>(src[0]);
-    char *src_val = const_cast<char *>(src_cat_tp->get_category_data_from_value(value));
+    char *src_val = const_cast<char *>(
+        reinterpret_cast<const ndt::categorical_type *>(src_cat_tp.extended())->get_category_data_from_value(value));
     opchild(echild, dst, &src_val);
   }
 
   static void destruct(ckernel_prefix *self)
   {
     extra_type *e = reinterpret_cast<extra_type *>(self);
-    if (e->src_cat_tp != NULL) {
-      base_type_decref(e->src_cat_tp);
-    }
+    e->src_cat_tp.~type();
     self->get_child(sizeof(extra_type))->destroy();
   }
 };
@@ -172,8 +171,8 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
 {
   nd::array categories = nd::empty(uniques.size(), element_tp);
   ckernel_builder<kernel_request_host> k;
-  make_assignment_kernel(&k, 0, element_tp, categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta), element_tp, arrmeta,
-                         kernel_request_single, &eval::default_eval_context);
+  make_assignment_kernel(&k, 0, element_tp, categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta), element_tp,
+                         arrmeta, kernel_request_single, &eval::default_eval_context);
   expr_single_t fn = k.get()->get_function<expr_single_t>();
 
   intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get()->metadata())->stride;
@@ -473,21 +472,20 @@ intptr_t ndt::categorical_type::make_assignment_kernel(void *ckb, intptr_t ckb_o
       case uint8_type_id: {
         categorical_to_other_kernel<uint8_t> *e = categorical_to_other_kernel<uint8_t>::make(ckb, kernreq, ckb_offset);
         // The kernel type owns a reference to this type
-        e->src_cat_tp = static_cast<const categorical_type *>(type(src_tp).release());
+        e->src_cat_tp = type(src_tp);
 
       } break;
       case uint16_type_id: {
         categorical_to_other_kernel<uint16_t> *e =
             categorical_to_other_kernel<uint16_t>::make(ckb, kernreq, ckb_offset);
         // The kernel type owns a reference to this type
-        e->src_cat_tp = static_cast<const categorical_type *>(type(src_tp).release());
-
+        e->src_cat_tp = type(src_tp);
       } break;
       case uint32_type_id: {
         categorical_to_other_kernel<uint32_t> *e =
             categorical_to_other_kernel<uint32_t>::make(ckb, kernreq, ckb_offset);
         // The kernel type owns a reference to this type
-        e->src_cat_tp = static_cast<const categorical_type *>(type(src_tp).release());
+        e->src_cat_tp = type(src_tp);
       } break;
       default:
         throw runtime_error("internal error in categorical_type::make_assignment_kernel");
