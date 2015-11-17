@@ -58,7 +58,7 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   const array_preamble *preamble = reinterpret_cast<const array_preamble *>(ndo.get());
   size_t arrmeta_size = 0;
   if (!preamble->is_builtin_type()) {
-    arrmeta_size = preamble->type->get_arrmeta_size();
+    arrmeta_size = preamble->tp->get_arrmeta_size();
   }
   intrusive_ptr<memory_block_data> result = make_array_memory_block(arrmeta_size);
   array_preamble *result_preamble = reinterpret_cast<array_preamble *>(result.get());
@@ -74,11 +74,11 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   result_preamble->flags = preamble->flags;
 
   // Clone the type
-  result_preamble->type = preamble->type;
+  result_preamble->tp = preamble->tp;
   if (!preamble->is_builtin_type()) {
-    base_type_incref(preamble->type);
-    preamble->type->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
-                                           reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo);
+    base_type_incref(preamble->tp);
+    preamble->tp->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
+                                         reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo);
   }
 
   return result;
@@ -87,8 +87,8 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
 void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o, const std::string &indent)
 {
   const array_preamble *preamble = reinterpret_cast<const array_preamble *>(memblock);
-  if (preamble->type != NULL) {
-    ndt::type tp = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id()) : ndt::type(preamble->type, true);
+  if (preamble->tp != NULL) {
+    ndt::type tp = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id()) : ndt::type(preamble->tp, true);
     o << indent << " type: " << tp << "\n";
   } else {
     o << indent << " uninitialized nd::array\n";
@@ -101,13 +101,13 @@ array_preamble::~array_preamble()
 
   // Call the data destructor if necessary (i.e. the nd::array owns
   // the data memory, and the type has a data destructor)
-  if (!owner && !is_builtin_type() && (type->get_flags() & type_flag_destructor) != 0) {
-    type->data_destruct(arrmeta, data);
+  if (!owner && !is_builtin_type() && (tp->get_flags() & type_flag_destructor) != 0) {
+    tp->data_destruct(arrmeta, data);
   }
 
   // Free the ndobject data if it wasn't allocated together with the memory block
-  if (!owner && !is_builtin_type() && !type->is_expression()) {
-    const ndt::type &dtp = type->get_type_at_dimension(NULL, type->get_ndim());
+  if (!owner && !is_builtin_type() && !tp->is_expression()) {
+    const ndt::type &dtp = tp->get_type_at_dimension(NULL, tp->get_ndim());
     if (dtp.get_kind() == memory_kind) {
       dtp.extended<ndt::base_memory_type>()->data_free(data);
     }
@@ -115,7 +115,7 @@ array_preamble::~array_preamble()
 
   // Free the references contained in the arrmeta
   if (!is_builtin_type()) {
-    type->arrmeta_destruct(arrmeta);
-    base_type_decref(type);
+    tp->arrmeta_destruct(arrmeta);
+    base_type_decref(tp);
   }
 }

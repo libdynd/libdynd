@@ -302,7 +302,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       // Initialize the fields
       result.get()->data = data_ptr;
       result.get()->owner = data_ref.release();
-      result.get()->type = ndt::type(tp).release();
+      result.get()->tp = ndt::type(tp).release();
       result.get()->flags = arr.get()->flags;
       if (tp.get_arrmeta_size() > 0) {
         tp.extended()->arrmeta_default_construct(result.get()->metadata(), true);
@@ -331,7 +331,7 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
       // Initialize the fields
       result.get()->data = data_ptr;
       result.get()->owner = data_ref.release();
-      result.get()->type = ndt::type(arr_tp).release();
+      result.get()->tp = ndt::type(arr_tp).release();
       result.get()->flags = arr.get()->flags;
       if (el_tp.get_arrmeta_size() > 0) {
         el_tp.extended()->arrmeta_default_construct(result.get()->metadata() + sizeof(fixed_dim_type_arrmeta), true);
@@ -361,7 +361,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
     // Use the same data reference, avoid producing a chain
     result.get()->owner = arr.get_data_memblock();
   }
-  result.get()->type = ndt::type(tp).release();
+  result.get()->tp = ndt::type(tp).release();
   result.get()->flags = arr.get()->flags;
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_type_id() == var_dim_type_id && tp.get_type_id() == fixed_dim_type_id) {
