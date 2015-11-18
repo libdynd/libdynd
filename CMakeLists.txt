@@ -59,14 +59,9 @@ if(DYND_LLVM)
 endif()
 
 if(DYND_CUDA)
-    set(DYND_CUDA_01 1)
-
     # CUDA 6.5, which has experimental C++11 support, is the minimum required
     find_package(CUDA_DyND 6.5 REQUIRED)
-
     add_definitions(-DDYND_CUDA)
-else()
-    set(DYND_CUDA_01 0)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH

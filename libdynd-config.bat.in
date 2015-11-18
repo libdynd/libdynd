@@ -27,7 +27,8 @@ if NOT "%1"=="-version" goto notversion
 :notversion
 
 if NOT "%1"=="-cuda" goto notcuda
-    echo "@DYND_CUDA_01@"
+    REM Use the echo: syntax because echo OFF and echo ON have other meanings.
+    echo:@DYND_CUDA@
     exit /B 0
 :notcuda
 
@@ -39,5 +40,5 @@ echo   -libname     Prints the name of the libdynd library.
 echo   -libpath     Prints the full path of the libdynd library.
 echo   -includedir  Prints the directory with the libdynd include files.
 echo   -version     Prints the version of libdynd.
-echo   -cuda        Prints whether or not libdynd was built with cuda support enabled.
+echo   -cuda        Prints whether libdynd was built with cuda support ON or OFF.
 exit /B 1
