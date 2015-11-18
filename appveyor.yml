@@ -41,4 +41,6 @@ on_success:
   # This happens when an executable writes to stderr while still executing successfully.
   # See http://stackoverflow.com/a/22615314/1935144
   # See also http://stackoverflow.com/a/2095623/1935144
-  - ps: if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { anaconda --token $env:appveyor_token upload (conda build --output conda.recipe) --user dynd --channel dev 2>&1 }
+  # Must redirect to null to avoid bug.
+  # See https://connect.microsoft.com/PowerShell/feedback/details/645954
+  - ps: if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { anaconda --token $env:appveyor_token upload (conda build --output conda.recipe) --user dynd --channel dev 2> $null }
