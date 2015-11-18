@@ -36,4 +36,10 @@ build_script:
   - conda-build conda.recipe
 
 on_success:
+  # Redirect output from stderr to stdout to avoid having the command for uploading
+  # the conda package fail in powershell in spite of a successful upload.
+  # This happens when an executable writes to stderr while still executing successfully.
+  # See http://stackoverflow.com/a/22615314/1935144
+  # See also http://stackoverflow.com/a/2095623/1935144
+  - du 2>&1
   - ps: if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { anaconda --token $env:appveyor_token upload (conda build --output conda.recipe) --user dynd --channel dev }
