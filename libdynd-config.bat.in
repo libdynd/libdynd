@@ -39,4 +39,5 @@ echo   -libname     Prints the name of the libdynd library.
 echo   -libpath     Prints the full path of the libdynd library.
 echo   -includedir  Prints the directory with the libdynd include files.
 echo   -version     Prints the version of libdynd.
+echo   -cuda        Prints whether or not libdynd was built with cuda support "ON" or "OFF".
 exit /B 1
