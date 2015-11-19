@@ -299,7 +299,7 @@ namespace nd {
       } else {
         size_t ndim = get()->tp->get_ndim();
         if (ndim == 0) {
-          return ndt::type(get()->tp, true);
+          return get()->tp;
         } else {
           return get()->tp->get_type_at_dimension(NULL, ndim);
         }
@@ -328,7 +328,7 @@ namespace nd {
         }
         ndim -= include_ndim;
         if (ndim == 0) {
-          return ndt::type(get()->tp, true);
+          return get()->tp;
         } else {
           return get()->tp->get_type_at_dimension(NULL, ndim);
         }
@@ -1646,8 +1646,8 @@ namespace nd {
         if (!lhs.is_scalar()) {
           throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
         }
-        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get()->metadata(), lhs.get()->data,
-                          ectx);
+        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get()->metadata(),
+                          lhs.get()->data, ectx);
         return result;
       }
     };
