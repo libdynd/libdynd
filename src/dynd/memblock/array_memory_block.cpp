@@ -57,7 +57,7 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   // Allocate the new memory block.
   const array_preamble *preamble = reinterpret_cast<const array_preamble *>(ndo.get());
   size_t arrmeta_size = 0;
-  if (!preamble->is_builtin_type()) {
+  if (!preamble->tp.is_builtin()) {
     arrmeta_size = preamble->tp->get_arrmeta_size();
   }
   intrusive_ptr<memory_block_data> result = make_array_memory_block(arrmeta_size);
@@ -75,7 +75,7 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
 
   // Clone the type
   result_preamble->tp = preamble->tp;
-  if (!preamble->is_builtin_type()) {
+  if (!preamble->tp.is_builtin()) {
     preamble->tp.extended()->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
                                                     reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble),
                                                     ndo);
@@ -88,33 +88,8 @@ void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std
 {
   const array_preamble *preamble = reinterpret_cast<const array_preamble *>(memblock);
   if (!preamble->tp.is_null()) {
-    ndt::type tp = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id()) : preamble->tp;
-    o << indent << " type: " << tp << "\n";
+    o << indent << " type: " << preamble->tp << "\n";
   } else {
     o << indent << " uninitialized nd::array\n";
-  }
-}
-
-array_preamble::~array_preamble()
-{
-  char *arrmeta = reinterpret_cast<char *>(this + 1);
-
-  // Call the data destructor if necessary (i.e. the nd::array owns
-  // the data memory, and the type has a data destructor)
-  if (!owner && !is_builtin_type() && (tp->get_flags() & type_flag_destructor) != 0) {
-    tp->data_destruct(arrmeta, data);
-  }
-
-  // Free the ndobject data if it wasn't allocated together with the memory block
-  if (!owner && !is_builtin_type() && !tp->is_expression()) {
-    const ndt::type &dtp = tp->get_type_at_dimension(NULL, tp->get_ndim());
-    if (dtp.get_kind() == memory_kind) {
-      dtp.extended<ndt::base_memory_type>()->data_free(data);
-    }
-  }
-
-  // Free the references contained in the arrmeta
-  if (!is_builtin_type()) {
-    tp->arrmeta_destruct(arrmeta);
   }
 }

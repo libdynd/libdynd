@@ -281,7 +281,7 @@ namespace nd {
 
     inline intptr_t get_ndim() const
     {
-      if (get()->is_builtin_type()) {
+      if (get()->tp.is_builtin()) {
         return 0;
       } else {
         return get()->tp->get_ndim();
@@ -294,16 +294,12 @@ namespace nd {
      */
     inline ndt::type get_dtype() const
     {
-      if (get()->is_builtin_type()) {
-        return ndt::type(get()->get_builtin_type_id());
-      } else {
-        size_t ndim = get()->tp->get_ndim();
-        if (ndim == 0) {
-          return get()->tp;
-        } else {
-          return get()->tp->get_type_at_dimension(NULL, ndim);
-        }
+      size_t ndim = get()->tp.get_ndim();
+      if (ndim == 0) {
+        return get()->tp;
       }
+
+      return get()->tp->get_type_at_dimension(NULL, ndim);
     }
 
     /**
@@ -316,11 +312,11 @@ namespace nd {
      */
     inline ndt::type get_dtype(size_t include_ndim) const
     {
-      if (get()->is_builtin_type()) {
+      if (get()->tp.is_builtin()) {
         if (include_ndim > 0) {
           throw too_many_indices(get_type(), include_ndim, 0);
         }
-        return ndt::type(get()->get_builtin_type_id());
+        return ndt::type(get()->tp.get_type_id());
       } else {
         size_t ndim = get()->tp->get_ndim();
         if (ndim < include_ndim) {
@@ -355,7 +351,7 @@ namespace nd {
     }
     inline void get_shape(intptr_t *out_shape) const
     {
-      if (!get()->is_builtin_type() && get()->tp->get_ndim() > 0) {
+      if (!get()->tp.is_builtin() && get()->tp->get_ndim() > 0) {
         get()->tp->get_shape(get()->tp->get_ndim(), 0, out_shape, get()->metadata(), get()->data);
       }
     }
@@ -395,7 +391,7 @@ namespace nd {
     }
     inline void get_strides(intptr_t *out_strides) const
     {
-      if (!get()->is_builtin_type()) {
+      if (!get()->tp.is_builtin()) {
         get()->tp->get_strides(0, out_strides, get()->metadata());
       }
     }

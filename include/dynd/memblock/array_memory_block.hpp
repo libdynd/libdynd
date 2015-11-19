@@ -10,6 +10,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/memblock/memory_block.hpp>
+#include <dynd/types/base_memory_type.hpp>
 
 namespace dynd {
 
@@ -29,23 +30,30 @@ struct DYND_API array_preamble : memory_block_data {
   char *data;
   intrusive_ptr<memory_block_data> owner;
 
-  ~array_preamble();
-
-  /** Returns true if the type is builtin */
-  inline bool is_builtin_type() const
+  ~array_preamble()
   {
-    return tp.is_builtin();
-  }
+    if (!tp.is_builtin()) {
+      char *arrmeta = reinterpret_cast<char *>(this + 1);
 
-  /** Should only be called if is_builtin_type() returns true */
-  inline type_id_t get_builtin_type_id() const
-  {
-    return tp.get_type_id();
-  }
+      if (!owner) {
+        // Call the data destructor if necessary (i.e. the nd::array owns
+        // the data memory, and the type has a data destructor)
+        if ((tp->get_flags() & type_flag_destructor) != 0) {
+          tp->data_destruct(arrmeta, data);
+        }
 
-  inline type_id_t get_type_id() const
-  {
-    return tp.get_type_id();
+        // Free the ndobject data if it wasn't allocated together with the memory block
+        if (!tp->is_expression()) {
+          const ndt::type &dtp = tp->get_type_at_dimension(NULL, tp->get_ndim());
+          if (dtp.get_kind() == memory_kind) {
+            dtp.extended<ndt::base_memory_type>()->data_free(data);
+          }
+        }
+      }
+
+      // Free the references contained in the arrmeta
+      tp->arrmeta_destruct(arrmeta);
+    }
   }
 
   /** Return a pointer to the arrmeta, immediately after the preamble */
