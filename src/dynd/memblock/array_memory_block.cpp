@@ -76,9 +76,9 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
   // Clone the type
   result_preamble->tp = preamble->tp;
   if (!preamble->is_builtin_type()) {
-    base_type_incref(preamble->tp);
-    preamble->tp->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
-                                         reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble), ndo);
+    preamble->tp.extended()->arrmeta_copy_construct(reinterpret_cast<char *>(result.get()) + sizeof(array_preamble),
+                                                    reinterpret_cast<const char *>(ndo.get()) + sizeof(array_preamble),
+                                                    ndo);
   }
 
   return result;
@@ -87,8 +87,8 @@ intrusive_ptr<memory_block_data> dynd::shallow_copy_array_memory_block(const int
 void dynd::array_memory_block_debug_print(const memory_block_data *memblock, std::ostream &o, const std::string &indent)
 {
   const array_preamble *preamble = reinterpret_cast<const array_preamble *>(memblock);
-  if (preamble->tp != NULL) {
-    ndt::type tp = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id()) : ndt::type(preamble->tp, true);
+  if (!preamble->tp.is_null()) {
+    ndt::type tp = preamble->is_builtin_type() ? ndt::type(preamble->get_type_id()) : preamble->tp;
     o << indent << " type: " << tp << "\n";
   } else {
     o << indent << " uninitialized nd::array\n";
@@ -116,6 +116,5 @@ array_preamble::~array_preamble()
   // Free the references contained in the arrmeta
   if (!is_builtin_type()) {
     tp->arrmeta_destruct(arrmeta);
-    base_type_decref(tp);
   }
 }

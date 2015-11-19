@@ -361,7 +361,7 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
     // Use the same data reference, avoid producing a chain
     result.get()->owner = arr.get_data_memblock();
   }
-  result.get()->tp = ndt::type(tp).release();
+  result.get()->tp = tp;
   result.get()->flags = arr.get()->flags;
   // First handle a special case of viewing outermost "var" as "fixed[#]"
   if (arr.get_type().get_type_id() == var_dim_type_id && tp.get_type_id() == fixed_dim_type_id) {

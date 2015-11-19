@@ -395,7 +395,7 @@ static nd::array array_function_dereference(const nd::array &self)
   if (!dt.is_builtin()) {
     dt.extended()->arrmeta_copy_construct(result.get()->metadata(), arrmeta, self);
   }
-  result.get()->tp = dt.release();
+  result.get()->tp = dt;
   result.get()->data = data;
   result.get()->owner = dataref;
   result.get()->flags = flags;
