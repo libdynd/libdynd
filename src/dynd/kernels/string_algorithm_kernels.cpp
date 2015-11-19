@@ -87,17 +87,14 @@ void kernels::string_find_kernel::init(const ndt::type *src_tp, const char *cons
     throw runtime_error(ss.str());
   }
   m_base.destructor = &kernels::string_find_kernel::destruct;
-  m_str_type = static_cast<const ndt::base_string_type *>(ndt::type(src_tp[0]).release());
+  m_str_type = src_tp[0];
   m_str_arrmeta = src_arrmeta[0];
-  m_sub_type = static_cast<const ndt::base_string_type *>(ndt::type(src_tp[1]).release());
+  m_sub_type = src_tp[1];
   m_sub_arrmeta = src_arrmeta[1];
 }
 
-void kernels::string_find_kernel::destruct(ckernel_prefix *extra)
+void kernels::string_find_kernel::destruct(ckernel_prefix *DYND_UNUSED(extra))
 {
-  extra_type *e = reinterpret_cast<extra_type *>(extra);
-  base_type_xdecref(e->m_str_type);
-  base_type_xdecref(e->m_sub_type);
 }
 
 inline void find_one_string(intptr_t *d, const char *str_begin, const char *str_end, const char *sub_begin,
@@ -141,8 +138,8 @@ inline void find_one_string(intptr_t *d, const char *str_begin, const char *str_
 void kernels::string_find_kernel::single(char *dst, char *const *src, ckernel_prefix *extra)
 {
   const extra_type *e = reinterpret_cast<const extra_type *>(extra);
-  string_encoding_t str_encoding = e->m_str_type->get_encoding();
-  string_encoding_t sub_encoding = e->m_sub_type->get_encoding();
+  string_encoding_t str_encoding = e->m_str_type.extended<ndt::base_string_type>()->get_encoding();
+  string_encoding_t sub_encoding = e->m_sub_type.extended<ndt::base_string_type>()->get_encoding();
   // TODO: Get the error mode from the evaluation context
   next_unicode_codepoint_t str_next_fn = get_next_unicode_codepoint_function(str_encoding, assign_error_nocheck);
   next_unicode_codepoint_t sub_next_fn = get_next_unicode_codepoint_function(sub_encoding, assign_error_nocheck);
@@ -150,9 +147,9 @@ void kernels::string_find_kernel::single(char *dst, char *const *src, ckernel_pr
   intptr_t *d = reinterpret_cast<intptr_t *>(dst);
   // Get the extents of the string and substring
   const char *str_begin, *str_end;
-  e->m_str_type->get_string_range(&str_begin, &str_end, e->m_str_arrmeta, src[0]);
+  e->m_str_type.extended<ndt::base_string_type>()->get_string_range(&str_begin, &str_end, e->m_str_arrmeta, src[0]);
   const char *sub_begin, *sub_end;
-  e->m_sub_type->get_string_range(&sub_begin, &sub_end, e->m_sub_arrmeta, src[1]);
+  e->m_sub_type.extended<ndt::base_string_type>()->get_string_range(&sub_begin, &sub_end, e->m_sub_arrmeta, src[1]);
   find_one_string(d, str_begin, str_end, sub_begin, sub_end, str_next_fn, sub_next_fn);
 }
 
@@ -160,8 +157,8 @@ void kernels::string_find_kernel::strided(char *dst, intptr_t dst_stride, char *
                                           size_t count, ckernel_prefix *extra)
 {
   const extra_type *e = reinterpret_cast<const extra_type *>(extra);
-  string_encoding_t str_encoding = e->m_str_type->get_encoding();
-  string_encoding_t sub_encoding = e->m_sub_type->get_encoding();
+  string_encoding_t str_encoding = e->m_str_type.extended<ndt::base_string_type>()->get_encoding();
+  string_encoding_t sub_encoding = e->m_sub_type.extended<ndt::base_string_type>()->get_encoding();
   // TODO: Get the error mode from the evaluation context
   next_unicode_codepoint_t str_next_fn = get_next_unicode_codepoint_function(str_encoding, assign_error_nocheck);
   next_unicode_codepoint_t sub_next_fn = get_next_unicode_codepoint_function(sub_encoding, assign_error_nocheck);
@@ -171,9 +168,9 @@ void kernels::string_find_kernel::strided(char *dst, intptr_t dst_stride, char *
     intptr_t *d = reinterpret_cast<intptr_t *>(dst);
     // Get the extents of the string and substring
     const char *str_begin, *str_end;
-    e->m_str_type->get_string_range(&str_begin, &str_end, e->m_str_arrmeta, src_str);
+    e->m_str_type.extended<ndt::base_string_type>()->get_string_range(&str_begin, &str_end, e->m_str_arrmeta, src_str);
     const char *sub_begin, *sub_end;
-    e->m_sub_type->get_string_range(&sub_begin, &sub_end, e->m_sub_arrmeta, src_sub);
+    e->m_sub_type.extended<ndt::base_string_type>()->get_string_range(&sub_begin, &sub_end, e->m_sub_arrmeta, src_sub);
     find_one_string(d, str_begin, str_end, sub_begin, sub_end, str_next_fn, sub_next_fn);
 
     dst += dst_stride;

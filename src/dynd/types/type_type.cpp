@@ -103,31 +103,22 @@ struct typed_data_assignment_kernel : nd::base_kernel<typed_data_assignment_kern
 };
 
 struct string_to_type_kernel : nd::base_kernel<string_to_type_kernel, 1> {
-  const ndt::base_string_type *src_string_dt;
+  ndt::type src_string_dt;
   const char *src_arrmeta;
   assign_error_mode errmode;
 
-  ~string_to_type_kernel()
-  {
-    base_type_xdecref(src_string_dt);
-  }
-
   void single(char *dst, char *const *src)
   {
-    const std::string &s = src_string_dt->get_utf8_string(src_arrmeta, src[0], errmode);
+    const std::string &s =
+        src_string_dt.extended<ndt::base_string_type>()->get_utf8_string(src_arrmeta, src[0], errmode);
     ndt::type(s).swap(*reinterpret_cast<ndt::type *>(dst));
   }
 };
 
 struct type_to_string_kernel : nd::base_kernel<type_to_string_kernel, 1> {
-  const ndt::base_string_type *dst_string_dt;
+  ndt::type dst_string_dt;
   const char *dst_arrmeta;
   eval::eval_context ectx;
-
-  ~type_to_string_kernel()
-  {
-    base_type_xdecref(dst_string_dt);
-  }
 
   void single(char *dst, char *const *src)
   {
@@ -151,7 +142,7 @@ intptr_t ndt::type_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, 
       // String to type
       string_to_type_kernel *e = string_to_type_kernel::make(ckb, kernreq, ckb_offset);
       // The kernel data owns a reference to this type
-      e->src_string_dt = static_cast<const base_string_type *>(type(src_tp).release());
+      e->src_string_dt = src_tp;
       e->src_arrmeta = src_arrmeta;
       e->errmode = ectx->errmode;
       return ckb_offset;
@@ -164,7 +155,7 @@ intptr_t ndt::type_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, 
       // Type to string
       type_to_string_kernel *e = type_to_string_kernel::make(ckb, kernreq, ckb_offset);
       // The kernel data owns a reference to this type
-      e->dst_string_dt = static_cast<const base_string_type *>(type(dst_tp).release());
+      e->dst_string_dt = dst_tp;
       e->dst_arrmeta = dst_arrmeta;
       e->ectx = *ectx;
       return ckb_offset;

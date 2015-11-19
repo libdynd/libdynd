@@ -704,32 +704,12 @@ namespace ndt {
     virtual bool reverse_adapt_type(const ndt::type &value_tp, const std::string &op, nd::callable &out_forward,
                                     nd::callable &out_reverse) const;
 
-    friend void base_type_decref(const base_type *ed);
-
     friend void intrusive_ptr_retain(const base_type *ptr);
     friend void intrusive_ptr_release(const base_type *ptr);
     friend long intrusive_ptr_use_count(const base_type *ptr);
 
     friend type make_dynamic_type(type_id_t tp_id);
   };
-
-  /**
-   * Decrements the reference count of the type,
-   * freeing it if the count reaches zero.
-   */
-  inline void base_type_decref(const base_type *bd)
-  {
-    if (--bd->m_use_count == 0) {
-      delete bd;
-    }
-  }
-
-  inline void base_type_xdecref(const base_type *bd)
-  {
-    if (!is_builtin_type(bd)) {
-      base_type_decref(bd);
-    }
-  }
 
   /**
    * Checks if the type is builtin or not, and if not,
@@ -750,7 +730,9 @@ namespace ndt {
   inline void intrusive_ptr_release(const base_type *ptr)
   {
     if (!is_builtin_type(ptr)) {
-      base_type_decref(ptr);
+      if (--ptr->m_use_count == 0) {
+        delete ptr;
+      }
     }
   }
 
