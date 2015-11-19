@@ -420,7 +420,7 @@ struct builtin_to_string_kernel_extra {
   typedef builtin_to_string_kernel_extra extra_type;
 
   ckernel_prefix base;
-  const ndt::base_string_type *dst_string_tp;
+  ndt::type dst_string_tp;
   type_id_t src_type_id;
   eval::eval_context ectx;
   const char *dst_arrmeta;
@@ -442,9 +442,7 @@ struct builtin_to_string_kernel_extra {
   static void destruct(ckernel_prefix *extra)
   {
     extra_type *e = reinterpret_cast<extra_type *>(extra);
-    if (e->dst_string_tp) {
-      base_type_decref(e->dst_string_tp);
-    }
+    e->dst_string_tp.~type();
   }
 };
 } // anonymous namespace
@@ -466,7 +464,7 @@ size_t dynd::make_builtin_to_string_assignment_kernel(void *ckb, intptr_t ckb_of
     e->base.function = reinterpret_cast<void *>(builtin_to_string_kernel_extra::single);
     e->base.destructor = builtin_to_string_kernel_extra::destruct;
     // The kernel data owns this reference
-    e->dst_string_tp = static_cast<const ndt::base_string_type *>(ndt::type(dst_string_tp).release());
+    e->dst_string_tp = dst_string_tp;
     e->src_type_id = src_type_id;
     e->ectx = *ectx;
     e->dst_arrmeta = dst_arrmeta;

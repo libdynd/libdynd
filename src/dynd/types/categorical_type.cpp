@@ -95,22 +95,20 @@ template <typename UIntType>
 struct category_to_categorical_kernel_extra : nd::base_kernel<category_to_categorical_kernel_extra<UIntType>, 1> {
   typedef category_to_categorical_kernel_extra self_type;
 
-  const ndt::categorical_type *dst_cat_tp;
+  ndt::type dst_cat_tp;
   const char *src_arrmeta;
 
   // Assign from an input matching the category type to a categorical type
   void single(char *dst, char *const *src)
   {
-    uint32_t src_val = dst_cat_tp->get_value_from_category(src_arrmeta, src[0]);
+    uint32_t src_val = dst_cat_tp.extended<ndt::categorical_type>()->get_value_from_category(src_arrmeta, src[0]);
     *reinterpret_cast<UIntType *>(dst) = src_val;
   }
 
   static void destruct(ckernel_prefix *self)
   {
     self_type *e = reinterpret_cast<self_type *>(self);
-    if (e->dst_cat_tp != NULL) {
-      base_type_decref(e->dst_cat_tp);
-    }
+    e->dst_cat_tp.~type();
   }
 };
 
@@ -436,19 +434,19 @@ intptr_t ndt::categorical_type::make_assignment_kernel(void *ckb, intptr_t ckb_o
       case uint8_type_id: {
         category_to_categorical_kernel_extra<uint8_t> *e =
             category_to_categorical_kernel_extra<uint8_t>::make(ckb, kernreq, ckb_offset);
-        e->dst_cat_tp = static_cast<const categorical_type *>(type(dst_tp).release());
+        e->dst_cat_tp = dst_tp;
         e->src_arrmeta = src_arrmeta;
       } break;
       case uint16_type_id: {
         category_to_categorical_kernel_extra<uint16_t> *e =
             category_to_categorical_kernel_extra<uint16_t>::make(ckb, kernreq, ckb_offset);
-        e->dst_cat_tp = static_cast<const categorical_type *>(type(dst_tp).release());
+        e->dst_cat_tp = dst_tp;
         e->src_arrmeta = src_arrmeta;
       } break;
       case uint32_type_id: {
         category_to_categorical_kernel_extra<uint32_t> *e =
             category_to_categorical_kernel_extra<uint32_t>::make(ckb, kernreq, ckb_offset);
-        e->dst_cat_tp = static_cast<const categorical_type *>(type(dst_tp).release());
+        e->dst_cat_tp = dst_tp;
         e->src_arrmeta = src_arrmeta;
       } break;
       default:
