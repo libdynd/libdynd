@@ -704,7 +704,6 @@ namespace ndt {
     virtual bool reverse_adapt_type(const ndt::type &value_tp, const std::string &op, nd::callable &out_forward,
                                     nd::callable &out_reverse) const;
 
-    friend void base_type_incref(const base_type *ed);
     friend void base_type_decref(const base_type *ed);
 
     friend void intrusive_ptr_retain(const base_type *ptr);
@@ -713,30 +712,6 @@ namespace ndt {
 
     friend type make_dynamic_type(type_id_t tp_id);
   };
-
-  /**
-   * Increments the reference count of the type
-   */
-  inline void base_type_incref(const base_type *bd)
-  {
-    // std::cout << "dynd type " << (void *)ed << " inc: " << ed->m_use_count +
-    // 1
-    //          << "\t";
-    // ed->print_type(std::cout);
-    // std::cout << std::endl;
-    ++bd->m_use_count;
-  }
-
-  /**
-   * Checks if the type is builtin or not, and if not,
-   * increments the reference count of the type.
-   */
-  inline void base_type_xincref(const base_type *bd)
-  {
-    if (!is_builtin_type(bd)) {
-      base_type_incref(bd);
-    }
-  }
 
   /**
    * Decrements the reference count of the type,
@@ -756,9 +731,15 @@ namespace ndt {
     }
   }
 
+  /**
+   * Checks if the type is builtin or not, and if not,
+   * increments the reference count of the type.
+   */
   inline void intrusive_ptr_retain(const base_type *ptr)
   {
-    base_type_xincref(ptr);
+    if (!is_builtin_type(ptr)) {
+      ++ptr->m_use_count;
+    }
   }
 
   /**

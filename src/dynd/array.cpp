@@ -694,7 +694,7 @@ void nd::array::flag_as_immutable()
     // something
     // other than a memblock owning its data, such as an external memblock.
     ok = false;
-  } else if (!get()->is_builtin_type() && !get()->tp->is_unique_data_owner(get()->metadata())) {
+  } else if (!get()->tp.is_builtin() && !get()->tp->is_unique_data_owner(get()->metadata())) {
     ok = false;
   }
 
@@ -1441,7 +1441,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const
     if (ndo->flags & immutable_access_flag)
       o << "immutable ";
     o << ")\n";
-    if (!ndo->is_builtin_type()) {
+    if (!ndo->tp.is_builtin()) {
       o << "  type-specific arrmeta:\n";
       ndo->tp->arrmeta_debug_print(get()->metadata(), o, indent + "   ");
     }
@@ -1467,8 +1467,8 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs)
   if (!rhs.is_null()) {
     o << "array(";
     array v = rhs.eval();
-    if (v.get()->is_builtin_type()) {
-      print_builtin_scalar(v.get()->get_builtin_type_id(), o, v.get()->data);
+    if (v.get()->tp.is_builtin()) {
+      print_builtin_scalar(v.get()->tp.get_type_id(), o, v.get()->data);
     } else {
       stringstream ss;
       v.get()->tp->print_data(ss, v.get()->metadata(), v.get()->data);
@@ -1606,8 +1606,8 @@ nd::array nd::empty_like(const nd::array &rhs, const ndt::type &uniform_tp)
 nd::array nd::empty_like(const nd::array &rhs)
 {
   ndt::type dt;
-  if (rhs.get()->is_builtin_type()) {
-    dt = ndt::type(rhs.get()->get_builtin_type_id());
+  if (rhs.get()->tp.is_builtin()) {
+    dt = ndt::type(rhs.get()->tp.get_type_id());
   } else {
     dt = rhs.get()->tp->get_canonical_type();
   }
