@@ -186,28 +186,12 @@ namespace ndt {
     }
 
   public:
-    /** Constructor */
-    type() = default;
+    using intrusive_ptr<const base_type>::intrusive_ptr;
 
     /**
-     * Constructor from a base_type. This claims ownership of the 'extended'
-     * reference if incref is false, be careful!
-     */
-    explicit type(const base_type *extended, bool incref) : intrusive_ptr<const base_type>(extended, incref)
-    {
-    }
-
-    /** Copy constructor. */
-    type(const type &other) = default;
-
-    /** Assignment operator. */
-    type &operator=(const type &rhs) = default;
-
-    /** Move constructor */
-    type(type &&rhs) = default;
-
-    /** Move assignment operator. */
-    type &operator=(type &&rhs) = default;
+      * Default constructor.
+      */
+    type() = default;
 
     /** Construct from a type ID */
     type(type_id_t tp_id) : type((validate_type_id(tp_id), instances[tp_id]))
@@ -514,8 +498,7 @@ namespace ndt {
       if (is_builtin()) {
         return true;
       } else {
-        return m_ptr->get_data_size() > 0 &&
-               (m_ptr->get_flags() & (type_flag_blockref | type_flag_destructor)) == 0;
+        return m_ptr->get_data_size() > 0 && (m_ptr->get_flags() & (type_flag_blockref | type_flag_destructor)) == 0;
       }
     }
 
