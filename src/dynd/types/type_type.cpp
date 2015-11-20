@@ -82,14 +82,14 @@ void ndt::type_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 
 void ndt::type_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
-  reinterpret_cast<type *>(data)->~type();
+    reinterpret_cast<type *>(data)->~type();
 }
 
-void ndt::type_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data, intptr_t stride,
+void ndt::type_type::data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
                                            size_t count) const
 {
   for (size_t i = 0; i != count; ++i, data += stride) {
-    reinterpret_cast<type *>(data)->~type();
+    data_destruct(arrmeta, data);
   }
 }
 

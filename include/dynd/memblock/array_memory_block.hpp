@@ -38,7 +38,7 @@ struct DYND_API array_preamble : memory_block_data {
       if (!owner) {
         // Call the data destructor if necessary (i.e. the nd::array owns
         // the data memory, and the type has a data destructor)
-        if ((tp->get_flags() & type_flag_destructor) != 0) {
+        if (!tp->is_expression() && (tp->get_flags() & type_flag_destructor) != 0) {
           tp->data_destruct(arrmeta, data);
         }
 

@@ -733,7 +733,7 @@ static ndt::type parse_array_parameters(const char *&rbegin, const char *end, ma
 {
   const char *begin = rbegin;
   if (!parse_token_ds(begin, end, '[')) {
-    throw datashape_parse_error(begin, "expected opening '[' after 'ref'");
+    throw datashape_parse_error(begin, "expected opening '[' after 'array'");
   }
   ndt::type tp = parse_datashape(begin, end, symtable);
   if (tp.is_null()) {
