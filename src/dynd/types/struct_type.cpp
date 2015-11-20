@@ -305,11 +305,87 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
+namespace dynd {
+namespace nd {
+
+  struct get_array_field_kernel : nd::base_kernel<get_array_field_kernel> {
+    static const size_t data_size = 0;
+
+    array self;
+    intptr_t i;
+
+    get_array_field_kernel(const array &self, intptr_t i) : self(self), i(i)
+    {
+    }
+
+    void single(array *dst, array *const *DYND_UNUSED(src))
+    {
+      array res = helper(self, i);
+      *dst = res;
+    }
+
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                 intptr_t DYND_UNUSED(nkwd), const array *kwds,
+                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      dst_tp = helper(kwds[0], kwds[1].as<intptr_t>()).get_type();
+    }
+
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                                intptr_t DYND_UNUSED(nkwd), const array *kwds,
+                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      get_array_field_kernel::make(ckb, kernreq, ckb_offset, kwds[0], kwds[1].as<intptr_t>());
+      return ckb_offset;
+    }
+
+    static array helper(const array &n, intptr_t i)
+    {
+      // Get the nd::array 'self' parameter
+      intptr_t undim = n.get_ndim();
+      ndt::type udt = n.get_dtype();
+      if (udt.get_kind() == expr_kind) {
+        std::string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
+        return n.replace_dtype(ndt::property_type::make(udt, field_name, i));
+      } else {
+        if (undim == 0) {
+          return n(i);
+        } else {
+          shortvector<irange> idx(undim + 1);
+          idx[undim] = irange(i);
+          return n.at_array(undim + 1, idx.get());
+        }
+      }
+    }
+  };
+
+} // namespace dynd::nd
+
+namespace ndt {
+
+  template <>
+  struct type::equivalent<nd::get_array_field_kernel> {
+    static type make()
+    {
+      return callable_type::make(type("Any"), tuple_type::make(),
+                                 struct_type::make({"self", "i"}, {type("Any"), type::make<intptr_t>()}));
+    }
+  };
+} // namespace dynd::ndt
+
+} // namespace dynd
+
 static array_preamble *property_get_array_field(const array_preamble *params, void *extra)
 {
   // Get the nd::array 'self' parameter
   nd::array n = nd::array(*(array_preamble **)params->data, true);
   intptr_t i = reinterpret_cast<intptr_t>(extra);
+
   intptr_t undim = n.get_ndim();
   ndt::type udt = n.get_dtype();
   if (udt.get_kind() == expr_kind) {
