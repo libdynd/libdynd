@@ -1,4 +1,4 @@
-![DyND Logo](docs/logo/dynd_logo_320px.png)
+[![DyND Logo](docs/logo/dynd_logo_320px.png)](http://libdynd.org)
 
 The DyND Library
 ================

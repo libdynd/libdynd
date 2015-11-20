@@ -14,5 +14,5 @@ test:
     - test_libdynd
 
 about:
-  home: https://github.com/libdynd/libdynd
+  home: http://libdynd.org
   license: BSD
