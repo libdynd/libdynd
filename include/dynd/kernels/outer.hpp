@@ -15,14 +15,11 @@ namespace nd {
 
     template <int N>
     struct outer_ck : base_virtual_kernel<outer_ck<N>> {
-      static intptr_t instantiate(
-          char *static_data, size_t DYND_UNUSED(data_size),
-          char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-          const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
-          const ndt::type *src_tp, const char *const *src_arrmeta,
-          dynd::kernel_request_t kernreq, const eval::eval_context *ectx,
-          intptr_t nkwd, const dynd::nd::array *kwds,
-          const std::map<std::string, ndt::type> &tp_vars)
+      static intptr_t instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  dynd::kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
+                                  const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
         intptr_t ndim = 0;
         for (intptr_t i = 0; i < nsrc; ++i) {
@@ -36,8 +33,7 @@ namespace nd {
         for (intptr_t i = 0, j = 0; i < nsrc; ++i) {
           ndt::type old_tp = src_tp[i];
           new_src_tp[i] = old_tp.with_new_axis(0, j);
-          new_src_tp[i] = new_src_tp[i].with_new_axis(
-              new_src_tp[i].get_ndim(), ndim - new_src_tp[i].get_ndim());
+          new_src_tp[i] = new_src_tp[i].with_new_axis(new_src_tp[i].get_ndim(), ndim - new_src_tp[i].get_ndim());
           ndt::type new_tp = new_src_tp[i];
 
           new (new_src_arrmeta_holder + i) arrmeta_holder(new_tp);
@@ -56,15 +52,12 @@ namespace nd {
               new_tp.extended<ndt::base_memory_type>()
                   ->get_element_type()
                   .extended<ndt::base_dim_type>()
-                  ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i],
-                                                  intrusive_ptr<memory_block_data>());
+                  ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i], intrusive_ptr<memory_block_data>());
             } else {
-              new_tp.extended<ndt::base_dim_type>()
-                  ->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i],
-                                                  intrusive_ptr<memory_block_data>());
+              new_tp.extended<ndt::base_dim_type>()->arrmeta_copy_construct_onedim(new_arrmeta, src_arrmeta[i],
+                                                                                   intrusive_ptr<memory_block_data>());
             }
-            old_tp = old_tp.get_type_at_dimension(
-                const_cast<char **>(src_arrmeta + i), 1);
+            old_tp = old_tp.get_type_at_dimension(const_cast<char **>(src_arrmeta + i), 1);
             new_tp = new_tp.get_type_at_dimension(&new_arrmeta, 1);
           }
           for (; new_tp.get_ndim();) {
@@ -77,30 +70,23 @@ namespace nd {
           new_src_arrmeta.push_back(new_src_arrmeta_holder[i].get());
         }
 
-        ckb_offset = elwise_virtual_ck<N>::instantiate(
-            static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-            new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx, nkwd,
-            kwds, tp_vars);
+        ckb_offset = elwise_virtual_ck<N>::instantiate(static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                                       new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx, nkwd,
+                                                       kwds, tp_vars);
         delete[] new_src_arrmeta_holder;
 
         return ckb_offset;
       }
 
-      static void
-      resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
-                       char *DYND_UNUSED(data), ndt::type &dst_tp,
-                       intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                       const dynd::nd::array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars)
+      static void resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
+                                   ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                                   const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        callable_type_data *child =
-            reinterpret_cast<callable *>(static_data)->get();
-        const ndt::callable_type *child_tp =
-            reinterpret_cast<callable *>(static_data)->get_type();
+        base_callable *child = reinterpret_cast<callable *>(static_data)->get();
+        const ndt::callable_type *child_tp = reinterpret_cast<callable *>(static_data)->get_type();
 
         if (child->resolve_dst_type != NULL) {
-          child->resolve_dst_type(child->static_data, 0, NULL, dst_tp, nsrc,
-                                  src_tp, nkwd, kwds, tp_vars);
+          child->resolve_dst_type(child->static_data, 0, NULL, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
         }
@@ -112,8 +98,7 @@ namespace nd {
           }
         }
         if (dst_tp.get_kind() == memory_kind) {
-          dst_tp = dst_tp.extended<ndt::base_memory_type>()
-                       ->with_replaced_storage_type(tp);
+          dst_tp = dst_tp.extended<ndt::base_memory_type>()->with_replaced_storage_type(tp);
         } else {
           dst_tp = tp;
         }

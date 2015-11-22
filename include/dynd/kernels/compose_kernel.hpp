@@ -120,8 +120,8 @@ namespace nd {
       {
         const struct static_data *static_data_x = reinterpret_cast<struct static_data *>(static_data);
 
-        callable_type_data *first = const_cast<callable_type_data *>(static_data_x->first.get());
-        callable_type_data *second = const_cast<callable_type_data *>(static_data_x->second.get());
+        base_callable *first = const_cast<base_callable *>(static_data_x->first.get());
+        base_callable *second = const_cast<base_callable *>(static_data_x->second.get());
 
         const ndt::type &buffer_tp = static_data_x->buffer_tp;
 

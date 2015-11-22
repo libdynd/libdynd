@@ -118,7 +118,7 @@ namespace nd {
    * operation and a strided operation, or constructing
    * with different array arrmeta.
    */
-  struct DYND_API callable_type_data {
+  struct DYND_API base_callable {
     char buffer[4];
 
     kernel_request_t kernreq;
@@ -130,13 +130,13 @@ namespace nd {
     callable_instantiate_t instantiate;
     callable_static_data_free_t static_data_free;
 
-    callable_type_data()
+    base_callable()
         : static_data(NULL), data_size(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL),
           static_data_free(NULL)
     {
     }
 
-    callable_type_data(expr_single_t single, expr_strided_t strided)
+    base_callable(expr_single_t single, expr_strided_t strided)
         : kernreq(kernel_request_single), data_size(0), data_init(NULL), resolve_dst_type(NULL),
           instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
     {
@@ -148,17 +148,17 @@ namespace nd {
       new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
     }
 
-    callable_type_data(kernel_request_t kernreq, single_t single, std::size_t data_size, callable_data_init_t data_init,
-                       callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
+    base_callable(kernel_request_t kernreq, single_t single, std::size_t data_size, callable_data_init_t data_init,
+                  callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
         : kernreq(kernreq), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
     {
     }
 
     template <typename T>
-    callable_type_data(kernel_request_t kernreq, single_t single, T &&static_data, std::size_t data_size,
-                       callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
-                       callable_instantiate_t instantiate)
+    base_callable(kernel_request_t kernreq, single_t single, T &&static_data, std::size_t data_size,
+                  callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+                  callable_instantiate_t instantiate)
         : kernreq(kernreq), single(single), data_size(data_size), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate),
           static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
@@ -172,9 +172,9 @@ namespace nd {
     }
 
     // non-copyable
-    callable_type_data(const callable_type_data &) = delete;
+    base_callable(const base_callable &) = delete;
 
-    ~callable_type_data()
+    ~base_callable()
     {
       // Call the static_data_free function, if it exists
       if (static_data_free != NULL) {
@@ -206,7 +206,7 @@ namespace nd {
     }
   };
 
-  static_assert((sizeof(callable_type_data) & 7) == 0, "callable_type_data must have size divisible by 8");
+  static_assert((sizeof(base_callable) & 7) == 0, "base_callable must have size divisible by 8");
 
 } // namespace dynd::nd
 } // namespace dynd
