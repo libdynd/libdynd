@@ -106,105 +106,108 @@ struct single_t {
   }
 };
 
-/**
- * This is a struct designed for interoperability at
- * the C ABI level. It contains enough information
- * to pass callable from one library to another
- * with no dependencies between them.
- *
- * The callable can produce a ckernel with with a few
- * variations, like choosing between a single
- * operation and a strided operation, or constructing
- * with different array arrmeta.
- */
-struct DYND_API callable_type_data {
-  char buffer[4];
+namespace nd {
 
-  kernel_request_t kernreq;
-  single_t single;
-  char *static_data;
-  std::size_t data_size;
-  callable_data_init_t data_init;
-  callable_resolve_dst_type_t resolve_dst_type;
-  callable_instantiate_t instantiate;
-  callable_static_data_free_t static_data_free;
+  /**
+   * This is a struct designed for interoperability at
+   * the C ABI level. It contains enough information
+   * to pass callable from one library to another
+   * with no dependencies between them.
+   *
+   * The callable can produce a ckernel with with a few
+   * variations, like choosing between a single
+   * operation and a strided operation, or constructing
+   * with different array arrmeta.
+   */
+  struct DYND_API callable_type_data {
+    char buffer[4];
 
-  callable_type_data()
-      : static_data(NULL), data_size(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL),
-        static_data_free(NULL)
-  {
-  }
+    kernel_request_t kernreq;
+    single_t single;
+    char *static_data;
+    std::size_t data_size;
+    callable_data_init_t data_init;
+    callable_resolve_dst_type_t resolve_dst_type;
+    callable_instantiate_t instantiate;
+    callable_static_data_free_t static_data_free;
 
-  callable_type_data(expr_single_t single, expr_strided_t strided)
-      : kernreq(kernel_request_single), data_size(0), data_init(NULL), resolve_dst_type(NULL),
-        instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
-  {
-    typedef void *static_data_type[2];
-    static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
-                  "static data requires stronger alignment");
-
-    this->static_data = new char[sizeof(static_data_type)];
-    new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
-  }
-
-  callable_type_data(kernel_request_t kernreq, single_t single, std::size_t data_size, callable_data_init_t data_init,
-                     callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-      : kernreq(kernreq), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
-  {
-  }
-
-  template <typename T>
-  callable_type_data(kernel_request_t kernreq, single_t single, T &&static_data, std::size_t data_size,
-                     callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
-                     callable_instantiate_t instantiate)
-      : kernreq(kernreq), single(single), data_size(data_size), data_init(data_init),
-        resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-        static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
-  {
-    typedef typename std::remove_reference<T>::type static_data_type;
-    static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
-                  "static data requires stronger alignment");
-
-    this->static_data = new char[sizeof(static_data_type)];
-    new (this->static_data)(static_data_type)(std::forward<T>(static_data));
-  }
-
-  // non-copyable
-  callable_type_data(const callable_type_data &) = delete;
-
-  ~callable_type_data()
-  {
-    // Call the static_data_free function, if it exists
-    if (static_data_free != NULL) {
-      static_data_free(static_data);
+    callable_type_data()
+        : static_data(NULL), data_size(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL),
+          static_data_free(NULL)
+    {
     }
-    delete[] static_data;
-  }
 
-  nd::array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                       char *const *src_data, intptr_t nkwd, const nd::array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars);
+    callable_type_data(expr_single_t single, expr_strided_t strided)
+        : kernreq(kernel_request_single), data_size(0), data_init(NULL), resolve_dst_type(NULL),
+          instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
+    {
+      typedef void *static_data_type[2];
+      static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
+                    "static data requires stronger alignment");
 
-  nd::array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                       nd::array *const *src_data, intptr_t nkwd, const nd::array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars);
+      this->static_data = new char[sizeof(static_data_type)];
+      new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
+    }
 
-  void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
-                  const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+    callable_type_data(kernel_request_t kernreq, single_t single, std::size_t data_size, callable_data_init_t data_init,
+                       callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
+        : kernreq(kernreq), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
+          resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
+    {
+    }
 
-  void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta, nd::array *const *src_data, intptr_t nkwd,
-                  const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+    template <typename T>
+    callable_type_data(kernel_request_t kernreq, single_t single, T &&static_data, std::size_t data_size,
+                       callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+                       callable_instantiate_t instantiate)
+        : kernreq(kernreq), single(single), data_size(data_size), data_init(data_init),
+          resolve_dst_type(resolve_dst_type), instantiate(instantiate),
+          static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
+    {
+      typedef typename std::remove_reference<T>::type static_data_type;
+      static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
+                    "static data requires stronger alignment");
 
-  template <typename StaticDataType>
-  static void static_data_destroy(char *static_data)
-  {
-    reinterpret_cast<StaticDataType *>(static_data)->~StaticDataType();
-  }
-};
+      this->static_data = new char[sizeof(static_data_type)];
+      new (this->static_data)(static_data_type)(std::forward<T>(static_data));
+    }
 
-static_assert((sizeof(callable_type_data) & 7) == 0, "callable_type_data must have size divisible by 8");
+    // non-copyable
+    callable_type_data(const callable_type_data &) = delete;
 
+    ~callable_type_data()
+    {
+      // Call the static_data_free function, if it exists
+      if (static_data_free != NULL) {
+        static_data_free(static_data);
+      }
+      delete[] static_data;
+    }
+
+    nd::array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                         char *const *src_data, intptr_t nkwd, const nd::array *kwds,
+                         const std::map<std::string, ndt::type> &tp_vars);
+
+    nd::array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+                         nd::array *const *src_data, intptr_t nkwd, const nd::array *kwds,
+                         const std::map<std::string, ndt::type> &tp_vars);
+
+    void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
+                    const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
+                    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+
+    void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
+                    const ndt::type *src_tp, const char *const *src_arrmeta, nd::array *const *src_data, intptr_t nkwd,
+                    const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+
+    template <typename StaticDataType>
+    static void static_data_destroy(char *static_data)
+    {
+      reinterpret_cast<StaticDataType *>(static_data)->~StaticDataType();
+    }
+  };
+
+  static_assert((sizeof(callable_type_data) & 7) == 0, "callable_type_data must have size divisible by 8");
+
+} // namespace dynd::nd
 } // namespace dynd

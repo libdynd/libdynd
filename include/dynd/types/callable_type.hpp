@@ -34,6 +34,8 @@ namespace ndt {
     struct get_pos_types_kernel;
 
   public:
+    typedef nd::callable_type_data data_type;
+
     callable_type(const type &ret_type, const type &pos_types, const type &kwd_types);
 
     virtual ~callable_type()

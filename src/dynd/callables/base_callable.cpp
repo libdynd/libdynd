@@ -10,9 +10,9 @@
 using namespace std;
 using namespace dynd;
 
-nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                                         const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
-                                         const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+nd::array nd::callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                                             const char *const *src_arrmeta, char *const *src_data, intptr_t nkwd,
+                                             const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
   std::unique_ptr<char[]> data(new char[data_size]);
@@ -42,9 +42,9 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
   return dst;
 }
 
-nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                                         const char *const *src_arrmeta, nd::array *const *src_data, intptr_t nkwd,
-                                         const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+nd::array nd::callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                                             const char *const *src_arrmeta, nd::array *const *src_data, intptr_t nkwd,
+                                             const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
   std::unique_ptr<char[]> data(new char[data_size]);
@@ -74,10 +74,10 @@ nd::array callable_type_data::operator()(ndt::type &dst_tp, intptr_t nsrc, const
   return dst;
 }
 
-void callable_type_data::operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
-                                    const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data,
-                                    intptr_t nkwd, const nd::array *kwds,
-                                    const std::map<std::string, ndt::type> &tp_vars)
+void nd::callable_type_data::operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
+                                        const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data,
+                                        intptr_t nkwd, const nd::array *kwds,
+                                        const std::map<std::string, ndt::type> &tp_vars)
 {
   std::unique_ptr<char[]> data(new char[data_size]);
   if (data_size > 0) {
@@ -92,12 +92,13 @@ void callable_type_data::operator()(const ndt::type &dst_tp, const char *dst_arr
   fn(ckb.get(), dst_data, src_data);
 }
 
-void callable_type_data::operator()(const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                    char *DYND_UNUSED(dst_data), intptr_t DYND_UNUSED(nsrc),
-                                    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                    nd::array *const *DYND_UNUSED(src_data), intptr_t DYND_UNUSED(nkwd),
-                                    const nd::array *DYND_UNUSED(kwds),
-                                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+void nd::callable_type_data::operator()(const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                        char *DYND_UNUSED(dst_data), intptr_t DYND_UNUSED(nsrc),
+                                        const ndt::type *DYND_UNUSED(src_tp),
+                                        const char *const *DYND_UNUSED(src_arrmeta),
+                                        nd::array *const *DYND_UNUSED(src_data), intptr_t DYND_UNUSED(nkwd),
+                                        const nd::array *DYND_UNUSED(kwds),
+                                        const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   throw std::runtime_error("view callables are not fully implemented yet");
 }
