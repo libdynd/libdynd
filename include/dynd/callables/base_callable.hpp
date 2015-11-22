@@ -121,6 +121,8 @@ namespace nd {
   struct DYND_API base_callable {
     char buffer[4];
 
+    atomic_refcount use_count;
+    ndt::type tp;
     kernel_request_t kernreq;
     single_t single;
     char *static_data;
@@ -131,13 +133,13 @@ namespace nd {
     callable_static_data_free_t static_data_free;
 
     base_callable()
-        : static_data(NULL), data_size(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL),
+        : use_count(0), static_data(NULL), data_size(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL),
           static_data_free(NULL)
     {
     }
 
     base_callable(expr_single_t single, expr_strided_t strided)
-        : kernreq(kernel_request_single), data_size(0), data_init(NULL), resolve_dst_type(NULL),
+        : use_count(0), kernreq(kernel_request_single), data_size(0), data_init(NULL), resolve_dst_type(NULL),
           instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
     {
       typedef void *static_data_type[2];
@@ -150,7 +152,7 @@ namespace nd {
 
     base_callable(kernel_request_t kernreq, single_t single, std::size_t data_size, callable_data_init_t data_init,
                   callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-        : kernreq(kernreq), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
+        : use_count(0), kernreq(kernreq), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
     {
     }
@@ -159,7 +161,7 @@ namespace nd {
     base_callable(kernel_request_t kernreq, single_t single, T &&static_data, std::size_t data_size,
                   callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
                   callable_instantiate_t instantiate)
-        : kernreq(kernreq), single(single), data_size(data_size), data_init(data_init),
+        : use_count(0), kernreq(kernreq), single(single), data_size(data_size), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate),
           static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
     {
