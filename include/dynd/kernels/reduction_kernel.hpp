@@ -93,64 +93,72 @@ namespace nd {
         }
       };
 
-      static void data_init(static_data_type *static_data, std::size_t DYND_UNUSED(data_size), data_type *data,
-                            const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                            const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void data_init(char *static_data, std::size_t DYND_UNUSED(data_size), char *data, const ndt::type &dst_tp,
+                            intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                            const std::map<std::string, ndt::type> &tp_vars)
       {
         new (data) data_type();
 
         const array &identity = kwds[1];
         if (!identity.is_missing()) {
-          data->identity = identity;
+          reinterpret_cast<data_type *>(data)->identity = identity;
         }
 
         if (kwds[0].is_missing()) {
-          data->naxis = src_tp[0].get_ndim() - static_data->child.get_type()->get_return_type().get_ndim();
-          data->axes = NULL;
+          reinterpret_cast<data_type *>(data)->naxis =
+              src_tp[0].get_ndim() -
+              reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type().get_ndim();
+          reinterpret_cast<data_type *>(data)->axes = NULL;
         } else {
-          data->naxis = kwds[0].get_dim_size();
-          data->axes = reinterpret_cast<const int *>(kwds[0].cdata());
+          reinterpret_cast<data_type *>(data)->naxis = kwds[0].get_dim_size();
+          reinterpret_cast<data_type *>(data)->axes = reinterpret_cast<const int *>(kwds[0].cdata());
         }
 
         if (kwds[2].is_missing()) {
-          data->keepdims = false;
+          reinterpret_cast<data_type *>(data)->keepdims = false;
         } else {
-          data->keepdims = kwds[2].as<bool>();
+          reinterpret_cast<data_type *>(data)->keepdims = kwds[2].as<bool>();
         }
 
-        const ndt::type &child_dst_tp = static_data->child.get_type()->get_return_type();
+        const ndt::type &child_dst_tp =
+            reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type();
         if (!dst_tp.is_symbolic()) {
-          data->ndim = src_tp[0].get_ndim() - child_dst_tp.get_ndim();
-          data->stored_ndim = data->ndim;
+          reinterpret_cast<data_type *>(data)->ndim = src_tp[0].get_ndim() - child_dst_tp.get_ndim();
+          reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
         }
 
-        if (static_data->child.get()->data_size != 0) {
-          static_data->child.get()->data_init(
-              static_data->child.get()->static_data, static_data->child.get()->data_size,
+        if (reinterpret_cast<static_data_type *>(static_data)->child.get()->data_size != 0) {
+          reinterpret_cast<static_data_type *>(static_data)->child.get()->data_init(
+              reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data,
+              reinterpret_cast<static_data_type *>(static_data)->child.get()->data_size,
               reinterpret_cast<char *>(data) + sizeof(data_type), child_dst_tp, nsrc, src_tp, nkwd - 3, kwds, tp_vars);
         }
       }
 
-      static void resolve_dst_type(static_data_type *static_data, std::size_t DYND_UNUSED(data_size), data_type *data,
-                                   ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                                   const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      static void resolve_dst_type(char *static_data, std::size_t DYND_UNUSED(data_size), char *data, ndt::type &dst_tp,
+                                   intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                                   const std::map<std::string, ndt::type> &tp_vars)
       {
-        ndt::type child_dst_tp = static_data->child.get_type()->get_return_type();
+        ndt::type child_dst_tp = reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
-          ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, data->naxis);
-          static_data->child.get()->resolve_dst_type(static_data->child.get()->static_data, 0, NULL, child_dst_tp, nsrc,
-                                                     &child_src_tp, nkwd, kwds, tp_vars);
+          ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
+          reinterpret_cast<static_data_type *>(static_data)->child.get()->resolve_dst_type(
+              reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, 0, NULL, child_dst_tp, nsrc,
+              &child_src_tp, nkwd, kwds, tp_vars);
         }
 
         // check that the child_dst_tp and the child_src_tp are the same here
 
         dst_tp = child_dst_tp;
-        data->ndim = src_tp[0].get_ndim() - dst_tp.get_ndim();
-        data->stored_ndim = data->ndim;
+        reinterpret_cast<data_type *>(data)->ndim = src_tp[0].get_ndim() - dst_tp.get_ndim();
+        reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
 
-        for (intptr_t i = data->ndim - 1, j = data->naxis - 1; i >= 0; --i) {
-          if (data->axes == NULL || (j >= 0 && i == data->axes[j])) {
-            if (data->keepdims) {
+        for (intptr_t i = reinterpret_cast<data_type *>(data)->ndim - 1,
+                      j = reinterpret_cast<data_type *>(data)->naxis - 1;
+             i >= 0; --i) {
+          if (reinterpret_cast<data_type *>(data)->axes == NULL ||
+              (j >= 0 && i == reinterpret_cast<data_type *>(data)->axes[j])) {
+            if (reinterpret_cast<data_type *>(data)->keepdims) {
               dst_tp = ndt::make_fixed_dim(1, dst_tp);
             }
             --j;

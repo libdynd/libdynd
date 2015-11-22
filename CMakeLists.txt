@@ -265,6 +265,9 @@ set(libdynd_SRC
     include/dynd/types/var_dim_type.hpp
     include/dynd/types/view_type.hpp
     include/dynd/types/void_pointer_type.hpp
+    # callables
+    src/dynd/callables/base_callable.cpp
+    include/dynd/callables/base_callable.hpp
     # Eval
     src/dynd/eval/eval_context.cpp
     src/dynd/eval/eval_engine.cpp
