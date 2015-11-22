@@ -50,7 +50,7 @@ namespace {
 
 struct option_callable_list {
   ndt::type af_tp[7];
-  callable_type_data af[7];
+  nd::callable_type_data af[7];
 
   option_callable_list()
   {
@@ -87,7 +87,7 @@ struct option_callable_list {
     return sizeof(af) / sizeof(af[0]);
   }
 
-  const callable_type_data *get() const
+  const nd::callable_type_data *get() const
   {
     return af;
   }
@@ -105,7 +105,7 @@ size_t kernels::make_option_assignment_kernel(
 {
   static option_callable_list afl;
   intptr_t size = afl.size();
-  const callable_type_data *af = afl.get();
+  const nd::callable_type_data *af = afl.get();
   const ndt::callable_type *const *af_tp =
       reinterpret_cast<const ndt::callable_type *const *>(afl.get_type());
   map<std::string, ndt::type> typevars;

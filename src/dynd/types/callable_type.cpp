@@ -35,7 +35,7 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
 }
 
 ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, const type &kwd_types)
-    : base_type(callable_type_id, function_kind, sizeof(callable_type_data), scalar_align_of<uint64_t>::value,
+    : base_type(callable_type_id, function_kind, sizeof(data_type), scalar_align_of<uint64_t>::value,
                 type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types)
 {
@@ -66,14 +66,15 @@ ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, c
   // for arguments that are symbolic.
 }
 
-static void print_callable(std::ostream &o, const ndt::callable_type *DYND_UNUSED(af_tp), const callable_type_data *af)
+static void print_callable(std::ostream &o, const ndt::callable_type *DYND_UNUSED(af_tp),
+                           const ndt::callable_type::data_type *af)
 {
   o << "<callable at " << (void *)af << ">";
 }
 
 void ndt::callable_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta), const char *data) const
 {
-  const callable_type_data *af = reinterpret_cast<const callable_type_data *>(data);
+  const data_type *af = reinterpret_cast<const data_type *>(data);
   print_callable(o, this, af);
 }
 
@@ -221,16 +222,16 @@ void ndt::callable_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
 
 void ndt::callable_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
-  const callable_type_data *d = reinterpret_cast<callable_type_data *>(data);
-  d->~callable_type_data();
+  const data_type *d = reinterpret_cast<data_type *>(data);
+  d->~data_type();
 }
 
 void ndt::callable_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), char *data, intptr_t stride,
                                                size_t count) const
 {
   for (size_t i = 0; i != count; ++i, data += stride) {
-    const callable_type_data *d = reinterpret_cast<callable_type_data *>(data);
-    d->~callable_type_data();
+    const data_type *d = reinterpret_cast<data_type *>(data);
+    d->~data_type();
   }
 }
 
@@ -245,7 +246,7 @@ struct callable_to_string_ck : nd::base_kernel<callable_to_string_ck, 1> {
 
   void single(char *dst, char *const *src)
   {
-    const callable_type_data *af = reinterpret_cast<const callable_type_data *>(src[0]);
+    const ndt::callable_type::data_type *af = reinterpret_cast<const ndt::callable_type::data_type *>(src[0]);
     stringstream ss;
     print_callable(ss, m_src_tp.extended<ndt::callable_type>(), af);
     m_dst_string_dt.extended<ndt::base_string_type>()->set_from_utf8_string(m_dst_arrmeta, dst, ss.str(), &m_ectx);
@@ -470,7 +471,8 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
       args[nargs - 1] = par_arrs[nargs];
     }
   }
-  const callable_type_data *af = reinterpret_cast<const callable_type_data *>(par_arrs[0].cdata());
+  const ndt::callable_type::data_type *af =
+      reinterpret_cast<const ndt::callable_type::data_type *>(par_arrs[0].cdata());
   const ndt::callable_type *af_tp = par_arrs[0].get_type().extended<ndt::callable_type>();
   nargs -= 1;
   // Validate the number of arguments

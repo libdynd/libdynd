@@ -31,7 +31,7 @@ TEST(SymbolicTypes, CreateFuncProto)
   // Function prototype from C++ template parameter
   tp = ndt::type::make<int64_t(float, int32_t, double)>();
   EXPECT_EQ(callable_type_id, tp.get_type_id());
-  EXPECT_EQ(sizeof(callable_type_data), tp.get_data_size());
+  EXPECT_EQ(sizeof(nd::callable_type_data), tp.get_data_size());
   EXPECT_EQ((size_t)scalar_align_of<int64_t>::value, tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   // function prototype is not actually symbolic, it is
