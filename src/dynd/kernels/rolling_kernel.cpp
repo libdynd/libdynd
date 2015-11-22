@@ -74,7 +74,7 @@ intptr_t nd::functional::rolling_ck::instantiate(
 
   intptr_t root_ckb_offset = ckb_offset;
   self_type *self = self_type::make(ckb, kernreq, ckb_offset);
-  const callable_type_data *window_af = static_data->window_op.get();
+  const base_callable *window_af = static_data->window_op.get();
   ndt::type dst_el_tp, src_el_tp;
   const char *dst_el_arrmeta, *src_el_arrmeta;
   if (!dst_tp.get_as_strided(dst_arrmeta, &self->m_dim_size,
@@ -152,7 +152,7 @@ void nd::functional::rolling_ck::resolve_dst_type(
 
   static_data_type *static_data =
       *reinterpret_cast<static_data_type **>(_static_data);
-  const callable_type_data *child_af = static_data->window_op.get();
+  const base_callable *child_af = static_data->window_op.get();
   // First get the type for the child callable
   ndt::type child_dst_tp;
   if (child_af->resolve_dst_type) {

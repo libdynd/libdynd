@@ -51,9 +51,9 @@ struct tuple_unary_op_ck : nd::base_kernel<tuple_unary_op_ck, 1> {
 };
 } // anonymous namespace
 
-intptr_t dynd::make_tuple_unary_op_ckernel(const nd::callable_type_data *af,
-                                           const ndt::callable_type *DYND_UNUSED(af_tp), void *ckb, intptr_t ckb_offset,
-                                           intptr_t field_count, const uintptr_t *dst_offsets, const ndt::type *dst_tp,
+intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *af, const ndt::callable_type *DYND_UNUSED(af_tp),
+                                           void *ckb, intptr_t ckb_offset, intptr_t field_count,
+                                           const uintptr_t *dst_offsets, const ndt::type *dst_tp,
                                            const char *const *dst_arrmeta, const uintptr_t *src_offsets,
                                            const ndt::type *src_tp, const char *const *src_arrmeta,
                                            kernel_request_t kernreq, const eval::eval_context *ectx)
@@ -75,7 +75,7 @@ intptr_t dynd::make_tuple_unary_op_ckernel(const nd::callable_type_data *af,
   return ckb_offset;
 }
 
-intptr_t dynd::make_tuple_unary_op_ckernel(const nd::callable_type_data *const *af,
+intptr_t dynd::make_tuple_unary_op_ckernel(const nd::base_callable *const *af,
                                            const ndt::callable_type *const *DYND_UNUSED(af_tp), void *ckb,
                                            intptr_t ckb_offset, intptr_t field_count, const uintptr_t *dst_offsets,
                                            const ndt::type *dst_tp, const char *const *dst_arrmeta,

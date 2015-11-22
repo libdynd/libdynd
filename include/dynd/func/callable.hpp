@@ -558,7 +558,7 @@ namespace nd {
 
     callable(const ndt::type &self_tp, expr_single_t single, expr_strided_t strided) : m_value(empty(self_tp))
     {
-      new (m_value.data()) callable_type_data(single, strided);
+      new (m_value.data()) base_callable(single, strided);
     }
 
     callable(const ndt::type &self_tp, kernel_request_t kernreq, single_t single, std::size_t data_size,
@@ -566,7 +566,7 @@ namespace nd {
              callable_instantiate_t instantiate)
         : m_value(empty(self_tp))
     {
-      new (m_value.data()) callable_type_data(kernreq, single, data_size, data_init, resolve_dst_type, instantiate);
+      new (m_value.data()) base_callable(kernreq, single, data_size, data_init, resolve_dst_type, instantiate);
     }
 
     template <typename T>
@@ -575,8 +575,8 @@ namespace nd {
              callable_instantiate_t instantiate)
         : m_value(empty(self_tp))
     {
-      new (m_value.data()) callable_type_data(kernreq, single, std::forward<T>(static_data), data_size, data_init,
-                                              resolve_dst_type, instantiate);
+      new (m_value.data()) base_callable(kernreq, single, std::forward<T>(static_data), data_size, data_init,
+                                         resolve_dst_type, instantiate);
     }
 
     callable(const callable &rhs) : m_value(rhs.m_value)
@@ -605,16 +605,15 @@ namespace nd {
       return m_value.is_null();
     }
 
-    callable_type_data *get()
+    base_callable *get()
     {
-      return !m_value.is_null()
-                 ? const_cast<callable_type_data *>(reinterpret_cast<const callable_type_data *>(m_value.data()))
-                 : NULL;
+      return !m_value.is_null() ? const_cast<base_callable *>(reinterpret_cast<const base_callable *>(m_value.data()))
+                                : NULL;
     }
 
-    const callable_type_data *get() const
+    const base_callable *get() const
     {
-      return !m_value.is_null() ? reinterpret_cast<const callable_type_data *>(m_value.cdata()) : NULL;
+      return !m_value.is_null() ? reinterpret_cast<const base_callable *>(m_value.cdata()) : NULL;
     }
 
     std::size_t get_data_size() const

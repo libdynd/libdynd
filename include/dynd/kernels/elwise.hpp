@@ -36,7 +36,7 @@ namespace nd {
                                    ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
                                    const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        const callable_type_data *child_af = reinterpret_cast<callable *>(static_data)->get();
+        const base_callable *child_af = reinterpret_cast<callable *>(static_data)->get();
         const ndt::callable_type *child_af_tp = reinterpret_cast<callable *>(static_data)->get_type();
 
         intptr_t ndim = 0;
