@@ -502,25 +502,6 @@ namespace nd {
     }
 
     template <typename KernelType>
-    typename std::enable_if<!std::is_same<decltype(&KernelType::instantiate), callable_instantiate_t>::value,
-                            callable_instantiate_t>::type
-    get_instantiate()
-    {
-      return [](char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
-                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
-                const array *kwds, const std::map<std::string, ndt::type> &tp_vars) {
-        typedef instantiate_traits<decltype(&KernelType::instantiate)> traits;
-        intptr_t res_ckb_offset =
-            KernelType::instantiate(reinterpret_cast<typename traits::static_data_type *>(static_data), data_size,
-                                    reinterpret_cast<typename traits::data_type *>(data), ckb, ckb_offset, dst_tp,
-                                    dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
-        reinterpret_cast<typename traits::data_type *>(data)->~data_type();
-        return res_ckb_offset;
-      };
-    }
-
-    template <typename KernelType>
     typename std::enable_if<!has_data_init<KernelType>::value, callable_data_init_t>::type get_data_init()
     {
       return NULL;
@@ -533,22 +514,6 @@ namespace nd {
     get_data_init()
     {
       return &KernelType::data_init;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<has_data_init<KernelType>::value &&
-                                !std::is_same<decltype(&KernelType::data_init), callable_data_init_t>::value,
-                            callable_data_init_t>::type
-    get_data_init()
-    {
-      return [](char *static_data, size_t data_size, char *data, const ndt::type &dst_tp, intptr_t nsrc,
-                const ndt::type *src_tp, intptr_t nkwd, const nd::array *kwds,
-                const std::map<std::string, ndt::type> &tp_vars) {
-        typedef data_init_traits<decltype(&KernelType::data_init)> traits;
-        KernelType::data_init(reinterpret_cast<typename traits::static_data_type *>(static_data), data_size,
-                              reinterpret_cast<typename traits::data_type *>(data), dst_tp, nsrc, src_tp, nkwd, kwds,
-                              tp_vars);
-      };
     }
 
     template <typename KernelType>
@@ -565,23 +530,6 @@ namespace nd {
     get_resolve_dst_type()
     {
       return &KernelType::resolve_dst_type;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<
-        has_resolve_dst_type<KernelType>::value &&
-            !std::is_same<decltype(&KernelType::resolve_dst_type), callable_resolve_dst_type_t>::value,
-        callable_resolve_dst_type_t>::type
-    get_resolve_dst_type()
-    {
-      return [](char *static_data, size_t data_size, char *data, ndt::type &dst_tp, intptr_t nsrc,
-                const ndt::type *src_tp, intptr_t nkwd, const nd::array *kwds,
-                const std::map<std::string, ndt::type> &tp_vars) {
-        typedef resolve_dst_type_traits<decltype(&KernelType::resolve_dst_type)> traits;
-        KernelType::resolve_dst_type(reinterpret_cast<typename traits::static_data_type *>(static_data), data_size,
-                                     reinterpret_cast<typename traits::data_type *>(data), dst_tp, nsrc, src_tp, nkwd,
-                                     kwds, tp_vars);
-      };
     }
 
     template <template <type_id_t...> class KernelType>
