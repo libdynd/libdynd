@@ -660,11 +660,6 @@ namespace nd {
       return get_type()->get_pos_types();
     }
 
-    operator nd::array() const
-    {
-      return m_value;
-    }
-
     void swap(nd::callable &rhs)
     {
       m_value.swap(rhs.m_value);
@@ -903,6 +898,11 @@ namespace nd {
       return callables;
     }
   };
+
+  inline std::ostream &operator<<(std::ostream &o, const callable &rhs)
+  {
+    return o << "<callable <" << rhs.get()->tp << "> at " << reinterpret_cast<const void *>(rhs.get()) << ">";
+  }
 
   template <typename DataType>
   class callable::args<DataType> {
