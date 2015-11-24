@@ -1827,8 +1827,3 @@ void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const 
     *reinterpret_cast<char **>(data) = const_cast<char *>(val.cdata());
   }
 }
-
-void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const nd::callable &value)
-{
-  forward_as_array(tp, arrmeta, data, static_cast<nd::array>(value));
-}

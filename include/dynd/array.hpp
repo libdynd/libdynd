@@ -1749,8 +1749,6 @@ namespace nd {
 
   DYND_API void forward_as_array(const ndt::type &tp, char *arrmeta, char *out_data, const nd::array &val);
 
-  DYND_API void forward_as_array(const ndt::type &tp, char *arrmeta, char *out_data, const nd::callable &val);
-
   template <typename T>
   void forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const std::vector<T> &val)
   {
