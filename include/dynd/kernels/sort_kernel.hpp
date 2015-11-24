@@ -55,9 +55,10 @@ namespace nd {
            reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_tp.get_data_size());
 
       const ndt::type child_src_tp[2] = {src0_element_tp, src0_element_tp};
-      return nd::less::get().get()->instantiate(nd::less::get().get()->static_data, nd::less::get().get()->data_size,
-                                                data, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, 2, child_src_tp,
-                                                NULL, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+      const callable &less = nd::less;
+      return less.get()->instantiate(less.get()->static_data, less.get()->data_size, data, ckb, ckb_offset,
+                                     ndt::type::make<bool1>(), NULL, 2, child_src_tp, NULL, kernel_request_single, ectx,
+                                     nkwd, kwds, tp_vars);
     }
   };
 
