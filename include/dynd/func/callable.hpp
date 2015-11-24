@@ -558,7 +558,7 @@ namespace nd {
 
     callable(const ndt::type &self_tp, expr_single_t single, expr_strided_t strided) : m_value(empty(self_tp))
     {
-      new (m_value.data()) base_callable(single, strided);
+      new (m_value.data()) base_callable(self_tp, single, strided);
     }
 
     callable(const ndt::type &self_tp, kernel_request_t kernreq, single_t single, std::size_t data_size,
@@ -566,7 +566,7 @@ namespace nd {
              callable_instantiate_t instantiate)
         : m_value(empty(self_tp))
     {
-      new (m_value.data()) base_callable(kernreq, single, data_size, data_init, resolve_dst_type, instantiate);
+      new (m_value.data()) base_callable(self_tp, kernreq, single, data_size, data_init, resolve_dst_type, instantiate);
     }
 
     template <typename T>
@@ -575,7 +575,7 @@ namespace nd {
              callable_instantiate_t instantiate)
         : m_value(empty(self_tp))
     {
-      new (m_value.data()) base_callable(kernreq, single, std::forward<T>(static_data), data_size, data_init,
+      new (m_value.data()) base_callable(self_tp, kernreq, single, std::forward<T>(static_data), data_size, data_init,
                                          resolve_dst_type, instantiate);
     }
 
@@ -628,12 +628,16 @@ namespace nd {
 
     const ndt::callable_type *get_type() const
     {
-      return !m_value.is_null() ? m_value.get_type().extended<ndt::callable_type>() : NULL;
+      if (get() == NULL) {
+        return NULL;
+      }
+
+      return get()->tp.extended<ndt::callable_type>();
     }
 
     const ndt::type &get_array_type() const
     {
-      return m_value.get_type();
+      return get()->tp;
     }
 
     const ndt::type &get_ret_type() const
