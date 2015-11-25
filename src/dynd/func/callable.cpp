@@ -181,24 +181,3 @@ void nd::detail::check_nkwd(const ndt::callable_type *af_tp, const std::vector<i
     throw std::invalid_argument(ss.str());
   }
 }
-
-nd::callable::callable(const nd::array &rhs)
-{
-  if (!rhs.is_null()) {
-    if (rhs.get_type().get_type_id() == callable_type_id) {
-      const base_callable *af = reinterpret_cast<const base_callable *>(rhs.cdata());
-      if (af->instantiate != NULL) {
-        // It's valid: callable type, contains instantiate function.
-        m_value = rhs;
-      } else {
-        throw invalid_argument("Require a non-empty callable, "
-                               "provided callable has NULL "
-                               "instantiate function");
-      }
-    } else {
-      stringstream ss;
-      ss << "Cannot implicitly convert nd::array of type " << rhs.get_type().value_type() << " to  callable";
-      throw type_error(ss.str());
-    }
-  }
-}
