@@ -549,6 +549,8 @@ namespace nd {
     struct has_kwds;
 
   public:
+    using intrusive_ptr<base_callable>::intrusive_ptr;
+
     callable() = default;
 
     callable(const ndt::type &self_tp, expr_single_t single, expr_strided_t strided)
@@ -575,14 +577,10 @@ namespace nd {
     {
     }
 
-    callable(const callable &rhs) = default;
-
     single_t get_single() const
     {
       return get()->single;
     }
-
-    callable &operator=(const callable &rhs) = default;
 
     bool is_null() const
     {
