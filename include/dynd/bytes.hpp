@@ -107,7 +107,6 @@ public:
   bytes &operator=(const bytes &rhs)
   {
     return assign(rhs.m_data, rhs.m_size);
-
   }
   bool operator==(const bytes &rhs) const
   {
@@ -122,50 +121,57 @@ public:
 
 namespace detail {
 
-class value_bytes {
-protected:
-  char *m_data;
-  size_t m_size;
+  class value_bytes {
+  protected:
+    char *m_data;
+    size_t m_size;
 
-  value_bytes(char *data, size_t size) : m_data(data), m_size(size)
-  {
-  }
+    value_bytes(char *data, size_t size) : m_data(data), m_size(size)
+    {
+    }
 
-public:
-  value_bytes(const value_bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
-  {
-    std::copy_n(other.m_data, m_size, m_data);
-  }
+  public:
+    value_bytes() : m_data(NULL), m_size(0)
+    {
+    }
 
-  ~value_bytes()
-  {
-    delete[] m_data;
-  }
+    value_bytes(const value_bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
+    {
+      std::copy_n(other.m_data, m_size, m_data);
+    }
 
-  operator char *()
-  {
-    return m_data;
-  }
+    ~value_bytes()
+    {
+      delete[] m_data;
+    }
 
-  operator const char *() const
-  {
-    return m_data;
-  }
+    operator char *()
+    {
+      return m_data;
+    }
 
-  value_bytes &operator=(const value_bytes &rhs)
-  {
-    std::copy_n(rhs.m_data, m_size, m_data);
+    operator const char *() const
+    {
+      return m_data;
+    }
 
-    return *this;
-  }
-};
+    value_bytes &operator=(const value_bytes &rhs)
+    {
+      std::copy_n(rhs.m_data, m_size, m_data);
+
+      return *this;
+    }
+  };
 
 } // namespace dynd::detail
 
-class strided_iterator : public detail::value_bytes, public std::iterator<std::random_access_iterator_tag, detail::value_bytes> {
+class strided_iterator : public detail::value_bytes,
+                         public std::iterator<std::random_access_iterator_tag, detail::value_bytes> {
   intptr_t m_stride;
 
 public:
+  strided_iterator() : m_stride(0) {};
+
   strided_iterator(char *data, size_t size, intptr_t stride) : value_bytes(data, size), m_stride(stride)
   {
   }
