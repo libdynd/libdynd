@@ -9,31 +9,27 @@
 using namespace std;
 using namespace dynd;
 
-void nd::functional::old_multidispatch_ck::resolve_dst_type(
-    char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
-    intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-    const std::map<std::string, ndt::type> &tp_vars)
+void nd::functional::old_multidispatch_ck::resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp,
+                                                            intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
+                                                            const array *kwds,
+                                                            const std::map<std::string, ndt::type> &tp_vars)
 {
-  const vector<nd::callable> *icd =
-      reinterpret_cast<const vector<nd::callable> *>(static_data);
+  const vector<nd::callable> *icd = reinterpret_cast<const vector<nd::callable> *>(static_data);
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::callable &child = (*icd)[i];
     if (nsrc == child.get_type()->get_npos()) {
       intptr_t isrc;
       std::map<std::string, ndt::type> typevars;
       for (isrc = 0; isrc < nsrc; ++isrc) {
-        if (!can_implicitly_convert(src_tp[isrc],
-                                    child.get_type()->get_pos_type(isrc),
-                                    typevars)) {
+        if (!can_implicitly_convert(src_tp[isrc], child.get_type()->get_pos_type(isrc), typevars)) {
           break;
         }
       }
       if (isrc == nsrc) {
         dst_tp = child.get_type()->get_return_type();
         if (dst_tp.is_symbolic()) {
-          child.get()->resolve_dst_type(
-              const_cast<char *>(child.get()->static_data), data_size, data,
-              dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          child.get()->resolve_dst_type(const_cast<char *>(child.get()->static_data), data, dst_tp, nsrc, src_tp, nkwd,
+                                        kwds, tp_vars);
         }
         return;
       }
@@ -55,22 +51,18 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(
 }
 
 intptr_t nd::functional::old_multidispatch_ck::instantiate(
-    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-    const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *src_tp, const char *const *src_arrmeta,
-    kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
+    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
     const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
-  const vector<nd::callable> *icd =
-      reinterpret_cast<vector<nd::callable> *>(static_data);
+  const vector<nd::callable> *icd = reinterpret_cast<vector<nd::callable> *>(static_data);
   for (intptr_t i = 0; i < (intptr_t)icd->size(); ++i) {
     const nd::callable &af = (*icd)[i];
     intptr_t isrc, nsrc = af.get_type()->get_npos();
     std::map<std::string, ndt::type> typevars;
     for (isrc = 0; isrc < nsrc; ++isrc) {
-      if (!can_implicitly_convert(
-               src_tp[isrc], af.get_type()->get_pos_type(isrc), typevars)) {
+      if (!can_implicitly_convert(src_tp[isrc], af.get_type()->get_pos_type(isrc), typevars)) {
         break;
       }
     }
@@ -83,15 +75,11 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(
         }
       }
       if (j == nsrc) {
-        return af.get()->instantiate(const_cast<char *>(af.get()->static_data),
-                                     0, NULL, ckb, ckb_offset, dst_tp,
-                                     dst_arrmeta, nsrc, src_tp, src_arrmeta,
-                                     kernreq, ectx, nkwd, kwds, tp_vars);
+        return af.get()->instantiate(const_cast<char *>(af.get()->static_data), 0, NULL, ckb, ckb_offset, dst_tp,
+                                     dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       } else {
-        return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset,
-                                     dst_tp, dst_arrmeta, nsrc, src_tp,
-                                     af.get_type()->get_pos_types_raw(),
-                                     src_arrmeta, kernreq, ectx);
+        return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+                                     af.get_type()->get_pos_types_raw(), src_arrmeta, kernreq, ectx);
       }
     }
   }

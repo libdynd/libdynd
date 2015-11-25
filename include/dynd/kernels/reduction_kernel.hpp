@@ -128,23 +128,24 @@ namespace nd {
         }
 
         if (reinterpret_cast<static_data_type *>(static_data)->child.get()->data_size != 0) {
-          reinterpret_cast<data_type *>(data)->child_data = reinterpret_cast<static_data_type *>(static_data)->child.get()->data_init(
-              reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, child_dst_tp, nsrc, src_tp,
-              nkwd - 3, kwds, tp_vars);
+          reinterpret_cast<data_type *>(data)->child_data =
+              reinterpret_cast<static_data_type *>(static_data)->child.get()->data_init(
+                  reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, child_dst_tp, nsrc,
+                  src_tp, nkwd - 3, kwds, tp_vars);
         }
 
         return data;
       }
 
-      static void resolve_dst_type(char *static_data, std::size_t DYND_UNUSED(data_size), char *data, ndt::type &dst_tp,
-                                   intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+      static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
+                                   const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                    const std::map<std::string, ndt::type> &tp_vars)
       {
         ndt::type child_dst_tp = reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
           ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
           reinterpret_cast<static_data_type *>(static_data)->child.get()->resolve_dst_type(
-              reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, 0, NULL, child_dst_tp, nsrc,
+              reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, NULL, child_dst_tp, nsrc,
               &child_src_tp, nkwd, kwds, tp_vars);
         }
 

@@ -23,7 +23,7 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
       throw std::runtime_error("dst_tp is symbolic, but resolve_dst_type is NULL");
     }
 
-    resolve_dst_type(static_data, data_size, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+    resolve_dst_type(static_data, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
   }
 
   // Allocate the destination array
@@ -52,7 +52,7 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
       throw std::runtime_error("dst_tp is symbolic, but resolve_dst_type is NULL");
     }
 
-    resolve_dst_type(static_data, data_size, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+    resolve_dst_type(static_data, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
   }
 
   // Allocate the destination array
@@ -60,8 +60,8 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
 
   // Generate and evaluate the ckernel
   ckernel_builder<kernel_request_host> ckb;
-  instantiate(static_data, data_size, data, &ckb, 0, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta,
-              kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
+  instantiate(static_data, data_size, data, &ckb, 0, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta, kernreq,
+              &eval::default_eval_context, nkwd, kwds, tp_vars);
   expr_metadata_single_t fn = ckb.get()->get_function<expr_metadata_single_t>();
   fn(ckb.get(), &dst, src_data);
 

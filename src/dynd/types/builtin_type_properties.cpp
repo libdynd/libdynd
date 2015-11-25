@@ -28,8 +28,8 @@ namespace nd {
       *dst = helper(self);
     }
 
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                  intptr_t DYND_UNUSED(nkwd), const array *kwds,
                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
@@ -68,8 +68,8 @@ namespace nd {
       *dst = helper(self);
     }
 
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                  intptr_t DYND_UNUSED(nkwd), const array *kwds,
                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
@@ -108,8 +108,8 @@ namespace nd {
       *dst = helper(self);
     }
 
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                 ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                  intptr_t DYND_UNUSED(nkwd), const array *kwds,
                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
