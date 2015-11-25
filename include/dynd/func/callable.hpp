@@ -537,9 +537,6 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
-  template <typename T>
-  struct declfunc;
-
   /**
    * Holds a single instance of an callable in an nd::array,
    * providing some more direct convenient interface.
@@ -590,16 +587,6 @@ namespace nd {
     bool is_null() const
     {
       return get() == NULL;
-    }
-
-    base_callable *get()
-    {
-      return intrusive_ptr<base_callable>::get();
-    }
-
-    const base_callable *get() const
-    {
-      return intrusive_ptr<base_callable>::get();
     }
 
     std::size_t get_data_size() const
