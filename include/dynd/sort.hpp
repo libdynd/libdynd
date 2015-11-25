@@ -14,5 +14,9 @@ namespace nd {
     static DYND_API callable make();
   } sort;
 
+  extern DYND_API struct unique : declfunc<unique> {
+    static DYND_API callable make();
+  } unique;
+
 } // namespace dynd::nd
 } // namespace dynd
