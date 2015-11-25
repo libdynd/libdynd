@@ -583,12 +583,6 @@ namespace nd {
     {
     }
 
-    /**
-      * Constructor from an nd::array. Validates that the input
-      * has "callable" type.
-      */
-    explicit callable(const nd::array &rhs);
-
     single_t get_single() const
     {
       return get()->single;
