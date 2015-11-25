@@ -22,9 +22,9 @@ namespace nd {
    * \param src_tp  An array of the source types.
    * \param kwds    An array of the.
    */
-  typedef void (*callable_data_init_t)(char *static_data, size_t data_size, char *data, const ndt::type &dst_tp,
-                                       intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                                       const std::map<std::string, ndt::type> &tp_vars);
+  typedef char *(*callable_data_init_t)(char *static_data, const ndt::type &dst_tp, intptr_t nsrc,
+                                        const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                                        const std::map<std::string, ndt::type> &tp_vars);
 
   /**
    * Resolves the destination type for this callable based on the types

@@ -77,6 +77,7 @@ namespace nd {
         std::intptr_t stored_ndim; // original number of dimensions
 
         std::intptr_t init_offset;
+        char *child_data;
 
         data_type() : ndim(0), naxis(0), axes(NULL), keepdims(false), stored_ndim(0)
         {
@@ -93,11 +94,10 @@ namespace nd {
         }
       };
 
-      static void data_init(char *static_data, std::size_t DYND_UNUSED(data_size), char *data, const ndt::type &dst_tp,
-                            intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
-                            const std::map<std::string, ndt::type> &tp_vars)
+      static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                             intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        new (data) data_type();
+        char *data = reinterpret_cast<char *>(new data_type());
 
         const array &identity = kwds[1];
         if (!identity.is_missing()) {
@@ -128,11 +128,12 @@ namespace nd {
         }
 
         if (reinterpret_cast<static_data_type *>(static_data)->child.get()->data_size != 0) {
-          reinterpret_cast<static_data_type *>(static_data)->child.get()->data_init(
-              reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data,
-              reinterpret_cast<static_data_type *>(static_data)->child.get()->data_size,
-              reinterpret_cast<char *>(data) + sizeof(data_type), child_dst_tp, nsrc, src_tp, nkwd - 3, kwds, tp_vars);
+          reinterpret_cast<data_type *>(data)->child_data = reinterpret_cast<static_data_type *>(static_data)->child.get()->data_init(
+              reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, child_dst_tp, nsrc, src_tp,
+              nkwd - 3, kwds, tp_vars);
         }
+
+        return data;
       }
 
       static void resolve_dst_type(char *static_data, std::size_t DYND_UNUSED(data_size), char *data, ndt::type &dst_tp,
@@ -499,7 +500,7 @@ namespace nd {
         e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         e->init_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
-        reinterpret_cast<data_type *>(data)->~data_type();
+        delete reinterpret_cast<data_type *>(data);
         return ckb_offset;
       }
     };
@@ -600,7 +601,7 @@ namespace nd {
             reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         self->init_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
-        reinterpret_cast<data_type *>(data)->~data_type();
+        delete reinterpret_cast<data_type *>(data);
         return ckb_offset;
       }
     };
@@ -863,7 +864,7 @@ namespace nd {
         self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<reduction_kernel>(root_ckb_offset);
         self->dst_init_kernel_offset = reinterpret_cast<data_type *>(data)->init_offset - root_ckb_offset;
 
-        reinterpret_cast<data_type *>(data)->~data_type();
+        delete reinterpret_cast<data_type *>(data);
         return ckb_offset;
       }
     };
