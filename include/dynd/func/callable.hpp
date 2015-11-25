@@ -544,70 +544,62 @@ namespace nd {
    * Holds a single instance of an callable in an nd::array,
    * providing some more direct convenient interface.
    */
-  class DYND_API callable {
+  class DYND_API callable : public intrusive_ptr<base_callable> {
     template <typename DataType, typename... A>
     class args;
 
     template <typename... A>
     struct has_kwds;
 
-    array m_value;
-
   public:
     callable() = default;
 
-    callable(const ndt::type &self_tp, expr_single_t single, expr_strided_t strided) : m_value(empty(self_tp))
+    callable(const ndt::type &self_tp, expr_single_t single, expr_strided_t strided)
+        : intrusive_ptr<base_callable>(new base_callable(self_tp, single, strided), true)
     {
-      new (m_value.data()) base_callable(self_tp, single, strided);
     }
 
     callable(const ndt::type &self_tp, kernel_request_t kernreq, single_t single, std::size_t data_size,
              callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
              callable_instantiate_t instantiate)
-        : m_value(empty(self_tp))
+        : intrusive_ptr<base_callable>(
+              new base_callable(self_tp, kernreq, single, data_size, data_init, resolve_dst_type, instantiate), true)
     {
-      new (m_value.data()) base_callable(self_tp, kernreq, single, data_size, data_init, resolve_dst_type, instantiate);
     }
 
     template <typename T>
     callable(const ndt::type &self_tp, kernel_request_t kernreq, single_t single, T &&static_data,
              std::size_t data_size, callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
              callable_instantiate_t instantiate)
-        : m_value(empty(self_tp))
+        : intrusive_ptr<base_callable>(new base_callable(self_tp, kernreq, single, std::forward<T>(static_data),
+                                                         data_size, data_init, resolve_dst_type, instantiate),
+                                       true)
+
     {
-      new (m_value.data()) base_callable(self_tp, kernreq, single, std::forward<T>(static_data), data_size, data_init,
-                                         resolve_dst_type, instantiate);
     }
 
-    callable(const callable &rhs) : m_value(rhs.m_value)
-    {
-    }
+    callable(const callable &rhs) = default;
 
     single_t get_single() const
     {
       return get()->single;
     }
 
-    callable &operator=(const callable &rhs)
-    {
-      m_value = rhs.m_value;
-      return *this;
-    }
+    callable &operator=(const callable &rhs) = default;
 
     bool is_null() const
     {
-      return m_value.is_null();
+      return get() == NULL;
     }
 
     base_callable *get()
     {
-      return !m_value.is_null() ? const_cast<base_callable *>(reinterpret_cast<const base_callable *>(m_value.data()))
-                                : NULL;
+      return intrusive_ptr<base_callable>::get();
     }
 
     const base_callable *get() const
     {
-      return !m_value.is_null() ? reinterpret_cast<const base_callable *>(m_value.cdata()) : NULL;
+      return intrusive_ptr<base_callable>::get();
     }
 
     std::size_t get_data_size() const
@@ -652,11 +644,6 @@ namespace nd {
     const array &get_arg_types() const
     {
       return get_type()->get_pos_types();
-    }
-
-    void swap(nd::callable &rhs)
-    {
-      m_value.swap(rhs.m_value);
     }
 
     /** Implements the general call operator which returns an array */

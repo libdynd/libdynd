@@ -150,16 +150,17 @@ namespace nd {
       new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
     }
 
-    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, std::size_t data_size, callable_data_init_t data_init,
-                  callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), kernreq(kernreq), single(single), static_data(NULL), data_size(data_size), data_init(data_init),
-          resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
+    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, std::size_t data_size,
+                  callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+                  callable_instantiate_t instantiate)
+        : use_count(0), tp(tp), kernreq(kernreq), single(single), static_data(NULL), data_size(data_size),
+          data_init(data_init), resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
     {
     }
 
     template <typename T>
-    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, T &&static_data, std::size_t data_size,
-                  callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, T &&static_data,
+                  std::size_t data_size, callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
                   callable_instantiate_t instantiate)
         : use_count(0), tp(tp), kernreq(kernreq), single(single), data_size(data_size), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate),
@@ -209,6 +210,23 @@ namespace nd {
   };
 
   static_assert((sizeof(base_callable) & 7) == 0, "base_callable must have size divisible by 8");
+
+  inline void intrusive_ptr_retain(base_callable *ptr)
+  {
+    ++ptr->use_count;
+  }
+
+  inline void intrusive_ptr_release(base_callable *ptr)
+  {
+    if (--ptr->use_count == 0) {
+      delete ptr;
+    }
+  }
+
+  inline long intrusive_ptr_use_count(base_callable *ptr)
+  {
+    return ptr->use_count;
+  }
 
 } // namespace dynd::nd
 } // namespace dynd
