@@ -29,8 +29,7 @@ namespace nd {
         single(child, dst, src_binary);
       }
 
-      void strided(char *dst, intptr_t dst_stride, char *const *src,
-                   const intptr_t *src_stride, size_t count)
+      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         ckernel_prefix *child = get_child();
         expr_strided_t childop = child->get_function<expr_strided_t>();
@@ -39,24 +38,19 @@ namespace nd {
         childop(child, dst, dst_stride, src_binary, src_binary_stride, count);
       }
 
-      static intptr_t
-      instantiate(char *static_data, size_t data_size, char *data, void *ckb,
-                  intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  intptr_t nkwd, const nd::array *kwds,
-                  const std::map<std::string, ndt::type> &tp_vars)
+      static intptr_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         make(ckb, kernreq, ckb_offset);
 
         ndt::type child_src_tp[2] = {dst_tp, src_tp[0]};
         const char *child_src_arrmeta[2] = {dst_arrmeta, src_arrmeta[0]};
-        return child.get()->instantiate(
-            child.get()->static_data, data_size, data, ckb, ckb_offset, dst_tp,
-            dst_arrmeta, nsrc + 1, child_src_tp, child_src_arrmeta, kernreq,
-            ectx, nkwd, kwds, tp_vars);
+        return child.get()->instantiate(child.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc + 1,
+                                        child_src_tp, child_src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };
 
@@ -77,8 +71,7 @@ namespace nd {
         childop(child, dst, src_binary);
       }
 
-      void strided(char *dst, intptr_t dst_stride, char *const *src,
-                   const intptr_t *src_stride, size_t count)
+      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         ckernel_prefix *child = get_child();
         expr_strided_t childop = child->get_function<expr_strided_t>();
@@ -87,24 +80,19 @@ namespace nd {
         childop(child, dst, dst_stride, src_binary, src_binary_stride, count);
       }
 
-      static intptr_t
-      instantiate(char *static_data, size_t data_size, char *data, void *ckb,
-                  intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  intptr_t nkwd, const nd::array *kwds,
-                  const std::map<std::string, ndt::type> &tp_vars)
+      static intptr_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
       {
         callable &child = *reinterpret_cast<callable *>(static_data);
         make(ckb, kernreq, ckb_offset);
 
         ndt::type child_src_tp[2] = {src_tp[0], dst_tp};
         const char *child_src_arrmeta[2] = {src_arrmeta[0], dst_arrmeta};
-        return child.get()->instantiate(
-            child.get()->static_data, data_size, data, ckb, ckb_offset, dst_tp,
-            dst_arrmeta, nsrc + 1, child_src_tp, child_src_arrmeta, kernreq,
-            ectx, nkwd, kwds, tp_vars);
+        return child.get()->instantiate(child.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc + 1,
+                                        child_src_tp, child_src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };
 

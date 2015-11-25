@@ -68,7 +68,7 @@ namespace nd {
                                    const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                    const std::map<std::string, ndt::type> &tp_vars);
 
-      static intptr_t instantiate(char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+      static intptr_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset,
                                   const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
@@ -92,7 +92,7 @@ namespace nd {
         }
       }
 
-      static intptr_t instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *data, void *ckb,
+      static intptr_t instantiate(char *static_data, char *data, void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t nkwd, const dynd::nd::array *kwds,
@@ -101,7 +101,7 @@ namespace nd {
         DispatcherType &dispatcher = **reinterpret_cast<std::unique_ptr<DispatcherType> *>(static_data);
 
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
-        return child.get()->instantiate(child.get()->static_data, child.get()->data_size, data, ckb, ckb_offset, dst_tp,
+        return child.get()->instantiate(child.get()->static_data,  data, ckb, ckb_offset, dst_tp,
                                         dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };

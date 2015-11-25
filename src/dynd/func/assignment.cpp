@@ -72,7 +72,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
   if (dst_tp.is_builtin()) {
     if (src_tp.is_builtin()) {
       nd::callable &child = nd::assign::overload(dst_tp, src_tp);
-      return child.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
+      return child.get()->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
                                       kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
     } else {
       return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,

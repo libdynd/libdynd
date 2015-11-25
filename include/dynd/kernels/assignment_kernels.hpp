@@ -106,7 +106,7 @@ namespace nd {
     template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t Src0TypeID, type_kind_t Src0TypeKind>
     struct assignment_virtual_kernel
         : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind>> {
-      static intptr_t instantiate(char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+      static intptr_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset,
                                   const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
@@ -115,22 +115,22 @@ namespace nd {
         switch (ectx->errmode) {
         case assign_error_nocheck:
           return assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind, assign_error_nocheck>::instantiate(
-              static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-              ectx, nkwd, kwds, tp_vars);
+              static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd,
+              kwds, tp_vars);
         case assign_error_overflow:
           return assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
-                                   assign_error_overflow>::instantiate(static_data, data_size, data, ckb, ckb_offset,
-                                                                       dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
-                                                                       kernreq, ectx, nkwd, kwds, tp_vars);
+                                   assign_error_overflow>::instantiate(static_data, data, ckb, ckb_offset, dst_tp,
+                                                                       dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
+                                                                       ectx, nkwd, kwds, tp_vars);
         case assign_error_fractional:
           return assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind,
-                                   assign_error_fractional>::instantiate(static_data, data_size, data, ckb, ckb_offset,
-                                                                         dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+                                   assign_error_fractional>::instantiate(static_data, data, ckb, ckb_offset, dst_tp,
+                                                                         dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                                                          kernreq, ectx, nkwd, kwds, tp_vars);
         case assign_error_inexact:
           return assignment_kernel<DstTypeID, DstTypeKind, Src0TypeID, Src0TypeKind, assign_error_inexact>::instantiate(
-              static_data, data_size, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-              ectx, nkwd, kwds, tp_vars);
+              static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd,
+              kwds, tp_vars);
         default:
           throw std::runtime_error("error");
         }
@@ -1598,11 +1598,11 @@ namespace nd {
         *reinterpret_cast<int32_t *>(dst) = ymd.to_days();
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                                  const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
@@ -1638,11 +1638,11 @@ namespace nd {
         bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
@@ -1685,11 +1685,10 @@ namespace nd {
         *reinterpret_cast<int64_t *>(dst) = dts.to_ticks();
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
@@ -1729,9 +1728,9 @@ namespace nd {
         bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                                   const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
@@ -1772,11 +1771,11 @@ namespace nd {
         *reinterpret_cast<int64_t *>(dst) = hmst.to_ticks();
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                                  const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
@@ -1811,11 +1810,11 @@ namespace nd {
         bst->set_from_utf8_string(m_dst_arrmeta, dst, s, &m_ectx);
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
@@ -1921,10 +1920,9 @@ namespace nd {
         }
       }
 
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                  const char *const *src_arrmeta, kernel_request_t kernreq,
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
                                   const std::map<std::string, ndt::type> &tp_vars)
       {
@@ -1940,14 +1938,14 @@ namespace nd {
         self_type *self = self_type::make(ckb, kernreq, ckb_offset);
         // instantiate src_is_avail
         nd::callable &is_avail = src_tp[0].extended<ndt::option_type>()->get_is_avail();
-        ckb_offset = is_avail.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc,
+        ckb_offset = is_avail.get()->instantiate(NULL, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc,
                                                  src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
         // instantiate dst_assign_na
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
         self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = dst_tp.extended<ndt::option_type>()->get_assign_na();
-        ckb_offset = assign_na.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
+        ckb_offset = assign_na.get()->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
                                                   kernreq, ectx, nkwd, kwds, tp_vars);
         // instantiate value_assign
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -2010,10 +2008,9 @@ namespace nd {
 
     template <type_id_t Src0TypeID, assign_error_mode ErrorMode>
     struct assignment_kernel<option_type_id, option_kind, Src0TypeID, real_kind, ErrorMode> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                  const char *const *src_arrmeta, kernel_request_t kernreq,
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
                                   const std::map<std::string, ndt::type> &tp_vars)
       {
@@ -2022,17 +2019,16 @@ namespace nd {
         // as NA.
         ndt::type src_tp_as_option = ndt::option_type::make(src_tp[0]);
         return assignment_kernel<option_type_id, option_kind, option_type_id, option_kind, ErrorMode>::instantiate(
-            NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, &src_tp_as_option, src_arrmeta, kernreq, ectx,
-            nkwd, kwds, tp_vars);
+            NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, &src_tp_as_option, src_arrmeta, kernreq, ectx, nkwd,
+            kwds, tp_vars);
       }
     };
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<option_type_id, option_kind, string_type_id, string_kind, ErrorMode> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                  const char *const *src_arrmeta, kernel_request_t kernreq,
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
                                   const std::map<std::string, ndt::type> &tp_vars)
       {
@@ -2089,7 +2085,7 @@ namespace nd {
         // Second child ckernel is the NA assignment
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
         nd::callable &assign_na = dst_tp.extended<ndt::option_type>()->get_assign_na();
-        ckb_offset = assign_na.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
+        ckb_offset = assign_na.get()->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
                                                   kernreq, ectx, nkwd, kwds, tp_vars);
         return ckb_offset;
       }
@@ -2151,11 +2147,11 @@ namespace nd {
       }
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                                kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
-                                const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
+                                const std::map<std::string, ndt::type> &tp_vars)
     {
       intptr_t root_ckb_offset = ckb_offset;
       typedef dynd::nd::option_to_value_ck self_type;
@@ -2168,7 +2164,7 @@ namespace nd {
       self_type *self = self_type::make(ckb, kernreq, ckb_offset);
       // instantiate src_is_avail
       nd::callable &af = src_tp[0].extended<ndt::option_type>()->get_is_avail();
-      ckb_offset = af.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc, src_tp,
+      ckb_offset = af.get()->instantiate(NULL, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc, src_tp,
                                          src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       // instantiate value_assign
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));

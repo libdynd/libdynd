@@ -23,15 +23,15 @@ namespace nd {
                                                   nkwd, kwds, tp_vars);
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t data_size, char *data, void *ckb,
-                                intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                 const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                 const eval::eval_context *ectx, intptr_t nkwd, const array *kwds,
                                 const std::map<std::string, ndt::type> &tp_vars)
     {
-      return CallableType::get().get()->instantiate(CallableType::get().get()->static_data, data_size, data, ckb,
-                                                    ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-                                                    ectx, nkwd, kwds, tp_vars);
+      return CallableType::get().get()->instantiate(CallableType::get().get()->static_data, data, ckb, ckb_offset,
+                                                    dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd,
+                                                    kwds, tp_vars);
     }
   };
 

@@ -140,12 +140,12 @@ namespace nd {
     template <>
     struct assign_na_kernel<fixed_dim_type_id,
                             dim_kind> : base_virtual_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind>> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                  kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                                  intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         switch (dst_tp.get_dtype().get_type_id()) {

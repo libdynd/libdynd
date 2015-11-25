@@ -261,7 +261,7 @@ namespace nd {
     struct is_avail_kernel<fixed_dim_type_id,
                            dim_kind> : base_virtual_kernel<is_avail_kernel<fixed_dim_type_id, dim_kind>> {
       static intptr_t
-      instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
+      instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                   intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *DYND_UNUSED(src_arrmeta),
                   kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),

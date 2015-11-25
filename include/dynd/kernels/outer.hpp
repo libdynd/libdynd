@@ -15,8 +15,8 @@ namespace nd {
 
     template <int N>
     struct outer_ck : base_virtual_kernel<outer_ck<N>> {
-      static intptr_t instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+      static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta,
                                   dynd::kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
                                   const dynd::nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
@@ -70,7 +70,7 @@ namespace nd {
           new_src_arrmeta.push_back(new_src_arrmeta_holder[i].get());
         }
 
-        ckb_offset = elwise_virtual_ck<N>::instantiate(static_data, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+        ckb_offset = elwise_virtual_ck<N>::instantiate(static_data,  NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                                        new_src_tp.data(), new_src_arrmeta.data(), kernreq, ectx, nkwd,
                                                        kwds, tp_vars);
         delete[] new_src_arrmeta_holder;

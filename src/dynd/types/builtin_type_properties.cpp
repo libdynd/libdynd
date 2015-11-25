@@ -36,13 +36,12 @@ namespace nd {
       dst_tp = helper(kwds[0]).get_type();
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                                intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       complex_real_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
       return ckb_offset;
@@ -76,13 +75,12 @@ namespace nd {
       dst_tp = helper(kwds[0]).get_type();
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                                intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       complex_imag_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
       return ckb_offset;
@@ -116,13 +114,12 @@ namespace nd {
       dst_tp = helper(kwds[0]).get_type();
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                                intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       complex_conj_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
       return ckb_offset;

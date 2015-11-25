@@ -23,11 +23,10 @@ void nd::copy_ck::resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UN
   dst_tp = src_tp[0].get_canonical_type();
 }
 
-intptr_t nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-                                  char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                  const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                  const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+intptr_t nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
@@ -39,7 +38,7 @@ intptr_t nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), size_t DYND_UN
             dynd::ndt::detail::builtin_data_alignments[dst_tp.unchecked_get_builtin_type_id()], kernreq);
       } else {
         nd::callable &child = nd::assign::overload(dst_tp, src_tp[0]);
-        return child.get()->instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta,
+        return child.get()->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta,
                                         kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
       }
     } else {

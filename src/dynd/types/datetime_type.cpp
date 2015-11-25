@@ -206,8 +206,8 @@ intptr_t ndt::datetime_type::make_assignment_kernel(void *ckb, intptr_t ckb_offs
     } else if (src_tp.get_kind() == string_kind) {
       // Assignment from strings
       typedef nd::assignment_kernel<datetime_type_id, string_type_id> self_type;
-      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                    kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
+      return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
+                                    ectx, 0, NULL, std::map<std::string, ndt::type>());
     } else if (src_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
@@ -220,8 +220,8 @@ intptr_t ndt::datetime_type::make_assignment_kernel(void *ckb, intptr_t ckb_offs
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
       typedef nd::assignment_kernel<string_type_id, datetime_type_id> self_type;
-      return self_type::instantiate(NULL, 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                    kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
+      return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
+                                    ectx, 0, NULL, std::map<std::string, ndt::type>());
     } else if (dst_tp.get_kind() == struct_kind) {
       // Convert to struct using the "struct" property
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, property_type::make(src_tp, "struct"),
