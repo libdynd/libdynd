@@ -139,17 +139,19 @@ namespace nd {
         *out_of_bounds = old_out_of_bounds;
       }
 
-      static void data_init(char *static_data, size_t DYND_UNUSED(data_size), char *data,
-                            const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                            intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      static char *data_init(char *static_data, const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                             const ndt::type *src_tp, intptr_t DYND_UNUSED(nkwd), const array *kwds,
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        new (data) data_type(src_tp, kwds[0].get_dim_size(), reinterpret_cast<int *>(kwds[0].data()),
-                             kwds[1].is_missing() ? NULL : reinterpret_cast<int *>(kwds[1].data()));
+        char *data = reinterpret_cast<char *>(
+            new data_type(src_tp, kwds[0].get_dim_size(), reinterpret_cast<int *>(kwds[0].data()),
+                          kwds[1].is_missing() ? NULL : reinterpret_cast<int *>(kwds[1].data())));
 
         reinterpret_cast<data_type *>(data)->child_src_tp = ndt::substitute_shape(
             reinterpret_cast<callable *>(static_data)->get_arg_type(0), reinterpret_cast<data_type *>(data)->ndim,
             reinterpret_cast<data_type *>(data)->shape);
+
+        return data;
       }
 
       static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
@@ -205,7 +207,7 @@ namespace nd {
               boundary_child.get()->static_data, boundary_child.get()->data_size, NULL, ckb, ckb_offset, child_dst_tp,
               child_dst_arrmeta, 0, NULL, NULL, kernel_request_single, ectx, nkwd - 3, kwds + 3, tp_vars);
 
-          reinterpret_cast<data_type *>(data)->~data_type();
+          delete reinterpret_cast<data_type *>(data);
           return ckb_offset;
         }
 
