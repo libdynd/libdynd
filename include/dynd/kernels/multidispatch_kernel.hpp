@@ -31,9 +31,8 @@ namespace nd {
      * real -> complex, where the size of the real component is nondecreasing
      *
      */
-    inline bool
-    can_implicitly_convert(const ndt::type &src, const ndt::type &dst,
-                           std::map<std::string, ndt::type> &typevars)
+    inline bool can_implicitly_convert(const ndt::type &src, const ndt::type &dst,
+                                       std::map<std::string, ndt::type> &typevars)
     {
       if (src == dst) {
         return true;
@@ -41,20 +40,17 @@ namespace nd {
       if (src.get_ndim() > 0 || dst.get_ndim() > 0) {
         ndt::type src_dtype, dst_dtype;
         if (src.match(dst, typevars)) {
-          return can_implicitly_convert(src.get_dtype(), dst.get_dtype(),
-                                        typevars);
+          return can_implicitly_convert(src.get_dtype(), dst.get_dtype(), typevars);
         } else {
           return false;
         }
       }
 
       if (src.get_kind() == uint_kind &&
-          (dst.get_kind() == uint_kind || dst.get_kind() == sint_kind ||
-           dst.get_kind() == real_kind)) {
+          (dst.get_kind() == uint_kind || dst.get_kind() == sint_kind || dst.get_kind() == real_kind)) {
         return src.get_data_size() < dst.get_data_size();
       }
-      if (src.get_kind() == sint_kind &&
-          (dst.get_kind() == sint_kind || dst.get_kind() == real_kind)) {
+      if (src.get_kind() == sint_kind && (dst.get_kind() == sint_kind || dst.get_kind() == real_kind)) {
         return src.get_data_size() < dst.get_data_size();
       }
       if (src.get_kind() == real_kind) {
@@ -68,62 +64,45 @@ namespace nd {
     }
 
     struct DYND_API old_multidispatch_ck : base_virtual_kernel<old_multidispatch_ck> {
-      static void resolve_dst_type(
-          char *static_data, size_t data_size, char *data, ndt::type &dst_tp,
-          intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-          const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
+      static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
+                                   const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                                   const std::map<std::string, ndt::type> &tp_vars);
 
-      static intptr_t
-      instantiate(char *static_data, size_t data_size, char *data, void *ckb,
-                  intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  intptr_t nkwd, const nd::array *kwds,
-                  const std::map<std::string, ndt::type> &tp_vars);
+      static intptr_t instantiate(char *static_data, size_t data_size, char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars);
     };
 
     template <typename DispatcherType>
-    struct multidispatch_kernel
-        : base_virtual_kernel<multidispatch_kernel<DispatcherType>> {
-      static void
-      resolve_dst_type(char *static_data, size_t DYND_UNUSED(data_size),
-                       char *data, ndt::type &dst_tp, intptr_t nsrc,
-                       const ndt::type *src_tp, intptr_t nkwd,
-                       const dynd::nd::array *kwds,
-                       const std::map<std::string, ndt::type> &tp_vars)
+    struct multidispatch_kernel : base_virtual_kernel<multidispatch_kernel<DispatcherType>> {
+      static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
+                                   const ndt::type *src_tp, intptr_t nkwd, const dynd::nd::array *kwds,
+                                   const std::map<std::string, ndt::type> &tp_vars)
       {
-        DispatcherType &dispatcher =
-            **reinterpret_cast<std::unique_ptr<DispatcherType> *>(static_data);
+        DispatcherType &dispatcher = **reinterpret_cast<std::unique_ptr<DispatcherType> *>(static_data);
 
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
-          child.get()->resolve_dst_type(child.get()->static_data,
-                                        child.get()->data_size, data, dst_tp,
-                                        nsrc, src_tp, nkwd, kwds, tp_vars);
+          child.get()->resolve_dst_type(child.get()->static_data, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else {
           dst_tp = child_dst_tp;
         }
       }
 
-      static intptr_t
-      instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *data,
-                  void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                  const char *dst_arrmeta, intptr_t nsrc,
-                  const ndt::type *src_tp, const char *const *src_arrmeta,
-                  kernel_request_t kernreq, const eval::eval_context *ectx,
-                  intptr_t nkwd, const dynd::nd::array *kwds,
-                  const std::map<std::string, ndt::type> &tp_vars)
+      static intptr_t instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *data, void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t nkwd, const dynd::nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
       {
-        DispatcherType &dispatcher =
-            **reinterpret_cast<std::unique_ptr<DispatcherType> *>(static_data);
+        DispatcherType &dispatcher = **reinterpret_cast<std::unique_ptr<DispatcherType> *>(static_data);
 
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
-        return child.get()->instantiate(
-            child.get()->static_data, child.get()->data_size, data, ckb,
-            ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-            ectx, nkwd, kwds, tp_vars);
+        return child.get()->instantiate(child.get()->static_data, child.get()->data_size, data, ckb, ckb_offset, dst_tp,
+                                        dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };
 

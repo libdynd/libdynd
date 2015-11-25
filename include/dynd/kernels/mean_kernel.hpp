@@ -64,11 +64,11 @@ namespace nd {
       return data;
     }
 
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), std::size_t DYND_UNUSED(data_size), char *data,
-                                 ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, intptr_t nkwd,
-                                 const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp, intptr_t nsrc,
+                                 const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
+                                 const std::map<std::string, ndt::type> &tp_vars)
     {
-      nd::sum::get().get()->resolve_dst_type(nd::sum::get().get()->static_data, nd::sum::get().get()->data_size,
+      nd::sum::get().get()->resolve_dst_type(nd::sum::get().get()->static_data,
                                              reinterpret_cast<data_type *>(data)->sum_data, dst_tp, nsrc, src_tp, nkwd,
                                              kwds, tp_vars);
     }
