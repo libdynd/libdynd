@@ -33,20 +33,11 @@ namespace nd {
         function = reinterpret_cast<void *>(fnptr);
       }
 
-      expr_strided_t get_followup_call_function() const
-      {
-        return followup_call_function;
-      }
+      expr_strided_t get_followup_call_function() const { return followup_call_function; }
 
-      void set_followup_call_function(expr_strided_t fnptr)
-      {
-        followup_call_function = fnptr;
-      }
+      void set_followup_call_function(expr_strided_t fnptr) { followup_call_function = fnptr; }
 
-      void single_first(char *dst, char *const *src)
-      {
-        (*reinterpret_cast<expr_single_t>(function))(this, dst, src);
-      }
+      void single_first(char *dst, char *const *src) { (*reinterpret_cast<expr_single_t>(function))(this, dst, src); }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
@@ -63,9 +54,7 @@ namespace nd {
       struct static_data_type {
         callable child;
 
-        static_data_type(const callable &child) : child(child)
-        {
-        }
+        static_data_type(const callable &child) : child(child) {}
       };
 
       struct data_type {
@@ -79,19 +68,11 @@ namespace nd {
         std::intptr_t init_offset;
         char *child_data;
 
-        data_type() : ndim(0), naxis(0), axes(NULL), keepdims(false), stored_ndim(0)
-        {
-        }
+        data_type() : ndim(0), naxis(0), axes(NULL), keepdims(false), stored_ndim(0) {}
 
-        bool is_broadcast() const
-        {
-          return axes != NULL && (naxis == 0 || stored_ndim - axes[0] != ndim);
-        }
+        bool is_broadcast() const { return axes != NULL && (naxis == 0 || stored_ndim - axes[0] != ndim); }
 
-        bool is_inner() const
-        {
-          return ndim == 1;
-        }
+        bool is_inner() const { return ndim == 1; }
       };
 
       static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
@@ -109,14 +90,16 @@ namespace nd {
               src_tp[0].get_ndim() -
               reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type().get_ndim();
           reinterpret_cast<data_type *>(data)->axes = NULL;
-        } else {
+        }
+        else {
           reinterpret_cast<data_type *>(data)->naxis = kwds[0].get_dim_size();
           reinterpret_cast<data_type *>(data)->axes = reinterpret_cast<const int *>(kwds[0].cdata());
         }
 
         if (kwds[2].is_missing()) {
           reinterpret_cast<data_type *>(data)->keepdims = false;
-        } else {
+        }
+        else {
           reinterpret_cast<data_type *>(data)->keepdims = kwds[2].as<bool>();
         }
 
@@ -127,12 +110,11 @@ namespace nd {
           reinterpret_cast<data_type *>(data)->stored_ndim = reinterpret_cast<data_type *>(data)->ndim;
         }
 
-        if (reinterpret_cast<static_data_type *>(static_data)->child.get()->data_size != 0) {
-          reinterpret_cast<data_type *>(data)->child_data =
-              reinterpret_cast<static_data_type *>(static_data)->child.get()->data_init(
-                  reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, child_dst_tp, nsrc,
-                  src_tp, nkwd - 3, kwds, tp_vars);
-        }
+        reinterpret_cast<data_type *>(data)->child_data =
+            reinterpret_cast<static_data_type *>(static_data)
+                ->child.get()
+                ->data_init(reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, child_dst_tp,
+                            nsrc, src_tp, nkwd - 3, kwds, tp_vars);
 
         return data;
       }
@@ -144,9 +126,10 @@ namespace nd {
         ndt::type child_dst_tp = reinterpret_cast<static_data_type *>(static_data)->child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
           ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
-          reinterpret_cast<static_data_type *>(static_data)->child.get()->resolve_dst_type(
-              reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, NULL, child_dst_tp, nsrc,
-              &child_src_tp, nkwd, kwds, tp_vars);
+          reinterpret_cast<static_data_type *>(static_data)
+              ->child.get()
+              ->resolve_dst_type(reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, NULL,
+                                 child_dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
         }
 
         // check that the child_dst_tp and the child_src_tp are the same here
@@ -164,7 +147,8 @@ namespace nd {
               dst_tp = ndt::make_fixed_dim(1, dst_tp);
             }
             --j;
-          } else {
+          }
+          else {
             ndt::type dim_tp = src_tp[0].get_type_at_dimension(NULL, i);
             dst_tp = dim_tp.extended<ndt::base_dim_type>()->with_element_type(dst_tp);
           }
@@ -195,9 +179,11 @@ namespace nd {
         // Get the function pointer for the first_call
         if (kernreq == kernel_request_single) {
           prefix->set_first_call_function(&SelfType::single_first_wrapper);
-        } else if (kernreq == kernel_request_strided) {
+        }
+        else if (kernreq == kernel_request_strided) {
           prefix->set_first_call_function(&SelfType::strided_first_wrapper);
-        } else {
+        }
+        else {
           std::stringstream ss;
           ss << "make_lifted_reduction_ckernel: unrecognized request " << (int)kernreq;
           throw std::runtime_error(ss.str());
@@ -246,8 +232,8 @@ namespace nd {
     struct reduction_kernel;
 
     template <>
-    struct reduction_kernel<fixed_dim_type_id, false,
-                            false> : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, false, false>> {
+    struct reduction_kernel<fixed_dim_type_id, false, false>
+        : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, false, false>> {
       std::intptr_t src0_element_size;
       std::intptr_t src0_element_stride;
 
@@ -256,10 +242,7 @@ namespace nd {
       {
       }
 
-      ~reduction_kernel()
-      {
-        get_child()->destroy();
-      }
+      ~reduction_kernel() { get_child()->destroy(); }
 
       void single_first(char *dst, char *const *src)
       {
@@ -292,7 +275,8 @@ namespace nd {
             child->strided_followup(dst, 0, &src0, &src0_element_stride, src0_element_size);
             src0 += src0_stride;
           }
-        } else {
+        }
+        else {
           // With a non-zero stride, each iteration of the outer loop is
           // "first"
           for (size_t i = 0; i != count; ++i) {
@@ -374,8 +358,8 @@ namespace nd {
      *
      */
     template <>
-    struct reduction_kernel<fixed_dim_type_id, false,
-                            true> : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, false, true>> {
+    struct reduction_kernel<fixed_dim_type_id, false, true>
+        : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, false, true>> {
       // The code assumes that size >= 1
       intptr_t size_first;
       intptr_t src_stride_first;
@@ -420,7 +404,8 @@ namespace nd {
             dst += dst_stride;
             src0 += src_stride[0];
           }
-        } else {
+        }
+        else {
           // With a non-zero stride, each iteration of the outer loop has to
           // initialize then reduce
           for (size_t i = 0; i != count; ++i) {
@@ -472,7 +457,8 @@ namespace nd {
         if (reinterpret_cast<data_type *>(data)->identity.is_null()) {
           e->size_first = e->size - 1;
           e->src_stride_first = e->src_stride;
-        } else {
+        }
+        else {
           e->size_first = e->size;
           e->src_stride_first = 0;
         }
@@ -492,7 +478,8 @@ namespace nd {
           ckb_offset = reduction_virtual_kernel::instantiate(
               static_data, data, ckb, ckb_offset, dst_element_tp, dst_element_arrmeta, nsrc, &src0_element_tp,
               &src0_element_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
-        } else {
+        }
+        else {
           ckb_offset = reduction_virtual_kernel::instantiate(static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                                              nsrc, &src0_element_tp, &src0_element_arrmeta,
                                                              kernel_request_single, ectx, nkwd, kwds, tp_vars);
@@ -507,8 +494,8 @@ namespace nd {
     };
 
     template <>
-    struct reduction_kernel<var_dim_type_id, false,
-                            true> : base_reduction_kernel<reduction_kernel<var_dim_type_id, false, true>> {
+    struct reduction_kernel<var_dim_type_id, false, true>
+        : base_reduction_kernel<reduction_kernel<var_dim_type_id, false, true>> {
       intptr_t src0_inner_stride;
       intptr_t src0_inner_stride_first;
       intptr_t init_offset;
@@ -518,7 +505,8 @@ namespace nd {
       {
         if (with_identity) {
           src0_inner_stride_first = 0;
-        } else {
+        }
+        else {
           src0_inner_stride_first = src0_inner_stride;
         }
       }
@@ -622,8 +610,8 @@ namespace nd {
      *
      */
     template <>
-    struct reduction_kernel<fixed_dim_type_id, true,
-                            false> : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, true, false>> {
+    struct reduction_kernel<fixed_dim_type_id, true, false>
+        : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, true, false>> {
       intptr_t size;
       intptr_t dst_stride, src_stride;
 
@@ -632,10 +620,7 @@ namespace nd {
       {
       }
 
-      ~reduction_kernel()
-      {
-        get_child()->destroy();
-      }
+      ~reduction_kernel() { get_child()->destroy(); }
 
       void single_first(char *dst, char *const *src)
       {
@@ -665,7 +650,8 @@ namespace nd {
             dst += dst_stride;
             src0 += src0_stride;
           }
-        } else {
+        }
+        else {
           // With a non-zero stride, each iteration of the outer loop is
           // "first"
           for (size_t i = 0; i != count; ++i) {
@@ -733,8 +719,8 @@ namespace nd {
      *
      */
     template <>
-    struct reduction_kernel<fixed_dim_type_id, true,
-                            true> : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, true, true>> {
+    struct reduction_kernel<fixed_dim_type_id, true, true>
+        : base_reduction_kernel<reduction_kernel<fixed_dim_type_id, true, true>> {
       // The code assumes that size >= 1
       intptr_t size;
       intptr_t dst_stride, src_stride;
@@ -744,9 +730,7 @@ namespace nd {
       intptr_t dst_stride_first;
       intptr_t src_stride_first;
 
-      reduction_kernel(intptr_t dst_stride, intptr_t src_stride) : dst_stride(dst_stride), src_stride(src_stride)
-      {
-      }
+      reduction_kernel(intptr_t dst_stride, intptr_t src_stride) : dst_stride(dst_stride), src_stride(src_stride) {}
 
       ~reduction_kernel()
       {
@@ -786,7 +770,8 @@ namespace nd {
             reduction_child->strided(dst, inner_dst_stride, &src0, &inner_src_stride, inner_size);
             src0 += src0_stride;
           }
-        } else {
+        }
+        else {
           // With a non-zero stride, every iteration is an initialization
           for (size_t i = 0; i != count; ++i) {
             init_child->strided(dst, inner_dst_stride, &src0, &src_stride_first, size);
@@ -851,7 +836,8 @@ namespace nd {
           self->size_first = self->size - 1;
           self->dst_stride_first = self->dst_stride;
           self->src_stride_first = self->src_stride;
-        } else {
+        }
+        else {
           self->size_first = self->size;
           self->dst_stride_first = 0;
           self->src_stride_first = 0;
@@ -901,10 +887,11 @@ namespace nd {
             ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
 
-      return table[src_tp[0].get_type_id() - fixed_dim_type_id][reinterpret_cast<data_type *>(data)->is_broadcast()]
-                  [reinterpret_cast<data_type *>(data)->is_inner()](static_data, data, ckb, ckb_offset, dst_tp,
-                                                                    dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq,
-                                                                    ectx, nkwd, kwds, tp_vars);
+      return table[src_tp[0].get_type_id() -
+                   fixed_dim_type_id][reinterpret_cast<data_type *>(data)
+                                          ->is_broadcast()][reinterpret_cast<data_type *>(data)->is_inner()](
+          static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds,
+          tp_vars);
     }
 
   } // namespace dynd::nd::functional

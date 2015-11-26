@@ -22,9 +22,8 @@ DYND_API nd::callable nd::sum::make()
 
   return functional::reduction(
       functional::multidispatch(ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
-                                [children](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                           const ndt::type * src_tp) mutable->callable &
-  {
+                                [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                           const ndt::type *src_tp) mutable -> callable & {
                                   callable &child = children[src_tp[0].get_dtype().get_type_id()];
                                   if (child.is_null()) {
                                     throw runtime_error("no suitable child found for nd::sum");
@@ -32,7 +31,7 @@ DYND_API nd::callable nd::sum::make()
 
                                   return child;
                                 },
-                                data_size_max(children)));
+                                0));
 }
 
 DYND_API struct nd::sum nd::sum;

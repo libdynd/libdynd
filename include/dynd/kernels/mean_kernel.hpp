@@ -23,9 +23,7 @@ namespace nd {
       char *compound_div_data;
     };
 
-    mean_kernel(int64 count) : count(count)
-    {
-    }
+    mean_kernel(int64 count) : count(count) {}
 
     void single(char *dst, char *const *src)
     {
@@ -43,23 +41,11 @@ namespace nd {
                            intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       char *data = reinterpret_cast<char *>(new data_type());
-
-      std::size_t sum_data_size = nd::sum::get().get()->data_size;
-      if (sum_data_size > 0) {
-        reinterpret_cast<data_type *>(data)->sum_data = nd::sum::get().get()->data_init(
-            nd::sum::get().get()->static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-      } else {
-        reinterpret_cast<data_type *>(data)->sum_data = NULL;
-      }
-
-      std::size_t compound_div_data_size = nd::compound_div::get().get()->data_size;
-      if (compound_div_data_size > 0) {
-        reinterpret_cast<data_type *>(data)->compound_div_data =
-            nd::compound_div::get().get()->data_init(nd::compound_div::get().get()->static_data, dst_tp, 1,
-                                                     reinterpret_cast<ndt::type *>(static_data), 0, NULL, tp_vars);
-      } else {
-        reinterpret_cast<data_type *>(data)->compound_div_data = NULL;
-      }
+      reinterpret_cast<data_type *>(data)->sum_data =
+          nd::sum::get().get()->data_init(nd::sum::get().get()->static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      reinterpret_cast<data_type *>(data)->compound_div_data =
+          nd::compound_div::get().get()->data_init(nd::compound_div::get().get()->static_data, dst_tp, 1,
+                                                   reinterpret_cast<ndt::type *>(static_data), 0, NULL, tp_vars);
 
       return data;
     }
@@ -105,10 +91,7 @@ namespace ndt {
 
   template <>
   struct type::equivalent<nd::mean_kernel> {
-    static type make()
-    {
-      return nd::sum::get().get_array_type();
-    }
+    static type make() { return nd::sum::get().get_array_type(); }
   };
 
 } // namespace dynd::ndt

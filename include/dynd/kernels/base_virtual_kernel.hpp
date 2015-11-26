@@ -28,12 +28,17 @@ namespace nd {
   template <typename T>
   struct base_virtual_kernel {
     struct single_wrapper {
-      static void func(ckernel_prefix *DYND_UNUSED(self), char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-      {
-      }
+      static void func(ckernel_prefix *DYND_UNUSED(self), char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
 
       static const char *ir;
     };
+
+    static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
+                           intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
+                           const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      return NULL;
+    }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
