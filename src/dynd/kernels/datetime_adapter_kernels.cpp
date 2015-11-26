@@ -31,17 +31,23 @@ static bool parse_datetime_since(const char *begin, const char *end, int64_t &ou
 {
   if (parse::parse_token(begin, end, "hours")) {
     out_unit_factor = DYND_TICKS_PER_HOUR;
-  } else if (parse::parse_token(begin, end, "minutes")) {
+  }
+  else if (parse::parse_token(begin, end, "minutes")) {
     out_unit_factor = DYND_TICKS_PER_MINUTE;
-  } else if (parse::parse_token(begin, end, "seconds")) {
+  }
+  else if (parse::parse_token(begin, end, "seconds")) {
     out_unit_factor = DYND_TICKS_PER_SECOND;
-  } else if (parse::parse_token(begin, end, "milliseconds")) {
+  }
+  else if (parse::parse_token(begin, end, "milliseconds")) {
     out_unit_factor = DYND_TICKS_PER_MILLISECOND;
-  } else if (parse::parse_token(begin, end, "microseconds")) {
+  }
+  else if (parse::parse_token(begin, end, "microseconds")) {
     out_unit_factor = DYND_TICKS_PER_MICROSECOND;
-  } else if (parse::parse_token(begin, end, "nanoseconds")) {
+  }
+  else if (parse::parse_token(begin, end, "nanoseconds")) {
     out_unit_divisor = DYND_NANOSECONDS_PER_TICK;
-  } else {
+  }
+  else {
     return false;
   }
   if (!parse::skip_required_whitespace(begin, end)) {
@@ -62,12 +68,14 @@ static bool parse_datetime_since(const char *begin, const char *end, int64_t &ou
     int year;
     if (parse::parse_date(begin, end, epoch.ymd, date_parse_no_ambig, 0)) {
       epoch.hmst.set_to_zero();
-    } else if (parse::parse_4digit_int_no_ws(begin, end, year)) {
+    }
+    else if (parse::parse_4digit_int_no_ws(begin, end, year)) {
       epoch.ymd.year = static_cast<int16_t>(year);
       epoch.ymd.month = 1;
       epoch.ymd.day = 1;
       epoch.hmst.set_to_zero();
-    } else {
+    }
+    else {
       return false;
     }
   }
@@ -112,7 +120,7 @@ static intptr_t instantiate_int_multiply_and_offset_callable(
 template <class Tsrc, class Tdst>
 nd::callable make_int_multiply_and_offset_callable(Tdst factor, Tdst offset, const ndt::type &func_proto)
 {
-  return nd::callable(func_proto, kernel_request_single, nd::single_t(), make_pair(factor, offset), 0, NULL, NULL,
+  return nd::callable(func_proto, kernel_request_single, nd::single_t(), make_pair(factor, offset), NULL, NULL,
                       &instantiate_int_multiply_and_offset_callable<Tsrc, Tdst>);
 }
 
@@ -126,7 +134,8 @@ struct int_offset_and_divide_ck : nd::base_kernel<int_offset_and_divide_ck<Tsrc,
     if (value != std::numeric_limits<Tsrc>::min()) {
       value += m_offset_divisor.first;
       *reinterpret_cast<Tdst *>(dst) = floordiv(value, m_offset_divisor.second);
-    } else {
+    }
+    else {
       *reinterpret_cast<Tdst *>(dst) = std::numeric_limits<Tdst>::min();
     }
   }
@@ -149,7 +158,7 @@ static intptr_t instantiate_int_offset_and_divide_callable(
 template <class Tsrc, class Tdst>
 nd::callable make_int_offset_and_divide_callable(Tdst offset, Tdst divisor, const ndt::type &func_proto)
 {
-  return nd::callable(func_proto, kernel_request_single, nd::single_t(), make_pair(offset, divisor), 0, NULL, NULL,
+  return nd::callable(func_proto, kernel_request_single, nd::single_t(), make_pair(offset, divisor), NULL, NULL,
                       &instantiate_int_offset_and_divide_callable<Tsrc, Tdst>);
 }
 
@@ -174,7 +183,8 @@ bool dynd::make_datetime_adapter_callable(const ndt::type &value_tp, const ndt::
         out_reverse = make_int_multiply_and_offset_callable<int64_t, int64_t>(
             unit_divisor, -epoch_datetime * unit_divisor,
             ndt::callable_type::make(ndt::type::make<int64_t>(), value_tp));
-      } else {
+      }
+      else {
         out_forward = make_int_multiply_and_offset_callable<int64_t, int64_t>(
             unit_factor, epoch_datetime, ndt::callable_type::make(value_tp, ndt::type::make<int64_t>()));
         out_reverse = make_int_offset_and_divide_callable<int64_t, int64_t>(
@@ -184,7 +194,8 @@ bool dynd::make_datetime_adapter_callable(const ndt::type &value_tp, const ndt::
     default:
       return false;
     }
-  } else {
+  }
+  else {
     return false;
   }
 }

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <unordered_set>
 #include <vector>
 
@@ -131,7 +132,7 @@ namespace ndt {
    */
   class DYND_API base_type {
     /** Embedded reference counting */
-    mutable atomic_refcount m_use_count;
+    mutable std::atomic_long m_use_count;
 
   protected:
     /// Standard dynd type data
@@ -211,7 +212,7 @@ namespace ndt {
      *
      * \param o  The std::ostream to print to.
      */
-    virtual void print_type(std::ostream &o) const = 0;
+    virtual void print_type(std::ostream &o) const = 0; 
 
     /**
      * Print the raw data interpreted as a single instance of this type.

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <iostream>
 
 #include <dynd/config.hpp>
@@ -78,7 +79,7 @@ struct DYND_API memory_block_data {
     void (*reset)(memory_block_data *self);
   };
 
-  atomic_refcount m_use_count;
+  std::atomic_long m_use_count;
   /** A memory_block_type_t enum value */
   uint32_t m_type;
 
