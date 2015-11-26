@@ -56,9 +56,9 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
 }
 
 // TODO This should handle both strided and var cases
-intptr_t nd::functional::rolling_ck::instantiate(char *_static_data, size_t data_size, char *data, void *ckb,
-                                                 intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                                 intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
+intptr_t nd::functional::rolling_ck::instantiate(char *_static_data, char *data, void *ckb, intptr_t ckb_offset,
+                                                 const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                                 const ndt::type *src_tp, const char *const *src_arrmeta,
                                                  kernel_request_t kernreq, const eval::eval_context *ectx,
                                                  intptr_t nkwd, const nd::array *kwds,
                                                  const std::map<std::string, ndt::type> &tp_vars)
@@ -112,7 +112,7 @@ intptr_t nd::functional::rolling_ck::instantiate(char *_static_data, size_t data
   }
 
   const char *src_winop_meta = self->m_src_winop_meta.get();
-  return window_af->instantiate(const_cast<char *>(window_af->static_data), data_size, data, ckb, ckb_offset, dst_el_tp,
+  return window_af->instantiate(const_cast<char *>(window_af->static_data),data, ckb, ckb_offset, dst_el_tp,
                                 dst_el_arrmeta, nsrc, &self->m_src_winop_meta.get_type(), &src_winop_meta,
                                 kernel_request_strided, ectx, nkwd, kwds, tp_vars);
 }

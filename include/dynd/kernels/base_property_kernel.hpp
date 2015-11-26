@@ -32,12 +32,11 @@ namespace nd {
       return reinterpret_cast<char *>(new ndt::type(kwds[0].as<ndt::type>()));
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data, void *ckb,
-                                intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                                const array *DYND_UNUSED(kwds),
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                                const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                                intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       self_type::make(ckb, kernreq, ckb_offset, *reinterpret_cast<ndt::type *>(data), dst_tp, dst_arrmeta);

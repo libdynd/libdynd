@@ -50,8 +50,8 @@ namespace kernels {
       strided(child, NULL, 0, src_inv_perm, src_stride_inv_perm, count);
     }
 
-    static intptr_t instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-                                intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+    static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                 const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                 const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
                                 const std::map<std::string, ndt::type> &tp_vars)
@@ -70,9 +70,8 @@ namespace kernels {
       inv(src_arrmeta_inv, dst_arrmeta, src_arrmeta, perm);
 
       self_type::make(ckb, kernreq, ckb_offset, detail::make_array_wrapper<N>(perm));
-      return child->instantiate(const_cast<char *>(child->static_data), 0, NULL, ckb, ckb_offset,
-                                ndt::type::make<void>(), NULL, nsrc, src_tp_inv, src_arrmeta_inv, kernreq, ectx, nkwd,
-                                kwds, tp_vars);
+      return child->instantiate(const_cast<char *>(child->static_data), NULL, ckb, ckb_offset, ndt::type::make<void>(),
+                                NULL, nsrc, src_tp_inv, src_arrmeta_inv, kernreq, ectx, nkwd, kwds, tp_vars);
     }
 
   private:
@@ -134,8 +133,8 @@ namespace kernels {
       single(dst, src_inv_perm, child);
     }
 
-    static intptr_t instantiate(char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data), void *ckb,
-                                intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+    static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                 const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                 const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
                                 const std::map<std::string, ndt::type> &tp_vars)
@@ -154,7 +153,7 @@ namespace kernels {
       inv_permute(src_arrmeta_inv, src_arrmeta, perm);
 
       self_type::make(ckb, kernreq, ckb_offset, detail::make_array_wrapper<N>(perm));
-      return child->instantiate(const_cast<char *>(child->static_data), 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+      return child->instantiate(const_cast<char *>(child->static_data), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                 nsrc, src_tp_inv, src_arrmeta_inv, kernreq, ectx, nkwd, kwds, tp_vars);
     }
 

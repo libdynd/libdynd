@@ -90,7 +90,7 @@ size_t ndt::adapt_type::make_operand_to_value_assignment_kernel(void *ckb, intpt
 {
   nd::base_callable *af = const_cast<nd::base_callable *>(m_forward.get());
   if (af != NULL) {
-    return af->instantiate(af->static_data, 0, NULL, ckb, ckb_offset, m_value_type, dst_arrmeta, -1, &m_operand_type,
+    return af->instantiate(af->static_data, NULL, ckb, ckb_offset, m_value_type, dst_arrmeta, -1, &m_operand_type,
                            &src_arrmeta, kernreq, ectx, 0, NULL, std::map<std::string, type>());
   } else {
     stringstream ss;
@@ -107,7 +107,7 @@ size_t ndt::adapt_type::make_value_to_operand_assignment_kernel(void *ckb, intpt
 {
   nd::base_callable *af = const_cast<nd::base_callable *>(m_reverse.get());
   if (af != NULL) {
-    return af->instantiate(af->static_data, 0, NULL, ckb, ckb_offset, m_operand_type, src_arrmeta, -1, &m_value_type,
+    return af->instantiate(af->static_data, NULL, ckb, ckb_offset, m_operand_type, src_arrmeta, -1, &m_value_type,
                            &dst_arrmeta, kernreq, ectx, 0, NULL, std::map<std::string, type>());
   } else {
     stringstream ss;

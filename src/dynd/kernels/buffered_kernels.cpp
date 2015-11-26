@@ -105,7 +105,7 @@ size_t dynd::make_buffered_ckernel(const nd::base_callable *af, const ndt::calla
   }
   // Instantiate the callable being buffered
   ckb_offset =
-      af->instantiate(const_cast<char *>(af->static_data), 0, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+      af->instantiate(const_cast<char *>(af->static_data), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                       src_tp_for_af, &buffered_arrmeta[0], kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);

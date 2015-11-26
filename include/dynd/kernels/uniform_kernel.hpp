@@ -12,8 +12,7 @@ namespace dynd {
 inline std::shared_ptr<std::default_random_engine> &get_random_device()
 {
   static std::random_device random_device;
-  static std::shared_ptr<std::default_random_engine> g(
-      new std::default_random_engine(random_device()));
+  static std::shared_ptr<std::default_random_engine> g(new std::default_random_engine(random_device()));
 
   return g;
 }
@@ -22,16 +21,12 @@ namespace nd {
   namespace random {
     namespace detail {
 
-      template <type_id_t DstTypeID, type_kind_t DstTypeKind,
-                typename GeneratorType>
+      template <type_id_t DstTypeID, type_kind_t DstTypeKind, typename GeneratorType>
       struct uniform_kernel;
 
       template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<
-          DstTypeID, sint_kind,
-          GeneratorType> : base_kernel<uniform_kernel<DstTypeID, sint_kind,
-                                                      GeneratorType>,
-                                       0> {
+      struct uniform_kernel<DstTypeID, sint_kind,
+                            GeneratorType> : base_kernel<uniform_kernel<DstTypeID, sint_kind, GeneratorType>, 0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;
@@ -70,17 +65,13 @@ namespace nd {
             }
         */
 
-        static intptr_t instantiate(
-            char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-            char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-            const ndt::type &DYND_UNUSED(dst_tp),
-            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-            const ndt::type *DYND_UNUSED(src_tp),
-            const char *const *DYND_UNUSED(src_arrmeta),
-            kernel_request_t kernreq,
-            const eval::eval_context *DYND_UNUSED(ectx),
-            intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+        static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                                    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                                    intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
         {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
@@ -104,17 +95,12 @@ namespace nd {
       };
 
       template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<
-          DstTypeID, uint_kind,
-          GeneratorType> : uniform_kernel<DstTypeID, sint_kind, GeneratorType> {
+      struct uniform_kernel<DstTypeID, uint_kind, GeneratorType> : uniform_kernel<DstTypeID, sint_kind, GeneratorType> {
       };
 
       template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<
-          DstTypeID, real_kind,
-          GeneratorType> : base_kernel<uniform_kernel<DstTypeID, real_kind,
-                                                      GeneratorType>,
-                                       0> {
+      struct uniform_kernel<DstTypeID, real_kind,
+                            GeneratorType> : base_kernel<uniform_kernel<DstTypeID, real_kind, GeneratorType>, 0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;
@@ -153,17 +139,13 @@ namespace nd {
             }
         */
 
-        static intptr_t instantiate(
-            char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-            char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-            const ndt::type &DYND_UNUSED(dst_tp),
-            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-            const ndt::type *DYND_UNUSED(src_tp),
-            const char *const *DYND_UNUSED(src_arrmeta),
-            kernel_request_t kernreq,
-            const eval::eval_context *DYND_UNUSED(ectx),
-            intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+        static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                                    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                                    intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
         {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
@@ -187,19 +169,15 @@ namespace nd {
       };
 
       template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<
-          DstTypeID, complex_kind,
-          GeneratorType> : base_kernel<uniform_kernel<DstTypeID, complex_kind,
-                                                      GeneratorType>,
-                                       0> {
+      struct uniform_kernel<DstTypeID, complex_kind,
+                            GeneratorType> : base_kernel<uniform_kernel<DstTypeID, complex_kind, GeneratorType>, 0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;
         std::uniform_real_distribution<typename R::value_type> d_real;
         std::uniform_real_distribution<typename R::value_type> d_imag;
 
-        uniform_kernel(GeneratorType *g, R a, R b)
-            : g(*g), d_real(a.real(), b.real()), d_imag(a.imag(), b.imag())
+        uniform_kernel(GeneratorType *g, R a, R b) : g(*g), d_real(a.real(), b.real()), d_imag(a.imag(), b.imag())
         {
         }
 
@@ -232,17 +210,13 @@ namespace nd {
             }
         */
 
-        static intptr_t instantiate(
-            char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size),
-            char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-            const ndt::type &DYND_UNUSED(dst_tp),
-            const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-            const ndt::type *DYND_UNUSED(src_tp),
-            const char *const *DYND_UNUSED(src_arrmeta),
-            kernel_request_t kernreq,
-            const eval::eval_context *DYND_UNUSED(ectx),
-            intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+        static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                    intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                    const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                                    kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
+                                    intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
         {
           std::shared_ptr<GeneratorType> g = get_random_device();
 
@@ -268,8 +242,7 @@ namespace nd {
     } // namespace dynd::nd::random::detail
 
     template <type_id_t DstTypeID, typename GeneratorType>
-    using uniform_kernel = detail::uniform_kernel<
-        DstTypeID, type_kind_of<DstTypeID>::value, GeneratorType>;
+    using uniform_kernel = detail::uniform_kernel<DstTypeID, type_kind_of<DstTypeID>::value, GeneratorType>;
 
   } // namespace dynd::nd::random
 } // namespace dynd::nd
@@ -277,8 +250,7 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t DstTypeID, typename GeneratorType>
-  struct type::equivalent<
-      nd::random::uniform_kernel<DstTypeID, GeneratorType>> {
+  struct type::equivalent<nd::random::uniform_kernel<DstTypeID, GeneratorType>> {
     typedef typename dynd::type_of<DstTypeID>::type R;
 
     static type make()

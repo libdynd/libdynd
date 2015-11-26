@@ -51,8 +51,7 @@ protected:
   {
     if (m_data != NULL) {
       // Destroy whatever was created
-      reinterpret_cast<CKBT *>(this)
-          ->destroy(reinterpret_cast<ckernel_prefix *>(m_data));
+      reinterpret_cast<CKBT *>(this)->destroy(reinterpret_cast<ckernel_prefix *>(m_data));
       // Free the memory
       reinterpret_cast<CKBT *>(this)->free(m_data);
     }
@@ -70,11 +69,9 @@ public:
   }
 
   template <typename SelfType, typename... A>
-  SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq,
-                 A &&... args)
+  SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)
   {
-    return reinterpret_cast<CKBT *>(this)
-        ->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);
+    return reinterpret_cast<CKBT *>(this)->template init<SelfType>(rawself, kernreq, std::forward<A>(args)...);
   }
 
   void reset()
@@ -99,8 +96,8 @@ public:
         requested_capacity = grown_capacity;
       }
       // Do a realloc
-      char *new_data = reinterpret_cast<char *>(reinterpret_cast<CKBT *>(
-          this)->realloc(m_data, m_capacity, requested_capacity));
+      char *new_data =
+          reinterpret_cast<char *>(reinterpret_cast<CKBT *>(this)->realloc(m_data, m_capacity, requested_capacity));
       if (new_data == NULL) {
         reinterpret_cast<CKBT *>(this)->destroy();
         m_data = NULL;
@@ -108,8 +105,7 @@ public:
       }
       // Zero out the newly allocated capacity
       reinterpret_cast<CKBT *>(this)
-          ->set(reinterpret_cast<char *>(new_data) + m_capacity, 0,
-                requested_capacity - m_capacity);
+          ->set(reinterpret_cast<char *>(new_data) + m_capacity, 0, requested_capacity - m_capacity);
       m_data = new_data;
       m_capacity = requested_capacity;
     }
@@ -162,9 +158,7 @@ template <kernel_request_t kernreq>
 class ckernel_builder;
 
 template <>
-class ckernel_builder<kernel_request_host> : public base_ckernel_builder<
-                                                 ckernel_builder<
-                                                     kernel_request_host>> {
+class ckernel_builder<kernel_request_host> : public base_ckernel_builder<ckernel_builder<kernel_request_host>> {
   // When the amount of data is small, this static data is used,
   // otherwise dynamic memory is allocated when it gets too big
   char m_static_data[16 * 8];
@@ -275,8 +269,7 @@ public:
 DYND_API void cuda_throw_if_not_success(cudaError_t);
 
 template <typename self_type, typename... A>
-__global__ void cuda_device_init(ckernel_prefix *rawself,
-                                 kernel_request_t kernreq, A... args)
+__global__ void cuda_device_init(ckernel_prefix *rawself, kernel_request_t kernreq, A... args)
 {
   self_type::init(rawself, kernreq, args...);
 }
@@ -284,10 +277,8 @@ __global__ void cuda_device_init(ckernel_prefix *rawself,
 DYND_INTERNAL __global__ void cuda_device_destroy(ckernel_prefix *self);
 
 template <>
-class
-    ckernel_builder<kernel_request_cuda_device> : public base_ckernel_builder<
-                                                      ckernel_builder<
-                                                          kernel_request_cuda_device>> {
+class ckernel_builder<kernel_request_cuda_device> : public base_ckernel_builder<
+                                                        ckernel_builder<kernel_request_cuda_device>> {
   static class pooled_allocator {
     std::multimap<std::size_t, void *> available_blocks;
     std::map<void *, std::size_t> used_blocks;
@@ -318,8 +309,7 @@ class
     void *allocate(size_t n)
     {
       void *res;
-      std::multimap<std::size_t, void *>::iterator available_block =
-          available_blocks.find(n);
+      std::multimap<std::size_t, void *>::iterator available_block = available_blocks.find(n);
 
       if (available_block != available_blocks.end()) {
         res = available_block->second;
@@ -369,8 +359,7 @@ public:
 
   void *copy(void *dst, const void *src, size_t size)
   {
-    cuda_throw_if_not_success(
-        cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice));
+    cuda_throw_if_not_success(cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice));
     return dst;
   }
 
@@ -381,11 +370,9 @@ public:
   }
 
   template <typename self_type, typename... A>
-  self_type *init(ckernel_prefix *rawself, kernel_request_t kernreq,
-                  A &&... args)
+  self_type *init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)
   {
-    cuda_device_init<self_type> << <1, 1>>>
-        (rawself, kernreq, std::forward<A>(args)...);
+    cuda_device_init<self_type> << <1, 1>>> (rawself, kernreq, std::forward<A>(args)...);
     // check for CUDA errors here
 
     return self_type::get_self(rawself);
@@ -393,8 +380,7 @@ public:
 
   void destroy()
   {
-    base_ckernel_builder<
-        ckernel_builder<kernel_request_cuda_device>>::destroy();
+    base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>>::destroy();
   }
 
   void destroy(ckernel_prefix *self)
@@ -407,8 +393,7 @@ public:
 #endif
 
 template <typename CKBT>
-ckernel_prefix *ckernel_prefix::make(CKBT *ckb, kernel_request_t kernreq,
-                                     intptr_t &inout_ckb_offset, void *func)
+ckernel_prefix *ckernel_prefix::make(CKBT *ckb, kernel_request_t kernreq, intptr_t &inout_ckb_offset, void *func)
 {
   intptr_t ckb_offset = inout_ckb_offset;
   inc_ckb_offset<ckernel_prefix>(inout_ckb_offset);
@@ -417,15 +402,13 @@ ckernel_prefix *ckernel_prefix::make(CKBT *ckb, kernel_request_t kernreq,
   return ckb->template init<ckernel_prefix>(rawself, kernreq, func);
 }
 
-inline intptr_t ckernel_prefix::instantiate(
-    char *static_data, size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-    void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-    const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-    const ndt::type *DYND_UNUSED(src_tp),
-    const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-    const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-    const nd::array *DYND_UNUSED(kwds),
-    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+inline intptr_t ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                            const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                            const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                            const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                            const nd::array *DYND_UNUSED(kwds),
+                                            const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
 {
   void *func;
   switch (kernreq) {
@@ -444,8 +427,7 @@ inline intptr_t ckernel_prefix::instantiate(
     throw std::invalid_argument("no kernel request");
   }
 
-  make(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq,
-       ckb_offset, func);
+  make(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq, ckb_offset, func);
   return ckb_offset;
 }
 
