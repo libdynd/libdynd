@@ -131,7 +131,7 @@ namespace ndt {
    */
   class DYND_API base_type {
     /** Embedded reference counting */
-    mutable atomic_refcount m_use_count;
+    mutable std::atomic_long m_use_count;
 
   protected:
     /// Standard dynd type data

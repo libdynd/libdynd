@@ -117,7 +117,7 @@ namespace nd {
    * with different array arrmeta.
    */
   struct DYND_API base_callable {
-    atomic_refcount use_count;
+    std::atomic_long use_count;
     ndt::type tp;
     kernel_request_t kernreq;
     single_t single;
