@@ -15,7 +15,7 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
                                         const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
-  char *data = (data_size > 0) ? data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars) : NULL;
+  char *data = data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Resolve the destination type
   if (dst_tp.is_symbolic()) {
@@ -44,7 +44,7 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
                                         const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
   // Allocate, then initialize, the data
-  char *data = (data_size > 0) ? data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars) : NULL;
+  char *data = data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Resolve the destination type
   if (dst_tp.is_symbolic()) {
@@ -72,7 +72,7 @@ void nd::base_callable::operator()(const ndt::type &dst_tp, const char *dst_arrm
                                    const ndt::type *src_tp, const char *const *src_arrmeta, char *const *src_data,
                                    intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
 {
-  char *data = (data_size > 0) ? data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars) : NULL;
+  char *data = data_init(static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
 
   // Generate and evaluate the ckernel
   ckernel_builder<kernel_request_host> ckb;

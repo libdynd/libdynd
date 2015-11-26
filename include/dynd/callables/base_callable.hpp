@@ -102,9 +102,7 @@ namespace nd {
 
     single_t() = default;
 
-    single_t(volatile expr_single_t func, const volatile char *ir) : func(func), ir(const_cast<const char *>(ir))
-    {
-    }
+    single_t(volatile expr_single_t func, const volatile char *ir) : func(func), ir(const_cast<const char *>(ir)) {}
   };
 
   /**
@@ -139,8 +137,8 @@ namespace nd {
     }
 
     base_callable(const ndt::type &tp, expr_single_t single, expr_strided_t strided)
-        : use_count(0), tp(tp), kernreq(kernel_request_single), data_size(0), data_init(NULL), resolve_dst_type(NULL),
-          instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
+        : use_count(0), tp(tp), kernreq(kernel_request_single), data_size(0), data_init(&ckernel_prefix::data_init),
+          resolve_dst_type(NULL), instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
     {
       typedef void *static_data_type[2];
       static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
@@ -211,10 +209,7 @@ namespace nd {
 
   static_assert((sizeof(base_callable) & 7) == 0, "base_callable must have size divisible by 8");
 
-  inline void intrusive_ptr_retain(base_callable *ptr)
-  {
-    ++ptr->use_count;
-  }
+  inline void intrusive_ptr_retain(base_callable *ptr) { ++ptr->use_count; }
 
   inline void intrusive_ptr_release(base_callable *ptr)
   {
@@ -223,10 +218,7 @@ namespace nd {
     }
   }
 
-  inline long intrusive_ptr_use_count(base_callable *ptr)
-  {
-    return ptr->use_count;
-  }
+  inline long intrusive_ptr_use_count(base_callable *ptr) { return ptr->use_count; }
 
 } // namespace dynd::nd
 } // namespace dynd

@@ -16,21 +16,18 @@ DYND_API nd::callable nd::max::make()
 {
   auto children = callable::make_all<max_kernel, arithmetic_type_ids>();
 
-  return functional::reduction(functional::multidispatch(
-      ndt::callable_type::make(ndt::scalar_kind_type::make(),
-                               ndt::scalar_kind_type::make()),
-      [children](const ndt::type & DYND_UNUSED(dst_tp),
-                 intptr_t DYND_UNUSED(nsrc),
-                 const ndt::type * src_tp) mutable->callable &
-  {
-        callable &child = children[src_tp[0].get_type_id()];
-        if (child.is_null()) {
-          throw runtime_error("no suitable child found for nd::sum");
-        }
+  return functional::reduction(
+      functional::multidispatch(ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
+                                [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                           const ndt::type *src_tp) mutable -> callable & {
+                                  callable &child = children[src_tp[0].get_type_id()];
+                                  if (child.is_null()) {
+                                    throw runtime_error("no suitable child found for nd::sum");
+                                  }
 
-        return child;
-      },
-      data_size_max(children)));
+                                  return child;
+                                },
+                                0));
 }
 
 DYND_API struct nd::max nd::max;

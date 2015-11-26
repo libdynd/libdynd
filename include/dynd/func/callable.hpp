@@ -587,11 +587,6 @@ namespace nd {
       return get() == NULL;
     }
 
-    std::size_t get_data_size() const
-    {
-      return get()->data_size;
-    }
-
     callable_property get_flags() const
     {
       return right_associative;
