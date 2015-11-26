@@ -10,9 +10,7 @@
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::functional::compose(const nd::callable &first,
-                                     const nd::callable &second,
-                                     const ndt::type &buf_tp)
+nd::callable nd::functional::compose(const nd::callable &first, const nd::callable &second, const ndt::type &buf_tp)
 {
   if (first.get_type()->get_npos() != 1) {
     throw runtime_error("Multi-parameter callable chaining is not implemented");
@@ -20,8 +18,7 @@ nd::callable nd::functional::compose(const nd::callable &first,
 
   if (second.get_type()->get_npos() != 1) {
     stringstream ss;
-    ss << "Cannot chain functions " << first << " and " << second
-       << ", because the second function is not unary";
+    ss << "Cannot chain functions " << first << " and " << second << ", because the second function is not unary";
     throw invalid_argument(ss.str());
   }
 
@@ -39,8 +36,6 @@ nd::callable nd::functional::compose(const nd::callable &first,
   */
 
   return callable::make<compose_kernel>(
-      ndt::callable_type::make(second.get_type()->get_return_type(),
-                               first.get_type()->get_pos_tuple()),
-      compose_kernel::static_data(first, second, buf_tp),
-      first.get()->data_size + second.get()->data_size);
+      ndt::callable_type::make(second.get_type()->get_return_type(), first.get_type()->get_pos_tuple()),
+      compose_kernel::static_data(first, second, buf_tp), 0);
 }
