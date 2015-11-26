@@ -145,9 +145,8 @@ namespace nd {
       new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
     }
 
-    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, std::size_t DYND_UNUSED(data_size),
-                  callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
-                  callable_instantiate_t instantiate)
+    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, callable_data_init_t data_init,
+                  callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
         : use_count(0), tp(tp), kernreq(kernreq), single(single), static_data(NULL), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
     {
@@ -155,8 +154,8 @@ namespace nd {
 
     template <typename T>
     base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, T &&static_data,
-                  std::size_t DYND_UNUSED(data_size), callable_data_init_t data_init,
-                  callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
+                  callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+                  callable_instantiate_t instantiate)
         : use_count(0), tp(tp), kernreq(kernreq), single(single), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate),
           static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
