@@ -38,5 +38,5 @@ nd::callable nd::functional::reduction(const callable &child)
                                {"axes", "identity", "keepdims"}, {ndt::option_type::make(ndt::type("Fixed * int32")),
                                                                   ndt::option_type::make(child.get_ret_type()),
                                                                   ndt::option_type::make(ndt::type::make<bool1>())}),
-      reduction_virtual_kernel::static_data_type(child), sizeof(reduction_virtual_kernel::data_type));
+      reduction_virtual_kernel::static_data_type(child));
 }

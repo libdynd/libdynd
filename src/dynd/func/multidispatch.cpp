@@ -278,5 +278,5 @@ nd::callable nd::functional::old_multidispatch(intptr_t naf,
 
   // TODO: Component callables might be arrays, not just scalars
   return callable::make<old_multidispatch_ck>(
-      ndt::make_generic_funcproto(nargs), std::move(sorted_af), 0);
+      ndt::make_generic_funcproto(nargs), std::move(sorted_af));
 }

@@ -60,13 +60,13 @@ nd::callable nd::functional::permute(const callable &child,
   switch (child_tp->get_npos()) {
   case 2:
     return callable::make<kernels::permute_ck<2>>(
-        self_tp, std::make_pair(child, perm), 0);
+        self_tp, std::make_pair(child, perm));
   case 3:
     return callable::make<kernels::permute_ck<3>>(
-        self_tp, std::make_pair(child, perm), 0);
+        self_tp, std::make_pair(child, perm));
   case 4:
     return callable::make<kernels::permute_ck<4>>(
-        self_tp, std::make_pair(child, perm), 0);
+        self_tp, std::make_pair(child, perm));
   default:
     throw std::runtime_error("not yet implemented");
   }

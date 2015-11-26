@@ -23,6 +23,5 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
   return callable::make<neighborhood_kernel<1>>(
       ndt::callable_type::make(funcproto_tp->get_pos_type(0).with_replaced_dtype(funcproto_tp->get_return_type()),
                                funcproto_tp->get_pos_tuple(), ndt::struct_type::make({"shape", "offset"}, arg_tp)),
-      neighborhood_kernel<1>::static_data_type(neighborhood_op, boundary_child),
-      sizeof(neighborhood_kernel<1>::data_type));
+      neighborhood_kernel<1>::static_data_type(neighborhood_op, boundary_child));
 }

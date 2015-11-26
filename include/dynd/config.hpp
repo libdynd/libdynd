@@ -19,7 +19,6 @@
 #include <utility>
 
 #include <dynd/visibility.hpp>
-#include <dynd/atomic_refcount.hpp>
 
 #ifdef __NVCC__
 #ifndef DYND_CUDA

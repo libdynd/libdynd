@@ -12,7 +12,7 @@ using namespace dynd;
 
 nd::callable nd::functional::outer(const callable &child)
 {
-  return callable::make<outer_ck>(outer_make_type(child.get_type()), child, 0);
+  return callable::make<outer_ck>(outer_make_type(child.get_type()), child);
 }
 
 ndt::type nd::functional::outer_make_type(const ndt::callable_type *child_tp)

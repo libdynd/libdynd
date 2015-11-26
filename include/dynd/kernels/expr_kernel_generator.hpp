@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/config.hpp>
-#include <dynd/atomic_refcount.hpp>
 #include <dynd/types/type_id.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/kernels/base_kernel.hpp>
@@ -29,7 +28,7 @@ struct DYND_API expr_operation_pair {
  */
 class DYND_API expr_kernel_generator {
     /** Embedded reference counting */
-    mutable atomic_refcount m_use_count;
+    mutable std::atomic_long m_use_count;
     bool m_elwise;
 public:
     expr_kernel_generator(bool elwise)

@@ -61,7 +61,7 @@ namespace nd {
     template <typename DispatcherType>
     callable multidispatch(const ndt::type &tp, const DispatcherType &dispatcher, std::size_t DYND_UNUSED(data_size))
     {
-      return callable::make<multidispatch_kernel<DispatcherType>>(tp, make_unique<DispatcherType>(dispatcher), 0);
+      return callable::make<multidispatch_kernel<DispatcherType>>(tp, make_unique<DispatcherType>(dispatcher));
     }
 
     namespace detail {

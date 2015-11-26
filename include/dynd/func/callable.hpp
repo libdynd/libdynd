@@ -716,7 +716,7 @@ namespace nd {
     template <typename KernelType>
     static typename std::enable_if<
         ndt::type::has_equivalent<KernelType>::value && !detail::has_data_size<KernelType>::value, callable>::type
-    make(std::size_t DYND_UNUSED(data_size))
+    make()
     {
       return callable(ndt::type::equivalent<KernelType>::make(), detail::get_kernreq<KernelType>(),
                       detail::get_single_t<KernelType>(), detail::get_data_init<KernelType>(),
@@ -726,7 +726,7 @@ namespace nd {
     template <typename KernelType, typename StaticDataType>
     static typename std::enable_if<
         ndt::type::has_equivalent<KernelType>::value && !detail::has_data_size<KernelType>::value, callable>::type
-    make(StaticDataType &&static_data, std::size_t DYND_UNUSED(data_size))
+    make(StaticDataType &&static_data)
     {
       return callable(ndt::type::equivalent<KernelType>::make(), detail::get_kernreq<KernelType>(),
                       detail::get_single_t<KernelType>(), std::forward<StaticDataType>(static_data),
@@ -758,7 +758,7 @@ namespace nd {
     template <typename KernelType>
     static typename std::enable_if<
         !ndt::type::has_equivalent<KernelType>::value && !detail::has_data_size<KernelType>::value, callable>::type
-    make(const ndt::type &self_tp, std::size_t DYND_UNUSED(data_size))
+    make(const ndt::type &self_tp)
     {
       return callable(self_tp, detail::get_kernreq<KernelType>(), detail::get_single_t<KernelType>(),
                       detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
@@ -768,7 +768,7 @@ namespace nd {
     template <typename KernelType, typename StaticDataType>
     static typename std::enable_if<
         !ndt::type::has_equivalent<KernelType>::value && !detail::has_data_size<KernelType>::value, callable>::type
-    make(const ndt::type &self_tp, StaticDataType &&static_data, std::size_t DYND_UNUSED(data_size))
+    make(const ndt::type &self_tp, StaticDataType &&static_data)
     {
       return callable(self_tp, detail::get_kernreq<KernelType>(), detail::get_single_t<KernelType>(),
                       std::forward<StaticDataType>(static_data), detail::get_data_init<KernelType>(),
@@ -776,25 +776,25 @@ namespace nd {
     }
 
     template <template <int> class CKT, typename T>
-    static callable make(const ndt::type &self_tp, T &&data, size_t data_size)
+    static callable make(const ndt::type &self_tp, T &&data)
     {
       switch (self_tp.extended<ndt::callable_type>()->get_npos()) {
       case 0:
-        return make<CKT<0>>(self_tp, std::forward<T>(data), data_size);
+        return make<CKT<0>>(self_tp, std::forward<T>(data));
       case 1:
-        return make<CKT<1>>(self_tp, std::forward<T>(data), data_size);
+        return make<CKT<1>>(self_tp, std::forward<T>(data));
       case 2:
-        return make<CKT<2>>(self_tp, std::forward<T>(data), data_size);
+        return make<CKT<2>>(self_tp, std::forward<T>(data));
       case 3:
-        return make<CKT<3>>(self_tp, std::forward<T>(data), data_size);
+        return make<CKT<3>>(self_tp, std::forward<T>(data));
       case 4:
-        return make<CKT<4>>(self_tp, std::forward<T>(data), data_size);
+        return make<CKT<4>>(self_tp, std::forward<T>(data));
       case 5:
-        return make<CKT<5>>(self_tp, std::forward<T>(data), data_size);
+        return make<CKT<5>>(self_tp, std::forward<T>(data));
       case 6:
-        return make<CKT<6>>(self_tp, std::forward<T>(data), data_size);
+        return make<CKT<6>>(self_tp, std::forward<T>(data));
       case 7:
-        return make<CKT<7>>(self_tp, std::forward<T>(data), data_size);
+        return make<CKT<7>>(self_tp, std::forward<T>(data));
       default:
         throw std::runtime_error("callable with nsrc > 7 not implemented yet");
       }
@@ -959,20 +959,6 @@ namespace nd {
     };
 
   } // namespace dynd::nd::detail
-
-  template <typename KeyType>
-  std::size_t data_size_max(const std::map<KeyType, callable> &callables)
-  {
-    std::size_t data_size_max = 0;
-    for (const std::pair<KeyType, callable> &pair : callables) {
-      std::size_t data_size = pair.second.get_data_size();
-      if (data_size > data_size_max) {
-        data_size_max = data_size;
-      }
-    }
-
-    return data_size_max;
-  }
 
   template <typename FuncType>
   struct declfunc {
