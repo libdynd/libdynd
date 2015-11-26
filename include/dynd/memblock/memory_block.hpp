@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <iostream>
 
 #include <dynd/config.hpp>

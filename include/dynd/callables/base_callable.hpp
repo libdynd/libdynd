@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <map>
 
 #include <dynd/array.hpp>
