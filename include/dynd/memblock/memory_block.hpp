@@ -9,7 +9,6 @@
 #include <iostream>
 
 #include <dynd/config.hpp>
-#include <dynd/atomic_refcount.hpp>
 
 namespace dynd {
 

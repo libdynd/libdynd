@@ -11,7 +11,6 @@
 
 #include <dynd/config.hpp>
 #include <dynd/types/type_id.hpp>
-#include <dynd/atomic_refcount.hpp>
 #include <dynd/irange.hpp>
 #include <dynd/memblock/memory_block.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
@@ -212,7 +211,7 @@ namespace ndt {
      *
      * \param o  The std::ostream to print to.
      */
-    virtual void print_type(std::ostream &o) const = 0; 
+    virtual void print_type(std::ostream &o) const = 0;
 
     /**
      * Print the raw data interpreted as a single instance of this type.
