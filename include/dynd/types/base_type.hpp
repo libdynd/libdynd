@@ -212,7 +212,7 @@ namespace ndt {
      *
      * \param o  The std::ostream to print to.
      */
-    virtual void print_type(std::ostream &o) const = 0;
+    virtual void print_type(std::ostream &o) const = 0; 
 
     /**
      * Print the raw data interpreted as a single instance of this type.
