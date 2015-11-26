@@ -80,7 +80,7 @@ struct property_kernel : nd::base_virtual_kernel<property_kernel> {
 nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
                                                  assign_error_mode errmode)
 {
-  return nd::callable::make<unary_assignment_ck>(ndt::callable_type::make(dst_tp, src_tp), errmode, 0);
+  return nd::callable::make<unary_assignment_ck>(ndt::callable_type::make(dst_tp, src_tp), errmode);
 }
 
 nd::callable dynd::make_callable_from_property(const ndt::type &tp, const std::string &propname)
@@ -92,7 +92,7 @@ nd::callable dynd::make_callable_from_property(const ndt::type &tp, const std::s
     throw type_error(ss.str());
   }
   ndt::type prop_tp = ndt::property_type::make(tp, propname);
-  return nd::callable::make<property_kernel>(ndt::callable_type::make(prop_tp.value_type(), tp), prop_tp, 0);
+  return nd::callable::make<property_kernel>(ndt::callable_type::make(prop_tp.value_type(), tp), prop_tp);
 }
 
 void nd::detail::validate_kwd_types(const ndt::callable_type *af_tp, std::vector<ndt::type> &kwd_tp,

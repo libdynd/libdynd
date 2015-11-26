@@ -23,7 +23,7 @@ namespace nd {
 
       ndt::type self_tp = ndt::type::make<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
-      return callable::make<CKT>(self_tp, 0);
+      return callable::make<CKT>(self_tp);
     }
 
     template <typename func_type, func_type func, typename... T>
@@ -44,7 +44,7 @@ namespace nd {
 
       ndt::type self_tp = ndt::type::make<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
-      return callable::make<ck_type>(self_tp, func, 0);
+      return callable::make<ck_type>(self_tp, func);
     }
 
     template <typename func_type, typename... T>
@@ -61,7 +61,7 @@ namespace nd {
 
       ndt::type self_tp = ndt::type::make<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
-      return callable::make<ck_type>(self_tp, func, 0);
+      return callable::make<ck_type>(self_tp, func);
     }
 
     template <typename func_type, typename... T>
@@ -77,7 +77,7 @@ namespace nd {
 
       ndt::type self_tp = ndt::type::make<typename funcproto_of<R (T::*)(A...)>::type>(std::forward<S>(names)...);
 
-      return callable::make<ck_type>(self_tp, typename ck_type::data_type(obj, mem_func), 0);
+      return callable::make<ck_type>(self_tp, typename ck_type::data_type(obj, mem_func));
     }
 
     template <typename O, typename R, typename... A, typename... T>
@@ -97,7 +97,7 @@ namespace nd {
 
       ndt::type self_tp = ndt::type::make<typename funcproto_of<func_type, K...>::type>(std::forward<T>(names)...);
 
-      return callable::make<ck_type>(self_tp, 0);
+      return callable::make<ck_type>(self_tp);
     }
 
     /**

@@ -37,5 +37,5 @@ nd::callable nd::functional::compose(const nd::callable &first, const nd::callab
 
   return callable::make<compose_kernel>(
       ndt::callable_type::make(second.get_type()->get_return_type(), first.get_type()->get_pos_tuple()),
-      compose_kernel::static_data(first, second, buf_tp), 0);
+      compose_kernel::static_data(first, second, buf_tp));
 }
