@@ -181,8 +181,6 @@ namespace nd {
     static void operator delete(void *ptr, size_t DYND_UNUSED(static_data_size)) { ::operator delete(ptr); }
   };
 
-  static_assert((sizeof(base_callable) & 7) == 0, "base_callable must have size divisible by 8");
-
   inline void intrusive_ptr_retain(base_callable *ptr) { ++ptr->use_count; }
 
   inline void intrusive_ptr_release(base_callable *ptr)
