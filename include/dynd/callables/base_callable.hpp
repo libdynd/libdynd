@@ -206,6 +206,11 @@ namespace nd {
     {
       return ::operator new(size + static_data_size);
     }
+
+    static void operator delete(void* ptr)
+    {
+        ::operator delete(ptr);
+    }
   };
 
   static_assert((sizeof(base_callable) & 7) == 0, "base_callable must have size divisible by 8");
