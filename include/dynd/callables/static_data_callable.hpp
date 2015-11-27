@@ -24,6 +24,8 @@ namespace nd {
       static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
                     "static data requires stronger alignment");
     }
+
+    virtual ~static_data_callable() {}
   };
 
 } // namespace dynd::nd
