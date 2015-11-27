@@ -41,7 +41,8 @@ namespace nd {
         ndt::type src_dtype, dst_dtype;
         if (src.match(dst, typevars)) {
           return can_implicitly_convert(src.get_dtype(), dst.get_dtype(), typevars);
-        } else {
+        }
+        else {
           return false;
         }
       }
@@ -56,7 +57,8 @@ namespace nd {
       if (src.get_kind() == real_kind) {
         if (dst.get_kind() == real_kind) {
           return src.get_data_size() < dst.get_data_size();
-        } else if (dst.get_kind() == complex_kind) {
+        }
+        else if (dst.get_kind() == complex_kind) {
           return src.get_data_size() * 2 <= dst.get_data_size();
         }
       }
@@ -86,14 +88,15 @@ namespace nd {
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
-          child.get()->resolve_dst_type(child.get()->static_data, data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
-        } else {
+          child.get()->resolve_dst_type(child.get()->static_data(), data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+        }
+        else {
           dst_tp = child_dst_tp;
         }
       }
 
-      static intptr_t instantiate(char *static_data, char *data, void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+      static intptr_t instantiate(char *static_data, char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t nkwd, const dynd::nd::array *kwds,
                                   const std::map<std::string, ndt::type> &tp_vars)
@@ -101,8 +104,8 @@ namespace nd {
         DispatcherType &dispatcher = **reinterpret_cast<std::unique_ptr<DispatcherType> *>(static_data);
 
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
-        return child.get()->instantiate(child.get()->static_data,  data, ckb, ckb_offset, dst_tp,
-                                        dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+        return child.get()->instantiate(child.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                        src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };
 

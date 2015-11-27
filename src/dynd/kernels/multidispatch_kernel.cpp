@@ -28,7 +28,7 @@ void nd::functional::old_multidispatch_ck::resolve_dst_type(char *static_data, c
       if (isrc == nsrc) {
         dst_tp = child.get_type()->get_return_type();
         if (dst_tp.is_symbolic()) {
-          child.get()->resolve_dst_type(const_cast<char *>(child.get()->static_data), data, dst_tp, nsrc, src_tp, nkwd,
+          child.get()->resolve_dst_type(const_cast<char *>(child.get()->static_data()), data, dst_tp, nsrc, src_tp, nkwd,
                                         kwds, tp_vars);
         }
         return;
@@ -77,7 +77,7 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(char *static_data, ch
         }
       }
       if (j == nsrc) {
-        return af.get()->instantiate(const_cast<char *>(af.get()->static_data), NULL, ckb, ckb_offset, dst_tp,
+        return af.get()->instantiate(const_cast<char *>(af.get()->static_data()), NULL, ckb, ckb_offset, dst_tp,
                                      dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       } else {
         return make_buffered_ckernel(af.get(), af.get_type(), ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,

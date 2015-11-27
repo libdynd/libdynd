@@ -118,19 +118,18 @@ namespace nd {
    * with different array arrmeta.
    */
   struct DYND_API base_callable {
+    char buffer[4];
+
     std::atomic_long use_count;
     ndt::type tp;
     kernel_request_t kernreq;
     single_t single;
-    char *static_data;
     callable_data_init_t data_init;
     callable_resolve_dst_type_t resolve_dst_type;
     callable_instantiate_t instantiate;
     callable_static_data_free_t static_data_free;
 
-    base_callable()
-        : use_count(0), static_data(NULL), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL),
-          static_data_free(NULL)
+    base_callable() : use_count(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL), static_data_free(NULL)
     {
     }
 
@@ -142,13 +141,12 @@ namespace nd {
       static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
                     "static data requires stronger alignment");
 
-      this->static_data = reinterpret_cast<char *>(this + 1);
-      new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
+      new (static_data()) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
     }
 
     base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, callable_data_init_t data_init,
                   callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), kernreq(kernreq), single(single), static_data(NULL), data_init(data_init),
+        : use_count(0), tp(tp), kernreq(kernreq), single(single), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
     {
     }
@@ -165,8 +163,7 @@ namespace nd {
       static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
                     "static data requires stronger alignment");
 
-      this->static_data = reinterpret_cast<char *>(this + 1);
-      new (this->static_data)(static_data_type)(std::forward<T>(static_data));
+      new (this->static_data())(static_data_type)(std::forward<T>(static_data));
     }
 
     // non-copyable
@@ -176,9 +173,13 @@ namespace nd {
     {
       // Call the static_data_free function, if it exists
       if (static_data_free != NULL) {
-        static_data_free(static_data);
+        static_data_free(static_data());
       }
     }
+
+    char *static_data() { return reinterpret_cast<char *>(this + 1); }
+
+    const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
 
     array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      char *const *src_data, intptr_t nkwd, const array *kwds,

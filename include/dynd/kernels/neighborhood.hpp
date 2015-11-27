@@ -57,12 +57,14 @@ namespace nd {
           if (ndim == 1) {
             child_src_arrmeta[0].dim_size = shape[0];
             child_src_arrmeta[0].stride = sizeof(int);
-          } else if (ndim == 2) {
+          }
+          else if (ndim == 2) {
             child_src_arrmeta[0].dim_size = shape[0];
             child_src_arrmeta[0].stride = 4 * sizeof(int);
             child_src_arrmeta[1].dim_size = shape[1];
             child_src_arrmeta[1].stride = sizeof(int);
-          } else if (ndim == 3) {
+          }
+          else if (ndim == 3) {
             child_src_arrmeta[0].dim_size = shape[0];
             child_src_arrmeta[0].stride = 4 * 4 * sizeof(int);
             child_src_arrmeta[1].dim_size = shape[1];
@@ -120,7 +122,8 @@ namespace nd {
         while (i < counts[1]) {
           if (*out_of_bounds) {
             boundary_child->single(dst, &src0);
-          } else {
+          }
+          else {
             child->single(dst, &src0);
           }
           ++i;
@@ -197,13 +200,14 @@ namespace nd {
           const char *child_src_arrmeta =
               reinterpret_cast<char *>(reinterpret_cast<data_type *>(data)->child_src_arrmeta);
           ckb_offset =
-              child.get()->instantiate(child.get()->static_data, NULL, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta,
-                                       nsrc, &reinterpret_cast<data_type *>(data)->child_src_tp, &child_src_arrmeta,
-                                       kernel_request_single, ectx, nkwd - 3, kwds + 3, tp_vars);
+              child.get()->instantiate(child.get()->static_data(), NULL, ckb, ckb_offset, child_dst_tp,
+                                       child_dst_arrmeta, nsrc, &reinterpret_cast<data_type *>(data)->child_src_tp,
+                                       &child_src_arrmeta, kernel_request_single, ectx, nkwd - 3, kwds + 3, tp_vars);
           neighborhood_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-                                        neighborhood_offset)->boundary_child_offset = ckb_offset - neighborhood_offset;
+                                        neighborhood_offset)
+              ->boundary_child_offset = ckb_offset - neighborhood_offset;
 
-          ckb_offset = boundary_child.get()->instantiate(boundary_child.get()->static_data, NULL, ckb, ckb_offset,
+          ckb_offset = boundary_child.get()->instantiate(boundary_child.get()->static_data(), NULL, ckb, ckb_offset,
                                                          child_dst_tp, child_dst_arrmeta, 0, NULL, NULL,
                                                          kernel_request_single, ectx, nkwd - 3, kwds + 3, tp_vars);
 
@@ -219,7 +223,8 @@ namespace nd {
         }
 
         neighborhood_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
-                                      neighborhood_offset)->boundary_child_offset = sizeof(neighborhood_kernel);
+                                      neighborhood_offset)
+            ->boundary_child_offset = sizeof(neighborhood_kernel);
 
         return instantiate(static_data, data, ckb, ckb_offset, child_dst_tp, child_dst_arrmeta, nsrc, child_src_tp,
                            child_src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);

@@ -28,7 +28,8 @@ struct buffered_ck : nd::base_kernel<buffered_ck> {
         ckernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
         ck->single(m_bufs[i].get_storage(), &src[i]);
         buf_src[i] = m_bufs[i].get_storage();
-      } else {
+      }
+      else {
         buf_src[i] = src[i];
       }
     }
@@ -47,7 +48,8 @@ struct buffered_ck : nd::base_kernel<buffered_ck> {
       if (!m_bufs[i].is_null()) {
         buf_src[i] = m_bufs[i].get_storage();
         buf_stride[i] = m_bufs[i].get_stride();
-      } else {
+      }
+      else {
         buf_src[i] = src[i];
         buf_stride[i] = src_stride[i];
       }
@@ -70,7 +72,8 @@ struct buffered_ck : nd::base_kernel<buffered_ck> {
           ckernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
           expr_strided_t ck_fn = ck->get_function<expr_strided_t>();
           ck_fn(ck, m_bufs[i].get_storage(), buf_stride[i], &src[i], &src_stride[i], chunk_size);
-        } else {
+        }
+        else {
           buf_src[i] += chunk_size * buf_stride[i];
         }
       }
@@ -98,14 +101,15 @@ size_t dynd::make_buffered_ckernel(const nd::base_callable *af, const ndt::calla
   for (intptr_t i = 0; i < nsrc; ++i) {
     if (src_tp[i] == src_tp_for_af[i]) {
       buffered_arrmeta[i] = src_arrmeta[i];
-    } else {
+    }
+    else {
       self->m_bufs[i].allocate(src_tp_for_af[i]);
       buffered_arrmeta[i] = self->m_bufs[i].get_arrmeta();
     }
   }
   // Instantiate the callable being buffered
   ckb_offset =
-      af->instantiate(const_cast<char *>(af->static_data), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+      af->instantiate(const_cast<char *>(af->static_data()), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                       src_tp_for_af, &buffered_arrmeta[0], kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
   reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
   self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);

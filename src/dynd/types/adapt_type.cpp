@@ -17,9 +17,11 @@ ndt::adapt_type::adapt_type(const type &operand_type, const type &value_type, co
 {
   if (!value_type.is_builtin() &&
       value_type.extended()->adapt_type(operand_type.value_type(), op, m_forward, m_reverse)) {
-  } else if (!operand_type.value_type().is_builtin() &&
-             operand_type.value_type().extended()->reverse_adapt_type(value_type, op, m_forward, m_reverse)) {
-  } else {
+  }
+  else if (!operand_type.value_type().is_builtin() &&
+           operand_type.value_type().extended()->reverse_adapt_type(value_type, op, m_forward, m_reverse)) {
+  }
+  else {
     stringstream ss;
     ss << "Cannot create type ";
     print_type(ss);
@@ -35,9 +37,7 @@ ndt::adapt_type::adapt_type(const type &operand_type, const type &value_type, co
   }
 }
 
-ndt::adapt_type::~adapt_type()
-{
-}
+ndt::adapt_type::~adapt_type() {}
 
 void ndt::adapt_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
                                  const char *DYND_UNUSED(data)) const
@@ -61,9 +61,11 @@ bool ndt::adapt_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != adapt_type_id) {
+  }
+  else if (rhs.get_type_id() != adapt_type_id) {
     return false;
-  } else {
+  }
+  else {
     const adapt_type *dt = static_cast<const adapt_type *>(&rhs);
     return m_value_type == dt->m_value_type && m_operand_type == dt->m_operand_type && m_op == dt->m_op;
   }
@@ -75,7 +77,8 @@ ndt::type ndt::adapt_type::with_replaced_storage_type(const type &replacement_ty
     // If there's no expression in the operand, just try substituting (the
     // constructor will error-check)
     return type(new adapt_type(replacement_type, m_value_type, m_op), false);
-  } else {
+  }
+  else {
     // With an expression operand, replace it farther down the chain
     return type(new adapt_type(reinterpret_cast<const base_expr_type *>(replacement_type.extended())
                                    ->with_replaced_storage_type(replacement_type),
@@ -90,9 +93,10 @@ size_t ndt::adapt_type::make_operand_to_value_assignment_kernel(void *ckb, intpt
 {
   nd::base_callable *af = const_cast<nd::base_callable *>(m_forward.get());
   if (af != NULL) {
-    return af->instantiate(af->static_data, NULL, ckb, ckb_offset, m_value_type, dst_arrmeta, -1, &m_operand_type,
+    return af->instantiate(af->static_data(), NULL, ckb, ckb_offset, m_value_type, dst_arrmeta, -1, &m_operand_type,
                            &src_arrmeta, kernreq, ectx, 0, NULL, std::map<std::string, type>());
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "Cannot apply ";
     print_type(ss);
@@ -107,9 +111,10 @@ size_t ndt::adapt_type::make_value_to_operand_assignment_kernel(void *ckb, intpt
 {
   nd::base_callable *af = const_cast<nd::base_callable *>(m_reverse.get());
   if (af != NULL) {
-    return af->instantiate(af->static_data, NULL, ckb, ckb_offset, m_operand_type, src_arrmeta, -1, &m_value_type,
+    return af->instantiate(af->static_data(), NULL, ckb, ckb_offset, m_operand_type, src_arrmeta, -1, &m_value_type,
                            &dst_arrmeta, kernreq, ectx, 0, NULL, std::map<std::string, type>());
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "Cannot apply ";
     print_type(ss);

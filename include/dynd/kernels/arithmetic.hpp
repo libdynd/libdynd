@@ -12,10 +12,7 @@ namespace nd {
   namespace detail {                                                                                                   \
     template <type_id_t Src0TypeID>                                                                                    \
     struct inline_##NAME {                                                                                             \
-      static auto f(typename type_of<Src0TypeID>::type a)                                                              \
-      {                                                                                                                \
-        return OP a;                                                                                                   \
-      }                                                                                                                \
+      static auto f(typename type_of<Src0TypeID>::type a) { return OP a; }                                             \
     };                                                                                                                 \
   } /* namespace detail */                                                                                             \
                                                                                                                        \
@@ -37,10 +34,7 @@ namespace nd {
   namespace detail {                                                                                                   \
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                              \
     struct inline_##NAME {                                                                                             \
-      static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b)                        \
-      {                                                                                                                \
-        return a OP b;                                                                                                 \
-      }                                                                                                                \
+      static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return a OP b; }     \
     };                                                                                                                 \
   } /* namespace detail */                                                                                             \
                                                                                                                        \
@@ -65,10 +59,7 @@ namespace nd {
   namespace detail {
     template <type_id_t Src0TypeID, type_id_t Src1TypeID>
     struct inline_logical_xor {
-      static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b)
-      {
-        return (!a) ^ (!b);
-      }
+      static auto f(typename type_of<Src0TypeID>::type a, typename type_of<Src1TypeID>::type b) { return (!a) ^ (!b); }
     };
   } // namespace detail
 
@@ -84,8 +75,8 @@ namespace nd {
   struct option_arithmetic_kernel;
 
   template <typename FuncType>
-  struct option_arithmetic_kernel<FuncType, true, false> : base_kernel<option_arithmetic_kernel<FuncType, true, false>,
-                                                                       2> {
+  struct option_arithmetic_kernel<FuncType, true, false>
+      : base_kernel<option_arithmetic_kernel<FuncType, true, false>, 2> {
     static const size_t data_size = 0;
     intptr_t arith_offset;
     intptr_t assign_na_offset;
@@ -97,7 +88,8 @@ namespace nd {
       is_avail->single(reinterpret_cast<char *>(&child_dst), &src[0]);
       if (child_dst) {
         this->get_child(arith_offset)->single(dst, src);
-      } else {
+      }
+      else {
         this->get_child(assign_na_offset)->single(dst, nullptr);
       }
     }
@@ -108,7 +100,7 @@ namespace nd {
     {
       auto k = FuncType::get().get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(), src_tp[1]};
-      k->resolve_dst_type(k->static_data, data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
+      k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
       dst_tp = ndt::option_type::make(dst_tp);
     }
 
@@ -123,7 +115,7 @@ namespace nd {
 
       auto is_avail = is_avail::get();
       ckb_offset =
-          is_avail.get()->instantiate(is_avail.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+          is_avail.get()->instantiate(is_avail.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                       src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       option_arithmetic_kernel *self = option_arithmetic_kernel::get_self(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), option_arith_offset);
@@ -131,22 +123,22 @@ namespace nd {
       auto arith = FuncType::get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(), src_tp[1]};
       ckb_offset =
-          arith.get()->instantiate(arith.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+          arith.get()->instantiate(arith.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                    child_src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       self = option_arithmetic_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
       auto assign_na = nd::assign_na_decl::get();
       ckb_offset =
-          assign_na.get()->instantiate(assign_na.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+          assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                        child_src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
   };
 
   template <typename FuncType>
-  struct option_arithmetic_kernel<FuncType, false, true> : base_kernel<option_arithmetic_kernel<FuncType, false, true>,
-                                                                       2> {
+  struct option_arithmetic_kernel<FuncType, false, true>
+      : base_kernel<option_arithmetic_kernel<FuncType, false, true>, 2> {
     static const size_t data_size = 0;
     intptr_t arith_offset;
     intptr_t assign_na_offset;
@@ -158,7 +150,8 @@ namespace nd {
       is_avail->single(reinterpret_cast<char *>(&child_dst), &src[1]);
       if (child_dst) {
         this->get_child(arith_offset)->single(dst, src);
-      } else {
+      }
+      else {
         this->get_child(assign_na_offset)->single(dst, nullptr);
       }
     }
@@ -169,7 +162,7 @@ namespace nd {
     {
       auto k = FuncType::get().get();
       const ndt::type child_src_tp[2] = {src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type()};
-      k->resolve_dst_type(k->static_data, data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
+      k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
       dst_tp = ndt::option_type::make(dst_tp);
     }
 
@@ -184,7 +177,7 @@ namespace nd {
 
       auto is_avail = is_avail::get();
       ckb_offset =
-          is_avail.get()->instantiate(is_avail.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+          is_avail.get()->instantiate(is_avail.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                       &src_tp[1], &src_arrmeta[1], kernel_request_single, ectx, nkwd, kwds, tp_vars);
       option_arithmetic_kernel *self = option_arithmetic_kernel::get_self(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), option_arith_offset);
@@ -192,22 +185,22 @@ namespace nd {
       auto arith = FuncType::get();
       const ndt::type child_src_tp[2] = {src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type()};
       ckb_offset =
-          arith.get()->instantiate(arith.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+          arith.get()->instantiate(arith.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                    child_src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       self = option_arithmetic_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
       auto assign_na = nd::assign_na_decl::get();
       ckb_offset =
-          assign_na.get()->instantiate(assign_na.get()->static_data, data, ckb, ckb_offset, src_tp[1], src_arrmeta[1],
+          assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, src_tp[1], src_arrmeta[1],
                                        0, nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
   };
 
   template <typename FuncType>
-  struct option_arithmetic_kernel<FuncType, true, true> : base_kernel<option_arithmetic_kernel<FuncType, true, true>,
-                                                                      2> {
+  struct option_arithmetic_kernel<FuncType, true, true>
+      : base_kernel<option_arithmetic_kernel<FuncType, true, true>, 2> {
     static const size_t data_size = 0;
     intptr_t is_avail_rhs_offset;
     intptr_t arith_offset;
@@ -223,7 +216,8 @@ namespace nd {
       is_avail_rhs->single(reinterpret_cast<char *>(&child_dst_rhs), &src[1]);
       if (child_dst_lhs && child_dst_rhs) {
         this->get_child(arith_offset)->single(dst, src);
-      } else {
+      }
+      else {
         this->get_child(assign_na_offset)->single(dst, nullptr);
       }
     }
@@ -235,7 +229,7 @@ namespace nd {
       auto k = FuncType::get().get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
-      k->resolve_dst_type(k->static_data, data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
+      k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
       dst_tp = ndt::option_type::make(dst_tp);
     }
 
@@ -250,14 +244,14 @@ namespace nd {
 
       auto is_avail_lhs = is_avail::get();
       ckb_offset =
-          is_avail_lhs.get()->instantiate(is_avail_lhs.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+          is_avail_lhs.get()->instantiate(is_avail_lhs.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                           nsrc, src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       option_arithmetic_kernel *self = option_arithmetic_kernel::get_self(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), option_arith_offset);
       self->is_avail_rhs_offset = ckb_offset - option_arith_offset;
       auto is_avail_rhs = is_avail::get();
       ckb_offset =
-          is_avail_rhs.get()->instantiate(is_avail_rhs.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+          is_avail_rhs.get()->instantiate(is_avail_rhs.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                           nsrc, src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       self = option_arithmetic_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_arith_offset);
@@ -266,14 +260,14 @@ namespace nd {
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
       ckb_offset =
-          arith.get()->instantiate(arith.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+          arith.get()->instantiate(arith.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                    child_src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       self = option_arithmetic_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
       auto assign_na = nd::assign_na_decl::get();
       ckb_offset =
-          assign_na.get()->instantiate(assign_na.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, 0,
+          assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 0,
                                        nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
@@ -286,10 +280,7 @@ namespace ndt {
 #define DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(NAME)                                                                      \
   template <type_id_t Src0TypeID>                                                                                      \
   struct type::equivalent<nd::NAME##_kernel<Src0TypeID>> {                                                             \
-    static type make()                                                                                                 \
-    {                                                                                                                  \
-      return ndt::type::make<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>();                              \
-    }                                                                                                                  \
+    static type make() { return ndt::type::make<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>(); }         \
   };
 
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(plus)
@@ -335,26 +326,17 @@ namespace ndt {
 
   template <typename FuncType>
   struct type::equivalent<nd::option_arithmetic_kernel<FuncType, true, false>> {
-    static type make()
-    {
-      return type("(?Scalar, Scalar) -> ?Scalar");
-    }
+    static type make() { return type("(?Scalar, Scalar) -> ?Scalar"); }
   };
 
   template <typename FuncType>
   struct type::equivalent<nd::option_arithmetic_kernel<FuncType, false, true>> {
-    static type make()
-    {
-      return type("(Scalar, ?Scalar) -> ?Scalar");
-    }
+    static type make() { return type("(Scalar, ?Scalar) -> ?Scalar"); }
   };
 
   template <typename FuncType>
   struct type::equivalent<nd::option_arithmetic_kernel<FuncType, true, true>> {
-    static type make()
-    {
-      return type("(?Scalar, ?Scalar) -> ?Scalar");
-    }
+    static type make() { return type("(?Scalar, ?Scalar) -> ?Scalar"); }
   };
 
 } // namespace dynd::ndt

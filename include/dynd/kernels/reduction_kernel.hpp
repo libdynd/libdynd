@@ -113,7 +113,7 @@ namespace nd {
         reinterpret_cast<data_type *>(data)->child_data =
             reinterpret_cast<static_data_type *>(static_data)
                 ->child.get()
-                ->data_init(reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, child_dst_tp,
+                ->data_init(reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data(), child_dst_tp,
                             nsrc, src_tp, nkwd - 3, kwds, tp_vars);
 
         return data;
@@ -128,7 +128,7 @@ namespace nd {
           ndt::type child_src_tp = src_tp[0].get_type_at_dimension(NULL, reinterpret_cast<data_type *>(data)->naxis);
           reinterpret_cast<static_data_type *>(static_data)
               ->child.get()
-              ->resolve_dst_type(reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data, NULL,
+              ->resolve_dst_type(reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data(), NULL,
                                  child_dst_tp, nsrc, &child_src_tp, nkwd, kwds, tp_vars);
         }
 
@@ -873,7 +873,7 @@ namespace nd {
       if (reinterpret_cast<data_type *>(data)->ndim == 0) {
         callable &child = reinterpret_cast<static_data_type *>(static_data)->child;
         ckb_offset = child.get()->instantiate(
-            child.get()->static_data, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
+            child.get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
             (reinterpret_cast<data_type *>(data)->stored_ndim == 0) ? kernel_request_single : kernel_request_strided,
             ectx, nkwd - 3, kwds + 3, tp_vars);
 
