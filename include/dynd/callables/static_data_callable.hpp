@@ -11,7 +11,7 @@ namespace dynd {
 namespace nd {
 
   template <typename T>
-  struct DYND_API static_data_callable : base_callable {
+  struct static_data_callable : base_callable {
     typedef typename std::remove_reference<T>::type static_data_type;
     static_data_type static_data;
 
