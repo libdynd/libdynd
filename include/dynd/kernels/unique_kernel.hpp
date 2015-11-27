@@ -23,10 +23,7 @@ namespace nd {
     {
     }
 
-    ~unique_kernel()
-    {
-      get_child()->destroy();
-    }
+    ~unique_kernel() { get_child()->destroy(); }
 
     void single(array *DYND_UNUSED(dst), array *const *src)
     {
@@ -35,11 +32,11 @@ namespace nd {
           (std::unique(strided_iterator(src[0]->data(), src0_element_data_size, src0_stride),
                        strided_iterator(src[0]->data() + src0_size * src0_stride, src0_element_data_size, src0_stride),
                        [child](char *lhs, char *rhs) {
-             bool1 dst;
-             char *src[2] = {lhs, rhs};
-             child->single(reinterpret_cast<char *>(&dst), src);
-             return dst;
-           }) -
+                         bool1 dst;
+                         char *src[2] = {lhs, rhs};
+                         child->single(reinterpret_cast<char *>(&dst), src);
+                         return dst;
+                       }) -
            src[0]->data()) /
           src0_stride;
 
@@ -60,7 +57,7 @@ namespace nd {
 
       const callable &equal = nd::equal;
       const ndt::type equal_src_tp[2] = {src0_element_tp, src0_element_tp};
-      return equal.get()->instantiate(equal.get()->static_data, data, ckb, ckb_offset, ndt::type::make<bool1>(), NULL,
+      return equal.get()->instantiate(equal.get()->static_data(), data, ckb, ckb_offset, ndt::type::make<bool1>(), NULL,
                                       2, equal_src_tp, NULL, kernel_request_single, ectx, nkwd, kwds, tp_vars);
     }
   };
@@ -71,10 +68,7 @@ namespace ndt {
 
   template <>
   struct type::equivalent<nd::unique_kernel> {
-    static type make()
-    {
-      return callable_type::make(type::make<void>(), {type("Fixed * Scalar")});
-    }
+    static type make() { return callable_type::make(type::make<void>(), {type("Fixed * Scalar")}); }
   };
 
 } // namespace dynd::ndt

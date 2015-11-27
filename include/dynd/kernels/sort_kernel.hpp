@@ -55,7 +55,7 @@ namespace nd {
 
       const ndt::type child_src_tp[2] = {src0_element_tp, src0_element_tp};
       const callable &less = nd::less;
-      return less.get()->instantiate(less.get()->static_data, data, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, 2,
+      return less.get()->instantiate(less.get()->static_data(), data, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, 2,
                                      child_src_tp, NULL, kernel_request_single, ectx, nkwd, kwds, tp_vars);
     }
   };

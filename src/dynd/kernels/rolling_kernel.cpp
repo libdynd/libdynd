@@ -112,7 +112,7 @@ intptr_t nd::functional::rolling_ck::instantiate(char *_static_data, char *data,
   }
 
   const char *src_winop_meta = self->m_src_winop_meta.get();
-  return window_af->instantiate(const_cast<char *>(window_af->static_data),data, ckb, ckb_offset, dst_el_tp,
+  return window_af->instantiate(const_cast<char *>(window_af->static_data()), data, ckb, ckb_offset, dst_el_tp,
                                 dst_el_arrmeta, nsrc, &self->m_src_winop_meta.get_type(), &src_winop_meta,
                                 kernel_request_strided, ectx, nkwd, kwds, tp_vars);
 }
@@ -137,15 +137,17 @@ void nd::functional::rolling_ck::resolve_dst_type(char *_static_data, char *data
   ndt::type child_dst_tp;
   if (child_af->resolve_dst_type) {
     ndt::type child_src_tp = ndt::make_fixed_dim(static_data->window_size, src_tp[0].get_type_at_dimension(NULL, 1));
-    child_af->resolve_dst_type(const_cast<char *>(child_af->static_data), data, child_dst_tp, 1, &child_src_tp, nkwd,
+    child_af->resolve_dst_type(const_cast<char *>(child_af->static_data()), data, child_dst_tp, 1, &child_src_tp, nkwd,
                                kwds, tp_vars);
-  } else {
+  }
+  else {
     child_dst_tp = static_data->window_op.get_type()->get_return_type();
   }
 
   if (src_tp[0].get_type_id() == var_dim_type_id) {
     dst_tp = ndt::var_dim_type::make(child_dst_tp);
-  } else {
+  }
+  else {
     dst_tp = ndt::make_fixed_dim(src_tp[0].get_dim_size(NULL, NULL), child_dst_tp);
   }
 }

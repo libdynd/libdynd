@@ -21,10 +21,7 @@ namespace kernels {
 
     intptr_t perm[N];
 
-    DYND_CUDA_HOST_DEVICE permute_ck(const intptr_t *perm)
-    {
-      memcpy(this->perm, perm, sizeof(this->perm));
-    }
+    DYND_CUDA_HOST_DEVICE permute_ck(const intptr_t *perm) { memcpy(this->perm, perm, sizeof(this->perm)); }
 
     DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
     {
@@ -70,8 +67,9 @@ namespace kernels {
       inv(src_arrmeta_inv, dst_arrmeta, src_arrmeta, perm);
 
       self_type::make(ckb, kernreq, ckb_offset, detail::make_array_wrapper<N>(perm));
-      return child->instantiate(const_cast<char *>(child->static_data), NULL, ckb, ckb_offset, ndt::type::make<void>(),
-                                NULL, nsrc, src_tp_inv, src_arrmeta_inv, kernreq, ectx, nkwd, kwds, tp_vars);
+      return child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, ckb_offset,
+                                ndt::type::make<void>(), NULL, nsrc, src_tp_inv, src_arrmeta_inv, kernreq, ectx, nkwd,
+                                kwds, tp_vars);
     }
 
   private:
@@ -81,7 +79,8 @@ namespace kernels {
         intptr_t j = perm[i];
         if (j == -1) {
           src_inv[i] = dst;
-        } else {
+        }
+        else {
           src_inv[i] = src[j];
         }
       }
@@ -94,7 +93,8 @@ namespace kernels {
         intptr_t j = perm[i];
         if (j == -1) {
           src_inv[i] = dst;
-        } else {
+        }
+        else {
           src_inv[i] = src[j];
         }
       }
@@ -118,10 +118,7 @@ namespace kernels {
 
     intptr_t perm[N];
 
-    permute_ck(const intptr_t *perm)
-    {
-      memcpy(this->perm, perm, sizeof(this->perm));
-    }
+    permute_ck(const intptr_t *perm) { memcpy(this->perm, perm, sizeof(this->perm)); }
 
     void single(char *dst, char *const *src)
     {
@@ -153,7 +150,7 @@ namespace kernels {
       inv_permute(src_arrmeta_inv, src_arrmeta, perm);
 
       self_type::make(ckb, kernreq, ckb_offset, detail::make_array_wrapper<N>(perm));
-      return child->instantiate(const_cast<char *>(child->static_data), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+      return child->instantiate(const_cast<char *>(child->static_data()), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
                                 nsrc, src_tp_inv, src_arrmeta_inv, kernreq, ectx, nkwd, kwds, tp_vars);
     }
 

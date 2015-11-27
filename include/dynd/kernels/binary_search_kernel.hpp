@@ -17,9 +17,7 @@ namespace nd {
     const intptr_t src0_size;
     const intptr_t src0_stride;
 
-    binary_search_kernel(intptr_t src0_size, intptr_t src0_stride) : src0_size(src0_size), src0_stride(src0_stride)
-    {
-    }
+    binary_search_kernel(intptr_t src0_size, intptr_t src0_stride) : src0_size(src0_size), src0_stride(src0_stride) {}
 
     void single(char *dst, char *const *src)
     {
@@ -39,13 +37,15 @@ namespace nd {
         if (child_dst0) {
           // value < arr[trial]
           last = trial;
-        } else {
+        }
+        else {
           int child_dst1;
           child->single(reinterpret_cast<char *>(&child_dst1), src_try1);
           if (child_dst1) {
             // value > arr[trial]
             first = trial + 1;
-          } else {
+          }
+          else {
             *reinterpret_cast<intptr_t *>(dst) = trial;
             return;
           }
@@ -70,7 +70,7 @@ namespace nd {
       ndt::type child_src_tp[2] = {element_tp, element_tp};
       const char *child_src_arrmeta[2] = {n_arrmeta, n_arrmeta};
 
-      return total_order::get().get()->instantiate(total_order::get().get()->static_data, data, ckb, ckb_offset,
+      return total_order::get().get()->instantiate(total_order::get().get()->static_data(), data, ckb, ckb_offset,
                                                    ndt::type::make<int>(), NULL, 2, child_src_tp, child_src_arrmeta,
                                                    kernreq, ectx, 0, NULL, tp_vars);
     }
@@ -82,10 +82,7 @@ namespace ndt {
 
   template <>
   struct type::equivalent<nd::binary_search_kernel> {
-    static type make()
-    {
-      return callable_type::make(type::make<intptr_t>(), {type("Fixed * Scalar"), type("Scalar")});
-    }
+    static type make() { return callable_type::make(type::make<intptr_t>(), {type("Fixed * Scalar"), type("Scalar")}); }
   };
 
 } // namespace dynd::ndt

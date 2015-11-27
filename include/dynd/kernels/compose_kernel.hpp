@@ -128,12 +128,12 @@ namespace nd {
         intptr_t root_ckb_offset = ckb_offset;
         compose_kernel *self = make(ckb, kernreq, ckb_offset, static_data_x->buffer_tp);
         ckb_offset =
-            first->instantiate(first->static_data, data, ckb, ckb_offset, buffer_tp, self->buffer_arrmeta.get(), 1,
+            first->instantiate(first->static_data(), data, ckb, ckb_offset, buffer_tp, self->buffer_arrmeta.get(), 1,
                                src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
         self = get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), root_ckb_offset);
         self->second_offset = ckb_offset - root_ckb_offset;
         const char *buffer_arrmeta = self->buffer_arrmeta.get();
-        return second->instantiate(second->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &buffer_tp,
+        return second->instantiate(second->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &buffer_tp,
                                    &buffer_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };

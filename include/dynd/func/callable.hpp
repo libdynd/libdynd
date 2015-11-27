@@ -539,7 +539,7 @@ namespace nd {
     callable() = default;
 
     callable(const ndt::type &self_tp, expr_single_t single, expr_strided_t strided)
-        : intrusive_ptr<base_callable>(new base_callable(self_tp, single, strided), true)
+        : intrusive_ptr<base_callable>(new (2 * sizeof(void *)) base_callable(self_tp, single, strided), true)
     {
     }
 
@@ -554,7 +554,8 @@ namespace nd {
     callable(const ndt::type &self_tp, kernel_request_t kernreq, single_t single, T &&static_data,
              callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
              callable_instantiate_t instantiate)
-        : intrusive_ptr<base_callable>(new base_callable(self_tp, kernreq, single, std::forward<T>(static_data),
+        : intrusive_ptr<base_callable>(new (sizeof(T))
+                                           base_callable(self_tp, kernreq, single, std::forward<T>(static_data),
                                                          data_init, resolve_dst_type, instantiate),
                                        true)
 
@@ -698,7 +699,7 @@ namespace nd {
     make()
     {
       return callable(ndt::type::equivalent<KernelType>::make(), detail::get_kernreq<KernelType>(),
-                      detail::get_single_t<KernelType>(),  detail::get_data_init<KernelType>(),
+                      detail::get_single_t<KernelType>(), detail::get_data_init<KernelType>(),
                       detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
 
@@ -709,8 +710,8 @@ namespace nd {
     {
       return callable(ndt::type::equivalent<KernelType>::make(), detail::get_kernreq<KernelType>(),
                       detail::get_single_t<KernelType>(), std::forward<StaticDataType>(static_data),
-                     detail::get_data_init<KernelType>(),
-                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
+                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
+                      detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>
@@ -740,8 +741,8 @@ namespace nd {
     make(const ndt::type &self_tp)
     {
       return callable(self_tp, detail::get_kernreq<KernelType>(), detail::get_single_t<KernelType>(),
-                   detail::get_data_init<KernelType>(),
-                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
+                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
+                      detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
@@ -750,9 +751,8 @@ namespace nd {
     make(const ndt::type &self_tp, StaticDataType &&static_data)
     {
       return callable(self_tp, detail::get_kernreq<KernelType>(), detail::get_single_t<KernelType>(),
-                      std::forward<StaticDataType>(static_data),
-                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                      detail::get_instantiate<KernelType>());
+                      std::forward<StaticDataType>(static_data), detail::get_data_init<KernelType>(),
+                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>

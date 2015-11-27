@@ -16,10 +16,7 @@ namespace nd {
     //    dst_(0) = a[n-1]
     //    dst_(i+1) = dst_(i) <OP> a[n-1-(i+1)]
     struct DYND_API left_compound_kernel : base_kernel<left_compound_kernel, 1> {
-      ~left_compound_kernel()
-      {
-        get_child()->destroy();
-      }
+      ~left_compound_kernel() { get_child()->destroy(); }
 
       void single(char *dst, char *const *src)
       {
@@ -49,8 +46,8 @@ namespace nd {
 
         ndt::type child_src_tp[2] = {dst_tp, src_tp[0]};
         const char *child_src_arrmeta[2] = {dst_arrmeta, src_arrmeta[0]};
-        return child.get()->instantiate(child.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc + 1,
-                                        child_src_tp, child_src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+        return child.get()->instantiate(child.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                        nsrc + 1, child_src_tp, child_src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };
 
@@ -58,10 +55,7 @@ namespace nd {
     //    dst_(0) = a[0]
     //    dst_(i+1) = a[i+1] <OP> dst_(i)
     struct DYND_API right_compound_kernel : base_kernel<right_compound_kernel, 1> {
-      ~right_compound_kernel()
-      {
-        get_child()->destroy();
-      }
+      ~right_compound_kernel() { get_child()->destroy(); }
 
       void single(char *dst, char *const *src)
       {
@@ -91,8 +85,8 @@ namespace nd {
 
         ndt::type child_src_tp[2] = {src_tp[0], dst_tp};
         const char *child_src_arrmeta[2] = {src_arrmeta[0], dst_arrmeta};
-        return child.get()->instantiate(child.get()->static_data, data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc + 1,
-                                        child_src_tp, child_src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+        return child.get()->instantiate(child.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                        nsrc + 1, child_src_tp, child_src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };
 

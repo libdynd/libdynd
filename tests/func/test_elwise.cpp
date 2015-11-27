@@ -25,10 +25,7 @@ using namespace std;
 using namespace dynd;
 
 struct callable0 {
-  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) const
-  {
-    return x + y;
-  }
+  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) const { return x + y; }
 };
 
 TEST(Elwise, UnaryExpr_FixedDim)
@@ -115,9 +112,9 @@ TEST(Elwise, UnaryExpr_StridedToVarDim)
   in(4).vals() = "284";
   const char *in_ptr = in.cdata();
   const char *src_arrmeta[1] = {in.get()->metadata()};
-  af.get()->instantiate(af.get()->static_data, NULL, &ckb, 0, dst_tp, out.get()->metadata(), af.get_type()->get_npos(),
-                        &src_tp, src_arrmeta, kernel_request_single, &eval::default_eval_context, 0, NULL,
-                        std::map<std::string, ndt::type>());
+  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, dst_tp, out.get()->metadata(),
+                        af.get_type()->get_npos(), &src_tp, src_arrmeta, kernel_request_single,
+                        &eval::default_eval_context, 0, NULL, std::map<std::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
   usngo(ckb.get(), out.data(), const_cast<char **>(&in_ptr));
   EXPECT_EQ(5, out.get_shape()[0]);
@@ -145,7 +142,7 @@ TEST(Elwise, UnaryExpr_VarToVarDim)
   in.vals() = in_vals;
   const char *in_ptr = in.cdata();
   const char *src_arrmeta[1] = {in.get()->metadata()};
-  af.get()->instantiate(af.get()->static_data, NULL, &ckb, 0, out.get_type(), out.get()->metadata(),
+  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, out.get_type(), out.get()->metadata(),
                         af.get_type()->get_npos(), &in.get_type(), src_arrmeta, kernel_request_single,
                         &eval::default_eval_context, 0, NULL, std::map<std::string, ndt::type>());
   expr_single_t usngo = ckb.get()->get_function<expr_single_t>();

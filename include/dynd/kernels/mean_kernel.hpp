@@ -41,10 +41,10 @@ namespace nd {
                            intptr_t nkwd, const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
     {
       char *data = reinterpret_cast<char *>(new data_type());
-      reinterpret_cast<data_type *>(data)->sum_data =
-          nd::sum::get().get()->data_init(nd::sum::get().get()->static_data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+      reinterpret_cast<data_type *>(data)->sum_data = nd::sum::get().get()->data_init(
+          nd::sum::get().get()->static_data(), dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
       reinterpret_cast<data_type *>(data)->compound_div_data =
-          nd::compound_div::get().get()->data_init(nd::compound_div::get().get()->static_data, dst_tp, 1,
+          nd::compound_div::get().get()->data_init(nd::compound_div::get().get()->static_data(), dst_tp, 1,
                                                    reinterpret_cast<ndt::type *>(static_data), 0, NULL, tp_vars);
 
       return data;
@@ -54,7 +54,7 @@ namespace nd {
                                  const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                  const std::map<std::string, ndt::type> &tp_vars)
     {
-      nd::sum::get().get()->resolve_dst_type(nd::sum::get().get()->static_data,
+      nd::sum::get().get()->resolve_dst_type(nd::sum::get().get()->static_data(),
                                              reinterpret_cast<data_type *>(data)->sum_data, dst_tp, nsrc, src_tp, nkwd,
                                              kwds, tp_vars);
     }
@@ -69,13 +69,13 @@ namespace nd {
       make(ckb, kernreq, ckb_offset, src_tp[0].get_size(src_arrmeta[0]));
 
       ckb_offset = nd::sum::get().get()->instantiate(
-          nd::sum::get().get()->static_data, reinterpret_cast<data_type *>(data)->sum_data, ckb, ckb_offset, dst_tp,
+          nd::sum::get().get()->static_data(), reinterpret_cast<data_type *>(data)->sum_data, ckb, ckb_offset, dst_tp,
           dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
 
       mean_kernel *self = get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), mean_offset);
       self->compound_div_offset = ckb_offset;
       ckb_offset = nd::compound_div::get().get()->instantiate(
-          nd::compound_div::get().get()->static_data, reinterpret_cast<data_type *>(data)->compound_div_data, ckb,
+          nd::compound_div::get().get()->static_data(), reinterpret_cast<data_type *>(data)->compound_div_data, ckb,
           ckb_offset, dst_tp, dst_arrmeta, 1, reinterpret_cast<ndt::type *>(static_data), NULL, kernreq, ectx, nkwd,
           kwds, tp_vars);
 
