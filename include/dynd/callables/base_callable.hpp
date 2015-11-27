@@ -202,14 +202,9 @@ namespace nd {
       reinterpret_cast<StaticDataType *>(static_data)->~StaticDataType();
     }
 
-    static void *operator new(size_t size, size_t static_data_size = 0)
+    static void *operator new(size_t size, int static_data_size = 0)
     {
       return ::operator new(size + static_data_size);
-    }
-
-    static void operator delete(void* ptr)
-    {
-        ::operator delete(ptr);
     }
   };
 
