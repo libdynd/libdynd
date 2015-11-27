@@ -142,7 +142,7 @@ namespace nd {
       static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
                     "static data requires stronger alignment");
 
-      this->static_data = new char[sizeof(static_data_type)];
+      this->static_data = reinterpret_cast<char *>(this + 1);
       new (static_data) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
     }
 
@@ -165,7 +165,7 @@ namespace nd {
       static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
                     "static data requires stronger alignment");
 
-      this->static_data = new char[sizeof(static_data_type)];
+      this->static_data = reinterpret_cast<char *>(this + 1);
       new (this->static_data)(static_data_type)(std::forward<T>(static_data));
     }
 
@@ -178,7 +178,6 @@ namespace nd {
       if (static_data_free != NULL) {
         static_data_free(static_data);
       }
-      delete[] static_data;
     }
 
     array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -201,6 +200,11 @@ namespace nd {
     static void static_data_destroy(char *static_data)
     {
       reinterpret_cast<StaticDataType *>(static_data)->~StaticDataType();
+    }
+
+    static void *operator new(size_t size, size_t static_data_size = 0)
+    {
+      return ::operator new(size + static_data_size);
     }
   };
 
