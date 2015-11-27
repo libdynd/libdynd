@@ -152,30 +152,18 @@ namespace nd {
     }
 
     template <typename T>
-    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, T &&static_data,
+    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, T &&DYND_UNUSED(static_data),
                   callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
                   callable_instantiate_t instantiate)
         : use_count(0), tp(tp), kernreq(kernreq), single(single), data_init(data_init),
-          resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-          static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
+          resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
     {
-      typedef typename std::remove_reference<T>::type static_data_type;
-      static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
-                    "static data requires stronger alignment");
-
-      new (this->static_data())(static_data_type)(std::forward<T>(static_data));
     }
 
     // non-copyable
     base_callable(const base_callable &) = delete;
 
-    ~base_callable()
-    {
-      // Call the static_data_free function, if it exists
-      if (static_data_free != NULL) {
-        static_data_free(static_data());
-      }
-    }
+    virtual ~base_callable() {}
 
     char *static_data() { return reinterpret_cast<char *>(this + 1); }
 
