@@ -202,20 +202,14 @@ namespace nd {
       reinterpret_cast<StaticDataType *>(static_data)->~StaticDataType();
     }
 
-    static void *operator new(size_t size, int static_data_size = 0)
+    static void *operator new(size_t size, size_t static_data_size = 0)
     {
       return ::operator new(size + static_data_size);
     }
 
-    static void operator delete(void* ptr)
-    {
-        ::operator delete(ptr);
-    }
+    static void operator delete(void *ptr) { ::operator delete(ptr); }
 
-    static void operator delete(void* ptr, int)
-    {
-        ::operator delete(ptr);
-    }
+    static void operator delete(void *ptr, size_t DYND_UNUSED(static_data_size)) { ::operator delete(ptr); }
   };
 
   static_assert((sizeof(base_callable) & 7) == 0, "base_callable must have size divisible by 8");
