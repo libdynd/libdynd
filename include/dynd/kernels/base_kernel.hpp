@@ -181,6 +181,8 @@ namespace nd {
       return self;                                                                                                     \
     }                                                                                                                  \
                                                                                                                        \
+    static const volatile char *DYND_USED(ir);                                                                         \
+                                                                                                                       \
     struct single_wrapper {                                                                                            \
       __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self,                                               \
                                                    typename arg_at<decltype(&SelfType::single), 0>::type dst,          \
@@ -198,16 +200,14 @@ namespace nd {
       {                                                                                                                \
         SelfType::get_self(self)->strided(dst, dst_stride, src, src_stride, count);                                    \
       }                                                                                                                \
-                                                                                                                       \
-      static const volatile char *DYND_USED(ir);                                                                       \
     };                                                                                                                 \
   };                                                                                                                   \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
-  const volatile char *DYND_USED(base_kernel<SelfType>::single_wrapper::ir) = NULL;                                    \
+  const volatile char *DYND_USED(base_kernel<SelfType>::ir) = NULL;                                                    \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
-  const volatile char *DYND_USED(base_kernel<SelfType>::strided_wrapper::ir) = NULL;                                   \
+  const volatile char *DYND_USED(base_kernel<SelfType>::single_wrapper::ir) = NULL;                                    \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType, 0> : base_kernel<SelfType> {                                                            \

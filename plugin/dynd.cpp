@@ -49,13 +49,13 @@ public:
     if (F.hasFnAttribute("emit_llvm")) {
       Module *M = F.getParent();
 
-/*
-      Module *mod = new Module("test", getGlobalContext());
-      ValueToValueMapTy vmap;
-      Function *newF = CloneFunction(&F, vmap, false);
-      mod->getFunctionList().push_back(newF);
-      mod->dump();
-*/
+      /*
+            Module *mod = new Module("test", getGlobalContext());
+            ValueToValueMapTy vmap;
+            Function *newF = CloneFunction(&F, vmap, false);
+            mod->getFunctionList().push_back(newF);
+            mod->dump();
+      */
 
       static Regex R("4func.*$");
       GlobalVariable *GV = M->getGlobalVariable(R.sub("2irE", F.getName()), true);

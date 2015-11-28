@@ -315,6 +315,7 @@ TEST(Callable, AssignmentAsExpr)
   EXPECT_EQ(891029, ints_out[2]);
 }
 
+/*
 TEST(Callable, LLVM)
 {
   nd::callable f = nd::functional::apply([](int x, int y) { return x + y; });
@@ -323,6 +324,7 @@ TEST(Callable, LLVM)
   std::cout << f->ir << std::endl;
   std::exit(-1);
 }
+*/
 
 /*
 // TODO Reenable once there's a convenient way to make the binary callable
