@@ -3,12 +3,16 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <iostream>
+#include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/Regex.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
+#include <llvm/Transforms/Utils/Cloning.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 
 using namespace std;
 using namespace llvm;
@@ -44,6 +48,14 @@ public:
   {
     if (F.hasFnAttribute("emit_llvm")) {
       Module *M = F.getParent();
+
+/*
+      Module *mod = new Module("test", getGlobalContext());
+      ValueToValueMapTy vmap;
+      Function *newF = CloneFunction(&F, vmap, false);
+      mod->getFunctionList().push_back(newF);
+      mod->dump();
+*/
 
       static Regex R("4func.*$");
       GlobalVariable *GV = M->getGlobalVariable(R.sub("2irE", F.getName()), true);

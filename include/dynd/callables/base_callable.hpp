@@ -103,7 +103,9 @@ namespace nd {
 
     single_t() = default;
 
-    single_t(volatile expr_single_t func, const volatile char *ir) : func(func), ir(const_cast<const char *>(ir)) {}
+    single_t(volatile expr_single_t func, const volatile char *ir) : func(func), ir(const_cast<const char *>(ir))
+    {
+    }
   };
 
   /**
@@ -122,11 +124,14 @@ namespace nd {
     ndt::type tp;
     kernel_request_t kernreq;
     kernel_targets_t targets;
+    const char *ir;
     callable_data_init_t data_init;
     callable_resolve_dst_type_t resolve_dst_type;
     callable_instantiate_t instantiate;
 
-    base_callable() : use_count(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL) {}
+    base_callable() : use_count(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL)
+    {
+    }
 
     base_callable(const ndt::type &tp, kernel_targets_t targets)
         : use_count(0), tp(tp), kernreq(kernel_request_single), targets(targets), data_init(&ckernel_prefix::data_init),
@@ -135,22 +140,30 @@ namespace nd {
       new (static_data()) kernel_targets_t(targets);
     }
 
-    base_callable(const ndt::type &tp, kernel_request_t kernreq, kernel_targets_t targets,
+    base_callable(const ndt::type &tp, kernel_request_t kernreq, kernel_targets_t targets, const volatile char *ir,
                   callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
                   callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), kernreq(kernreq), targets(targets), data_init(data_init),
-          resolve_dst_type(resolve_dst_type), instantiate(instantiate)
+        : use_count(0), tp(tp), kernreq(kernreq), targets(targets), ir(const_cast<const char *>(ir)),
+          data_init(data_init), resolve_dst_type(resolve_dst_type), instantiate(instantiate)
     {
     }
 
     // non-copyable
     base_callable(const base_callable &) = delete;
 
-    virtual ~base_callable() {}
+    virtual ~base_callable()
+    {
+    }
 
-    char *static_data() { return reinterpret_cast<char *>(this + 1); }
+    char *static_data()
+    {
+      return reinterpret_cast<char *>(this + 1);
+    }
 
-    const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
+    const char *static_data() const
+    {
+      return reinterpret_cast<const char *>(this + 1);
+    }
 
     array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      char *const *src_data, intptr_t nkwd, const array *kwds,
@@ -173,14 +186,23 @@ namespace nd {
       return ::operator new(size + static_data_size);
     }
 
-    static void operator delete(void *ptr) { ::operator delete(ptr); }
+    static void operator delete(void *ptr)
+    {
+      ::operator delete(ptr);
+    }
 
-    static void operator delete(void *ptr, size_t DYND_UNUSED(static_data_size)) { ::operator delete(ptr); }
+    static void operator delete(void *ptr, size_t DYND_UNUSED(static_data_size))
+    {
+      ::operator delete(ptr);
+    }
   };
 
   static_assert((sizeof(base_callable) & 7) == 0, "base_callable must have size divisible by 8");
 
-  inline void intrusive_ptr_retain(base_callable *ptr) { ++ptr->use_count; }
+  inline void intrusive_ptr_retain(base_callable *ptr)
+  {
+    ++ptr->use_count;
+  }
 
   inline void intrusive_ptr_release(base_callable *ptr)
   {
@@ -189,7 +211,10 @@ namespace nd {
     }
   }
 
-  inline long intrusive_ptr_use_count(base_callable *ptr) { return ptr->use_count; }
+  inline long intrusive_ptr_use_count(base_callable *ptr)
+  {
+    return ptr->use_count;
+  }
 
 } // namespace dynd::nd
 } // namespace dynd
