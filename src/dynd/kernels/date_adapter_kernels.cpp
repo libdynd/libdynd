@@ -83,7 +83,7 @@ static intptr_t instantiate_int_offset_callable(char *static_data, char *DYND_UN
 template <class Tsrc, class Tdst>
 nd::callable make_int_offset_callable(Tdst offset, const ndt::type &func_proto)
 {
-  return nd::callable(func_proto, kernel_request_single, nd::single_t(), offset, NULL, NULL,
+  return nd::callable(func_proto, kernel_request_single, kernel_targets_t(), offset, NULL, NULL,
                       &instantiate_int_offset_callable<Tsrc, Tdst>);
 }
 } // anonymous namespace
