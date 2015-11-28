@@ -127,15 +127,12 @@ namespace nd {
     callable_data_init_t data_init;
     callable_resolve_dst_type_t resolve_dst_type;
     callable_instantiate_t instantiate;
-    callable_static_data_free_t static_data_free;
 
-    base_callable() : use_count(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL), static_data_free(NULL)
-    {
-    }
+    base_callable() : use_count(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL) {}
 
     base_callable(const ndt::type &tp, expr_single_t single, expr_strided_t strided)
         : use_count(0), tp(tp), kernreq(kernel_request_single), data_init(&ckernel_prefix::data_init),
-          resolve_dst_type(NULL), instantiate(&ckernel_prefix::instantiate), static_data_free(NULL)
+          resolve_dst_type(NULL), instantiate(&ckernel_prefix::instantiate)
     {
       typedef void *static_data_type[2];
       static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
@@ -147,35 +144,14 @@ namespace nd {
     base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, callable_data_init_t data_init,
                   callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
         : use_count(0), tp(tp), kernreq(kernreq), single(single), data_init(data_init),
-          resolve_dst_type(resolve_dst_type), instantiate(instantiate), static_data_free(NULL)
+          resolve_dst_type(resolve_dst_type), instantiate(instantiate)
     {
-    }
-
-    template <typename T>
-    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, T &&static_data,
-                  callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
-                  callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), kernreq(kernreq), single(single), data_init(data_init),
-          resolve_dst_type(resolve_dst_type), instantiate(instantiate),
-          static_data_free(&static_data_destroy<typename std::remove_reference<T>::type>)
-    {
-      typedef typename std::remove_reference<T>::type static_data_type;
-      static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
-                    "static data requires stronger alignment");
-
-      new (this->static_data())(static_data_type)(std::forward<T>(static_data));
     }
 
     // non-copyable
     base_callable(const base_callable &) = delete;
 
-    ~base_callable()
-    {
-      // Call the static_data_free function, if it exists
-      if (static_data_free != NULL) {
-        static_data_free(static_data());
-      }
-    }
+    virtual ~base_callable() {}
 
     char *static_data() { return reinterpret_cast<char *>(this + 1); }
 
@@ -196,12 +172,6 @@ namespace nd {
     void operator()(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, intptr_t nsrc,
                     const ndt::type *src_tp, const char *const *src_arrmeta, array *const *src_data, intptr_t nkwd,
                     const array *kwds, const std::map<std::string, ndt::type> &tp_vars);
-
-    template <typename StaticDataType>
-    static void static_data_destroy(char *static_data)
-    {
-      reinterpret_cast<StaticDataType *>(static_data)->~StaticDataType();
-    }
 
     static void *operator new(size_t size, size_t static_data_size = 0)
     {

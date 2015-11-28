@@ -16,6 +16,7 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/callables/static_data_callable.hpp>
 
 namespace dynd {
 
@@ -554,9 +555,9 @@ namespace nd {
     callable(const ndt::type &self_tp, kernel_request_t kernreq, single_t single, T &&static_data,
              callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
              callable_instantiate_t instantiate)
-        : intrusive_ptr<base_callable>(new (sizeof(T))
-                                           base_callable(self_tp, kernreq, single, std::forward<T>(static_data),
-                                                         data_init, resolve_dst_type, instantiate),
+        : intrusive_ptr<base_callable>(new static_data_callable<T>(self_tp, kernreq, single, data_init,
+                                                                   resolve_dst_type, instantiate,
+                                                                   std::forward<T>(static_data)),
                                        true)
 
     {
