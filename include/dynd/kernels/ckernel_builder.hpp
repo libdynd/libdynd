@@ -413,10 +413,10 @@ inline intptr_t ckernel_prefix::instantiate(char *static_data, char *DYND_UNUSED
   void *func;
   switch (kernreq) {
   case kernel_request_single:
-    func = *reinterpret_cast<void **>(static_data);
+    func = reinterpret_cast<kernel_targets_t *>(static_data)->single;
     break;
   case kernel_request_strided:
-    func = *(reinterpret_cast<void **>(static_data) + 1);
+    func = reinterpret_cast<kernel_targets_t *>(static_data)->strided;
     break;
   default:
     throw std::invalid_argument("unrecognized kernel request");

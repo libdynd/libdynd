@@ -22,6 +22,12 @@ typedef void (*expr_metadata_single_t)(ckernel_prefix *self, nd::array *dst, nd:
 typedef void (*expr_strided_t)(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
                                const intptr_t *src_stride, size_t count);
 
+struct kernel_targets_t {
+  void *single;
+  void *contiguous;
+  void *strided;
+};
+
 /**
  * Definition for kernel request parameters.
  */

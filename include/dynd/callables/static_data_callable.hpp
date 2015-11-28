@@ -15,10 +15,10 @@ namespace nd {
     typedef typename std::remove_reference<T>::type static_data_type;
     static_data_type static_data;
 
-    static_data_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, callable_data_init_t data_init,
-                         callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate,
-                         T &&static_data)
-        : base_callable(tp, kernreq, single, data_init, resolve_dst_type, instantiate),
+    static_data_callable(const ndt::type &tp, kernel_request_t kernreq, kernel_targets_t targets,
+                         callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+                         callable_instantiate_t instantiate, T &&static_data)
+        : base_callable(tp, kernreq, targets, data_init, resolve_dst_type, instantiate),
           static_data(std::forward<T>(static_data))
     {
       static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,

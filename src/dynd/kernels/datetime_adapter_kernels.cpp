@@ -120,7 +120,7 @@ static intptr_t instantiate_int_multiply_and_offset_callable(
 template <class Tsrc, class Tdst>
 nd::callable make_int_multiply_and_offset_callable(Tdst factor, Tdst offset, const ndt::type &func_proto)
 {
-  return nd::callable(func_proto, kernel_request_single, nd::single_t(), make_pair(factor, offset), NULL, NULL,
+  return nd::callable(func_proto, kernel_request_single, kernel_targets_t(), make_pair(factor, offset), NULL, NULL,
                       &instantiate_int_multiply_and_offset_callable<Tsrc, Tdst>);
 }
 
@@ -158,7 +158,7 @@ static intptr_t instantiate_int_offset_and_divide_callable(
 template <class Tsrc, class Tdst>
 nd::callable make_int_offset_and_divide_callable(Tdst offset, Tdst divisor, const ndt::type &func_proto)
 {
-  return nd::callable(func_proto, kernel_request_single, nd::single_t(), make_pair(offset, divisor), NULL, NULL,
+  return nd::callable(func_proto, kernel_request_single, kernel_targets_t(), make_pair(offset, divisor), NULL, NULL,
                       &instantiate_int_offset_and_divide_callable<Tsrc, Tdst>);
 }
 

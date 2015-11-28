@@ -118,32 +118,27 @@ namespace nd {
    * with different array arrmeta.
    */
   struct DYND_API base_callable {
-    char buffer[4];
-
     std::atomic_long use_count;
     ndt::type tp;
     kernel_request_t kernreq;
-    single_t single;
+    kernel_targets_t targets;
     callable_data_init_t data_init;
     callable_resolve_dst_type_t resolve_dst_type;
     callable_instantiate_t instantiate;
 
     base_callable() : use_count(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL) {}
 
-    base_callable(const ndt::type &tp, expr_single_t single, expr_strided_t strided)
-        : use_count(0), tp(tp), kernreq(kernel_request_single), data_init(&ckernel_prefix::data_init),
+    base_callable(const ndt::type &tp, kernel_targets_t targets)
+        : use_count(0), tp(tp), kernreq(kernel_request_single), targets(targets), data_init(&ckernel_prefix::data_init),
           resolve_dst_type(NULL), instantiate(&ckernel_prefix::instantiate)
     {
-      typedef void *static_data_type[2];
-      static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
-                    "static data requires stronger alignment");
-
-      new (static_data()) static_data_type{reinterpret_cast<void *>(single), reinterpret_cast<void *>(strided)};
+      new (static_data()) kernel_targets_t(targets);
     }
 
-    base_callable(const ndt::type &tp, kernel_request_t kernreq, single_t single, callable_data_init_t data_init,
-                  callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate)
-        : use_count(0), tp(tp), kernreq(kernreq), single(single), data_init(data_init),
+    base_callable(const ndt::type &tp, kernel_request_t kernreq, kernel_targets_t targets,
+                  callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
+                  callable_instantiate_t instantiate)
+        : use_count(0), tp(tp), kernreq(kernreq), targets(targets), data_init(data_init),
           resolve_dst_type(resolve_dst_type), instantiate(instantiate)
     {
     }
