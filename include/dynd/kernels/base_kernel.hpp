@@ -93,7 +93,10 @@ namespace nd {
      * The ckernel destructor function, which is placed in
      * the ckernel_prefix destructor.
      */
-    static void destruct(ckernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
+    static void destruct(ckernel_prefix *self)
+    {
+      reinterpret_cast<SelfType *>(self)->~SelfType();
+    }
 
     static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
@@ -178,8 +181,10 @@ namespace nd {
       return self;                                                                                                     \
     }                                                                                                                  \
                                                                                                                        \
+    static const volatile char *DYND_USED(ir);                                                                         \
+                                                                                                                       \
     struct single_wrapper {                                                                                            \
-      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix * self,                                              \
+      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self,                                               \
                                                    typename arg_at<decltype(&SelfType::single), 0>::type dst,          \
                                                    typename arg_at<decltype(&SelfType::single), 1>::type src)          \
       {                                                                                                                \
@@ -190,21 +195,19 @@ namespace nd {
     };                                                                                                                 \
                                                                                                                        \
     struct strided_wrapper {                                                                                           \
-      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix * self, char *dst, intptr_t dst_stride,              \
-                                                   char *const *src, const intptr_t *src_stride, size_t count)         \
+      __VA_ARGS__ static void func(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,             \
+                                   const intptr_t *src_stride, size_t count)                                           \
       {                                                                                                                \
         SelfType::get_self(self)->strided(dst, dst_stride, src, src_stride, count);                                    \
       }                                                                                                                \
-                                                                                                                       \
-      static const volatile char *DYND_USED(ir);                                                                       \
     };                                                                                                                 \
   };                                                                                                                   \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
-  const volatile char *DYND_USED(base_kernel<SelfType>::single_wrapper::ir) = NULL;                                    \
+  const volatile char *DYND_USED(base_kernel<SelfType>::ir) = NULL;                                                    \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
-  const volatile char *DYND_USED(base_kernel<SelfType>::strided_wrapper::ir) = NULL;                                   \
+  const volatile char *DYND_USED(base_kernel<SelfType>::single_wrapper::ir) = NULL;                                    \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType, 0> : base_kernel<SelfType> {                                                            \
