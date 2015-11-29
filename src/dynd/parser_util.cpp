@@ -24,7 +24,8 @@ bool parse::parse_name_no_ws(const char *&rbegin, const char *end, const char *&
   }
   if (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z') || *begin == '_') {
     ++begin;
-  } else {
+  }
+  else {
     return false;
   }
   while (begin < end && (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z') ||
@@ -47,7 +48,8 @@ bool parse::parse_alpha_name_no_ws(const char *&rbegin, const char *end, const c
   }
   if (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z')) {
     ++begin;
-  } else {
+  }
+  else {
     return false;
   }
   while (begin < end && (('a' <= *begin && *begin <= 'z') || ('A' <= *begin && *begin <= 'Z'))) {
@@ -115,7 +117,8 @@ bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
       default:
         throw parse::parse_error(begin - 2, "invalid escape sequence in string");
       }
-    } else if (c == '"') {
+    }
+    else if (c == '"') {
       out_strbegin = rbegin + 1;
       out_strend = begin - 1;
       out_escaped = escaped;
@@ -166,11 +169,14 @@ void parse::unescape_string(const char *strbegin, const char *strend, std::strin
           cp *= 16;
           if ('0' <= d && d <= '9') {
             cp += d - '0';
-          } else if ('A' <= d && d <= 'F') {
+          }
+          else if ('A' <= d && d <= 'F') {
             cp += d - 'A' + 10;
-          } else if ('a' <= d && d <= 'f') {
+          }
+          else if ('a' <= d && d <= 'f') {
             cp += d - 'a' + 10;
-          } else {
+          }
+          else {
             cp = '?';
           }
         }
@@ -187,11 +193,14 @@ void parse::unescape_string(const char *strbegin, const char *strend, std::strin
           cp *= 16;
           if ('0' <= d && d <= '9') {
             cp += d - '0';
-          } else if ('A' <= d && d <= 'F') {
+          }
+          else if ('A' <= d && d <= 'F') {
             cp += d - 'A' + 10;
-          } else if ('a' <= d && d <= 'f') {
+          }
+          else if ('a' <= d && d <= 'f') {
             cp += d - 'a' + 10;
-          } else {
+          }
+          else {
             cp = '?';
           }
         }
@@ -201,7 +210,8 @@ void parse::unescape_string(const char *strbegin, const char *strend, std::strin
       default:
         out += '?';
       }
-    } else {
+    }
+    else {
       out += c;
     }
   }
@@ -224,12 +234,14 @@ bool parse::parse_json_number_no_ws(const char *&rbegin, const char *end, const 
   // Either '0' or a non-zero digit followed by digits
   if (*begin == '0') {
     ++begin;
-  } else if ('1' <= *begin && *begin <= '9') {
+  }
+  else if ('1' <= *begin && *begin <= '9') {
     ++begin;
     while (begin < end && ('0' <= *begin && *begin <= '9')) {
       ++begin;
     }
-  } else {
+  }
+  else {
     return false;
   }
   // Optional decimal point, followed by one or more digits
@@ -295,13 +307,15 @@ bool parse::parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &
         begin += 2;
         out_val = (d0 - '0') * 10 + (d1 - '0');
         return true;
-      } else {
+      }
+      else {
         ++begin;
         out_val = (d0 - '0');
         return true;
       }
     }
-  } else if (end - begin == 1) {
+  }
+  else if (end - begin == 1) {
     int d0 = begin[0];
     if (d0 >= '0' && d0 <= '9') {
       ++begin;
@@ -356,7 +370,8 @@ inline static T checked_string_to_uint(const char *begin, const char *end, bool 
       if (result < prev_result) {
         out_overflow = true;
       }
-    } else {
+    }
+    else {
       if (c == '.') {
         // Accept ".", ".0" with trailing decimal zeros as well
         ++begin;
@@ -366,7 +381,8 @@ inline static T checked_string_to_uint(const char *begin, const char *end, bool 
         if (begin == end) {
           break;
         }
-      } else if (c == 'e' || c == 'E') {
+      }
+      else if (c == 'e' || c == 'E') {
         // Accept "1e5", "1e+5" integers with a positive exponent,
         // a subset of floating point syntax. Note that "1.2e1"
         // is not accepted as the value 12 by this code.
@@ -419,7 +435,8 @@ inline static T unchecked_string_to_uint(const char *begin, const char *end)
     char c = *begin;
     if ('0' <= c && c <= '9') {
       result = (result * 10u) + (uint32_t)(c - '0');
-    } else if (c == 'e' || c == 'E') {
+    }
+    else if (c == 'e' || c == 'E') {
       // Accept "1e5", "1e+5" integers with a positive exponent,
       // a subset of floating point syntax. Note that "1.2e1"
       // is not accepted as the value 12 by this code.
@@ -448,7 +465,8 @@ inline static T unchecked_string_to_uint(const char *begin, const char *end)
         }
       }
       break;
-    } else {
+    }
+    else {
       break;
     }
     ++begin;
@@ -481,13 +499,15 @@ static T checked_string_to_signed_int(const char *begin, const char *end)
     ss.write(begin, end - begin);
     ss << " to " << ndt::type::make<T>();
     throw overflow_error(ss.str());
-  } else if (badparse) {
+  }
+  else if (badparse) {
     stringstream ss;
     ss << "parse error converting string ";
     ss.write(begin, end - begin);
     ss << " to" << ndt::type::make<T>();
     throw invalid_argument(ss.str());
-  } else {
+  }
+  else {
     return negative ? -static_cast<T>(uvalue) : static_cast<T>(uvalue);
   }
 }
@@ -535,25 +555,29 @@ double parse::checked_string_to_float64(const char *begin, const char *end, assi
   if (size == 3) {
     if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
       return make_double_nan(negative);
-    } else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') &&
-               (pos[2] == 'F' || pos[2] == 'f')) {
+    }
+    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
       return negative ? -numeric_limits<double>::infinity() : numeric_limits<double>::infinity();
     }
-  } else if (size == 7) {
+  }
+  else if (size == 7) {
     if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
         (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
       return make_double_nan(negative);
     }
-  } else if (size == 6) {
+  }
+  else if (size == 6) {
     if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
       if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
         return make_double_nan(negative);
-      } else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
-                 (pos[5] == 'F' || pos[5] == 'f')) {
+      }
+      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
+               (pos[5] == 'F' || pos[5] == 'f')) {
         return negative ? -numeric_limits<double>::infinity() : numeric_limits<double>::infinity();
       }
     }
-  } else if (size == 8) {
+  }
+  else if (size == 8) {
     if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
         (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
         (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
@@ -616,35 +640,30 @@ static float checked_float64_to_float32(double value, assign_error_mode errmode)
   switch (errmode) {
   case assign_error_nocheck:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_nocheck>::single_wrapper::func(NULL,
-                                                                                    reinterpret_cast<char *>(&out.dst),
-                                                                                    src);
+                                        assign_error_nocheck>::single_wrapper(NULL, reinterpret_cast<char *>(&out.dst),
+                                                                              src);
     break;
   case assign_error_overflow:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_overflow>::single_wrapper::func(NULL,
-                                                                                     reinterpret_cast<char *>(&out.dst),
-                                                                                     src);
+                                        assign_error_overflow>::single_wrapper(NULL, reinterpret_cast<char *>(&out.dst),
+                                                                               src);
     break;
   case assign_error_fractional:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_fractional>::single_wrapper::func(NULL,
-                                                                                       reinterpret_cast<char *>(
-                                                                                           &out.dst),
-                                                                                       src);
+                                        assign_error_fractional>::single_wrapper(NULL,
+                                                                                 reinterpret_cast<char *>(&out.dst),
+                                                                                 src);
     break;
   case assign_error_inexact:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_inexact>::single_wrapper::func(NULL,
-                                                                                    reinterpret_cast<char *>(&out.dst),
-                                                                                    src);
+                                        assign_error_inexact>::single_wrapper(NULL, reinterpret_cast<char *>(&out.dst),
+                                                                              src);
     break;
   default:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_fractional>::single_wrapper::func(NULL,
-                                                                                       reinterpret_cast<char *>(
-                                                                                           &out.dst),
-                                                                                       src);
+                                        assign_error_fractional>::single_wrapper(NULL,
+                                                                                 reinterpret_cast<char *>(&out.dst),
+                                                                                 src);
     break;
   }
   return out.result;
@@ -788,7 +807,8 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin, const 
       }
       ss << tid;
       throw overflow_error(ss.str());
-    } else if (badparse) {
+    }
+    else if (badparse) {
       stringstream ss;
       ss << "parse error converting string ";
       print_escaped_utf8_string(ss, begin, end);
@@ -799,7 +819,8 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin, const 
       ss << tid;
       throw invalid_argument(ss.str());
     }
-  } else {
+  }
+  else {
     // errmode == assign_error_nocheck
     switch (tid) {
     case int8_type_id:
@@ -875,58 +896,69 @@ void parse::string_to_bool(char *out_bool, const char *begin, const char *end, b
   if (option && matches_option_type_na_token(begin, end)) {
     *out_bool = DYND_BOOL_NA;
     return;
-  } else {
+  }
+  else {
     size_t size = end - begin;
     if (size == 1) {
       char c = *begin;
       if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
         *out_bool = 0;
         return;
-      } else if (errmode == assign_error_nocheck || c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
+      }
+      else if (errmode == assign_error_nocheck || c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
         *out_bool = 1;
         return;
       }
-    } else if (size == 4) {
+    }
+    else if (size == 4) {
       if (errmode == assign_error_nocheck) {
         *out_bool = 1;
         return;
-      } else if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
-                 (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
+      }
+      else if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
+               (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
         *out_bool = 1;
         return;
       }
-    } else if (size == 5) {
+    }
+    else if (size == 5) {
       if ((begin[0] == 'F' || begin[0] == 'f') && (begin[1] == 'A' || begin[1] == 'a') &&
           (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'S' || begin[3] == 's') &&
           (begin[4] == 'E' || begin[4] == 'e')) {
         *out_bool = 0;
         return;
-      } else if (errmode == assign_error_nocheck) {
+      }
+      else if (errmode == assign_error_nocheck) {
         *out_bool = 1;
         return;
       }
-    } else if (size == 0) {
+    }
+    else if (size == 0) {
       if (errmode == assign_error_nocheck) {
         *out_bool = 0;
         return;
       }
-    } else if (size == 2) {
+    }
+    else if (size == 2) {
       if ((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'O' || begin[1] == 'o')) {
         *out_bool = 0;
         return;
-      } else if (errmode == assign_error_nocheck ||
-                 ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
+      }
+      else if (errmode == assign_error_nocheck ||
+               ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
         *out_bool = 1;
         return;
       }
-    } else if (size == 3) {
+    }
+    else if (size == 3) {
       if ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'F' || begin[1] == 'f') &&
           (begin[2] == 'F' || begin[2] == 'f')) {
         *out_bool = 0;
         return;
-      } else if (errmode == assign_error_nocheck ||
-                 ((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
-                  (begin[2] == 'S' || begin[2] == 's'))) {
+      }
+      else if (errmode == assign_error_nocheck ||
+               ((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
+                (begin[2] == 'S' || begin[2] == 's'))) {
         *out_bool = 1;
         return;
       }
@@ -938,7 +970,8 @@ void parse::string_to_bool(char *out_bool, const char *begin, const char *end, b
   print_escaped_utf8_string(ss, begin, end);
   if (option) {
     ss << " to ?bool";
-  } else {
+  }
+  else {
     ss << " to bool";
   }
   throw invalid_argument(ss.str());
@@ -949,11 +982,13 @@ bool parse::matches_option_type_na_token(const char *begin, const char *end)
   size_t size = end - begin;
   if (size == 0) {
     return true;
-  } else if (size == 2) {
+  }
+  else if (size == 2) {
     if (begin[0] == 'N' && begin[1] == 'A') {
       return true;
     }
-  } else if (size == 4) {
+  }
+  else if (size == 4) {
     if (((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'U' || begin[1] == 'u') &&
          (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'L' || begin[3] == 'l'))) {
       return true;
@@ -995,12 +1030,10 @@ int dynd::parse_int64(int64_t &res, const char *begin, const char *end)
 
 int dynd::parse_double(double &res, const char *begin, const char *end)
 {
-  try
-  {
+  try {
     res = parse::checked_string_to_float64(begin, end, assign_error_nocheck);
   }
-  catch (...)
-  {
+  catch (...) {
     return 1;
   }
 

@@ -159,31 +159,19 @@ struct overflow_check<int128> {
 };
 template <>
 struct overflow_check<uint8_t> {
-  inline static bool is_overflow(uint64_t value)
-  {
-    return (value & ~0xffULL) != 0;
-  }
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffULL) != 0; }
 };
 template <>
 struct overflow_check<uint16_t> {
-  inline static bool is_overflow(uint64_t value)
-  {
-    return (value & ~0xffffULL) != 0;
-  }
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffffULL) != 0; }
 };
 template <>
 struct overflow_check<uint32_t> {
-  inline static bool is_overflow(uint64_t value)
-  {
-    return (value & ~0xffffffffULL) != 0;
-  }
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffffffffULL) != 0; }
 };
 template <>
 struct overflow_check<uint64_t> {
-  inline static bool is_overflow(uint64_t DYND_UNUSED(value))
-  {
-    return false;
-  }
+  inline static bool is_overflow(uint64_t DYND_UNUSED(value)) { return false; }
 };
 
 namespace {
@@ -204,12 +192,14 @@ struct string_to_int {
     if (e->errmode == assign_error_nocheck) {
       uint64_t value = parse::unchecked_string_to_uint64(s.data(), s.data() + s.size());
       result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
-    } else {
+    }
+    else {
       bool overflow = false, badparse = false;
       uint64_t value = parse::checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
       if (badparse) {
         raise_string_cast_error(ndt::type::make<T>(), e->src_string_tp, e->src_arrmeta, src[0]);
-      } else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
+      }
+      else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
         raise_string_cast_overflow_error(ndt::type::make<T>(), e->src_string_tp, e->src_arrmeta, src[0]);
       }
       result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
@@ -237,12 +227,14 @@ struct string_to_uint {
     if (e->errmode == assign_error_nocheck) {
       uint64_t value = parse::unchecked_string_to_uint64(s.data(), s.data() + s.size());
       result = negative ? static_cast<T>(0) : static_cast<T>(value);
-    } else {
+    }
+    else {
       bool overflow = false, badparse = false;
       uint64_t value = parse::checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
       if (badparse) {
         raise_string_cast_error(ndt::type::make<T>(), e->src_string_tp, e->src_arrmeta, src[0]);
-      } else if (overflow || (negative && value != 0) || overflow_check<T>::is_overflow(value)) {
+      }
+      else if (overflow || (negative && value != 0) || overflow_check<T>::is_overflow(value)) {
         raise_string_cast_overflow_error(ndt::type::make<T>(), e->src_string_tp, e->src_arrmeta, src[0]);
       }
       result = static_cast<T>(value);
@@ -267,12 +259,14 @@ static void string_to_int128_single(ckernel_prefix *extra, char *dst, char *cons
   if (e->errmode == assign_error_nocheck) {
     uint128 value = parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
     result = negative ? static_cast<int128>(0) : static_cast<int128>(value);
-  } else {
+  }
+  else {
     bool overflow = false, badparse = false;
     uint128 value = parse::checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
     if (badparse) {
       raise_string_cast_error(ndt::type::make<int128>(), e->src_string_tp, e->src_arrmeta, src[0]);
-    } else if (overflow || overflow_check<int128>::is_overflow(value, negative)) {
+    }
+    else if (overflow || overflow_check<int128>::is_overflow(value, negative)) {
       raise_string_cast_overflow_error(ndt::type::make<int128>(), e->src_string_tp, e->src_arrmeta, src[0]);
     }
     result = negative ? -static_cast<int128>(value) : static_cast<int128>(value);
@@ -294,12 +288,14 @@ static void string_to_uint128_single(ckernel_prefix *extra, char *dst, char *con
   int128 result;
   if (e->errmode == assign_error_nocheck) {
     result = parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
-  } else {
+  }
+  else {
     bool overflow = false, badparse = false;
     result = parse::checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
     if (badparse) {
       raise_string_cast_error(ndt::type::make<int128>(), e->src_string_tp, e->src_arrmeta, src[0]);
-    } else if (overflow || (negative && result != 0)) {
+    }
+    else if (overflow || (negative && result != 0)) {
       raise_string_cast_overflow_error(ndt::type::make<uint128>(), e->src_string_tp, e->src_arrmeta, src[0]);
     }
   }
@@ -319,23 +315,23 @@ static void string_to_float32_single(ckernel_prefix *extra, char *dst, char *con
   switch (e->errmode) {
   case assign_error_nocheck:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_nocheck>::single_wrapper::func(NULL, dst, child_src);
+                                        assign_error_nocheck>::single_wrapper(NULL, dst, child_src);
     break;
   case assign_error_overflow:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_overflow>::single_wrapper::func(NULL, dst, child_src);
+                                        assign_error_overflow>::single_wrapper(NULL, dst, child_src);
     break;
   case assign_error_fractional:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_fractional>::single_wrapper::func(NULL, dst, child_src);
+                                        assign_error_fractional>::single_wrapper(NULL, dst, child_src);
     break;
   case assign_error_inexact:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_inexact>::single_wrapper::func(NULL, dst, child_src);
+                                        assign_error_inexact>::single_wrapper(NULL, dst, child_src);
     break;
   default:
     dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_fractional>::single_wrapper::func(NULL, dst, child_src);
+                                        assign_error_fractional>::single_wrapper(NULL, dst, child_src);
     break;
   }
 }
@@ -376,13 +372,23 @@ static void string_to_complex_float64_single(ckernel_prefix *DYND_UNUSED(self), 
   throw std::runtime_error("TODO: implement string_to_complex_float64_single");
 }
 
-static expr_single_t static_string_to_builtin_kernels[builtin_type_id_count - 2] = {
-    &string_to_bool_single,            &string_to_int<int8_t>::single,    &string_to_int<int16_t>::single,
-    &string_to_int<int32_t>::single,   &string_to_int<int64_t>::single,   &string_to_int128_single,
-    &string_to_uint<uint8_t>::single,  &string_to_uint<uint16_t>::single, &string_to_uint<uint32_t>::single,
-    &string_to_uint<uint64_t>::single, &string_to_uint128_single,         &string_to_float16_single,
-    &string_to_float32_single,         &string_to_float64_single,         &string_to_float128_single,
-    &string_to_complex_float32_single, &string_to_complex_float64_single};
+static expr_single_t static_string_to_builtin_kernels[builtin_type_id_count - 2] = {&string_to_bool_single,
+                                                                                    &string_to_int<int8_t>::single,
+                                                                                    &string_to_int<int16_t>::single,
+                                                                                    &string_to_int<int32_t>::single,
+                                                                                    &string_to_int<int64_t>::single,
+                                                                                    &string_to_int128_single,
+                                                                                    &string_to_uint<uint8_t>::single,
+                                                                                    &string_to_uint<uint16_t>::single,
+                                                                                    &string_to_uint<uint32_t>::single,
+                                                                                    &string_to_uint<uint64_t>::single,
+                                                                                    &string_to_uint128_single,
+                                                                                    &string_to_float16_single,
+                                                                                    &string_to_float32_single,
+                                                                                    &string_to_float64_single,
+                                                                                    &string_to_float128_single,
+                                                                                    &string_to_complex_float32_single,
+                                                                                    &string_to_complex_float64_single};
 
 size_t dynd::make_string_to_builtin_assignment_kernel(void *ckb, intptr_t ckb_offset, type_id_t dst_type_id,
                                                       const ndt::type &src_string_tp, const char *src_arrmeta,
@@ -405,7 +411,8 @@ size_t dynd::make_string_to_builtin_assignment_kernel(void *ckb, intptr_t ckb_of
     e->errmode = ectx->errmode;
     e->src_arrmeta = src_arrmeta;
     return ckb_offset;
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "make_string_to_builtin_assignment_kernel: destination type id " << dst_type_id << " is not builtin";
     throw runtime_error(ss.str());
@@ -469,7 +476,8 @@ size_t dynd::make_builtin_to_string_assignment_kernel(void *ckb, intptr_t ckb_of
     e->ectx = *ectx;
     e->dst_arrmeta = dst_arrmeta;
     return ckb_offset;
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "make_builtin_to_string_assignment_kernel: source type id " << src_type_id << " is not builtin";
     throw runtime_error(ss.str());
