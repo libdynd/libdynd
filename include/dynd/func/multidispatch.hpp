@@ -11,30 +11,7 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
-#include <typeinfo>
-
 namespace dynd {
-
-template <typename T>
-struct ndim {
-  static const int value = nd::detail::ndim_from_array<T>::value;
-};
-
-template <typename T>
-struct Void {
-  typedef void type;
-};
-
-template <typename T, typename U = void>
-struct has_key_type {
-  static const bool value = false;
-};
-
-template <typename T>
-struct has_key_type<T, typename Void<typename T::key_type>::type> {
-  static const bool value = true;
-};
-
 namespace nd {
   namespace functional {
 
@@ -52,16 +29,10 @@ namespace nd {
       return old_multidispatch(children.size(), children.begin());
     }
 
-    template <class T, class... Args>
-    std::unique_ptr<T> make_unique(Args &&... args)
-    {
-      return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-    }
-
     template <typename DispatcherType>
     callable multidispatch(const ndt::type &tp, const DispatcherType &dispatcher)
     {
-      return callable::make<multidispatch_kernel<DispatcherType>>(tp, make_unique<DispatcherType>(dispatcher));
+      return callable::make<multidispatch_kernel<DispatcherType>>(tp, dispatcher);
     }
 
     namespace detail {
@@ -92,9 +63,8 @@ namespace nd {
         }
 
         return functional::multidispatch(
-            tp,
-            [children, dispatcher, on_null](const ndt::type &dst_tp, intptr_t nsrc,
-                                            const ndt::type *src_tp) mutable -> callable & {
+            tp, [children, dispatcher, on_null](const ndt::type &dst_tp, intptr_t nsrc,
+                                                const ndt::type *src_tp) mutable -> callable & {
               callable &child = children[dispatcher(dst_tp, nsrc, src_tp)];
               if (child.is_null()) {
                 return on_null();
@@ -192,47 +162,6 @@ namespace nd {
       return multidispatch(tp, std::begin(children), std::end(children));
     }
 
-    /*
-        template <typename IteratorType>
-        callable multidispatch(const ndt::type &tp, const IteratorType
-       &begin_child,
-                               const IteratorType &end_child,
-                               const callable &default_child)
-        {
-          return detail::multidispatch(tp, begin_child, end_child,
-                                       [default_child]() -> callable & {
-            return const_cast<callable &>(default_child);
-          });
-        }
-
-        template <typename IteratorType>
-        callable multidispatch(const IteratorType &begin_child,
-                               const IteratorType &end_child,
-                               const callable &default_child)
-        {
-          return multidispatch(ndt::type("(...) -> Any"), begin_child,
-       end_child,
-                               default_child);
-        }
-
-        inline callable
-        multidispatch(const std::initializer_list<callable> &children,
-                      const callable &default_child)
-        {
-          return multidispatch(std::begin(children), std::end(children),
-                               default_child);
-        }
-
-        inline callable
-        multidispatch(const ndt::type &tp,
-                      const std::initializer_list<callable> &children,
-                      const callable &default_child)
-        {
-          return multidispatch(tp, std::begin(children), std::end(children),
-                               default_child);
-        }
-    */
-
     template <typename IteratorType>
     callable multidispatch(const ndt::type &tp, const IteratorType &begin_child, const IteratorType &end_child,
                            const std::vector<intptr_t> &permutation)
@@ -263,51 +192,6 @@ namespace nd {
     {
       return multidispatch(tp, std::begin(children), std::end(children), permutation);
     }
-
-    /*
-        template <typename IteratorType>
-        callable multidispatch(const ndt::type &tp, const IteratorType
-       &begin_child,
-                               const IteratorType &end_child,
-                               const callable &default_child,
-                               const std::vector<intptr_t> &permutation)
-        {
-          return detail::multidispatch(tp, begin_child, end_child, permutation,
-                                       [default_child]() -> callable & {
-            return const_cast<callable &>(default_child);
-          });
-        }
-
-        template <typename IteratorType>
-        callable multidispatch(const IteratorType &begin_child,
-                               const IteratorType &end_child,
-                               const callable &default_child,
-                               const std::vector<intptr_t> &permutation)
-        {
-          return multidispatch(ndt::type("(...) -> Any"), begin_child,
-       end_child,
-                               default_child, permutation);
-        }
-
-        inline callable
-        multidispatch(const std::initializer_list<callable> &children,
-                      const callable &default_child,
-                      const std::vector<intptr_t> &permutation)
-        {
-          return multidispatch(std::begin(children), std::end(children),
-                               default_child, permutation);
-        }
-
-        inline callable multidispatch(
-            const ndt::type &tp, const std::initializer_list<callable>
-       &children,
-            const callable &default_child, const std::vector<intptr_t>
-       &permutation)
-        {
-          return multidispatch(tp, std::begin(children), std::end(children),
-                               default_child, permutation);
-        }
-    */
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
