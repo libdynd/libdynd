@@ -7,7 +7,6 @@
 #include <map>
 #include <set>
 
-#include <dynd/auxiliary_data.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>

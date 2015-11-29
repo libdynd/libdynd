@@ -471,7 +471,6 @@ set(libdynd_SRC
     include/dynd/array_iter.hpp
     include/dynd/arrmeta_holder.hpp
     include/dynd/asarray.hpp
-    include/dynd/auxiliary_data.hpp
     include/dynd/bool1.hpp
     include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
