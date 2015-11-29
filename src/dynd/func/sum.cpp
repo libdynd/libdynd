@@ -19,7 +19,6 @@ DYND_API nd::callable nd::sum::make()
                            complex_float32_type_id, complex_float64_type_id> arithmetic_type_ids;
 
   auto children = callable::make_all<sum_kernel, arithmetic_type_ids>();
-
   return functional::reduction(
       functional::multidispatch(ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
                                 [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),

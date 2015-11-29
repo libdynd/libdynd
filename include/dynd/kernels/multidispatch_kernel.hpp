@@ -81,6 +81,20 @@ namespace nd {
     struct multidispatch_kernel : base_virtual_kernel<multidispatch_kernel<DispatcherType>> {
       typedef DispatcherType static_data_type;
 
+/*
+      static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                             intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
+        callable &child = dispatcher(dst_tp, nsrc, src_tp);
+
+        std::cout << child << std::endl;
+
+        return NULL;
+      }
+*/
+
       static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                    const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                    const std::map<std::string, ndt::type> &tp_vars)
@@ -90,7 +104,7 @@ namespace nd {
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
         const ndt::type &child_dst_tp = child.get_type()->get_return_type();
         if (child_dst_tp.is_symbolic()) {
-          child.get()->resolve_dst_type(child.get()->static_data(), data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
+          child->resolve_dst_type(child->static_data(), data, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         }
         else {
           dst_tp = child_dst_tp;
@@ -106,8 +120,8 @@ namespace nd {
         DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
 
         callable &child = dispatcher(dst_tp, nsrc, src_tp);
-        return child.get()->instantiate(child.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                                        src_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+        return child->instantiate(child->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
+                                  src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };
 

@@ -13,28 +13,17 @@
 namespace dynd {
 namespace nd {
 
-  template <typename F, template <type_id_t...> class K, int N>
-  struct comparison_operator;
-
-  template <typename F, template <type_id_t, type_id_t> class K>
-  struct comparison_operator<F, K, 2> : declfunc<F> {
-    static std::map<std::array<type_id_t, 2>, callable> children;
-
-    static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
-    {
-      return children[{{src0_type.get_type_id(), src1_type.get_type_id()}}];
-    }
-
-    static std::map<std::array<type_id_t, 2>, callable> make_children()
+  template <typename FuncType, template <type_id_t...> class KernelType>
+  struct comparison_operator : declfunc<FuncType> {
+    static decltype(auto) make_children()
     {
       typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, uint8_type_id,
                                uint16_type_id, uint32_type_id, uint64_type_id, float32_type_id,
                                float64_type_id> numeric_type_ids;
 
-      std::map<std::array<type_id_t, 2>, callable> children =
-          callable::make_all<K, numeric_type_ids, numeric_type_ids>(0);
+      auto children = callable::make_all<KernelType, numeric_type_ids, numeric_type_ids>();
 
-      callable self = functional::call<F>(ndt::type("(Any, Any) -> Any"));
+      callable self = functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
 
       for (type_id_t i0 : i2a<numeric_type_ids>()) {
         for (type_id_t i1 : i2a<dim_type_ids>()) {
@@ -44,10 +33,10 @@ namespace nd {
       }
 
       for (type_id_t i : i2a<numeric_type_ids>()) {
-        children[{{option_type_id, i}}] = callable::make<option_comparison_kernel<F, true, false>>();
-        children[{{i, option_type_id}}] = callable::make<option_comparison_kernel<F, false, true>>();
+        children[{{option_type_id, i}}] = callable::make<option_comparison_kernel<FuncType, true, false>>();
+        children[{{i, option_type_id}}] = callable::make<option_comparison_kernel<FuncType, false, true>>();
       }
-      children[{{option_type_id, option_type_id}}] = callable::make<option_comparison_kernel<F, true, true>>();
+      children[{{option_type_id, option_type_id}}] = callable::make<option_comparison_kernel<FuncType, true, true>>();
 
       for (type_id_t dim_tp_id : i2a<dim_type_ids>()) {
         children[{{dim_tp_id, option_type_id}}] = functional::elwise(self);
@@ -62,19 +51,18 @@ namespace nd {
         }
       }
 
-      children[{{string_type_id, string_type_id}}] = callable::make<K<string_type_id, string_type_id>>(0);
+      children[{{string_type_id, string_type_id}}] = callable::make<KernelType<string_type_id, string_type_id>>();
 
       return children;
     }
 
     static callable make()
     {
-      children = F::make_children();
-
+      auto children = FuncType::make_children();
       return functional::multidispatch(
-          ndt::type("(Any, Any) -> Any"),
-          [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> callable & {
-            callable &child = overload(src_tp[0], src_tp[1]);
+          ndt::type("(Any, Any) -> Any"), [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                                     const ndt::type *src_tp) mutable -> callable & {
+            callable &child = children[{{src_tp[0].get_type_id(), src_tp[1].get_type_id()}}];
             if (child.is_null()) {
               throw std::runtime_error("no child found");
             }
@@ -84,16 +72,13 @@ namespace nd {
     }
   };
 
-  template <typename T, template <type_id_t, type_id_t> class K>
-  std::map<std::array<type_id_t, 2>, callable> comparison_operator<T, K, 2>::children;
-
-  extern DYND_API struct less : comparison_operator<less, less_kernel, 2> {
+  extern DYND_API struct less : comparison_operator<less, less_kernel> {
   } less;
 
-  extern DYND_API struct less_equal : comparison_operator<less_equal, less_equal_kernel, 2> {
+  extern DYND_API struct less_equal : comparison_operator<less_equal, less_equal_kernel> {
   } less_equal;
 
-  extern DYND_API struct equal : comparison_operator<equal, equal_kernel, 2> {
+  extern DYND_API struct equal : comparison_operator<equal, equal_kernel> {
     static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
       std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
@@ -109,7 +94,7 @@ namespace nd {
     }
   } equal;
 
-  extern DYND_API struct not_equal : comparison_operator<not_equal, not_equal_kernel, 2> {
+  extern DYND_API struct not_equal : comparison_operator<not_equal, not_equal_kernel> {
     static std::map<std::array<type_id_t, 2>, callable> make_children()
     {
       std::map<std::array<type_id_t, 2>, callable> children = comparison_operator::make_children();
@@ -125,40 +110,14 @@ namespace nd {
     }
   } not_equal;
 
-  extern DYND_API struct greater_equal : comparison_operator<greater_equal, greater_equal_kernel, 2> {
+  extern DYND_API struct greater_equal : comparison_operator<greater_equal, greater_equal_kernel> {
   } greater_equal;
 
-  extern DYND_API struct greater : comparison_operator<greater, greater_kernel, 2> {
+  extern DYND_API struct greater : comparison_operator<greater, greater_kernel> {
   } greater;
 
   extern DYND_API struct total_order : declfunc<total_order> {
-    static DYND_API std::map<std::array<type_id_t, 2>, callable> children;
-
-    static callable &overload(const ndt::type &src0_type, const ndt::type &src1_type)
-    {
-      return children[{{src0_type.get_type_id(), src1_type.get_type_id()}}];
-    }
-
-    static callable make()
-    {
-      children[{{fixed_string_type_id, fixed_string_type_id}}] =
-          callable::make<total_order_kernel<fixed_string_type_id, fixed_string_type_id>>();
-      children[{{string_type_id, string_type_id}}] =
-          callable::make<total_order_kernel<string_type_id, string_type_id>>();
-      children[{{int32_type_id, int32_type_id}}] = callable::make<total_order_kernel<int32_type_id, int32_type_id>>();
-      children[{{bool_type_id, bool_type_id}}] = callable::make<total_order_kernel<bool_type_id, bool_type_id>>();
-
-      return functional::multidispatch(
-          ndt::type("(Any, Any) -> Any"),
-          [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> callable & {
-            callable &child = overload(src_tp[0], src_tp[1]);
-            if (child.is_null()) {
-              throw std::runtime_error("no child found");
-            }
-
-            return child;
-          });
-    }
+    static DYND_API callable make();
   } total_order;
 
 } // namespace dynd::nd

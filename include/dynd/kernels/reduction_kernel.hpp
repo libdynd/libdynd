@@ -112,9 +112,8 @@ namespace nd {
 
         reinterpret_cast<data_type *>(data)->child_data =
             reinterpret_cast<static_data_type *>(static_data)
-                ->child.get()
-                ->data_init(reinterpret_cast<static_data_type *>(static_data)->child.get()->static_data(), child_dst_tp,
-                            nsrc, src_tp, nkwd - 3, kwds, tp_vars);
+                ->child->data_init(reinterpret_cast<static_data_type *>(static_data)->child->static_data(),
+                                   child_dst_tp, nsrc, src_tp, nkwd - 3, kwds, tp_vars);
 
         return data;
       }
