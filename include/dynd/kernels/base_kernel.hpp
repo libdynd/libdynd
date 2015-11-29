@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <typeinfo>
+
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/callable_type.hpp>
 
