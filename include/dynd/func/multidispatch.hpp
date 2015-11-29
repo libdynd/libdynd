@@ -59,7 +59,7 @@ namespace nd {
     }
 
     template <typename DispatcherType>
-    callable multidispatch(const ndt::type &tp, const DispatcherType &dispatcher, std::size_t DYND_UNUSED(data_size))
+    callable multidispatch(const ndt::type &tp, const DispatcherType &dispatcher)
     {
       return callable::make<multidispatch_kernel<DispatcherType>>(tp, make_unique<DispatcherType>(dispatcher));
     }
@@ -101,8 +101,7 @@ namespace nd {
               }
 
               return child;
-            },
-            0);
+            });
       }
 
       template <typename IteratorType, typename OnNullType>

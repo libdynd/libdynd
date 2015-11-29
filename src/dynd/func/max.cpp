@@ -26,8 +26,7 @@ DYND_API nd::callable nd::max::make()
                                   }
 
                                   return child;
-                                },
-                                0));
+                                }));
 }
 
 DYND_API struct nd::max nd::max;

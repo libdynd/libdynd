@@ -46,8 +46,7 @@ namespace nd {
             }
 
             return child;
-          },
-          0);
+          });
     }
   };
 
@@ -118,8 +117,7 @@ namespace nd {
             }
 
             return child;
-          },
-          0);
+          });
     }
   };
 
@@ -192,8 +190,7 @@ namespace nd {
             }
 
             return child;
-          },
-          0);
+          });
     }
   };
 

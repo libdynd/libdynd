@@ -19,14 +19,12 @@ DYND_API nd::callable nd::is_avail::dim_children[2];
 
 DYND_API nd::callable nd::is_avail::make()
 {
-  typedef type_id_sequence<
-      bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
-      int128_type_id, float32_type_id, float64_type_id, complex_float32_type_id,
-      complex_float64_type_id, void_type_id, string_type_id, fixed_dim_type_id,
-      date_type_id, time_type_id, datetime_type_id> type_ids;
+  typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
+                           float32_type_id, float64_type_id, complex_float32_type_id, complex_float64_type_id,
+                           void_type_id, string_type_id, fixed_dim_type_id, date_type_id, time_type_id,
+                           datetime_type_id> type_ids;
 
-  for (const std::pair<const type_id_t, callable> &pair :
-       callable::make_all<is_avail_kernel, type_ids>(0)) {
+  for (const std::pair<const type_id_t, callable> &pair : callable::make_all<is_avail_kernel, type_ids>(0)) {
     children[pair.first] = pair.second;
   }
 
@@ -38,8 +36,7 @@ DYND_API nd::callable nd::is_avail::make()
 
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
-      [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-         const ndt::type *src_tp) -> callable & {
+      [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> callable & {
         callable *child = nullptr;
         if (src_tp[0].get_kind() == option_kind)
           child = &children[src_tp[0].extended<ndt::option_type>()->get_value_type().get_type_id()];
@@ -51,8 +48,7 @@ DYND_API nd::callable nd::is_avail::make()
         }
 
         return *child;
-      },
-      0);
+      });
 }
 
 // underlying_type<type_id>::type
@@ -66,14 +62,12 @@ DYND_API nd::callable nd::assign_na_decl::dim_children[2];
 
 DYND_API nd::callable nd::assign_na_decl::make()
 {
-  typedef type_id_sequence<
-      bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id,
-      int128_type_id, float32_type_id, float64_type_id, complex_float32_type_id,
-      complex_float64_type_id, void_type_id, string_type_id, fixed_dim_type_id,
-      date_type_id, time_type_id, datetime_type_id> type_ids;
+  typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
+                           float32_type_id, float64_type_id, complex_float32_type_id, complex_float64_type_id,
+                           void_type_id, string_type_id, fixed_dim_type_id, date_type_id, time_type_id,
+                           datetime_type_id> type_ids;
 
-  for (const std::pair<const type_id_t, callable> &pair :
-       callable::make_all<assign_na_kernel, type_ids>(0)) {
+  for (const std::pair<const type_id_t, callable> &pair : callable::make_all<assign_na_kernel, type_ids>(0)) {
     children[pair.first] = pair.second;
   }
 
@@ -85,9 +79,7 @@ DYND_API nd::callable nd::assign_na_decl::make()
   }
 
   return functional::multidispatch(
-      t,
-      [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-         const ndt::type *DYND_UNUSED(src_tp)) -> callable & {
+      t, [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) -> callable & {
         callable *child = nullptr;
         if (dst_tp.get_kind() == option_kind) {
           child = &children[dst_tp.extended<ndt::option_type>()->get_value_type().get_type_id()];
@@ -100,8 +92,7 @@ DYND_API nd::callable nd::assign_na_decl::make()
         }
 
         return *child;
-      },
-      0);
+      });
 }
 
 DYND_API struct nd::assign_na_decl nd::assign_na_decl;

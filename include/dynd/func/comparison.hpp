@@ -73,15 +73,14 @@ namespace nd {
 
       return functional::multidispatch(
           ndt::type("(Any, Any) -> Any"),
-          [](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type * src_tp)->callable & {
+          [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> callable & {
             callable &child = overload(src_tp[0], src_tp[1]);
             if (child.is_null()) {
               throw std::runtime_error("no child found");
             }
 
             return child;
-          },
-          0);
+          });
     }
   };
 
@@ -151,15 +150,14 @@ namespace nd {
 
       return functional::multidispatch(
           ndt::type("(Any, Any) -> Any"),
-          [](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type * src_tp)->callable & {
+          [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> callable & {
             callable &child = overload(src_tp[0], src_tp[1]);
             if (child.is_null()) {
               throw std::runtime_error("no child found");
             }
 
             return child;
-          },
-          0);
+          });
     }
   } total_order;
 

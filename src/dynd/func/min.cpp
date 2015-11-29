@@ -26,8 +26,7 @@ DYND_API nd::callable nd::min::make()
                                   }
 
                                   return child;
-                                },
-                                0));
+                                }));
 }
 
 DYND_API struct nd::min nd::min;
