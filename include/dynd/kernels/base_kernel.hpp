@@ -93,10 +93,7 @@ namespace nd {
      * The ckernel destructor function, which is placed in
      * the ckernel_prefix destructor.
      */
-    static void destruct(ckernel_prefix *self)
-    {
-      reinterpret_cast<SelfType *>(self)->~SelfType();
-    }
+    static void destruct(ckernel_prefix *self) { reinterpret_cast<SelfType *>(self)->~SelfType(); }
 
     static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &DYND_UNUSED(dst_tp),
                            intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp), intptr_t DYND_UNUSED(nkwd),
@@ -167,11 +164,15 @@ namespace nd {
       SelfType *self = parent_type::init(rawself, kernreq, std::forward<A>(args)...);                                  \
       switch (kernreq) {                                                                                               \
       case kernel_request_single:                                                                                      \
+        self->function =                                                                                               \
+            reinterpret_cast<void *>(static_cast<void (*)(ckernel_prefix *, char *, char *const *)>(single_wrapper));  \
+        break;                                                                                                         \
       case kernel_request_array:                                                                                       \
-        self->function = reinterpret_cast<void *>(single_wrapper::func);                                               \
+        self->function = reinterpret_cast<void *>(                                                                     \
+            static_cast<void (*)(ckernel_prefix *, array *, array * const *)>(single_wrapper));                        \
         break;                                                                                                         \
       case kernel_request_strided:                                                                                     \
-        self->function = reinterpret_cast<void *>(strided_wrapper::func);                                              \
+        self->function = reinterpret_cast<void *>(strided_wrapper);                                                    \
         break;                                                                                                         \
       default:                                                                                                         \
         DYND_HOST_THROW(std::invalid_argument,                                                                         \
@@ -181,33 +182,45 @@ namespace nd {
       return self;                                                                                                     \
     }                                                                                                                  \
                                                                                                                        \
+    __VA_ARGS__ void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))                                     \
+    {                                                                                                                  \
+      std::stringstream ss;                                                                                            \
+      ss << "void single(char *dst, char *const *src) is not implemented in " << typeid(SelfType).name();              \
+      throw std::runtime_error(ss.str());                                                                              \
+    }                                                                                                                  \
+                                                                                                                       \
+    __VA_ARGS__ static void DYND_EMIT_LLVM(single_wrapper)(ckernel_prefix * self, char *dst, char *const *src)         \
+    {                                                                                                                  \
+      typedef typename std::conditional<detail::has_member_single<SelfType, void(char *, char *const *)>::value,       \
+                                        SelfType, base_kernel>::type type;                                             \
+      reinterpret_cast<type *>(self)->single(dst, src);                                                                \
+    }                                                                                                                  \
+                                                                                                                       \
+    __VA_ARGS__ void single(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                   \
+    {                                                                                                                  \
+      std::stringstream ss;                                                                                            \
+      ss << "void single(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();            \
+      throw std::runtime_error(ss.str());                                                                              \
+    }                                                                                                                  \
+                                                                                                                       \
+    __VA_ARGS__ static void single_wrapper(ckernel_prefix *self, array *dst, array *const *src)                        \
+    {                                                                                                                  \
+      typedef typename std::conditional<detail::has_member_single<SelfType, void(array *, array * const *)>::value,    \
+                                        SelfType, base_kernel>::type type;                                             \
+      reinterpret_cast<type *>(self)->single(dst, src);                                                                \
+    }                                                                                                                  \
+                                                                                                                       \
+    __VA_ARGS__ static void strided_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,    \
+                                            const intptr_t *src_stride, size_t count)                                  \
+    {                                                                                                                  \
+      SelfType::get_self(self)->strided(dst, dst_stride, src, src_stride, count);                                      \
+    }                                                                                                                  \
+                                                                                                                       \
     static const volatile char *DYND_USED(ir);                                                                         \
-                                                                                                                       \
-    struct single_wrapper {                                                                                            \
-      __VA_ARGS__ static void DYND_EMIT_LLVM(func)(ckernel_prefix *self,                                               \
-                                                   typename arg_at<decltype(&SelfType::single), 0>::type dst,          \
-                                                   typename arg_at<decltype(&SelfType::single), 1>::type src)          \
-      {                                                                                                                \
-        SelfType::get_self(self)->single(dst, src);                                                                    \
-      }                                                                                                                \
-                                                                                                                       \
-      static const volatile char *DYND_USED(ir);                                                                       \
-    };                                                                                                                 \
-                                                                                                                       \
-    struct strided_wrapper {                                                                                           \
-      __VA_ARGS__ static void func(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,             \
-                                   const intptr_t *src_stride, size_t count)                                           \
-      {                                                                                                                \
-        SelfType::get_self(self)->strided(dst, dst_stride, src, src_stride, count);                                    \
-      }                                                                                                                \
-    };                                                                                                                 \
   };                                                                                                                   \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
   const volatile char *DYND_USED(base_kernel<SelfType>::ir) = NULL;                                                    \
-                                                                                                                       \
-  template <typename SelfType>                                                                                         \
-  const volatile char *DYND_USED(base_kernel<SelfType>::single_wrapper::ir) = NULL;                                    \
                                                                                                                        \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType, 0> : base_kernel<SelfType> {                                                            \
