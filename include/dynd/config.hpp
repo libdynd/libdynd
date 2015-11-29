@@ -46,7 +46,7 @@
 #define DYND_TOLOWER std::tolower
 
 #define DYND_USED(NAME) NAME __attribute__((used))
-#define DYND_EMIT_LLVM(NAME) __attribute__((annotate("emit_llvm"))) NAME
+#define DYND_EMIT_LLVM(NAME) __attribute__((annotate(#NAME), annotate("emit_llvm"))) NAME
 
 #define DYND_ALLOW_UNSIGNED_UNARY_MINUS
 #define DYND_END_ALLOW_UNSIGNED_UNARY_MINUS

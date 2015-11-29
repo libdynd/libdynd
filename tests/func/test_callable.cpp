@@ -326,6 +326,7 @@ TEST(Callable, AssignmentAsExpr)
 #include <llvm/Support/SourceMgr.h>
 */
 
+/*
 TEST(Callable, LLVM)
 {
   nd::callable f = nd::functional::apply([](int x, int y) { return x + y; });
@@ -335,9 +336,8 @@ TEST(Callable, LLVM)
 
 //  llvm::SMDiagnostic error;
 //  llvm::parseIR(llvm::MemoryBuffer::getMemBuffer(llvm::StringRef(f->ir))->getMemBufferRef(), error, llvm::getGlobalContext());
-
-  std::exit(-1);
 }
+*/
 
 /*
 // TODO Reenable once there's a convenient way to make the binary callable

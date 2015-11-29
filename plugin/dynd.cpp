@@ -4,6 +4,7 @@
 //
 
 #include <iostream>
+
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/LegacyPassManager.h>
@@ -38,7 +39,11 @@ public:
         if (Function *fn = dyn_cast<Function>(e->getOperand(0)->getOperand(0))) {
           auto anno = cast<ConstantDataArray>(cast<GlobalVariable>(e->getOperand(1)->getOperand(0))->getOperand(0))
                           ->getAsCString();
-          fn->addFnAttr(anno); // <-- add function annotation here
+          if (fn->hasFnAttribute("emit_llvm")) {
+            fn->addFnAttr("name", anno);
+          } else {
+            fn->addFnAttr(anno); // <-- add function annotation here
+          }
         }
       }
     }
@@ -49,30 +54,26 @@ public:
   bool runOnFunction(Function &F) override
   {
     if (F.hasFnAttribute("emit_llvm")) {
-      Module *M = F.getParent();
+      StringRef Name = F.getName();
 
-      static Regex R("14single_wrapper.*$");
-      GlobalVariable *GV = M->getGlobalVariable(R.sub("2irE", F.getName()), true);
+      Module *NewM = new Module("", getGlobalContext());
+      StringRef NewName = F.getFnAttribute("name").getValueAsString();
+      Function *NewF = reinterpret_cast<Function *>(NewM->getOrInsertFunction(NewName, F.getFunctionType()));
 
-      if (GV != NULL) {
-        Module *NewM = new Module("", getGlobalContext());
-
-        ValueToValueMapTy vmap;
-        Function *newF = reinterpret_cast<Function *>(NewM->getOrInsertFunction("single_wrapper", F.getFunctionType()));
-        Function::arg_iterator DestI = newF->arg_begin();
-        for (const Argument &I : F.args()) {
-          if (vmap.count(&I) == 0) {
-            DestI->setName(I.getName());
-            vmap[&I] = &*DestI++;
-          }
+      ValueToValueMapTy vmap;
+      Function::arg_iterator DestI = NewF->arg_begin();
+      for (const Argument &I : F.args()) {
+        if (vmap.count(&I) == 0) {
+          DestI->setName(I.getName());
+          vmap[&I] = &*DestI++;
         }
-
-        SmallVector<ReturnInst *, 3> ret;
-        CloneFunctionInto(newF, &F, vmap, false, ret);
-        SM[F.getName()] = NewM;
-
-        return true;
       }
+
+      SmallVector<ReturnInst *, 3> ret;
+      CloneFunctionInto(NewF, &F, vmap, false, ret);
+
+      StringRef Key = Name.slice(0, Name.find(NewName) - to_string(NewName.size()).size());
+      SM[Key] = NewM;
     }
 
     return false;
@@ -80,9 +81,9 @@ public:
 
   bool doFinalization(Module &M) override
   {
-    static Regex R("14single_wrapper.*$");
-    for (const auto &SME : SM) {
-      GlobalVariable *GV = M.getGlobalVariable(R.sub("2irE", SME.getKey()), true);
+    for (const StringMapEntry<Module *> &SME : SM) {
+      GlobalVariable *GV = M.getGlobalVariable(SME.getKey().str() + "2irE", true);
+
       if (GV != NULL) {
         Module *NewM = SME.getValue();
 
