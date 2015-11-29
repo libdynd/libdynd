@@ -102,6 +102,11 @@ add_subdirectory(thirdparty/cephes)
 add_subdirectory(thirdparty/datetime)
 include_directories(thirdparty/datetime/include)
 
+# LLVM, disabled for now
+#add_definitions(${LLVM_DEFINITIONS})
+#include_directories(${LLVM_INCLUDE_DIRS})
+#llvm_map_components_to_libnames(LLVM_LINK_LIBS core option target bitreader support profiledata codegen irreader linker instrumentation objcarcopts lto)
+
 set(DYND_LINK_LIBS cephes datetime)
 
 # Get the git revision

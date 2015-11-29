@@ -13,12 +13,14 @@
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/ADT/StringMap.h>
 
 using namespace std;
 using namespace llvm;
 
 class EmitLLVMFunctionPass : public FunctionPass {
   static char ID;
+  StringMap<Module *> SM;
 
 public:
   EmitLLVMFunctionPass() : FunctionPass(ID)
@@ -49,30 +51,54 @@ public:
     if (F.hasFnAttribute("emit_llvm")) {
       Module *M = F.getParent();
 
-      /*
-            Module *mod = new Module("test", getGlobalContext());
-            ValueToValueMapTy vmap;
-            Function *newF = CloneFunction(&F, vmap, false);
-            mod->getFunctionList().push_back(newF);
-            mod->dump();
-      */
-
-      static Regex R("4func.*$");
+      static Regex R("14single_wrapper.*$");
       GlobalVariable *GV = M->getGlobalVariable(R.sub("2irE", F.getName()), true);
-      if (GV != NULL) {
-        string S;
-        raw_string_ostream SO(S);
-        F.print(SO);
 
-        Constant *CDA = ConstantDataArray::getString(M->getContext(), SO.str());
-        GV->setInitializer(ConstantExpr::getBitCast(new GlobalVariable(*M, CDA->getType(), true, GV->getLinkage(), CDA),
-                                                    Type::getInt8PtrTy(M->getContext())));
+      if (GV != NULL) {
+        Module *NewM = new Module("", getGlobalContext());
+
+        ValueToValueMapTy vmap;
+        Function *newF = reinterpret_cast<Function *>(NewM->getOrInsertFunction("single_wrapper", F.getFunctionType()));
+        Function::arg_iterator DestI = newF->arg_begin();
+        for (const Argument &I : F.args()) {
+          if (vmap.count(&I) == 0) {
+            DestI->setName(I.getName());
+            vmap[&I] = &*DestI++;
+          }
+        }
+
+        SmallVector<ReturnInst *, 3> ret;
+        CloneFunctionInto(newF, &F, vmap, false, ret);
+        SM[F.getName()] = NewM;
 
         return true;
       }
     }
 
     return false;
+  }
+
+  bool doFinalization(Module &M) override
+  {
+    static Regex R("14single_wrapper.*$");
+    for (const auto &SME : SM) {
+      GlobalVariable *GV = M.getGlobalVariable(R.sub("2irE", SME.getKey()), true);
+      if (GV != NULL) {
+        Module *NewM = SME.getValue();
+
+        string S;
+        raw_string_ostream SO(S);
+        NewM->print(SO, NULL);
+
+        Constant *CDA = ConstantDataArray::getString(M.getContext(), SO.str());
+        GV->setInitializer(ConstantExpr::getBitCast(new GlobalVariable(M, CDA->getType(), true, GV->getLinkage(), CDA),
+                                                    Type::getInt8PtrTy(M.getContext())));
+
+        delete NewM;
+      }
+    }
+
+    return true;
   }
 };
 
