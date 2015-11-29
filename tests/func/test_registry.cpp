@@ -16,6 +16,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(CallableRegistry, Dispatch)
 {
   nd::callable af;
@@ -29,6 +30,7 @@ TEST(CallableRegistry, Dispatch)
   // Bool doesn't implicitly convert to float
   EXPECT_THROW(af(true), type_error);
 }
+*/
 
 TEST(CallableRegistry, Arithmetic)
 {
