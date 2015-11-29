@@ -18,31 +18,25 @@ DYND_API nd::callable nd::random::uniform::children[DYND_TYPE_ID_MAX + 1];
 
 DYND_API nd::callable nd::random::uniform::make()
 {
-  typedef type_id_sequence<int32_type_id, int64_type_id, uint32_type_id,
-                           uint64_type_id, float32_type_id, float64_type_id,
-                           complex_float32_type_id,
-                           complex_float64_type_id> numeric_type_ids;
+  typedef type_id_sequence<int32_type_id, int64_type_id, uint32_type_id, uint64_type_id, float32_type_id,
+                           float64_type_id, complex_float32_type_id, complex_float64_type_id> numeric_type_ids;
 
   std::random_device random_device;
 
-  for (
-      const auto &pair :
-      callable::make_all<uniform_kernel_alias<std::default_random_engine>::type,
-                         numeric_type_ids>(0)) {
+  for (const auto &pair :
+       callable::make_all<uniform_kernel_alias<std::default_random_engine>::type, numeric_type_ids>(0)) {
     children[pair.first] = pair.second;
   }
 
   return functional::elwise(functional::multidispatch(
       ndt::type("(a: ?R, b: ?R) -> R"),
-      [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-         const ndt::type *DYND_UNUSED(src_tp)) -> callable & {
+      [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) -> callable & {
         callable &child = children[dst_tp.get_type_id()];
         if (child.is_null()) {
           throw std::runtime_error("assignment error");
         }
         return child;
-      },
-      0));
+      }));
 }
 
 DYND_API struct nd::random::uniform nd::random::uniform;

@@ -29,14 +29,13 @@ namespace nd {
 
       return functional::multidispatch(
           ndt::type("(Any) -> Any"),
-          [](const ndt::type & dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type * src_tp)->callable & {
+          [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> callable & {
             callable &child = overload(dst_tp, src_tp[0]);
             if (child.is_null()) {
               throw std::runtime_error("assignment error");
             }
             return child;
-          },
-          0);
+          });
     }
   };
 
@@ -130,8 +129,8 @@ DYND_API size_t make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offs
  *                      ckb, ckb_offset, kernreq);
  *      // Proceed to create 'single' kernel...
  */
-DYND_API size_t
-make_kernreq_to_single_kernel_adapter(void *ckb, intptr_t ckb_offset, int nsrc, kernel_request_t kernreq);
+DYND_API size_t make_kernreq_to_single_kernel_adapter(void *ckb, intptr_t ckb_offset, int nsrc,
+                                                      kernel_request_t kernreq);
 
 #ifdef DYND_CUDA
 /**
@@ -153,21 +152,17 @@ DYND_API size_t make_cuda_pod_typed_data_assignment_kernel(void *ckb, intptr_t c
                                                            bool src_device, size_t data_size, size_t data_alignment,
                                                            kernel_request_t kernreq);
 
-DYND_API intptr_t
-make_cuda_device_builtin_type_assignment_kernel(const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-                                                char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                                const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                                const char *const *src_arrmeta, kernel_request_t kernreq,
-                                                const eval::eval_context *ectx, const nd::array &kwds,
-                                                const std::map<std::string, ndt::type> &tp_vars);
+DYND_API intptr_t make_cuda_device_builtin_type_assignment_kernel(
+    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data, void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<std::string, ndt::type> &tp_vars);
 
-DYND_API intptr_t
-make_cuda_to_device_builtin_type_assignment_kernel(const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp,
-                                                   char *data, void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                                   const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
-                                                   const char *const *src_arrmeta, kernel_request_t kernreq,
-                                                   const eval::eval_context *ectx, const nd::array &kwds,
-                                                   const std::map<std::string, ndt::type> &tp_vars);
+DYND_API intptr_t make_cuda_to_device_builtin_type_assignment_kernel(
+    const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data, void *ckb, intptr_t ckb_offset,
+    const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc, const ndt::type *src_tp,
+    const char *const *src_arrmeta, kernel_request_t kernreq, const eval::eval_context *ectx, const nd::array &kwds,
+    const std::map<std::string, ndt::type> &tp_vars);
 
 DYND_API intptr_t make_cuda_from_device_builtin_type_assignment_kernel(
     const arrfunc_type_data *self, const ndt::arrfunc_type *af_tp, char *data, void *ckb, intptr_t ckb_offset,

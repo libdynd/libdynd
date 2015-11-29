@@ -30,8 +30,7 @@ DYND_API nd::callable nd::sum::make()
                                   }
 
                                   return child;
-                                },
-                                0));
+                                }));
 }
 
 DYND_API struct nd::sum nd::sum;
