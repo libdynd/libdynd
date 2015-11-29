@@ -27,9 +27,10 @@ using namespace dynd;
 
 TEST(Callable, SingleStridedConstructor)
 {
-  nd::callable f(ndt::type("(int32) -> int32"), [](ckernel_prefix *DYND_UNUSED(self), char *dst, char *const *src) {
-    *reinterpret_cast<int32 *>(dst) = *reinterpret_cast<int32 *>(src[0]) + 5;
-  }, 0);
+  nd::callable f(ndt::type("(int32) -> int32"),
+                 [](ckernel_prefix *DYND_UNUSED(self), char * dst,
+                    char * const * src) { *reinterpret_cast<int32 *>(dst) = *reinterpret_cast<int32 *>(src[0]) + 5; },
+                 0);
 
   EXPECT_ARRAY_EQ(8, f(3));
 }
@@ -77,7 +78,10 @@ TEST(Callable, Assignment)
   EXPECT_EQ(891029, ints_out[2]);
 }
 
-static double func(int x, double y) { return 2.0 * x + y; }
+static double func(int x, double y)
+{
+  return 2.0 * x + y;
+}
 
 TEST(Callable, Construction)
 {
@@ -316,13 +320,22 @@ TEST(Callable, AssignmentAsExpr)
 }
 
 /*
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IRReader/IRReader.h>
+#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/Support/SourceMgr.h>
+*/
+
+/*
 TEST(Callable, LLVM)
 {
   nd::callable f = nd::functional::apply([](int x, int y) { return x + y; });
   // nd::callable f = nd::add::children[int32_type_id][int32_type_id];
 
   std::cout << f->ir << std::endl;
-  std::exit(-1);
+
+//  llvm::SMDiagnostic error;
+//  llvm::parseIR(llvm::MemoryBuffer::getMemBuffer(llvm::StringRef(f->ir))->getMemBufferRef(), error, llvm::getGlobalContext());
 }
 */
 

@@ -4,6 +4,7 @@
 //
 
 #include <iostream>
+
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/LegacyPassManager.h>
@@ -13,12 +14,14 @@
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/ADT/StringMap.h>
 
 using namespace std;
 using namespace llvm;
 
 class EmitLLVMFunctionPass : public FunctionPass {
   static char ID;
+  StringMap<Module *> SM;
 
 public:
   EmitLLVMFunctionPass() : FunctionPass(ID)
@@ -36,7 +39,11 @@ public:
         if (Function *fn = dyn_cast<Function>(e->getOperand(0)->getOperand(0))) {
           auto anno = cast<ConstantDataArray>(cast<GlobalVariable>(e->getOperand(1)->getOperand(0))->getOperand(0))
                           ->getAsCString();
-          fn->addFnAttr(anno); // <-- add function annotation here
+          if (fn->hasFnAttribute("emit_llvm")) {
+            fn->addFnAttr("name", anno);
+          } else {
+            fn->addFnAttr(anno); // <-- add function annotation here
+          }
         }
       }
     }
@@ -47,32 +54,52 @@ public:
   bool runOnFunction(Function &F) override
   {
     if (F.hasFnAttribute("emit_llvm")) {
-      Module *M = F.getParent();
+      StringRef Name = F.getName();
 
-      /*
-            Module *mod = new Module("test", getGlobalContext());
-            ValueToValueMapTy vmap;
-            Function *newF = CloneFunction(&F, vmap, false);
-            mod->getFunctionList().push_back(newF);
-            mod->dump();
-      */
+      Module *NewM = new Module("", getGlobalContext());
+      StringRef NewName = F.getFnAttribute("name").getValueAsString();
+      Function *NewF = reinterpret_cast<Function *>(NewM->getOrInsertFunction(NewName, F.getFunctionType()));
 
-      static Regex R("4func.*$");
-      GlobalVariable *GV = M->getGlobalVariable(R.sub("2irE", F.getName()), true);
-      if (GV != NULL) {
-        string S;
-        raw_string_ostream SO(S);
-        F.print(SO);
-
-        Constant *CDA = ConstantDataArray::getString(M->getContext(), SO.str());
-        GV->setInitializer(ConstantExpr::getBitCast(new GlobalVariable(*M, CDA->getType(), true, GV->getLinkage(), CDA),
-                                                    Type::getInt8PtrTy(M->getContext())));
-
-        return true;
+      ValueToValueMapTy vmap;
+      Function::arg_iterator DestI = NewF->arg_begin();
+      for (const Argument &I : F.args()) {
+        if (vmap.count(&I) == 0) {
+          DestI->setName(I.getName());
+          vmap[&I] = &*DestI++;
+        }
       }
+
+      SmallVector<ReturnInst *, 3> ret;
+      CloneFunctionInto(NewF, &F, vmap, false, ret);
+
+      StringRef Key = Name.slice(0, Name.find(NewName) - to_string(NewName.size()).size());
+      SM[Key] = NewM;
     }
 
     return false;
+  }
+
+  bool doFinalization(Module &M) override
+  {
+    for (const StringMapEntry<Module *> &SME : SM) {
+      GlobalVariable *GV = M.getGlobalVariable(SME.getKey().str() + "2irE", true);
+
+      if (GV != NULL) {
+        Module *NewM = SME.getValue();
+
+        string S;
+        raw_string_ostream SO(S);
+        NewM->print(SO, NULL);
+
+        Constant *CDA = ConstantDataArray::getString(M.getContext(), SO.str());
+        GV->setInitializer(ConstantExpr::getBitCast(new GlobalVariable(M, CDA->getType(), true, GV->getLinkage(), CDA),
+                                                    Type::getInt8PtrTy(M.getContext())));
+
+        delete NewM;
+      }
+    }
+
+    return true;
   }
 };
 
