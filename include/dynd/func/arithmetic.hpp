@@ -14,21 +14,11 @@
 namespace dynd {
 namespace nd {
 
-  template <typename F, template <type_id_t...> class K, int N, typename TypeIDSequence>
-  struct arithmetic_operator;
-
   template <typename FuncType, template <type_id_t> class KernelType, typename TypeIDSequence>
-  struct arithmetic_operator<FuncType, KernelType, 1, TypeIDSequence> : declfunc<FuncType> {
-    static std::map<type_id_t, callable> children;
-
-    static callable &overload(const ndt::type &src0_tp)
-    {
-      return children[src0_tp.get_type_id()];
-    }
-
+  struct unary_arithmetic_operator : declfunc<FuncType> {
     static callable make()
     {
-      children = callable::make_all<KernelType, TypeIDSequence>(0);
+      auto children = callable::make_all<KernelType, TypeIDSequence>();
 
       const callable self = functional::call<FuncType>(ndt::type("(Any) -> Any"));
 
@@ -37,24 +27,21 @@ namespace nd {
         children[i0] = functional::elwise(child_tp, self);
       }
 
-      return functional::multidispatch(
-          self.get_array_type(),
-          [](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type * src_tp)->callable & {
-            callable &child = overload(src_tp[0]);
-            if (child.is_null()) {
-              throw std::runtime_error(FuncType::what(src_tp[0]));
-            }
+      return functional::multidispatch(self.get_array_type(),
+                                       [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                                  const ndt::type *src_tp) mutable -> callable & {
+                                         callable &child = children[src_tp[0].get_type_id()];
+                                         if (child.is_null()) {
+                                           throw std::runtime_error(FuncType::what(src_tp[0]));
+                                         }
 
-            return child;
-          });
+                                         return child;
+                                       });
     }
   };
 
-  template <typename FuncType, template <type_id_t> class KernelType, typename TypeIDSequence>
-  std::map<type_id_t, callable> arithmetic_operator<FuncType, KernelType, 1, TypeIDSequence>::children;
-
 #define DYND_DEF_UNARY_OP_CALLABLE(NAME, TYPES)                                                                        \
-  extern DYND_API struct NAME : arithmetic_operator<NAME, NAME##_kernel, 1, TYPES> {                                   \
+  extern DYND_API struct NAME : unary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                                \
     static std::string what(const ndt::type &src0_type)                                                                \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
@@ -71,17 +58,10 @@ namespace nd {
 #undef DYND_DEF_UNARY_OP_CALLABLE
 
   template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
-  struct arithmetic_operator<FuncType, KernelType, 2, TypeIDSequence> : declfunc<FuncType> {
-    static std::map<std::array<type_id_t, 2>, callable> children;
-
-    static callable &overload(const ndt::type &src0_tp, const ndt::type &src1_tp)
+  struct binary_arithmetic_operator : declfunc<FuncType> {
+    static callable make()
     {
-      return children[{{src0_tp.get_type_id(), src1_tp.get_type_id()}}];
-    }
-
-    static void fill()
-    {
-      children = callable::make_all<KernelType, TypeIDSequence, TypeIDSequence>(0);
+      auto children = callable::make_all<KernelType, TypeIDSequence, TypeIDSequence>();
 
       for (type_id_t i : i2a<TypeIDSequence>()) {
         children[{{option_type_id, i}}] = callable::make<option_arithmetic_kernel<FuncType, true, false>>();
@@ -102,16 +82,11 @@ namespace nd {
           children[{{i0, i1}}] = functional::elwise(self);
         }
       }
-    }
-
-    static callable make()
-    {
-      FuncType::fill();
 
       return functional::multidispatch(
-          ndt::type("(Any, Any) -> Any"),
-          [](const ndt::type & DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type * src_tp)->callable & {
-            callable &child = overload(src_tp[0], src_tp[1]);
+          ndt::type("(Any, Any) -> Any"), [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                                     const ndt::type *src_tp) mutable -> callable & {
+            callable &child = children[{{src_tp[0].get_type_id(), src_tp[1].get_type_id()}}];
             if (child.is_null()) {
               throw std::runtime_error(FuncType::what(src_tp[0], src_tp[1]));
             }
@@ -121,11 +96,8 @@ namespace nd {
     }
   };
 
-  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
-  std::map<std::array<type_id_t, 2>, callable> arithmetic_operator<FuncType, KernelType, 2, TypeIDSequence>::children;
-
 #define DYND_DEF_BINARY_OP_CALLABLE(NAME, TYPES)                                                                       \
-  extern DYND_API struct NAME : arithmetic_operator<NAME, NAME##_kernel, 2, TYPES> {                                   \
+  extern DYND_API struct NAME : binary_arithmetic_operator<NAME, NAME##_kernel, TYPES> {                               \
     static std::string what(const ndt::type &src0_tp, const ndt::type &src1_tp)                                        \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
@@ -156,11 +128,9 @@ namespace nd {
 
   template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
   struct compound_arithmetic_operator : declfunc<FuncType> {
-    static std::map<std::array<type_id_t, 2>, callable> children;
-
-    static void fill()
+    static callable make()
     {
-      children = callable::make_all<KernelType, TypeIDSequence, TypeIDSequence>();
+      auto children = callable::make_all<KernelType, TypeIDSequence, TypeIDSequence>();
 
       callable self = functional::call<FuncType>(ndt::type("(Any, Any) -> Any"));
       for (type_id_t i0 : i2a<TypeIDSequence>()) {
@@ -175,28 +145,19 @@ namespace nd {
           children[{{i0, i1}}] = functional::elwise(self);
         }
       }
-    }
 
-    static callable make()
-    {
-      FuncType::fill();
+      return functional::multidispatch(ndt::type("(Any) -> Any"),
+                                       [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                                  const ndt::type *src_tp) mutable -> callable & {
+                                         callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
+                                         if (child.is_null()) {
+                                           throw std::runtime_error("no child found");
+                                         }
 
-      return functional::multidispatch(
-          ndt::type("(Any) -> Any"),
-          [](const ndt::type & dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type * src_tp)->callable & {
-            callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
-            if (child.is_null()) {
-              throw std::runtime_error("no child found");
-            }
-
-            return child;
-          });
+                                         return child;
+                                       });
     }
   };
-
-  template <typename FuncType, template <type_id_t, type_id_t> class KernelType, typename TypeIDSequence>
-  std::map<std::array<type_id_t, 2>, callable>
-  compound_arithmetic_operator<FuncType, KernelType, TypeIDSequence>::children;
 
 #define DYND_DEF_COMPOUND_OP_CALLABLE(NAME, TYPES)                                                                     \
   extern DYND_API struct NAME : compound_arithmetic_operator<NAME, NAME##_kernel_t, TYPES> {                           \

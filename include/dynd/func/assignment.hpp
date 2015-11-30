@@ -5,54 +5,15 @@
 
 #pragma once
 
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/func/callable.hpp>
+#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
-  template <typename T, int N>
-  struct declop;
-
-  template <typename T>
-  struct declop<T, 2> : declfunc<T> {
-    static std::map<std::array<type_id_t, 2>, callable> children;
-    static callable default_child;
-
-    static callable &overload(const ndt::type &dst_tp, const ndt::type &src0_tp)
-    {
-      return children[{{dst_tp.get_type_id(), src0_tp.get_type_id()}}];
-    }
-
-    static callable make()
-    {
-      children = T::make_children();
-
-      return functional::multidispatch(
-          ndt::type("(Any) -> Any"),
-          [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> callable & {
-            callable &child = overload(dst_tp, src_tp[0]);
-            if (child.is_null()) {
-              throw std::runtime_error("assignment error");
-            }
-            return child;
-          });
-    }
-  };
-
-  template <typename T>
-  std::map<std::array<type_id_t, 2>, callable> declop<T, 2>::children;
-
-  template <typename T>
-  callable declop<T, 2>::default_child;
-
-  extern DYND_API struct assign : declop<assign, 2> {
-    static callable &overload(const ndt::type &dst_tp, const ndt::type &src0_tp)
-    {
-      get();
-      return children[{{dst_tp.get_type_id(), src0_tp.get_type_id()}}];
-    }
-
-    static DYND_API std::map<std::array<type_id_t, 2>, callable> make_children();
+  extern DYND_API struct assign : declfunc<assign> {
+    static DYND_API callable make();
   } assign;
 
 } // namespace dynd::nd
