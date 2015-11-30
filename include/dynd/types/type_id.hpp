@@ -624,6 +624,16 @@ struct type_kind_of<pointer_type_id> {
 };
 
 template <>
+struct type_kind_of<fixed_bytes_type_id> {
+  static const type_kind_t value = bytes_kind;
+};
+
+template <>
+struct type_kind_of<bytes_type_id> {
+  static const type_kind_t value = bytes_kind;
+};
+
+template <>
 struct type_kind_of<fixed_string_type_id> {
   static const type_kind_t value = string_kind;
 };

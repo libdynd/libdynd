@@ -24,6 +24,10 @@ DYND_API nd::callable nd::assign::make()
   children[{{date_type_id, struct_type_id}}] = callable::make<assignment_kernel<date_type_id, struct_type_id>>();
   children[{{struct_type_id, date_type_id}}] = callable::make<assignment_kernel<struct_type_id, date_type_id>>();
   children[{{string_type_id, date_type_id}}] = callable::make<assignment_kernel<string_type_id, date_type_id>>();
+  children[{{string_type_id, string_type_id}}] = callable::make<assignment_kernel<string_type_id, string_type_id>>();
+  children[{{bytes_type_id, bytes_type_id}}] = callable::make<assignment_kernel<bytes_type_id, bytes_type_id>>();
+  children[{{fixed_bytes_type_id, fixed_bytes_type_id}}] =
+      callable::make<assignment_kernel<fixed_bytes_type_id, fixed_bytes_type_id>>();
 
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
@@ -66,9 +70,20 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
         break;
       }
     }
+    else if (dst_tp.get_type_id() == bytes_type_id) {
+      switch (src_tp.get_type_id()) {
+      case bytes_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
     else if (dst_tp.get_type_id() == string_type_id) {
       switch (src_tp.get_type_id()) {
       case date_type_id:
+      case string_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());

@@ -10,6 +10,7 @@
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
+#include <dynd/func/assignment.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -94,7 +95,7 @@ intptr_t ndt::tuple_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset,
       return make_broadcast_to_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                                                        kernreq, ectx);
     } else {
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+      return ::make_assignment_kernel(ckb, ckb_offset, src_tp, src_arrmeta, dst_tp, dst_arrmeta,
                                                        kernreq, ectx);
     }
   }

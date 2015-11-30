@@ -14,6 +14,8 @@
 #include <dynd/kernels/cuda_launch.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/kernels/string_assignment_kernels.hpp>
+#include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
@@ -2605,6 +2607,55 @@ namespace nd {
       {
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       ndt::property_type::make(src_tp[0], "struct"), src_arrmeta[0], kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<bytes_type_id, bytes_kind, bytes_type_id, bytes_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<bytes_type_id, bytes_kind, bytes_type_id, bytes_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_blockref_bytes_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_alignment(), dst_arrmeta,
+                                                     src_tp[0].get_data_alignment(), src_arrmeta[0], kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>
+        : base_virtual_kernel<
+              assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_fixed_bytes_to_blockref_bytes_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_alignment(),
+                                                                    dst_arrmeta, src_tp[0].get_data_size(),
+                                                                    src_tp[0].get_data_alignment(), kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<string_type_id, string_kind, string_type_id, string_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<string_type_id, string_kind, string_type_id, string_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_blockref_string_assignment_kernel(
+            ckb, ckb_offset, dst_arrmeta, dst_tp.extended<ndt::base_string_type>()->get_encoding(), src_arrmeta[0],
+            src_tp[0].extended<ndt::base_string_type>()->get_encoding(), kernreq, ectx);
       }
     };
 

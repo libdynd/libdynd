@@ -27,9 +27,7 @@ ndt::bytes_type::bytes_type(size_t alignment)
   }
 }
 
-ndt::bytes_type::~bytes_type()
-{
-}
+ndt::bytes_type::~bytes_type() {}
 
 void ndt::bytes_type::get_bytes_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                       const char *data) const
@@ -68,22 +66,17 @@ void ndt::bytes_type::print_type(std::ostream &o) const
   }
 }
 
-bool ndt::bytes_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
-{
-  return true;
-}
+bool ndt::bytes_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const { return true; }
 
-ndt::type ndt::bytes_type::get_canonical_type() const
-{
-  return type(this, true);
-}
+ndt::type ndt::bytes_type::get_canonical_type() const { return type(this, true); }
 
 void ndt::bytes_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *DYND_UNUSED(arrmeta),
                                 const char *data) const
 {
   if (data == NULL) {
     out_shape[i] = -1;
-  } else {
+  }
+  else {
     const bytes_type_data *d = reinterpret_cast<const bytes_type_data *>(data);
     out_shape[i] = d->end() - d->begin();
   }
@@ -99,51 +92,25 @@ bool ndt::bytes_type::is_lossless_assignment(const type &dst_tp, const type &src
   if (dst_tp.extended() == this) {
     if (src_tp.get_kind() == bytes_kind) {
       return true;
-    } else {
+    }
+    else {
       return false;
     }
-  } else {
+  }
+  else {
     return false;
   }
-}
-
-intptr_t ndt::bytes_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                 const char *dst_arrmeta, const type &src_tp, const char *src_arrmeta,
-                                                 kernel_request_t kernreq, const eval::eval_context *ectx) const
-{
-  if (this == dst_tp.extended()) {
-    switch (src_tp.get_type_id()) {
-    case bytes_type_id: {
-      return make_blockref_bytes_assignment_kernel(ckb, ckb_offset, get_data_alignment(), dst_arrmeta,
-                                                   src_tp.get_data_alignment(), src_arrmeta, kernreq, ectx);
-    }
-    case fixed_bytes_type_id: {
-      return make_fixed_bytes_to_blockref_bytes_assignment_kernel(ckb, ckb_offset, get_data_alignment(), dst_arrmeta,
-                                                                  src_tp.get_data_size(), src_tp.get_data_alignment(),
-                                                                  kernreq, ectx);
-    }
-    default: {
-      if (!src_tp.is_builtin()) {
-        src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                                  ectx);
-      }
-      break;
-    }
-    }
-  }
-
-  stringstream ss;
-  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-  throw runtime_error(ss.str());
 }
 
 bool ndt::bytes_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != bytes_type_id) {
+  }
+  else if (rhs.get_type_id() != bytes_type_id) {
     return false;
-  } else {
+  }
+  else {
     const bytes_type *dt = static_cast<const bytes_type *>(&rhs);
     return m_alignment == dt->m_alignment;
   }
