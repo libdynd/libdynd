@@ -200,7 +200,7 @@ using type_id_sequence = integer_sequence<type_id_t, I...>;
 
 typedef type_id_sequence<int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id> int_type_ids;
 typedef type_id_sequence<bool_type_id, uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id>
-uint_type_ids;
+    uint_type_ids;
 typedef type_id_sequence<float16_type_id, float32_type_id, float64_type_id, float128_type_id> float_type_ids;
 typedef type_id_sequence<complex_float32_type_id, complex_float64_type_id> complex_type_ids;
 
@@ -289,27 +289,19 @@ namespace detail {
   struct log2_x;
   template <>
   struct log2_x<1> {
-    enum {
-      value = 0
-    };
+    enum { value = 0 };
   };
   template <>
   struct log2_x<2> {
-    enum {
-      value = 1
-    };
+    enum { value = 1 };
   };
   template <>
   struct log2_x<4> {
-    enum {
-      value = 2
-    };
+    enum { value = 2 };
   };
   template <>
   struct log2_x<8> {
-    enum {
-      value = 3
-    };
+    enum { value = 3 };
   };
 }
 
@@ -657,6 +649,16 @@ struct type_kind_of<datetime_type_id> {
 };
 
 template <>
+struct type_kind_of<tuple_type_id> {
+  static const type_kind_t value = tuple_kind;
+};
+
+template <>
+struct type_kind_of<struct_type_id> {
+  static const type_kind_t value = struct_kind;
+};
+
+template <>
 struct type_kind_of<option_type_id> {
   static const type_kind_t value = option_kind;
 };
@@ -695,8 +697,8 @@ namespace detail {
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID>
   struct is_lossless_assignable<DstTypeID, complex_kind, SrcTypeID, real_kind> {
-    static const bool value =
-        (sizeof(typename type_of<DstTypeID>::type) / 2) > sizeof(typename type_of<SrcTypeID>::type);
+    static const bool value = (sizeof(typename type_of<DstTypeID>::type) / 2) >
+                              sizeof(typename type_of<SrcTypeID>::type);
   };
 
   template <type_id_t DstTypeID, type_id_t SrcTypeID, type_kind_t TypeKind>
@@ -715,157 +717,107 @@ struct is_lossless_assignable : detail::is_lossless_assignable<DstTypeID, type_k
 // of a particular type.
 template <typename T>
 struct is_dynd_scalar {
-  enum {
-    value = false
-  };
+  enum { value = false };
 };
 template <>
 struct is_dynd_scalar<bool1> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<char> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<signed char> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<short> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<int> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<long> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<long long> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<int128> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<unsigned char> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<unsigned short> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<unsigned int> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<unsigned long> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<unsigned long long> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<uint128> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<float16> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<float32> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<float64> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<float128> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<complex64> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<complex128> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 // Allow std::complex as scalars equivalent to dynd_complex
 template <>
 struct is_dynd_scalar<std::complex<float>> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 template <>
 struct is_dynd_scalar<std::complex<double>> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 
 // Metaprogram for determining if a type is a valid C++ pointer to a scalar
 // of a particular type.
 template <typename T>
 struct is_dynd_scalar_pointer {
-  enum {
-    value = false
-  };
+  enum { value = false };
 };
 template <typename T>
 struct is_dynd_scalar_pointer<T *> {
-  enum {
-    value = is_dynd_scalar<T>::value
-  };
+  enum { value = is_dynd_scalar<T>::value };
 };
 
 // Metaprogram for determining scalar alignment
@@ -881,15 +833,11 @@ struct scalar_align_of {
 // Metaprogram for determining if a type is the C++ "bool" or not
 template <typename T>
 struct is_type_bool {
-  enum {
-    value = false
-  };
+  enum { value = false };
 };
 template <>
 struct is_type_bool<bool> {
-  enum {
-    value = true
-  };
+  enum { value = true };
 };
 
 } // namespace dynd

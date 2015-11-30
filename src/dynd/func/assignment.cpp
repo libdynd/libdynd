@@ -12,7 +12,6 @@ using namespace dynd;
 
 DYND_API nd::callable nd::assign::make()
 {
-
   typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
                            uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
                            float32_type_id, float64_type_id, complex_float32_type_id,
@@ -20,6 +19,12 @@ DYND_API nd::callable nd::assign::make()
 
   map<std::array<type_id_t, 2>, callable> children =
       callable::make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_type_ids, numeric_type_ids>();
+  children[{{date_type_id, date_type_id}}] = callable::make<assignment_kernel<date_type_id, date_type_id>>();
+  children[{{date_type_id, string_type_id}}] = callable::make<assignment_kernel<date_type_id, string_type_id>>();
+  children[{{date_type_id, struct_type_id}}] = callable::make<assignment_kernel<date_type_id, struct_type_id>>();
+  children[{{struct_type_id, date_type_id}}] = callable::make<assignment_kernel<struct_type_id, date_type_id>>();
+  children[{{string_type_id, date_type_id}}] = callable::make<assignment_kernel<string_type_id, date_type_id>>();
+
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
       [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
@@ -32,6 +37,59 @@ DYND_API nd::callable nd::assign::make()
 }
 
 DYND_API struct nd::assign nd::assign;
+
+intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                      const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
+                                      const eval::eval_context *ectx)
+{
+  if (dst_tp.is_builtin()) {
+    if (src_tp.is_builtin()) {
+      return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                            dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                            std::map<std::string, ndt::type>());
+    }
+    else {
+      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
+                                                       kernreq, ectx);
+    }
+  }
+  else {
+    if (dst_tp.get_type_id() == date_type_id) {
+      switch (src_tp.get_type_id()) {
+      case date_type_id:
+      case string_type_id:
+      case struct_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == string_type_id) {
+      switch (src_tp.get_type_id()) {
+      case date_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == struct_type_id) {
+      switch (src_tp.get_type_id()) {
+      case date_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    return dst_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                                     ectx);
+  }
+}
 
 size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offset, size_t data_size,
                                                    size_t data_alignment, kernel_request_t kernreq)
@@ -72,27 +130,6 @@ size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offse
       nd::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
       return ckb_offset;
     }
-  }
-}
-
-intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                      const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-                                      const eval::eval_context *ectx)
-{
-  if (dst_tp.is_builtin()) {
-    if (src_tp.is_builtin()) {
-      return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
-                                            dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
-                                            std::map<std::string, ndt::type>());
-    }
-    else {
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
-    }
-  }
-  else {
-    return dst_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                                     ectx);
   }
 }
 
