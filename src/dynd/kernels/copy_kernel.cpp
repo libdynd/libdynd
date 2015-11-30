@@ -36,16 +36,19 @@ intptr_t nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNU
         return make_pod_typed_data_assignment_kernel(
             ckb, ckb_offset, dynd::ndt::detail::builtin_data_sizes[dst_tp.unchecked_get_builtin_type_id()],
             dynd::ndt::detail::builtin_data_alignments[dst_tp.unchecked_get_builtin_type_id()], kernreq);
-      } else {
-        nd::callable &child = nd::assign::overload(dst_tp, src_tp[0]);
-        return child.get()->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, src_tp, src_arrmeta,
-                                        kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
       }
-    } else {
+      else {
+        return assign::get()->instantiate(assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1,
+                                          src_tp, src_arrmeta, kernreq, ectx, 0, NULL,
+                                          std::map<std::string, ndt::type>());
+      }
+    }
+    else {
       return src_tp[0].extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
                                                           src_arrmeta[0], kernreq, ectx);
     }
-  } else {
+  }
+  else {
     return dst_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
                                                      kernreq, ectx);
   }

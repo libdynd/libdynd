@@ -4,22 +4,31 @@
 //
 
 #include <dynd/func/assignment.hpp>
+#include <dynd/func/multidispatch.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
 
-DYND_API map<array<type_id_t, 2>, nd::callable> nd::assign::make_children()
+DYND_API nd::callable nd::assign::make()
 {
+
   typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
                            uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
                            float32_type_id, float64_type_id, complex_float32_type_id,
                            complex_float64_type_id> numeric_type_ids;
 
-  map<std::array<type_id_t, 2>, callable> children2 =
-      callable::make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_type_ids, numeric_type_ids>(0);
-
-  return children2;
+  map<std::array<type_id_t, 2>, callable> children =
+      callable::make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_type_ids, numeric_type_ids>();
+  return functional::multidispatch(
+      ndt::type("(Any) -> Any"),
+      [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
+        callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
+        if (child.is_null()) {
+          throw std::runtime_error("assignment error");
+        }
+        return child;
+      });
 }
 
 DYND_API struct nd::assign nd::assign;
@@ -46,7 +55,8 @@ size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offse
       nd::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
       return ckb_offset;
     }
-  } else {
+  }
+  else {
     // Unaligned specialization tables
     switch (data_size) {
     case 2:
@@ -71,14 +81,16 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
 {
   if (dst_tp.is_builtin()) {
     if (src_tp.is_builtin()) {
-      nd::callable &child = nd::assign::overload(dst_tp, src_tp);
-      return child.get()->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta,
-                                      kernreq, ectx, 0, NULL, std::map<std::string, ndt::type>());
-    } else {
+      return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                            dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                            std::map<std::string, ndt::type>());
+    }
+    else {
       return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                                                        kernreq, ectx);
     }
-  } else {
+  }
+  else {
     return dst_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
                                                      ectx);
   }
@@ -90,12 +102,10 @@ static const expr_strided_t wrap_single_as_strided_fixedcount[7] = {
     &nd::wrap_single_as_strided_fixedcount_ck<0>::strided, &nd::wrap_single_as_strided_fixedcount_ck<1>::strided,
     &nd::wrap_single_as_strided_fixedcount_ck<2>::strided, &nd::wrap_single_as_strided_fixedcount_ck<3>::strided,
     &nd::wrap_single_as_strided_fixedcount_ck<4>::strided, &nd::wrap_single_as_strided_fixedcount_ck<5>::strided,
-    &nd::wrap_single_as_strided_fixedcount_ck<6>::strided, };
+    &nd::wrap_single_as_strided_fixedcount_ck<6>::strided,
+};
 
-static void simple_wrapper_kernel_destruct(ckernel_prefix *self)
-{
-  self->get_child(sizeof(ckernel_prefix))->destroy();
-}
+static void simple_wrapper_kernel_destruct(ckernel_prefix *self) { self->get_child(sizeof(ckernel_prefix))->destroy(); }
 
 } // anonymous namespace
 
@@ -113,7 +123,8 @@ size_t dynd::make_kernreq_to_single_kernel_adapter(void *ckb, intptr_t ckb_offse
       e->function = reinterpret_cast<void *>(wrap_single_as_strided_fixedcount[nsrc]);
       e->destructor = &simple_wrapper_kernel_destruct;
       return ckb_offset;
-    } else {
+    }
+    else {
       nd::wrap_single_as_strided_ck *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)
                                              ->alloc_ck<nd::wrap_single_as_strided_ck>(ckb_offset);
       e->base.function = reinterpret_cast<void *>(&nd::wrap_single_as_strided_ck::strided);
@@ -223,15 +234,18 @@ size_t dynd::make_cuda_pod_typed_data_assignment_kernel(void *out, intptr_t offs
     if (src_device) {
       nd::cuda_device_to_device_copy_ck::make(out, kernreq, offset_out, data_size);
       return offset_out;
-    } else {
+    }
+    else {
       nd::cuda_host_to_device_copy_ck::make(out, kernreq, offset_out, data_size);
       return offset_out;
     }
-  } else {
+  }
+  else {
     if (src_device) {
       nd::cuda_device_to_host_copy_ck::make(out, kernreq, offset_out, data_size);
       return offset_out;
-    } else {
+    }
+    else {
       return make_pod_typed_data_assignment_kernel(out, offset_out, data_size, data_alignment, kernreq);
     }
   }
