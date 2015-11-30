@@ -36,9 +36,7 @@ ndt::date_type::date_type()
 {
 }
 
-ndt::date_type::~date_type()
-{
-}
+ndt::date_type::~date_type() {}
 
 void ndt::date_type::set_ymd(const char *DYND_UNUSED(arrmeta), char *data, assign_error_mode errmode, int32_t year,
                              int32_t month, int32_t day) const
@@ -74,28 +72,29 @@ void ndt::date_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrmeta
   std::string s = ymd.to_str();
   if (s.empty()) {
     o << "NA";
-  } else {
+  }
+  else {
     o << s;
   }
 }
 
-void ndt::date_type::print_type(std::ostream &o) const
-{
-  o << "date";
-}
+void ndt::date_type::print_type(std::ostream &o) const { o << "date"; }
 
 bool ndt::date_type::is_lossless_assignment(const type &dst_tp, const type &src_tp) const
 {
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == date_type_id) {
+    }
+    else if (src_tp.get_type_id() == date_type_id) {
       // There is only one possibility for the date type (TODO: timezones!)
       return true;
-    } else {
+    }
+    else {
       return false;
     }
-  } else {
+  }
+  else {
     return false;
   }
 }
@@ -104,9 +103,11 @@ bool ndt::date_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != date_type_id) {
+  }
+  else if (rhs.get_type_id() != date_type_id) {
     return false;
-  } else {
+  }
+  else {
     // There is only one possibility for the date type (TODO: timezones!)
     return true;
   }
@@ -117,33 +118,16 @@ intptr_t ndt::date_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, 
                                                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
-    if (src_tp.get_type_id() == date_type_id) {
-      return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
-    } else if (src_tp.get_kind() == string_kind) {
+    if (src_tp.get_kind() == string_kind) {
       // Assignment from strings
       typedef nd::assignment_kernel<date_type_id, string_type_id> self_type;
       return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
                                     ectx, 0, NULL, std::map<std::string, ndt::type>());
-    } else if (src_tp.get_kind() == struct_kind) {
-      // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
-                                      src_arrmeta, kernreq, ectx);
-    } else if (!src_tp.is_builtin()) {
+    }
+    else if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                                                        kernreq, ectx);
     }
-  } else {
-    if (dst_tp.get_kind() == string_kind) {
-      // Assignment to strings
-      typedef nd::assignment_kernel<string_type_id, date_type_id> self_type;
-      return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
-                                    ectx, 0, NULL, std::map<std::string, ndt::type>());
-    } else if (dst_tp.get_kind() == struct_kind) {
-      // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, property_type::make(src_tp, "struct"),
-                                      src_arrmeta, kernreq, ectx);
-    }
-    // TODO
   }
 
   stringstream ss;
@@ -158,7 +142,8 @@ size_t ndt::date_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, co
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
       return make_builtin_type_comparison_kernel(ckb, ckb_offset, int32_type_id, int32_type_id, comptype);
-    } else if (!src1_tp.is_builtin()) {
+    }
+    else if (!src1_tp.is_builtin()) {
       return src1_tp.extended()->make_comparison_kernel(ckb, ckb_offset, src0_tp, src0_arrmeta, src1_tp, src1_arrmeta,
                                                         comptype, ectx);
     }
@@ -169,10 +154,7 @@ size_t ndt::date_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, co
 
 ///////// functions on the type
 
-static int32_t fn_type_today(ndt::type DYND_UNUSED(dt))
-{
-  return date_ymd::get_current_local_date().to_days();
-}
+static int32_t fn_type_today(ndt::type DYND_UNUSED(dt)) { return date_ymd::get_current_local_date().to_days(); }
 
 static int32_t date_from_ymd(int year, int month, int day)
 {
@@ -214,7 +196,8 @@ void ndt::date_type::get_dynamic_type_functions(const std::pair<std::string, nd:
   static pair<std::string, nd::callable> date_type_functions[] = {
       pair<std::string, nd::callable>("today", nd::functional::apply(&fn_type_today, "self")),
       pair<std::string, nd::callable>("__construct__",
-                                      nd::functional::apply(&fn_type_construct, "self", "year", "month", "day")), };
+                                      nd::functional::apply(&fn_type_construct, "self", "year", "month", "day")),
+  };
 
   *out_functions = date_type_functions;
   *out_count = sizeof(date_type_functions) / sizeof(date_type_functions[0]);
@@ -362,29 +345,28 @@ struct date_set_struct_kernel : nd::base_kernel<date_set_struct_kernel, 1> {
 } // anonymous namespace
 
 namespace {
-enum date_properties_t {
-  dateprop_year,
-  dateprop_month,
-  dateprop_day,
-  dateprop_weekday,
-  dateprop_struct
-};
+enum date_properties_t { dateprop_year, dateprop_month, dateprop_day, dateprop_weekday, dateprop_struct };
 }
 
 size_t ndt::date_type::get_elwise_property_index(const std::string &property_name) const
 {
   if (property_name == "year") {
     return dateprop_year;
-  } else if (property_name == "month") {
+  }
+  else if (property_name == "month") {
     return dateprop_month;
-  } else if (property_name == "day") {
+  }
+  else if (property_name == "day") {
     return dateprop_day;
-  } else if (property_name == "weekday") {
+  }
+  else if (property_name == "weekday") {
     return dateprop_weekday;
-  } else if (property_name == "struct") {
+  }
+  else if (property_name == "struct") {
     // A read/write property for accessing a date as a struct
     return dateprop_struct;
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "dynd date type does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());

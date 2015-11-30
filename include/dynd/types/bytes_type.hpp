@@ -29,10 +29,7 @@ namespace ndt {
     virtual ~bytes_type();
 
     /** Alignment of the bytes data being pointed to. */
-    size_t get_target_alignment() const
-    {
-      return m_alignment;
-    }
+    size_t get_target_alignment() const { return m_alignment; }
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
@@ -53,10 +50,6 @@ namespace ndt {
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-                                    const eval::eval_context *ectx) const;
-
     void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
                                      size_t *out_count) const;
 
@@ -66,10 +59,7 @@ namespace ndt {
       return *reinterpret_cast<const type *>(&bytes_tp);
     }
 
-    static type make(size_t alignment)
-    {
-      return type(new bytes_type(alignment), false);
-    }
+    static type make(size_t alignment) { return type(new bytes_type(alignment), false); }
   };
 
 } // namespace dynd::ndt
