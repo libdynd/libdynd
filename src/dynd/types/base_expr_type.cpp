@@ -88,13 +88,12 @@ size_t ndt::base_expr_type::make_value_to_operand_assignment_kernel(
   throw dynd::type_error(ss.str());
 }
 
-intptr_t ndt::base_expr_type::make_assignment_kernel(
-    void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-    const eval::eval_context *ectx) const
+intptr_t ndt::base_expr_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
+                                                     const char *dst_arrmeta, const type &src_tp,
+                                                     const char *src_arrmeta, kernel_request_t kernreq,
+                                                     const eval::eval_context *ectx) const
 {
-  return make_expression_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
-                                           src_tp, src_arrmeta, kernreq, ectx);
+  return make_expression_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
 }
 
 size_t ndt::base_expr_type::make_comparison_kernel(
