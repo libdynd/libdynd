@@ -684,7 +684,17 @@ struct type_kind_of<categorical_type_id> {
 };
 
 template <>
+struct type_kind_of<adapt_type_id> {
+  static const type_kind_t value = expr_kind;
+};
+
+template <>
 struct type_kind_of<convert_type_id> {
+  static const type_kind_t value = expr_kind;
+};
+
+template <>
+struct type_kind_of<expr_type_id> {
   static const type_kind_t value = expr_kind;
 };
 
@@ -696,6 +706,11 @@ struct type_kind_of<byteswap_type_id> {
 template <>
 struct type_kind_of<view_type_id> {
   static const type_kind_t value = expr_kind;
+};
+
+template <>
+struct type_kind_of<type_type_id> {
+  static const type_kind_t value = type_kind;
 };
 
 namespace detail {
