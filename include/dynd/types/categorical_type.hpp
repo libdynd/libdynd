@@ -35,9 +35,7 @@ namespace ndt {
   public:
     categorical_type(const nd::array &categories, bool presorted = false);
 
-    virtual ~categorical_type()
-    {
-    }
+    virtual ~categorical_type() {}
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
@@ -53,19 +51,13 @@ namespace ndt {
     /**
      * Returns the type of the category values.
      */
-    const type &get_category_type() const
-    {
-      return m_category_tp;
-    }
+    const type &get_category_type() const { return m_category_tp; }
 
     /**
      * Return the type of the underlying integer used
      * to index the category list.
      */
-    const type &get_storage_type() const
-    {
-      return m_storage_type;
-    }
+    const type &get_storage_type() const { return m_storage_type; }
 
     uint32_t get_value_from_category(const char *category_arrmeta, const char *category_data) const;
     uint32_t get_value_from_category(const nd::array &category) const;
@@ -96,10 +88,6 @@ namespace ndt {
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-                                    const eval::eval_context *ectx) const;
-
     void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
                                       size_t *out_count) const;
     void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
@@ -109,10 +97,7 @@ namespace ndt {
     friend struct assign_from_same_category_type;
     friend struct assign_from_commensurate_category_type;
 
-    static type make(const nd::array &values)
-    {
-      return type(new categorical_type(values), false);
-    }
+    static type make(const nd::array &values) { return type(new categorical_type(values), false); }
   };
 
   DYND_API type factor_categorical(const nd::array &values);

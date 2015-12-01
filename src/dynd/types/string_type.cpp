@@ -24,9 +24,7 @@ ndt::string_type::string_type()
 {
 }
 
-ndt::string_type::~string_type()
-{
-}
+ndt::string_type::~string_type() {}
 
 void ndt::string_type::get_string_range(const char **out_begin, const char **out_end, const char *DYND_UNUSED(arrmeta),
                                         const char *data) const
@@ -59,7 +57,8 @@ void ndt::string_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), ch
     // Append the codepoint, or increase the allocated memory as necessary
     if (dst_end - dst_current >= 8) {
       append_fn(cp, dst_current, dst_end);
-    } else {
+    }
+    else {
       char *dst_begin_saved = dst_begin;
       dst_d.resize(2 * dst_d.size());
       dst_begin = dst_d.begin();
@@ -91,20 +90,11 @@ void ndt::string_type::print_data(std::ostream &o, const char *DYND_UNUSED(arrme
   o << "\"";
 }
 
-void ndt::string_type::print_type(std::ostream &o) const
-{
-  o << "string";
-}
+void ndt::string_type::print_type(std::ostream &o) const { o << "string"; }
 
-bool ndt::string_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
-{
-  return true;
-}
+bool ndt::string_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const { return true; }
 
-ndt::type ndt::string_type::get_canonical_type() const
-{
-  return type(this, true);
-}
+ndt::type ndt::string_type::get_canonical_type() const { return type(this, true); }
 
 void ndt::string_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *DYND_UNUSED(arrmeta),
                                  const char *DYND_UNUSED(data)) const
@@ -128,9 +118,11 @@ bool ndt::string_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != string_type_id) {
+  }
+  else if (rhs.get_type_id() != string_type_id) {
     return false;
-  } else {
+  }
+  else {
     return true;
   }
 }
@@ -154,31 +146,15 @@ intptr_t ndt::string_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset
                                                   kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
-    switch (src_tp.get_type_id()) {
-    case string_type_id: {
-      return make_blockref_string_assignment_kernel(ckb, ckb_offset, dst_arrmeta, get_encoding(), src_arrmeta,
-                                                    src_tp.extended<base_string_type>()->get_encoding(), kernreq, ectx);
-    }
-    case fixed_string_type_id: {
-      return make_fixed_string_to_blockref_string_assignment_kernel(
-          ckb, ckb_offset, dst_arrmeta, get_encoding(), src_tp.get_data_size(),
-          src_tp.extended<base_string_type>()->get_encoding(), kernreq, ectx);
-    }
-    default: {
-      if (!src_tp.is_builtin()) {
-        return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                         kernreq, ectx);
-      } else {
-        return make_builtin_to_string_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp.get_type_id(),
-                                                        kernreq, ectx);
-      }
-    }
-    }
-  } else {
+    return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
+                                                     ectx);
+  }
+  else {
     if (dst_tp.is_builtin()) {
       return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp, src_arrmeta,
                                                       kernreq, ectx);
-    } else {
+    }
+    else {
       stringstream ss;
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;
       throw dynd::type_error(ss.str());
@@ -193,10 +169,12 @@ size_t ndt::string_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, 
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
       return make_string_comparison_kernel(ckb, ckb_offset, string_encoding_utf_8, comptype, ectx);
-    } else if (src1_dt.get_kind() == string_kind) {
+    }
+    else if (src1_dt.get_kind() == string_kind) {
       return make_general_string_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
                                                    comptype, ectx);
-    } else if (!src1_dt.is_builtin()) {
+    }
+    else if (!src1_dt.is_builtin()) {
       return src1_dt.extended()->make_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_dt, src1_arrmeta,
                                                         comptype, ectx);
     }
