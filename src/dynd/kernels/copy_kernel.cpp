@@ -44,12 +44,10 @@ intptr_t nd::copy_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNU
       }
     }
     else {
-      return src_tp[0].extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
-                                                          src_arrmeta[0], kernreq, ectx);
+      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, ectx);
     }
   }
   else {
-    return dst_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
-                                                     kernreq, ectx);
+    return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, ectx);
   }
 }

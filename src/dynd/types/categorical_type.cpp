@@ -50,9 +50,7 @@ class cmp {
   ckernel_prefix *m_less_self;
 
 public:
-  cmp(const expr_single_t less, ckernel_prefix *less_self) : m_less(less), m_less_self(less_self)
-  {
-  }
+  cmp(const expr_single_t less, ckernel_prefix *less_self) : m_less(less), m_less_self(less_self) {}
 
   bool operator()(const char *a, const char *b) const
   {
@@ -201,7 +199,8 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     m_value_to_category_index = nd::range(category_count);
     m_value_to_category_index.flag_as_immutable();
     m_category_index_to_value = m_value_to_category_index;
-  } else {
+  }
+  else {
     // Process the categories array to make sure it's valid
     const type &cdt = categories.get_type();
     if (cdt.get_type_id() != fixed_dim_type_id) {
@@ -237,7 +236,8 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
 
       if (uniques.find(category_value) == uniques.end()) {
         uniques.insert(category_value);
-      } else {
+      }
+      else {
         stringstream ss;
         ss << "categories must be unique: category value ";
         m_category_tp.print_data(ss, categories_element_arrmeta, category_value);
@@ -264,9 +264,11 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
   // Use the number of categories to set which underlying integer storage to use
   if (category_count <= 256) {
     m_storage_type = type::make<uint8_t>();
-  } else if (category_count <= 65536) {
+  }
+  else if (category_count <= 65536) {
     m_storage_type = type::make<uint16_t>();
-  } else {
+  }
+  else {
     m_storage_type = type::make<uint32_t>();
   }
   m_members.data_size = m_storage_type.get_data_size();
@@ -292,7 +294,8 @@ void ndt::categorical_type::print_data(std::ostream &o, const char *DYND_UNUSED(
   }
   if ((intptr_t)value < category_count) {
     m_category_tp.print_data(o, get_category_arrmeta(), get_category_data_from_value(value));
-  } else {
+  }
+  else {
     o << "NA";
   }
 }
@@ -318,7 +321,8 @@ void ndt::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_s
   const type &cd = get_category_type();
   if (!cd.is_builtin()) {
     cd.extended()->get_shape(ndim, i, out_shape, get_category_arrmeta(), NULL);
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "requested too many dimensions from type " << type(this, true);
     throw runtime_error(ss.str());
@@ -332,14 +336,16 @@ uint32_t ndt::categorical_type::get_value_from_category(const char *category_arr
   const char *src_arrmeta[2] = {m_categories.get()->metadata(), category_arrmeta};
   char *src_data[2] = {const_cast<char *>(m_categories.cdata()), const_cast<char *>(category_data)};
   intptr_t i = (*nd::binary_search::get().get())(dst_tp, 2, src_tp, src_arrmeta, src_data, 0, NULL,
-                                                 std::map<std::string, ndt::type>()).as<intptr_t>();
+                                                 std::map<std::string, ndt::type>())
+                   .as<intptr_t>();
   if (i < 0) {
     stringstream ss;
     ss << "Unrecognized category value ";
     m_category_tp.print_data(ss, category_arrmeta, category_data);
     ss << " assigning to dynd type " << type(this, true);
     throw std::runtime_error(ss.str());
-  } else {
+  }
+  else {
     return (uint32_t)unchecked_fixed_dim_get<intptr_t>(m_category_index_to_value, i);
   }
 }
@@ -350,7 +356,8 @@ uint32_t ndt::categorical_type::get_value_from_category(const nd::array &categor
   if (category.get_type() == m_category_tp) {
     // If the type is right, get the category value directly
     c = category;
-  } else {
+  }
+  else {
     // Otherwise convert to the correct type, then get the category value
     c = nd::empty(m_category_tp);
     c.val_assign(category);
@@ -363,7 +370,8 @@ uint32_t ndt::categorical_type::get_value_from_category(const nd::array &categor
     m_category_tp.print_data(ss, c.get()->metadata(), c.data());
     ss << " assigning to dynd type " << type(this, true);
     throw std::runtime_error(ss.str());
-  } else {
+  }
+  else {
     return (uint32_t)unchecked_fixed_dim_get<intptr_t>(m_category_index_to_value, i);
   }
 }
@@ -401,11 +409,12 @@ bool ndt::categorical_type::is_lossless_assignment(const type &dst_tp, const typ
     if (src_tp.extended() == this) {
       // Casting from identical types
       return true;
-    } else {
+    }
+    else {
       return false; // TODO
     }
-
-  } else {
+  }
+  else {
     return ::is_lossless_assignment(dst_tp, m_category_tp); // TODO
   }
 }
@@ -453,17 +462,19 @@ intptr_t ndt::categorical_type::make_assignment_kernel(void *ckb, intptr_t ckb_o
       }
       // The kernel type owns a reference to this type
       return ckb_offset;
-    } else if (src_tp.value_type() != m_category_tp && src_tp.value_type().get_type_id() != categorical_type_id) {
+    }
+    else if (src_tp.value_type() != m_category_tp && src_tp.value_type().get_type_id() != categorical_type_id) {
       // Make a convert type to the category type, and have it do the chaining
       type src_cvt_tp = convert_type::make(m_category_tp, src_tp);
-      return src_cvt_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp,
-                                                           src_arrmeta, kernreq, ectx);
-    } else {
+      return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_cvt_tp, src_arrmeta, kernreq, ectx);
+    }
+    else {
       // Let the src_tp handle it
       return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                                                        kernreq, ectx);
     }
-  } else {
+  }
+  else {
     if (dst_tp.value_type().get_type_id() != categorical_type_id) {
       switch (m_storage_type.get_type_id()) {
       case uint8_type_id: {
@@ -489,7 +500,8 @@ intptr_t ndt::categorical_type::make_assignment_kernel(void *ckb, intptr_t ckb_o
       }
       return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, get_category_type(), get_category_arrmeta(),
                                       kernel_request_single, ectx);
-    } else {
+    }
+    else {
       stringstream ss;
       ss << "Cannot assign from " << src_tp << " to " << dst_tp;
       throw runtime_error(ss.str());
@@ -576,10 +588,7 @@ static nd::array property_ndo_get_ints(const nd::array &n)
   return n.view_scalars(cd->get_storage_type());
 }
 
-static size_t categorical_array_properties_size()
-{
-  return 1;
-}
+static size_t categorical_array_properties_size() { return 1; }
 
 static const pair<std::string, gfunc::callable> *categorical_array_properties()
 {

@@ -673,6 +673,31 @@ struct type_kind_of<option_type_id> {
   static const type_kind_t value = option_kind;
 };
 
+template <>
+struct type_kind_of<char_type_id> {
+  static const type_kind_t value = char_kind;
+};
+
+template <>
+struct type_kind_of<categorical_type_id> {
+  static const type_kind_t value = custom_kind;
+};
+
+template <>
+struct type_kind_of<convert_type_id> {
+  static const type_kind_t value = expr_kind;
+};
+
+template <>
+struct type_kind_of<byteswap_type_id> {
+  static const type_kind_t value = expr_kind;
+};
+
+template <>
+struct type_kind_of<view_type_id> {
+  static const type_kind_t value = expr_kind;
+};
+
 namespace detail {
 
   template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t SrcTypeID, type_kind_t SrcTypeKind>
