@@ -374,6 +374,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
     else if (dst_tp.get_type_id() == type_type_id) {
       switch (src_tp.get_type_id()) {
       case convert_type_id:
+      case string_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -446,6 +447,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case option_type_id:
       case unary_expr_type_id:
       case int128_type_id:
+      case type_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());

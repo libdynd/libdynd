@@ -3285,6 +3285,21 @@ namespace nd {
           src_string_dt.extended<ndt::base_string_type>()->get_utf8_string(src_arrmeta, src[0], errmode);
       ndt::type(s).swap(*reinterpret_cast<ndt::type *>(dst));
     }
+
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                const nd::array *DYND_UNUSED(kwds),
+                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      string_to_type_kernel *e = make(ckb, kernreq, ckb_offset);
+      // The kernel data owns a reference to this type
+      e->src_string_dt = src_tp[0];
+      e->src_arrmeta = src_arrmeta[0];
+      e->errmode = ectx->errmode;
+      return ckb_offset;
+    }
   };
 
   struct type_to_string_kernel : base_kernel<type_to_string_kernel, 1> {
@@ -3297,6 +3312,22 @@ namespace nd {
       std::stringstream ss;
       ss << *reinterpret_cast<ndt::type *>(src[0]);
       dst_string_dt->set_from_utf8_string(dst_arrmeta, dst, ss.str(), &ectx);
+    }
+
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
+                                const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
+                                kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                const nd::array *DYND_UNUSED(kwds),
+                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    {
+      // Type to string
+      nd::type_to_string_kernel *e = nd::type_to_string_kernel::make(ckb, kernreq, ckb_offset);
+      // The kernel data owns a reference to this type
+      e->dst_string_dt = dst_tp;
+      e->dst_arrmeta = dst_arrmeta;
+      e->ectx = *ectx;
+      return ckb_offset;
     }
   };
 
