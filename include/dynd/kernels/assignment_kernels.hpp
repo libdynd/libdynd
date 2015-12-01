@@ -17,13 +17,16 @@
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
+#include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/date_type.hpp>
+#include <dynd/types/categorical_type.hpp>
 #include <dynd/types/char_type.hpp>
 #include <dynd/types/time_type.hpp>
+#include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/parser_util.hpp>
@@ -102,6 +105,54 @@ is_overflow(SrcType DYND_UNUSED(src))
 }
 
 namespace nd {
+
+  template <typename UIntType>
+  struct category_to_categorical_kernel_extra : base_kernel<category_to_categorical_kernel_extra<UIntType>, 1> {
+    typedef category_to_categorical_kernel_extra self_type;
+
+    ndt::type dst_cat_tp;
+    const char *src_arrmeta;
+
+    // Assign from an input matching the category type to a categorical type
+    void single(char *dst, char *const *src)
+    {
+      uint32_t src_val = dst_cat_tp.extended<ndt::categorical_type>()->get_value_from_category(src_arrmeta, src[0]);
+      *reinterpret_cast<UIntType *>(dst) = src_val;
+    }
+
+    static void destruct(ckernel_prefix *self)
+    {
+      self_type *e = reinterpret_cast<self_type *>(self);
+      e->dst_cat_tp.~type();
+    }
+  };
+
+  // Assign from a categorical type to some other type
+  template <typename UIntType>
+  struct categorical_to_other_kernel : base_kernel<categorical_to_other_kernel<UIntType>, 1> {
+    typedef categorical_to_other_kernel extra_type;
+
+    ndt::type src_cat_tp;
+
+    void single(char *dst, char *const *src)
+    {
+      ckernel_prefix *echild = this->get_child();
+      expr_single_t opchild = echild->get_function<expr_single_t>();
+
+      uint32_t value = *reinterpret_cast<const UIntType *>(src[0]);
+      char *src_val = const_cast<char *>(
+          reinterpret_cast<const ndt::categorical_type *>(src_cat_tp.extended())->get_category_data_from_value(value));
+      opchild(echild, dst, &src_val);
+    }
+
+    static void destruct(ckernel_prefix *self)
+    {
+      extra_type *e = reinterpret_cast<extra_type *>(self);
+      e->src_cat_tp.~type();
+      self->get_child(sizeof(extra_type))->destroy();
+    }
+  };
+
   namespace detail {
 
     template <type_id_t DstTypeID, type_kind_t DstTypeKind, type_id_t Src0TypeID, type_kind_t Src0TypeKind,
@@ -2632,6 +2683,27 @@ namespace nd {
         : base_virtual_kernel<
               assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        const ndt::fixed_bytes_type *src_fs = src_tp[0].extended<ndt::fixed_bytes_type>();
+        if (dst_tp.get_data_size() != src_fs->get_data_size()) {
+          throw std::runtime_error("cannot assign to a fixed_bytes type of a different size");
+        }
+        return make_pod_typed_data_assignment_kernel(
+            ckb, ckb_offset, dst_tp.get_data_size(),
+            std::min(dst_tp.get_data_alignment(), src_fs->get_data_alignment()), kernreq);
+      }
+    };
+
+    template <type_id_t Src0TypeID>
+    struct assignment_virtual_kernel<string_type_id, string_kind, Src0TypeID, sint_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<string_type_id, string_kind, Src0TypeID, sint_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                                   const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
@@ -2639,9 +2711,23 @@ namespace nd {
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        return make_fixed_bytes_to_blockref_bytes_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_alignment(),
-                                                                    dst_arrmeta, src_tp[0].get_data_size(),
-                                                                    src_tp[0].get_data_alignment(), kernreq, ectx);
+        return make_builtin_to_string_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0].get_type_id(),
+                                                        kernreq, ectx);
+      }
+    };
+
+    template <type_id_t DstTypeID>
+    struct assignment_virtual_kernel<DstTypeID, bool_kind, string_type_id, string_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, bool_kind, string_type_id, string_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
+                                                        src_arrmeta[0], kernreq, ectx);
       }
     };
 
@@ -2661,9 +2747,42 @@ namespace nd {
       }
     };
 
+    template <>
+    struct assignment_virtual_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind>
+        : base_virtual_kernel<
+              assignment_virtual_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_fixed_string_to_blockref_string_assignment_kernel(
+            ckb, ckb_offset, dst_arrmeta, dst_tp.extended<ndt::base_string_type>()->get_encoding(),
+            src_tp[0].get_data_size(), src_tp[0].extended<ndt::base_string_type>()->get_encoding(), kernreq, ectx);
+      }
+    };
+
     template <type_id_t DstTypeID, type_kind_t DstKind, type_id_t Src0TypeID>
     struct assignment_virtual_kernel<DstTypeID, DstKind, Src0TypeID, expr_kind>
         : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, DstKind, Src0TypeID, expr_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_expression_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+                                                 kernreq, ectx);
+      }
+    };
+
+    template <type_id_t Src0TypeID>
+    struct assignment_virtual_kernel<fixed_string_type_id, string_kind, Src0TypeID, expr_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<fixed_string_type_id, string_kind, Src0TypeID, expr_kind>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -2709,6 +2828,75 @@ namespace nd {
         return make_fixed_string_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
                                                    dst_tp.extended<ndt::char_type>()->get_encoding(),
                                                    src_fs->get_data_size(), src_fs->get_encoding(), kernreq, ectx);
+      }
+    };
+
+    template <type_id_t Src0TypeID, type_kind_t Src0TypeKind>
+    struct assignment_virtual_kernel<fixed_string_type_id, string_kind, Src0TypeID, Src0TypeKind>
+        : base_virtual_kernel<assignment_virtual_kernel<fixed_string_type_id, string_kind, Src0TypeID, Src0TypeKind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_builtin_to_string_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0].get_type_id(),
+                                                        kernreq, ectx);
+      }
+    };
+
+    template <type_id_t DstTypeID>
+    struct assignment_virtual_kernel<DstTypeID, sint_kind, fixed_string_type_id, string_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, sint_kind, fixed_string_type_id, string_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
+                                                        src_arrmeta[0], kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind>
+        : base_virtual_kernel<
+              assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        const ndt::fixed_string_type *src_fs = src_tp[0].extended<ndt::fixed_string_type>();
+        return make_fixed_string_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
+                                                   dst_tp.extended<ndt::fixed_string_type>()->get_encoding(),
+                                                   src_fs->get_data_size(), src_fs->get_encoding(), kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind>
+        : base_virtual_kernel<
+              assignment_virtual_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        const ndt::base_string_type *src_fs = src_tp[0].extended<ndt::base_string_type>();
+        return make_blockref_string_to_fixed_string_assignment_kernel(
+            ckb, ckb_offset, dst_tp.get_data_size(), dst_tp.extended<ndt::fixed_string_type>()->get_encoding(),
+            src_fs->get_encoding(), kernreq, ectx);
       }
     };
 
