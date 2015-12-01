@@ -149,17 +149,10 @@ intptr_t ndt::string_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset
     return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
                                                      ectx);
   }
-  else {
-    if (dst_tp.is_builtin()) {
-      return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp, src_arrmeta,
-                                                      kernreq, ectx);
-    }
-    else {
-      stringstream ss;
-      ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-      throw dynd::type_error(ss.str());
-    }
-  }
+
+  stringstream ss;
+  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
+  throw dynd::type_error(ss.str());
 }
 
 size_t ndt::string_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt,

@@ -181,12 +181,26 @@ DYND_API nd::callable nd::assign::make()
       callable::make<assignment_kernel<complex_float32_type_id, convert_type_id>>();
   children[{{complex_float64_type_id, convert_type_id}}] =
       callable::make<assignment_kernel<complex_float64_type_id, convert_type_id>>();
+  children[{{bool_type_id, string_type_id}}] = callable::make<assignment_kernel<bool_type_id, string_type_id>>();
+  children[{{int8_type_id, string_type_id}}] = callable::make<assignment_kernel<int8_type_id, string_type_id>>();
+  children[{{int16_type_id, string_type_id}}] = callable::make<assignment_kernel<int16_type_id, string_type_id>>();
+  children[{{int32_type_id, string_type_id}}] = callable::make<assignment_kernel<int32_type_id, string_type_id>>();
+  children[{{int64_type_id, string_type_id}}] = callable::make<assignment_kernel<int64_type_id, string_type_id>>();
+  children[{{int128_type_id, string_type_id}}] = callable::make<assignment_kernel<int128_type_id, string_type_id>>();
+  children[{{uint8_type_id, string_type_id}}] = callable::make<assignment_kernel<uint8_type_id, string_type_id>>();
+  children[{{uint16_type_id, string_type_id}}] = callable::make<assignment_kernel<uint16_type_id, string_type_id>>();
+  children[{{uint32_type_id, string_type_id}}] = callable::make<assignment_kernel<uint32_type_id, string_type_id>>();
+  children[{{uint64_type_id, string_type_id}}] = callable::make<assignment_kernel<uint64_type_id, string_type_id>>();
+  children[{{float32_type_id, string_type_id}}] = callable::make<assignment_kernel<float32_type_id, string_type_id>>();
+  children[{{float64_type_id, string_type_id}}] = callable::make<assignment_kernel<float64_type_id, string_type_id>>();
 
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
       [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
         callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
         if (child.is_null()) {
+          std::cout << dst_tp << std::endl;
+          std::cout << src_tp[0] << std::endl;
           throw std::runtime_error("assignment error");
         }
         return child;
@@ -215,6 +229,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case property_type_id:
       case adapt_type_id:
       case convert_type_id:
+      case string_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -430,6 +445,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case expr_type_id:
       case option_type_id:
       case unary_expr_type_id:
+      case int128_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
