@@ -118,13 +118,7 @@ intptr_t ndt::date_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, 
                                                 kernel_request_t kernreq, const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
-    if (src_tp.get_kind() == string_kind) {
-      // Assignment from strings
-      typedef nd::assignment_kernel<date_type_id, string_type_id> self_type;
-      return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
-                                    ectx, 0, NULL, std::map<std::string, ndt::type>());
-    }
-    else if (!src_tp.is_builtin()) {
+    if (!src_tp.is_builtin()) {
       return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
                                                        kernreq, ectx);
     }

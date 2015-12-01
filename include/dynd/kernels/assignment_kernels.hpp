@@ -2766,7 +2766,162 @@ namespace nd {
       }
     };
 
+    template <>
+    struct assignment_virtual_kernel<time_type_id, datetime_kind, struct_type_id, struct_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<time_type_id, datetime_kind, struct_type_id, struct_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_assignment_kernel(ckb, ckb_offset, ndt::property_type::make(dst_tp, "struct"), dst_arrmeta,
+                                      src_tp[0], src_arrmeta[0], kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<struct_type_id, struct_kind, time_type_id, datetime_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<struct_type_id, struct_kind, time_type_id, datetime_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        // Convert to struct using the "struct" property
+        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      ndt::property_type::make(src_tp[0], "struct"), src_arrmeta[0], kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<time_type_id, datetime_kind, time_type_id, datetime_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<time_type_id, datetime_kind, time_type_id, datetime_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
+                                                     dst_tp.get_data_alignment(), kernreq);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<struct_type_id, struct_kind, datetime_type_id, datetime_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<struct_type_id, struct_kind, datetime_type_id, datetime_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                      ndt::property_type::make(src_tp[0], "struct"), src_arrmeta[0], kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<datetime_type_id, datetime_kind, struct_type_id, struct_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<datetime_type_id, datetime_kind, struct_type_id, struct_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        // Convert to struct using the "struct" property
+        return make_assignment_kernel(ckb, ckb_offset, ndt::property_type::make(dst_tp, "struct"), dst_arrmeta,
+                                      src_tp[0], src_arrmeta[0], kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind>
+        : base_virtual_kernel<
+              assignment_virtual_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        if (src_tp[0].extended<ndt::datetime_type>()->get_timezone() == tz_abstract) {
+          // TODO: If the destination timezone is not UTC, do an
+          //       appropriate transformation
+          if (dst_tp.extended<ndt::datetime_type>()->get_timezone() == tz_utc) {
+            return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
+                                                         dst_tp.get_data_alignment(), kernreq);
+          }
+        }
+        else if (dst_tp.extended<ndt::datetime_type>()->get_timezone() != tz_abstract) {
+          // The value stored is independent of the time zone, so
+          // a straight assignment is fine.
+          return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
+                                                       dst_tp.get_data_alignment(), kernreq);
+        }
+        else if (ectx->errmode == assign_error_nocheck) {
+          // TODO: If the source timezone is not UTC, do an appropriate
+          //       transformation
+          if (src_tp[0].extended<ndt::datetime_type>()->get_timezone() == tz_utc) {
+            return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
+                                                         dst_tp.get_data_alignment(), kernreq);
+          }
+        }
+
+        std::stringstream ss;
+        ss << "Cannot assign from " << src_tp[0] << " to " << dst_tp;
+        throw dynd::type_error(ss.str());
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<type_type_id, type_kind, type_type_id, type_kind>
+        : base_kernel<assignment_virtual_kernel<type_type_id, type_kind, type_type_id, type_kind>, 1> {
+      void single(char *dst, char *const *src)
+      {
+        *reinterpret_cast<ndt::type *>(dst) = *reinterpret_cast<ndt::type *>(src[0]);
+      }
+    };
+
   } // namespace dynd::nd::detail
+
+  struct string_to_type_kernel : base_kernel<string_to_type_kernel, 1> {
+    ndt::type src_string_dt;
+    const char *src_arrmeta;
+    assign_error_mode errmode;
+
+    void single(char *dst, char *const *src)
+    {
+      const std::string &s =
+          src_string_dt.extended<ndt::base_string_type>()->get_utf8_string(src_arrmeta, src[0], errmode);
+      ndt::type(s).swap(*reinterpret_cast<ndt::type *>(dst));
+    }
+  };
+
+  struct type_to_string_kernel : base_kernel<type_to_string_kernel, 1> {
+    ndt::type dst_string_dt;
+    const char *dst_arrmeta;
+    eval::eval_context ectx;
+
+    void single(char *dst, char *const *src)
+    {
+      std::stringstream ss;
+      ss << *reinterpret_cast<ndt::type *>(src[0]);
+      dst_string_dt->set_from_utf8_string(dst_arrmeta, dst, ss.str(), &ectx);
+    }
+  };
+
 } // namespace dynd::nd
 
 namespace ndt {

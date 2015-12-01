@@ -37,9 +37,7 @@ ndt::datetime_type::datetime_type(datetime_tz_t timezone)
 {
 }
 
-ndt::datetime_type::~datetime_type()
-{
-}
+ndt::datetime_type::~datetime_type() {}
 
 void ndt::datetime_type::set_cal(const char *DYND_UNUSED(arrmeta), char *data, assign_error_mode errmode, int32_t year,
                                  int32_t month, int32_t day, int32_t hour, int32_t minute, int32_t second,
@@ -95,7 +93,8 @@ void ndt::datetime_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), 
     if (m_timezone == tz_utc && (parse::compare_range_to_literal(tz_begin, tz_end, "Z") ||
                                  parse::compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
       // It's a UTC time to a UTC time zone
-    } else {
+    }
+    else {
       stringstream ss;
       ss << "DyND time zone support is partial, cannot handle ";
       ss.write(tz_begin, tz_end - tz_begin);
@@ -134,7 +133,8 @@ void ndt::datetime_type::print_type(std::ostream &o) const
 {
   if (m_timezone == tz_abstract) {
     o << "datetime";
-  } else {
+  }
+  else {
     o << "datetime[tz='";
     switch (m_timezone) {
     case tz_utc:
@@ -153,13 +153,16 @@ bool ndt::datetime_type::is_lossless_assignment(const type &dst_tp, const type &
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == date_type_id) {
+    }
+    else if (src_tp.get_type_id() == date_type_id) {
       // There is only one possibility for the datetime type (TODO: timezones!)
       return true;
-    } else {
+    }
+    else {
       return false;
     }
-  } else {
+  }
+  else {
     return false;
   }
 }
@@ -168,71 +171,15 @@ bool ndt::datetime_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != datetime_type_id) {
+  }
+  else if (rhs.get_type_id() != datetime_type_id) {
     return false;
-  } else {
+  }
+  else {
     const datetime_type &r = static_cast<const datetime_type &>(rhs);
     // TODO: When "other" timezone data is supported, need to compare them too
     return m_timezone == r.m_timezone;
   }
-}
-
-intptr_t ndt::datetime_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                    const char *dst_arrmeta, const type &src_tp,
-                                                    const char *src_arrmeta, kernel_request_t kernreq,
-                                                    const eval::eval_context *ectx) const
-{
-  if (this == dst_tp.extended()) {
-    if (src_tp == dst_tp) {
-      return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
-    } else if (src_tp.get_type_id() == datetime_type_id) {
-      if (src_tp.extended<datetime_type>()->get_timezone() == tz_abstract) {
-        // TODO: If the destination timezone is not UTC, do an
-        //       appropriate transformation
-        if (get_timezone() == tz_utc) {
-          return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
-        }
-      } else if (get_timezone() != tz_abstract) {
-        // The value stored is independent of the time zone, so
-        // a straight assignment is fine.
-        return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
-      } else if (ectx->errmode == assign_error_nocheck) {
-        // TODO: If the source timezone is not UTC, do an appropriate
-        //       transformation
-        if (src_tp.extended<datetime_type>()->get_timezone() == tz_utc) {
-          return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
-        }
-      }
-    } else if (src_tp.get_kind() == string_kind) {
-      // Assignment from strings
-      typedef nd::assignment_kernel<datetime_type_id, string_type_id> self_type;
-      return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
-                                    ectx, 0, NULL, std::map<std::string, ndt::type>());
-    } else if (src_tp.get_kind() == struct_kind) {
-      // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
-                                      src_arrmeta, kernreq, ectx);
-    } else if (!src_tp.is_builtin()) {
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
-    }
-  } else {
-    if (dst_tp.get_kind() == string_kind) {
-      // Assignment to strings
-      typedef nd::assignment_kernel<string_type_id, datetime_type_id> self_type;
-      return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
-                                    ectx, 0, NULL, std::map<std::string, ndt::type>());
-    } else if (dst_tp.get_kind() == struct_kind) {
-      // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, property_type::make(src_tp, "struct"),
-                                      src_arrmeta, kernreq, ectx);
-    }
-    // TODO
-  }
-
-  stringstream ss;
-  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-  throw dynd::type_error(ss.str());
 }
 
 ///////// functions on the type
@@ -342,7 +289,8 @@ void ndt::datetime_type::get_dynamic_array_properties(const std::pair<std::strin
       pair<std::string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
       pair<std::string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
       pair<std::string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
-      pair<std::string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self")), };
+      pair<std::string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self")),
+  };
 
   *out_properties = date_array_properties;
   *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
@@ -370,7 +318,8 @@ void ndt::datetime_type::get_dynamic_array_functions(const std::pair<std::string
 {
   static pair<std::string, gfunc::callable> date_array_functions[] = {
       pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-      pair<std::string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")), };
+      pair<std::string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
+  };
 
   *out_functions = date_array_functions;
   *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
@@ -413,7 +362,8 @@ struct datetime_get_date_kernel : nd::base_kernel<datetime_get_date_kernel, 1> {
       days /= DYND_TICKS_PER_DAY;
 
       *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
-    } else {
+    }
+    else {
       throw runtime_error("datetime date property only implemented for "
                           "UTC and abstract timezones");
     }
@@ -434,7 +384,8 @@ struct datetime_get_time_kernel : nd::base_kernel<datetime_get_time_kernel, 1> {
         ticks += DYND_TICKS_PER_DAY;
       }
       *reinterpret_cast<int64_t *>(dst) = ticks;
-    } else {
+    }
+    else {
       throw runtime_error("datetime time property only implemented for "
                           "UTC and abstract timezones");
     }
@@ -452,7 +403,8 @@ struct datetime_get_year_kernel : nd::base_kernel<datetime_get_year_kernel, 1> {
       date_ymd ymd;
       ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
       *reinterpret_cast<int32_t *>(dst) = ymd.year;
-    } else {
+    }
+    else {
       throw runtime_error("datetime property access only implemented for "
                           "UTC and abstract timezones");
     }
@@ -470,7 +422,8 @@ struct datetime_get_month_kernel : nd::base_kernel<datetime_get_month_kernel, 1>
       date_ymd ymd;
       ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
       *reinterpret_cast<int32_t *>(dst) = ymd.month;
-    } else {
+    }
+    else {
       throw runtime_error("datetime property access only implemented for "
                           "UTC and abstract timezones");
     }
@@ -488,7 +441,8 @@ struct datetime_get_day_kernel : nd::base_kernel<datetime_get_day_kernel, 1> {
       date_ymd ymd;
       ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
       *reinterpret_cast<int32_t *>(dst) = ymd.day;
-    } else {
+    }
+    else {
       throw runtime_error("datetime property access only implemented for "
                           "UTC and abstract timezones");
     }
@@ -509,7 +463,8 @@ struct datetime_get_hour_kernel : nd::base_kernel<datetime_get_hour_kernel, 1> {
       }
       hour /= DYND_TICKS_PER_HOUR;
       *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(hour);
-    } else {
+    }
+    else {
       throw runtime_error("datetime property access only implemented for "
                           "UTC and abstract timezones");
     }
@@ -530,7 +485,8 @@ struct datetime_get_minute_kernel : nd::base_kernel<datetime_get_minute_kernel, 
       }
       minute /= DYND_TICKS_PER_MINUTE;
       *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(minute);
-    } else {
+    }
+    else {
       throw runtime_error("datetime property access only implemented for UTC and "
                           "abstract timezones");
     }
@@ -551,7 +507,8 @@ struct datetime_get_second_kernel : nd::base_kernel<datetime_get_second_kernel, 
       }
       second /= DYND_TICKS_PER_SECOND;
       *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(second);
-    } else {
+    }
+    else {
       throw runtime_error("datetime property access only implemented for "
                           "UTC and abstract timezones");
     }
@@ -572,7 +529,8 @@ struct datetime_get_microsecond_kernel : nd::base_kernel<datetime_get_microsecon
       }
       microsecond /= DYND_TICKS_PER_MICROSECOND;
       *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(microsecond);
-    } else {
+    }
+    else {
       throw runtime_error("datetime property access only implemented for "
                           "UTC and abstract timezones");
     }
@@ -592,7 +550,8 @@ struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
         tick += 10000000LL;
       }
       *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(tick);
-    } else {
+    }
+    else {
       throw runtime_error("datetime property access only implemented for "
                           "UTC and abstract timezones");
     }
@@ -622,27 +581,38 @@ size_t ndt::datetime_type::get_elwise_property_index(const std::string &property
   if (property_name == "struct") {
     // A read/write property for accessing a datetime as a struct
     return datetimeprop_struct;
-  } else if (property_name == "date") {
+  }
+  else if (property_name == "date") {
     return datetimeprop_date;
-  } else if (property_name == "time") {
+  }
+  else if (property_name == "time") {
     return datetimeprop_time;
-  } else if (property_name == "year") {
+  }
+  else if (property_name == "year") {
     return datetimeprop_year;
-  } else if (property_name == "month") {
+  }
+  else if (property_name == "month") {
     return datetimeprop_month;
-  } else if (property_name == "day") {
+  }
+  else if (property_name == "day") {
     return datetimeprop_day;
-  } else if (property_name == "hour") {
+  }
+  else if (property_name == "hour") {
     return datetimeprop_hour;
-  } else if (property_name == "minute") {
+  }
+  else if (property_name == "minute") {
     return datetimeprop_minute;
-  } else if (property_name == "second") {
+  }
+  else if (property_name == "second") {
     return datetimeprop_second;
-  } else if (property_name == "microsecond") {
+  }
+  else if (property_name == "microsecond") {
     return datetimeprop_microsecond;
-  } else if (property_name == "tick") {
+  }
+  else if (property_name == "tick") {
     return datetimeprop_tick;
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "dynd type " << type(this, true) << " does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());

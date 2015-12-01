@@ -21,9 +21,7 @@ ndt::time_type::time_type(datetime_tz_t timezone)
 {
 }
 
-ndt::time_type::~time_type()
-{
-}
+ndt::time_type::~time_type() {}
 
 void ndt::time_type::set_time(const char *DYND_UNUSED(arrmeta), char *data, assign_error_mode errmode, int32_t hour,
                               int32_t minute, int32_t second, int32_t tick) const
@@ -48,7 +46,8 @@ void ndt::time_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), char
     if (m_timezone == tz_utc && (parse::compare_range_to_literal(tz_begin, tz_end, "Z") ||
                                  parse::compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
       // It's a UTC time to a UTC time zone
-    } else {
+    }
+    else {
       stringstream ss;
       ss << "DyND time zone support is partial, cannot handle ";
       ss.write(tz_begin, tz_end - tz_begin);
@@ -79,7 +78,8 @@ void ndt::time_type::print_type(std::ostream &o) const
 {
   if (m_timezone == tz_abstract) {
     o << "time";
-  } else {
+  }
+  else {
     o << "time[tz='";
     switch (m_timezone) {
     case tz_utc:
@@ -98,13 +98,16 @@ bool ndt::time_type::is_lossless_assignment(const type &dst_tp, const type &src_
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == time_type_id) {
+    }
+    else if (src_tp.get_type_id() == time_type_id) {
       // There is only one possibility for the time type (TODO: timezones!)
       return true;
-    } else {
+    }
+    else {
       return false;
     }
-  } else {
+  }
+  else {
     return false;
   }
 }
@@ -113,52 +116,15 @@ bool ndt::time_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != time_type_id) {
+  }
+  else if (rhs.get_type_id() != time_type_id) {
     return false;
-  } else {
+  }
+  else {
     const time_type &r = static_cast<const time_type &>(rhs);
     // TODO: When "other" timezone data is supported, need to compare them too
     return m_timezone == r.m_timezone;
   }
-}
-
-intptr_t ndt::time_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                const char *dst_arrmeta, const type &src_tp, const char *src_arrmeta,
-                                                kernel_request_t kernreq, const eval::eval_context *ectx) const
-{
-  if (this == dst_tp.extended()) {
-    if (src_tp.get_type_id() == time_type_id) {
-      return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
-    } else if (src_tp.get_kind() == string_kind) {
-      // Assignment from strings
-      typedef nd::assignment_kernel<time_type_id, string_type_id> self_type;
-      return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
-                                    ectx, 0, NULL, std::map<std::string, ndt::type>());
-    } else if (src_tp.get_kind() == struct_kind) {
-      // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(ckb, ckb_offset, property_type::make(dst_tp, "struct"), dst_arrmeta, src_tp,
-                                      src_arrmeta, kernreq, ectx);
-    } else if (!src_tp.is_builtin()) {
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
-    }
-  } else {
-    if (dst_tp.get_kind() == string_kind) {
-      // Assignment to strings
-      typedef nd::assignment_kernel<string_type_id, time_type_id> self_type;
-      return self_type::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq,
-                                    ectx, 0, NULL, std::map<std::string, ndt::type>());
-    } else if (dst_tp.get_kind() == struct_kind) {
-      // Convert to struct using the "struct" property
-      return ::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, property_type::make(src_tp, "struct"),
-                                      src_arrmeta, kernreq, ectx);
-    }
-    // TODO
-  }
-
-  stringstream ss;
-  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-  throw dynd::type_error(ss.str());
 }
 
 size_t ndt::time_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_tp,
@@ -168,7 +134,8 @@ size_t ndt::time_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, co
   if (this == src0_tp.extended()) {
     if (*this == *src1_tp.extended()) {
       return make_builtin_type_comparison_kernel(ckb, ckb_offset, int64_type_id, int64_type_id, comptype);
-    } else if (!src1_tp.is_builtin()) {
+    }
+    else if (!src1_tp.is_builtin()) {
       return src1_tp.extended()->make_comparison_kernel(ckb, ckb_offset, src0_tp, src0_arrmeta, src1_tp, src1_arrmeta,
                                                         comptype, ectx);
     }
@@ -229,7 +196,8 @@ void ndt::time_type::get_dynamic_array_functions(const std::pair<std::string, gf
                                                  size_t *out_count) const
 {
   static pair<std::string, gfunc::callable> time_array_functions[] = {
-      pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")), };
+      pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
+  };
 
   *out_functions = time_array_functions;
   *out_count = sizeof(time_array_functions) / sizeof(time_array_functions[0]);
@@ -312,18 +280,24 @@ size_t ndt::time_type::get_elwise_property_index(const std::string &property_nam
 {
   if (property_name == "hour") {
     return timeprop_hour;
-  } else if (property_name == "minute") {
+  }
+  else if (property_name == "minute") {
     return timeprop_minute;
-  } else if (property_name == "second") {
+  }
+  else if (property_name == "second") {
     return timeprop_second;
-  } else if (property_name == "microsecond") {
+  }
+  else if (property_name == "microsecond") {
     return timeprop_microsecond;
-  } else if (property_name == "tick") {
+  }
+  else if (property_name == "tick") {
     return timeprop_tick;
-  } else if (property_name == "struct") {
+  }
+  else if (property_name == "struct") {
     // A read/write property for accessing a time as a struct
     return timeprop_struct;
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "dynd time type does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());
