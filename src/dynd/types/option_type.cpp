@@ -33,14 +33,9 @@ ndt::option_type::option_type(const type &value_tp)
   }
 }
 
-ndt::option_type::~option_type()
-{
-}
+ndt::option_type::~option_type() {}
 
-void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const
-{
-  m_value_tp.get_vars(vars);
-}
+void ndt::option_type::get_vars(std::unordered_set<std::string> &vars) const { m_value_tp.get_vars(vars); }
 
 bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eval::eval_context *ectx) const
 {
@@ -72,7 +67,8 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
     default:
       return false;
     }
-  } else {
+  }
+  else {
     ckernel_builder<kernel_request_host> ckb;
     nd::callable &af = get_is_avail();
     type src_tp[1] = {type(this, true)};
@@ -125,11 +121,12 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::ev
     default:
       break;
     }
-  } else {
+  }
+  else {
     ckernel_builder<kernel_request_host> ckb;
     nd::callable &af = get_assign_na();
-    af.get()->instantiate(NULL, NULL, &ckb, 0, type(this, true), arrmeta, 0, NULL, NULL, kernel_request_single, ectx,
-                          0, NULL, std::map<std::string, type>());
+    af.get()->instantiate(NULL, NULL, &ckb, 0, type(this, true), arrmeta, 0, NULL, NULL, kernel_request_single, ectx, 0,
+                          NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<expr_single_t>()(ckp, data, NULL);
   }
@@ -139,15 +136,13 @@ void ndt::option_type::print_data(std::ostream &o, const char *arrmeta, const ch
 {
   if (is_avail(arrmeta, data, &eval::default_eval_context)) {
     m_value_tp.print_data(o, arrmeta, data);
-  } else {
+  }
+  else {
     o << "NA";
   }
 }
 
-void ndt::option_type::print_type(std::ostream &o) const
-{
-  o << "?" << m_value_tp;
-}
+void ndt::option_type::print_type(std::ostream &o) const { o << "?" << m_value_tp; }
 
 bool ndt::option_type::is_expression() const
 {
@@ -173,15 +168,13 @@ void ndt::option_type::transform_child_types(type_transform_fn_t transform_fn, i
   if (was_transformed) {
     out_transformed_tp = make(tmp_tp);
     out_was_transformed = true;
-  } else {
+  }
+  else {
     out_transformed_tp = type(this, true);
   }
 }
 
-ndt::type ndt::option_type::get_canonical_type() const
-{
-  return make(m_value_tp.get_canonical_type());
-}
+ndt::type ndt::option_type::get_canonical_type() const { return make(m_value_tp.get_canonical_type()); }
 
 void ndt::option_type::set_from_utf8_string(const char *arrmeta, char *data, const char *utf8_begin,
                                             const char *utf8_end, const eval::eval_context *ectx) const
@@ -189,15 +182,18 @@ void ndt::option_type::set_from_utf8_string(const char *arrmeta, char *data, con
   if (m_value_tp.get_kind() != string_kind && m_value_tp.get_kind() != dynamic_kind &&
       parse::matches_option_type_na_token(utf8_begin, utf8_end)) {
     assign_na(arrmeta, data, ectx);
-  } else {
+  }
+  else {
     if (m_value_tp.is_builtin()) {
       if (m_value_tp.unchecked_get_builtin_type_id() == bool_type_id) {
         parse::string_to_bool(data, utf8_begin, utf8_end, false, ectx->errmode);
-      } else {
+      }
+      else {
         parse::string_to_number(data, m_value_tp.unchecked_get_builtin_type_id(), utf8_begin, utf8_end, false,
                                 ectx->errmode);
       }
-    } else {
+    }
+    else {
       m_value_tp.extended()->set_from_utf8_string(arrmeta, data, utf8_begin, utf8_end, ectx);
     }
   }
@@ -207,7 +203,8 @@ ndt::type ndt::option_type::get_type_at_dimension(char **inout_arrmeta, intptr_t
 {
   if (i == 0) {
     return type(this, true);
-  } else {
+  }
+  else {
     return m_value_tp.get_type_at_dimension(inout_arrmeta, i, total_ndim);
   }
 }
@@ -216,7 +213,8 @@ bool ndt::option_type::is_lossless_assignment(const type &dst_tp, const type &sr
 {
   if (dst_tp.extended() == this) {
     return ::is_lossless_assignment(m_value_tp, src_tp);
-  } else {
+  }
+  else {
     return ::is_lossless_assignment(dst_tp, m_value_tp);
   }
 }
@@ -225,9 +223,11 @@ bool ndt::option_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != option_type_id) {
+  }
+  else if (rhs.get_type_id() != option_type_id) {
     return false;
-  } else {
+  }
+  else {
     const option_type *ot = static_cast<const option_type *>(&rhs);
     return m_value_tp == ot->m_value_tp;
   }
@@ -285,20 +285,6 @@ void ndt::option_type::data_destruct(const char *arrmeta, char *data) const
 void ndt::option_type::data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const
 {
   m_value_tp.extended()->data_destruct_strided(arrmeta, data, stride, count);
-}
-
-intptr_t ndt::option_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                  const char *dst_arrmeta, const type &src_tp, const char *src_arrmeta,
-                                                  kernel_request_t kernreq, const eval::eval_context *ectx) const
-{
-  // Let expression types resolve themselves first
-  if (this == dst_tp.extended() && src_tp.get_kind() == expr_kind) {
-    return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                                     ectx);
-  }
-
-  return kernels::make_option_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                                ectx);
 }
 
 bool ndt::option_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
@@ -412,7 +398,8 @@ ndt::type ndt::option_type::make(const type &value_tp)
 
   if (value_tp.is_builtin()) {
     return so.static_builtins_instance[value_tp.get_type_id()];
-  } else {
+  }
+  else {
     return type(new option_type(value_tp), false);
   }
 }

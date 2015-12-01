@@ -18,6 +18,7 @@
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/kernels/string_numeric_assignment_kernels.hpp>
+#include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
@@ -2998,6 +2999,20 @@ namespace nd {
       {
         return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
                                                      dst_tp.get_data_alignment(), kernreq);
+      }
+    };
+
+    struct assignment_option_kernel
+        : base_virtual_kernel<assignment_option_kernel> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        return kernels::make_option_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
+                                                      kernreq, ectx);
       }
     };
 
