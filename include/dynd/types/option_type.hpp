@@ -35,17 +35,11 @@ namespace ndt {
 
     virtual ~option_type();
 
-    size_t get_default_data_size() const
-    {
-      return m_value_tp.get_default_data_size();
-    }
+    size_t get_default_data_size() const { return m_value_tp.get_default_data_size(); }
 
     void get_vars(std::unordered_set<std::string> &vars) const;
 
-    const type &get_value_type() const
-    {
-      return m_value_tp.value_type();
-    }
+    const type &get_value_type() const { return m_value_tp.value_type(); }
 
     /** Assigns NA to one value */
     void assign_na(const char *arrmeta, char *data, const eval::eval_context *ectx) const;
@@ -53,15 +47,9 @@ namespace ndt {
     /** Returns true if the value is available */
     bool is_avail(const char *arrmeta, const char *data, const eval::eval_context *ectx) const;
 
-    nd::callable &get_is_avail() const
-    {
-      return nd::is_avail::get_child(m_value_tp);
-    }
+    nd::callable &get_is_avail() const { return nd::is_avail::get_child(m_value_tp); }
 
-    nd::callable &get_assign_na() const
-    {
-      return nd::assign_na_decl::get_child(m_value_tp);
-    }
+    nd::callable &get_assign_na() const { return nd::assign_na_decl::get_child(m_value_tp); }
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
@@ -92,10 +80,6 @@ namespace ndt {
 
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
-
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-                                    const eval::eval_context *ectx) const;
 
     bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;

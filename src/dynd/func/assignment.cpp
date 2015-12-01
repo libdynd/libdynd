@@ -103,6 +103,18 @@ DYND_API nd::callable nd::assign::make()
   children[{{string_type_id, unary_expr_type_id}}] =
       callable::make<assignment_kernel<string_type_id, unary_expr_type_id>>();
   children[{{bool_type_id, string_type_id}}] = callable::make<assignment_kernel<bool_type_id, string_type_id>>();
+  children[{{option_type_id, convert_type_id}}] = callable::make<assignment_kernel<option_type_id, convert_type_id>>();
+  children[{{option_type_id, option_type_id}}] =
+      callable::make<detail::assignment_option_kernel>(ndt::type("(?Any) -> ?Any"));
+  for (type_id_t tp_id : {int32_type_id, string_type_id, float64_type_id, bool_type_id, int8_type_id}) {
+    children[{{tp_id, option_type_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(?Any) -> ?Any"));
+    children[{{option_type_id, tp_id}}] = callable::make<detail::assignment_option_kernel>(ndt::type("(?Any) -> ?Any"));
+  }
+  children[{{string_type_id, type_type_id}}] = callable::make<type_to_string_kernel>(ndt::type("(type) -> string"));
+  children[{{type_type_id, string_type_id}}] = callable::make<string_to_type_kernel>(ndt::type("(string) -> type"));
+  children[{{date_type_id, unary_expr_type_id}}] =
+      callable::make<assignment_kernel<date_type_id, unary_expr_type_id>>();
+  children[{{date_type_id, adapt_type_id}}] = callable::make<assignment_kernel<date_type_id, adapt_type_id>>();
 
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
@@ -142,6 +154,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       switch (src_tp.get_type_id()) {
       case bool_type_id:
       case fixed_string_type_id:
+      case option_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -153,7 +166,21 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
     }
   }
   else {
-    if (dst_tp.get_type_id() == date_type_id) {
+    if (dst_tp.get_type_id() == option_type_id) {
+      switch (src_tp.get_type_id()) {
+      case convert_type_id:
+      case option_type_id:
+      case int32_type_id:
+      case string_type_id:
+      case float64_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == date_type_id) {
       switch (src_tp.get_type_id()) {
       case date_type_id:
       case fixed_string_type_id:
@@ -161,6 +188,8 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case struct_type_id:
       case convert_type_id:
       case expr_type_id:
+      case unary_expr_type_id:
+      case adapt_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -268,6 +297,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case int32_type_id:
       case convert_type_id:
       case expr_type_id:
+      case option_type_id:
       case unary_expr_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
