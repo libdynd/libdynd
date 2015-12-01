@@ -45,6 +45,13 @@ DYND_API nd::callable nd::assign::make()
   children[{{int64_type_id, byteswap_type_id}}] = callable::make<assignment_kernel<int64_type_id, byteswap_type_id>>();
   children[{{float32_type_id, byteswap_type_id}}] =
       callable::make<assignment_kernel<float32_type_id, byteswap_type_id>>();
+  children[{{struct_type_id, property_type_id}}] =
+      callable::make<assignment_kernel<struct_type_id, property_type_id>>();
+  children[{{int32_type_id, property_type_id}}] = callable::make<assignment_kernel<int32_type_id, property_type_id>>();
+  children[{{int8_type_id, property_type_id}}] = callable::make<assignment_kernel<int8_type_id, property_type_id>>();
+  children[{{int16_type_id, property_type_id}}] = callable::make<assignment_kernel<int16_type_id, property_type_id>>();
+  children[{{float32_type_id, property_type_id}}] =
+      callable::make<assignment_kernel<float32_type_id, property_type_id>>();
   children[{{float64_type_id, byteswap_type_id}}] =
       callable::make<assignment_kernel<float64_type_id, byteswap_type_id>>();
   children[{{complex_float32_type_id, byteswap_type_id}}] =
@@ -100,6 +107,8 @@ DYND_API nd::callable nd::assign::make()
       callable::make<assignment_kernel<string_type_id, fixed_string_type_id>>();
   children[{{string_type_id, convert_type_id}}] = callable::make<assignment_kernel<string_type_id, convert_type_id>>();
   children[{{string_type_id, expr_type_id}}] = callable::make<assignment_kernel<string_type_id, expr_type_id>>();
+  children[{{property_type_id, struct_type_id}}] =
+      callable::make<assignment_kernel<property_type_id, struct_type_id>>();
   children[{{string_type_id, unary_expr_type_id}}] =
       callable::make<assignment_kernel<string_type_id, unary_expr_type_id>>();
   children[{{bool_type_id, string_type_id}}] = callable::make<assignment_kernel<bool_type_id, string_type_id>>();
@@ -115,12 +124,83 @@ DYND_API nd::callable nd::assign::make()
   children[{{date_type_id, unary_expr_type_id}}] =
       callable::make<assignment_kernel<date_type_id, unary_expr_type_id>>();
   children[{{date_type_id, adapt_type_id}}] = callable::make<assignment_kernel<date_type_id, adapt_type_id>>();
+  children[{{pointer_type_id, pointer_type_id}}] =
+      callable::make<assignment_kernel<pointer_type_id, pointer_type_id>>();
+  children[{{adapt_type_id, string_type_id}}] = callable::make<assignment_kernel<adapt_type_id, string_type_id>>();
+  children[{{adapt_type_id, date_type_id}}] = callable::make<assignment_kernel<adapt_type_id, date_type_id>>();
+  children[{{int32_type_id, adapt_type_id}}] = callable::make<assignment_kernel<int32_type_id, adapt_type_id>>();
+  children[{{bool_type_id, convert_type_id}}] = callable::make<assignment_kernel<bool_type_id, convert_type_id>>();
+  children[{{type_type_id, convert_type_id}}] = callable::make<assignment_kernel<type_type_id, convert_type_id>>();
+  children[{{convert_type_id, convert_type_id}}] =
+      callable::make<assignment_kernel<convert_type_id, convert_type_id>>();
+  children[{{float64_type_id, convert_type_id}}] =
+      callable::make<assignment_kernel<float64_type_id, convert_type_id>>();
+  children[{{int32_type_id, convert_type_id}}] = callable::make<assignment_kernel<int32_type_id, convert_type_id>>();
+  children[{{int8_type_id, convert_type_id}}] = callable::make<assignment_kernel<int8_type_id, convert_type_id>>();
+  children[{{float32_type_id, convert_type_id}}] =
+      callable::make<assignment_kernel<float32_type_id, convert_type_id>>();
+  children[{{int64_type_id, convert_type_id}}] = callable::make<assignment_kernel<int64_type_id, convert_type_id>>();
+  children[{{int16_type_id, convert_type_id}}] = callable::make<assignment_kernel<int16_type_id, convert_type_id>>();
+  children[{{convert_type_id, float64_type_id}}] =
+      callable::make<assignment_kernel<convert_type_id, float64_type_id>>();
+  children[{{convert_type_id, int8_type_id}}] = callable::make<assignment_kernel<convert_type_id, int8_type_id>>();
+  children[{{convert_type_id, int16_type_id}}] = callable::make<assignment_kernel<convert_type_id, int16_type_id>>();
+  children[{{convert_type_id, int32_type_id}}] = callable::make<assignment_kernel<convert_type_id, int32_type_id>>();
+  children[{{convert_type_id, int64_type_id}}] = callable::make<assignment_kernel<convert_type_id, int64_type_id>>();
+  children[{{convert_type_id, uint8_type_id}}] = callable::make<assignment_kernel<convert_type_id, uint8_type_id>>();
+  children[{{convert_type_id, uint16_type_id}}] = callable::make<assignment_kernel<convert_type_id, uint16_type_id>>();
+  children[{{convert_type_id, uint32_type_id}}] = callable::make<assignment_kernel<convert_type_id, uint32_type_id>>();
+  children[{{convert_type_id, uint64_type_id}}] = callable::make<assignment_kernel<convert_type_id, uint64_type_id>>();
+  children[{{view_type_id, int8_type_id}}] = callable::make<assignment_kernel<view_type_id, int8_type_id>>();
+  children[{{view_type_id, int16_type_id}}] = callable::make<assignment_kernel<view_type_id, int16_type_id>>();
+  children[{{view_type_id, int32_type_id}}] = callable::make<assignment_kernel<view_type_id, int32_type_id>>();
+  children[{{view_type_id, int64_type_id}}] = callable::make<assignment_kernel<view_type_id, int64_type_id>>();
+  children[{{view_type_id, uint8_type_id}}] = callable::make<assignment_kernel<view_type_id, uint8_type_id>>();
+  children[{{view_type_id, uint16_type_id}}] = callable::make<assignment_kernel<view_type_id, uint16_type_id>>();
+  children[{{view_type_id, uint32_type_id}}] = callable::make<assignment_kernel<view_type_id, uint32_type_id>>();
+  children[{{view_type_id, uint64_type_id}}] = callable::make<assignment_kernel<view_type_id, uint64_type_id>>();
+  children[{{uint8_type_id, view_type_id}}] = callable::make<assignment_kernel<uint8_type_id, view_type_id>>();
+  children[{{uint16_type_id, view_type_id}}] = callable::make<assignment_kernel<uint16_type_id, view_type_id>>();
+  children[{{uint32_type_id, view_type_id}}] = callable::make<assignment_kernel<uint32_type_id, view_type_id>>();
+  children[{{uint64_type_id, view_type_id}}] = callable::make<assignment_kernel<uint64_type_id, view_type_id>>();
+  children[{{uint8_type_id, convert_type_id}}] = callable::make<assignment_kernel<uint8_type_id, convert_type_id>>();
+  children[{{uint16_type_id, convert_type_id}}] = callable::make<assignment_kernel<uint16_type_id, convert_type_id>>();
+  children[{{uint32_type_id, convert_type_id}}] = callable::make<assignment_kernel<uint32_type_id, convert_type_id>>();
+  children[{{uint64_type_id, convert_type_id}}] = callable::make<assignment_kernel<uint64_type_id, convert_type_id>>();
+  children[{{float64_type_id, property_type_id}}] =
+      callable::make<assignment_kernel<float64_type_id, property_type_id>>();
+  children[{{int64_type_id, adapt_type_id}}] = callable::make<assignment_kernel<int64_type_id, adapt_type_id>>();
+  children[{{fixed_dim_type_id, convert_type_id}}] =
+      callable::make<assignment_kernel<fixed_dim_type_id, convert_type_id>>();
+  children[{{struct_type_id, convert_type_id}}] = callable::make<assignment_kernel<struct_type_id, convert_type_id>>();
+  children[{{view_type_id, int32_type_id}}] = callable::make<assignment_kernel<view_type_id, int32_type_id>>();
+  children[{{view_type_id, int64_type_id}}] = callable::make<assignment_kernel<view_type_id, int64_type_id>>();
+  children[{{view_type_id, view_type_id}}] = callable::make<assignment_kernel<view_type_id, view_type_id>>();
+  children[{{adapt_type_id, datetime_type_id}}] = callable::make<assignment_kernel<adapt_type_id, datetime_type_id>>();
+  children[{{complex_float32_type_id, convert_type_id}}] =
+      callable::make<assignment_kernel<complex_float32_type_id, convert_type_id>>();
+  children[{{complex_float64_type_id, convert_type_id}}] =
+      callable::make<assignment_kernel<complex_float64_type_id, convert_type_id>>();
+  children[{{bool_type_id, string_type_id}}] = callable::make<assignment_kernel<bool_type_id, string_type_id>>();
+  children[{{int8_type_id, string_type_id}}] = callable::make<assignment_kernel<int8_type_id, string_type_id>>();
+  children[{{int16_type_id, string_type_id}}] = callable::make<assignment_kernel<int16_type_id, string_type_id>>();
+  children[{{int32_type_id, string_type_id}}] = callable::make<assignment_kernel<int32_type_id, string_type_id>>();
+  children[{{int64_type_id, string_type_id}}] = callable::make<assignment_kernel<int64_type_id, string_type_id>>();
+  children[{{int128_type_id, string_type_id}}] = callable::make<assignment_kernel<int128_type_id, string_type_id>>();
+  children[{{uint8_type_id, string_type_id}}] = callable::make<assignment_kernel<uint8_type_id, string_type_id>>();
+  children[{{uint16_type_id, string_type_id}}] = callable::make<assignment_kernel<uint16_type_id, string_type_id>>();
+  children[{{uint32_type_id, string_type_id}}] = callable::make<assignment_kernel<uint32_type_id, string_type_id>>();
+  children[{{uint64_type_id, string_type_id}}] = callable::make<assignment_kernel<uint64_type_id, string_type_id>>();
+  children[{{float32_type_id, string_type_id}}] = callable::make<assignment_kernel<float32_type_id, string_type_id>>();
+  children[{{float64_type_id, string_type_id}}] = callable::make<assignment_kernel<float64_type_id, string_type_id>>();
 
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
       [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
         callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
         if (child.is_null()) {
+          std::cout << dst_tp << std::endl;
+          std::cout << src_tp[0] << std::endl;
           throw std::runtime_error("assignment error");
         }
         return child;
@@ -133,17 +213,6 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
                                       const ndt::type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
                                       const eval::eval_context *ectx)
 {
-  /*
-    if (dst_tp.get_kind() == expr_kind || src_tp.get_kind() == expr_kind) {
-      std::cout << dst_tp << std::endl;
-      std::cout << src_tp << std::endl;
-      return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
-    dst_arrmeta,
-                                            1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
-                                            std::map<std::string, ndt::type>());
-    }
-  */
-
   if (dst_tp.is_builtin()) {
     if (src_tp.is_builtin()) {
       return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
@@ -155,6 +224,12 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case bool_type_id:
       case fixed_string_type_id:
       case option_type_id:
+      case view_type_id:
+      case byteswap_type_id:
+      case property_type_id:
+      case adapt_type_id:
+      case convert_type_id:
+      case string_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -166,7 +241,80 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
     }
   }
   else {
-    if (dst_tp.get_type_id() == option_type_id) {
+    if (dst_tp.get_type_id() == pointer_type_id) {
+      switch (src_tp.get_type_id()) {
+      case pointer_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    if (dst_tp.get_type_id() == fixed_dim_type_id) {
+      switch (src_tp.get_type_id()) {
+      case convert_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == view_type_id) {
+      switch (src_tp.get_type_id()) {
+      case int32_type_id:
+      case int64_type_id:
+      case view_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == adapt_type_id) {
+      switch (src_tp.get_type_id()) {
+      case string_type_id:
+      case date_type_id:
+      case datetime_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == convert_type_id) {
+      switch (src_tp.get_type_id()) {
+      case float64_type_id:
+      case int8_type_id:
+      case int16_type_id:
+      case int32_type_id:
+      case int64_type_id:
+      case uint8_type_id:
+      case uint16_type_id:
+      case uint32_type_id:
+      case uint64_type_id:
+      case convert_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == property_type_id) {
+      switch (src_tp.get_type_id()) {
+      case struct_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == option_type_id) {
       switch (src_tp.get_type_id()) {
       case convert_type_id:
       case option_type_id:
@@ -223,18 +371,16 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
         break;
       }
     }
-    /*
-        else if (dst_tp.get_type_id() == type_type_id) {
-          switch (src_tp.get_type_id()) {
-          case type_type_id:
-            return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
-                                                  dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
-                                                  std::map<std::string, ndt::type>());
-          default:
-            break;
-          }
-        }
-    */
+    else if (dst_tp.get_type_id() == type_type_id) {
+      switch (src_tp.get_type_id()) {
+      case convert_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
     else if (dst_tp.get_type_id() == char_type_id) {
       switch (src_tp.get_type_id()) {
       case char_type_id:
@@ -299,6 +445,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case expr_type_id:
       case option_type_id:
       case unary_expr_type_id:
+      case int128_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -311,6 +458,8 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case date_type_id:
       case time_type_id:
       case datetime_type_id:
+      case property_type_id:
+      case convert_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());

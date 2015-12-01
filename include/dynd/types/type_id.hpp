@@ -689,6 +689,11 @@ struct type_kind_of<adapt_type_id> {
 };
 
 template <>
+struct type_kind_of<property_type_id> {
+  static const type_kind_t value = expr_kind;
+};
+
+template <>
 struct type_kind_of<convert_type_id> {
   static const type_kind_t value = expr_kind;
 };

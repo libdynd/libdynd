@@ -15,11 +15,9 @@ namespace ndt {
    */
   class DYND_API base_expr_type : public base_type {
   public:
-    base_expr_type(type_id_t type_id, type_kind_t kind, size_t data_size,
-                   size_t alignment, flags_type flags, size_t arrmeta_size,
-                   size_t ndim = 0)
-        : base_type(type_id, kind, data_size, alignment, flags, arrmeta_size,
-                    ndim, 0)
+    base_expr_type(type_id_t type_id, type_kind_t kind, size_t data_size, size_t alignment, flags_type flags,
+                   size_t arrmeta_size, size_t ndim = 0)
+        : base_type(type_id, kind, data_size, alignment, flags, arrmeta_size, ndim, 0)
     {
     }
 
@@ -40,11 +38,9 @@ namespace ndt {
      * Returns a flags value which inherits the appropriate flags from
      * the value and operand types.
      */
-    static inline flags_type inherited_flags(flags_type value_flags,
-                                             flags_type operand_flags)
+    static inline flags_type inherited_flags(flags_type value_flags, flags_type operand_flags)
     {
-      return (value_flags & type_flags_value_inherited) |
-             (operand_flags & type_flags_operand_inherited);
+      return (value_flags & type_flags_value_inherited) | (operand_flags & type_flags_operand_inherited);
     }
 
     /**
@@ -55,8 +51,7 @@ namespace ndt {
      * of this instance. Implementations of this should raise an exception
      * when this is not true.
      */
-    virtual type
-    with_replaced_storage_type(const type &replacement_type) const = 0;
+    virtual type with_replaced_storage_type(const type &replacement_type) const = 0;
 
     // Always return true for expression types
     bool is_expression() const;
@@ -69,8 +64,7 @@ namespace ndt {
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                 const intrusive_ptr<memory_block_data> &embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                             const std::string &indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
     // Expression types stop the iterdata chain
     // TODO: Maybe it should be more flexible?
@@ -78,28 +72,18 @@ namespace ndt {
 
     /** Makes a kernel which converts from (operand_type().value_type()) to
      * (value_type()) */
-    virtual size_t make_operand_to_value_assignment_kernel(
-        void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-        const char *src_arrmeta, kernel_request_t kernreq,
-        const eval::eval_context *ectx) const;
+    virtual size_t make_operand_to_value_assignment_kernel(void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+                                                           const char *src_arrmeta, kernel_request_t kernreq,
+                                                           const eval::eval_context *ectx) const;
 
     /** Makes a kernel which converts from (value_type()) to
      * (operand_type().value_type()) */
-    virtual size_t make_value_to_operand_assignment_kernel(
-        void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-        const char *src_arrmeta, kernel_request_t kernreq,
-        const eval::eval_context *ectx) const;
+    virtual size_t make_value_to_operand_assignment_kernel(void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+                                                           const char *src_arrmeta, kernel_request_t kernreq,
+                                                           const eval::eval_context *ectx) const;
 
-    virtual intptr_t
-    make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                           const char *dst_arrmeta, const type &src_tp,
-                           const char *src_arrmeta, kernel_request_t kernreq,
-                           const eval::eval_context *ectx) const;
-
-    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                  const type &src0_dt, const char *src0_arrmeta,
-                                  const type &src1_dt, const char *src1_arrmeta,
-                                  comparison_type_t comptype,
+    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt, const char *src0_arrmeta,
+                                  const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
   };
 
