@@ -34,9 +34,7 @@ ndt::pointer_type::pointer_type(const type &target_tp)
   }
 }
 
-ndt::pointer_type::~pointer_type()
-{
-}
+ndt::pointer_type::~pointer_type() {}
 
 void ndt::pointer_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
@@ -45,10 +43,7 @@ void ndt::pointer_type::print_data(std::ostream &o, const char *arrmeta, const c
   m_target_tp.print_data(o, arrmeta + sizeof(pointer_type_arrmeta), target_data);
 }
 
-void ndt::pointer_type::print_type(std::ostream &o) const
-{
-  o << "pointer[" << m_target_tp << "]";
-}
+void ndt::pointer_type::print_type(std::ostream &o) const { o << "pointer[" << m_target_tp << "]"; }
 
 bool ndt::pointer_type::is_expression() const
 {
@@ -76,7 +71,8 @@ void ndt::pointer_type::transform_child_types(type_transform_fn_t transform_fn, 
   if (was_transformed) {
     out_transformed_tp = make(tmp_tp);
     out_was_transformed = true;
-  } else {
+  }
+  else {
     out_transformed_tp = type(this, true);
   }
 }
@@ -93,7 +89,8 @@ const ndt::type &ndt::pointer_type::get_operand_type() const
 
   if (m_target_tp.get_type_id() == pointer_type_id) {
     return m_target_tp;
-  } else {
+  }
+  else {
     return vpt;
   }
 }
@@ -103,11 +100,13 @@ ndt::type ndt::pointer_type::apply_linear_index(intptr_t nindices, const irange 
 {
   if (nindices == 0) {
     return type(this, true);
-  } else {
+  }
+  else {
     type dt = m_target_tp.apply_linear_index(nindices, indices, current_i, root_tp, leading_dimension);
     if (dt == m_target_tp) {
       return type(this, true);
-    } else {
+    }
+    else {
       return make(dt);
     }
   }
@@ -158,7 +157,8 @@ ndt::type ndt::pointer_type::get_type_at_dimension(char **inout_arrmeta, intptr_
 {
   if (i == 0) {
     return type(this, true);
-  } else {
+  }
+  else {
     if (inout_arrmeta != NULL) {
       *inout_arrmeta += sizeof(pointer_type_arrmeta);
     }
@@ -177,7 +177,8 @@ void ndt::pointer_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape
     }
     m_target_tp.extended()->get_shape(ndim, i, out_shape, arrmeta ? (arrmeta + sizeof(pointer_type_arrmeta)) : NULL,
                                       target_data);
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "requested too many dimensions from type " << m_target_tp;
     throw runtime_error(ss.str());
@@ -189,7 +190,8 @@ axis_order_classification_t ndt::pointer_type::classify_axis_order(const char *a
   // Return the classification of the target type
   if (m_target_tp.get_ndim() > 1) {
     return m_target_tp.extended()->classify_axis_order(arrmeta + sizeof(pointer_type_arrmeta));
-  } else {
+  }
+  else {
     return axis_order_none;
   }
 }
@@ -198,7 +200,8 @@ bool ndt::pointer_type::is_lossless_assignment(const type &dst_tp, const type &s
 {
   if (dst_tp.extended() == this) {
     return ::is_lossless_assignment(m_target_tp, src_tp);
-  } else {
+  }
+  else {
     return ::is_lossless_assignment(dst_tp, m_target_tp);
   }
 }
@@ -207,9 +210,11 @@ bool ndt::pointer_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != pointer_type_id) {
+  }
+  else if (rhs.get_type_id() != pointer_type_id) {
     return false;
-  } else {
+  }
+  else {
     const pointer_type *dt = static_cast<const pointer_type *>(&rhs);
     return m_target_tp == dt->m_target_tp;
   }
@@ -285,32 +290,10 @@ void ndt::pointer_type::arrmeta_debug_print(const char *arrmeta, std::ostream &o
   }
 }
 
-intptr_t ndt::pointer_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                   const char *dst_arrmeta, const type &src_tp, const char *src_arrmeta,
-                                                   kernel_request_t kernreq, const eval::eval_context *ectx) const
-{
-  if (dst_tp.get_type_id() == pointer_type_id) {
-    if (dst_tp == src_tp) {
-      return make_pod_typed_data_assignment_kernel(ckb, ckb_offset, get_data_size(), get_data_alignment(), kernreq);
-    } else {
-      type dst_target_tp = dst_tp.extended<pointer_type>()->get_target_type();
-      if (dst_target_tp == src_tp) {
-        return make_value_to_pointer_assignment_kernel(ckb, ckb_offset, dst_target_tp, kernreq);
-      }
-    }
-  }
-
-  return base_expr_type::make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                                ectx);
-}
-
 namespace {
 
 struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
-  ~operand_to_value_ck()
-  {
-    get_child()->destroy();
-  }
+  ~operand_to_value_ck() { get_child()->destroy(); }
 
   void single(char *dst, char *const *src)
   {
@@ -477,7 +460,8 @@ ndt::type ndt::pointer_type::make(const type &target_tp)
 
   if (target_tp.is_builtin()) {
     return sp.static_builtins_instance[target_tp.get_type_id()];
-  } else {
+  }
+  else {
     return type(new pointer_type(target_tp), false);
   }
 }
