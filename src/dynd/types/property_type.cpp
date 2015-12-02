@@ -5,7 +5,6 @@
 
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/convert_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 
 using namespace std;

@@ -7,7 +7,6 @@
 #include <dynd/types/base_tuple_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/types/tuple_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/ensure_immutable_contig.hpp>

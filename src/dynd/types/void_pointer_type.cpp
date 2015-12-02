@@ -4,7 +4,6 @@
 //
 
 #include <dynd/types/void_pointer_type.hpp>
-#include <dynd/func/assignment.hpp>
 #include <dynd/exceptions.hpp>
 
 #include <algorithm>

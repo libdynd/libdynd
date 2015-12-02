@@ -8,13 +8,13 @@
 #include <set>
 
 #include <dynd/types/categorical_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/gfunc/make_gcallable.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/func/apply.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/search.hpp>
 

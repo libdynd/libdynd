@@ -4,7 +4,6 @@
 //
 
 #include <dynd/types/ndarrayarg_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
