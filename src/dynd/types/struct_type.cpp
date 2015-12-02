@@ -23,15 +23,14 @@ ndt::struct_type::struct_type(const nd::array &field_names, const nd::array &fie
   create_array_properties();
 }
 
-ndt::struct_type::~struct_type()
-{
-}
+ndt::struct_type::~struct_type() {}
 
 static bool is_simple_identifier_name(const char *begin, const char *end)
 {
   if (begin == end) {
     return false;
-  } else {
+  }
+  else {
     char c = *begin++;
     if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
       return false;
@@ -57,14 +56,16 @@ void ndt::struct_type::print_type(std::ostream &o) const
     const string &fn = get_field_name_raw(i);
     if (is_simple_identifier_name(fn.begin(), fn.end())) {
       o.write(fn.begin(), fn.end() - fn.begin());
-    } else {
+    }
+    else {
       print_escaped_utf8_string(o, fn.begin(), fn.end(), true);
     }
     o << ": " << get_field_type(i);
   }
   if (m_variadic) {
     o << ", ...}";
-  } else {
+  }
+  else {
     o << "}";
   }
 }
@@ -84,7 +85,8 @@ void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn, i
     tmp_field_types.flag_as_immutable();
     out_transformed_tp = struct_type::make(m_field_names, tmp_field_types, m_variadic);
     out_was_transformed = true;
-  } else {
+  }
+  else {
     out_transformed_tp = type(this, true);
   }
 }
@@ -123,35 +125,13 @@ bool ndt::struct_type::is_lossless_assignment(const type &dst_tp, const type &sr
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == struct_type_id) {
+    }
+    else if (src_tp.get_type_id() == struct_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
 
   return false;
-}
-
-intptr_t ndt::struct_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                  const char *dst_arrmeta, const type &src_tp, const char *src_arrmeta,
-                                                  kernel_request_t kernreq, const eval::eval_context *ectx) const
-{
-  if (this == dst_tp.extended()) {
-    if (this == src_tp.extended()) {
-      return make_tuple_identical_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta, kernreq, ectx);
-    } else if (src_tp.get_kind() == struct_kind) {
-      return make_struct_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq, ectx);
-    } else if (src_tp.is_builtin()) {
-      return make_broadcast_to_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
-    } else {
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
-    }
-  }
-
-  stringstream ss;
-  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-  throw dynd::type_error(ss.str());
 }
 
 size_t ndt::struct_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt,
@@ -161,7 +141,8 @@ size_t ndt::struct_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, 
   if (this == src0_dt.extended()) {
     if (*this == *src1_dt.extended()) {
       return make_tuple_comparison_kernel(ckb, ckb_offset, src0_dt, src0_arrmeta, src1_arrmeta, comptype, ectx);
-    } else if (src1_dt.get_kind() == struct_kind) {
+    }
+    else if (src1_dt.get_kind() == struct_kind) {
       // TODO
     }
   }
@@ -173,9 +154,11 @@ bool ndt::struct_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != struct_type_id) {
+  }
+  else if (rhs.get_type_id() != struct_type_id) {
     return false;
-  } else {
+  }
+  else {
     const struct_type *dt = static_cast<const struct_type *>(&rhs);
     return get_data_alignment() == dt->get_data_alignment() && m_field_types.equals_exact(dt->m_field_types) &&
            m_field_names.equals_exact(dt->m_field_names) && m_variadic == dt->m_variadic;
@@ -299,7 +282,8 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
       pair<std::string, nd::callable>("field_names",
                                       nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))),
       pair<std::string, nd::callable>("arrmeta_offsets",
-                                      nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))), };
+                                      nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))),
+  };
 
   *out_properties = type_properties;
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
@@ -314,9 +298,7 @@ namespace nd {
     array self;
     intptr_t i;
 
-    get_array_field_kernel(const array &self, intptr_t i) : self(self), i(i)
-    {
-    }
+    get_array_field_kernel(const array &self, intptr_t i) : self(self), i(i) {}
 
     void single(array *dst, array *const *DYND_UNUSED(src))
     {
@@ -352,10 +334,12 @@ namespace nd {
       if (udt.get_kind() == expr_kind) {
         std::string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
         return n.replace_dtype(ndt::property_type::make(udt, field_name, i));
-      } else {
+      }
+      else {
         if (undim == 0) {
           return n(i);
-        } else {
+        }
+        else {
           shortvector<irange> idx(undim + 1);
           idx[undim] = irange(i);
           return n.at_array(undim + 1, idx.get());
@@ -391,10 +375,12 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
   if (udt.get_kind() == expr_kind) {
     std::string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
     return n.replace_dtype(ndt::property_type::make(udt, field_name, i)).release();
-  } else {
+  }
+  else {
     if (undim == 0) {
       return n(i).release();
-    } else {
+    }
+    else {
       shortvector<irange> idx(undim + 1);
       idx[undim] = irange(i);
       return n.at_array(undim + 1, idx.get()).release();

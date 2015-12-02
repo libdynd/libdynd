@@ -85,36 +85,13 @@ void ndt::type_type::data_destruct_strided(const char *arrmeta, char *data, intp
 }
 
 intptr_t ndt::type_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                const char *dst_arrmeta, const type &src_tp, const char *src_arrmeta,
-                                                kernel_request_t kernreq, const eval::eval_context *ectx) const
+                                                const char *DYND_UNUSED(dst_arrmeta), const type &src_tp,
+                                                const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                                const eval::eval_context *DYND_UNUSED(ectx)) const
 {
   if (this == dst_tp.extended()) {
     if (src_tp.get_type_id() == type_type_id) {
       nd::assignment_kernel<type_type_id, type_type_id>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    }
-    else if (src_tp.get_kind() == string_kind) {
-      // String to type
-      nd::string_to_type_kernel *e = nd::string_to_type_kernel::make(ckb, kernreq, ckb_offset);
-      // The kernel data owns a reference to this type
-      e->src_string_dt = src_tp;
-      e->src_arrmeta = src_arrmeta;
-      e->errmode = ectx->errmode;
-      return ckb_offset;
-    }
-    else if (!src_tp.is_builtin()) {
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
-    }
-  }
-  else {
-    if (dst_tp.get_kind() == string_kind) {
-      // Type to string
-      nd::type_to_string_kernel *e = nd::type_to_string_kernel::make(ckb, kernreq, ckb_offset);
-      // The kernel data owns a reference to this type
-      e->dst_string_dt = dst_tp;
-      e->dst_arrmeta = dst_arrmeta;
-      e->ectx = *ectx;
       return ckb_offset;
     }
   }

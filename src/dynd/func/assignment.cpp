@@ -5,6 +5,8 @@
 
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/multidispatch.hpp>
+#include <dynd/func/call.hpp>
+#include <dynd/func/elwise.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
@@ -193,14 +195,27 @@ DYND_API nd::callable nd::assign::make()
   children[{{uint64_type_id, string_type_id}}] = callable::make<assignment_kernel<uint64_type_id, string_type_id>>();
   children[{{float32_type_id, string_type_id}}] = callable::make<assignment_kernel<float32_type_id, string_type_id>>();
   children[{{float64_type_id, string_type_id}}] = callable::make<assignment_kernel<float64_type_id, string_type_id>>();
+  children[{{ndarrayarg_type_id, ndarrayarg_type_id}}] =
+      callable::make<ndarrayarg_assign_ck>(ndt::type("(Any) -> Any"));
+  children[{{tuple_type_id, tuple_type_id}}] = callable::make<assignment_kernel<tuple_type_id, tuple_type_id>>();
+  children[{{struct_type_id, int32_type_id}}] = callable::make<assignment_kernel<struct_type_id, struct_type_id>>();
+  children[{{struct_type_id, struct_type_id}}] = callable::make<assignment_kernel<struct_type_id, struct_type_id>>();
+  for (type_id_t tp_id : {bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
+                          uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
+                          float32_type_id, float64_type_id, fixed_dim_type_id, type_type_id}) {
+    children[{{tp_id, var_dim_type_id}}] =
+        nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+    children[{{var_dim_type_id, tp_id}}] =
+        nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+  }
+  children[{{var_dim_type_id, var_dim_type_id}}] =
+      nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
 
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
       [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
         callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
         if (child.is_null()) {
-          std::cout << dst_tp << std::endl;
-          std::cout << src_tp[0] << std::endl;
           throw std::runtime_error("assignment error");
         }
         return child;
@@ -241,7 +256,54 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
     }
   }
   else {
-    if (dst_tp.get_type_id() == pointer_type_id) {
+    if (dst_tp.get_type_id() == fixed_dim_type_id) {
+      switch (src_tp.get_type_id()) {
+      case convert_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    /*
+        else if (dst_tp.get_type_id() == var_dim_type_id) {
+          switch (src_tp.get_type_id()) {
+          case bool_type_id:
+          case uint8_type_id:
+          case uint16_type_id:
+          case uint32_type_id:
+          case uint64_type_id:
+          case uint128_type_id:
+          case int8_type_id:
+          case int16_type_id:
+          case int32_type_id:
+          case int64_type_id:
+          case int128_type_id:
+          case float32_type_id:
+          case float64_type_id:
+          case type_type_id:
+          case fixed_dim_type_id:
+          case var_dim_type_id:
+            return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                                  dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                                  std::map<std::string, ndt::type>());
+          default:
+            break;
+          }
+        }
+    */
+    else if (dst_tp.get_type_id() == tuple_type_id) {
+      switch (src_tp.get_type_id()) {
+      case tuple_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
+    else if (dst_tp.get_type_id() == pointer_type_id) {
       switch (src_tp.get_type_id()) {
       case pointer_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
@@ -251,9 +313,9 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
         break;
       }
     }
-    if (dst_tp.get_type_id() == fixed_dim_type_id) {
+    else if (dst_tp.get_type_id() == ndarrayarg_type_id) {
       switch (src_tp.get_type_id()) {
-      case convert_type_id:
+      case ndarrayarg_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -374,6 +436,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
     else if (dst_tp.get_type_id() == type_type_id) {
       switch (src_tp.get_type_id()) {
       case convert_type_id:
+      case string_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -446,6 +509,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case option_type_id:
       case unary_expr_type_id:
       case int128_type_id:
+      case type_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -460,6 +524,8 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case datetime_type_id:
       case property_type_id:
       case convert_type_id:
+      case struct_type_id:
+      case int32_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());

@@ -21,15 +21,11 @@ namespace ndt {
     std::vector<std::pair<std::string, gfunc::callable>> m_array_properties;
 
   protected:
-    uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const
-    {
-      return reinterpret_cast<uintptr_t *>(arrmeta);
-    }
+    uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
 
   public:
     inline tuple_type(const nd::array &field_types, bool variadic)
-        : base_tuple_type(tuple_type_id, field_types, type_flag_none, true,
-                          variadic)
+        : base_tuple_type(tuple_type_id, field_types, type_flag_none, true, variadic)
     {
     }
 
@@ -42,34 +38,22 @@ namespace ndt {
 
     void print_type(std::ostream &o) const;
 
-    void transform_child_types(type_transform_fn_t transform_fn,
-                               intptr_t arrmeta_offset, void *extra,
-                               type &out_transformed_tp,
-                               bool &out_was_transformed) const;
+    void transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
+                               type &out_transformed_tp, bool &out_was_transformed) const;
     type get_canonical_type() const;
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
     bool operator==(const base_type &rhs) const;
 
-    void arrmeta_debug_print(const char *arrmeta, std::ostream &o,
-                             const std::string &indent) const;
+    void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                    const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta,
-                                    kernel_request_t kernreq,
-                                    const eval::eval_context *ectx) const;
-
-    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset,
-                                  const type &src0_dt, const char *src0_arrmeta,
-                                  const type &src1_dt, const char *src1_arrmeta,
-                                  comparison_type_t comptype,
+    size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt, const char *src0_arrmeta,
+                                  const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
 
-    void get_dynamic_type_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
+    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                     size_t *out_count) const;
 
     /** Makes a tuple type with the specified types */
     static type make(const nd::array &field_types, bool variadic = false)
@@ -78,10 +62,7 @@ namespace ndt {
     }
 
     /** Makes an empty tuple */
-    static type make(bool variadic = false)
-    {
-      return make(nd::empty(0, make_type()), variadic);
-    }
+    static type make(bool variadic = false) { return make(nd::empty(0, make_type()), variadic); }
   };
 
   DYND_API nd::array pack(intptr_t field_count, const nd::array *field_vals);
