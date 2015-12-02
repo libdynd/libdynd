@@ -11,9 +11,7 @@ using namespace std;
 using namespace dynd;
 
 // Default destructor for the extended type does nothing
-ndt::base_type::~base_type()
-{
-}
+ndt::base_type::~base_type() {}
 
 bool ndt::base_type::is_type_subarray(const type &subarray_tp) const
 {
@@ -33,15 +31,9 @@ void ndt::base_type::print_data(ostream &DYND_UNUSED(o), const char *DYND_UNUSED
   throw std::runtime_error(ss.str());
 }
 
-bool ndt::base_type::is_expression() const
-{
-  return false;
-}
+bool ndt::base_type::is_expression() const { return false; }
 
-bool ndt::base_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const
-{
-  return true;
-}
+bool ndt::base_type::is_unique_data_owner(const char *DYND_UNUSED(arrmeta)) const { return true; }
 
 void ndt::base_type::transform_child_types(type_transform_fn_t DYND_UNUSED(transform_fn),
                                            intptr_t DYND_UNUSED(arrmeta_offset), void *DYND_UNUSED(self),
@@ -73,7 +65,8 @@ ndt::type ndt::base_type::apply_linear_index(intptr_t nindices, const irange *DY
   // Default to scalar behavior
   if (nindices == 0) {
     return type(this, true);
-  } else {
+  }
+  else {
     throw too_many_indices(type(this, true), current_i + nindices, current_i);
   }
 }
@@ -90,7 +83,8 @@ intptr_t ndt::base_type::apply_linear_index(intptr_t nindices, const irange *DYN
     // Copy any arrmeta verbatim
     arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
     return 0;
-  } else {
+  }
+  else {
     throw too_many_indices(type(this, true), current_i + nindices, current_i);
   }
 }
@@ -108,7 +102,8 @@ ndt::type ndt::base_type::get_type_at_dimension(char **DYND_UNUSED(inout_arrmeta
   // Default to heterogeneous dimension/scalar behavior
   if (i == 0) {
     return type(this, true);
-  } else {
+  }
+  else {
     throw too_many_indices(type(this, true), total_ndim + i, total_ndim);
   }
 }
@@ -128,10 +123,7 @@ void ndt::base_type::get_strides(size_t DYND_UNUSED(i), intptr_t *DYND_UNUSED(ou
   // Default to scalar behavior
 }
 
-bool ndt::base_type::is_c_contiguous(const char *DYND_UNUSED(arrmeta)) const
-{
-  return false;
-}
+bool ndt::base_type::is_c_contiguous(const char *DYND_UNUSED(arrmeta)) const { return false; }
 
 axis_order_classification_t ndt::base_type::classify_axis_order(const char *DYND_UNUSED(arrmeta)) const
 {
@@ -145,19 +137,14 @@ bool ndt::base_type::is_lossless_assignment(const type &dst_tp, const type &src_
   return dst_tp == src_tp;
 }
 
-size_t ndt::base_type::get_default_data_size() const
-{
-  return get_data_size();
-}
+size_t ndt::base_type::get_default_data_size() const { return get_data_size(); }
 
 // TODO: Make this a pure virtual function eventually
-void ndt::base_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
-{
-}
+void ndt::base_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const {}
 
-void
-ndt::base_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                       const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+void ndt::base_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
 }
 
@@ -172,9 +159,7 @@ void ndt::base_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
 }
 
 // TODO: Make this a pure virtual function eventually
-void ndt::base_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
-{
-}
+void ndt::base_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
 
 // TODO: Make this a pure virtual function eventually
 void ndt::base_type::arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
@@ -230,23 +215,6 @@ size_t ndt::base_type::iterdata_destruct(iterdata_common *DYND_UNUSED(iterdata),
   throw std::runtime_error(ss.str());
 }
 
-intptr_t ndt::base_type::make_assignment_kernel(void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
-                                                const type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                                const type &src_tp, const char *DYND_UNUSED(src_arrmeta),
-                                                kernel_request_t DYND_UNUSED(kernreq),
-                                                const eval::eval_context *DYND_UNUSED(ectx)) const
-{
-  stringstream ss;
-  ss << "make_assignment_kernel has not been implemented for type '";
-  if (this == dst_tp.extended()) {
-    ss << dst_tp;
-  } else {
-    ss << src_tp;
-  }
-  ss << "'";
-  throw std::runtime_error(ss.str());
-}
-
 size_t ndt::base_type::make_comparison_kernel(void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
                                               const type &src0_dt, const char *DYND_UNUSED(src0_arrmeta),
                                               const type &src1_dt, const char *DYND_UNUSED(src1_arrmeta),
@@ -296,12 +264,14 @@ void ndt::base_type::get_scalar_properties_and_functions(
     if (ndim == 0) {
       get_dynamic_array_properties(&properties, &properties_count);
       get_dynamic_array_functions(&functions, &functions_count);
-    } else {
+    }
+    else {
       type dt = get_type_at_dimension(NULL, ndim);
       if (!dt.is_builtin()) {
         dt.extended()->get_dynamic_array_properties(&properties, &properties_count);
         dt.extended()->get_dynamic_array_functions(&functions, &functions_count);
-      } else {
+      }
+      else {
         get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &properties_count);
       }
     }
@@ -405,24 +375,47 @@ bool ndt::base_type::reverse_adapt_type(const type &DYND_UNUSED(value_tp), const
 
 // Some information about the builtin types
 
-DYND_API uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {
-    0,                sizeof(bool1),                sizeof(int8),                  sizeof(int16),   sizeof(int32),
-    sizeof(int64),    sizeof(int128),               sizeof(uint8),                 sizeof(uint16),  sizeof(uint32),
-    sizeof(uint64),   sizeof(uint128),              sizeof(float16),               sizeof(float32), sizeof(float64),
-    sizeof(float128), sizeof(dynd::complex<float>), sizeof(dynd::complex<double>), 0};
+DYND_API uint8_t ndt::detail::builtin_data_sizes[builtin_type_id_count] = {0,
+                                                                           sizeof(bool1),
+                                                                           sizeof(int8),
+                                                                           sizeof(int16),
+                                                                           sizeof(int32),
+                                                                           sizeof(int64),
+                                                                           sizeof(int128),
+                                                                           sizeof(uint8),
+                                                                           sizeof(uint16),
+                                                                           sizeof(uint32),
+                                                                           sizeof(uint64),
+                                                                           sizeof(uint128),
+                                                                           sizeof(float16),
+                                                                           sizeof(float32),
+                                                                           sizeof(float64),
+                                                                           sizeof(float128),
+                                                                           sizeof(dynd::complex<float>),
+                                                                           sizeof(dynd::complex<double>),
+                                                                           0};
 
 DYND_API uint8_t ndt::detail::builtin_kinds[builtin_type_id_count] = {
     void_kind, bool_kind, sint_kind, sint_kind, sint_kind, sint_kind, sint_kind,    uint_kind,    uint_kind, uint_kind,
     uint_kind, uint_kind, real_kind, real_kind, real_kind, real_kind, complex_kind, complex_kind, void_kind};
 
 DYND_API uint8_t ndt::detail::builtin_data_alignments[builtin_type_id_count] = {
-    1,                                            1,
-    1,                                            scalar_align_of<int16>::value,
-    scalar_align_of<int32>::value,                scalar_align_of<int64>::value,
-    scalar_align_of<int128>::value,               1,
-    scalar_align_of<uint16>::value,               scalar_align_of<uint32>::value,
-    scalar_align_of<uint64>::value,               scalar_align_of<uint128>::value,
-    scalar_align_of<float16>::value,              scalar_align_of<float32>::value,
-    scalar_align_of<float64>::value,              scalar_align_of<float128>::value,
-    scalar_align_of<dynd::complex<float>>::value, scalar_align_of<dynd::complex<double>>::value,
+    1,
+    1,
+    1,
+    scalar_align_of<int16>::value,
+    scalar_align_of<int32>::value,
+    scalar_align_of<int64>::value,
+    scalar_align_of<int128>::value,
+    1,
+    scalar_align_of<uint16>::value,
+    scalar_align_of<uint32>::value,
+    scalar_align_of<uint64>::value,
+    scalar_align_of<uint128>::value,
+    scalar_align_of<float16>::value,
+    scalar_align_of<float32>::value,
+    scalar_align_of<float64>::value,
+    scalar_align_of<float128>::value,
+    scalar_align_of<dynd::complex<float>>::value,
+    scalar_align_of<dynd::complex<double>>::value,
     1};

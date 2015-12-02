@@ -30,8 +30,7 @@ namespace ndt {
 
     const type &get_pattern_type() const { return m_pattern_tp; }
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
@@ -43,21 +42,13 @@ namespace ndt {
     void arrmeta_reset_buffers(char *arrmeta) const;
     void arrmeta_finalize_buffers(char *arrmeta) const;
     void arrmeta_destruct(char *arrmeta) const;
-    void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta),
-                             std::ostream &DYND_UNUSED(o),
+    void arrmeta_debug_print(const char *DYND_UNUSED(arrmeta), std::ostream &DYND_UNUSED(o),
                              const std::string &DYND_UNUSED(indent)) const
     {
     }
 
     void data_destruct(const char *arrmeta, char *data) const;
-    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride,
-                               size_t count) const;
-
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset,
-                                    const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta,
-                                    kernel_request_t kernreq,
-                                    const eval::eval_context *ectx) const;
+    void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
   };
 
   /** Returns type "type" */
@@ -67,10 +58,7 @@ namespace ndt {
     return type_tp;
   }
 
-  inline type make_type(const type &pattern_tp)
-  {
-    return type(new type_type(pattern_tp), false);
-  }
+  inline type make_type(const type &pattern_tp) { return type(new type_type(pattern_tp), false); }
 
 } // namespace dynd::ndt
 } // namespace dynd

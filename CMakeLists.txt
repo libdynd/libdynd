@@ -373,7 +373,6 @@ set(libdynd_SRC
     src/dynd/kernels/single_comparer_builtin.hpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     src/dynd/kernels/tuple_comparison_kernels.cpp
-    src/dynd/kernels/var_dim_assignment_kernels.cpp
     include/dynd/kernels/apply.hpp
     include/dynd/kernels/arithmetic.hpp
     include/dynd/kernels/assign_na_kernel.hpp
@@ -419,7 +418,6 @@ set(libdynd_SRC
     include/dynd/kernels/tuple_assignment_kernels.hpp
     include/dynd/kernels/tuple_comparison_kernels.hpp
     include/dynd/kernels/uniform_kernel.hpp
-    include/dynd/kernels/var_dim_assignment_kernels.hpp
     include/dynd/kernels/view_kernel.hpp
     # MemBlock
     src/dynd/memblock/memory_block.cpp

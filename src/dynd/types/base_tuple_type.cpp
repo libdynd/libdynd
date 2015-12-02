@@ -23,12 +23,16 @@ ndt::base_tuple_type::base_tuple_type(type_id_t type_id, const nd::array &field_
       m_field_count(field_types.get_dim_size()), m_field_types(field_types),
       m_arrmeta_offsets(nd::empty(m_field_count, type::make<uintptr_t>())), m_variadic(variadic)
 {
+/*
+  Todo: Reenable this without a deadlock.
+
   if (!nd::ensure_immutable_contig<type>(m_field_types)) {
     stringstream ss;
     ss << "dynd tuple type requires an array of types, got an array with "
           "type " << m_field_types.get_type();
     throw invalid_argument(ss.str());
   }
+*/
 
   // Calculate the needed element alignment and arrmeta offsets
   size_t arrmeta_offset = 0;

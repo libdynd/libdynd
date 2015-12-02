@@ -83,20 +83,3 @@ void ndt::type_type::data_destruct_strided(const char *arrmeta, char *data, intp
     data_destruct(arrmeta, data);
   }
 }
-
-intptr_t ndt::type_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                const char *DYND_UNUSED(dst_arrmeta), const type &src_tp,
-                                                const char *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                                const eval::eval_context *DYND_UNUSED(ectx)) const
-{
-  if (this == dst_tp.extended()) {
-    if (src_tp.get_type_id() == type_type_id) {
-      nd::assignment_kernel<type_type_id, type_type_id>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    }
-  }
-
-  stringstream ss;
-  ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-  throw dynd::type_error(ss.str());
-}
