@@ -210,6 +210,16 @@ DYND_API nd::callable nd::assign::make()
   }
   children[{{var_dim_type_id, var_dim_type_id}}] =
       nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+  for (type_id_t tp_id : {bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
+                          uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
+                          float32_type_id, float64_type_id, type_type_id}) {
+    children[{{tp_id, fixed_dim_type_id}}] =
+        nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+    children[{{fixed_dim_type_id, tp_id}}] =
+        nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+  }
+  children[{{fixed_dim_type_id, fixed_dim_type_id}}] =
+      nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
 
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
@@ -245,6 +255,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       case adapt_type_id:
       case convert_type_id:
       case string_type_id:
+      case var_dim_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
                                               std::map<std::string, ndt::type>());
@@ -258,6 +269,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
   else {
     if (dst_tp.get_type_id() == fixed_dim_type_id) {
       switch (src_tp.get_type_id()) {
+      case var_dim_type_id:
       case convert_type_id:
         return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
                                               dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
@@ -266,33 +278,31 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
         break;
       }
     }
-    /*
-        else if (dst_tp.get_type_id() == var_dim_type_id) {
-          switch (src_tp.get_type_id()) {
-          case bool_type_id:
-          case uint8_type_id:
-          case uint16_type_id:
-          case uint32_type_id:
-          case uint64_type_id:
-          case uint128_type_id:
-          case int8_type_id:
-          case int16_type_id:
-          case int32_type_id:
-          case int64_type_id:
-          case int128_type_id:
-          case float32_type_id:
-          case float64_type_id:
-          case type_type_id:
-          case fixed_dim_type_id:
-          case var_dim_type_id:
-            return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
-                                                  dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
-                                                  std::map<std::string, ndt::type>());
-          default:
-            break;
-          }
-        }
-    */
+    else if (dst_tp.get_type_id() == var_dim_type_id) {
+      switch (src_tp.get_type_id()) {
+      case bool_type_id:
+      case uint8_type_id:
+      case uint16_type_id:
+      case uint32_type_id:
+      case uint64_type_id:
+      case uint128_type_id:
+      case int8_type_id:
+      case int16_type_id:
+      case int32_type_id:
+      case int64_type_id:
+      case int128_type_id:
+      case float32_type_id:
+      case float64_type_id:
+      case type_type_id:
+      case fixed_dim_type_id:
+      case var_dim_type_id:
+        return nd::assign::get()->instantiate(nd::assign::get()->static_data(), NULL, ckb, ckb_offset, dst_tp,
+                                              dst_arrmeta, 1, &src_tp, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                              std::map<std::string, ndt::type>());
+      default:
+        break;
+      }
+    }
     else if (dst_tp.get_type_id() == tuple_type_id) {
       switch (src_tp.get_type_id()) {
       case tuple_type_id:
