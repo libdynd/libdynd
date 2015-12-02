@@ -157,53 +157,26 @@ namespace ndt {
     virtual ~base_type();
 
     /** For debugging purposes, the type's use count */
-    inline int32_t get_use_count() const
-    {
-      return m_use_count;
-    }
+    inline int32_t get_use_count() const { return m_use_count; }
 
     /** Returns the struct of data common to all types. */
-    inline const base_type_members &get_base_type_members() const
-    {
-      return m_members;
-    }
+    inline const base_type_members &get_base_type_members() const { return m_members; }
 
     /** The type's type id */
-    inline type_id_t get_type_id() const
-    {
-      return static_cast<type_id_t>(m_members.type_id);
-    }
+    inline type_id_t get_type_id() const { return static_cast<type_id_t>(m_members.type_id); }
     /** The type's kind */
-    inline type_kind_t get_kind() const
-    {
-      return static_cast<type_kind_t>(m_members.kind);
-    }
+    inline type_kind_t get_kind() const { return static_cast<type_kind_t>(m_members.kind); }
     /** The size of one instance of the type, or 0 if there is not one fixed
      * size. */
-    inline size_t get_data_size() const
-    {
-      return m_members.data_size;
-    }
+    inline size_t get_data_size() const { return m_members.data_size; }
     /** The type's data alignment. Every data pointer for this type _must_ be
      * aligned. */
-    inline size_t get_data_alignment() const
-    {
-      return m_members.data_alignment;
-    }
+    inline size_t get_data_alignment() const { return m_members.data_alignment; }
     /** The number of array dimensions this type has */
-    inline intptr_t get_ndim() const
-    {
-      return m_members.ndim;
-    }
+    inline intptr_t get_ndim() const { return m_members.ndim; }
     /** The number of outer strided dimensions this type has in a row */
-    inline intptr_t get_strided_ndim() const
-    {
-      return m_members.strided_ndim;
-    }
-    inline base_type_members::flags_type get_flags() const
-    {
-      return m_members.flags;
-    }
+    inline intptr_t get_strided_ndim() const { return m_members.strided_ndim; }
+    inline base_type_members::flags_type get_flags() const { return m_members.flags; }
     virtual size_t get_default_data_size() const;
 
     /**
@@ -222,10 +195,7 @@ namespace ndt {
      */
     virtual void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
-    inline bool is_indexable() const
-    {
-      return (m_members.flags & type_flag_indexable) != 0;
-    }
+    inline bool is_indexable() const { return (m_members.flags & type_flag_indexable) != 0; }
 
     /**
      * Returns true if the type is a scalar.
@@ -234,10 +204,7 @@ namespace ndt {
      *behavior,
      * but the simplicity seems to probably be worth it.
      */
-    bool is_scalar() const
-    {
-      return m_members.ndim == 0 && (m_members.flags & type_flag_variadic) == 0;
-    }
+    bool is_scalar() const { return m_members.ndim == 0 && (m_members.flags & type_flag_variadic) == 0; }
 
     /**
      * Returns true if the given type is a subarray of this type.
@@ -448,10 +415,7 @@ namespace ndt {
     virtual bool operator==(const base_type &rhs) const = 0;
 
     /** The size of the nd::array arrmeta for this type */
-    inline size_t get_arrmeta_size() const
-    {
-      return m_members.arrmeta_size;
-    }
+    inline size_t get_arrmeta_size() const { return m_members.arrmeta_size; }
     /**
      * Constructs the nd::array arrmeta for this type using default settings.
      * The element size of the result must match that from
@@ -530,23 +494,6 @@ namespace ndt {
     virtual size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
     /**
-     * Creates an assignment kernel for one data value from the
-     * src type/arrmeta to the dst type/arrmeta. This adds the
-     * kernel at the 'ckb_offset' position in 'ckb's data, as part
-     * of a hierarchy matching the type's hierarchy.
-     *
-     * This function should always be called with this == dst_tp first,
-     * and types which don't support the particular assignment should
-     * then call the corresponding function with this == src_dt.
-     *
-     * \returns  The offset at the end of 'ckb' after adding this
-     *           kernel.
-     */
-    virtual intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp,
-                                            const char *dst_arrmeta, const ndt::type &src_tp, const char *src_arrmeta,
-                                            kernel_request_t kernreq, const eval::eval_context *ectx) const;
-
-    /**
      * Creates a comparison kernel for one data value from one
      * type/arrmeta to another type/arrmeta. This adds the
      * kernel at the 'ckb_offset' position in 'ckb's data, as part
@@ -580,9 +527,7 @@ namespace ndt {
      */
     virtual void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback, void *callback_data) const;
 
-    virtual void get_vars(std::unordered_set<std::string> &DYND_UNUSED(vars)) const
-    {
-    }
+    virtual void get_vars(std::unordered_set<std::string> &DYND_UNUSED(vars)) const {}
 
     /**
      * Additional dynamic properties exposed by the type as gfunc::callable.
@@ -736,10 +681,7 @@ namespace ndt {
     }
   }
 
-  inline long intrusive_ptr_use_count(const base_type *ptr)
-  {
-    return ptr->m_use_count;
-  }
+  inline long intrusive_ptr_use_count(const base_type *ptr) { return ptr->m_use_count; }
 
   namespace detail {
     extern DYND_API uint8_t builtin_data_sizes[builtin_type_id_count];
@@ -756,7 +698,8 @@ namespace ndt {
   {
     if (is_builtin_type(bt)) {
       return static_cast<intptr_t>(detail::builtin_data_sizes[reinterpret_cast<uintptr_t>(bt)]);
-    } else {
+    }
+    else {
       return bt->get_data_size();
     }
   }
@@ -770,7 +713,8 @@ namespace ndt {
   {
     if (is_builtin_type(bt)) {
       return static_cast<type_kind_t>(detail::builtin_kinds[reinterpret_cast<uintptr_t>(bt)]);
-    } else {
+    }
+    else {
       return bt->get_kind();
     }
   }
@@ -784,7 +728,8 @@ namespace ndt {
   {
     if (is_builtin_type(bt)) {
       return static_cast<size_t>(detail::builtin_data_alignments[reinterpret_cast<uintptr_t>(bt)]);
-    } else {
+    }
+    else {
       return bt->get_data_alignment();
     }
   }

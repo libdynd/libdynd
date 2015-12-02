@@ -263,8 +263,7 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
       default:
         break;
       }
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
+      throw std::runtime_error("unsupported assignment");
     }
   }
   else {
@@ -562,8 +561,8 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
         break;
       }
     }
-    return dst_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                                     ectx);
+
+    throw std::runtime_error("unsupported assignment");
   }
 }
 
