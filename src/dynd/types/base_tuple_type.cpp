@@ -10,7 +10,6 @@
 #include <dynd/shortvector.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/ensure_immutable_contig.hpp>
-#include <dynd/buffer_storage.hpp>
 
 using namespace std;
 using namespace dynd;

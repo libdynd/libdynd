@@ -21,14 +21,15 @@
 #include <dynd/func/copy.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable_registry.hpp>
+#include <dynd/func/apply.hpp>
+#include <dynd/convert.hpp>
 
 using namespace std;
 using namespace dynd;
 
 TEST(Compose, Simple)
 {
-  nd::callable composed = nd::functional::compose(
-      nd::copy, func::get_regfunction("sin"), ndt::type::make<double>());
+  nd::callable composed = nd::functional::compose(nd::copy, func::get_regfunction("sin"), ndt::type::make<double>());
   nd::array a = nd::empty<double>();
   composed("0.0", kwds("dst", a));
   EXPECT_EQ(0., a.as<double>());
@@ -37,3 +38,11 @@ TEST(Compose, Simple)
   composed(3.1, kwds("dst", a));
   EXPECT_DOUBLE_EQ(sin(3.1), a.as<double>());
 }
+
+/*
+TEST(Convert, Unary)
+{
+  nd::callable f = nd::functional::apply([](double x) { return x; });
+  nd::callable g = nd::functional::convert(ndt::type("(float32) -> float64"), f);
+}
+*/

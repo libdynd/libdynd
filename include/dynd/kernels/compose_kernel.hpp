@@ -6,9 +6,9 @@
 #pragma once
 
 #include <dynd/arrmeta_holder.hpp>
-#include <dynd/buffer_storage.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/kernels/convert_kernel.hpp>
 
 namespace dynd {
 namespace nd {

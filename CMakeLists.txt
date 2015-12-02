@@ -345,7 +345,6 @@ set(libdynd_SRC
     include/dynd/gfunc/make_gcallable.hpp
     # Kernels
     src/dynd/kernels/base_kernel.cpp
-    src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_builder.cpp
@@ -379,7 +378,6 @@ set(libdynd_SRC
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/base_kernel.hpp
     include/dynd/kernels/base_virtual_kernel.hpp
-    include/dynd/kernels/buffered_kernels.hpp
     include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_builder.hpp
@@ -445,6 +443,7 @@ set(libdynd_SRC
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     # src/dynd/config.cpp
+    src/dynd/convert.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
     src/dynd/int128.cpp
@@ -470,12 +469,12 @@ set(libdynd_SRC
     include/dynd/arrmeta_holder.hpp
     include/dynd/asarray.hpp
     include/dynd/bool1.hpp
-    include/dynd/buffer_storage.hpp
     include/dynd/config.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/cling_all.hpp
     include/dynd/complex.hpp
+    include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/float16.hpp
