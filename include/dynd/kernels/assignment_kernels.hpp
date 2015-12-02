@@ -13,6 +13,8 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
+#include <dynd/kernels/tuple_assignment_kernels.hpp>
+#include <dynd/kernels/struct_assignment_kernels.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
@@ -23,6 +25,7 @@
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
+#include <dynd/types/ndarrayarg_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/categorical_type.hpp>
@@ -40,6 +43,18 @@
 #endif
 
 namespace dynd {
+
+struct ndarrayarg_assign_ck : nd::base_kernel<ndarrayarg_assign_ck, 1> {
+  void single(char *dst, char *const *src)
+  {
+    if (*reinterpret_cast<void *const *>(src[0]) == NULL) {
+      *reinterpret_cast<void **>(dst) = NULL;
+    }
+    else {
+      throw std::invalid_argument("Cannot make a copy of a non-NULL dynd ndarrayarg value");
+    }
+  }
+};
 
 template <typename DstType, typename SrcType>
 typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
@@ -2730,6 +2745,64 @@ namespace nd {
       {
         return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
                                                         src_arrmeta[0], kernreq, ectx);
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<tuple_type_id, tuple_kind, tuple_type_id, tuple_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<tuple_type_id, tuple_kind, tuple_type_id, tuple_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        if (dst_tp.extended() == src_tp[0].extended()) {
+          return make_tuple_identical_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta[0], kernreq,
+                                                        ectx);
+        }
+        else if (src_tp[0].get_kind() == tuple_kind || src_tp[0].get_kind() == struct_kind) {
+          return make_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
+                                              ectx);
+        }
+        else if (src_tp[0].is_builtin()) {
+          return make_broadcast_to_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
+                                                           src_arrmeta[0], kernreq, ectx);
+        }
+
+        std::stringstream ss;
+        ss << "Cannot assign from " << src_tp[0] << " to " << dst_tp;
+        throw dynd::type_error(ss.str());
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<struct_type_id, struct_kind, struct_type_id, struct_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<struct_type_id, struct_kind, struct_type_id, struct_kind>> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        if (dst_tp.extended() == src_tp[0].extended()) {
+          return make_tuple_identical_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_arrmeta[0], kernreq,
+                                                        ectx);
+        }
+        else if (src_tp[0].get_kind() == struct_kind) {
+          return make_struct_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
+                                               ectx);
+        }
+        else if (src_tp[0].is_builtin()) {
+          return make_broadcast_to_tuple_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0],
+                                                           src_arrmeta[0], kernreq, ectx);
+        }
+
+        std::stringstream ss;
+        ss << "Cannot assign from " << src_tp[0] << " to " << dst_tp;
+        throw dynd::type_error(ss.str());
       }
     };
 
