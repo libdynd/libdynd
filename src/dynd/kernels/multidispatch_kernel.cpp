@@ -82,8 +82,8 @@ intptr_t nd::functional::old_multidispatch_ck::instantiate(char *static_data, ch
       }
       else {
         return convert_kernel::instantiate(const_cast<char *>(reinterpret_cast<const char *>(&af)), NULL, ckb,
-                                           ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp,
-                                           af.get_type()->get_pos_types_raw(), src_arrmeta, kernreq, ectx);
+                                           ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernreq, ectx,
+                                           nkwd, kwds, tp_vars);
       }
     }
   }

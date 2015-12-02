@@ -4,15 +4,12 @@
 //
 
 #include <dynd/convert.hpp>
-#include <dynd/type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/convert_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
 
-nd::callable nd::functional::convert(ndt::type &&, callable &&)
+nd::callable nd::functional::convert(const ndt::type &tp, const callable &child)
 {
-  throw std::runtime_error("");
-//  return callable::make<convert_kernel>(std::forward<ndt::type>(tp), std::forward<callable>(child));
+  return callable::make<convert_kernel>(tp, child);
 }

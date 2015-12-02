@@ -11,7 +11,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    DYND_API callable convert(ndt::type &&tp, callable &&child);
+    DYND_API callable convert(const ndt::type &tp, const callable &child);
 
   } // namespace dynd::nd::functional
 } // namespace dynd::nd

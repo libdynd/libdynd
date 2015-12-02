@@ -5,7 +5,6 @@
 
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
-#include <dynd/buffer_storage.hpp>
 #include <dynd/kernels/byteswap_kernels.hpp>
 
 using namespace std;

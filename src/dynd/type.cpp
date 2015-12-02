@@ -10,7 +10,6 @@
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
-#include <dynd/buffer_storage.hpp>
 #include <dynd/gfunc/make_gcallable.hpp>
 #include <dynd/gfunc/call_gcallable.hpp>
 #include <dynd/func/callable.hpp>
