@@ -8,7 +8,7 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/ensure_immutable_contig.hpp>

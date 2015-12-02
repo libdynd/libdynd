@@ -10,10 +10,8 @@
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/kernels/elwise.hpp>
-#include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/types/typevar_type.hpp>
 
 using namespace std;

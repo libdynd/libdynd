@@ -17,8 +17,6 @@
 #include <dynd/types/unary_expr_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
-#include <dynd/kernels/string_assignment_kernels.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/datetime_adapter_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/gfunc/make_gcallable.hpp>

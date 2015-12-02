@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/func/assignment.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;

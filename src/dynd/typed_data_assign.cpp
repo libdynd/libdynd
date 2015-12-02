@@ -15,7 +15,6 @@
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/diagnostics.hpp>
 #include <dynd/array.hpp>
 

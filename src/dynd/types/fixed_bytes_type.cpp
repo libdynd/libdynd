@@ -6,7 +6,6 @@
 #include <algorithm>
 
 #include <dynd/types/fixed_bytes_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 
