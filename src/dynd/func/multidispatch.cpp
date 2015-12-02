@@ -9,7 +9,6 @@
 #include <unordered_map>
 
 #include <dynd/func/multidispatch.hpp>
-#include <dynd/kernels/buffered_kernels.hpp>
 
 using namespace std;
 using namespace dynd;

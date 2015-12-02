@@ -345,7 +345,6 @@ set(libdynd_SRC
     include/dynd/gfunc/make_gcallable.hpp
     # Kernels
     src/dynd/kernels/base_kernel.cpp
-    src/dynd/kernels/buffered_kernels.cpp
     src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_builder.cpp
@@ -445,6 +444,7 @@ set(libdynd_SRC
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
     # src/dynd/config.cpp
+    src/dynd/convert.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
     src/dynd/int128.cpp
@@ -476,6 +476,7 @@ set(libdynd_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
     include/dynd/cling_all.hpp
     include/dynd/complex.hpp
+    include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
     include/dynd/ensure_immutable_contig.hpp
     include/dynd/float16.hpp
