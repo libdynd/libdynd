@@ -29,9 +29,6 @@ build_script:
   - conda config --set always_yes yes
   - conda update conda
   - conda install conda-build
-  # Install development version of conda build until the next release.
-  # This ensures that, when the tests are run, libdynd.dll is on the path.
-  - pip install git+git://github.com/conda/conda-build.git
   - ps: if(-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { conda install anaconda-client }
   - conda-build conda.recipe
 
