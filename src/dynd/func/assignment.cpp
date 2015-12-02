@@ -210,6 +210,16 @@ DYND_API nd::callable nd::assign::make()
   }
   children[{{var_dim_type_id, var_dim_type_id}}] =
       nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+  for (type_id_t tp_id : {bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
+                          uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
+                          float32_type_id, float64_type_id, type_type_id}) {
+    children[{{tp_id, fixed_dim_type_id}}] =
+        nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+    children[{{fixed_dim_type_id, tp_id}}] =
+        nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
+  }
+  children[{{fixed_dim_type_id, fixed_dim_type_id}}] =
+      nd::functional::elwise(nd::functional::call<assign>(ndt::type("(Any) -> Any")));
 
   return functional::multidispatch(
       ndt::type("(Any) -> Any"),
