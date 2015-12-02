@@ -38,16 +38,10 @@ namespace ndt {
 
     virtual ~var_dim_type();
 
-    size_t get_default_data_size() const
-    {
-      return sizeof(var_dim_type_data);
-    }
+    size_t get_default_data_size() const { return sizeof(var_dim_type_data); }
 
     /** Alignment of the data being pointed to. */
-    size_t get_target_alignment() const
-    {
-      return m_element_tp.get_data_alignment();
-    }
+    size_t get_target_alignment() const { return m_element_tp.get_data_alignment(); }
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
@@ -62,8 +56,8 @@ namespace ndt {
     type apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i, const type &root_tp,
                             bool leading_dimension) const;
     intptr_t apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta, const type &result_tp,
-                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
-                                const type &root_tp, bool leading_dimension, char **inout_data,
+                                char *out_arrmeta, const intrusive_ptr<memory_block_data> &embedded_reference,
+                                size_t current_i, const type &root_tp, bool leading_dimension, char **inout_data,
                                 intrusive_ptr<memory_block_data> &inout_dataref) const;
     type at_single(intptr_t i0, const char **inout_arrmeta, const char **inout_data) const;
 
@@ -97,10 +91,6 @@ namespace ndt {
                               const intptr_t *shape, type &out_uniform_tp) const;
     size_t iterdata_destruct(iterdata_common *iterdata, intptr_t ndim) const;
 
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-                                    const eval::eval_context *ectx) const;
-
     void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback, void *callback_data) const;
 
     void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
@@ -112,10 +102,7 @@ namespace ndt {
 
     virtual type with_element_type(const type &element_tp) const;
 
-    static type make(const type &element_tp)
-    {
-      return type(new var_dim_type(element_tp), false);
-    }
+    static type make(const type &element_tp) { return type(new var_dim_type(element_tp), false); }
 
     static type make(const type &element_tp, intptr_t ndim)
     {
