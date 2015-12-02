@@ -11,9 +11,6 @@
 #include <dynd/memblock/objectarray_memory_block.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/var_dim_assignment_kernels.hpp>
-#include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/func/apply.hpp>
 
 using namespace std;
