@@ -29,10 +29,7 @@ class fixed_dim_iterator;
 template <typename ElementType>
 class fixed_dim : public as_t<ElementType> {
 protected:
-  fixed_dim operator()(const char *metadata, char *data)
-  {
-    return fixed_dim(metadata, data);
-  }
+  fixed_dim operator()(const char *metadata, char *data) { return fixed_dim(metadata, data); }
 
   template <typename Index0Type, typename... IndexType>
   decltype(auto) operator()(const char *metadata, char *data, Index0Type index0, IndexType... index)
@@ -49,24 +46,14 @@ public:
   template <int NDim>
   class iterator_type : public fixed_dim_iterator<ElementType, NDim> {
   public:
-    iterator_type(const char *metadata, char *data) : fixed_dim_iterator<ElementType, NDim>(metadata, data)
-    {
-    }
+    iterator_type(const char *metadata, char *data) : fixed_dim_iterator<ElementType, NDim>(metadata, data) {}
   };
 
-  fixed_dim(const char *metadata, char *data) : as_t<ElementType>(metadata, data)
-  {
-  }
+  fixed_dim(const char *metadata, char *data) : as_t<ElementType>(metadata, data) {}
 
-  size_t size() const
-  {
-    return reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size;
-  }
+  size_t size() const { return reinterpret_cast<const fixed_dim_type_arrmeta *>(this->m_metadata)->dim_size; }
 
-  void set_data(char *data)
-  {
-    this->m_data = data;
-  }
+  void set_data(char *data) { this->m_data = data; }
 
   template <typename... IndexType>
   decltype(auto) operator()(IndexType... index)
@@ -98,24 +85,13 @@ protected:
   char *m_data;
 
 public:
-  fixed_dim_iterator(const char *metadata, char *data) : m_metadata(metadata), m_data(data)
-  {
-  }
+  fixed_dim_iterator(const char *metadata, char *data) : m_metadata(metadata), m_data(data) {}
 
-  fixed_dim<ElementType> operator*()
-  {
-    return fixed_dim<ElementType>(m_metadata, m_data);
-  }
+  fixed_dim<ElementType> operator*() { return fixed_dim<ElementType>(m_metadata, m_data); }
 
-  bool operator==(const fixed_dim_iterator &rhs) const
-  {
-    return m_data == rhs.m_data;
-  }
+  bool operator==(const fixed_dim_iterator &rhs) const { return m_data == rhs.m_data; }
 
-  bool operator!=(const fixed_dim_iterator &rhs) const
-  {
-    return m_data != rhs.m_data;
-  }
+  bool operator!=(const fixed_dim_iterator &rhs) const { return m_data != rhs.m_data; }
 };
 
 template <typename ElementType, int NDim>
@@ -156,10 +132,7 @@ namespace ndt {
 
     size_t get_default_data_size() const;
 
-    intptr_t get_fixed_dim_size() const
-    {
-      return m_dim_size;
-    }
+    intptr_t get_fixed_dim_size() const { return m_dim_size; }
 
     intptr_t get_fixed_stride(const char *arrmeta) const
     {
@@ -215,10 +188,6 @@ namespace ndt {
 
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
-
-    intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp, const char *dst_arrmeta,
-                                    const type &src_tp, const char *src_arrmeta, kernel_request_t kernreq,
-                                    const eval::eval_context *ectx) const;
 
     void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback, void *callback_data) const;
 
@@ -291,27 +260,18 @@ namespace ndt {
 
   template <typename T, int N>
   struct type::equivalent<T[N]> {
-    static type make()
-    {
-      return make_fixed_dim(N, type::make<T>());
-    }
+    static type make() { return make_fixed_dim(N, type::make<T>()); }
   };
 
   // Need to handle const properly
   template <typename T, int N>
   struct type::equivalent<const T[N]> {
-    static type make()
-    {
-      return type::make<T[N]>();
-    }
+    static type make() { return type::make<T[N]>(); }
   };
 
   template <typename ElementType>
   struct type::equivalent<fixed_dim<ElementType>> {
-    static type make()
-    {
-      return fixed_dim_kind_type::make(type::make<ElementType>());
-    }
+    static type make() { return fixed_dim_kind_type::make(type::make<ElementType>()); }
   };
 
 } // namespace dynd::ndt

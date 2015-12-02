@@ -460,62 +460,6 @@ void ndt::fixed_dim_type::data_destruct_strided(const char *arrmeta, char *data,
   }
 }
 
-intptr_t ndt::fixed_dim_type::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const type &dst_tp,
-                                                     const char *dst_arrmeta, const type &src_tp,
-                                                     const char *src_arrmeta, kernel_request_t kernreq,
-                                                     const eval::eval_context *ectx) const
-{
-  if (this == dst_tp.extended()) {
-    const fixed_dim_type_arrmeta *dst_md = reinterpret_cast<const fixed_dim_type_arrmeta *>(dst_arrmeta);
-    intptr_t src_size, src_stride;
-    type src_el_tp;
-    const char *src_el_arrmeta;
-
-    if (src_tp.get_ndim() < dst_tp.get_ndim()) {
-      src_stride = 0;
-      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1>::make(
-          ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride, &src_stride);
-
-      return ::make_assignment_kernel(ckb, ckb_offset, m_element_tp, dst_arrmeta + sizeof(fixed_dim_type_arrmeta),
-                                      src_tp, src_arrmeta, kernel_request_strided, ectx);
-    }
-    else if (src_tp.get_as_strided(src_arrmeta, &src_size, &src_stride, &src_el_tp, &src_el_arrmeta)) {
-      nd::functional::elwise_ck<fixed_dim_type_id, fixed_dim_type_id, 1>::make(
-          ckb, kernreq, ckb_offset, get_fixed_dim_size(), dst_md->stride, &src_stride);
-
-      // Check for a broadcasting error
-      if (src_size != 1 && get_fixed_dim_size() != src_size) {
-        throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
-      }
-
-      return ::make_assignment_kernel(ckb, ckb_offset, m_element_tp, dst_arrmeta + sizeof(fixed_dim_type_arrmeta),
-                                      src_el_tp, src_el_arrmeta, kernel_request_strided, ectx);
-    }
-    else if (!src_tp.is_builtin()) {
-      // Give the src type a chance to make a kernel
-      return src_tp.extended()->make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                                                       kernreq, ectx);
-    }
-    else {
-      stringstream ss;
-      ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-      throw dynd::type_error(ss.str());
-    }
-  }
-  else if (dst_tp.get_kind() == string_kind) {
-    return make_any_to_string_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, src_arrmeta, kernreq,
-                                                ectx);
-  }
-  else if (dst_tp.get_ndim() < src_tp.get_ndim()) {
-    throw broadcast_error(dst_tp, dst_arrmeta, src_tp, src_arrmeta);
-  }
-  else {
-    stringstream ss;
-    ss << "Cannot assign from " << src_tp << " to " << dst_tp;
-    throw dynd::type_error(ss.str());
-  }
-}
-
 void ndt::fixed_dim_type::foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback,
                                           void *callback_data) const
 {
