@@ -9,7 +9,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
-#include <dynd/kernels/string_numeric_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
 using namespace std;
