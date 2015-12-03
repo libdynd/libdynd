@@ -64,19 +64,4 @@ inline intptr_t make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt
 DYND_API size_t make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offset, size_t data_size,
                                                       size_t data_alignment, kernel_request_t kernreq);
 
-/**
- * Creates an assignment kernel from the src to the dst built in
- * type ids.
- *
- * \param ckb  The hierarchical assignment kernel being constructed.
- * \param ckb_offset  The offset within 'ckb'.
- * \param dst_type_id  The destination dynd type id.
- * \param src_type_id  The source dynd type id.
- * \param kernreq  What kind of kernel must be placed in 'ckb'.
- * \param errmode  The error mode to use for assignments.
- */
-DYND_API size_t make_builtin_type_assignment_kernel(void *ckb, intptr_t ckb_offset, type_id_t dst_type_id,
-                                                    type_id_t src_type_id, kernel_request_t kernreq,
-                                                    assign_error_mode errmode);
-
 } // namespace dynd

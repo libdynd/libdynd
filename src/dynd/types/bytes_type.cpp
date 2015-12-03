@@ -5,7 +5,6 @@
 
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
-#include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/apply.hpp>

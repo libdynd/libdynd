@@ -7,7 +7,6 @@
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
-#include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/kernels/string_comparison_kernels.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/typevar_type.hpp>

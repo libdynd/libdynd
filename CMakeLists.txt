@@ -345,7 +345,6 @@ set(libdynd_SRC
     include/dynd/gfunc/make_gcallable.hpp
     # Kernels
     src/dynd/kernels/base_kernel.cpp
-    src/dynd/kernels/bytes_assignment_kernels.cpp
     src/dynd/kernels/byteswap_kernels.cpp
     src/dynd/kernels/ckernel_builder.cpp
     src/dynd/kernels/comparison_kernels.cpp
@@ -362,7 +361,6 @@ set(libdynd_SRC
     src/dynd/kernels/option_assignment_kernels.cpp
     src/dynd/kernels/pointer_assignment_kernels.cpp
     src/dynd/kernels/rolling_kernel.cpp
-    src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
@@ -377,7 +375,6 @@ set(libdynd_SRC
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/base_kernel.hpp
     include/dynd/kernels/base_virtual_kernel.hpp
-    include/dynd/kernels/bytes_assignment_kernels.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/ckernel_common_functions.hpp
@@ -406,7 +403,6 @@ set(libdynd_SRC
     include/dynd/kernels/reduction_kernel.hpp
     include/dynd/kernels/rolling_kernel.hpp
     include/dynd/kernels/sort_kernel.hpp
-    include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp

@@ -9,7 +9,6 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
-#include <dynd/kernels/string_assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;
