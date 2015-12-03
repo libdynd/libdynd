@@ -18,75 +18,6 @@ using namespace std;
 using namespace dynd;
 
 namespace {
-
-struct string_to_builtin_kernel {
-  typedef string_to_builtin_kernel extra_type;
-
-  ckernel_prefix base;
-  ndt::type src_string_tp;
-  assign_error_mode errmode;
-  const char *src_arrmeta;
-
-  static void destruct(ckernel_prefix *extra)
-  {
-    extra_type *e = reinterpret_cast<extra_type *>(extra);
-    e->src_string_tp.~type();
-  }
-};
-} // anonymous namespace
-
-static expr_single_t static_string_to_builtin_kernels[builtin_type_id_count - 2] = {
-    &nd::assignment_kernel<bool_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<int8_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<int16_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<int32_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<int64_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<int128_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<uint8_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<uint16_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<uint32_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<uint64_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<uint128_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<float16_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<float32_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<float64_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<float128_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<complex_float32_type_id, string_type_id>::single_wrapper,
-    &nd::assignment_kernel<complex_float64_type_id, string_type_id>::single_wrapper};
-
-size_t dynd::make_string_to_builtin_assignment_kernel(void *ckb, intptr_t ckb_offset, type_id_t dst_type_id,
-                                                      const ndt::type &src_string_tp, const char *src_arrmeta,
-                                                      kernel_request_t kernreq, const eval::eval_context *ectx)
-{
-  if (src_string_tp.get_kind() != string_kind) {
-    stringstream ss;
-    ss << "make_string_to_builtin_assignment_kernel: source type " << src_string_tp << " is not a string type";
-    throw runtime_error(ss.str());
-  }
-
-  if (dst_type_id >= bool_type_id && dst_type_id <= complex_float64_type_id) {
-    ckb_offset = make_kernreq_to_single_kernel_adapter(ckb, ckb_offset, 1, kernreq);
-    string_to_builtin_kernel *e =
-        reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<string_to_builtin_kernel>(ckb_offset);
-    e->base.function = reinterpret_cast<void *>(static_string_to_builtin_kernels[dst_type_id - bool_type_id]);
-    e->base.destructor = &string_to_builtin_kernel::destruct;
-    // The kernel data owns this reference
-    e->src_string_tp = ndt::type(src_string_tp);
-    e->errmode = ectx->errmode;
-    e->src_arrmeta = src_arrmeta;
-    return ckb_offset;
-  }
-  else {
-    stringstream ss;
-    ss << "make_string_to_builtin_assignment_kernel: destination type id " << dst_type_id << " is not builtin";
-    throw runtime_error(ss.str());
-  }
-}
-
-/////////////////////////////////////////
-// string to builtin assignment
-
-namespace {
 struct builtin_to_string_kernel_extra {
   typedef builtin_to_string_kernel_extra extra_type;
 
@@ -146,17 +77,4 @@ size_t dynd::make_builtin_to_string_assignment_kernel(void *ckb, intptr_t ckb_of
     ss << "make_builtin_to_string_assignment_kernel: source type id " << src_type_id << " is not builtin";
     throw runtime_error(ss.str());
   }
-}
-
-void dynd::assign_utf8_string_to_builtin(type_id_t dst_type_id, char *dst, const char *str_begin, const char *str_end,
-                                         const eval::eval_context *ectx)
-{
-  ndt::type dt = ndt::string_type::make();
-  dynd::string d(str_begin, str_end - str_begin);
-
-  ckernel_builder<kernel_request_host> k;
-  make_string_to_builtin_assignment_kernel(&k, 0, dst_type_id, dt, NULL, kernel_request_single, ectx);
-  expr_single_t fn = k.get()->get_function<expr_single_t>();
-  char *src = reinterpret_cast<char *>(&d);
-  fn(k.get(), dst, &src);
 }
