@@ -44,6 +44,128 @@
 
 namespace dynd {
 
+// Trim taken from boost string algorithms library
+// Trim taken from boost string algorithms library
+template <typename ForwardIteratorT>
+inline ForwardIteratorT trim_begin(ForwardIteratorT InBegin, ForwardIteratorT InEnd)
+{
+  ForwardIteratorT It = InBegin;
+  for (; It != InEnd; ++It) {
+    if (!isspace(*It))
+      return It;
+  }
+
+  return It;
+}
+template <typename ForwardIteratorT>
+inline ForwardIteratorT trim_end(ForwardIteratorT InBegin, ForwardIteratorT InEnd)
+{
+  for (ForwardIteratorT It = InEnd; It != InBegin;) {
+    if (!isspace(*(--It)))
+      return ++It;
+  }
+
+  return InBegin;
+}
+template <typename SequenceT>
+inline void trim_left_if(SequenceT &Input)
+{
+  Input.erase(Input.begin(), trim_begin(Input.begin(), Input.end()));
+}
+template <typename SequenceT>
+inline void trim_right_if(SequenceT &Input)
+{
+  Input.erase(trim_end(Input.begin(), Input.end()), Input.end());
+}
+template <typename SequenceT>
+inline void trim(SequenceT &Input)
+{
+  trim_right_if(Input);
+  trim_left_if(Input);
+}
+// End trim taken from boost string algorithms
+inline void to_lower(std::string &s)
+{
+  for (size_t i = 0, i_end = s.size(); i != i_end; ++i) {
+    s[i] = tolower(s[i]);
+  }
+}
+
+template <class T>
+struct overflow_check;
+template <>
+struct overflow_check<int8_t> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
+    return (value & ~0x7fULL) != 0 && !(negative && value == 0x80ULL);
+  }
+};
+template <>
+struct overflow_check<int16_t> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
+    return (value & ~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
+  }
+};
+template <>
+struct overflow_check<int32_t> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
+    return (value & ~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
+  }
+};
+template <>
+struct overflow_check<int64_t> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
+    return (value & ~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
+  }
+};
+template <>
+struct overflow_check<int128> {
+  inline static bool is_overflow(uint128 value, bool negative)
+  {
+    return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
+           !(negative && value.m_hi == 0x8000000000000000ULL && value.m_lo == 0ULL);
+  }
+};
+template <>
+struct overflow_check<uint8_t> {
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffULL) != 0; }
+};
+template <>
+struct overflow_check<uint16_t> {
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffffULL) != 0; }
+};
+template <>
+struct overflow_check<uint32_t> {
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffffffffULL) != 0; }
+};
+template <>
+struct overflow_check<uint64_t> {
+  inline static bool is_overflow(uint64_t DYND_UNUSED(value)) { return false; }
+};
+
+inline void raise_string_cast_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
+                                    const char *data)
+{
+  std::stringstream ss;
+  ss << "cannot cast string ";
+  string_tp.print_data(ss, arrmeta, data);
+  ss << " to " << dst_tp;
+  throw std::invalid_argument(ss.str());
+}
+
+inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
+                                             const char *data)
+{
+  std::stringstream ss;
+  ss << "overflow converting string ";
+  string_tp.print_data(ss, arrmeta, data);
+  ss << " to " << dst_tp;
+  throw std::overflow_error(ss.str());
+}
+
 struct ndarrayarg_assign_ck : nd::base_kernel<ndarrayarg_assign_ck, 1> {
   void single(char *dst, char *const *src)
   {
@@ -2733,21 +2855,6 @@ namespace nd {
       }
     };
 
-    template <type_id_t DstTypeID>
-    struct assignment_virtual_kernel<DstTypeID, bool_kind, string_type_id, string_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, bool_kind, string_type_id, string_kind>> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
-                                                        src_arrmeta[0], kernreq, ectx);
-      }
-    };
-
     template <>
     struct assignment_virtual_kernel<tuple_type_id, tuple_kind, tuple_type_id, tuple_kind>
         : base_virtual_kernel<assignment_virtual_kernel<tuple_type_id, tuple_kind, tuple_type_id, tuple_kind>> {
@@ -3012,79 +3119,392 @@ namespace nd {
       }
     };
 
-    template <type_id_t DstTypeID>
-    struct assignment_virtual_kernel<DstTypeID, bool_kind, fixed_string_type_id, string_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, bool_kind, fixed_string_type_id, string_kind>> {
+    template <>
+    struct assignment_virtual_kernel<bool_type_id, bool_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<bool_type_id, bool_kind, string_type_id, string_kind>, 1> {
+      ndt::type src_string_tp;
+      assign_error_mode errmode;
+      const char *src_arrmeta;
+
+      assignment_virtual_kernel(const ndt::type &src_string_tp, assign_error_mode errmode, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), errmode(errmode), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        // Get the string from the source
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], errmode);
+        trim(s);
+        parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, errmode);
+      }
+
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
-                                                        src_arrmeta[0], kernreq, ectx);
+        make(ckb, kernreq, ckb_offset, src_tp[0], ectx->errmode, src_arrmeta[0]);
+        return ckb_offset;
       }
     };
 
-    template <type_id_t DstTypeID>
-    struct assignment_virtual_kernel<DstTypeID, sint_kind, string_type_id, string_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, sint_kind, string_type_id, string_kind>> {
+    template <type_id_t Src0TypeID>
+    struct assignment_virtual_kernel<Src0TypeID, sint_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<Src0TypeID, sint_kind, string_type_id, string_kind>, 1> {
+      typedef typename type_of<Src0TypeID>::type T;
+
+      ndt::type src_string_tp;
+      assign_error_mode errmode;
+      const char *src_arrmeta;
+
+      assignment_virtual_kernel(const ndt::type &src_string_tp, assign_error_mode errmode, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), errmode(errmode), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], errmode);
+        trim(s);
+        bool negative = false;
+        if (!s.empty() && s[0] == '-') {
+          s.erase(0, 1);
+          negative = true;
+        }
+        T result;
+        if (errmode == assign_error_nocheck) {
+          uint64_t value = parse::unchecked_string_to_uint64(s.data(), s.data() + s.size());
+          result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
+        }
+        else {
+          bool overflow = false, badparse = false;
+          uint64_t value = parse::checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
+          if (badparse) {
+            raise_string_cast_error(ndt::type::make<T>(), src_string_tp, src_arrmeta, src[0]);
+          }
+          else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
+            raise_string_cast_overflow_error(ndt::type::make<T>(), src_string_tp, src_arrmeta, src[0]);
+          }
+          result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
+        }
+        *reinterpret_cast<T *>(dst) = result;
+      }
+
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
-                                                        src_arrmeta[0], kernreq, ectx);
+        assignment_virtual_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], ectx->errmode, src_arrmeta[0]);
+        return ckb_offset;
       }
     };
 
-    template <type_id_t DstTypeID>
-    struct assignment_virtual_kernel<DstTypeID, uint_kind, string_type_id, string_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, uint_kind, string_type_id, string_kind>> {
+    template <>
+    struct assignment_virtual_kernel<int128_type_id, sint_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<int128_type_id, sint_kind, string_type_id, string_kind>, 1> {
+      ndt::type src_string_tp;
+      assign_error_mode errmode;
+      const char *src_arrmeta;
+
+      assignment_virtual_kernel(const ndt::type &src_string_tp, assign_error_mode errmode, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), errmode(errmode), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], errmode);
+        trim(s);
+        bool negative = false;
+        if (!s.empty() && s[0] == '-') {
+          s.erase(0, 1);
+          negative = true;
+        }
+        int128 result;
+        if (errmode == assign_error_nocheck) {
+          uint128 value = parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
+          result = negative ? static_cast<int128>(0) : static_cast<int128>(value);
+        }
+        else {
+          bool overflow = false, badparse = false;
+          uint128 value = parse::checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
+          if (badparse) {
+            raise_string_cast_error(ndt::type::make<int128>(), src_string_tp, src_arrmeta, src[0]);
+          }
+          else if (overflow || overflow_check<int128>::is_overflow(value, negative)) {
+            raise_string_cast_overflow_error(ndt::type::make<int128>(), src_string_tp, src_arrmeta, src[0]);
+          }
+          result = negative ? -static_cast<int128>(value) : static_cast<int128>(value);
+        }
+        *reinterpret_cast<int128 *>(dst) = result;
+      }
+
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
-                                                        src_arrmeta[0], kernreq, ectx);
+        make(ckb, kernreq, ckb_offset, src_tp[0], ectx->errmode, src_arrmeta[0]);
+        return ckb_offset;
       }
     };
 
-    template <type_id_t DstTypeID>
-    struct assignment_virtual_kernel<DstTypeID, real_kind, string_type_id, string_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, real_kind, string_type_id, string_kind>> {
+    template <type_id_t Src0TypeID>
+    struct assignment_virtual_kernel<Src0TypeID, uint_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<Src0TypeID, uint_kind, string_type_id, string_kind>, 1> {
+      typedef typename type_of<Src0TypeID>::type T;
+
+      ndt::type src_string_tp;
+      assign_error_mode errmode;
+      const char *src_arrmeta;
+
+      assignment_virtual_kernel(const ndt::type &src_string_tp, assign_error_mode errmode, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), errmode(errmode), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], errmode);
+        trim(s);
+        bool negative = false;
+        if (!s.empty() && s[0] == '-') {
+          s.erase(0, 1);
+          negative = true;
+        }
+        T result;
+        if (errmode == assign_error_nocheck) {
+          uint64_t value = parse::unchecked_string_to_uint64(s.data(), s.data() + s.size());
+          result = negative ? static_cast<T>(0) : static_cast<T>(value);
+        }
+        else {
+          bool overflow = false, badparse = false;
+          uint64_t value = parse::checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
+          if (badparse) {
+            raise_string_cast_error(ndt::type::make<T>(), src_string_tp, src_arrmeta, src[0]);
+          }
+          else if (overflow || (negative && value != 0) || overflow_check<T>::is_overflow(value)) {
+            raise_string_cast_overflow_error(ndt::type::make<T>(), src_string_tp, src_arrmeta, src[0]);
+          }
+          result = static_cast<T>(value);
+        }
+        *reinterpret_cast<T *>(dst) = result;
+      }
+
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
-                                                        src_arrmeta[0], kernreq, ectx);
+        assignment_virtual_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], ectx->errmode, src_arrmeta[0]);
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<uint128_type_id, uint_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<uint128_type_id, uint_kind, string_type_id, string_kind>, 1> {
+      ndt::type src_string_tp;
+      assign_error_mode errmode;
+      const char *src_arrmeta;
+
+      assignment_virtual_kernel(const ndt::type &src_string_tp, assign_error_mode errmode, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), errmode(errmode), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], errmode);
+        trim(s);
+        bool negative = false;
+        if (!s.empty() && s[0] == '-') {
+          s.erase(0, 1);
+          negative = true;
+        }
+        int128 result;
+        if (errmode == assign_error_nocheck) {
+          result = parse::unchecked_string_to_uint128(s.data(), s.data() + s.size());
+        }
+        else {
+          bool overflow = false, badparse = false;
+          result = parse::checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
+          if (badparse) {
+            raise_string_cast_error(ndt::type::make<int128>(), src_string_tp, src_arrmeta, src[0]);
+          }
+          else if (overflow || (negative && result != 0)) {
+            raise_string_cast_overflow_error(ndt::type::make<uint128>(), src_string_tp, src_arrmeta, src[0]);
+          }
+        }
+        *reinterpret_cast<uint128 *>(dst) = result;
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        make(ckb, kernreq, ckb_offset, src_tp[0], ectx->errmode, src_arrmeta[0]);
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<float16_type_id, real_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<float16_type_id, real_kind, string_type_id, string_kind>, 1> {
+      void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
+      {
+        throw std::runtime_error("TODO: implement string_to_float16_single");
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<float32_type_id, real_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<float32_type_id, real_kind, string_type_id, string_kind>, 1> {
+      ndt::type src_string_tp;
+      assign_error_mode errmode;
+      const char *src_arrmeta;
+
+      assignment_virtual_kernel(const ndt::type &src_string_tp, assign_error_mode errmode, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), errmode(errmode), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        // Get the string from the source
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], errmode);
+        trim(s);
+        double value = parse::checked_string_to_float64(s.data(), s.data() + s.size(), errmode);
+        // Assign double -> float according to the error mode
+        char *child_src[1] = {reinterpret_cast<char *>(&value)};
+        switch (errmode) {
+        case assign_error_nocheck:
+          dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
+                                              assign_error_nocheck>::single_wrapper(NULL, dst, child_src);
+          break;
+        case assign_error_overflow:
+          dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
+                                              assign_error_overflow>::single_wrapper(NULL, dst, child_src);
+          break;
+        case assign_error_fractional:
+          dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
+                                              assign_error_fractional>::single_wrapper(NULL, dst, child_src);
+          break;
+        case assign_error_inexact:
+          dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
+                                              assign_error_inexact>::single_wrapper(NULL, dst, child_src);
+          break;
+        default:
+          dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
+                                              assign_error_fractional>::single_wrapper(NULL, dst, child_src);
+          break;
+        }
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        make(ckb, kernreq, ckb_offset, src_tp[0], ectx->errmode, src_arrmeta[0]);
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<float64_type_id, real_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<float64_type_id, real_kind, string_type_id, string_kind>, 1> {
+      ndt::type src_string_tp;
+      assign_error_mode errmode;
+      const char *src_arrmeta;
+
+      assignment_virtual_kernel(const ndt::type &src_string_tp, assign_error_mode errmode, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), errmode(errmode), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        // Get the string from the source
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], errmode);
+        trim(s);
+        double value = parse::checked_string_to_float64(s.data(), s.data() + s.size(), errmode);
+        *reinterpret_cast<double *>(dst) = value;
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        make(ckb, kernreq, ckb_offset, src_tp[0], ectx->errmode, src_arrmeta[0]);
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<float128_type_id, real_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<float128_type_id, real_kind, string_type_id, string_kind>, 1> {
+      void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
+      {
+        throw std::runtime_error("TODO: implement string_to_float128_single");
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<complex_float32_type_id, complex_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<complex_float32_type_id, complex_kind, string_type_id, string_kind>,
+                      1> {
+      void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
+      {
+        throw std::runtime_error("TODO: implement string_to_complex_float32_single");
+      }
+    };
+
+    template <>
+    struct assignment_virtual_kernel<complex_float64_type_id, complex_kind, string_type_id, string_kind>
+        : base_kernel<assignment_virtual_kernel<complex_float64_type_id, complex_kind, string_type_id, string_kind>,
+                      1> {
+      void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
+      {
+        throw std::runtime_error("TODO: implement string_to_complex_float64_single");
       }
     };
 
     template <type_id_t DstTypeID>
     struct assignment_virtual_kernel<DstTypeID, sint_kind, fixed_string_type_id, string_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<DstTypeID, sint_kind, fixed_string_type_id, string_kind>> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        return make_string_to_builtin_assignment_kernel(ckb, ckb_offset, dst_tp.get_type_id(), src_tp[0],
-                                                        src_arrmeta[0], kernreq, ectx);
-      }
+        : assignment_virtual_kernel<DstTypeID, sint_kind, string_type_id, string_kind> {
     };
 
     template <>
