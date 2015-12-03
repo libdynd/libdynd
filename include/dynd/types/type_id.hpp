@@ -11,6 +11,7 @@
 #include <dynd/config.hpp>
 
 namespace dynd {
+class bytes;
 class string;
 
 namespace ndt {
@@ -502,6 +503,11 @@ struct type_of<complex_float32_type_id> {
 template <>
 struct type_of<complex_float64_type_id> {
   typedef complex128 type;
+};
+
+template <>
+struct type_of<bytes_type_id> {
+  typedef bytes type;
 };
 
 template <>

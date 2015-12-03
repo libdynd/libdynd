@@ -17,8 +17,6 @@
 #include <dynd/kernels/struct_assignment_kernels.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
-#include <dynd/kernels/string_assignment_kernels.hpp>
-#include <dynd/kernels/bytes_assignment_kernels.hpp>
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
@@ -2694,65 +2692,6 @@ namespace nd {
     }
   };
 
-  template <int N>
-  struct wrap_single_as_strided_fixedcount_ck {
-    static void strided(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
-                        const intptr_t *src_stride, size_t count)
-    {
-      ckernel_prefix *echild = self->get_child(sizeof(ckernel_prefix));
-      expr_single_t opchild = echild->get_function<expr_single_t>();
-      char *src_copy[N];
-      for (int j = 0; j < N; ++j) {
-        src_copy[j] = src[j];
-      }
-      for (size_t i = 0; i != count; ++i) {
-        opchild(echild, dst, src_copy);
-        dst += dst_stride;
-        for (int j = 0; j < N; ++j) {
-          src_copy[j] += src_stride[j];
-        }
-      }
-    }
-  };
-
-  template <>
-  struct wrap_single_as_strided_fixedcount_ck<0> {
-    static void strided(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-                        const intptr_t *DYND_UNUSED(src_stride), size_t count)
-    {
-      ckernel_prefix *echild = self->get_child(sizeof(ckernel_prefix));
-      expr_single_t opchild = echild->get_function<expr_single_t>();
-      for (size_t i = 0; i != count; ++i) {
-        opchild(echild, dst, NULL);
-        dst += dst_stride;
-      }
-    }
-  };
-
-  struct DYND_API wrap_single_as_strided_ck {
-    typedef wrap_single_as_strided_ck self_type;
-    ckernel_prefix base;
-    intptr_t nsrc;
-
-    static inline void strided(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
-                               const intptr_t *src_stride, size_t count)
-    {
-      intptr_t nsrc = reinterpret_cast<self_type *>(self)->nsrc;
-      shortvector<char *> src_copy(nsrc, src);
-      ckernel_prefix *child = self->get_child(sizeof(self_type));
-      expr_single_t child_fn = child->get_function<expr_single_t>();
-      for (size_t i = 0; i != count; ++i) {
-        child_fn(child, dst, src_copy.get());
-        dst += dst_stride;
-        for (intptr_t j = 0; j < nsrc; ++j) {
-          src_copy[j] += src_stride[j];
-        }
-      }
-    }
-
-    static void destruct(ckernel_prefix *self) { self->get_child(sizeof(self_type))->destroy(); }
-  };
-
   namespace detail {
 
     template <>
@@ -2798,21 +2737,6 @@ namespace nd {
       {
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta,
                                       ndt::property_type::make(src_tp[0], "struct"), src_arrmeta[0], kernreq, ectx);
-      }
-    };
-
-    template <>
-    struct assignment_virtual_kernel<bytes_type_id, bytes_kind, bytes_type_id, bytes_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<bytes_type_id, bytes_kind, bytes_type_id, bytes_kind>> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        return make_blockref_bytes_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_alignment(), dst_arrmeta,
-                                                     src_tp[0].get_data_alignment(), src_arrmeta[0], kernreq, ectx);
       }
     };
 
@@ -2941,36 +2865,89 @@ namespace nd {
     };
 
     template <>
-    struct assignment_virtual_kernel<string_type_id, string_kind, string_type_id, string_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<string_type_id, string_kind, string_type_id, string_kind>> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp, const char *const *src_arrmeta,
-                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        return make_blockref_string_assignment_kernel(
-            ckb, ckb_offset, dst_arrmeta, dst_tp.extended<ndt::base_string_type>()->get_encoding(), src_arrmeta[0],
-            src_tp[0].extended<ndt::base_string_type>()->get_encoding(), kernreq, ectx);
-      }
-    };
-
-    template <>
     struct assignment_virtual_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind>
-        : base_virtual_kernel<
-              assignment_virtual_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind>> {
+        : base_kernel<assignment_virtual_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind>, 1> {
+      string_encoding_t m_dst_encoding, m_src_encoding;
+      intptr_t m_src_element_size;
+      next_unicode_codepoint_t m_next_fn;
+      append_unicode_codepoint_t m_append_fn;
+
+      assignment_virtual_kernel(string_encoding_t dst_encoding, string_encoding_t src_encoding,
+                                intptr_t src_element_size, next_unicode_codepoint_t next_fn,
+                                append_unicode_codepoint_t append_fn)
+          : m_dst_encoding(dst_encoding), m_src_encoding(src_encoding), m_src_element_size(src_element_size),
+            m_next_fn(next_fn), m_append_fn(append_fn)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        dynd::string *dst_d = reinterpret_cast<dynd::string *>(dst);
+        intptr_t src_charsize = string_encoding_char_size_table[m_src_encoding];
+        intptr_t dst_charsize = string_encoding_char_size_table[m_dst_encoding];
+
+        if (dst_d->begin() != NULL) {
+          throw std::runtime_error("Cannot assign to an already initialized dynd string");
+        }
+
+        char *dst_current;
+        const char *src_begin = src[0];
+        const char *src_end = src[0] + m_src_element_size;
+        next_unicode_codepoint_t next_fn = m_next_fn;
+        append_unicode_codepoint_t append_fn = m_append_fn;
+        uint32_t cp;
+
+        // Allocate the initial output as the src number of characters + some
+        // padding
+        // TODO: Don't add padding if the output is not a multi-character encoding
+        dynd::string tmp;
+        tmp.resize(((src_end - src_begin) / src_charsize + 16) * dst_charsize * 1124 / 1024);
+        char *dst_begin = tmp.begin();
+        char *dst_end = tmp.end();
+
+        dst_current = dst_begin;
+        while (src_begin < src_end) {
+          cp = next_fn(src_begin, src_end);
+          // Append the codepoint, or increase the allocated memory as necessary
+          if (cp != 0) {
+            if (dst_end - dst_current >= 8) {
+              append_fn(cp, dst_current, dst_end);
+            }
+            else {
+              char *dst_begin_saved = dst_begin;
+              tmp.resize(2 * (dst_end - dst_begin));
+              dst_begin = tmp.begin();
+              dst_end = tmp.end();
+              dst_current = dst_begin + (dst_current - dst_begin_saved);
+
+              append_fn(cp, dst_current, dst_end);
+            }
+          }
+          else {
+            break;
+          }
+        }
+
+        // Shrink-wrap the memory to just fit the string
+        dst_d->assign(dst_begin, dst_current - dst_begin);
+      }
+
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
+                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
                                   const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                                   const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        return make_fixed_string_to_blockref_string_assignment_kernel(
-            ckb, ckb_offset, dst_arrmeta, dst_tp.extended<ndt::base_string_type>()->get_encoding(),
-            src_tp[0].get_data_size(), src_tp[0].extended<ndt::base_string_type>()->get_encoding(), kernreq, ectx);
+        assignment_virtual_kernel::make(
+            ckb, kernreq, ckb_offset, dst_tp.extended<ndt::base_string_type>()->get_encoding(),
+            src_tp[0].extended<ndt::base_string_type>()->get_encoding(), src_tp[0].get_data_size(),
+            get_next_unicode_codepoint_function(src_tp[0].extended<ndt::base_string_type>()->get_encoding(),
+                                                ectx->errmode),
+            get_append_unicode_codepoint_function(dst_tp.extended<ndt::base_string_type>()->get_encoding(),
+                                                  ectx->errmode));
+        return ckb_offset;
       }
     };
 
@@ -3091,42 +3068,6 @@ namespace nd {
       {
         return make_expression_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0],
                                                  kernreq, ectx);
-      }
-    };
-
-    template <>
-    struct assignment_virtual_kernel<char_type_id, char_kind, char_type_id, char_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<char_type_id, char_kind, char_type_id, char_kind>> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        const ndt::char_type *src_fs = src_tp[0].extended<ndt::char_type>();
-        return make_fixed_string_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
-                                                   dst_tp.extended<ndt::char_type>()->get_encoding(),
-                                                   src_fs->get_data_size(), src_fs->get_encoding(), kernreq, ectx);
-      }
-    };
-
-    template <>
-    struct assignment_virtual_kernel<char_type_id, char_kind, fixed_string_type_id, string_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<char_type_id, char_kind, fixed_string_type_id, string_kind>> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        const ndt::base_string_type *src_fs = src_tp[0].extended<ndt::base_string_type>();
-        return make_fixed_string_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
-                                                   dst_tp.extended<ndt::char_type>()->get_encoding(),
-                                                   src_fs->get_data_size(), src_fs->get_encoding(), kernreq, ectx);
       }
     };
 
@@ -3520,8 +3461,52 @@ namespace nd {
 
     template <>
     struct assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind>
-        : base_virtual_kernel<
-              assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind>> {
+        : base_kernel<assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind>,
+                      1> {
+      next_unicode_codepoint_t m_next_fn;
+      append_unicode_codepoint_t m_append_fn;
+      intptr_t m_dst_data_size, m_src_data_size;
+      bool m_overflow_check;
+
+      assignment_virtual_kernel(next_unicode_codepoint_t next_fn, append_unicode_codepoint_t append_fn,
+                                intptr_t dst_data_size, intptr_t src_data_size, bool overflow_check)
+          : m_next_fn(next_fn), m_append_fn(append_fn), m_dst_data_size(dst_data_size), m_src_data_size(src_data_size),
+            m_overflow_check(overflow_check)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        char *dst_end = dst + m_dst_data_size;
+        const char *src_end = src[0] + m_src_data_size;
+        next_unicode_codepoint_t next_fn = m_next_fn;
+        append_unicode_codepoint_t append_fn = m_append_fn;
+        uint32_t cp = 0;
+
+        char *src_copy = src[0];
+        while (src_copy < src_end && dst < dst_end) {
+          cp = next_fn(const_cast<const char *&>(src_copy), src_end);
+          // The fixed_string type uses null-terminated strings
+          if (cp == 0) {
+            // Null-terminate the destination string, and we're done
+            memset(dst, 0, dst_end - dst);
+            return;
+          }
+          else {
+            append_fn(cp, dst, dst_end);
+          }
+        }
+        if (src_copy < src_end) {
+          if (m_overflow_check) {
+            throw std::runtime_error("Input string is too large to convert to "
+                                     "destination fixed-size string");
+          }
+        }
+        else if (dst < dst_end) {
+          memset(dst, 0, dst_end - dst);
+        }
+      }
+
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -3531,16 +3516,65 @@ namespace nd {
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         const ndt::fixed_string_type *src_fs = src_tp[0].extended<ndt::fixed_string_type>();
-        return make_fixed_string_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
-                                                   dst_tp.extended<ndt::fixed_string_type>()->get_encoding(),
-                                                   src_fs->get_data_size(), src_fs->get_encoding(), kernreq, ectx);
+        assignment_virtual_kernel::make(
+            ckb, kernreq, ckb_offset, get_next_unicode_codepoint_function(src_fs->get_encoding(), ectx->errmode),
+            get_append_unicode_codepoint_function(dst_tp.extended<ndt::fixed_string_type>()->get_encoding(),
+                                                  ectx->errmode),
+            dst_tp.get_data_size(), src_fs->get_data_size(), ectx->errmode != assign_error_nocheck);
+        return ckb_offset;
       }
     };
 
     template <>
+    struct assignment_virtual_kernel<char_type_id, char_kind, char_type_id, char_kind>
+        : assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind> {
+    };
+
+    template <>
+    struct assignment_virtual_kernel<char_type_id, char_kind, fixed_string_type_id, string_kind>
+        : assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind> {
+    };
+
+    template <>
     struct assignment_virtual_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind>
-        : base_virtual_kernel<
-              assignment_virtual_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind>> {
+        : base_kernel<assignment_virtual_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind>, 1> {
+      next_unicode_codepoint_t m_next_fn;
+      append_unicode_codepoint_t m_append_fn;
+      intptr_t m_dst_data_size;
+      bool m_overflow_check;
+
+      assignment_virtual_kernel(next_unicode_codepoint_t next_fn, append_unicode_codepoint_t append_fn,
+                                intptr_t dst_data_size, bool overflow_check)
+          : m_next_fn(next_fn), m_append_fn(append_fn), m_dst_data_size(dst_data_size), m_overflow_check(overflow_check)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        char *dst_end = dst + m_dst_data_size;
+        const dynd::string *src_d = reinterpret_cast<const dynd::string *>(src[0]);
+        const char *src_begin = src_d->begin();
+        const char *src_end = src_d->end();
+        next_unicode_codepoint_t next_fn = m_next_fn;
+        append_unicode_codepoint_t append_fn = m_append_fn;
+        uint32_t cp;
+
+        while (src_begin < src_end && dst < dst_end) {
+          cp = next_fn(src_begin, src_end);
+          append_fn(cp, dst, dst_end);
+        }
+        if (src_begin < src_end) {
+          if (m_overflow_check) {
+            throw std::runtime_error("Input string is too large to "
+                                     "convert to destination "
+                                     "fixed-size string");
+          }
+        }
+        else if (dst < dst_end) {
+          memset(dst, 0, dst_end - dst);
+        }
+      }
+
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -3550,9 +3584,12 @@ namespace nd {
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         const ndt::base_string_type *src_fs = src_tp[0].extended<ndt::base_string_type>();
-        return make_blockref_string_to_fixed_string_assignment_kernel(
-            ckb, ckb_offset, dst_tp.get_data_size(), dst_tp.extended<ndt::fixed_string_type>()->get_encoding(),
-            src_fs->get_encoding(), kernreq, ectx);
+        assignment_virtual_kernel::make(ckb, kernreq, ckb_offset,
+                                        get_next_unicode_codepoint_function(src_fs->get_encoding(), ectx->errmode),
+                                        get_append_unicode_codepoint_function(
+                                            dst_tp.extended<ndt::fixed_string_type>()->get_encoding(), ectx->errmode),
+                                        dst_tp.get_data_size(), ectx->errmode != assign_error_nocheck);
+        return ckb_offset;
       }
     };
 
@@ -3568,15 +3605,22 @@ namespace nd {
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         const ndt::base_string_type *src_fs = src_tp[0].extended<ndt::base_string_type>();
-        return make_blockref_string_to_fixed_string_assignment_kernel(ckb, ckb_offset, dst_tp.get_data_size(),
-                                                                      dst_tp.extended<ndt::char_type>()->get_encoding(),
-                                                                      src_fs->get_encoding(), kernreq, ectx);
+        assignment_virtual_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind>::make(
+            ckb, kernreq, ckb_offset, get_next_unicode_codepoint_function(src_fs->get_encoding(), ectx->errmode),
+            get_append_unicode_codepoint_function(dst_tp.extended<ndt::char_type>()->get_encoding(), ectx->errmode),
+            dst_tp.get_data_size(), ectx->errmode != assign_error_nocheck);
+        return ckb_offset;
       }
     };
 
     template <>
     struct assignment_virtual_kernel<fixed_string_type_id, string_kind, char_type_id, char_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<fixed_string_type_id, string_kind, char_type_id, char_kind>> {
+        : assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind> {
+    };
+
+    template <>
+    struct assignment_virtual_kernel<string_type_id, string_kind, char_type_id, char_kind>
+        : base_virtual_kernel<assignment_virtual_kernel<string_type_id, string_kind, char_type_id, char_kind>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -3585,28 +3629,13 @@ namespace nd {
                                   const nd::array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
-        const ndt::base_string_type *dst_fs = dst_tp.extended<ndt::base_string_type>();
-        return make_fixed_string_assignment_kernel(ckb, ckb_offset, dst_fs->get_data_size(), dst_fs->get_encoding(),
-                                                   src_tp[0].get_data_size(),
-                                                   src_tp[0].extended<ndt::char_type>()->get_encoding(), kernreq, ectx);
-      }
-    };
-
-    template <>
-    struct assignment_virtual_kernel<string_type_id, string_kind, char_type_id, char_kind>
-        : base_virtual_kernel<assignment_virtual_kernel<string_type_id, string_kind, char_type_id, char_kind>> {
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &dst_tp, const char *dst_arrmeta,
-                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
-                                  const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                  const eval::eval_context *ectx, intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        const ndt::base_string_type *dst_fs = dst_tp.extended<ndt::base_string_type>();
-        return make_fixed_string_to_blockref_string_assignment_kernel(
-            ckb, ckb_offset, dst_arrmeta, dst_fs->get_encoding(), src_tp[0].get_data_size(),
-            src_tp[0].extended<ndt::char_type>()->get_encoding(), kernreq, ectx);
+        assignment_virtual_kernel<string_type_id, string_kind, fixed_string_type_id, string_kind>::make(
+            ckb, kernreq, ckb_offset, dst_tp.extended<ndt::base_string_type>()->get_encoding(),
+            src_tp[0].extended<ndt::char_type>()->get_encoding(), src_tp[0].get_data_size(),
+            get_next_unicode_codepoint_function(src_tp[0].extended<ndt::char_type>()->get_encoding(), ectx->errmode),
+            get_append_unicode_codepoint_function(dst_tp.extended<ndt::base_string_type>()->get_encoding(),
+                                                  ectx->errmode));
+        return ckb_offset;
       }
     };
 

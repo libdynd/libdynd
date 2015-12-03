@@ -7,7 +7,6 @@
 
 #include <dynd/types/busdate_type.hpp>
 #include <dynd/types/date_type.hpp>
-#include <dynd/kernels/string_assignment_kernels.hpp>
 #include <dynd/exceptions.hpp>
 
 #include <datetime_strings.h>
