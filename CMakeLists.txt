@@ -364,7 +364,6 @@ set(libdynd_SRC
     src/dynd/kernels/rolling_kernel.cpp
     src/dynd/kernels/string_assignment_kernels.cpp
     src/dynd/kernels/string_algorithm_kernels.cpp
-    src/dynd/kernels/string_numeric_assignment_kernels.cpp
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/take_kernel.cpp
@@ -409,7 +408,6 @@ set(libdynd_SRC
     include/dynd/kernels/sort_kernel.hpp
     include/dynd/kernels/string_assignment_kernels.hpp
     include/dynd/kernels/string_algorithm_kernels.hpp
-    include/dynd/kernels/string_numeric_assignment_kernels.hpp
     include/dynd/kernels/string_comparison_kernels.hpp
     include/dynd/kernels/struct_assignment_kernels.hpp
     include/dynd/kernels/take_kernel.hpp
