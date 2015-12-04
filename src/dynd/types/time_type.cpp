@@ -322,9 +322,42 @@ void ndt::time_type::get_dynamic_array_properties(const std::pair<std::string, n
 
 ///////// functions on the nd::array
 
+struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
+  nd::array self;
+
+  to_struct_kernel(const nd::array &self) : self(self) {}
+
+  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
+
+  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    dst_tp = helper(kwds[0]).get_type();
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, kwds[0]);
+    return ckb_offset;
+  }
+
+  static nd::array helper(const nd::array &n)
+  {
+    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
+  }
+};
+
 static nd::array function_ndo_to_struct(const nd::array &n)
 {
-  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
+  nd::callable f = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
+  return f(kwds("self", n));
 }
 
 void ndt::time_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,

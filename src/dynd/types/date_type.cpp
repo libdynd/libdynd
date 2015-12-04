@@ -12,6 +12,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/types/unary_expr_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
@@ -291,37 +292,185 @@ void ndt::date_type::get_dynamic_array_properties(const std::pair<std::string, n
 
 ///////// functions on the nd::array
 
+struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
+  nd::array self;
+
+  to_struct_kernel(const nd::array &self) : self(self) {}
+
+  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
+
+  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    dst_tp = helper(kwds[0]).get_type();
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, kwds[0]);
+    return ckb_offset;
+  }
+
+  static nd::array helper(const nd::array &n)
+  {
+    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
+  }
+};
+
 static nd::array function_ndo_to_struct(const nd::array &n)
 {
-  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
+  nd::callable f = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
+  return f(kwds("self", n));
 }
+
+struct strftime_kernel : nd::base_kernel<strftime_kernel> {
+  nd::array self;
+  std::string format;
+
+  strftime_kernel(const nd::array &self, std::string format) : self(self), format(format) {}
+
+  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self, format); }
+
+  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    dst_tp = helper(kwds[0], kwds[1].as<std::string>()).get_type();
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, kwds[0], kwds[1].as<std::string>());
+    return ckb_offset;
+  }
+
+  static nd::array helper(const nd::array &n, const std::string &format)
+  {
+    // TODO: Allow 'format' itself to be an array, with broadcasting, etc.
+    if (format.empty()) {
+      throw runtime_error("format string for strftime should not be empty");
+    }
+    return n.replace_dtype(
+        ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(), make_strftime_kernelgen(format)));
+  }
+};
 
 static nd::array function_ndo_strftime(const nd::array &n, const std::string &format)
 {
-  // TODO: Allow 'format' itself to be an array, with broadcasting, etc.
-  if (format.empty()) {
-    throw runtime_error("format string for strftime should not be empty");
-  }
-  return n.replace_dtype(
-      ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(), make_strftime_kernelgen(format)));
+  nd::callable f = nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"));
+  return f(kwds("self", n, "format", nd::array(format)));
 }
+
+struct weekday_kernel : nd::base_kernel<weekday_kernel> {
+  nd::array self;
+
+  weekday_kernel(const nd::array &self) : self(self) {}
+
+  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
+
+  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    dst_tp = helper(kwds[0]).get_type();
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, kwds[0]);
+    return ckb_offset;
+  }
+
+  static nd::array helper(const nd::array &n)
+  {
+    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
+  }
+};
 
 static nd::array function_ndo_weekday(const nd::array &n)
 {
-  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
+  nd::callable f = nd::callable::make<weekday_kernel>(ndt::type("(self: Any) -> Any"));
+  return f(kwds("self", n));
 }
+
+/*
+struct replace_kernel : nd::base_kernel<replace_kernel> {
+  nd::array self;
+  int32_t year;
+  int32_t month;
+  int32_t day;
+
+  replace_kernel(const nd::array &self, int32_t year, int32_t month, int32_t day)
+      : self(self), year(year), month(month), day(day)
+  {
+  }
+
+  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self, year, month, day); }
+
+  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    dst_tp = helper(kwds[0], kwds[1].is_missing() ? numeric_limits<int32_t>::max() : kwds[1].as<int32_t>(),
+                    kwds[2].is_missing() ? numeric_limits<int32_t>::max() : kwds[2].as<int32_t>(),
+                    kwds[3].is_missing() ? numeric_limits<int32_t>::max() : kwds[3].as<int32_t>())
+                 .get_type();
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, kwds[0],
+         kwds[1].is_missing() ? numeric_limits<int32_t>::max() : kwds[1].as<int32_t>(),
+         kwds[2].is_missing() ? numeric_limits<int32_t>::max() : kwds[2].as<int32_t>(),
+         kwds[3].is_missing() ? numeric_limits<int32_t>::max() : kwds[3].as<int32_t>());
+    return ckb_offset;
+  }
+
+  static nd::array helper(const nd::array &n, int32_t year, int32_t month, int32_t day)
+  {
+    // TODO: Allow 'year', 'month', and 'day' to be arrays, with broadcasting,
+    // etc.
+    if (year == numeric_limits<int32_t>::max() && month == numeric_limits<int32_t>::max() &&
+        day == numeric_limits<int32_t>::max()) {
+      throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
+    }
+    return n.replace_dtype(
+        ndt::unary_expr_type::make(ndt::date_type::make(), n.get_dtype(), make_replace_kernelgen(year, month, day)));
+  }
+};
 
 static nd::array function_ndo_replace(const nd::array &n, int32_t year, int32_t month, int32_t day)
 {
-  // TODO: Allow 'year', 'month', and 'day' to be arrays, with broadcasting,
-  // etc.
-  if (year == numeric_limits<int32_t>::max() && month == numeric_limits<int32_t>::max() &&
-      day == numeric_limits<int32_t>::max()) {
-    throw std::runtime_error("no parameters provided to date.replace, should provide at least one");
-  }
-  return n.replace_dtype(
-      ndt::unary_expr_type::make(ndt::date_type::make(), n.get_dtype(), make_replace_kernelgen(year, month, day)));
+  nd::callable f =
+      nd::callable::make<weekday_kernel>(ndt::type("(self: Any, year: int32, month: int32, day: int32) -> Any"));
+  return f(kwds("self", n, "year", year, "month", month, "day", day));
 }
+*/
 
 void ndt::date_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                                                  size_t *out_count) const
@@ -329,11 +478,12 @@ void ndt::date_type::get_dynamic_array_functions(const std::pair<std::string, gf
   static pair<std::string, gfunc::callable> date_array_functions[] = {
       pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
       pair<std::string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
-      pair<std::string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self")),
-      pair<std::string, gfunc::callable>(
-          "replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
-                                                       numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),
-                                                       numeric_limits<int32_t>::max()))};
+      pair<std::string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self"))};
+
+  //      pair<std::string, gfunc::callable>(
+  //        "replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
+  //                                                   numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),
+  //                                                 numeric_limits<int32_t>::max()))};
 
   *out_functions = date_array_functions;
   *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
