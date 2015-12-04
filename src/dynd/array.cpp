@@ -1834,23 +1834,3 @@ nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)
   }
   return result;
 }
-
-void nd::forward_as_array(const ndt::type &tp, char *arrmeta, char *data, const nd::array &val)
-{
-
-  if (tp.is_builtin() || tp.get_type_id() == callable_type_id) {
-    memcpy(data, val.cdata(), tp.get_data_size());
-  }
-  else {
-    pointer_type_arrmeta *am = reinterpret_cast<pointer_type_arrmeta *>(arrmeta);
-    // Insert the reference in the destination pointer's arrmeta
-    am->blockref = val.get_data_memblock().get();
-    // Copy the rest of the arrmeta after the pointer's arrmeta
-    const ndt::type &val_tp = val.get_type();
-    if (val_tp.get_arrmeta_size() > 0) {
-      val_tp.extended()->arrmeta_copy_construct(arrmeta + sizeof(pointer_type_arrmeta), val.get()->metadata(), val);
-    }
-    // Copy the pointer
-    *reinterpret_cast<char **>(data) = const_cast<char *>(val.cdata());
-  }
-}

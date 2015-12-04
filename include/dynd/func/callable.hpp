@@ -118,9 +118,7 @@ namespace nd {
       available.push_back(j);
     }
 
-    DYND_API void fill_missing_values(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
-                                      const uintptr_t *data_offsets,
-                                      std::vector<nd::array> &DYND_UNUSED(kwds_as_vector),
+    DYND_API void fill_missing_values(const ndt::type *tp, std::vector<nd::array> &DYND_UNUSED(kwds_as_vector),
                                       const std::vector<intptr_t> &missing);
 
     DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t npos);
@@ -150,11 +148,10 @@ namespace nd {
     /** The case of no keyword arguments being provided */
     template <>
     class kwds<> {
-      void fill_values(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
-                       const uintptr_t *data_offsets, std::vector<nd::array> &kwds_as_vector,
+      void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
                        const std::vector<intptr_t> &DYND_UNUSED(available), const std::vector<intptr_t> &missing) const
       {
-        fill_missing_values(tp, arrmeta, arrmeta_offsets, data, data_offsets, kwds_as_vector, missing);
+        fill_missing_values(tp, kwds_as_vector, missing);
       }
 
     public:
@@ -171,24 +168,10 @@ namespace nd {
       }
 
       /** Converts the keyword args + filled in defaults into an nd::array */
-      array as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector,
-                     const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
+      void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
+                    const std::vector<intptr_t> &missing) const
       {
-        array res = empty_shell(tp);
-        ndt::struct_type::fill_default_data_offsets(res.get_dim_size(),
-                                                    tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
-                                                    reinterpret_cast<uintptr_t *>(res.get()->metadata()));
-
-        char *arrmeta = res.get()->metadata();
-        const uintptr_t *arrmeta_offsets = res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw();
-        char *data = res.data();
-        const uintptr_t *data_offsets =
-            res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.get()->metadata());
-
-        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), arrmeta, arrmeta_offsets, data,
-                    data_offsets, kwds_as_vector, available, missing);
-
-        return res;
+        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), kwds_as_vector, available, missing);
       }
     };
 
@@ -201,59 +184,34 @@ namespace nd {
         kwds *self;
 
         template <size_t I>
-        void on_each(typename as_<K, const char *>::type... names)
-        {
-          self->m_names[I] = get<I>(names...);
-        }
-
-        void operator()(typename as_<K, const char *>::type... names)
-        {
-          typedef make_index_sequence<sizeof...(K)> I;
-          for_each<I>(*this, names...);
-        }
-      } set_names;
-
-      struct {
-        kwds *self;
-
-        template <size_t I>
-        void on_each(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
-                     const uintptr_t *data_offsets, std::vector<nd::array> &kwds_as_vector,
-                     const std::vector<intptr_t> &available) const
+        void on_each(std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available) const
         {
           intptr_t j = available[I];
           if (j != -1) {
-            nd::forward_as_array(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j],
-                                 std::get<I>(self->m_values));
             kwds_as_vector[j] = nd::array(std::get<I>(self->m_values));
           }
         }
 
-        void operator()(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
-                        const uintptr_t *data_offsets, std::vector<nd::array> &kwds_as_vector,
-                        const std::vector<intptr_t> &available) const
+        void operator()(std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available) const
         {
           typedef make_index_sequence<sizeof...(K)> I;
-          for_each<I>(*this, tp, arrmeta, arrmeta_offsets, data, data_offsets, kwds_as_vector, available);
+          for_each<I>(*this, kwds_as_vector, available);
         }
       } fill_available_values;
 
-      void fill_values(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
-                       const uintptr_t *data_offsets, std::vector<nd::array> &kwds_as_vector,
+      void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
                        const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
       {
-        fill_available_values(tp, arrmeta, arrmeta_offsets, data, data_offsets, kwds_as_vector, available);
-        fill_missing_values(tp, arrmeta, arrmeta_offsets, data, data_offsets, kwds_as_vector, missing);
+        fill_available_values(kwds_as_vector, available);
+        fill_missing_values(tp, kwds_as_vector, missing);
       }
 
     public:
-      kwds(typename as_<K, const char *>::type... names, K &&... values) : m_values(std::forward<K>(values)...)
+      kwds(typename as_<K, const char *>::type... names, K &&... values)
+          : m_names{names...}, m_values(std::forward<K>(values)...)
       {
-        set_names.self = this;
         validate_names.self = this;
         fill_available_values.self = this;
-
-        set_names(names...);
       }
 
       struct {
@@ -289,20 +247,10 @@ namespace nd {
         }
       } validate_names;
 
-      array as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector,
-                     const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
+      void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
+                    const std::vector<intptr_t> &missing) const
       {
-        array res = empty_shell(tp);
-        ndt::struct_type::fill_default_data_offsets(res.get_dim_size(),
-                                                    tp.extended<ndt::base_struct_type>()->get_field_types_raw(),
-                                                    reinterpret_cast<uintptr_t *>(res.get()->metadata()));
-
-        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), res.get()->metadata(),
-                    res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw(), res.data(),
-                    res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.get()->metadata()),
-                    kwds_as_vector, available, missing);
-
-        return res;
+        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), kwds_as_vector, available, missing);
       }
     };
 
@@ -312,25 +260,21 @@ namespace nd {
       const char *const *m_names;
       array *m_values;
 
-      void fill_available_values(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
-                                 const uintptr_t *data_offsets, std::vector<nd::array> &kwds_as_vector,
-                                 const std::vector<intptr_t> &available) const
+      void fill_available_values(std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available) const
       {
         for (intptr_t i = 0; i < m_size; ++i) {
           intptr_t j = available[i];
           if (j != -1) {
-            nd::forward_as_array(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j], this->m_values[i]);
             kwds_as_vector[j] = this->m_values[i];
           }
         }
       }
 
-      void fill_values(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
-                       const uintptr_t *data_offsets, std::vector<nd::array> &kwds_as_vector,
+      void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
                        const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
       {
-        fill_available_values(tp, arrmeta, arrmeta_offsets, data, data_offsets, kwds_as_vector, available);
-        fill_missing_values(tp, arrmeta, arrmeta_offsets, data, data_offsets, kwds_as_vector, missing);
+        fill_available_values(kwds_as_vector, available);
+        fill_missing_values(tp, kwds_as_vector, missing);
       }
 
     public:
@@ -359,21 +303,10 @@ namespace nd {
         check_nkwd(af_tp, available, missing);
       }
 
-      array as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector,
-                     const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
+      void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
+                    const std::vector<intptr_t> &missing) const
       {
-        array res = empty_shell(tp);
-        auto field_count = tp.extended<ndt::base_struct_type>()->get_field_count();
-        auto field_types = tp.extended<ndt::base_struct_type>()->get_field_types_raw();
-        ndt::struct_type::fill_default_data_offsets(field_count, field_types,
-                                                    reinterpret_cast<uintptr_t *>(res.get()->metadata()));
-
-        fill_values(field_types, res.get()->metadata(),
-                    res.get_type().extended<ndt::base_struct_type>()->get_arrmeta_offsets_raw(), res.data(),
-                    res.get_type().extended<ndt::base_struct_type>()->get_data_offsets(res.get()->metadata()),
-                    kwds_as_vector, available, missing);
-
-        return res;
+        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), kwds_as_vector, available, missing);
       }
     };
 
@@ -644,8 +577,7 @@ namespace nd {
 
       // ...
       std::vector<nd::array> kwds_as_vector(available.size() + missing.size());
-      array kwds_as_array =
-          kwds.as_array(ndt::struct_type::make(self_tp->get_kwd_names(), kwd_tp), kwds_as_vector, available, missing);
+      kwds.as_array(ndt::struct_type::make(self_tp->get_kwd_names(), kwd_tp), kwds_as_vector, available, missing);
 
       ndt::type dst_tp;
       if (dst.is_null()) {
