@@ -614,8 +614,8 @@ void ndt::datetime_type::get_dynamic_array_functions(const std::pair<std::string
   static pair<std::string, nd::callable> date_array_functions[] = {
       pair<std::string, nd::callable>("to_struct",
                                       nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>(
-          "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
+//      pair<std::string, nd::callable>(
+  //        "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
   };
 
   *out_functions = date_array_functions;
