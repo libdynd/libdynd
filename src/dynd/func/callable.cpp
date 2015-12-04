@@ -34,7 +34,8 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
     assign_error_mode errmode = *reinterpret_cast<assign_error_mode *>(static_data);
     if (errmode == ectx->errmode) {
       return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq, ectx);
-    } else {
+    }
+    else {
       eval::eval_context ectx_tmp(*ectx);
       ectx_tmp.errmode = errmode;
       return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp[0], src_arrmeta[0], kernreq,
@@ -59,7 +60,8 @@ struct property_kernel : nd::base_virtual_kernel<property_kernel> {
     if (dst_tp.value_type() == prop_src_tp.value_type()) {
       if (src_tp[0] == prop_src_tp.operand_type()) {
         return make_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, prop_src_tp, src_arrmeta[0], kernreq, ectx);
-      } else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
+      }
+      else if (src_tp[0].value_type() == prop_src_tp.operand_type()) {
         return make_assignment_kernel(
             ckb, ckb_offset, dst_tp, dst_arrmeta,
             prop_src_tp.extended<ndt::base_expr_type>()->with_replaced_storage_type(src_tp[0]), src_arrmeta[0], kernreq,
@@ -132,13 +134,10 @@ void nd::detail::validate_kwd_types(const ndt::callable_type *af_tp, std::vector
   }
 }
 
-void nd::detail::fill_missing_values(const ndt::type *tp, char *arrmeta, const uintptr_t *arrmeta_offsets, char *data,
-                                     const uintptr_t *data_offsets, std::vector<nd::array> &kwds_as_vector,
+void nd::detail::fill_missing_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
                                      const std::vector<intptr_t> &missing)
 {
   for (intptr_t j : missing) {
-    tp[j].extended()->arrmeta_default_construct(arrmeta + arrmeta_offsets[j], true);
-    assign_na(tp[j], arrmeta + arrmeta_offsets[j], data + data_offsets[j], &eval::default_eval_context);
     kwds_as_vector[j] = nd::empty(tp[j]);
     kwds_as_vector[j].assign_na();
   }
@@ -177,7 +176,8 @@ void nd::detail::check_nkwd(const ndt::callable_type *af_tp, const std::vector<i
     // TODO: Provide the missing keyword parameter names in this error
     //       message
     ss << "callable requires keyword parameters that were not provided. "
-          "callable signature " << ndt::type(af_tp, true);
+          "callable signature "
+       << ndt::type(af_tp, true);
     throw std::invalid_argument(ss.str());
   }
 }
