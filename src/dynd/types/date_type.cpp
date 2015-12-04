@@ -324,12 +324,6 @@ struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
   }
 };
 
-static nd::array function_ndo_to_struct(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
-
 struct strftime_kernel : nd::base_kernel<strftime_kernel> {
   nd::array self;
   std::string format;
@@ -368,12 +362,6 @@ struct strftime_kernel : nd::base_kernel<strftime_kernel> {
   }
 };
 
-static nd::array function_ndo_strftime(const nd::array &n, const std::string &format)
-{
-  nd::callable f = nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"));
-  return f(kwds("self", n, "format", nd::array(format)));
-}
-
 struct weekday_kernel : nd::base_kernel<weekday_kernel> {
   nd::array self;
 
@@ -405,12 +393,6 @@ struct weekday_kernel : nd::base_kernel<weekday_kernel> {
     return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
   }
 };
-
-static nd::array function_ndo_weekday(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<weekday_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
 
 /*
 struct replace_kernel : nd::base_kernel<replace_kernel> {
@@ -472,13 +454,15 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year, int32_t 
 }
 */
 
-void ndt::date_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+void ndt::date_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
                                                  size_t *out_count) const
 {
-  static pair<std::string, gfunc::callable> date_array_functions[] = {
-      pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-      pair<std::string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
-      pair<std::string, gfunc::callable>("weekday", gfunc::make_callable(&function_ndo_weekday, "self"))};
+  static pair<std::string, nd::callable> date_array_functions[] = {
+      pair<std::string, nd::callable>("to_struct",
+                                      nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"))),
+      pair<std::string, nd::callable>(
+          "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
+      pair<std::string, nd::callable>("weekday", nd::callable::make<weekday_kernel>(ndt::type("(self: Any) -> Any")))};
 
   //      pair<std::string, gfunc::callable>(
   //        "replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",

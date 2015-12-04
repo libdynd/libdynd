@@ -14,9 +14,7 @@
 using namespace std;
 using namespace dynd;
 
-ndt::base_string_type::~base_string_type()
-{
-}
+ndt::base_string_type::~base_string_type() {}
 
 std::string ndt::base_string_type::get_utf8_string(const char *arrmeta, const char *data,
                                                    assign_error_mode errmode) const
@@ -26,10 +24,7 @@ std::string ndt::base_string_type::get_utf8_string(const char *arrmeta, const ch
   return string_range_as_utf8_string(get_encoding(), begin, end, errmode);
 }
 
-size_t ndt::base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const
-{
-  return 0;
-}
+size_t ndt::base_string_type::get_iterdata_size(intptr_t DYND_UNUSED(ndim)) const { return 0; }
 
 static void get_extended_string_encoding(const ndt::type &dt)
 {
@@ -39,10 +34,7 @@ static void get_extended_string_encoding(const ndt::type &dt)
   //  return ss.str();
 }
 
-static size_t base_string_type_properties_size()
-{
-  return 1;
-}
+static size_t base_string_type_properties_size() { return 1; }
 
 static const pair<std::string, nd::callable> *base_string_type_properties()
 {
@@ -76,9 +68,7 @@ public:
   {
   }
 
-  virtual ~string_find_kernel_generator()
-  {
-  }
+  virtual ~string_find_kernel_generator() {}
 
   size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                           size_t src_count, const ndt::type *src_tp, const char *const *src_arrmeta,
@@ -116,10 +106,7 @@ public:
     return ckb_offset;
   }
 
-  void print_type(std::ostream &o) const
-  {
-    o << m_name << "(op0, op1)";
-  }
+  void print_type(std::ostream &o) const { o << m_name << "(op0, op1)"; }
 };
 } // anonymous namespace
 
@@ -179,7 +166,7 @@ static const pair<string, gfunc::callable> *base_string_array_functions()
 */
 
 void ndt::base_string_type::get_dynamic_array_functions(
-    const std::pair<std::string, gfunc::callable> **DYND_UNUSED(out_functions), size_t *DYND_UNUSED(out_count)) const
+    const std::pair<std::string, nd::callable> **DYND_UNUSED(out_functions), size_t *DYND_UNUSED(out_count)) const
 {
   /*
       *out_functions = base_string_array_functions();

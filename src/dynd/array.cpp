@@ -768,11 +768,11 @@ nd::array nd::array::p(const std::string &property_name) const
   throw runtime_error(ss.str());
 }
 
-const gfunc::callable &nd::array::find_dynamic_function(const char *function_name) const
+const nd::callable &nd::array::find_dynamic_function(const char *function_name) const
 {
   ndt::type dt = get_type();
   if (!dt.is_builtin()) {
-    const std::pair<std::string, gfunc::callable> *properties;
+    const std::pair<std::string, nd::callable> *properties;
     size_t count;
     dt.extended()->get_dynamic_array_functions(&properties, &count);
     // TODO: We probably want to make some kind of acceleration structure for

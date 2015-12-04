@@ -49,7 +49,7 @@ namespace ndt {
         m_value_type.extended()->get_dynamic_array_properties(out_properties, out_count);
       }
     }
-    void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+    void get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
                                      size_t *out_count) const
     {
       if (!m_value_type.is_builtin()) {

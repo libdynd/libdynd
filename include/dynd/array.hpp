@@ -408,7 +408,7 @@ namespace nd {
      *
      * \param function_name  The name of the function.
      */
-    const gfunc::callable &find_dynamic_function(const char *function_name) const;
+    const nd::callable &find_dynamic_function(const char *function_name) const;
 
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
      * use it */

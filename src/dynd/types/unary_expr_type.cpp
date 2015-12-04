@@ -145,7 +145,7 @@ void ndt::unary_expr_type::get_dynamic_array_properties(const std::pair<std::str
   }
 }
 
-void ndt::unary_expr_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+void ndt::unary_expr_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
                                                        size_t *out_count) const
 {
   const type &udt = m_value_type.get_dtype();
