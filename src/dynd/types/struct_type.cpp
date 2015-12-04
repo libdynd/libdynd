@@ -314,13 +314,12 @@ namespace nd {
       dst_tp = helper(kwds[0], kwds[1].as<intptr_t>()).get_type();
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *DYND_UNUSED(data),
-                                void *ckb, intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                const ndt::type *DYND_UNUSED(src_tp), const char *const *DYND_UNUSED(src_arrmeta),
-                                kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx),
-                                intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                                const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                                const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       get_array_field_kernel::make(ckb, kernreq, ckb_offset, kwds[0], kwds[1].as<intptr_t>());
       return ckb_offset;
@@ -370,22 +369,8 @@ static array_preamble *property_get_array_field(const array_preamble *params, vo
   nd::array n = nd::array(*(array_preamble **)params->data, true);
   intptr_t i = reinterpret_cast<intptr_t>(extra);
 
-  intptr_t undim = n.get_ndim();
-  ndt::type udt = n.get_dtype();
-  if (udt.get_kind() == expr_kind) {
-    std::string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
-    return n.replace_dtype(ndt::property_type::make(udt, field_name, i)).release();
-  }
-  else {
-    if (undim == 0) {
-      return n(i).release();
-    }
-    else {
-      shortvector<irange> idx(undim + 1);
-      idx[undim] = irange(i);
-      return n.at_array(undim + 1, idx.get()).release();
-    }
-  }
+  nd::callable f = nd::callable::make<nd::get_array_field_kernel>();
+  return f(kwds("self", n, "i", i)).release();
 }
 
 static nd::array make_self_names()
