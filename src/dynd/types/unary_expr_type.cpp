@@ -7,6 +7,7 @@
 #include <dynd/shortvector.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/shape_tools.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -20,10 +21,7 @@ ndt::unary_expr_type::unary_expr_type(const type &value_type, const type &operan
 {
 }
 
-ndt::unary_expr_type::~unary_expr_type()
-{
-  expr_kernel_generator_decref(m_kgen);
-}
+ndt::unary_expr_type::~unary_expr_type() { expr_kernel_generator_decref(m_kgen); }
 
 void ndt::unary_expr_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
                                       const char *DYND_UNUSED(data)) const
@@ -50,10 +48,12 @@ ndt::type ndt::unary_expr_type::apply_linear_index(intptr_t nindices, const iran
     // Scalar behavior
     if (nindices == 0) {
       return type(this, true);
-    } else {
+    }
+    else {
       throw too_many_indices(type(this, true), current_i + nindices, current_i);
     }
-  } else {
+  }
+  else {
     throw runtime_error("unary_expr_type::apply_linear_index is only "
                         "implemented for elwise kernel generators");
   }
@@ -75,10 +75,12 @@ intptr_t ndt::unary_expr_type::apply_linear_index(intptr_t nindices, const irang
         m_operand_type.extended()->arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
       }
       return 0;
-    } else {
+    }
+    else {
       throw too_many_indices(type(this, true), current_i + nindices, current_i);
     }
-  } else {
+  }
+  else {
     throw runtime_error("unary_expr_type::apply_linear_index is only "
                         "implemented for elwise kernel generators");
   }
@@ -94,9 +96,11 @@ bool ndt::unary_expr_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != unary_expr_type_id) {
+  }
+  else if (rhs.get_type_id() != unary_expr_type_id) {
     return false;
-  } else {
+  }
+  else {
     const unary_expr_type *dt = static_cast<const unary_expr_type *>(&rhs);
     return m_value_type == dt->m_value_type && m_operand_type == dt->m_operand_type && m_kgen == dt->m_kgen;
   }
@@ -129,13 +133,14 @@ ndt::type ndt::unary_expr_type::with_replaced_storage_type(const type &DYND_UNUS
   throw runtime_error("TODO: implement unary_expr_type::with_replaced_storage_type");
 }
 
-void ndt::unary_expr_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+void ndt::unary_expr_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                         size_t *out_count) const
 {
   const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {
     udt.extended()->get_dynamic_array_properties(out_properties, out_count);
-  } else {
+  }
+  else {
     get_builtin_type_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
   }
 }
@@ -146,7 +151,8 @@ void ndt::unary_expr_type::get_dynamic_array_functions(const std::pair<std::stri
   const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {
     udt.extended()->get_dynamic_array_functions(out_functions, out_count);
-  } else {
+  }
+  else {
     // get_builtin_type_dynamic_array_functions(udt.get_type_id(),
     // out_functions, out_count);
   }

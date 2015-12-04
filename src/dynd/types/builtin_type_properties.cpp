@@ -138,38 +138,20 @@ namespace ndt {
 } // namespace dynd::ndt
 } // namespace dynd
 
-static nd::array property_complex_real(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<nd::complex_real_kernel>();
-  return f(kwds("self", n));
-}
-
-static nd::array property_complex_imag(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<nd::complex_imag_kernel>();
-  return f(kwds("self", n));
-}
-
-static nd::array property_complex_conj(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<nd::complex_conj_kernel>();
-  return f(kwds("self", n));
-}
-
 static size_t complex_array_properties_size() { return 3; }
 
-static const pair<std::string, gfunc::callable> *complex_array_properties()
+static const pair<std::string, nd::callable> *complex_array_properties()
 {
-  static const pair<std::string, gfunc::callable> complex_array_properties[3] = {
-      pair<std::string, gfunc::callable>("real", gfunc::make_callable(&property_complex_real, "self")),
-      pair<std::string, gfunc::callable>("imag", gfunc::make_callable(&property_complex_imag, "self")),
-      pair<std::string, gfunc::callable>("conj", gfunc::make_callable(&property_complex_conj, "self"))};
+  static const pair<std::string, nd::callable> complex_array_properties[3] = {
+      pair<std::string, nd::callable>("real", nd::callable::make<nd::complex_real_kernel>()),
+      pair<std::string, nd::callable>("imag", nd::callable::make<nd::complex_imag_kernel>()),
+      pair<std::string, nd::callable>("conj", nd::callable::make<nd::complex_conj_kernel>())};
 
   return complex_array_properties;
 }
 
 void dynd::get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
-                                                     const std::pair<std::string, gfunc::callable> **out_properties,
+                                                     const std::pair<std::string, nd::callable> **out_properties,
                                                      size_t *out_count)
 {
   switch (builtin_type_id) {

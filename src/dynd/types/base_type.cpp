@@ -247,7 +247,7 @@ void ndt::base_type::foreach_leading(const char *DYND_UNUSED(arrmeta), char *DYN
 }
 
 void ndt::base_type::get_scalar_properties_and_functions(
-    std::vector<std::pair<std::string, gfunc::callable>> &out_properties,
+    std::vector<std::pair<std::string, nd::callable>> &out_properties,
     std::vector<std::pair<std::string, gfunc::callable>> &out_functions) const
 {
   if ((get_flags() & type_flag_symbolic) == 0) {
@@ -260,7 +260,8 @@ void ndt::base_type::get_scalar_properties_and_functions(
     // additional properties of their own.
     size_t ndim = get_ndim();
     size_t properties_count = 0, functions_count = 0;
-    const std::pair<std::string, gfunc::callable> *properties = NULL, *functions = NULL;
+    const std::pair<std::string, nd::callable> *properties = NULL;
+    const std::pair<std::string, gfunc::callable> *functions = NULL;
     if (ndim == 0) {
       get_dynamic_array_properties(&properties, &properties_count);
       get_dynamic_array_functions(&functions, &functions_count);
@@ -302,7 +303,7 @@ void ndt::base_type::get_dynamic_type_functions(const std::pair<std::string, nd:
   *out_count = 0;
 }
 
-void ndt::base_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+void ndt::base_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                   size_t *out_count) const
 {
   // Default to no properties

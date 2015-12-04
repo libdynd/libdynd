@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/property_type.hpp>
@@ -293,8 +294,6 @@ namespace dynd {
 namespace nd {
 
   struct get_array_field_kernel : nd::base_kernel<get_array_field_kernel> {
-    static const size_t data_size = 0;
-
     array self;
     intptr_t i;
 
@@ -306,22 +305,22 @@ namespace nd {
       *dst = res;
     }
 
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+    static void resolve_dst_type(char *static_data, char *DYND_UNUSED(data), ndt::type &dst_tp,
                                  intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                  intptr_t DYND_UNUSED(nkwd), const array *kwds,
                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      dst_tp = helper(kwds[0], kwds[1].as<intptr_t>()).get_type();
+      dst_tp = helper(kwds[0], *reinterpret_cast<intptr_t *>(static_data)).get_type();
     }
 
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+    static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                                 const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                 const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                                 const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
                                 const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
-      get_array_field_kernel::make(ckb, kernreq, ckb_offset, kwds[0], kwds[1].as<intptr_t>());
+      get_array_field_kernel::make(ckb, kernreq, ckb_offset, kwds[0], *reinterpret_cast<intptr_t *>(static_data));
       return ckb_offset;
     }
 
@@ -349,29 +348,7 @@ namespace nd {
 
 } // namespace dynd::nd
 
-namespace ndt {
-
-  template <>
-  struct type::equivalent<nd::get_array_field_kernel> {
-    static type make()
-    {
-      return callable_type::make(type("Any"), tuple_type::make(),
-                                 struct_type::make({"self", "i"}, {type("Any"), type::make<intptr_t>()}));
-    }
-  };
-} // namespace dynd::ndt
-
 } // namespace dynd
-
-static array_preamble *property_get_array_field(const array_preamble *params, void *extra)
-{
-  // Get the nd::array 'self' parameter
-  nd::array n = nd::array(*(array_preamble **)params->data, true);
-  intptr_t i = reinterpret_cast<intptr_t>(extra);
-
-  nd::callable f = nd::callable::make<nd::get_array_field_kernel>();
-  return f(kwds("self", n, "i", i)).release();
-}
 
 static nd::array make_self_names()
 {
@@ -382,7 +359,7 @@ static nd::array make_self_names()
 static nd::array make_self_types()
 {
   nd::array result = nd::empty(1, ndt::make_type());
-  ndt::unchecked_fixed_dim_get_rw<ndt::type>(result, 0) = ndt::make_ndarrayarg();
+  ndt::unchecked_fixed_dim_get_rw<ndt::type>(result, 0) = ndt::any_kind_type::make();
   result.flag_as_immutable();
   return result;
 }
@@ -397,7 +374,7 @@ ndt::struct_type::struct_type(int, int)
   // The data offsets also consist of one zero
   //    m_data_offsets = m_arrmeta_offsets;
   // Inherit any operand flags from the fields
-  m_members.flags |= (make_ndarrayarg().get_flags() & type_flags_operand_inherited);
+  m_members.flags |= (ndt::any_kind_type::make().get_flags() & type_flags_operand_inherited);
   m_members.data_alignment = sizeof(void *);
   m_members.arrmeta_size = 0;
   m_members.data_size = sizeof(void *);
@@ -412,11 +389,12 @@ void ndt::struct_type::create_array_properties()
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
     // TODO: Transform the name into a valid Python symbol?
     m_array_properties[i].first = get_field_name(i);
-    m_array_properties[i].second.set(array_parameters_type, &property_get_array_field, (void *)i);
+    m_array_properties[i].second = nd::callable::make<nd::get_array_field_kernel>(
+        callable_type::make(type("Any"), tuple_type::make(), array_parameters_type), i);
   }
 }
 
-void ndt::struct_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+void ndt::struct_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                     size_t *out_count) const
 {
   *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];

@@ -9,6 +9,7 @@
 #include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -355,7 +356,7 @@ ndt::type ndt::expr_type::with_replaced_storage_type(const type &DYND_UNUSED(rep
   throw runtime_error("TODO: implement expr_type::with_replaced_storage_type");
 }
 
-void ndt::expr_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+void ndt::expr_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                   size_t *out_count) const
 {
   const type &udt = m_value_type.get_dtype();
