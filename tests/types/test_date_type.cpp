@@ -366,6 +366,7 @@ TEST(DateType, WeekDay)
   EXPECT_EQ(2, a.f("weekday").as<int32_t>());
 }
 
+/*
 TEST(DateType, Replace)
 {
   ndt::type d = ndt::date_type::make();
@@ -428,6 +429,7 @@ TEST(DateType, ReplaceOfConvert)
   // Call replace on it
   EXPECT_EQ("2013-03-13", a.f("replace", 2013).as<std::string>());
 }
+*/
 
 TEST(DateType, NumPyCompatibleProperty)
 {
