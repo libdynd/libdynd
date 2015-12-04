@@ -716,7 +716,7 @@ nd::array nd::array::p(const char *property_name) const
 {
   if (!is_null()) {
     ndt::type dt = get_type();
-    const std::pair<std::string, gfunc::callable> *properties;
+    const std::pair<std::string, nd::callable> *properties;
     size_t count;
     if (!dt.is_builtin()) {
       dt.extended()->get_dynamic_array_properties(&properties, &count);
@@ -729,7 +729,7 @@ nd::array nd::array::p(const char *property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return properties[i].second.call(*this);
+          return const_cast<nd::callable &>(properties[i].second)(kwds("self", *this));
         }
       }
     }
@@ -744,7 +744,7 @@ nd::array nd::array::p(const std::string &property_name) const
 {
   if (!is_null()) {
     ndt::type dt = get_type();
-    const std::pair<std::string, gfunc::callable> *properties;
+    const std::pair<std::string, nd::callable> *properties;
     size_t count;
     if (!dt.is_builtin()) {
       dt.extended()->get_dynamic_array_properties(&properties, &count);
@@ -757,7 +757,7 @@ nd::array nd::array::p(const std::string &property_name) const
     if (count > 0) {
       for (size_t i = 0; i < count; ++i) {
         if (properties[i].first == property_name) {
-          return properties[i].second.call(*this);
+          return const_cast<nd::callable &>(properties[i].second)(kwds("self", *this));
         }
       }
     }

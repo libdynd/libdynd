@@ -13,6 +13,7 @@
 #pragma once
 
 #include <dynd/type.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 
@@ -54,7 +55,7 @@ namespace ndt {
 
     // Propagate properties and functions from the value type
     void get_dynamic_array_properties(
-        const std::pair<std::string, gfunc::callable> **out_properties,
+        const std::pair<std::string, nd::callable> **out_properties,
         size_t *out_count) const
     {
       if (!m_value_type.is_builtin()) {

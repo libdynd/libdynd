@@ -12,7 +12,7 @@ namespace dynd {
 
 DYND_API void get_builtin_type_dynamic_array_properties(
                 type_id_t builtin_type_id,
-                const std::pair<std::string, gfunc::callable> **out_properties,
+                const std::pair<std::string, nd::callable> **out_properties,
                 size_t *out_count);
 
 DYND_API size_t get_builtin_type_elwise_property_index(

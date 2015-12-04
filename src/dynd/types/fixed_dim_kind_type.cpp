@@ -230,7 +230,7 @@ void ndt::fixed_dim_kind_type::get_dynamic_type_properties(const std::pair<std::
 }
 
 void
-ndt::fixed_dim_kind_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+ndt::fixed_dim_kind_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                        size_t *out_count) const
 {
   if (m_element_tp.is_builtin()) {

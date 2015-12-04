@@ -31,7 +31,8 @@ struct DYND_API var_dim_type_data {
 namespace ndt {
 
   class DYND_API var_dim_type : public base_dim_type {
-    std::vector<std::pair<std::string, gfunc::callable>> m_array_properties, m_array_functions;
+    std::vector<std::pair<std::string, nd::callable>> m_array_properties;
+    std::vector<std::pair<std::string, gfunc::callable>> m_array_functions;
 
   public:
     var_dim_type(const type &element_tp);
@@ -95,7 +96,7 @@ namespace ndt {
 
     void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
                                      size_t *out_count) const;
-    void get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+    void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                       size_t *out_count) const;
     void get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
                                      size_t *out_count) const;

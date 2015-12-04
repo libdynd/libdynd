@@ -262,12 +262,6 @@ struct get_date_kernel : nd::base_kernel<get_date_kernel> {
   }
 };
 
-static nd::array property_ndo_get_date(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_date_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
-
 struct get_year_kernel : nd::base_kernel<get_year_kernel> {
   nd::array self;
 
@@ -299,12 +293,6 @@ struct get_year_kernel : nd::base_kernel<get_year_kernel> {
     return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "year"));
   }
 };
-
-static nd::array property_ndo_get_year(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_year_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
 
 struct get_month_kernel : nd::base_kernel<get_month_kernel> {
   nd::array self;
@@ -338,12 +326,6 @@ struct get_month_kernel : nd::base_kernel<get_month_kernel> {
   }
 };
 
-static nd::array property_ndo_get_month(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_month_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
-
 struct get_day_kernel : nd::base_kernel<get_day_kernel> {
   nd::array self;
 
@@ -375,12 +357,6 @@ struct get_day_kernel : nd::base_kernel<get_day_kernel> {
     return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "day"));
   }
 };
-
-static nd::array property_ndo_get_day(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_day_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
 
 struct get_hour_kernel : nd::base_kernel<get_hour_kernel> {
   nd::array self;
@@ -414,12 +390,6 @@ struct get_hour_kernel : nd::base_kernel<get_hour_kernel> {
   }
 };
 
-static nd::array property_ndo_get_hour(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_hour_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
-
 struct get_minute_kernel : nd::base_kernel<get_minute_kernel> {
   nd::array self;
 
@@ -451,12 +421,6 @@ struct get_minute_kernel : nd::base_kernel<get_minute_kernel> {
     return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "minute"));
   }
 };
-
-static nd::array property_ndo_get_minute(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_minute_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
 
 struct get_second_kernel : nd::base_kernel<get_second_kernel> {
   nd::array self;
@@ -490,12 +454,6 @@ struct get_second_kernel : nd::base_kernel<get_second_kernel> {
   }
 };
 
-static nd::array property_ndo_get_second(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_second_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
-
 struct get_microsecond_kernel : nd::base_kernel<get_microsecond_kernel> {
   nd::array self;
 
@@ -527,12 +485,6 @@ struct get_microsecond_kernel : nd::base_kernel<get_microsecond_kernel> {
     return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "microsecond"));
   }
 };
-
-static nd::array property_ndo_get_microsecond(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_microsecond_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
 
 struct get_tick_kernel : nd::base_kernel<get_tick_kernel> {
   nd::array self;
@@ -566,26 +518,19 @@ struct get_tick_kernel : nd::base_kernel<get_tick_kernel> {
   }
 };
 
-static nd::array property_ndo_get_tick(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<get_tick_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
-
-void ndt::datetime_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+void ndt::datetime_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                       size_t *out_count) const
 {
-  static pair<std::string, gfunc::callable> date_array_properties[] = {
-      pair<std::string, gfunc::callable>("date", gfunc::make_callable(&property_ndo_get_date, "self")),
-      pair<std::string, gfunc::callable>("year", gfunc::make_callable(&property_ndo_get_year, "self")),
-      pair<std::string, gfunc::callable>("month", gfunc::make_callable(&property_ndo_get_month, "self")),
-      pair<std::string, gfunc::callable>("day", gfunc::make_callable(&property_ndo_get_day, "self")),
-      pair<std::string, gfunc::callable>("hour", gfunc::make_callable(&property_ndo_get_hour, "self")),
-      pair<std::string, gfunc::callable>("minute", gfunc::make_callable(&property_ndo_get_minute, "self")),
-      pair<std::string, gfunc::callable>("second", gfunc::make_callable(&property_ndo_get_second, "self")),
-      pair<std::string, gfunc::callable>("microsecond", gfunc::make_callable(&property_ndo_get_microsecond, "self")),
-      pair<std::string, gfunc::callable>("tick", gfunc::make_callable(&property_ndo_get_tick, "self")),
-  };
+  static pair<std::string, nd::callable> date_array_properties[] = {
+      pair<std::string, nd::callable>("year", nd::callable::make<get_year_kernel>(ndt::type("(self: Any) -> Any"))),
+      pair<std::string, nd::callable>("month", nd::callable::make<get_month_kernel>(ndt::type("(self: Any) -> Any"))),
+      pair<std::string, nd::callable>("day", nd::callable::make<get_day_kernel>(ndt::type("(self: Any) -> Any"))),
+      pair<std::string, nd::callable>("hour", nd::callable::make<get_hour_kernel>(ndt::type("(self: Any) -> Any"))),
+      pair<std::string, nd::callable>("minute", nd::callable::make<get_minute_kernel>(ndt::type("(self: Any) -> Any"))),
+      pair<std::string, nd::callable>("second", nd::callable::make<get_second_kernel>(ndt::type("(self: Any) -> Any"))),
+      pair<std::string, nd::callable>("microsecond",
+                                      nd::callable::make<get_microsecond_kernel>(ndt::type("(self: Any) -> Any"))),
+      pair<std::string, nd::callable>("tick", nd::callable::make<get_tick_kernel>(ndt::type("(self: Any) -> Any")))};
 
   *out_properties = date_array_properties;
   *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);

@@ -634,7 +634,7 @@ void ndt::fixed_dim_type::get_dynamic_type_properties(const std::pair<std::strin
   *out_count = sizeof(fixed_dim_type_properties) / sizeof(fixed_dim_type_properties[0]);
 }
 
-void ndt::fixed_dim_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+void ndt::fixed_dim_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                        size_t *out_count) const
 {
   *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];

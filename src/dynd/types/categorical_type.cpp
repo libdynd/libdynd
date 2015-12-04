@@ -14,6 +14,7 @@
 #include <dynd/gfunc/make_gcallable.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/func/apply.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/search.hpp>
@@ -532,24 +533,51 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   return type(new categorical_type(categories, true), false);
 }
 
-static nd::array property_ndo_get_ints(const nd::array &n)
-{
-  ndt::type udt = n.get_dtype().value_type();
-  const ndt::categorical_type *cd = udt.extended<ndt::categorical_type>();
-  return n.view_scalars(cd->get_storage_type());
-}
+struct get_ints_kernel : nd::base_kernel<get_ints_kernel> {
+  nd::array self;
+
+  get_ints_kernel(const nd::array &self) : self(self) {}
+
+  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
+
+  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    dst_tp = helper(kwds[0]).get_type();
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    get_ints_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
+    return ckb_offset;
+  }
+
+  static nd::array helper(const nd::array &n)
+  {
+    ndt::type udt = n.get_dtype().value_type();
+    const ndt::categorical_type *cd = udt.extended<ndt::categorical_type>();
+    return n.view_scalars(cd->get_storage_type());
+  }
+};
 
 static size_t categorical_array_properties_size() { return 1; }
 
-static const pair<std::string, gfunc::callable> *categorical_array_properties()
+static const pair<std::string, nd::callable> *categorical_array_properties()
 {
-  static pair<std::string, gfunc::callable> categorical_array_properties[1] = {
-      pair<std::string, gfunc::callable>("ints", gfunc::make_callable(&property_ndo_get_ints, "self"))};
+  static pair<std::string, nd::callable> categorical_array_properties[1] = {
+      pair<std::string, nd::callable>("ints", nd::callable::make<get_ints_kernel>(ndt::type("(self: Any) -> Any")))};
 
   return categorical_array_properties;
 }
 
-void ndt::categorical_type::get_dynamic_array_properties(const std::pair<std::string, gfunc::callable> **out_properties,
+void ndt::categorical_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                          size_t *out_count) const
 {
   *out_properties = categorical_array_properties();

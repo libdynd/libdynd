@@ -262,7 +262,7 @@ ndt::type ndt::property_type::with_replaced_storage_type(
 }
 
 void ndt::property_type::get_dynamic_array_properties(
-    const std::pair<std::string, gfunc::callable> **out_properties,
+    const std::pair<std::string, nd::callable> **out_properties,
     size_t *out_count) const
 {
   const type &udt = m_value_tp.get_dtype();
