@@ -570,12 +570,6 @@ struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
   }
 };
 
-static nd::array function_ndo_to_struct(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
-
 struct strftime_kernel : nd::base_kernel<strftime_kernel> {
   nd::array self;
   std::string format;
@@ -614,18 +608,14 @@ struct strftime_kernel : nd::base_kernel<strftime_kernel> {
   }
 };
 
-static nd::array function_ndo_strftime(const nd::array &n, const std::string &format)
-{
-  nd::callable f = nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"));
-  return f(kwds("self", n, "format", nd::array(format)));
-}
-
-void ndt::datetime_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+void ndt::datetime_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
                                                      size_t *out_count) const
 {
-  static pair<std::string, gfunc::callable> date_array_functions[] = {
-      pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-      pair<std::string, gfunc::callable>("strftime", gfunc::make_callable(&function_ndo_strftime, "self", "format")),
+  static pair<std::string, nd::callable> date_array_functions[] = {
+      pair<std::string, nd::callable>("to_struct",
+                                      nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"))),
+//      pair<std::string, nd::callable>(
+  //        "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
   };
 
   *out_functions = date_array_functions;

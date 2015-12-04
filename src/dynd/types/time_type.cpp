@@ -354,18 +354,11 @@ struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
   }
 };
 
-static nd::array function_ndo_to_struct(const nd::array &n)
-{
-  nd::callable f = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
-  return f(kwds("self", n));
-}
-
-void ndt::time_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+void ndt::time_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
                                                  size_t *out_count) const
 {
-  static pair<std::string, gfunc::callable> time_array_functions[] = {
-      pair<std::string, gfunc::callable>("to_struct", gfunc::make_callable(&function_ndo_to_struct, "self")),
-  };
+  static pair<std::string, nd::callable> time_array_functions[] = {pair<std::string, nd::callable>(
+      "to_struct", nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any")))};
 
   *out_functions = time_array_functions;
   *out_count = sizeof(time_array_functions) / sizeof(time_array_functions[0]);

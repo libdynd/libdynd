@@ -352,43 +352,70 @@ void ndt::pointer_type::get_dynamic_type_properties(const std::pair<std::string,
   *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
 }
 
-static nd::array array_function_dereference(const nd::array &self)
-{
-  // Follow the pointers to eliminate them
-  ndt::type dt = self.get_type();
-  const char *arrmeta = self.get()->metadata();
-  char *data = self.get()->data;
-  memory_block_data *dataref = self.get()->owner.get();
-  if (dataref == NULL) {
-    dataref = self.get();
-  }
-  uint64_t flags = self.get()->flags;
+struct dereference_kernel : nd::base_kernel<dereference_kernel> {
+  nd::array self;
 
-  while (dt.get_type_id() == pointer_type_id) {
-    const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
-    dt = dt.extended<ndt::pointer_type>()->get_target_type();
-    arrmeta += sizeof(pointer_type_arrmeta);
-    data = *reinterpret_cast<char **>(data) + md->offset;
-    dataref = md->blockref.get();
+  dereference_kernel(const nd::array &self) : self(self) {}
+
+  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
+
+  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
+                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    dst_tp = helper(kwds[0]).get_type();
   }
 
-  // Create an array without the pointers
-  nd::array result(make_array_memory_block(dt.get_arrmeta_size()));
-  if (!dt.is_builtin()) {
-    dt.extended()->arrmeta_copy_construct(result.get()->metadata(), arrmeta, self);
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, kwds[0]);
+    return ckb_offset;
   }
-  result.get()->tp = dt;
-  result.get()->data = data;
-  result.get()->owner = dataref;
-  result.get()->flags = flags;
-  return result;
-}
 
-void ndt::pointer_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+  static nd::array helper(const nd::array &self)
+  {
+    // Follow the pointers to eliminate them
+    ndt::type dt = self.get_type();
+    const char *arrmeta = self.get()->metadata();
+    char *data = self.get()->data;
+    memory_block_data *dataref = self.get()->owner.get();
+    if (dataref == NULL) {
+      dataref = self.get();
+    }
+    uint64_t flags = self.get()->flags;
+
+    while (dt.get_type_id() == pointer_type_id) {
+      const pointer_type_arrmeta *md = reinterpret_cast<const pointer_type_arrmeta *>(arrmeta);
+      dt = dt.extended<ndt::pointer_type>()->get_target_type();
+      arrmeta += sizeof(pointer_type_arrmeta);
+      data = *reinterpret_cast<char **>(data) + md->offset;
+      dataref = md->blockref.get();
+    }
+
+    // Create an array without the pointers
+    nd::array result(make_array_memory_block(dt.get_arrmeta_size()));
+    if (!dt.is_builtin()) {
+      dt.extended()->arrmeta_copy_construct(result.get()->metadata(), arrmeta, self);
+    }
+    result.get()->tp = dt;
+    result.get()->data = data;
+    result.get()->owner = dataref;
+    result.get()->flags = flags;
+    return result;
+  }
+};
+
+void ndt::pointer_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
                                                     size_t *out_count) const
 {
-  static pair<std::string, gfunc::callable> pointer_array_functions[] = {
-      pair<std::string, gfunc::callable>("dereference", gfunc::make_callable(&array_function_dereference, "self"))};
+  static pair<std::string, nd::callable> pointer_array_functions[] = {pair<std::string, nd::callable>(
+      "dereference", nd::callable::make<dereference_kernel>(ndt::type("(self: Any) -> Any")))};
 
   *out_functions = pointer_array_functions;
   *out_count = sizeof(pointer_array_functions) / sizeof(pointer_array_functions[0]);

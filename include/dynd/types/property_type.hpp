@@ -46,28 +46,22 @@ namespace ndt {
      *up
      *                        the index from the name.
      */
-    property_type(const type &value_tp, const type &operand_tp,
-                  const std::string &property_name,
+    property_type(const type &value_tp, const type &operand_tp, const std::string &property_name,
                   size_t property_index = std::numeric_limits<size_t>::max());
 
     virtual ~property_type();
 
     inline bool is_reversed_property() const { return m_reversed_property; }
 
-    inline const std::string &get_property_name() const
-    {
-      return m_property_name;
-    }
+    inline const std::string &get_property_name() const { return m_property_name; }
 
     const type &get_value_type() const { return m_value_tp; }
     const type &get_operand_type() const { return m_operand_tp; }
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
-    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape,
-                   const char *arrmeta, const char *data) const;
+    void get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, const char *arrmeta, const char *data) const;
 
     bool is_lossless_assignment(const type &dst_tp, const type &src_tp) const;
 
@@ -75,22 +69,18 @@ namespace ndt {
 
     type with_replaced_storage_type(const type &replacement_type) const;
 
-    size_t make_operand_to_value_assignment_kernel(
-        void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-        const char *src_arrmeta, kernel_request_t kernreq,
-        const eval::eval_context *ectx) const;
+    size_t make_operand_to_value_assignment_kernel(void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+                                                   const char *src_arrmeta, kernel_request_t kernreq,
+                                                   const eval::eval_context *ectx) const;
 
-    size_t make_value_to_operand_assignment_kernel(
-        void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
-        const char *src_arrmeta, kernel_request_t kernreq,
-        const eval::eval_context *ectx) const;
+    size_t make_value_to_operand_assignment_kernel(void *ckb, intptr_t ckb_offset, const char *dst_arrmeta,
+                                                   const char *src_arrmeta, kernel_request_t kernreq,
+                                                   const eval::eval_context *ectx) const;
 
-    void get_dynamic_array_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
-    void get_dynamic_array_functions(
-        const std::pair<std::string, gfunc::callable> **out_functions,
-        size_t *out_count) const;
+    void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
+                                      size_t *out_count) const;
+    void get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
+                                     size_t *out_count) const;
 
     /**
      * Makes a property type for accessing a named element-wise property
@@ -99,22 +89,17 @@ namespace ndt {
     static type make(const type &operand_tp, const std::string &property_name,
                      size_t property_index = std::numeric_limits<size_t>::max())
     {
-      return type(new property_type(operand_tp, property_name, property_index),
-                  false);
+      return type(new property_type(operand_tp, property_name, property_index), false);
     }
 
     /**
      * Makes a reversed property type for viewing the operand as the output
      * of a property of value_tp (with its getters/setters exchanged).
      */
-    static type
-    make_reversed(const type &value_tp, const type &operand_tp,
-                  const std::string &property_name,
-                  size_t property_index = std::numeric_limits<size_t>::max())
+    static type make_reversed(const type &value_tp, const type &operand_tp, const std::string &property_name,
+                              size_t property_index = std::numeric_limits<size_t>::max())
     {
-      return type(new property_type(value_tp, operand_tp, property_name,
-                                    property_index),
-                  false);
+      return type(new property_type(value_tp, operand_tp, property_name, property_index), false);
     }
   };
 

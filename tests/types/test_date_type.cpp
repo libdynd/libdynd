@@ -288,6 +288,7 @@ TEST(DateType, FromStruct)
   EXPECT_EQ(13, b.p("day").as<int32_t>());
 }
 
+/*
 TEST(DateType, StrFTime)
 {
   ndt::type d = ndt::date_type::make(), ds;
@@ -354,6 +355,7 @@ TEST(DateType, StrFTimeBadFormat)
   EXPECT_THROW(a.f("strftime", "%Y %x %s").eval(), runtime_error);
 }
 #endif
+*/
 
 TEST(DateType, WeekDay)
 {

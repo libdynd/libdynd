@@ -449,8 +449,9 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 
 // Maximum number of args (including out) for now
 // (need to add varargs capability to this calling convention)
-static const int max_args = 6;
+//static const int max_args = 6;
 
+/*
 static array_preamble *function___call__(const array_preamble *params, void *DYND_UNUSED(self))
 {
   // TODO: Remove the const_cast
@@ -503,18 +504,21 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
   // Return void
   return nd::empty(ndt::type::make<void>()).release();
 }
+*/
 
-void ndt::callable_type::get_dynamic_array_functions(const std::pair<std::string, gfunc::callable> **out_functions,
+void ndt::callable_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **,
                                                      size_t *out_count) const
 {
-  static pair<std::string, gfunc::callable> callable_array_functions[] = {pair<std::string, gfunc::callable>(
+/*
+  static pair<std::string, gfunc::callable> callable_array_functions[] = {pair<std::string, nd::callable>(
       "execute", gfunc::callable(type("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
                                       "p1:ndarrayarg,p2:ndarrayarg,"
                                       "p3:ndarrayarg,p4:ndarrayarg}"),
                                  &function___call__, NULL, 3, nd::empty("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
                                                                         "p1:ndarrayarg,p2:ndarrayarg,"
                                                                         "p3:ndarrayarg,p4:ndarrayarg}")))};
+*/
 
-  *out_functions = callable_array_functions;
-  *out_count = sizeof(callable_array_functions) / sizeof(callable_array_functions[0]);
+//  *out_functions = callable_array_functions;
+  *out_count = 0; //sizeof(callable_array_functions) / sizeof(callable_array_functions[0]);
 }
