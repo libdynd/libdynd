@@ -33,7 +33,6 @@
 #include <dynd/types/byteswap_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
-#include <dynd/types/ndarrayarg_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
@@ -101,7 +100,6 @@ static const map<std::string, ndt::type> &builtin_types()
     bit["datetime"] = ndt::datetime_type::make();
     bit["bytes"] = ndt::bytes_type::make(1);
     bit["type"] = ndt::make_type<ndt::type_type>();
-    bit["ndarrayarg"] = ndt::make_ndarrayarg();
   }
 
   return bit;

@@ -12,7 +12,6 @@
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
-#include <dynd/types/ndarrayarg_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -135,8 +134,7 @@ TEST(Type, BasicConstructor)
   d = ndt::type::make<unsigned long long>();
   EXPECT_EQ(uint64_type_id, d.get_type_id());
   EXPECT_EQ(uint_kind, d.get_kind());
-  EXPECT_EQ((size_t)scalar_align_of<unsigned long long>::value,
-            d.get_data_alignment());
+  EXPECT_EQ((size_t)scalar_align_of<unsigned long long>::value, d.get_data_alignment());
   EXPECT_EQ(sizeof(unsigned long long), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
   // Roundtripping through a string
@@ -180,26 +178,10 @@ TEST(Type, TypeIDConstructor)
   EXPECT_EQ(float32_type_id, ndt::type(float32_type_id).get_type_id());
   EXPECT_EQ(float64_type_id, ndt::type(float64_type_id).get_type_id());
   EXPECT_EQ(float128_type_id, ndt::type(float128_type_id).get_type_id());
-  EXPECT_EQ(complex_float32_type_id,
-            ndt::type(complex_float32_type_id).get_type_id());
-  EXPECT_EQ(complex_float64_type_id,
-            ndt::type(complex_float64_type_id).get_type_id());
+  EXPECT_EQ(complex_float32_type_id, ndt::type(complex_float32_type_id).get_type_id());
+  EXPECT_EQ(complex_float64_type_id, ndt::type(complex_float64_type_id).get_type_id());
   EXPECT_EQ(void_type_id, ndt::type(void_type_id).get_type_id());
   EXPECT_EQ(ndt::bytes_type::make(), ndt::type(bytes_type_id));
   EXPECT_EQ(ndt::fixed_bytes_kind_type::make(), ndt::type(fixed_bytes_type_id));
-  EXPECT_EQ(ndt::pointer_type::make(ndt::any_kind_type::make()),
-            ndt::type(pointer_type_id));
-}
-
-TEST(Type, NDArrayArg)
-{
-  // Minimal test of the ndarrayarg type
-  ndt::type d = ndt::make_ndarrayarg();
-  EXPECT_EQ(ndarrayarg_type_id, d.get_type_id());
-  EXPECT_EQ(dynamic_kind, d.get_kind());
-  EXPECT_EQ((size_t)scalar_align_of<void *>::value, d.get_data_alignment());
-  EXPECT_EQ(sizeof(void *), d.get_data_size());
-  EXPECT_FALSE(d.is_builtin());
-  // Roundtripping through a string
-  EXPECT_EQ(d, ndt::type(d.str()));
+  EXPECT_EQ(ndt::pointer_type::make(ndt::any_kind_type::make()), ndt::type(pointer_type_id));
 }
