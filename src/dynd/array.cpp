@@ -401,7 +401,7 @@ nd::array::array(const char *str, size_t size)
 }
 nd::array::array(const ndt::type &tp)
 {
-  array temp(nd::empty(ndt::make_type()));
+  array temp(nd::empty(ndt::make_type<ndt::type_type>()));
   temp.swap(*this);
   ndt::type(tp).swap(*reinterpret_cast<ndt::type *>(get()->data));
   get()->flags = nd::read_access_flag | nd::immutable_access_flag;
@@ -493,14 +493,14 @@ nd::array nd::array_rw(const char *str, size_t size)
 }
 nd::array nd::array_rw(const ndt::type &tp)
 {
-  array temp = array(nd::empty(ndt::make_type()));
+  array temp = array(nd::empty(ndt::make_type<ndt::type_type>()));
   ndt::type(tp).swap(*reinterpret_cast<ndt::type *>(temp.get()->data));
   return temp;
 }
 
 nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type> &vec)
 {
-  ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_type());
+  ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_type<ndt::type_type>());
   char *data_ptr = NULL;
   array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), sizeof(ndt::type) * vec.size(),
                                        dt.get_data_alignment(), &data_ptr));
@@ -1426,7 +1426,7 @@ ndt::type nd::detail::array_as_type(const nd::array &lhs)
 
   nd::array temp = lhs;
   if (temp.get_type().get_type_id() != type_type_id) {
-    temp = temp.ucast(ndt::make_type()).eval();
+    temp = temp.ucast(ndt::make_type<ndt::type_type>()).eval();
   }
   return *reinterpret_cast<const ndt::type *>(temp.cdata());
 }

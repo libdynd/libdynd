@@ -178,74 +178,49 @@ namespace nd {
     template <typename... K>
     class kwds {
       const char *m_names[sizeof...(K)];
-      std::tuple<K...> m_values;
-
-      struct {
-        kwds *self;
-
-        template <size_t I>
-        void on_each(std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available) const
-        {
-          intptr_t j = available[I];
-          if (j != -1) {
-            kwds_as_vector[j] = nd::array(std::get<I>(self->m_values));
-          }
-        }
-
-        void operator()(std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available) const
-        {
-          typedef make_index_sequence<sizeof...(K)> I;
-          for_each<I>(*this, kwds_as_vector, available);
-        }
-      } fill_available_values;
+      array m_vals[sizeof...(K)];
 
       void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
                        const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
       {
-        fill_available_values(kwds_as_vector, available);
+        for (size_t i = 0; i < sizeof...(K); ++i) {
+          intptr_t j = available[i];
+          if (j != -1) {
+            kwds_as_vector[j] = m_vals[i];
+          }
+        }
+
         fill_missing_values(tp, kwds_as_vector, missing);
       }
 
     public:
       kwds(typename as_<K, const char *>::type... names, K &&... values)
-          : m_names{names...}, m_values(std::forward<K>(values)...)
+          : m_names{names...}, m_vals{std::forward<K>(values)...}
       {
-        validate_names.self = this;
-        fill_available_values.self = this;
       }
 
-      struct {
-        kwds *self;
+      void validate_names(const ndt::callable_type *af_tp, array &dst, std::vector<ndt::type> &tp,
+                          std::vector<intptr_t> &available, std::vector<intptr_t> &missing) const
+      {
+        bool has_dst_tp = false;
 
-        template <size_t I>
-        void on_each(const ndt::callable_type *af_tp, array &dst, bool &has_dst_tp, std::vector<ndt::type> &kwd_tp,
-                     std::vector<intptr_t> &available) const
-        {
-          check_name(af_tp, dst, self->m_names[I], std::get<I>(self->m_values), has_dst_tp, kwd_tp.data(), available);
+        for (size_t i = 0; i < sizeof...(K); ++i) {
+          check_name(af_tp, dst, m_names[i], m_vals[i], has_dst_tp, tp.data(), available);
         }
 
-        void operator()(const ndt::callable_type *af_tp, array &dst, std::vector<ndt::type> &tp,
-                        std::vector<intptr_t> &available, std::vector<intptr_t> &missing) const
-        {
-          bool has_dst_tp = false;
-
-          typedef make_index_sequence<sizeof...(K)> I;
-          for_each<I>(*this, af_tp, dst, has_dst_tp, tp, available);
-
-          intptr_t nkwd = sizeof...(K);
-          if (has_dst_tp) {
-            nkwd--;
-          }
-
-          for (intptr_t j : af_tp->get_option_kwd_indices()) {
-            if (tp[j].is_null()) {
-              missing.push_back(j);
-            }
-          }
-
-          check_nkwd(af_tp, available, missing);
+        intptr_t nkwd = sizeof...(K);
+        if (has_dst_tp) {
+          nkwd--;
         }
-      } validate_names;
+
+        for (intptr_t j : af_tp->get_option_kwd_indices()) {
+          if (tp[j].is_null()) {
+            missing.push_back(j);
+          }
+        }
+
+        check_nkwd(af_tp, available, missing);
+      }
 
       void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
                     const std::vector<intptr_t> &missing) const
@@ -783,6 +758,12 @@ namespace nd {
       return callables;
     }
   };
+
+  template <typename CallableType, typename... ArgTypes>
+  callable make_callable(ArgTypes &&... args)
+  {
+    return callable(new CallableType(std::forward<ArgTypes>(args)...), true);
+  }
 
   inline std::ostream &operator<<(std::ostream &o, const callable &rhs)
   {

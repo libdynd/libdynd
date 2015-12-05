@@ -369,7 +369,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = make_fixed_dim(tp.extended<callable_type>()->get_npos(), make_type());
+      dst_tp = make_fixed_dim(tp.extended<callable_type>()->get_npos(), make_type<type_type>());
     }
   };
 
@@ -391,7 +391,7 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       const type &tp = *reinterpret_cast<const ndt::type *>(data);
-      dst_tp = make_fixed_dim(tp.extended<callable_type>()->get_nkwd(), make_type());
+      dst_tp = make_fixed_dim(tp.extended<callable_type>()->get_nkwd(), make_type<type_type>());
     }
   };
 

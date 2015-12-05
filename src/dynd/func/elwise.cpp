@@ -15,7 +15,7 @@ ndt::type nd::functional::elwise_make_type(const ndt::callable_type *child_tp)
 {
   const ndt::type *param_types = child_tp->get_pos_types_raw();
   intptr_t param_count = child_tp->get_npos();
-  dynd::nd::array out_param_types = dynd::nd::empty(param_count, ndt::make_type());
+  dynd::nd::array out_param_types = dynd::nd::empty(param_count, ndt::make_type<ndt::type_type>());
   std::string dimsname("Dims");
   ndt::type *pt = reinterpret_cast<ndt::type *>(out_param_types.data());
 

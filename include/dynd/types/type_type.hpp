@@ -15,8 +15,7 @@ typedef ndt::type type_type_data;
 namespace ndt {
 
   /**
-   * A dynd type whose nd::array instances themselves contain
-   * dynd types.
+   * A type whose instance represents a type itself.
    */
   class DYND_API type_type : public base_type {
     type m_pattern_tp;
@@ -50,15 +49,6 @@ namespace ndt {
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
   };
-
-  /** Returns type "type" */
-  inline const type &make_type()
-  {
-    static const type type_tp(new type_type(), false);
-    return type_tp;
-  }
-
-  inline type make_type(const type &pattern_tp) { return type(new type_type(pattern_tp), false); }
 
 } // namespace dynd::ndt
 } // namespace dynd

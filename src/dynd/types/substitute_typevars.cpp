@@ -33,7 +33,7 @@ static nd::array substitute_type_array(const nd::array &type_array, const std::m
 {
   intptr_t field_count = type_array.get_dim_size();
   const ndt::type *field_types = reinterpret_cast<const ndt::type *>(type_array.cdata());
-  nd::array tmp_field_types(nd::empty(field_count, ndt::make_type()));
+  nd::array tmp_field_types(nd::empty(field_count, ndt::make_type<ndt::type_type>()));
   ndt::type *ftraw = reinterpret_cast<ndt::type *>(tmp_field_types.data());
   for (intptr_t i = 0; i < field_count; ++i) {
     ftraw[i] = ndt::substitute(field_types[i], typevars, concrete);

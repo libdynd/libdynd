@@ -38,7 +38,7 @@ void ndt::tuple_type::print_type(std::ostream &o) const
 void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
                                             type &out_transformed_tp, bool &out_was_transformed) const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
+  nd::array tmp_field_types(nd::empty(m_field_count, make_type<type_type>()));
   type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
   bool was_transformed = false;
@@ -58,7 +58,7 @@ void ndt::tuple_type::transform_child_types(type_transform_fn_t transform_fn, in
 
 ndt::type ndt::tuple_type::get_canonical_type() const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
+  nd::array tmp_field_types(nd::empty(m_field_count, make_type<type_type>()));
   type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {

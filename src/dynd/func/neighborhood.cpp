@@ -15,7 +15,7 @@ nd::callable nd::functional::neighborhood(const callable &neighborhood_op, const
   const ndt::callable_type *funcproto_tp = neighborhood_op.get_array_type().extended<ndt::callable_type>();
 
   intptr_t nh_ndim = funcproto_tp->get_pos_type(0).get_ndim();
-  nd::array arg_tp = nd::empty(2, ndt::make_type());
+  nd::array arg_tp = nd::empty(2, ndt::make_type<ndt::type_type>());
   arg_tp(0).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
   arg_tp(1).vals() = ndt::type("?" + std::to_string(nh_ndim) + " * int");
 

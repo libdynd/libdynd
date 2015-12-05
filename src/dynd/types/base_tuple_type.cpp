@@ -175,7 +175,7 @@ ndt::type ndt::base_tuple_type::apply_linear_index(intptr_t nindices, const iran
       return type(this, true);
     } else {
       // Take the subset of the fields in-place
-      nd::array tmp_field_types(nd::empty(dimension_size, make_type()));
+      nd::array tmp_field_types(nd::empty(dimension_size, make_type<type_type>()));
       type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
       for (intptr_t i = 0; i < dimension_size; ++i) {

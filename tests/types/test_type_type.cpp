@@ -21,7 +21,7 @@ TEST(DTypeDType, Create)
   ndt::type d;
 
   // Strings with various encodings and sizes
-  d = ndt::make_type();
+  d = ndt::make_type<ndt::type_type>();
   EXPECT_EQ(type_type_id, d.get_type_id());
   EXPECT_EQ(type_kind, d.get_kind());
   EXPECT_EQ(ndt::type("type"), d);
@@ -45,7 +45,7 @@ TEST(DTypeDType, StringCasting)
 {
   nd::array a;
 
-  a = nd::array("int32").ucast(ndt::make_type());
+  a = nd::array("int32").ucast(ndt::make_type<ndt::type_type>());
   a = a.eval();
   EXPECT_EQ(type_type_id, a.get_type().get_type_id());
   EXPECT_EQ(ndt::type::make<int32_t>(), a.as<ndt::type>());
@@ -58,7 +58,7 @@ TEST(DTypeDType, ScalarRefCount)
   ndt::type d, d2;
   d = ndt::type("Fixed * 12 * int");
 
-  a = nd::empty(ndt::make_type());
+  a = nd::empty(ndt::make_type<ndt::type_type>());
   EXPECT_EQ(1, d.extended()->get_use_count());
   a.vals() = d;
   EXPECT_EQ(2, d.extended()->get_use_count());
@@ -84,7 +84,7 @@ TEST(DTypeDType, StridedArrayRefCount)
   d = ndt::type("Fixed * 12 * int");
 
   // 1D Strided Array
-  a = nd::empty(10, ndt::make_type());
+  a = nd::empty(10, ndt::make_type<ndt::type_type>());
   EXPECT_EQ(1, d.extended()->get_use_count());
   a.vals() = d;
   EXPECT_EQ(11, d.extended()->get_use_count());
@@ -131,7 +131,7 @@ TEST(DTypeDType, FixedArrayRefCount)
   d = ndt::type("Fixed * 12 * int");
 
   // 1D Fixed Array
-  a = nd::empty(ndt::make_fixed_dim(10, ndt::make_type()));
+  a = nd::empty(ndt::make_fixed_dim(10, ndt::make_type<ndt::type_type>()));
   EXPECT_EQ(1, d.extended()->get_use_count());
   a.vals() = d;
   EXPECT_EQ(11, d.extended()->get_use_count());
@@ -178,7 +178,7 @@ TEST(DTypeDType, VarArrayRefCount)
   d = ndt::type("Fixed * 12 * int");
 
   // 1D Var Array
-  a = nd::empty(ndt::var_dim_type::make(ndt::make_type()));
+  a = nd::empty(ndt::var_dim_type::make(ndt::make_type<ndt::type_type>()));
   // It should have an objectarray memory block type
   EXPECT_EQ((uint32_t)objectarray_memory_block_type,
             reinterpret_cast<const var_dim_type_arrmeta *>(a.get()->metadata())->blockref->m_type);
@@ -200,7 +200,7 @@ TEST(DTypeDType, VarArrayRefCount)
   EXPECT_EQ(1, d.extended()->get_use_count());
 
   // 2D Strided + Var Array
-  a = nd::empty(3, ndt::var_dim_type::make(ndt::make_type()));
+  a = nd::empty(3, ndt::var_dim_type::make(ndt::make_type<ndt::type_type>()));
   a.vals_at(0) = nd::empty("2 * type");
   a.vals_at(1) = nd::empty("3 * type");
   a.vals_at(2) = nd::empty("4 * type");

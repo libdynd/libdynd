@@ -1447,7 +1447,7 @@ namespace nd {
   inline dynd::nd::array::array(const std::initializer_list<ndt::type> &il)
   {
     intptr_t dim0 = il.size();
-    make_strided_array(ndt::make_type(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
+    make_strided_array(ndt::make_type<ndt::type_type>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
     auto data_ptr = reinterpret_cast<ndt::type *>(get()->data);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
@@ -1497,7 +1497,7 @@ namespace nd {
   template <int N>
   nd::array::array(const ndt::type(&rhs)[N])
   {
-    nd::empty(N, ndt::make_type()).swap(*this);
+    nd::empty(N, ndt::make_type<ndt::type_type>()).swap(*this);
     ndt::type *out = reinterpret_cast<ndt::type *>(get()->data);
     for (int i = 0; i < N; ++i) {
       out[i] = rhs[i];
@@ -1532,7 +1532,7 @@ namespace nd {
 
   inline nd::array::array(const ndt::type *rhs, intptr_t dim_size)
   {
-    nd::empty(dim_size, ndt::make_type()).swap(*this);
+    nd::empty(dim_size, ndt::make_type<ndt::type_type>()).swap(*this);
     auto lhs = reinterpret_cast<ndt::type *>(get()->data);
     for (intptr_t i = 0; i < dim_size; ++i) {
       lhs[i] = rhs[i];

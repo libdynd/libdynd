@@ -62,7 +62,7 @@ namespace ndt {
     }
 
     /** Makes an empty tuple */
-    static type make(bool variadic = false) { return make(nd::empty(0, make_type()), variadic); }
+    static type make(bool variadic = false) { return make(nd::empty(0, make_type<type_type>()), variadic); }
   };
 
   DYND_API nd::array pack(intptr_t field_count, const nd::array *field_vals);

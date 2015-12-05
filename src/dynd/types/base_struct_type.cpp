@@ -41,9 +41,7 @@ ndt::base_struct_type::base_struct_type(type_id_t type_id, const nd::array &fiel
   m_members.kind = variadic ? kind_kind : struct_kind;
 }
 
-ndt::base_struct_type::~base_struct_type()
-{
-}
+ndt::base_struct_type::~base_struct_type() {}
 
 intptr_t ndt::base_struct_type::get_field_index(const char *field_name_begin, const char *field_name_end) const
 {
@@ -72,7 +70,8 @@ ndt::type ndt::base_struct_type::apply_linear_index(intptr_t nindices, const ira
 {
   if (nindices == 0) {
     return type(this, true);
-  } else {
+  }
+  else {
     bool remove_dimension;
     intptr_t start_index, index_stride, dimension_size;
     apply_single_linear_index(*indices, m_field_count, current_i, &root_tp, remove_dimension, start_index, index_stride,
@@ -80,12 +79,14 @@ ndt::type ndt::base_struct_type::apply_linear_index(intptr_t nindices, const ira
     if (remove_dimension) {
       return get_field_type(start_index)
           .apply_linear_index(nindices - 1, indices + 1, current_i + 1, root_tp, leading_dimension);
-    } else if (nindices == 1 && start_index == 0 && index_stride == 1 && dimension_size == m_field_count) {
+    }
+    else if (nindices == 1 && start_index == 0 && index_stride == 1 && dimension_size == m_field_count) {
       // This is a do-nothing index, keep the same type
       return type(this, true);
-    } else {
+    }
+    else {
       // Take the subset of the fields in-place
-      nd::array tmp_field_types(nd::empty(dimension_size, make_type()));
+      nd::array tmp_field_types(nd::empty(dimension_size, make_type<type_type>()));
       type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
       // Make an "N * string" array without copying the actual
@@ -120,7 +121,8 @@ intptr_t ndt::base_struct_type::apply_linear_index(intptr_t nindices, const iran
     // If there are no more indices, copy the arrmeta verbatim
     arrmeta_copy_construct(out_arrmeta, arrmeta, embedded_reference);
     return 0;
-  } else {
+  }
+  else {
     const uintptr_t *offsets = get_data_offsets(arrmeta);
     const uintptr_t *arrmeta_offsets = get_arrmeta_offsets_raw();
     bool remove_dimension;
@@ -139,7 +141,8 @@ intptr_t ndt::base_struct_type::apply_linear_index(intptr_t nindices, const iran
           offset = dt.extended()->apply_linear_index(nindices - 1, indices + 1, arrmeta + arrmeta_offsets[start_index],
                                                      result_tp, out_arrmeta, embedded_reference, current_i + 1, root_tp,
                                                      true, inout_data, inout_dataref);
-        } else {
+        }
+        else {
           intrusive_ptr<memory_block_data> tmp;
           offset += dt.extended()->apply_linear_index(nindices - 1, indices + 1, arrmeta + arrmeta_offsets[start_index],
                                                       result_tp, out_arrmeta, embedded_reference, current_i + 1,
@@ -147,7 +150,8 @@ intptr_t ndt::base_struct_type::apply_linear_index(intptr_t nindices, const iran
         }
       }
       return offset;
-    } else {
+    }
+    else {
       intrusive_ptr<memory_block_data> tmp;
       intptr_t *out_offsets = reinterpret_cast<intptr_t *>(out_arrmeta);
       const struct_type *result_e_dt = result_tp.extended<struct_type>();
@@ -180,10 +184,11 @@ bool ndt::base_struct_type::match(const char *arrmeta, const type &candidate_tp,
       if (!get_field_names().equals_exact(candidate_tp.extended<base_struct_type>()->get_field_names())) {
         return false;
       }
-    } else {
+    }
+    else {
       nd::array leading_field_names = get_field_names();
       if (!leading_field_names.equals_exact(
-               candidate_tp.extended<base_struct_type>()->get_field_names()(irange() < m_field_count))) {
+              candidate_tp.extended<base_struct_type>()->get_field_names()(irange() < m_field_count))) {
         return false;
       }
     }
@@ -206,7 +211,8 @@ size_t ndt::base_struct_type::get_elwise_property_index(const std::string &prope
   intptr_t i = get_field_index(property_name);
   if (i >= 0) {
     return i;
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "dynd type " << type(this, true) << " does not have a kernel for property " << property_name;
     throw runtime_error(ss.str());
@@ -221,7 +227,8 @@ ndt::type ndt::base_struct_type::get_elwise_property_type(size_t elwise_property
     out_readable = true;
     out_writable = false;
     return get_field_type(elwise_property_index).value_type();
-  } else {
+  }
+  else {
     return type::make<void>();
   }
 }
@@ -230,10 +237,7 @@ namespace {
 struct struct_property_getter_ck : nd::base_kernel<struct_property_getter_ck, 1> {
   size_t m_field_offset;
 
-  ~struct_property_getter_ck()
-  {
-    get_child()->destroy();
-  }
+  ~struct_property_getter_ck() { get_child()->destroy(); }
 
   void single(char *dst, char *const *src)
   {
@@ -268,7 +272,8 @@ size_t ndt::base_struct_type::make_elwise_property_getter_kernel(void *ckb, intp
     self->m_field_offset = get_data_offsets(src_arrmeta)[src_elwise_property_index];
     return ::make_assignment_kernel(ckb, ckb_offset, field_type.value_type(), dst_arrmeta, field_type,
                                     src_arrmeta + arrmeta_offsets[src_elwise_property_index], kernreq, ectx);
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "dynd type " << type(this, true);
     ss << " given an invalid property index" << src_elwise_property_index;

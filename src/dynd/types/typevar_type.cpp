@@ -193,7 +193,7 @@ nd::array ndt::make_typevar_range(const char *name, intptr_t count)
   if (count > 10) {
     throw runtime_error("TODO: extend make_typevar_range");
   }
-  result = nd::empty(count, make_type());
+  result = nd::empty(count, make_type<type_type>());
   auto result_ptr = reinterpret_cast<type *>(result.data());
   for (int i = 0; i < count; ++i) {
     result_ptr[i] = typevar_type::make(s);

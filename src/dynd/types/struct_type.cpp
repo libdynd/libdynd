@@ -73,7 +73,7 @@ void ndt::struct_type::print_type(std::ostream &o) const
 void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn, intptr_t arrmeta_offset, void *extra,
                                              type &out_transformed_tp, bool &out_was_transformed) const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
+  nd::array tmp_field_types(nd::empty(m_field_count, make_type<type_type>()));
   type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
   bool was_transformed = false;
@@ -93,7 +93,7 @@ void ndt::struct_type::transform_child_types(type_transform_fn_t transform_fn, i
 
 ndt::type ndt::struct_type::get_canonical_type() const
 {
-  nd::array tmp_field_types(nd::empty(m_field_count, make_type()));
+  nd::array tmp_field_types(nd::empty(m_field_count, make_type<type_type>()));
   type *tmp_field_types_raw = reinterpret_cast<type *>(tmp_field_types.data());
 
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
@@ -357,7 +357,7 @@ static nd::array make_self_names()
 
 static nd::array make_self_types()
 {
-  nd::array result = nd::empty(1, ndt::make_type());
+  nd::array result = nd::empty(1, ndt::make_type<ndt::type_type>());
   ndt::unchecked_fixed_dim_get_rw<ndt::type>(result, 0) = ndt::any_kind_type::make();
   result.flag_as_immutable();
   return result;
@@ -428,7 +428,7 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   intptr_t rhs_n = rhs_tp.extended<ndt::base_struct_type>()->get_field_count();
   intptr_t res_n = lhs_n + rhs_n;
   nd::array res_field_names = nd::empty(res_n, ndt::string_type::make());
-  nd::array res_field_types = nd::empty(res_n, ndt::make_type());
+  nd::array res_field_types = nd::empty(res_n, ndt::make_type<ndt::type_type>());
   res_field_names(irange(0, lhs_n)).vals() = lhs_tp.extended<ndt::base_struct_type>()->get_field_names();
   res_field_names(irange(lhs_n, res_n)).vals() = rhs_tp.extended<ndt::base_struct_type>()->get_field_names();
   res_field_types(irange(0, lhs_n)).vals() = lhs_tp.extended<ndt::base_struct_type>()->get_field_types();

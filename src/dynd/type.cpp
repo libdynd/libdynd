@@ -76,14 +76,25 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
   return data;
 }
 
-const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {
-    ndt::type(uninitialized_type_id), ndt::type(bool_type_id),            ndt::type(int8_type_id),
-    ndt::type(int16_type_id),         ndt::type(int32_type_id),           ndt::type(int64_type_id),
-    ndt::type(int128_type_id),        ndt::type(uint8_type_id),           ndt::type(uint16_type_id),
-    ndt::type(uint32_type_id),        ndt::type(uint64_type_id),          ndt::type(uint128_type_id),
-    ndt::type(float16_type_id),       ndt::type(float32_type_id),         ndt::type(float64_type_id),
-    ndt::type(float128_type_id),      ndt::type(complex_float32_type_id), ndt::type(complex_float64_type_id),
-    ndt::type(void_type_id)};
+const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {ndt::type(uninitialized_type_id),
+                                                                    ndt::type(bool_type_id),
+                                                                    ndt::type(int8_type_id),
+                                                                    ndt::type(int16_type_id),
+                                                                    ndt::type(int32_type_id),
+                                                                    ndt::type(int64_type_id),
+                                                                    ndt::type(int128_type_id),
+                                                                    ndt::type(uint8_type_id),
+                                                                    ndt::type(uint16_type_id),
+                                                                    ndt::type(uint32_type_id),
+                                                                    ndt::type(uint64_type_id),
+                                                                    ndt::type(uint128_type_id),
+                                                                    ndt::type(float16_type_id),
+                                                                    ndt::type(float32_type_id),
+                                                                    ndt::type(float64_type_id),
+                                                                    ndt::type(float128_type_id),
+                                                                    ndt::type(complex_float32_type_id),
+                                                                    ndt::type(complex_float64_type_id),
+                                                                    ndt::type(void_type_id)};
 
 ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(reinterpret_cast<const base_type *>(uninitialized_type_id), false),
@@ -134,28 +145,24 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(),                                           // property_type_id
     type(),                                           // expr_type_id
     type(),                                           // unary_expr_type_id
-    make_type(),                                      // type_type_id
+    make_type<type_type>(),                           // type_type_id
 };
 
-ndt::type::type(const std::string &rep)
-{
-  type_from_datashape(rep).swap(*this);
-}
+ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); }
 
-ndt::type::type(const char *rep_begin, const char *rep_end)
-{
-  type_from_datashape(rep_begin, rep_end).swap(*this);
-}
+ndt::type::type(const char *rep_begin, const char *rep_end) { type_from_datashape(rep_begin, rep_end).swap(*this); }
 
 ndt::type ndt::type::at_array(int nindices, const irange *indices) const
 {
   if (this->is_builtin()) {
     if (nindices == 0) {
       return *this;
-    } else {
+    }
+    else {
       throw too_many_indices(*this, nindices, 0);
     }
-  } else {
+  }
+  else {
     return m_ptr->apply_linear_index(nindices, indices, 0, *this, true);
   }
 }
@@ -244,19 +251,19 @@ ndt::type ndt::type::apply_linear_index(intptr_t nindices, const irange *indices
   if (is_builtin()) {
     if (nindices == 0) {
       return *this;
-    } else {
+    }
+    else {
       throw too_many_indices(*this, nindices + current_i, current_i);
     }
-  } else {
+  }
+  else {
     return m_ptr->apply_linear_index(nindices, indices, current_i, root_tp, leading_dimension);
   }
 }
 
 namespace {
 struct replace_scalar_type_extra {
-  replace_scalar_type_extra(const ndt::type &dt) : scalar_tp(dt)
-  {
-  }
+  replace_scalar_type_extra(const ndt::type &dt) : scalar_tp(dt) {}
   const ndt::type &scalar_tp;
 };
 static void replace_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset), void *extra,
@@ -266,7 +273,8 @@ static void replace_scalar_types(const ndt::type &dt, intptr_t DYND_UNUSED(arrme
   if (!dt.is_indexable()) {
     out_transformed_tp = ndt::convert_type::make(e->scalar_tp, dt);
     out_was_transformed = true;
-  } else {
+  }
+  else {
     dt.extended()->transform_child_types(&replace_scalar_types, 0, extra, out_transformed_tp, out_was_transformed);
   }
 }
@@ -297,7 +305,8 @@ static void replace_dtype(const ndt::type &tp, intptr_t DYND_UNUSED(arrmeta_offs
   if (tp.get_ndim() == e->m_replace_ndim) {
     out_transformed_tp = e->m_replacement_tp;
     out_was_transformed = true;
-  } else {
+  }
+  else {
     tp.extended()->transform_child_types(&replace_dtype, 0, extra, out_transformed_tp, out_was_transformed);
   }
 }
@@ -316,7 +325,8 @@ ndt::type ndt::type::without_memory_type() const
 {
   if (get_kind() == memory_kind) {
     return extended<base_memory_type>()->get_element_type();
-  } else {
+  }
+  else {
     return *this;
   }
 }
@@ -337,9 +347,11 @@ intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
 {
   if (get_kind() == dim_kind) {
     return static_cast<const base_dim_type *>(get())->get_dim_size(arrmeta, data);
-  } else if (get_kind() == struct_kind) {
+  }
+  else if (get_kind() == struct_kind) {
     return static_cast<const base_struct_type *>(get())->get_field_count();
-  } else if (get_ndim() > 0) {
+  }
+  else if (get_ndim() > 0) {
     intptr_t dim_size = -1;
     get()->get_shape(1, 0, &dim_size, arrmeta, data);
     if (dim_size >= 0) {
@@ -376,7 +388,8 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size, intp
     *out_el_tp = extended<base_dim_type>()->get_element_type();
     *out_el_arrmeta = arrmeta + sizeof(fixed_dim_type_arrmeta);
     return true;
-  } else {
+  }
+  else {
     return false;
   }
 }
@@ -392,7 +405,8 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim, const size_st
       *out_el_tp = out_el_tp->extended<base_dim_type>()->get_element_type();
     }
     return true;
-  } else {
+  }
+  else {
     return false;
   }
 }
@@ -635,12 +649,14 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &
     for (intptr_t i = ndim - 2; i >= 0; --i) {
       if (shape[i] >= 0) {
         result_tp = ndt::make_fixed_dim(shape[i], result_tp);
-      } else {
+      }
+      else {
         result_tp = ndt::var_dim_type::make(result_tp);
       }
     }
     return result_tp;
-  } else {
+  }
+  else {
     return dtp;
   }
 }
@@ -652,13 +668,15 @@ ndt::type ndt::make_type(intptr_t ndim, const intptr_t *shape, const ndt::type &
     for (intptr_t i = ndim - 1; i >= 0; --i) {
       if (shape[i] >= 0) {
         result_tp = ndt::make_fixed_dim(shape[i], result_tp);
-      } else {
+      }
+      else {
         result_tp = ndt::var_dim_type::make(result_tp);
         out_any_var = true;
       }
     }
     return result_tp;
-  } else {
+  }
+  else {
     return dtp;
   }
 }
@@ -671,20 +689,11 @@ type_id_t ndt::register_type(const std::string &name, type_make_t make)
   return static_cast<type_id_t>(registry::size++);
 }
 
-ndt::type ndt::type::make(type_id_t tp_id, const nd::array &args)
-{
-  return registry::data[tp_id].func(tp_id, args);
-}
+ndt::type ndt::type::make(type_id_t tp_id, const nd::array &args) { return registry::data[tp_id].func(tp_id, args); }
 
-ndt::type ndt::type_of(const nd::array &value)
-{
-  return value.get_type();
-}
+ndt::type ndt::type_of(const nd::array &value) { return value.get_type(); }
 
-ndt::type ndt::type_of(const nd::callable &value)
-{
-  return value.get_array_type();
-}
+ndt::type ndt::type_of(const nd::callable &value) { return value.get_array_type(); }
 
 ndt::type ndt::get_forward_type(const nd::array &val)
 {
@@ -718,10 +727,7 @@ void dynd::hexadecimal_print(std::ostream &o, char value)
   o << hexadecimal[v >> 4] << hexadecimal[v & 0x0f];
 }
 
-void dynd::hexadecimal_print(std::ostream &o, unsigned char value)
-{
-  hexadecimal_print(o, static_cast<char>(value));
-}
+void dynd::hexadecimal_print(std::ostream &o, unsigned char value) { hexadecimal_print(o, static_cast<char>(value)); }
 
 void dynd::hexadecimal_print(std::ostream &o, unsigned short value)
 {
@@ -743,7 +749,8 @@ void dynd::hexadecimal_print(std::ostream &o, unsigned long value)
 {
   if (sizeof(unsigned int) == sizeof(unsigned long)) {
     hexadecimal_print(o, static_cast<unsigned int>(value));
-  } else {
+  }
+  else {
     hexadecimal_print(o, static_cast<unsigned long long>(value));
   }
 }
@@ -772,7 +779,8 @@ void dynd::hexadecimal_print_summarized(std::ostream &o, const char *data, intpt
 {
   if (element_size * 2 <= summary_size) {
     hexadecimal_print(o, data, element_size);
-  } else {
+  }
+  else {
     // Print a summary
     intptr_t size = max(summary_size / 4 - 1, (intptr_t)1);
     hexadecimal_print(o, data, size);
@@ -845,7 +853,8 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp, const 
       if (num_rows > row_threshold && leading.size() > 1) {
         if (trailing.empty()) {
           trailing.insert(trailing.begin(), leading.back());
-        } else {
+        }
+        else {
           num_rows -= line_count(leading.back());
         }
         leading.pop_back();
@@ -871,7 +880,8 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp, const 
       }
     }
     o << "]";
-  } else {
+  }
+  else {
     // Pack the values in a regular grid
     // Keep getting more strings until we use up our column budget.
     intptr_t total_cols = (max_num_cols + 2) * (leading.size() + trailing.size());
@@ -897,7 +907,8 @@ void dynd::strided_array_summarized(std::ostream &o, const ndt::type &tp, const 
       // Combine the lists if the total size is covered
       copy(trailing.begin(), trailing.end(), back_inserter(leading));
       trailing.clear();
-    } else {
+    }
+    else {
       // Remove partial rows if the total size is not covered
       if (leading.size() > (size_t)per_row && leading.size() % per_row != 0) {
         leading.erase(leading.begin() + (leading.size() / per_row) * per_row, leading.end());
@@ -1008,7 +1019,8 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
 {
   if (is_builtin()) {
     print_builtin_scalar(get_type_id(), o, data);
-  } else {
+  }
+  else {
     extended()->print_data(o, arrmeta, data);
   }
 }
@@ -1018,7 +1030,7 @@ struct ndt::common_type::init {
   void on_each()
   {
     children[front<TypeIDSequence>::value][back<TypeIDSequence>::value] = [](const ndt::type &DYND_UNUSED(tp0),
-                                                                             const ndt::type & DYND_UNUSED(tp1)) {
+                                                                             const ndt::type &DYND_UNUSED(tp1)) {
       return ndt::type::make<
           typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
                                     typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
@@ -1040,7 +1052,7 @@ ndt::common_type::common_type()
     children[tp_id][option_type_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
       return option_type::make(ndt::common_type(tp0, tp1.extended<option_type>()->get_value_type()));
     };
-    children[any_kind_type_id][tp_id] = [](const ndt::type &DYND_UNUSED(tp0), const ndt::type & tp1) { return tp1; };
+    children[any_kind_type_id][tp_id] = [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &tp1) { return tp1; };
     children[tp_id][any_kind_type_id] = [](const ndt::type &tp0, const ndt::type &DYND_UNUSED(tp1)) { return tp0; };
   }
   children[fixed_dim_type_id][fixed_dim_type_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
