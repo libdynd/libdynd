@@ -93,12 +93,11 @@ namespace nd {
 
     template <typename T>
     void check_name(const ndt::callable_type *af_tp, array &dst, const std::string &name, const T &value,
-                    bool &has_dst_tp, ndt::type *kwd_tp, std::vector<intptr_t> &available)
+                    ndt::type *kwd_tp, std::vector<intptr_t> &available)
     {
       intptr_t j = af_tp->get_kwd_index(name);
       if (j == -1) {
         if (is_special_kwd(af_tp, dst, name, value)) {
-          has_dst_tp = true;
         }
         else {
           std::stringstream ss;
@@ -148,26 +147,14 @@ namespace nd {
     /** The case of no keyword arguments being provided */
     template <>
     struct kwds<> {
-      static constexpr size_t size = 0;
-      static constexpr char *names = nullptr;
-      static constexpr array *values = nullptr;
+      static const size_t size = 0;
+      const char *m_names[1];
+      array values[1];
 
       void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
                        const std::vector<intptr_t> &DYND_UNUSED(available), const std::vector<intptr_t> &missing) const
       {
         fill_missing_values(tp, kwds_as_vector, missing);
-      }
-
-      void validate_names(const ndt::callable_type *af_tp, array &DYND_UNUSED(dst),
-                          std::vector<ndt::type> &DYND_UNUSED(tp), std::vector<intptr_t> &available,
-                          std::vector<intptr_t> &missing) const
-      {
-        // No keywords provided, so all are missing
-        for (intptr_t j : af_tp->get_option_kwd_indices()) {
-          missing.push_back(j);
-        }
-
-        check_nkwd(af_tp, available, missing);
       }
 
       /** Converts the keyword args + filled in defaults into an nd::array */
@@ -180,9 +167,9 @@ namespace nd {
 
     template <typename... K>
     struct kwds {
-      static constexpr size_t size = sizeof...(K);
+      static const size_t size = sizeof...(K);
       const char *m_names[sizeof...(K)];
-      array m_vals[sizeof...(K)];
+      array values[sizeof...(K)];
 
       void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
                        const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
@@ -190,7 +177,7 @@ namespace nd {
         for (size_t i = 0; i < sizeof...(K); ++i) {
           intptr_t j = available[i];
           if (j != -1) {
-            kwds_as_vector[j] = m_vals[i];
+            kwds_as_vector[j] = values[i];
           }
         }
 
@@ -198,31 +185,8 @@ namespace nd {
       }
 
       kwds(typename as_<K, const char *>::type... names, K &&... values)
-          : m_names{names...}, m_vals{std::forward<K>(values)...}
+          : m_names{names...}, values{std::forward<K>(values)...}
       {
-      }
-
-      void validate_names(const ndt::callable_type *af_tp, array &dst, std::vector<ndt::type> &tp,
-                          std::vector<intptr_t> &available, std::vector<intptr_t> &missing) const
-      {
-        bool has_dst_tp = false;
-
-        for (size_t i = 0; i < sizeof...(K); ++i) {
-          check_name(af_tp, dst, m_names[i], m_vals[i], has_dst_tp, tp.data(), available);
-        }
-
-        intptr_t nkwd = sizeof...(K);
-        if (has_dst_tp) {
-          nkwd--;
-        }
-
-        for (intptr_t j : af_tp->get_option_kwd_indices()) {
-          if (tp[j].is_null()) {
-            missing.push_back(j);
-          }
-        }
-
-        check_nkwd(af_tp, available, missing);
       }
 
       void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
@@ -234,16 +198,16 @@ namespace nd {
 
     template <>
     struct kwds<intptr_t, const char *const *, array *> {
-      intptr_t m_size;
+      size_t size;
       const char *const *m_names;
-      array *m_values;
+      array *values;
 
       void fill_available_values(std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available) const
       {
-        for (intptr_t i = 0; i < m_size; ++i) {
+        for (size_t i = 0; i < size; ++i) {
           intptr_t j = available[i];
           if (j != -1) {
-            kwds_as_vector[j] = this->m_values[i];
+            kwds_as_vector[j] = this->values[i];
           }
         }
       }
@@ -255,30 +219,7 @@ namespace nd {
         fill_missing_values(tp, kwds_as_vector, missing);
       }
 
-      kwds(intptr_t size, const char *const *names, array *values) : m_size(size), m_names(names), m_values(values) {}
-
-      void validate_names(const ndt::callable_type *af_tp, array &dst, std::vector<ndt::type> &kwd_tp,
-                          std::vector<intptr_t> &available, std::vector<intptr_t> &missing) const
-      {
-        bool has_dst_tp = false;
-
-        for (intptr_t i = 0; i < m_size; ++i) {
-          check_name(af_tp, dst, m_names[i], m_values[i], has_dst_tp, kwd_tp.data(), available);
-        }
-
-        intptr_t nkwd = m_size;
-        if (has_dst_tp) {
-          nkwd--;
-        }
-
-        for (intptr_t j : af_tp->get_option_kwd_indices()) {
-          if (kwd_tp[j].is_null()) {
-            missing.push_back(j);
-          }
-        }
-
-        check_nkwd(af_tp, available, missing);
-      }
+      kwds(intptr_t size, const char *const *names, array *values) : size(size), m_names(names), values(values) {}
 
       void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
                     const std::vector<intptr_t> &missing) const
@@ -536,7 +477,17 @@ namespace nd {
       // ...
       std::vector<ndt::type> kwd_tp(self_tp->get_nkwd());
       std::vector<intptr_t> available, missing;
-      kwds.validate_names(self_tp, dst, kwd_tp, available, missing);
+
+      for (size_t i = 0; i < kwds.size; ++i) {
+        detail::check_name(self_tp, dst, kwds.m_names[i], kwds.values[i], kwd_tp.data(), available);
+      }
+      for (intptr_t j : self_tp->get_option_kwd_indices()) {
+        if (kwd_tp[j].is_null()) {
+          missing.push_back(j);
+        }
+      }
+
+      detail::check_nkwd(self_tp, available, missing);
 
       // Validate the destination type, if it was provided
       if (!dst.is_null()) {
@@ -797,7 +748,7 @@ namespace nd {
       void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
                    DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
       {
-        auto &value = std::get<I>(self->m_values);
+        auto &value = std::get<I>(self->values);
         const ndt::type &tp = ndt::type::make<decltype(value)>(value);
         const char *arrmeta = value.get()->metadata();
 
@@ -809,14 +760,14 @@ namespace nd {
       }
     };
 
-    std::tuple<typename as_array<A>::type...> m_values;
+    std::tuple<typename as_array<A>::type...> values;
     ndt::type m_tp[sizeof...(A)];
     const char *m_arrmeta[sizeof...(A)];
     DataType m_data[sizeof...(A)];
 
   public:
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
-        : m_values(std::forward<A>(a)...)
+        : values(std::forward<A>(a)...)
     {
       detail::check_narg(self_tp, sizeof...(A));
 
