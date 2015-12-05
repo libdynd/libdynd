@@ -784,6 +784,12 @@ namespace nd {
     }
   };
 
+  template <typename CallableType, typename... ArgTypes>
+  callable make_callable(ArgTypes &&... args)
+  {
+    return callable(new CallableType(std::forward<ArgTypes>(args)...), true);
+  }
+
   inline std::ostream &operator<<(std::ostream &o, const callable &rhs)
   {
     return o << "<callable <" << rhs.get()->tp << "> at " << reinterpret_cast<const void *>(rhs.get()) << ">";

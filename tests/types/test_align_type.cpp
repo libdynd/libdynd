@@ -17,7 +17,8 @@
 using namespace std;
 using namespace dynd;
 
-TEST(AlignDType, Create) {
+TEST(AlignDType, Create)
+{
   ndt::type d;
 
   d = ndt::make_unaligned<float>();
@@ -32,10 +33,11 @@ TEST(AlignDType, Create) {
   EXPECT_EQ(d, ndt::type(d.str()));
 
   // The "type" type is an object type, it should throw in this case
-  EXPECT_THROW(d = make_unaligned(ndt::make_type()), dynd::type_error);
+  EXPECT_THROW(d = make_unaligned(ndt::make_type<ndt::type_type>()), dynd::type_error);
 }
 
-TEST(AlignDType, Basic) {
+TEST(AlignDType, Basic)
+{
   nd::array a;
 
   union {
@@ -59,27 +61,26 @@ TEST(AlignDType, Basic) {
   EXPECT_EQ(0x12345678abcdef01LL, a.as<int64_t>());
 }
 
-TEST(AlignDType, Chained) {
+TEST(AlignDType, Chained)
+{
   // The unaligned type can give back an expression type as the value type,
   // make sure that is handled properly at the type object level.
   ndt::type d = make_unaligned(ndt::byteswap_type::make(ndt::type::make<int>()));
   EXPECT_EQ(ndt::byteswap_type::make(ndt::type::make<int>(),
-                               ndt::view_type::make(ndt::make_fixed_bytes(4, 4),
-                                              ndt::make_fixed_bytes(4, 1))),
+                                     ndt::view_type::make(ndt::make_fixed_bytes(4, 4), ndt::make_fixed_bytes(4, 1))),
             d);
   EXPECT_EQ(ndt::make_fixed_bytes(4, 1), d.storage_type());
   EXPECT_EQ(ndt::type::make<int>(), d.value_type());
 }
 
-TEST(AlignDType, CanonicalDType) {
+TEST(AlignDType, CanonicalDType)
+{
   // The canonical type of an alignment result is always the aligned type
-  EXPECT_EQ((ndt::type::make<float>()),
-            (ndt::make_unaligned<float>().get_canonical_type()));
+  EXPECT_EQ((ndt::type::make<float>()), (ndt::make_unaligned<float>().get_canonical_type()));
 }
 
-TEST(AlignDType, AdaptDatetime) {
-  EXPECT_EQ(
-      ndt::type("adapt[(unaligned[datetime]) -> int64, 'seconds since 1970']"),
-      ndt::make_unaligned(
-          ndt::type("adapt[(datetime) -> int64, 'seconds since 1970']")));
+TEST(AlignDType, AdaptDatetime)
+{
+  EXPECT_EQ(ndt::type("adapt[(unaligned[datetime]) -> int64, 'seconds since 1970']"),
+            ndt::make_unaligned(ndt::type("adapt[(datetime) -> int64, 'seconds since 1970']")));
 }
