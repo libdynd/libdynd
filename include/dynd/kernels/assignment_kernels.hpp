@@ -22,7 +22,6 @@
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
-#include <dynd/types/ndarrayarg_type.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/categorical_type.hpp>
