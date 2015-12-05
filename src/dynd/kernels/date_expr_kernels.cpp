@@ -9,6 +9,7 @@
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/types/string_type.hpp>
 #include <datetime_strings.h>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

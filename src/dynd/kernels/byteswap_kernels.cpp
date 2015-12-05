@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <dynd/diagnostics.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/byteswap_kernels.hpp>
 

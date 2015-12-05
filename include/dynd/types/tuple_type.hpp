@@ -18,7 +18,7 @@ namespace dynd {
 namespace ndt {
 
   class DYND_API tuple_type : public base_tuple_type {
-    std::vector<std::pair<std::string, gfunc::callable>> m_array_properties;
+    std::vector<std::pair<std::string, nd::callable>> m_array_properties;
 
   protected:
     uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }

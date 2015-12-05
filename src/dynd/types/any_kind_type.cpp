@@ -7,7 +7,6 @@
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/gfunc/gcallable.hpp>
 #include <dynd/types/builtin_type_properties.hpp>
 
 using namespace std;

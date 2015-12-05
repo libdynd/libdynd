@@ -338,11 +338,6 @@ set(libdynd_SRC
     include/dynd/func/take.hpp
     include/dynd/func/take_by_pointer.hpp
     include/dynd/func/view.hpp
-    # GFunc
-    src/dynd/gfunc/gcallable.cpp
-    include/dynd/gfunc/gcallable.hpp
-    include/dynd/gfunc/call_gcallable.hpp
-    include/dynd/gfunc/make_gcallable.hpp
     # Kernels
     src/dynd/kernels/base_kernel.cpp
     src/dynd/kernels/byteswap_kernels.cpp

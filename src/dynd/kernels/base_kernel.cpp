@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 
 using namespace std;
@@ -16,7 +17,7 @@ struct expression_type_expr_kernel_extra {
 
     bool is_expr[N];
 
-    
+
 };
 
 } // anonymous namespace

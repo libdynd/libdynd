@@ -4,6 +4,7 @@
 //
 
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

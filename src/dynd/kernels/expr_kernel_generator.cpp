@@ -5,6 +5,7 @@
 
 #include <dynd/type.hpp>
 #include <dynd/kernels/expr_kernel_generator.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -20,7 +20,6 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/gfunc/make_gcallable.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/parser_util.hpp>
 
