@@ -143,18 +143,21 @@ namespace nd {
 
     /** A holder class for the keyword arguments */
     template <typename... K>
-    class kwds;
+    struct kwds;
 
     /** The case of no keyword arguments being provided */
     template <>
-    class kwds<> {
+    struct kwds<> {
+      static constexpr size_t size = 0;
+      static constexpr char *names = nullptr;
+      static constexpr array *values = nullptr;
+
       void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
                        const std::vector<intptr_t> &DYND_UNUSED(available), const std::vector<intptr_t> &missing) const
       {
         fill_missing_values(tp, kwds_as_vector, missing);
       }
 
-    public:
       void validate_names(const ndt::callable_type *af_tp, array &DYND_UNUSED(dst),
                           std::vector<ndt::type> &DYND_UNUSED(tp), std::vector<intptr_t> &available,
                           std::vector<intptr_t> &missing) const
@@ -176,7 +179,8 @@ namespace nd {
     };
 
     template <typename... K>
-    class kwds {
+    struct kwds {
+      static constexpr size_t size = sizeof...(K);
       const char *m_names[sizeof...(K)];
       array m_vals[sizeof...(K)];
 
@@ -193,7 +197,6 @@ namespace nd {
         fill_missing_values(tp, kwds_as_vector, missing);
       }
 
-    public:
       kwds(typename as_<K, const char *>::type... names, K &&... values)
           : m_names{names...}, m_vals{std::forward<K>(values)...}
       {
@@ -230,7 +233,7 @@ namespace nd {
     };
 
     template <>
-    class kwds<intptr_t, const char *const *, array *> {
+    struct kwds<intptr_t, const char *const *, array *> {
       intptr_t m_size;
       const char *const *m_names;
       array *m_values;
@@ -252,7 +255,6 @@ namespace nd {
         fill_missing_values(tp, kwds_as_vector, missing);
       }
 
-    public:
       kwds(intptr_t size, const char *const *names, array *values) : m_size(size), m_names(names), m_values(values) {}
 
       void validate_names(const ndt::callable_type *af_tp, array &dst, std::vector<ndt::type> &kwd_tp,
