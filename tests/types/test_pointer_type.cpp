@@ -10,7 +10,7 @@
 
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/array.hpp>
-#include <dynd/gfunc/call_gcallable.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

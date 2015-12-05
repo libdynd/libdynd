@@ -30,6 +30,7 @@
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/parser_util.hpp>
 #include <map>

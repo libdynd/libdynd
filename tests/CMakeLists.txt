@@ -88,7 +88,6 @@ set(tests_SRC
     func/test_take.cpp
     func/test_take_by_pointer.cpp
     func/test_view.cpp
-    gfunc/test_callable.cpp
     array/test_array.cpp
     array/test_array_range.cpp
     array/test_array_assign.cpp

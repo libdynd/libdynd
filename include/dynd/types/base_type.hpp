@@ -18,11 +18,6 @@
 
 namespace dynd {
 
-// Forward definition from dynd/func/callable.hpp
-namespace gfunc {
-  class callable;
-};
-
 // Forward definition from dynd/type.hpp
 namespace ndt {
   class base_type;

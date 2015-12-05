@@ -973,4 +973,51 @@ DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, con
  */
 DYND_API nd::callable make_callable_from_property(const ndt::type &tp, const std::string &propname);
 
+/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+inline nd::array nd::array::f(const char *function_name)
+{
+  return const_cast<callable &>(find_dynamic_function(function_name))(kwds("self", *this));
+}
+inline nd::array nd::array::f(const char *function_name) const
+{
+  return const_cast<callable &>(find_dynamic_function(function_name))(kwds("self", *this));
+}
+
+/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+template <class T0>
+inline nd::array nd::array::f(const char *function_name, const T0 &p0)
+{
+  nd::callable g = find_dynamic_function(function_name);
+  return g(kwds("self", *this, g.get_type()->get_kwd_name_raw(1).data(), nd::array(p0)));
+}
+
+/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+template <class T0, class T1>
+inline nd::array nd::array::f(const char *function_name, const T0 &p0, const T1 &p1)
+{
+  nd::callable g = find_dynamic_function(function_name);
+  return g(kwds("self", *this, g.get_type()->get_kwd_name_raw(1).data(), nd::array(p0),
+                g.get_type()->get_kwd_name_raw(2).data(), nd::array(p1)));
+}
+
+/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+template <class T0, class T1, class T2>
+inline nd::array nd::array::f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2)
+{
+  nd::callable g = find_dynamic_function(function_name);
+  return g(kwds("self", *this, g.get_type()->get_kwd_name_raw(1).data(), nd::array(p0),
+                g.get_type()->get_kwd_name_raw(2).data(), nd::array(p1), g.get_type()->get_kwd_name_raw(3).data(),
+                nd::array(p2)));
+}
+
+/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
+template <class T0, class T1, class T2, class T3>
+inline nd::array nd::array::f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2, const T3 &p3)
+{
+  nd::callable g = find_dynamic_function(function_name);
+  return g(kwds("self", *this, g.get_type()->get_kwd_name_raw(1).data(), nd::array(p0),
+                g.get_type()->get_kwd_name_raw(2).data(), nd::array(p1), g.get_type()->get_kwd_name_raw(3).data(),
+                nd::array(p2), g.get_type()->get_kwd_name_raw(4).data(), nd::array(p3)));
+}
+
 } // namespace dynd

@@ -9,7 +9,6 @@
 #include <dynd/types/property_type.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/gfunc/make_gcallable.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/kernels/tuple_assignment_kernels.hpp>
 #include <dynd/kernels/struct_assignment_kernels.hpp>
