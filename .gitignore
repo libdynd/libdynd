@@ -14,5 +14,6 @@ debug
 *.pyc
 *.orig
 tests/dnd_tests
+.ipynb_checkpoints
 
 .tags*
