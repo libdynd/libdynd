@@ -910,11 +910,11 @@ DYND_API nd::callable make_callable_from_property(const ndt::type &tp, const std
 /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
 inline nd::array nd::array::f(const char *function_name)
 {
-  return const_cast<callable &>(find_dynamic_function(function_name))(kwds("self", *this));
+  return find_dynamic_function(function_name)(kwds("self", *this));
 }
 inline nd::array nd::array::f(const char *function_name) const
 {
-  return const_cast<callable &>(find_dynamic_function(function_name))(kwds("self", *this));
+  return find_dynamic_function(function_name)(kwds("self", *this));
 }
 
 /** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */

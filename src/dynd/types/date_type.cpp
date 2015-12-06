@@ -453,24 +453,18 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year, int32_t 
 }
 */
 
-void ndt::date_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                 size_t *out_count) const
+void ndt::date_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
   //       pair<std::string, nd::callable>(
   //          "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
 
-  static pair<std::string, nd::callable> date_array_functions[] = {
-      pair<std::string, nd::callable>("to_struct",
-                                      nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("weekday", nd::callable::make<weekday_kernel>(ndt::type("(self: Any) -> Any")))};
+  functions["to_struct"] = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
+  functions["weekday"] = nd::callable::make<weekday_kernel>(ndt::type("(self: Any) -> Any"));
 
   //      pair<std::string, gfunc::callable>(
   //        "replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
   //                                                   numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),
   //                                                 numeric_limits<int32_t>::max()))};
-
-  *out_functions = date_array_functions;
-  *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
 }
 
 ///////// property accessor kernels (used by property_type)

@@ -254,12 +254,11 @@ void ndt::property_type::get_dynamic_array_properties(const std::pair<std::strin
   }
 }
 
-void ndt::property_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                     size_t *out_count) const
+void ndt::property_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
   const type &udt = m_value_tp.get_dtype();
   if (!udt.is_builtin()) {
-    udt.extended()->get_dynamic_array_functions(out_functions, out_count);
+    udt.extended()->get_dynamic_array_functions(functions);
   }
   else {
     // get_builtin_type_dynamic_array_functions(udt.get_type_id(),

@@ -46,8 +46,7 @@ namespace ndt {
     void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
                                      size_t *out_count) const;
 
-    void get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                     size_t *out_count) const;
+    void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
   };
 
 } // namespace dynd::ndt

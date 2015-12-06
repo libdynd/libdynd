@@ -607,18 +607,12 @@ struct strftime_kernel : nd::base_kernel<strftime_kernel> {
   }
 };
 
-void ndt::datetime_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                     size_t *out_count) const
+void ndt::datetime_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
-  static pair<std::string, nd::callable> date_array_functions[] = {
-      pair<std::string, nd::callable>("to_struct",
-                                      nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"))),
-//      pair<std::string, nd::callable>(
-  //        "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
-  };
+  functions["to_struct"] = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
 
-  *out_functions = date_array_functions;
-  *out_count = sizeof(date_array_functions) / sizeof(date_array_functions[0]);
+  //      pair<std::string, nd::callable>(
+  //        "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
 }
 
 ///////// property accessor kernels (used by property_type)

@@ -19,7 +19,8 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
 {
   if (begin == end) {
     return false;
-  } else {
+  }
+  else {
     char c = *begin++;
     if (!(('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_')) {
       return false;
@@ -42,13 +43,15 @@ ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, c
   if (m_pos_tuple.get_type_id() != tuple_type_id) {
     stringstream ss;
     ss << "dynd callable positional arg types require a tuple type, got a "
-          "type \"" << m_pos_tuple << "\"";
+          "type \""
+       << m_pos_tuple << "\"";
     throw invalid_argument(ss.str());
   }
   if (m_kwd_struct.get_type_id() != struct_type_id) {
     stringstream ss;
     ss << "dynd callable keyword arg types require a struct type, got a "
-          "type \"" << m_kwd_struct << "\"";
+          "type \""
+       << m_kwd_struct << "\"";
     throw invalid_argument(ss.str());
   }
 
@@ -95,7 +98,8 @@ void ndt::callable_type::print_type(std::ostream &o) const
   if (m_pos_tuple.extended<tuple_type>()->is_variadic()) {
     if (npos > 0) {
       o << ", ...";
-    } else {
+    }
+    else {
       o << "...";
     }
   }
@@ -109,7 +113,8 @@ void ndt::callable_type::print_type(std::ostream &o) const
     const string &an = get_kwd_name_raw(i);
     if (is_simple_identifier_name(an.begin(), an.end())) {
       o.write(an.begin(), an.end() - an.begin());
-    } else {
+    }
+    else {
       print_escaped_utf8_string(o, an.begin(), an.end(), true);
     }
     o << ": " << get_kwd_type(i);
@@ -133,7 +138,8 @@ void ndt::callable_type::transform_child_types(type_transform_fn_t transform_fn,
   if (was_transformed) {
     out_transformed_tp = make(tmp_return_type, tmp_pos_types, tmp_kwd_types);
     out_was_transformed = true;
-  } else {
+  }
+  else {
     out_transformed_tp = type(this, true);
   }
 }
@@ -178,7 +184,8 @@ bool ndt::callable_type::is_lossless_assignment(const type &dst_tp, const type &
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == callable_type_id) {
+    }
+    else if (src_tp.get_type_id() == callable_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -190,9 +197,11 @@ bool ndt::callable_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != callable_type_id) {
+  }
+  else if (rhs.get_type_id() != callable_type_id) {
     return false;
-  } else {
+  }
+  else {
     const callable_type *fpt = static_cast<const callable_type *>(&rhs);
     return m_return_type == fpt->m_return_type && m_pos_tuple == fpt->m_pos_tuple && m_kwd_struct == fpt->m_kwd_struct;
   }
@@ -202,23 +211,17 @@ void ndt::callable_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), b
 {
 }
 
-void ndt::callable_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                                const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference))
-    const
+void ndt::callable_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
 }
 
-void ndt::callable_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const
-{
-}
+void ndt::callable_type::arrmeta_reset_buffers(char *DYND_UNUSED(arrmeta)) const {}
 
-void ndt::callable_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const
-{
-}
+void ndt::callable_type::arrmeta_finalize_buffers(char *DYND_UNUSED(arrmeta)) const {}
 
-void ndt::callable_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const
-{
-}
+void ndt::callable_type::arrmeta_destruct(char *DYND_UNUSED(arrmeta)) const {}
 
 void ndt::callable_type::data_destruct(const char *DYND_UNUSED(arrmeta), char *data) const
 {
@@ -275,7 +278,8 @@ intptr_t ndt::callable_type::make_assignment_kernel(void *ckb, intptr_t ckb_offs
                                                     const eval::eval_context *ectx) const
 {
   if (this == dst_tp.extended()) {
-  } else {
+  }
+  else {
     if (dst_tp.get_kind() == string_kind) {
       // Assignment to strings
       return make_callable_to_string_assignment_kernel(ckb, ckb_offset, dst_tp, dst_arrmeta, src_tp, kernreq, ectx);
@@ -343,10 +347,7 @@ static nd::array property_get_kwd_names(const ndt::type &tp)
 
 */
 
-static ndt::type property_get_return_type(ndt::type tp)
-{
-  return tp.extended<ndt::callable_type>()->get_return_type();
-}
+static ndt::type property_get_return_type(ndt::type tp) { return tp.extended<ndt::callable_type>()->get_return_type(); }
 
 void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
                                                      size_t *out_count) const
@@ -449,7 +450,7 @@ ndt::type ndt::make_generic_funcproto(intptr_t nargs)
 
 // Maximum number of args (including out) for now
 // (need to add varargs capability to this calling convention)
-//static const int max_args = 6;
+// static const int max_args = 6;
 
 /*
 static array_preamble *function___call__(const array_preamble *params, void *DYND_UNUSED(self))
@@ -506,19 +507,18 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
 }
 */
 
-void ndt::callable_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **,
-                                                     size_t *out_count) const
+void ndt::callable_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const
 {
-/*
-  static pair<std::string, gfunc::callable> callable_array_functions[] = {pair<std::string, nd::callable>(
-      "execute", gfunc::callable(type("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
-                                      "p1:ndarrayarg,p2:ndarrayarg,"
-                                      "p3:ndarrayarg,p4:ndarrayarg}"),
-                                 &function___call__, NULL, 3, nd::empty("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
-                                                                        "p1:ndarrayarg,p2:ndarrayarg,"
-                                                                        "p3:ndarrayarg,p4:ndarrayarg}")))};
-*/
+  /*
+    static pair<std::string, gfunc::callable> callable_array_functions[] = {pair<std::string, nd::callable>(
+        "execute", gfunc::callable(type("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+                                        "p1:ndarrayarg,p2:ndarrayarg,"
+                                        "p3:ndarrayarg,p4:ndarrayarg}"),
+                                   &function___call__, NULL, 3,
+    nd::empty("{self:ndarrayarg,out:ndarrayarg,p0:ndarrayarg,"
+                                                                          "p1:ndarrayarg,p2:ndarrayarg,"
+                                                                          "p3:ndarrayarg,p4:ndarrayarg}")))};
+  */
 
-//  *out_functions = callable_array_functions;
-  *out_count = 0; //sizeof(callable_array_functions) / sizeof(callable_array_functions[0]);
+  //  *out_functions = callable_array_functions;
 }

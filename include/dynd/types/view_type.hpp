@@ -49,11 +49,10 @@ namespace ndt {
         m_value_type.extended()->get_dynamic_array_properties(out_properties, out_count);
       }
     }
-    void get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                     size_t *out_count) const
+    void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
     {
       if (!m_value_type.is_builtin()) {
-        m_value_type.extended()->get_dynamic_array_functions(out_functions, out_count);
+        m_value_type.extended()->get_dynamic_array_functions(functions);
       }
     }
 
