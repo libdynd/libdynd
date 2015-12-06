@@ -748,7 +748,7 @@ namespace nd {
       void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
                    DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
       {
-        auto &value = std::get<I>(self->values);
+        auto &value = self->values[I];
         const ndt::type &tp = ndt::type::make<decltype(value)>(value);
         const char *arrmeta = value.get()->metadata();
 
@@ -760,14 +760,14 @@ namespace nd {
       }
     };
 
-    std::tuple<typename as_array<A>::type...> values;
+    array values[sizeof...(A)];
     ndt::type m_tp[sizeof...(A)];
     const char *m_arrmeta[sizeof...(A)];
     DataType m_data[sizeof...(A)];
 
   public:
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
-        : values(std::forward<A>(a)...)
+        : values{std::forward<A>(a)...}
     {
       detail::check_narg(self_tp, sizeof...(A));
 
