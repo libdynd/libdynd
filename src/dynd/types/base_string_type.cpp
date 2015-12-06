@@ -165,8 +165,7 @@ static const pair<string, gfunc::callable> *base_string_array_functions()
 }
 */
 
-void ndt::base_string_type::get_dynamic_array_functions(
-    const std::pair<std::string, nd::callable> **DYND_UNUSED(out_functions), size_t *DYND_UNUSED(out_count)) const
+void ndt::base_string_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const
 {
   /*
       *out_functions = base_string_array_functions();

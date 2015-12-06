@@ -135,7 +135,7 @@ namespace ndt {
   protected:
     // Helper function for array dimension types
     void get_scalar_properties_and_functions(std::vector<std::pair<std::string, nd::callable>> &out_properties,
-                                             std::vector<std::pair<std::string, nd::callable>> &out_functions) const;
+                                             std::map<std::string, nd::callable> &functions) const;
 
   public:
     typedef base_type_members::flags_type flags_type;
@@ -539,11 +539,10 @@ namespace ndt {
     /**
      * Additional dynamic properties exposed by any nd::array of this type as gfunc::callable.
      *
-     * \note Array types copy these properties from the first non-array data
-     *type, so such properties must
-     *       be able to handle the case where they are the first non-array data
-     *type in an array type, not
-     *       just strictly of the non-array data type.
+     * \note Array types copy these properties from the first non-array data type,
+     *       so such properties must be able to handle the case where they are the
+     *       first non-array data type in an array type, not just strictly of the
+     *       non-array data type.
      */
     virtual void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
                                               size_t *out_count) const;
@@ -556,8 +555,7 @@ namespace ndt {
      *       they are the first non-array data type in an array type, not
      *       just strictly of the non-array data type.
      */
-    virtual void get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                             size_t *out_count) const;
+    virtual void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
 
     /**
      * Returns the index for the element-wise property of the given name.

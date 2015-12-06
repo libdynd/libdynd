@@ -353,14 +353,9 @@ struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
   }
 };
 
-void ndt::time_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                 size_t *out_count) const
+void ndt::time_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
-  static pair<std::string, nd::callable> time_array_functions[] = {pair<std::string, nd::callable>(
-      "to_struct", nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any")))};
-
-  *out_functions = time_array_functions;
-  *out_count = sizeof(time_array_functions) / sizeof(time_array_functions[0]);
+  functions["to_struct"] = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
 }
 
 ///////// property accessor kernels (used by property_type)

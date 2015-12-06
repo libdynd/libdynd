@@ -580,11 +580,9 @@ void ndt::var_dim_type::get_dynamic_array_properties(const std::pair<std::string
   *out_count = (int)m_array_properties.size();
 }
 
-void ndt::var_dim_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                    size_t *out_count) const
+void ndt::var_dim_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
-  *out_functions = m_array_functions.empty() ? NULL : &m_array_functions[0];
-  *out_count = (int)m_array_functions.size();
+  functions = m_array_functions;
 }
 
 ndt::type ndt::var_dim_type::with_element_type(const type &element_tp) const { return make(element_tp); }

@@ -227,14 +227,13 @@ void ndt::fixed_dim_kind_type::get_dynamic_array_properties(const std::pair<std:
   }
 }
 
-void ndt::fixed_dim_kind_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                           size_t *out_count) const
+void ndt::fixed_dim_kind_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
   if (m_element_tp.is_builtin()) {
     // TODO
   }
   else {
-    m_element_tp.extended()->get_dynamic_array_functions(out_functions, out_count);
+    m_element_tp.extended()->get_dynamic_array_functions(functions);
   }
 }
 

@@ -305,6 +305,7 @@ namespace ndt {
      * \param property_name  The property to access.
      */
     nd::array p(const char *property_name) const;
+
     /**
      * Accesses a dynamic property of the type.
      *

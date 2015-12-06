@@ -60,15 +60,10 @@ namespace ndt {
         get_builtin_type_dynamic_array_properties(m_value_type.get_type_id(), out_properties, out_count);
       }
     }
-    void get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                     size_t *out_count) const
+    void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
     {
       if (!m_value_type.is_builtin()) {
-        m_value_type.extended()->get_dynamic_array_functions(out_functions, out_count);
-      }
-      else {
-        *out_functions = NULL;
-        *out_count = 0;
+        m_value_type.extended()->get_dynamic_array_functions(functions);
       }
     }
 

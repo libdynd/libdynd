@@ -248,7 +248,7 @@ void ndt::base_type::foreach_leading(const char *DYND_UNUSED(arrmeta), char *DYN
 
 void ndt::base_type::get_scalar_properties_and_functions(
     std::vector<std::pair<std::string, nd::callable>> &out_properties,
-    std::vector<std::pair<std::string, nd::callable>> &out_functions) const
+    std::map<std::string, nd::callable> &functions) const
 {
   if ((get_flags() & type_flag_symbolic) == 0) {
     // This copies properties from the first non-array data type dimension
@@ -259,18 +259,17 @@ void ndt::base_type::get_scalar_properties_and_functions(
     // possibly add
     // additional properties of their own.
     size_t ndim = get_ndim();
-    size_t properties_count = 0, functions_count = 0;
+    size_t properties_count = 0;
     const std::pair<std::string, nd::callable> *properties = NULL;
-    const std::pair<std::string, nd::callable> *functions = NULL;
     if (ndim == 0) {
       get_dynamic_array_properties(&properties, &properties_count);
-      get_dynamic_array_functions(&functions, &functions_count);
+      get_dynamic_array_functions(functions);
     }
     else {
       type dt = get_type_at_dimension(NULL, ndim);
       if (!dt.is_builtin()) {
         dt.extended()->get_dynamic_array_properties(&properties, &properties_count);
-        dt.extended()->get_dynamic_array_functions(&functions, &functions_count);
+        dt.extended()->get_dynamic_array_functions(functions);
       }
       else {
         get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &properties_count);
@@ -279,10 +278,6 @@ void ndt::base_type::get_scalar_properties_and_functions(
     out_properties.resize(properties_count);
     for (size_t i = 0; i < properties_count; ++i) {
       out_properties[i] = properties[i];
-    }
-    out_functions.resize(functions_count);
-    for (size_t i = 0; i < functions_count; ++i) {
-      out_functions[i] = functions[i];
     }
   }
 }
@@ -311,13 +306,7 @@ void ndt::base_type::get_dynamic_array_properties(const std::pair<std::string, n
   *out_count = 0;
 }
 
-void ndt::base_type::get_dynamic_array_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                 size_t *out_count) const
-{
-  // Default to no functions
-  *out_functions = NULL;
-  *out_count = 0;
-}
+void ndt::base_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const {}
 
 size_t ndt::base_type::get_elwise_property_index(const std::string &property_name) const
 {

@@ -768,22 +768,13 @@ nd::array nd::array::p(const std::string &property_name) const
   throw runtime_error(ss.str());
 }
 
-const nd::callable &nd::array::find_dynamic_function(const char *function_name) const
+nd::callable nd::array::find_dynamic_function(const char *function_name) const
 {
   ndt::type dt = get_type();
   if (!dt.is_builtin()) {
-    const std::pair<std::string, nd::callable> *properties;
-    size_t count;
-    dt.extended()->get_dynamic_array_functions(&properties, &count);
-    // TODO: We probably want to make some kind of acceleration structure for
-    // the name lookup
-    if (count > 0) {
-      for (size_t i = 0; i < count; ++i) {
-        if (properties[i].first == function_name) {
-          return properties[i].second;
-        }
-      }
-    }
+    std::map<std::string, callable> functions;
+    dt->get_dynamic_array_functions(functions);
+    return functions[function_name];
   }
 
   stringstream ss;
