@@ -48,13 +48,6 @@ namespace nd {
     DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
                             const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars);
 
-    DYND_API void check_nkwd(const ndt::callable_type *af_tp, const std::vector<intptr_t> &available,
-                             const std::vector<intptr_t> &missing);
-
-    DYND_API void validate_kwd_types(const ndt::callable_type *af_tp, std::vector<ndt::type> &kwd_tp,
-                                     const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing,
-                                     std::map<std::string, ndt::type> &tp_vars);
-
     inline void set_data(char *&data, array &value) { data = const_cast<char *>(value.cdata()); }
 
     inline void set_data(char *&data, const array &value) { data = const_cast<char *>(value.cdata()); }
@@ -344,16 +337,13 @@ namespace nd {
       std::vector<intptr_t> available, missing;
 
       for (size_t i = 0; i < kwds.size; ++i) {
-        const char *name = kwds.m_names[i];
-        array value = kwds.values[i];
-
-        intptr_t j = self_tp->get_kwd_index(name);
+        intptr_t j = self_tp->get_kwd_index(kwds.m_names[i]);
         if (j == -1) {
-          if (detail::is_special_kwd(self_tp, dst, name, value)) {
+          if (detail::is_special_kwd(self_tp, dst, kwds.m_names[i], kwds.values[i])) {
           }
           else {
             std::stringstream ss;
-            ss << "passed an unexpected keyword \"" << name << "\" to callable with type " << get()->tp;
+            ss << "passed an unexpected keyword \"" << kwds.m_names[i] << "\" to callable with type " << get()->tp;
             throw std::invalid_argument(ss.str());
           }
         }
@@ -361,10 +351,10 @@ namespace nd {
           ndt::type &actual_tp = kwd_tp[j];
           if (!actual_tp.is_null()) {
             std::stringstream ss;
-            ss << "callable passed keyword \"" << name << "\" more than once";
+            ss << "callable passed keyword \"" << kwds.m_names[i] << "\" more than once";
             throw std::invalid_argument(ss.str());
           }
-          actual_tp = value.get_type();
+          actual_tp = kwds.values[i].get_type();
         }
         available.push_back(j);
       }
@@ -374,7 +364,15 @@ namespace nd {
         }
       }
 
-      detail::check_nkwd(self_tp, available, missing);
+      if (intptr_t(available.size() + missing.size()) < self_tp->get_nkwd()) {
+        std::stringstream ss;
+        // TODO: Provide the missing keyword parameter names in this error
+        //       message
+        ss << "callable requires keyword parameters that were not provided. "
+              "callable signature "
+           << get()->tp;
+        throw std::invalid_argument(ss.str());
+      }
 
       // Validate the destination type, if it was provided
       if (!dst.is_null()) {
@@ -388,6 +386,7 @@ namespace nd {
 
       // Validate the keyword arguments, and does substitutions to make
       // them concrete
+      std::vector<array> kwds_as_vector(available.size() + missing.size());
       for (intptr_t j : available) {
         if (j == -1) {
           continue;
@@ -408,16 +407,7 @@ namespace nd {
         }
       }
 
-      for (intptr_t j : missing) {
-        ndt::type &actual_tp = kwd_tp[j];
-        actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
-        if (actual_tp.is_symbolic()) {
-          actual_tp = ndt::option_type::make(ndt::type::make<void>());
-        }
-      }
-
       // ...
-      std::vector<array> kwds_as_vector(available.size() + missing.size());
       for (size_t i = 0; i < kwds.size; ++i) {
         intptr_t j = available[i];
         if (j != -1) {
@@ -425,9 +415,12 @@ namespace nd {
         }
       }
 
-      // Fill the missing values
       for (intptr_t j : missing) {
-        kwds_as_vector[j] = empty(kwd_tp[j]);
+        ndt::type actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
+        if (actual_tp.is_symbolic()) {
+          actual_tp = ndt::option_type::make(ndt::type::make<void>());
+        }
+        kwds_as_vector[j] = empty(actual_tp);
         kwds_as_vector[j].assign_na();
       }
 
@@ -787,11 +780,9 @@ namespace nd {
   };
 
   template <typename FuncType>
-  std::ostream &operator<<(std::ostream &o, const declfunc<FuncType> &rhs)
+  std::ostream &operator<<(std::ostream &o, const declfunc<FuncType> &DYND_UNUSED(rhs))
   {
-    o << static_cast<const callable &>(rhs);
-
-    return o;
+    return o << FuncType::get();
   }
 
 } // namespace nd
