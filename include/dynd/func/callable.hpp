@@ -467,8 +467,8 @@ namespace nd {
     const array &get_arg_types() const { return get_type()->get_pos_types(); }
 
     /** Implements the general call operator which returns an array */
-    template <typename ArgsType, typename KwdsType>
-    array call(const ArgsType &args, const KwdsType &kwds, std::map<std::string, ndt::type> &tp_vars)
+    template <typename... A, typename... K>
+    array call(const args<A...> &args, const detail::kwds<K...> &kwds, std::map<std::string, ndt::type> &tp_vars)
     {
       const ndt::callable_type *self_tp = get_type();
 
@@ -515,7 +515,7 @@ namespace nd {
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst.get()->metadata(), dst.data(), args.size(), args.types(), args.arrmeta(), args.data(),
+      (*get())(dst_tp, dst->metadata(), dst.data(), args.size(), args.types(), args.arrmeta(), args.data(),
                kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
       return dst;
     }
@@ -757,13 +757,10 @@ namespace nd {
       }
 
       for (size_t i = 0; i < sizeof...(A); ++i) {
-        const ndt::type &tp = values[i].get()->tp;
-        const char *arrmeta = values[i].get()->metadata();
+        detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
-        detail::check_arg(self_tp, i, tp, arrmeta, tp_vars);
-
-        m_tp[i] = tp;
-        m_arrmeta[i] = arrmeta;
+        m_tp[i] = values[i]->tp;
+        m_arrmeta[i] = values[i]->metadata();
         detail::set_data(m_data[i], values[i]);
       }
     }
@@ -791,15 +788,11 @@ namespace nd {
       detail::check_narg(self_tp, m_size);
 
       for (std::size_t i = 0; i < m_size; ++i) {
-        array &value = values[i];
-        const char *arrmeta = value.get()->metadata();
-        const ndt::type &tp = value.get_type();
+        detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
-        detail::check_arg(self_tp, i, tp, arrmeta, tp_vars);
-
-        m_tp[i] = tp;
-        m_arrmeta[i] = arrmeta;
-        detail::set_data(m_data[i], value);
+        m_tp[i] = values[i]->tp;
+        m_arrmeta[i] = values[i]->metadata();
+        detail::set_data(m_data[i], values[i]);
       }
     }
 
