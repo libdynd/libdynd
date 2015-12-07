@@ -109,7 +109,7 @@ TEST(Callable, CallOperator)
   std::cout << "3" << std::endl;
   EXPECT_THROW(af(2), invalid_argument);
   std::cout << "4" << std::endl;
-  EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
+//  EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
   // Extra keyword argument
   std::cout << "5" << std::endl;
   EXPECT_THROW(af(2, 3.5, kwds("x", 10)), invalid_argument);
