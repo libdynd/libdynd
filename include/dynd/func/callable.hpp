@@ -768,7 +768,14 @@ namespace nd {
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
         : values{std::forward<A>(a)...}
     {
-      detail::check_narg(self_tp, sizeof...(A));
+      std::cout << "af_tp->is_pos_variadic() = " << self_tp->is_pos_variadic() << std::endl;
+      std::cout << "narg = " << sizeof...(A) << std::endl;
+      std::cout << "af_tp->get_npos() = " << self_tp->get_npos() << std::endl;
+      if (!self_tp->is_pos_variadic() && (sizeof...(A) != self_tp->get_npos())) {
+        std::stringstream ss;
+        ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << sizeof...(A);
+        throw std::invalid_argument(ss.str());
+      }
 
       typedef make_index_sequence<sizeof...(A)> I;
       for_each<I>(init(), this, self_tp, m_tp, m_arrmeta, m_data, tp_vars);
