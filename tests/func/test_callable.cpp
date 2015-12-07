@@ -101,34 +101,51 @@ TEST(Callable, CallOperator)
 {
   nd::callable af = nd::functional::apply(&func);
   // Calling with positional arguments
+  std::cout << "1" << std::endl;
   EXPECT_EQ(4.5, af(1, 2.5).as<double>());
+  std::cout << "2" << std::endl;
   EXPECT_EQ(7.5, af(2, 3.5).as<double>());
   // Wrong number of positional argumetns
+  std::cout << "3" << std::endl;
   EXPECT_THROW(af(2), invalid_argument);
+  std::cout << "4" << std::endl;
   EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
   // Extra keyword argument
+  std::cout << "5" << std::endl;
   EXPECT_THROW(af(2, 3.5, kwds("x", 10)), invalid_argument);
 
   af = nd::functional::apply(&func, "x");
   // Calling with positional and keyword arguments
+  std::cout << "6" << std::endl;
   EXPECT_EQ(4.5, af(1, kwds("x", 2.5)).as<double>());
+  std::cout << "7" << std::endl;
   EXPECT_EQ(7.5, af(2, kwds("x", 3.5)).as<double>());
   // Wrong number of positional/keyword arguments
+  std::cout << "8" << std::endl;
   EXPECT_THROW(af(2), invalid_argument);
+  std::cout << "9" << std::endl;
   EXPECT_THROW(af(2, 3.5), invalid_argument);
+  std::cout << "10" << std::endl;
   EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
   // Extra/wrong keyword argument
+  std::cout << "11" << std::endl;
   EXPECT_THROW(af(2, kwds("y", 3.5)), invalid_argument);
+  std::cout << "12" << std::endl;
   EXPECT_THROW(af(2, kwds("x", 10, "y", 20)), invalid_argument);
+  std::cout << "13" << std::endl;
   EXPECT_THROW(af(2, 3.5, kwds("x", 10, "y", 20)), invalid_argument);
 
   af = nd::functional::apply([]() { return 10; });
   // Calling with no arguments
+  std::cout << "14" << std::endl;
   EXPECT_EQ(10, af().as<int>());
   // Calling with empty keyword arguments
+  std::cout << "15" << std::endl;
   EXPECT_EQ(10, af(kwds()).as<int>());
   // Wrong number of positional/keyword arguments
+  std::cout << "16" << std::endl;
   EXPECT_THROW(af(2), invalid_argument);
+  std::cout << "17" << std::endl;
   EXPECT_THROW(af(kwds("y", 3.5)), invalid_argument);
 }
 

@@ -748,15 +748,14 @@ namespace nd {
       void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
                    DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
       {
-        const array &value = self->values[I];
-        const ndt::type &tp = value.get()->tp;
-        const char *arrmeta = value.get()->metadata();
+        const ndt::type &tp = self->values[I].get()->tp;
+        const char *arrmeta = self->values[I].get()->metadata();
 
         detail::check_arg(af_tp, I, tp, arrmeta, tp_vars);
 
         src_tp[I] = tp;
         src_arrmeta[I] = arrmeta;
-        detail::set_data(src_data[I], value);
+        detail::set_data(src_data[I], self->values[I]);
       }
     };
 
