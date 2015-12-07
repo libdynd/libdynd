@@ -515,7 +515,7 @@ namespace nd {
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst.get()->metadata(), dst.data(), args.size(), args.types(), args.arrmeta(), args.data(),
+      (*get())(dst_tp, dst->metadata(), dst.data(), args.size(), args.types(), args.arrmeta(), args.data(),
                kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
       return dst;
     }
@@ -743,7 +743,7 @@ namespace nd {
   template <typename DataType, typename... A>
   struct callable::args {
     array values[sizeof...(A)];
-    ndt::type m_tp[sizeof...(A)];
+    ndt::type tp[sizeof...(A)];
     const char *m_arrmeta[sizeof...(A)];
     DataType m_data[sizeof...(A)];
 
@@ -757,20 +757,17 @@ namespace nd {
       }
 
       for (size_t i = 0; i < sizeof...(A); ++i) {
-        const ndt::type &tp = values[i].get()->tp;
-        const char *arrmeta = values[i].get()->metadata();
+        detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
-        detail::check_arg(self_tp, i, tp, arrmeta, tp_vars);
-
-        m_tp[i] = tp;
-        m_arrmeta[i] = arrmeta;
+        tp[i] = values[i]->tp;
+        m_arrmeta[i] = values[i]->metadata();
         detail::set_data(m_data[i], values[i]);
       }
     }
 
     size_t size() const { return sizeof...(A); }
 
-    const ndt::type *types() const { return m_tp; }
+    const ndt::type *types() const { return tp; }
 
     const char *const *arrmeta() const { return m_arrmeta; }
 
@@ -781,31 +778,27 @@ namespace nd {
   template <typename DataType>
   struct callable::args<DataType, size_t, array *> {
     size_t m_size;
-    std::vector<ndt::type> m_tp;
+    std::vector<ndt::type> tp;
     std::vector<const char *> m_arrmeta;
     std::vector<DataType> m_data;
 
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size, array *values)
-        : m_size(size), m_tp(m_size), m_arrmeta(m_size), m_data(m_size)
+        : m_size(size), tp(m_size), m_arrmeta(m_size), m_data(m_size)
     {
       detail::check_narg(self_tp, m_size);
 
       for (std::size_t i = 0; i < m_size; ++i) {
-        array &value = values[i];
-        const char *arrmeta = value.get()->metadata();
-        const ndt::type &tp = value.get_type();
+        detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
-        detail::check_arg(self_tp, i, tp, arrmeta, tp_vars);
-
-        m_tp[i] = tp;
-        m_arrmeta[i] = arrmeta;
-        detail::set_data(m_data[i], value);
+        tp[i] = values[i]->tp;
+        m_arrmeta[i] = values[i]->metadata();
+        detail::set_data(m_data[i], values[i]);
       }
     }
 
     size_t size() const { return m_size; }
 
-    const ndt::type *types() const { return m_tp.data(); }
+    const ndt::type *types() const { return tp.data(); }
 
     const char *const *arrmeta() const { return m_arrmeta.data(); }
 
