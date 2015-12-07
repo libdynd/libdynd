@@ -120,7 +120,7 @@ namespace nd {
     DYND_API void fill_missing_values(const ndt::type *tp, std::vector<nd::array> &DYND_UNUSED(kwds_as_vector),
                                       const std::vector<intptr_t> &missing);
 
-    DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t npos);
+    DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t narg);
 
     DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
                             const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars);
@@ -748,28 +748,31 @@ namespace nd {
       void on_each(const args *self, const ndt::callable_type *af_tp, ndt::type *src_tp, const char **src_arrmeta,
                    DataType *src_data, std::map<std::string, ndt::type> &tp_vars) const
       {
-        auto &value = std::get<I>(self->values);
-        const ndt::type &tp = ndt::type::make<decltype(value)>(value);
-        const char *arrmeta = value.get()->metadata();
+        const ndt::type &tp = self->values[I].get()->tp;
+        const char *arrmeta = self->values[I].get()->metadata();
 
         detail::check_arg(af_tp, I, tp, arrmeta, tp_vars);
 
         src_tp[I] = tp;
         src_arrmeta[I] = arrmeta;
-        detail::set_data(src_data[I], value);
+        detail::set_data(src_data[I], self->values[I]);
       }
     };
 
-    std::tuple<typename as_array<A>::type...> values;
+    array values[sizeof...(A)];
     ndt::type m_tp[sizeof...(A)];
     const char *m_arrmeta[sizeof...(A)];
     DataType m_data[sizeof...(A)];
 
   public:
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
-        : values(std::forward<A>(a)...)
+        : values{std::forward<A>(a)...}
     {
-      detail::check_narg(self_tp, sizeof...(A));
+      if (!self_tp->is_pos_variadic() && (sizeof...(A) != self_tp->get_npos())) {
+        std::stringstream ss;
+        ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << sizeof...(A);
+        throw std::invalid_argument(ss.str());
+      }
 
       typedef make_index_sequence<sizeof...(A)> I;
       for_each<I>(init(), this, self_tp, m_tp, m_arrmeta, m_data, tp_vars);
