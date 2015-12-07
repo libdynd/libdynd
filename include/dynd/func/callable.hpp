@@ -13,42 +13,11 @@
 #include <dynd/types/callable_type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/types/struct_type.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/callables/static_data_callable.hpp>
 
 namespace dynd {
-
-/**
- * TODO: This `as_array` metafunction should either go somewhere better (this
- *       file is for callable), or be in a detail:: namespace.
- */
-template <typename T>
-struct as_array {
-  typedef nd::array type;
-};
-
-template <>
-struct as_array<nd::array> {
-  typedef nd::array type;
-};
-
-template <>
-struct as_array<const nd::array> {
-  typedef const nd::array type;
-};
-
-template <>
-struct as_array<const nd::array &> {
-  typedef const nd::array &type;
-};
-
-template <>
-struct as_array<nd::array &> {
-  typedef nd::array &type;
-};
-
 namespace nd {
   namespace detail {
 
@@ -156,13 +125,6 @@ namespace nd {
       {
         fill_missing_values(tp, kwds_as_vector, missing);
       }
-
-      /** Converts the keyword args + filled in defaults into an nd::array */
-      void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
-                    const std::vector<intptr_t> &missing) const
-      {
-        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), kwds_as_vector, available, missing);
-      }
     };
 
     template <typename... K>
@@ -187,12 +149,6 @@ namespace nd {
       kwds(typename as_<K, const char *>::type... names, K &&... values)
           : m_names{names...}, values{std::forward<K>(values)...}
       {
-      }
-
-      void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
-                    const std::vector<intptr_t> &missing) const
-      {
-        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), kwds_as_vector, available, missing);
       }
     };
 
@@ -220,12 +176,6 @@ namespace nd {
       }
 
       kwds(intptr_t size, const char *const *names, array *values) : size(size), m_names(names), values(values) {}
-
-      void as_array(const ndt::type &tp, std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available,
-                    const std::vector<intptr_t> &missing) const
-      {
-        fill_values(tp.extended<ndt::base_struct_type>()->get_field_types_raw(), kwds_as_vector, available, missing);
-      }
     };
 
     template <typename... T>
@@ -504,8 +454,8 @@ namespace nd {
       detail::validate_kwd_types(self_tp, kwd_tp, available, missing, tp_vars);
 
       // ...
-      std::vector<nd::array> kwds_as_vector(available.size() + missing.size());
-      kwds.as_array(ndt::struct_type::make(self_tp->get_kwd_names(), kwd_tp), kwds_as_vector, available, missing);
+      std::vector<array> kwds_as_vector(available.size() + missing.size());
+      kwds.fill_values(kwd_tp.data(), kwds_as_vector, available, missing);
 
       ndt::type dst_tp;
       if (dst.is_null()) {
