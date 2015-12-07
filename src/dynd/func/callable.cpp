@@ -119,10 +119,6 @@ void nd::detail::validate_kwd_types(const ndt::callable_type *af_tp, std::vector
       ss << "callable expected " << expected_tp << " but passed " << actual_tp;
       throw std::invalid_argument(ss.str());
     }
-
-    if (j != -1 && (kwd_tp[j].get_kind() == dim_kind || kwd_tp[j].get_kind() == memory_kind)) {
-      kwd_tp[j] = ndt::pointer_type::make(kwd_tp[j]);
-    }
   }
 
   for (intptr_t j : missing) {
