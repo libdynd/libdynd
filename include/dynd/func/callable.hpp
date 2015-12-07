@@ -120,7 +120,7 @@ namespace nd {
     DYND_API void fill_missing_values(const ndt::type *tp, std::vector<nd::array> &DYND_UNUSED(kwds_as_vector),
                                       const std::vector<intptr_t> &missing);
 
-    DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t npos);
+    DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t narg);
 
     DYND_API void check_arg(const ndt::callable_type *af_tp, intptr_t i, const ndt::type &actual_tp,
                             const char *actual_arrmeta, std::map<std::string, ndt::type> &tp_vars);
