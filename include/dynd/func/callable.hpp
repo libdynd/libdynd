@@ -467,8 +467,8 @@ namespace nd {
     const array &get_arg_types() const { return get_type()->get_pos_types(); }
 
     /** Implements the general call operator which returns an array */
-    template <typename... A, typename... K>
-    array call(const args<A...> &args, const detail::kwds<K...> &kwds, std::map<std::string, ndt::type> &tp_vars)
+    template <typename ArgsType, typename KwdsType>
+    array call(const ArgsType &args, const KwdsType &kwds, std::map<std::string, ndt::type> &tp_vars)
     {
       const ndt::callable_type *self_tp = get_type();
 
@@ -743,7 +743,7 @@ namespace nd {
   template <typename DataType, typename... A>
   struct callable::args {
     array values[sizeof...(A)];
-    ndt::type m_tp[sizeof...(A)];
+    ndt::type tp[sizeof...(A)];
     const char *m_arrmeta[sizeof...(A)];
     DataType m_data[sizeof...(A)];
 
@@ -759,7 +759,7 @@ namespace nd {
       for (size_t i = 0; i < sizeof...(A); ++i) {
         detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
-        m_tp[i] = values[i]->tp;
+        tp[i] = values[i]->tp;
         m_arrmeta[i] = values[i]->metadata();
         detail::set_data(m_data[i], values[i]);
       }
@@ -767,7 +767,7 @@ namespace nd {
 
     size_t size() const { return sizeof...(A); }
 
-    const ndt::type *types() const { return m_tp; }
+    const ndt::type *types() const { return tp; }
 
     const char *const *arrmeta() const { return m_arrmeta; }
 
@@ -778,19 +778,19 @@ namespace nd {
   template <typename DataType>
   struct callable::args<DataType, size_t, array *> {
     size_t m_size;
-    std::vector<ndt::type> m_tp;
+    std::vector<ndt::type> tp;
     std::vector<const char *> m_arrmeta;
     std::vector<DataType> m_data;
 
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size, array *values)
-        : m_size(size), m_tp(m_size), m_arrmeta(m_size), m_data(m_size)
+        : m_size(size), tp(m_size), m_arrmeta(m_size), m_data(m_size)
     {
       detail::check_narg(self_tp, m_size);
 
       for (std::size_t i = 0; i < m_size; ++i) {
         detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
-        m_tp[i] = values[i]->tp;
+        tp[i] = values[i]->tp;
         m_arrmeta[i] = values[i]->metadata();
         detail::set_data(m_data[i], values[i]);
       }
@@ -798,7 +798,7 @@ namespace nd {
 
     size_t size() const { return m_size; }
 
-    const ndt::type *types() const { return m_tp.data(); }
+    const ndt::type *types() const { return tp.data(); }
 
     const char *const *arrmeta() const { return m_arrmeta.data(); }
 
