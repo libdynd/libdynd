@@ -27,24 +27,6 @@ namespace nd {
      * output type, and the "dst" keyword argument always provides an
      * output array.
      */
-    template <typename T>
-    bool is_special_kwd(const ndt::callable_type *DYND_UNUSED(self_tp), const std::string &DYND_UNUSED(name),
-                        const T &DYND_UNUSED(value), std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      return false;
-    }
-
-    inline bool is_special_kwd(const ndt::callable_type *DYND_UNUSED(self_tp), array &dst, const std::string &name,
-                               const ndt::type &value)
-    {
-      if (name == "dst_tp") {
-        dst = nd::empty(value);
-        return true;
-      }
-
-      return false;
-    }
-
     inline bool is_special_kwd(const ndt::callable_type *DYND_UNUSED(self_tp), array &dst, const std::string &name,
                                const nd::array &value)
     {
@@ -60,9 +42,8 @@ namespace nd {
       return false;
     }
 
-    template <typename T>
-    void check_name(const ndt::callable_type *af_tp, array &dst, const std::string &name, const T &value,
-                    ndt::type *kwd_tp, std::vector<intptr_t> &available)
+    inline void check_name(const ndt::callable_type *af_tp, array &dst, const std::string &name, const array &value,
+                           ndt::type *kwd_tp, std::vector<intptr_t> &available)
     {
       intptr_t j = af_tp->get_kwd_index(name);
       if (j == -1) {
@@ -81,13 +62,10 @@ namespace nd {
           ss << "callable passed keyword \"" << name << "\" more than once";
           throw std::invalid_argument(ss.str());
         }
-        actual_tp = ndt::type_of(value);
+        actual_tp = value.get_type();
       }
       available.push_back(j);
     }
-
-    DYND_API void fill_missing_values(const ndt::type *tp, std::vector<nd::array> &DYND_UNUSED(kwds_as_vector),
-                                      const std::vector<intptr_t> &missing);
 
     DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t narg);
 
@@ -111,40 +89,10 @@ namespace nd {
 
     /** A holder class for the keyword arguments */
     template <typename... K>
-    struct kwds;
-
-    /** The case of no keyword arguments being provided */
-    template <>
-    struct kwds<> {
-      static const size_t size = 0;
-      const char *m_names[1];
-      array values[1];
-
-      void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
-                       const std::vector<intptr_t> &DYND_UNUSED(available), const std::vector<intptr_t> &missing) const
-      {
-        fill_missing_values(tp, kwds_as_vector, missing);
-      }
-    };
-
-    template <typename... K>
     struct kwds {
       static const size_t size = sizeof...(K);
       const char *m_names[sizeof...(K)];
       array values[sizeof...(K)];
-
-      void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
-                       const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
-      {
-        for (size_t i = 0; i < sizeof...(K); ++i) {
-          intptr_t j = available[i];
-          if (j != -1) {
-            kwds_as_vector[j] = values[i];
-          }
-        }
-
-        fill_missing_values(tp, kwds_as_vector, missing);
-      }
 
       kwds(typename as_<K, const char *>::type... names, K &&... values)
           : m_names{names...}, values{std::forward<K>(values)...}
@@ -152,28 +100,19 @@ namespace nd {
       }
     };
 
+    /** The case of no keyword arguments being provided */
+    template <>
+    struct kwds<> {
+      static const size_t size = 0;
+      const char *m_names[1];
+      array values[1];
+    };
+
     template <>
     struct kwds<intptr_t, const char *const *, array *> {
       size_t size;
       const char *const *m_names;
       array *values;
-
-      void fill_available_values(std::vector<nd::array> &kwds_as_vector, const std::vector<intptr_t> &available) const
-      {
-        for (size_t i = 0; i < size; ++i) {
-          intptr_t j = available[i];
-          if (j != -1) {
-            kwds_as_vector[j] = this->values[i];
-          }
-        }
-      }
-
-      void fill_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
-                       const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing) const
-      {
-        fill_available_values(kwds_as_vector, available);
-        fill_missing_values(tp, kwds_as_vector, missing);
-      }
 
       kwds(intptr_t size, const char *const *names, array *values) : size(size), m_names(names), values(values) {}
     };
@@ -455,7 +394,18 @@ namespace nd {
 
       // ...
       std::vector<array> kwds_as_vector(available.size() + missing.size());
-      kwds.fill_values(kwd_tp.data(), kwds_as_vector, available, missing);
+      for (size_t i = 0; i < kwds.size; ++i) {
+        intptr_t j = available[i];
+        if (j != -1) {
+          kwds_as_vector[j] = kwds.values[i];
+        }
+      }
+
+      // Fill the missing values
+      for (intptr_t j : missing) {
+        kwds_as_vector[j] = empty(kwd_tp[j]);
+        kwds_as_vector[j].assign_na();
+      }
 
       ndt::type dst_tp;
       if (dst.is_null()) {
