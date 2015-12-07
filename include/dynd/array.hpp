@@ -232,6 +232,11 @@ namespace nd {
     /** Low level access to the array preamble */
     array_preamble *get() const { return reinterpret_cast<array_preamble *>(intrusive_ptr<memory_block_data>::get()); }
 
+  array_preamble *operator->() const
+  {
+    return get();
+  }
+
     /** Returns true if the array is NULL */
     inline bool is_null() const { return intrusive_ptr<memory_block_data>::get() == NULL; }
 
