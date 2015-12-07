@@ -11,7 +11,6 @@
 
 #include <dynd/type.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/func/option.hpp>
 
 namespace dynd {
 
@@ -47,9 +46,8 @@ namespace ndt {
     /** Returns true if the value is available */
     bool is_avail(const char *arrmeta, const char *data, const eval::eval_context *ectx) const;
 
-    nd::callable &get_is_avail() const { return nd::is_avail::get_child(m_value_tp); }
-
-    nd::callable &get_assign_na() const { return nd::assign_na_decl::get_child(m_value_tp); }
+    nd::callable &get_is_avail() const;
+    nd::callable &get_assign_na() const;
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 

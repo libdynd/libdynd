@@ -14,6 +14,7 @@
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/substitute_typevars.hpp>
+#include <dynd/types/option_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/callables/static_data_callable.hpp>
 
@@ -40,31 +41,6 @@ namespace nd {
       }
 
       return false;
-    }
-
-    inline void check_name(const ndt::callable_type *af_tp, array &dst, const std::string &name, const array &value,
-                           ndt::type *kwd_tp, std::vector<intptr_t> &available)
-    {
-      intptr_t j = af_tp->get_kwd_index(name);
-      if (j == -1) {
-        if (is_special_kwd(af_tp, dst, name, value)) {
-        }
-        else {
-          std::stringstream ss;
-          ss << "passed an unexpected keyword \"" << name << "\" to callable with type " << ndt::type(af_tp, true);
-          throw std::invalid_argument(ss.str());
-        }
-      }
-      else {
-        ndt::type &actual_tp = kwd_tp[j];
-        if (!actual_tp.is_null()) {
-          std::stringstream ss;
-          ss << "callable passed keyword \"" << name << "\" more than once";
-          throw std::invalid_argument(ss.str());
-        }
-        actual_tp = value.get_type();
-      }
-      available.push_back(j);
     }
 
     DYND_API void check_narg(const ndt::callable_type *af_tp, intptr_t narg);
@@ -368,7 +344,29 @@ namespace nd {
       std::vector<intptr_t> available, missing;
 
       for (size_t i = 0; i < kwds.size; ++i) {
-        detail::check_name(self_tp, dst, kwds.m_names[i], kwds.values[i], kwd_tp.data(), available);
+        const char *name = kwds.m_names[i];
+        array value = kwds.values[i];
+
+        intptr_t j = self_tp->get_kwd_index(name);
+        if (j == -1) {
+          if (detail::is_special_kwd(self_tp, dst, name, value)) {
+          }
+          else {
+            std::stringstream ss;
+            ss << "passed an unexpected keyword \"" << name << "\" to callable with type " << get()->tp;
+            throw std::invalid_argument(ss.str());
+          }
+        }
+        else {
+          ndt::type &actual_tp = kwd_tp[j];
+          if (!actual_tp.is_null()) {
+            std::stringstream ss;
+            ss << "callable passed keyword \"" << name << "\" more than once";
+            throw std::invalid_argument(ss.str());
+          }
+          actual_tp = value.get_type();
+        }
+        available.push_back(j);
       }
       for (intptr_t j : self_tp->get_option_kwd_indices()) {
         if (kwd_tp[j].is_null()) {
@@ -390,7 +388,33 @@ namespace nd {
 
       // Validate the keyword arguments, and does substitutions to make
       // them concrete
-      detail::validate_kwd_types(self_tp, kwd_tp, available, missing, tp_vars);
+      for (intptr_t j : available) {
+        if (j == -1) {
+          continue;
+        }
+
+        ndt::type &actual_tp = kwd_tp[j];
+
+        ndt::type expected_tp = self_tp->get_kwd_type(j);
+        if (expected_tp.get_type_id() == option_type_id) {
+          expected_tp = expected_tp.p("value_type").as<ndt::type>();
+        }
+
+        if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
+          std::stringstream ss;
+          ss << "keyword \"" << self_tp->get_kwd_name(j) << "\" does not match, ";
+          ss << "callable expected " << expected_tp << " but passed " << actual_tp;
+          throw std::invalid_argument(ss.str());
+        }
+      }
+
+      for (intptr_t j : missing) {
+        ndt::type &actual_tp = kwd_tp[j];
+        actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
+        if (actual_tp.is_symbolic()) {
+          actual_tp = ndt::option_type::make(ndt::type::make<void>());
+        }
+      }
 
       // ...
       std::vector<array> kwds_as_vector(available.size() + missing.size());
