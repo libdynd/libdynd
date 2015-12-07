@@ -134,15 +134,6 @@ void nd::detail::validate_kwd_types(const ndt::callable_type *af_tp, std::vector
   }
 }
 
-void nd::detail::fill_missing_values(const ndt::type *tp, std::vector<nd::array> &kwds_as_vector,
-                                     const std::vector<intptr_t> &missing)
-{
-  for (intptr_t j : missing) {
-    kwds_as_vector[j] = nd::empty(tp[j]);
-    kwds_as_vector[j].assign_na();
-  }
-}
-
 void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg)
 {
   if (!af_tp->is_pos_variadic() && narg != af_tp->get_npos()) {
