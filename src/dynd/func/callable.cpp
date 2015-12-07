@@ -145,9 +145,6 @@ void nd::detail::fill_missing_values(const ndt::type *tp, std::vector<nd::array>
 
 void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg)
 {
-  std::cout << "af_tp->is_pos_variadic() = " << af_tp->is_pos_variadic() << std::endl;
-  std::cout << "narg = " << narg << std::endl;
-  std::cout << "af_tp->get_npos() = " << af_tp->get_npos() << std::endl;
   if (!af_tp->is_pos_variadic() && narg != af_tp->get_npos()) {
     std::stringstream ss;
     ss << "callable expected " << af_tp->get_npos() << " positional arguments, but received " << narg;

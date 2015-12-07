@@ -768,9 +768,6 @@ namespace nd {
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
         : values{std::forward<A>(a)...}
     {
-      std::cout << "af_tp->is_pos_variadic() = " << self_tp->is_pos_variadic() << std::endl;
-      std::cout << "narg = " << sizeof...(A) << std::endl;
-      std::cout << "af_tp->get_npos() = " << self_tp->get_npos() << std::endl;
       if (!self_tp->is_pos_variadic() && (sizeof...(A) != self_tp->get_npos())) {
         std::stringstream ss;
         ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << sizeof...(A);
