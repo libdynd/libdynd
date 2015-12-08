@@ -333,8 +333,8 @@ namespace nd {
       array dst;
 
       // ...
-      std::vector<ndt::type> kwd_tp(self_tp->get_nkwd());
-      std::vector<intptr_t> available, missing;
+      intptr_t nkwd = 0;
+      std::vector<array> kwds_as_vector(self_tp->get_nkwd());
 
       for (size_t i = 0; i < kwds.size; ++i) {
         intptr_t j = self_tp->get_kwd_index(kwds.m_names[i]);
@@ -348,30 +348,28 @@ namespace nd {
           }
         }
         else {
-          ndt::type &actual_tp = kwd_tp[j];
-          if (!actual_tp.is_null()) {
+          array &value = kwds_as_vector[j];
+          if (!value.is_null()) {
             std::stringstream ss;
             ss << "callable passed keyword \"" << kwds.m_names[i] << "\" more than once";
             throw std::invalid_argument(ss.str());
           }
-          actual_tp = kwds.values[i].get_type();
-        }
-        available.push_back(j);
-      }
-      for (intptr_t j : self_tp->get_option_kwd_indices()) {
-        if (kwd_tp[j].is_null()) {
-          missing.push_back(j);
-        }
-      }
+          value = kwds.values[i];
 
-      if (intptr_t(available.size() + missing.size()) < self_tp->get_nkwd()) {
-        std::stringstream ss;
-        // TODO: Provide the missing keyword parameter names in this error
-        //       message
-        ss << "callable requires keyword parameters that were not provided. "
-              "callable signature "
-           << get()->tp;
-        throw std::invalid_argument(ss.str());
+          ndt::type expected_tp = self_tp->get_kwd_type(j);
+          if (expected_tp.get_type_id() == option_type_id) {
+            expected_tp = expected_tp.p("value_type").as<ndt::type>();
+          }
+
+          const ndt::type &actual_tp = value.get_type();
+          if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
+            std::stringstream ss;
+            ss << "keyword \"" << self_tp->get_kwd_name(j) << "\" does not match, ";
+            ss << "callable expected " << expected_tp << " but passed " << actual_tp;
+            throw std::invalid_argument(ss.str());
+          }
+          ++nkwd;
+        }
       }
 
       // Validate the destination type, if it was provided
@@ -384,56 +382,38 @@ namespace nd {
         }
       }
 
-      // Validate the keyword arguments, and does substitutions to make
-      // them concrete
-      std::vector<array> kwds_as_vector(available.size() + missing.size());
-      for (intptr_t j : available) {
-        if (j == -1) {
-          continue;
-        }
-
-        ndt::type &actual_tp = kwd_tp[j];
-
-        ndt::type expected_tp = self_tp->get_kwd_type(j);
-        if (expected_tp.get_type_id() == option_type_id) {
-          expected_tp = expected_tp.p("value_type").as<ndt::type>();
-        }
-
-        if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
-          std::stringstream ss;
-          ss << "keyword \"" << self_tp->get_kwd_name(j) << "\" does not match, ";
-          ss << "callable expected " << expected_tp << " but passed " << actual_tp;
-          throw std::invalid_argument(ss.str());
+      for (intptr_t j : self_tp->get_option_kwd_indices()) {
+        if (kwds_as_vector[j].is_null()) {
+          ndt::type actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
+          if (actual_tp.is_symbolic()) {
+            actual_tp = ndt::option_type::make(ndt::type::make<void>());
+          }
+          kwds_as_vector[j] = empty(actual_tp);
+          kwds_as_vector[j].assign_na();
+          ++nkwd;
         }
       }
 
-      // ...
-      for (size_t i = 0; i < kwds.size; ++i) {
-        intptr_t j = available[i];
-        if (j != -1) {
-          kwds_as_vector[j] = kwds.values[i];
-        }
-      }
-
-      for (intptr_t j : missing) {
-        ndt::type actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
-        if (actual_tp.is_symbolic()) {
-          actual_tp = ndt::option_type::make(ndt::type::make<void>());
-        }
-        kwds_as_vector[j] = empty(actual_tp);
-        kwds_as_vector[j].assign_na();
+      if (nkwd < self_tp->get_nkwd()) {
+        std::stringstream ss;
+        // TODO: Provide the missing keyword parameter names in this error
+        //       message
+        ss << "callable requires keyword parameters that were not provided. "
+              "callable signature "
+           << get()->tp;
+        throw std::invalid_argument(ss.str());
       }
 
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        return (*get())(dst_tp, args.size(), args.types(), args.arrmeta(), args.data(), kwds_as_vector.size(),
-                        kwds_as_vector.data(), tp_vars);
+        return (*get())(dst_tp, args.size(), args.types(), args.arrmeta(), args.data(), nkwd, kwds_as_vector.data(),
+                        tp_vars);
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst->metadata(), dst.data(), args.size(), args.types(), args.arrmeta(), args.data(),
-               kwds_as_vector.size(), kwds_as_vector.data(), tp_vars);
+      (*get())(dst_tp, dst->metadata(), dst.data(), args.size(), args.types(), args.arrmeta(), args.data(), nkwd,
+               kwds_as_vector.data(), tp_vars);
       return dst;
     }
 
