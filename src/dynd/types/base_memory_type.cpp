@@ -9,15 +9,14 @@
 using namespace std;
 using namespace dynd;
 
-ndt::base_memory_type::~base_memory_type()
-{
-}
+ndt::base_memory_type::~base_memory_type() {}
 
 size_t ndt::base_memory_type::get_default_data_size() const
 {
   if (m_element_tp.is_builtin()) {
     return m_element_tp.get_data_size();
-  } else {
+  }
+  else {
     return m_element_tp.extended()->get_default_data_size();
   }
 }
@@ -38,10 +37,7 @@ void ndt::base_memory_type::get_strides(size_t i, intptr_t *out_strides, const c
   m_element_tp.extended()->get_strides(i, out_strides, arrmeta);
 }
 
-void ndt::base_memory_type::get_vars(std::unordered_set<std::string> &vars) const
-{
-  m_element_tp.get_vars(vars);
-}
+void ndt::base_memory_type::get_vars(std::unordered_set<std::string> &vars) const { m_element_tp.get_vars(vars); }
 
 ndt::type ndt::base_memory_type::apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,
                                                     const type &root_tp, bool leading_dimension) const
@@ -52,8 +48,9 @@ ndt::type ndt::base_memory_type::apply_linear_index(intptr_t nindices, const ira
 
 intptr_t ndt::base_memory_type::apply_linear_index(intptr_t nindices, const irange *indices, const char *arrmeta,
                                                    const type &result_type, char *out_arrmeta,
-                                                   const intrusive_ptr<memory_block_data> &embedded_reference, size_t current_i,
-                                                   const type &root_tp, bool leading_dimension, char **inout_data,
+                                                   const intrusive_ptr<memory_block_data> &embedded_reference,
+                                                   size_t current_i, const type &root_tp, bool leading_dimension,
+                                                   char **inout_data,
                                                    intrusive_ptr<memory_block_data> &inout_dataref) const
 {
   if (m_element_tp.is_builtin()) {
@@ -84,7 +81,8 @@ bool ndt::base_memory_type::is_lossless_assignment(const type &dst_tp, const typ
   // Default to calling with the storage types
   if (dst_tp.extended() == this) {
     return ::is_lossless_assignment(m_element_tp, src_tp);
-  } else {
+  }
+  else {
     return ::is_lossless_assignment(dst_tp, m_element_tp);
   }
 }
@@ -99,15 +97,13 @@ void ndt::base_memory_type::transform_child_types(type_transform_fn_t transform_
   if (was_transformed) {
     out_transformed_tp = with_replaced_storage_type(tmp_tp);
     out_was_transformed = true;
-  } else {
+  }
+  else {
     out_transformed_tp = type(this, true);
   }
 }
 
-ndt::type ndt::base_memory_type::get_canonical_type() const
-{
-  return m_element_tp.get_canonical_type();
-}
+ndt::type ndt::base_memory_type::get_canonical_type() const { return m_element_tp.get_canonical_type(); }
 
 void ndt::base_memory_type::arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const
 {
@@ -149,12 +145,7 @@ static ndt::type property_get_storage_type(ndt::type tp)
   return md->get_element_type();
 }
 
-void ndt::base_memory_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                        size_t *out_count) const
+void ndt::base_memory_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {
-  static pair<std::string, nd::callable> type_properties[] = {
-      pair<std::string, nd::callable>("storage_type", nd::functional::apply(&property_get_storage_type, "self"))};
-
-  *out_properties = type_properties;
-  *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  properties["storage_type"] = nd::functional::apply(&property_get_storage_type, "self");
 }

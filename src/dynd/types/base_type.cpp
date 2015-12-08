@@ -275,13 +275,7 @@ void ndt::base_type::get_scalar_properties_and_functions(std::map<std::string, n
   }
 }
 
-void ndt::base_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                 size_t *out_count) const
-{
-  // Default to no properties
-  *out_properties = NULL;
-  *out_count = 0;
-}
+void ndt::base_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &DYND_UNUSED(properties)) const {}
 
 void ndt::base_type::get_dynamic_type_functions(const std::pair<std::string, nd::callable> **out_functions,
                                                 size_t *out_count) const

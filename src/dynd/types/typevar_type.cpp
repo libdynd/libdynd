@@ -15,7 +15,8 @@ ndt::typevar_type::typevar_type(const std::string &name)
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
+  }
+  else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
     print_escaped_utf8_string(ss, m_name);
@@ -24,10 +25,7 @@ ndt::typevar_type::typevar_type(const std::string &name)
   }
 }
 
-void ndt::typevar_type::get_vars(std::unordered_set<std::string> &vars) const
-{
-  vars.insert(m_name);
-}
+void ndt::typevar_type::get_vars(std::unordered_set<std::string> &vars) const { vars.insert(m_name); }
 
 void ndt::typevar_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
                                    const char *DYND_UNUSED(data)) const
@@ -64,7 +62,8 @@ bool ndt::typevar_type::is_lossless_assignment(const type &dst_tp, const type &s
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == typevar_type_id) {
+    }
+    else if (src_tp.get_type_id() == typevar_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -76,9 +75,11 @@ bool ndt::typevar_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != typevar_type_id) {
+  }
+  else if (rhs.get_type_id() != typevar_type_id) {
     return false;
-  } else {
+  }
+  else {
     const typevar_type *tvt = static_cast<const typevar_type *>(&rhs);
     return m_name == tvt->m_name;
   }
@@ -89,9 +90,9 @@ void ndt::typevar_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta), bo
   throw type_error("Cannot store data of typevar type");
 }
 
-void
-ndt::typevar_type::arrmeta_copy_construct(char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
-                                          const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
+void ndt::typevar_type::arrmeta_copy_construct(
+    char *DYND_UNUSED(dst_arrmeta), const char *DYND_UNUSED(src_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference)) const
 {
   throw type_error("Cannot store data of typevar type");
 }
@@ -117,7 +118,8 @@ bool ndt::typevar_type::match(const char *DYND_UNUSED(arrmeta), const type &cand
     // This typevar hasn't been seen yet
     tv_type = candidate_tp;
     return true;
-  } else {
+  }
+  else {
     // Make sure the type matches previous
     // instances of the type var
     return candidate_tp == tv_type;
@@ -131,8 +133,7 @@ static nd::array property_get_name(const ndt::type &tp)
 }
 */
 
-void ndt::typevar_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                    size_t *out_count) const
+void ndt::typevar_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {
   struct name_kernel : nd::base_property_kernel<name_kernel> {
     name_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
@@ -158,11 +159,7 @@ void ndt::typevar_type::get_dynamic_type_properties(const std::pair<std::string,
     }
   };
 
-  static pair<std::string, nd::callable> type_properties[] = {
-      pair<std::string, nd::callable>("name", nd::callable::make<name_kernel>(type("(self: type) -> Any"))), };
-
-  *out_properties = type_properties;
-  *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  properties["name"] = nd::callable::make<name_kernel>(type("(self: type) -> Any"));
 }
 
 bool ndt::is_valid_typevar_name(const char *begin, const char *end)
@@ -180,7 +177,8 @@ bool ndt::is_valid_typevar_name(const char *begin, const char *end)
       ++begin;
     }
     return true;
-  } else {
+  }
+  else {
     return false;
   }
 }

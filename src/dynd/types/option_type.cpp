@@ -318,20 +318,9 @@ static nd::array property_get_assign_na(const ndt::type &tp)
 }
 */
 
-void ndt::option_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                   size_t *out_count) const
+void ndt::option_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {
-  static pair<std::string, nd::callable> type_properties[] = {
-      pair<std::string, nd::callable>("value_type", nd::functional::apply(&property_get_value_type, "self")),
-      //      pair<string, gfunc::callable>(
-      //        "is_avail", gfunc::make_callable(&property_get_is_avail,
-      //        "self")),
-      //  pair<string, gfunc::callable>(
-      //    "assign_na", gfunc::make_callable(&property_get_assign_na, "self")),
-  };
-
-  *out_properties = type_properties;
-  *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  properties["value_type"] = nd::functional::apply(&property_get_value_type, "self");
 }
 
 namespace {

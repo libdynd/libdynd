@@ -25,8 +25,7 @@ namespace ndt {
 
     const std::string &get_name() const { return m_name; }
 
-    void print_data(std::ostream &o, const char *arrmeta,
-                    const char *data) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     void print_type(std::ostream &o) const;
 
@@ -38,24 +37,19 @@ namespace ndt {
 
     bool operator==(const base_type &rhs) const;
 
-    type get_type_at_dimension(char **inout_arrmeta, intptr_t i,
-                               intptr_t total_ndim = 0) const;
+    type get_type_at_dimension(char **inout_arrmeta, intptr_t i, intptr_t total_ndim = 0) const;
 
     void arrmeta_default_construct(char *arrmeta, bool blockref_alloc) const;
     void arrmeta_copy_construct(char *dst_arrmeta, const char *src_arrmeta,
                                 const intrusive_ptr<memory_block_data> &embedded_reference) const;
-    size_t
-    arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
-                                  const intrusive_ptr<memory_block_data> &embedded_reference) const;
+    size_t arrmeta_copy_construct_onedim(char *dst_arrmeta, const char *src_arrmeta,
+                                         const intrusive_ptr<memory_block_data> &embedded_reference) const;
     void arrmeta_destruct(char *arrmeta) const;
 
-    bool match(const char *arrmeta, const type &candidate_tp,
-               const char *candidate_arrmeta,
+    bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    void get_dynamic_type_properties(
-        const std::pair<std::string, nd::callable> **out_properties,
-        size_t *out_count) const;
+    void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
 
     virtual type with_element_type(const type &element_tp) const;
 
@@ -65,8 +59,7 @@ namespace ndt {
       return type(new typevar_dim_type(name, element_type), false);
     }
 
-    static type make(const std::string &name, const type &element_tp,
-                     intptr_t ndim)
+    static type make(const std::string &name, const type &element_tp, intptr_t ndim)
     {
       type result = element_tp;
       for (intptr_t i = 0; i < ndim; ++i) {

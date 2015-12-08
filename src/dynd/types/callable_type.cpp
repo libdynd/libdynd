@@ -349,8 +349,7 @@ static nd::array property_get_kwd_names(const ndt::type &tp)
 
 static ndt::type property_get_return_type(ndt::type tp) { return tp.extended<ndt::callable_type>()->get_return_type(); }
 
-void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                     size_t *out_count) const
+void ndt::callable_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {
   struct pos_types_kernel : nd::base_property_kernel<pos_types_kernel> {
     pos_types_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
@@ -418,27 +417,10 @@ void ndt::callable_type::get_dynamic_type_properties(const std::pair<std::string
     }
   };
 
-  static pair<std::string, nd::callable> type_properties[] = {
-      pair<std::string, nd::callable>("pos_types",
-                                      nd::callable::make<pos_types_kernel>(type("(self: type) -> Fixed * type"))),
-      pair<std::string, nd::callable>("kwd_types",
-                                      nd::callable::make<kwd_types_kernel>(type("(self: type) -> Fixed * type"))),
-      pair<std::string, nd::callable>("kwd_names",
-                                      nd::callable::make<kwd_names_kernel>(type("(self: type) -> Fixed * Any"))),
-      /*
-            pair<string, nd::callable>("kwd",
-                                      nd::functional::apply(&property_get_kwd)),
-            pair<string, nd::callable>("pos_types",
-                                      nd::functional::apply(&property_get_pos_types)),
-            pair<string, nd::callable>("kwd_types",
-                                      nd::functional::apply(&property_get_kwd_types)),
-            pair<string, nd::callable>("kwd_names",
-                                      nd::functional::apply(&property_get_kwd_names)),
-      */
-      pair<std::string, nd::callable>("return_type", nd::functional::apply(&property_get_return_type, "self"))};
-
-  *out_properties = type_properties;
-  *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  properties["pos_types"] = nd::callable::make<pos_types_kernel>(type("(self: type) -> Fixed * type"));
+  properties["kwd_types"] = nd::callable::make<kwd_types_kernel>(type("(self: type) -> Fixed * type"));
+  properties["kwd_names"] = nd::callable::make<kwd_names_kernel>(type("(self: type) -> Fixed * Any"));
+  properties["return_type"] = nd::functional::apply(&property_get_return_type, "self");
 }
 
 ndt::type ndt::make_generic_funcproto(intptr_t nargs)

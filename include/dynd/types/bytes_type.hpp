@@ -50,8 +50,7 @@ namespace ndt {
     void data_destruct(const char *arrmeta, char *data) const;
     void data_destruct_strided(const char *arrmeta, char *data, intptr_t stride, size_t count) const;
 
-    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                     size_t *out_count) const;
+    void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
 
     static const type &make()
     {

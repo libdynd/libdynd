@@ -527,8 +527,7 @@ namespace ndt {
     /**
      * Additional dynamic properties exposed by the type as gfunc::callable.
      */
-    virtual void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                             size_t *out_count) const;
+    virtual void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
 
     /**
      * Additional dynamic functions exposed by the type as gfunc::callable.
