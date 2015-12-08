@@ -566,21 +566,17 @@ struct get_ints_kernel : nd::base_kernel<get_ints_kernel> {
   }
 };
 
-static size_t categorical_array_properties_size() { return 1; }
-
-static const pair<std::string, nd::callable> *categorical_array_properties()
+static const std::map<std::string, nd::callable> &categorical_array_properties()
 {
-  static pair<std::string, nd::callable> categorical_array_properties[1] = {
-      pair<std::string, nd::callable>("ints", nd::callable::make<get_ints_kernel>(ndt::type("(self: Any) -> Any")))};
+  static const std::map<std::string, nd::callable> categorical_array_properties{
+      {"ints", nd::callable::make<get_ints_kernel>(ndt::type("(self: Any) -> Any"))}};
 
   return categorical_array_properties;
 }
 
-void ndt::categorical_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                         size_t *out_count) const
+void ndt::categorical_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  *out_properties = categorical_array_properties();
-  *out_count = categorical_array_properties_size();
+  properties = categorical_array_properties();
 }
 
 static ndt::type property_type_get_storage_type(ndt::type d)

@@ -88,8 +88,7 @@ namespace ndt {
     void arrmeta_destruct(char *arrmeta) const;
     void arrmeta_debug_print(const char *arrmeta, std::ostream &o, const std::string &indent) const;
 
-    void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                      size_t *out_count) const;
+    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
     void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
                                      size_t *out_count) const;
 

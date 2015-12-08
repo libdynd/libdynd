@@ -44,10 +44,7 @@ ndt::expr_type::expr_type(const type &value_type, const type &operand_type, cons
   }
 }
 
-ndt::expr_type::~expr_type()
-{
-  expr_kernel_generator_decref(m_kgen);
-}
+ndt::expr_type::~expr_type() { expr_kernel_generator_decref(m_kgen); }
 
 void ndt::expr_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
                                 const char *DYND_UNUSED(data)) const
@@ -86,7 +83,8 @@ ndt::type ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *in
       intptr_t field_undim = dt.get_ndim();
       if (nindices + field_undim <= undim) {
         result_src_dt[i] = dt;
-      } else {
+      }
+      else {
         size_t index_offset = undim - field_undim;
         result_src_dt[i] =
             dt.apply_linear_index(nindices - index_offset, indices + index_offset, current_i, root_tp, false);
@@ -95,7 +93,8 @@ ndt::type ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *in
     type result_operand_type = ndt::tuple_type::make(result_src_dt);
     expr_kernel_generator_incref(m_kgen);
     return make_expr(result_value_dt, result_operand_type, m_kgen);
-  } else {
+  }
+  else {
     throw runtime_error("expr_type::apply_linear_index is only implemented for "
                         "elwise kernel generators");
   }
@@ -123,7 +122,8 @@ intptr_t ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *ind
       if (nindices + field_undim <= undim) {
         pd->arrmeta_copy_construct(out_arrmeta + out_arrmeta_offsets[i], arrmeta + arrmeta_offsets[i],
                                    embedded_reference);
-      } else {
+      }
+      else {
         intrusive_ptr<memory_block_data> tmp;
         size_t index_offset = undim - field_undim;
         intptr_t offset = pd->apply_linear_index(
@@ -136,7 +136,8 @@ intptr_t ndt::expr_type::apply_linear_index(intptr_t nindices, const irange *ind
       }
     }
     return 0;
-  } else {
+  }
+  else {
     throw runtime_error("expr_type::apply_linear_index is only implemented for "
                         "elwise kernel generators");
   }
@@ -174,7 +175,8 @@ void ndt::expr_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_shape, c
     const type &dt = m_value_type.get_dtype();
     if (!dt.is_builtin()) {
       dt.extended()->get_shape(ndim, i + undim, out_shape, NULL, NULL);
-    } else {
+    }
+    else {
       stringstream ss;
       ss << "requested too many dimensions from type " << type(this, true);
       throw runtime_error(ss.str());
@@ -191,9 +193,11 @@ bool ndt::expr_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != expr_type_id) {
+  }
+  else if (rhs.get_type_id() != expr_type_id) {
     return false;
-  } else {
+  }
+  else {
     const expr_type *dt = static_cast<const expr_type *>(&rhs);
     return m_value_type == dt->m_value_type && m_operand_type == dt->m_operand_type && m_kgen == dt->m_kgen;
   }
@@ -220,10 +224,7 @@ struct expr_type_offset_applier_extra : nd::base_kernel<expr_type_offset_applier
     opchild(echild, dst, src_modified);
   }
 
-  static void destruct(ckernel_prefix *self)
-  {
-    self->get_child(sizeof(extra_type))->destroy();
-  }
+  static void destruct(ckernel_prefix *self) { self->get_child(sizeof(extra_type))->destroy(); }
 };
 
 struct expr_type_offset_applier_general_extra : nd::base_kernel<expr_type_offset_applier_general_extra, 1> {
@@ -292,10 +293,7 @@ static void src_deref_single(ckernel_prefix *self, char *dst, char *const *src)
   child_fn(child, dst, reinterpret_cast<char *const *>(*src));
 }
 
-static void src_deref_destruct(ckernel_prefix *self)
-{
-  self->get_child(sizeof(ckernel_prefix))->destroy();
-}
+static void src_deref_destruct(ckernel_prefix *self) { self->get_child(sizeof(ckernel_prefix))->destroy(); }
 
 static size_t make_src_deref_ckernel(void *ckb, intptr_t ckb_offset)
 {
@@ -356,14 +354,14 @@ ndt::type ndt::expr_type::with_replaced_storage_type(const type &DYND_UNUSED(rep
   throw runtime_error("TODO: implement expr_type::with_replaced_storage_type");
 }
 
-void ndt::expr_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                  size_t *out_count) const
+void ndt::expr_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
   const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {
-    udt.extended()->get_dynamic_array_properties(out_properties, out_count);
-  } else {
-    get_builtin_type_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
+    udt.extended()->get_dynamic_array_properties(properties);
+  }
+  else {
+    get_builtin_type_dynamic_array_properties(udt.get_type_id(), properties);
   }
 }
 
@@ -372,7 +370,8 @@ void ndt::expr_type::get_dynamic_array_functions(std::map<std::string, nd::calla
   const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {
     udt.extended()->get_dynamic_array_functions(functions);
-  } else {
+  }
+  else {
     // get_builtin_type_dynamic_array_functions(udt.get_type_id(),
     // out_functions, out_count);
   }

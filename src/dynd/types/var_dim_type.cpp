@@ -573,11 +573,9 @@ void ndt::var_dim_type::get_dynamic_type_properties(const std::pair<std::string,
   *out_count = sizeof(var_dim_type_properties) / sizeof(var_dim_type_properties[0]);
 }
 
-void ndt::var_dim_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                     size_t *out_count) const
+void ndt::var_dim_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];
-  *out_count = (int)m_array_properties.size();
+  properties = m_array_properties;
 }
 
 void ndt::var_dim_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const

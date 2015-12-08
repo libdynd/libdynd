@@ -134,7 +134,7 @@ namespace ndt {
 
   protected:
     // Helper function for array dimension types
-    void get_scalar_properties_and_functions(std::vector<std::pair<std::string, nd::callable>> &out_properties,
+    void get_scalar_properties_and_functions(std::map<std::string, nd::callable> &properties,
                                              std::map<std::string, nd::callable> &functions) const;
 
   public:
@@ -544,8 +544,7 @@ namespace ndt {
      *       first non-array data type in an array type, not just strictly of the
      *       non-array data type.
      */
-    virtual void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                              size_t *out_count) const;
+    virtual void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
 
     /**
      * Additional dynamic functions exposed by any nd::array of this type as gfunc::callable.

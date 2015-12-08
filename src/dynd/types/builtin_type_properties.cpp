@@ -138,31 +138,25 @@ namespace ndt {
 } // namespace dynd::ndt
 } // namespace dynd
 
-static size_t complex_array_properties_size() { return 3; }
-
-static const pair<std::string, nd::callable> *complex_array_properties()
+const std::map<std::string, nd::callable> &complex_array_properties()
 {
-  static const pair<std::string, nd::callable> complex_array_properties[3] = {
-      pair<std::string, nd::callable>("real", nd::callable::make<nd::complex_real_kernel>()),
-      pair<std::string, nd::callable>("imag", nd::callable::make<nd::complex_imag_kernel>()),
-      pair<std::string, nd::callable>("conj", nd::callable::make<nd::complex_conj_kernel>())};
+  static const std::map<std::string, nd::callable> complex_array_properties{
+      {"real", nd::callable::make<nd::complex_real_kernel>()},
+      {"imag", nd::callable::make<nd::complex_imag_kernel>()},
+      {"conj", nd::callable::make<nd::complex_conj_kernel>()}};
 
   return complex_array_properties;
 }
 
 void dynd::get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
-                                                     const std::pair<std::string, nd::callable> **out_properties,
-                                                     size_t *out_count)
+                                                     std::map<std::string, nd::callable> &properties)
 {
   switch (builtin_type_id) {
   case complex_float32_type_id:
   case complex_float64_type_id:
-    *out_properties = complex_array_properties();
-    *out_count = complex_array_properties_size();
+    properties = complex_array_properties();
     break;
   default:
-    *out_properties = NULL;
-    *out_count = 0;
     break;
   }
 }

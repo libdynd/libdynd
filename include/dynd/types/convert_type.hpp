@@ -50,16 +50,16 @@ namespace ndt {
                                                    const eval::eval_context *ectx) const;
 
     // Propagate properties and functions from the value type
-    void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                      size_t *out_count) const
+    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
     {
       if (!m_value_type.is_builtin()) {
-        m_value_type.extended()->get_dynamic_array_properties(out_properties, out_count);
+        m_value_type.extended()->get_dynamic_array_properties(properties);
       }
       else {
-        get_builtin_type_dynamic_array_properties(m_value_type.get_type_id(), out_properties, out_count);
+        get_builtin_type_dynamic_array_properties(m_value_type.get_type_id(), properties);
       }
     }
+
     void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
     {
       if (!m_value_type.is_builtin()) {

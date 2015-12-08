@@ -18,7 +18,7 @@ namespace dynd {
 namespace ndt {
 
   class DYND_API struct_type : public base_struct_type {
-    std::vector<std::pair<std::string, nd::callable>> m_array_properties;
+    std::map<std::string, nd::callable> m_array_properties;
 
     void create_array_properties();
 
@@ -59,8 +59,7 @@ namespace ndt {
 
     void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
                                      size_t *out_count) const;
-    void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                      size_t *out_count) const;
+    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
 
     /** Makes a struct type with the specified fields */
     static type make(const nd::array &field_names, const nd::array &field_types, bool variadic = false)

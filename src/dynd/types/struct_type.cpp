@@ -384,20 +384,16 @@ void ndt::struct_type::create_array_properties()
 {
   type array_parameters_type(new struct_type(0, 0), false);
 
-  m_array_properties.resize(m_field_count);
   for (intptr_t i = 0, i_end = m_field_count; i != i_end; ++i) {
     // TODO: Transform the name into a valid Python symbol?
-    m_array_properties[i].first = get_field_name(i);
-    m_array_properties[i].second = nd::callable::make<nd::get_array_field_kernel>(
+    m_array_properties[get_field_name(i)] = nd::callable::make<nd::get_array_field_kernel>(
         callable_type::make(type("Any"), tuple_type::make(), array_parameters_type), i);
   }
 }
 
-void ndt::struct_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                    size_t *out_count) const
+void ndt::struct_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  *out_properties = m_array_properties.empty() ? NULL : &m_array_properties[0];
-  *out_count = (int)m_array_properties.size();
+  properties = m_array_properties;
 }
 
 nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
