@@ -166,17 +166,10 @@ nd::functional::elwise(nd::functional::apply(date_from_ymd));
 }
 */
 
-void ndt::date_type::get_dynamic_type_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                size_t *out_count) const
+void ndt::date_type::get_dynamic_type_functions(std::map<std::string, nd::callable> &functions) const
 {
-  static pair<std::string, nd::callable> date_type_functions[] = {
-      pair<std::string, nd::callable>("today", nd::functional::apply(&fn_type_today, "self")),
-      pair<std::string, nd::callable>("__construct__",
-                                      nd::functional::apply(&fn_type_construct, "self", "year", "month", "day")),
-  };
-
-  *out_functions = date_type_functions;
-  *out_count = sizeof(date_type_functions) / sizeof(date_type_functions[0]);
+  functions["today"] = nd::functional::apply(&fn_type_today, "self");
+  functions["__construct__"] = nd::functional::apply(&fn_type_construct, "self", "year", "month", "day");
 }
 
 ///////// properties on the nd::array

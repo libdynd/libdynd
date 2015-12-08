@@ -532,8 +532,7 @@ namespace ndt {
     /**
      * Additional dynamic functions exposed by the type as gfunc::callable.
      */
-    virtual void get_dynamic_type_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                            size_t *out_count) const;
+    virtual void get_dynamic_type_functions(std::map<std::string, nd::callable> &functions) const;
 
     /**
      * Additional dynamic properties exposed by any nd::array of this type as gfunc::callable.

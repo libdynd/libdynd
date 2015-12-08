@@ -208,8 +208,7 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
 }
 */
 
-void ndt::datetime_type::get_dynamic_type_functions(const std::pair<std::string, nd::callable> **out_functions,
-                                                    size_t *out_count) const
+void ndt::datetime_type::get_dynamic_type_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const
 {
   //  static pair<string, nd::callable> datetime_type_functions[] = {
   /*
@@ -222,8 +221,6 @@ void ndt::datetime_type::get_dynamic_type_functions(const std::pair<std::string,
   */
   //};
 
-  *out_functions = NULL;
-  *out_count = 0;
   //      sizeof(datetime_type_functions) / sizeof(datetime_type_functions[0]);
 }
 
