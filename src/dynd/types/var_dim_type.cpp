@@ -555,8 +555,7 @@ void ndt::var_dim_type::foreach_leading(const char *arrmeta, char *data, foreach
   }
 }
 
-void ndt::var_dim_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                    size_t *out_count) const
+void ndt::var_dim_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {
   struct get_element_type {
     type tp;
@@ -566,11 +565,7 @@ void ndt::var_dim_type::get_dynamic_type_properties(const std::pair<std::string,
     type operator()() const { return tp.extended<base_dim_type>()->get_element_type(); }
   };
 
-  static pair<std::string, nd::callable> var_dim_type_properties[] = {
-      pair<std::string, nd::callable>("element_type", nd::functional::apply<get_element_type, type>("self"))};
-
-  *out_properties = var_dim_type_properties;
-  *out_count = sizeof(var_dim_type_properties) / sizeof(var_dim_type_properties[0]);
+  properties["element_type"] =  nd::functional::apply<get_element_type, type>("self");
 }
 
 void ndt::var_dim_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const

@@ -207,8 +207,7 @@ static nd::array property_get_arrmeta_offsets(const ndt::type &tp)
 }
 */
 
-void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                   size_t *out_count) const
+void ndt::struct_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {
   struct field_types_kernel : nd::base_property_kernel<field_types_kernel> {
     field_types_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
@@ -276,17 +275,9 @@ void ndt::struct_type::get_dynamic_type_properties(const std::pair<std::string, 
     }
   };
 
-  static pair<std::string, nd::callable> type_properties[] = {
-      pair<std::string, nd::callable>("field_types",
-                                      nd::callable::make<field_types_kernel>(type("(self: type) -> Any"))),
-      pair<std::string, nd::callable>("field_names",
-                                      nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))),
-      pair<std::string, nd::callable>("arrmeta_offsets",
-                                      nd::callable::make<field_names_kernel>(type("(self: type) -> Any"))),
-  };
-
-  *out_properties = type_properties;
-  *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  properties["field_types"] = nd::callable::make<field_types_kernel>(type("(self: type) -> Any"));
+  properties["field_names"] = nd::callable::make<field_names_kernel>(type("(self: type) -> Any"));
+  properties["arrmeta_offsets"] = nd::callable::make<field_names_kernel>(type("(self: type) -> Any"));
 }
 
 namespace dynd {

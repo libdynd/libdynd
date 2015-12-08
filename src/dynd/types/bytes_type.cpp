@@ -129,13 +129,8 @@ void ndt::bytes_type::data_destruct_strided(const char *DYND_UNUSED(arrmeta), ch
   }
 }
 
-void ndt::bytes_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                  size_t *out_count) const
+void ndt::bytes_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {
-  static pair<std::string, nd::callable> type_properties[] = {pair<std::string, nd::callable>(
-      "target_alignment",
-      nd::functional::apply([](type self) { return self.extended<bytes_type>()->get_target_alignment(); }, "self"))};
-
-  *out_properties = type_properties;
-  *out_count = sizeof(type_properties) / sizeof(type_properties[0]);
+  properties["target_alignment"] =
+      nd::functional::apply([](type self) { return self.extended<bytes_type>()->get_target_alignment(); }, "self");
 }

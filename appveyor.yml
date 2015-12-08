@@ -10,6 +10,8 @@ skip_tags: true
 matrix:
   fast_finish: true     # immediately finish build once one of the jobs fails.
 
+os: Visual Studio 2015
+
 environment:
   global:
     appveyor_token:

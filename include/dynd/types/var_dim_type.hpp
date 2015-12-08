@@ -94,8 +94,7 @@ namespace ndt {
 
     void foreach_leading(const char *arrmeta, char *data, foreach_fn_t callback, void *callback_data) const;
 
-    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                     size_t *out_count) const;
+    void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
     void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
     void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
 

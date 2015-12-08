@@ -57,8 +57,7 @@ namespace ndt {
                                   const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
 
-    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                     size_t *out_count) const;
+    void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
     void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
 
     /** Makes a struct type with the specified fields */

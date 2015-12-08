@@ -52,8 +52,7 @@ namespace ndt {
                                   const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
 
-    void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                     size_t *out_count) const;
+    void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
 
     /** Makes a tuple type with the specified types */
     static type make(const nd::array &field_types, bool variadic = false)

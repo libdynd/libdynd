@@ -34,21 +34,17 @@ static void get_extended_string_encoding(const ndt::type &dt)
   //  return ss.str();
 }
 
-static size_t base_string_type_properties_size() { return 1; }
-
-static const pair<std::string, nd::callable> *base_string_type_properties()
+static const std::map<std::string, nd::callable> &base_string_type_properties()
 {
-  static pair<std::string, nd::callable> base_string_type_properties[1] = {
-      pair<std::string, nd::callable>("encoding", nd::functional::apply(&get_extended_string_encoding))};
+  static const std::map<std::string, nd::callable> base_string_type_properties{
+      {"encoding", nd::functional::apply(&get_extended_string_encoding)}};
 
   return base_string_type_properties;
 }
 
-void ndt::base_string_type::get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                        size_t *out_count) const
+void ndt::base_string_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {
-  *out_properties = base_string_type_properties();
-  *out_count = base_string_type_properties_size();
+  properties = base_string_type_properties();
 }
 
 namespace {
@@ -165,7 +161,8 @@ static const pair<string, gfunc::callable> *base_string_array_functions()
 }
 */
 
-void ndt::base_string_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const
+void ndt::base_string_type::get_dynamic_array_functions(
+    std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const
 {
   /*
       *out_functions = base_string_array_functions();
