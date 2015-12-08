@@ -333,8 +333,12 @@ namespace nd {
       array dst;
 
       // ...
-      intptr_t nkwd = 0;
-      std::vector<array> kwds_as_vector(self_tp->get_nkwd());
+      intptr_t nkwd = args.size - self_tp->get_npos();
+      std::vector<array> kwds_as_vector(nkwd + self_tp->get_nkwd());
+
+      for (intptr_t i = 0; i < nkwd; ++i) {
+        kwds_as_vector[i] = args.values[self_tp->get_npos() + i];
+      }
 
       for (size_t i = 0; i < kwds.size; ++i) {
         intptr_t j = self_tp->get_kwd_index(kwds.m_names[i]);
@@ -407,12 +411,11 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        return (*get())(dst_tp, args.size(), args.types(), args.arrmeta(), args.data(), nkwd, kwds_as_vector.data(),
-                        tp_vars);
+        return (*get())(dst_tp, args.size, args.tp, args.arrmeta, args.data(), nkwd, kwds_as_vector.data(), tp_vars);
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst->metadata(), dst.data(), args.size(), args.types(), args.arrmeta(), args.data(), nkwd,
+      (*get())(dst_tp, dst->metadata(), dst.data(), args.size, args.tp, args.arrmeta, args.data(), nkwd,
                kwds_as_vector.data(), tp_vars);
       return dst;
     }
@@ -622,16 +625,16 @@ namespace nd {
 
   template <typename DataType>
   struct callable::args<DataType> {
+    static const size_t size = 0;
+    array *values;
+    ndt::type *tp;
+    const char *const *arrmeta;
+
     args(std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars), const ndt::callable_type *self_tp)
+        : values(nullptr), tp(nullptr), arrmeta(nullptr)
     {
       detail::check_narg(self_tp, 0);
     }
-
-    size_t size() const { return 0; }
-
-    const ndt::type *types() const { return NULL; }
-
-    const char *const *arrmeta() const { return NULL; }
 
     DataType const *data() const { return NULL; }
   };
@@ -639,9 +642,10 @@ namespace nd {
   /** A holder class for the array arguments */
   template <typename DataType, typename... A>
   struct callable::args {
+    static const size_t size = sizeof...(A);
     array values[sizeof...(A)];
     ndt::type tp[sizeof...(A)];
-    const char *m_arrmeta[sizeof...(A)];
+    const char *arrmeta[sizeof...(A)];
     DataType m_data[sizeof...(A)];
 
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
@@ -657,16 +661,10 @@ namespace nd {
         detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
         tp[i] = values[i]->tp;
-        m_arrmeta[i] = values[i]->metadata();
+        arrmeta[i] = values[i]->metadata();
         detail::set_data(m_data[i], values[i]);
       }
     }
-
-    size_t size() const { return sizeof...(A); }
-
-    const ndt::type *types() const { return tp; }
-
-    const char *const *arrmeta() const { return m_arrmeta; }
 
     DataType const *data() const { return m_data; }
   };
@@ -674,30 +672,31 @@ namespace nd {
   /** A way to pass a run-time array of array arguments */
   template <typename DataType>
   struct callable::args<DataType, size_t, array *> {
-    size_t m_size;
-    std::vector<ndt::type> tp;
-    std::vector<const char *> m_arrmeta;
+    size_t size;
+    array *values;
+    ndt::type *tp;
+    const char **arrmeta;
     std::vector<DataType> m_data;
 
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size, array *values)
-        : m_size(size), tp(m_size), m_arrmeta(m_size), m_data(m_size)
+        : size(size), values(values), tp(new ndt::type[size]), arrmeta(new const char *[size]), m_data(size)
     {
-      detail::check_narg(self_tp, m_size);
+      detail::check_narg(self_tp, size);
 
-      for (std::size_t i = 0; i < m_size; ++i) {
+      for (std::size_t i = 0; i < size; ++i) {
         detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
         tp[i] = values[i]->tp;
-        m_arrmeta[i] = values[i]->metadata();
+        arrmeta[i] = values[i]->metadata();
         detail::set_data(m_data[i], values[i]);
       }
     }
 
-    size_t size() const { return m_size; }
-
-    const ndt::type *types() const { return tp.data(); }
-
-    const char *const *arrmeta() const { return m_arrmeta.data(); }
+    ~args()
+    {
+      delete[] tp;
+      delete[] arrmeta;
+    }
 
     DataType const *data() const { return m_data.data(); }
   };
@@ -765,7 +764,7 @@ namespace nd {
     return o << FuncType::get();
   }
 
-} // namespace nd
+} // namespace dynd::nd
 
 /**
  * Creates an callable which does the assignment from
