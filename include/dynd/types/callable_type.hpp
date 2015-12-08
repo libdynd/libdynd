@@ -67,6 +67,11 @@ namespace ndt {
       return m_pos_tuple.extended<tuple_type>()->is_variadic();
     }
 
+    bool is_kwd_variadic() const
+    {
+      return m_kwd_struct.extended<struct_type>()->is_variadic();
+    }
+
     const type &get_kwd_struct() const
     {
       return m_kwd_struct;
