@@ -97,39 +97,6 @@ nd::callable dynd::make_callable_from_property(const ndt::type &tp, const std::s
   return nd::callable::make<property_kernel>(ndt::callable_type::make(prop_tp.value_type(), tp), prop_tp);
 }
 
-void nd::detail::validate_kwd_types(const ndt::callable_type *af_tp, std::vector<ndt::type> &kwd_tp,
-                                    const std::vector<intptr_t> &available, const std::vector<intptr_t> &missing,
-                                    std::map<std::string, ndt::type> &tp_vars)
-{
-  for (intptr_t j : available) {
-    if (j == -1) {
-      continue;
-    }
-
-    ndt::type &actual_tp = kwd_tp[j];
-
-    ndt::type expected_tp = af_tp->get_kwd_type(j);
-    if (expected_tp.get_type_id() == option_type_id) {
-      expected_tp = expected_tp.p("value_type").as<ndt::type>();
-    }
-
-    if (!expected_tp.match(actual_tp.value_type(), tp_vars)) {
-      std::stringstream ss;
-      ss << "keyword \"" << af_tp->get_kwd_name(j) << "\" does not match, ";
-      ss << "callable expected " << expected_tp << " but passed " << actual_tp;
-      throw std::invalid_argument(ss.str());
-    }
-  }
-
-  for (intptr_t j : missing) {
-    ndt::type &actual_tp = kwd_tp[j];
-    actual_tp = ndt::substitute(af_tp->get_kwd_type(j), tp_vars, false);
-    if (actual_tp.is_symbolic()) {
-      actual_tp = ndt::option_type::make(ndt::type::make<void>());
-    }
-  }
-}
-
 void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg)
 {
   if (!af_tp->is_pos_variadic() && narg != af_tp->get_npos()) {
@@ -151,20 +118,6 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const nd
     std::stringstream ss;
     ss << "positional argument " << i << " to callable does not match, ";
     ss << "expected " << expected_tp << ", received " << actual_tp;
-    throw std::invalid_argument(ss.str());
-  }
-}
-
-void nd::detail::check_nkwd(const ndt::callable_type *af_tp, const std::vector<intptr_t> &available,
-                            const std::vector<intptr_t> &missing)
-{
-  if (intptr_t(available.size() + missing.size()) < af_tp->get_nkwd()) {
-    std::stringstream ss;
-    // TODO: Provide the missing keyword parameter names in this error
-    //       message
-    ss << "callable requires keyword parameters that were not provided. "
-          "callable signature "
-       << ndt::type(af_tp, true);
     throw std::invalid_argument(ss.str());
   }
 }

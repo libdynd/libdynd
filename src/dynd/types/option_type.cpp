@@ -10,6 +10,7 @@
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/parser_util.hpp>
 #include <dynd/func/apply.hpp>
+#include <dynd/func/option.hpp>
 #include <dynd/math.hpp>
 
 #include <algorithm>
@@ -128,6 +129,9 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::ev
     ckp->get_function<expr_single_t>()(ckp, data, NULL);
   }
 }
+
+nd::callable &ndt::option_type::get_is_avail() const { return nd::is_avail::get_child(m_value_tp); }
+nd::callable &ndt::option_type::get_assign_na() const { return nd::assign_na_decl::get_child(m_value_tp); }
 
 void ndt::option_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
