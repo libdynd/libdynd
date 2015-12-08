@@ -332,12 +332,18 @@ namespace nd {
 
       array dst;
 
+      intptr_t narg = args.size;
+
       // ...
       intptr_t nkwd = args.size - self_tp->get_npos();
-      std::vector<array> kwds_as_vector(nkwd + self_tp->get_nkwd());
+      if (!self_tp->is_kwd_variadic() && nkwd > self_tp->get_nkwd()) {
+        throw std::invalid_argument("too many extra positional arguments");
+      }
 
+      std::vector<array> kwds_as_vector(nkwd + self_tp->get_nkwd());
       for (intptr_t i = 0; i < nkwd; ++i) {
         kwds_as_vector[i] = args.values[self_tp->get_npos() + i];
+        --narg;
       }
 
       for (size_t i = 0; i < kwds.size; ++i) {
@@ -411,11 +417,11 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        return (*get())(dst_tp, args.size, args.tp, args.arrmeta, args.data(), nkwd, kwds_as_vector.data(), tp_vars);
+        return (*get())(dst_tp, narg, args.tp, args.arrmeta, args.data(), nkwd, kwds_as_vector.data(), tp_vars);
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst->metadata(), dst.data(), args.size, args.tp, args.arrmeta, args.data(), nkwd,
+      (*get())(dst_tp, dst->metadata(), dst.data(), narg, args.tp, args.arrmeta, args.data(), nkwd,
                kwds_as_vector.data(), tp_vars);
       return dst;
     }
@@ -450,6 +456,7 @@ namespace nd {
     _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
     {
       std::map<std::string, ndt::type> tp_vars;
+
       return call(
           ArgsType<AT0, array, array>(tp_vars, get_type(), array(std::forward<A0>(a0)), array(std::forward<A1>(a1))),
           kwds, tp_vars);
@@ -651,13 +658,14 @@ namespace nd {
     args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
         : values{std::forward<A>(a)...}
     {
-      if (!self_tp->is_pos_variadic() && (sizeof...(A) != self_tp->get_npos())) {
+      if (!self_tp->is_pos_variadic() && (static_cast<intptr_t>(sizeof...(A)) < self_tp->get_npos())) {
         std::stringstream ss;
         ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << sizeof...(A);
         throw std::invalid_argument(ss.str());
       }
 
-      for (size_t i = 0; i < sizeof...(A); ++i) {
+      for (intptr_t i = 0; i < (self_tp->is_pos_variadic() ? static_cast<intptr_t>(sizeof...(A)) : self_tp->get_npos());
+           ++i) {
         detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
 
         tp[i] = values[i]->tp;
@@ -764,6 +772,20 @@ namespace nd {
     return o << FuncType::get();
   }
 
+  template <typename... ArgTypes>
+  array array::f(const char *name, ArgTypes &&... args)
+  {
+    callable f = find_dynamic_function(name);
+    return f(*this, std::forward<ArgTypes>(args)...);
+  }
+
+  template <typename... ArgTypes>
+  array array::f(const char *name, ArgTypes &&... args) const
+  {
+    callable f = find_dynamic_function(name);
+    return f(*this, std::forward<ArgTypes>(args)...);
+  }
+
 } // namespace dynd::nd
 
 /**
@@ -785,52 +807,5 @@ DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, con
  * \param propname  The name of the property.
  */
 DYND_API nd::callable make_callable_from_property(const ndt::type &tp, const std::string &propname);
-
-/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
-inline nd::array nd::array::f(const char *function_name)
-{
-  return find_dynamic_function(function_name)(kwds("self", *this));
-}
-inline nd::array nd::array::f(const char *function_name) const
-{
-  return find_dynamic_function(function_name)(kwds("self", *this));
-}
-
-/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
-template <class T0>
-inline nd::array nd::array::f(const char *function_name, const T0 &p0)
-{
-  nd::callable g = find_dynamic_function(function_name);
-  return g(kwds("self", *this, g.get_type()->get_kwd_name_raw(1).data(), nd::array(p0)));
-}
-
-/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
-template <class T0, class T1>
-inline nd::array nd::array::f(const char *function_name, const T0 &p0, const T1 &p1)
-{
-  nd::callable g = find_dynamic_function(function_name);
-  return g(kwds("self", *this, g.get_type()->get_kwd_name_raw(1).data(), nd::array(p0),
-                g.get_type()->get_kwd_name_raw(2).data(), nd::array(p1)));
-}
-
-/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
-template <class T0, class T1, class T2>
-inline nd::array nd::array::f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2)
-{
-  nd::callable g = find_dynamic_function(function_name);
-  return g(kwds("self", *this, g.get_type()->get_kwd_name_raw(1).data(), nd::array(p0),
-                g.get_type()->get_kwd_name_raw(2).data(), nd::array(p1), g.get_type()->get_kwd_name_raw(3).data(),
-                nd::array(p2)));
-}
-
-/** Calls the dynamic function - #include <dynd/gfunc/call_callable.hpp> to use it */
-template <class T0, class T1, class T2, class T3>
-inline nd::array nd::array::f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2, const T3 &p3)
-{
-  nd::callable g = find_dynamic_function(function_name);
-  return g(kwds("self", *this, g.get_type()->get_kwd_name_raw(1).data(), nd::array(p0),
-                g.get_type()->get_kwd_name_raw(2).data(), nd::array(p1), g.get_type()->get_kwd_name_raw(3).data(),
-                nd::array(p2), g.get_type()->get_kwd_name_raw(4).data(), nd::array(p3)));
-}
 
 } // namespace dynd

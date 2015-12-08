@@ -232,10 +232,7 @@ namespace nd {
     /** Low level access to the array preamble */
     array_preamble *get() const { return reinterpret_cast<array_preamble *>(intrusive_ptr<memory_block_data>::get()); }
 
-  array_preamble *operator->() const
-  {
-    return get();
-  }
+    array_preamble *operator->() const { return get(); }
 
     /** Returns true if the array is NULL */
     inline bool is_null() const { return intrusive_ptr<memory_block_data>::get() == NULL; }
@@ -417,31 +414,13 @@ namespace nd {
 
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
      * use it */
-    array f(const char *function_name);
+    template <typename... ArgTypes>
+    array f(const char *name, ArgTypes &&... args);
 
     /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
      * use it */
-    array f(const char *function_name) const;
-
-    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
-     * use it */
-    template <class T0>
-    array f(const char *function_name, const T0 &p0);
-
-    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
-     * use it */
-    template <class T0, class T1>
-    array f(const char *function_name, const T0 &p0, const T1 &p1);
-
-    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
-     * use it */
-    template <class T0, class T1, class T2>
-    array f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2);
-
-    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
-     * use it */
-    template <class T0, class T1, class T2, class T3>
-    array f(const char *function_name, const T0 &p0, const T1 &p1, const T2 &p2, const T3 &p3);
+    template <typename... ArgTypes>
+    array f(const char *name, ArgTypes &&... args) const;
 
     array &operator+=(const array &rhs);
     array &operator-=(const array &rhs);
