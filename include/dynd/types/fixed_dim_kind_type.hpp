@@ -70,8 +70,7 @@ namespace ndt {
 
     void get_dynamic_type_properties(const std::pair<std::string, nd::callable> **out_properties,
                                      size_t *out_count) const;
-    void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                      size_t *out_count) const;
+    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
     void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
 
     virtual type with_element_type(const type &element_tp) const;

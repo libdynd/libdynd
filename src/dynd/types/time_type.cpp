@@ -304,19 +304,16 @@ struct get_tick_kernel : nd::base_kernel<get_tick_kernel> {
   }
 };
 
-void ndt::time_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                  size_t *out_count) const
+void ndt::time_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  static pair<std::string, nd::callable> time_array_properties[] = {
-      pair<std::string, nd::callable>("hour", nd::callable::make<get_hour_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("minute", nd::callable::make<get_minute_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("second", nd::callable::make<get_second_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("microsecond",
-                                      nd::callable::make<get_microsecond_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("tick", nd::callable::make<get_tick_kernel>(ndt::type("(self: Any) -> Any")))};
+  static const std::map<std::string, nd::callable> time_array_properties{
+      {"hour", nd::callable::make<get_hour_kernel>(ndt::type("(self: Any) -> Any"))},
+      {"minute", nd::callable::make<get_minute_kernel>(ndt::type("(self: Any) -> Any"))},
+      {"second", nd::callable::make<get_second_kernel>(ndt::type("(self: Any) -> Any"))},
+      {"microsecond", nd::callable::make<get_microsecond_kernel>(ndt::type("(self: Any) -> Any"))},
+      {"tick", nd::callable::make<get_tick_kernel>(ndt::type("(self: Any) -> Any"))}};
 
-  *out_properties = time_array_properties;
-  *out_count = sizeof(time_array_properties) / sizeof(time_array_properties[0]);
+  properties = time_array_properties;
 }
 
 ///////// functions on the nd::array

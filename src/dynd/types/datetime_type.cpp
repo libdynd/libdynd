@@ -517,22 +517,16 @@ struct get_tick_kernel : nd::base_kernel<get_tick_kernel> {
   }
 };
 
-void ndt::datetime_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                      size_t *out_count) const
+void ndt::datetime_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  static pair<std::string, nd::callable> date_array_properties[] = {
-      pair<std::string, nd::callable>("year", nd::callable::make<get_year_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("month", nd::callable::make<get_month_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("day", nd::callable::make<get_day_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("hour", nd::callable::make<get_hour_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("minute", nd::callable::make<get_minute_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("second", nd::callable::make<get_second_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("microsecond",
-                                      nd::callable::make<get_microsecond_kernel>(ndt::type("(self: Any) -> Any"))),
-      pair<std::string, nd::callable>("tick", nd::callable::make<get_tick_kernel>(ndt::type("(self: Any) -> Any")))};
-
-  *out_properties = date_array_properties;
-  *out_count = sizeof(date_array_properties) / sizeof(date_array_properties[0]);
+  properties["year"] = nd::callable::make<get_year_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["month"] = nd::callable::make<get_month_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["day"] = nd::callable::make<get_day_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["hour"] = nd::callable::make<get_hour_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["minute"] = nd::callable::make<get_minute_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["second"] = nd::callable::make<get_second_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["microsecond"] = nd::callable::make<get_microsecond_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["tick"] = nd::callable::make<get_tick_kernel>(ndt::type("(self: Any) -> Any"));
 }
 
 ///////// functions on the nd::array

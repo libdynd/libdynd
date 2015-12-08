@@ -712,59 +712,49 @@ void nd::array::flag_as_immutable()
   }
 }
 
-nd::array nd::array::p(const char *property_name) const
+nd::array nd::array::p(const char *name) const
 {
   if (!is_null()) {
     ndt::type dt = get_type();
-    const std::pair<std::string, nd::callable> *properties;
-    size_t count;
+    std::map<std::string, nd::callable> properties;
     if (!dt.is_builtin()) {
-      dt.extended()->get_dynamic_array_properties(&properties, &count);
+      dt.extended()->get_dynamic_array_properties(properties);
     }
     else {
-      get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
+      get_builtin_type_dynamic_array_properties(dt.get_type_id(), properties);
     }
-    // TODO: We probably want to make some kind of acceleration structure for
-    // the name lookup
-    if (count > 0) {
-      for (size_t i = 0; i < count; ++i) {
-        if (properties[i].first == property_name) {
-          return const_cast<nd::callable &>(properties[i].second)(kwds("self", *this));
-        }
-      }
+
+    callable p = properties[name];
+    if (!p.is_null()) {
+      return p(*this);
     }
   }
 
   stringstream ss;
-  ss << "dynd array does not have property " << property_name;
+  ss << "dynd array does not have property " << name;
   throw runtime_error(ss.str());
 }
 
-nd::array nd::array::p(const std::string &property_name) const
+nd::array nd::array::p(const std::string &name) const
 {
   if (!is_null()) {
     ndt::type dt = get_type();
-    const std::pair<std::string, nd::callable> *properties;
-    size_t count;
+    std::map<std::string, nd::callable> properties;
     if (!dt.is_builtin()) {
-      dt.extended()->get_dynamic_array_properties(&properties, &count);
+      dt.extended()->get_dynamic_array_properties(properties);
     }
     else {
-      get_builtin_type_dynamic_array_properties(dt.get_type_id(), &properties, &count);
+      get_builtin_type_dynamic_array_properties(dt.get_type_id(), properties);
     }
-    // TODO: We probably want to make some kind of acceleration structure for
-    // the name lookup
-    if (count > 0) {
-      for (size_t i = 0; i < count; ++i) {
-        if (properties[i].first == property_name) {
-          return const_cast<nd::callable &>(properties[i].second)(kwds("self", *this));
-        }
-      }
+
+    callable p = properties[name];
+    if (!p.is_null()) {
+      return p(*this);
     }
   }
 
   stringstream ss;
-  ss << "dynd array does not have property " << property_name;
+  ss << "dynd array does not have property " << name;
   throw runtime_error(ss.str());
 }
 

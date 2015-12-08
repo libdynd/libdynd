@@ -133,15 +133,14 @@ ndt::type ndt::unary_expr_type::with_replaced_storage_type(const type &DYND_UNUS
   throw runtime_error("TODO: implement unary_expr_type::with_replaced_storage_type");
 }
 
-void ndt::unary_expr_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                        size_t *out_count) const
+void ndt::unary_expr_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
   const type &udt = m_value_type.get_dtype();
   if (!udt.is_builtin()) {
-    udt.extended()->get_dynamic_array_properties(out_properties, out_count);
+    udt.extended()->get_dynamic_array_properties(properties);
   }
   else {
-    get_builtin_type_dynamic_array_properties(udt.get_type_id(), out_properties, out_count);
+    get_builtin_type_dynamic_array_properties(udt.get_type_id(), properties);
   }
 }
 

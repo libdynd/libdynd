@@ -51,8 +51,7 @@ namespace ndt {
                                   const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
 
-    void get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                      size_t *out_count) const;
+    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
     void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
 
     size_t get_elwise_property_index(const std::string &property_name) const;

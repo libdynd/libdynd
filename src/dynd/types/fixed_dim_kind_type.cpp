@@ -216,14 +216,13 @@ void ndt::fixed_dim_kind_type::get_dynamic_type_properties(const std::pair<std::
   *out_count = sizeof(fixed_dim_kind_type_properties) / sizeof(fixed_dim_kind_type_properties[0]);
 }
 
-void ndt::fixed_dim_kind_type::get_dynamic_array_properties(const std::pair<std::string, nd::callable> **out_properties,
-                                                            size_t *out_count) const
+void ndt::fixed_dim_kind_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
   if (m_element_tp.is_builtin()) {
-    get_builtin_type_dynamic_array_properties(m_element_tp.get_type_id(), out_properties, out_count);
+    get_builtin_type_dynamic_array_properties(m_element_tp.get_type_id(), properties);
   }
   else {
-    m_element_tp.extended()->get_dynamic_array_properties(out_properties, out_count);
+    m_element_tp.extended()->get_dynamic_array_properties(properties);
   }
 }
 
