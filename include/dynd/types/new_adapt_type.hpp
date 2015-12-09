@@ -29,6 +29,10 @@ namespace ndt {
     const nd::callable &get_forward() const { return m_forward; }
     const nd::callable &get_inverse() const { return m_inverse; }
 
+type get_canonical_type() const { return get_value_type(); }
+
+    bool is_expression() const { return true; }
+
     void print_type(std::ostream &o) const;
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 

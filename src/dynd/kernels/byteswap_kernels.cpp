@@ -29,3 +29,7 @@ size_t dynd::make_pairwise_byteswap_assignment_function(void *ckb, intptr_t ckb_
 nd::callable nd::byteswap::make() { return callable::make<byteswap_ck>(ndt::type("(Any) -> Any")); }
 
 struct nd::byteswap nd::byteswap;
+
+nd::callable nd::pairwise_byteswap::make() { return callable::make<pairwise_byteswap_ck>(ndt::type("(Any) -> Any")); }
+
+struct nd::pairwise_byteswap nd::pairwise_byteswap;

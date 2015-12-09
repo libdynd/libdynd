@@ -968,6 +968,11 @@ namespace ndt {
   };
 
   template <typename T>
+  struct type::is_layout_compatible<complex<T>> {
+    static const bool value = true;
+  };
+
+  template <typename T>
   struct type::equivalent<std::complex<T>> {
     static type make() { return type::make<complex<T>>(); }
   };

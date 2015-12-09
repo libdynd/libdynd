@@ -121,19 +121,11 @@ class DYND_API disable_invalid_parameter_handler {
   disable_invalid_parameter_handler(const disable_invalid_parameter_handler &);
   disable_invalid_parameter_handler &operator=(const disable_invalid_parameter_handler &);
 
-  static void nop_parameter_handler(const wchar_t *, const wchar_t *, const wchar_t *, unsigned int, uintptr_t)
-  {
-  }
+  static void nop_parameter_handler(const wchar_t *, const wchar_t *, const wchar_t *, unsigned int, uintptr_t) {}
 
 public:
-  disable_invalid_parameter_handler()
-  {
-    m_saved = _set_invalid_parameter_handler(&nop_parameter_handler);
-  }
-  ~disable_invalid_parameter_handler()
-  {
-    _set_invalid_parameter_handler(m_saved);
-  }
+  disable_invalid_parameter_handler() { m_saved = _set_invalid_parameter_handler(&nop_parameter_handler); }
+  ~disable_invalid_parameter_handler() { _set_invalid_parameter_handler(m_saved); }
 };
 
 #endif // end of compiler vendor checks
@@ -209,9 +201,7 @@ protected:
 
 public:
   /** Default constructor */
-  intrusive_ptr() : m_ptr(0)
-  {
-  }
+  intrusive_ptr() : m_ptr(0) {}
 
   /** Constructor from a raw pointer */
   explicit intrusive_ptr(T *ptr, bool add_ref = true) : m_ptr(ptr)
@@ -230,10 +220,7 @@ public:
   }
 
   /** Move constructor */
-  intrusive_ptr(intrusive_ptr &&other) : m_ptr(other.m_ptr)
-  {
-    other.m_ptr = 0;
-  }
+  intrusive_ptr(intrusive_ptr &&other) : m_ptr(other.m_ptr) { other.m_ptr = 0; }
 
   /** Destructor */
   ~intrusive_ptr()
@@ -243,20 +230,11 @@ public:
     }
   }
 
-  intptr_t use_count() const
-  {
-    return intrusive_ptr_use_count(m_ptr);
-  }
+  intptr_t use_count() const { return intrusive_ptr_use_count(m_ptr); }
 
-  explicit operator bool() const
-  {
-    return m_ptr != NULL;
-  }
+  explicit operator bool() const { return m_ptr != NULL; }
 
-  T *operator->() const
-  {
-    return m_ptr;
-  }
+  T *operator->() const { return m_ptr; }
 
   /** Assignment */
   intrusive_ptr &operator=(const intrusive_ptr &rhs)
@@ -267,7 +245,8 @@ public:
     if (rhs.m_ptr != 0) {
       m_ptr = rhs.m_ptr;
       intrusive_ptr_retain(m_ptr);
-    } else {
+    }
+    else {
       m_ptr = 0;
     }
     return *this;
@@ -300,16 +279,10 @@ public:
   }
 
   /** Returns true if there is only one reference to this memory block */
-  bool unique() const
-  {
-    return intrusive_ptr_use_count(m_ptr) <= 1;
-  }
+  bool unique() const { return intrusive_ptr_use_count(m_ptr) <= 1; }
 
   /** Gets the raw memory_block_data pointer */
-  T *get() const
-  {
-    return m_ptr;
-  }
+  T *get() const { return m_ptr; }
 
   /** Gives away ownership of the reference count */
   T *release()
@@ -349,6 +322,18 @@ struct is_instance<T, T<A...>> {
   static const bool value = true;
 };
 
+template <typename T, typename U>
+T alias_cast(U value)
+{
+  union {
+    U tmp;
+    T res;
+  };
+
+  tmp = value;
+  return res;
+}
+
 /**
  * Matches string literal arguments.
  */
@@ -365,11 +350,11 @@ struct is_char_string_param<char *> {
   static const bool value = true;
 };
 template <int N>
-struct is_char_string_param<const char (&)[N]> {
+struct is_char_string_param<const char(&)[N]> {
   static const bool value = true;
 };
 template <int N>
-struct is_char_string_param<const char (&&)[N]> {
+struct is_char_string_param<const char(&&)[N]> {
   static const bool value = true;
 };
 
@@ -623,8 +608,9 @@ extern DYND_API const char dynd_version_string[];
                                                                                                                        \
   template <typename T, typename MemberType>                                                                           \
   class has_member_##NAME<T, MemberType> {                                                                             \
-    template <typename U, typename = typename std::enable_if<std::is_member_pointer<decltype(                          \
-                              &U::NAME)>::value &&std::is_same<decltype(&U::NAME), MemberType T::*>::value>::type>     \
+    template <typename U,                                                                                              \
+              typename = typename std::enable_if<std::is_member_pointer<decltype(&U::NAME)>::value &&                  \
+                                                 std::is_same<decltype(&U::NAME), MemberType T::*>::value>::type>      \
     static std::true_type test(int);                                                                                   \
                                                                                                                        \
     template <typename>                                                                                                \
@@ -659,18 +645,13 @@ namespace dynd {
  * Function to call for initializing dynd's global state, such
  * as cached ndt::type objects, the arrfunc registry, etc.
  */
-inline int libdynd_init()
-{
-  return 0;
-}
+inline int libdynd_init() { return 0; }
 
 /**
  * Function to call to free all resources associated with
  * dynd's global state, that were initialized by libdynd_init.
  */
-inline void libdynd_cleanup()
-{
-}
+inline void libdynd_cleanup() {}
 
 /**
   * A function which can be used at runtime to identify whether
@@ -726,7 +707,7 @@ struct is_numeric : std::integral_constant<bool, is_arithmetic<T>::value || is_c
 };
 
 template <typename T, typename U>
-struct is_mixed_arithmetic : std::integral_constant<bool, is_arithmetic<T>::value &&is_arithmetic<U>::value> {
+struct is_mixed_arithmetic : std::integral_constant<bool, is_arithmetic<T>::value && is_arithmetic<U>::value> {
 };
 
 template <typename T>
@@ -744,13 +725,13 @@ using not_t = std::integral_constant<bool, !T::value>;
 
 // Checks whether T is not the common type of T and U
 template <typename T, typename U>
-struct is_lcast_arithmetic : not_t<typename conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value,
+struct is_lcast_arithmetic : not_t<typename conditional_make<is_arithmetic<T>::value && is_arithmetic<U>::value,
                                                              is_common_type_of, true_t, T, T, U>::type> {
 };
 
 // Checks whether U is not the common type of T and U
 template <typename T, typename U>
-struct is_rcast_arithmetic : not_t<typename conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value,
+struct is_rcast_arithmetic : not_t<typename conditional_make<is_arithmetic<T>::value && is_arithmetic<U>::value,
                                                              is_common_type_of, true_t, U, T, U>::type> {
 };
 
@@ -822,7 +803,7 @@ template <typename T, typename U>
 struct operator_if_lrcast_arithmetic
     : std::enable_if<!std::is_same<T, U>::value && !(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value) &&
                          is_lcast_arithmetic<T, U>::value && is_rcast_arithmetic<T, U>::value,
-                     typename conditional_make<is_arithmetic<T>::value &&is_arithmetic<U>::value, std::common_type,
+                     typename conditional_make<is_arithmetic<T>::value && is_arithmetic<U>::value, std::common_type,
                                                make_void, T, U>::type::type> {
 };
 
@@ -865,25 +846,25 @@ DYND_CUDA_HOST_DEVICE typename operator_if_lrcast_arithmetic<T, U>::type operato
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<is_mixed_arithmetic<T, U>::value,
-                                              complex<typename std::common_type<T, U>::type>>::type
-operator/(complex<T> lhs, U rhs)
+DYND_CUDA_HOST_DEVICE
+    typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
+    operator/(complex<T> lhs, U rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
          static_cast<typename std::common_type<T, U>::type>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<is_mixed_arithmetic<T, U>::value,
-                                              complex<typename std::common_type<T, U>::type>>::type
-operator/(T lhs, complex<U> rhs)
+DYND_CUDA_HOST_DEVICE
+    typename std::enable_if<is_mixed_arithmetic<T, U>::value, complex<typename std::common_type<T, U>::type>>::type
+    operator/(T lhs, complex<U> rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) /
          static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value &&is_integral<U>::value, T &>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_floating_point<T>::value && is_integral<U>::value, T &>::type
 operator/=(T &lhs, U rhs)
 {
   return lhs /= static_cast<T>(rhs);
@@ -906,7 +887,7 @@ operator/=(T &lhs, U rhs)
     func_type func;                                                                                                    \
     func_type *cuda_device_func;                                                                                       \
     cuda_throw_if_not_success(cudaMalloc(&cuda_device_func, sizeof(func_type)));                                       \
-    NAME<func_type> << <1, 1>>> (reinterpret_cast<void *>(cuda_device_func));                                          \
+    NAME<func_type><<<1, 1>>>(reinterpret_cast<void *>(cuda_device_func));                                             \
     cuda_throw_if_not_success(cudaMemcpy(&func, cuda_device_func, sizeof(func_type), cudaMemcpyDeviceToHost));         \
     cuda_throw_if_not_success(cudaFree(cuda_device_func));                                                             \
                                                                                                                        \
@@ -925,30 +906,15 @@ namespace detail {
   public:
     DYND_CUDA_HOST_DEVICE array_wrapper() = default;
 
-    DYND_CUDA_HOST_DEVICE array_wrapper(const T *data)
-    {
-      memcpy(m_data, data, sizeof(m_data));
-    }
+    DYND_CUDA_HOST_DEVICE array_wrapper(const T *data) { memcpy(m_data, data, sizeof(m_data)); }
 
-    DYND_CUDA_HOST_DEVICE operator T *()
-    {
-      return m_data;
-    }
+    DYND_CUDA_HOST_DEVICE operator T *() { return m_data; }
 
-    DYND_CUDA_HOST_DEVICE operator const T *() const
-    {
-      return m_data;
-    }
+    DYND_CUDA_HOST_DEVICE operator const T *() const { return m_data; }
 
-    DYND_CUDA_HOST_DEVICE T &operator[](intptr_t i)
-    {
-      return m_data[i];
-    }
+    DYND_CUDA_HOST_DEVICE T &operator[](intptr_t i) { return m_data[i]; }
 
-    DYND_CUDA_HOST_DEVICE const T &operator[](intptr_t i) const
-    {
-      return m_data[i];
-    }
+    DYND_CUDA_HOST_DEVICE const T &operator[](intptr_t i) const { return m_data[i]; }
   };
 
   template <typename T>
@@ -956,19 +922,11 @@ namespace detail {
   public:
     DYND_CUDA_HOST_DEVICE array_wrapper() = default;
 
-    DYND_CUDA_HOST_DEVICE array_wrapper(const T *DYND_UNUSED(data))
-    {
-    }
+    DYND_CUDA_HOST_DEVICE array_wrapper(const T *DYND_UNUSED(data)) {}
 
-    DYND_CUDA_HOST_DEVICE operator T *()
-    {
-      return NULL;
-    }
+    DYND_CUDA_HOST_DEVICE operator T *() { return NULL; }
 
-    DYND_CUDA_HOST_DEVICE operator const T *() const
-    {
-      return NULL;
-    }
+    DYND_CUDA_HOST_DEVICE operator const T *() const { return NULL; }
   };
 
   template <int N, typename T>
@@ -982,14 +940,9 @@ namespace detail {
     T m_value;
 
   public:
-    value_wrapper(const T &value) : m_value(value)
-    {
-    }
+    value_wrapper(const T &value) : m_value(value) {}
 
-    DYND_CUDA_HOST_DEVICE operator T() const
-    {
-      return m_value;
-    }
+    DYND_CUDA_HOST_DEVICE operator T() const { return m_value; }
   };
 
   template <typename T>
