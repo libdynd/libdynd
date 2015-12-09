@@ -10,33 +10,14 @@
 namespace dynd {
 namespace nd {
 
-  struct real_kernel : base_kernel<real_kernel> {
-    array self;
+  template <type_id_t RealTypeID>
+  struct real_kernel : base_kernel<real_kernel<RealTypeID>, 1> {
+    typedef typename type_of<RealTypeID>::type real_type;
 
-    real_kernel(const array &self) : self(self) {}
-
-    void single(array *dst, array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                 intptr_t DYND_UNUSED(nkwd), const array *kwds,
-                                 const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+    void single(char *dst, char *const *src)
     {
-      dst_tp = helper(kwds[0]).get_type();
+      *reinterpret_cast<real_type *>(dst) = reinterpret_cast<complex<real_type> *>(src[0])->real();
     }
-
-    static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                                const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                                intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                                const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                                const array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-    {
-      make(ckb, kernreq, ckb_offset, kwds[0]);
-      return ckb_offset;
-    }
-
-    static array helper(const array &n) { return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "real")); }
   };
 
 } // namespace dynd::nd
@@ -44,8 +25,13 @@ namespace nd {
 namespace ndt {
 
   template <>
-  struct type::equivalent<nd::real_kernel> {
-    static type make() { return type("(self: Any) -> Any"); }
+  struct type::equivalent<nd::real_kernel<float32_type_id>> {
+    static type make() { return type("(complex[float32]) -> float32"); }
+  };
+
+  template <>
+  struct type::equivalent<nd::real_kernel<float64_type_id>> {
+    static type make() { return type("(complex[float64]) -> float64"); }
   };
 
 } // namespace dynd::ndt

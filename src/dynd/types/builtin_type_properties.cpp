@@ -8,6 +8,7 @@
 #include <dynd/kernels/real_kernel.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/func/callable.hpp>
+#include <dynd/func/elwise.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -100,10 +101,20 @@ namespace ndt {
 } // namespace dynd::ndt
 } // namespace dynd
 
-const std::map<std::string, nd::callable> &complex_array_properties()
+const std::map<std::string, nd::callable> &complex32_array_properties()
 {
   static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::callable::make<nd::real_kernel>()},
+      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float32_type_id>>())},
+      {"imag", nd::callable::make<nd::complex_imag_kernel>()},
+      {"conj", nd::callable::make<nd::complex_conj_kernel>()}};
+
+  return complex_array_properties;
+}
+
+const std::map<std::string, nd::callable> &complex64_array_properties()
+{
+  static const std::map<std::string, nd::callable> complex_array_properties{
+      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float64_type_id>>())},
       {"imag", nd::callable::make<nd::complex_imag_kernel>()},
       {"conj", nd::callable::make<nd::complex_conj_kernel>()}};
 
@@ -115,8 +126,10 @@ void dynd::get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
 {
   switch (builtin_type_id) {
   case complex_float32_type_id:
+    properties = complex32_array_properties();
+    break;
   case complex_float64_type_id:
-    properties = complex_array_properties();
+    properties = complex64_array_properties();
     break;
   default:
     break;
@@ -189,27 +202,11 @@ ndt::type dynd::get_builtin_type_elwise_property_type(type_id_t builtin_type_id,
   return ndt::type();
 }
 
-struct get_property_kernel_complex_float32_real_kernel
-    : nd::base_kernel<get_property_kernel_complex_float32_real_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    *reinterpret_cast<uint32_t *>(dst) = (*reinterpret_cast<uint32_t *const *>(src))[0];
-  }
-};
-
 struct get_property_kernel_complex_float32_imag_kernel
     : nd::base_kernel<get_property_kernel_complex_float32_imag_kernel, 1> {
   void single(char *dst, char *const *src)
   {
     *reinterpret_cast<uint32_t *>(dst) = (*reinterpret_cast<uint32_t *const *>(src))[1];
-  }
-};
-
-struct get_property_kernel_complex_float64_real_kernel
-    : nd::base_kernel<get_property_kernel_complex_float64_real_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    *reinterpret_cast<uint64_t *>(dst) = (*reinterpret_cast<uint64_t *const *>(src))[0];
   }
 };
 
@@ -248,9 +245,9 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(void *ckb, intptr_t
   case complex_float32_type_id:
     switch (src_elwise_property_index) {
     case 0:
-      return get_property_kernel_complex_float32_real_kernel::instantiate(
-          NULL, NULL, ckb, ckb_offset, ndt::type(), dst_arrmeta, 1, NULL, &src_arrmeta, kernreq, ectx, 0, NULL,
-          std::map<std::string, ndt::type>());
+      return nd::real_kernel<float32_type_id>::instantiate(NULL, NULL, ckb, ckb_offset, ndt::type(), dst_arrmeta, 1,
+                                                           NULL, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                                           std::map<std::string, ndt::type>());
     case 1:
       return get_property_kernel_complex_float32_imag_kernel::instantiate(
           NULL, NULL, ckb, ckb_offset, ndt::type(), dst_arrmeta, 1, NULL, &src_arrmeta, kernreq, ectx, 0, NULL,
@@ -266,9 +263,9 @@ size_t dynd::make_builtin_type_elwise_property_getter_kernel(void *ckb, intptr_t
   case complex_float64_type_id:
     switch (src_elwise_property_index) {
     case 0:
-      return get_property_kernel_complex_float64_real_kernel::instantiate(
-          NULL, NULL, ckb, ckb_offset, ndt::type(), dst_arrmeta, 1, NULL, &src_arrmeta, kernreq, ectx, 0, NULL,
-          std::map<std::string, ndt::type>());
+      return nd::real_kernel<float64_type_id>::instantiate(NULL, NULL, ckb, ckb_offset, ndt::type(), dst_arrmeta, 1,
+                                                           NULL, &src_arrmeta, kernreq, ectx, 0, NULL,
+                                                           std::map<std::string, ndt::type>());
     case 1:
       return get_property_kernel_complex_float64_imag_kernel::instantiate(
           NULL, NULL, ckb, ckb_offset, ndt::type(), dst_arrmeta, 1, NULL, &src_arrmeta, kernreq, ectx, 0, NULL,
