@@ -17,10 +17,7 @@ public:
   T m_real, m_imag;
   typedef T value_type;
 
-  DYND_CUDA_HOST_DEVICE complex(const T &re = 0.0, const T &im = 0.0)
-      : m_real(re), m_imag(im)
-  {
-  }
+  DYND_CUDA_HOST_DEVICE complex(const T &re = 0.0, const T &im = 0.0) : m_real(re), m_imag(im) {}
 
   template <typename U>
   DYND_CUDA_HOST_DEVICE complex(const complex<U> &rhs)
@@ -28,18 +25,10 @@ public:
   {
   }
 
-  complex(const std::complex<T> &rhs) : m_real(rhs.real()), m_imag(rhs.imag())
-  {
-  }
+  complex(const std::complex<T> &rhs) : m_real(rhs.real()), m_imag(rhs.imag()) {}
 
-  DYND_CUDA_HOST_DEVICE T real() const
-  {
-    return m_real;
-  }
-  DYND_CUDA_HOST_DEVICE T imag() const
-  {
-    return m_imag;
-  }
+  DYND_CUDA_HOST_DEVICE T real() const { return m_real; }
+  DYND_CUDA_HOST_DEVICE T imag() const { return m_imag; }
 
   DYND_CUDA_HOST_DEVICE complex<T> &operator=(const complex<T> &rhs)
   {
@@ -81,8 +70,7 @@ public:
 
   DYND_CUDA_HOST_DEVICE complex<T> operator*=(const complex<T> &rhs)
   {
-    new (this) complex<T>(m_real * rhs.m_real - m_imag * rhs.m_imag,
-                          m_real * rhs.m_imag + rhs.m_real * m_imag);
+    new (this) complex<T>(m_real * rhs.m_real - m_imag * rhs.m_imag, m_real * rhs.m_imag + rhs.m_real * m_imag);
 
     return *this;
   }
@@ -112,28 +100,18 @@ public:
     return *this;
   }
 
-  DYND_CUDA_HOST_DEVICE explicit operator bool() const
-  {
-    return m_real || m_imag;
-  }
+  DYND_CUDA_HOST_DEVICE explicit operator bool() const { return m_real || m_imag; }
 
-  DYND_CUDA_HOST_DEVICE explicit operator T() const
-  {
-    return m_real;
-  }
+  DYND_CUDA_HOST_DEVICE explicit operator T() const { return m_real; }
 
-  template <typename U, typename = typename std::enable_if<
-                            is_mixed_arithmetic<T, U>::value &&
-                            !std::is_same<U, bool>::value>::type>
+  template <typename U,
+            typename = typename std::enable_if<is_mixed_arithmetic<T, U>::value && !std::is_same<U, bool>::value>::type>
   DYND_CUDA_HOST_DEVICE explicit operator U() const
   {
     return static_cast<U>(m_real);
   }
 
-  operator std::complex<T>() const
-  {
-    return std::complex<T>(m_real, m_imag);
-  }
+  operator std::complex<T>() const { return std::complex<T>(m_real, m_imag); }
 };
 
 template <typename T>
@@ -257,17 +235,17 @@ DYND_CUDA_HOST_DEVICE bool operator==(complex<T> lhs, complex<U> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<U>::value || std::is_floating_point<U>::value, bool>::type
-operator==(complex<T> lhs, U rhs)
+DYND_CUDA_HOST_DEVICE
+    typename std::enable_if<std::is_integral<U>::value || std::is_floating_point<U>::value, bool>::type
+    operator==(complex<T> lhs, U rhs)
 {
   return (lhs.m_real == rhs) && !lhs.m_imag;
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value, bool>::type
-operator==(T lhs, complex<U> rhs)
+DYND_CUDA_HOST_DEVICE
+    typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, bool>::type
+    operator==(T lhs, complex<U> rhs)
 {
   return rhs == lhs;
 }
@@ -309,7 +287,8 @@ DYND_CUDA_HOST_DEVICE complex<T> operator-(const complex<T> &rhs)
 }
 
 template <typename T>
-DYND_CUDA_HOST_DEVICE complex<T> operator!(const complex<T> &rhs){
+DYND_CUDA_HOST_DEVICE complex<T> operator!(const complex<T> &rhs)
+{
   return (!rhs.m_real && !rhs.m_imag);
 }
 
@@ -320,8 +299,7 @@ DYND_CUDA_HOST_DEVICE complex<T> operator+(complex<T> lhs, complex<T> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE complex<typename std::common_type<T, U>::type>
-operator+(complex<T> lhs, complex<U> rhs)
+DYND_CUDA_HOST_DEVICE complex<typename std::common_type<T, U>::type> operator+(complex<T> lhs, complex<U> rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) +
          static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
@@ -334,9 +312,8 @@ DYND_CUDA_HOST_DEVICE complex<T> operator+(complex<T> lhs, T rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<U>::value || std::is_floating_point<U>::value,
-    complex<typename std::common_type<T, U>::type>>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_integral<U>::value || std::is_floating_point<U>::value,
+                                              complex<typename std::common_type<T, U>::type>>::type
 operator+(complex<T> lhs, U rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) +
@@ -350,9 +327,8 @@ DYND_CUDA_HOST_DEVICE complex<T> operator+(T lhs, complex<T> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value,
-    complex<typename std::common_type<T, U>::type>>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value,
+                                              complex<typename std::common_type<T, U>::type>>::type
 operator+(T lhs, complex<U> rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) +
@@ -366,8 +342,7 @@ DYND_CUDA_HOST_DEVICE complex<T> operator-(complex<T> lhs, complex<T> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE complex<typename std::common_type<T, U>::type>
-operator-(complex<T> lhs, complex<U> rhs)
+DYND_CUDA_HOST_DEVICE complex<typename std::common_type<T, U>::type> operator-(complex<T> lhs, complex<U> rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) -
          static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
@@ -380,9 +355,8 @@ DYND_CUDA_HOST_DEVICE complex<T> operator-(complex<T> lhs, T rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<U>::value || std::is_floating_point<U>::value,
-    complex<typename std::common_type<T, U>::type>>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_integral<U>::value || std::is_floating_point<U>::value,
+                                              complex<typename std::common_type<T, U>::type>>::type
 operator-(complex<T> lhs, U rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) -
@@ -396,9 +370,8 @@ DYND_CUDA_HOST_DEVICE complex<T> operator-(T lhs, complex<T> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value,
-    complex<typename std::common_type<T, U>::type>>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value,
+                                              complex<typename std::common_type<T, U>::type>>::type
 operator-(T lhs, complex<U> rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) -
@@ -412,8 +385,7 @@ DYND_CUDA_HOST_DEVICE complex<T> operator*(complex<T> lhs, complex<T> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE complex<typename std::common_type<T, U>::type>
-operator*(complex<T> lhs, complex<U> rhs)
+DYND_CUDA_HOST_DEVICE complex<typename std::common_type<T, U>::type> operator*(complex<T> lhs, complex<U> rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) *
          static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
@@ -426,9 +398,8 @@ DYND_CUDA_HOST_DEVICE complex<T> operator*(complex<T> lhs, T rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<U>::value || std::is_floating_point<U>::value,
-    complex<typename std::common_type<T, U>::type>>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_integral<U>::value || std::is_floating_point<U>::value,
+                                              complex<typename std::common_type<T, U>::type>>::type
 operator*(complex<T> lhs, U rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) *
@@ -442,9 +413,8 @@ DYND_CUDA_HOST_DEVICE complex<T> operator*(T lhs, complex<T> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE typename std::enable_if<
-    std::is_integral<T>::value || std::is_floating_point<T>::value,
-    complex<typename std::common_type<T, U>::type>>::type
+DYND_CUDA_HOST_DEVICE typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value,
+                                              complex<typename std::common_type<T, U>::type>>::type
 operator*(T lhs, complex<U> rhs)
 {
   return static_cast<typename std::common_type<T, U>::type>(lhs) *
@@ -458,8 +428,7 @@ DYND_CUDA_HOST_DEVICE complex<T> operator/(complex<T> lhs, complex<T> rhs)
 }
 
 template <typename T, typename U>
-DYND_CUDA_HOST_DEVICE complex<typename std::common_type<T, U>::type>
-operator/(complex<T> lhs, complex<U> rhs)
+DYND_CUDA_HOST_DEVICE complex<typename std::common_type<T, U>::type> operator/(complex<T> lhs, complex<U> rhs)
 {
   return static_cast<complex<typename std::common_type<T, U>::type>>(lhs) /
          static_cast<complex<typename std::common_type<T, U>::type>>(rhs);
@@ -497,6 +466,12 @@ template <>
 DYND_CUDA_HOST_DEVICE inline complex<double> _i<double>()
 {
   return complex<double>(0.0, 1.0);
+}
+
+template <typename T>
+complex<T> conj(const complex<T> &z)
+{
+  return complex<T>(z.real(), -z.imag());
 }
 
 } // namespace dynd
