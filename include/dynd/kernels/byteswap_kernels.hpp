@@ -99,8 +99,8 @@ namespace nd {
     }
   };
 
-  extern struct byteswap : declfunc<byteswap> {
-    static callable make();
+  extern DYND_API struct byteswap : declfunc<byteswap> {
+    static DYND_API callable make();
   } byteswap;
 
 } // namespace dynd::nd
