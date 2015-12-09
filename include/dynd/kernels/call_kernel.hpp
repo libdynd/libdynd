@@ -1,3 +1,8 @@
+//
+// Copyright (C) 2011-15 DyND Developers
+// BSD 2-Clause License, see LICENSE.txt
+//
+
 #pragma once
 
 #include <dynd/kernels/base_virtual_kernel.hpp>

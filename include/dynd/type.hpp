@@ -302,16 +302,10 @@ namespace ndt {
     /**
      * Accesses a dynamic property of the type.
      *
-     * \param property_name  The property to access.
+     * \param name  The property to access.
      */
-    nd::array p(const char *property_name) const;
-
-    /**
-     * Accesses a dynamic property of the type.
-     *
-     * \param property_name  The property to access.
-     */
-    nd::array p(const std::string &property_name) const;
+    nd::array p(const char *name) const;
+    nd::array p(const std::string &name) const;
 
     /**
      * Indexes into the type, intended for recursive calls from the
@@ -667,6 +661,11 @@ namespace ndt {
 
       return vars;
     }
+
+    std::map<std::string, nd::callable> get_properties() const;
+    std::map<std::string, nd::callable> get_functions() const;
+    std::map<std::string, nd::callable> get_array_properties() const;
+    std::map<std::string, nd::callable> get_array_functions() const;
 
     /**
      * Returns a const pointer to the base_type object which
