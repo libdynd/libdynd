@@ -30,7 +30,6 @@
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/char_type.hpp>
-#include <dynd/types/byteswap_type.hpp>
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -460,27 +459,6 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, 
   else {
     // Default to complex[double] if no parameters are provided
     return ndt::type::make<dynd::complex<double>>();
-  }
-}
-
-// byteswap_type : byteswap[type]
-// This is called after 'byteswap' is already matched
-static ndt::type parse_byteswap_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
-{
-  const char *begin = rbegin;
-  if (parse_token_ds(begin, end, '[')) {
-    ndt::type tp = parse_datashape(begin, end, symtable);
-    if (tp.is_null()) {
-      throw datashape_parse_error(begin, "expected a type parameter");
-    }
-    if (!parse_token_ds(begin, end, ']')) {
-      throw datashape_parse_error(begin, "expected closing ']'");
-    }
-    rbegin = begin;
-    return ndt::byteswap_type::make(tp);
-  }
-  else {
-    throw datashape_parse_error(begin, "expected opening '['");
   }
 }
 
@@ -1440,9 +1418,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     }
     else if (parse::compare_range_to_literal(nbegin, nend, "char")) {
       result = parse_char_parameters(begin, end);
-    }
-    else if (parse::compare_range_to_literal(nbegin, nend, "byteswap")) {
-      result = parse_byteswap_parameters(begin, end, symtable);
     }
     else if (parse::compare_range_to_literal(nbegin, nend, "bytes")) {
       result = parse_bytes_parameters(begin, end);

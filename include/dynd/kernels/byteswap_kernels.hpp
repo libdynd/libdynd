@@ -120,19 +120,4 @@ namespace nd {
   } pairwise_byteswap;
 
 } // namespace dynd::nd
-
-/**
- * Creates an assignment kernel which does a byteswap
- * of the specified data size.
- */
-DYND_API size_t make_byteswap_assignment_function(void *ckb, intptr_t ckb_offset, intptr_t data_size,
-                                                  intptr_t data_alignment, kernel_request_t kernreq);
-
-/**
- * Creates an assignment kernel which does a byteswap
- * of the specified data size.
- */
-DYND_API size_t make_pairwise_byteswap_assignment_function(void *ckb, intptr_t ckb_offset, intptr_t data_size,
-                                                           intptr_t data_alignment, kernel_request_t kernreq);
-
 } // namespace dynd
