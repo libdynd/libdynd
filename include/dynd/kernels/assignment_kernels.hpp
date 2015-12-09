@@ -26,6 +26,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/char_type.hpp>
+#include <dynd/types/new_adapt_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -162,18 +163,6 @@ inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const ndt:
   ss << " to " << dst_tp;
   throw std::overflow_error(ss.str());
 }
-
-struct ndarrayarg_assign_ck : nd::base_kernel<ndarrayarg_assign_ck, 1> {
-  void single(char *dst, char *const *src)
-  {
-    if (*reinterpret_cast<void *const *>(src[0]) == NULL) {
-      *reinterpret_cast<void **>(dst) = NULL;
-    }
-    else {
-      throw std::invalid_argument("Cannot make a copy of a non-NULL dynd ndarrayarg value");
-    }
-  }
-};
 
 template <typename DstType, typename SrcType>
 typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
@@ -3533,6 +3522,20 @@ namespace nd {
     template <>
     struct assignment_virtual_kernel<char_type_id, char_kind, fixed_string_type_id, string_kind>
         : assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind> {
+    };
+
+    struct new_adapt_assign_to_kernel : base_virtual_kernel<new_adapt_assign_to_kernel> {
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta,
+                                  kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
+                                  const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+      {
+        const callable &inverse = dst_tp.extended<ndt::new_adapt_type>()->get_inverse();
+        const ndt::type &value_tp = dst_tp.value_type();
+        return inverse->instantiate(inverse->static_data(), data, ckb, ckb_offset, dst_tp.storage_type(), dst_arrmeta,
+                                    nsrc, &value_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
+      }
     };
 
     template <>

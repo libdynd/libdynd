@@ -320,17 +320,7 @@ namespace ndt {
      * type looks like for the purposes of calculation,
      * printing, etc.
      */
-    const type &value_type() const
-    {
-      // Only expr_kind types have different value_type
-      if (is_builtin() || m_ptr->get_kind() != expr_kind) {
-        return *this;
-      }
-      else {
-        // All chaining happens in the operand_type
-        return static_cast<const base_expr_type *>(m_ptr)->get_value_type();
-      }
-    }
+    const type &value_type() const;
 
     /**
      * For expression types, returns the operand type,
@@ -353,21 +343,7 @@ namespace ndt {
      * which is the type of the underlying input data.
      * This is the bottom of the expression chain.
      */
-    const type &storage_type() const
-    {
-      // Only expr_kind types have different storage_type
-      if (is_builtin() || m_ptr->get_kind() != expr_kind) {
-        return *this;
-      }
-      else {
-        // Follow the operand type chain to get the storage type
-        const type *dt = &static_cast<const base_expr_type *>(m_ptr)->get_operand_type();
-        while (dt->get_kind() == expr_kind) {
-          dt = &static_cast<const base_expr_type *>(dt->m_ptr)->get_operand_type();
-        }
-        return *dt;
-      }
-    }
+    const type &storage_type() const;
 
     /**
      * The type number is an enumeration of data types, starting

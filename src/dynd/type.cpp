@@ -11,6 +11,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/func/callable.hpp>
+#include <dynd/types/new_adapt_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
@@ -300,6 +301,40 @@ ndt::type ndt::type::without_memory_type() const
   }
 }
 
+const ndt::type &ndt::type::storage_type() const
+{
+  // Only expr_kind types have different storage_type
+  if (is_builtin() || m_ptr->get_kind() != expr_kind) {
+    return *this;
+  }
+  else if (get_type_id() == new_adapt_type_id) {
+    return extended<ndt::new_adapt_type>()->get_storage_type();
+  }
+  else {
+    // Follow the operand type chain to get the storage type
+    const type *dt = &static_cast<const base_expr_type *>(m_ptr)->get_operand_type();
+    while (dt->get_kind() == expr_kind) {
+      dt = &static_cast<const base_expr_type *>(dt->m_ptr)->get_operand_type();
+    }
+    return *dt;
+  }
+}
+
+const ndt::type &ndt::type::value_type() const
+{
+  // Only expr_kind types have different value_type
+  if (is_builtin() || m_ptr->get_kind() != expr_kind) {
+    return *this;
+  }
+  else if (get_type_id() == new_adapt_type_id) {
+    return extended<ndt::new_adapt_type>()->get_value_type();
+  }
+  else {
+    // All chaining happens in the operand_type
+    return static_cast<const base_expr_type *>(m_ptr)->get_value_type();
+  }
+}
+
 ndt::type ndt::type::with_new_axis(intptr_t i, intptr_t new_ndim) const
 {
   ndt::type tp = without_memory_type();
@@ -551,8 +586,8 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "C");
   case option_type_id:
     return (o << "option");
-  case ndarrayarg_type_id:
-    return (o << "ndarrayarg");
+  case new_adapt_type_id:
+    return o << "adapt";
   case kind_sym_type_id:
     return (o << "kind_sym");
   case int_sym_type_id:
