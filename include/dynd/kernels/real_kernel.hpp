@@ -13,10 +13,11 @@ namespace nd {
   template <type_id_t RealTypeID>
   struct real_kernel : base_kernel<real_kernel<RealTypeID>, 1> {
     typedef typename type_of<RealTypeID>::type real_type;
+    typedef complex<typename type_of<RealTypeID>::type> complex_type;
 
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<real_type *>(dst) = reinterpret_cast<complex<real_type> *>(src[0])->real();
+      *reinterpret_cast<real_type *>(dst) = reinterpret_cast<complex_type *>(src[0])->real();
     }
   };
 
@@ -24,14 +25,13 @@ namespace nd {
 
 namespace ndt {
 
-  template <>
-  struct type::equivalent<nd::real_kernel<float32_type_id>> {
-    static type make() { return type("(complex[float32]) -> float32"); }
-  };
-
-  template <>
-  struct type::equivalent<nd::real_kernel<float64_type_id>> {
-    static type make() { return type("(complex[float64]) -> float64"); }
+  template <type_id_t RealTypeID>
+  struct type::equivalent<nd::real_kernel<RealTypeID>> {
+    static type make()
+    {
+      return callable_type::make(type::make<typename nd::real_kernel<RealTypeID>::real_type>(),
+                                 {type::make<typename nd::real_kernel<RealTypeID>::complex_type>()});
+    }
   };
 
 } // namespace dynd::ndt
