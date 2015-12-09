@@ -143,9 +143,9 @@ enum type_id_t {
 
   // A type that enforces C contiguity
   c_contiguous_type_id,
-  ndarrayarg_type_id,
 
   // Adapter types
+  new_adapt_type_id,
   adapt_type_id,
   convert_type_id,
   byteswap_type_id,
