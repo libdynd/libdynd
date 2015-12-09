@@ -390,15 +390,21 @@ namespace nd {
     /**
      * Accesses a dynamic property of the array.
      *
-     * \param property_name  The property to access.
+     * \param name  The property to access.
      */
-    array p(const char *property_name) const;
-    /**
-     * Accesses a dynamic property of the array.
-     *
-     * \param property_name  The property to access.
-     */
-    array p(const std::string &property_name) const;
+    array p(const char *name) const;
+    array p(const std::string &name) const;
+
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
+     * use it */
+    template <typename... ArgTypes>
+    array f(const char *name, ArgTypes &&... args);
+
+    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
+     * use it */
+    template <typename... ArgTypes>
+    array f(const char *name, ArgTypes &&... args) const;
+
     /**
      * Finds the dynamic function of the array. Throws an
      * exception if it does not exist. To call the function,
@@ -411,16 +417,6 @@ namespace nd {
      * \param function_name  The name of the function.
      */
     callable find_dynamic_function(const char *function_name) const;
-
-    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
-     * use it */
-    template <typename... ArgTypes>
-    array f(const char *name, ArgTypes &&... args);
-
-    /** Calls the dynamic function - #include <dynd/func/call_callable.hpp> to
-     * use it */
-    template <typename... ArgTypes>
-    array f(const char *name, ArgTypes &&... args) const;
 
     array &operator+=(const array &rhs);
     array &operator-=(const array &rhs);

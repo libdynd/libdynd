@@ -11,11 +11,10 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/func/callable.hpp>
-
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
-
+#include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
@@ -201,37 +200,19 @@ bool ndt::type::match(const ndt::type &candidate_tp) const
   return match(candidate_tp, tp_vars);
 }
 
-nd::array ndt::type::p(const char *property_name) const
+nd::array ndt::type::p(const char *name) const
 {
-  if (!is_builtin()) {
-    std::map<std::string, nd::callable> properties;
-    extended()->get_dynamic_type_properties(properties);
-    nd::callable p = properties[property_name];
-    if (!p.is_null()) {
-      return p(*this);
-    }
+  map<std::string, nd::callable> properties(get_properties());
+  if (nd::callable &p = properties[name]) {
+    return p(*this);
   }
 
   stringstream ss;
-  ss << "dynd type does not have property " << property_name;
+  ss << "type does not have property " << name;
   throw runtime_error(ss.str());
 }
 
-nd::array ndt::type::p(const std::string &property_name) const
-{
-  if (!is_builtin()) {
-    std::map<std::string, nd::callable> properties;
-    extended()->get_dynamic_type_properties(properties);
-    nd::callable p = properties[property_name];
-    if (!p.is_null()) {
-      return p(*this);
-    }
-  }
-
-  stringstream ss;
-  ss << "dynd type does not have property " << property_name;
-  throw runtime_error(ss.str());
-}
+nd::array ndt::type::p(const std::string &name) const { return p(name.c_str()); }
 
 ndt::type ndt::type::apply_linear_index(intptr_t nindices, const irange *indices, size_t current_i,
                                         const ndt::type &root_tp, bool leading_dimension) const
@@ -380,6 +361,50 @@ bool ndt::type::get_as_strided(const char *arrmeta, intptr_t *out_dim_size, intp
   else {
     return false;
   }
+}
+
+std::map<std::string, nd::callable> ndt::type::get_properties() const
+{
+  std::map<std::string, nd::callable> properties;
+  if (!is_builtin()) {
+    m_ptr->get_dynamic_type_properties(properties);
+  }
+
+  return properties;
+}
+
+std::map<std::string, nd::callable> ndt::type::get_functions() const
+{
+  std::map<std::string, nd::callable> functions;
+  if (!is_builtin()) {
+    m_ptr->get_dynamic_type_functions(functions);
+  }
+
+  return functions;
+}
+
+std::map<std::string, nd::callable> ndt::type::get_array_properties() const
+{
+  std::map<std::string, nd::callable> array_properties;
+  if (is_builtin()) {
+    get_builtin_type_dynamic_array_properties(static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr)),
+                                              array_properties);
+  }
+  else {
+    m_ptr->get_dynamic_array_properties(array_properties);
+  }
+
+  return array_properties;
+}
+
+std::map<std::string, nd::callable> ndt::type::get_array_functions() const
+{
+  std::map<std::string, nd::callable> array_functions;
+  if (!is_builtin()) {
+    m_ptr->get_dynamic_array_functions(array_functions);
+  }
+
+  return array_functions;
 }
 
 bool ndt::type::get_as_strided(const char *arrmeta, intptr_t ndim, const size_stride_t **out_size_stride,
