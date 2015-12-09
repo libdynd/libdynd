@@ -591,10 +591,16 @@ namespace nd {
       return view(ndt::type(rhs));
     }
 
-    template <typename Type>
-    Type view()
+    template <typename T>
+    typename std::enable_if<ndt::type::is_layout_compatible<T>::value, T>::type view() const
     {
-      return Type(get()->metadata(), data());
+      return *reinterpret_cast<const T *>(cdata());
+    }
+
+    template <typename T>
+    typename std::enable_if<!ndt::type::is_layout_compatible<T>::value, T>::type view()
+    {
+      return T(get()->metadata(), data());
     }
 
     /**

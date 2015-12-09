@@ -836,6 +836,11 @@ namespace ndt {
   };
 
   template <>
+  struct type::is_layout_compatible<bool> {
+    static const bool value = true;
+  };
+
+  template <>
   struct type::equivalent<signed char> {
     static type make() { return type(type_id_of<signed char>::value); }
   };
@@ -846,8 +851,18 @@ namespace ndt {
   };
 
   template <>
+  struct type::is_layout_compatible<short> {
+    static const bool value = true;
+  };
+
+  template <>
   struct type::equivalent<int> {
     static type make() { return type(type_id_of<int>::value); }
+  };
+
+  template <>
+  struct type::is_layout_compatible<int> {
+    static const bool value = true;
   };
 
   template <>
@@ -856,8 +871,18 @@ namespace ndt {
   };
 
   template <>
+  struct type::is_layout_compatible<long> {
+    static const bool value = true;
+  };
+
+  template <>
   struct type::equivalent<long long> {
     static type make() { return type(type_id_of<long long>::value); }
+  };
+
+  template <>
+  struct type::is_layout_compatible<long long> {
+    static const bool value = true;
   };
 
   template <>
@@ -911,8 +936,18 @@ namespace ndt {
   };
 
   template <>
+  struct type::is_layout_compatible<float> {
+    static const bool value = true;
+  };
+
+  template <>
   struct type::equivalent<double> {
     static type make() { return type(type_id_of<double>::value); }
+  };
+
+  template <>
+  struct type::is_layout_compatible<double> {
+    static const bool value = true;
   };
 
   /*

@@ -58,37 +58,48 @@ TEST(ByteswapDType, Create)
                dynd::type_error);
 }
 
+template <typename T, typename U>
+T alias_cast(U value)
+{
+  union {
+    U tmp;
+    T res;
+  };
+
+  tmp = value;
+  return res;
+}
+
 TEST(AdaptType, Byteswap)
 {
   nd::array a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<int16_t>(), ndt::type::make<int16_t>(),
                                                               nd::byteswap, nd::byteswap));
   a.val_assign(0x1362);
-  EXPECT_EQ(0x6213, *reinterpret_cast<const int16_t *>(a.cdata()));
+  EXPECT_EQ(0x6213, a.view<int16_t>());
 
   a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<int32_t>(), ndt::type::make<int32_t>(),
                                                     nd::byteswap, nd::byteswap));
   a.val_assign(0x12345678);
-  EXPECT_EQ(0x78563412, *reinterpret_cast<const int32_t *>(a.cdata()));
+  EXPECT_EQ(0x78563412, a.view<int32_t>());
 
   a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<int64_t>(), ndt::type::make<int64_t>(),
                                                     nd::byteswap, nd::byteswap));
   a.val_assign(0x12345678abcdef01LL);
-  EXPECT_EQ(0x01efcdab78563412LL, *reinterpret_cast<const int64_t *>(a.cdata()));
+  EXPECT_EQ(0x01efcdab78563412LL, a.view<int64_t>());
+
+  a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<float>(), ndt::type::make<float>(), nd::byteswap,
+                                                    nd::byteswap));
+  a.val_assign(alias_cast<float>(0xDA0F4940));
+  EXPECT_EQ(3.1415926f, a.view<float>());
 
   /*
-    int32_t u = 0xDA0F4940;
-    a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<float>(), ndt::type::make<float>(), nd::byteswap,
-                                                      nd::byteswap));
-    a.val_assign(*reinterpret_cast<float *>(&u));
-    EXPECT_EQ(3.1415926f, *reinterpret_cast<const float *>(a.cdata()));
-
-    int64_t v = 0x112D4454FB210940LL;
-    a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<double>(), ndt::type::make<double>(),
-    nd::byteswap,
-                                                      nd::byteswap));
-    a.val_assign(*reinterpret_cast<double *>(&v));
-    EXPECT_EQ(3.14159265358979, *reinterpret_cast<const double *>(a.cdata()));
-  */
+      int64_t v = 0x112D4454FB210940LL;
+      a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<double>(), ndt::type::make<double>(),
+      nd::byteswap,
+                                                        nd::byteswap));
+      a.val_assign(*reinterpret_cast<double *>(&v));
+      EXPECT_EQ(3.14159265358979, *reinterpret_cast<const double *>(a.cdata()));
+    */
 }
 
 TEST(ByteswapDType, Basic)
