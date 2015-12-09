@@ -75,17 +75,20 @@ TEST(AdaptType, Byteswap)
   a.val_assign(0x12345678abcdef01LL);
   EXPECT_EQ(0x01efcdab78563412LL, *reinterpret_cast<const int64_t *>(a.cdata()));
 
-  int32_t u = 0xDA0F4940;
-  a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<float>(), ndt::type::make<float>(), nd::byteswap,
-                                                    nd::byteswap));
-  a.val_assign(*reinterpret_cast<float *>(&u));
-  EXPECT_EQ(3.1415926f, *reinterpret_cast<const float *>(a.cdata()));
+  /*
+    int32_t u = 0xDA0F4940;
+    a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<float>(), ndt::type::make<float>(), nd::byteswap,
+                                                      nd::byteswap));
+    a.val_assign(*reinterpret_cast<float *>(&u));
+    EXPECT_EQ(3.1415926f, *reinterpret_cast<const float *>(a.cdata()));
 
-  int64_t v = 0x112D4454FB210940LL;
-  a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<double>(), ndt::type::make<double>(), nd::byteswap,
-                                                    nd::byteswap));
-  a.val_assign(*reinterpret_cast<double *>(&v));
-  EXPECT_EQ(3.14159265358979, *reinterpret_cast<const double *>(a.cdata()));
+    int64_t v = 0x112D4454FB210940LL;
+    a = nd::empty(ndt::make_type<ndt::new_adapt_type>(ndt::type::make<double>(), ndt::type::make<double>(),
+    nd::byteswap,
+                                                      nd::byteswap));
+    a.val_assign(*reinterpret_cast<double *>(&v));
+    EXPECT_EQ(3.14159265358979, *reinterpret_cast<const double *>(a.cdata()));
+  */
 }
 
 TEST(ByteswapDType, Basic)
