@@ -16,9 +16,10 @@ namespace ndt {
     nd::callable m_forward;
     nd::callable m_inverse;
 
-    new_adapt_type(const ndt::type &value_tp, const ndt::type &storage_tp, const nd::callable &forward, const nd::callable &inverse);
-
   public:
+    new_adapt_type(const ndt::type &value_tp, const ndt::type &storage_tp, const nd::callable &forward,
+                   const nd::callable &inverse);
+
     new_adapt_type(const nd::callable &forward, const nd::callable &inverse);
 
     virtual ~new_adapt_type() {}
