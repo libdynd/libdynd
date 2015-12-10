@@ -9,9 +9,68 @@
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/parser_util.hpp>
+#include <dynd/functional.hpp>
 
 using namespace std;
 using namespace dynd;
+
+namespace {
+struct time_get_tick_kernel : nd::base_kernel<time_get_tick_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(ticks % 10000000);
+  }
+};
+
+struct time_get_struct_kernel : nd::base_kernel<time_get_struct_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    time_hmst *dst_struct = reinterpret_cast<time_hmst *>(dst);
+    dst_struct->set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
+  }
+};
+
+struct time_set_struct_kernel : nd::base_kernel<time_set_struct_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    time_hmst *src_struct = *reinterpret_cast<time_hmst *const *>(src);
+    *reinterpret_cast<int64_t *>(dst) = src_struct->to_ticks();
+  }
+};
+
+struct time_get_hour_kernel : nd::base_kernel<time_get_hour_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(ticks / DYND_TICKS_PER_HOUR);
+  }
+};
+
+struct time_get_minute_kernel : nd::base_kernel<time_get_minute_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_MINUTE) % 60);
+  }
+};
+
+struct time_get_second_kernel : nd::base_kernel<time_get_second_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_SECOND) % 60);
+  }
+};
+
+struct time_get_microsecond_kernel : nd::base_kernel<time_get_microsecond_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_MICROSECOND) % 1000000);
+  }
+};
+}
 
 ndt::time_type::time_type(datetime_tz_t timezone)
     : base_type(time_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_none, 0, 0, 0),
@@ -144,278 +203,28 @@ size_t ndt::time_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, co
 
 ///////// properties on the nd::array
 
-struct get_hour_kernel : nd::base_kernel<get_hour_kernel> {
-  nd::array self;
-
-  get_hour_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_hour_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "hour"));
-  }
-};
-
-struct get_minute_kernel : nd::base_kernel<get_minute_kernel> {
-  nd::array self;
-
-  get_minute_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_minute_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "minute"));
-  }
-};
-
-struct get_second_kernel : nd::base_kernel<get_second_kernel> {
-  nd::array self;
-
-  get_second_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_second_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "second"));
-  }
-};
-
-struct get_microsecond_kernel : nd::base_kernel<get_microsecond_kernel> {
-  nd::array self;
-
-  get_microsecond_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_microsecond_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "microsecond"));
-  }
-};
-
-struct get_tick_kernel : nd::base_kernel<get_tick_kernel> {
-  nd::array self;
-
-  get_tick_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_tick_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "tick"));
-  }
-};
-
 void ndt::time_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  static const std::map<std::string, nd::callable> time_array_properties{
-      {"hour", nd::callable::make<get_hour_kernel>(ndt::type("(self: Any) -> Any"))},
-      {"minute", nd::callable::make<get_minute_kernel>(ndt::type("(self: Any) -> Any"))},
-      {"second", nd::callable::make<get_second_kernel>(ndt::type("(self: Any) -> Any"))},
-      {"microsecond", nd::callable::make<get_microsecond_kernel>(ndt::type("(self: Any) -> Any"))},
-      {"tick", nd::callable::make<get_tick_kernel>(ndt::type("(self: Any) -> Any"))}};
 
-  properties = time_array_properties;
+  properties["hour"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                             nd::callable::make<time_get_hour_kernel>(ndt::type("(Any) -> Any")));
+  properties["minute"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                               nd::callable::make<time_get_minute_kernel>(ndt::type("(Any) -> Any")));
+  properties["second"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                               nd::callable::make<time_get_second_kernel>(ndt::type("(Any) -> Any")));
+  properties["microsecond"] = nd::functional::adapt(
+      ndt::type::make<int32_t>(), nd::callable::make<time_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
+  properties["tick"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                             nd::callable::make<time_get_tick_kernel>(ndt::type("(Any) -> Any")));
 }
-
-///////// functions on the nd::array
-
-struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
-  nd::array self;
-
-  to_struct_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
-  }
-};
 
 void ndt::time_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
-  functions["to_struct"] = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
+  functions["to_struct"] = nd::functional::adapt(ndt::type("{hour: int8, minute: int8, second: int8, tick: int32}"),
+                                                 nd::callable::make<time_get_struct_kernel>(ndt::type("(Any) -> Any")));
 }
 
 ///////// property accessor kernels (used by property_type)
-
-namespace {
-
-struct time_get_hour_kernel : nd::base_kernel<time_get_hour_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
-    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(ticks / DYND_TICKS_PER_HOUR);
-  }
-};
-
-struct time_get_minute_kernel : nd::base_kernel<time_get_minute_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
-    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_MINUTE) % 60);
-  }
-};
-
-struct time_get_second_kernel : nd::base_kernel<time_get_second_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
-    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_SECOND) % 60);
-  }
-};
-
-struct time_get_microsecond_kernel : nd::base_kernel<time_get_microsecond_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
-    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>((ticks / DYND_TICKS_PER_MICROSECOND) % 1000000);
-  }
-};
-
-struct time_get_tick_kernel : nd::base_kernel<time_get_tick_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
-    *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(ticks % 10000000);
-  }
-};
-
-struct time_get_struct_kernel : nd::base_kernel<time_get_struct_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    time_hmst *dst_struct = reinterpret_cast<time_hmst *>(dst);
-    dst_struct->set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
-  }
-};
-
-struct time_set_struct_kernel : nd::base_kernel<time_set_struct_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    time_hmst *src_struct = *reinterpret_cast<time_hmst *const *>(src);
-    *reinterpret_cast<int64_t *>(dst) = src_struct->to_ticks();
-  }
-};
-
-} // anonymous namespace
 
 namespace {
 enum time_properties_t {
