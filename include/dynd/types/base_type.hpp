@@ -627,6 +627,7 @@ namespace ndt {
      */
     virtual bool adapt_type(const ndt::type &operand_tp, const std::string &op, nd::callable &out_forward,
                             nd::callable &out_reverse) const;
+
     /**
      * Produces forward and reverse callables for adapting the current type
      * to the value type, according to the information stored in

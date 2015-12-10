@@ -23,7 +23,6 @@
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/adapt_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
@@ -1014,11 +1013,6 @@ nd::array nd::array::uview(const ndt::type &uniform_dt, intptr_t replace_ndim) c
 {
   // Use the view function specifying to replace all dimensions
   return view(get_type().with_replaced_dtype(uniform_dt, replace_ndim));
-}
-
-nd::array nd::array::adapt(const ndt::type &tp, const std::string &adapt_op)
-{
-  return uview(ndt::adapt_type::make(get_dtype(), tp, adapt_op), 0);
 }
 
 namespace {

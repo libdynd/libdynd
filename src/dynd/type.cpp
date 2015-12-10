@@ -133,18 +133,15 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     var_dim_type::make(any_kind_type::make()),        // var_dim_type_id
     struct_type::make(true),                          // struct_type_id
     tuple_type::make(true),                           // tuple_type_id
-    type(),                                           //   option_type_id,
+    type(),                                           // option_type_id,
     type(),                                           // c_contiguous_type_id
-    type(),                                           // ndarrayarg_type_id
+    type(),                                           // new_adapt_type_id
     type(),                                           // adapt_type_id
     type(),                                           // convert_type_id
-    type(),                                           // byteswap_type_id
     type(),                                           // view_type_id
     type(),                                           // cuda_host_type_id
     type(),                                           // cuda_device_type_id
-    type(),                                           // property_type_id
     type(),                                           // expr_type_id
-    type(),                                           // unary_expr_type_id
     make_type<type_type>(),                           // type_type_id
 };
 
@@ -594,16 +591,10 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "int_sym");
   case convert_type_id:
     return (o << "convert");
-  case byteswap_type_id:
-    return (o << "byteswap");
   case view_type_id:
     return (o << "view");
-  case property_type_id:
-    return (o << "property");
   case expr_type_id:
     return (o << "expr");
-  case unary_expr_type_id:
-    return (o << "unary_expr");
   case type_type_id:
     return (o << "type");
   case callable_type_id:
