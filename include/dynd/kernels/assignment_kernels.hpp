@@ -3541,6 +3541,12 @@ namespace nd {
     struct new_adapt_assign_from_kernel : base_kernel<new_adapt_assign_from_kernel, 1> {
       intptr_t forward_offset;
 
+      ~new_adapt_assign_from_kernel()
+      {
+        get_child()->destroy();
+        get_child(forward_offset)->destroy();
+      }
+
       void single(char *dst, char *const *src)
       {
         array buffer = empty(ndt::type("date"));
