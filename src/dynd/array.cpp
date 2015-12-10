@@ -726,7 +726,7 @@ nd::array nd::array::p(const char *name) const
 
     callable p = properties[name];
     if (!p.is_null()) {
-      return p(*this);
+      return p(eval()); // ToDo: Replace eval() here with an implicit cast
     }
   }
 
@@ -737,25 +737,7 @@ nd::array nd::array::p(const char *name) const
 
 nd::array nd::array::p(const std::string &name) const
 {
-  if (!is_null()) {
-    ndt::type dt = get_type();
-    std::map<std::string, nd::callable> properties;
-    if (!dt.is_builtin()) {
-      dt.extended()->get_dynamic_array_properties(properties);
-    }
-    else {
-      get_builtin_type_dynamic_array_properties(dt.get_type_id(), properties);
-    }
-
-    callable p = properties[name];
-    if (!p.is_null()) {
-      return p(*this);
-    }
-  }
-
-  stringstream ss;
-  ss << "dynd array does not have property " << name;
-  throw runtime_error(ss.str());
+  return p(name.c_str());
 }
 
 nd::callable nd::array::find_dynamic_function(const char *function_name) const
@@ -781,7 +763,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
   else {
     // Create a canonical type for the result
     const ndt::type &dt = current_tp.get_canonical_type();
-    array result(nd::empty(dt));
+    array result(empty(dt));
     if (dt.get_type_id() == fixed_dim_type_id) {
       // Reorder strides of output strided dimensions in a KEEPORDER fashion
       dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),

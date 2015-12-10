@@ -12,11 +12,13 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/new_adapt_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/unary_expr_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/date_adapter_kernels.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/exceptions.hpp>
@@ -28,6 +30,35 @@
 
 using namespace std;
 using namespace dynd;
+
+struct date_set_struct_kernel : nd::base_kernel<date_set_struct_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    const date_ymd *src_struct = *reinterpret_cast<date_ymd *const *>(src);
+    *reinterpret_cast<int32_t *>(dst) = src_struct->to_days();
+  }
+};
+
+struct date_get_struct_kernel : nd::base_kernel<date_get_struct_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
+    dst_struct->set_from_days(**reinterpret_cast<int32_t *const *>(src));
+  }
+};
+
+struct date_get_weekday_kernel : nd::base_kernel<date_get_weekday_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    int32_t days = **reinterpret_cast<int32_t *const *>(src);
+    // 1970-01-05 is Monday
+    int weekday = (int)((days - 4) % 7);
+    if (weekday < 0) {
+      weekday += 7;
+    }
+    *reinterpret_cast<int32_t *>(dst) = weekday;
+  }
+};
 
 ndt::date_type::date_type()
     : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_none, 0, 0, 0)
@@ -279,38 +310,6 @@ void ndt::date_type::get_dynamic_array_properties(std::map<std::string, nd::call
 
 ///////// functions on the nd::array
 
-struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
-  nd::array self;
-
-  to_struct_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
-  }
-};
-
 struct strftime_kernel : nd::base_kernel<strftime_kernel> {
   nd::array self;
   std::string format;
@@ -346,38 +345,6 @@ struct strftime_kernel : nd::base_kernel<strftime_kernel> {
     }
     return n.replace_dtype(
         ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(), make_strftime_kernelgen(format)));
-  }
-};
-
-struct weekday_kernel : nd::base_kernel<weekday_kernel> {
-  nd::array self;
-
-  weekday_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
   }
 };
 
@@ -443,13 +410,13 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year, int32_t 
 
 void ndt::date_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
-  //       pair<std::string, nd::callable>(
+  functions["to_struct"] = nd::functional::adapt(ndt::type("{year: int16, month: int8, day: int8}"),
+                                                 nd::callable::make<date_get_struct_kernel>(ndt::type("(Any) -> Any")));
+  functions["weekday"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                               nd::callable::make<date_get_weekday_kernel>(ndt::type("(Any) -> Any")));
+
+
   //          "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
-
-  functions["to_struct"] = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
-  functions["weekday"] = nd::callable::make<weekday_kernel>(ndt::type("(self: Any) -> Any"));
-
-  //      pair<std::string, gfunc::callable>(
   //        "replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
   //                                                   numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),
   //                                                 numeric_limits<int32_t>::max()))};
@@ -483,35 +450,6 @@ struct date_get_day_kernel : nd::base_kernel<date_get_day_kernel, 1> {
     date_ymd ymd;
     ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
     *reinterpret_cast<int32_t *>(dst) = ymd.day;
-  }
-};
-
-struct date_get_weekday_kernel : nd::base_kernel<date_get_weekday_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    int32_t days = **reinterpret_cast<int32_t *const *>(src);
-    // 1970-01-05 is Monday
-    int weekday = (int)((days - 4) % 7);
-    if (weekday < 0) {
-      weekday += 7;
-    }
-    *reinterpret_cast<int32_t *>(dst) = weekday;
-  }
-};
-
-struct date_get_struct_kernel : nd::base_kernel<date_get_struct_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    date_ymd *dst_struct = reinterpret_cast<date_ymd *>(dst);
-    dst_struct->set_from_days(**reinterpret_cast<int32_t *const *>(src));
-  }
-};
-
-struct date_set_struct_kernel : nd::base_kernel<date_set_struct_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    const date_ymd *src_struct = *reinterpret_cast<date_ymd *const *>(src);
-    *reinterpret_cast<int32_t *>(dst) = src_struct->to_days();
   }
 };
 

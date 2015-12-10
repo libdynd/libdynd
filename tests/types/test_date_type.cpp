@@ -45,30 +45,20 @@ TEST(DateType, ValueCreation)
   EXPECT_EQ((1600 - 1970) * 365 - (1972 - 1600) / 4 + 3 + 366,
             nd::array("1601-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
-  EXPECT_EQ((1900 - 1970) * 365 - (1970 - 1900) / 4,
-            nd::array("1900-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ((1900 - 1970) * 365 - (1970 - 1900) / 4, nd::array("1900-01-01").ucast(d).view_scalars(di).as<int32_t>());
   EXPECT_EQ((1900 - 1970) * 365 - (1970 - 1900) / 4 + 365,
             nd::array("1901-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
-  EXPECT_EQ(-3 * 365 - 1,
-            nd::array("1967-01-01").ucast(d).view_scalars(di).as<int32_t>());
-  EXPECT_EQ(-2 * 365 - 1,
-            nd::array("1968-01-01").ucast(d).view_scalars(di).as<int32_t>());
-  EXPECT_EQ(-1 * 365,
-            nd::array("1969-01-01").ucast(d).view_scalars(di).as<int32_t>());
-  EXPECT_EQ(0 * 365,
-            nd::array("1970-01-01").ucast(d).view_scalars(di).as<int32_t>());
-  EXPECT_EQ(1 * 365,
-            nd::array("1971-01-01").ucast(d).view_scalars(di).as<int32_t>());
-  EXPECT_EQ(2 * 365,
-            nd::array("1972-01-01").ucast(d).view_scalars(di).as<int32_t>());
-  EXPECT_EQ(3 * 365 + 1,
-            nd::array("1973-01-01").ucast(d).view_scalars(di).as<int32_t>());
-  EXPECT_EQ(4 * 365 + 1,
-            nd::array("1974-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ(-3 * 365 - 1, nd::array("1967-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ(-2 * 365 - 1, nd::array("1968-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ(-1 * 365, nd::array("1969-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ(0 * 365, nd::array("1970-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ(1 * 365, nd::array("1971-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ(2 * 365, nd::array("1972-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ(3 * 365 + 1, nd::array("1973-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ(4 * 365 + 1, nd::array("1974-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
-  EXPECT_EQ((2000 - 1970) * 365 + (2000 - 1972) / 4,
-            nd::array("2000-01-01").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ((2000 - 1970) * 365 + (2000 - 1972) / 4, nd::array("2000-01-01").ucast(d).view_scalars(di).as<int32_t>());
   EXPECT_EQ((2000 - 1970) * 365 + (2000 - 1972) / 4 + 366,
             nd::array("2001-01-01").ucast(d).view_scalars(di).as<int32_t>());
 
@@ -89,9 +79,8 @@ TEST(DateType, ValueCreation)
             nd::array("2001-03-22").ucast(d).view_scalars(di).as<int32_t>());
 
   // Unambiguous date format which has extra empty time attached
-  EXPECT_EQ(
-      (2000 - 1970) * 365 + (2000 - 1972) / 4 + 366 + 31 + 28 + 21,
-      nd::array("2001-03-22 00:00:00").ucast(d).view_scalars(di).as<int32_t>());
+  EXPECT_EQ((2000 - 1970) * 365 + (2000 - 1972) / 4 + 366 + 31 + 28 + 21,
+            nd::array("2001-03-22 00:00:00").ucast(d).view_scalars(di).as<int32_t>());
 }
 
 TEST(DateType, BadInputStrings)
@@ -165,17 +154,11 @@ TEST(DateType, DatePropertyConvertOfString)
 {
   nd::array a, b, c;
   const char *strs[] = {"1931-12-12", "2013-05-14", "2012-12-25"};
-  a = nd::array(strs)
-          .ucast(ndt::fixed_string_type::make(10, string_encoding_ascii))
-          .eval();
+  a = nd::array(strs).ucast(ndt::fixed_string_type::make(10, string_encoding_ascii)).eval();
   b = a.ucast(ndt::date_type::make());
-  EXPECT_EQ(ndt::make_fixed_dim(
-                3, ndt::fixed_string_type::make(10, string_encoding_ascii)),
-            a.get_type());
-  EXPECT_EQ(ndt::make_fixed_dim(
-                3, ndt::convert_type::make(ndt::date_type::make(),
-                                           ndt::fixed_string_type::make(
-                                               10, string_encoding_ascii))),
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::fixed_string_type::make(10, string_encoding_ascii)), a.get_type());
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::convert_type::make(ndt::date_type::make(),
+                                                           ndt::fixed_string_type::make(10, string_encoding_ascii))),
             b.get_type());
 
   // year property
@@ -189,7 +172,7 @@ TEST(DateType, DatePropertyConvertOfString)
 
   // weekday function
   c = b.f("weekday");
-  EXPECT_EQ(property_type_id, c.get_dtype().get_type_id());
+  EXPECT_EQ(new_adapt_type_id, c.get_dtype().get_type_id());
   c = c.eval();
   EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<int>()), c.get_type());
   EXPECT_EQ(5, c(0).as<int>());
@@ -204,12 +187,10 @@ TEST(DateType, ToStructFunction)
 
   a = nd::array("1955-03-13").ucast(d).eval();
   b = a.f("to_struct");
-  EXPECT_EQ(ndt::property_type::make(d, "struct"), b.get_type());
+  EXPECT_EQ(new_adapt_type_id, b.get_type().get_type_id());
   b = b.eval();
   EXPECT_EQ(ndt::struct_type::make({"year", "month", "day"},
-                                   {ndt::type::make<int16_t>(),
-                                    ndt::type::make<int8_t>(),
-                                    ndt::type::make<int8_t>()}),
+                                   {ndt::type::make<int16_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>()}),
             b.get_type());
   EXPECT_EQ(1955, b.p("year").as<int32_t>());
   EXPECT_EQ(3, b.p("month").as<int32_t>());
@@ -231,9 +212,7 @@ TEST(DateType, ToStruct)
 
   // This is the default struct produced
   ds = ndt::struct_type::make({"year", "month", "day"},
-                              {ndt::type::make<int32_t>(),
-                               ndt::type::make<int8_t>(),
-                               ndt::type::make<int8_t>()});
+                              {ndt::type::make<int32_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>()});
   b = nd::empty(ds);
   b.vals() = a;
   EXPECT_EQ(1955, b(0).as<int32_t>());
@@ -242,9 +221,7 @@ TEST(DateType, ToStruct)
 
   // This should work too
   ds = ndt::struct_type::make({"month", "year", "day"},
-                              {ndt::type::make<int16_t>(),
-                               ndt::type::make<int16_t>(),
-                               ndt::type::make<float>()});
+                              {ndt::type::make<int16_t>(), ndt::type::make<int16_t>(), ndt::type::make<float>()});
   b = nd::empty(ds);
   b.vals() = a;
   EXPECT_EQ(1955, b(1).as<int16_t>());
@@ -259,9 +236,7 @@ TEST(DateType, FromStruct)
 
   // This is the default struct accepted
   ds = ndt::struct_type::make({"year", "month", "day"},
-                              {ndt::type::make<int32_t>(),
-                               ndt::type::make<int8_t>(),
-                               ndt::type::make<int8_t>()});
+                              {ndt::type::make<int32_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>()});
   a = nd::empty(ds);
   a(0).vals() = 1955;
   a(1).vals() = 3;
@@ -274,9 +249,7 @@ TEST(DateType, FromStruct)
 
   // This should work too
   ds = ndt::struct_type::make({"month", "year", "day"},
-                              {ndt::type::make<int16_t>(),
-                               ndt::type::make<int16_t>(),
-                               ndt::type::make<float>()});
+                              {ndt::type::make<int16_t>(), ndt::type::make<int16_t>(), ndt::type::make<float>()});
   a = nd::empty(ds);
   a.p("year").vals() = 1955;
   a.p("month").vals() = 3;
@@ -489,8 +462,7 @@ TEST(DateType, AdaptAsInt)
 {
   nd::array a, b;
 
-  a = parse_json("3 * date",
-                 "[\"2001-01-05\", \"1999-12-20\", \"2000-01-01\"]");
+  a = parse_json("3 * date", "[\"2001-01-05\", \"1999-12-20\", \"2000-01-01\"]");
   b = a.adapt(ndt::type::make<int>(), "days since 2000-01-01");
   EXPECT_EQ(370, b(0).as<int>());
   EXPECT_EQ(-12, b(1).as<int>());
@@ -1077,8 +1049,7 @@ TEST(DateYMD, SetFromStr_Errors)
   EXPECT_THROW(d.set_from_str("01-02-99", date_parse_mdy, 0), invalid_argument);
   EXPECT_THROW(d.set_from_str("01-02-99", date_parse_dmy, 0), invalid_argument);
   EXPECT_THROW(d.set_from_str("99-02-01", date_parse_ymd, 0), invalid_argument);
-  EXPECT_THROW(d.set_from_str("01-Feb-99", date_parse_dmy, 0),
-               invalid_argument);
+  EXPECT_THROW(d.set_from_str("01-Feb-99", date_parse_dmy, 0), invalid_argument);
 }
 
 TEST(DateYMD, TwoDigitYear_FixedWindow)
