@@ -8,7 +8,6 @@
 #include <dynd/kernels/real_kernel.hpp>
 #include <dynd/kernels/imag_kernel.hpp>
 #include <dynd/kernels/conj_kernel.hpp>
-#include <dynd/types/property_type.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/func/elwise.hpp>
 
