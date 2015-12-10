@@ -45,4 +45,15 @@ void ndt::new_adapt_type::print_data(std::ostream &o, const char *arrmeta, const
   m_storage_tp.print_data(o, arrmeta, data);
 }
 
-bool ndt::new_adapt_type::operator==(const base_type &rhs) const { return (this == &rhs); }
+bool ndt::new_adapt_type::operator==(const base_type &rhs) const
+{
+  if (this == &rhs) {
+    return true;
+  }
+
+  if (rhs.get_type_id() != new_adapt_type_id) {
+    return false;
+  }
+
+  return false;
+}
