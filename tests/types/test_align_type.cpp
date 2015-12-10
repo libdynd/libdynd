@@ -81,9 +81,3 @@ TEST(AlignDType, CanonicalDType)
   // The canonical type of an alignment result is always the aligned type
   EXPECT_EQ((ndt::type::make<float>()), (ndt::make_unaligned<float>().get_canonical_type()));
 }
-
-TEST(AlignDType, AdaptDatetime)
-{
-  EXPECT_EQ(ndt::type("adapt[(unaligned[datetime]) -> int64, 'seconds since 1970']"),
-            ndt::make_unaligned(ndt::type("adapt[(datetime) -> int64, 'seconds since 1970']")));
-}

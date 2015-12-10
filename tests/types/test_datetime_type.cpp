@@ -167,7 +167,7 @@ TEST(DatetimeType, Properties) {
     EXPECT_EQ(1236540, n.p("tick").as<int32_t>());
 }
 
-
+/*
 TEST(DatetimeType, AdaptFromInt) {
     nd::array a, b;
 
@@ -199,6 +199,7 @@ TEST(DatetimeType, AdaptAsInt) {
     EXPECT_EQ(-12*24*60*60 + 10*60*60 + 22*60, b(1).as<int64_t>());
     EXPECT_EQ(12*60*60 + 34*60 + 56, b(2).as<int64_t>());
 }
+*/
 
 TEST(DateTimeStruct, FromToString) {
     datetime_struct dts;

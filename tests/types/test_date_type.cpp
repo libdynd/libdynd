@@ -16,7 +16,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/types/adapt_type.hpp>
 #include <dynd/json_parser.hpp>
 
 using namespace std;
@@ -408,6 +407,7 @@ TEST(DateType, ReplaceOfConvert)
 }
 */
 
+/*
 TEST(DateType, NumPyCompatibleProperty)
 {
   int64_t vals64[] = {-16730, 0, 11001, numeric_limits<int64_t>::min()};
@@ -470,6 +470,7 @@ TEST(DateType, AdaptAsInt)
   EXPECT_EQ(-12, b(1).as<int>());
   EXPECT_EQ(0, b(2).as<int>());
 }
+*/
 
 TEST(DateYMD, LeapYear)
 {
