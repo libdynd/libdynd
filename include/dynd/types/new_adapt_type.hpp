@@ -37,6 +37,10 @@ type get_canonical_type() const { return get_value_type(); }
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     bool operator==(const base_type &rhs) const;
+
+    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
+    void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
+
   };
 
 } // namespace dynd::ndt

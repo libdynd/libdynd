@@ -4,6 +4,7 @@
 //
 
 #include <dynd/types/new_adapt_type.hpp>
+#include <dynd/types/builtin_type_properties.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -56,4 +57,27 @@ bool ndt::new_adapt_type::operator==(const base_type &rhs) const
   }
 
   return false;
+}
+
+void ndt::new_adapt_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
+{
+  const type &udt = m_value_tp.get_dtype();
+  if (!udt.is_builtin()) {
+    udt.extended()->get_dynamic_array_properties(properties);
+  }
+  else {
+    get_builtin_type_dynamic_array_properties(udt.get_type_id(), properties);
+  }
+}
+
+void ndt::new_adapt_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
+{
+  const type &udt = m_value_tp.get_dtype();
+  if (!udt.is_builtin()) {
+    udt.extended()->get_dynamic_array_functions(functions);
+  }
+  else {
+    // get_builtin_type_dynamic_array_functions(udt.get_type_id(),
+    // out_functions, out_count);
+  }
 }

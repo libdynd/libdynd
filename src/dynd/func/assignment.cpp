@@ -134,8 +134,12 @@ DYND_API nd::callable nd::assign::make()
       nd::callable::make<detail::new_adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
   children[{{new_adapt_type_id, date_type_id}}] =
       nd::callable::make<detail::new_adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
+//  children[{{new_adapt_type_id, struct_type_id}}] =
+  //    nd::callable::make<detail::new_adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
 
   children[{{int32_type_id, new_adapt_type_id}}] =
+      nd::callable::make<detail::new_adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
+  children[{{struct_type_id, new_adapt_type_id}}] =
       nd::callable::make<detail::new_adapt_assign_from_kernel>(ndt::type("(Any) -> Any"));
 
   children[{{fixed_bytes_type_id, view_type_id}}] =

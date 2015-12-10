@@ -187,7 +187,7 @@ TEST(DateType, ToStructFunction)
 
   a = nd::array("1955-03-13").ucast(d).eval();
   b = a.f("to_struct");
-  EXPECT_EQ(ndt::property_type::make(d, "struct"), b.get_type());
+  EXPECT_EQ(new_adapt_type_id, b.get_type().get_type_id());
   b = b.eval();
   EXPECT_EQ(ndt::struct_type::make({"year", "month", "day"},
                                    {ndt::type::make<int16_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>()}),
@@ -198,6 +198,8 @@ TEST(DateType, ToStructFunction)
 
   // Do it again, but now with a chain of expressions
   a = nd::array("1955-03-13").ucast(d).f("to_struct");
+  std::cout << "here" << std::endl;
+  std::cout << a.get_type() << std::endl;
   EXPECT_EQ(1955, a.p("year").as<int32_t>());
   EXPECT_EQ(3, a.p("month").as<int32_t>());
   EXPECT_EQ(13, a.p("day").as<int32_t>());

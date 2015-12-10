@@ -3540,6 +3540,9 @@ namespace nd {
 
     struct new_adapt_assign_from_kernel : base_kernel<new_adapt_assign_from_kernel, 1> {
       intptr_t forward_offset;
+      array buffer;
+
+      new_adapt_assign_from_kernel(const ndt::type &buffer_tp) : buffer(empty(buffer_tp)) {}
 
       ~new_adapt_assign_from_kernel()
       {
@@ -3549,8 +3552,6 @@ namespace nd {
 
       void single(char *dst, char *const *src)
       {
-        array buffer = empty(ndt::type("date"));
-
         get_child()->single(buffer.data(), src);
 
         char *child_src[1] = {buffer.data()};
@@ -3568,7 +3569,7 @@ namespace nd {
           const callable &forward = src_tp[0].extended<ndt::new_adapt_type>()->get_forward();
 
           intptr_t self_offset = ckb_offset;
-          make(ckb, kernreq, ckb_offset);
+          make(ckb, kernreq, ckb_offset, storage_tp.get_canonical_type());
 
           ckb_offset = nd::assign::get()->instantiate(nd::assign::get()->static_data(), data, ckb, ckb_offset,
                                                       storage_tp.get_canonical_type(), dst_arrmeta, nsrc, &storage_tp,

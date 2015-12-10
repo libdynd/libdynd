@@ -11,7 +11,7 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    struct adapt_kernel : nd::base_kernel<adapt_kernel> {
+    struct adapt_kernel : base_kernel<adapt_kernel> {
       struct static_data_type {
         ndt::type value_tp;
         callable forward;
@@ -20,9 +20,9 @@ namespace nd {
       const ndt::type &value_tp;
       const callable &forward;
 
-      adapt_kernel(const ndt::type &value_tp, const nd::callable &forward) : value_tp(value_tp), forward(forward) {}
+      adapt_kernel(const ndt::type &value_tp, const callable &forward) : value_tp(value_tp), forward(forward) {}
 
-      void single(nd::array *dst, nd::array *const *src)
+      void single(array *dst, array *const *src)
       {
         *dst = src[0]->replace_dtype(
             ndt::make_type<ndt::new_adapt_type>(value_tp, src[0]->get_dtype(), forward, callable()));
@@ -30,7 +30,7 @@ namespace nd {
 
       static void resolve_dst_type(char *static_data, char *DYND_UNUSED(data), ndt::type &dst_tp,
                                    intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                                   intptr_t DYND_UNUSED(nkwd), const nd::array *DYND_UNUSED(kwds),
+                                   intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
                                    const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         dst_tp = reinterpret_cast<static_data_type *>(static_data)->value_tp;
@@ -41,7 +41,7 @@ namespace nd {
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
                                   const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
                                   const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
+                                  const array *DYND_UNUSED(kwds),
                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
       {
         make(ckb, kernreq, ckb_offset, reinterpret_cast<static_data_type *>(static_data)->value_tp,
