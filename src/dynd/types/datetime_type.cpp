@@ -21,12 +21,414 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/parser_util.hpp>
+#include <dynd/functional.hpp>
 
 #include <datetime_strings.h>
 #include <datetime_localtime.h>
 
 using namespace std;
 using namespace dynd;
+
+namespace {
+
+struct datetime_get_struct_kernel : nd::base_kernel<datetime_get_struct_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_struct_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
+  {
+    throw runtime_error("TODO: get_property_kernel_struct_single");
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_set_struct_kernel : nd::base_kernel<datetime_set_struct_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_set_struct_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
+  {
+    throw runtime_error("TODO: set_property_kernel_struct_single");
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_date_kernel : nd::base_kernel<datetime_get_date_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_date_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      int64_t days = **reinterpret_cast<int64_t *const *>(src);
+      if (days < 0) {
+        days -= (DYND_TICKS_PER_DAY - 1);
+      }
+      days /= DYND_TICKS_PER_DAY;
+
+      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
+    }
+    else {
+      throw runtime_error("datetime date property only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_time_kernel : nd::base_kernel<datetime_get_time_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_time_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
+      ticks %= DYND_TICKS_PER_DAY;
+      if (ticks < 0) {
+        ticks += DYND_TICKS_PER_DAY;
+      }
+      *reinterpret_cast<int64_t *>(dst) = ticks;
+    }
+    else {
+      throw runtime_error("datetime time property only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_year_kernel : nd::base_kernel<datetime_get_year_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_year_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      date_ymd ymd;
+      ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
+      *reinterpret_cast<int32_t *>(dst) = ymd.year;
+    }
+    else {
+      throw runtime_error("datetime property access only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_month_kernel : nd::base_kernel<datetime_get_month_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_month_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      date_ymd ymd;
+      ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
+      *reinterpret_cast<int32_t *>(dst) = ymd.month;
+    }
+    else {
+      throw runtime_error("datetime property access only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_day_kernel : nd::base_kernel<datetime_get_day_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_day_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      date_ymd ymd;
+      ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
+      *reinterpret_cast<int32_t *>(dst) = ymd.day;
+    }
+    else {
+      throw runtime_error("datetime property access only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_hour_kernel : nd::base_kernel<datetime_get_hour_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_hour_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      int64_t hour = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_DAY;
+      if (hour < 0) {
+        hour += DYND_TICKS_PER_DAY;
+      }
+      hour /= DYND_TICKS_PER_HOUR;
+      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(hour);
+    }
+    else {
+      throw runtime_error("datetime property access only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_minute_kernel : nd::base_kernel<datetime_get_minute_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_minute_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      int64_t minute = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_HOUR;
+      if (minute < 0) {
+        minute += DYND_TICKS_PER_HOUR;
+      }
+      minute /= DYND_TICKS_PER_MINUTE;
+      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(minute);
+    }
+    else {
+      throw runtime_error("datetime property access only implemented for UTC and "
+                          "abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_second_kernel : nd::base_kernel<datetime_get_second_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_second_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      int64_t second = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_MINUTE;
+      if (second < 0) {
+        second += DYND_TICKS_PER_MINUTE;
+      }
+      second /= DYND_TICKS_PER_SECOND;
+      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(second);
+    }
+    else {
+      throw runtime_error("datetime property access only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_microsecond_kernel : nd::base_kernel<datetime_get_microsecond_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_microsecond_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      int64_t microsecond = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_SECOND;
+      if (microsecond < 0) {
+        microsecond += DYND_TICKS_PER_SECOND;
+      }
+      microsecond /= DYND_TICKS_PER_MICROSECOND;
+      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(microsecond);
+    }
+    else {
+      throw runtime_error("datetime property access only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
+  ndt::type datetime_tp;
+
+  datetime_get_tick_kernel(const ndt::type &datetime_tp) : datetime_tp(datetime_tp) {}
+
+  void single(char *dst, char *const *src)
+  {
+    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
+    datetime_tz_t tz = dd->get_timezone();
+    if (tz == tz_utc || tz == tz_abstract) {
+      int64_t tick = **reinterpret_cast<int64_t *const *>(src) % 10000000LL;
+      if (tick < 0) {
+        tick += 10000000LL;
+      }
+      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(tick);
+    }
+    else {
+      throw runtime_error("datetime property access only implemented for "
+                          "UTC and abstract timezones");
+    }
+  }
+
+  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
+                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
+                              intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
+                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
+                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                              const nd::array *DYND_UNUSED(kwds),
+                              const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+  {
+    make(ckb, kernreq, ckb_offset, src_tp[0]);
+    return ckb_offset;
+  }
+};
+
+} // anonymous namespace
 
 ndt::datetime_type::datetime_type(datetime_tz_t timezone)
     : base_type(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_none, 0, 0, 0),
@@ -226,620 +628,39 @@ void ndt::datetime_type::get_dynamic_type_functions(std::map<std::string, nd::ca
 
 ///////// properties on the nd::array
 
-struct get_date_kernel : nd::base_kernel<get_date_kernel> {
-  nd::array self;
-
-  get_date_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_date_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "date"));
-  }
-};
-
-struct get_year_kernel : nd::base_kernel<get_year_kernel> {
-  nd::array self;
-
-  get_year_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_year_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "year"));
-  }
-};
-
-struct get_month_kernel : nd::base_kernel<get_month_kernel> {
-  nd::array self;
-
-  get_month_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_month_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "month"));
-  }
-};
-
-struct get_day_kernel : nd::base_kernel<get_day_kernel> {
-  nd::array self;
-
-  get_day_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_day_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "day"));
-  }
-};
-
-struct get_hour_kernel : nd::base_kernel<get_hour_kernel> {
-  nd::array self;
-
-  get_hour_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_hour_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "hour"));
-  }
-};
-
-struct get_minute_kernel : nd::base_kernel<get_minute_kernel> {
-  nd::array self;
-
-  get_minute_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_minute_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "minute"));
-  }
-};
-
-struct get_second_kernel : nd::base_kernel<get_second_kernel> {
-  nd::array self;
-
-  get_second_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_second_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "second"));
-  }
-};
-
-struct get_microsecond_kernel : nd::base_kernel<get_microsecond_kernel> {
-  nd::array self;
-
-  get_microsecond_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_microsecond_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "microsecond"));
-  }
-};
-
-struct get_tick_kernel : nd::base_kernel<get_tick_kernel> {
-  nd::array self;
-
-  get_tick_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_tick_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "tick"));
-  }
-};
-
 void ndt::datetime_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  properties["year"] = nd::callable::make<get_year_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["month"] = nd::callable::make<get_month_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["day"] = nd::callable::make<get_day_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["hour"] = nd::callable::make<get_hour_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["minute"] = nd::callable::make<get_minute_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["second"] = nd::callable::make<get_second_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["microsecond"] = nd::callable::make<get_microsecond_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["tick"] = nd::callable::make<get_tick_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["year"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                             nd::callable::make<datetime_get_year_kernel>(ndt::type("(Any) -> Any")));
+  properties["month"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                              nd::callable::make<datetime_get_month_kernel>(ndt::type("(Any) -> Any")));
+  properties["day"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                            nd::callable::make<datetime_get_day_kernel>(ndt::type("(Any) -> Any")));
+  properties["hour"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                             nd::callable::make<datetime_get_hour_kernel>(ndt::type("(Any) -> Any")));
+  properties["minute"] = nd::functional::adapt(
+      ndt::type::make<int32_t>(), nd::callable::make<datetime_get_minute_kernel>(ndt::type("(Any) -> Any")));
+  properties["second"] = nd::functional::adapt(
+      ndt::type::make<int32_t>(), nd::callable::make<datetime_get_second_kernel>(ndt::type("(Any) -> Any")));
+  properties["microsecond"] = nd::functional::adapt(
+      ndt::type::make<int32_t>(), nd::callable::make<datetime_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
+  properties["tick"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                             nd::callable::make<datetime_get_tick_kernel>(ndt::type("(Any) -> Any")));
 }
 
 ///////// functions on the nd::array
 
-struct to_struct_kernel : nd::base_kernel<to_struct_kernel> {
-  nd::array self;
-
-  to_struct_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "struct"));
-  }
-};
-
-struct strftime_kernel : nd::base_kernel<strftime_kernel> {
-  nd::array self;
-  std::string format;
-
-  strftime_kernel(const nd::array &self, std::string format) : self(self), format(format) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self, format); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0], kwds[1].as<std::string>()).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    make(ckb, kernreq, ckb_offset, kwds[0], kwds[1].as<std::string>());
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n, const std::string &format)
-  {
-    // TODO: Allow 'format' itself to be an array, with broadcasting, etc.
-    if (format.empty()) {
-      throw runtime_error("format string for strftime should not be empty");
-    }
-    return n.replace_dtype(
-        ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(), make_strftime_kernelgen(format)));
-  }
-};
-
 void ndt::datetime_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
 {
-  functions["to_struct"] = nd::callable::make<to_struct_kernel>(ndt::type("(self: Any) -> Any"));
+  functions["to_struct"] = nd::functional::adapt(
+      ndt::type("{year: int16, month: int8, day: int8, hour: int8, minute: int8, second: int8, tick: int32}"),
+      nd::callable::make<datetime_get_struct_kernel>(ndt::type("(Any) -> Any")));
 
   //      pair<std::string, nd::callable>(
   //        "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
 }
 
 ///////// property accessor kernels (used by property_type)
-
-namespace {
-
-struct datetime_get_struct_kernel : nd::base_kernel<datetime_get_struct_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-  {
-    throw runtime_error("TODO: get_property_kernel_struct_single");
-  }
-};
-
-struct datetime_set_struct_kernel : nd::base_kernel<datetime_set_struct_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-  {
-    throw runtime_error("TODO: set_property_kernel_struct_single");
-  }
-};
-
-struct datetime_get_date_kernel : nd::base_kernel<datetime_get_date_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      int64_t days = **reinterpret_cast<int64_t *const *>(src);
-      if (days < 0) {
-        days -= (DYND_TICKS_PER_DAY - 1);
-      }
-      days /= DYND_TICKS_PER_DAY;
-
-      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(days);
-    }
-    else {
-      throw runtime_error("datetime date property only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_time_kernel : nd::base_kernel<datetime_get_time_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      int64_t ticks = **reinterpret_cast<int64_t *const *>(src);
-      ticks %= DYND_TICKS_PER_DAY;
-      if (ticks < 0) {
-        ticks += DYND_TICKS_PER_DAY;
-      }
-      *reinterpret_cast<int64_t *>(dst) = ticks;
-    }
-    else {
-      throw runtime_error("datetime time property only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_year_kernel : nd::base_kernel<datetime_get_year_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      date_ymd ymd;
-      ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
-      *reinterpret_cast<int32_t *>(dst) = ymd.year;
-    }
-    else {
-      throw runtime_error("datetime property access only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_month_kernel : nd::base_kernel<datetime_get_month_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      date_ymd ymd;
-      ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
-      *reinterpret_cast<int32_t *>(dst) = ymd.month;
-    }
-    else {
-      throw runtime_error("datetime property access only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_day_kernel : nd::base_kernel<datetime_get_day_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      date_ymd ymd;
-      ymd.set_from_ticks(**reinterpret_cast<int64_t *const *>(src));
-      *reinterpret_cast<int32_t *>(dst) = ymd.day;
-    }
-    else {
-      throw runtime_error("datetime property access only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_hour_kernel : nd::base_kernel<datetime_get_hour_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      int64_t hour = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_DAY;
-      if (hour < 0) {
-        hour += DYND_TICKS_PER_DAY;
-      }
-      hour /= DYND_TICKS_PER_HOUR;
-      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(hour);
-    }
-    else {
-      throw runtime_error("datetime property access only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_minute_kernel : nd::base_kernel<datetime_get_minute_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      int64_t minute = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_HOUR;
-      if (minute < 0) {
-        minute += DYND_TICKS_PER_HOUR;
-      }
-      minute /= DYND_TICKS_PER_MINUTE;
-      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(minute);
-    }
-    else {
-      throw runtime_error("datetime property access only implemented for UTC and "
-                          "abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_second_kernel : nd::base_kernel<datetime_get_second_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      int64_t second = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_MINUTE;
-      if (second < 0) {
-        second += DYND_TICKS_PER_MINUTE;
-      }
-      second /= DYND_TICKS_PER_SECOND;
-      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(second);
-    }
-    else {
-      throw runtime_error("datetime property access only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_microsecond_kernel : nd::base_kernel<datetime_get_microsecond_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      int64_t microsecond = **reinterpret_cast<int64_t *const *>(src) % DYND_TICKS_PER_SECOND;
-      if (microsecond < 0) {
-        microsecond += DYND_TICKS_PER_SECOND;
-      }
-      microsecond /= DYND_TICKS_PER_MICROSECOND;
-      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(microsecond);
-    }
-    else {
-      throw runtime_error("datetime property access only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
-  ndt::type datetime_tp;
-
-  void single(char *dst, char *const *src)
-  {
-    const ndt::datetime_type *dd = reinterpret_cast<const ndt::datetime_type *>(datetime_tp.extended());
-    datetime_tz_t tz = dd->get_timezone();
-    if (tz == tz_utc || tz == tz_abstract) {
-      int64_t tick = **reinterpret_cast<int64_t *const *>(src) % 10000000LL;
-      if (tick < 0) {
-        tick += 10000000LL;
-      }
-      *reinterpret_cast<int32_t *>(dst) = static_cast<int32_t>(tick);
-    }
-    else {
-      throw runtime_error("datetime property access only implemented for "
-                          "UTC and abstract timezones");
-    }
-  }
-};
-
-} // anonymous namespace
 
 namespace {
 enum date_properties_t {
@@ -931,48 +752,37 @@ size_t ndt::datetime_type::make_elwise_property_getter_kernel(void *ckb, intptr_
 {
   switch (src_property_index) {
   case datetimeprop_struct: {
-    datetime_get_struct_kernel *e = datetime_get_struct_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_struct_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_date: {
-    datetime_get_date_kernel *e = datetime_get_date_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_date_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_time: {
-    datetime_get_time_kernel *e = datetime_get_time_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_time_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_year: {
-    datetime_get_year_kernel *e = datetime_get_year_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_year_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_month: {
-    datetime_get_month_kernel *e = datetime_get_month_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_month_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_day: {
-    datetime_get_day_kernel *e = datetime_get_day_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_day_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_hour: {
-    datetime_get_hour_kernel *e = datetime_get_hour_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_hour_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_minute: {
-    datetime_get_minute_kernel *e = datetime_get_minute_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_minute_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_second: {
-    datetime_get_second_kernel *e = datetime_get_second_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_second_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_microsecond: {
-    datetime_get_microsecond_kernel *e = datetime_get_microsecond_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_microsecond_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   case datetimeprop_tick: {
-    datetime_get_tick_kernel *e = datetime_get_tick_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_get_tick_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   default:
     stringstream ss;
@@ -988,8 +798,7 @@ size_t ndt::datetime_type::make_elwise_property_setter_kernel(
 {
   switch (dst_property_index) {
   case datetimeprop_struct: {
-    datetime_set_struct_kernel *e = datetime_set_struct_kernel::make(ckb, kernreq, ckb_offset);
-    e->datetime_tp = type(this, true);
+    datetime_set_struct_kernel::make(ckb, kernreq, ckb_offset, type(this, true));
   } break;
   default:
     stringstream ss;
