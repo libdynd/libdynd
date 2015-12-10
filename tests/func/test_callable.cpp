@@ -248,31 +248,6 @@ TEST(Callable, Assignment_CallInterface)
   EXPECT_THROW(af(false), invalid_argument);
 }
 
-TEST(Callable, Property)
-{
-  // Create an callable for getting the year from a date
-  nd::callable af = make_callable_from_property(ndt::date_type::make(), "year");
-  // Validate that its types, etc are set right
-  ASSERT_EQ(1, af.get_type()->get_narg());
-  ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
-  ASSERT_EQ(ndt::date_type::make(), af.get_type()->get_pos_type(0));
-
-  const char *src_arrmeta[1] = {NULL};
-
-  // Instantiate a single ckernel
-  ckernel_builder<kernel_request_host> ckb;
-  af.get()->instantiate(af.get()->static_data(), NULL, &ckb, 0, af.get_type()->get_return_type(), NULL,
-                        af.get_type()->get_npos(), af.get_type()->get_pos_types_raw(), src_arrmeta,
-                        kernel_request_single, &eval::default_eval_context, 0, NULL,
-                        std::map<std::string, ndt::type>());
-  int int_out = 0;
-  int date_in = date_ymd::to_days(2013, 12, 30);
-  const char *date_in_ptr = reinterpret_cast<const char *>(&date_in);
-  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-  usngo(ckb.get(), reinterpret_cast<char *>(&int_out), const_cast<char **>(&date_in_ptr));
-  EXPECT_EQ(2013, int_out);
-}
-
 TEST(Callable, AssignmentAsExpr)
 {
   // Create an callable for converting string to int

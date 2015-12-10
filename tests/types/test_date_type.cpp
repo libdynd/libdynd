@@ -11,7 +11,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/date_util.hpp>
-#include <dynd/types/property_type.hpp>
+#include <dynd/types/new_adapt_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/convert_type.hpp>
@@ -130,9 +130,9 @@ TEST(DateType, DateProperties)
   nd::array a;
 
   a = nd::array("1955-03-13").ucast(d).eval();
-  EXPECT_EQ(ndt::property_type::make(d, "year"), a.p("year").get_type());
-  EXPECT_EQ(ndt::property_type::make(d, "month"), a.p("month").get_type());
-  EXPECT_EQ(ndt::property_type::make(d, "day"), a.p("day").get_type());
+  EXPECT_EQ(new_adapt_type_id, a.p("year").get_type().get_type_id());
+  EXPECT_EQ(new_adapt_type_id, a.p("month").get_type().get_type_id());
+  EXPECT_EQ(new_adapt_type_id, a.p("day").get_type().get_type_id());
   EXPECT_EQ(1955, a.p("year").as<int32_t>());
   EXPECT_EQ(3, a.p("month").as<int32_t>());
   EXPECT_EQ(13, a.p("day").as<int32_t>());
@@ -163,7 +163,7 @@ TEST(DateType, DatePropertyConvertOfString)
 
   // year property
   c = b.p("year");
-  EXPECT_EQ(property_type_id, c.get_dtype().get_type_id());
+  EXPECT_EQ(new_adapt_type_id, c.get_dtype().get_type_id());
   c = c.eval();
   EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<int>()), c.get_type());
   EXPECT_EQ(1931, c(0).as<int>());

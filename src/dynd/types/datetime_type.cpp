@@ -12,7 +12,6 @@
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/date_util.hpp>
-#include <dynd/types/property_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/unary_expr_type.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -659,8 +658,6 @@ void ndt::datetime_type::get_dynamic_array_functions(std::map<std::string, nd::c
   //      pair<std::string, nd::callable>(
   //        "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
 }
-
-///////// property accessor kernels (used by property_type)
 
 namespace {
 enum date_properties_t {

@@ -6,7 +6,6 @@
 #include <dynd/array.hpp>
 #include <dynd/func/callable.hpp>
 #include <dynd/types/time_type.hpp>
-#include <dynd/types/property_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/parser_util.hpp>
 #include <dynd/functional.hpp>
@@ -223,8 +222,6 @@ void ndt::time_type::get_dynamic_array_functions(std::map<std::string, nd::calla
   functions["to_struct"] = nd::functional::adapt(ndt::type("{hour: int8, minute: int8, second: int8, tick: int32}"),
                                                  nd::callable::make<time_get_struct_kernel>(ndt::type("(Any) -> Any")));
 }
-
-///////// property accessor kernels (used by property_type)
 
 namespace {
 enum time_properties_t {
