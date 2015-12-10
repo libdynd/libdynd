@@ -128,6 +128,10 @@ DYND_API nd::callable nd::assign::make()
       nd::callable::make<detail::new_adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
   children[{{new_adapt_type_id, float64_type_id}}] =
       nd::callable::make<detail::new_adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
+  children[{{new_adapt_type_id, complex_float32_type_id}}] =
+      nd::callable::make<detail::new_adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
+  children[{{new_adapt_type_id, complex_float64_type_id}}] =
+      nd::callable::make<detail::new_adapt_assign_to_kernel>(ndt::type("(Any) -> Any"));
 
   children[{{fixed_bytes_type_id, view_type_id}}] =
       callable::make<assignment_kernel<fixed_bytes_type_id, view_type_id>>();
@@ -152,11 +156,6 @@ DYND_API nd::callable nd::assign::make()
   children[{{int16_type_id, view_type_id}}] = callable::make<assignment_kernel<int16_type_id, view_type_id>>();
   children[{{int32_type_id, view_type_id}}] = callable::make<assignment_kernel<int32_type_id, view_type_id>>();
   children[{{int64_type_id, view_type_id}}] = callable::make<assignment_kernel<int64_type_id, view_type_id>>();
-  children[{{int16_type_id, byteswap_type_id}}] = callable::make<assignment_kernel<int16_type_id, byteswap_type_id>>();
-  children[{{int32_type_id, byteswap_type_id}}] = callable::make<assignment_kernel<int32_type_id, byteswap_type_id>>();
-  children[{{int64_type_id, byteswap_type_id}}] = callable::make<assignment_kernel<int64_type_id, byteswap_type_id>>();
-  children[{{float32_type_id, byteswap_type_id}}] =
-      callable::make<assignment_kernel<float32_type_id, byteswap_type_id>>();
   children[{{struct_type_id, property_type_id}}] =
       callable::make<assignment_kernel<struct_type_id, property_type_id>>();
   children[{{int32_type_id, property_type_id}}] = callable::make<assignment_kernel<int32_type_id, property_type_id>>();
@@ -164,12 +163,6 @@ DYND_API nd::callable nd::assign::make()
   children[{{int16_type_id, property_type_id}}] = callable::make<assignment_kernel<int16_type_id, property_type_id>>();
   children[{{float32_type_id, property_type_id}}] =
       callable::make<assignment_kernel<float32_type_id, property_type_id>>();
-  children[{{float64_type_id, byteswap_type_id}}] =
-      callable::make<assignment_kernel<float64_type_id, byteswap_type_id>>();
-  children[{{complex_float32_type_id, byteswap_type_id}}] =
-      callable::make<assignment_kernel<complex_float32_type_id, byteswap_type_id>>();
-  children[{{complex_float64_type_id, byteswap_type_id}}] =
-      callable::make<assignment_kernel<complex_float64_type_id, byteswap_type_id>>();
   children[{{categorical_type_id, convert_type_id}}] =
       callable::make<assignment_kernel<categorical_type_id, convert_type_id>>();
   children[{{string_type_id, convert_type_id}}] = callable::make<assignment_kernel<string_type_id, convert_type_id>>();

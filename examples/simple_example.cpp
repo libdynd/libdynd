@@ -10,7 +10,6 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/byteswap_type.hpp>
 #include <dynd/array_range.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/func/apply.hpp>
