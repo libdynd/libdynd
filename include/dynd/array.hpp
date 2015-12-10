@@ -614,16 +614,6 @@ namespace nd {
     array uview(const ndt::type &uniform_dt, intptr_t replace_ndim) const;
 
     /**
-     * Adapts the array into the destination type, using the provided
-     * adaption operator. This creates an adapt[] type.
-     *
-     * Example:
-     * nd::array({3, 5, 10}).adapt(ndt::date_type::make(), "days since
-     *2001-1-1");
-     */
-    array adapt(const ndt::type &tp, const std::string &adapt_op);
-
-    /**
      * Permutes the dimensions of the array, returning a view to the result.
      * Only strided dimensions can be permuted and no dimension can be permuted
      * across a variable dimension. At present, there is no error checking.

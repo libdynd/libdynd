@@ -14,12 +14,10 @@
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/func/compose.hpp>
 #include <dynd/func/copy.hpp>
-#include <dynd/types/adapt_type.hpp>
 #include <dynd/func/callable_registry.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/convert.hpp>

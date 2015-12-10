@@ -38,7 +38,6 @@
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
-#include <dynd/types/adapt_type.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
 #include <dynd/types/kind_sym_type.hpp>
@@ -298,37 +297,6 @@ static ndt::type parse_option_parameters(const char *&rbegin, const char *end, m
   // shown
   rbegin = begin;
   return ndt::option_type::make(tp);
-}
-
-static ndt::type parse_adapt_parameters(const char *&rbegin, const char *end, map<std::string, ndt::type> &symtable)
-{
-  const char *begin = rbegin;
-  if (!parse_token_ds(begin, end, '[')) {
-    throw datashape_parse_error(begin, "expected opening '[' after 'adapt'");
-  }
-  const char *saved_begin = begin;
-  ndt::type proto_tp = parse_datashape(begin, end, symtable);
-  if (proto_tp.is_null() || proto_tp.get_type_id() != callable_type_id ||
-      proto_tp.extended<ndt::callable_type>()->get_npos() != 1 ||
-      proto_tp.extended<ndt::callable_type>()->get_nkwd() != 0) {
-    throw datashape_parse_error(saved_begin, "expected a unary function signature");
-  }
-  if (!parse_token_ds(begin, end, ',')) {
-    throw datashape_parse_error(begin, "expected a ,");
-  }
-  std::string adapt_op;
-  ndt::type value_tp;
-  if (!parse_quoted_string(begin, end, adapt_op)) {
-    throw datashape_parse_error(begin, "expected an an adapt op");
-  }
-  if (!parse_token_ds(begin, end, ']')) {
-    throw datashape_parse_error(begin, "expected closing ']'");
-  }
-  // TODO catch errors, convert them to datashape_parse_error so the position is
-  // shown
-  rbegin = begin;
-  return ndt::adapt_type::make(proto_tp.extended<ndt::callable_type>()->get_pos_type(0),
-                               proto_tp.extended<ndt::callable_type>()->get_return_type(), adapt_op);
 }
 
 static string_encoding_t string_to_encoding(const char *error_begin, const std::string &estr)
@@ -1439,9 +1407,6 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
     }
     else if (parse::compare_range_to_literal(nbegin, nend, "option")) {
       result = parse_option_parameters(begin, end, symtable);
-    }
-    else if (parse::compare_range_to_literal(nbegin, nend, "adapt")) {
-      result = parse_adapt_parameters(begin, end, symtable);
     }
     else if (parse::compare_range_to_literal(nbegin, nend, "Any")) {
       result = ndt::any_kind_type::make();

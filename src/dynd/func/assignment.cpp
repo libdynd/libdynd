@@ -154,9 +154,6 @@ DYND_API nd::callable nd::assign::make()
   children[{{categorical_type_id, convert_type_id}}] =
       callable::make<assignment_kernel<categorical_type_id, convert_type_id>>();
   children[{{string_type_id, convert_type_id}}] = callable::make<assignment_kernel<string_type_id, convert_type_id>>();
-  children[{{adapt_type_id, string_type_id}}] = callable::make<assignment_kernel<adapt_type_id, string_type_id>>();
-  children[{{adapt_type_id, date_type_id}}] = callable::make<assignment_kernel<adapt_type_id, date_type_id>>();
-  children[{{int32_type_id, adapt_type_id}}] = callable::make<assignment_kernel<int32_type_id, adapt_type_id>>();
   children[{{bool_type_id, convert_type_id}}] = callable::make<assignment_kernel<bool_type_id, convert_type_id>>();
   children[{{type_type_id, convert_type_id}}] = callable::make<assignment_kernel<type_type_id, convert_type_id>>();
   children[{{convert_type_id, convert_type_id}}] =
@@ -195,14 +192,12 @@ DYND_API nd::callable nd::assign::make()
   children[{{uint16_type_id, convert_type_id}}] = callable::make<assignment_kernel<uint16_type_id, convert_type_id>>();
   children[{{uint32_type_id, convert_type_id}}] = callable::make<assignment_kernel<uint32_type_id, convert_type_id>>();
   children[{{uint64_type_id, convert_type_id}}] = callable::make<assignment_kernel<uint64_type_id, convert_type_id>>();
-  children[{{int64_type_id, adapt_type_id}}] = callable::make<assignment_kernel<int64_type_id, adapt_type_id>>();
   children[{{fixed_dim_type_id, convert_type_id}}] =
       callable::make<assignment_kernel<fixed_dim_type_id, convert_type_id>>();
   children[{{struct_type_id, convert_type_id}}] = callable::make<assignment_kernel<struct_type_id, convert_type_id>>();
   children[{{view_type_id, int32_type_id}}] = callable::make<assignment_kernel<view_type_id, int32_type_id>>();
   children[{{view_type_id, int64_type_id}}] = callable::make<assignment_kernel<view_type_id, int64_type_id>>();
   children[{{view_type_id, view_type_id}}] = callable::make<assignment_kernel<view_type_id, view_type_id>>();
-  children[{{adapt_type_id, datetime_type_id}}] = callable::make<assignment_kernel<adapt_type_id, datetime_type_id>>();
   children[{{complex_float32_type_id, convert_type_id}}] =
       callable::make<assignment_kernel<complex_float32_type_id, convert_type_id>>();
   children[{{complex_float64_type_id, convert_type_id}}] =

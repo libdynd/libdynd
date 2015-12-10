@@ -269,9 +269,7 @@ set(libdynd_SRC
     include/dynd/callables/base_callable.hpp
     # Eval
     src/dynd/eval/eval_context.cpp
-    src/dynd/eval/eval_engine.cpp
     include/dynd/eval/eval_context.hpp
-    include/dynd/eval/eval_engine.hpp
     # Func
     src/dynd/func/arithmetic.cpp
     src/dynd/func/callable.cpp
