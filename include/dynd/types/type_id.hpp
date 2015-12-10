@@ -148,7 +148,6 @@ enum type_id_t {
   new_adapt_type_id,
   adapt_type_id,
   convert_type_id,
-  byteswap_type_id,
   view_type_id,
 
   // A CUDA host memory type
@@ -156,12 +155,8 @@ enum type_id_t {
   // A CUDA device (global) memory type
   cuda_device_type_id,
 
-  // A type for property access
-  property_type_id,
-
   // Advanced expression types
   expr_type_id,
-  unary_expr_type_id,
 
   // Instances of this type are themselves types
   type_type_id,
@@ -695,11 +690,6 @@ struct type_kind_of<adapt_type_id> {
 };
 
 template <>
-struct type_kind_of<property_type_id> {
-  static const type_kind_t value = expr_kind;
-};
-
-template <>
 struct type_kind_of<convert_type_id> {
   static const type_kind_t value = expr_kind;
 };
@@ -710,17 +700,7 @@ struct type_kind_of<expr_type_id> {
 };
 
 template <>
-struct type_kind_of<byteswap_type_id> {
-  static const type_kind_t value = expr_kind;
-};
-
-template <>
 struct type_kind_of<view_type_id> {
-  static const type_kind_t value = expr_kind;
-};
-
-template <>
-struct type_kind_of<unary_expr_type_id> {
   static const type_kind_t value = expr_kind;
 };
 
