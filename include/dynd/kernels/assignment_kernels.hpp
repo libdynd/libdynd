@@ -3538,6 +3538,48 @@ namespace nd {
       }
     };
 
+    struct new_adapt_assign_from_kernel : base_kernel<new_adapt_assign_from_kernel, 1> {
+      intptr_t forward_offset;
+
+      void single(char *dst, char *const *src)
+      {
+        array buffer = empty(ndt::type("date"));
+
+        get_child()->single(buffer.data(), src);
+
+        char *child_src[1] = {buffer.data()};
+        get_child(forward_offset)->single(dst, child_src);
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
+      {
+        const callable &forward = src_tp[0].extended<ndt::new_adapt_type>()->get_forward();
+        const ndt::type &storage_tp = src_tp[0].storage_type();
+
+        intptr_t self_offset = ckb_offset;
+        make(ckb, kernreq, ckb_offset);
+
+        if (storage_tp.is_expression()) {
+          ckb_offset = nd::assign::get()->instantiate(nd::assign::get()->static_data(), data, ckb, ckb_offset,
+                                                      storage_tp.get_canonical_type(), dst_arrmeta, nsrc, &storage_tp,
+                                                      src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+        }
+
+        intptr_t forward_offset = ckb_offset - self_offset;
+        ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
+        ckb_offset = forward->instantiate(forward->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                          src_tp2, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+        get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), self_offset)->forward_offset =
+            forward_offset;
+
+        return ckb_offset;
+      }
+    };
+
     template <>
     struct assignment_virtual_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind>
         : base_kernel<assignment_virtual_kernel<fixed_string_type_id, string_kind, string_type_id, string_kind>, 1> {

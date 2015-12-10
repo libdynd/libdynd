@@ -12,6 +12,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/property_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/new_adapt_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/unary_expr_type.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -28,6 +29,19 @@
 
 using namespace std;
 using namespace dynd;
+
+struct date_get_weekday_kernel : nd::base_kernel<date_get_weekday_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    int32_t days = **reinterpret_cast<int32_t *const *>(src);
+    // 1970-01-05 is Monday
+    int weekday = (int)((days - 4) % 7);
+    if (weekday < 0) {
+      weekday += 7;
+    }
+    *reinterpret_cast<int32_t *>(dst) = weekday;
+  }
+};
 
 ndt::date_type::date_type()
     : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_none, 0, 0, 0)
@@ -377,7 +391,10 @@ struct weekday_kernel : nd::base_kernel<weekday_kernel> {
 
   static nd::array helper(const nd::array &n)
   {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
+    return n.replace_dtype(ndt::make_type<ndt::new_adapt_type>(
+        ndt::type::make<int32_t>(), n.get_dtype(), nd::callable::make<date_get_weekday_kernel>(ndt::type("(Any) -> Any")),
+        nd::callable()));
+    //  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
   }
 };
 
@@ -483,19 +500,6 @@ struct date_get_day_kernel : nd::base_kernel<date_get_day_kernel, 1> {
     date_ymd ymd;
     ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
     *reinterpret_cast<int32_t *>(dst) = ymd.day;
-  }
-};
-
-struct date_get_weekday_kernel : nd::base_kernel<date_get_weekday_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    int32_t days = **reinterpret_cast<int32_t *const *>(src);
-    // 1970-01-05 is Monday
-    int weekday = (int)((days - 4) % 7);
-    if (weekday < 0) {
-      weekday += 7;
-    }
-    *reinterpret_cast<int32_t *>(dst) = weekday;
   }
 };
 
