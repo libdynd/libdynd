@@ -3557,24 +3557,32 @@ namespace nd {
                                   const eval::eval_context *ectx, intptr_t nkwd, const nd::array *kwds,
                                   const std::map<std::string, ndt::type> &tp_vars)
       {
-        const callable &forward = src_tp[0].extended<ndt::new_adapt_type>()->get_forward();
         const ndt::type &storage_tp = src_tp[0].storage_type();
-
-        intptr_t self_offset = ckb_offset;
-        make(ckb, kernreq, ckb_offset);
-
         if (storage_tp.is_expression()) {
+          const callable &forward = src_tp[0].extended<ndt::new_adapt_type>()->get_forward();
+
+          intptr_t self_offset = ckb_offset;
+          make(ckb, kernreq, ckb_offset);
+
           ckb_offset = nd::assign::get()->instantiate(nd::assign::get()->static_data(), data, ckb, ckb_offset,
                                                       storage_tp.get_canonical_type(), dst_arrmeta, nsrc, &storage_tp,
                                                       src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+
+          intptr_t forward_offset = ckb_offset - self_offset;
+          ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
+          ckb_offset = forward->instantiate(forward->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                            src_tp2, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+          get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), self_offset)->forward_offset =
+              forward_offset;
+
+          return ckb_offset;
         }
 
-        intptr_t forward_offset = ckb_offset - self_offset;
+        const callable &forward = src_tp[0].extended<ndt::new_adapt_type>()->get_forward();
+
         ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
         ckb_offset = forward->instantiate(forward->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                           src_tp2, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
-        get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), self_offset)->forward_offset =
-            forward_offset;
 
         return ckb_offset;
       }

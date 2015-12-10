@@ -332,13 +332,10 @@ TEST(DateType, StrFTimeBadFormat)
 
 TEST(DateType, WeekDay)
 {
-  std::cout << "DateType::WeekDay" << std::endl;
-
   ndt::type d = ndt::date_type::make();
   nd::array a;
 
   a = nd::array("1955-03-13").ucast(d).eval();
-  std::cout << a.f("weekday").eval().as<int32_t>() << std::endl;
   EXPECT_EQ(6, a.f("weekday").as<int32_t>());
   a = nd::array("2002-12-04").ucast(d).eval();
   EXPECT_EQ(2, a.f("weekday").as<int32_t>());

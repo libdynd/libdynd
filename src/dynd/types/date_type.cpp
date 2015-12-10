@@ -392,9 +392,8 @@ struct weekday_kernel : nd::base_kernel<weekday_kernel> {
   static nd::array helper(const nd::array &n)
   {
     return n.replace_dtype(ndt::make_type<ndt::new_adapt_type>(
-        ndt::type::make<int32_t>(), n.get_dtype(), nd::callable::make<date_get_weekday_kernel>(ndt::type("(Any) -> Any")),
-        nd::callable()));
-    //  return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "weekday"));
+        ndt::type::make<int32_t>(), n.get_dtype(),
+        nd::callable::make<date_get_weekday_kernel>(ndt::type("(Any) -> Any")), nd::callable()));
   }
 };
 
