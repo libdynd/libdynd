@@ -12,7 +12,6 @@
 #include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/property_type.hpp>
 #include <dynd/type.hpp>
 
 using namespace std;
@@ -83,18 +82,6 @@ nd::callable dynd::make_callable_from_assignment(const ndt::type &dst_tp, const 
                                                  assign_error_mode errmode)
 {
   return nd::callable::make<unary_assignment_ck>(ndt::callable_type::make(dst_tp, src_tp), errmode);
-}
-
-nd::callable dynd::make_callable_from_property(const ndt::type &tp, const std::string &propname)
-{
-  if (tp.get_kind() == expr_kind) {
-    stringstream ss;
-    ss << "Creating an callable from a property requires a non-expression"
-       << ", got " << tp;
-    throw type_error(ss.str());
-  }
-  ndt::type prop_tp = ndt::property_type::make(tp, propname);
-  return nd::callable::make<property_kernel>(ndt::callable_type::make(prop_tp.value_type(), tp), prop_tp);
 }
 
 void nd::detail::check_narg(const ndt::callable_type *af_tp, intptr_t narg)

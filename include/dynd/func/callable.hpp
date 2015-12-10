@@ -799,13 +799,4 @@ namespace nd {
 DYND_API nd::callable make_callable_from_assignment(const ndt::type &dst_tp, const ndt::type &src_tp,
                                                     assign_error_mode errmode);
 
-/**
- * Creates an callable which does the assignment from
- * data of `tp` to its property `propname`
- *
- * \param tp  The type of the source.
- * \param propname  The name of the property.
- */
-DYND_API nd::callable make_callable_from_property(const ndt::type &tp, const std::string &propname);
-
 } // namespace dynd

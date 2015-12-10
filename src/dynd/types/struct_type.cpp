@@ -6,7 +6,7 @@
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/type_alignment.hpp>
-#include <dynd/types/property_type.hpp>
+#include <dynd/types/new_adapt_type.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
@@ -321,7 +321,8 @@ namespace nd {
       ndt::type udt = n.get_dtype();
       if (udt.get_kind() == expr_kind) {
         std::string field_name = udt.value_type().extended<ndt::struct_type>()->get_field_name(i);
-        return n.replace_dtype(ndt::property_type::make(udt, field_name, i));
+        return n.replace_dtype(ndt::make_type<ndt::new_adapt_type>(
+            udt.value_type().extended<ndt::struct_type>()->get_field_type(i), udt, nd::callable(), nd::callable()));
       }
       else {
         if (undim == 0) {

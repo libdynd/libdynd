@@ -10,7 +10,6 @@
 
 #include <dynd/func/callable.hpp>
 #include <dynd/types/date_type.hpp>
-#include <dynd/types/property_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/new_adapt_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -30,6 +29,37 @@
 
 using namespace std;
 using namespace dynd;
+
+namespace {
+
+struct date_get_year_kernel : nd::base_kernel<date_get_year_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.year;
+  }
+};
+
+struct date_get_month_kernel : nd::base_kernel<date_get_month_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.month;
+  }
+};
+
+struct date_get_day_kernel : nd::base_kernel<date_get_day_kernel, 1> {
+  void single(char *dst, char *const *src)
+  {
+    date_ymd ymd;
+    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
+    *reinterpret_cast<int32_t *>(dst) = ymd.day;
+  }
+};
+
+} // anonymous namespace
 
 struct date_set_struct_kernel : nd::base_kernel<date_set_struct_kernel, 1> {
   void single(char *dst, char *const *src)
@@ -205,107 +235,14 @@ void ndt::date_type::get_dynamic_type_functions(std::map<std::string, nd::callab
 
 ///////// properties on the nd::array
 
-struct get_year_kernel : nd::base_kernel<get_year_kernel> {
-  nd::array self;
-
-  get_year_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_year_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "year"));
-  }
-};
-
-struct get_month_kernel : nd::base_kernel<get_month_kernel> {
-  nd::array self;
-
-  get_month_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_month_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "month"));
-  }
-};
-
-struct get_day_kernel : nd::base_kernel<get_day_kernel> {
-  nd::array self;
-
-  get_day_kernel(const nd::array &self) : self(self) {}
-
-  void single(nd::array *dst, nd::array *const *DYND_UNUSED(src)) { *dst = helper(self); }
-
-  static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
-                               intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                               intptr_t DYND_UNUSED(nkwd), const nd::array *kwds,
-                               const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    dst_tp = helper(kwds[0]).get_type();
-  }
-
-  static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
-                              const ndt::type &DYND_UNUSED(dst_tp), const char *DYND_UNUSED(dst_arrmeta),
-                              intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
-                              const char *const *DYND_UNUSED(src_arrmeta), kernel_request_t kernreq,
-                              const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                              const nd::array *kwds, const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-  {
-    get_day_kernel::make(ckb, kernreq, ckb_offset, kwds[0]);
-    return ckb_offset;
-  }
-
-  static nd::array helper(const nd::array &n)
-  {
-    return n.replace_dtype(ndt::property_type::make(n.get_dtype(), "day"));
-  }
-};
-
 void ndt::date_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  properties["year"] = nd::callable::make<get_year_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["month"] = nd::callable::make<get_month_kernel>(ndt::type("(self: Any) -> Any"));
-  properties["day"] = nd::callable::make<get_day_kernel>(ndt::type("(self: Any) -> Any"));
+  properties["year"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                             nd::callable::make<date_get_year_kernel>(ndt::type("(Any) -> Any")));
+  properties["month"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                              nd::callable::make<date_get_month_kernel>(ndt::type("(Any) -> Any")));
+  properties["day"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+                                            nd::callable::make<date_get_day_kernel>(ndt::type("(Any) -> Any")));
 }
 
 ///////// functions on the nd::array
@@ -415,45 +352,11 @@ void ndt::date_type::get_dynamic_array_functions(std::map<std::string, nd::calla
   functions["weekday"] = nd::functional::adapt(ndt::type::make<int32_t>(),
                                                nd::callable::make<date_get_weekday_kernel>(ndt::type("(Any) -> Any")));
 
-
   //          "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
   //        "replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
   //                                                   numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),
   //                                                 numeric_limits<int32_t>::max()))};
 }
-
-///////// property accessor kernels (used by property_type)
-
-namespace {
-
-struct date_get_year_kernel : nd::base_kernel<date_get_year_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    date_ymd ymd;
-    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
-    *reinterpret_cast<int32_t *>(dst) = ymd.year;
-  }
-};
-
-struct date_get_month_kernel : nd::base_kernel<date_get_month_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    date_ymd ymd;
-    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
-    *reinterpret_cast<int32_t *>(dst) = ymd.month;
-  }
-};
-
-struct date_get_day_kernel : nd::base_kernel<date_get_day_kernel, 1> {
-  void single(char *dst, char *const *src)
-  {
-    date_ymd ymd;
-    ymd.set_from_days(**reinterpret_cast<int32_t *const *>(src));
-    *reinterpret_cast<int32_t *>(dst) = ymd.day;
-  }
-};
-
-} // anonymous namespace
 
 namespace {
 enum date_properties_t { dateprop_year, dateprop_month, dateprop_day, dateprop_weekday, dateprop_struct };
