@@ -15,7 +15,6 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
-#include <dynd/kernels/date_adapter_kernels.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/apply.hpp>
@@ -451,18 +450,4 @@ size_t ndt::date_type::make_elwise_property_setter_kernel(
     ss << "dynd date type given an invalid property index" << dst_property_index;
     throw runtime_error(ss.str());
   }
-}
-
-bool ndt::date_type::adapt_type(const type &operand_tp, const std::string &op, nd::callable &out_forward,
-                                nd::callable &out_reverse) const
-{
-  return make_date_adapter_callable(operand_tp, op, out_forward, out_reverse);
-}
-
-bool ndt::date_type::reverse_adapt_type(const type &value_tp, const std::string &op, nd::callable &out_forward,
-                                        nd::callable &out_reverse) const
-{
-  // Note that out_reverse and out_forward are swapped compared with
-  // adapt_type
-  return make_date_adapter_callable(value_tp, op, out_reverse, out_forward);
 }

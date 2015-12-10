@@ -76,11 +76,6 @@ namespace ndt {
                                               size_t dst_elwise_property_index, const char *src_arrmeta,
                                               kernel_request_t kernreq, const eval::eval_context *ectx) const;
 
-    bool adapt_type(const type &operand_tp, const std::string &op, nd::callable &out_forward,
-                    nd::callable &out_reverse) const;
-    bool reverse_adapt_type(const type &value_tp, const std::string &op, nd::callable &out_forward,
-                            nd::callable &out_reverse) const;
-
     /** Returns type "datetime" (with abstract/naive time zone) */
     static const type &make()
     {

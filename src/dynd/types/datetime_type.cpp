@@ -15,7 +15,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
-#include <dynd/kernels/datetime_adapter_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/parser_util.hpp>
@@ -802,18 +801,4 @@ size_t ndt::datetime_type::make_elwise_property_setter_kernel(
     throw runtime_error(ss.str());
   }
   return ckb_offset;
-}
-
-bool ndt::datetime_type::adapt_type(const type &operand_tp, const std::string &op, nd::callable &out_forward,
-                                    nd::callable &out_reverse) const
-{
-  return make_datetime_adapter_callable(type(this, true), operand_tp, op, out_forward, out_reverse);
-}
-
-bool ndt::datetime_type::reverse_adapt_type(const type &value_tp, const std::string &op, nd::callable &out_forward,
-                                            nd::callable &out_reverse) const
-{
-  // Note that out_reverse and out_forward are swapped compared with
-  // adapt_type
-  return make_datetime_adapter_callable(type(this, true), value_tp, op, out_reverse, out_forward);
 }
