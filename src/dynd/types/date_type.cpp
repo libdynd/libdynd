@@ -13,7 +13,6 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/new_adapt_type.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/unary_expr_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/kernels/date_adapter_kernels.hpp>
@@ -247,6 +246,7 @@ void ndt::date_type::get_dynamic_array_properties(std::map<std::string, nd::call
 
 ///////// functions on the nd::array
 
+/*
 struct strftime_kernel : nd::base_kernel<strftime_kernel> {
   nd::array self;
   std::string format;
@@ -284,6 +284,7 @@ struct strftime_kernel : nd::base_kernel<strftime_kernel> {
         ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(), make_strftime_kernelgen(format)));
   }
 };
+*/
 
 /*
 struct replace_kernel : nd::base_kernel<replace_kernel> {

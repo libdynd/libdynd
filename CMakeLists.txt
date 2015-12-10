@@ -198,7 +198,6 @@ set(libdynd_SRC
     src/dynd/types/pow_dimsym_type.cpp
     src/dynd/types/scalar_kind_type.cpp
     src/dynd/types/typevar_type.cpp
-    src/dynd/types/unary_expr_type.cpp
     src/dynd/types/var_dim_type.cpp
     src/dynd/types/view_type.cpp
     src/dynd/types/void_pointer_type.cpp
@@ -262,7 +261,6 @@ set(libdynd_SRC
     include/dynd/types/typevar_constructed_type.hpp
     include/dynd/types/typevar_dim_type.hpp
     include/dynd/types/typevar_type.hpp
-    include/dynd/types/unary_expr_type.hpp
     include/dynd/types/var_dim_type.hpp
     include/dynd/types/view_type.hpp
     include/dynd/types/void_pointer_type.hpp
@@ -272,12 +270,8 @@ set(libdynd_SRC
     # Eval
     src/dynd/eval/eval_context.cpp
     src/dynd/eval/eval_engine.cpp
-    src/dynd/eval/groupby_elwise_reduce_eval.cpp
-    src/dynd/eval/unary_elwise_eval.cpp
     include/dynd/eval/eval_context.hpp
     include/dynd/eval/eval_engine.hpp
-    include/dynd/eval/groupby_elwise_reduce_eval.hpp
-    include/dynd/eval/unary_elwise_eval.hpp
     # Func
     src/dynd/func/arithmetic.cpp
     src/dynd/func/callable.cpp
