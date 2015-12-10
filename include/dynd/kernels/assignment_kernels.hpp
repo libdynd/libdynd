@@ -3589,7 +3589,7 @@ namespace nd {
 
         ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
         ckb_offset = forward->instantiate(forward->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
-                                          src_tp2, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+                                          src_tp2, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
 
         return ckb_offset;
       }

@@ -198,8 +198,6 @@ TEST(DateType, ToStructFunction)
 
   // Do it again, but now with a chain of expressions
   a = nd::array("1955-03-13").ucast(d).f("to_struct");
-  std::cout << "here" << std::endl;
-  std::cout << a.get_type() << std::endl;
   EXPECT_EQ(1955, a.p("year").as<int32_t>());
   EXPECT_EQ(3, a.p("month").as<int32_t>());
   EXPECT_EQ(13, a.p("day").as<int32_t>());
