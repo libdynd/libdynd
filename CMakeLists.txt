@@ -182,7 +182,6 @@ set(libdynd_SRC
     src/dynd/types/kind_sym_type.cpp
     src/dynd/types/option_type.cpp
     src/dynd/types/pointer_type.cpp
-    src/dynd/types/property_type.cpp
     src/dynd/types/string_type.cpp
     src/dynd/types/struct_type.cpp
     src/dynd/types/substitute_shape.cpp
@@ -248,7 +247,6 @@ set(libdynd_SRC
     include/dynd/types/option_type.hpp
     include/dynd/types/pointer_type.hpp
     include/dynd/types/pow_dimsym_type.hpp
-    include/dynd/types/property_type.hpp
     include/dynd/types/scalar_kind_type.hpp
     include/dynd/types/string_type.hpp
     include/dynd/types/struct_type.hpp
