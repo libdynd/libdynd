@@ -7,9 +7,7 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/func/apply.hpp>
 
-#include <dynd/types/expr_type.hpp>
 #include <dynd/kernels/string_algorithm_kernels.hpp>
-#include <dynd/kernels/expr_kernel_generator.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -46,65 +44,6 @@ void ndt::base_string_type::get_dynamic_type_properties(std::map<std::string, nd
 {
   properties = base_string_type_properties();
 }
-
-namespace {
-// TODO: The representation of deferred operations needs work,
-//       this way is too verbose and boilerplatey
-class string_find_kernel_generator : public expr_kernel_generator {
-  ndt::type m_rdt, m_op1dt, m_op2dt;
-  expr_operation_pair m_op_pair;
-  const char *m_name;
-
-  typedef kernels::string_find_kernel extra_type;
-
-public:
-  string_find_kernel_generator(const ndt::type &rdt, const ndt::type &op1dt, const ndt::type &op2dt,
-                               const expr_operation_pair &op_pair, const char *name)
-      : expr_kernel_generator(true), m_rdt(rdt), m_op1dt(op1dt), m_op2dt(op2dt), m_op_pair(op_pair), m_name(name)
-  {
-  }
-
-  virtual ~string_find_kernel_generator() {}
-
-  size_t make_expr_kernel(void *ckb, intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
-                          size_t src_count, const ndt::type *src_tp, const char *const *src_arrmeta,
-                          kernel_request_t kernreq, const eval::eval_context *DYND_UNUSED(ectx)) const
-  {
-    if (src_count != 2) {
-      stringstream ss;
-      ss << "The " << m_name << " kernel requires 2 src operands, ";
-      ss << "received " << src_count;
-      throw runtime_error(ss.str());
-    }
-    if (dst_tp != m_rdt || src_tp[0] != m_op1dt || src_tp[1] != m_op2dt) {
-      // If the types don't match the ones for this generator,
-      // call the elementwise dimension handler to handle one dimension
-      // or handle input/output buffering, giving 'this' as the next
-      // kernel generator to call
-      throw std::runtime_error("make_elwise_dimension_expr_kernel is not implemented");
-    }
-    // This is a leaf kernel, so no additional allocation is needed
-    extra_type *e = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->alloc_ck<extra_type>(ckb_offset);
-    switch (kernreq) {
-    case kernel_request_single:
-      e->base().function = reinterpret_cast<void *>(m_op_pair.single);
-      break;
-    case kernel_request_strided:
-      e->base().function = reinterpret_cast<void *>(m_op_pair.strided);
-      break;
-    default: {
-      stringstream ss;
-      ss << "generic_kernel_generator: unrecognized request " << (int)kernreq;
-      throw runtime_error(ss.str());
-    }
-    }
-    e->init(src_tp, src_arrmeta);
-    return ckb_offset;
-  }
-
-  void print_type(std::ostream &o) const { o << m_name << "(op0, op1)"; }
-};
-} // anonymous namespace
 
 /*
 static nd::array array_function_find(const nd::array& self, const nd::array&

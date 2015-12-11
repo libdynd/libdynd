@@ -8,7 +8,6 @@
 #include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
-#include <dynd/types/expr_type.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/type.hpp>

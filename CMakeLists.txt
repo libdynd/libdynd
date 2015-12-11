@@ -166,7 +166,6 @@ set(libdynd_SRC
     src/dynd/types/datetime_util.cpp
     src/dynd/types/dim_fragment_type.cpp
     src/dynd/types/ellipsis_dim_type.cpp
-    src/dynd/types/expr_type.cpp
     src/dynd/types/fixed_dim_type.cpp
     src/dynd/types/fixed_dim_kind_type.cpp
     src/dynd/types/fixed_bytes_kind_type.cpp
@@ -226,7 +225,6 @@ set(libdynd_SRC
     include/dynd/types/datetime_util.hpp
     include/dynd/types/dim_fragment_type.hpp
     include/dynd/types/ellipsis_dim_type.hpp
-    include/dynd/types/expr_type.hpp
     include/dynd/types/fixed_dim_type.hpp
     include/dynd/types/fixed_dim_kind_type.hpp
     include/dynd/types/fixed_bytes_kind_type.hpp
@@ -325,8 +323,6 @@ set(libdynd_SRC
     src/dynd/kernels/comparison_kernels.cpp
     src/dynd/kernels/compare_kernels.cpp
     src/dynd/kernels/copy_kernel.cpp
-    src/dynd/kernels/date_expr_kernels.cpp
-    src/dynd/kernels/expr_kernel_generator.cpp
     src/dynd/kernels/expression_assignment_kernels.cpp
     src/dynd/kernels/expression_comparison_kernels.cpp
     src/dynd/kernels/fft_kernel.cpp
@@ -358,9 +354,7 @@ set(libdynd_SRC
     include/dynd/kernels/copy_kernel.hpp
     include/dynd/kernels/constant_kernel.hpp
     include/dynd/kernels/cuda_launch.hpp
-    include/dynd/kernels/date_expr_kernels.hpp
     include/dynd/kernels/elwise.hpp
-    include/dynd/kernels/expr_kernel_generator.hpp
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/fft_kernel.hpp

@@ -9,7 +9,6 @@
 #include <dynd/ensure_immutable_contig.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
 
 using namespace std;

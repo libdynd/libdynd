@@ -14,7 +14,6 @@
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/apply.hpp>
