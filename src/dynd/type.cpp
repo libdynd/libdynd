@@ -11,7 +11,7 @@
 #include <dynd/exceptions.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/types/new_adapt_type.hpp>
+#include <dynd/types/adapt_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
@@ -135,7 +135,7 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     tuple_type::make(true),                           // tuple_type_id
     type(),                                           // option_type_id,
     type(),                                           // c_contiguous_type_id
-    type(),                                           // new_adapt_type_id
+    type(),                                           // adapt_type_id
     type(),                                           // convert_type_id
     type(),                                           // view_type_id
     type(),                                           // cuda_host_type_id
@@ -303,8 +303,8 @@ const ndt::type &ndt::type::storage_type() const
   if (is_builtin() || m_ptr->get_kind() != expr_kind) {
     return *this;
   }
-  else if (get_type_id() == new_adapt_type_id) {
-    return extended<ndt::new_adapt_type>()->get_storage_type();
+  else if (get_type_id() == adapt_type_id) {
+    return extended<ndt::adapt_type>()->get_storage_type();
   }
   else {
     // Follow the operand type chain to get the storage type
@@ -322,8 +322,8 @@ const ndt::type &ndt::type::value_type() const
   if (is_builtin() || m_ptr->get_kind() != expr_kind) {
     return *this;
   }
-  else if (get_type_id() == new_adapt_type_id) {
-    return extended<ndt::new_adapt_type>()->get_value_type();
+  else if (get_type_id() == adapt_type_id) {
+    return extended<ndt::adapt_type>()->get_value_type();
   }
   else {
     // All chaining happens in the operand_type
@@ -582,7 +582,7 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "C");
   case option_type_id:
     return (o << "option");
-  case new_adapt_type_id:
+  case adapt_type_id:
     return o << "adapt";
   case kind_sym_type_id:
     return (o << "kind_sym");

@@ -145,7 +145,7 @@ enum type_id_t {
   c_contiguous_type_id,
 
   // Adapter types
-  new_adapt_type_id,
+  adapt_type_id,
   convert_type_id,
   view_type_id,
 

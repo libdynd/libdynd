@@ -11,7 +11,7 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
-#include <dynd/types/new_adapt_type.hpp>
+#include <dynd/types/adapt_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/kernels/date_expr_kernels.hpp>

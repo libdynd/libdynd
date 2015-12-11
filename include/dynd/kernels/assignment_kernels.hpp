@@ -26,7 +26,7 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/types/char_type.hpp>
-#include <dynd/types/new_adapt_type.hpp>
+#include <dynd/types/adapt_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -3463,27 +3463,27 @@ namespace nd {
         : assignment_virtual_kernel<fixed_string_type_id, string_kind, fixed_string_type_id, string_kind> {
     };
 
-    struct new_adapt_assign_to_kernel : base_virtual_kernel<new_adapt_assign_to_kernel> {
+    struct adapt_assign_to_kernel : base_virtual_kernel<adapt_assign_to_kernel> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
                                   const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *DYND_UNUSED(src_tp), const char *const *src_arrmeta,
                                   kernel_request_t kernreq, const eval::eval_context *ectx, intptr_t nkwd,
                                   const nd::array *kwds, const std::map<std::string, ndt::type> &tp_vars)
       {
-        const callable &inverse = dst_tp.extended<ndt::new_adapt_type>()->get_inverse();
+        const callable &inverse = dst_tp.extended<ndt::adapt_type>()->get_inverse();
         const ndt::type &value_tp = dst_tp.value_type();
         return inverse->instantiate(inverse->static_data(), data, ckb, ckb_offset, dst_tp.storage_type(), dst_arrmeta,
                                     nsrc, &value_tp, src_arrmeta, kernreq, ectx, nkwd, kwds, tp_vars);
       }
     };
 
-    struct new_adapt_assign_from_kernel : base_kernel<new_adapt_assign_from_kernel, 1> {
+    struct adapt_assign_from_kernel : base_kernel<adapt_assign_from_kernel, 1> {
       intptr_t forward_offset;
       array buffer;
 
-      new_adapt_assign_from_kernel(const ndt::type &buffer_tp) : buffer(empty(buffer_tp)) {}
+      adapt_assign_from_kernel(const ndt::type &buffer_tp) : buffer(empty(buffer_tp)) {}
 
-      ~new_adapt_assign_from_kernel()
+      ~adapt_assign_from_kernel()
       {
         get_child()->destroy();
         get_child(forward_offset)->destroy();
@@ -3505,7 +3505,7 @@ namespace nd {
       {
         const ndt::type &storage_tp = src_tp[0].storage_type();
         if (storage_tp.is_expression()) {
-          const callable &forward = src_tp[0].extended<ndt::new_adapt_type>()->get_forward();
+          const callable &forward = src_tp[0].extended<ndt::adapt_type>()->get_forward();
 
           intptr_t self_offset = ckb_offset;
           make(ckb, kernreq, ckb_offset, storage_tp.get_canonical_type());
@@ -3524,7 +3524,7 @@ namespace nd {
           return ckb_offset;
         }
 
-        const callable &forward = src_tp[0].extended<ndt::new_adapt_type>()->get_forward();
+        const callable &forward = src_tp[0].extended<ndt::adapt_type>()->get_forward();
 
         ndt::type src_tp2[1] = {storage_tp.get_canonical_type()};
         ckb_offset = forward->instantiate(forward->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
