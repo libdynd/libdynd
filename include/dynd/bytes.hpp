@@ -21,20 +21,14 @@ public:
   {
   }
 
-  bytes(const char *data, size_t size) : m_data(new char[size]), m_size(size)
-  {
-    std::copy_n(data, m_size, m_data);
-  }
+  bytes(const char *data, size_t size) : m_data(new char[size]), m_size(size) { memcpy(m_data, data, size); }
 
   bytes(const bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
   {
-    std::copy_n(other.m_data, m_size, m_data);
+    memcpy(m_data, other.m_data, other.m_size);
   }
 
-  ~bytes()
-  {
-    delete[] m_data;
-  }
+  ~bytes() { delete[] m_data; }
 
   char *data()
   {
@@ -59,7 +53,7 @@ public:
       m_size = size;
     }
 
-    std::copy_n(data, m_size, m_data);
+    memcpy(m_data, data, m_size);
 
     return *this;
   }
@@ -76,7 +70,7 @@ public:
   {
     if (size != m_size) {
       char *data = new char[size];
-      std::copy_n(m_data, std::min(size, m_size), data);
+      memcpy(data, m_data, std::min(size, m_size));
       delete[] m_data;
 
       m_data = data;
@@ -137,7 +131,7 @@ namespace detail {
 
     value_bytes(const value_bytes &other) : m_data(new char[other.m_size]), m_size(other.m_size)
     {
-      std::copy_n(other.m_data, m_size, m_data);
+      memcpy(m_data, other.m_data, m_size);
     }
 
     ~value_bytes()
@@ -157,7 +151,8 @@ namespace detail {
 
     value_bytes &operator=(const value_bytes &rhs)
     {
-      std::copy_n(rhs.m_data, m_size, m_data);
+      // TODO: This is unsafe, need to fix it.
+      memcpy(m_data, rhs.m_data, m_size);
 
       return *this;
     }
@@ -209,7 +204,7 @@ public:
     return tmp;
   }
 
-  strided_iterator &operator+=(int i)
+  strided_iterator &operator+=(std::ptrdiff_t i)
   {
     m_data += i * m_stride;
     return *this;
@@ -228,7 +223,7 @@ public:
     return tmp;
   }
 
-  strided_iterator &operator-=(int i)
+  strided_iterator &operator-=(std::ptrdiff_t i)
   {
     m_data -= i * m_stride;
     return *this;

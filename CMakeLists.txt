@@ -442,11 +442,13 @@ set(libdynd_SRC
     include/dynd/arrmeta_holder.hpp
     include/dynd/asarray.hpp
     include/dynd/bool1.hpp
-    include/dynd/config.hpp
+    include/dynd/bytes.hpp
+    include/dynd/cephes.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp
-    include/dynd/cling_all.hpp
     include/dynd/complex.hpp
+    include/dynd/config.hpp
+    include/dynd/cling_all.hpp
     include/dynd/convert.hpp
     include/dynd/diagnostics.hpp
     include/dynd/ensure_immutable_contig.hpp
