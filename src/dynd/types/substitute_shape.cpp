@@ -7,7 +7,6 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/pointer_type.hpp>
-#include <dynd/types/base_struct_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/base_memory_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>

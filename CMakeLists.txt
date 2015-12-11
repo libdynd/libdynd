@@ -147,7 +147,6 @@ set(libdynd_SRC
     src/dynd/types/base_expr_type.cpp
     src/dynd/types/base_memory_type.cpp
     src/dynd/types/base_string_type.cpp
-    src/dynd/types/base_struct_type.cpp
     src/dynd/types/base_tuple_type.cpp
     src/dynd/types/base_dim_type.cpp
     src/dynd/types/busdate_type.cpp
@@ -211,7 +210,6 @@ set(libdynd_SRC
     include/dynd/types/base_memory_type.hpp
     include/dynd/types/base_expr_type.hpp
     include/dynd/types/base_string_type.hpp
-    include/dynd/types/base_struct_type.hpp
     include/dynd/types/base_tuple_type.hpp
     include/dynd/types/base_dim_type.hpp
     include/dynd/types/busdate_type.hpp

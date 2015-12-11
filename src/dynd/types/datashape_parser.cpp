@@ -5,6 +5,7 @@
 
 #include <map>
 #include <set>
+#include <stdexcept>
 
 #include <dynd/types/datashape_parser.hpp>
 #include <dynd/parser_util.hpp>

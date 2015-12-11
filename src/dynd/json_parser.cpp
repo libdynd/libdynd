@@ -281,7 +281,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
     return false;
   }
 
-  const ndt::base_struct_type *fsd = tp.extended<ndt::base_struct_type>();
+  const ndt::struct_type *fsd = tp.extended<ndt::struct_type>();
   intptr_t field_count = fsd->get_field_count();
   const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
   const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
