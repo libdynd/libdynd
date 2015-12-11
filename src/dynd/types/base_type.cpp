@@ -283,48 +283,6 @@ void ndt::base_type::get_dynamic_array_properties(std::map<std::string, nd::call
 
 void ndt::base_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const {}
 
-size_t ndt::base_type::get_elwise_property_index(const std::string &property_name) const
-{
-  std::stringstream ss;
-  ss << "the dynd type " << type(this, true);
-  ss << " doesn't have a property \"" << property_name << "\"";
-  throw std::runtime_error(ss.str());
-}
-
-ndt::type ndt::base_type::get_elwise_property_type(size_t DYND_UNUSED(elwise_property_index),
-                                                   bool &DYND_UNUSED(out_readable),
-                                                   bool &DYND_UNUSED(out_writable)) const
-{
-  throw std::runtime_error("get_elwise_property_type: this dynd type does "
-                           "not have any properties");
-}
-
-size_t ndt::base_type::make_elwise_property_getter_kernel(void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
-                                                          const char *DYND_UNUSED(dst_arrmeta),
-                                                          const char *DYND_UNUSED(src_arrmeta),
-                                                          size_t DYND_UNUSED(src_elwise_property_index),
-                                                          kernel_request_t DYND_UNUSED(kernreq),
-                                                          const eval::eval_context *DYND_UNUSED(ectx)) const
-{
-  std::stringstream ss;
-  ss << "the dynd type " << type(this, true);
-  ss << " doesn't have any readable properties";
-  throw std::runtime_error(ss.str());
-}
-
-size_t ndt::base_type::make_elwise_property_setter_kernel(void *DYND_UNUSED(ckb), intptr_t DYND_UNUSED(ckb_offset),
-                                                          const char *DYND_UNUSED(dst_arrmeta),
-                                                          size_t DYND_UNUSED(dst_elwise_property_index),
-                                                          const char *DYND_UNUSED(src_arrmeta),
-                                                          kernel_request_t DYND_UNUSED(kernreq),
-                                                          const eval::eval_context *DYND_UNUSED(ectx)) const
-{
-  std::stringstream ss;
-  ss << "the dynd type " << type(this, true);
-  ss << " doesn't have any writable properties";
-  throw std::runtime_error(ss.str());
-}
-
 bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp), const std::string &DYND_UNUSED(op),
                                 nd::callable &DYND_UNUSED(out_forward), nd::callable &DYND_UNUSED(out_reverse)) const
 {
