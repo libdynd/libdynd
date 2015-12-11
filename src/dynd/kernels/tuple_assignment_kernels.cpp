@@ -117,7 +117,7 @@ size_t dynd::make_tuple_identical_assignment_kernel(void *ckb, intptr_t ckb_offs
                                                  val_tup_tp.get_data_alignment(), kernreq);
   }
 
-  auto sd = val_tup_tp.extended<ndt::base_tuple_type>();
+  auto sd = val_tup_tp.extended<ndt::tuple_type>();
   intptr_t field_count = sd->get_field_count();
   const uintptr_t *arrmeta_offsets = sd->get_arrmeta_offsets_raw();
   shortvector<const char *> dst_fields_arrmeta(field_count);
@@ -155,8 +155,8 @@ size_t dynd::make_tuple_assignment_kernel(void *ckb, intptr_t ckb_offset, const 
        << " is not of tuple or struct kind";
     throw runtime_error(ss.str());
   }
-  auto dst_sd = dst_tuple_tp.extended<ndt::base_tuple_type>();
-  auto src_sd = src_tuple_tp.extended<ndt::base_tuple_type>();
+  auto dst_sd = dst_tuple_tp.extended<ndt::tuple_type>();
+  auto src_sd = src_tuple_tp.extended<ndt::tuple_type>();
   intptr_t field_count = dst_sd->get_field_count();
 
   if (field_count != src_sd->get_field_count()) {
@@ -202,7 +202,7 @@ size_t dynd::make_broadcast_to_tuple_assignment_kernel(void *ckb, intptr_t ckb_o
        << " is not of tuple or struct kind";
     throw runtime_error(ss.str());
   }
-  auto dst_sd = dst_tuple_tp.extended<ndt::base_tuple_type>();
+  auto dst_sd = dst_tuple_tp.extended<ndt::tuple_type>();
   intptr_t field_count = dst_sd->get_field_count();
 
   const uintptr_t *dst_arrmeta_offsets = dst_sd->get_arrmeta_offsets_raw();

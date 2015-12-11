@@ -78,10 +78,10 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
   case struct_type_id:
     return ndt::struct_type::make(
         pattern.extended<struct_type>()->get_field_names(),
-        substitute_type_array(pattern.extended<base_tuple_type>()->get_field_types(), typevars, concrete));
+        substitute_type_array(pattern.extended<tuple_type>()->get_field_types(), typevars, concrete));
   case tuple_type_id:
     return ndt::tuple_type::make(
-        substitute_type_array(pattern.extended<base_tuple_type>()->get_field_types(), typevars, concrete));
+        substitute_type_array(pattern.extended<tuple_type>()->get_field_types(), typevars, concrete));
   case option_type_id:
     return ndt::option_type::make(
         ndt::substitute(pattern.extended<option_type>()->get_value_type(), typevars, concrete));

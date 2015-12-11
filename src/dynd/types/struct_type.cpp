@@ -19,7 +19,7 @@ using namespace std;
 using namespace dynd;
 
 ndt::struct_type::struct_type(const nd::array &field_names, const nd::array &field_types, bool variadic)
-    : base_tuple_type(struct_type_id, field_types, type_flag_none, true, variadic), m_field_names(field_names)
+    : tuple_type(struct_type_id, field_types, type_flag_none, true, variadic), m_field_names(field_names)
 {
   /*
     if (!nd::ensure_immutable_contig<std::string>(m_field_names)) {
@@ -497,8 +497,7 @@ static nd::array make_self_types()
   return result;
 }
 
-ndt::struct_type::struct_type(int, int)
-    : base_tuple_type(struct_type_id, make_self_types(), type_flag_none, false, false)
+ndt::struct_type::struct_type(int, int) : tuple_type(struct_type_id, make_self_types(), type_flag_none, false, false)
 {
   // Equivalent to ndt::struct_type::make(ndt::make_ndarrayarg(), "self");
   // but hardcoded to break the dependency of struct_type::array_parameters_type
@@ -534,7 +533,7 @@ bool ndt::struct_type::match(const char *arrmeta, const type &candidate_tp, cons
                              std::map<std::string, type> &tp_vars) const
 {
   intptr_t candidate_field_count = candidate_tp.extended<struct_type>()->get_field_count();
-  bool candidate_variadic = candidate_tp.extended<base_tuple_type>()->is_variadic();
+  bool candidate_variadic = candidate_tp.extended<tuple_type>()->is_variadic();
 
   if ((m_field_count == candidate_field_count && !candidate_variadic) ||
       ((candidate_field_count >= m_field_count) && m_variadic)) {

@@ -16,7 +16,7 @@ intptr_t nd::equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     const std::map<std::string, ndt::type> &tp_vars)
 {
   intptr_t root_ckb_offset = ckb_offset;
-  auto bsd = src_tp->extended<ndt::base_tuple_type>();
+  auto bsd = src_tp->extended<ndt::tuple_type>();
   size_t field_count = bsd->get_field_count();
   extra_type *e = extra_type::make(ckb, kernel_request_host | kernel_request_single, ckb_offset, field_count,
                                    bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));
@@ -54,7 +54,7 @@ intptr_t nd::not_equal_kernel<tuple_type_id, tuple_type_id>::instantiate(
     const std::map<std::string, ndt::type> &tp_vars)
 {
   intptr_t root_ckb_offset = ckb_offset;
-  auto bsd = src_tp->extended<ndt::base_tuple_type>();
+  auto bsd = src_tp->extended<ndt::tuple_type>();
   size_t field_count = bsd->get_field_count();
   extra_type *e = extra_type::make(ckb, kernel_request_host | kernel_request_single, ckb_offset, field_count,
                                    bsd->get_data_offsets(src_arrmeta[0]), bsd->get_data_offsets(src_arrmeta[1]));

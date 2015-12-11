@@ -9,7 +9,7 @@
 #include <string>
 
 #include <dynd/type.hpp>
-#include <dynd/types/base_tuple_type.hpp>
+#include <dynd/types/tuple_type.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/type_type.hpp>
 #include <dynd/memblock/memory_block.hpp>
@@ -17,7 +17,7 @@
 namespace dynd {
 namespace ndt {
 
-  class DYND_API struct_type : public base_tuple_type {
+  class DYND_API struct_type : public tuple_type {
     nd::array m_field_names;
     std::map<std::string, nd::callable> m_array_properties;
 

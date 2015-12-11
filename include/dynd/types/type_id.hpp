@@ -146,7 +146,6 @@ enum type_id_t {
 
   // Adapter types
   new_adapt_type_id,
-  adapt_type_id,
   convert_type_id,
   view_type_id,
 
@@ -682,11 +681,6 @@ struct type_kind_of<char_type_id> {
 template <>
 struct type_kind_of<categorical_type_id> {
   static const type_kind_t value = custom_kind;
-};
-
-template <>
-struct type_kind_of<adapt_type_id> {
-  static const type_kind_t value = expr_kind;
 };
 
 template <>

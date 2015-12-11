@@ -136,7 +136,6 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(),                                           // option_type_id,
     type(),                                           // c_contiguous_type_id
     type(),                                           // new_adapt_type_id
-    type(),                                           // adapt_type_id
     type(),                                           // convert_type_id
     type(),                                           // view_type_id
     type(),                                           // cuda_host_type_id

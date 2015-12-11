@@ -210,7 +210,7 @@ namespace ndt {
         return make(ret_tp, tuple_type::make({tuple_tp}), struct_type::make());
       }
 
-      return make(ret_tp, tuple_tp, struct_type::make(tuple_tp.extended<base_tuple_type>()->is_variadic()));
+      return make(ret_tp, tuple_tp, struct_type::make(tuple_tp.extended<tuple_type>()->is_variadic()));
     }
 
     /** Makes an callable type with just positional arguments */
