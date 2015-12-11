@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/types/new_adapt_type.hpp>
+#include <dynd/types/adapt_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -26,7 +26,7 @@ namespace nd {
       void single(array *dst, array *const *src)
       {
         *dst = src[0]->replace_dtype(
-            ndt::make_type<ndt::new_adapt_type>(value_tp, src[0]->get_dtype(), forward, callable()));
+            ndt::make_type<ndt::adapt_type>(value_tp, src[0]->get_dtype(), forward, callable()));
       }
 
       static void resolve_dst_type(char *static_data, char *DYND_UNUSED(data), ndt::type &dst_tp,
