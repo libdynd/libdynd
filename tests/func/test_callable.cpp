@@ -16,7 +16,6 @@
 #include <dynd/func/callable.hpp>
 #include <dynd/func/apply.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/expr_kernel_generator.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/array.hpp>

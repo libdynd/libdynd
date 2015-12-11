@@ -4,7 +4,6 @@
 //
 
 #include <dynd/types/adapt_type.hpp>
-#include <dynd/types/builtin_type_properties.hpp>
 
 using namespace std;
 using namespace dynd;

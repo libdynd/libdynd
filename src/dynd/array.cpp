@@ -27,7 +27,6 @@
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/types/categorical_type.hpp>
-#include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/memblock/memmap_memory_block.hpp>
 #include <dynd/view.hpp>
 

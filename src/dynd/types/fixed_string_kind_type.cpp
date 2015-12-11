@@ -8,7 +8,6 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/types/builtin_type_properties.hpp>
 
 using namespace std;
 using namespace dynd;

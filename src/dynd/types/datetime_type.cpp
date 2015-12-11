@@ -14,7 +14,6 @@
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/kernels/date_expr_kernels.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/parser_util.hpp>

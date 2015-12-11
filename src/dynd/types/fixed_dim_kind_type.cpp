@@ -11,7 +11,6 @@
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/func/apply.hpp>
-#include <dynd/types/builtin_type_properties.hpp>
 
 using namespace std;
 using namespace dynd;

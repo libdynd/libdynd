@@ -1161,6 +1161,9 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
+  DYND_API void get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
+                                                          std::map<std::string, nd::callable> &properties);
+
 /** Prints raw bytes as hexadecimal */
 DYND_API void hexadecimal_print(std::ostream &o, char value);
 DYND_API void hexadecimal_print(std::ostream &o, unsigned char value);
