@@ -137,13 +137,11 @@ DYND_API nd::callable nd::assign::make()
   children[{{fixed_bytes_type_id, view_type_id}}] =
       callable::make<assignment_kernel<fixed_bytes_type_id, view_type_id>>();
   children[{{date_type_id, expr_type_id}}] = callable::make<assignment_kernel<date_type_id, expr_type_id>>();
-  children[{{date_type_id, adapt_type_id}}] = callable::make<assignment_kernel<date_type_id, adapt_type_id>>();
   children[{{option_type_id, convert_type_id}}] = callable::make<assignment_kernel<option_type_id, convert_type_id>>();
   children[{{string_type_id, convert_type_id}}] = callable::make<assignment_kernel<string_type_id, convert_type_id>>();
   children[{{string_type_id, expr_type_id}}] = callable::make<assignment_kernel<string_type_id, expr_type_id>>();
   children[{{datetime_type_id, convert_type_id}}] =
       callable::make<assignment_kernel<datetime_type_id, convert_type_id>>();
-  children[{{datetime_type_id, adapt_type_id}}] = callable::make<assignment_kernel<datetime_type_id, adapt_type_id>>();
   children[{{fixed_string_type_id, convert_type_id}}] =
       callable::make<assignment_kernel<fixed_string_type_id, convert_type_id>>();
   children[{{convert_type_id, convert_type_id}}] =

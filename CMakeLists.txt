@@ -138,7 +138,6 @@ set(config_cpp src/dynd/config.cpp)
 
 set(libdynd_SRC
     # Types
-    src/dynd/types/adapt_type.cpp
     src/dynd/types/new_adapt_type.cpp
     src/dynd/types/any_kind_type.cpp
     src/dynd/types/array_type.cpp
@@ -200,7 +199,6 @@ set(libdynd_SRC
     src/dynd/types/var_dim_type.cpp
     src/dynd/types/view_type.cpp
     src/dynd/types/void_pointer_type.cpp
-    include/dynd/types/adapt_type.hpp
     include/dynd/types/new_adapt_type.hpp
     include/dynd/types/any_kind_type.hpp
     include/dynd/types/array_type.hpp
