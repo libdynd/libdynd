@@ -350,7 +350,7 @@ intptr_t ndt::type::get_dim_size(const char *arrmeta, const char *data) const
     return static_cast<const base_dim_type *>(get())->get_dim_size(arrmeta, data);
   }
   else if (get_kind() == struct_kind) {
-    return static_cast<const base_struct_type *>(get())->get_field_count();
+    return static_cast<const struct_type *>(get())->get_field_count();
   }
   else if (get_ndim() > 0) {
     intptr_t dim_size = -1;

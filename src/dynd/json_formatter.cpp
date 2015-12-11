@@ -8,7 +8,7 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/datetime_type.hpp>
-#include <dynd/types/base_struct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -226,7 +226,7 @@ static void format_json_type(output_data &out, const ndt::type &dt, const char *
 
 static void format_json_struct(output_data &out, const ndt::type &dt, const char *arrmeta, const char *data)
 {
-  const ndt::base_struct_type *bsd = dt.extended<ndt::base_struct_type>();
+  const ndt::struct_type *bsd = dt.extended<ndt::struct_type>();
   intptr_t field_count = bsd->get_field_count();
   const size_t *data_offsets = bsd->get_data_offsets(arrmeta);
   const size_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();

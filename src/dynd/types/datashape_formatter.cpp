@@ -4,7 +4,7 @@
 //
 
 #include <dynd/types/datashape_formatter.hpp>
-#include <dynd/types/base_struct_type.hpp>
+#include <dynd/types/struct_type.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
@@ -24,7 +24,7 @@ static void format_struct_datashape(std::ostream &o, const ndt::type &tp, const 
   if (arrmeta == NULL) {
     data = NULL;
   }
-  const ndt::base_struct_type *bsd = tp.extended<ndt::base_struct_type>();
+  const ndt::struct_type *bsd = tp.extended<ndt::struct_type>();
   size_t field_count = bsd->get_field_count();
   const uintptr_t *arrmeta_offsets = bsd->get_arrmeta_offsets_raw();
   const uintptr_t *data_offsets = NULL;
