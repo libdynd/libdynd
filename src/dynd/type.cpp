@@ -15,7 +15,6 @@
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/datashape_parser.hpp>
-#include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/categorical_kind_type.hpp>
@@ -26,6 +25,11 @@
 #include <dynd/types/fixed_bytes_kind_type.hpp>
 #include <dynd/types/fixed_string_kind_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
+#include <dynd/kernels/real_kernel.hpp>
+#include <dynd/kernels/imag_kernel.hpp>
+#include <dynd/kernels/conj_kernel.hpp>
+#include <dynd/func/callable.hpp>
+#include <dynd/func/elwise.hpp>
 
 #include <sstream>
 #include <cstring>
@@ -1122,3 +1126,42 @@ ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp
 ndt::common_type::child_type ndt::common_type::children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX];
 
 class ndt::common_type ndt::common_type;
+
+namespace {
+
+const std::map<std::string, nd::callable> &complex32_array_properties()
+{
+  static const std::map<std::string, nd::callable> complex_array_properties{
+      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float32_type_id>>())},
+      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float32_type_id>>())},
+      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float32_type_id>>())}};
+
+  return complex_array_properties;
+}
+
+const std::map<std::string, nd::callable> &complex64_array_properties()
+{
+  static const std::map<std::string, nd::callable> complex_array_properties{
+      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float64_type_id>>())},
+      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float64_type_id>>())},
+      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float64_type_id>>())}};
+
+  return complex_array_properties;
+}
+
+} // anonymous namespace
+
+void dynd::get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
+                                                     std::map<std::string, nd::callable> &properties)
+{
+  switch (builtin_type_id) {
+  case complex_float32_type_id:
+    properties = complex32_array_properties();
+    break;
+  case complex_float64_type_id:
+    properties = complex64_array_properties();
+    break;
+  default:
+    break;
+  }
+}

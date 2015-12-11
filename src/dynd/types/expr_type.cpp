@@ -6,7 +6,6 @@
 #include <dynd/types/expr_type.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/types/tuple_type.hpp>
-#include <dynd/types/builtin_type_properties.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/func/callable.hpp>

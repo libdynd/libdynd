@@ -148,7 +148,6 @@ set(libdynd_SRC
     src/dynd/types/base_string_type.cpp
     src/dynd/types/base_dim_type.cpp
     src/dynd/types/busdate_type.cpp
-    src/dynd/types/builtin_type_properties.cpp
     src/dynd/types/bytes_type.cpp
     src/dynd/types/categorical_type.cpp
     src/dynd/types/categorical_kind_type.cpp
@@ -209,7 +208,6 @@ set(libdynd_SRC
     include/dynd/types/base_string_type.hpp
     include/dynd/types/base_dim_type.hpp
     include/dynd/types/busdate_type.hpp
-    include/dynd/types/builtin_type_properties.hpp
     include/dynd/types/bytes_type.hpp
     include/dynd/types/c_contiguous_type.hpp
     include/dynd/types/categorical_type.hpp
