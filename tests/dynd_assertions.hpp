@@ -69,7 +69,7 @@ inline ::testing::AssertionResult CompareDyNDArrays(const char *expr1, const cha
                                               "should have compared unequal";
     }
     else if (val1.get_type().get_kind() == tuple_kind) {
-      const ndt::base_tuple_type *bsd = val1.get_type().extended<ndt::base_tuple_type>();
+      const ndt::tuple_type *bsd = val1.get_type().extended<ndt::tuple_type>();
       intptr_t field_count = bsd->get_field_count();
       for (intptr_t i = 0; i < field_count; ++i) {
         nd::array field1 = val1(i), field2 = val2(i);

@@ -8,6 +8,7 @@
 #include <dynd/types/date_util.hpp>
 #include <dynd/types/date_parser.hpp>
 #include <dynd/types/struct_type.hpp>
+#include <dynd/func/callable.hpp>
 
 using namespace std;
 using namespace dynd;

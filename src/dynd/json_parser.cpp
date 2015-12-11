@@ -353,7 +353,7 @@ static bool parse_tuple_json_from_list(const ndt::type &tp, const char *arrmeta,
     return false;
   }
 
-  auto fsd = tp.extended<ndt::base_tuple_type>();
+  auto fsd = tp.extended<ndt::tuple_type>();
   intptr_t field_count = fsd->get_field_count();
   const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
   const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
