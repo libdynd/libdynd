@@ -54,6 +54,7 @@ matrix:
     script:
     - conda build conda.recipe
   - language: objective-c
+    os: osx
     osx_image: xcode6.4
     compiler: clang
     env: OSX CONDA=true
