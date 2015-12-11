@@ -101,7 +101,7 @@ TEST(Callable, CallOperator)
   EXPECT_EQ(7.5, f(2, 3.5).as<double>());
   // Wrong number of positional argumetns
   EXPECT_THROW(f(2), invalid_argument);
-  //  EXPECT_THROW(af(2, 3.5, 7), invalid_argument);
+  EXPECT_THROW(f(2, 3.5, 7), invalid_argument);
   // Extra keyword argument
   EXPECT_THROW(f(2, 3.5, kwds("x", 10)), invalid_argument);
 
