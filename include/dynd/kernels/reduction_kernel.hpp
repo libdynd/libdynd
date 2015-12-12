@@ -572,10 +572,11 @@ namespace nd {
                                   const std::map<std::string, ndt::type> &tp_vars)
       {
         const ndt::type &src0_element_tp = src_tp[0].extended<ndt::var_dim_type>()->get_element_type();
-        const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(var_dim_type_arrmeta);
+        const char *src0_element_arrmeta = src_arrmeta[0] + sizeof(ndt::var_dim_type::metadata_type);
 
         intptr_t root_ckb_offset = ckb_offset;
-        make(ckb, kernreq, ckb_offset, reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[0])->stride);
+        make(ckb, kernreq, ckb_offset,
+             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[0])->stride);
 
         --reinterpret_cast<data_type *>(data)->ndim;
         --reinterpret_cast<data_type *>(data)->naxis;

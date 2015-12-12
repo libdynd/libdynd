@@ -181,7 +181,7 @@ TEST(DTypeDType, VarArrayRefCount)
   a = nd::empty(ndt::var_dim_type::make(ndt::make_type<ndt::type_type>()));
   // It should have an objectarray memory block type
   EXPECT_EQ((uint32_t)objectarray_memory_block_type,
-            reinterpret_cast<const var_dim_type_arrmeta *>(a.get()->metadata())->blockref->m_type);
+            reinterpret_cast<const ndt::var_dim_type::metadata_type *>(a.get()->metadata())->blockref->m_type);
   a.vals() = nd::empty("10 * type");
   EXPECT_EQ(1, d.extended()->get_use_count());
   a.vals() = d;
