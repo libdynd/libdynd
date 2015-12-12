@@ -766,45 +766,6 @@ namespace nd {
   DYND_API array operator>=(const array &a0, const array &a1);
   DYND_API array operator>(const array &a0, const array &a1);
 
-  DYND_API nd::array array_rw(bool1 value);
-  DYND_API nd::array array_rw(bool value);
-  DYND_API nd::array array_rw(signed char value);
-  DYND_API nd::array array_rw(short value);
-  DYND_API nd::array array_rw(int value);
-  DYND_API nd::array array_rw(long value);
-  DYND_API nd::array array_rw(long long value);
-  DYND_API nd::array array_rw(const int128 &value);
-  DYND_API nd::array array_rw(unsigned char value);
-  DYND_API nd::array array_rw(unsigned short value);
-  DYND_API nd::array array_rw(unsigned int value);
-  DYND_API nd::array array_rw(unsigned long value);
-  DYND_API nd::array array_rw(unsigned long long value);
-  DYND_API nd::array array_rw(const uint128 &value);
-  DYND_API nd::array array_rw(float16 value);
-  DYND_API nd::array array_rw(float value);
-  DYND_API nd::array array_rw(double value);
-  DYND_API nd::array array_rw(const float128 &value);
-  DYND_API nd::array array_rw(dynd::complex<float> value);
-  DYND_API nd::array array_rw(dynd::complex<double> value);
-  DYND_API nd::array array_rw(std::complex<float> value);
-  DYND_API nd::array array_rw(std::complex<double> value);
-  DYND_API nd::array array_rw(const std::string &value);
-  /** Construct a string from a NULL-terminated UTF8 string */
-  DYND_API nd::array array_rw(const char *cstr);
-  /** Construct a string from a UTF8 buffer and specified buffer size */
-  DYND_API nd::array array_rw(const char *str, size_t size);
-  /**
-   * Constructs a scalar with the 'type' type.
-   * NOTE: Does NOT create a scalar of the provided type,
-   *       use dynd::empty(type) for that!
-   */
-  DYND_API nd::array array_rw(const ndt::type &tp);
-  /**
-   * Constructs a readwrite array from a C-style array.
-   */
-  template <class T, int N>
-  nd::array array_rw(const T(&rhs)[N]);
-
   /**
    * This is a helper class for dealing with value assignment and collapsing
    * a view-based array into a strided array. Only the array class itself
@@ -1454,20 +1415,6 @@ namespace nd {
                        default_access_flags, NULL)
         .swap(*this);
     DYND_MEMCPY(get()->data, reinterpret_cast<const void *>(&rhs), size);
-  }
-
-  // Temporarily removed due to conflicting dll linkage with earlier versions of this function.
-  template <class T, int N>
-  nd::array array_rw(const T(&rhs)[N])
-  {
-    const int ndim = detail::ndim_from_array<T[N]>::value;
-    intptr_t shape[ndim];
-    size_t size = detail::fill_shape<T[N]>::fill(shape);
-
-    nd::array result = make_strided_array(ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)), ndim,
-                                          shape, readwrite_access_flags, NULL);
-    DYND_MEMCPY(result.get()->data, reinterpret_cast<const void *>(&rhs), size);
-    return result;
   }
 
   template <int N>
