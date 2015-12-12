@@ -14,28 +14,22 @@ namespace nd {
   struct compound_add_kernel;
 
   template <typename DstType, typename Src0Type>
-  struct compound_add_kernel<
-      DstType, Src0Type,
-      false> : base_kernel<compound_add_kernel<DstType, Src0Type, false>, 1> {
+  struct compound_add_kernel<DstType, Src0Type, false> : base_kernel<compound_add_kernel<DstType, Src0Type, false>, 1> {
     typedef DstType dst_type;
     typedef Src0Type src0_type;
 
-    static const std::size_t data_size = 0;
-
     void single(char *dst, char *const *src)
     {
-      *reinterpret_cast<dst_type *>(dst) +=
-          *reinterpret_cast<src0_type *>(src[0]);
+      *reinterpret_cast<dst_type *>(dst) += *reinterpret_cast<src0_type *>(src[0]);
     }
 
-    void strided(char *dst, std::intptr_t dst_stride, char *const *src,
-                 const std::intptr_t *src_stride, std::size_t count)
+    void strided(char *dst, std::intptr_t dst_stride, char *const *src, const std::intptr_t *src_stride,
+                 std::size_t count)
     {
       char *src0 = src[0];
       std::intptr_t src0_stride = src_stride[0];
       for (std::size_t i = 0; i < count; ++i) {
-        *reinterpret_cast<dst_type *>(dst) +=
-            *reinterpret_cast<src0_type *>(src0);
+        *reinterpret_cast<dst_type *>(dst) += *reinterpret_cast<src0_type *>(src0);
         dst += dst_stride;
         src0 += src0_stride;
       }
@@ -43,30 +37,24 @@ namespace nd {
   };
 
   template <typename DstType, typename Src0Type>
-  struct compound_add_kernel<
-      DstType, Src0Type,
-      true> : base_kernel<compound_add_kernel<DstType, Src0Type, true>, 1> {
+  struct compound_add_kernel<DstType, Src0Type, true> : base_kernel<compound_add_kernel<DstType, Src0Type, true>, 1> {
     typedef DstType dst_type;
     typedef Src0Type src0_type;
-
-    static const std::size_t data_size = 0;
 
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<dst_type *>(dst) =
-          static_cast<dst_type>(*reinterpret_cast<dst_type *>(dst) +
-                                *reinterpret_cast<src0_type *>(src[0]));
+          static_cast<dst_type>(*reinterpret_cast<dst_type *>(dst) + *reinterpret_cast<src0_type *>(src[0]));
     }
 
-    void strided(char *dst, std::intptr_t dst_stride, char *const *src,
-                 const std::intptr_t *src_stride, std::size_t count)
+    void strided(char *dst, std::intptr_t dst_stride, char *const *src, const std::intptr_t *src_stride,
+                 std::size_t count)
     {
       char *src0 = src[0];
       std::intptr_t src0_stride = src_stride[0];
       for (std::size_t i = 0; i < count; ++i) {
         *reinterpret_cast<dst_type *>(dst) =
-            static_cast<dst_type>(*reinterpret_cast<dst_type *>(dst) +
-                                  *reinterpret_cast<src0_type *>(src0));
+            static_cast<dst_type>(*reinterpret_cast<dst_type *>(dst) + *reinterpret_cast<src0_type *>(src0));
         dst += dst_stride;
         src0 += src0_stride;
       }
@@ -74,34 +62,24 @@ namespace nd {
   };
 
   template <typename Src0Type>
-  struct compound_add_kernel<
-      bool1, Src0Type,
-      true> : base_kernel<compound_add_kernel<bool1, Src0Type, true>, 1> {
+  struct compound_add_kernel<bool1, Src0Type, true> : base_kernel<compound_add_kernel<bool1, Src0Type, true>, 1> {
     typedef bool1 dst_type;
     typedef Src0Type src0_type;
-
-    static const std::size_t data_size = 0;
 
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<dst_type *>(dst) =
-          *reinterpret_cast<dst_type *>(dst) +
-                  *reinterpret_cast<src0_type *>(src[0])
-              ? true
-              : false;
+          *reinterpret_cast<dst_type *>(dst) + *reinterpret_cast<src0_type *>(src[0]) ? true : false;
     }
 
-    void strided(char *dst, std::intptr_t dst_stride, char *const *src,
-                 const std::intptr_t *src_stride, std::size_t count)
+    void strided(char *dst, std::intptr_t dst_stride, char *const *src, const std::intptr_t *src_stride,
+                 std::size_t count)
     {
       char *src0 = src[0];
       std::intptr_t src0_stride = src_stride[0];
       for (std::size_t i = 0; i < count; ++i) {
         *reinterpret_cast<dst_type *>(dst) =
-            *reinterpret_cast<dst_type *>(dst) +
-                    *reinterpret_cast<src0_type *>(src0)
-                ? true
-                : false;
+            *reinterpret_cast<dst_type *>(dst) + *reinterpret_cast<src0_type *>(src0) ? true : false;
         dst += dst_stride;
         src0 += src0_stride;
       }
@@ -110,10 +88,8 @@ namespace nd {
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
   struct compound_add_kernel_t
-      : compound_add_kernel<
-            typename type_of<DstTypeID>::type,
-            typename type_of<Src0TypeID>::type,
-            !is_lossless_assignable<DstTypeID, Src0TypeID>::value> {
+      : compound_add_kernel<typename type_of<DstTypeID>::type, typename type_of<Src0TypeID>::type,
+                            !is_lossless_assignable<DstTypeID, Src0TypeID>::value> {
   };
 
 } // namespace dynd::nd
@@ -122,10 +98,7 @@ namespace ndt {
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
   struct type::equivalent<nd::compound_add_kernel_t<DstTypeID, Src0TypeID>> {
-    static type make()
-    {
-      return callable_type::make(type(DstTypeID), type(Src0TypeID));
-    }
+    static type make() { return callable_type::make(type(DstTypeID), type(Src0TypeID)); }
   };
 
 } // namespace dynd::ndt

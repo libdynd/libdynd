@@ -44,20 +44,12 @@ struct join;
 template <typename I, typename J>
 struct take;
 
-template <typename... I>
-struct alternate;
-
 template <typename T, T... I>
 struct integer_sequence {
-  enum {
-    size = sizeof...(I)
-  };
+  enum { size = sizeof...(I) };
   typedef T value_type;
 
-  static constexpr size_t size2()
-  {
-    return sizeof...(I);
-  }
+  static constexpr size_t size2() { return sizeof...(I); }
 };
 
 namespace detail {
@@ -106,16 +98,12 @@ struct is_index_sequence<index_sequence<I...>> {
 
 template <typename T, T I0, T... I>
 struct at<integer_sequence<T, I0, I...>, 0> {
-  enum {
-    value = I0
-  };
+  enum { value = I0 };
 };
 
 template <typename T, T I0, T... I, size_t J>
 struct at<integer_sequence<T, I0, I...>, J> {
-  enum {
-    value = at<integer_sequence<T, I...>, J - 1>::value
-  };
+  enum { value = at<integer_sequence<T, I...>, J - 1>::value };
 };
 
 template <typename T, T... I, T... J>
@@ -147,9 +135,7 @@ namespace detail {
 
   template <typename T, T start, T stop, T step>
   struct make_integer_sequence<1, T, start, stop, step> {
-    enum {
-      next = start + step
-    };
+    enum { next = start + step };
 
     typedef typename join < integer_sequence<T, start>,
         typename make_integer_sequence<next<stop, T, next, stop, step>::type>::type type;
@@ -225,14 +211,9 @@ struct to<integer_sequence<T, I0, I...>, J> {
 
 template <typename... T>
 struct type_sequence {
-  enum {
-    size = sizeof...(T)
-  };
+  enum { size = sizeof...(T) };
 
-  static constexpr size_t size2()
-  {
-    return sizeof...(T);
-  }
+  static constexpr size_t size2() { return sizeof...(T); }
 };
 
 template <typename T>
@@ -331,43 +312,6 @@ struct take<type_sequence<T...>, index_sequence<I...>> {
 };
 
 template <typename T>
-struct alternate<integer_sequence<T>, integer_sequence<T>> {
-  typedef integer_sequence<T> type;
-};
-
-// This case shouldn't be necessary, but was added to work around bug:
-// https://connect.microsoft.com/VisualStudio/feedback/details/1045397/recursive-variadic-template-metaprogram-ice-when-pack-gets-to-empty-size
-template <typename T, T I0, T J0>
-struct alternate<integer_sequence<T, I0>, integer_sequence<T, J0>> {
-  typedef integer_sequence<T, I0, J0> type;
-};
-
-template <typename T, T I0, T... I, T J0, T... J>
-struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>> {
-  typedef typename join<integer_sequence<T, I0, J0>,
-                        typename alternate<integer_sequence<T, I...>, integer_sequence<T, J...>>::type>::type type;
-};
-
-template <typename T>
-struct alternate<integer_sequence<T>, integer_sequence<T>, integer_sequence<T>, integer_sequence<T>> {
-  typedef integer_sequence<T> type;
-};
-
-// Another workaround
-template <typename T, T I0, T J0, T K0, T L0>
-struct alternate<integer_sequence<T, I0>, integer_sequence<T, J0>, integer_sequence<T, K0>, integer_sequence<T, L0>> {
-  typedef integer_sequence<T, I0, J0, K0, L0> type;
-};
-
-template <typename T, T I0, T... I, T J0, T... J, T K0, T... K, T L0, T... L>
-struct alternate<integer_sequence<T, I0, I...>, integer_sequence<T, J0, J...>, integer_sequence<T, K0, K...>,
-                 integer_sequence<T, L0, L...>> {
-  typedef typename join<integer_sequence<T, I0, J0, K0, L0>,
-                        typename alternate<integer_sequence<T, I...>, integer_sequence<T, J...>,
-                                           integer_sequence<T, K...>, integer_sequence<T, L...>>::type>::type type;
-};
-
-template <typename T>
 struct pop_front {
   typedef typename from<T, 1>::type type;
 };
@@ -423,35 +367,6 @@ typename std::enable_if<(S::size2() > 1), void>::type for_each(A &&... a)
 {
   for_each<typename to<S, 1>::type>(std::forward<A>(a)...);
   for_each<typename pop_front<S>::type>(std::forward<A>(a)...);
-}
-
-namespace detail {
-  template <size_t I, typename... A>
-  struct get_impl;
-
-  template <typename A0, typename... A>
-  struct get_impl<0, A0, A...> {
-    typedef A0 result_type;
-    static result_type get(A0 &&a0, A &&...)
-    {
-      return a0;
-    }
-  };
-
-  template <size_t I, typename A0, typename... A>
-  struct get_impl<I, A0, A...> {
-    typedef typename get_impl<I - 1, A...>::result_type result_type;
-    static result_type get(A0 &&, A &&... a)
-    {
-      return get_impl<I - 1, A...>::get(std::forward<A>(a)...);
-    }
-  };
-} // namespace detail
-
-template <size_t I, typename... A>
-typename detail::get_impl<I, A...>::result_type get(A &&... a)
-{
-  return detail::get_impl<I, A...>::get(std::forward<A>(a)...);
 }
 
 } // namespace dynd

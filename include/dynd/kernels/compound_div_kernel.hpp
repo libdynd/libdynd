@@ -20,8 +20,6 @@ namespace nd {
     typedef DstType dst_type;
     typedef Src0Type src0_type;
 
-    static const std::size_t data_size = 0;
-
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<dst_type *>(dst) /=
@@ -48,8 +46,6 @@ namespace nd {
       true> : base_kernel<compound_div_kernel<DstType, Src0Type, true>, 1> {
     typedef DstType dst_type;
     typedef Src0Type src0_type;
-
-    static const std::size_t data_size = 0;
 
     void single(char *dst, char *const *src)
     {
@@ -79,8 +75,6 @@ namespace nd {
       true> : base_kernel<compound_div_kernel<bool1, Src0Type, true>, 1> {
     typedef bool1 dst_type;
     typedef Src0Type src0_type;
-
-    static const std::size_t data_size = 0;
 
     void single(char *dst, char *const *src)
     {

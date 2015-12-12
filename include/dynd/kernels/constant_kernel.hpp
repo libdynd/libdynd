@@ -12,25 +12,14 @@ namespace dynd {
 namespace nd {
   namespace functional {
 
-    // All methods are inlined, so this does not need to be declared DYND_API.
     struct constant_kernel : base_kernel<constant_kernel> {
-      static const std::size_t data_size = 0;
-
       char *data;
 
-      constant_kernel(char *data) : data(data)
-      {
-      }
+      constant_kernel(char *data) : data(data) {}
 
-      ~constant_kernel()
-      {
-        get_child()->destroy();
-      }
+      ~constant_kernel() { get_child()->destroy(); }
 
-      void single(char *dst, char *const *DYND_UNUSED(src))
-      {
-        get_child()->single(dst, &data);
-      }
+      void single(char *dst, char *const *DYND_UNUSED(src)) { get_child()->single(dst, &data); }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                    const intptr_t *DYND_UNUSED(src_stride), size_t count)

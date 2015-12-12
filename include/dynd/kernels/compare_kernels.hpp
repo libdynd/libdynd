@@ -17,16 +17,8 @@
 namespace dynd {
 namespace nd {
 
-  template <typename K>
-  struct base_comparison_kernel;
-
-  template <template <type_id_t, type_id_t> class K, type_id_t I0, type_id_t I1>
-  struct base_comparison_kernel<K<I0, I1>> : base_kernel<K<I0, I1>, 2> {
-    static const std::size_t data_size = 0;
-  };
-
   template <type_id_t I0, type_id_t I1>
-  struct less_kernel : base_comparison_kernel<less_kernel<I0, I1>> {
+  struct less_kernel : base_kernel<less_kernel<I0, I1>, 2> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -39,7 +31,7 @@ namespace nd {
   };
 
   template <type_id_t I0>
-  struct less_kernel<I0, I0> : base_comparison_kernel<less_kernel<I0, I0>> {
+  struct less_kernel<I0, I0> : base_kernel<less_kernel<I0, I0>, 2> {
     typedef typename type_of<I0>::type A0;
 
     void single(char *dst, char *const *src)
@@ -49,7 +41,7 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct less_equal_kernel : base_comparison_kernel<less_equal_kernel<I0, I1>> {
+  struct less_equal_kernel : base_kernel<less_equal_kernel<I0, I1>, 2> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -62,7 +54,7 @@ namespace nd {
   };
 
   template <type_id_t I0>
-  struct less_equal_kernel<I0, I0> : base_comparison_kernel<less_equal_kernel<I0, I0>> {
+  struct less_equal_kernel<I0, I0> : base_kernel<less_equal_kernel<I0, I0>, 2> {
     typedef typename type_of<I0>::type A0;
 
     void single(char *dst, char *const *src)
@@ -72,7 +64,7 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct equal_kernel : base_comparison_kernel<equal_kernel<I0, I1>> {
+  struct equal_kernel : base_kernel<equal_kernel<I0, I1>, 2> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -85,7 +77,7 @@ namespace nd {
   };
 
   template <type_id_t I0>
-  struct equal_kernel<I0, I0> : base_comparison_kernel<equal_kernel<I0, I0>> {
+  struct equal_kernel<I0, I0> : base_kernel<equal_kernel<I0, I0>, 2> {
     typedef typename type_of<I0>::type A0;
 
     void single(char *dst, char *const *src)
@@ -95,8 +87,7 @@ namespace nd {
   };
 
   template <>
-  struct equal_kernel<tuple_type_id,
-                      tuple_type_id> : base_comparison_kernel<equal_kernel<tuple_type_id, tuple_type_id>> {
+  struct equal_kernel<tuple_type_id, tuple_type_id> : base_kernel<equal_kernel<tuple_type_id, tuple_type_id>, 2> {
     typedef equal_kernel extra_type;
 
     size_t field_count;
@@ -149,7 +140,7 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct not_equal_kernel : base_comparison_kernel<not_equal_kernel<I0, I1>> {
+  struct not_equal_kernel : base_kernel<not_equal_kernel<I0, I1>, 2> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -162,7 +153,7 @@ namespace nd {
   };
 
   template <type_id_t I0>
-  struct not_equal_kernel<I0, I0> : base_comparison_kernel<not_equal_kernel<I0, I0>> {
+  struct not_equal_kernel<I0, I0> : base_kernel<not_equal_kernel<I0, I0>, 2> {
     typedef typename type_of<I0>::type A0;
 
     void single(char *dst, char *const *src)
@@ -172,8 +163,8 @@ namespace nd {
   };
 
   template <>
-  struct not_equal_kernel<tuple_type_id,
-                          tuple_type_id> : base_comparison_kernel<not_equal_kernel<tuple_type_id, tuple_type_id>> {
+  struct not_equal_kernel<tuple_type_id, tuple_type_id>
+      : base_kernel<not_equal_kernel<tuple_type_id, tuple_type_id>, 2> {
     typedef not_equal_kernel extra_type;
 
     size_t field_count;
@@ -226,7 +217,7 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct greater_equal_kernel : base_comparison_kernel<greater_equal_kernel<I0, I1>> {
+  struct greater_equal_kernel : base_kernel<greater_equal_kernel<I0, I1>, 2> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -239,7 +230,7 @@ namespace nd {
   };
 
   template <type_id_t I0>
-  struct greater_equal_kernel<I0, I0> : base_comparison_kernel<greater_equal_kernel<I0, I0>> {
+  struct greater_equal_kernel<I0, I0> : base_kernel<greater_equal_kernel<I0, I0>, 2> {
     typedef typename type_of<I0>::type A0;
 
     void single(char *dst, char *const *src)
@@ -249,7 +240,7 @@ namespace nd {
   };
 
   template <type_id_t I0, type_id_t I1>
-  struct greater_kernel : base_comparison_kernel<greater_kernel<I0, I1>> {
+  struct greater_kernel : base_kernel<greater_kernel<I0, I1>, 2> {
     typedef typename type_of<I0>::type A0;
     typedef typename type_of<I1>::type A1;
     typedef typename std::common_type<A0, A1>::type T;
@@ -262,7 +253,7 @@ namespace nd {
   };
 
   template <type_id_t I0>
-  struct greater_kernel<I0, I0> : base_comparison_kernel<greater_kernel<I0, I0>> {
+  struct greater_kernel<I0, I0> : base_kernel<greater_kernel<I0, I0>, 2> {
     typedef typename type_of<I0>::type A0;
 
     void single(char *dst, char *const *src)
@@ -275,9 +266,8 @@ namespace nd {
   struct option_comparison_kernel;
 
   template <typename FuncType>
-  struct option_comparison_kernel<FuncType, true, false> : base_kernel<option_comparison_kernel<FuncType, true, false>,
-                                                                       2> {
-    static const size_t data_size = 0;
+  struct option_comparison_kernel<FuncType, true, false>
+      : base_kernel<option_comparison_kernel<FuncType, true, false>, 2> {
     intptr_t comp_offset;
     intptr_t assign_na_offset;
 
@@ -288,7 +278,8 @@ namespace nd {
       is_avail->single(reinterpret_cast<char *>(&child_dst), &src[0]);
       if (child_dst) {
         this->get_child(comp_offset)->single(dst, src);
-      } else {
+      }
+      else {
         this->get_child(assign_na_offset)->single(dst, nullptr);
       }
     }
@@ -326,9 +317,8 @@ namespace nd {
   };
 
   template <typename FuncType>
-  struct option_comparison_kernel<FuncType, false, true> : base_kernel<option_comparison_kernel<FuncType, false, true>,
-                                                                       2> {
-    static const size_t data_size = 0;
+  struct option_comparison_kernel<FuncType, false, true>
+      : base_kernel<option_comparison_kernel<FuncType, false, true>, 2> {
     intptr_t comp_offset;
     intptr_t assign_na_offset;
 
@@ -339,7 +329,8 @@ namespace nd {
       is_avail->single(reinterpret_cast<char *>(&child_dst), &src[1]);
       if (child_dst) {
         this->get_child(comp_offset)->single(dst, src);
-      } else {
+      }
+      else {
         this->get_child(assign_na_offset)->single(dst, nullptr);
       }
     }
@@ -361,7 +352,9 @@ namespace nd {
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), option_comp_offset);
       self->comp_offset = ckb_offset - option_comp_offset;
       auto cmp = FuncType::get();
-      const ndt::type child_src_tp[2] = {src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type(), };
+      const ndt::type child_src_tp[2] = {
+          src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type(),
+      };
       ckb_offset = cmp.get()->instantiate(cmp.get()->static_data(), data, ckb, ckb_offset,
                                           dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
                                           child_src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
@@ -377,9 +370,8 @@ namespace nd {
   };
 
   template <typename FuncType>
-  struct option_comparison_kernel<FuncType, true, true> : base_kernel<option_comparison_kernel<FuncType, true, true>,
-                                                                      2> {
-    static const size_t data_size = 0;
+  struct option_comparison_kernel<FuncType, true, true>
+      : base_kernel<option_comparison_kernel<FuncType, true, true>, 2> {
     intptr_t is_avail_rhs_offset;
     intptr_t comp_offset;
     intptr_t assign_na_offset;
@@ -394,7 +386,8 @@ namespace nd {
       is_avail_rhs->single(reinterpret_cast<char *>(&child_dst_rhs), &src[1]);
       if (child_dst_lhs && child_dst_rhs) {
         this->get_child(comp_offset)->single(dst, src);
-      } else {
+      }
+      else {
         this->get_child(assign_na_offset)->single(dst, nullptr);
       }
     }
@@ -446,74 +439,47 @@ namespace ndt {
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::less_kernel<Src0TypeID, Src1TypeID>> {
-    static type make()
-    {
-      return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)});
-    }
+    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::less_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type make()
-    {
-      return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)});
-    }
+    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type make()
-    {
-      return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)});
-    }
+    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::not_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type make()
-    {
-      return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)});
-    }
+    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::greater_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type make()
-    {
-      return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)});
-    }
+    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct type::equivalent<nd::greater_kernel<Src0TypeID, Src1TypeID>> {
-    static type make()
-    {
-      return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)});
-    }
+    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <typename FuncType>
   struct type::equivalent<nd::option_comparison_kernel<FuncType, true, false>> {
-    static type make()
-    {
-      return type("(?Scalar, Scalar) -> ?bool");
-    }
+    static type make() { return type("(?Scalar, Scalar) -> ?bool"); }
   };
 
   template <typename FuncType>
   struct type::equivalent<nd::option_comparison_kernel<FuncType, false, true>> {
-    static type make()
-    {
-      return type("(Scalar, ?Scalar) -> ?bool");
-    }
+    static type make() { return type("(Scalar, ?Scalar) -> ?bool"); }
   };
 
   template <typename FuncType>
   struct type::equivalent<nd::option_comparison_kernel<FuncType, true, true>> {
-    static type make()
-    {
-      return type("(?Scalar, ?Scalar) -> ?bool");
-    }
+    static type make() { return type("(?Scalar, ?Scalar) -> ?bool"); }
   };
 
 } // namespace dynd::ndt

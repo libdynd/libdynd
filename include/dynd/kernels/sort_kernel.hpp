@@ -13,8 +13,6 @@ namespace dynd {
 namespace nd {
 
   struct sort_kernel : base_kernel<sort_kernel, 1> {
-    static const size_t data_size = 0;
-
     const intptr_t src0_size;
     const intptr_t src0_stride;
     const intptr_t src0_element_data_size;
