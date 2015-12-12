@@ -2597,87 +2597,44 @@ namespace nd {
 
 #endif
 
-  template <class T>
-  struct aligned_fixed_size_copy_assign_type : base_kernel<aligned_fixed_size_copy_assign_type<T>, 1> {
-    void single(char *dst, char *const *src) { *reinterpret_cast<T *>(dst) = **reinterpret_cast<T *const *>(src); }
-
-    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-    {
-      char *src0 = *src;
-      intptr_t src0_stride = *src_stride;
-      for (size_t i = 0; i != count; ++i) {
-        *reinterpret_cast<T *>(dst) = *reinterpret_cast<T *>(src0);
-        dst += dst_stride;
-        src0 += src0_stride;
-      }
-    }
-  };
-
   template <int N>
-  struct aligned_fixed_size_copy_assign;
+  struct trivial_copy_kernel;
 
   template <>
-  struct aligned_fixed_size_copy_assign<1> : base_kernel<aligned_fixed_size_copy_assign<1>, 1> {
-    void single(char *dst, char *const *src) { *dst = **src; }
+  struct trivial_copy_kernel<1> : base_kernel<trivial_copy_kernel<1>, 1> {
+    void single(char *dst, char *const *src) { *dst = *src[0]; }
+  };
 
-    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
+  template <>
+  struct trivial_copy_kernel<2> : base_kernel<trivial_copy_kernel<2>, 1> {
+    void single(char *dst, char *const *src)
     {
-      char *src0 = *src;
-      intptr_t src0_stride = *src_stride;
-      for (size_t i = 0; i != count; ++i) {
-        *dst = *src0;
-        dst += dst_stride;
-        src0 += src0_stride;
-      }
+      *reinterpret_cast<int16_t *>(dst) = *reinterpret_cast<int16_t *>(src[0]);
     }
   };
 
   template <>
-  struct aligned_fixed_size_copy_assign<2> : aligned_fixed_size_copy_assign_type<int16_t> {
-  };
-
-  template <>
-  struct aligned_fixed_size_copy_assign<4> : aligned_fixed_size_copy_assign_type<int32_t> {
-  };
-
-  template <>
-  struct aligned_fixed_size_copy_assign<8> : aligned_fixed_size_copy_assign_type<int64_t> {
-  };
-
-  template <int N>
-  struct unaligned_fixed_size_copy_assign : base_kernel<unaligned_fixed_size_copy_assign<N>, 1> {
-    void single(char *dst, char *const *src) { memcpy(dst, *src, N); }
-
-    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
+  struct trivial_copy_kernel<4> : base_kernel<trivial_copy_kernel<4>, 1> {
+    void single(char *dst, char *const *src)
     {
-      char *src0 = *src;
-      intptr_t src0_stride = *src_stride;
-      for (size_t i = 0; i != count; ++i) {
-        memcpy(dst, src0, N);
-        dst += dst_stride;
-        src0 += src0_stride;
-      }
+      *reinterpret_cast<int32_t *>(dst) = *reinterpret_cast<int32_t *>(src[0]);
     }
   };
 
-  // All methods are inlined, so this can be public without declaring it DYND_API
+  template <>
+  struct trivial_copy_kernel<8> : base_kernel<trivial_copy_kernel<8>, 1> {
+    void single(char *dst, char *const *src)
+    {
+      *reinterpret_cast<int64_t *>(dst) = *reinterpret_cast<int64_t *>(src[0]);
+    }
+  };
+
   struct unaligned_copy_ck : base_kernel<unaligned_copy_ck, 1> {
     size_t data_size;
 
     unaligned_copy_ck(size_t data_size) : data_size(data_size) {}
 
     void single(char *dst, char *const *src) { memcpy(dst, *src, data_size); }
-
-    void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-    {
-      char *src0 = *src;
-      intptr_t src0_stride = *src_stride;
-      for (size_t i = 0; i != count; ++i) {
-        memcpy(dst, src0, data_size);
-        dst += dst_stride;
-        src0 += src0_stride;
-      }
-    }
   };
 
   namespace detail {

@@ -83,13 +83,13 @@ TEST(Callable, Construction)
   EXPECT_EQ(4.5, af0(1, 2.5).as<double>());
 
   nd::callable af1 = nd::functional::apply(&func, "y");
-  EXPECT_EQ(4.5, af1(1, kwds("y", 2.5)).as<double>());
+  EXPECT_EQ(4.5, af1({1}, {{"y", 2.5}}).as<double>());
 
   nd::callable af2 = nd::functional::apply([](int x, int y) { return x - y; });
   EXPECT_EQ(-4, af2(3, 7).as<int>());
 
   nd::callable af3 = nd::functional::apply([](int x, int y) { return x - y; }, "y");
-  EXPECT_EQ(-4, af3(3, kwds("y", 7)).as<int>());
+  EXPECT_EQ(-4, af3({3}, {{"y", 7}}).as<int>());
 }
 
 TEST(Callable, CallOperator)
@@ -102,50 +102,48 @@ TEST(Callable, CallOperator)
   EXPECT_THROW(f(2), invalid_argument);
   EXPECT_THROW(f(2, 3.5, 7), invalid_argument);
   // Extra keyword argument
-  EXPECT_THROW(f(2, 3.5, kwds("x", 10)), invalid_argument);
+  EXPECT_THROW(f({2, 3.5}, {{"x", 10}}), invalid_argument);
 
   f = nd::functional::apply([](int x, double y) { return 2.0 * x + y; }, "y");
   // Calling with positional and keyword arguments
-  EXPECT_EQ(4.5, f(1, kwds("y", 2.5)).as<double>());
-  EXPECT_EQ(7.5, f(2, kwds("y", 3.5)).as<double>());
+  EXPECT_EQ(4.5, f({1}, {{"y", 2.5}}).as<double>());
+  EXPECT_EQ(7.5, f({2}, {{"y", 3.5}}).as<double>());
   // Calling with positional arguments
   EXPECT_EQ(7.5, f(2, 3.5).as<double>());
   // Wrong number of positional/keyword arguments
   EXPECT_THROW(f(2), invalid_argument);
   EXPECT_THROW(f(2, 3.5, 7), invalid_argument);
   // Extra/wrong keyword argument
-  EXPECT_THROW(f(2, kwds("x", 3.5)), invalid_argument);
-  EXPECT_THROW(f(2, kwds("x", 10, "y", 20)), invalid_argument);
-  EXPECT_THROW(f(2, 3.5, kwds("x", 10, "y", 20)), invalid_argument);
+  EXPECT_THROW(f({2}, {{"x", 3.5}}), invalid_argument);
+  EXPECT_THROW(f({2}, {{"x", 10}, {"y", 20}}), invalid_argument);
+  EXPECT_THROW(f({2, 3.5}, {{"x", 10}, {"y", 20}}), invalid_argument);
 
   f = nd::functional::apply([]() { return 10; });
   // Calling with no arguments
   EXPECT_EQ(10, f().as<int>());
-  // Calling with empty keyword arguments
-  EXPECT_EQ(10, f(kwds()).as<int>());
+  // Calling with no arguments
+  EXPECT_EQ(10, f({}, {}).as<int>());
   // Wrong number of positional/keyword arguments
   EXPECT_THROW(f(2), invalid_argument);
-  EXPECT_THROW(f(kwds("y", 3.5)), invalid_argument);
+  EXPECT_THROW(f({}, {{"y", 3.5}}), invalid_argument);
 }
 
 TEST(Callable, DynamicCall)
 {
-  nd::callable af;
+  nd::array args[3] = {7, 2.5, 5};
+  pair<const char *, nd::array> kwds[3] = {{"x", args[0]}, {"y", args[1]}, {"z", args[2]}};
 
-  nd::array values[3] = {7, 2.5, 5};
-  const char *names[3] = {"x", "y", "z"};
-
-  af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });
-  EXPECT_EQ(26.5, af(3, values).as<double>());
+  nd::callable af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; });
+  EXPECT_EQ(26.5, af.call(3, args, 0, nullptr).as<double>());
 
   af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "z");
-  EXPECT_EQ(26.5, af(2, values, kwds(1, names + 2, values + 2)).as<double>());
+  EXPECT_EQ(26.5, af.call(2, args, 1, kwds + 2).as<double>());
 
   af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "y", "z");
-  EXPECT_EQ(26.5, af(1, values, kwds(2, names + 1, values + 1)).as<double>());
+  EXPECT_EQ(26.5, af.call(1, args, 2, kwds + 1).as<double>());
 
   af = nd::functional::apply([](int x, double y, int z) { return 2 * x - y + 3 * z; }, "x", "y", "z");
-  EXPECT_EQ(26.5, af(kwds(3, names, values)).as<double>());
+  EXPECT_EQ(26.5, af.call(0, nullptr, 3, kwds).as<double>());
 }
 
 TEST(Callable, DecomposedDynamicCall)
@@ -182,42 +180,12 @@ TEST(Callable, DecomposedDynamicCall)
 TEST(Callable, KeywordParsing)
 {
   nd::callable af0 = nd::functional::apply([](int x, int y) { return x + y; }, "y");
-  EXPECT_EQ(5, af0(1, kwds("y", 4)).as<int>());
-  EXPECT_THROW(af0(1, kwds("z", 4)).as<int>(), std::invalid_argument);
-  EXPECT_THROW(af0(1, kwds("Y", 4)).as<int>(), std::invalid_argument);
-  EXPECT_THROW(af0(1, kwds("y", 2.5)).as<int>(), std::invalid_argument);
-  EXPECT_THROW(af0(1, kwds("y", 4, "y", 2.5)).as<int>(), std::invalid_argument);
+  EXPECT_EQ(5, af0({1}, {{"y", 4}}).as<int>());
+  EXPECT_THROW(af0({1}, {{"z", 4}}).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0({1}, {{"Y", 4}}).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0({1}, {{"y", 2.5}}).as<int>(), std::invalid_argument);
+  EXPECT_THROW(af0({1}, {{"y", 4}, {"y", 2.5}}).as<int>(), std::invalid_argument);
 }
-
-/*
-TEST(Callable, Option)
-{
-  struct callable {
-    int operator()(int x, int y) { return x + y; }
-
-    static void
-    resolve_option_vals(const callable_type_data *DYND_UNUSED(self),
-                        const callable_type *DYND_UNUSED(self_tp),
-                        intptr_t DYND_UNUSED(nsrc),
-                        const ndt::type *DYND_UNUSED(src_tp), nd::array &kwds,
-                        const std::map<std::string, ndt::type>
-&DYND_UNUSED(tp_vars))
-    {
-      nd::array x = kwds.p("x");
-      if (x.is_missing()) {
-        x.vals() = 4;
-      }
-    }
-  };
-
-  nd::callable af = nd::functional::apply(callable(), "x");
-  EXPECT_EQ(5, af(1, kwds("x", 4)).as<int>());
-
-  af.set_as_option(&callable::resolve_option_vals, "x");
-  EXPECT_EQ(6, af(1, kwds("x", 5)).as<int>());
-  EXPECT_EQ(5, af(1).as<int>());
-}
-*/
 
 TEST(Callable, Assignment_CallInterface)
 {
@@ -307,56 +275,5 @@ TEST(Callable, LLVM)
 //  llvm::SMDiagnostic error;
 //  llvm::parseIR(llvm::MemoryBuffer::getMemBuffer(llvm::StringRef(f->ir))->getMemBufferRef(), error,
 llvm::getGlobalContext());
-}
-*/
-
-/*
-// TODO Reenable once there's a convenient way to make the binary callable
-TEST(Callable, Expr) {
-    callable_type_data af;
-    // Create an callable for adding two ints
-    ndt::type add_ints_type = (nd::array((int)0) +
-nd::array((int)0)).get_type();
-    make_callable_from_assignment(
-                    ndt::type::make<int>(), add_ints_type,
-                    expr_operation_funcproto, assign_error_default, af);
-    // Validate that its types, etc are set right
-    ASSERT_EQ(expr_operation_funcproto, (callable_proto_t)af.ckernel_funcproto);
-    ASSERT_EQ(2, af.get_narg());
-    ASSERT_EQ(ndt::type::make<int>(), af.get_return_type());
-    ASSERT_EQ(ndt::type::make<int>(), af.get_arg_type(0));
-    ASSERT_EQ(ndt::type::make<int>(), af.get_arg_type(1));
-
-    const char *src_arrmeta[2] = {NULL, NULL};
-
-    // Instantiate a single ckernel
-    ckernel_builder ckb;
-    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                        af.get_arg_types(), src_arrmeta,
-                        kernel_request_single, &eval::default_eval_context);
-    int int_out = 0;
-    int int_in1 = 1, int_in2 = 3;
-    char *int_in_ptr[2] = {reinterpret_cast<char *>(&int_in1),
-                        reinterpret_cast<char *>(&int_in2)};
-    expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
-    usngo(reinterpret_cast<char *>(&int_out), int_in_ptr, ckb.get());
-    EXPECT_EQ(4, int_out);
-
-    // Instantiate a strided ckernel
-    ckb.reset();
-    af.instantiate(&af, &ckb, 0, af.get_return_type(), NULL,
-                        af.get_arg_types(), src_arrmeta,
-                        kernel_request_strided, &eval::default_eval_context);
-    int ints_out[3] = {0, 0, 0};
-    int ints_in1[3] = {1,2,3}, ints_in2[3] = {5,-210,1234};
-    char *ints_in_ptr[2] = {reinterpret_cast<char *>(&ints_in1),
-                        reinterpret_cast<char *>(&ints_in2)};
-    intptr_t ints_in_strides[2] = {sizeof(int), sizeof(int)};
-    expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
-    ustro(reinterpret_cast<char *>(ints_out), sizeof(int),
-                    ints_in_ptr, ints_in_strides, 3, ckb.get());
-    EXPECT_EQ(6, ints_out[0]);
-    EXPECT_EQ(-208, ints_out[1]);
-    EXPECT_EQ(1237, ints_out[2]);
 }
 */

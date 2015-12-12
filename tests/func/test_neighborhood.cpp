@@ -34,19 +34,19 @@ TEST(Neighborhood, Sum1D)
                                                 }),
                                                 nd::functional::apply([]() { return NA; }));
 
-  EXPECT_ARRAY_EQ((nd::array{3, 6, NA, NA}), f(nd::array{0, 1, 2, 3}, kwds("shape", nd::array{3})));
+  EXPECT_ARRAY_EQ((nd::array{3, 6, NA, NA}), f({nd::array{0, 1, 2, 3}}, {{"shape", nd::array{3}}}));
 
   EXPECT_ARRAY_EQ((nd::array{NA, 3, 6, NA}),
-                  f(nd::array{0, 1, 2, 3}, kwds("shape", nd::array{3}, "offset", nd::array{-1})));
+                  f({nd::array{0, 1, 2, 3}}, {{"shape", nd::array{3}}, {"offset", nd::array{-1}}}));
 
   EXPECT_ARRAY_EQ((nd::array{15, 21, 27, 33, 39, NA, NA, NA, NA, NA}),
-                  f(nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, kwds("shape", nd::array{6})));
+                  f({nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}, {{"shape", nd::array{6}}}));
 
   EXPECT_ARRAY_EQ((nd::array{NA, 15, 21, 27, 33, 39, NA, NA, NA, NA}),
-                  f(nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, kwds("shape", nd::array{6}, "offset", nd::array{-1})));
+                  f({nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}, {{"shape", nd::array{6}}, {"offset", nd::array{-1}}}));
 
   EXPECT_ARRAY_EQ((nd::array{NA, NA, 3, 6, 9, 12, 15, 18, 21, 24}),
-                  f(nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, kwds("shape", nd::array{3}, "offset", nd::array{-2})));
+                  f({nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}, {{"shape", nd::array{3}}, {"offset", nd::array{-2}}}));
 }
 
 TEST(Neighborhood, Sum2D)
@@ -65,11 +65,11 @@ TEST(Neighborhood, Sum2D)
                                                 nd::functional::apply([]() { return NA; }));
 
   EXPECT_ARRAY_EQ((nd::array{{10, 14, 18, NA}, {NA, NA, NA, NA}}),
-                  f(nd::array{{0, 1, 2, 3}, {4, 5, 6, 7}}, kwds("shape", nd::array{2, 2})));
+                  f({nd::array{{0, 1, 2, 3}, {4, 5, 6, 7}}}, {{"shape", nd::array{2, 2}}}));
 
   EXPECT_ARRAY_EQ(
       (nd::array{{45, 54, NA, NA}, {81, 90, NA, NA}, {NA, NA, NA, NA}, {NA, NA, NA, NA}}),
-      f(nd::array{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}}, kwds("shape", nd::array{3, 3})));
+      f({nd::array{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}}}, {{"shape", nd::array{3, 3}}}));
 
   /*
       nd::callable af = nd::functional::neighborhood(nd::functional::apply(&sum<2>), 2);
@@ -157,11 +157,11 @@ TEST(Neighborhood, Sum3D)
                              {{999, 1026, NA, NA}, {1107, 1134, NA, NA}, {NA, NA, NA, NA}, {NA, NA, NA, NA}},
                              {{NA, NA, NA, NA}, {NA, NA, NA, NA}, {NA, NA, NA, NA}, {NA, NA, NA, NA}},
                              {{NA, NA, NA, NA}, {NA, NA, NA, NA}, {NA, NA, NA, NA}, {NA, NA, NA, NA}}}),
-                  f(nd::array{{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}},
-                              {{16, 17, 18, 19}, {20, 21, 22, 23}, {24, 25, 26, 27}, {28, 29, 30, 31}},
-                              {{32, 33, 34, 35}, {36, 37, 38, 39}, {40, 41, 42, 43}, {44, 45, 46, 47}},
-                              {{48, 49, 50, 51}, {52, 53, 54, 55}, {56, 57, 58, 59}, {60, 61, 62, 63}}},
-                    kwds("shape", nd::array{3, 3, 3})));
+                  f({nd::array{{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}},
+                               {{16, 17, 18, 19}, {20, 21, 22, 23}, {24, 25, 26, 27}, {28, 29, 30, 31}},
+                               {{32, 33, 34, 35}, {36, 37, 38, 39}, {40, 41, 42, 43}, {44, 45, 46, 47}},
+                               {{48, 49, 50, 51}, {52, 53, 54, 55}, {56, 57, 58, 59}, {60, 61, 62, 63}}}},
+                    {{"shape", nd::array{3, 3, 3}}}));
 
   /*
     nd::callable af = nd::functional::neighborhood(nd::functional::apply(&sum<3>), 3);

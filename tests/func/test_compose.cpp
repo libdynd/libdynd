@@ -29,11 +29,11 @@ TEST(Compose, Simple)
 {
   nd::callable composed = nd::functional::compose(nd::copy, func::get_regfunction("sin"), ndt::type::make<double>());
   nd::array a = nd::empty<double>();
-  composed("0.0", kwds("dst", a));
+  composed({"0.0"}, {{"dst", a}});
   EXPECT_EQ(0., a.as<double>());
-  composed("1.5", kwds("dst", a));
+  composed({"1.5"}, {{"dst", a}});
   EXPECT_DOUBLE_EQ(sin(1.5), a.as<double>());
-  composed(3.1, kwds("dst", a));
+  composed({3.1}, {{"dst", a}});
   EXPECT_DOUBLE_EQ(sin(3.1), a.as<double>());
 }
 

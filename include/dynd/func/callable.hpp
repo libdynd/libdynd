@@ -130,13 +130,15 @@ namespace nd {
    * A special way to provide the keyword argument as an array of
    * names and an array of nd::array values.
    */
-  template <typename... T>
-  typename std::enable_if<!detail::is_variadic_kwds<T...>::value,
-                          detail::kwds<intptr_t, const char *const *, array *>>::type
-  kwds(T &&... t)
-  {
-    return detail::kwds<intptr_t, const char *const *, array *>(std::forward<T>(t)...);
-  }
+  /*
+    template <typename... T>
+    typename std::enable_if<!detail::is_variadic_kwds<T...>::value,
+                            detail::kwds<intptr_t, const char *const *, array *>>::type
+    kwds(T &&... t)
+    {
+      return detail::kwds<intptr_t, const char *const *, array *>(std::forward<T>(t)...);
+    }
+  */
 
   /**
    * Empty keyword args.
@@ -324,36 +326,56 @@ namespace nd {
 
     const array &get_arg_types() const { return get_type()->get_pos_types(); }
 
-    /** Implements the general call operator which returns an array */
-    template <typename ArgsType, typename KwdsType>
-    array call(const ArgsType &args, const KwdsType &kwds, std::map<std::string, ndt::type> &tp_vars)
+    template <typename DataType>
+    array call(size_t args_size, const array *args_values, size_t kwds_size,
+               const std::pair<const char *, array> *kwds_values)
     {
+      std::map<std::string, ndt::type> tp_vars;
       const ndt::callable_type *self_tp = get_type();
+
+      if (!self_tp->is_pos_variadic() && (static_cast<intptr_t>(args_size) < self_tp->get_npos())) {
+        std::stringstream ss;
+        ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << args_size;
+        throw std::invalid_argument(ss.str());
+      }
+
+      std::vector<ndt::type> args_tp(args_size);
+      std::vector<const char *> args_arrmeta(args_size);
+      std::vector<DataType> args_data(args_size);
+
+      for (intptr_t i = 0; i < (self_tp->is_pos_variadic() ? static_cast<intptr_t>(args_size) : self_tp->get_npos());
+           ++i) {
+        detail::check_arg(self_tp, i, args_values[i]->tp, args_values[i]->metadata(), tp_vars);
+
+        args_tp[i] = args_values[i]->tp;
+        args_arrmeta[i] = args_values[i]->metadata();
+        detail::set_data(args_data[i], args_values[i]);
+      }
 
       array dst;
 
-      intptr_t narg = args.size;
+      intptr_t narg = args_size;
 
       // ...
-      intptr_t nkwd = args.size - self_tp->get_npos();
+      intptr_t nkwd = args_size - self_tp->get_npos();
       if (!self_tp->is_kwd_variadic() && nkwd > self_tp->get_nkwd()) {
         throw std::invalid_argument("too many extra positional arguments");
       }
 
       std::vector<array> kwds_as_vector(nkwd + self_tp->get_nkwd());
       for (intptr_t i = 0; i < nkwd; ++i) {
-        kwds_as_vector[i] = args.values[self_tp->get_npos() + i];
+        kwds_as_vector[i] = args_values[self_tp->get_npos() + i];
         --narg;
       }
 
-      for (size_t i = 0; i < kwds.size; ++i) {
-        intptr_t j = self_tp->get_kwd_index(kwds.m_names[i]);
+      for (size_t i = 0; i < kwds_size; ++i) {
+        intptr_t j = self_tp->get_kwd_index(kwds_values[i].first);
         if (j == -1) {
-          if (detail::is_special_kwd(self_tp, dst, kwds.m_names[i], kwds.values[i])) {
+          if (detail::is_special_kwd(self_tp, dst, kwds_values[i].first, kwds_values[i].second)) {
           }
           else {
             std::stringstream ss;
-            ss << "passed an unexpected keyword \"" << kwds.m_names[i] << "\" to callable with type " << get()->tp;
+            ss << "passed an unexpected keyword \"" << kwds_values[i].first << "\" to callable with type " << get()->tp;
             throw std::invalid_argument(ss.str());
           }
         }
@@ -361,10 +383,10 @@ namespace nd {
           array &value = kwds_as_vector[j];
           if (!value.is_null()) {
             std::stringstream ss;
-            ss << "callable passed keyword \"" << kwds.m_names[i] << "\" more than once";
+            ss << "callable passed keyword \"" << kwds_values[i].first << "\" more than once";
             throw std::invalid_argument(ss.str());
           }
-          value = kwds.values[i];
+          value = kwds_values[i].second;
 
           ndt::type expected_tp = self_tp->get_kwd_type(j);
           if (expected_tp.get_type_id() == option_type_id) {
@@ -417,75 +439,39 @@ namespace nd {
       ndt::type dst_tp;
       if (dst.is_null()) {
         dst_tp = self_tp->get_return_type();
-        return (*get())(dst_tp, narg, args.tp, args.arrmeta, args.data(), nkwd, kwds_as_vector.data(), tp_vars);
+        return (*get())(dst_tp, narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
+                        kwds_as_vector.data(), tp_vars);
       }
 
       dst_tp = dst.get_type();
-      (*get())(dst_tp, dst->metadata(), dst.data(), narg, args.tp, args.arrmeta, args.data(), nkwd,
+      (*get())(dst_tp, dst->metadata(), dst.data(), narg, args_tp.data(), args_arrmeta.data(), args_data.data(), nkwd,
                kwds_as_vector.data(), tp_vars);
       return dst;
     }
 
-    /**
-    * operator()(kwds<...>(...))
-    */
-    template <template <typename...> class ArgsType, typename AT0, typename... K>
-    array _call(detail::kwds<K...> &&k)
-    {
-      std::map<std::string, ndt::type> tp_vars;
-      return call(ArgsType<AT0>(tp_vars, get_type()), std::forward<detail::kwds<K...>>(k), tp_vars);
-    }
-
-    /**
-     * operator()(a0, a1, ..., an, kwds<...>(...))
-     */
-    template <template <typename...> class ArgsType, typename AT0, typename... T>
-    typename std::enable_if<sizeof...(T) != 3, array>::type _call(T &&... a)
-    {
-      std::map<std::string, ndt::type> tp_vars;
-
-      typedef typename instantiate<ArgsType, typename to<type_sequence<AT0, T...>, sizeof...(T)>::type>::type args_type;
-      typedef make_index_sequence<sizeof...(T) + 1> I;
-      return call(make_with<I, args_type>(tp_vars, get_type(), std::forward<T>(a)...),
-                  dynd::get<sizeof...(T)-1>(std::forward<T>(a)...), tp_vars);
-    }
-
-    template <template <typename...> class ArgsType, typename AT0, typename A0, typename A1, typename... K>
-    typename std::enable_if<!std::is_convertible<A0 &&, size_t>::value || !std::is_convertible<A1 &&, array *>::value,
-                            array>::type
-    _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
-    {
-      std::map<std::string, ndt::type> tp_vars;
-
-      return call(
-          ArgsType<AT0, array, array>(tp_vars, get_type(), array(std::forward<A0>(a0)), array(std::forward<A1>(a1))),
-          kwds, tp_vars);
-    }
-
-    template <template <typename...> class ArgsType, typename AT0, typename A0, typename A1, typename... K>
-    typename std::enable_if<std::is_convertible<A0 &&, size_t>::value && std::is_convertible<A1 &&, array *>::value,
-                            array>::type
-    _call(A0 &&a0, A1 &&a1, const detail::kwds<K...> &kwds)
-    {
-      std::map<std::string, ndt::type> tp_vars;
-      return call(ArgsType<AT0, size_t, array *>(tp_vars, get_type(), std::forward<A0>(a0), std::forward<A1>(a1)), kwds,
-                  tp_vars);
-    }
-
-    template <typename... A>
-    typename std::enable_if<has_kwds<A...>::value, array>::type operator()(A &&... a)
+    array call(size_t args_size, const array *args_values, size_t kwds_size,
+               const std::pair<const char *, array> *kwds_values)
     {
       if (get()->kernreq == kernel_request_single) {
-        return _call<args, char *>(std::forward<A>(a)...);
+        return call<char *>(args_size, args_values, kwds_size, kwds_values);
       }
 
-      return _call<args, array *>(std::forward<A>(a)...);
+      return call<array *>(args_size, args_values, kwds_size, kwds_values);
     }
 
-    template <typename... A>
-    typename std::enable_if<!has_kwds<A...>::value, array>::type operator()(A &&... a)
+    template <typename... ArgTypes>
+    array operator()(ArgTypes &&... args)
     {
-      return (*this)(std::forward<A>(a)..., kwds());
+      array tmp[sizeof...(ArgTypes)] = {std::forward<ArgTypes>(args)...};
+      return call(sizeof...(ArgTypes), tmp, 0, nullptr);
+    }
+
+    array operator()() { return call(0, nullptr, 0, nullptr); }
+
+    array operator()(const std::initializer_list<array> &args,
+                     const std::initializer_list<std::pair<const char *, array>> &kwds)
+    {
+      return call(args.size(), args.begin(), kwds.size(), kwds.begin());
     }
 
     template <typename KernelType>
@@ -753,10 +739,16 @@ namespace nd {
 
     operator const callable &() const { return get(); }
 
-    template <typename... A>
-    array operator()(A &&... a)
+    template <typename... ArgTypes>
+    array operator()(ArgTypes &&... args)
     {
-      return get()(std::forward<A>(a)...);
+      return get()(std::forward<ArgTypes>(args)...);
+    }
+
+    array operator()(const std::initializer_list<array> &args,
+                     const std::initializer_list<std::pair<const char *, array>> &kwds)
+    {
+      return get()(args, kwds);
     }
 
     static callable &get()

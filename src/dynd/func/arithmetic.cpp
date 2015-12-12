@@ -10,10 +10,7 @@ using namespace dynd;
 
 #define DYND_DEF_UNARY_OP_AND_CALLABLE(OP, NAME)                                                                       \
   DYND_API struct nd::NAME nd::NAME;                                                                                   \
-  nd::array nd::operator OP(const array &a0)                                                                           \
-  {                                                                                                                    \
-    return nd::NAME(a0);                                                                                               \
-  }
+  nd::array nd::operator OP(const array &a0) { return nd::NAME(a0); }
 
 DYND_DEF_UNARY_OP_AND_CALLABLE(+, plus)
 DYND_DEF_UNARY_OP_AND_CALLABLE(-, minus)
@@ -24,10 +21,7 @@ DYND_DEF_UNARY_OP_AND_CALLABLE(~, bitwise_not)
 
 #define DYND_DEF_BINARY_OP_WITH_CALLABLE(OP, NAME)                                                                     \
   DYND_API struct nd::NAME nd::NAME;                                                                                   \
-  nd::array nd::operator OP(const array &a0, const array &a1)                                                          \
-  {                                                                                                                    \
-    return nd::NAME(a0, a1);                                                                                           \
-  }
+  nd::array nd::operator OP(const array &a0, const array &a1) { return nd::NAME(a0, a1); }
 
 DYND_DEF_BINARY_OP_WITH_CALLABLE(+, add)
 DYND_DEF_BINARY_OP_WITH_CALLABLE(-, subtract)
@@ -42,7 +36,7 @@ DYND_DEF_BINARY_OP_WITH_CALLABLE(||, logical_or)
   DYND_API struct nd::NAME nd::NAME;                                                                                   \
   nd::array &nd::array::operator OP(const array &rhs)                                                                  \
   {                                                                                                                    \
-    nd::NAME(rhs, kwds("dst", *this));                                                                                 \
+    nd::NAME({rhs}, {{"dst", *this}});                                                                                 \
     return *this;                                                                                                      \
   }
 
