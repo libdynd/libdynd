@@ -15,8 +15,6 @@ namespace nd {
     typedef typename type_of<Src0TypeID>::type src0_type;
     typedef src0_type dst_type;
 
-    static const std::size_t data_size = 0;
-
     void single(char *dst, char *const *src)
     {
       if (*reinterpret_cast<src0_type *>(src[0]) > *reinterpret_cast<dst_type *>(dst)) {
@@ -44,8 +42,6 @@ namespace nd {
     typedef complex<float> src0_type;
     typedef src0_type dst_type;
 
-    static const std::size_t data_size = 0;
-
     void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
     {
       throw std::runtime_error("nd::max is not implemented for complex types");
@@ -56,8 +52,6 @@ namespace nd {
   struct max_kernel<complex_float64_type_id> : base_kernel<max_kernel<complex_float64_type_id>, 1> {
     typedef complex<double> src0_type;
     typedef src0_type dst_type;
-
-    static const std::size_t data_size = 0;
 
     void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
     {

@@ -17,8 +17,6 @@ namespace nd {
     //                     std::declval<src0_type>()) dst_type;
     typedef src0_type dst_type;
 
-    static const std::size_t data_size = 0;
-
     void single(char *dst, char *const *src)
     {
       *reinterpret_cast<dst_type *>(dst) =

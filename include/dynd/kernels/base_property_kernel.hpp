@@ -14,8 +14,6 @@ namespace nd {
   struct base_property_kernel : base_kernel<SelfType, 0> {
     typedef SelfType self_type;
 
-    static const std::size_t data_size = sizeof(ndt::type);
-
     ndt::type tp;
     const ndt::type &dst_tp;
     const char *dst_arrmeta;

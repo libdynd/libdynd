@@ -85,58 +85,6 @@ TEST(Array, FromValueConstructor)
   EXPECT_EQ((uint32_t)nd::read_access_flag | nd::immutable_access_flag, a.get_access_flags());
 }
 
-TEST(Array, FromValueConstructorRW)
-{
-  nd::array a;
-  // Bool
-  a = nd::array_rw(true);
-  EXPECT_EQ(ndt::type::make<bool1>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw(bool1(true));
-  EXPECT_EQ(ndt::type::make<bool1>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  // Signed int
-  a = nd::array_rw((int8_t)1);
-  EXPECT_EQ(ndt::type::make<int8_t>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw((int16_t)1);
-  EXPECT_EQ(ndt::type::make<int16_t>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw((int32_t)1);
-  EXPECT_EQ(ndt::type::make<int32_t>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw((int64_t)1);
-  EXPECT_EQ(ndt::type::make<int64_t>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  // Unsigned int
-  a = nd::array_rw((uint8_t)1);
-  EXPECT_EQ(ndt::type::make<uint8_t>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw((uint16_t)1);
-  EXPECT_EQ(ndt::type::make<uint16_t>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw((uint32_t)1);
-  EXPECT_EQ(ndt::type::make<uint32_t>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw((uint64_t)1);
-  EXPECT_EQ(ndt::type::make<uint64_t>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  // Floating point
-  a = nd::array_rw(1.0f);
-  EXPECT_EQ(ndt::type::make<float>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw(1.0);
-  EXPECT_EQ(ndt::type::make<double>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  // Complex
-  a = nd::array_rw(dynd::complex<float>(1, 1));
-  EXPECT_EQ(ndt::type::make<dynd::complex<float>>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-  a = nd::array_rw(dynd::complex<double>(1, 1));
-  EXPECT_EQ(ndt::type::make<dynd::complex<double>>(), a.get_type());
-  EXPECT_EQ(nd::readwrite_access_flags, a.get_access_flags());
-}
-
 TYPED_TEST_P(Array, ScalarConstructor)
 {
   nd::array a;

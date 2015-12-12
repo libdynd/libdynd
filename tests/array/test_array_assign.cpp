@@ -377,7 +377,7 @@ TYPED_TEST_P(ArrayAssign, BroadcastAssign)
 TEST(ArrayAssign, Casting)
 {
   float v0[4] = {3.5, 1.0, 0, 1000};
-  nd::array a = nd::array_rw(v0), b;
+  nd::array a = nd::array(v0), b;
   eval::eval_context tmp_ectx;
 
   b = a.ucast(ndt::type::make<int>());
@@ -499,7 +499,7 @@ updated.
 
 TEST(ArrayAssign, ChainedCastingWrite) {
     float v0[3] = {0, 0, 0};
-    nd::array a = nd::array_rw(v0), b;
+    nd::array a = nd::array(v0), b;
     eval::eval_context tmp_ectx;
 
     b = a.ucast<int>(0);
@@ -528,7 +528,7 @@ TEST(ArrayAssign, ChainedCastingReadWrite)
 {
   float v0[3] = {0.5f, -1000.f, -2.2f};
   int16_t v1[3] = {0, 0, 0};
-  nd::array a = nd::array_rw(v0), b = nd::array_rw(v1);
+  nd::array a = nd::array(v0), b = nd::array(v1);
   eval::eval_context tmp_ectx;
 
   // First test with a single expression in both src and dst

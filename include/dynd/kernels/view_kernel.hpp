@@ -11,8 +11,6 @@ namespace dynd {
 namespace nd {
 
   struct view_kernel : base_kernel<view_kernel> {
-    static const size_t data_size = 0;
-
     void single(array *dst, array *const *src)
     {
       const ndt::type &dst_tp = dst->get_type();
