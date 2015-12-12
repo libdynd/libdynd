@@ -451,7 +451,7 @@ TEST_P(FFT2D, Linear)
 
   y0 = nd::fft({x0}, {{"shape", x0.get_shape()}, {"axes", axes}});
   y1 = nd::fft({x1}, {{"shape", x1.get_shape()}, {"axes", axes}});
-  y = nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes)}});
+  y = nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes}});
 
   EXPECT_ARRAY_NEAR(y0 + y1, y, rel_err_max<double>());
 
