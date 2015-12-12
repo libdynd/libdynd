@@ -19,24 +19,23 @@ using namespace dynd;
 
 #ifdef DYND_FFTW
 
-class FFT1D : public ::testing::TestWithParam<
-                  std::tr1::tuple<const char *, const char *, const char *>> {
+class FFT1D : public ::testing::TestWithParam<std::tr1::tuple<const char *, const char *, const char *>> {
 
 public:
   ndt::type GetParam() const
   {
-    ndt::type concrete_tp = ndt::type(std::tr1::get<1>(::testing::TestWithParam<
-        std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
-    ndt::type pattern_tp = ndt::type(std::tr1::get<0>(::testing::TestWithParam<
-        std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
-    ndt::type dtp = ndt::type(std::tr1::get<2>(::testing::TestWithParam<
-        std::tr1::tuple<const char *, const char *,  const char *>>::GetParam()));
+    ndt::type concrete_tp = ndt::type(std::tr1::get<1>(
+        ::testing::TestWithParam<std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
+    ndt::type pattern_tp = ndt::type(std::tr1::get<0>(
+        ::testing::TestWithParam<std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
+    ndt::type dtp = ndt::type(std::tr1::get<2>(
+        ::testing::TestWithParam<std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
 
     if (pattern_tp == ndt::type("T")) {
       std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = dtp;
 
-      return ndt::substitute(concrete_tp, tp_vars, true);      
+      return ndt::substitute(concrete_tp, tp_vars, true);
     }
 
 #ifdef DYND_CUDA
@@ -44,7 +43,7 @@ public:
       std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = dtp;
 
-      return ndt::substitute(ndt::make_cuda_device(concrete_tp), tp_vars, true);      
+      return ndt::substitute(ndt::make_cuda_device(concrete_tp), tp_vars, true);
     }
 #endif
 
@@ -52,24 +51,23 @@ public:
   }
 };
 
-class FFT2D : public ::testing::TestWithParam<
-                  std::tr1::tuple<const char *, const char *, const char *>> {
+class FFT2D : public ::testing::TestWithParam<std::tr1::tuple<const char *, const char *, const char *>> {
 
 public:
   ndt::type GetParam() const
   {
-    ndt::type concrete_tp = ndt::type(std::tr1::get<1>(::testing::TestWithParam<
-        std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
-    ndt::type pattern_tp = ndt::type(std::tr1::get<0>(::testing::TestWithParam<
-        std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
-    ndt::type dtp = ndt::type(std::tr1::get<2>(::testing::TestWithParam<
-        std::tr1::tuple<const char *, const char *,  const char *>>::GetParam()));
+    ndt::type concrete_tp = ndt::type(std::tr1::get<1>(
+        ::testing::TestWithParam<std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
+    ndt::type pattern_tp = ndt::type(std::tr1::get<0>(
+        ::testing::TestWithParam<std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
+    ndt::type dtp = ndt::type(std::tr1::get<2>(
+        ::testing::TestWithParam<std::tr1::tuple<const char *, const char *, const char *>>::GetParam()));
 
     if (pattern_tp == ndt::type("T")) {
       std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = dtp;
 
-      return ndt::substitute(concrete_tp, tp_vars, true);      
+      return ndt::substitute(concrete_tp, tp_vars, true);
     }
 
 #ifdef DYND_CUDA
@@ -77,7 +75,7 @@ public:
       std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = dtp;
 
-      return ndt::substitute(ndt::make_cuda_device(concrete_tp), tp_vars, true);      
+      return ndt::substitute(ndt::make_cuda_device(concrete_tp), tp_vars, true);
     }
 #endif
 
@@ -153,8 +151,7 @@ TYPED_TEST_CASE_P(RFFT1D);
 
 template <typename T>
 struct FixedDim1D {
-  typedef testing::Types<T[4], T[8], T[17], T[25], T[64], T[76], T[99], T[128],
-                         T[203], T[256], T[512]> Types;
+  typedef testing::Types<T[4], T[8], T[17], T[25], T[64], T[76], T[99], T[128], T[203], T[256], T[512]> Types;
 };
 
 template <typename T>
@@ -191,8 +188,7 @@ TYPED_TEST_CASE_P(RFFT2D);
 
 template <typename T>
 struct FixedDim2D {
-  typedef testing::Types<T[4][4], T[8][8], T[17][25], T[64][64], T[76][14],
-                         T[128][128], T[203][99], T[256][256],
+  typedef testing::Types<T[4][4], T[8][8], T[17][25], T[64][64], T[76][14], T[128][128], T[203][99], T[256][256],
                          T[512][512]> Types;
 };
 
@@ -215,8 +211,8 @@ TEST_P(FFT1D, Linear)
 {
   const ndt::type &tp = GetParam();
 
-  nd::array x0 = nd::random::uniform(kwds("dst_tp", tp));
-  nd::array x1 = nd::random::uniform(kwds("dst_tp", tp));
+  nd::array x0 = nd::random::uniform({}, {{"dst_tp", tp}});
+  nd::array x1 = nd::random::uniform({}, {{"dst_tp", tp}});
   nd::array x = x0 + x1;
 
   nd::array y0 = nd::fft(x0);
@@ -236,7 +232,7 @@ TEST_P(FFT1D, Inverse)
 {
   const ndt::type &tp = GetParam();
 
-  nd::array x = nd::random::uniform(kwds("dst_tp", tp));
+  nd::array x = nd::random::uniform({}, {{"dst_tp", tp}});
 
   nd::array y = nd::ifft(nd::fft(x));
 
@@ -440,8 +436,8 @@ TEST_P(FFT2D, Linear)
 {
   const ndt::type &tp = GetParam();
 
-  nd::array x0 = nd::random::uniform(kwds("dst_tp", tp));
-  nd::array x1 = nd::random::uniform(kwds("dst_tp", tp));
+  nd::array x0 = nd::random::uniform({}, {{"dst_tp", tp}});
+  nd::array x1 = nd::random::uniform({}, {{"dst_tp", tp}});
   nd::array x = x0 + x1;
 
   nd::array y0 = nd::fft(x0);
@@ -453,9 +449,9 @@ TEST_P(FFT2D, Linear)
   vector<intptr_t> axes;
   axes.push_back(0);
 
-  y0 = nd::fft(x0, kwds("shape", x0.get_shape(), "axes", axes));
-  y1 = nd::fft(x1, kwds("shape", x1.get_shape(), "axes", axes));
-  y = nd::fft(x, kwds("shape", x.get_shape(), "axes", axes));
+  y0 = nd::fft({x0}, {{"shape", x0.get_shape()}, {"axes", axes}});
+  y1 = nd::fft({x1}, {{"shape", x1.get_shape()}, {"axes", axes}});
+  y = nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes)}});
 
   EXPECT_ARRAY_NEAR(y0 + y1, y, rel_err_max<double>());
 
@@ -463,9 +459,9 @@ TEST_P(FFT2D, Linear)
     axes.clear();
     axes.push_back(1);
 
-    y0 = nd::fft(x0, kwds("shape", x0.get_shape(), "axes", axes));
-    y1 = nd::fft(x1, kwds("shape", x1.get_shape(), "axes", axes));
-    y = nd::fft(x, kwds("shape", x.get_shape(), "axes", axes));
+    y0 = nd::fft({x0}, {{"shape", x0.get_shape()}, {"axes", axes}});
+    y1 = nd::fft({x1}, {{"shape", x1.get_shape()}, {"axes", axes}});
+    y = nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes}});
 
     EXPECT_ARRAY_NEAR(y0 + y1, y, rel_err_max<double>());
   }
@@ -475,7 +471,7 @@ TEST_P(FFT2D, Inverse)
 {
   const ndt::type &tp = GetParam();
 
-  nd::array x = nd::random::uniform(kwds("dst_tp", tp));
+  nd::array x = nd::random::uniform({}, {{"dst_tp", tp}});
 
   nd::array y = nd::ifft(nd::fft(x));
 
@@ -484,31 +480,30 @@ TEST_P(FFT2D, Inverse)
   y = y.to_host();
 #endif
 
-  EXPECT_ARRAY_NEAR(x, y / (y.get_dim_size(0) * y.get_dim_size(1)),
-                    rel_err_max<double>());
+  EXPECT_ARRAY_NEAR(x, y / (y.get_dim_size(0) * y.get_dim_size(1)), rel_err_max<double>());
 
-/*
-#ifdef DYND_CUDA
-  x = x.to_cuda_device();
-  y = y.to_cuda_device();
-#endif
-*/
+  /*
+  #ifdef DYND_CUDA
+    x = x.to_cuda_device();
+    y = y.to_cuda_device();
+  #endif
+  */
 
   if (tp.get_type_id() != cuda_device_type_id) {
 
     vector<intptr_t> axes;
     axes.push_back(0);
 
-    y = nd::ifft(nd::fft(x, kwds("shape", x.get_shape(), "axes", axes)),
-                 kwds("shape", y.get_shape(), "axes", axes));
+    y = nd::ifft({nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes}})},
+                 {{"shape", y.get_shape()}, {"axes", axes}});
 
     EXPECT_ARRAY_NEAR(x, y / y.get_dim_size(0), rel_err_max<double>());
 
     axes.clear();
     axes.push_back(1);
 
-    y = nd::ifft(nd::fft(x, kwds("shape", x.get_shape(), "axes", axes)),
-                 kwds("shape", y.get_shape(), "axes", axes));
+    y = nd::ifft({nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes)}})},
+                 {{"shape", y.get_shape()}, {"axes", axes}});
 
     EXPECT_ARRAY_NEAR(x, y / y.get_dim_size(1), rel_err_max<double>());
   }
@@ -530,7 +525,7 @@ TYPED_TEST_P(FFT2D, Zeros)
   vector<intptr_t> axes;
   axes.push_back(0);
 
-  y = nd::fft(x, kwds("shape", x.get_shape(), "axes", axes));
+  y = nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes}});
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
     for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
       EXPECT_EQ(0, y(i, j).as<typename TestFixture::DstType>());
@@ -540,7 +535,7 @@ TYPED_TEST_P(FFT2D, Zeros)
   axes.clear();
   axes.push_back(1);
 
-  y = nd::fft(x, kwds("shape", x.get_shape(), "axes", axes));
+  y = nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes}});
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
     for (int j = 0; j < TestFixture::DstShape[1]; ++j) {
       EXPECT_EQ(0, y(i, j).as<typename TestFixture::DstType>());
@@ -808,34 +803,27 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta)
 // INSTANTIATE_TYPED_TEST_CASE_P(ComplexFloat, FFT1D,
 // FixedDim1D<dynd_complex<float> >::Types);
 
-#define Shapes                                                                 \
-  ::testing::Values("4 * R", "8 * R", "17 * R", "25 * R", "64 * R", "76 * R",  \
-                    "99 * R", "128 * R", "203 * R", "256 * R")
-#define DTypes ::testing::Values("complex[float64]") 
+#define Shapes                                                                                                         \
+  ::testing::Values("4 * R", "8 * R", "17 * R", "25 * R", "64 * R", "76 * R", "99 * R", "128 * R", "203 * R", "256 * " \
+                                                                                                              "R")
+#define DTypes ::testing::Values("complex[float64]")
 
-INSTANTIATE_TEST_CASE_P(Host, FFT1D, ::testing::Combine(::testing::Values("T"),
-                                                        Shapes, DTypes));
+INSTANTIATE_TEST_CASE_P(Host, FFT1D, ::testing::Combine(::testing::Values("T"), Shapes, DTypes));
 #ifdef DYND_CUDA
-INSTANTIATE_TEST_CASE_P(CUDADevice, FFT1D,
-                        ::testing::Combine(::testing::Values("cuda_device[T]"),
-                                           Shapes, DTypes));
+INSTANTIATE_TEST_CASE_P(CUDADevice, FFT1D, ::testing::Combine(::testing::Values("cuda_device[T]"), Shapes, DTypes));
 #endif
 
 #undef Shapes
 #undef DTypes
 
-#define Shapes                                                                 \
-  ::testing::Values("4 * 4 * R", "8 * 8 * R", "17 * 25 * R", "64 * 64 * R", "76 * 14 * R")
+#define Shapes ::testing::Values("4 * 4 * R", "8 * 8 * R", "17 * 25 * R", "64 * 64 * R", "76 * 14 * R")
 // "128 * 128 * R", "203 * 99 * R", "256 * 256 * R"
 
 #define DTypes ::testing::Values("complex[float64]")
 
-INSTANTIATE_TEST_CASE_P(Host, FFT2D, ::testing::Combine(::testing::Values("T"),
-                                                        Shapes, DTypes));
+INSTANTIATE_TEST_CASE_P(Host, FFT2D, ::testing::Combine(::testing::Values("T"), Shapes, DTypes));
 #ifdef DYND_CUDA
-INSTANTIATE_TEST_CASE_P(CUDADevice, FFT2D,
-                        ::testing::Combine(::testing::Values("cuda_device[T]"),
-                                           Shapes, DTypes));
+INSTANTIATE_TEST_CASE_P(CUDADevice, FFT2D, ::testing::Combine(::testing::Values("cuda_device[T]"), Shapes, DTypes));
 #endif
 
 #undef Shapes

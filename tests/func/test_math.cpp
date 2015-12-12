@@ -19,6 +19,6 @@ using namespace dynd;
 
 TEST(Math, Sin)
 {
-  nd::array x = nd::random::uniform(kwds("dst_tp", ndt::type("100 * float64")));
+  nd::array x = nd::random::uniform({}, {{"dst_tp", ndt::type("100 * float64")}});
   nd::sin(x);
 }

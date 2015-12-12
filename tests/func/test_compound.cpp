@@ -23,7 +23,7 @@ TEST(Functional, LeftCompound)
 
   nd::array y = nd::empty(ndt::type::make<int>());
   y.val_assign(3);
-  EXPECT_ARRAY_EQ(8, f(5, kwds("dst", y)));
+  EXPECT_ARRAY_EQ(8, f({5}, {{"dst", y}}));
 }
 
 TEST(Functional, RightCompound)
@@ -32,5 +32,5 @@ TEST(Functional, RightCompound)
 
   nd::array y = nd::empty(ndt::type::make<int>());
   y.val_assign(3);
-  EXPECT_ARRAY_EQ(2, f(5, kwds("dst", y)));
+  EXPECT_ARRAY_EQ(2, f({5}, {{"dst", y}}));
 }
