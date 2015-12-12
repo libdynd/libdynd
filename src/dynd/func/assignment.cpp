@@ -226,43 +226,24 @@ intptr_t dynd::make_assignment_kernel(void *ckb, intptr_t ckb_offset, const ndt:
 }
 
 size_t dynd::make_pod_typed_data_assignment_kernel(void *ckb, intptr_t ckb_offset, size_t data_size,
-                                                   size_t data_alignment, kernel_request_t kernreq)
+                                                   size_t DYND_UNUSED(data_alignment), kernel_request_t kernreq)
 {
-  if (data_size == data_alignment) {
-    // Aligned specialization tables
-    switch (data_size) {
-    case 1:
-      nd::aligned_fixed_size_copy_assign<1>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    case 2:
-      nd::aligned_fixed_size_copy_assign<2>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    case 4:
-      nd::aligned_fixed_size_copy_assign<4>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    case 8:
-      nd::aligned_fixed_size_copy_assign<8>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    default:
-      nd::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
-      return ckb_offset;
-    }
-  }
-  else {
-    // Unaligned specialization tables
-    switch (data_size) {
-    case 2:
-      nd::unaligned_fixed_size_copy_assign<2>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    case 4:
-      nd::unaligned_fixed_size_copy_assign<4>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    case 8:
-      nd::unaligned_fixed_size_copy_assign<8>::make(ckb, kernreq, ckb_offset);
-      return ckb_offset;
-    default:
-      nd::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
-      return ckb_offset;
-    }
+  // Aligned specialization tables
+  switch (data_size) {
+  case 1:
+    nd::trivial_copy_kernel<1>::make(ckb, kernreq, ckb_offset);
+    return ckb_offset;
+  case 2:
+    nd::trivial_copy_kernel<2>::make(ckb, kernreq, ckb_offset);
+    return ckb_offset;
+  case 4:
+    nd::trivial_copy_kernel<4>::make(ckb, kernreq, ckb_offset);
+    return ckb_offset;
+  case 8:
+    nd::trivial_copy_kernel<8>::make(ckb, kernreq, ckb_offset);
+    return ckb_offset;
+  default:
+    nd::unaligned_copy_ck::make(ckb, kernreq, ckb_offset, data_size);
+    return ckb_offset;
   }
 }

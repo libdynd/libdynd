@@ -38,6 +38,7 @@ DYND_DEF_BINARY_OP_WITH_CALLABLE(||, logical_or)
 
 #undef DYND_DEF_BINARY_OP_WITH_CALLABLE
 
+/*
 #define DYND_DEF_COMPOUND_OP_WITH_CALLABLE(OP, NAME)                                                                   \
   DYND_API struct nd::NAME nd::NAME;                                                                                   \
   nd::array &nd::array::operator OP(const array &rhs)                                                                  \
@@ -50,3 +51,4 @@ DYND_DEF_COMPOUND_OP_WITH_CALLABLE(+=, compound_add)
 DYND_DEF_COMPOUND_OP_WITH_CALLABLE(/=, compound_div)
 
 #undef DYND_DEF_COMPOUND_OP_WITH_CALLABLE
+*/
