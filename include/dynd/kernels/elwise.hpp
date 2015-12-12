@@ -468,7 +468,7 @@ namespace nd {
         intptr_t modified_src_stride[N];
         for (int i = 0; i < N; ++i) {
           if (m_is_src_var[i]) {
-            var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
+            ndt::var_dim_type::data_type *vddd = reinterpret_cast<ndt::var_dim_type::data_type *>(src[i]);
             modified_src[i] = vddd->begin + m_src_offset[i];
             if (vddd->size == 1) {
               modified_src_stride[i] = 0;
@@ -558,11 +558,12 @@ namespace nd {
           }
           else {
             const ndt::var_dim_type *vdd = static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
-            const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[i]);
+            const ndt::var_dim_type::metadata_type *src_md =
+                reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[i]);
             src_stride[i] = src_md->stride;
             src_offset[i] = src_md->offset;
             is_src_var[i] = true;
-            child_src_arrmeta[i] = src_arrmeta[i] + sizeof(var_dim_type_arrmeta);
+            child_src_arrmeta[i] = src_arrmeta[i] + sizeof(ndt::var_dim_type::metadata_type);
             child_src_tp[i] = vdd->get_element_type();
             finished &= src_ndim == 1;
           }
@@ -691,7 +692,7 @@ namespace nd {
         ckernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
-        var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
+        ndt::var_dim_type::data_type *dst_vddd = reinterpret_cast<ndt::var_dim_type::data_type *>(dst);
         char *modified_dst;
         intptr_t modified_dst_stride = 0;
         intptr_t dim_size;
@@ -705,7 +706,7 @@ namespace nd {
           dim_size = dst_vddd->size;
           for (int i = 0; i < N; ++i) {
             if (m_is_src_var[i]) {
-              var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
+              ndt::var_dim_type::data_type *vddd = reinterpret_cast<ndt::var_dim_type::data_type *>(src[i]);
               modified_src[i] = vddd->begin + m_src_offset[i];
               if (vddd->size == 1) {
                 modified_src_stride[i] = 0;
@@ -740,7 +741,7 @@ namespace nd {
           dim_size = 1;
           for (int i = 0; i < N; ++i) {
             if (m_is_src_var[i]) {
-              var_dim_type_data *vddd = reinterpret_cast<var_dim_type_data *>(src[i]);
+              ndt::var_dim_type::data_type *vddd = reinterpret_cast<ndt::var_dim_type::data_type *>(src[i]);
               modified_src[i] = vddd->begin + m_src_offset[i];
               if (vddd->size == 1) {
                 modified_src_stride[i] = 0;
@@ -833,9 +834,10 @@ namespace nd {
 
         // The dst var parameters
         const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
-        const var_dim_type_arrmeta *dst_md = reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
+        const ndt::var_dim_type::metadata_type *dst_md =
+            reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta);
 
-        child_dst_arrmeta = dst_arrmeta + sizeof(var_dim_type_arrmeta);
+        child_dst_arrmeta = dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type);
         child_dst_tp = dst_vdd->get_element_type();
 
         intptr_t src_stride[N], src_offset[N], src_size[N];
@@ -863,11 +865,12 @@ namespace nd {
           }
           else {
             const ndt::var_dim_type *vdd = static_cast<const ndt::var_dim_type *>(src_tp[i].extended());
-            const var_dim_type_arrmeta *src_md = reinterpret_cast<const var_dim_type_arrmeta *>(src_arrmeta[i]);
+            const ndt::var_dim_type::metadata_type *src_md =
+                reinterpret_cast<const ndt::var_dim_type::metadata_type *>(src_arrmeta[i]);
             src_stride[i] = src_md->stride;
             src_offset[i] = src_md->offset;
             is_src_var[i] = true;
-            child_src_arrmeta[i] = src_arrmeta[i] + sizeof(var_dim_type_arrmeta);
+            child_src_arrmeta[i] = src_arrmeta[i] + sizeof(ndt::var_dim_type::metadata_type);
             child_src_tp[i] = vdd->get_element_type();
             finished &= src_ndim == 1;
           }
@@ -911,7 +914,7 @@ namespace nd {
         ckernel_prefix *child = this->get_child();
         kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
-        var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
+        ndt::var_dim_type::data_type *dst_vddd = reinterpret_cast<ndt::var_dim_type::data_type *>(dst);
         char *modified_dst;
         intptr_t modified_dst_stride = 0;
         intptr_t dim_size;
@@ -974,9 +977,10 @@ namespace nd {
 
         // The dst var parameters
         const ndt::var_dim_type *dst_vdd = dst_tp.extended<ndt::var_dim_type>();
-        const var_dim_type_arrmeta *dst_md = reinterpret_cast<const var_dim_type_arrmeta *>(dst_arrmeta);
+        const ndt::var_dim_type::metadata_type *dst_md =
+            reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta);
 
-        child_dst_arrmeta = dst_arrmeta + sizeof(var_dim_type_arrmeta);
+        child_dst_arrmeta = dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type);
         child_dst_tp = dst_vdd->get_element_type();
 
         bool finished = dst_ndim == 1;

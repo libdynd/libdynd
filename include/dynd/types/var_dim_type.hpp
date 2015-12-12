@@ -5,29 +5,11 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
 #include <dynd/types/base_dim_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
-#include <dynd/string_encodings.hpp>
 
 namespace dynd {
-
-struct DYND_API var_dim_type_arrmeta {
-  /**
-   * A reference to the memory block which contains the array's data.
-   */
-  intrusive_ptr<memory_block_data> blockref;
-  intptr_t stride;
-  /* Each pointed-to destination is offset by this amount */
-  intptr_t offset;
-};
-
-struct DYND_API var_dim_type_data {
-  char *begin;
-  size_t size;
-};
-
 namespace ndt {
 
   class DYND_API var_dim_type : public base_dim_type {
@@ -35,11 +17,22 @@ namespace ndt {
     std::map<std::string, nd::callable> m_array_functions;
 
   public:
+    struct metadata_type {
+      intrusive_ptr<memory_block_data> blockref; // A reference to the memory block which contains the array's data.
+      intptr_t stride;
+      intptr_t offset; // Each pointed-to destination is offset by this amount
+    };
+
+    struct data_type {
+      char *begin;
+      size_t size;
+    };
+
     var_dim_type(const type &element_tp);
 
     virtual ~var_dim_type();
 
-    size_t get_default_data_size() const { return sizeof(var_dim_type_data); }
+    size_t get_default_data_size() const { return sizeof(data_type); }
 
     /** Alignment of the data being pointed to. */
     size_t get_target_alignment() const { return m_element_tp.get_data_alignment(); }
@@ -111,9 +104,6 @@ namespace ndt {
 
       return result;
     }
-
-    typedef var_dim_type_data data_type;
-    typedef var_dim_type_arrmeta metadata_type;
   };
 
   /**

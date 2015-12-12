@@ -46,7 +46,7 @@ struct output_data {
 
   // Write a literal string
   template <int N>
-  inline void write(const char (&str)[N])
+  inline void write(const char(&str)[N])
   {
     ensure_capacity(N - 1);
     memcpy(out_end, str, N - 1);
@@ -77,12 +77,14 @@ static void format_json_bool(output_data &out, const ndt::type &dt, const char *
   bool1 value(false);
   if (dt.get_type_id() == bool_type_id) {
     value = (*data != 0);
-  } else {
+  }
+  else {
     typed_data_assign(ndt::type::make<bool1>(), NULL, reinterpret_cast<char *>(&value), dt, arrmeta, data);
   }
   if (value) {
     out.write("true");
-  } else {
+  }
+  else {
     out.write("false");
   }
 }
@@ -128,12 +130,14 @@ static void print_escaped_unicode_codepoint(output_data &out, uint32_t cp, appen
         ss << "\\u";
         hexadecimal_print(ss, static_cast<uint16_t>(cp));
         out.write(ss.str());
-      } else {
+      }
+      else {
         out.write(static_cast<char>(cp));
       }
       break;
     }
-  } else {
+  }
+  else {
     out.ensure_capacity(16);
     append_fn(cp, out.out_end, out.out_capacity_end);
   }
@@ -182,7 +186,8 @@ static void format_json_option(output_data &out, const ndt::type &dt, const char
   const ndt::option_type *ot = dt.extended<ndt::option_type>();
   if (ot->is_avail(arrmeta, data, &eval::default_eval_context)) {
     format_json(out, ot->get_value_type(), arrmeta, data);
-  } else {
+  }
+  else {
     out.write("null");
   }
 }
@@ -240,7 +245,8 @@ static void format_json_struct(output_data &out, const ndt::type &dt, const char
       }
     }
     out.write(']');
-  } else {
+  }
+  else {
     out.write('{');
     for (intptr_t i = 0; i < field_count; ++i) {
       const dynd::string &fname = bsd->get_field_name_raw(i);
@@ -275,12 +281,12 @@ static void format_json_dim(output_data &out, const ndt::type &dt, const char *a
   }
   case var_dim_type_id: {
     const ndt::var_dim_type *vad = dt.extended<ndt::var_dim_type>();
-    const var_dim_type_arrmeta *md = reinterpret_cast<const var_dim_type_arrmeta *>(arrmeta);
-    const var_dim_type_data *d = reinterpret_cast<const var_dim_type_data *>(data);
+    const ndt::var_dim_type::metadata_type *md = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(arrmeta);
+    const ndt::var_dim_type::data_type *d = reinterpret_cast<const ndt::var_dim_type::data_type *>(data);
     ndt::type element_tp = vad->get_element_type();
     intptr_t size = d->size, stride = md->stride;
     const char *begin = d->begin + md->offset;
-    arrmeta += sizeof(var_dim_type_arrmeta);
+    arrmeta += sizeof(ndt::var_dim_type::metadata_type);
     for (intptr_t i = 0; i < size; ++i) {
       ::format_json(out, element_tp, arrmeta, begin + i * stride);
       if (i != size - 1) {
@@ -351,7 +357,8 @@ nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
 
   if (!n.get_type().is_expression()) {
     ::format_json(out, n.get_type(), n.get()->metadata(), n.cdata());
-  } else {
+  }
+  else {
     nd::array tmp = n.eval();
     ::format_json(out, tmp.get_type(), tmp.get()->metadata(), tmp.cdata());
   }

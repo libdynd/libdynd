@@ -21,9 +21,9 @@ void nd::masked_take_ck::single(char *dst, char *const *src)
   // Start with the dst matching the dim size. (Maybe better to
   // do smaller? This means no resize required in the loop.)
   ndt::var_dim_element_initialize(m_dst_tp, m_dst_meta, dst, dim_size);
-  var_dim_type_data *vdd = reinterpret_cast<var_dim_type_data *>(dst);
+  ndt::var_dim_type::data_type *vdd = reinterpret_cast<ndt::var_dim_type::data_type *>(dst);
   char *dst_ptr = vdd->begin;
-  intptr_t dst_stride = reinterpret_cast<const var_dim_type_arrmeta *>(m_dst_meta)->stride;
+  intptr_t dst_stride = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->stride;
   intptr_t dst_count = 0;
   intptr_t i = 0;
   while (i < dim_size) {
@@ -68,7 +68,7 @@ intptr_t nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *D
   self->m_dst_tp = dst_tp;
   self->m_dst_meta = dst_arrmeta;
   ndt::type dst_el_tp = self->m_dst_tp.extended<ndt::var_dim_type>()->get_element_type();
-  const char *dst_el_meta = self->m_dst_meta + sizeof(var_dim_type_arrmeta);
+  const char *dst_el_meta = self->m_dst_meta + sizeof(ndt::var_dim_type::metadata_type);
 
   intptr_t src0_dim_size, mask_dim_size;
   ndt::type src0_el_tp, mask_el_tp;

@@ -35,9 +35,9 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
   kernel_strided_t nachild_fn = nachild->get_function<kernel_strided_t>();
   kernel_strided_t wopchild_fn = wopchild->get_function<kernel_strided_t>();
   // Get pointers to the src and dst data
-  var_dim_type_data *dst_dat = reinterpret_cast<var_dim_type_data *>(dst);
-  intptr_t dst_stride = reinterpret_cast<const var_dim_type_arrmeta *>(m_dst_meta)->stride;
-  var_dim_type_data *src_dat = reinterpret_cast<var_dim_type_data *>(src[0]);
+  ndt::var_dim_type::data_type *dst_dat = reinterpret_cast<ndt::var_dim_type::data_type *>(dst);
+  intptr_t dst_stride = reinterpret_cast<const ndt::var_dim_type::metadata_type *>(m_dst_meta)->stride;
+  ndt::var_dim_type::data_type *src_dat = reinterpret_cast<ndt::var_dim_type::data_type *>(src[0]);
   char *src_arr_ptr = src_dat->begin + m_src_offset;
   intptr_t dim_size = src_dat->size;
   // Allocate the output data
