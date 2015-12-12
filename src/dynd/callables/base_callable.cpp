@@ -33,7 +33,7 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
   ckernel_builder<kernel_request_host> ckb;
   instantiate(static_data(), data, &ckb, 0, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta,
               kernel_request_single, &eval::default_eval_context, nkwd, kwds, tp_vars);
-  expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+  kernel_single_t fn = ckb.get()->get_function<kernel_single_t>();
   fn(ckb.get(), dst.data(), src_data);
 
   return dst;
@@ -62,7 +62,7 @@ nd::array nd::base_callable::operator()(ndt::type &dst_tp, intptr_t nsrc, const 
   ckernel_builder<kernel_request_host> ckb;
   instantiate(static_data(), data, &ckb, 0, dst_tp, dst.get()->metadata(), nsrc, src_tp, src_arrmeta, kernreq,
               &eval::default_eval_context, nkwd, kwds, tp_vars);
-  expr_metadata_single_t fn = ckb.get()->get_function<expr_metadata_single_t>();
+  kernel_call_t fn = ckb.get()->get_function<kernel_call_t>();
   fn(ckb.get(), &dst, src_data);
 
   return dst;
@@ -78,7 +78,7 @@ void nd::base_callable::operator()(const ndt::type &dst_tp, const char *dst_arrm
   ckernel_builder<kernel_request_host> ckb;
   instantiate(static_data(), data, &ckb, 0, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta, kernel_request_single,
               &eval::default_eval_context, nkwd, kwds, tp_vars);
-  expr_single_t fn = ckb.get()->get_function<expr_single_t>();
+  kernel_single_t fn = ckb.get()->get_function<kernel_single_t>();
   fn(ckb.get(), dst_data, src_data);
 }
 

@@ -14,8 +14,8 @@ void nd::functional::strided_rolling_ck::single(char *dst, char *const *src)
 {
   ckernel_prefix *nachild = get_child();
   ckernel_prefix *wopchild = get_child(m_window_op_offset);
-  expr_strided_t nachild_fn = nachild->get_function<expr_strided_t>();
-  expr_strided_t wopchild_fn = wopchild->get_function<expr_strided_t>();
+  kernel_strided_t nachild_fn = nachild->get_function<kernel_strided_t>();
+  kernel_strided_t wopchild_fn = wopchild->get_function<kernel_strided_t>();
   // Fill in NA/NaN at the beginning
   if (m_dim_size > 0) {
     nachild_fn(nachild, dst, m_dst_stride, NULL, NULL, std::min(m_window_size - 1, m_dim_size));
@@ -32,8 +32,8 @@ void nd::functional::var_rolling_ck::single(char *dst, char *const *src)
   // Get the child ckernels
   ckernel_prefix *nachild = get_child();
   ckernel_prefix *wopchild = get_child(m_window_op_offset);
-  expr_strided_t nachild_fn = nachild->get_function<expr_strided_t>();
-  expr_strided_t wopchild_fn = wopchild->get_function<expr_strided_t>();
+  kernel_strided_t nachild_fn = nachild->get_function<kernel_strided_t>();
+  kernel_strided_t wopchild_fn = wopchild->get_function<kernel_strided_t>();
   // Get pointers to the src and dst data
   var_dim_type_data *dst_dat = reinterpret_cast<var_dim_type_data *>(dst);
   intptr_t dst_stride = reinterpret_cast<const var_dim_type_arrmeta *>(m_dst_meta)->stride;

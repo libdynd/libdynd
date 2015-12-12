@@ -21,7 +21,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = get_child();
-        expr_single_t single = child->get_function<expr_single_t>();
+        kernel_single_t single = child->get_function<kernel_single_t>();
         char *src_binary[2] = {dst, src[0]};
         single(child, dst, src_binary);
       }
@@ -29,7 +29,7 @@ namespace nd {
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         ckernel_prefix *child = get_child();
-        expr_strided_t childop = child->get_function<expr_strided_t>();
+        kernel_strided_t childop = child->get_function<kernel_strided_t>();
         char *src_binary[2] = {dst, src[0]};
         const intptr_t src_binary_stride[2] = {dst_stride, src_stride[0]};
         childop(child, dst, dst_stride, src_binary, src_binary_stride, count);
@@ -60,7 +60,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = get_child();
-        expr_single_t childop = child->get_function<expr_single_t>();
+        kernel_single_t childop = child->get_function<kernel_single_t>();
         char *src_binary[2] = {src[0], dst};
         childop(child, dst, src_binary);
       }
@@ -68,7 +68,7 @@ namespace nd {
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         ckernel_prefix *child = get_child();
-        expr_strided_t childop = child->get_function<expr_strided_t>();
+        kernel_strided_t childop = child->get_function<kernel_strided_t>();
         char *src_binary[2] = {src[0], dst};
         const intptr_t src_binary_stride[2] = {src_stride[0], dst_stride};
         childop(child, dst, dst_stride, src_binary, src_binary_stride, count);

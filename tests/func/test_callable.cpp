@@ -53,7 +53,7 @@ TEST(Callable, Assignment)
   int int_out = 0;
   char str_in[16] = "3251";
   const char *str_in_ptr = str_in;
-  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+  kernel_single_t usngo = ckb.get()->get_function<kernel_single_t>();
   usngo(ckb.get(), reinterpret_cast<char *>(&int_out), const_cast<char **>(&str_in_ptr));
   EXPECT_EQ(3251, int_out);
 
@@ -66,7 +66,7 @@ TEST(Callable, Assignment)
   int ints_out[3] = {0, 0, 0};
   char strs_in[3][16] = {"123", "4567", "891029"};
   const char *strs_in_ptr = strs_in[0];
-  expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
+  kernel_strided_t ustro = ckb.get()->get_function<kernel_strided_t>();
   intptr_t strs_in_stride = sizeof(strs_in[0]);
   ustro(ckb.get(), reinterpret_cast<char *>(&ints_out), sizeof(int), const_cast<char **>(&strs_in_ptr), &strs_in_stride,
         3);
@@ -236,7 +236,7 @@ TEST(Callable, AssignmentAsExpr)
   int int_out = 0;
   char str_in[16] = "3251";
   char *str_in_ptr = str_in;
-  expr_single_t usngo = ckb.get()->get_function<expr_single_t>();
+  kernel_single_t usngo = ckb.get()->get_function<kernel_single_t>();
   usngo(ckb.get(), reinterpret_cast<char *>(&int_out), &str_in_ptr);
   EXPECT_EQ(3251, int_out);
 
@@ -250,7 +250,7 @@ TEST(Callable, AssignmentAsExpr)
   char strs_in[3][16] = {"123", "4567", "891029"};
   char *strs_in_ptr = strs_in[0];
   intptr_t strs_in_stride = 16;
-  expr_strided_t ustro = ckb.get()->get_function<expr_strided_t>();
+  kernel_strided_t ustro = ckb.get()->get_function<kernel_strided_t>();
   ustro(ckb.get(), reinterpret_cast<char *>(&ints_out), sizeof(int), &strs_in_ptr, &strs_in_stride, 3);
   EXPECT_EQ(123, ints_out[0]);
   EXPECT_EQ(4567, ints_out[1]);

@@ -296,7 +296,7 @@ struct operand_to_value_ck : nd::base_kernel<operand_to_value_ck, 1> {
   void single(char *dst, char *const *src)
   {
     ckernel_prefix *copy_value = get_child();
-    expr_single_t copy_value_fn = copy_value->get_function<expr_single_t>();
+    kernel_single_t copy_value_fn = copy_value->get_function<kernel_single_t>();
     // The src value is a pointer, and copy_value_fn expects a pointer
     // to that pointer
     char **src_ptr = reinterpret_cast<char **>(src[0]);

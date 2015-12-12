@@ -26,11 +26,11 @@ namespace {
 class sorter {
   char *m_originptr;
   intptr_t m_stride;
-  const expr_single_t m_less;
+  const kernel_single_t m_less;
   ckernel_prefix *m_less_self;
 
 public:
-  sorter(const char *originptr, intptr_t stride, const expr_single_t less, ckernel_prefix *less_self)
+  sorter(const char *originptr, intptr_t stride, const kernel_single_t less, ckernel_prefix *less_self)
       : m_originptr(const_cast<char *>(originptr)), m_stride(stride), m_less(less), m_less_self(less_self)
   {
   }
@@ -46,11 +46,11 @@ public:
 };
 
 class cmp {
-  const expr_single_t m_less;
+  const kernel_single_t m_less;
   ckernel_prefix *m_less_self;
 
 public:
-  cmp(const expr_single_t less, ckernel_prefix *less_self) : m_less(less), m_less_self(less_self) {}
+  cmp(const kernel_single_t less, ckernel_prefix *less_self) : m_less(less), m_less_self(less_self) {}
 
   bool operator()(const char *a, const char *b) const
   {
@@ -121,7 +121,7 @@ static nd::array make_sorted_categories(const set<const char *, cmp> &uniques, c
   ckernel_builder<kernel_request_host> k;
   make_assignment_kernel(&k, 0, element_tp, categories.get()->metadata() + sizeof(fixed_dim_type_arrmeta), element_tp,
                          arrmeta, kernel_request_single, &eval::default_eval_context);
-  expr_single_t fn = k.get()->get_function<expr_single_t>();
+  kernel_single_t fn = k.get()->get_function<kernel_single_t>();
 
   intptr_t stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(categories.get()->metadata())->stride;
   char *dst_ptr = categories.data();
@@ -173,7 +173,7 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     ckernel_builder<kernel_request_host> k;
     ::make_comparison_kernel(&k, 0, m_category_tp, categories_element_arrmeta, m_category_tp,
                              categories_element_arrmeta, comparison_type_sorting_less, &eval::default_eval_context);
-    expr_single_t fn = k.get()->get_function<expr_single_t>();
+    kernel_single_t fn = k.get()->get_function<kernel_single_t>();
 
     cmp less(fn, k.get());
     set<const char *, cmp> uniques(less);
@@ -348,7 +348,7 @@ nd::array ndt::categorical_type::get_categories() const
   ckernel_builder<kernel_request_host> k;
   ::make_assignment_kernel(&k, 0, m_category_tp, el_arrmeta, el_tp, get_category_arrmeta(), kernel_request_single,
                            &eval::default_eval_context);
-  expr_single_t fn = k.get()->get_function<expr_single_t>();
+  kernel_single_t fn = k.get()->get_function<kernel_single_t>();
   for (intptr_t i = 0; i < dim_size; ++i) {
     char *src = const_cast<char *>(get_category_data_from_value((uint32_t)i));
     fn(k.get(), categories.data() + i * stride, &src);
@@ -514,7 +514,7 @@ ndt::type ndt::factor_categorical(const nd::array &values)
   ckernel_builder<kernel_request_host> k;
   ::make_comparison_kernel(&k, 0, el_tp, el_arrmeta, el_tp, el_arrmeta, comparison_type_sorting_less,
                            &eval::default_eval_context);
-  expr_single_t fn = k.get()->get_function<expr_single_t>();
+  kernel_single_t fn = k.get()->get_function<kernel_single_t>();
 
   cmp less(fn, k.get());
   set<const char *, cmp> uniques(less);

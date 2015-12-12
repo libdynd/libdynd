@@ -38,12 +38,12 @@ struct tuple_unary_op_ck : nd::base_kernel<tuple_unary_op_ck, 1> {
     const tuple_unary_op_item *fi = &m_fields[0];
     intptr_t field_count = m_fields.size();
     ckernel_prefix *child;
-    expr_single_t child_fn;
+    kernel_single_t child_fn;
 
     for (intptr_t i = 0; i < field_count; ++i) {
       const tuple_unary_op_item &item = fi[i];
       child = get_child(item.child_kernel_offset);
-      child_fn = child->get_function<expr_single_t>();
+      child_fn = child->get_function<kernel_single_t>();
       char *child_src = src[0] + item.src_data_offset;
       child_fn(child, dst + item.dst_data_offset, &child_src);
     }

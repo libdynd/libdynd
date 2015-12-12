@@ -107,7 +107,7 @@ namespace nd {
       char *child_src[2];
       for (size_t i = 0; i != field_count; ++i) {
         ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) + kernel_offsets[i]);
-        expr_single_t opchild = echild->get_function<expr_single_t>();
+        kernel_single_t opchild = echild->get_function<kernel_single_t>();
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];
         child_src[1] = src[1] + src1_data_offsets[i];
@@ -184,7 +184,7 @@ namespace nd {
       char *child_src[2];
       for (size_t i = 0; i != field_count; ++i) {
         ckernel_prefix *echild = reinterpret_cast<ckernel_prefix *>(reinterpret_cast<char *>(this) + kernel_offsets[i]);
-        expr_single_t opchild = echild->get_function<expr_single_t>();
+        kernel_single_t opchild = echild->get_function<kernel_single_t>();
         // if (src0.field_i < src1.field_i) return true
         child_src[0] = src[0] + src0_data_offsets[i];
         child_src[1] = src[1] + src1_data_offsets[i];

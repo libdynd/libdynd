@@ -28,7 +28,7 @@ size_t dynd::make_comparison_kernel(void *ckb, intptr_t ckb_offset, const ndt::t
   }
 }
 
-static expr_single_t compare_kernel_table[builtin_type_id_count - 2][builtin_type_id_count - 2][7] = {
+static kernel_single_t compare_kernel_table[builtin_type_id_count - 2][builtin_type_id_count - 2][7] = {
 #define INNER_LEVEL(src0_type, src1_type)                                                                              \
   {                                                                                                                    \
     &single_comparison_builtin<src0_type, src1_type>::sorting_less,                                                    \

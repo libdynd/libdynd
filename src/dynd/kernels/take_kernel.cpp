@@ -14,7 +14,7 @@ using namespace dynd;
 void nd::masked_take_ck::single(char *dst, char *const *src)
 {
   ckernel_prefix *child = get_child();
-  expr_strided_t child_fn = child->get_function<expr_strided_t>();
+  kernel_strided_t child_fn = child->get_function<kernel_strided_t>();
   char *src0 = src[0];
   char *mask = src[1];
   intptr_t dim_size = m_dim_size, src0_stride = m_src0_stride, mask_stride = m_mask_stride;
@@ -107,7 +107,7 @@ intptr_t nd::masked_take_ck::instantiate(char *DYND_UNUSED(static_data), char *D
 void nd::indexed_take_ck::single(char *dst, char *const *src)
 {
   ckernel_prefix *child = get_child();
-  expr_single_t child_fn = child->get_function<expr_single_t>();
+  kernel_single_t child_fn = child->get_function<kernel_single_t>();
   char *src0 = src[0];
   const char *index = src[1];
   intptr_t dst_dim_size = m_dst_dim_size, src0_dim_size = m_src0_dim_size, dst_stride = m_dst_stride,
@@ -148,8 +148,8 @@ intptr_t nd::indexed_take_ck::instantiate(char *DYND_UNUSED(static_data), char *
   intptr_t index_dim_size;
   ndt::type src0_el_tp, index_el_tp;
   const char *src0_el_meta, *index_el_meta;
-  if (!src_tp[0]
-           .get_as_strided(src_arrmeta[0], &self->m_src0_dim_size, &self->m_src0_stride, &src0_el_tp, &src0_el_meta)) {
+  if (!src_tp[0].get_as_strided(src_arrmeta[0], &self->m_src0_dim_size, &self->m_src0_stride, &src0_el_tp,
+                                &src0_el_meta)) {
     stringstream ss;
     ss << "indexed take arrfunc: could not process type " << src_tp[0];
     ss << " as a strided dimension";
@@ -189,10 +189,12 @@ intptr_t nd::take_ck::instantiate(char *DYND_UNUSED(static_data), char *DYND_UNU
   if (mask_el_tp.get_type_id() == bool_type_id) {
     return nd::masked_take_ck::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                            kernreq, ectx, nkwd, kwds, tp_vars);
-  } else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
+  }
+  else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
     return nd::indexed_take_ck::instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, src_tp, src_arrmeta,
                                             kernreq, ectx, nkwd, kwds, tp_vars);
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "take: unsupported type for the index " << mask_el_tp << ", need bool or intptr";
     throw invalid_argument(ss.str());
@@ -216,14 +218,17 @@ void nd::take_ck::resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UN
   ndt::type mask_el_tp = src_tp[1].get_type_at_dimension(NULL, 1);
   if (mask_el_tp.get_type_id() == bool_type_id) {
     dst_tp = ndt::var_dim_type::make(src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
-  } else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
+  }
+  else if (mask_el_tp.get_type_id() == (type_id_t)type_id_of<intptr_t>::value) {
     if (src_tp[1].get_type_id() == var_dim_type_id) {
       dst_tp = ndt::var_dim_type::make(src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
-    } else {
+    }
+    else {
       dst_tp = ndt::make_fixed_dim(src_tp[1].get_dim_size(NULL, NULL),
                                    src_tp[0].get_type_at_dimension(NULL, 1).get_canonical_type());
     }
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "take: unsupported type for the index " << mask_el_tp << ", need bool or intptr";
     throw invalid_argument(ss.str());

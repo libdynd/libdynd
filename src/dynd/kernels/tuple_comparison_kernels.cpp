@@ -36,7 +36,7 @@ struct tuple_compare_sorting_less_matching_arrmeta_kernel {
     char *child_src[2];
     for (size_t i = 0; i != field_count; ++i) {
       ckernel_prefix *sorting_less_kdp = reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[i]);
-      expr_single_t opchild = sorting_less_kdp->get_function<expr_single_t>();
+      kernel_single_t opchild = sorting_less_kdp->get_function<kernel_single_t>();
       size_t data_offset = src_data_offsets[i];
       // if (src0.field_i < src1.field_i) return true
       child_src[0] = src[0] + data_offset;
@@ -92,7 +92,7 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
     char *child_src[2];
     for (size_t i = 0; i != field_count; ++i) {
       ckernel_prefix *src0_sorting_less_src1 = reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2 * i]);
-      expr_single_t opchild = src0_sorting_less_src1->get_function<expr_single_t>();
+      kernel_single_t opchild = src0_sorting_less_src1->get_function<kernel_single_t>();
       // if (src0.field_i < src1.field_i) return true
       child_src[0] = src[0] + src0_data_offsets[i];
       child_src[1] = src[1] + src1_data_offsets[i];
@@ -103,7 +103,7 @@ struct tuple_compare_sorting_less_diff_arrmeta_kernel {
         return;
       }
       ckernel_prefix *src1_sorting_less_src0 = reinterpret_cast<ckernel_prefix *>(eraw + kernel_offsets[2 * i + 1]);
-      opchild = src1_sorting_less_src0->get_function<expr_single_t>();
+      opchild = src1_sorting_less_src0->get_function<kernel_single_t>();
       // if (src1.field_i < src0.field_i) return false
       child_src[0] = src[1] + src1_data_offsets[i];
       child_src[1] = src[0] + src0_data_offsets[i];

@@ -74,7 +74,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
                           ectx, 0, NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;
-    ckp->get_function<expr_single_t>()(ckp, &result, const_cast<char **>(&data));
+    ckp->get_function<kernel_single_t>()(ckp, &result, const_cast<char **>(&data));
     return result != 0;
   }
 }
@@ -126,7 +126,7 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::ev
     af.get()->instantiate(NULL, NULL, &ckb, 0, type(this, true), arrmeta, 0, NULL, NULL, kernel_request_single, ectx, 0,
                           NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
-    ckp->get_function<expr_single_t>()(ckp, data, NULL);
+    ckp->get_function<kernel_single_t>()(ckp, data, NULL);
   }
 }
 

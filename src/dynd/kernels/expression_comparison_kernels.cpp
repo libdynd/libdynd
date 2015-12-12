@@ -68,9 +68,9 @@ struct buffered_kernel_extra {
 
     // Get and execute the assignment kernel
     ckernel_prefix *echild;
-    expr_single_t opchild;
+    kernel_single_t opchild;
     echild = reinterpret_cast<ckernel_prefix *>(eraw + b.kernel_offset);
-    opchild = echild->get_function<expr_single_t>();
+    opchild = echild->get_function<kernel_single_t>();
     opchild(echild, dst, const_cast<char **>(&src));
 
     // Return the buffer
@@ -96,9 +96,9 @@ struct buffered_kernel_extra {
     }
     // Call the comparison kernel
     ckernel_prefix *echild;
-    expr_single_t opchild;
+    kernel_single_t opchild;
     echild = reinterpret_cast<ckernel_prefix *>(eraw + e->cmp_kernel_offset);
-    opchild = echild->get_function<expr_single_t>();
+    opchild = echild->get_function<kernel_single_t>();
     int result;
     opchild(echild, reinterpret_cast<char *>(&result), src_buffered);
 
