@@ -34,63 +34,34 @@ namespace ndt {
     struct get_pos_types_kernel;
 
   public:
-    typedef nd::base_callable data_type;
+    typedef nd::callable data_type;
 
     callable_type(const type &ret_type, const type &pos_types, const type &kwd_types);
 
-    virtual ~callable_type()
-    {
-    }
+    virtual ~callable_type() {}
 
     const string &get_kwd_name_raw(intptr_t i) const
     {
       return m_kwd_struct.extended<struct_type>()->get_field_name_raw(i);
     }
 
-    const type &get_return_type() const
-    {
-      return m_return_type;
-    }
+    const type &get_return_type() const { return m_return_type; }
 
-    const type &get_pos_tuple() const
-    {
-      return m_pos_tuple;
-    }
+    const type &get_pos_tuple() const { return m_pos_tuple; }
 
-    const nd::array &get_pos_types() const
-    {
-      return m_pos_tuple.extended<tuple_type>()->get_field_types();
-    }
+    const nd::array &get_pos_types() const { return m_pos_tuple.extended<tuple_type>()->get_field_types(); }
 
-    bool is_pos_variadic() const
-    {
-      return m_pos_tuple.extended<tuple_type>()->is_variadic();
-    }
+    bool is_pos_variadic() const { return m_pos_tuple.extended<tuple_type>()->is_variadic(); }
 
-    bool is_kwd_variadic() const
-    {
-      return m_kwd_struct.extended<struct_type>()->is_variadic();
-    }
+    bool is_kwd_variadic() const { return m_kwd_struct.extended<struct_type>()->is_variadic(); }
 
-    const type &get_kwd_struct() const
-    {
-      return m_kwd_struct;
-    }
+    const type &get_kwd_struct() const { return m_kwd_struct; }
 
-    const nd::array &get_kwd_types() const
-    {
-      return m_kwd_struct.extended<struct_type>()->get_field_types();
-    }
+    const nd::array &get_kwd_types() const { return m_kwd_struct.extended<struct_type>()->get_field_types(); }
 
-    const nd::array &get_kwd_names() const
-    {
-      return m_kwd_struct.extended<struct_type>()->get_field_names();
-    }
+    const nd::array &get_kwd_names() const { return m_kwd_struct.extended<struct_type>()->get_field_names(); }
 
-    const type *get_pos_types_raw() const
-    {
-      return m_pos_tuple.extended<tuple_type>()->get_field_types_raw();
-    }
+    const type *get_pos_types_raw() const { return m_pos_tuple.extended<tuple_type>()->get_field_types_raw(); }
 
     const type &get_pos_type(intptr_t i) const
     {
@@ -101,15 +72,9 @@ namespace ndt {
       return m_pos_tuple.extended<tuple_type>()->get_field_type(i);
     }
 
-    const type &get_kwd_type(intptr_t i) const
-    {
-      return m_kwd_struct.extended<struct_type>()->get_field_type(i);
-    }
+    const type &get_kwd_type(intptr_t i) const { return m_kwd_struct.extended<struct_type>()->get_field_type(i); }
 
-    std::string get_kwd_name(intptr_t i) const
-    {
-      return m_kwd_struct.extended<struct_type>()->get_field_name(i);
-    }
+    std::string get_kwd_name(intptr_t i) const { return m_kwd_struct.extended<struct_type>()->get_field_name(i); }
 
     intptr_t get_kwd_index(const std::string &arg_name) const
     {
@@ -118,39 +83,21 @@ namespace ndt {
 
     void get_vars(std::unordered_set<std::string> &vars) const;
 
-    bool has_kwd(const std::string &name) const
-    {
-      return get_kwd_index(name) != -1;
-    }
+    bool has_kwd(const std::string &name) const { return get_kwd_index(name) != -1; }
 
-    const std::vector<intptr_t> &get_option_kwd_indices() const
-    {
-      return m_opt_kwd_indices;
-    }
+    const std::vector<intptr_t> &get_option_kwd_indices() const { return m_opt_kwd_indices; }
 
     /** Returns the number of arguments, both positional and keyword. */
-    intptr_t get_narg() const
-    {
-      return get_npos() + get_nkwd();
-    }
+    intptr_t get_narg() const { return get_npos() + get_nkwd(); }
 
     /** Returns the number of positional arguments. */
-    intptr_t get_npos() const
-    {
-      return m_pos_tuple.extended<tuple_type>()->get_field_count();
-    }
+    intptr_t get_npos() const { return m_pos_tuple.extended<tuple_type>()->get_field_count(); }
 
     /** Returns the number of keyword arguments. */
-    intptr_t get_nkwd() const
-    {
-      return m_kwd_struct.extended<tuple_type>()->get_field_count();
-    }
+    intptr_t get_nkwd() const { return m_kwd_struct.extended<tuple_type>()->get_field_count(); }
 
     /** Returns the number of optional arguments. */
-    intptr_t get_nopt() const
-    {
-      return m_opt_kwd_indices.size();
-    }
+    intptr_t get_nopt() const { return m_opt_kwd_indices.size(); }
 
     void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
@@ -220,26 +167,17 @@ namespace ndt {
     }
 
     /** Makes an callable type with no arguments */
-    static type make(const type &ret_tp)
-    {
-      return make(ret_tp, tuple_type::make(), struct_type::make());
-    }
+    static type make(const type &ret_tp) { return make(ret_tp, tuple_type::make(), struct_type::make()); }
   };
 
   template <typename R>
   struct type::equivalent<R()> {
-    static type make()
-    {
-      return callable_type::make(type::make<R>());
-    }
+    static type make() { return callable_type::make(type::make<R>()); }
   };
 
   template <typename R, typename A0, typename... A>
   struct type::equivalent<R(A0, A...)> {
-    static type make()
-    {
-      return callable_type::make(type::make<R>(), {type::make<A0>(), type::make<A>()...});
-    }
+    static type make() { return callable_type::make(type::make<R>(), {type::make<A0>(), type::make<A>()...}); }
 
     template <typename... T>
     static type make(const T &... names)
