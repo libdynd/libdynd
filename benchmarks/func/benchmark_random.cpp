@@ -20,7 +20,7 @@ static void BM_Func_Random_Uniform(benchmark::State &state)
 {
   ndt::type dst_tp = ndt::make_fixed_dim(100000, ndt::type::make<T>());
   while (state.KeepRunning()) {
-    nd::random::uniform(kwds("dst_tp", dst_tp));
+    nd::random::uniform({}, {{"dst_tp", dst_tp}});
   }
 }
 

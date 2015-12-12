@@ -42,7 +42,7 @@ static void BM_Func_Apply_Function(benchmark::State &state)
   nd::array b = 11;
   nd::array c = nd::empty(af.get_type()->get_return_type());
   while (state.KeepRunning()) {
-    af(a, b, kwds("dst", c));
+    af({a, b}, {{"dst", c}}));
   }
 }
 
@@ -56,7 +56,7 @@ static void BM_Func_Apply_Callable(benchmark::State &state)
   nd::array b = 11;
   nd::array c = nd::empty(af.get_type()->get_return_type());
   while (state.KeepRunning()) {
-    af(a, b, kwds("dst", c));
+    af({a, b}, {{"dst", c}}));
   }
 }
 

@@ -459,26 +459,19 @@ namespace nd {
       return call<array *>(args_size, args_values, kwds_size, kwds_values);
     }
 
+    template <typename... ArgTypes>
+    array operator()(ArgTypes &&... args)
+    {
+      array tmp[sizeof...(ArgTypes)] = {std::forward<ArgTypes>(args)...};
+      return call(sizeof...(ArgTypes), tmp, 0, nullptr);
+    }
+
+    array operator()() { return call(0, nullptr, 0, nullptr); }
+
     array operator()(const std::initializer_list<array> &args,
                      const std::initializer_list<std::pair<const char *, array>> &kwds)
     {
-      if (get()->kernreq == kernel_request_single) {
-        return call<char *>(args.size(), args.begin(), kwds.size(), kwds.begin());
-      }
-
-      return call<array *>(args.size(), args.begin(), kwds.size(), kwds.begin());
-    }
-
-    template <typename... A>
-    array operator()(A &&... a)
-    {
-      array args_values[sizeof...(A)] = {a...};
-
-      if (get()->kernreq == kernel_request_single) {
-        return call<char *>(sizeof...(A), args_values, 0, NULL);
-      }
-
-      return call<array *>(sizeof...(A), args_values, 0, NULL);
+      return call(args.size(), args.begin(), kwds.size(), kwds.begin());
     }
 
     template <typename KernelType>
@@ -746,10 +739,16 @@ namespace nd {
 
     operator const callable &() const { return get(); }
 
-    template <typename... A>
-    array operator()(A &&... a)
+    template <typename... ArgTypes>
+    array operator()(ArgTypes &&... args)
     {
-      return get()(std::forward<A>(a)...);
+      return get()(std::forward<ArgTypes>(args)...);
+    }
+
+    array operator()(const std::initializer_list<array> &args,
+                     const std::initializer_list<std::pair<const char *, array>> &kwds)
+    {
+      return get()(args, kwds);
     }
 
     static callable &get()
