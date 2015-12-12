@@ -58,10 +58,10 @@ namespace nd {
         char *buffer_data = buffer.data();
 
         ckernel_prefix *first = get_child();
-        expr_single_t first_func = first->get_function<expr_single_t>();
+        kernel_single_t first_func = first->get_function<kernel_single_t>();
 
         ckernel_prefix *second = get_child(second_offset);
-        expr_single_t second_func = second->get_function<expr_single_t>();
+        kernel_single_t second_func = second->get_function<kernel_single_t>();
 
         first_func(first, buffer_data, src);
         second_func(second, dst, &buffer_data);
@@ -75,10 +75,10 @@ namespace nd {
         intptr_t buffer_stride = reinterpret_cast<const fixed_dim_type_arrmeta *>(buffer.get()->metadata())->stride;
 
         ckernel_prefix *first = get_child();
-        expr_strided_t first_func = first->get_function<expr_strided_t>();
+        kernel_strided_t first_func = first->get_function<kernel_strided_t>();
 
         ckernel_prefix *second = get_child(second_offset);
-        expr_strided_t second_func = second->get_function<expr_strided_t>();
+        kernel_strided_t second_func = second->get_function<kernel_strided_t>();
 
         char *src0 = src[0];
         intptr_t src0_stride = src_stride[0];

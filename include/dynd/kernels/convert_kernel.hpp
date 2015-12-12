@@ -159,7 +159,7 @@ namespace nd {
         std::vector<char *> buf_src(narg);
         std::vector<intptr_t> buf_stride(narg);
         ckernel_prefix *child = get_child();
-        expr_strided_t child_fn = child->get_function<expr_strided_t>();
+        kernel_strided_t child_fn = child->get_function<kernel_strided_t>();
 
         for (intptr_t i = 0; i < narg; ++i) {
           if (!m_bufs[i].is_null()) {
@@ -178,7 +178,7 @@ namespace nd {
             if (!m_bufs[i].is_null()) {
               m_bufs[i].reset_arrmeta();
               ckernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
-              expr_strided_t ck_fn = ck->get_function<expr_strided_t>();
+              kernel_strided_t ck_fn = ck->get_function<kernel_strided_t>();
               ck_fn(ck, m_bufs[i].get_storage(), m_bufs[i].get_stride(), &src[i], &src_stride[i], chunk_size);
             }
           }
@@ -187,7 +187,7 @@ namespace nd {
             if (!m_bufs[i].is_null()) {
               m_bufs[i].reset_arrmeta();
               ckernel_prefix *ck = get_child(m_src_buf_ck_offsets[i]);
-              expr_strided_t ck_fn = ck->get_function<expr_strided_t>();
+              kernel_strided_t ck_fn = ck->get_function<kernel_strided_t>();
               ck_fn(ck, m_bufs[i].get_storage(), buf_stride[i], &src[i], &src_stride[i], chunk_size);
             }
             else {

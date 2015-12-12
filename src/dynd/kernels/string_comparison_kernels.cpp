@@ -205,7 +205,7 @@ size_t dynd::make_fixed_string_comparison_kernel(void *ckb, intptr_t ckb_offset,
                                                  const eval::eval_context *DYND_UNUSED(ectx))
 {
   static int lookup[5] = {0, 1, 0, 1, 2};
-  static expr_single_t fixed_string_comparisons_table[3][7] = {DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
+  static kernel_single_t fixed_string_comparisons_table[3][7] = {DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(ascii_utf8),
                                                                DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf16),
                                                                DYND_FIXEDSTRING_COMPARISON_TABLE_TYPE_LEVEL(utf32)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {
@@ -295,7 +295,7 @@ size_t dynd::make_string_comparison_kernel(void *ckb, intptr_t ckb_offset, strin
                                            comparison_type_t comptype, const eval::eval_context *DYND_UNUSED(ectx))
 {
   static int lookup[5] = {0, 1, 0, 1, 2};
-  static expr_single_t string_comparisons_table[3][7] = {DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint8_t),
+  static kernel_single_t string_comparisons_table[3][7] = {DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint8_t),
                                                          DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint16_t),
                                                          DYND_STRING_COMPARISON_TABLE_TYPE_LEVEL(uint32_t)};
   if (0 <= encoding && encoding < 5 && 0 <= comptype && comptype < 7) {

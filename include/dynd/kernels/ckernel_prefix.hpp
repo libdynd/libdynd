@@ -17,10 +17,10 @@ namespace dynd {
 
 struct ckernel_prefix;
 
-typedef void (*expr_single_t)(ckernel_prefix *self, char *dst, char *const *src);
-typedef void (*expr_metadata_single_t)(ckernel_prefix *self, nd::array *dst, nd::array *const *src);
-typedef void (*expr_strided_t)(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
-                               const intptr_t *src_stride, size_t count);
+typedef void (*kernel_call_t)(ckernel_prefix *self, nd::array *dst, nd::array *const *src);
+typedef void (*kernel_single_t)(ckernel_prefix *self, char *dst, char *const *src);
+typedef void (*kernel_strided_t)(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,
+                                 const intptr_t *src_stride, size_t count);
 
 struct kernel_targets_t {
   void *single;
@@ -43,11 +43,11 @@ enum {
   kernel_request_cuda_host_device = kernel_request_host,
 #endif
 
-  /** Kernel function expr_single_t, "(T1, T2, ...) -> R" */
+  /** Kernel function kernel_single_t, "(T1, T2, ...) -> R" */
   kernel_request_single = 0x00000008,
   /** ... */
   kernel_request_array = 0x00000020,
-  /** Kernel function expr_strided_t, "(T1, T2, ...) -> R" */
+  /** Kernel function kernel_strided_t, "(T1, T2, ...) -> R" */
   kernel_request_strided = 0x00000010,
 
   /** ... */
@@ -67,7 +67,7 @@ kernel_request_t without_memory(kernel_request_t kernreq) {
  * This is the struct which begins the memory layout
  * of all ckernels. First comes the function pointer,
  * which has a context-specific prototype, such as
- * `expr_single_t`, and then comes the
+ * `kernel_single_t`, and then comes the
  * destructor.
  *
  * The ckernel is defined in terms of a C ABI definition,
@@ -90,7 +90,7 @@ struct DYND_API ckernel_prefix {
    * Call to get the kernel function pointer, whose type
    * must be known by the context.
    *
-   *      kdp->get_function<expr_single_t>()
+   *      kdp->get_function<kernel_single_t>()
    */
   template <typename T>
   DYND_CUDA_HOST_DEVICE T get_function() const
@@ -111,13 +111,13 @@ struct DYND_API ckernel_prefix {
 
   DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
   {
-    (*reinterpret_cast<expr_single_t>(function))(this, dst, src);
+    (*reinterpret_cast<kernel_single_t>(function))(this, dst, src);
   }
 
   DYND_CUDA_HOST_DEVICE void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,
                                      size_t count)
   {
-    (*reinterpret_cast<expr_strided_t>(function))(this, dst, dst_stride, src, src_stride, count);
+    (*reinterpret_cast<kernel_strided_t>(function))(this, dst, dst_stride, src, src_stride, count);
   }
 
   /**

@@ -252,7 +252,7 @@ namespace nd {
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = this->get_child();
-        expr_strided_t opchild = child->get_function<expr_strided_t>();
+        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
         opchild(child, dst, m_dst_stride, src, m_src_stride, m_size);
       }
@@ -261,7 +261,7 @@ namespace nd {
                                          size_t count)
       {
         ckernel_prefix *child = this->get_child();
-        expr_strided_t opchild = child->get_function<expr_strided_t>();
+        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
         char *src_loop[N];
         for (int j = 0; j != N; ++j) {
@@ -368,7 +368,7 @@ namespace nd {
       DYND_CUDA_HOST_DEVICE void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = this->get_child();
-        expr_strided_t opchild = child->get_function<expr_strided_t>();
+        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
         opchild(child, dst, m_dst_stride, src, NULL, m_size);
       }
 
@@ -376,7 +376,7 @@ namespace nd {
                                          const intptr_t *DYND_UNUSED(src_stride), size_t count)
       {
         ckernel_prefix *child = this->get_child();
-        expr_strided_t opchild = child->get_function<expr_strided_t>();
+        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
         for (size_t i = 0; i < count; i += 1) {
           opchild(child, dst, m_dst_stride, NULL, NULL, m_size);
@@ -460,7 +460,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = this->get_child();
-        expr_strided_t opchild = child->get_function<expr_strided_t>();
+        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
         // Broadcast all the src 'var' dimensions to dst
         intptr_t dim_size = m_size;
@@ -598,7 +598,7 @@ namespace nd {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         ckernel_prefix *child = this->get_child();
-        expr_strided_t opchild = child->get_function<expr_strided_t>();
+        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
         // Broadcast all the src 'var' dimensions to dst
         intptr_t dim_size = m_size;
@@ -689,7 +689,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         ckernel_prefix *child = this->get_child();
-        expr_strided_t opchild = child->get_function<expr_strided_t>();
+        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
         var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
         char *modified_dst;
@@ -909,7 +909,7 @@ namespace nd {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         ckernel_prefix *child = this->get_child();
-        expr_strided_t opchild = child->get_function<expr_strided_t>();
+        kernel_strided_t opchild = child->get_function<kernel_strided_t>();
 
         var_dim_type_data *dst_vddd = reinterpret_cast<var_dim_type_data *>(dst);
         char *modified_dst;

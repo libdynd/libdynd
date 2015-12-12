@@ -261,7 +261,7 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       ckernel_prefix *echild = this->get_child();
-      expr_single_t opchild = echild->get_function<expr_single_t>();
+      kernel_single_t opchild = echild->get_function<kernel_single_t>();
 
       uint32_t value = *reinterpret_cast<const UIntType *>(src[0]);
       char *src_val = const_cast<char *>(
@@ -1915,19 +1915,19 @@ namespace nd {
         // TODO: Would be nice to do this as a predicate
         //       instead of having to go through a dst pointer
         ckernel_prefix *src_is_avail = this->get_child();
-        expr_single_t src_is_avail_fn = src_is_avail->get_function<expr_single_t>();
+        kernel_single_t src_is_avail_fn = src_is_avail->get_function<kernel_single_t>();
         bool1 avail = bool1(false);
         src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(&avail), src);
         if (avail) {
           // It's available, copy using value assignment
           ckernel_prefix *value_assign = this->get_child(m_value_assign_offset);
-          expr_single_t value_assign_fn = value_assign->get_function<expr_single_t>();
+          kernel_single_t value_assign_fn = value_assign->get_function<kernel_single_t>();
           value_assign_fn(value_assign, dst, src);
         }
         else {
           // It's not available, assign an NA
           ckernel_prefix *dst_assign_na = this->get_child(m_dst_assign_na_offset);
-          expr_single_t dst_assign_na_fn = dst_assign_na->get_function<expr_single_t>();
+          kernel_single_t dst_assign_na_fn = dst_assign_na->get_function<kernel_single_t>();
           dst_assign_na_fn(dst_assign_na, dst, NULL);
         }
       }
@@ -1936,11 +1936,11 @@ namespace nd {
       {
         // Three child ckernels
         ckernel_prefix *src_is_avail = this->get_child();
-        expr_strided_t src_is_avail_fn = src_is_avail->get_function<expr_strided_t>();
+        kernel_strided_t src_is_avail_fn = src_is_avail->get_function<kernel_strided_t>();
         ckernel_prefix *value_assign = this->get_child(m_value_assign_offset);
-        expr_strided_t value_assign_fn = value_assign->get_function<expr_strided_t>();
+        kernel_strided_t value_assign_fn = value_assign->get_function<kernel_strided_t>();
         ckernel_prefix *dst_assign_na = this->get_child(m_dst_assign_na_offset);
-        expr_strided_t dst_assign_na_fn = dst_assign_na->get_function<expr_strided_t>();
+        kernel_strided_t dst_assign_na_fn = dst_assign_na->get_function<kernel_strided_t>();
         // Process in chunks using the dynd default buffer size
         bool1 avail[DYND_BUFFER_CHUNK_SIZE];
         while (count > 0) {
@@ -2061,13 +2061,13 @@ namespace nd {
         if (parse::matches_option_type_na_token(std->begin(), std->end())) {
           // It's not available, assign an NA
           ckernel_prefix *dst_assign_na = get_child(m_dst_assign_na_offset);
-          expr_single_t dst_assign_na_fn = dst_assign_na->get_function<expr_single_t>();
+          kernel_single_t dst_assign_na_fn = dst_assign_na->get_function<kernel_single_t>();
           dst_assign_na_fn(dst_assign_na, dst, NULL);
         }
         else {
           // It's available, copy using value assignment
           ckernel_prefix *value_assign = get_child();
-          expr_single_t value_assign_fn = value_assign->get_function<expr_single_t>();
+          kernel_single_t value_assign_fn = value_assign->get_function<kernel_single_t>();
           value_assign_fn(value_assign, dst, src);
         }
       }
@@ -2178,9 +2178,9 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       ckernel_prefix *src_is_avail = get_child();
-      expr_single_t src_is_avail_fn = src_is_avail->get_function<expr_single_t>();
+      kernel_single_t src_is_avail_fn = src_is_avail->get_function<kernel_single_t>();
       ckernel_prefix *value_assign = get_child(m_value_assign_offset);
-      expr_single_t value_assign_fn = value_assign->get_function<expr_single_t>();
+      kernel_single_t value_assign_fn = value_assign->get_function<kernel_single_t>();
       // Make sure it's not an NA
       bool1 avail = bool1(false);
       src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(&avail), src);
@@ -2195,9 +2195,9 @@ namespace nd {
     {
       // Two child ckernels
       ckernel_prefix *src_is_avail = get_child();
-      expr_strided_t src_is_avail_fn = src_is_avail->get_function<expr_strided_t>();
+      kernel_strided_t src_is_avail_fn = src_is_avail->get_function<kernel_strided_t>();
       ckernel_prefix *value_assign = get_child(m_value_assign_offset);
-      expr_strided_t value_assign_fn = value_assign->get_function<expr_strided_t>();
+      kernel_strided_t value_assign_fn = value_assign->get_function<kernel_strided_t>();
       // Process in chunks using the dynd default buffer size
       bool1 avail[DYND_BUFFER_CHUNK_SIZE];
       char *src_copy = src[0];
@@ -2537,7 +2537,7 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       ckernel_prefix *child = this->get_child();
-      expr_single_t single = child->get_function<expr_single_t>();
+      kernel_single_t single = child->get_function<kernel_single_t>();
 
       single(this->dst, src, child);
       cuda_throw_if_not_success(cudaMemcpy(dst, this->dst, data_size, cudaMemcpyHostToDevice));
@@ -2566,7 +2566,7 @@ namespace nd {
     void single(char *dst, char *const *src)
     {
       ckernel_prefix *child = this->get_child();
-      expr_single_t single = child->get_function<expr_single_t>();
+      kernel_single_t single = child->get_function<kernel_single_t>();
 
       cuda_throw_if_not_success(cudaMemcpy(this->src, *src, data_size, cudaMemcpyDeviceToHost));
       single(dst, &this->src, child);

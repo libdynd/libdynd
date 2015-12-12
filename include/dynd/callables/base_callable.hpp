@@ -98,12 +98,12 @@ namespace nd {
   }
 
   struct single_t {
-    volatile expr_single_t func;
+    volatile kernel_single_t func;
     const char *ir;
 
     single_t() = default;
 
-    single_t(volatile expr_single_t func, const volatile char *ir) : func(func), ir(const_cast<const char *>(ir))
+    single_t(volatile kernel_single_t func, const volatile char *ir) : func(func), ir(const_cast<const char *>(ir))
     {
     }
   };

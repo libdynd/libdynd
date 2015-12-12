@@ -18,7 +18,7 @@ namespace nd {
     struct DYND_API reduction_kernel_prefix : ckernel_prefix {
       // This function pointer is for all the calls of the function
       // on a given destination data address after the "first call".
-      expr_strided_t followup_call_function;
+      kernel_strided_t followup_call_function;
 
       template <typename T>
       T get_first_call_function() const
@@ -32,20 +32,20 @@ namespace nd {
         function = reinterpret_cast<void *>(fnptr);
       }
 
-      expr_strided_t get_followup_call_function() const { return followup_call_function; }
+      kernel_strided_t get_followup_call_function() const { return followup_call_function; }
 
-      void set_followup_call_function(expr_strided_t fnptr) { followup_call_function = fnptr; }
+      void set_followup_call_function(kernel_strided_t fnptr) { followup_call_function = fnptr; }
 
-      void single_first(char *dst, char *const *src) { (*reinterpret_cast<expr_single_t>(function))(this, dst, src); }
+      void single_first(char *dst, char *const *src) { (*reinterpret_cast<kernel_single_t>(function))(this, dst, src); }
 
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
-        (*reinterpret_cast<expr_strided_t>(function))(this, dst, dst_stride, src, src_stride, count);
+        (*reinterpret_cast<kernel_strided_t>(function))(this, dst, dst_stride, src, src_stride, count);
       }
 
       void strided_followup(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
-        (*reinterpret_cast<expr_strided_t>(followup_call_function))(this, dst, dst_stride, src, src_stride, count);
+        (*reinterpret_cast<kernel_strided_t>(followup_call_function))(this, dst, dst_stride, src, src_stride, count);
       }
     };
 
@@ -629,8 +629,8 @@ namespace nd {
       void strided_first(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         reduction_kernel_prefix *echild = reinterpret_cast<reduction_kernel_prefix *>(this->get_child());
-        expr_strided_t opchild_first_call = echild->get_first_call_function<expr_strided_t>();
-        expr_strided_t opchild_followup_call = echild->get_followup_call_function();
+        kernel_strided_t opchild_first_call = echild->get_first_call_function<kernel_strided_t>();
+        kernel_strided_t opchild_followup_call = echild->get_followup_call_function();
         intptr_t inner_size = this->size;
         intptr_t inner_dst_stride = this->dst_stride;
         intptr_t inner_src_stride = this->src_stride;
@@ -787,7 +787,7 @@ namespace nd {
       {
         ckernel_prefix *echild_reduce = get_child();
         // No initialization, all reduction
-        expr_strided_t opchild_reduce = echild_reduce->get_function<expr_strided_t>();
+        kernel_strided_t opchild_reduce = echild_reduce->get_function<kernel_strided_t>();
         intptr_t inner_size = this->size;
         intptr_t inner_dst_stride = this->dst_stride;
         intptr_t inner_src_stride = this->src_stride;

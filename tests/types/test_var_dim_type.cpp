@@ -239,7 +239,7 @@ TEST(VarArrayDType, AssignKernel)
 {
   nd::array a, b;
   ckernel_builder<kernel_request_host> k;
-  expr_single_t fn;
+  kernel_single_t fn;
   char *src = NULL;
 
   // Assignment scalar -> uninitialized var array
@@ -248,7 +248,7 @@ TEST(VarArrayDType, AssignKernel)
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(1, a(irange()).get_shape()[0]);
@@ -262,7 +262,7 @@ TEST(VarArrayDType, AssignKernel)
   EXPECT_EQ(var_dim_type_id, a.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
@@ -278,7 +278,7 @@ TEST(VarArrayDType, AssignKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
@@ -295,7 +295,7 @@ TEST(VarArrayDType, AssignKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
@@ -312,7 +312,7 @@ TEST(VarArrayDType, AssignKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
@@ -328,7 +328,7 @@ TEST(VarArrayDType, AssignKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   // No error, a is still uninitialized
@@ -350,7 +350,7 @@ TEST(VarArrayDType, AssignKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
@@ -360,7 +360,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
 {
   nd::array a, b;
   ckernel_builder<kernel_request_host> k;
-  expr_single_t fn;
+  kernel_single_t fn;
   char *src = NULL;
   int vals_int[] = {3, 5, 7};
 
@@ -371,7 +371,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
@@ -388,7 +388,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
@@ -405,7 +405,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
@@ -418,7 +418,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   EXPECT_EQ(3, a(0).as<int>());
@@ -434,7 +434,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
@@ -447,7 +447,7 @@ TEST(VarArrayDType, AssignVarStridedKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
@@ -457,7 +457,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
 {
   nd::array a, b;
   ckernel_builder<kernel_request_host> k;
-  expr_single_t fn;
+  kernel_single_t fn;
   char *src = NULL;
 
   // Assignment fixed array -> uninitialized var array
@@ -467,7 +467,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
@@ -484,7 +484,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   ASSERT_EQ(3, a(irange()).get_shape()[0]);
@@ -501,7 +501,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   EXPECT_EQ(fixed_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
@@ -514,7 +514,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   fn(k.get(), a.data(), &src);
   EXPECT_EQ(3, a(0).as<int>());
@@ -530,7 +530,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
@@ -543,7 +543,7 @@ TEST(VarArrayDType, AssignVarFixedKernel)
   EXPECT_EQ(var_dim_type_id, b.get_type().get_type_id());
   make_assignment_kernel(&k, 0, a.get_type(), a.get()->metadata(), b.get_type(), b.get()->metadata(),
                          kernel_request_single, &eval::default_eval_context);
-  fn = k.get()->get_function<expr_single_t>();
+  fn = k.get()->get_function<kernel_single_t>();
   src = const_cast<char *>(b.cdata());
   EXPECT_THROW(fn(k.get(), a.data(), &src), broadcast_error);
   k.reset();
