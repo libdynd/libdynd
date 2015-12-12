@@ -502,7 +502,7 @@ TEST_P(FFT2D, Inverse)
     axes.clear();
     axes.push_back(1);
 
-    y = nd::ifft({nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes)}})},
+    y = nd::ifft({nd::fft({x}, {{"shape", x.get_shape()}, {"axes", axes}})},
                  {{"shape", y.get_shape()}, {"axes", axes}});
 
     EXPECT_ARRAY_NEAR(x, y / y.get_dim_size(1), rel_err_max<double>());
