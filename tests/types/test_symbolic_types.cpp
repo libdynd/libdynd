@@ -32,7 +32,7 @@ TEST(SymbolicTypes, CreateFuncProto)
   tp = ndt::type::make<int64_t(float, int32_t, double)>();
   EXPECT_EQ(callable_type_id, tp.get_type_id());
   EXPECT_EQ(sizeof(ndt::callable_type::data_type), tp.get_data_size());
-  EXPECT_EQ((size_t)alignof(int64_t), tp.get_data_alignment());
+  EXPECT_EQ(alignof(nd::callable), tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   // function prototype is not actually symbolic, it is
   // used to store callable objects
