@@ -427,7 +427,7 @@ struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
 } // anonymous namespace
 
 ndt::datetime_type::datetime_type(datetime_tz_t timezone)
-    : base_type(datetime_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_none, 0, 0, 0),
+    : base_type(datetime_type_id, datetime_kind, 8, alignof(int64_t), type_flag_none, 0, 0, 0),
       m_timezone(timezone)
 {
 }

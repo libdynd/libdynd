@@ -1551,7 +1551,8 @@ namespace nd {
   namespace detail {
     template <class T>
     struct array_as_helper {
-      inline static typename std::enable_if<is_dynd_scalar<T>::value || is_dynd_scalar_pointer<T>::value, T>::type
+      inline static typename std::enable_if<
+          is_dynd_scalar<T>::value || is_dynd_scalar<typename std::remove_pointer<T>::type>::value, T>::type
       as(const array &lhs, const eval::eval_context *ectx)
       {
         T result;

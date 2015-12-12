@@ -99,7 +99,7 @@ TEST(StructType, CreateTwoField)
   EXPECT_EQ(struct_kind, dt.get_kind());
   EXPECT_EQ(0u, dt.get_data_size());
   EXPECT_EQ(sizeof(two_field_struct), dt.extended()->get_default_data_size());
-  EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_data_alignment());
+  EXPECT_EQ((size_t)alignof(two_field_struct), dt.get_data_alignment());
   EXPECT_FALSE(dt.is_pod());
   EXPECT_EQ(0u, (dt.get_flags() & (type_flag_blockref | type_flag_destructor)));
   tdt = dt.extended<ndt::struct_type>();
@@ -130,7 +130,7 @@ TEST(StructType, CreateThreeField)
   EXPECT_EQ(struct_kind, dt.get_kind());
   EXPECT_EQ(0u, dt.get_data_size());
   EXPECT_EQ(sizeof(three_field_struct), dt.extended()->get_default_data_size());
-  EXPECT_EQ((size_t)scalar_align_of<two_field_struct>::value, dt.get_data_alignment());
+  EXPECT_EQ((size_t)alignof(two_field_struct), dt.get_data_alignment());
   EXPECT_FALSE(dt.is_pod());
   EXPECT_EQ(0u, (dt.get_flags() & (type_flag_blockref | type_flag_destructor)));
   tdt = dt.extended<ndt::struct_type>();

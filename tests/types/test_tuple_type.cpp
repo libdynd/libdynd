@@ -42,7 +42,7 @@ TEST(TupleType, CreateSimple)
   EXPECT_EQ(tuple_type_id, tp.get_type_id());
   EXPECT_EQ(tuple_kind, tp.get_kind());
   EXPECT_EQ(0u, tp.get_data_size());
-  EXPECT_EQ((size_t)scalar_align_of<double>::value, tp.get_data_alignment());
+  EXPECT_EQ((size_t)alignof(double), tp.get_data_alignment());
   EXPECT_FALSE(tp.is_pod());
   EXPECT_FALSE(tp.extended<ndt::tuple_type>()->is_variadic());
   EXPECT_EQ(0u, (tp.get_flags() & (type_flag_blockref | type_flag_destructor)));
@@ -56,10 +56,8 @@ TEST(TupleType, CreateSimple)
 
 TEST(TupleType, Equality)
 {
-  EXPECT_EQ(ndt::type("(int32, float16, int32)"),
-            ndt::type("(int32, float16, int32)"));
-  EXPECT_NE(ndt::type("(int32, float16, int32)"),
-            ndt::type("(int32, float16, int32, ...)"));
+  EXPECT_EQ(ndt::type("(int32, float16, int32)"), ndt::type("(int32, float16, int32)"));
+  EXPECT_NE(ndt::type("(int32, float16, int32)"), ndt::type("(int32, float16, int32, ...)"));
 }
 
 TEST(TupleType, Assign)

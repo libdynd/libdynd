@@ -87,10 +87,7 @@ struct date_get_weekday_kernel : nd::base_kernel<date_get_weekday_kernel, 1> {
   }
 };
 
-ndt::date_type::date_type()
-    : base_type(date_type_id, datetime_kind, 4, scalar_align_of<int32_t>::value, type_flag_none, 0, 0, 0)
-{
-}
+ndt::date_type::date_type() : base_type(date_type_id, datetime_kind, 4, alignof(int32_t), type_flag_none, 0, 0, 0) {}
 
 ndt::date_type::~date_type() {}
 

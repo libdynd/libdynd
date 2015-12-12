@@ -105,7 +105,7 @@ TEST(Type, BasicConstructor)
   d = ndt::type::make<long long>();
   EXPECT_EQ(int64_type_id, d.get_type_id());
   EXPECT_EQ(sint_kind, d.get_kind());
-  EXPECT_EQ((size_t)scalar_align_of<long long>::value, d.get_data_alignment());
+  EXPECT_EQ((size_t)alignof(long long), d.get_data_alignment());
   EXPECT_EQ(sizeof(long long), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
   // Roundtripping through a string
@@ -134,7 +134,7 @@ TEST(Type, BasicConstructor)
   d = ndt::type::make<unsigned long long>();
   EXPECT_EQ(uint64_type_id, d.get_type_id());
   EXPECT_EQ(uint_kind, d.get_kind());
-  EXPECT_EQ((size_t)scalar_align_of<unsigned long long>::value, d.get_data_alignment());
+  EXPECT_EQ((size_t)alignof(unsigned long long), d.get_data_alignment());
   EXPECT_EQ(sizeof(unsigned long long), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
   // Roundtripping through a string
@@ -154,7 +154,7 @@ TEST(Type, BasicConstructor)
   d = ndt::type::make<double>();
   EXPECT_EQ(float64_type_id, d.get_type_id());
   EXPECT_EQ(real_kind, d.get_kind());
-  EXPECT_EQ((size_t)scalar_align_of<double>::value, d.get_data_alignment());
+  EXPECT_EQ((size_t)alignof(double), d.get_data_alignment());
   EXPECT_EQ(sizeof(double), d.get_data_size());
   EXPECT_TRUE(d.is_builtin());
   // Roundtripping through a string
