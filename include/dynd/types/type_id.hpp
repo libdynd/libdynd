@@ -849,35 +849,4 @@ struct is_dynd_scalar<std::complex<double>> {
   enum { value = true };
 };
 
-// Metaprogram for determining if a type is a valid C++ pointer to a scalar
-// of a particular type.
-template <typename T>
-struct is_dynd_scalar_pointer {
-  enum { value = false };
-};
-template <typename T>
-struct is_dynd_scalar_pointer<T *> {
-  enum { value = is_dynd_scalar<T>::value };
-};
-
-// Metaprogram for determining scalar alignment
-template <typename T>
-struct scalar_align_of {
-  struct align_helper {
-    char x;
-    T t;
-  };
-  static const int value = sizeof(align_helper) - sizeof(T);
-};
-
-// Metaprogram for determining if a type is the C++ "bool" or not
-template <typename T>
-struct is_type_bool {
-  enum { value = false };
-};
-template <>
-struct is_type_bool<bool> {
-  enum { value = true };
-};
-
 } // namespace dynd

@@ -58,15 +58,9 @@ protected:
   }
 
 public:
-  base_ckernel_builder()
-  {
-    reinterpret_cast<CKBT *>(this)->init();
-  }
+  base_ckernel_builder() { reinterpret_cast<CKBT *>(this)->init(); }
 
-  ~base_ckernel_builder()
-  {
-    reinterpret_cast<CKBT *>(this)->destroy();
-  }
+  ~base_ckernel_builder() { reinterpret_cast<CKBT *>(this)->destroy(); }
 
   template <typename SelfType, typename... A>
   SelfType *init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)
@@ -126,10 +120,7 @@ public:
     return reinterpret_cast<T *>(m_data + ckb_offset);
   }
 
-  ckernel_prefix *get() const
-  {
-    return reinterpret_cast<ckernel_prefix *>(m_data);
-  }
+  ckernel_prefix *get() const { return reinterpret_cast<ckernel_prefix *>(m_data); }
 
   /**
    * For use during construction, gets the ckernel component
@@ -148,10 +139,7 @@ public:
   }
 
   /** For debugging/informational purposes */
-  intptr_t get_capacity() const
-  {
-    return m_capacity;
-  }
+  intptr_t get_capacity() const { return m_capacity; }
 };
 
 template <kernel_request_t kernreq>
@@ -163,10 +151,7 @@ class ckernel_builder<kernel_request_host> : public base_ckernel_builder<ckernel
   // otherwise dynamic memory is allocated when it gets too big
   char m_static_data[16 * 8];
 
-  bool using_static_data() const
-  {
-    return m_data == &m_static_data[0];
-  }
+  bool using_static_data() const { return m_data == &m_static_data[0]; }
 
 public:
   void init()
@@ -180,27 +165,16 @@ public:
   SelfType *init(PrefixType *rawself, kernel_request_t kernreq, A &&... args)
   {
     /* Alignment requirement of the type. */
-    static_assert(static_cast<size_t>(scalar_align_of<SelfType>::value) <=
-                      static_cast<size_t>(scalar_align_of<uint64_t>::value),
-                  "ckernel types require alignment <= 64 bits");
+    static_assert(alignof(SelfType) <= alignof(uint64_t), "ckernel types require alignment <= 64 bits");
 
     return SelfType::init(rawself, kernreq, std::forward<A>(args)...);
   }
 
-  void destroy()
-  {
-    base_ckernel_builder<ckernel_builder<kernel_request_host>>::destroy();
-  }
+  void destroy() { base_ckernel_builder<ckernel_builder<kernel_request_host>>::destroy(); }
 
-  void destroy(ckernel_prefix *self)
-  {
-    self->destroy();
-  }
+  void destroy(ckernel_prefix *self) { self->destroy(); }
 
-  void *alloc(size_t size)
-  {
-    return std::malloc(size);
-  }
+  void *alloc(size_t size) { return std::malloc(size); }
 
   void *realloc(void *ptr, size_t old_size, size_t new_size)
   {
@@ -212,7 +186,8 @@ public:
         copy(new_data, ptr, old_size);
       }
       return new_data;
-    } else {
+    }
+    else {
       return std::realloc(ptr, new_size);
     }
   }
@@ -224,15 +199,9 @@ public:
     }
   }
 
-  void *copy(void *dst, const void *src, size_t size)
-  {
-    return std::memcpy(dst, src, size);
-  }
+  void *copy(void *dst, const void *src, size_t size) { return std::memcpy(dst, src, size); }
 
-  void *set(void *dst, int value, size_t size)
-  {
-    return std::memset(dst, value, size);
-  }
+  void *set(void *dst, int value, size_t size) { return std::memset(dst, value, size); }
 
   void swap(ckernel_builder<kernel_request_host> &rhs)
   {
@@ -242,21 +211,24 @@ public:
         copy(tmp_static_data, m_static_data, sizeof(m_static_data));
         copy(m_static_data, rhs.m_static_data, sizeof(m_static_data));
         copy(rhs.m_static_data, tmp_static_data, sizeof(m_static_data));
-      } else {
+      }
+      else {
         copy(rhs.m_static_data, m_static_data, sizeof(m_static_data));
         m_data = rhs.m_data;
         m_capacity = rhs.m_capacity;
         rhs.m_data = &rhs.m_static_data[0];
         rhs.m_capacity = 16 * sizeof(intptr_t);
       }
-    } else {
+    }
+    else {
       if (rhs.using_static_data()) {
         copy(m_static_data, rhs.m_static_data, sizeof(m_static_data));
         rhs.m_data = m_data;
         rhs.m_capacity = m_capacity;
         m_data = &m_static_data[0];
         m_capacity = sizeof(m_static_data);
-      } else {
+      }
+      else {
         (std::swap)(m_data, rhs.m_data);
         (std::swap)(m_capacity, rhs.m_capacity);
       }
@@ -277,8 +249,8 @@ __global__ void cuda_device_init(ckernel_prefix *rawself, kernel_request_t kernr
 DYND_INTERNAL __global__ void cuda_device_destroy(ckernel_prefix *self);
 
 template <>
-class ckernel_builder<kernel_request_cuda_device> : public base_ckernel_builder<
-                                                        ckernel_builder<kernel_request_cuda_device>> {
+class ckernel_builder<kernel_request_cuda_device>
+    : public base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>> {
   static class pooled_allocator {
     std::multimap<std::size_t, void *> available_blocks;
     std::map<void *, std::size_t> used_blocks;
@@ -314,7 +286,8 @@ class ckernel_builder<kernel_request_cuda_device> : public base_ckernel_builder<
       if (available_block != available_blocks.end()) {
         res = available_block->second;
         available_blocks.erase(available_block);
-      } else {
+      }
+      else {
         cuda_throw_if_not_success(cudaMalloc(&res, n));
       }
 
@@ -339,10 +312,7 @@ public:
     m_capacity = 16 * 8;
   }
 
-  void *alloc(size_t size)
-  {
-    return allocator.allocate(size);
-  }
+  void *alloc(size_t size) { return allocator.allocate(size); }
 
   void *realloc(void *old_ptr, size_t old_size, size_t new_size)
   {
@@ -352,10 +322,7 @@ public:
     return new_ptr;
   }
 
-  void free(void *ptr)
-  {
-    allocator.deallocate(ptr);
-  }
+  void free(void *ptr) { allocator.deallocate(ptr); }
 
   void *copy(void *dst, const void *src, size_t size)
   {
@@ -372,20 +339,17 @@ public:
   template <typename self_type, typename... A>
   self_type *init(ckernel_prefix *rawself, kernel_request_t kernreq, A &&... args)
   {
-    cuda_device_init<self_type> << <1, 1>>> (rawself, kernreq, std::forward<A>(args)...);
+    cuda_device_init<self_type><<<1, 1>>>(rawself, kernreq, std::forward<A>(args)...);
     // check for CUDA errors here
 
     return self_type::get_self(rawself);
   }
 
-  void destroy()
-  {
-    base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>>::destroy();
-  }
+  void destroy() { base_ckernel_builder<ckernel_builder<kernel_request_cuda_device>>::destroy(); }
 
   void destroy(ckernel_prefix *self)
   {
-    cuda_device_destroy << <1, 1>>> (self);
+    cuda_device_destroy<<<1, 1>>>(self);
     // check for CUDA errors here
   }
 };

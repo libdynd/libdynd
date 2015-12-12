@@ -104,12 +104,6 @@
 
 #define DYND_USE_STD_ATOMIC
 
-#if _MSC_VER == 1800
-// MSVC 2013 doesn't support nested initializer lists
-// https://stackoverflow.com/questions/23965565/how-to-do-nested-initializer-lists-in-visual-c-2013
-#define DYND_NESTED_INIT_LIST_BUG
-#endif
-
 // No DYND_CONSTEXPR yet, define it as nothing
 #define DYND_CONSTEXPR
 
@@ -386,19 +380,6 @@ struct remove_all_pointers<T *> {
   typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
 };
 
-template <typename T, typename U>
-struct as_ {
-  typedef U type;
-};
-
-template <template <typename...> class C, typename T>
-struct instantiate;
-
-template <template <typename...> class C, typename... T>
-struct instantiate<C, type_sequence<T...>> {
-  typedef C<T...> type;
-};
-
 namespace detail {
 
   template <typename func_type, typename... B>
@@ -472,28 +453,6 @@ template <typename func_type, int I>
 struct arg_at {
   typedef typename at<typename args_of<func_type>::type, I>::type type;
 };
-
-namespace detail {
-
-  template <typename SequenceType>
-  struct with;
-
-  template <typename T, T... I>
-  struct with<integer_sequence<T, I...>> {
-    template <typename ConstructibleType, typename... ArgTypes>
-    static ConstructibleType make(ArgTypes &&... args)
-    {
-      return ConstructibleType(get<I>(std::forward<ArgTypes>(args)...)...);
-    }
-  };
-
-} // namespace dynd::detail
-
-template <typename SequenceType, typename ConstructibleType, typename... ArgTypes>
-ConstructibleType make_with(ArgTypes &&... args)
-{
-  return detail::with<SequenceType>::template make<ConstructibleType, ArgTypes...>(std::forward<ArgTypes>(args)...);
-}
 
 } // namespace dynd
 

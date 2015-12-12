@@ -72,8 +72,7 @@ struct time_get_microsecond_kernel : nd::base_kernel<time_get_microsecond_kernel
 }
 
 ndt::time_type::time_type(datetime_tz_t timezone)
-    : base_type(time_type_id, datetime_kind, 8, scalar_align_of<int64_t>::value, type_flag_none, 0, 0, 0),
-      m_timezone(timezone)
+    : base_type(time_type_id, datetime_kind, 8, alignof(int64_t), type_flag_none, 0, 0, 0), m_timezone(timezone)
 {
 }
 

@@ -35,7 +35,7 @@ static bool is_simple_identifier_name(const char *begin, const char *end)
 }
 
 ndt::callable_type::callable_type(const type &ret_type, const type &pos_types, const type &kwd_types)
-    : base_type(callable_type_id, function_kind, sizeof(data_type), scalar_align_of<uint64_t>::value,
+    : base_type(callable_type_id, function_kind, sizeof(data_type), alignof(uint64_t),
                 type_flag_zeroinit | type_flag_destructor, 0, 0, 0),
       m_return_type(ret_type), m_pos_tuple(pos_types), m_kwd_struct(kwd_types)
 {

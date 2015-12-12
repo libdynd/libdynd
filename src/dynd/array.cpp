@@ -38,7 +38,7 @@ inline typename std::enable_if<is_dynd_scalar<T>::value, intrusive_ptr<memory_bl
 make_builtin_scalar_array(const T &value, uint64_t flags)
 {
   char *data_ptr = NULL;
-  intrusive_ptr<memory_block_data> result = make_array_memory_block(0, sizeof(T), scalar_align_of<T>::value, &data_ptr);
+  intrusive_ptr<memory_block_data> result = make_array_memory_block(0, sizeof(T), alignof(T), &data_ptr);
   *reinterpret_cast<T *>(data_ptr) = value;
   array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
   ndo->tp = ndt::type(type_id_of<T>::value);
@@ -733,10 +733,7 @@ nd::array nd::array::p(const char *name) const
   throw runtime_error(ss.str());
 }
 
-nd::array nd::array::p(const std::string &name) const
-{
-  return p(name.c_str());
-}
+nd::array nd::array::p(const std::string &name) const { return p(name.c_str()); }
 
 nd::callable nd::array::find_dynamic_function(const char *function_name) const
 {

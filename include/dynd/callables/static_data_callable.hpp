@@ -22,8 +22,7 @@ namespace nd {
         : base_callable(tp, kernreq, targets, ir, data_init, resolve_dst_type, instantiate),
           static_data(std::forward<T>(static_data))
     {
-      static_assert(scalar_align_of<static_data_type>::value <= scalar_align_of<std::uint64_t>::value,
-                    "static data requires stronger alignment");
+      static_assert(alignof(static_data_type) <= alignof(uint64_t), "static data requires stronger alignment");
     }
 
     virtual ~static_data_callable() {}

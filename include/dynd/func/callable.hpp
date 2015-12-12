@@ -56,109 +56,10 @@ namespace nd {
 
     inline void set_data(array *&data, const array &value) { data = const_cast<array *>(&value); }
 
-    /** A holder class for the keyword arguments */
-    template <typename... K>
-    struct kwds {
-      static const size_t size = sizeof...(K);
-      const char *m_names[sizeof...(K)];
-      array values[sizeof...(K)];
-
-      kwds(typename as_<K, const char *>::type... names, K &&... values)
-          : m_names{names...}, values{std::forward<K>(values)...}
-      {
-      }
-    };
-
-    /** The case of no keyword arguments being provided */
-    template <>
-    struct kwds<> {
-      static const size_t size = 0;
-      const char *m_names[1];
-      array values[1];
-    };
-
-    template <>
-    struct kwds<intptr_t, const char *const *, array *> {
-      size_t size;
-      const char *const *m_names;
-      array *values;
-
-      kwds(intptr_t size, const char *const *names, array *values) : size(size), m_names(names), values(values) {}
-    };
-
-    template <typename... T>
-    struct is_variadic_kwds {
-      enum { value = true };
-    };
-
-    template <typename T0, typename T1, typename T2>
-    struct is_variadic_kwds<T0, T1, T2> {
-      enum {
-        value = !std::is_convertible<T0, intptr_t>::value || !std::is_convertible<T1, const char *const *>::value ||
-                !std::is_convertible<T2, nd::array *>::value
-      };
-    };
-
-    template <typename... T>
-    struct as_kwds {
-      typedef typename instantiate<
-          nd::detail::kwds,
-          typename dynd::take<type_sequence<T...>, make_index_sequence<1, sizeof...(T), 2>>::type>::type type;
-    };
-  } // namespace dynd::nd::detail
-
-  /**
-   * A function to provide keyword arguments to an callable. The arguments
-   * must alternate between the keyword name and the argument value.
-   *
-   *   callable af = <some callable>;
-   *   af(arr1, arr2, kwds("firstkwarg", kwval1, "second", kwval2));
-   */
-  template <typename... T>
-  typename std::enable_if<detail::is_variadic_kwds<T...>::value, typename detail::as_kwds<T...>::type>::type
-  kwds(T &&... t)
-  {
-    // Sequence of even integers, for extracting the keyword names
-    typedef make_index_sequence<0, sizeof...(T), 2> I;
-    // Sequence of odd integers, for extracting the keyword values
-    typedef make_index_sequence<1, sizeof...(T), 2> J;
-
-    return make_with<typename join<I, J>::type, decltype(kwds(std::forward<T>(t)...))>(std::forward<T>(t)...);
-  }
-
-  /**
-   * A special way to provide the keyword argument as an array of
-   * names and an array of nd::array values.
-   */
-  /*
-    template <typename... T>
-    typename std::enable_if<!detail::is_variadic_kwds<T...>::value,
-                            detail::kwds<intptr_t, const char *const *, array *>>::type
-    kwds(T &&... t)
-    {
-      return detail::kwds<intptr_t, const char *const *, array *>(std::forward<T>(t)...);
-    }
-  */
-
-  /**
-   * Empty keyword args.
-   */
-  inline detail::kwds<> kwds() { return detail::kwds<>(); }
-
-} // namespace dynd::nd
-
-using nd::kwds;
-
-namespace nd {
-  namespace detail {
-
     DYND_HAS(data_size);
     DYND_HAS(data_init);
     DYND_HAS(resolve_dst_type);
     DYND_HAS(instantiate);
-    DYND_HAS(static_data_free);
-
-    DYND_GET(static_data_free, callable_static_data_free_t, NULL);
 
     template <typename KernelType>
     typename std::enable_if<!has_member_single<KernelType, void(array *, array *const *)>::value,
@@ -259,17 +160,14 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
+  typedef array callable_arg_t;
+  typedef std::pair<const char *, array> callable_kwd_t;
+
   /**
    * Holds a single instance of an callable in an nd::array,
    * providing some more direct convenient interface.
    */
   class DYND_API callable : public intrusive_ptr<base_callable> {
-    template <typename DataType, typename... A>
-    struct args;
-
-    template <typename... A>
-    struct has_kwds;
-
   public:
     using intrusive_ptr<base_callable>::intrusive_ptr;
 
@@ -615,95 +513,6 @@ namespace nd {
   {
     return o << "<callable <" << rhs.get()->tp << "> at " << reinterpret_cast<const void *>(rhs.get()) << ">";
   }
-
-  template <typename DataType>
-  struct callable::args<DataType> {
-    static const size_t size = 0;
-    array *values;
-    ndt::type *tp;
-    const char *const *arrmeta;
-
-    args(std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars), const ndt::callable_type *self_tp)
-        : values(nullptr), tp(nullptr), arrmeta(nullptr)
-    {
-      detail::check_narg(self_tp, 0);
-    }
-
-    DataType const *data() const { return NULL; }
-  };
-
-  /** A holder class for the array arguments */
-  template <typename DataType, typename... A>
-  struct callable::args {
-    static const size_t size = sizeof...(A);
-    array values[sizeof...(A)];
-    ndt::type tp[sizeof...(A)];
-    const char *arrmeta[sizeof...(A)];
-    DataType m_data[sizeof...(A)];
-
-    args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, A &&... a)
-        : values{std::forward<A>(a)...}
-    {
-      if (!self_tp->is_pos_variadic() && (static_cast<intptr_t>(sizeof...(A)) < self_tp->get_npos())) {
-        std::stringstream ss;
-        ss << "callable expected " << self_tp->get_npos() << " positional arguments, but received " << sizeof...(A);
-        throw std::invalid_argument(ss.str());
-      }
-
-      for (intptr_t i = 0; i < (self_tp->is_pos_variadic() ? static_cast<intptr_t>(sizeof...(A)) : self_tp->get_npos());
-           ++i) {
-        detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
-
-        tp[i] = values[i]->tp;
-        arrmeta[i] = values[i]->metadata();
-        detail::set_data(m_data[i], values[i]);
-      }
-    }
-
-    DataType const *data() const { return m_data; }
-  };
-
-  /** A way to pass a run-time array of array arguments */
-  template <typename DataType>
-  struct callable::args<DataType, size_t, array *> {
-    size_t size;
-    array *values;
-    ndt::type *tp;
-    const char **arrmeta;
-    std::vector<DataType> m_data;
-
-    args(std::map<std::string, ndt::type> &tp_vars, const ndt::callable_type *self_tp, size_t size, array *values)
-        : size(size), values(values), tp(new ndt::type[size]), arrmeta(new const char *[size]), m_data(size)
-    {
-      detail::check_narg(self_tp, size);
-
-      for (std::size_t i = 0; i < size; ++i) {
-        detail::check_arg(self_tp, i, values[i]->tp, values[i]->metadata(), tp_vars);
-
-        tp[i] = values[i]->tp;
-        arrmeta[i] = values[i]->metadata();
-        detail::set_data(m_data[i], values[i]);
-      }
-    }
-
-    ~args()
-    {
-      delete[] tp;
-      delete[] arrmeta;
-    }
-
-    DataType const *data() const { return m_data.data(); }
-  };
-
-  template <>
-  struct callable::has_kwds<> {
-    static const bool value = false;
-  };
-
-  template <typename A0, typename... A>
-  struct callable::has_kwds<A0, A...> {
-    static const bool value = is_instance<detail::kwds, typename std::decay<A0>::type>::value || has_kwds<A...>::value;
-  };
 
   namespace detail {
 
