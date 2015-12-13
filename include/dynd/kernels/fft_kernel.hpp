@@ -95,15 +95,9 @@ namespace nd {
       ::fftw_execute_dft_c2r(plan, in, out);
     }
 
-    inline void fftw_destroy_plan(::fftwf_plan plan)
-    {
-      ::fftwf_destroy_plan(plan);
-    }
+    inline void fftw_destroy_plan(::fftwf_plan plan) { ::fftwf_destroy_plan(plan); }
 
-    inline void fftw_destroy_plan(::fftw_plan plan)
-    {
-      ::fftw_destroy_plan(plan);
-    }
+    inline void fftw_destroy_plan(::fftw_plan plan) { ::fftw_destroy_plan(plan); }
   }
 
   template <typename T>
@@ -130,14 +124,9 @@ namespace nd {
 
     plan_type plan;
 
-    fftw_ck(const plan_type &plan) : plan(plan)
-    {
-    }
+    fftw_ck(const plan_type &plan) : plan(plan) {}
 
-    ~fftw_ck()
-    {
-      detail::fftw_destroy_plan(plan);
-    }
+    ~fftw_ck() { detail::fftw_destroy_plan(plan); }
 
     void single(char *dst, char *const *src)
     {
@@ -169,7 +158,8 @@ namespace nd {
       int flags;
       if (kwds[2].is_missing()) {
         flags = FFTW_ESTIMATE;
-      } else {
+      }
+      else {
         flags = kwds[2].as<int>();
       }
 
@@ -186,7 +176,8 @@ namespace nd {
         if (axes.get_type().get_type_id() == pointer_type_id) {
           axes = axes;
         }
-      } else {
+      }
+      else {
         axes = nd::range(src_tp[0].get_ndim());
       }
 
@@ -247,7 +238,8 @@ namespace nd {
       nd::array shape = kwds[0];
       if (shape.is_missing()) {
         dst_tp = src_tp[0];
-      } else {
+      }
+      else {
         if (shape.get_type().get_type_id() == pointer_type_id) {
           shape = shape.f("dereference");
         }
@@ -270,8 +262,8 @@ namespace nd {
 namespace ndt {
 
   template <typename fftw_dst_type, typename fftw_src_type, int sign>
-  struct type::equivalent<nd::fftw_ck<fftw_dst_type, fftw_src_type, sign>> {
-    static type make()
+  struct traits<nd::fftw_ck<fftw_dst_type, fftw_src_type, sign>> {
+    static type equivalent()
     {
       return ndt::type("(Fixed**N * complex[float64], shape: ?N * int64, axes: "
                        "?Fixed * int64, flags: ?int32) -> Fixed**N * "
