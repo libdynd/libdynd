@@ -334,7 +334,6 @@ set(libdynd_SRC
     src/dynd/kernels/string_comparison_kernels.cpp
     src/dynd/kernels/struct_assignment_kernels.cpp
     src/dynd/kernels/take_kernel.cpp
-    src/dynd/kernels/kernels_for_disassembly.cpp
     src/dynd/kernels/single_comparer_builtin.hpp
     src/dynd/kernels/tuple_assignment_kernels.cpp
     src/dynd/kernels/tuple_comparison_kernels.cpp
