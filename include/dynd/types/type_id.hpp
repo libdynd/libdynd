@@ -760,6 +760,10 @@ struct is_dynd_scalar {
   enum { value = false };
 };
 template <>
+struct is_dynd_scalar<bool> {
+  enum { value = true };
+};
+template <>
 struct is_dynd_scalar<bool1> {
   enum { value = true };
 };

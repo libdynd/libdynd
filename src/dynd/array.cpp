@@ -269,120 +269,6 @@ static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::t
   return result;
 }
 
-// Constructors from C++ scalars
-nd::array::array(bool1 value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(bool value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(bool1(value), nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(signed char value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-
-nd::array::array(char value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-
-nd::array::array(short value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-
-nd::array::array(long value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(long long value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(const int128 &value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(unsigned char value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(unsigned short value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(unsigned int value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(unsigned long value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(unsigned long long value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(const uint128 &value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(float16 value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(float value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(double value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(const float128 &value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(dynd::complex<float> value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(dynd::complex<double> value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(std::complex<float> value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
-nd::array::array(std::complex<double> value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
 nd::array::array(const std::string &value)
 {
   array temp = make_string_array(value.c_str(), value.size(), string_encoding_utf_8,
@@ -399,13 +285,6 @@ nd::array::array(const char *str, size_t size)
 {
   array temp = make_string_array(str, size, string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
   temp.swap(*this);
-}
-nd::array::array(const ndt::type &tp)
-{
-  array temp(nd::empty(ndt::make_type<ndt::type_type>()));
-  temp.swap(*this);
-  ndt::type(tp).swap(*reinterpret_cast<ndt::type *>(get()->data));
-  get()->flags = nd::read_access_flag | nd::immutable_access_flag;
 }
 
 nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type> &vec)
