@@ -27,7 +27,6 @@ namespace ndt {
 } // namespace ndt;
 
 namespace nd {
-
   class DYND_API array;
 
   enum array_access_flags {
@@ -133,28 +132,6 @@ namespace nd {
 
     /** Constructs an array from a 1D bool initializer list */
     array(const std::initializer_list<bool> &il);
-
-    /** Assigns an array from a 1D initializer list */
-    template <class T>
-    inline array operator=(const std::initializer_list<T> &il)
-    {
-      array(il).swap(*this);
-      return *this;
-    }
-    /** Assigns an array from a 2D initializer list */
-    template <class T>
-    inline array operator=(const std::initializer_list<std::initializer_list<T>> &il)
-    {
-      array(il).swap(*this);
-      return *this;
-    }
-    /** Assigns an array from a 3D initializer list */
-    template <class T>
-    inline array operator=(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il)
-    {
-      array(il).swap(*this);
-      return *this;
-    }
 
     /**
      * Constructs an array from a std::vector.
