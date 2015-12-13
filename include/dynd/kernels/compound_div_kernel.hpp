@@ -115,8 +115,8 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t DstTypeID, type_id_t Src0TypeID>
-  struct type::equivalent<nd::compound_div_kernel_t<DstTypeID, Src0TypeID>> {
-    static type make()
+  struct traits<nd::compound_div_kernel_t<DstTypeID, Src0TypeID>> {
+    static type equivalent()
     {
       return callable_type::make(type(DstTypeID), type(Src0TypeID));
     }

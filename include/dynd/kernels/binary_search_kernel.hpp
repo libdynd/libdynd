@@ -79,8 +79,8 @@ namespace nd {
 namespace ndt {
 
   template <>
-  struct type::equivalent<nd::binary_search_kernel> {
-    static type make() { return callable_type::make(type::make<intptr_t>(), {type("Fixed * Scalar"), type("Scalar")}); }
+  struct traits<nd::binary_search_kernel> {
+    static type equivalent() { return callable_type::make(type::make<intptr_t>(), {type("Fixed * Scalar"), type("Scalar")}); }
   };
 
 } // namespace dynd::ndt

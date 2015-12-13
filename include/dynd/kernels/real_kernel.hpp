@@ -26,8 +26,8 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t RealTypeID>
-  struct type::equivalent<nd::real_kernel<RealTypeID>> {
-    static type make()
+  struct traits<nd::real_kernel<RealTypeID>> {
+    static type equivalent()
     {
       return callable_type::make(type::make<typename nd::real_kernel<RealTypeID>::real_type>(),
                                  {type::make<typename nd::real_kernel<RealTypeID>::complex_type>()});

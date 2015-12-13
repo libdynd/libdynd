@@ -133,6 +133,16 @@ namespace ndt {
 
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 
+  template <typename T>
+  struct traits {
+    ~traits() = delete;
+  };
+
+  template <typename T>
+  struct has_traits {
+    static const bool value = std::is_destructible<traits<T>>::value;
+  };
+
   /**
    * This class represents a data type.
    *
@@ -789,25 +799,6 @@ namespace ndt {
       return ss.str();
     }
 
-    template <typename T>
-    struct equivalent {
-      ~equivalent() = delete;
-    };
-
-    template <typename T>
-    struct has_equivalent {
-      static const bool value = std::is_destructible<equivalent<T>>::value;
-    };
-
-    /**
-     * ``value'' should be true for an ndt::type object whose memory layout
-     * matches that of C++.
-     */
-    template <typename T>
-    struct is_layout_compatible {
-      static const bool value = false;
-    };
-
     /**
      * Convenience function which makes an ndt::type
      * object from a template parameter. This includes
@@ -817,7 +808,7 @@ namespace ndt {
     template <typename T, typename... A>
     static type make(A &&... a)
     {
-      return equivalent<T>::make(std::forward<A>(a)...);
+      return traits<T>::equivalent(std::forward<A>(a)...);
     }
 
     static type make(type_id_t tp_id, const nd::array &args);
@@ -826,196 +817,202 @@ namespace ndt {
   };
 
   template <>
-  struct type::equivalent<bool1> {
-    static type make() { return type(type_id_of<bool1>::value); }
+  struct traits<bool1> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<bool1>::value); }
   };
 
   template <>
-  struct type::equivalent<bool> {
-    static type make() { return type::make<bool1>(); }
+  struct traits<bool> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<bool1>::value); }
   };
 
   template <>
-  struct type::is_layout_compatible<bool> {
-    static const bool value = true;
+  struct traits<signed char> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<signed char>::value); }
   };
 
   template <>
-  struct type::equivalent<signed char> {
-    static type make() { return type(type_id_of<signed char>::value); }
+  struct traits<short> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<short>::value); }
   };
 
   template <>
-  struct type::equivalent<short> {
-    static type make() { return type(type_id_of<short>::value); }
+  struct traits<int> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<int>::value); }
   };
 
   template <>
-  struct type::is_layout_compatible<short> {
-    static const bool value = true;
+  struct traits<long> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<long>::value); }
   };
 
   template <>
-  struct type::equivalent<int> {
-    static type make() { return type(type_id_of<int>::value); }
+  struct traits<long long> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<long long>::value); }
   };
 
   template <>
-  struct type::is_layout_compatible<int> {
-    static const bool value = true;
+  struct traits<int128> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<int128>::value); }
   };
 
   template <>
-  struct type::equivalent<long> {
-    static type make() { return type(type_id_of<long>::value); }
+  struct traits<unsigned char> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<unsigned char>::value); }
   };
 
   template <>
-  struct type::is_layout_compatible<long> {
-    static const bool value = true;
+  struct traits<unsigned short> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<unsigned short>::value); }
   };
 
   template <>
-  struct type::equivalent<long long> {
-    static type make() { return type(type_id_of<long long>::value); }
+  struct traits<unsigned int> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<unsigned int>::value); }
   };
 
   template <>
-  struct type::is_layout_compatible<long long> {
-    static const bool value = true;
+  struct traits<unsigned long> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<unsigned long>::value); }
   };
 
   template <>
-  struct type::equivalent<int128> {
-    static type make() { return type(type_id_of<int128>::value); }
+  struct traits<unsigned long long> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<unsigned long long>::value); }
   };
 
   template <>
-  struct type::equivalent<unsigned char> {
-    static type make() { return type(type_id_of<unsigned char>::value); }
+  struct traits<uint128> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<uint128>::value); }
   };
 
   template <>
-  struct type::equivalent<unsigned short> {
-    static type make() { return type(type_id_of<unsigned short>::value); }
+  struct traits<char> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<char>::value); }
   };
 
   template <>
-  struct type::equivalent<unsigned int> {
-    static type make() { return type(type_id_of<unsigned int>::value); }
+  struct traits<float16> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<float16>::value); }
   };
 
   template <>
-  struct type::equivalent<unsigned long> {
-    static type make() { return type(type_id_of<unsigned long>::value); }
+  struct traits<float> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<float>::value); }
   };
 
   template <>
-  struct type::equivalent<unsigned long long> {
-    static type make() { return type(type_id_of<unsigned long long>::value); }
+  struct traits<double> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<double>::value); }
   };
 
   template <>
-  struct type::equivalent<uint128> {
-    static type make() { return type(type_id_of<uint128>::value); }
-  };
+  struct traits<float128> {
+    static const bool is_same_layout = true;
 
-  template <>
-  struct type::equivalent<char> {
-    static type make() { return type(type_id_of<char>::value); }
-  };
-
-  template <>
-  struct type::equivalent<float16> {
-    static type make() { return type(type_id_of<float16>::value); }
-  };
-
-  template <>
-  struct type::equivalent<float> {
-    static type make() { return type(type_id_of<float>::value); }
-  };
-
-  template <>
-  struct type::is_layout_compatible<float> {
-    static const bool value = true;
-  };
-
-  template <>
-  struct type::equivalent<double> {
-    static type make() { return type(type_id_of<double>::value); }
-  };
-
-  template <>
-  struct type::is_layout_compatible<double> {
-    static const bool value = true;
-  };
-
-  /*
-    template <>
-    struct type::equivalent<long double> {
-      static type make() { return type(type_id_of<long double>::value); }
-    };
-  */
-
-  template <>
-  struct type::equivalent<float128> {
-    static type make() { return type(type_id_of<float128>::value); }
+    static type equivalent() { return type(type_id_of<float128>::value); }
   };
 
   template <typename T>
-  struct type::equivalent<complex<T>> {
-    static type make() { return type(type_id_of<complex<T>>::value); }
+  struct traits<complex<T>> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<complex<T>>::value); }
   };
 
   template <typename T>
-  struct type::is_layout_compatible<complex<T>> {
-    static const bool value = true;
-  };
+  struct traits<std::complex<T>> {
+    static const bool is_same_layout = true;
 
-  template <typename T>
-  struct type::equivalent<std::complex<T>> {
-    static type make() { return type::make<complex<T>>(); }
+    static type equivalent() { return type(type_id_of<std::complex<T>>::value); }
   };
 
   template <>
-  struct type::equivalent<void> {
-    static type make() { return type(type_id_of<void>::value); }
+  struct traits<void> {
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return type(type_id_of<void>::value); }
   };
 
   template <>
-  struct type::equivalent<type> {
-    static type make() { return type(type_type_id); }
+  struct traits<type> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_type_id); }
   };
 
-  // The removal of const is a temporary solution until we decide if and how
-  // types should support const
   template <typename T>
-  struct type::equivalent<const T> {
-    template <typename... A>
-    static type make(A &&... a)
-    {
-      return type::make<T>(std::forward<A>(a)...);
-    }
+  struct traits<const T> {
+    static const bool is_same_layout = traits<T>::is_same_layout;
+
+    static type equivalent() { return traits<T>::equivalent(); }
   };
 
   // Same as for const
   template <typename T>
-  struct type::equivalent<T &> {
-    template <typename... A>
-    static type make(A &&... a)
-    {
-      return type::make<T>(std::forward<A>(a)...);
-    }
+  struct traits<T &> {
+    static const bool is_same_layout = traits<T>::is_same_layout;
+
+    static type equivalent() { return traits<T>::equivalent(); }
   };
 
   // Same as for const
   template <typename T>
-  struct type::equivalent<T &&> {
-    template <typename... A>
-    static type make(A &&... a)
-    {
-      return type::make<T>(std::forward<A>(a)...);
-    }
+  struct traits<T &&> {
+    static const bool is_same_layout = traits<T>::is_same_layout;
+
+    static type equivalent() { return traits<T>::equivalent(); }
+  };
+
+  template <typename T, int N>
+  struct traits<T[N]> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return make_fixed_dim(N, type::make<T>()); }
+  };
+
+  // Need to handle const properly
+  template <typename T, int N>
+  struct traits<const T[N]> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type::make<T[N]>(); }
   };
 
   /**
@@ -1098,58 +1095,6 @@ namespace ndt {
   }
 
   /**
-   * Returns the type of an array constructed from a value.
-   */
-  template <typename T>
-  type type_of(const T &DYND_UNUSED(value))
-  {
-    return type::make<T>();
-  }
-
-  template <typename T>
-  type type_of(const std::vector<T> &value)
-  {
-    return make_fixed_dim(value.size(), type::make<T>());
-  }
-
-  DYND_API type type_of(const nd::array &val);
-
-  DYND_API type type_of(const nd::callable &val);
-
-  /**
-   * Returns the type to use for packing this specific value. The value
-   * is allowed to affect the type, e.g. for packing a std::vector
-   */
-  template <typename T>
-  type get_forward_type(const T &DYND_UNUSED(val))
-  {
-    // check for exact type
-
-    // Default case is for when T and the ndt::type have identical
-    // memory layout, which is guaranteed by make_exact_type<T>().
-    return type::make<T>();
-  }
-
-  template <typename T>
-  type get_forward_type(const std::vector<T> &val)
-  {
-    // check for exact type
-
-    // Depending on the data size, store the data by value or as a pointer
-    // to an nd::array
-    if (sizeof(T) * val.size() > 32) {
-      return make_pointer_type(make_fixed_dim(val.size(), type::make<T>()));
-    }
-    else {
-      return make_fixed_dim(val.size(), type::make<T>());
-    }
-  }
-
-  DYND_API type get_forward_type(const nd::array &val);
-
-  DYND_API type get_forward_type(const nd::callable &val);
-
-  /**
    * A static array of the builtin types and void.
    * If code is specialized just for a builtin type, like int, it can use
    * static_builtin_types[type_id_of<int>::value] as a fast
@@ -1161,8 +1106,8 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
-  DYND_API void get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
-                                                          std::map<std::string, nd::callable> &properties);
+DYND_API void get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
+                                                        std::map<std::string, nd::callable> &properties);
 
 /** Prints raw bytes as hexadecimal */
 DYND_API void hexadecimal_print(std::ostream &o, char value);

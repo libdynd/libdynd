@@ -733,27 +733,6 @@ type_id_t ndt::register_type(const std::string &name, type_make_t make)
 
 ndt::type ndt::type::make(type_id_t tp_id, const nd::array &args) { return registry::data[tp_id].func(tp_id, args); }
 
-ndt::type ndt::type_of(const nd::array &value) { return value.get_type(); }
-
-ndt::type ndt::type_of(const nd::callable &value) { return value.get_array_type(); }
-
-ndt::type ndt::get_forward_type(const nd::array &val)
-{
-  if (val.get_type().get_type_id() == callable_type_id) {
-    return val.get_type();
-  }
-  /*
-    if ((val.get_access_flags() & nd::write_access_flag) == 0) {
-      throw std::runtime_error("TODO: how to handle readonly/immutable arrays "
-                               "in struct/tuple packing");
-    }
-  */
-
-  // cpp_type<float32_type_id>::type
-
-  return pointer_type::make(val.get_type());
-}
-
 template <class T, class Tas>
 static void print_as(std::ostream &o, const char *data)
 {

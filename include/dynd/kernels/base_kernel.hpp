@@ -7,8 +7,8 @@
 
 #include <typeinfo>
 
+#include <dynd/type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
-#include <dynd/types/callable_type.hpp>
 
 namespace dynd {
 namespace nd {

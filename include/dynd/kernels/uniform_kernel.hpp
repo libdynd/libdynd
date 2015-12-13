@@ -25,21 +25,16 @@ namespace nd {
       struct uniform_kernel;
 
       template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<DstTypeID, sint_kind,
-                            GeneratorType> : base_kernel<uniform_kernel<DstTypeID, sint_kind, GeneratorType>, 0> {
+      struct uniform_kernel<DstTypeID, sint_kind, GeneratorType>
+          : base_kernel<uniform_kernel<DstTypeID, sint_kind, GeneratorType>, 0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;
         std::uniform_int_distribution<R> d;
 
-        uniform_kernel(GeneratorType *g, R a, R b) : g(*g), d(a, b)
-        {
-        }
+        uniform_kernel(GeneratorType *g, R a, R b) : g(*g), d(a, b) {}
 
-        void single(char *dst, char *const *DYND_UNUSED(src))
-        {
-          *reinterpret_cast<R *>(dst) = d(g);
-        }
+        void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<R *>(dst) = d(g); }
 
         /*
             static void
@@ -78,14 +73,16 @@ namespace nd {
           R a;
           if (kwds[0].is_missing()) {
             a = 0;
-          } else {
+          }
+          else {
             a = kwds[0].as<R>();
           }
 
           R b;
           if (kwds[1].is_missing()) {
             b = std::numeric_limits<R>::max();
-          } else {
+          }
+          else {
             b = kwds[1].as<R>();
           }
 
@@ -99,21 +96,16 @@ namespace nd {
       };
 
       template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<DstTypeID, real_kind,
-                            GeneratorType> : base_kernel<uniform_kernel<DstTypeID, real_kind, GeneratorType>, 0> {
+      struct uniform_kernel<DstTypeID, real_kind, GeneratorType>
+          : base_kernel<uniform_kernel<DstTypeID, real_kind, GeneratorType>, 0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;
         std::uniform_real_distribution<R> d;
 
-        uniform_kernel(GeneratorType *g, R a, R b) : g(*g), d(a, b)
-        {
-        }
+        uniform_kernel(GeneratorType *g, R a, R b) : g(*g), d(a, b) {}
 
-        void single(char *dst, char *const *DYND_UNUSED(src))
-        {
-          *reinterpret_cast<R *>(dst) = d(g);
-        }
+        void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<R *>(dst) = d(g); }
 
         /*
             static void
@@ -152,14 +144,16 @@ namespace nd {
           R a;
           if (kwds[0].is_missing()) {
             a = 0;
-          } else {
+          }
+          else {
             a = kwds[0].as<R>();
           }
 
           R b;
           if (kwds[1].is_missing()) {
             b = 1;
-          } else {
+          }
+          else {
             b = kwds[1].as<R>();
           }
 
@@ -169,22 +163,17 @@ namespace nd {
       };
 
       template <type_id_t DstTypeID, typename GeneratorType>
-      struct uniform_kernel<DstTypeID, complex_kind,
-                            GeneratorType> : base_kernel<uniform_kernel<DstTypeID, complex_kind, GeneratorType>, 0> {
+      struct uniform_kernel<DstTypeID, complex_kind, GeneratorType>
+          : base_kernel<uniform_kernel<DstTypeID, complex_kind, GeneratorType>, 0> {
         typedef typename type_of<DstTypeID>::type R;
 
         GeneratorType &g;
         std::uniform_real_distribution<typename R::value_type> d_real;
         std::uniform_real_distribution<typename R::value_type> d_imag;
 
-        uniform_kernel(GeneratorType *g, R a, R b) : g(*g), d_real(a.real(), b.real()), d_imag(a.imag(), b.imag())
-        {
-        }
+        uniform_kernel(GeneratorType *g, R a, R b) : g(*g), d_real(a.real(), b.real()), d_imag(a.imag(), b.imag()) {}
 
-        void single(char *dst, char *const *DYND_UNUSED(src))
-        {
-          *reinterpret_cast<R *>(dst) = R(d_real(g), d_imag(g));
-        }
+        void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<R *>(dst) = R(d_real(g), d_imag(g)); }
 
         /*
             static void
@@ -223,14 +212,16 @@ namespace nd {
           R a;
           if (kwds[0].is_missing()) {
             a = R(0, 0);
-          } else {
+          }
+          else {
             a = kwds[0].as<R>();
           }
 
           R b;
           if (kwds[1].is_missing()) {
             b = R(1, 1);
-          } else {
+          }
+          else {
             b = kwds[1].as<R>();
           }
 
@@ -250,10 +241,10 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t DstTypeID, typename GeneratorType>
-  struct type::equivalent<nd::random::uniform_kernel<DstTypeID, GeneratorType>> {
+  struct traits<nd::random::uniform_kernel<DstTypeID, GeneratorType>> {
     typedef typename dynd::type_of<DstTypeID>::type R;
 
-    static type make()
+    static type equivalent()
     {
       std::map<std::string, ndt::type> tp_vars;
       tp_vars["R"] = ndt::type::make<R>();

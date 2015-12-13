@@ -44,12 +44,12 @@ DYND_API nd::callable nd::ifft::make()
 
 #ifdef DYND_FFTW
   children.push_back(
-      nd::callable::make<fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>(0));
+      nd::callable::make<fftw_ck<fftw_complex, fftw_complex, FFTW_BACKWARD>>());
 #endif
 
 #ifdef DYND_CUDA
   children.push_back(nd::callable::make<
-      cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_INVERSE>>(0));
+      cufft_ck<cufftDoubleComplex, cufftDoubleComplex, CUFFT_INVERSE>>());
 #endif
 
   if (children.empty()) {

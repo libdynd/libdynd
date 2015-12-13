@@ -5,12 +5,8 @@
 
 #pragma once
 
-#include <dynd/type.hpp>
-#include <dynd/types/base_dim_type.hpp>
-#include <dynd/types/fixed_dim_kind_type.hpp>
-#include <dynd/typed_data_assign.hpp>
-#include <dynd/types/view_type.hpp>
 #include <dynd/array.hpp>
+#include <dynd/types/base_dim_type.hpp>
 
 namespace dynd {
 
@@ -256,21 +252,17 @@ namespace ndt {
     return result;
   }
 
-  template <typename T, int N>
-  struct type::equivalent<T[N]> {
-    static type make() { return make_fixed_dim(N, type::make<T>()); }
-  };
-
-  // Need to handle const properly
-  template <typename T, int N>
-  struct type::equivalent<const T[N]> {
-    static type make() { return type::make<T[N]>(); }
-  };
-
-  template <typename ElementType>
-  struct type::equivalent<fixed_dim<ElementType>> {
-    static type make() { return fixed_dim_kind_type::make(type::make<ElementType>()); }
-  };
-
 } // namespace dynd::ndt
+
+namespace nd {
+
+  template <typename T, int N>
+  struct traits<T[N]> {
+    static void init(const T(&value)[N], const char *DYND_UNUSED(metadata), char *data)
+    {
+      memcpy(data, value, N * sizeof(T));
+    }
+  };
+
+} // namespace dynd::nd
 } // namespace dynd

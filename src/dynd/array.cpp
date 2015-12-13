@@ -285,16 +285,19 @@ nd::array::array(signed char value)
           make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
+
+nd::array::array(char value)
+    : intrusive_ptr<memory_block_data>(
+          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
+{
+}
+
 nd::array::array(short value)
     : intrusive_ptr<memory_block_data>(
           make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
 {
 }
-nd::array::array(int value)
-    : intrusive_ptr<memory_block_data>(
-          make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))
-{
-}
+
 nd::array::array(long value)
     : intrusive_ptr<memory_block_data>(
           make_builtin_scalar_array(value, nd::read_access_flag | nd::immutable_access_flag))

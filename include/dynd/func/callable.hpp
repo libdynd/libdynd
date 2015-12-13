@@ -8,14 +8,10 @@
 #include <memory>
 
 #include <dynd/config.hpp>
-#include <dynd/eval/eval_context.hpp>
-#include <dynd/types/base_type.hpp>
-#include <dynd/types/callable_type.hpp>
-#include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/types/callable_type.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/types/type_type.hpp>
 #include <dynd/callables/static_data_callable.hpp>
 
 namespace dynd {
@@ -372,17 +368,16 @@ namespace nd {
     }
 
     template <typename KernelType>
-    static typename std::enable_if<ndt::type::has_equivalent<KernelType>::value, callable>::type make()
+    static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type make()
     {
-      return callable(ndt::type::equivalent<KernelType>::make(), detail::get_kernreq<KernelType>(),
+      return callable(ndt::traits<KernelType>::equivalent(), detail::get_kernreq<KernelType>(),
                       detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
                       detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
                       detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>
-    static typename std::enable_if<!ndt::type::has_equivalent<KernelType>::value, callable>::type
-    make(const ndt::type &tp)
+    static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type make(const ndt::type &tp)
     {
       return callable(tp, detail::get_kernreq<KernelType>(), detail::get_targets<KernelType>(),
                       detail::get_ir<KernelType>(), detail::get_data_init<KernelType>(),
@@ -390,17 +385,17 @@ namespace nd {
     }
 
     template <typename KernelType, typename StaticDataType>
-    static typename std::enable_if<ndt::type::has_equivalent<KernelType>::value, callable>::type
+    static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type
     make(StaticDataType &&static_data)
     {
-      return callable(ndt::type::equivalent<KernelType>::make(), detail::get_kernreq<KernelType>(),
+      return callable(ndt::traits<KernelType>::equivalent(), detail::get_kernreq<KernelType>(),
                       detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
                       std::forward<StaticDataType>(static_data), detail::get_data_init<KernelType>(),
                       detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
-    static typename std::enable_if<!ndt::type::has_equivalent<KernelType>::value, callable>::type
+    static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type
     make(const ndt::type &tp, StaticDataType &&static_data)
     {
       return callable(tp, detail::get_kernreq<KernelType>(), detail::get_targets<KernelType>(),

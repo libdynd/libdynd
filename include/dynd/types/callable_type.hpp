@@ -9,8 +9,6 @@
 #include <string>
 
 #include <dynd/array.hpp>
-#include <dynd/callables/base_callable.hpp>
-#include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/string_type.hpp>
@@ -171,16 +169,16 @@ namespace ndt {
   };
 
   template <typename R>
-  struct type::equivalent<R()> {
-    static type make() { return callable_type::make(type::make<R>()); }
+  struct traits<R()> {
+    static type equivalent() { return callable_type::make(type::make<R>()); }
   };
 
   template <typename R, typename A0, typename... A>
-  struct type::equivalent<R(A0, A...)> {
-    static type make() { return callable_type::make(type::make<R>(), {type::make<A0>(), type::make<A>()...}); }
+  struct traits<R(A0, A...)> {
+    static type equivalent() { return callable_type::make(type::make<R>(), {type::make<A0>(), type::make<A>()...}); }
 
     template <typename... T>
-    static type make(const T &... names)
+    static type equivalent(const T &... names)
     {
       type tp[1 + sizeof...(A)] = {type::make<A0>(), type::make<A>()...};
 

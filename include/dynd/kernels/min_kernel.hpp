@@ -6,6 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
+#include <dynd/types/callable_type.hpp>
 
 namespace dynd {
 namespace nd {
@@ -64,8 +65,8 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t Src0TypeID>
-  struct type::equivalent<nd::min_kernel<Src0TypeID>> {
-    static type make()
+  struct traits<nd::min_kernel<Src0TypeID>> {
+    static type equivalent()
     {
       return callable_type::make(ndt::type::make<typename nd::min_kernel<Src0TypeID>::dst_type>(), type(Src0TypeID));
     }
