@@ -14,6 +14,7 @@
 #include <dynd/array.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
+#include <dynd/types/callable_type.hpp>
 
 using namespace std;
 using namespace dynd;

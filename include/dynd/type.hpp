@@ -134,8 +134,9 @@ namespace ndt {
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
 
   template <typename T>
-  struct traits;
-
+  struct traits {
+    ~traits() = delete;
+  };
 
   template <typename T>
   struct has_traits {
@@ -997,6 +998,21 @@ namespace ndt {
     static const bool is_same_layout = traits<T>::is_same_layout;
 
     static type equivalent() { return traits<T>::equivalent(); }
+  };
+
+  template <typename T, int N>
+  struct traits<T[N]> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return make_fixed_dim(N, type::make<T>()); }
+  };
+
+  // Need to handle const properly
+  template <typename T, int N>
+  struct traits<const T[N]> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type::make<T[N]>(); }
   };
 
   /**

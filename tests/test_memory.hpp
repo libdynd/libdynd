@@ -12,6 +12,7 @@
 #include <dynd/types/cuda_host_type.hpp>
 #include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/type_id.hpp>
+#include <dynd/types/callable_type.hpp>
 
 using namespace std;
 using namespace dynd;

@@ -252,21 +252,6 @@ namespace ndt {
     return result;
   }
 
-  template <typename T, int N>
-  struct traits<T[N]> {
-    static const bool is_same_layout = true;
-
-    static type equivalent() { return make_fixed_dim(N, type::make<T>()); }
-  };
-
-  // Need to handle const properly
-  template <typename T, int N>
-  struct traits<const T[N]> {
-    static const bool is_same_layout = true;
-
-    static type equivalent() { return type::make<T[N]>(); }
-  };
-
 } // namespace dynd::ndt
 
 namespace nd {
