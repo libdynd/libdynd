@@ -12,7 +12,7 @@
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/type_type.hpp>
-#include <dynd/memblock/memory_block.hpp>
+#include <dynd/types/string_type.hpp>
 
 namespace dynd {
 namespace ndt {

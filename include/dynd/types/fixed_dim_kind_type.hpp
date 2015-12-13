@@ -11,6 +11,7 @@
 #include <dynd/types/view_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/type_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/array.hpp>
 
 namespace dynd {
@@ -113,6 +114,13 @@ namespace ndt {
   template <typename T, int N>
   struct traits<nd::strided_vals<T, N>> {
     static type equivalent() { return fixed_dim_kind_type::make(type::make<T>(), N); }
+  };
+
+  template <typename ElementType>
+  struct traits<fixed_dim<ElementType>> {
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return fixed_dim_kind_type::make(type::make<ElementType>()); }
   };
 
 } // namespace dynd::ndt

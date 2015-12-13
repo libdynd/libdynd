@@ -9,8 +9,6 @@
 #include <string>
 
 #include <dynd/array.hpp>
-#include <dynd/callables/base_callable.hpp>
-#include <dynd/types/cuda_device_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/string_type.hpp>
