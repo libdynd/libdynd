@@ -65,7 +65,7 @@ DYND_API nd::callable nd::assign::make()
   children[{{string_type_id, string_type_id}}] = callable::make<assignment_kernel<string_type_id, string_type_id>>();
   children[{{string_type_id, fixed_string_type_id}}] =
       callable::make<assignment_kernel<string_type_id, fixed_string_type_id>>();
-  //  children[{{bool_type_id, string_type_id}}] = callable::make<assignment_kernel<bool_type_id, string_type_id>>();
+    children[{{bool_type_id, string_type_id}}] = callable::make<assignment_kernel<bool_type_id, string_type_id>>();
   children[{{option_type_id, option_type_id}}] =
       callable::make<detail::assignment_option_kernel>(ndt::type("(?Any) -> ?Any"));
   for (type_id_t tp_id : {int32_type_id, string_type_id, float64_type_id, bool_type_id, int8_type_id}) {

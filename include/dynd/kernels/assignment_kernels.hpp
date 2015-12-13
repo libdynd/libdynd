@@ -2952,9 +2952,9 @@ namespace nd {
       }
     };
 
-    template <assign_error_mode ErrorMode>
-    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, ErrorMode>, 1> {
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_nocheck>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_nocheck>, 1> {
       ndt::type src_string_tp;
       const char *src_arrmeta;
 
@@ -2967,9 +2967,141 @@ namespace nd {
       {
         // Get the string from the source
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
-                            ->get_utf8_string(src_arrmeta, src[0], ErrorMode);
+                            ->get_utf8_string(src_arrmeta, src[0], assign_error_nocheck);
         trim(s);
-        parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, ErrorMode);
+        parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_nocheck);
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], src_arrmeta[0]);
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_inexact>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_inexact>, 1> {
+      ndt::type src_string_tp;
+      const char *src_arrmeta;
+
+      assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        // Get the string from the source
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], assign_error_inexact);
+        trim(s);
+        parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_inexact);
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], src_arrmeta[0]);
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_default>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_default>, 1> {
+      ndt::type src_string_tp;
+      const char *src_arrmeta;
+
+      assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        // Get the string from the source
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], assign_error_default);
+        trim(s);
+        parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_default);
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], src_arrmeta[0]);
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_overflow>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_overflow>, 1> {
+      ndt::type src_string_tp;
+      const char *src_arrmeta;
+
+      assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        // Get the string from the source
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], assign_error_overflow);
+        trim(s);
+        parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_overflow);
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
+                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
+                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
+                                  const nd::array *DYND_UNUSED(kwds),
+                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+      {
+        assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], src_arrmeta[0]);
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_fractional>
+        : base_kernel<assignment_kernel<bool_type_id, bool_kind, string_type_id, string_kind, assign_error_fractional>, 1> {
+      ndt::type src_string_tp;
+      const char *src_arrmeta;
+
+      assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta)
+          : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta)
+      {
+      }
+
+      void single(char *dst, char *const *src)
+      {
+        // Get the string from the source
+        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
+                            ->get_utf8_string(src_arrmeta, src[0], assign_error_fractional);
+        trim(s);
+        parse::string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_fractional);
       }
 
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
