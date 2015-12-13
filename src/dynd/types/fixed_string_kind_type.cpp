@@ -7,7 +7,6 @@
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
 
 using namespace std;
 using namespace dynd;

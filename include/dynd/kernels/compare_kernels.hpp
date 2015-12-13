@@ -9,7 +9,6 @@
 #include <dynd/kernels/total_order_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/func/option.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/type.hpp>

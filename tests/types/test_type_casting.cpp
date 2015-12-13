@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include "inc_gtest.hpp"
 
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/array.hpp>
 

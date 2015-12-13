@@ -9,7 +9,6 @@
 
 #include <dynd/fpstatus.hpp>
 #include <dynd/type.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/kernels/expression_assignment_kernels.hpp>
 #include <dynd/kernels/cuda_launch.hpp>
@@ -20,7 +19,6 @@
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/pointer_assignment_kernels.hpp>
 #include <dynd/eval/eval_context.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/type_id.hpp>
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/date_type.hpp>

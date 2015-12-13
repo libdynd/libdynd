@@ -51,8 +51,7 @@ std::ostream &dynd::operator<<(ostream &o, assign_error_mode errmode)
 // of the source type, false otherwise. This is used, for example,
 // to skip any overflow checks when doing value assignments between differing
 // types.
-bool dynd::is_lossless_assignment(const ndt::type &dst_tp,
-                                  const ndt::type &src_tp)
+bool dynd::is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_tp)
 {
   if (dst_tp.is_builtin() && src_tp.is_builtin()) {
     switch (src_tp.get_kind()) {
@@ -153,71 +152,62 @@ bool dynd::is_lossless_assignment(const ndt::type &dst_tp,
         break;
       }
     case bytes_kind:
-      return dst_tp.get_kind() == bytes_kind &&
-             dst_tp.get_data_size() == src_tp.get_data_size();
+      return dst_tp.get_kind() == bytes_kind && dst_tp.get_data_size() == src_tp.get_data_size();
     default:
       break;
     }
 
-    throw std::runtime_error(
-        "unhandled built-in case in is_lossless_assignmently");
+    throw std::runtime_error("unhandled built-in case in is_lossless_assignmently");
   }
 
   // Use the available base_type to check the casting
   if (!dst_tp.is_builtin()) {
     // Call with dst_dt (the first parameter) first
     return dst_tp.extended()->is_lossless_assignment(dst_tp, src_tp);
-  } else {
+  }
+  else {
     // Fall back to src_dt if the dst's extended is NULL
     return src_tp.extended()->is_lossless_assignment(dst_tp, src_tp);
   }
 }
 
-void dynd::typed_data_copy(const ndt::type &tp, const char *dst_arrmeta,
-                           char *dst_data, const char *src_arrmeta,
+void dynd::typed_data_copy(const ndt::type &tp, const char *dst_arrmeta, char *dst_data, const char *src_arrmeta,
                            const char *src_data)
 {
   if (tp.get_type_id() == option_type_id) {
-    return typed_data_copy(tp.extended<ndt::option_type>()->get_value_type(),
-                           dst_arrmeta, dst_data, src_arrmeta, src_data);
+    return typed_data_copy(tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, dst_data, src_arrmeta,
+                           src_data);
   }
 
   size_t data_size = tp.get_data_size();
   if (tp.is_pod()) {
     memcpy(dst_data, src_data, data_size);
-  } else {
-    ckernel_builder<kernel_request_host> k;
-    make_assignment_kernel(&k, 0, tp, dst_arrmeta, tp, src_arrmeta,
-                           kernel_request_single, &eval::default_eval_context);
-    kernel_single_t fn = k.get()->get_function<kernel_single_t>();
-    char *src = const_cast<char *>(src_data);
-    fn(k.get(), dst_data, &src);
+  }
+  else {
+    nd::array kwd = nd::empty(ndt::option_type::make(ndt::type::make<int>()));
+    kwd.assign_na();
+    std::map<std::string, ndt::type> tp_vars;
+    nd::assign::get()->call(tp, dst_arrmeta, dst_data, 1, &tp, &src_arrmeta, const_cast<char *const *>(&src_data), 1,
+                            &kwd, tp_vars);
   }
 }
 
-void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
-                             char *dst_data, const ndt::type &src_tp,
-                             const char *src_arrmeta, const char *src_data,
-                             const eval::eval_context *ectx)
+void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, const ndt::type &src_tp,
+                             const char *src_arrmeta, const char *src_data, const eval::eval_context *ectx)
 {
-  DYND_ASSERT_ALIGNED(dst, 0, dst_tp.get_data_alignment(),
-                      "dst type: " << dst_tp << ", src type: " << src_tp);
-  DYND_ASSERT_ALIGNED(src, 0, src_dt.get_data_alignment(),
-                      "src type: " << src_tp << ", dst type: " << dst_tp);
+  DYND_ASSERT_ALIGNED(dst, 0, dst_tp.get_data_alignment(), "dst type: " << dst_tp << ", src type: " << src_tp);
+  DYND_ASSERT_ALIGNED(src, 0, src_dt.get_data_alignment(), "src type: " << src_tp << ", dst type: " << dst_tp);
 
-  ckernel_builder<kernel_request_host> k;
-  make_assignment_kernel(&k, 0, dst_tp, dst_arrmeta, src_tp, src_arrmeta,
-                         kernel_request_single, ectx);
-  kernel_single_t fn = k.get()->get_function<kernel_single_t>();
-  char *src = const_cast<char *>(src_data);
-  fn(k.get(), dst_data, &src);
+  nd::array kwd = nd::empty(ndt::option_type::make(ndt::type::make<int>()));
+  *reinterpret_cast<int *>(kwd.data()) = static_cast<int>(ectx->errmode);
+  std::map<std::string, ndt::type> tp_vars;
+  nd::assign::get()->call(dst_tp, dst_arrmeta, dst_data, 1, &src_tp, &src_arrmeta, const_cast<char *const *>(&src_data),
+                          1, &kwd, tp_vars);
 }
 
-void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta,
-                             char *dst_data, const nd::array &src_arr,
+void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, const nd::array &src_arr,
                              const eval::eval_context *ectx)
 {
-  typed_data_assign(dst_tp, dst_arrmeta, dst_data, src_arr.get_type(),
-                    src_arr.get()->metadata(), src_arr.cdata(),
+  typed_data_assign(dst_tp, dst_arrmeta, dst_data, src_arr.get_type(), src_arr.get()->metadata(), src_arr.cdata(),
                     ectx);
 }
