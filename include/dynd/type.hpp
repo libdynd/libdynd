@@ -825,6 +825,23 @@ namespace ndt {
     friend DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
+  template <typename T>
+  struct traits {
+    ~traits() = delete;
+  };
+
+  template <typename T>
+  struct has_traits {
+    static const bool value = std::is_destructible<traits<T>>::value;
+  };
+
+  template <>
+  struct traits<int> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(type_id_of<int>::value); }
+  };
+
   template <>
   struct type::equivalent<bool1> {
     static type make() { return type(type_id_of<bool1>::value); }
@@ -1161,8 +1178,8 @@ namespace ndt {
 
 } // namespace dynd::ndt
 
-  DYND_API void get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
-                                                          std::map<std::string, nd::callable> &properties);
+DYND_API void get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
+                                                        std::map<std::string, nd::callable> &properties);
 
 /** Prints raw bytes as hexadecimal */
 DYND_API void hexadecimal_print(std::ostream &o, char value);

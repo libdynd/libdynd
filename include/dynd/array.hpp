@@ -64,6 +64,10 @@ namespace nd {
       */
     array() = default;
 
+    template <typename T, typename = std::enable_if_t<ndt::has_traits<
+                              typename std::remove_cv<typename std::remove_reference<T>::type>::type>::value>>
+    array(T &&value);
+
     /**
       * Copy constructs an array.
       */
@@ -80,9 +84,9 @@ namespace nd {
      */
     array(bool1 value);
     array(bool value);
+    array(char value);
     array(signed char value);
     array(short value);
-    array(int value);
     array(long value);
     array(long long value);
     array(const int128 &value);
@@ -730,6 +734,32 @@ namespace nd {
     friend class array_vals_at;
   };
 
+  template <typename T>
+  struct traits {
+    static void init(const T &value, const char *DYND_UNUSED(metadata), char *data)
+    {
+      static_assert(ndt::traits<T>::is_same_layout, "must be layout compatible");
+      *reinterpret_cast<T *>(data) = value;
+    }
+
+    static void as(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) {}
+  };
+
+  /**
+   * Constructs an uninitialized array of the given dtype. This is
+   * the usual function to use for allocating such an array.
+   */
+  DYND_API array empty(const ndt::type &tp);
+
+  template <typename T, typename>
+  array::array(T &&value)
+      : intrusive_ptr<memory_block_data>(
+            empty(ndt::traits<typename std::remove_cv<typename std::remove_reference<T>::type>::type>::equivalent()))
+  {
+    traits<typename std::remove_cv<typename std::remove_reference<T>::type>::type>::init(std::forward<T>(value), get()->metadata(), get()->data);
+    get()->flags = nd::read_access_flag | nd::immutable_access_flag;
+  }
+
 } // namespace dynd::nd
 
 namespace ndt {
@@ -1006,12 +1036,6 @@ namespace nd {
       }
     };
   } // namespace detail
-
-  /**
-   * Constructs an uninitialized array of the given dtype. This is
-   * the usual function to use for allocating such an array.
-   */
-  DYND_API array empty(const ndt::type &tp);
 
   /**
    * Constructs an uninitialized array with uninitialized arrmeta of the
