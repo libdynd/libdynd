@@ -276,8 +276,8 @@ namespace ndt {
 
 #define DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(NAME)                                                                      \
   template <type_id_t Src0TypeID>                                                                                      \
-  struct type::equivalent<nd::NAME##_kernel<Src0TypeID>> {                                                             \
-    static type make() { return ndt::type::make<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>(); }         \
+  struct traits<nd::NAME##_kernel<Src0TypeID>> {                                                                       \
+    static type equivalent() { return ndt::type::make<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>(); }   \
   };
 
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(plus)
@@ -291,8 +291,8 @@ namespace ndt {
 
 #define DYND_DEF_BINARY_OP_KERNEL_EQUIVALENT(NAME)                                                                     \
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>                                                                \
-  struct type::equivalent<nd::NAME##_kernel<Src0TypeID, Src1TypeID>> {                                                 \
-    static type make()                                                                                                 \
+  struct traits<nd::NAME##_kernel<Src0TypeID, Src1TypeID>> {                                                           \
+    static type equivalent()                                                                                           \
     {                                                                                                                  \
       return ndt::type::make<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID, Src1TypeID>::f)>();                  \
     }                                                                                                                  \
@@ -314,26 +314,26 @@ namespace ndt {
 #undef DYND_DEF_BINARY_OP_KERNEL_EQUIVALENT
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::logical_xor_kernel<Src0TypeID, Src1TypeID>> {
-    static type make()
+  struct traits<nd::logical_xor_kernel<Src0TypeID, Src1TypeID>> {
+    static type equivalent()
     {
       return ndt::type::make<decltype(&dynd::nd::detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f)>();
     }
   };
 
   template <typename FuncType>
-  struct type::equivalent<nd::option_arithmetic_kernel<FuncType, true, false>> {
-    static type make() { return type("(?Scalar, Scalar) -> ?Scalar"); }
+  struct traits<nd::option_arithmetic_kernel<FuncType, true, false>> {
+    static type equivalent() { return type("(?Scalar, Scalar) -> ?Scalar"); }
   };
 
   template <typename FuncType>
-  struct type::equivalent<nd::option_arithmetic_kernel<FuncType, false, true>> {
-    static type make() { return type("(Scalar, ?Scalar) -> ?Scalar"); }
+  struct traits<nd::option_arithmetic_kernel<FuncType, false, true>> {
+    static type equivalent() { return type("(Scalar, ?Scalar) -> ?Scalar"); }
   };
 
   template <typename FuncType>
-  struct type::equivalent<nd::option_arithmetic_kernel<FuncType, true, true>> {
-    static type make() { return type("(?Scalar, ?Scalar) -> ?Scalar"); }
+  struct traits<nd::option_arithmetic_kernel<FuncType, true, true>> {
+    static type equivalent() { return type("(?Scalar, ?Scalar) -> ?Scalar"); }
   };
 
 } // namespace dynd::ndt

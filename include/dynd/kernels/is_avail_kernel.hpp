@@ -329,8 +329,8 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t Src0ValueTypeID>
-  struct type::equivalent<nd::is_avail_kernel<Src0ValueTypeID>> {
-    static type make()
+  struct traits<nd::is_avail_kernel<Src0ValueTypeID>> {
+    static type equivalent()
     {
       return callable_type::make(type::make<bool1>(), option_type::make(Src0ValueTypeID));
     }

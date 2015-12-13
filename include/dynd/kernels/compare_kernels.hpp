@@ -438,48 +438,48 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::less_kernel<Src0TypeID, Src1TypeID>> {
-    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+  struct traits<nd::less_kernel<Src0TypeID, Src1TypeID>> {
+    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::less_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+  struct traits<nd::less_equal_kernel<Src0TypeID, Src1TypeID>> {
+    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+  struct traits<nd::equal_kernel<Src0TypeID, Src1TypeID>> {
+    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::not_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+  struct traits<nd::not_equal_kernel<Src0TypeID, Src1TypeID>> {
+    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::greater_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+  struct traits<nd::greater_equal_kernel<Src0TypeID, Src1TypeID>> {
+    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::greater_kernel<Src0TypeID, Src1TypeID>> {
-    static type make() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+  struct traits<nd::greater_kernel<Src0TypeID, Src1TypeID>> {
+    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <typename FuncType>
-  struct type::equivalent<nd::option_comparison_kernel<FuncType, true, false>> {
-    static type make() { return type("(?Scalar, Scalar) -> ?bool"); }
+  struct traits<nd::option_comparison_kernel<FuncType, true, false>> {
+    static type equivalent() { return type("(?Scalar, Scalar) -> ?bool"); }
   };
 
   template <typename FuncType>
-  struct type::equivalent<nd::option_comparison_kernel<FuncType, false, true>> {
-    static type make() { return type("(Scalar, ?Scalar) -> ?bool"); }
+  struct traits<nd::option_comparison_kernel<FuncType, false, true>> {
+    static type equivalent() { return type("(Scalar, ?Scalar) -> ?bool"); }
   };
 
   template <typename FuncType>
-  struct type::equivalent<nd::option_comparison_kernel<FuncType, true, true>> {
-    static type make() { return type("(?Scalar, ?Scalar) -> ?bool"); }
+  struct traits<nd::option_comparison_kernel<FuncType, true, true>> {
+    static type equivalent() { return type("(?Scalar, ?Scalar) -> ?bool"); }
   };
 
 } // namespace dynd::ndt

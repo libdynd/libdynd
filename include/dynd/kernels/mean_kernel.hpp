@@ -90,8 +90,8 @@ namespace nd {
 namespace ndt {
 
   template <>
-  struct type::equivalent<nd::mean_kernel> {
-    static type make() { return nd::sum::get().get_array_type(); }
+  struct traits<nd::mean_kernel> {
+    static type equivalent() { return nd::sum::get().get_array_type(); }
   };
 
 } // namespace dynd::ndt

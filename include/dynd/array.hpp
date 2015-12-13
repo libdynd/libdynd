@@ -64,8 +64,8 @@ namespace nd {
       */
     array() = default;
 
-    template <typename T, typename = std::enable_if_t<ndt::has_traits<
-                              typename std::remove_cv<typename std::remove_reference<T>::type>::type>::value>>
+    template <typename T,
+              typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
     array(T &&value);
 
     /**
@@ -596,13 +596,13 @@ namespace nd {
     }
 
     template <typename T>
-    typename std::enable_if<ndt::type::is_layout_compatible<T>::value, T>::type view() const
+    typename std::enable_if<ndt::traits<T>::is_same_layout, T>::type view() const
     {
       return *reinterpret_cast<const T *>(cdata());
     }
 
     template <typename T>
-    typename std::enable_if<!ndt::type::is_layout_compatible<T>::value, T>::type view()
+    typename std::enable_if<!ndt::traits<T>::is_same_layout, T>::type view()
     {
       return T(get()->metadata(), data());
     }
@@ -714,21 +714,6 @@ namespace nd {
 
     void debug_print(std::ostream &o, const std::string &indent = "") const;
 
-    template <typename T>
-    struct convert {
-      static_assert(ndt::type::is_layout_compatible<T>::value, "must be layout compatible");
-
-      static void from(char *DYND_UNUSED(metadata), char *data, const T &value)
-      {
-        *reinterpret_cast<const T *>(data) = value;
-      }
-
-      static const T &to(const char *DYND_UNUSED(metadata), const char *data)
-      {
-        return *reinterpret_cast<const T *>(data);
-      }
-    };
-
     friend DYND_API std::ostream &operator<<(std::ostream &o, const array &rhs);
     friend class array_vals;
     friend class array_vals_at;
@@ -753,25 +738,13 @@ namespace nd {
 
   template <typename T, typename>
   array::array(T &&value)
-      : intrusive_ptr<memory_block_data>(
-            empty(ndt::traits<typename std::remove_cv<typename std::remove_reference<T>::type>::type>::equivalent()))
+      : intrusive_ptr<memory_block_data>(empty(ndt::traits<typename remove_reference_then_cv<T>::type>::equivalent()))
   {
-    traits<typename std::remove_cv<typename std::remove_reference<T>::type>::type>::init(std::forward<T>(value), get()->metadata(), get()->data);
-    get()->flags = nd::read_access_flag | nd::immutable_access_flag;
+    traits<typename remove_reference_then_cv<T>::type>::init(std::forward<T>(value), get()->metadata(), get()->data);
+    get()->flags = is_dynd_scalar<typename remove_reference_then_cv<T>::type>::value
+                       ? (nd::read_access_flag | nd::immutable_access_flag)
+                       : nd::readwrite_access_flags;
   }
-
-} // namespace dynd::nd
-
-namespace ndt {
-
-  template <>
-  struct type::equivalent<nd::array> {
-    static const type &make(const nd::array &val) { return val.get_type(); }
-  };
-
-} // namespace dynd::ndt
-
-namespace nd {
 
   DYND_API array as_struct();
   DYND_API array as_struct(std::size_t size, const char **names, const array *values);

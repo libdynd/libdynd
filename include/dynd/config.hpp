@@ -376,6 +376,11 @@ struct remove_all_pointers {
 };
 
 template <typename T>
+struct remove_reference_then_cv {
+  typedef typename std::remove_cv<typename std::remove_reference<T>::type>::type type;
+};
+
+template <typename T>
 struct remove_all_pointers<T *> {
   typedef typename remove_all_pointers<typename std::remove_cv<T>::type>::type type;
 };

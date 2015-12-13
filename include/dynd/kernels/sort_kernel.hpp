@@ -63,8 +63,8 @@ namespace nd {
 namespace ndt {
 
   template <>
-  struct type::equivalent<nd::sort_kernel> {
-    static type make()
+  struct traits<nd::sort_kernel> {
+    static type equivalent()
     {
       return callable_type::make(type::make<void>(), {type("Fixed * Scalar")});
     }

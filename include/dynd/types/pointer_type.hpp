@@ -111,8 +111,8 @@ namespace ndt {
   };
 
   template <typename T>
-  struct type::equivalent<T *> {
-    static type make() { return pointer_type::make(type::make<T>()); }
+  struct traits<T *> {
+    static type equivalent() { return pointer_type::make(type::make<T>()); }
   };
 
   inline type make_pointer_type(const type &target_tp) { return pointer_type::make(target_tp); }

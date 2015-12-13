@@ -65,8 +65,8 @@ namespace nd {
 namespace ndt {
 
   template <>
-  struct type::equivalent<nd::unique_kernel> {
-    static type make() { return callable_type::make(type::make<void>(), {type("Fixed * Scalar")}); }
+  struct traits<nd::unique_kernel> {
+    static type equivalent() { return callable_type::make(type::make<void>(), {type("Fixed * Scalar")}); }
   };
 
 } // namespace dynd::ndt

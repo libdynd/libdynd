@@ -99,20 +99,20 @@ namespace ndt {
   }
 
   template <typename T>
-  struct type::equivalent<T[]> {
-    static type make() { return fixed_dim_kind_type::make(type::make<T>()); }
+  struct traits<T[]> {
+    static type equivalent() { return fixed_dim_kind_type::make(type::make<T>()); }
   };
 
   // Need to handle const properly
   template <typename T>
-  struct type::equivalent<const T[]> {
-    static type make() { return type::make<T[]>(); }
+  struct traits<const T[]> {
+    static type equivalent() { return type::make<T[]>(); }
   };
 
   // Produces type "Fixed ** <N> * <T>"
   template <typename T, int N>
-  struct type::equivalent<nd::strided_vals<T, N>> {
-    static type make() { return fixed_dim_kind_type::make(type::make<T>(), N); }
+  struct traits<nd::strided_vals<T, N>> {
+    static type equivalent() { return fixed_dim_kind_type::make(type::make<T>(), N); }
   };
 
 } // namespace dynd::ndt

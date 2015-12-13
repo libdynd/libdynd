@@ -90,8 +90,8 @@ namespace nd {
 namespace ndt {
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
-  struct type::equivalent<nd::total_order_kernel<Src0TypeID, Src1TypeID>> {
-    static type make()
+  struct traits<nd::total_order_kernel<Src0TypeID, Src1TypeID>> {
+    static type equivalent()
     {
       return callable_type::make(type::make<int>(), {type(Src0TypeID), type(Src1TypeID)});
     }
