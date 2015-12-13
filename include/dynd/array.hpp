@@ -64,6 +64,9 @@ namespace nd {
       */
     array() = default;
 
+    /**
+      * Constructs an array from a C++ type.
+      */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
     array(T &&value);
@@ -82,39 +85,11 @@ namespace nd {
      * Constructs a zero-dimensional scalar from a C++ scalar.
      *
      */
-    array(bool1 value);
-    array(bool value);
-    array(char value);
-    array(signed char value);
-    array(short value);
-    array(long value);
-    array(long long value);
-    array(const int128 &value);
-    array(unsigned char value);
-    array(unsigned short value);
-    array(unsigned int value);
-    array(unsigned long value);
-    array(unsigned long long value);
-    array(const uint128 &value);
-    array(float16 value);
-    array(float value);
-    array(double value);
-    array(const float128 &value);
-    array(complex<float> value);
-    array(complex<double> value);
-    array(std::complex<float> value);
-    array(std::complex<double> value);
     array(const std::string &value);
     /** Construct a string from a NULL-terminated UTF8 string */
     array(const char *cstr);
     /** Construct a string from a UTF8 buffer and specified buffer size */
     array(const char *str, size_t size);
-    /**
-     * Constructs a scalar with the 'type' type.
-     * NOTE: Does NOT create a scalar of the provided type,
-     *       use nd::empty(type) for that!
-     */
-    array(const ndt::type &dt);
 
     /**
      * Constructs an array from a multi-dimensional C-style array.
@@ -741,9 +716,8 @@ namespace nd {
       : intrusive_ptr<memory_block_data>(empty(ndt::traits<typename remove_reference_then_cv<T>::type>::equivalent()))
   {
     traits<typename remove_reference_then_cv<T>::type>::init(std::forward<T>(value), get()->metadata(), get()->data);
-    get()->flags = is_dynd_scalar<typename remove_reference_then_cv<T>::type>::value
-                       ? (nd::read_access_flag | nd::immutable_access_flag)
-                       : nd::readwrite_access_flags;
+    get()->flags =
+        (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
   }
 
   DYND_API array as_struct();
