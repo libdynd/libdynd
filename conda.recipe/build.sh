@@ -34,6 +34,6 @@ cmake \
     -DDYND_BUILD_BENCHMARKS=OFF \
     -DCMAKE_INSTALL_PREFIX=$PREFIX .. || exit 1
 echo Building with make...
-make -j3 || exit 1
+make -j2 || exit 1
 echo Installing the build...
 make install || exit 1
