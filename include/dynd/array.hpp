@@ -495,13 +495,14 @@ namespace nd {
 
     array at(const irange &i0) const { return at_array(1, &i0); }
 
-    /** Does a value-assignment from the rhs array. */
-    void val_assign(const array &rhs, const eval::eval_context *ectx = &eval::default_eval_context) const;
     /** Does a value-assignment from the rhs raw scalar */
     void val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
                     const eval::eval_context *ectx = &eval::default_eval_context) const;
 
-    array assign(const array &rhs, assign_error_mode error_mode = assign_error_default) const;
+    /**
+     * Assigns values from another array to this array.
+     */
+    array assign(const array &rhs, assign_error_mode error_mode = assign_error_fractional) const;
 
     /**
      * Casts the type of the array into the specified type.
@@ -746,7 +747,7 @@ namespace nd {
      */
     array_vals &operator=(const array &rhs)
     {
-      m_arr.val_assign(rhs);
+      m_arr.assign(rhs);
       return *this;
     }
 
@@ -786,7 +787,7 @@ namespace nd {
      */
     array_vals_at &operator=(const array &rhs)
     {
-      m_arr.val_assign(rhs);
+      m_arr.assign(rhs);
       return *this;
     }
 
@@ -1125,7 +1126,7 @@ namespace nd {
   inline array dtyped_zeros(intptr_t ndim, const intptr_t *shape, const ndt::type &tp)
   {
     nd::array res = dtyped_empty(ndim, shape, tp);
-    res.val_assign(0);
+    res.assign(0);
 
     return res;
   }
@@ -1167,7 +1168,7 @@ namespace nd {
   inline array dtyped_ones(intptr_t ndim, const intptr_t *shape, const ndt::type &tp)
   {
     nd::array res = dtyped_empty(ndim, shape, tp);
-    res.val_assign(1);
+    res.assign(1);
 
     return res;
   }

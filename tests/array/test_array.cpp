@@ -431,7 +431,7 @@ TYPED_TEST_P(Array, AsScalar)
   nd::array a;
 
   a = nd::empty(TestFixture::MakeType(ndt::type::make<float>()));
-  a.val_assign(3.14f);
+  a.assign(3.14f);
   EXPECT_EQ(3.14f, a.as<float>());
   EXPECT_EQ(3.14f, a.as<double>());
   if (!TestFixture::IsTypeID(cuda_device_type_id)) {
@@ -450,7 +450,7 @@ TYPED_TEST_P(Array, AsScalar)
   EXPECT_EQ(true, a.as<bool>(assign_error_nocheck));
 
   a = nd::empty(TestFixture::MakeType(ndt::type::make<double>()));
-  a.val_assign(3.141592653589);
+  a.assign(3.141592653589);
   EXPECT_EQ(3.141592653589, a.as<double>());
   if (!TestFixture::IsTypeID(cuda_device_type_id)) {
     EXPECT_THROW(a.as<float>(assign_error_inexact), runtime_error);

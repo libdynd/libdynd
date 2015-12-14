@@ -28,8 +28,7 @@ TEST(OptionType, Create)
   EXPECT_EQ(option_kind, d.get_kind());
   EXPECT_EQ(2u, d.get_data_alignment());
   EXPECT_EQ(2u, d.get_data_size());
-  EXPECT_EQ(ndt::type::make<int16_t>(),
-            d.extended<ndt::option_type>()->get_value_type());
+  EXPECT_EQ(ndt::type::make<int16_t>(), d.extended<ndt::option_type>()->get_value_type());
   EXPECT_TRUE(d.is_scalar());
   EXPECT_FALSE(d.is_expression());
   // Roundtripping through a string
@@ -41,20 +40,16 @@ TEST(OptionType, Create)
   d = ndt::option_type::make(ndt::string_type::make());
   EXPECT_EQ(option_type_id, d.get_type_id());
   EXPECT_EQ(option_kind, d.get_kind());
-  EXPECT_EQ(ndt::string_type::make().get_data_alignment(),
-            d.get_data_alignment());
+  EXPECT_EQ(ndt::string_type::make().get_data_alignment(), d.get_data_alignment());
   EXPECT_EQ(ndt::string_type::make().get_data_size(), d.get_data_size());
-  EXPECT_EQ(ndt::string_type::make(),
-            d.extended<ndt::option_type>()->get_value_type());
+  EXPECT_EQ(ndt::string_type::make(), d.extended<ndt::option_type>()->get_value_type());
   EXPECT_FALSE(d.is_expression());
   // Roundtripping through a string
   EXPECT_EQ(d, ndt::type(d.str()));
   EXPECT_EQ("?string", d.str());
 
   // No option of option allowed
-  EXPECT_THROW(
-      ndt::option_type::make(ndt::option_type::make(ndt::type::make<int>())),
-      type_error);
+  EXPECT_THROW(ndt::option_type::make(ndt::option_type::make(ndt::type::make<int>())), type_error);
   EXPECT_THROW(ndt::type("option[option[bool]]"), type_error);
 }
 
@@ -69,7 +64,7 @@ TEST(OptionType, OptionIntAssign)
   b.vals() = a;
   EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
   tmp_ectx.errmode = assign_error_nocheck;
-  b.val_assign(a, &tmp_ectx);
+  b.assign(a, tmp_ectx.errmode);
   EXPECT_JSON_EQ_ARR("[-10, -32768]", nd::view(b, "2 * int16"));
 
   // Assignment from option[T] to T without any NAs
@@ -99,8 +94,7 @@ TEST(OptionType, Cast)
   a = parse_json("3 * string", "[\"null\", \"NA\", \"25\"]");
   b = a.ucast(ndt::type("?int"));
   b = b.eval();
-  EXPECT_ARRAY_EQ(nd::view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"),
-                nd::view(b, "3 * int"));
+  EXPECT_ARRAY_EQ(nd::view(parse_json("3 * ?int", "[null, null, 25]"), "3 * int"), nd::view(b, "3 * int"));
 }
 
 TEST(OptionType, FloatNAvsNaN)

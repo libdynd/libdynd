@@ -230,7 +230,7 @@ TEST(StructType, EqualTypeAssign)
   a(1, 2).vals() = 8;
 
   nd::array b = nd::empty(2, dt);
-  b.val_assign(a);
+  b.assign(a);
   EXPECT_EQ(3, a(0, 0).as<int>());
   EXPECT_EQ(4.25, a(0, 1).as<double>());
   EXPECT_EQ(5, a(0, 2).as<short>());
@@ -254,7 +254,7 @@ TEST(StructType, DifferentTypeAssign)
   ndt::type dt2 = ndt::struct_type::make(
       {"y", "z", "x"}, {ndt::type::make<float>(), ndt::type::make<int>(), ndt::type::make<uint8_t>()});
   nd::array b = nd::empty(2, dt2);
-  b.val_assign(a);
+  b.assign(a);
   EXPECT_EQ(3, b(0, 2).as<int>());
   EXPECT_EQ(4.25, b(0, 0).as<double>());
   EXPECT_EQ(5, b(0, 1).as<short>());
