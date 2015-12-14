@@ -33,8 +33,6 @@ TEST(TypeAssign, FixedSizeTestsNoExcept)
 
   ndt::type s_dt, d_dt;
   char *s_ptr;
-  eval::eval_context ectx_nocheck;
-  ectx_nocheck.errmode = assign_error_nocheck;
 
   // Test bool -> each builtin type
   s_dt = ndt::type(bool_type_id);
@@ -274,63 +272,48 @@ TEST(TypeAssign, FixedSizeTests_Float64)
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
-  eval::eval_context tmp_ectx;
-
   // typed_data_assign checks that the float64 -> float32value gets converted exactly
   // when using the assign_error_inexact mode
   v_f64 = 1 / 3.0;
-  tmp_ectx.errmode = assign_error_inexact;
   EXPECT_THROW(
       typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
       runtime_error);
-  tmp_ectx.errmode = assign_error_inexact;
   EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                                  assign_error_inexact),
                runtime_error);
-  tmp_ectx.errmode = assign_error_fractional;
   typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional);
   EXPECT_EQ((float)v_f64, v_f32);
-  tmp_ectx.errmode = assign_error_fractional;
   typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                     assign_error_fractional);
   EXPECT_EQ(dynd::complex<float>((float)v_f64), v_cf32);
 
   // Since this is a float -> double conversion, it should be exact coming back to float
   v_f64 = 1 / 3.0f;
-  tmp_ectx.errmode = assign_error_inexact;
   typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact);
   EXPECT_EQ(v_f64, v_f32);
-  tmp_ectx.errmode = assign_error_inexact;
   typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr, assign_error_inexact);
   EXPECT_EQ(dynd::complex<double>(v_f64), dynd::complex<double>(v_cf32));
 
   // This should overflow converting to float
   v_f64 = -1.5e250;
-  tmp_ectx.errmode = assign_error_inexact;
   EXPECT_THROW(
       typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_inexact),
       runtime_error);
-  tmp_ectx.errmode = assign_error_fractional;
   EXPECT_THROW(
       typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_fractional),
       runtime_error);
-  tmp_ectx.errmode = assign_error_overflow;
   EXPECT_THROW(
       typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_overflow),
       runtime_error);
-  tmp_ectx.errmode = assign_error_inexact;
   EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                                  assign_error_inexact),
                runtime_error);
-  tmp_ectx.errmode = assign_error_fractional;
   EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                                  assign_error_fractional),
                runtime_error);
-  tmp_ectx.errmode = assign_error_overflow;
   EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, s_dt, NULL, s_ptr,
                                  assign_error_overflow),
                runtime_error);
-  tmp_ectx.errmode = assign_error_nocheck;
   typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, s_dt, NULL, s_ptr, assign_error_nocheck);
 #ifdef _MSC_VER
   EXPECT_TRUE(_fpclass(v_f32) == _FPCLASS_NINF);
@@ -751,68 +734,53 @@ TEST(TypeAssign, FixedSizeTests_Complex_Float64)
 #undef ONE_TEST
 #undef ONE_TEST_THROW
 
-  eval::eval_context tmp_ectx;
-
   // typed_data_assign checks that the float64 -> float32value gets converted exactly
   // when using the assign_error_inexact mode
   v_cf64 = 1 / 3.0;
   v_f32 = 0.f;
-  tmp_ectx.errmode = assign_error_inexact;
   EXPECT_THROW(typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id),
                                  NULL, (char *)&v_cf64, assign_error_inexact),
                runtime_error);
   v_cf32 = 0.f;
-  tmp_ectx.errmode = assign_error_inexact;
   EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
                                  ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
                runtime_error);
-  tmp_ectx.errmode = assign_error_fractional;
   typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL,
                     (char *)&v_cf64, assign_error_fractional);
   EXPECT_EQ((float)v_cf64.real(), v_f32);
-  tmp_ectx.errmode = assign_error_fractional;
   typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL,
                     (char *)&v_cf64, assign_error_fractional);
   EXPECT_EQ(dynd::complex<float>((float)v_cf64.real()), v_cf32);
 
   // Since this is a float -> double conversion, it should be exact coming back to float
   v_cf64 = 1 / 3.0f;
-  tmp_ectx.errmode = assign_error_inexact;
   typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL,
                     (char *)&v_cf64, assign_error_inexact);
   EXPECT_EQ(v_cf64, dynd::complex<double>(v_f32));
-  tmp_ectx.errmode = assign_error_inexact;
   typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32, ndt::type(complex_float64_type_id), NULL,
                     (char *)&v_cf64, assign_error_inexact);
   EXPECT_EQ(v_cf64, dynd::complex<double>(v_cf32));
 
   // This should overflow converting to float
   v_cf64 = -1.5e250;
-  tmp_ectx.errmode = assign_error_inexact;
   EXPECT_THROW(typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id),
                                  NULL, (char *)&v_cf64, assign_error_inexact),
                runtime_error);
-  tmp_ectx.errmode = assign_error_fractional;
   EXPECT_THROW(typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id),
                                  NULL, (char *)&v_cf64, assign_error_fractional),
                runtime_error);
-  tmp_ectx.errmode = assign_error_overflow;
   EXPECT_THROW(typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id),
                                  NULL, (char *)&v_cf64, assign_error_overflow),
                runtime_error);
-  tmp_ectx.errmode = assign_error_inexact;
   EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
                                  ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_inexact),
                runtime_error);
-  tmp_ectx.errmode = assign_error_fractional;
   EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
                                  ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_fractional),
                runtime_error);
-  tmp_ectx.errmode = assign_error_overflow;
   EXPECT_THROW(typed_data_assign(ndt::type(complex_float32_type_id), NULL, (char *)&v_cf32,
                                  ndt::type(complex_float64_type_id), NULL, (char *)&v_cf64, assign_error_overflow),
                runtime_error);
-  tmp_ectx.errmode = assign_error_nocheck;
   typed_data_assign(ndt::type(float32_type_id), NULL, (char *)&v_f32, ndt::type(complex_float64_type_id), NULL,
                     (char *)&v_cf64, assign_error_nocheck);
 #ifdef _MSC_VER
