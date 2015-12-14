@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/kernels/comparison_kernels.hpp>
-#include <dynd/typed_data_assign.hpp>
 
 namespace dynd {
 

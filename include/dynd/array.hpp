@@ -501,6 +501,8 @@ namespace nd {
     void val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
                     const eval::eval_context *ectx = &eval::default_eval_context) const;
 
+    array assign(const array &rhs);
+
     /**
      * Casts the type of the array into the specified type.
      * This casts the entire type. If you want to cast the

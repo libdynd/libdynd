@@ -460,6 +460,8 @@ void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, con
   typed_data_assign(get_type(), get()->metadata(), data(), rhs_dt, rhs_arrmeta, rhs_data, ectx);
 }
 
+nd::array nd::array::assign(const array &rhs) { return nd::assign({rhs}, {{"dst", *this}}); }
+
 void nd::array::flag_as_immutable()
 {
   // If it's already immutable, everything's ok

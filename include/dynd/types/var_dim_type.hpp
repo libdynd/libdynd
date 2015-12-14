@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/types/base_dim_type.hpp>
-#include <dynd/typed_data_assign.hpp>
 #include <dynd/types/view_type.hpp>
 
 namespace dynd {
