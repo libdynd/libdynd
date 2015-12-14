@@ -26,7 +26,7 @@ ndt::var_dim_type::var_dim_type(const type &element_tp)
   //       objectarray_memory_block,
   //       not by the var_dim elements.
   // Propagate just the value-inherited flags from the element
-  m_members.flags |= (element_tp.get_flags() & type_flags_value_inherited);
+  this->flags |= (element_tp.get_flags() & type_flags_value_inherited);
 
   // Copy nd::array properties and functions from the first non-array dimension
   get_scalar_properties_and_functions(m_array_properties, m_array_functions);

@@ -23,7 +23,7 @@ ndt::fixed_dim_type::fixed_dim_type(intptr_t dim_size, const type &element_tp)
       m_dim_size(dim_size)
 {
   // Propagate the inherited flags from the element
-  m_members.flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
+  this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
   // Copy nd::array properties and functions from the first non-array dimension
   get_scalar_properties_and_functions(m_array_properties, m_array_functions);
 }
