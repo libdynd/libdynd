@@ -504,6 +504,8 @@ namespace nd {
      */
     array assign(const array &rhs, assign_error_mode error_mode = assign_error_fractional) const;
 
+    array assign_na() const;
+
     /**
      * Casts the type of the array into the specified type.
      * This casts the entire type. If you want to cast the
@@ -659,8 +661,6 @@ namespace nd {
 
     bool is_missing() const;
 
-    void assign_na();
-
     /** Sorting comparison between two arrays. (Returns a bool, does not
      * broadcast) */
     //   bool op_sorting_less(const array &rhs) const;
@@ -755,7 +755,7 @@ namespace nd {
     template <class T>
     typename std::enable_if<is_dynd_scalar<T>::value, array_vals &>::type operator=(const T &rhs)
     {
-      m_arr.val_assign(ndt::type::make<T>(), NULL, (const char *)&rhs);
+      m_arr.assign(rhs);
       return *this;
     }
 
@@ -795,7 +795,7 @@ namespace nd {
     template <class T>
     typename std::enable_if<is_dynd_scalar<T>::value, array_vals_at &>::type operator=(const T &rhs)
     {
-      m_arr.val_assign(ndt::type::make<T>(), NULL, (const char *)&rhs);
+      m_arr.assign(rhs);
       return *this;
     }
 
@@ -1521,24 +1521,6 @@ namespace nd {
    */
   DYND_API array memmap(const std::string &filename, intptr_t begin = 0,
                         intptr_t end = std::numeric_limits<intptr_t>::max(), uint32_t access = default_access_flags);
-
-  DYND_API bool is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data,
-                                const eval::eval_context *ectx);
-
-  /**
-   * Returns true if the array is a scalar whose value is available (not NA).
-   */
-  inline bool is_scalar_avail(const array &arr, const eval::eval_context *ectx = &eval::default_eval_context)
-  {
-    return is_scalar_avail(arr.get_type(), arr.get()->metadata(), arr.cdata(), ectx);
-  }
-
-  DYND_API void assign_na(const ndt::type &tp, const char *arrmeta, char *data, const eval::eval_context *ectx);
-
-  inline void assign_na(array &out, const eval::eval_context *ectx = &eval::default_eval_context)
-  {
-    assign_na(out.get_type(), out.get()->metadata(), out.data(), ectx);
-  }
 
   /**
    * Creates a ctuple nd::array with the given field names and

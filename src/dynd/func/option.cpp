@@ -57,10 +57,10 @@ DYND_API nd::callable nd::is_avail::make()
 
 DYND_API struct nd::is_avail nd::is_avail;
 
-DYND_API nd::callable nd::assign_na_decl::children[DYND_TYPE_ID_MAX + 1];
-DYND_API nd::callable nd::assign_na_decl::dim_children[2];
+DYND_API nd::callable nd::assign_na::children[DYND_TYPE_ID_MAX + 1];
+DYND_API nd::callable nd::assign_na::dim_children[2];
 
-DYND_API nd::callable nd::assign_na_decl::make()
+DYND_API nd::callable nd::assign_na::make()
 {
   typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
                            float32_type_id, float64_type_id, complex_float32_type_id, complex_float64_type_id,
@@ -72,7 +72,7 @@ DYND_API nd::callable nd::assign_na_decl::make()
   }
 
   auto t = ndt::type("() -> ?Any");
-  callable self = functional::call<assign_na_decl>(t);
+  callable self = functional::call<assign_na>(t);
 
   for (auto tp_id : {fixed_dim_type_id, var_dim_type_id}) {
     dim_children[tp_id - fixed_dim_type_id] = functional::elwise(self);
@@ -95,4 +95,4 @@ DYND_API nd::callable nd::assign_na_decl::make()
       });
 }
 
-DYND_API struct nd::assign_na_decl nd::assign_na_decl;
+DYND_API struct nd::assign_na nd::assign_na;
