@@ -44,43 +44,43 @@ TEST(AdaptType, ByteswapEval)
   nd::array a = nd::empty(ndt::make_type<ndt::adapt_type>(ndt::type::make<int16_t>(),
                                                           ndt::make_fixed_bytes(sizeof(int16_t), alignof(int16_t)),
                                                           nd::byteswap, nd::byteswap));
-  a.val_assign(0x1362);
+  a.assign(0x1362);
   EXPECT_EQ(0x6213, a.view<int16_t>());
 
   a = nd::empty(ndt::make_type<ndt::adapt_type>(ndt::type::make<int32_t>(),
                                                 ndt::make_fixed_bytes(sizeof(int32_t), alignof(int32_t)), nd::byteswap,
                                                 nd::byteswap));
-  a.val_assign(0x12345678);
+  a.assign(0x12345678);
   EXPECT_EQ(0x78563412, a.view<int32_t>());
 
   a = nd::empty(ndt::make_type<ndt::adapt_type>(ndt::type::make<int64_t>(),
                                                 ndt::make_fixed_bytes(sizeof(int64_t), alignof(int64_t)), nd::byteswap,
                                                 nd::byteswap));
-  a.val_assign(0x12345678abcdef01LL);
+  a.assign(0x12345678abcdef01LL);
   EXPECT_EQ(0x01efcdab78563412LL, a.view<int64_t>());
 
   a = nd::empty(ndt::make_type<ndt::adapt_type>(
       ndt::type::make<float>(), ndt::make_fixed_bytes(sizeof(float), alignof(float)), nd::byteswap, nd::byteswap));
-  a.val_assign(alias_cast<float>(0xDA0F4940));
+  a.assign(alias_cast<float>(0xDA0F4940));
   EXPECT_EQ(3.1415926f, a.view<float>());
 
   a = nd::empty(ndt::make_type<ndt::adapt_type>(
       ndt::type::make<double>(), ndt::make_fixed_bytes(sizeof(double), alignof(double)), nd::byteswap, nd::byteswap));
-  a.val_assign(alias_cast<double>(0x112D4454FB210940LL));
+  a.assign(alias_cast<double>(0x112D4454FB210940LL));
   EXPECT_EQ(3.14159265358979, a.view<double>());
 
   a = nd::empty(ndt::make_type<ndt::adapt_type>(
       ndt::type::make<dynd::complex<float>>(),
       ndt::make_fixed_bytes(sizeof(dynd::complex<float>), alignof(dynd::complex<float>)), nd::pairwise_byteswap,
       nd::pairwise_byteswap));
-  a.val_assign(dynd::complex<float>(alias_cast<float>(0xDA0F4940), alias_cast<float>(0xC1B88FD3)));
+  a.assign(dynd::complex<float>(alias_cast<float>(0xDA0F4940), alias_cast<float>(0xC1B88FD3)));
   EXPECT_EQ(dynd::complex<float>(3.1415926f, -1.23456e12f), a.view<dynd::complex<float>>());
 
   a = nd::empty(ndt::make_type<ndt::adapt_type>(
       ndt::type::make<dynd::complex<double>>(),
       ndt::make_fixed_bytes(sizeof(dynd::complex<double>), alignof(dynd::complex<double>)), nd::pairwise_byteswap,
       nd::pairwise_byteswap));
-  a.val_assign(
+  a.assign(
       dynd::complex<double>(alias_cast<double>(0x112D4454FB210940LL), alias_cast<double>(0x002892B01FF771C2LL)));
   EXPECT_EQ(dynd::complex<double>(3.14159265358979, -1.2345678912345e12), a.view<dynd::complex<double>>());
 }

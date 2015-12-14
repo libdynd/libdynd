@@ -150,7 +150,7 @@ TEST(DatetimeType, AbstractTZToUTC)
   EXPECT_THROW(a.vals() = b(0), type_error);
   eval::eval_context ectx;
   ectx.errmode = assign_error_nocheck;
-  a.val_assign(b(1), &ectx);
+  a.assign(b(1), ectx.errmode);
   EXPECT_EQ("2010-03-12T11:15:59", a.as<std::string>());
 }
 

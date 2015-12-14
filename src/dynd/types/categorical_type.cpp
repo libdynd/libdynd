@@ -313,7 +313,7 @@ uint32_t ndt::categorical_type::get_value_from_category(const nd::array &categor
   else {
     // Otherwise convert to the correct type, then get the category value
     c = nd::empty(m_category_tp);
-    c.val_assign(category);
+    c.assign(category);
   }
 
   intptr_t i = nd::binary_search(m_categories, c).as<intptr_t>();

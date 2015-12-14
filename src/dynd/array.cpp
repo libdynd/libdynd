@@ -437,30 +437,16 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
   }
 }
 
-void nd::array::val_assign(const array &rhs, const eval::eval_context *ectx) const
-{
-  // Verify read access permission
-  if (!(rhs.get_flags() & read_access_flag)) {
-    throw runtime_error("tried to read from a dynd array that is not readable");
-  }
-
-  /*
-    const ndt::type &dst_tp = get_type();
-    const ndt::type &src_tp = rhs.get_type();
-    if (dst_tp.is_builtin() && src_tp.is_builtin()) {
-    }
-  */
-
-  typed_data_assign(get_type(), get()->metadata(), data(), rhs.get_type(), rhs.get()->metadata(), rhs.cdata(), ectx);
-}
-
 void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
                            const eval::eval_context *ectx) const
 {
   typed_data_assign(get_type(), get()->metadata(), data(), rhs_dt, rhs_arrmeta, rhs_data, ectx);
 }
 
-nd::array nd::array::assign(const array &rhs) { return nd::assign({rhs}, {{"dst", *this}}); }
+nd::array nd::array::assign(const array &rhs, assign_error_mode error_mode) const
+{
+  return nd::assign({rhs}, {{"error_mode", static_cast<int>(error_mode)}, {"dst", *this}});
+}
 
 void nd::array::flag_as_immutable()
 {
@@ -557,7 +543,7 @@ nd::array nd::array::eval(const eval::eval_context *ectx) const
       dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                               get()->metadata());
     }
-    result.val_assign(*this, ectx);
+    result.assign(*this, ectx->errmode);
     return result;
   }
 }
@@ -577,7 +563,7 @@ nd::array nd::array::eval_immutable(const eval::eval_context *ectx) const
       dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                               get()->metadata());
     }
-    result.val_assign(*this, ectx);
+    result.assign(*this, ectx->errmode);
     result.get()->flags = immutable_access_flag | read_access_flag;
     return result;
   }
@@ -593,7 +579,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
     dt.extended<ndt::fixed_dim_type>()->reorder_default_constructed_strides(result.get()->metadata(), get_type(),
                                                                             get()->metadata());
   }
-  result.val_assign(*this, ectx);
+  result.assign(*this, ectx->errmode);
   // If the access_flags are 0, use the defaults
   access_flags = access_flags ? access_flags : (int32_t)nd::default_access_flags;
   // If the access_flags are just readonly, add immutable
@@ -607,7 +593,7 @@ nd::array nd::array::eval_copy(uint32_t access_flags, const eval::eval_context *
 nd::array nd::array::to_host() const
 {
   array result = empty(get_type().without_memory_type());
-  result.val_assign(*this);
+  result.assign(*this);
 
   return result;
 }
@@ -617,7 +603,7 @@ nd::array nd::array::to_host() const
 nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 {
   array result = empty(make_cuda_host(get_type().without_memory_type(), cuda_host_flags));
-  result.val_assign(*this);
+  result.assign(*this);
 
   return result;
 }
@@ -625,7 +611,7 @@ nd::array nd::array::to_cuda_host(unsigned int cuda_host_flags) const
 nd::array nd::array::to_cuda_device() const
 {
   array result = empty(make_cuda_device(get_type().without_memory_type()));
-  result.val_assign(*this);
+  result.assign(*this);
 
   return result;
 }
@@ -1254,7 +1240,7 @@ nd::array nd::as_struct(std::size_t size, const char **names, const array *value
 
   array res = empty(ndt::struct_type::make(make_strided_string_array(names, size), array(types)));
   for (std::size_t i = 0; i < size; ++i) {
-    res(i).val_assign(values[i]);
+    res(i).assign(values[i]);
   }
 
   return res;
@@ -1405,8 +1391,8 @@ nd::array nd::concatenate(const nd::array &x, const nd::array &y)
   }
 
   nd::array res = nd::empty(x.get_dim_size() + y.get_dim_size(), x.get_dtype());
-  res(irange(0, x.get_dim_size())).val_assign(x);
-  res(irange(x.get_dim_size(), res.get_dim_size())).val_assign(y);
+  res(irange(0, x.get_dim_size())).assign(x);
+  res(irange(x.get_dim_size(), res.get_dim_size())).assign(y);
 
   return res;
 }

@@ -22,7 +22,7 @@ TEST(Functional, LeftCompound)
   nd::callable f = nd::functional::left_compound(nd::functional::apply([](int x, int y) { return x + y; }));
 
   nd::array y = nd::empty(ndt::type::make<int>());
-  y.val_assign(3);
+  y.assign(3);
   EXPECT_ARRAY_EQ(8, f({5}, {{"dst", y}}));
 }
 
@@ -31,6 +31,6 @@ TEST(Functional, RightCompound)
   nd::callable f = nd::functional::right_compound(nd::functional::apply([](int x, int y) { return x - y; }));
 
   nd::array y = nd::empty(ndt::type::make<int>());
-  y.val_assign(3);
+  y.assign(3);
   EXPECT_ARRAY_EQ(2, f({5}, {{"dst", y}}));
 }
