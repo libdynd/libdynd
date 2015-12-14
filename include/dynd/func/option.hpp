@@ -23,7 +23,7 @@ namespace nd {
     static DYND_API callable make();
   } is_avail;
 
-  extern DYND_API struct assign_na_decl : declfunc<assign_na_decl> {
+  extern DYND_API struct assign_na : declfunc<assign_na> {
     static DYND_API callable children[DYND_TYPE_ID_MAX + 1];
     static DYND_API callable dim_children[2];
 
@@ -34,7 +34,7 @@ namespace nd {
     }
 
     static DYND_API callable make();
-  } assign_na_decl;
+  } assign_na;
 
 } // namespace dynd::nd
 } // namespace dynd

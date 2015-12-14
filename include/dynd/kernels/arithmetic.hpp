@@ -127,7 +127,7 @@ namespace nd {
       self = option_arithmetic_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      auto assign_na = nd::assign_na_decl::get();
+      auto assign_na = nd::assign_na::get();
       ckb_offset =
           assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                        child_src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
@@ -188,7 +188,7 @@ namespace nd {
       self = option_arithmetic_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      auto assign_na = nd::assign_na_decl::get();
+      auto assign_na = nd::assign_na::get();
       ckb_offset =
           assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, src_tp[1], src_arrmeta[1],
                                        0, nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
@@ -262,7 +262,7 @@ namespace nd {
       self = option_arithmetic_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_arith_offset);
       self->assign_na_offset = ckb_offset - option_arith_offset;
-      auto assign_na = nd::assign_na_decl::get();
+      auto assign_na = nd::assign_na::get();
       ckb_offset =
           assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, 0,
                                        nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);

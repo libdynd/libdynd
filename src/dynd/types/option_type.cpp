@@ -131,7 +131,7 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::ev
 }
 
 nd::callable &ndt::option_type::get_is_avail() const { return nd::is_avail::get_child(m_value_tp); }
-nd::callable &ndt::option_type::get_assign_na() const { return nd::assign_na_decl::get_child(m_value_tp); }
+nd::callable &ndt::option_type::get_assign_na() const { return nd::assign_na::get_child(m_value_tp); }
 
 void ndt::option_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {

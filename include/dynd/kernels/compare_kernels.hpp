@@ -307,7 +307,7 @@ namespace nd {
       self = option_comparison_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
-      auto assign_na = nd::assign_na_decl::get();
+      auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
                                                 ndt::option_type::make(ndt::type::make<bool1>()), nullptr, 0, nullptr,
                                                 nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
@@ -360,7 +360,7 @@ namespace nd {
       self = option_comparison_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
-      auto assign_na = nd::assign_na_decl::get();
+      auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
                                                 ndt::option_type::make(ndt::type::make<bool1>()), nullptr, 0, nullptr,
                                                 nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
@@ -424,7 +424,7 @@ namespace nd {
       self = option_comparison_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),
                                                 option_comp_offset);
       self->assign_na_offset = ckb_offset - option_comp_offset;
-      auto assign_na = nd::assign_na_decl::get();
+      auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
                                                 ndt::option_type::make(ndt::type::make<bool1>()), nullptr, 0, nullptr,
                                                 nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);

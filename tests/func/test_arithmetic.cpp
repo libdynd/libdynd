@@ -281,7 +281,7 @@ TEST(Arithmetic, CompoundDiv)
 TEST(Arithmetic, OptionArithmeticInt32)
 {
   nd::array NA = nd::empty(ndt::type("?int32"));
-  nd::assign_na(NA);
+  NA.assign_na();
   EXPECT_ALL_FALSE(nd::is_avail(NA + 1));
   EXPECT_ALL_FALSE(nd::is_avail(NA - 1));
   EXPECT_ALL_FALSE(nd::is_avail(NA * 1));
@@ -301,7 +301,7 @@ TEST(Arithmetic, OptionArithmeticInt32)
 TEST(Arithmetic, OptionArithmeticFloat64)
 {
   nd::array NA = nd::empty(ndt::type("?float64"));
-  nd::assign_na(NA);
+  NA.assign_na();
   EXPECT_ALL_FALSE(nd::is_avail(NA + 1));
   EXPECT_ALL_FALSE(nd::is_avail(NA - 1));
   EXPECT_ALL_FALSE(nd::is_avail(NA * 1));

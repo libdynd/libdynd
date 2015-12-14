@@ -19,11 +19,11 @@ using namespace dynd;
 TEST(Option, IsAvail)
 {
   nd::array x = nd::empty("?int64");
-  nd::assign_na(x);
+  x.assign_na();
   EXPECT_FALSE(nd::is_avail(x).as<bool>());
 
   x = nd::empty("?datetime");
-  nd::assign_na(x);
+  x.assign_na();
   EXPECT_FALSE(nd::is_avail(x).as<bool>());
 
   x = parse_json("?time", "\"11:00:13\"");
@@ -82,14 +82,14 @@ TEST(Option, IsAvailArray)
 
 TEST(Option, AssignNA)
 {
-  nd::array x = nd::assign_na_decl({}, {{"dst_tp", ndt::type("?int64")}});
+  nd::array x = nd::assign_na({}, {{"dst_tp", ndt::type("?int64")}});
   EXPECT_FALSE(nd::is_avail(x).as<bool>());
 }
 
 TEST(Option, AssignNAArray)
 {
   nd::array a = nd::empty("3 * ?int64");
-  a(0).vals() = nd::assign_na_decl({}, {{"dst_tp", ndt::type("?int64")}});
+  a(0).vals() = nd::assign_na({}, {{"dst_tp", ndt::type("?int64")}});
   a(1).vals() = 1.0;
   a(2).vals() = 3.0;
   nd::array expected = {false, true, true};

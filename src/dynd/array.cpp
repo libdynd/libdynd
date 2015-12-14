@@ -9,6 +9,7 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/comparison.hpp>
 #include <dynd/func/elwise.hpp>
+#include <dynd/func/option.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/tuple_type.hpp>
@@ -448,6 +449,8 @@ nd::array nd::array::assign(const array &rhs, assign_error_mode error_mode) cons
   return nd::assign({rhs}, {{"error_mode", static_cast<int>(error_mode)}, {"dst", *this}});
 }
 
+nd::array nd::array::assign_na() const { return nd::assign_na({}, {{"dst", *this}}); }
+
 void nd::array::flag_as_immutable()
 {
   // If it's already immutable, everything's ok
@@ -626,14 +629,6 @@ bool nd::array::is_missing() const
   }
 
   return false;
-}
-
-void nd::array::assign_na()
-{
-  ndt::type tp = get_type();
-  if (tp.get_type_id() == option_type_id) {
-    tp.extended<ndt::option_type>()->assign_na(get()->metadata(), data(), &eval::default_eval_context);
-  }
 }
 
 bool nd::array::equals_exact(const array &rhs) const
@@ -1471,44 +1466,6 @@ nd::array nd::memmap(const std::string &DYND_UNUSED(filename), intptr_t DYND_UNU
     ndo_meta->blockref = mm.release();
     return result;
   */
-}
-
-bool nd::is_scalar_avail(const ndt::type &tp, const char *arrmeta, const char *data, const eval::eval_context *ectx)
-{
-  if (tp.is_scalar()) {
-    if (tp.get_type_id() == option_type_id) {
-      return tp.extended<ndt::option_type>()->is_avail(arrmeta, data, ectx);
-    }
-    else if (tp.get_kind() == expr_kind && tp.value_type().get_type_id() == option_type_id) {
-      nd::array tmp = nd::empty(tp.value_type());
-      tmp.val_assign(tp, arrmeta, data, ectx);
-      return tmp.get_type().extended<ndt::option_type>()->is_avail(arrmeta, data, ectx);
-    }
-    else {
-      return true;
-    }
-  }
-  else {
-    return false;
-  }
-}
-
-void nd::assign_na(const ndt::type &tp, const char *arrmeta, char *data, const eval::eval_context *ectx)
-{
-  if (tp.get_type_id() == option_type_id) {
-    tp.extended<ndt::option_type>()->assign_na(arrmeta, data, ectx);
-  }
-  else {
-    const ndt::type &dtp = tp.get_dtype().value_type();
-    if (dtp.get_type_id() == option_type_id) {
-      throw std::runtime_error("nd::assign_na is not yet implemented");
-    }
-    else {
-      stringstream ss;
-      ss << "Cannot assign missing value token NA to dtype " << dtp;
-      throw invalid_argument(ss.str());
-    }
-  }
 }
 
 nd::array nd::combine_into_tuple(size_t field_count, const array *field_values)

@@ -33,7 +33,7 @@ TEST(Comparison, Simple)
 TEST(Comparison, OptionScalar)
 {
   nd::array NA = nd::empty(ndt::type("?int32"));
-  nd::assign_na(NA);
+  NA.assign_na();
   EXPECT_ALL_FALSE(nd::is_avail(NA < 1));
   EXPECT_ALL_FALSE(nd::is_avail(NA > 1));
   EXPECT_ALL_FALSE(nd::is_avail(NA >= 1));
