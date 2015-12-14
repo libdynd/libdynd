@@ -8,6 +8,7 @@
 #include <dynd/func/call.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/types/any_kind_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -18,6 +19,9 @@ DYND_API nd::callable nd::assign::make()
                            uint8_type_id, uint16_type_id, uint32_type_id, uint64_type_id, uint128_type_id,
                            float32_type_id, float64_type_id, complex_float32_type_id,
                            complex_float64_type_id> numeric_type_ids;
+
+  ndt::type self_tp = ndt::callable_type::make(ndt::any_kind_type::make(), {ndt::any_kind_type::make()}, {"error_mode"},
+                                               {ndt::option_type::make(ndt::type::make<int>())});
 
   map<std::array<type_id_t, 2>, callable> children =
       callable::make_all<_bind<assign_error_mode, assignment_kernel>::type, numeric_type_ids, numeric_type_ids>();
@@ -65,7 +69,7 @@ DYND_API nd::callable nd::assign::make()
   children[{{string_type_id, string_type_id}}] = callable::make<assignment_kernel<string_type_id, string_type_id>>();
   children[{{string_type_id, fixed_string_type_id}}] =
       callable::make<assignment_kernel<string_type_id, fixed_string_type_id>>();
-    children[{{bool_type_id, string_type_id}}] = callable::make<assignment_kernel<bool_type_id, string_type_id>>();
+  children[{{bool_type_id, string_type_id}}] = callable::make<assignment_kernel<bool_type_id, string_type_id>>();
   children[{{option_type_id, option_type_id}}] =
       callable::make<detail::assignment_option_kernel>(ndt::type("(?Any) -> ?Any"));
   for (type_id_t tp_id : {int32_type_id, string_type_id, float64_type_id, bool_type_id, int8_type_id}) {
@@ -203,7 +207,7 @@ DYND_API nd::callable nd::assign::make()
   children[{{date_type_id, convert_type_id}}] = callable::make<assignment_kernel<date_type_id, convert_type_id>>();
 
   return functional::multidispatch(
-      ndt::type("(Any) -> Any"),
+self_tp,
       [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
         callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
         if (child.is_null()) {

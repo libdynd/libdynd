@@ -439,19 +439,7 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
 
 void nd::array::val_assign(const array &rhs, const eval::eval_context *ectx) const
 {
-  // Verify read access permission
-  if (!(rhs.get_flags() & read_access_flag)) {
-    throw runtime_error("tried to read from a dynd array that is not readable");
-  }
-
-  /*
-    const ndt::type &dst_tp = get_type();
-    const ndt::type &src_tp = rhs.get_type();
-    if (dst_tp.is_builtin() && src_tp.is_builtin()) {
-    }
-  */
-
-  typed_data_assign(get_type(), get()->metadata(), data(), rhs.get_type(), rhs.get()->metadata(), rhs.cdata(), ectx);
+  assign(rhs, ectx->errmode);
 }
 
 void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
@@ -460,7 +448,10 @@ void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, con
   typed_data_assign(get_type(), get()->metadata(), data(), rhs_dt, rhs_arrmeta, rhs_data, ectx);
 }
 
-nd::array nd::array::assign(const array &rhs) { return nd::assign({rhs}, {{"dst", *this}}); }
+nd::array nd::array::assign(const array &rhs, assign_error_mode error_mode) const
+{
+  return nd::assign({rhs}, {{"error_mode", static_cast<int>(error_mode)}, {"dst", *this}});
+}
 
 void nd::array::flag_as_immutable()
 {
