@@ -495,15 +495,14 @@ namespace nd {
 
     array at(const irange &i0) const { return at_array(1, &i0); }
 
-    /** Does a value-assignment from the rhs raw scalar */
-    void val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
-                    const eval::eval_context *ectx = &eval::default_eval_context) const;
-
     /**
      * Assigns values from another array to this array.
      */
     array assign(const array &rhs, assign_error_mode error_mode = assign_error_fractional) const;
 
+    /**
+     * Assigns the "not available" value to this array.
+     */
     array assign_na() const;
 
     /**
