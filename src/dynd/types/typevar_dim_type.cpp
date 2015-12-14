@@ -163,7 +163,7 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(std::map<std::string, nd
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst,
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp, 
                       static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get()->metadata(),
                       static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).cdata());
     }

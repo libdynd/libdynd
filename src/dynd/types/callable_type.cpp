@@ -358,8 +358,9 @@ void ndt::callable_type::get_dynamic_type_properties(std::map<std::string, nd::c
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_pos_types().get()->metadata(),
-                      tp.extended<callable_type>()->get_pos_types().cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
+                        tp.extended<callable_type>()->get_pos_types().get()->metadata(),
+                        tp.extended<callable_type>()->get_pos_types().cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
@@ -380,8 +381,9 @@ void ndt::callable_type::get_dynamic_type_properties(std::map<std::string, nd::c
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_kwd_types().get()->metadata(),
-                      tp.extended<callable_type>()->get_kwd_types().cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
+                        tp.extended<callable_type>()->get_kwd_types().get()->metadata(),
+                        tp.extended<callable_type>()->get_kwd_types().cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
@@ -402,8 +404,9 @@ void ndt::callable_type::get_dynamic_type_properties(std::map<std::string, nd::c
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<callable_type>()->get_kwd_names().get()->metadata(),
-                      tp.extended<callable_type>()->get_kwd_names().cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
+                        tp.extended<callable_type>()->get_kwd_names().get()->metadata(),
+                        tp.extended<callable_type>()->get_kwd_names().cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,

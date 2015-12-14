@@ -1252,7 +1252,7 @@ nd::array nd::eval_raw_copy(const ndt::type &dt, const char *arrmeta, const char
     result = nd::empty(cdt);
   }
 
-  typed_data_assign(cdt, result.get()->metadata(), result.data(), dt, arrmeta, data, &eval::default_eval_context);
+  typed_data_assign(cdt, result.get()->metadata(), result.data(), dt, arrmeta, data);
 
   return result;
 }

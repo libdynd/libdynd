@@ -1457,7 +1457,7 @@ namespace nd {
           throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
         }
         typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get()->metadata(),
-                          lhs.get()->data, ectx);
+                          lhs.get()->data, ectx->errmode);
         return result;
       }
     };

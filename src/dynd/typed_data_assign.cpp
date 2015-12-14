@@ -171,43 +171,15 @@ bool dynd::is_lossless_assignment(const ndt::type &dst_tp, const ndt::type &src_
   }
 }
 
-void dynd::typed_data_copy(const ndt::type &tp, const char *dst_arrmeta, char *dst_data, const char *src_arrmeta,
-                           const char *src_data)
-{
-  if (tp.get_type_id() == option_type_id) {
-    return typed_data_copy(tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, dst_data, src_arrmeta,
-                           src_data);
-  }
-
-  size_t data_size = tp.get_data_size();
-  if (tp.is_pod()) {
-    memcpy(dst_data, src_data, data_size);
-  }
-  else {
-    nd::array kwd = nd::empty(ndt::option_type::make(ndt::type::make<int>()));
-    kwd.assign_na();
-    std::map<std::string, ndt::type> tp_vars;
-    nd::assign::get()->call(tp, dst_arrmeta, dst_data, 1, &tp, &src_arrmeta, const_cast<char *const *>(&src_data), 1,
-                            &kwd, tp_vars);
-  }
-}
-
 void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, const ndt::type &src_tp,
-                             const char *src_arrmeta, const char *src_data, const eval::eval_context *ectx)
+                             const char *src_arrmeta, const char *src_data, assign_error_mode error_mode)
 {
   DYND_ASSERT_ALIGNED(dst, 0, dst_tp.get_data_alignment(), "dst type: " << dst_tp << ", src type: " << src_tp);
   DYND_ASSERT_ALIGNED(src, 0, src_dt.get_data_alignment(), "src type: " << src_tp << ", dst type: " << dst_tp);
 
   nd::array kwd = nd::empty(ndt::option_type::make(ndt::type::make<int>()));
-  *reinterpret_cast<int *>(kwd.data()) = static_cast<int>(ectx->errmode);
+  *reinterpret_cast<int *>(kwd.data()) = static_cast<int>(error_mode);
   std::map<std::string, ndt::type> tp_vars;
   nd::assign::get()->call(dst_tp, dst_arrmeta, dst_data, 1, &src_tp, &src_arrmeta, const_cast<char *const *>(&src_data),
                           1, &kwd, tp_vars);
-}
-
-void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta, char *dst_data, const nd::array &src_arr,
-                             const eval::eval_context *ectx)
-{
-  typed_data_assign(dst_tp, dst_arrmeta, dst_data, src_arr.get_type(), src_arr.get()->metadata(), src_arr.cdata(),
-                    ectx);
 }
