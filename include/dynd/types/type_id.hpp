@@ -96,8 +96,6 @@ enum type_id_t {
   complex_float64_type_id,
   // Means no type, just like in C. (Different from NumPy)
   void_type_id,
-  // Like C/C++ (void*), the storage of pointer_type
-  void_pointer_type_id,
 
   // A pointer type
   pointer_type_id,

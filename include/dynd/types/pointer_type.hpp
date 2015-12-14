@@ -16,7 +16,6 @@
 #pragma once
 
 #include <dynd/type.hpp>
-#include <dynd/types/void_pointer_type.hpp>
 
 namespace dynd {
 
@@ -102,12 +101,6 @@ namespace ndt {
     void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
 
     static type make(const type &target_tp);
-
-    template <typename T>
-    static type make()
-    {
-      return make(type::make<T>());
-    }
   };
 
   template <typename T>

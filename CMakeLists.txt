@@ -195,7 +195,6 @@ set(libdynd_SRC
     src/dynd/types/typevar_type.cpp
     src/dynd/types/var_dim_type.cpp
     src/dynd/types/view_type.cpp
-    src/dynd/types/void_pointer_type.cpp
     include/dynd/types/adapt_type.hpp
     include/dynd/types/any_kind_type.hpp
     include/dynd/types/array_type.hpp
@@ -253,8 +252,7 @@ set(libdynd_SRC
     include/dynd/types/typevar_type.hpp
     include/dynd/types/var_dim_type.hpp
     include/dynd/types/view_type.hpp
-    include/dynd/types/void_pointer_type.hpp
-    # callables
+    # Callables
     src/dynd/callables/base_callable.cpp
     include/dynd/callables/base_callable.hpp
     # Eval

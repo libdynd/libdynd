@@ -119,7 +119,6 @@ ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
     type(reinterpret_cast<const base_type *>(complex_float32_type_id), false),
     type(reinterpret_cast<const base_type *>(complex_float64_type_id), false),
     type(reinterpret_cast<const base_type *>(void_type_id), false),
-    type(),                                           // void_pointer_type_id
     pointer_type::make(any_kind_type::make()),        // pointer_type_id
     type(),                                           // reference_type_id
     bytes_type::make(),                               //   bytes_type_id,
@@ -551,8 +550,6 @@ std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
     return (o << "complex_float64");
   case void_type_id:
     return (o << "void");
-  case void_pointer_type_id:
-    return (o << "void_pointer");
   case pointer_type_id:
     return (o << "pointer");
   case bytes_type_id:
