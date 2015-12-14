@@ -144,8 +144,7 @@ void ndt::typevar_type::get_dynamic_type_properties(std::map<std::string, nd::ca
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       const nd::array &a = tp.extended<typevar_type>()->get_name();
-      typed_data_assign(dst_tp, dst_arrmeta, dst, a.get_type(), a.get()->metadata(), a.cdata(),
-                        &eval::default_eval_context);
+      typed_data_assign(dst_tp, dst_arrmeta, dst, a.get_type(), a.get()->metadata(), a.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,

@@ -365,8 +365,8 @@ void ndt::struct_type::get_dynamic_type_properties(std::map<std::string, nd::cal
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_field_types.get()->metadata(),
-                      tp.extended<struct_type>()->m_field_types.cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp, tp.extended<struct_type>()->m_field_types.get()->metadata(),
+                        tp.extended<struct_type>()->m_field_types.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
@@ -387,8 +387,8 @@ void ndt::struct_type::get_dynamic_type_properties(std::map<std::string, nd::cal
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_field_names.get()->metadata(),
-                      tp.extended<struct_type>()->m_field_names.cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp, tp.extended<struct_type>()->m_field_names.get()->metadata(),
+                        tp.extended<struct_type>()->m_field_names.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
@@ -409,8 +409,9 @@ void ndt::struct_type::get_dynamic_type_properties(std::map<std::string, nd::cal
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<struct_type>()->m_arrmeta_offsets.get()->metadata(),
-                      tp.extended<struct_type>()->m_arrmeta_offsets.cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
+                        tp.extended<struct_type>()->m_arrmeta_offsets.get()->metadata(),
+                        tp.extended<struct_type>()->m_arrmeta_offsets.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
@@ -637,14 +638,14 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   // Copy the data from the input arrays
   for (intptr_t i = 0; i < lhs_n; ++i) {
     const ndt::type &tp = res_field_tps[i];
-    typed_data_copy(tp, res_arrmeta + res_arrmeta_offsets[i], res_data + res_data_offsets[i],
-                    lhs_arrmeta + lhs_arrmeta_offsets[i], lhs_data + lhs_data_offsets[i]);
+    typed_data_assign(tp, res_arrmeta + res_arrmeta_offsets[i], res_data + res_data_offsets[i], tp,
+                      lhs_arrmeta + lhs_arrmeta_offsets[i], lhs_data + lhs_data_offsets[i]);
   }
 
   for (intptr_t i = 0; i < rhs_n; ++i) {
     const ndt::type &tp = res_field_tps[i + lhs_n];
-    typed_data_copy(tp, res_arrmeta + res_arrmeta_offsets[i + lhs_n], res_data + res_data_offsets[i + lhs_n],
-                    rhs_arrmeta + rhs_arrmeta_offsets[i], rhs_data + rhs_data_offsets[i]);
+    typed_data_assign(tp, res_arrmeta + res_arrmeta_offsets[i + lhs_n], res_data + res_data_offsets[i + lhs_n], tp,
+                      rhs_arrmeta + rhs_arrmeta_offsets[i], rhs_data + rhs_data_offsets[i]);
   }
 
   return res;

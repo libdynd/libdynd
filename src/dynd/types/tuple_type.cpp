@@ -15,23 +15,23 @@
 using namespace std;
 using namespace dynd;
 
-ndt::tuple_type::tuple_type(type_id_t type_id, const nd::array &field_types, flags_type flags,
-                                      bool layout_in_arrmeta, bool variadic)
+ndt::tuple_type::tuple_type(type_id_t type_id, const nd::array &field_types, flags_type flags, bool layout_in_arrmeta,
+                            bool variadic)
     : base_type(type_id, variadic ? kind_kind : tuple_kind, 0, 1,
                 flags | type_flag_indexable | (variadic ? type_flag_symbolic : 0), 0, 0, 0),
       m_field_count(field_types.get_dim_size()), m_field_types(field_types),
       m_arrmeta_offsets(nd::empty(m_field_count, type::make<uintptr_t>())), m_variadic(variadic)
 {
-/*
-  Todo: Reenable this without a deadlock.
+  /*
+    Todo: Reenable this without a deadlock.
 
-  if (!nd::ensure_immutable_contig<type>(m_field_types)) {
-    stringstream ss;
-    ss << "dynd tuple type requires an array of types, got an array with "
-          "type " << m_field_types.get_type();
-    throw invalid_argument(ss.str());
-  }
-*/
+    if (!nd::ensure_immutable_contig<type>(m_field_types)) {
+      stringstream ss;
+      ss << "dynd tuple type requires an array of types, got an array with "
+            "type " << m_field_types.get_type();
+      throw invalid_argument(ss.str());
+    }
+  */
 
   // Calculate the needed element alignment and arrmeta offsets
   size_t arrmeta_offset = 0;
@@ -553,8 +553,8 @@ void ndt::tuple_type::get_dynamic_type_properties(std::map<std::string, nd::call
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_field_types.get()->metadata(),
-                      tp.extended<tuple_type>()->m_field_types.cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp, tp.extended<tuple_type>()->m_field_types.get()->metadata(),
+                        tp.extended<tuple_type>()->m_field_types.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
@@ -575,8 +575,9 @@ void ndt::tuple_type::get_dynamic_type_properties(std::map<std::string, nd::call
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<tuple_type>()->m_arrmeta_offsets.get()->metadata(),
-                      tp.extended<tuple_type>()->m_arrmeta_offsets.cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
+                        tp.extended<tuple_type>()->m_arrmeta_offsets.get()->metadata(),
+                        tp.extended<tuple_type>()->m_arrmeta_offsets.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,

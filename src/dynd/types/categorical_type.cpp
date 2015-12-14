@@ -601,8 +601,9 @@ void ndt::categorical_type::get_dynamic_type_properties(std::map<std::string, nd
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_copy(dst_tp, dst_arrmeta, dst, tp.extended<categorical_type>()->m_categories.get()->metadata(),
-                      tp.extended<categorical_type>()->m_categories.cdata());
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
+                        tp.extended<categorical_type>()->m_categories.get()->metadata(),
+                        tp.extended<categorical_type>()->m_categories.cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), size_t DYND_UNUSED(data_size), char *data,
