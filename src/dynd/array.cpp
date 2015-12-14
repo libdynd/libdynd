@@ -438,12 +438,6 @@ nd::array nd::array::at_array(intptr_t nindices, const irange *indices, bool col
   }
 }
 
-void nd::array::val_assign(const ndt::type &rhs_dt, const char *rhs_arrmeta, const char *rhs_data,
-                           const eval::eval_context *ectx) const
-{
-  typed_data_assign(get_type(), get()->metadata(), data(), rhs_dt, rhs_arrmeta, rhs_data, ectx);
-}
-
 nd::array nd::array::assign(const array &rhs, assign_error_mode error_mode) const
 {
   return nd::assign({rhs}, {{"error_mode", static_cast<int>(error_mode)}, {"dst", *this}});
