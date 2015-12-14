@@ -12,18 +12,14 @@
 using namespace std;
 using namespace dynd;
 
-ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim,
-                                          const intptr_t *tagged_dims)
-    : base_dim_type(dim_fragment_type_id, pattern_kind, type::make<void>(), 0, 1,
-                    0, type_flag_symbolic, false),
+ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim, const intptr_t *tagged_dims)
+    : base_dim_type(dim_fragment_type_id, pattern_kind, type::make<void>(), 0, 1, 0, type_flag_symbolic, false),
       m_tagged_dims(ndim, tagged_dims)
 {
-  m_members.ndim = static_cast<uint8_t>(ndim);
+  this->ndim = static_cast<uint8_t>(ndim);
 }
 
-static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
-                                                  const ndt::type &tp,
-                                                  intptr_t *out_tagged_dims)
+static inline ndt::type get_tagged_dims_from_type(intptr_t ndim, const ndt::type &tp, intptr_t *out_tagged_dims)
 {
   ndt::type dtp = tp.without_memory_type();
   for (int i = 0; i < ndim; ++i) {
@@ -31,9 +27,9 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
     case fixed_dim_type_id:
       if (dtp.get_kind() == kind_kind) {
         out_tagged_dims[i] = -2;
-      } else {
-        out_tagged_dims[i] =
-            dtp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
+      }
+      else {
+        out_tagged_dims[i] = dtp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
       }
       break;
     case var_dim_type_id:
@@ -50,8 +46,7 @@ static inline ndt::type get_tagged_dims_from_type(intptr_t ndim,
   return dtp;
 }
 
-static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
-                                                   const intptr_t *tagged_dims,
+static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp, const intptr_t *tagged_dims,
                                                    intptr_t *out_tagged_dims)
 {
   tp = tp.without_memory_type();
@@ -63,11 +58,13 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
         if (tagged_dim < 0) {
           out_tagged_dims[i] = -2;
         }
-      } else {
+      }
+      else {
         dim_size = tp.extended<ndt::fixed_dim_type>()->get_fixed_dim_size();
         if (tagged_dim < 0 || tagged_dim == 1) {
           out_tagged_dims[i] = dim_size;
-        } else if (tagged_dim != dim_size && dim_size != 1) {
+        }
+        else if (tagged_dim != dim_size && dim_size != 1) {
           return false;
         }
       }
@@ -87,23 +84,19 @@ static inline bool broadcast_tagged_dims_from_type(intptr_t ndim, ndt::type tp,
 }
 
 ndt::dim_fragment_type::dim_fragment_type(intptr_t ndim, const type &tp)
-    : base_dim_type(dim_fragment_type_id, type::make<void>(), 0, 1, 0,
-                    type_flag_symbolic, false),
-      m_tagged_dims(ndim)
+    : base_dim_type(dim_fragment_type_id, type::make<void>(), 0, 1, 0, type_flag_symbolic, false), m_tagged_dims(ndim)
 {
   if (ndim > tp.get_ndim()) {
     stringstream ss;
-    ss << "Tried to make a dimension fragment from type " << tp << " with "
-       << ndim << " dimensions, but the type only has " << tp.get_ndim()
-       << " dimensions";
+    ss << "Tried to make a dimension fragment from type " << tp << " with " << ndim
+       << " dimensions, but the type only has " << tp.get_ndim() << " dimensions";
     throw type_error(ss.str());
   }
   get_tagged_dims_from_type(ndim, tp, m_tagged_dims.get());
-  m_members.ndim = static_cast<uint8_t>(ndim);
+  this->ndim = static_cast<uint8_t>(ndim);
 }
 
-ndt::type ndt::dim_fragment_type::broadcast_with_type(intptr_t ndim,
-                                                      const type &tp) const
+ndt::type ndt::dim_fragment_type::broadcast_with_type(intptr_t ndim, const type &tp) const
 {
   if (ndim == 0) {
     return type(this, true);
@@ -114,26 +107,24 @@ ndt::type ndt::dim_fragment_type::broadcast_with_type(intptr_t ndim,
   if (ndim > this_ndim) {
     dimvector shape(ndim);
     type dtp = get_tagged_dims_from_type(ndim - this_ndim, tp, shape.get());
-    if (!broadcast_tagged_dims_from_type(this_ndim, dtp, get_tagged_dims(),
-                                         shape.get() + (ndim - this_ndim))) {
+    if (!broadcast_tagged_dims_from_type(this_ndim, dtp, get_tagged_dims(), shape.get() + (ndim - this_ndim))) {
       return type();
     }
     return make_dim_fragment(ndim, shape.get());
-  } else if (ndim < this_ndim) {
+  }
+  else if (ndim < this_ndim) {
     dimvector shape(this_ndim);
-    memcpy(shape.get(), get_tagged_dims(),
-           (this_ndim - ndim) * sizeof(intptr_t));
-    if (!broadcast_tagged_dims_from_type(ndim, tp,
-                                         get_tagged_dims() + (this_ndim - ndim),
+    memcpy(shape.get(), get_tagged_dims(), (this_ndim - ndim) * sizeof(intptr_t));
+    if (!broadcast_tagged_dims_from_type(ndim, tp, get_tagged_dims() + (this_ndim - ndim),
                                          shape.get() + (this_ndim - ndim))) {
       return type();
     }
     return make_dim_fragment(this_ndim, shape.get());
-  } else {
+  }
+  else {
     dimvector shape(ndim);
     memcpy(shape.get(), get_tagged_dims(), this_ndim * sizeof(intptr_t));
-    if (!broadcast_tagged_dims_from_type(ndim, tp, get_tagged_dims(),
-                                         shape.get())) {
+    if (!broadcast_tagged_dims_from_type(ndim, tp, get_tagged_dims(), shape.get())) {
       return type();
     }
     return make_dim_fragment(ndim, shape.get());
@@ -159,13 +150,13 @@ ndt::type ndt::dim_fragment_type::apply_to_dtype(const type &dtp) const
       }
     }
     return tp;
-  } else {
+  }
+  else {
     return dtp;
   }
 }
 
-void ndt::dim_fragment_type::print_data(std::ostream &DYND_UNUSED(o),
-                                        const char *DYND_UNUSED(arrmeta),
+void ndt::dim_fragment_type::print_data(std::ostream &DYND_UNUSED(o), const char *DYND_UNUSED(arrmeta),
                                         const char *DYND_UNUSED(data)) const
 {
   throw type_error("Cannot store data of dim_fragment type");
@@ -178,48 +169,46 @@ void ndt::dim_fragment_type::print_type(std::ostream &o) const
   for (intptr_t i = 0; i < ndim; ++i) {
     if (m_tagged_dims[i] == dim_fragment_var) {
       o << "var * ";
-    } else if (m_tagged_dims[i] == dim_fragment_fixed_sym) {
+    }
+    else if (m_tagged_dims[i] == dim_fragment_fixed_sym) {
       o << "Fixed * ";
-    } else {
+    }
+    else {
       o << "fixed[" << m_tagged_dims[i] << "]";
     }
   }
   o << "void]";
 }
 
-ndt::type ndt::dim_fragment_type::apply_linear_index(
-    intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    size_t DYND_UNUSED(current_i), const type &DYND_UNUSED(root_tp),
-    bool DYND_UNUSED(leading_dimension)) const
+ndt::type ndt::dim_fragment_type::apply_linear_index(intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
+                                                     size_t DYND_UNUSED(current_i), const type &DYND_UNUSED(root_tp),
+                                                     bool DYND_UNUSED(leading_dimension)) const
 {
   throw type_error("Cannot store data of dim_fragment type");
 }
 
 intptr_t ndt::dim_fragment_type::apply_linear_index(
-    intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices),
-    const char *DYND_UNUSED(arrmeta), const type &DYND_UNUSED(result_tp),
-    char *DYND_UNUSED(out_arrmeta),
-    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference),
-    size_t DYND_UNUSED(current_i), const type &DYND_UNUSED(root_tp),
-    bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
+    intptr_t DYND_UNUSED(nindices), const irange *DYND_UNUSED(indices), const char *DYND_UNUSED(arrmeta),
+    const type &DYND_UNUSED(result_tp), char *DYND_UNUSED(out_arrmeta),
+    const intrusive_ptr<memory_block_data> &DYND_UNUSED(embedded_reference), size_t DYND_UNUSED(current_i),
+    const type &DYND_UNUSED(root_tp), bool DYND_UNUSED(leading_dimension), char **DYND_UNUSED(inout_data),
     intrusive_ptr<memory_block_data> &DYND_UNUSED(inout_dataref)) const
 {
   throw type_error("Cannot store data of dim_fragment type");
 }
 
-intptr_t
-ndt::dim_fragment_type::get_dim_size(const char *DYND_UNUSED(arrmeta),
-                                     const char *DYND_UNUSED(data)) const
+intptr_t ndt::dim_fragment_type::get_dim_size(const char *DYND_UNUSED(arrmeta), const char *DYND_UNUSED(data)) const
 {
   if (get_ndim() > 0) {
     return m_tagged_dims[0] >= 0 ? m_tagged_dims[0] : -1;
-  } else {
+  }
+  else {
     return -1;
   }
 }
 
-bool ndt::dim_fragment_type::is_lossless_assignment(
-    const type &DYND_UNUSED(dst_tp), const type &DYND_UNUSED(src_tp)) const
+bool ndt::dim_fragment_type::is_lossless_assignment(const type &DYND_UNUSED(dst_tp),
+                                                    const type &DYND_UNUSED(src_tp)) const
 {
   return false;
 }
@@ -228,18 +217,19 @@ bool ndt::dim_fragment_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != dim_fragment_type_id) {
+  }
+  else if (rhs.get_type_id() != dim_fragment_type_id) {
     return false;
-  } else {
+  }
+  else {
     const dim_fragment_type *dft = static_cast<const dim_fragment_type *>(&rhs);
     return get_ndim() == rhs.get_ndim() &&
-           memcmp(m_tagged_dims.get(), dft->m_tagged_dims.get(),
-                  get_ndim() * sizeof(intptr_t)) == 0;
+           memcmp(m_tagged_dims.get(), dft->m_tagged_dims.get(), get_ndim() * sizeof(intptr_t)) == 0;
   }
 }
 
-void ndt::dim_fragment_type::arrmeta_default_construct(
-    char *DYND_UNUSED(arrmeta), bool DYND_UNUSED(blockref_alloc)) const
+void ndt::dim_fragment_type::arrmeta_default_construct(char *DYND_UNUSED(arrmeta),
+                                                       bool DYND_UNUSED(blockref_alloc)) const
 {
   throw type_error("Cannot store data of dim_fragment type");
 }

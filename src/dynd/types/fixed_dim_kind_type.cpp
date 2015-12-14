@@ -20,7 +20,7 @@ ndt::fixed_dim_kind_type::fixed_dim_kind_type(const type &element_tp)
                     type_flag_symbolic, true)
 {
   // Propagate the inherited flags from the element
-  m_members.flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
+  this->flags |= (element_tp.get_flags() & (type_flags_operand_inherited | type_flags_value_inherited));
 }
 
 ndt::fixed_dim_kind_type::~fixed_dim_kind_type() {}
