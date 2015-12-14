@@ -431,7 +431,6 @@ struct static_pointer {
   ndt::pointer_type bt15;
   ndt::pointer_type bt16;
   ndt::pointer_type bt17;
-  ndt::void_pointer_type bt18;
 
   ndt::type static_builtins_instance[builtin_type_id_count];
 
@@ -441,7 +440,7 @@ struct static_pointer {
         bt7(ndt::type((type_id_t)7)), bt8(ndt::type((type_id_t)8)), bt9(ndt::type((type_id_t)9)),
         bt10(ndt::type((type_id_t)10)), bt11(ndt::type((type_id_t)11)), bt12(ndt::type((type_id_t)12)),
         bt13(ndt::type((type_id_t)13)), bt14(ndt::type((type_id_t)14)), bt15(ndt::type((type_id_t)15)),
-        bt16(ndt::type((type_id_t)16)), bt17(ndt::type((type_id_t)17)), bt18()
+        bt16(ndt::type((type_id_t)16)), bt17(ndt::type((type_id_t)17))
   {
     static_builtins_instance[1] = ndt::type(&bt1, true);
     static_builtins_instance[2] = ndt::type(&bt2, true);
@@ -460,7 +459,6 @@ struct static_pointer {
     static_builtins_instance[15] = ndt::type(&bt15, true);
     static_builtins_instance[16] = ndt::type(&bt16, true);
     static_builtins_instance[17] = ndt::type(&bt17, true);
-    static_builtins_instance[18] = ndt::type(&bt18, true);
   }
 };
 } // anonymous namespace
