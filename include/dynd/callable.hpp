@@ -496,6 +496,8 @@ namespace nd {
 
   template <typename FuncType>
   struct declfunc {
+    operator callable() const { return get(); }
+
     operator callable &() { return get(); }
 
     operator const callable &() const { return get(); }
