@@ -3,8 +3,8 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/func/callable.hpp>
 #include <dynd/types/base_memory_type.hpp>
-#include <dynd/func/apply.hpp>
 
 using namespace std;
 using namespace dynd;

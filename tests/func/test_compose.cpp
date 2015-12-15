@@ -11,6 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/callable.hpp>
@@ -19,7 +20,6 @@
 #include <dynd/func/compose.hpp>
 #include <dynd/func/copy.hpp>
 #include <dynd/func/callable_registry.hpp>
-#include <dynd/func/apply.hpp>
 #include <dynd/convert.hpp>
 
 using namespace std;

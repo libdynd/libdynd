@@ -13,7 +13,7 @@
 #include <dynd/types/struct_type.hpp>
 #include <dynd/type_promotion.hpp>
 
-#include <dynd/func/apply.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/func/elwise.hpp>
 
 inline std::string ShapeFormatter(const std::vector<intptr_t> &shape)

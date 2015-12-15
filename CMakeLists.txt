@@ -297,7 +297,6 @@ set(libdynd_SRC
     include/dynd/func/constant.hpp
     include/dynd/func/elwise.hpp
     include/dynd/func/fft.hpp
-    include/dynd/func/apply.hpp
     include/dynd/func/reduction.hpp
     include/dynd/func/math.hpp
     include/dynd/func/max.hpp

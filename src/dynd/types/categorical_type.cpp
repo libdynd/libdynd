@@ -7,13 +7,12 @@
 #include <map>
 #include <set>
 
+#include <dynd/func/callable.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/array_range.hpp>
-#include <dynd/func/apply.hpp>
-#include <dynd/func/callable.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/search.hpp>

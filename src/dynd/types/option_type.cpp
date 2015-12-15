@@ -9,7 +9,6 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/parser_util.hpp>
-#include <dynd/func/apply.hpp>
 #include <dynd/func/option.hpp>
 #include <dynd/math.hpp>
 

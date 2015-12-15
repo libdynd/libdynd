@@ -16,7 +16,6 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/functional.hpp>
 #include <dynd/func/elwise.hpp>
-#include <dynd/func/apply.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/array_iter.hpp>
 #include <dynd/parser_util.hpp>

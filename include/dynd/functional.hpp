@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/kernels/adapt_kernel.hpp>
-#include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/outer.hpp>

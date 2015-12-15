@@ -3,11 +3,11 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/func/callable.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/func/apply.hpp>
 
 #include <algorithm>
 
