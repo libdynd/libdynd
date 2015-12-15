@@ -199,6 +199,9 @@ namespace nd {
     {
     }
 
+    template <typename CallableType, typename... T, typename = std::enable_if_t<all_char_string_params<T...>::value>>
+    explicit callable(CallableType f, T &&... names);
+
     bool is_null() const { return get() == NULL; }
 
     callable_property get_flags() const { return right_associative; }
@@ -638,6 +641,13 @@ namespace nd {
     }
 
   } // namespace dynd::nd::functional
+
+  template <typename CallableType, typename... T, typename>
+  callable::callable(CallableType f, T &&... names)
+      : callable(nd::functional::apply(f, std::forward<T>(names)...))
+  {
+  }
+
 } // namespace dynd::nd
 
 /**
