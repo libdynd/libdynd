@@ -101,55 +101,55 @@ const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {ndt::type(un
 
 ndt::type_registry::type_registry() : m_size(0)
 {
-  insert(type(reinterpret_cast<const base_type *>(uninitialized_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(bool_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(int8_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(int16_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(int32_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(int64_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(int128_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(uint8_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(uint16_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(uint32_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(uint64_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(uint128_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(float16_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(float32_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(float64_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(float128_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(complex_float32_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(complex_float64_type_id), false));
-  insert(type(reinterpret_cast<const base_type *>(void_type_id), false));
-  insert(pointer_type::make(any_kind_type::make()));        // pointer_type_id
-  insert(type());                                           // reference_type_id
-  insert(bytes_type::make());                               //   bytes_type_id,
-  insert(fixed_bytes_kind_type::make());                    //   fixed_bytes_type_id,
-  insert(char_type::make());                                //   char_type_id,
-  insert(string_type::make());                              //   string_type_id,
-  insert(fixed_string_kind_type::make());                   //   fixed_string_type_id,
-  insert(categorical_kind_type::make());                    // categorical_type_id
-  insert(date_type::make());                                // date_type_id
-  insert(time_type::make());                                // time_type_id
-  insert(datetime_type::make());                            // datetime_type_id
-  insert(type());                                           // busdate_type_id
-  insert(fixed_dim_kind_type::make(any_kind_type::make())); // fixed_dim_type_id
-  insert(var_dim_type::make(any_kind_type::make()));        // var_dim_type_id
-  insert(struct_type::make(true));                          // struct_type_id
-  insert(tuple_type::make(true));                           // tuple_type_id
-  insert(type());                                           // option_type_id,
-  insert(type());                                           // c_contiguous_type_id
-  insert(type());                                           // adapt_type_id
-  insert(type());                                           // convert_type_id
-  insert(type());                                           // view_type_id
-  insert(type());                                           // cuda_host_type_id
-  insert(type());                                           // cuda_device_type_id
-  insert(type());                                           // expr_type_id
-  insert(make_type<type_type>());                           // type_type_id
+  insert("uninitialized", type(reinterpret_cast<const base_type *>(uninitialized_type_id), false));
+  insert("bool", type(reinterpret_cast<const base_type *>(bool_type_id), false));
+  insert("int8", type(reinterpret_cast<const base_type *>(int8_type_id), false));
+  insert("int16", type(reinterpret_cast<const base_type *>(int16_type_id), false));
+  insert("int32", type(reinterpret_cast<const base_type *>(int32_type_id), false));
+  insert("int64", type(reinterpret_cast<const base_type *>(int64_type_id), false));
+  insert("int128", type(reinterpret_cast<const base_type *>(int128_type_id), false));
+  insert("uint8", type(reinterpret_cast<const base_type *>(uint8_type_id), false));
+  insert("uint16", type(reinterpret_cast<const base_type *>(uint16_type_id), false));
+  insert("uint32", type(reinterpret_cast<const base_type *>(uint32_type_id), false));
+  insert("uint64", type(reinterpret_cast<const base_type *>(uint64_type_id), false));
+  insert("uint128", type(reinterpret_cast<const base_type *>(uint128_type_id), false));
+  insert("float16", type(reinterpret_cast<const base_type *>(float16_type_id), false));
+  insert("float32", type(reinterpret_cast<const base_type *>(float32_type_id), false));
+  insert("float64", type(reinterpret_cast<const base_type *>(float64_type_id), false));
+  insert("float128", type(reinterpret_cast<const base_type *>(float128_type_id), false));
+  insert("complex", type(reinterpret_cast<const base_type *>(complex_float32_type_id), false));
+  insert("complex", type(reinterpret_cast<const base_type *>(complex_float64_type_id), false));
+  insert("void", type(reinterpret_cast<const base_type *>(void_type_id), false));
+  insert("pointer", pointer_type::make(any_kind_type::make()));
+  insert("array", type());
+  insert("bytes", bytes_type::make());
+  insert("fixed_bytes", fixed_bytes_kind_type::make());
+  insert("char", char_type::make());
+  insert("string", string_type::make());
+  insert("fixed_string", fixed_string_kind_type::make());
+  insert("Categorical", categorical_kind_type::make());
+  insert("date", date_type::make());
+  insert("time", time_type::make());
+  insert("datetime", datetime_type::make());
+  insert("busdate", type());
+  insert("Fixed", fixed_dim_kind_type::make(any_kind_type::make()));
+  insert("var", var_dim_type::make(any_kind_type::make()));
+  insert("struct", struct_type::make(true));
+  insert("tuple", tuple_type::make(true));
+  insert("option", type());
+  insert("C", type());
+  insert("adapt", type());
+  insert("convert", type());
+  insert("view", type());
+  insert("cuda_host", type());
+  insert("cuda_device", type());
+  insert("expr", type());
+  insert("type", make_type<type_type>());
 }
 
 size_t ndt::type_registry::size() const { return m_size; }
 
-type_id_t ndt::type_registry::insert(const type &kind)
+type_id_t ndt::type_registry::insert(const char *DYND_UNUSED(name), const type &kind)
 {
   new (m_infos + m_size) type_info{kind};
 

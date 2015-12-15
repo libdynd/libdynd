@@ -827,7 +827,7 @@ namespace ndt {
 
     size_t size() const;
 
-    type_id_t insert(const type &kind);
+    type_id_t insert(const char *name, const type &kind);
 
     const type_info &operator[](type_id_t tp_id) const;
   } type_registry;
