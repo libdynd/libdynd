@@ -99,52 +99,57 @@ const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {ndt::type(un
                                                                     ndt::type(complex_float64_type_id),
                                                                     ndt::type(void_type_id)};
 
-ndt::type ndt::type::instances[DYND_TYPE_ID_MAX + 1] = {
-    type(reinterpret_cast<const base_type *>(uninitialized_type_id), false),
-    type(reinterpret_cast<const base_type *>(bool_type_id), false),
-    type(reinterpret_cast<const base_type *>(int8_type_id), false),
-    type(reinterpret_cast<const base_type *>(int16_type_id), false),
-    type(reinterpret_cast<const base_type *>(int32_type_id), false),
-    type(reinterpret_cast<const base_type *>(int64_type_id), false),
-    type(reinterpret_cast<const base_type *>(int128_type_id), false),
-    type(reinterpret_cast<const base_type *>(uint8_type_id), false),
-    type(reinterpret_cast<const base_type *>(uint16_type_id), false),
-    type(reinterpret_cast<const base_type *>(uint32_type_id), false),
-    type(reinterpret_cast<const base_type *>(uint64_type_id), false),
-    type(reinterpret_cast<const base_type *>(uint128_type_id), false),
-    type(reinterpret_cast<const base_type *>(float16_type_id), false),
-    type(reinterpret_cast<const base_type *>(float32_type_id), false),
-    type(reinterpret_cast<const base_type *>(float64_type_id), false),
-    type(reinterpret_cast<const base_type *>(float128_type_id), false),
-    type(reinterpret_cast<const base_type *>(complex_float32_type_id), false),
-    type(reinterpret_cast<const base_type *>(complex_float64_type_id), false),
-    type(reinterpret_cast<const base_type *>(void_type_id), false),
-    pointer_type::make(any_kind_type::make()),        // pointer_type_id
-    type(),                                           // reference_type_id
-    bytes_type::make(),                               //   bytes_type_id,
-    fixed_bytes_kind_type::make(),                    //   fixed_bytes_type_id,
-    char_type::make(),                                //   char_type_id,
-    string_type::make(),                              //   string_type_id,
-    fixed_string_kind_type::make(),                   //   fixed_string_type_id,
-    categorical_kind_type::make(),                    // categorical_type_id
-    date_type::make(),                                // date_type_id
-    time_type::make(),                                // time_type_id
-    datetime_type::make(),                            // datetime_type_id
-    type(),                                           // busdate_type_id
-    fixed_dim_kind_type::make(any_kind_type::make()), // fixed_dim_type_id
-    var_dim_type::make(any_kind_type::make()),        // var_dim_type_id
-    struct_type::make(true),                          // struct_type_id
-    tuple_type::make(true),                           // tuple_type_id
-    type(),                                           // option_type_id,
-    type(),                                           // c_contiguous_type_id
-    type(),                                           // adapt_type_id
-    type(),                                           // convert_type_id
-    type(),                                           // view_type_id
-    type(),                                           // cuda_host_type_id
-    type(),                                           // cuda_device_type_id
-    type(),                                           // expr_type_id
-    make_type<type_type>(),                           // type_type_id
-};
+ndt::type_registry::type_registry()
+{
+  instances[0] = type(reinterpret_cast<const base_type *>(uninitialized_type_id), false);
+  instances[1] = type(reinterpret_cast<const base_type *>(bool_type_id), false);
+  instances[2] = type(reinterpret_cast<const base_type *>(int8_type_id), false);
+  instances[3] = type(reinterpret_cast<const base_type *>(int16_type_id), false);
+  instances[4] = type(reinterpret_cast<const base_type *>(int32_type_id), false);
+  instances[5] = type(reinterpret_cast<const base_type *>(int64_type_id), false);
+  instances[6] = type(reinterpret_cast<const base_type *>(int128_type_id), false);
+  instances[7] = type(reinterpret_cast<const base_type *>(uint8_type_id), false);
+  instances[8] = type(reinterpret_cast<const base_type *>(uint16_type_id), false);
+  instances[9] = type(reinterpret_cast<const base_type *>(uint32_type_id), false);
+  instances[10] = type(reinterpret_cast<const base_type *>(uint64_type_id), false);
+  instances[11] = type(reinterpret_cast<const base_type *>(uint128_type_id), false);
+  instances[12] = type(reinterpret_cast<const base_type *>(float16_type_id), false);
+  instances[13] = type(reinterpret_cast<const base_type *>(float32_type_id), false);
+  instances[14] = type(reinterpret_cast<const base_type *>(float64_type_id), false);
+  instances[15] = type(reinterpret_cast<const base_type *>(float128_type_id), false);
+  instances[16] = type(reinterpret_cast<const base_type *>(complex_float32_type_id), false);
+  instances[17] = type(reinterpret_cast<const base_type *>(complex_float64_type_id), false);
+  instances[18] = type(reinterpret_cast<const base_type *>(void_type_id), false);
+  instances[19] = pointer_type::make(any_kind_type::make());        // pointer_type_id
+  instances[20] = type();                                           // reference_type_id
+  instances[21] = bytes_type::make();                               //   bytes_type_id,
+  instances[22] = fixed_bytes_kind_type::make();                    //   fixed_bytes_type_id,
+  instances[23] = char_type::make();                                //   char_type_id,
+  instances[24] = string_type::make();                              //   string_type_id,
+  instances[25] = fixed_string_kind_type::make();                   //   fixed_string_type_id,
+  instances[26] = categorical_kind_type::make();                    // categorical_type_id
+  instances[27] = date_type::make();                                // date_type_id
+  instances[28] = time_type::make();                                // time_type_id
+  instances[29] = datetime_type::make();                            // datetime_type_id
+  instances[30] = type();                                           // busdate_type_id
+  instances[31] = fixed_dim_kind_type::make(any_kind_type::make()); // fixed_dim_type_id
+  instances[32] = var_dim_type::make(any_kind_type::make());        // var_dim_type_id
+  instances[33] = struct_type::make(true);                          // struct_type_id
+  instances[34] = tuple_type::make(true);                           // tuple_type_id
+  instances[35] = type();                                           // option_type_id,
+  instances[36] = type();                                           // c_contiguous_type_id
+  instances[37] = type();                                           // adapt_type_id
+  instances[38] = type();                                           // convert_type_id
+  instances[39] = type();                                           // view_type_id
+  instances[40] = type();                                           // cuda_host_type_id
+  instances[41] = type();                                           // cuda_device_type_id
+  instances[42] = type();                                           // expr_type_id
+  instances[43] = make_type<type_type>();                           // type_type_id
+}
+
+struct ndt::type_registry ndt::type_registry;
+
+ndt::type::type(type_id_t tp_id) : type((validate_type_id(tp_id), type_registry.instances[tp_id])) {}
 
 ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); }
 
