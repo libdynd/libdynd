@@ -814,10 +814,22 @@ namespace ndt {
     friend DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
-  extern struct type_registry {
-    type instances[DYND_TYPE_ID_MAX + 1];
+  struct type_info {
+    type kind;
+  };
 
+  extern struct type_registry {
+    size_t m_size;
+    type_info m_infos[DYND_TYPE_ID_MAX + 1];
+
+  public:
     type_registry();
+
+    size_t size() const;
+
+    type_id_t insert(const type &kind);
+
+    const type_info &operator[](type_id_t tp_id) const;
   } type_registry;
 
   template <>
