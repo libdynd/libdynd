@@ -3,9 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/types/typevar_type.hpp>
-#include <dynd/func/apply.hpp>
+#include <dynd/func/callable.hpp>
 #include <dynd/kernels/base_property_kernel.hpp>
+#include <dynd/types/typevar_type.hpp>
 
 using namespace std;
 using namespace dynd;

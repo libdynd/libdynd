@@ -3,10 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/func/callable.hpp>
+#include <dynd/kernels/base_property_kernel.hpp>
 #include <dynd/types/typevar_dim_type.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/func/apply.hpp>
-#include <dynd/kernels/base_property_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -163,7 +163,7 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(std::map<std::string, nd
 
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
-      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp, 
+      typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
                       static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get()->metadata(),
                       static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).cdata());
     }

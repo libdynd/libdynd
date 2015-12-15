@@ -12,7 +12,6 @@
 #include "../dynd_assertions.hpp"
 
 #include <dynd/json_parser.hpp>
-#include <dynd/func/apply.hpp>
 #include <dynd/func/neighborhood.hpp>
 #include <dynd/types/struct_type.hpp>
 

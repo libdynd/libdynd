@@ -4,7 +4,6 @@
 //
 
 #include <dynd/func/callable.hpp>
-#include <dynd/func/apply.hpp>
 #include <dynd/types/c_contiguous_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/type_alignment.hpp>

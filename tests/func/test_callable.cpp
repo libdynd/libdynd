@@ -14,7 +14,6 @@
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/func/apply.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>

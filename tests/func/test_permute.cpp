@@ -11,7 +11,6 @@
 #include "inc_gtest.hpp"
 #include "../dynd_assertions.hpp"
 
-#include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
 #include <dynd/func/permute.hpp>

@@ -3,6 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
+#include <dynd/func/callable.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/typevar_type.hpp>
@@ -10,7 +11,6 @@
 #include <dynd/types/type_alignment.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/func/apply.hpp>
 
 using namespace std;
 using namespace dynd;

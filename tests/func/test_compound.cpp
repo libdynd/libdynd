@@ -11,7 +11,6 @@
 #include "inc_gtest.hpp"
 #include "../dynd_assertions.hpp"
 
-#include <dynd/func/apply.hpp>
 #include <dynd/func/compound.hpp>
 
 using namespace std;

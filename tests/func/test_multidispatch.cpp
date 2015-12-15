@@ -12,7 +12,6 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/apply.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/random.hpp>
