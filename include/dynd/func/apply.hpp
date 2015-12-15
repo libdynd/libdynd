@@ -5,12 +5,17 @@
 
 #pragma once
 
+#include <dynd/kernels/apply_function_kernel.hpp>
+#include <dynd/kernels/apply_member_function_kernel.hpp>
+#include <dynd/kernels/apply_callable_kernel.hpp>
+#include <dynd/kernels/construct_then_apply_callable_kernel.hpp>
 #include <dynd/func/callable.hpp>
-#include <dynd/kernels/apply.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
 
 namespace dynd {
 namespace nd {
   namespace functional {
+
     /**
      * Makes an callable out of function ``func``, using the provided keyword
      * parameter names. This function takes ``func`` as a template
@@ -109,6 +114,7 @@ namespace nd {
     {
       return apply<kernel_request_host, func_type, K...>(std::forward<T>(names)...);
     }
+
   } // namespace dynd::nd::functional
 } // namespace dynd::nd
 } // namespace dynd
