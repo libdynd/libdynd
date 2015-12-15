@@ -512,6 +512,7 @@ ndt::type_registry::type_registry() : m_size(0)
 ndt::type_registry::~type_registry()
 {
   for (size_t i = builtin_type_id_count; i < m_size; ++i) {
+    delete[] m_infos[i].name;
     delete[] m_infos[i].bases;
   }
 }
