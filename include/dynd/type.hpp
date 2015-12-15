@@ -815,6 +815,9 @@ namespace ndt {
   };
 
   struct type_info {
+    const char *name;
+    size_t nbases;
+    const type_id_t *bases;
     type kind;
   };
 
@@ -826,6 +829,8 @@ namespace ndt {
     type_registry();
 
     size_t size() const;
+
+    type_id_t emplace(const char *name, size_t nbases, const type_id_t *bases, const type &kind);
 
     type_id_t insert(const char *name, const type &kind);
 
@@ -1109,14 +1114,6 @@ namespace ndt {
     return register_type(name,
                          [](type_id_t tp_id, const nd::array &args) { return type(new TypeType(tp_id, args), false); });
   }
-
-  /**
-   * A static array of the builtin types and void.
-   * If code is specialized just for a builtin type, like int, it can use
-   * static_builtin_types[type_id_of<int>::value] as a fast
-   * way to get a const reference to its type.
-   */
-  extern DYND_API const type static_builtin_types[builtin_type_id_count];
 
   DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
 

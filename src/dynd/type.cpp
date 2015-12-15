@@ -79,47 +79,41 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
   return data;
 }
 
-const ndt::type ndt::static_builtin_types[builtin_type_id_count] = {ndt::type(uninitialized_type_id),
-                                                                    ndt::type(bool_type_id),
-                                                                    ndt::type(int8_type_id),
-                                                                    ndt::type(int16_type_id),
-                                                                    ndt::type(int32_type_id),
-                                                                    ndt::type(int64_type_id),
-                                                                    ndt::type(int128_type_id),
-                                                                    ndt::type(uint8_type_id),
-                                                                    ndt::type(uint16_type_id),
-                                                                    ndt::type(uint32_type_id),
-                                                                    ndt::type(uint64_type_id),
-                                                                    ndt::type(uint128_type_id),
-                                                                    ndt::type(float16_type_id),
-                                                                    ndt::type(float32_type_id),
-                                                                    ndt::type(float64_type_id),
-                                                                    ndt::type(float128_type_id),
-                                                                    ndt::type(complex_float32_type_id),
-                                                                    ndt::type(complex_float64_type_id),
-                                                                    ndt::type(void_type_id)};
-
 ndt::type_registry::type_registry() : m_size(0)
 {
-  insert("uninitialized", type(reinterpret_cast<const base_type *>(uninitialized_type_id), false));
-  insert("bool", type(reinterpret_cast<const base_type *>(bool_type_id), false));
-  insert("int8", type(reinterpret_cast<const base_type *>(int8_type_id), false));
-  insert("int16", type(reinterpret_cast<const base_type *>(int16_type_id), false));
-  insert("int32", type(reinterpret_cast<const base_type *>(int32_type_id), false));
-  insert("int64", type(reinterpret_cast<const base_type *>(int64_type_id), false));
-  insert("int128", type(reinterpret_cast<const base_type *>(int128_type_id), false));
-  insert("uint8", type(reinterpret_cast<const base_type *>(uint8_type_id), false));
-  insert("uint16", type(reinterpret_cast<const base_type *>(uint16_type_id), false));
-  insert("uint32", type(reinterpret_cast<const base_type *>(uint32_type_id), false));
-  insert("uint64", type(reinterpret_cast<const base_type *>(uint64_type_id), false));
-  insert("uint128", type(reinterpret_cast<const base_type *>(uint128_type_id), false));
-  insert("float16", type(reinterpret_cast<const base_type *>(float16_type_id), false));
-  insert("float32", type(reinterpret_cast<const base_type *>(float32_type_id), false));
-  insert("float64", type(reinterpret_cast<const base_type *>(float64_type_id), false));
-  insert("float128", type(reinterpret_cast<const base_type *>(float128_type_id), false));
-  insert("complex", type(reinterpret_cast<const base_type *>(complex_float32_type_id), false));
-  insert("complex", type(reinterpret_cast<const base_type *>(complex_float64_type_id), false));
-  insert("void", type(reinterpret_cast<const base_type *>(void_type_id), false));
+  emplace("uninitialized", 0, nullptr, type(reinterpret_cast<const base_type *>(uninitialized_type_id), false));
+
+  static const type_id_t bool_bases[1] = {any_kind_type_id};
+  emplace("bool", 1, bool_bases, type(reinterpret_cast<const base_type *>(bool_type_id), false));
+
+  static const type_id_t int_bases[1] = {any_kind_type_id};
+  emplace("int8", 1, int_bases, type(reinterpret_cast<const base_type *>(int8_type_id), false));
+  emplace("int16", 1, int_bases, type(reinterpret_cast<const base_type *>(int16_type_id), false));
+  emplace("int32", 1, int_bases, type(reinterpret_cast<const base_type *>(int32_type_id), false));
+  emplace("int64", 1, int_bases, type(reinterpret_cast<const base_type *>(int64_type_id), false));
+  emplace("int128", 1, int_bases, type(reinterpret_cast<const base_type *>(int128_type_id), false));
+
+  static const type_id_t uint_bases[1] = {any_kind_type_id};
+  emplace("uint8", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint8_type_id), false));
+  emplace("uint16", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint16_type_id), false));
+  emplace("uint32", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint32_type_id), false));
+  emplace("uint64", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint64_type_id), false));
+  emplace("uint128", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint128_type_id), false));
+
+  static const type_id_t float_bases[1] = {any_kind_type_id};
+  emplace("float16", 1, float_bases, type(reinterpret_cast<const base_type *>(float16_type_id), false));
+  emplace("float32", 1, float_bases, type(reinterpret_cast<const base_type *>(float32_type_id), false));
+  emplace("float64", 1, float_bases, type(reinterpret_cast<const base_type *>(float64_type_id), false));
+  emplace("float128", 1, float_bases, type(reinterpret_cast<const base_type *>(float128_type_id), false));
+
+  static const type_id_t complex_bases[1] = {any_kind_type_id};
+  emplace("complex32", 1, complex_bases, type(reinterpret_cast<const base_type *>(complex_float32_type_id), false));
+  emplace("complex64", 1, complex_bases, type(reinterpret_cast<const base_type *>(complex_float64_type_id), false));
+
+  static const type_id_t void_bases[1] = {any_kind_type_id};
+  emplace("void", 1, void_bases, type(reinterpret_cast<const base_type *>(void_type_id), false));
+
+  // ...
   insert("pointer", pointer_type::make(any_kind_type::make()));
   insert("array", type());
   insert("bytes", bytes_type::make());
@@ -149,12 +143,14 @@ ndt::type_registry::type_registry() : m_size(0)
 
 size_t ndt::type_registry::size() const { return m_size; }
 
-type_id_t ndt::type_registry::insert(const char *DYND_UNUSED(name), const type &kind)
+type_id_t ndt::type_registry::emplace(const char *name, size_t nbase, const type_id_t *bases, const type &kind)
 {
-  new (m_infos + m_size) type_info{kind};
+  new (m_infos + m_size) type_info{name, nbase, bases, kind};
 
   return static_cast<type_id_t>(m_size++);
 }
+
+type_id_t ndt::type_registry::insert(const char *name, const type &kind) { return emplace(name, 0, nullptr, kind); }
 
 const ndt::type_info &ndt::type_registry::operator[](type_id_t tp_id) const { return m_infos[tp_id]; }
 
