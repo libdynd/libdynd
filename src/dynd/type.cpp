@@ -511,10 +511,12 @@ ndt::type_registry::type_registry() : m_size(0)
 
 ndt::type_registry::~type_registry()
 {
+/*
   for (size_t i = builtin_type_id_count; i < m_size; ++i) {
     delete[] m_infos[i].name;
     delete[] m_infos[i].bases;
   }
+*/
 }
 
 size_t ndt::type_registry::size() const { return m_size; }
@@ -526,12 +528,13 @@ type_id_t ndt::type_registry::emplace(const char *name, size_t nbase, const type
   return static_cast<type_id_t>(m_size++);
 }
 
-type_id_t ndt::type_registry::insert(const char *name, type_id_t tp_id, type_make_t construct, const type &kind)
+type_id_t ndt::type_registry::insert(const char *name, type_id_t DYND_UNUSED(tp_id), type_make_t construct,
+                                     const type &kind)
 {
-  char *name_copy = new char[strlen(name)];
-  strcpy(name_copy, name);
+  //  char *name_copy = new char[strlen(name)];
+  // strcpy(name_copy, name);
 
-  return emplace(name_copy, 1, new type_id_t[1]{tp_id}, construct, kind);
+  return emplace(name, 1, nullptr, construct, kind);
 }
 
 const ndt::type_info &ndt::type_registry::operator[](type_id_t tp_id) const { return m_infos[tp_id]; }
