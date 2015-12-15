@@ -13,7 +13,7 @@
 #include "../test_memory_new.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 
 using namespace std;
 using namespace dynd;

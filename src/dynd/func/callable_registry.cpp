@@ -6,7 +6,7 @@
 #include <map>
 #include <cmath>
 
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/multidispatch.hpp>
 #include <dynd/func/random.hpp>

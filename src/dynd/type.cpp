@@ -9,7 +9,7 @@
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/exceptions.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/types/convert_type.hpp>
 #include <dynd/types/option_type.hpp>
@@ -27,7 +27,6 @@
 #include <dynd/kernels/real_kernel.hpp>
 #include <dynd/kernels/imag_kernel.hpp>
 #include <dynd/kernels/conj_kernel.hpp>
-#include <dynd/func/callable.hpp>
 #include <dynd/func/elwise.hpp>
 
 #include <sstream>

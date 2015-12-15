@@ -13,7 +13,7 @@
 
 #include <dynd/view.hpp>
 #include <dynd/json_parser.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/struct_type.hpp>

@@ -9,8 +9,8 @@
 
 #pragma once
 
+#include <dynd/callable.hpp>
 #include <dynd/type.hpp>
-#include <dynd/func/callable.hpp>
 
 namespace dynd {
 

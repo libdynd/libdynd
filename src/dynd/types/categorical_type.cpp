@@ -7,7 +7,7 @@
 #include <map>
 #include <set>
 
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/categorical_type.hpp>
 #include <dynd/kernels/comparison_kernels.hpp>
 #include <dynd/types/fixed_dim_type.hpp>

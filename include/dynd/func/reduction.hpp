@@ -5,9 +5,7 @@
 
 #pragma once
 
-#include <dynd/config.hpp>
-#include <dynd/array.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 
 namespace dynd {
 namespace nd {

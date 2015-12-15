@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/types/pow_dimsym_type.hpp>
 #include <dynd/types/typevar_type.hpp>

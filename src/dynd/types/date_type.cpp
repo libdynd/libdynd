@@ -8,7 +8,7 @@
 #include <cerrno>
 #include <algorithm>
 
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/adapt_type.hpp>

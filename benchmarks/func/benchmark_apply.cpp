@@ -10,7 +10,7 @@
 
 #include <benchmark/benchmark.h>
 
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/func/random.hpp>
 
 using namespace std;

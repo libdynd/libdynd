@@ -12,7 +12,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/kernels/byteswap_kernels.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/types/struct_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>

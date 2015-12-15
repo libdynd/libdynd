@@ -8,7 +8,7 @@
 #include <numeric>
 
 #include <dynd/iterator.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
 
 namespace dynd {

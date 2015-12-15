@@ -7,7 +7,7 @@
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/kernels/expression_comparison_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 
 using namespace std;
 using namespace dynd;

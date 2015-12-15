@@ -11,10 +11,9 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/types/date_type.hpp>
-#include <dynd/func/callable.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/func/compose.hpp>
