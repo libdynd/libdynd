@@ -79,83 +79,6 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
   return data;
 }
 
-ndt::type_registry::type_registry() : m_size(0)
-{
-  emplace("uninitialized", 0, nullptr, type(reinterpret_cast<const base_type *>(uninitialized_type_id), false));
-
-  static const type_id_t bool_bases[1] = {any_kind_type_id};
-  emplace("bool", 1, bool_bases, type(reinterpret_cast<const base_type *>(bool_type_id), false));
-
-  static const type_id_t int_bases[1] = {any_kind_type_id};
-  emplace("int8", 1, int_bases, type(reinterpret_cast<const base_type *>(int8_type_id), false));
-  emplace("int16", 1, int_bases, type(reinterpret_cast<const base_type *>(int16_type_id), false));
-  emplace("int32", 1, int_bases, type(reinterpret_cast<const base_type *>(int32_type_id), false));
-  emplace("int64", 1, int_bases, type(reinterpret_cast<const base_type *>(int64_type_id), false));
-  emplace("int128", 1, int_bases, type(reinterpret_cast<const base_type *>(int128_type_id), false));
-
-  static const type_id_t uint_bases[1] = {any_kind_type_id};
-  emplace("uint8", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint8_type_id), false));
-  emplace("uint16", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint16_type_id), false));
-  emplace("uint32", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint32_type_id), false));
-  emplace("uint64", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint64_type_id), false));
-  emplace("uint128", 1, uint_bases, type(reinterpret_cast<const base_type *>(uint128_type_id), false));
-
-  static const type_id_t float_bases[1] = {any_kind_type_id};
-  emplace("float16", 1, float_bases, type(reinterpret_cast<const base_type *>(float16_type_id), false));
-  emplace("float32", 1, float_bases, type(reinterpret_cast<const base_type *>(float32_type_id), false));
-  emplace("float64", 1, float_bases, type(reinterpret_cast<const base_type *>(float64_type_id), false));
-  emplace("float128", 1, float_bases, type(reinterpret_cast<const base_type *>(float128_type_id), false));
-
-  static const type_id_t complex_bases[1] = {any_kind_type_id};
-  emplace("complex32", 1, complex_bases, type(reinterpret_cast<const base_type *>(complex_float32_type_id), false));
-  emplace("complex64", 1, complex_bases, type(reinterpret_cast<const base_type *>(complex_float64_type_id), false));
-
-  static const type_id_t void_bases[1] = {any_kind_type_id};
-  emplace("void", 1, void_bases, type(reinterpret_cast<const base_type *>(void_type_id), false));
-
-  // ...
-  insert("pointer", pointer_type::make(any_kind_type::make()));
-  insert("array", type());
-  insert("bytes", bytes_type::make());
-  insert("fixed_bytes", fixed_bytes_kind_type::make());
-  insert("char", char_type::make());
-  insert("string", string_type::make());
-  insert("fixed_string", fixed_string_kind_type::make());
-  insert("Categorical", categorical_kind_type::make());
-  insert("date", date_type::make());
-  insert("time", time_type::make());
-  insert("datetime", datetime_type::make());
-  insert("busdate", type());
-  insert("Fixed", fixed_dim_kind_type::make(any_kind_type::make()));
-  insert("var", var_dim_type::make(any_kind_type::make()));
-  insert("struct", struct_type::make(true));
-  insert("tuple", tuple_type::make(true));
-  insert("option", type());
-  insert("C", type());
-  insert("adapt", type());
-  insert("convert", type());
-  insert("view", type());
-  insert("cuda_host", type());
-  insert("cuda_device", type());
-  insert("expr", type());
-  insert("type", make_type<type_type>());
-}
-
-size_t ndt::type_registry::size() const { return m_size; }
-
-type_id_t ndt::type_registry::emplace(const char *name, size_t nbase, const type_id_t *bases, const type &kind)
-{
-  new (m_infos + m_size) type_info{name, nbase, bases, kind};
-
-  return static_cast<type_id_t>(m_size++);
-}
-
-type_id_t ndt::type_registry::insert(const char *name, const type &kind) { return emplace(name, 0, nullptr, kind); }
-
-const ndt::type_info &ndt::type_registry::operator[](type_id_t tp_id) const { return m_infos[tp_id]; }
-
-struct ndt::type_registry ndt::type_registry;
-
 ndt::type::type(type_id_t tp_id) : type((validate_type_id(tp_id), type_registry[tp_id].kind)) {}
 
 ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); }
@@ -520,6 +443,99 @@ bool ndt::type::data_layout_compatible_with(const ndt::type &rhs) const
   }
   return false;
 }
+
+ndt::type_registry::type_registry() : m_size(0)
+{
+  emplace("uninitialized", 0, nullptr, nullptr,
+          type(reinterpret_cast<const base_type *>(uninitialized_type_id), false));
+
+  static const type_id_t bool_bases[1] = {any_kind_type_id};
+  emplace("bool", 1, bool_bases, nullptr, type(reinterpret_cast<const base_type *>(bool_type_id), false));
+
+  static const type_id_t int_bases[1] = {any_kind_type_id};
+  emplace("int8", 1, int_bases, nullptr, type(reinterpret_cast<const base_type *>(int8_type_id), false));
+  emplace("int16", 1, int_bases, nullptr, type(reinterpret_cast<const base_type *>(int16_type_id), false));
+  emplace("int32", 1, int_bases, nullptr, type(reinterpret_cast<const base_type *>(int32_type_id), false));
+  emplace("int64", 1, int_bases, nullptr, type(reinterpret_cast<const base_type *>(int64_type_id), false));
+  emplace("int128", 1, int_bases, nullptr, type(reinterpret_cast<const base_type *>(int128_type_id), false));
+
+  static const type_id_t uint_bases[1] = {any_kind_type_id};
+  emplace("uint8", 1, uint_bases, nullptr, type(reinterpret_cast<const base_type *>(uint8_type_id), false));
+  emplace("uint16", 1, uint_bases, nullptr, type(reinterpret_cast<const base_type *>(uint16_type_id), false));
+  emplace("uint32", 1, uint_bases, nullptr, type(reinterpret_cast<const base_type *>(uint32_type_id), false));
+  emplace("uint64", 1, uint_bases, nullptr, type(reinterpret_cast<const base_type *>(uint64_type_id), false));
+  emplace("uint128", 1, uint_bases, nullptr, type(reinterpret_cast<const base_type *>(uint128_type_id), false));
+
+  static const type_id_t float_bases[1] = {any_kind_type_id};
+  emplace("float16", 1, float_bases, nullptr, type(reinterpret_cast<const base_type *>(float16_type_id), false));
+  emplace("float32", 1, float_bases, nullptr, type(reinterpret_cast<const base_type *>(float32_type_id), false));
+  emplace("float64", 1, float_bases, nullptr, type(reinterpret_cast<const base_type *>(float64_type_id), false));
+  emplace("float128", 1, float_bases, nullptr, type(reinterpret_cast<const base_type *>(float128_type_id), false));
+
+  static const type_id_t complex_bases[1] = {any_kind_type_id};
+  emplace("complex32", 1, complex_bases, nullptr,
+          type(reinterpret_cast<const base_type *>(complex_float32_type_id), false));
+  emplace("complex64", 1, complex_bases, nullptr,
+          type(reinterpret_cast<const base_type *>(complex_float64_type_id), false));
+
+  static const type_id_t void_bases[1] = {any_kind_type_id};
+  emplace("void", 1, void_bases, nullptr, type(reinterpret_cast<const base_type *>(void_type_id), false));
+
+  // ...
+  insert("pointer", any_kind_type_id, nullptr, pointer_type::make(any_kind_type::make()));
+  insert("array", any_kind_type_id, nullptr, type());
+  insert("bytes", any_kind_type_id, nullptr, bytes_type::make());
+  insert("fixed_bytes", any_kind_type_id, nullptr, fixed_bytes_kind_type::make());
+  insert("char", any_kind_type_id, nullptr, char_type::make());
+  insert("string", any_kind_type_id, nullptr, string_type::make());
+  insert("fixed_string", any_kind_type_id, nullptr, fixed_string_kind_type::make());
+  insert("Categorical", any_kind_type_id, nullptr, categorical_kind_type::make());
+  insert("date", any_kind_type_id, nullptr, date_type::make());
+  insert("time", any_kind_type_id, nullptr, time_type::make());
+  insert("datetime", any_kind_type_id, nullptr, datetime_type::make());
+  insert("busdate", any_kind_type_id, nullptr, type());
+  insert("Fixed", any_kind_type_id, nullptr, fixed_dim_kind_type::make(any_kind_type::make()));
+  insert("var", any_kind_type_id, nullptr, var_dim_type::make(any_kind_type::make()));
+  insert("struct", tuple_type_id, nullptr, struct_type::make(true));
+  insert("tuple", any_kind_type_id, nullptr, tuple_type::make(true));
+  insert("option", any_kind_type_id, nullptr, type());
+  insert("C", any_kind_type_id, nullptr, type());
+  insert("adapt", any_kind_type_id, nullptr, type());
+  insert("convert", any_kind_type_id, nullptr, type());
+  insert("view", any_kind_type_id, nullptr, type());
+  insert("cuda_host", any_kind_type_id, nullptr, type());
+  insert("cuda_device", any_kind_type_id, nullptr, type());
+  insert("expr", any_kind_type_id, nullptr, type());
+  insert("type", any_kind_type_id, nullptr, make_type<type_type>());
+}
+
+ndt::type_registry::~type_registry()
+{
+  for (size_t i = builtin_type_id_count; i < m_size; ++i) {
+    delete[] m_infos[i].bases;
+  }
+}
+
+size_t ndt::type_registry::size() const { return m_size; }
+
+type_id_t ndt::type_registry::emplace(const char *name, size_t nbase, const type_id_t *bases, type_make_t construct,
+                                      const type &kind)
+{
+  new (m_infos + m_size) type_info{name, nbase, bases, construct, kind};
+  return static_cast<type_id_t>(m_size++);
+}
+
+type_id_t ndt::type_registry::insert(const char *name, type_id_t tp_id, type_make_t construct, const type &kind)
+{
+  char *name_copy = new char[strlen(name)];
+  strcpy(name_copy, name);
+
+  return emplace(name_copy, 1, new type_id_t[1]{tp_id}, construct, kind);
+}
+
+const ndt::type_info &ndt::type_registry::operator[](type_id_t tp_id) const { return m_infos[tp_id]; }
+
+class ndt::type_registry ndt::type_registry;
 
 std::ostream &dynd::operator<<(std::ostream &o, type_id_t tid)
 {
