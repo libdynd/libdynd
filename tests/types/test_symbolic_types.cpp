@@ -10,7 +10,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/array.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/callable_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/types/typevar_dim_type.hpp>

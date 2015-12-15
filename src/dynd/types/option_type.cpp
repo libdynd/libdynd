@@ -4,7 +4,7 @@
 //
 
 #include <dynd/array.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>

@@ -11,7 +11,7 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/take.hpp>
 #include <dynd/array.hpp>

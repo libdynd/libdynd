@@ -5,7 +5,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/array_iter.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/comparison.hpp>
 #include <dynd/func/elwise.hpp>

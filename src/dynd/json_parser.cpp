@@ -4,7 +4,7 @@
 //
 
 #include <dynd/json_parser.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/types/base_bytes_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>

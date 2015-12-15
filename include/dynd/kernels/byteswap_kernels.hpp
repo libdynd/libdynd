@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/diagnostics.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 
 namespace dynd {
 

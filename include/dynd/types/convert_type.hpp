@@ -13,7 +13,7 @@
 #pragma once
 
 #include <dynd/type.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/typed_data_assign.hpp>
 
 namespace dynd {

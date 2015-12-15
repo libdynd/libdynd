@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include <dynd/callable.hpp>
 #include <dynd/types/struct_type.hpp>
-#include <dynd/func/callable.hpp>
 
 namespace dynd {
 

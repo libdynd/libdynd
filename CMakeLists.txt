@@ -260,7 +260,6 @@ set(libdynd_SRC
     include/dynd/eval/eval_context.hpp
     # Func
     src/dynd/func/arithmetic.cpp
-    src/dynd/func/callable.cpp
     src/dynd/func/callable_registry.cpp
     src/dynd/func/assignment.cpp
     src/dynd/func/comparison.cpp
@@ -287,7 +286,6 @@ set(libdynd_SRC
     src/dynd/func/take_by_pointer.cpp
     src/dynd/func/view.cpp
     include/dynd/func/arithmetic.hpp
-    include/dynd/func/callable.hpp
     include/dynd/func/callable_registry.hpp
     include/dynd/func/assignment.hpp
     include/dynd/func/copy.hpp
@@ -397,6 +395,7 @@ set(libdynd_SRC
     src/dynd/array.cpp
     src/dynd/array_range.cpp
     src/dynd/asarray.cpp
+    src/dynd/callable.cpp
     # src/dynd/config.cpp
     src/dynd/convert.cpp
     src/dynd/float16.cpp
@@ -425,6 +424,7 @@ set(libdynd_SRC
     include/dynd/asarray.hpp
     include/dynd/bool1.hpp
     include/dynd/bytes.hpp
+    include/dynd/callable.hpp
     include/dynd/cephes.hpp
     include/dynd/cmake_config.hpp.in # Included here for ease of editing in IDEs
     ${CMAKE_CURRENT_BINARY_DIR}/include/dynd/cmake_config.hpp

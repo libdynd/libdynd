@@ -8,7 +8,7 @@
 #include <dynd/types/adapt_type.hpp>
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/typed_data_assign.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/func/assignment.hpp>
 
 using namespace std;

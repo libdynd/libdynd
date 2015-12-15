@@ -10,7 +10,7 @@
 #include <cstring>
 #include <limits>
 
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/func/assignment.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/types/convert_type.hpp>

@@ -3,7 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/math.hpp>
 #include <dynd/func/multidispatch.hpp>

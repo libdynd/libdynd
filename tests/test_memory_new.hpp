@@ -11,7 +11,7 @@
 
 #include <inc_gtest.hpp>
 
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 
 template <typename T>
 class Memory;

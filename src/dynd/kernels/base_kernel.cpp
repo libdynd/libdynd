@@ -3,12 +3,10 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/func/callable.hpp>
-#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/callable.hpp>
 
 using namespace std;
 using namespace dynd;
-
 
 namespace {
 template<int N>

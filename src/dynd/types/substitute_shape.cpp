@@ -4,7 +4,7 @@
 //
 
 #include <dynd/types/substitute_shape.hpp>
-#include <dynd/func/callable.hpp>
+#include <dynd/callable.hpp>
 #include <dynd/shape_tools.hpp>
 #include <dynd/types/pointer_type.hpp>
 #include <dynd/types/option_type.hpp>
