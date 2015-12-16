@@ -55,7 +55,7 @@ namespace nd {
 
       const callable &equal = nd::equal::get();
       const ndt::type equal_src_tp[2] = {src0_element_tp, src0_element_tp};
-      return equal.get()->instantiate(equal.get()->static_data(), data, ckb, ckb_offset, ndt::type::make<bool1>(), NULL,
+      return equal.get()->instantiate(equal.get()->static_data(), data, ckb, ckb_offset, ndt::make_type<bool1>(), NULL,
                                       2, equal_src_tp, NULL, kernel_request_single, ectx, nkwd, kwds, tp_vars);
     }
   };
@@ -66,7 +66,7 @@ namespace ndt {
 
   template <>
   struct traits<nd::unique_kernel> {
-    static type equivalent() { return callable_type::make(type::make<void>(), {type("Fixed * Scalar")}); }
+    static type equivalent() { return callable_type::make(make_type<void>(), {type("Fixed * Scalar")}); }
   };
 
 } // namespace dynd::ndt

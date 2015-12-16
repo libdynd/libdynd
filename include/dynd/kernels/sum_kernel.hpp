@@ -49,7 +49,7 @@ namespace ndt {
     static type equivalent()
     {
       return callable_type::make(
-          ndt::type::make<typename nd::sum_kernel<Src0TypeID>::dst_type>(),
+          ndt::make_type<typename nd::sum_kernel<Src0TypeID>::dst_type>(),
           type(Src0TypeID));
     }
   };

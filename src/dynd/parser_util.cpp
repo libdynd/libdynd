@@ -497,14 +497,14 @@ static T checked_string_to_signed_int(const char *begin, const char *end)
     stringstream ss;
     ss << "overflow converting string ";
     ss.write(begin, end - begin);
-    ss << " to " << ndt::type::make<T>();
+    ss << " to " << ndt::make_type<T>();
     throw overflow_error(ss.str());
   }
   else if (badparse) {
     stringstream ss;
     ss << "parse error converting string ";
     ss.write(begin, end - begin);
-    ss << " to" << ndt::type::make<T>();
+    ss << " to" << ndt::make_type<T>();
     throw invalid_argument(ss.str());
   }
   else {

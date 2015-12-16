@@ -332,7 +332,7 @@ namespace ndt {
   struct traits<nd::is_avail_kernel<Src0ValueTypeID>> {
     static type equivalent()
     {
-      return callable_type::make(type::make<bool1>(), option_type::make(Src0ValueTypeID));
+      return callable_type::make(make_type<bool1>(), option_type::make(Src0ValueTypeID));
     }
   };
 

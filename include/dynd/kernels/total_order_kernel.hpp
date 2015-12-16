@@ -93,7 +93,7 @@ namespace ndt {
   struct traits<nd::total_order_kernel<Src0TypeID, Src1TypeID>> {
     static type equivalent()
     {
-      return callable_type::make(type::make<int>(), {type(Src0TypeID), type(Src1TypeID)});
+      return callable_type::make(make_type<int>(), {type(Src0TypeID), type(Src1TypeID)});
     }
   };
 

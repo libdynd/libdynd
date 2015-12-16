@@ -79,7 +79,7 @@ static void format_json_bool(output_data &out, const ndt::type &dt, const char *
     value = (*data != 0);
   }
   else {
-    typed_data_assign(ndt::type::make<bool1>(), NULL, reinterpret_cast<char *>(&value), dt, arrmeta, data);
+    typed_data_assign(ndt::make_type<bool1>(), NULL, reinterpret_cast<char *>(&value), dt, arrmeta, data);
   }
   if (value) {
     out.write("true");
@@ -345,7 +345,7 @@ static void format_json(output_data &out, const ndt::type &dt, const char *arrme
 nd::array dynd::format_json(const nd::array &n, bool struct_as_list)
 {
   // Create a UTF-8 string
-  nd::array result = nd::empty(ndt::string_type::make());
+  nd::array result = nd::empty(ndt::make_type<ndt::string_type>());
 
   // Initialize the output with some memory
   output_data out;

@@ -71,29 +71,29 @@ static const map<std::string, ndt::type> &builtin_types()
 {
   static map<std::string, ndt::type> bit;
   if (bit.empty()) {
-    bit["void"] = ndt::type::make<void>();
-    bit["bool"] = ndt::type::make<bool1>();
-    bit["int8"] = ndt::type::make<int8>();
-    bit["int16"] = ndt::type::make<int16>();
-    bit["int32"] = ndt::type::make<int32>();
-    bit["int"] = ndt::type::make<int32>();
-    bit["int64"] = ndt::type::make<int64>();
-    bit["int128"] = ndt::type::make<int128>();
-    bit["intptr"] = ndt::type::make<intptr_t>();
-    bit["uint8"] = ndt::type::make<uint8>();
-    bit["uint16"] = ndt::type::make<uint16>();
-    bit["uint32"] = ndt::type::make<uint32>();
-    bit["uint64"] = ndt::type::make<uint64>();
-    bit["uint128"] = ndt::type::make<uint128>();
-    bit["uintptr"] = ndt::type::make<uintptr_t>();
-    bit["float16"] = ndt::type::make<float16>();
-    bit["float32"] = ndt::type::make<float32>();
-    bit["float64"] = ndt::type::make<float64>();
-    bit["real"] = ndt::type::make<double>();
-    bit["float128"] = ndt::type::make<float128>();
-    bit["complex64"] = ndt::type::make<dynd::complex<float>>();
-    bit["complex128"] = ndt::type::make<dynd::complex<double>>();
-    bit["complex"] = ndt::type::make<dynd::complex<double>>();
+    bit["void"] = ndt::make_type<void>();
+    bit["bool"] = ndt::make_type<bool1>();
+    bit["int8"] = ndt::make_type<int8>();
+    bit["int16"] = ndt::make_type<int16>();
+    bit["int32"] = ndt::make_type<int32>();
+    bit["int"] = ndt::make_type<int32>();
+    bit["int64"] = ndt::make_type<int64>();
+    bit["int128"] = ndt::make_type<int128>();
+    bit["intptr"] = ndt::make_type<intptr_t>();
+    bit["uint8"] = ndt::make_type<uint8>();
+    bit["uint16"] = ndt::make_type<uint16>();
+    bit["uint32"] = ndt::make_type<uint32>();
+    bit["uint64"] = ndt::make_type<uint64>();
+    bit["uint128"] = ndt::make_type<uint128>();
+    bit["uintptr"] = ndt::make_type<uintptr_t>();
+    bit["float16"] = ndt::make_type<float16>();
+    bit["float32"] = ndt::make_type<float32>();
+    bit["float64"] = ndt::make_type<float64>();
+    bit["real"] = ndt::make_type<double>();
+    bit["float128"] = ndt::make_type<float128>();
+    bit["complex64"] = ndt::make_type<dynd::complex<float>>();
+    bit["complex128"] = ndt::make_type<dynd::complex<double>>();
+    bit["complex"] = ndt::make_type<dynd::complex<double>>();
     bit["date"] = ndt::date_type::make();
     bit["time"] = ndt::time_type::make(tz_abstract);
     bit["datetime"] = ndt::datetime_type::make();
@@ -326,7 +326,7 @@ static string_encoding_t string_to_encoding(const char *error_begin, const std::
 // This is called after 'string' is already matched
 static ndt::type parse_string_parameters(const char *&DYND_UNUSED(rbegin), const char *DYND_UNUSED(end))
 {
-  return ndt::string_type::make();
+  return ndt::make_type<ndt::string_type>();
 }
 
 // fixed_string_type : fixed_string[NUMBER] |
@@ -392,10 +392,10 @@ static ndt::type parse_char_parameters(const char *&rbegin, const char *end)
       throw datashape_parse_error(begin, "expected closing ']'");
     }
     rbegin = begin;
-    return ndt::char_type::make(encoding);
+    return ndt::make_type<ndt::char_type>(encoding);
   }
   else {
-    return ndt::char_type::make();
+    return ndt::make_type<ndt::char_type>();
   }
 }
 
@@ -415,11 +415,11 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, 
     }
     if (tp.get_type_id() == float32_type_id) {
       rbegin = begin;
-      return ndt::type::make<dynd::complex<float>>();
+      return ndt::make_type<dynd::complex<float>>();
     }
     else if (tp.get_type_id() == float64_type_id) {
       rbegin = begin;
-      return ndt::type::make<dynd::complex<double>>();
+      return ndt::make_type<dynd::complex<double>>();
     }
     else {
       throw datashape_parse_error(saved_begin, "unsupported real type for complex numbers");
@@ -427,7 +427,7 @@ static ndt::type parse_complex_parameters(const char *&rbegin, const char *end, 
   }
   else {
     // Default to complex[double] if no parameters are provided
-    return ndt::type::make<dynd::complex<double>>();
+    return ndt::make_type<dynd::complex<double>>();
   }
 }
 
@@ -844,7 +844,7 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
       result = parse_datashape_list(begin, end, symtable);
     }
     if (result.is_null()) {
-      result = nd::empty(0, ndt::type::make<void>());
+      result = nd::empty(0, ndt::make_type<void>());
     }
     rbegin = begin;
     return result;
@@ -1291,20 +1291,20 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
           if (parse_token_ds(begin, end, '*')) {
             if ('0' <= *bbegin && *bbegin <= '9') {
               intptr_t dim_size = parse::checked_string_to_intptr(bbegin, bend);
-              result = ndt::make_pow_dimsym(ndt::make_fixed_dim(dim_size, ndt::type::make<void>()), exponent_name,
+              result = ndt::make_pow_dimsym(ndt::make_fixed_dim(dim_size, ndt::make_type<void>()), exponent_name,
                                             parse_datashape(begin, end, symtable));
             }
             else if (parse::compare_range_to_literal(bbegin, bend, "var")) {
-              result = ndt::make_pow_dimsym(ndt::var_dim_type::make(ndt::type::make<void>()), exponent_name,
+              result = ndt::make_pow_dimsym(ndt::var_dim_type::make(ndt::make_type<void>()), exponent_name,
                                             parse_datashape(begin, end, symtable));
             }
             else if (parse::compare_range_to_literal(bbegin, bend, "Fixed")) {
-              result = ndt::make_pow_dimsym(ndt::make_fixed_dim_kind(ndt::type::make<void>()), exponent_name,
+              result = ndt::make_pow_dimsym(ndt::make_fixed_dim_kind(ndt::make_type<void>()), exponent_name,
                                             parse_datashape(begin, end, symtable));
             }
             else if (isupper(*bbegin)) {
               result =
-                  ndt::make_pow_dimsym(ndt::typevar_dim_type::make(std::string(bbegin, bend), ndt::type::make<void>()),
+                  ndt::make_pow_dimsym(ndt::typevar_dim_type::make(std::string(bbegin, bend), ndt::make_type<void>()),
                                        exponent_name, parse_datashape(begin, end, symtable));
             }
             else {

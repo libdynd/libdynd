@@ -83,7 +83,7 @@ ndt::type ndt::pointer_type::get_canonical_type() const
 
 const ndt::type &ndt::pointer_type::get_operand_type() const
 {
-  static type vpt = make(type::make<void>());
+  static type vpt = make(make_type<void>());
 
   if (m_target_tp.get_type_id() == pointer_type_id) {
     return m_target_tp;

@@ -34,21 +34,6 @@
 using namespace std;
 using namespace dynd;
 
-template <class T>
-inline typename std::enable_if<is_dynd_scalar<T>::value, intrusive_ptr<memory_block_data>>::type
-make_builtin_scalar_array(const T &value, uint64_t flags)
-{
-  char *data_ptr = NULL;
-  intrusive_ptr<memory_block_data> result = make_array_memory_block(0, sizeof(T), alignof(T), &data_ptr);
-  *reinterpret_cast<T *>(data_ptr) = value;
-  array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-  ndo->tp = ndt::type(type_id_of<T>::value);
-  ndo->data = data_ptr;
-  ndo->owner = NULL;
-  ndo->flags = flags;
-  return result;
-}
-
 nd::array nd::make_strided_array(const ndt::type &dtp, intptr_t ndim, const intptr_t *shape, int64_t access_flags,
                                  const int *axis_perm)
 {
@@ -214,7 +199,7 @@ nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
 nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t DYND_UNUSED(encoding),
                                 uint64_t DYND_UNUSED(access_flags))
 {
-  nd::array result = empty(ndt::string_type::make());
+  nd::array result = empty(ndt::make_type<ndt::string_type>());
   reinterpret_cast<string *>(result.data())->assign(str, len);
   return result;
 }
@@ -226,7 +211,7 @@ nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t ar
     total_string_length += strlen(cstr_array[i]);
   }
 
-  ndt::type stp = ndt::string_type::make();
+  ndt::type stp = ndt::make_type<ndt::string_type>();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result = nd::empty(tp);
   string *string_ptr = reinterpret_cast<string *>(result.data());
@@ -245,7 +230,7 @@ nd::array nd::make_strided_string_array(const std::string **str_array, size_t ar
     total_string_length += str_array[i]->size();
   }
 
-  ndt::type stp = ndt::string_type::make();
+  ndt::type stp = ndt::make_type<ndt::string_type>();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result = nd::empty(tp);
   string *string_arr_ptr = reinterpret_cast<string *>(result.data());
@@ -320,7 +305,7 @@ nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::st
     total_string_size += vec[i].size();
   }
 
-  ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::string_type::make());
+  ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_type<ndt::string_type>());
   // Make an array memory block which contains both the string pointers and
   // the string data
   array result = nd::empty(dt);
@@ -661,7 +646,7 @@ bool nd::array::equals_exact(const array &rhs) const
           const char *const src[2] = {iter.data<0>(), iter.data<1>()};
           ndt::type tp[2] = {iter.get_uniform_dtype<0>(), iter.get_uniform_dtype<1>()};
           const char *arrmeta[2] = {iter.arrmeta<0>(), iter.arrmeta<1>()};
-          ndt::type dst_tp = ndt::type::make<bool1>();
+          ndt::type dst_tp = ndt::make_type<bool1>();
           if ((*not_equal::get().get())(dst_tp, 2, tp, arrmeta, const_cast<char *const *>(src), 0, NULL,
                                         std::map<std::string, ndt::type>())
                   .as<bool>()) {
@@ -1133,7 +1118,7 @@ std::string nd::detail::array_as_string(const nd::array &lhs, assign_error_mode 
 
   nd::array temp = lhs;
   if (temp.get_type().get_kind() != string_kind) {
-    temp = temp.ucast(ndt::string_type::make()).eval();
+    temp = temp.ucast(ndt::make_type<ndt::string_type>()).eval();
   }
   const ndt::base_string_type *esd = static_cast<const ndt::base_string_type *>(temp.get_type().extended());
   return esd->get_utf8_string(temp.get()->metadata(), temp.get()->data, errmode);

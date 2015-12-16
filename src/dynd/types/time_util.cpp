@@ -115,7 +115,7 @@ const ndt::type &time_hmst::type()
 {
   static ndt::type tp = ndt::struct_type::make(
       {"hour", "minute", "second", "tick"},
-      {ndt::type::make<int8_t>(), ndt::type::make<int8_t>(),
-       ndt::type::make<int8_t>(), ndt::type::make<int32_t>()});
+      {ndt::make_type<int8_t>(), ndt::make_type<int8_t>(),
+       ndt::make_type<int8_t>(), ndt::make_type<int32_t>()});
   return tp;
 }

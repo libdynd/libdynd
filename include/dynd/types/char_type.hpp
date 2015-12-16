@@ -23,7 +23,7 @@ namespace ndt {
     string_encoding_t m_encoding;
 
   public:
-    char_type(string_encoding_t encoding);
+    char_type(string_encoding_t encoding = string_encoding_utf_32);
 
     virtual ~char_type();
 
@@ -61,14 +61,6 @@ namespace ndt {
     size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt, const char *src0_arrmeta,
                                   const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
-
-    static const type &make()
-    {
-      static const type char_tp(new char_type(string_encoding_utf_32), false);
-      return char_tp;
-    }
-
-    static type make(string_encoding_t encoding) { return type(new char_type(encoding), false); }
   };
 
 } // namespace dynd::ndt

@@ -29,8 +29,8 @@ namespace ndt {
   struct traits<nd::imag_kernel<RealTypeID>> {
     static type equivalent()
     {
-      return callable_type::make(type::make<typename nd::imag_kernel<RealTypeID>::real_type>(),
-                                 {type::make<typename nd::imag_kernel<RealTypeID>::complex_type>()});
+      return callable_type::make(make_type<typename nd::imag_kernel<RealTypeID>::real_type>(),
+                                 {make_type<typename nd::imag_kernel<RealTypeID>::complex_type>()});
     }
   };
 

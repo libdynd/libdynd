@@ -57,13 +57,6 @@ namespace ndt {
     size_t make_comparison_kernel(void *ckb, intptr_t ckb_offset, const type &src0_dt, const char *src0_arrmeta,
                                   const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
-
-    /** Returns type "string" */
-    static const type &make()
-    {
-      static const type string_tp(new string_type(), false);
-      return string_tp;
-    }
   };
 
 } // namespace dynd::ndt

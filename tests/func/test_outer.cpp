@@ -24,9 +24,9 @@ TEST(Outer, 1D)
   nd::array x, y, z, res;
   nd::callable af = nd::functional::outer(nd::functional::apply(&func0));
 
-  x = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::type::make<double>())}});
-  y = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::type::make<double>())}});
-  z = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::type::make<double>())}});
+  x = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::make_type<double>())}});
+  y = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::make_type<double>())}});
+  z = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(10, ndt::make_type<double>())}});
 
   res = af(x, y, z);
   for (intptr_t i = 0; i < x.get_dim_size(); ++i) {
@@ -37,9 +37,9 @@ TEST(Outer, 1D)
     }
   }
 
-  x = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(4, ndt::type::make<double>())}});
-  y = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(16, ndt::type::make<double>())}});
-  z = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(8, ndt::type::make<double>())}});
+  x = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(4, ndt::make_type<double>())}});
+  y = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(16, ndt::make_type<double>())}});
+  z = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(8, ndt::make_type<double>())}});
 
   res = af(x, y, z);
   for (intptr_t i = 0; i < x.get_dim_size(); ++i) {

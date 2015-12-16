@@ -226,7 +226,7 @@ namespace nd {
       dimvector src_shape(ndim);
       src_tp[0].extended()->get_shape(ndim, 0, src_shape.get(), NULL, NULL);
       src_shape[ndim - 1] = (shape.is_null() ? src_shape[ndim - 1] : shape(ndim - 1).as<intptr_t>()) / 2 + 1;
-      dst_tp = ndt::make_fixed_dim(ndim, src_shape.get(), ndt::type::make<complex<double>>());
+      dst_tp = ndt::make_fixed_dim(ndim, src_shape.get(), ndt::make_type<complex<double>>());
     }
 
     template <bool real_to_complex>
@@ -244,7 +244,7 @@ namespace nd {
           shape = shape.f("dereference");
         }
         dst_tp = ndt::make_fixed_dim(shape.get_dim_size(), reinterpret_cast<const intptr_t *>(shape.data()),
-                                     ndt::type::make<complex<double>>());
+                                     ndt::make_type<complex<double>>());
       }
     }
 

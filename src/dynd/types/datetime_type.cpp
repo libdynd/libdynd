@@ -626,21 +626,21 @@ void ndt::datetime_type::get_dynamic_type_functions(std::map<std::string, nd::ca
 
 void ndt::datetime_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  properties["year"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["year"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<datetime_get_year_kernel>(ndt::type("(Any) -> Any")));
-  properties["month"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["month"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                               nd::callable::make<datetime_get_month_kernel>(ndt::type("(Any) -> Any")));
-  properties["day"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["day"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                             nd::callable::make<datetime_get_day_kernel>(ndt::type("(Any) -> Any")));
-  properties["hour"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["hour"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<datetime_get_hour_kernel>(ndt::type("(Any) -> Any")));
   properties["minute"] = nd::functional::adapt(
-      ndt::type::make<int32_t>(), nd::callable::make<datetime_get_minute_kernel>(ndt::type("(Any) -> Any")));
+      ndt::make_type<int32_t>(), nd::callable::make<datetime_get_minute_kernel>(ndt::type("(Any) -> Any")));
   properties["second"] = nd::functional::adapt(
-      ndt::type::make<int32_t>(), nd::callable::make<datetime_get_second_kernel>(ndt::type("(Any) -> Any")));
+      ndt::make_type<int32_t>(), nd::callable::make<datetime_get_second_kernel>(ndt::type("(Any) -> Any")));
   properties["microsecond"] = nd::functional::adapt(
-      ndt::type::make<int32_t>(), nd::callable::make<datetime_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
-  properties["tick"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+      ndt::make_type<int32_t>(), nd::callable::make<datetime_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
+  properties["tick"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<datetime_get_tick_kernel>(ndt::type("(Any) -> Any")));
 }
 

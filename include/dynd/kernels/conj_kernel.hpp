@@ -28,8 +28,8 @@ namespace ndt {
   struct traits<nd::conj_kernel<RealTypeID>> {
     static type equivalent()
     {
-      return callable_type::make(type::make<typename nd::conj_kernel<RealTypeID>::complex_type>(),
-                                 {type::make<typename nd::conj_kernel<RealTypeID>::complex_type>()});
+      return callable_type::make(make_type<typename nd::conj_kernel<RealTypeID>::complex_type>(),
+                                 {make_type<typename nd::conj_kernel<RealTypeID>::complex_type>()});
     }
   };
 

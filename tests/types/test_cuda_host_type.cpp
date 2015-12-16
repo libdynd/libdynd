@@ -23,10 +23,10 @@ using namespace dynd;
 
 TEST(CUDAHostType, Basic)
 {
-  ndt::type d = ndt::make_cuda_host(ndt::type::make<int32_t>());
+  ndt::type d = ndt::make_cuda_host(ndt::make_type<int32_t>());
   EXPECT_EQ(cuda_host_type_id, d.get_type_id());
   EXPECT_EQ(memory_kind, d.get_kind());
-  EXPECT_EQ(ndt::type::make<int32_t>(), d.p("storage_type").as<ndt::type>());
+  EXPECT_EQ(ndt::make_type<int32_t>(), d.p("storage_type").as<ndt::type>());
   EXPECT_FALSE(d.is_expression());
   EXPECT_EQ((unsigned int)cudaHostAllocDefault,
             d.extended<cuda_host_type>()->get_cuda_host_flags());
@@ -35,21 +35,21 @@ TEST(CUDAHostType, Basic)
   EXPECT_EQ(d, ndt::type(d.str()));
   // A memory type cannot be the element of an array dimension
   EXPECT_THROW(
-      ndt::make_fixed_dimsym(ndt::make_cuda_host(ndt::type::make<int32_t>())),
+      ndt::make_fixed_dimsym(ndt::make_cuda_host(ndt::make_type<int32_t>())),
       invalid_argument);
-  d = ndt::make_cuda_host(ndt::type::make<float>(), cudaHostAllocMapped);
+  d = ndt::make_cuda_host(ndt::make_type<float>(), cudaHostAllocMapped);
   EXPECT_EQ((unsigned int)cudaHostAllocMapped,
             d.extended<cuda_host_type>()->get_cuda_host_flags());
 }
 
 TEST(CUDAHostType, BuiltIn)
 {
-  ndt::type d = ndt::make_cuda_host(ndt::type::make<float>());
+  ndt::type d = ndt::make_cuda_host(ndt::make_type<float>());
   EXPECT_EQ(cuda_host_type_id, d.get_type_id());
   EXPECT_EQ(memory_kind, d.get_kind());
   EXPECT_EQ(sizeof(float), d.get_data_size());
   // CUDA host type and CUDA device type have the same data alignment
-  EXPECT_EQ(ndt::make_cuda_device(ndt::type::make<float>()).get_data_alignment(),
+  EXPECT_EQ(ndt::make_cuda_device(ndt::make_type<float>()).get_data_alignment(),
             d.get_data_alignment());
   EXPECT_EQ(d, ndt::type("cuda_host[float32]"));
 }
@@ -57,7 +57,7 @@ TEST(CUDAHostType, BuiltIn)
 TEST(CUDAHostType, FixedDim)
 {
   ndt::type d =
-      ndt::make_cuda_host(ndt::make_fixed_dimsym(ndt::type::make<float>()));
+      ndt::make_cuda_host(ndt::make_fixed_dimsym(ndt::make_type<float>()));
   EXPECT_EQ(cuda_host_type_id, d.get_type_id());
   EXPECT_EQ(memory_kind, d.get_kind());
   EXPECT_EQ(d.extended<base_memory_type>()->get_element_type().get_data_size(),
@@ -67,15 +67,15 @@ TEST(CUDAHostType, FixedDim)
 
 TEST(CUDAHostType, IsTypeSubarray)
 {
-  EXPECT_TRUE(ndt::make_cuda_host(ndt::type::make<int32_t>()).is_type_subarray(
-      ndt::make_cuda_host(ndt::type::make<int32_t>())));
-  EXPECT_TRUE(ndt::make_cuda_host(ndt::type::make<int32_t>())
-                  .is_type_subarray(ndt::type::make<int32_t>()));
+  EXPECT_TRUE(ndt::make_cuda_host(ndt::make_type<int32_t>()).is_type_subarray(
+      ndt::make_cuda_host(ndt::make_type<int32_t>())));
+  EXPECT_TRUE(ndt::make_cuda_host(ndt::make_type<int32_t>())
+                  .is_type_subarray(ndt::make_type<int32_t>()));
   EXPECT_TRUE(
-      ndt::make_cuda_host(ndt::make_fixed_dimsym(ndt::type::make<int32_t>()))
-          .is_type_subarray(ndt::type::make<int32_t>()));
-  EXPECT_FALSE(ndt::type::make<int32_t>().is_type_subarray(
-      ndt::make_cuda_host(ndt::type::make<int32_t>())));
+      ndt::make_cuda_host(ndt::make_fixed_dimsym(ndt::make_type<int32_t>()))
+          .is_type_subarray(ndt::make_type<int32_t>()));
+  EXPECT_FALSE(ndt::make_type<int32_t>().is_type_subarray(
+      ndt::make_cuda_host(ndt::make_type<int32_t>())));
 }
 
 #endif

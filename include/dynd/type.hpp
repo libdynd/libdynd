@@ -129,6 +129,8 @@ namespace nd {
 } // namespace dynd::nd
 
 namespace ndt {
+  DYND_HAS(equivalent);
+
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
@@ -157,24 +159,6 @@ namespace ndt {
    *
    */
   class DYND_API type : public intrusive_ptr<const base_type> {
-    /**
-     * Validates that the given type ID is a proper ID and casts to
-     * a base_type pointer if it is. Throws
-     * an exception if not.
-     *
-     * \param type_id  The type id to validate.
-     */
-    static const base_type *validate_builtin_type_id(type_id_t type_id)
-    {
-      // 0 <= type_id < builtin_type_id_count
-      if ((unsigned int)type_id < builtin_type_id_count) {
-        return reinterpret_cast<const base_type *>(type_id);
-      }
-
-      return NULL;
-      //      throw invalid_type_id((int)type_id);
-    }
-
   public:
     using intrusive_ptr<const base_type>::intrusive_ptr;
 
@@ -797,22 +781,28 @@ namespace ndt {
       return ss.str();
     }
 
-    /**
-     * Convenience function which makes an ndt::type
-     * object from a template parameter. This includes
-     * convenience cases, where the memory layout of the given
-     * type may not precisely match that of T.
-     */
-    template <typename T, typename... A>
-    static type make(A &&... a)
-    {
-      return traits<T>::equivalent(std::forward<A>(a)...);
-    }
-
     static type make(type_id_t tp_id, const nd::array &args);
 
     friend DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
+
+  /**
+   * Returns the equivalent type.
+   */
+  template <typename T, typename... ArgTypes>
+  typename std::enable_if<has_traits<T>::value, type>::type make_type(ArgTypes &&... args)
+  {
+    return traits<T>::equivalent(std::forward<ArgTypes>(args)...);
+  }
+
+  /**
+   * Allocates and constructs a type with a use count of 1.
+   */
+  template <typename T, typename... ArgTypes>
+  typename std::enable_if<!has_traits<T>::value, type>::type make_type(ArgTypes &&... args)
+  {
+    return type(new T(std::forward<ArgTypes>(args)...), false);
+  }
 
   struct type_info {
     const char *name;
@@ -1035,7 +1025,7 @@ namespace ndt {
   struct traits<T[N]> {
     static const bool is_same_layout = true;
 
-    static type equivalent() { return make_fixed_dim(N, type::make<T>()); }
+    static type equivalent() { return make_fixed_dim(N, make_type<T>()); }
   };
 
   // Need to handle const properly
@@ -1043,17 +1033,8 @@ namespace ndt {
   struct traits<const T[N]> {
     static const bool is_same_layout = true;
 
-    static type equivalent() { return type::make<T[N]>(); }
+    static type equivalent() { return make_type<T[N]>(); }
   };
-
-  /**
-   * Allocates and constructs a type with a use count of 1.
-   */
-  template <typename TypeType, typename... ArgTypes>
-  type make_type(ArgTypes &&... args)
-  {
-    return type(new TypeType(std::forward<ArgTypes>(args)...), false);
-  }
 
   /**
     * Returns the common type of two types. For built-in types, this is analogous to

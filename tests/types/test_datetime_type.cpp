@@ -65,7 +65,7 @@ TEST(DatetimeType, CreateFromString)
 
 TEST(DatetimeType, ValueCreationAbstract)
 {
-  ndt::type d = ndt::datetime_type::make(), di = ndt::type::make<int64_t>();
+  ndt::type d = ndt::datetime_type::make(), di = ndt::make_type<int64_t>();
 
   EXPECT_EQ((((1600 - 1970) * 365 - (1972 - 1600) / 4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
             nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
@@ -91,7 +91,7 @@ TEST(DatetimeType, ValueCreationAbstract)
 
 TEST(DatetimeType, ValueCreationUTC)
 {
-  ndt::type d = ndt::datetime_type::make(tz_utc), di = ndt::type::make<int64_t>();
+  ndt::type d = ndt::datetime_type::make(tz_utc), di = ndt::make_type<int64_t>();
 
   EXPECT_EQ((((1600 - 1970) * 365 - (1972 - 1600) / 4 + 3 - 365) * 1440LL + 4 * 60 + 16) * 60 * 10000000LL,
             nd::array("1599-01-01T04:16").ucast(d).view_scalars(di).as<int64_t>());
@@ -195,7 +195,7 @@ TEST(DatetimeType, AdaptAsInt) {
     nd::array a, b;
 
     a = parse_json("3 * datetime", "[\"2001-01-05T00:00\", \"1999-12-20T10:22\", \"2000-01-01T12:34:56\"]");
-    b = a.adapt(ndt::type::make<int64_t>(), "seconds since 2000-01-01T00:00");
+    b = a.adapt(ndt::make_type<int64_t>(), "seconds since 2000-01-01T00:00");
     EXPECT_EQ(370*24*60*60, b(0).as<int64_t>());
     EXPECT_EQ(-12*24*60*60 + 10*60*60 + 22*60, b(1).as<int64_t>());
     EXPECT_EQ(12*60*60 + 34*60 + 56, b(2).as<int64_t>());

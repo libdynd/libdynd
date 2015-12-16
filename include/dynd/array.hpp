@@ -534,7 +534,7 @@ namespace nd {
     template <class T>
     inline array ucast(intptr_t replace_ndim = 0) const
     {
-      return ucast(ndt::type::make<T>(), replace_ndim);
+      return ucast(ndt::make_type<T>(), replace_ndim);
     }
 
     /**
@@ -634,7 +634,7 @@ namespace nd {
     template <class T>
     array view_scalars() const
     {
-      return view_scalars(ndt::type::make<T>());
+      return view_scalars(ndt::make_type<T>());
     }
 
     /**
@@ -679,6 +679,18 @@ namespace nd {
     {
       static_assert(ndt::traits<T>::is_same_layout, "must be layout compatible");
       *reinterpret_cast<T *>(data) = value;
+    }
+
+    static void as(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) {}
+  };
+
+  template <typename T>
+  struct traits<std::initializer_list<T>> {
+    static void init(const std::initializer_list<T> &DYND_UNUSED(value), const char *DYND_UNUSED(metadata),
+                     char *DYND_UNUSED(data))
+    {
+      //      static_assert(ndt::traits<T>::is_same_layout, "must be layout compatible");
+      //    *reinterpret_cast<T *>(data) = value;
     }
 
     static void as(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) {}
@@ -1098,7 +1110,7 @@ namespace nd {
   template <typename T>
   array empty()
   {
-    return empty(ndt::type::make<T>());
+    return empty(ndt::make_type<T>());
   }
 
   /**
@@ -1298,7 +1310,7 @@ namespace nd {
   dynd::nd::array::array(const std::initializer_list<T> &il)
   {
     intptr_t dim0 = il.size();
-    make_strided_array(ndt::type::make<T>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
+    make_strided_array(ndt::make_type<T>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
     DYND_MEMCPY(get()->data, il.begin(), sizeof(T) * dim0);
   }
   template <class T>
@@ -1309,7 +1321,7 @@ namespace nd {
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    make_strided_array(ndt::type::make<T>(), 2, shape, nd::default_access_flags, NULL).swap(*this);
+    make_strided_array(ndt::make_type<T>(), 2, shape, nd::default_access_flags, NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get()->data);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
@@ -1321,7 +1333,7 @@ namespace nd {
 
     // Get and validate that the shape is regular
     detail::initializer_list_shape<S>::compute(shape, il);
-    make_strided_array(ndt::type::make<T>(), 3, shape, nd::default_access_flags, NULL).swap(*this);
+    make_strided_array(ndt::make_type<T>(), 3, shape, nd::default_access_flags, NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get()->data);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
   }
@@ -1344,7 +1356,7 @@ namespace nd {
   inline dynd::nd::array::array(const std::initializer_list<bool> &il)
   {
     intptr_t dim0 = il.size();
-    make_strided_array(ndt::type::make<bool>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
+    make_strided_array(ndt::make_type<bool>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
     auto data_ptr = reinterpret_cast<bool1 *>(get()->data);
     for (intptr_t i = 0; i < dim0; ++i) {
       data_ptr[i] = *(il.begin() + i);
@@ -1399,7 +1411,7 @@ namespace nd {
   template <class T>
   inline nd::array::array(const T *rhs, intptr_t dim_size)
   {
-    nd::empty(dim_size, ndt::type::make<T>()).swap(*this);
+    nd::empty(dim_size, ndt::make_type<T>()).swap(*this);
     DYND_MEMCPY(get()->data, reinterpret_cast<const void *>(&rhs), dim_size * sizeof(T));
   }
 
@@ -1418,7 +1430,7 @@ namespace nd {
     struct make_from_vec {
       inline static typename std::enable_if<is_dynd_scalar<T>::value, array>::type make(const std::vector<T> &vec)
       {
-        array result = nd::empty(vec.size(), ndt::type::make<T>());
+        array result = nd::empty(vec.size(), ndt::make_type<T>());
         if (!vec.empty()) {
           DYND_MEMCPY(result.data(), &vec[0], vec.size() * sizeof(T));
         }
@@ -1456,7 +1468,7 @@ namespace nd {
         if (!lhs.is_scalar()) {
           throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
         }
-        typed_data_assign(ndt::type::make<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get()->metadata(),
+        typed_data_assign(ndt::make_type<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get()->metadata(),
                           lhs.get()->data, ectx->errmode);
         return result;
       }

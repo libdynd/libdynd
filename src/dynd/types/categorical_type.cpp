@@ -177,8 +177,8 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
     cmp less(fn, k.get());
     set<const char *, cmp> uniques(less);
 
-    m_value_to_category_index = nd::empty(category_count, type::make<intptr_t>());
-    m_category_index_to_value = nd::empty(category_count, type::make<intptr_t>());
+    m_value_to_category_index = nd::empty(category_count, make_type<intptr_t>());
+    m_category_index_to_value = nd::empty(category_count, make_type<intptr_t>());
 
     // create the mapping from indices of (to be lexicographically sorted)
     // categories to values
@@ -215,13 +215,13 @@ ndt::categorical_type::categorical_type(const nd::array &categories, bool presor
 
   // Use the number of categories to set which underlying integer storage to use
   if (category_count <= 256) {
-    m_storage_type = type::make<uint8_t>();
+    m_storage_type = make_type<uint8_t>();
   }
   else if (category_count <= 65536) {
-    m_storage_type = type::make<uint16_t>();
+    m_storage_type = make_type<uint16_t>();
   }
   else {
-    m_storage_type = type::make<uint32_t>();
+    m_storage_type = make_type<uint32_t>();
   }
   this->data_size = m_storage_type.get_data_size();
   this->data_alignment = (uint8_t)m_storage_type.get_data_alignment();
@@ -283,7 +283,7 @@ void ndt::categorical_type::get_shape(intptr_t ndim, intptr_t i, intptr_t *out_s
 
 uint32_t ndt::categorical_type::get_value_from_category(const char *category_arrmeta, const char *category_data) const
 {
-  type dst_tp = type::make<intptr_t>();
+  type dst_tp = make_type<intptr_t>();
   type src_tp[2] = {m_categories.get_type(), m_category_tp};
   const char *src_arrmeta[2] = {m_categories.get()->metadata(), category_arrmeta};
   char *src_data[2] = {const_cast<char *>(m_categories.cdata()), const_cast<char *>(category_data)};

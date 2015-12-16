@@ -51,7 +51,7 @@ static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const 
       break;
     default: {
       // The data needs to be converted to UTF-8 before parsing
-      ndt::type utf8_tp = ndt::string_type::make();
+      ndt::type utf8_tp = ndt::make_type<ndt::string_type>();
       out_tmp_ref = json.ucast(utf8_tp).eval();
       sdt = static_cast<const ndt::base_string_type *>(utf8_tp.extended());
       sdt->get_string_range(&begin, &end, out_tmp_ref.get()->metadata(), out_tmp_ref.cdata());
@@ -441,7 +441,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
       *out_data = value;
     }
     else {
-      typed_data_assign(tp, arrmeta, out_data, ndt::type::make<bool1>(), NULL, &value);
+      typed_data_assign(tp, arrmeta, out_data, ndt::make_type<bool1>(), NULL, &value);
     }
     rbegin = begin;
   }
@@ -450,7 +450,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
       *out_data = value;
     }
     else {
-      typed_data_assign(tp, arrmeta, out_data, ndt::option_type::make(ndt::type::make<bool1>()), NULL, &value);
+      typed_data_assign(tp, arrmeta, out_data, ndt::option_type::make(ndt::make_type<bool1>()), NULL, &value);
     }
     rbegin = begin;
   }
@@ -970,14 +970,14 @@ static ndt::type discover_type(const char *&begin, const char *end)
   case 't':
     ++begin;
     if (parse_token(begin, end, "rue")) {
-      return ndt::type::make<bool1>();
+      return ndt::make_type<bool1>();
     }
     throw parse::parse_error(begin, "invalid json value");
   case 'F':
   case 'f':
     ++begin;
     if (parse_token(begin, end, "alse")) {
-      return ndt::type::make<bool1>();
+      return ndt::make_type<bool1>();
     }
     throw parse::parse_error(begin, "invalid json value");
   case 'n':
@@ -993,11 +993,11 @@ static ndt::type discover_type(const char *&begin, const char *end)
       }
       int64_t int_val;
       if (!parse_int64(int_val, nbegin, nend)) {
-        return ndt::type::make<int64>();
+        return ndt::make_type<int64>();
       }
       double float_val;
       if (!parse_double(float_val, nbegin, nend)) {
-        return ndt::type::make<double>();
+        return ndt::make_type<double>();
       }
       throw parse::parse_error(begin, "invalid json value");
     }

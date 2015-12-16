@@ -166,13 +166,16 @@ uint32_t noerror_next_utf8(const char *&it, const char *end)
         // Passed! Return here.
         ++it;
         return cp;
-      } else {
+      }
+      else {
         return ERROR_SUBSTITUTE_CODEPOINT;
       }
-    } else {
+    }
+    else {
       return ERROR_SUBSTITUTE_CODEPOINT;
     }
-  } else {
+  }
+  else {
     return ERROR_SUBSTITUTE_CODEPOINT;
   }
 
@@ -183,14 +186,16 @@ void append_utf8(uint32_t cp, char *&it, char *end)
 {
   if (end - it >= 6) {
     it = utf8::append(cp, it);
-  } else {
+  }
+  else {
     char tmp[6];
     char *tmp_ptr = tmp;
     tmp_ptr = utf8::append(cp, tmp_ptr);
     if (tmp_ptr - tmp <= end - it) {
       memcpy(it, tmp, tmp_ptr - tmp);
       it += (tmp_ptr - tmp);
-    } else {
+    }
+    else {
       throw std::runtime_error("Input too large to convert to destination string");
     }
   }
@@ -200,14 +205,16 @@ void noerror_append_utf8(uint32_t cp, char *&it, char *end)
 {
   if (end - it >= 6) {
     it = utf8::append(cp, it);
-  } else {
+  }
+  else {
     char tmp[6];
     char *tmp_ptr = tmp;
     tmp_ptr = utf8::append(cp, tmp_ptr);
     if (tmp_ptr - tmp <= end - it) {
       memcpy(it, tmp, tmp_ptr - tmp);
       it += (tmp_ptr - tmp);
-    } else {
+    }
+    else {
       // If it didn't fit, null-terminate
       memset(it, 0, end - it);
       it = end;
@@ -233,15 +240,17 @@ uint32_t next_utf16(const char *&it_raw, const char *end_raw)
       uint32_t trail_surrogate = *reinterpret_cast<const uint16_t *>(it_raw + 2);
       if (utf8::internal::is_trail_surrogate(trail_surrogate)) {
         cp = (cp << 10) + trail_surrogate + utf8::internal::SURROGATE_OFFSET;
-      } else {
+      }
+      else {
         throw string_decode_error(it_raw, it_raw + 4, string_encoding_utf_16);
       }
       it_raw += 2;
-    } else {
+    }
+    else {
       throw string_decode_error(it_raw, end_raw, string_encoding_utf_16);
     }
-
-  } else if (utf8::internal::is_trail_surrogate(cp)) {
+  }
+  else if (utf8::internal::is_trail_surrogate(cp)) {
     // Lone trail surrogate
     throw string_decode_error(it_raw, it_raw + 2, string_encoding_utf_16);
   }
@@ -260,14 +269,16 @@ uint32_t noerror_next_utf16(const char *&it_raw, const char *end_raw)
       it_raw += 2;
       if (utf8::internal::is_trail_surrogate(trail_surrogate)) {
         cp = (cp << 10) + trail_surrogate + utf8::internal::SURROGATE_OFFSET;
-      } else {
+      }
+      else {
         return ERROR_SUBSTITUTE_CODEPOINT;
       }
-    } else {
+    }
+    else {
       return ERROR_SUBSTITUTE_CODEPOINT;
     }
-
-  } else if (utf8::internal::is_trail_surrogate(cp)) {
+  }
+  else if (utf8::internal::is_trail_surrogate(cp)) {
     // Lone trail surrogate
     return ERROR_SUBSTITUTE_CODEPOINT;
   }
@@ -285,7 +296,8 @@ void append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
     }
     *it = static_cast<uint16_t>((cp & 0x3ff) + utf8::internal::TRAIL_SURROGATE_MIN);
     ++it;
-  } else {
+  }
+  else {
     *it = static_cast<uint16_t>(cp);
     ++it;
   }
@@ -301,12 +313,14 @@ void noerror_append_utf16(uint32_t cp, char *&it_raw, char *end_raw)
       ++it;
       *it = static_cast<uint16_t>((cp & 0x3ff) + utf8::internal::TRAIL_SURROGATE_MIN);
       ++it;
-    } else {
+    }
+    else {
       // Null-terminate
       memset(it_raw, 0, end_raw - it_raw);
       it_raw = end_raw;
     }
-  } else {
+  }
+  else {
     *it = static_cast<uint16_t>(cp);
     ++it;
   }
@@ -410,20 +424,23 @@ std::string dynd::string_range_as_utf8_string(string_encoding_t encoding, const 
   case string_encoding_ucs_2:
     if (errmode == assign_error_nocheck) {
       return string_range_as_utf8_string_templ<&noerror_next_ucs2>(begin, end);
-    } else {
+    }
+    else {
       return string_range_as_utf8_string_templ<&next_ucs2>(begin, end);
     }
   case string_encoding_utf_16: {
     if (errmode == assign_error_nocheck) {
       return string_range_as_utf8_string_templ<&noerror_next_utf16>(begin, end);
-    } else {
+    }
+    else {
       return string_range_as_utf8_string_templ<&next_utf16>(begin, end);
     }
   }
   case string_encoding_utf_32: {
     if (errmode == assign_error_nocheck) {
       return string_range_as_utf8_string_templ<&noerror_next_utf32>(begin, end);
-    } else {
+    }
+    else {
       return string_range_as_utf8_string_templ<&next_utf32>(begin, end);
     }
   }
@@ -468,15 +485,18 @@ void dynd::print_escaped_unicode_codepoint(std::ostream &o, uint32_t cp, bool si
       if (cp < 0x20 || cp == 0x7f) {
         o << "\\u";
         hexadecimal_print(o, static_cast<uint16_t>(cp));
-      } else {
+      }
+      else {
         o << static_cast<char>(cp);
       }
       break;
     }
-  } else if (cp < 0x10000) {
+  }
+  else if (cp < 0x10000) {
     o << "\\u";
     hexadecimal_print(o, static_cast<uint16_t>(cp));
-  } else {
+  }
+  else {
     o << "\\U";
     hexadecimal_print(o, static_cast<uint32_t>(cp));
   }
@@ -495,18 +515,17 @@ void dynd::print_escaped_utf8_string(std::ostream &o, const char *str_begin, con
   o << (single_quote ? '\'' : '\"');
 }
 
-void dynd::append_utf8_codepoint(uint32_t cp, std::string &out_str)
-{
-  string_append_utf8(cp, out_str);
-}
+void dynd::append_utf8_codepoint(uint32_t cp, std::string &out_str) { string_append_utf8(cp, out_str); }
 
 ndt::type dynd::char_type_of_encoding(string_encoding_t encoding)
 {
   if (encoding == string_encoding_utf_8) {
     return ndt::make_fixed_bytes(1, 1);
-  } else if (encoding == string_encoding_utf_16) {
+  }
+  else if (encoding == string_encoding_utf_16) {
     return ndt::make_fixed_bytes(2, 2);
-  } else {
-    return ndt::char_type::make(encoding);
+  }
+  else {
+    return ndt::make_type<ndt::char_type>(encoding);
   }
 }
