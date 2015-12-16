@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/assignment.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/call.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
@@ -206,15 +206,14 @@ DYND_API nd::callable nd::assign::make()
   children[{{time_type_id, convert_type_id}}] = callable::make<assignment_kernel<time_type_id, convert_type_id>>();
   children[{{date_type_id, convert_type_id}}] = callable::make<assignment_kernel<date_type_id, convert_type_id>>();
 
-  return functional::multidispatch(
-self_tp,
-      [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) mutable -> callable & {
-        callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
-        if (child.is_null()) {
-          throw std::runtime_error("assignment error");
-        }
-        return child;
-      });
+  return functional::dispatch(self_tp, [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                                  const ndt::type *src_tp) mutable -> callable & {
+    callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];
+    if (child.is_null()) {
+      throw std::runtime_error("assignment error");
+    }
+    return child;
+  });
 }
 
 DYND_API struct nd::assign nd::assign;

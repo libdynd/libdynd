@@ -3,10 +3,7 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-#include <dynd/callable.hpp>
-#include <dynd/func/call.hpp>
-#include <dynd/func/elwise.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/kernels/arithmetic.hpp>
 #include <dynd/kernels/compound_add_kernel.hpp>
 #include <dynd/kernels/compound_div_kernel.hpp>
@@ -27,16 +24,16 @@ namespace nd {
         children[i0] = functional::elwise(child_tp, self);
       }
 
-      return functional::multidispatch(self.get_array_type(),
-                                       [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                                  const ndt::type *src_tp) mutable -> callable & {
-                                         callable &child = children[src_tp[0].get_type_id()];
-                                         if (child.is_null()) {
-                                           throw std::runtime_error(FuncType::what(src_tp[0]));
-                                         }
+      return functional::dispatch(self.get_array_type(),
+                                  [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                             const ndt::type *src_tp) mutable -> callable & {
+                                    callable &child = children[src_tp[0].get_type_id()];
+                                    if (child.is_null()) {
+                                      throw std::runtime_error(FuncType::what(src_tp[0]));
+                                    }
 
-                                         return child;
-                                       });
+                                    return child;
+                                  });
     }
   };
 
@@ -83,16 +80,16 @@ namespace nd {
         }
       }
 
-      return functional::multidispatch(
-          ndt::type("(Any, Any) -> Any"), [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                                     const ndt::type *src_tp) mutable -> callable & {
-            callable &child = children[{{src_tp[0].get_type_id(), src_tp[1].get_type_id()}}];
-            if (child.is_null()) {
-              throw std::runtime_error(FuncType::what(src_tp[0], src_tp[1]));
-            }
+      return functional::dispatch(ndt::type("(Any, Any) -> Any"),
+                                  [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                             const ndt::type *src_tp) mutable -> callable & {
+                                    callable &child = children[{{src_tp[0].get_type_id(), src_tp[1].get_type_id()}}];
+                                    if (child.is_null()) {
+                                      throw std::runtime_error(FuncType::what(src_tp[0], src_tp[1]));
+                                    }
 
-            return child;
-          });
+                                    return child;
+                                  });
     }
   };
 
@@ -146,7 +143,7 @@ namespace nd {
         }
       }
 
-      return functional::multidispatch(ndt::type("(Any) -> Any"),
+      return functional::dispatch(ndt::type("(Any) -> Any"),
                                        [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
                                                   const ndt::type *src_tp) mutable -> callable & {
                                          callable &child = children[{{dst_tp.get_type_id(), src_tp[0].get_type_id()}}];

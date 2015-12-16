@@ -41,16 +41,16 @@ nd::callable nd::total_order::make()
   children[{{int32_type_id, int32_type_id}}] = callable::make<total_order_kernel<int32_type_id, int32_type_id>>();
   children[{{bool_type_id, bool_type_id}}] = callable::make<total_order_kernel<bool_type_id, bool_type_id>>();
 
-  return functional::multidispatch(ndt::type("(Any, Any) -> Any"),
-                                   [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                              const ndt::type *src_tp) mutable -> callable & {
-                                     callable &child = children[{{src_tp[0].get_type_id(), src_tp[1].get_type_id()}}];
-                                     if (child.is_null()) {
-                                       throw std::runtime_error("no child found");
-                                     }
+  return functional::dispatch(ndt::type("(Any, Any) -> Any"),
+                              [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                         const ndt::type *src_tp) mutable -> callable & {
+                                callable &child = children[{{src_tp[0].get_type_id(), src_tp[1].get_type_id()}}];
+                                if (child.is_null()) {
+                                  throw std::runtime_error("no child found");
+                                }
 
-                                     return child;
-                                   });
+                                return child;
+                              });
 }
 
 DYND_API struct nd::total_order nd::total_order;

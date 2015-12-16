@@ -191,11 +191,10 @@ namespace nd {
     callable(const ndt::type &self_tp, kernel_request_t kernreq, kernel_targets_t targets, const volatile char *ir,
              T &&static_data, callable_data_init_t data_init, callable_resolve_dst_type_t resolve_dst_type,
              callable_instantiate_t instantiate)
-        : intrusive_ptr<base_callable>(new static_data_callable<T>(self_tp, kernreq, targets, ir, data_init,
-                                                                   resolve_dst_type, instantiate,
-                                                                   std::forward<T>(static_data)),
+        : intrusive_ptr<base_callable>(new static_data_callable<typename std::remove_reference<T>::type>(
+                                           self_tp, kernreq, targets, ir, data_init, resolve_dst_type, instantiate,
+                                           std::forward<T>(static_data)),
                                        true)
-
     {
     }
 
@@ -224,6 +223,21 @@ namespace nd {
     const ndt::type &get_arg_type(std::intptr_t i) const { return get_type()->get_pos_type(i); }
 
     const array &get_arg_types() const { return get_type()->get_pos_types(); }
+
+    const callable &get_overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp) const
+    {
+      return get()->overload(ret_tp, narg, arg_tp);
+    }
+
+    const callable &get_overload(const ndt::type &ret_tp, const std::initializer_list<ndt::type> &arg_tp) const
+    {
+      return get_overload(ret_tp, arg_tp.size(), arg_tp.begin());
+    }
+
+    void set_overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp, const callable &value)
+    {
+      get()->overload(ret_tp, narg, arg_tp) = value;
+    }
 
     template <typename DataType>
     array call(size_t args_size, const array *args_values, size_t kwds_size,
@@ -459,6 +473,27 @@ namespace nd {
   callable make_callable(ArgTypes &&... args)
   {
     return callable(new CallableType(std::forward<ArgTypes>(args)...), true);
+  }
+
+  template <typename CallableType, typename KernelType, typename... ArgTypes>
+  std::enable_if_t<ndt::has_traits<KernelType>::value, callable> make_callable(ArgTypes &&... args)
+  {
+    return callable(new CallableType(ndt::traits<KernelType>::equivalent(), detail::get_kernreq<KernelType>(),
+                                     detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
+                                     detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
+                                     detail::get_instantiate<KernelType>(), std::forward<ArgTypes>(args)...),
+                    true);
+  }
+
+  template <typename CallableType, typename KernelType, typename... ArgTypes>
+  std::enable_if_t<!ndt::has_traits<KernelType>::value, callable> make_callable(const ndt::type &tp,
+                                                                                ArgTypes &&... args)
+  {
+    return callable(new CallableType(tp, detail::get_kernreq<KernelType>(), detail::get_targets<KernelType>(),
+                                     detail::get_ir<KernelType>(), detail::get_data_init<KernelType>(),
+                                     detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>(),
+                                     std::forward<ArgTypes>(args)...),
+                    true);
   }
 
   inline std::ostream &operator<<(std::ostream &o, const callable &rhs)

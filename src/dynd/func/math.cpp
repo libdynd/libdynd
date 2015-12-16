@@ -4,9 +4,8 @@
 //
 
 #include <dynd/callable.hpp>
-#include <dynd/func/elwise.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/math.hpp>
-#include <dynd/func/multidispatch.hpp>
 
 using namespace std;
 using namespace dynd;

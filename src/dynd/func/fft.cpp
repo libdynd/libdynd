@@ -4,7 +4,7 @@
 //
 
 #include <dynd/func/fft.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/take.hpp>
 
 using namespace std;

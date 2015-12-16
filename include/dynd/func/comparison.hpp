@@ -4,9 +4,7 @@
 //
 
 #include <dynd/callable.hpp>
-#include <dynd/func/call.hpp>
-#include <dynd/func/elwise.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/kernels/compare_kernels.hpp>
 #include <dynd/types/option_type.hpp>
 
@@ -59,16 +57,16 @@ namespace nd {
     static callable make()
     {
       auto children = FuncType::make_children();
-      return functional::multidispatch(
-          ndt::type("(Any, Any) -> Any"), [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
-                                                     const ndt::type *src_tp) mutable -> callable & {
-            callable &child = children[{{src_tp[0].get_type_id(), src_tp[1].get_type_id()}}];
-            if (child.is_null()) {
-              throw std::runtime_error("no child found");
-            }
+      return functional::dispatch(ndt::type("(Any, Any) -> Any"),
+                                  [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
+                                             const ndt::type *src_tp) mutable -> callable & {
+                                    callable &child = children[{{src_tp[0].get_type_id(), src_tp[1].get_type_id()}}];
+                                    if (child.is_null()) {
+                                      throw std::runtime_error("no child found");
+                                    }
 
-            return child;
-          });
+                                    return child;
+                                  });
     }
   };
 
