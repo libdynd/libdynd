@@ -18,13 +18,9 @@ namespace nd {
                          const volatile char *ir, callable_data_init_t data_init,
                          callable_resolve_dst_type_t resolve_dst_type, callable_instantiate_t instantiate,
                          const StaticDataType &static_data)
-        : base_callable(tp, kernreq, targets, ir, data_init, resolve_dst_type, instantiate),
-          static_data(static_data)
+        : base_callable(tp, kernreq, targets, ir, data_init, resolve_dst_type, instantiate), static_data(static_data)
     {
-      static_assert(alignof(StaticDataType) <= alignof(uint64_t), "static data requires stronger alignment");
     }
-
-    virtual ~static_data_callable() {}
   };
 
 } // namespace dynd::nd

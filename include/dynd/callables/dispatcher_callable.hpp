@@ -14,7 +14,7 @@ namespace nd {
   struct dispatcher_callable : static_data_callable<DispatcherType> {
     using static_data_callable<DispatcherType>::static_data_callable;
 
-    virtual callable &overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp)
+    callable &overload(const ndt::type &ret_tp, intptr_t narg, const ndt::type *arg_tp)
     {
       return this->static_data(ret_tp, narg, arg_tp);
     }
