@@ -53,7 +53,7 @@ namespace nd {
       make(ckb, kernreq, ckb_offset, reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->dim_size,
            reinterpret_cast<const fixed_dim_type_arrmeta *>(src_arrmeta[0])->stride, src0_element_tp.get_data_size());
 
-      const callable &equal = nd::equal;
+      const callable &equal = nd::equal::get();
       const ndt::type equal_src_tp[2] = {src0_element_tp, src0_element_tp};
       return equal.get()->instantiate(equal.get()->static_data(), data, ckb, ckb_offset, ndt::type::make<bool1>(), NULL,
                                       2, equal_src_tp, NULL, kernel_request_single, ectx, nkwd, kwds, tp_vars);

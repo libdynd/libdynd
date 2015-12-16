@@ -26,7 +26,7 @@ using namespace dynd;
 
 TEST(Compose, Simple)
 {
-  nd::callable composed = nd::functional::compose(nd::copy, func::get_regfunction("sin"), ndt::type::make<double>());
+  nd::callable composed = nd::functional::compose(nd::copy::get(), func::get_regfunction("sin"), ndt::type::make<double>());
   nd::array a = nd::empty<double>();
   composed({"0.0"}, {{"dst", a}});
   EXPECT_EQ(0., a.as<double>());

@@ -74,26 +74,24 @@ TEST(Callable, Assignment)
   EXPECT_EQ(891029, ints_out[2]);
 }
 
-static double func(int x, double y) { return 2.0 * x + y; }
-
 TEST(Callable, Construction)
 {
-  nd::callable af0 = nd::functional::apply(&func);
-  EXPECT_EQ(4.5, af0(1, 2.5).as<double>());
+  nd::callable f0([](int x, double y) { return 2.0 * x + y; });
+  EXPECT_ARRAY_EQ(4.5, f0(1, 2.5));
 
-  nd::callable af1 = nd::functional::apply(&func, "y");
-  EXPECT_EQ(4.5, af1({1}, {{"y", 2.5}}).as<double>());
+  nd::callable f1([](int x, double y) { return 2.0 * x + y; }, "y");
+  EXPECT_ARRAY_EQ(4.5, f1({1}, {{"y", 2.5}}));
 
-  nd::callable af2 = nd::functional::apply([](int x, int y) { return x - y; });
-  EXPECT_EQ(-4, af2(3, 7).as<int>());
+  nd::callable f2([](int x, int y) { return x - y; });
+  EXPECT_ARRAY_EQ(-4, f2(3, 7).as<int>());
 
-  nd::callable af3 = nd::functional::apply([](int x, int y) { return x - y; }, "y");
-  EXPECT_EQ(-4, af3({3}, {{"y", 7}}).as<int>());
+  nd::callable f3([](int x, int y) { return x - y; }, "y");
+  EXPECT_ARRAY_EQ(-4, f3({3}, {{"y", 7}}).as<int>());
 }
 
 TEST(Callable, CallOperator)
 {
-  nd::callable f = nd::functional::apply(&func);
+  nd::callable f([](int x, double y) { return 2.0 * x + y; });
   // Calling with positional arguments
   EXPECT_EQ(4.5, f(1, 2.5).as<double>());
   EXPECT_EQ(7.5, f(2, 3.5).as<double>());

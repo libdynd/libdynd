@@ -182,8 +182,9 @@ TEST(StructType, CanonicalType)
 
   // Struct with three fields
   ndt::type d1 = ndt::convert_type::make(ndt::type::make<dynd::complex<double>>(), ndt::type::make<float>());
-  ndt::type d2 = ndt::make_type<ndt::adapt_type>(
-      ndt::type::make<int32_t>(), ndt::make_fixed_bytes(sizeof(int32_t), alignof(int32_t)), nd::byteswap, nd::byteswap);
+  ndt::type d2 = ndt::make_type<ndt::adapt_type>(ndt::type::make<int32_t>(),
+                                                 ndt::make_fixed_bytes(sizeof(int32_t), alignof(int32_t)),
+                                                 nd::byteswap::get(), nd::byteswap::get());
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_32);
   dt = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
   EXPECT_EQ(ndt::struct_type::make({"x", "y", "z"},
@@ -194,8 +195,9 @@ TEST(StructType, CanonicalType)
 TEST(StructType, IsExpression)
 {
   ndt::type d1 = ndt::type::make<float>();
-  ndt::type d2 = ndt::make_type<ndt::adapt_type>(
-      ndt::type::make<int32_t>(), ndt::make_fixed_bytes(sizeof(int32_t), alignof(int32_t)), nd::byteswap, nd::byteswap);
+  ndt::type d2 = ndt::make_type<ndt::adapt_type>(ndt::type::make<int32_t>(),
+                                                 ndt::make_fixed_bytes(sizeof(int32_t), alignof(int32_t)),
+                                                 nd::byteswap::get(), nd::byteswap::get());
   ndt::type d3 = ndt::fixed_string_type::make(5, string_encoding_utf_32);
   ndt::type d = ndt::struct_type::make({"x", "y", "z"}, {d1, d2, d3});
 
