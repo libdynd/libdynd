@@ -7,7 +7,7 @@
 #include <dynd/kernels/assign_na_kernel.hpp>
 #include <dynd/kernels/is_avail_kernel.hpp>
 #include <dynd/math.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/call.hpp>
 #include <dynd/func/elwise.hpp>
 
@@ -34,7 +34,7 @@ DYND_API nd::callable nd::is_avail::make()
     dim_children[tp_id - fixed_dim_type_id] = functional::elwise(self);
   }
 
-  return functional::multidispatch(
+  return functional::dispatch(
       ndt::type("(Any) -> Any"),
       [](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp) -> callable & {
         callable *child = nullptr;
@@ -78,7 +78,7 @@ DYND_API nd::callable nd::assign_na::make()
     dim_children[tp_id - fixed_dim_type_id] = functional::elwise(self);
   }
 
-  return functional::multidispatch(
+  return functional::dispatch(
       t, [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) -> callable & {
         callable *child = nullptr;
         if (dst_tp.get_kind() == option_kind) {

@@ -274,7 +274,6 @@ set(libdynd_SRC
     src/dynd/func/max.cpp
     src/dynd/func/min.cpp
     src/dynd/func/mean.cpp
-    src/dynd/func/multidispatch.cpp
     src/dynd/func/neighborhood.cpp
     src/dynd/func/option.cpp
     src/dynd/func/outer.cpp
@@ -300,7 +299,6 @@ set(libdynd_SRC
     include/dynd/func/max.hpp
     include/dynd/func/mean.hpp
     include/dynd/func/min.hpp
-    include/dynd/func/multidispatch.hpp
     include/dynd/func/neighborhood.hpp
     include/dynd/func/option.hpp
     include/dynd/func/outer.hpp
@@ -400,6 +398,7 @@ set(libdynd_SRC
     src/dynd/convert.cpp
     src/dynd/float16.cpp
     src/dynd/float128.cpp
+    src/dynd/functional.cpp
     src/dynd/int128.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp

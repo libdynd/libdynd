@@ -8,7 +8,7 @@
 
 #include <dynd/callable.hpp>
 #include <dynd/func/elwise.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/random.hpp>
 #include <dynd/func/callable_registry.hpp>
 #include <dynd/func/arithmetic.hpp>

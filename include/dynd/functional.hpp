@@ -8,6 +8,7 @@
 #include <numeric>
 
 #include <dynd/kernels/adapt_kernel.hpp>
+#include <dynd/func/call.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
 #include <dynd/func/permute.hpp>
@@ -35,7 +36,7 @@ namespace nd {
     }
 
     template <typename DispatcherType>
-    callable multidispatch(const ndt::type &tp, const DispatcherType &dispatcher)
+    callable dispatch(const ndt::type &tp, const DispatcherType &dispatcher)
     {
       return make_callable<dispatcher_callable<DispatcherType>, multidispatch_kernel<DispatcherType>>(tp, dispatcher);
     }
@@ -67,16 +68,15 @@ namespace nd {
               child;
         }
 
-        return functional::multidispatch(
-            tp, [children, dispatcher, on_null](const ndt::type &dst_tp, intptr_t nsrc,
-                                                const ndt::type *src_tp) mutable -> callable & {
-              callable &child = children[dispatcher(dst_tp, nsrc, src_tp)];
-              if (child.is_null()) {
-                return on_null();
-              }
+        return functional::dispatch(tp, [children, dispatcher, on_null](const ndt::type &dst_tp, intptr_t nsrc,
+                                                                        const ndt::type *src_tp) mutable -> callable & {
+          callable &child = children[dispatcher(dst_tp, nsrc, src_tp)];
+          if (child.is_null()) {
+            return on_null();
+          }
 
-              return child;
-            });
+          return child;
+        });
       }
 
       template <typename IteratorType, typename OnNullType>

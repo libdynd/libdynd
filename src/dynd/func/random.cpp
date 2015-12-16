@@ -1,8 +1,7 @@
 #include <chrono>
 
-#include <dynd/func/elwise.hpp>
 #include <dynd/func/random.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/kernels/uniform_kernel.hpp>
 
 using namespace std;
@@ -28,9 +27,9 @@ DYND_API nd::callable nd::random::uniform::make()
     children[pair.first] = pair.second;
   }
 
-  return functional::elwise(functional::multidispatch(
-      ndt::type("(a: ?R, b: ?R) -> R"),
-      [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) -> callable & {
+  return functional::elwise(
+      functional::dispatch(ndt::type("(a: ?R, b: ?R) -> R"), [](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                                                const ndt::type *DYND_UNUSED(src_tp)) -> callable & {
         callable &child = children[dst_tp.get_type_id()];
         if (child.is_null()) {
           throw std::runtime_error("assignment error");

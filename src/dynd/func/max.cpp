@@ -4,7 +4,7 @@
 //
 
 #include <dynd/kernels/max_kernel.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/reduction.hpp>
 #include <dynd/func/max.hpp>
 #include <dynd/types/scalar_kind_type.hpp>
@@ -17,7 +17,7 @@ DYND_API nd::callable nd::max::make()
   auto children = callable::make_all<max_kernel, arithmetic_type_ids>();
 
   return functional::reduction(
-      functional::multidispatch(ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
+      functional::dispatch(ndt::callable_type::make(ndt::scalar_kind_type::make(), ndt::scalar_kind_type::make()),
                                 [children](const ndt::type &DYND_UNUSED(dst_tp), intptr_t DYND_UNUSED(nsrc),
                                            const ndt::type *src_tp) mutable -> callable & {
                                   callable &child = children[src_tp[0].get_type_id()];

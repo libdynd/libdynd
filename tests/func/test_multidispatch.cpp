@@ -11,9 +11,7 @@
 #include "inc_gtest.hpp"
 #include "dynd_assertions.hpp"
 
-#include <dynd/array.hpp>
-#include <dynd/func/elwise.hpp>
-#include <dynd/func/multidispatch.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/func/random.hpp>
 
 using namespace std;
