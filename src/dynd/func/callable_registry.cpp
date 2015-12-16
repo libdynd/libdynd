@@ -72,68 +72,41 @@ static nd::callable make_ufunc(T0 f0, T1 f1, T2 f2, T3 f3, T4 f4, T5 f5, T6 f6, 
 namespace {
 template <typename T>
 struct add {
-  inline T operator()(T x, T y) const
-  {
-    return x + y;
-  }
+  inline T operator()(T x, T y) const { return x + y; }
 };
 template <typename T>
 struct subtract {
-  inline T operator()(T x, T y) const
-  {
-    return x - y;
-  }
+  inline T operator()(T x, T y) const { return x - y; }
 };
 template <typename T>
 struct multiply {
-  inline T operator()(T x, T y) const
-  {
-    return x * y;
-  }
+  inline T operator()(T x, T y) const { return x * y; }
 };
 template <typename T>
 struct divide {
-  inline T operator()(T x, T y) const
-  {
-    return x / y;
-  }
+  inline T operator()(T x, T y) const { return x / y; }
 };
 template <typename T>
 struct negative {
-  inline T operator()(T x) const
-  {
-    return -x;
-  }
+  inline T operator()(T x) const { return -x; }
 };
 template <typename T>
 struct sign {
   // Note that by returning `x` in the else case, NaN will pass
   // through
-  inline T operator()(T x) const
-  {
-    return x > T(0) ? 1 : (x < T(0) ? -1 : x);
-  }
+  inline T operator()(T x) const { return x > T(0) ? 1 : (x < T(0) ? -1 : x); }
 };
 template <>
 struct sign<int128> {
-  inline int128 operator()(const int128 &x) const
-  {
-    return x.is_negative() ? -1 : (x == 0 ? 0 : 1);
-  }
+  inline int128 operator()(const int128 &x) const { return x.is_negative() ? -1 : (x == 0 ? 0 : 1); }
 };
 template <>
 struct sign<uint128> {
-  inline uint128 operator()(const uint128 &x) const
-  {
-    return x == 0 ? 0 : 1;
-  }
+  inline uint128 operator()(const uint128 &x) const { return x == 0 ? 0 : 1; }
 };
 template <typename T>
 struct conj_fn {
-  inline T operator()(T x) const
-  {
-    return conj(x);
-  };
+  inline T operator()(T x) const { return conj(x); };
 };
 #if !(defined(_MSC_VER) && _MSC_VER < 1700)
 template <typename T>
@@ -143,9 +116,11 @@ struct logaddexp {
     // log(exp(x) + exp(y))
     if (x > y) {
       return x + log1p(exp(y - x));
-    } else if (x <= y) {
+    }
+    else if (x <= y) {
       return y + log1p(exp(x - y));
-    } else {
+    }
+    else {
       // a NaN, +inf/+inf, or -inf/-inf
       return x + y;
     }
@@ -159,9 +134,11 @@ struct logaddexp2 {
     // log2(exp2(x) + exp2(y))
     if (x > y) {
       return x + log2_e * log1p(exp2(y - x));
-    } else if (x <= y) {
+    }
+    else if (x <= y) {
       return y + log2_e * log1p(exp2(x - y));
-    } else {
+    }
+    else {
       // a NaN, +inf/+inf, or -inf/-inf
       return x + y;
     }
@@ -185,7 +162,7 @@ std::map<std::string, nd::callable> &func::get_regfunctions()
                             add<float>(), add<double>(), add<complex<float>>(),
                             add<complex<double>>()));
     */
-    registry["add"] = nd::add;
+    registry["add"] = nd::add::get();
     registry["subtract"] = make_ufunc(subtract<int32_t>(), subtract<int64_t>(), subtract<int128>(), subtract<float>(),
                                       subtract<double>(), subtract<complex<float>>(), subtract<complex<double>>());
     registry["multiply"] =
@@ -227,12 +204,12 @@ std::map<std::string, nd::callable> &func::get_regfunctions()
 
     registry["power"] = make_ufunc(&powf, static_cast<double (*)(double, double)>(&::pow));
 
-    registry["uniform"] = nd::random::uniform;
-    registry["take"] = nd::take;
-    registry["sum"] = nd::sum;
-    registry["is_avail"] = nd::is_avail;
-    registry["min"] = nd::min;
-    registry["max"] = nd::max;
+    registry["uniform"] = nd::random::uniform::get();
+    registry["take"] = nd::take::get();
+    registry["sum"] = nd::sum::get();
+    registry["is_avail"] = nd::is_avail::get();
+    registry["min"] = nd::min::get();
+    registry["max"] = nd::max::get();
   }
 
   return registry;
@@ -245,7 +222,8 @@ nd::callable func::get_regfunction(const std::string &name)
   map<std::string, nd::callable>::const_iterator it = registry.find(name);
   if (it != registry.end()) {
     return it->second;
-  } else {
+  }
+  else {
     stringstream ss;
     ss << "No dynd function ";
     print_escaped_utf8_string(ss, name);
