@@ -155,16 +155,21 @@ namespace nd {
 
     const char *static_data() const { return reinterpret_cast<const char *>(this + 1); }
 
+    virtual callable &overload(const ndt::type &DYND_UNUSED(ret_tp), intptr_t DYND_UNUSED(narg),
+                               const ndt::type *DYND_UNUSED(arg_tp))
+    {
+      throw std::runtime_error("callable is not overloadable");
+    }
+
     array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      char *const *src_data, intptr_t nkwd, const array *kwds,
                      const std::map<std::string, ndt::type> &tp_vars);
 
     array call(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
-                     char *const *src_data, intptr_t nkwd, const array *kwds,
-                     const std::map<std::string, ndt::type> &tp_vars)
-{
+               char *const *src_data, intptr_t nkwd, const array *kwds, const std::map<std::string, ndt::type> &tp_vars)
+    {
       return (*this)(dst_tp, nsrc, src_tp, src_arrmeta, src_data, nkwd, kwds, tp_vars);
-}
+    }
 
     array operator()(ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp, const char *const *src_arrmeta,
                      array *const *src_data, intptr_t nkwd, const array *kwds,

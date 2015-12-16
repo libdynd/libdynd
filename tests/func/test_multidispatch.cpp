@@ -126,11 +126,15 @@ TEST(MultiDispatchCallable, Values)
 
 TEST(Multidispatch, Unary)
 {
-  nd::callable func0 = nd::functional::apply([](int32) { return 0; });
-  nd::callable func1 = nd::functional::apply([](float32) { return 1; });
-  nd::callable func2 = nd::functional::apply([](float64) { return 2; });
+  nd::callable f0([](int) { return 0; });
+  nd::callable f1([](float) { return 1; });
+  nd::callable f2([](double) { return 2; });
 
-  nd::callable func = nd::functional::multidispatch({func0, func1, func2});
+  nd::callable f = nd::functional::multidispatch({f0, f1, f2});
+  EXPECT_EQ(f0, f.get_overload(ndt::type::make<int>(), {ndt::type::make<int>()}));
+  EXPECT_EQ(f1, f.get_overload(ndt::type::make<int>(), {ndt::type::make<float>()}));
+  EXPECT_EQ(f2, f.get_overload(ndt::type::make<int>(), {ndt::type::make<double>()}));
+
   /*
     EXPECT_ARRAY_EQ(0, func(int32()));
     EXPECT_ARRAY_EQ(1, func(float32()));
@@ -139,12 +143,16 @@ TEST(Multidispatch, Unary)
     EXPECT_THROW(func(float16()), runtime_error);
   */
 
-  func = nd::functional::multidispatch(ndt::type("(Any) -> Any"), {func0, func1, func2});
-  EXPECT_ARRAY_EQ(0, func(int32()));
-  EXPECT_ARRAY_EQ(1, func(float32()));
-  EXPECT_ARRAY_EQ(2, func(float64()));
-  EXPECT_THROW(func(int64()), runtime_error);
-  EXPECT_THROW(func(float16()), runtime_error);
+  f = nd::functional::multidispatch(ndt::type("(Any) -> Any"), {f0, f1, f2});
+  EXPECT_EQ(f0, f.get_overload(ndt::type::make<int>(), {ndt::type::make<int>()}));
+  EXPECT_EQ(f1, f.get_overload(ndt::type::make<int>(), {ndt::type::make<float>()}));
+  EXPECT_EQ(f2, f.get_overload(ndt::type::make<int>(), {ndt::type::make<double>()}));
+
+  EXPECT_ARRAY_EQ(0, f(int()));
+  EXPECT_ARRAY_EQ(1, f(float()));
+  EXPECT_ARRAY_EQ(2, f(double()));
+  EXPECT_THROW(f(int64()), runtime_error);
+  EXPECT_THROW(f(float16()), runtime_error);
 }
 
 TEST(Multidispatch, UnaryWithPermutation)
@@ -167,28 +175,23 @@ TEST(Multidispatch, Binary)
   nd::callable func1 = nd::functional::apply([](int32, float32) { return 1; });
   nd::callable func2 = nd::functional::apply([](int32, float64) { return 2; });
   nd::callable func3 = nd::functional::apply([](float32, int32) { return 3; });
-  nd::callable func4 =
-      nd::functional::apply([](float64, float32) { return 4; });
-  nd::callable func5 =
-      nd::functional::apply([](float64, float64) { return 5; });
+  nd::callable func4 = nd::functional::apply([](float64, float32) { return 4; });
+  nd::callable func5 = nd::functional::apply([](float64, float64) { return 5; });
 
-  nd::callable func =
-      nd::functional::multidispatch({func0, func1, func2, func3, func4, func5});
-/*
-  EXPECT_ARRAY_EQ(0, func(int32(), int32()));
-  EXPECT_ARRAY_EQ(1, func(int32(), float32()));
-  EXPECT_ARRAY_EQ(2, func(int32(), float64()));
-  EXPECT_ARRAY_EQ(3, func(float32(), int32()));
-  EXPECT_ARRAY_EQ(4, func(float64(), float32()));
-  EXPECT_ARRAY_EQ(5, func(float64(), float64()));
-  EXPECT_THROW(func(int32()), runtime_error);
-  EXPECT_THROW(func(float32()), runtime_error);
-  EXPECT_THROW(func(int64()), runtime_error);
-*/
+  nd::callable func = nd::functional::multidispatch({func0, func1, func2, func3, func4, func5});
+  /*
+    EXPECT_ARRAY_EQ(0, func(int32(), int32()));
+    EXPECT_ARRAY_EQ(1, func(int32(), float32()));
+    EXPECT_ARRAY_EQ(2, func(int32(), float64()));
+    EXPECT_ARRAY_EQ(3, func(float32(), int32()));
+    EXPECT_ARRAY_EQ(4, func(float64(), float32()));
+    EXPECT_ARRAY_EQ(5, func(float64(), float64()));
+    EXPECT_THROW(func(int32()), runtime_error);
+    EXPECT_THROW(func(float32()), runtime_error);
+    EXPECT_THROW(func(int64()), runtime_error);
+  */
 
-  func =
-      nd::functional::multidispatch(ndt::type("(Any, Any) -> Any"),
-                                    {func0, func1, func2, func3, func4, func5});
+  func = nd::functional::multidispatch(ndt::type("(Any, Any) -> Any"), {func0, func1, func2, func3, func4, func5});
   EXPECT_ARRAY_EQ(0, func(int32(), int32()));
   EXPECT_ARRAY_EQ(1, func(int32(), float32()));
   EXPECT_ARRAY_EQ(2, func(int32(), float64()));

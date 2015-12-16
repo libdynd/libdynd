@@ -10,6 +10,7 @@
 #include <dynd/iterator.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/kernels/multidispatch_kernel.hpp>
+#include <dynd/callables/dispatcher_callable.hpp>
 
 namespace dynd {
 namespace nd {
@@ -32,7 +33,7 @@ namespace nd {
     template <typename DispatcherType>
     callable multidispatch(const ndt::type &tp, const DispatcherType &dispatcher)
     {
-      return callable::make<multidispatch_kernel<DispatcherType>>(tp, dispatcher);
+      return make_callable<dispatcher_callable<DispatcherType>, multidispatch_kernel<DispatcherType>>(tp, dispatcher);
     }
 
     namespace detail {
