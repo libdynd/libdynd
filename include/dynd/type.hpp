@@ -995,6 +995,13 @@ namespace ndt {
   };
 
   template <>
+  struct traits<string> {
+    static const bool is_same_layout = true;
+
+    static type equivalent() { return type(string_type_id); }
+  };
+
+  template <>
   struct traits<type> {
     static const bool is_same_layout = true;
 

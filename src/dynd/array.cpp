@@ -1158,7 +1158,7 @@ void nd::array::debug_print(std::ostream &o, const std::string &indent) const
   if (intrusive_ptr<memory_block_data>::get()) {
     const array_preamble *ndo = get();
     o << " address: " << (void *)intrusive_ptr<memory_block_data>::get() << "\n";
-    o << " refcount: " << ndo->m_use_count << "\n";
+    o << " refcount: " << static_cast<long>(ndo->m_use_count) << "\n";
     o << " type:\n";
     o << "  pointer: " << (void *)ndo->tp.extended() << "\n";
     o << "  type: " << get_type() << "\n";

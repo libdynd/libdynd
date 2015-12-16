@@ -199,7 +199,7 @@ namespace nd {
     }
 
     template <typename CallableType, typename... T, typename = std::enable_if_t<all_char_string_params<T...>::value>>
-    explicit callable(CallableType f, T &&... names);
+    callable(CallableType f, T &&... names);
 
     bool is_null() const { return get() == NULL; }
 

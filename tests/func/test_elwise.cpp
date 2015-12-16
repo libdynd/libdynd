@@ -11,58 +11,18 @@
 #include "inc_gtest.hpp"
 
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/func/elwise.hpp>
-#include <dynd/func/take.hpp>
-#include <dynd/array.hpp>
+#include <dynd/functional.hpp>
 #include <dynd/json_parser.hpp>
 #include "../dynd_assertions.hpp"
 
 using namespace std;
 using namespace dynd;
 
-struct callable0 {
-  DYND_CUDA_HOST_DEVICE int operator()(int x, int y) const { return x + y; }
-};
-
-TEST(Elwise, UnaryExpr_FixedDim)
+TEST(Elwise, Unary_FixedDim)
 {
-  // Create an callable for converting string to int
-  nd::callable af_base =
-      make_callable_from_assignment(ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
-  // Lift the callable
-  nd::callable af = nd::functional::elwise(af_base);
-
-  // Test it on some data
-  const char *in[3] = {"172", "-139", "12345"};
-  nd::array a = nd::empty("3 * string");
-  a.vals() = in;
-  nd::array b = af(a);
-  EXPECT_EQ(ndt::type("3 * int32"), b.get_type());
-  EXPECT_EQ(172, b(0).as<int>());
-  EXPECT_EQ(-139, b(1).as<int>());
-  EXPECT_EQ(12345, b(2).as<int>());
-}
-
-TEST(Elwise, UnaryExpr_StridedDim)
-{
-  // Create an callable for converting string to int
-  nd::callable af_base =
-      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
-  // Lift the callable
-  nd::callable af = nd::functional::elwise(af_base);
-
-  // Test it on some data
-  ckernel_builder<kernel_request_host> ckb;
-  nd::array in = nd::empty(3, "fixed_string[16]");
-  in(0).vals() = "172";
-  in(1).vals() = "-139";
-  in(2).vals() = "12345";
-  nd::array out = af(in);
-  EXPECT_EQ(ndt::type("3 * int32"), out.get_type());
-  EXPECT_EQ(172, out(0).as<int>());
-  EXPECT_EQ(-139, out(1).as<int>());
-  EXPECT_EQ(12345, out(2).as<int>());
+  nd::callable f = nd::functional::elwise([](dynd::string s) { return s.size(); });
+  EXPECT_ARRAY_EQ((nd::array{static_cast<size_t>(5), static_cast<size_t>(2), static_cast<size_t>(6)}),
+                  f({{"Hello", ", ", "world!"}}, {}));
 }
 
 TEST(Elwise, UnaryExpr_VarDim)
@@ -186,6 +146,12 @@ TEST(Elwise, UnaryExpr_MultiDimVarToVarDim)
   EXPECT_EQ(4, out(2, 2).as<int>());
 }
 
+TEST(Elwise, Binary_FixedDim_FixedDim)
+{
+  nd::callable f = nd::functional::elwise([](int x, int y) { return x + y; });
+  EXPECT_ARRAY_EQ((nd::array{3, 5, 7}), f({{0, 1, 2}, {3, 4, 5}}, {}));
+}
+
 /*
 // TODO Reenable once there's a convenient way to make the binary callable
 TEST(LiftCallable, Expr_MultiDimVarToVarDim) {
@@ -230,27 +196,3 @@ nd::array((int32_t)0)).get_type();
     EXPECT_EQ(12, out(2, 2).as<int>());
 }
 */
-
-TEST(Elwise, Simple)
-{
-  nd::callable af;
-
-  nd::array a = parse_json("3 * int", "[0, 1, 2]");
-  nd::array b = parse_json("3 * int", "[3, 4, 5]");
-
-  af = nd::functional::elwise(nd::functional::apply<callable0>());
-  EXPECT_ARRAY_EQ(nd::array({3, 5, 7}), af(a, b));
-
-#ifdef __CUDACC__
-//  a = a.to_cuda_device();
-//  b = b.to_cuda_device();
-
-//  af = nd::functional::apply<kernel_request_cuda_device, xcallable0>();
-//  std::cout << af << std::endl;
-// EXPECT_ARRAY_EQ(nd::array({3, 5, 7}).to_cuda_device(), nd::elwise(a, b,
-// kwds("func", af)));
-
-//  baf = nd::functional::elwise(af);
-//  EXPECT_ARRAY_EQ(nd::array({3, 5, 7}).to_cuda_device(), baf(a, b));
-#endif
-}
