@@ -122,15 +122,15 @@ TEST(DataShapeParser, Unaligned)
 
 TEST(DataShapeParser, Option)
 {
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(ndt::make_type<bool1>())),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())),
             ndt::type("Fixed * option[bool]"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(ndt::make_type<bool1>())), ndt::type("Fixed * ?bool"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(ndt::make_fixed_dim_kind(ndt::make_type<float>()))),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>())), ndt::type("Fixed * ?bool"));
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<ndt::option_type>(ndt::make_fixed_dim_kind(ndt::make_type<float>()))),
             ndt::type("Fixed * option[Fixed * float32]"));
-  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::option_type::make(ndt::make_fixed_dim_kind(ndt::make_type<float>()))),
+  EXPECT_EQ(ndt::make_fixed_dim_kind(ndt::make_type<ndt::option_type>(ndt::make_fixed_dim_kind(ndt::make_type<float>()))),
             ndt::type("Fixed * ?Fixed * float32"));
-  EXPECT_EQ(ndt::struct_type::make({"x", "y"}, {ndt::option_type::make(ndt::make_type<int32_t>()),
-                                                ndt::option_type::make(ndt::make_type<int64_t>())}),
+  EXPECT_EQ(ndt::struct_type::make({"x", "y"}, {ndt::make_type<ndt::option_type>(ndt::make_type<int32_t>()),
+                                                ndt::make_type<ndt::option_type>(ndt::make_type<int64_t>())}),
             ndt::type("{x : ?int32, y : ?int64}"));
 }
 

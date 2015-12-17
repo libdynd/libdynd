@@ -8,7 +8,7 @@
 #include <numeric>
 
 #include <dynd/kernels/adapt_kernel.hpp>
-#include <dynd/func/call.hpp>
+#include <dynd/kernels/call_kernel.hpp>
 #include <dynd/func/elwise.hpp>
 #include <dynd/func/outer.hpp>
 #include <dynd/func/permute.hpp>
@@ -20,6 +20,12 @@
 namespace dynd {
 namespace nd {
   namespace functional {
+
+    template <typename FuncType>
+    callable call(const ndt::type &tp)
+    {
+      return callable::make<call_kernel<FuncType>>(tp);
+    }
 
     /**
      * Creates a multiple dispatch callable out of a set of callables. The

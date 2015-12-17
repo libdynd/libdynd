@@ -450,7 +450,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
       *out_data = value;
     }
     else {
-      typed_data_assign(tp, arrmeta, out_data, ndt::option_type::make(ndt::make_type<bool1>()), NULL, &value);
+      typed_data_assign(tp, arrmeta, out_data, ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), NULL, &value);
     }
     rbegin = begin;
   }
@@ -466,7 +466,7 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta, char *ou
   const char *nbegin, *nend;
   bool escaped = false;
   if (option && parse::parse_token_no_ws(begin, end, "null")) {
-    ndt::option_type::make(tp).extended<ndt::option_type>()->assign_na(arrmeta, out_data, ectx);
+    ndt::make_type<ndt::option_type>(tp).extended<ndt::option_type>()->assign_na(arrmeta, out_data, ectx);
   }
   else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
     parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend, false, ectx->errmode);
@@ -982,7 +982,7 @@ static ndt::type discover_type(const char *&begin, const char *end)
     throw parse::parse_error(begin, "invalid json value");
   case 'n':
     if (parse_token(begin, end, "null")) {
-      return ndt::option_type::make(ndt::type("Any"));
+      return ndt::make_type<ndt::option_type>(ndt::type("Any"));
     }
     throw parse::parse_error(begin, "invalid json value");
   default:

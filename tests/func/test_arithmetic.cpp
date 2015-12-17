@@ -16,7 +16,7 @@
 #include <dynd/array.hpp>
 #include <dynd/json_parser.hpp>
 #include <dynd/func/take.hpp>
-#include <dynd/func/option.hpp>
+#include <dynd/option.hpp>
 
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/arithmetic.hpp>

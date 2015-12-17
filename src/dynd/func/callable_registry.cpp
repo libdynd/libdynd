@@ -6,9 +6,8 @@
 #include <map>
 #include <cmath>
 
-#include <dynd/callable.hpp>
-#include <dynd/func/elwise.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/option.hpp>
 #include <dynd/func/random.hpp>
 #include <dynd/func/callable_registry.hpp>
 #include <dynd/func/arithmetic.hpp>
@@ -16,7 +15,7 @@
 #include <dynd/func/sum.hpp>
 #include <dynd/func/min.hpp>
 #include <dynd/func/max.hpp>
-#include <dynd/func/option.hpp>
+
 
 using namespace std;
 using namespace dynd;
@@ -149,19 +148,8 @@ struct logaddexp2 {
 
 std::map<std::string, nd::callable> &func::get_regfunctions()
 {
-  // Probably want to use a concurrent_hash_map, like
-  // http://www.threadingbuildingblocks.org/docs/help/reference/containers_overview/concurrent_hash_map_cls.htm
   static map<std::string, nd::callable> registry;
   if (registry.empty()) {
-    // Arithmetic
-    /*
-      func::set_regfunction(
-          "add", make_ufunc(add<int32_t>(), add<int64_t>(), add<int128>(),
-                            add<uint32_t>(), add<uint64_t>(),
-      add<dynd_uint128>(),
-                            add<float>(), add<double>(), add<complex<float>>(),
-                            add<complex<double>>()));
-    */
     registry["add"] = nd::add::get();
     registry["subtract"] = make_ufunc(subtract<int32_t>(), subtract<int64_t>(), subtract<int128>(), subtract<float>(),
                                       subtract<double>(), subtract<complex<float>>(), subtract<complex<double>>());

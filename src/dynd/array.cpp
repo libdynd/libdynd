@@ -9,7 +9,7 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/comparison.hpp>
 #include <dynd/func/elwise.hpp>
-#include <dynd/func/option.hpp>
+#include <dynd/option.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/fixed_dim_type.hpp>
 #include <dynd/types/tuple_type.hpp>

@@ -331,7 +331,7 @@ namespace nd {
         if (kwds_as_vector[j].is_null()) {
           ndt::type actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
           if (actual_tp.is_symbolic()) {
-            actual_tp = ndt::option_type::make(ndt::make_type<void>());
+            actual_tp = ndt::make_type<ndt::option_type>(ndt::make_type<void>());
           }
           kwds_as_vector[j] = empty(actual_tp);
           kwds_as_vector[j].assign_na();

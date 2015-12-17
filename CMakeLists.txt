@@ -275,7 +275,6 @@ set(libdynd_SRC
     src/dynd/func/min.cpp
     src/dynd/func/mean.cpp
     src/dynd/func/neighborhood.cpp
-    src/dynd/func/option.cpp
     src/dynd/func/outer.cpp
     src/dynd/func/permute.cpp
     src/dynd/func/random.cpp
@@ -300,7 +299,6 @@ set(libdynd_SRC
     include/dynd/func/mean.hpp
     include/dynd/func/min.hpp
     include/dynd/func/neighborhood.hpp
-    include/dynd/func/option.hpp
     include/dynd/func/outer.hpp
     include/dynd/func/permute.hpp
     include/dynd/func/random.hpp
@@ -400,6 +398,7 @@ set(libdynd_SRC
     src/dynd/float128.cpp
     src/dynd/functional.cpp
     src/dynd/int128.cpp
+    src/dynd/option.cpp
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/type.cpp
@@ -449,6 +448,7 @@ set(libdynd_SRC
     include/dynd/json_formatter.hpp
     include/dynd/json_parser.hpp
     include/dynd/irange.hpp
+    include/dynd/option.hpp
     include/dynd/parser_util.hpp
     include/dynd/platform_definitions.hpp
     include/dynd/shortvector.hpp

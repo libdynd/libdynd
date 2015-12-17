@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include <dynd/kernels/base_kernel.hpp>
+#include <dynd/option.hpp>
 #include <dynd/kernels/total_order_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/kernels/tuple_comparison_kernels.hpp>
-#include <dynd/func/option.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/type.hpp>
 
@@ -309,8 +308,8 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
-                                                nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
+                                                nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
   };
@@ -362,8 +361,8 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
-                                                nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
+                                                nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
   };
@@ -426,8 +425,8 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
-                                                nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
+                                                nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
   };

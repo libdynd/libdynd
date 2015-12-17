@@ -83,7 +83,7 @@ ndt::type ndt::detail::internal_substitute(const ndt::type &pattern, const std::
     return ndt::tuple_type::make(
         substitute_type_array(pattern.extended<tuple_type>()->get_field_types(), typevars, concrete));
   case option_type_id:
-    return ndt::option_type::make(
+    return ndt::make_type<ndt::option_type>(
         ndt::substitute(pattern.extended<option_type>()->get_value_type(), typevars, concrete));
   case callable_type_id:
     return ndt::callable_type::make(

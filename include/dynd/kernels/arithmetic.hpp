@@ -1,7 +1,6 @@
 #pragma once
 
-#include <dynd/kernels/base_kernel.hpp>
-#include <dynd/func/option.hpp>
+#include <dynd/option.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/apply.hpp>
 
@@ -100,7 +99,7 @@ namespace nd {
       auto k = FuncType::get().get();
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(), src_tp[1]};
       k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
-      dst_tp = ndt::option_type::make(dst_tp);
+      dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
     }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
@@ -161,7 +160,7 @@ namespace nd {
       auto k = FuncType::get().get();
       const ndt::type child_src_tp[2] = {src_tp[0], src_tp[1].extended<ndt::option_type>()->get_value_type()};
       k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
-      dst_tp = ndt::option_type::make(dst_tp);
+      dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
     }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
@@ -227,7 +226,7 @@ namespace nd {
       const ndt::type child_src_tp[2] = {src_tp[0].extended<ndt::option_type>()->get_value_type(),
                                          src_tp[1].extended<ndt::option_type>()->get_value_type()};
       k->resolve_dst_type(k->static_data(), data, dst_tp, nsrc, child_src_tp, nkwd, kwds, tp_vars);
-      dst_tp = ndt::option_type::make(dst_tp);
+      dst_tp = ndt::make_type<ndt::option_type>(dst_tp);
     }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
@@ -277,7 +276,7 @@ namespace ndt {
 #define DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(NAME)                                                                      \
   template <type_id_t Src0TypeID>                                                                                      \
   struct traits<nd::NAME##_kernel<Src0TypeID>> {                                                                       \
-    static type equivalent() { return ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>(); }   \
+    static type equivalent() { return ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>(); }    \
   };
 
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(plus)
@@ -294,7 +293,7 @@ namespace ndt {
   struct traits<nd::NAME##_kernel<Src0TypeID, Src1TypeID>> {                                                           \
     static type equivalent()                                                                                           \
     {                                                                                                                  \
-      return ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID, Src1TypeID>::f)>();                  \
+      return ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID, Src1TypeID>::f)>();                   \
     }                                                                                                                  \
   };
 

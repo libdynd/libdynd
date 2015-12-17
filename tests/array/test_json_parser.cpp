@@ -47,15 +47,9 @@ TEST(JSON, DiscoverFloat64)
   EXPECT_EQ(ndt::make_type<float64>(), ndt::json::discover("3.14"));
 }
 
-TEST(JSON, DiscoverString)
-{
-  EXPECT_EQ(ndt::type(string_type_id), ndt::json::discover("\"Hello, world!\""));
-}
+TEST(JSON, DiscoverString) { EXPECT_EQ(ndt::type(string_type_id), ndt::json::discover("\"Hello, world!\"")); }
 
-TEST(JSON, DiscoverOption)
-{
-  EXPECT_EQ(ndt::type("?Any"), ndt::json::discover("null"));
-}
+TEST(JSON, DiscoverOption) { EXPECT_EQ(ndt::type("?Any"), ndt::json::discover("null")); }
 
 TEST(JSON, DiscoverArray)
 {
@@ -140,17 +134,17 @@ TEST(JSONParser, BuiltinsFromBool)
   }
 
   // Handling of NULL with option[bool]
-  a = parse_json(ndt::option_type::make(ndt::make_type<bool1>()), "null");
-  EXPECT_EQ(ndt::option_type::make(ndt::make_type<bool1>()), a.get_type());
+  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "null");
+  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
-  a = parse_json(ndt::option_type::make(ndt::make_type<bool1>()), "\"NULL\"");
-  EXPECT_EQ(ndt::option_type::make(ndt::make_type<bool1>()), a.get_type());
+  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"NULL\"");
+  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
-  a = parse_json(ndt::option_type::make(ndt::make_type<bool1>()), "\"NA\"");
-  EXPECT_EQ(ndt::option_type::make(ndt::make_type<bool1>()), a.get_type());
+  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"NA\"");
+  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
-  a = parse_json(ndt::option_type::make(ndt::make_type<bool1>()), "\"\"");
-  EXPECT_EQ(ndt::option_type::make(ndt::make_type<bool1>()), a.get_type());
+  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"\"");
+  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
 
   // Handling of an NULL, invalid token, string with junk in it, empty string
@@ -211,11 +205,11 @@ TEST(JSONParser, OptionInt)
 {
   nd::array a, b, c;
 
-  a = parse_json(ndt::option_type::make(ndt::make_type<int8_t>()), "123");
-  EXPECT_EQ(ndt::option_type::make(ndt::make_type<int8_t>()), a.get_type());
+  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<int8_t>()), "123");
+  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<int8_t>()), a.get_type());
   EXPECT_EQ(123, a.as<int8_t>());
-  a = parse_json(ndt::option_type::make(ndt::make_type<int8_t>()), "null");
-  EXPECT_EQ(ndt::option_type::make(ndt::make_type<int8_t>()), a.get_type());
+  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<int8_t>()), "null");
+  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<int8_t>()), a.get_type());
   EXPECT_EQ(DYND_INT8_NA, *reinterpret_cast<const int8_t *>(a.cdata()));
   EXPECT_THROW(a.as<int8_t>(), overflow_error);
 
@@ -460,9 +454,9 @@ TEST(JSONParser, NestedListInts)
 TEST(JSONParser, Struct)
 {
   nd::array n;
-  ndt::type sdt =
-      ndt::struct_type::make({"id", "amount", "name", "when"}, {ndt::make_type<int>(),   ndt::make_type<double>(),
-                                                                ndt::make_type<ndt::string_type>(), ndt::date_type::make()});
+  ndt::type sdt = ndt::struct_type::make(
+      {"id", "amount", "name", "when"},
+      {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<ndt::string_type>(), ndt::date_type::make()});
 
   // A straightforward struct
   n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,"

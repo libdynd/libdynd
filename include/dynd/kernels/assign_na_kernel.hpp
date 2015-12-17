@@ -19,17 +19,15 @@ namespace nd {
 
     template <>
     struct assign_na_kernel<bool_type_id, bool_kind> : base_kernel<assign_na_kernel<bool_type_id, bool_kind>, 0> {
-      void single(char *dst, char *const *DYND_UNUSED(src))
-      {
-        *dst = 2;
-      }
+      void single(char *dst, char *const *DYND_UNUSED(src)) { *dst = 2; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                    const intptr_t *DYND_UNUSED(src_stride), size_t count)
       {
         if (dst_stride == 1) {
           memset(dst, 2, count);
-        } else {
+        }
+        else {
           for (size_t i = 0; i != count; ++i, dst += dst_stride) {
             *dst = 2;
           }
@@ -88,8 +86,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<complex_float32_type_id,
-                            complex_kind> : base_kernel<assign_na_kernel<complex_float32_type_id, complex_kind>, 0> {
+    struct assign_na_kernel<complex_float32_type_id, complex_kind>
+        : base_kernel<assign_na_kernel<complex_float32_type_id, complex_kind>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         reinterpret_cast<uint32_t *>(dst)[0] = DYND_FLOAT32_NA_AS_UINT;
@@ -107,8 +105,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<complex_float64_type_id,
-                            complex_kind> : base_kernel<assign_na_kernel<complex_float64_type_id, complex_kind>, 0> {
+    struct assign_na_kernel<complex_float64_type_id, complex_kind>
+        : base_kernel<assign_na_kernel<complex_float64_type_id, complex_kind>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         reinterpret_cast<uint64_t *>(dst)[0] = DYND_FLOAT64_NA_AS_UINT;
@@ -127,9 +125,7 @@ namespace nd {
 
     template <>
     struct assign_na_kernel<void_type_id, void_kind> : base_kernel<assign_na_kernel<void_type_id, void_kind>, 0> {
-      void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
-      {
-      }
+      void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
 
       void strided(char *DYND_UNUSED(dst), intptr_t DYND_UNUSED(dst_stride), char *const *DYND_UNUSED(src),
                    const intptr_t *DYND_UNUSED(src_stride), size_t DYND_UNUSED(count))
@@ -138,8 +134,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<fixed_dim_type_id,
-                            dim_kind> : base_virtual_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind>> {
+    struct assign_na_kernel<fixed_dim_type_id, dim_kind>
+        : base_virtual_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -200,8 +196,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<string_type_id, string_kind> : base_kernel<assign_na_kernel<string_type_id, string_kind>,
-                                                                       1> {
+    struct assign_na_kernel<string_type_id, string_kind>
+        : base_kernel<assign_na_kernel<string_type_id, string_kind>, 1> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         string *std = reinterpret_cast<string *>(dst);
@@ -225,12 +221,9 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<date_type_id, datetime_kind> : base_kernel<assign_na_kernel<date_type_id, datetime_kind>,
-                                                                       1> {
-      void single(char *dst, char *const *DYND_UNUSED(src))
-      {
-        *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA;
-      }
+    struct assign_na_kernel<date_type_id, datetime_kind>
+        : base_kernel<assign_na_kernel<date_type_id, datetime_kind>, 1> {
+      void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                    const intptr_t *DYND_UNUSED(src_stride), size_t count)
@@ -242,12 +235,9 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<time_type_id, datetime_kind> : base_kernel<assign_na_kernel<time_type_id, datetime_kind>,
-                                                                       1> {
-      void single(char *dst, char *const *DYND_UNUSED(src))
-      {
-        *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA;
-      }
+    struct assign_na_kernel<time_type_id, datetime_kind>
+        : base_kernel<assign_na_kernel<time_type_id, datetime_kind>, 1> {
+      void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                    const intptr_t *DYND_UNUSED(src_stride), size_t count)
@@ -259,12 +249,9 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<datetime_type_id,
-                            datetime_kind> : base_kernel<assign_na_kernel<datetime_type_id, datetime_kind>, 1> {
-      void single(char *dst, char *const *DYND_UNUSED(src))
-      {
-        *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA;
-      }
+    struct assign_na_kernel<datetime_type_id, datetime_kind>
+        : base_kernel<assign_na_kernel<datetime_type_id, datetime_kind>, 1> {
+      void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
                    const intptr_t *DYND_UNUSED(src_stride), size_t count)
@@ -287,10 +274,7 @@ namespace ndt {
 
   template <type_id_t Src0ValueTypeID>
   struct traits<nd::assign_na_kernel<Src0ValueTypeID>> {
-    static type equivalent()
-    {
-      return callable_type::make(option_type::make(Src0ValueTypeID));
-    }
+    static type equivalent() { return callable_type::make(make_type<option_type>(Src0ValueTypeID)); }
   };
 
 } // namespace dynd::ndt
