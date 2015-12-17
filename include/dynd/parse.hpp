@@ -627,92 +627,92 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char
   return false;
 }
 
-namespace parse {
-
-  /**
-   * A utility for checking whether a value would overflow when converted to
-   * the specified type.
-   *
-   * if (overflow_check<int8_t>(unsigned_value, is_negative)) {
-   *   throw overflow_error(...);
-   * }
-   *
-   * if (overflow_check<int8_t>(signed_value)) {
-   *   throw overflow_error(...);
-   * }
-   */
-  template <class T>
-  struct overflow_check;
-  template <>
-  struct overflow_check<signed char> {
-    inline static bool is_overflow(uint64_t value, bool negative)
-    {
-      return (value & ~0x7fULL) != 0 && !(negative && value == 0x80ULL);
-    }
-    inline static bool is_overflow(int64_t value) { return (value < -0x80) || (value > 0x7f); }
-  };
-  template <>
-  struct overflow_check<short> {
-    inline static bool is_overflow(uint64_t value, bool negative)
-    {
-      return (value & ~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
-    }
-    inline static bool is_overflow(int64_t value) { return (value < -0x8000) || (value > 0x7fff); }
-  };
-  template <>
-  struct overflow_check<int> {
-    inline static bool is_overflow(uint64_t value, bool negative)
-    {
-      return (value & ~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
-    }
-    inline static bool is_overflow(int64_t value) { return (value < -0x80000000LL) || (value > 0x7fffffffLL); }
-  };
-  template <>
-  struct overflow_check<long> {
-    inline static bool is_overflow(uint64_t value, bool negative)
-    {
+/**
+ * A utility for checking whether a value would overflow when converted to
+ * the specified type.
+ *
+ * if (overflow_check<int8_t>(unsigned_value, is_negative)) {
+ *   throw overflow_error(...);
+ * }
+ *
+ * if (overflow_check<int8_t>(signed_value)) {
+ *   throw overflow_error(...);
+ * }
+ */
+template <class T>
+struct overflow_check;
+template <>
+struct overflow_check<signed char> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
+    return (value & ~0x7fULL) != 0 && !(negative && value == 0x80ULL);
+  }
+  inline static bool is_overflow(int64_t value) { return (value < -0x80) || (value > 0x7f); }
+};
+template <>
+struct overflow_check<short> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
+    return (value & ~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
+  }
+  inline static bool is_overflow(int64_t value) { return (value < -0x8000) || (value > 0x7fff); }
+};
+template <>
+struct overflow_check<int> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
+    return (value & ~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
+  }
+  inline static bool is_overflow(int64_t value) { return (value < -0x80000000LL) || (value > 0x7fffffffLL); }
+};
+template <>
+struct overflow_check<long> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
 #if INT_MAX == LONG_MAX
-      return (value & ~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
+    return (value & ~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
 #else
-      return (value & ~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
+    return (value & ~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
 #endif
-    }
+  }
 #if INT_MAX == LONG_MAX
-    inline static bool is_overflow(int64_t value) { return (value < -0x80000000LL) || (value > 0x7fffffffLL); }
+  inline static bool is_overflow(int64_t value) { return (value < -0x80000000LL) || (value > 0x7fffffffLL); }
 #else
-    inline static bool is_overflow(int64_t DYND_UNUSED(value)) { return false; }
+  inline static bool is_overflow(int64_t DYND_UNUSED(value)) { return false; }
 #endif
-  };
-  template <>
-  struct overflow_check<long long> {
-    inline static bool is_overflow(uint64_t value, bool negative)
-    {
-      return (value & ~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
-    }
-    inline static bool is_overflow(int64_t DYND_UNUSED(value)) { return false; }
-  };
-  template <>
-  struct overflow_check<int128> {
-    inline static bool is_overflow(const uint128 &value, bool negative)
-    {
-      return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
-             !(negative && value.m_hi == 0x8000000000000000ULL && value.m_lo == 0ULL);
-    }
-  };
-  template <>
-  struct overflow_check<uint8_t> {
-    inline static bool is_overflow(uint64_t value) { return (value & ~0xffULL) != 0; }
-  };
-  template <>
-  struct overflow_check<uint16_t> {
-    inline static bool is_overflow(uint64_t value) { return (value & ~0xffffULL) != 0; }
-  };
-  template <>
-  struct overflow_check<uint32_t> {
-    inline static bool is_overflow(uint64_t value) { return (value & ~0xffffffffULL) != 0; }
-  };
-
-} // namespace dynd::parse
+};
+template <>
+struct overflow_check<long long> {
+  inline static bool is_overflow(uint64_t value, bool negative)
+  {
+    return (value & ~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
+  }
+  inline static bool is_overflow(int64_t DYND_UNUSED(value)) { return false; }
+};
+template <>
+struct overflow_check<int128> {
+  inline static bool is_overflow(const uint128 &value, bool negative)
+  {
+    return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
+           !(negative && value.m_hi == 0x8000000000000000ULL && value.m_lo == 0ULL);
+  }
+};
+template <>
+struct overflow_check<uint8_t> {
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffULL) != 0; }
+};
+template <>
+struct overflow_check<uint16_t> {
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffffULL) != 0; }
+};
+template <>
+struct overflow_check<uint32_t> {
+  inline static bool is_overflow(uint64_t value) { return (value & ~0xffffffffULL) != 0; }
+};
+template <>
+struct overflow_check<uint64_t> {
+  inline static bool is_overflow(uint64_t DYND_UNUSED(value)) { return false; }
+};
 
 DYND_API int parse_int64(int64_t &res, const char *begin, const char *end);
 

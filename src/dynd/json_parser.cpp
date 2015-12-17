@@ -13,7 +13,7 @@
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 
 using namespace std;
 using namespace dynd;

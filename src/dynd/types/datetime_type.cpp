@@ -16,7 +16,7 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/array_iter.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/functional.hpp>
 
 #include <datetime_strings.h>
@@ -427,8 +427,7 @@ struct datetime_get_tick_kernel : nd::base_kernel<datetime_get_tick_kernel, 1> {
 } // anonymous namespace
 
 ndt::datetime_type::datetime_type(datetime_tz_t timezone)
-    : base_type(datetime_type_id, datetime_kind, 8, alignof(int64_t), type_flag_none, 0, 0, 0),
-      m_timezone(timezone)
+    : base_type(datetime_type_id, datetime_kind, 8, alignof(int64_t), type_flag_none, 0, 0, 0), m_timezone(timezone)
 {
 }
 
@@ -485,8 +484,8 @@ void ndt::datetime_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), 
   const char *tz_begin = NULL, *tz_end = NULL;
   dts.set_from_str(utf8_begin, utf8_end, ectx->date_parse_order, ectx->century_window, ectx->errmode, tz_begin, tz_end);
   if (m_timezone != tz_abstract && tz_begin != tz_end) {
-    if (m_timezone == tz_utc && (compare_range_to_literal(tz_begin, tz_end, "Z") ||
-                                 compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
+    if (m_timezone == tz_utc &&
+        (compare_range_to_literal(tz_begin, tz_end, "Z") || compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
       // It's a UTC time to a UTC time zone
     }
     else {

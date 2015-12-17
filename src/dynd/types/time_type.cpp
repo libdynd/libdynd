@@ -7,7 +7,7 @@
 #include <dynd/callable.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/typevar_type.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/functional.hpp>
 
 using namespace std;
@@ -98,8 +98,8 @@ void ndt::time_type::set_from_utf8_string(const char *DYND_UNUSED(arrmeta), char
   // TODO: Use errmode to adjust strictness of the parsing
   hmst.set_from_str(utf8_begin, utf8_end, tz_begin, tz_end);
   if (m_timezone != tz_abstract && tz_begin != tz_end) {
-    if (m_timezone == tz_utc && (compare_range_to_literal(tz_begin, tz_end, "Z") ||
-                                 compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
+    if (m_timezone == tz_utc &&
+        (compare_range_to_literal(tz_begin, tz_end, "Z") || compare_range_to_literal(tz_begin, tz_end, "UTC"))) {
       // It's a UTC time to a UTC time zone
     }
     else {

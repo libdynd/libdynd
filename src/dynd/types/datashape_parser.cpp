@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 #include <dynd/types/datashape_parser.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/types/array_type.hpp>
 #include <dynd/types/callable_type.hpp>

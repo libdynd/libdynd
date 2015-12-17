@@ -29,7 +29,7 @@
 #include <dynd/types/fixed_bytes_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/option.hpp>
 #include <map>
 
@@ -86,61 +86,6 @@ inline void to_lower(std::string &s)
     s[i] = tolower(s[i]);
   }
 }
-
-template <class T>
-struct overflow_check;
-template <>
-struct overflow_check<int8_t> {
-  inline static bool is_overflow(uint64_t value, bool negative)
-  {
-    return (value & ~0x7fULL) != 0 && !(negative && value == 0x80ULL);
-  }
-};
-template <>
-struct overflow_check<int16_t> {
-  inline static bool is_overflow(uint64_t value, bool negative)
-  {
-    return (value & ~0x7fffULL) != 0 && !(negative && value == 0x8000ULL);
-  }
-};
-template <>
-struct overflow_check<int32_t> {
-  inline static bool is_overflow(uint64_t value, bool negative)
-  {
-    return (value & ~0x7fffffffULL) != 0 && !(negative && value == 0x80000000ULL);
-  }
-};
-template <>
-struct overflow_check<int64_t> {
-  inline static bool is_overflow(uint64_t value, bool negative)
-  {
-    return (value & ~0x7fffffffffffffffULL) != 0 && !(negative && value == 0x8000000000000000ULL);
-  }
-};
-template <>
-struct overflow_check<int128> {
-  inline static bool is_overflow(uint128 value, bool negative)
-  {
-    return (value.m_hi & ~0x7fffffffffffffffULL) != 0 &&
-           !(negative && value.m_hi == 0x8000000000000000ULL && value.m_lo == 0ULL);
-  }
-};
-template <>
-struct overflow_check<uint8_t> {
-  inline static bool is_overflow(uint64_t value) { return (value & ~0xffULL) != 0; }
-};
-template <>
-struct overflow_check<uint16_t> {
-  inline static bool is_overflow(uint64_t value) { return (value & ~0xffffULL) != 0; }
-};
-template <>
-struct overflow_check<uint32_t> {
-  inline static bool is_overflow(uint64_t value) { return (value & ~0xffffffffULL) != 0; }
-};
-template <>
-struct overflow_check<uint64_t> {
-  inline static bool is_overflow(uint64_t DYND_UNUSED(value)) { return false; }
-};
 
 inline void raise_string_cast_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
                                     const char *data)

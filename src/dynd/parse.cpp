@@ -6,7 +6,7 @@
 #include <string>
 #include <climits>
 
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/option_type.hpp>
@@ -492,7 +492,7 @@ static T checked_string_to_signed_int(const char *begin, const char *end)
     ++begin;
   }
   uint64_t uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
-  if (overflow || parse::overflow_check<T>::is_overflow(uvalue, negative)) {
+  if (overflow || overflow_check<T>::is_overflow(uvalue, negative)) {
     stringstream ss;
     ss << "overflow converting string ";
     ss.write(begin, end - begin);
@@ -603,7 +603,7 @@ template <class T>
 static inline void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow,
                                            bool &badparse)
 {
-  overflow = overflow || parse::overflow_check<T>::is_overflow(uvalue, negative);
+  overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
   if (!overflow && !badparse) {
     *reinterpret_cast<T *>(out_int) =
         static_cast<T>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
@@ -613,7 +613,7 @@ static inline void assign_signed_int_value(char *out_int, uint64_t uvalue, bool 
 static inline void assign_signed_int128_value(char *out_int, uint128 uvalue, bool &negative, bool &overflow,
                                               bool &badparse)
 {
-  overflow = overflow || parse::overflow_check<int128>::is_overflow(uvalue, negative);
+  overflow = overflow || overflow_check<int128>::is_overflow(uvalue, negative);
   if (!overflow && !badparse) {
     *reinterpret_cast<int128 *>(out_int) = negative ? -static_cast<int128>(uvalue) : static_cast<int128>(uvalue);
   }
@@ -623,7 +623,7 @@ template <class T>
 static inline void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow,
                                              bool &badparse)
 {
-  overflow = overflow || negative || parse::overflow_check<T>::is_overflow(uvalue);
+  overflow = overflow || negative || overflow_check<T>::is_overflow(uvalue);
   if (!overflow && !badparse) {
     *reinterpret_cast<T *>(out_int) = static_cast<T>(uvalue);
   }
