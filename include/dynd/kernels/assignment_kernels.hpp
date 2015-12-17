@@ -30,6 +30,7 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 #include <dynd/parser_util.hpp>
+#include <dynd/option.hpp>
 #include <map>
 
 #if defined(_MSC_VER)
@@ -2022,17 +2023,18 @@ namespace nd {
         const ndt::type &src_val_tp = src_tp[0].extended<ndt::option_type>()->get_value_type();
         self_type *self = self_type::make(ckb, kernreq, ckb_offset);
         // instantiate src_is_avail
-        nd::callable &is_avail = src_tp[0].extended<ndt::option_type>()->get_is_avail();
-        ckb_offset =
-            is_avail.get()->instantiate(NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
-                                        src_arrmeta, kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
+        nd::callable &is_avail = nd::is_avail::get();
+        ckb_offset = is_avail.get()->instantiate(is_avail->static_data(), NULL, ckb, ckb_offset,
+                                                 ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta, kernreq,
+                                                 &eval::default_eval_context, nkwd, kwds, tp_vars);
         // instantiate dst_assign_na
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
         self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-        nd::callable &assign_na = dst_tp.extended<ndt::option_type>()->get_assign_na();
-        ckb_offset = assign_na.get()->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
-                                                  kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
+        nd::callable &assign_na = nd::assign_na::get();
+        ckb_offset =
+            assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+                                         NULL, NULL, kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
         // instantiate value_assign
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
         self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);
@@ -2172,9 +2174,10 @@ namespace nd {
                    ->get_at<string_to_option_tp_ck>(root_ckb_offset);
         // Second child ckernel is the NA assignment
         self->m_dst_assign_na_offset = ckb_offset - root_ckb_offset;
-        nd::callable &assign_na = dst_tp.extended<ndt::option_type>()->get_assign_na();
-        ckb_offset = assign_na.get()->instantiate(NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, NULL, NULL,
-                                                  kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
+        nd::callable &assign_na = nd::assign_na::get();
+        ckb_offset = assign_na.get()->instantiate(assign_na->static_data(), NULL, ckb, ckb_offset, dst_tp, dst_arrmeta,
+                                                  nsrc, src_tp, src_arrmeta, kernreq, &eval::default_eval_context, nkwd,
+                                                  kwds, tp_vars);
         return ckb_offset;
       }
     };
@@ -2251,9 +2254,10 @@ namespace nd {
       const ndt::type &src_val_tp = src_tp[0].extended<ndt::option_type>()->get_value_type();
       self_type *self = self_type::make(ckb, kernreq, ckb_offset);
       // instantiate src_is_avail
-      nd::callable &af = src_tp[0].extended<ndt::option_type>()->get_is_avail();
-      ckb_offset = af.get()->instantiate(NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
-                                         src_arrmeta, kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
+      nd::callable &af = nd::is_avail::get();
+      ckb_offset =
+          af.get()->instantiate(af->static_data(), NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
+                                src_arrmeta, kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
       // instantiate value_assign
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
       self = reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->get_at<self_type>(root_ckb_offset);

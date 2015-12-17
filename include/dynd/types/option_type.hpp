@@ -3,14 +3,9 @@
 // BSD 2-Clause License, see LICENSE.txt
 //
 
-/**
- * The option type represents data which may or may not be there.
- */
-
 #pragma once
 
 #include <dynd/callable.hpp>
-#include <dynd/type.hpp>
 
 namespace dynd {
 
@@ -26,6 +21,9 @@ namespace dynd {
 
 namespace ndt {
 
+  /**
+   * The option type represents data which may or may not be there.
+   */
   class DYND_API option_type : public base_type {
     type m_value_tp;
 
@@ -46,12 +44,8 @@ namespace ndt {
     /** Returns true if the value is available */
     bool is_avail(const char *arrmeta, const char *data, const eval::eval_context *ectx) const;
 
-    nd::callable &get_is_avail() const;
-    nd::callable &get_assign_na() const;
-
-    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
-
     void print_type(std::ostream &o) const;
+    void print_data(std::ostream &o, const char *arrmeta, const char *data) const;
 
     bool is_expression() const;
     bool is_unique_data_owner(const char *arrmeta) const;

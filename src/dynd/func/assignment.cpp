@@ -5,8 +5,6 @@
 
 #include <dynd/func/assignment.hpp>
 #include <dynd/functional.hpp>
-#include <dynd/func/call.hpp>
-#include <dynd/func/elwise.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/types/any_kind_type.hpp>
 

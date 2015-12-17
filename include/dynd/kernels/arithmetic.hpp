@@ -1,7 +1,6 @@
 #pragma once
 
-#include <dynd/kernels/base_kernel.hpp>
-#include <dynd/func/option.hpp>
+#include <dynd/option.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/apply.hpp>
 

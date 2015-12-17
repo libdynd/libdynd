@@ -11,8 +11,7 @@
 
 #include <dynd/array.hpp>
 #include <dynd/view.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/func/option.hpp>
+#include <dynd/option.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/json_parser.hpp>

@@ -9,8 +9,8 @@
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
 #include <dynd/parser_util.hpp>
-#include <dynd/func/option.hpp>
 #include <dynd/math.hpp>
+#include <dynd/option.hpp>
 
 #include <algorithm>
 
@@ -67,10 +67,10 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
   }
   else {
     ckernel_builder<kernel_request_host> ckb;
-    nd::callable &af = get_is_avail();
+    nd::callable &af = nd::is_avail::get();
     type src_tp[1] = {type(this, true)};
-    af.get()->instantiate(NULL, NULL, &ckb, 0, make_type<bool1>(), NULL, 1, src_tp, &arrmeta, kernel_request_single,
-                          ectx, 0, NULL, std::map<std::string, type>());
+    af.get()->instantiate(af->static_data(), NULL, &ckb, 0, make_type<bool1>(), NULL, 1, src_tp, &arrmeta,
+                          kernel_request_single, ectx, 0, NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<kernel_single_t>()(ckp, &result, const_cast<char **>(&data));
@@ -121,16 +121,15 @@ void ndt::option_type::assign_na(const char *arrmeta, char *data, const eval::ev
   }
   else {
     ckernel_builder<kernel_request_host> ckb;
-    nd::callable &af = get_assign_na();
-    af.get()->instantiate(NULL, NULL, &ckb, 0, type(this, true), arrmeta, 0, NULL, NULL, kernel_request_single, ectx, 0,
-                          NULL, std::map<std::string, type>());
+    nd::callable &af = nd::assign_na::get();
+    af.get()->instantiate(af->static_data(), NULL, &ckb, 0, type(this, true), arrmeta, 0, NULL, NULL,
+                          kernel_request_single, ectx, 0, NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     ckp->get_function<kernel_single_t>()(ckp, data, NULL);
   }
 }
 
-nd::callable &ndt::option_type::get_is_avail() const { return nd::is_avail::get_child(m_value_tp); }
-nd::callable &ndt::option_type::get_assign_na() const { return nd::assign_na::get_child(m_value_tp); }
+void ndt::option_type::print_type(std::ostream &o) const { o << "?" << m_value_tp; }
 
 void ndt::option_type::print_data(std::ostream &o, const char *arrmeta, const char *data) const
 {
@@ -141,8 +140,6 @@ void ndt::option_type::print_data(std::ostream &o, const char *arrmeta, const ch
     o << "NA";
   }
 }
-
-void ndt::option_type::print_type(std::ostream &o) const { o << "?" << m_value_tp; }
 
 bool ndt::option_type::is_expression() const
 {
@@ -302,20 +299,6 @@ static ndt::type property_get_value_type(ndt::type tp)
   const ndt::option_type *pd = tp.extended<ndt::option_type>();
   return pd->get_value_type();
 }
-
-/*
-static nd::array property_get_is_avail(const ndt::type &tp)
-{
-  const ndt::option_type *pd = tp.extended<ndt::option_type>();
-  return pd->get_is_avail();
-}
-
-static nd::array property_get_assign_na(const ndt::type &tp)
-{
-  const ndt::option_type *pd = tp.extended<ndt::option_type>();
-  return pd->get_assign_na();
-}
-*/
 
 void ndt::option_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
 {

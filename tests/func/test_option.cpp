@@ -11,7 +11,7 @@
 #include "../test_memory_new.hpp"
 #include "../dynd_assertions.hpp"
 
-#include <dynd/func/option.hpp>
+#include <dynd/option.hpp>
 
 using namespace std;
 using namespace dynd;
