@@ -35,7 +35,7 @@ TEST(DateType, Create)
 
 TEST(DateType, ValueCreation)
 {
-  ndt::type d = ndt::date_type::make(), di = ndt::type::make<int32_t>();
+  ndt::type d = ndt::date_type::make(), di = ndt::make_type<int32_t>();
 
   EXPECT_EQ((1600 - 1970) * 365 - (1972 - 1600) / 4 + 3 - 365,
             nd::array("1599-01-01").ucast(d).view_scalars(di).as<int32_t>());
@@ -164,7 +164,7 @@ TEST(DateType, DatePropertyConvertOfString)
   c = b.p("year");
   EXPECT_EQ(adapt_type_id, c.get_dtype().get_type_id());
   c = c.eval();
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<int>()), c.get_type());
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), c.get_type());
   EXPECT_EQ(1931, c(0).as<int>());
   EXPECT_EQ(2013, c(1).as<int>());
   EXPECT_EQ(2012, c(2).as<int>());
@@ -173,7 +173,7 @@ TEST(DateType, DatePropertyConvertOfString)
   c = b.f("weekday");
   EXPECT_EQ(adapt_type_id, c.get_dtype().get_type_id());
   c = c.eval();
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::type::make<int>()), c.get_type());
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_type<int>()), c.get_type());
   EXPECT_EQ(5, c(0).as<int>());
   EXPECT_EQ(1, c(1).as<int>());
   EXPECT_EQ(1, c(2).as<int>());
@@ -189,7 +189,7 @@ TEST(DateType, ToStructFunction)
   EXPECT_EQ(adapt_type_id, b.get_type().get_type_id());
   b = b.eval();
   EXPECT_EQ(ndt::struct_type::make({"year", "month", "day"},
-                                   {ndt::type::make<int16_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>()}),
+                                   {ndt::make_type<int16_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>()}),
             b.get_type());
   EXPECT_EQ(1955, b.p("year").as<int32_t>());
   EXPECT_EQ(3, b.p("month").as<int32_t>());
@@ -212,7 +212,7 @@ TEST(DateType, ToStruct)
 
   // This is the default struct produced
   ds = ndt::struct_type::make({"year", "month", "day"},
-                              {ndt::type::make<int32_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>()});
+                              {ndt::make_type<int32_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>()});
   b = nd::empty(ds);
   b.val_assign(a);
   EXPECT_EQ(1955, b(0).as<int32_t>());
@@ -221,7 +221,7 @@ TEST(DateType, ToStruct)
 
   // This should work too
   ds = ndt::struct_type::make({"month", "year", "day"},
-                              {ndt::type::make<int16_t>(), ndt::type::make<int16_t>(), ndt::type::make<float>()});
+                              {ndt::make_type<int16_t>(), ndt::make_type<int16_t>(), ndt::make_type<float>()});
   b = nd::empty(ds);
   b.vals() = a;
   EXPECT_EQ(1955, b(1).as<int16_t>());
@@ -236,7 +236,7 @@ TEST(DateType, FromStruct)
 
   // This is the default struct accepted
   ds = ndt::struct_type::make({"year", "month", "day"},
-                              {ndt::type::make<int32_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>()});
+                              {ndt::make_type<int32_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>()});
   a = nd::empty(ds);
   a(0).vals() = 1955;
   a(1).vals() = 3;
@@ -249,7 +249,7 @@ TEST(DateType, FromStruct)
 
   // This should work too
   ds = ndt::struct_type::make({"month", "year", "day"},
-                              {ndt::type::make<int16_t>(), ndt::type::make<int16_t>(), ndt::type::make<float>()});
+                              {ndt::make_type<int16_t>(), ndt::make_type<int16_t>(), ndt::make_type<float>()});
   a = nd::empty(ds);
   a.p("year").vals() = 1955;
   a.p("month").vals() = 3;
@@ -465,7 +465,7 @@ TEST(DateType, AdaptAsInt)
   nd::array a, b;
 
   a = parse_json("3 * date", "[\"2001-01-05\", \"1999-12-20\", \"2000-01-01\"]");
-  b = a.adapt(ndt::type::make<int>(), "days since 2000-01-01");
+  b = a.adapt(ndt::make_type<int>(), "days since 2000-01-01");
   EXPECT_EQ(370, b(0).as<int>());
   EXPECT_EQ(-12, b(1).as<int>());
   EXPECT_EQ(0, b(2).as<int>());

@@ -30,7 +30,7 @@ TEST(ArrayViews, OneDimensionalRawMemory)
 
   // Make an 8 byte aligned array of 80 chars
   a = nd::empty<uint64_t[10]>();
-  a = a.view_scalars(ndt::type::make<char>());
+  a = a.view_scalars(ndt::make_type<char>());
 
   // Initialize the char values from a uint64_t,
   // to avoid having to know the endianness
@@ -38,7 +38,7 @@ TEST(ArrayViews, OneDimensionalRawMemory)
   memcpy(c_values, &u8_value, 8);
   a(irange() < 8).vals() = c_values;
   b = a.view_scalars<uint64_t>();
-  EXPECT_EQ(ndt::make_fixed_dim(10, ndt::type::make<uint64_t>()), b.get_type());
+  EXPECT_EQ(ndt::make_fixed_dim(10, ndt::make_type<uint64_t>()), b.get_type());
   EXPECT_EQ(1u, b.get_shape().size());
   EXPECT_EQ(10, b.get_shape()[0]);
   EXPECT_EQ(a.cdata(), b.cdata());
@@ -50,7 +50,7 @@ TEST(ArrayViews, OneDimensionalRawMemory)
   // where necessary
   a(1 <= irange() < 9).vals() = c_values;
   b = a(1 <= irange() < 73).view_scalars<uint64_t>();
-  EXPECT_EQ(ndt::make_fixed_dim(9, ndt::view_type::make(ndt::type::make<uint64_t>(),
+  EXPECT_EQ(ndt::make_fixed_dim(9, ndt::view_type::make(ndt::make_type<uint64_t>(),
                                                   ndt::make_fixed_bytes(8, 1))),
             b.get_type());
   EXPECT_EQ(1u, b.get_shape().size());
@@ -71,7 +71,7 @@ TEST(ArrayViews, MultiDimensionalRawMemory)
 
   b = a.view_scalars<int32_t>();
   EXPECT_EQ(ndt::make_fixed_dim(
-                2, ndt::make_fixed_dim(3, ndt::type::make<int32_t>())),
+                2, ndt::make_fixed_dim(3, ndt::make_type<int32_t>())),
             b.get_type());
   EXPECT_EQ(2u, b.get_shape().size());
   EXPECT_EQ(2, b.get_shape()[0]);
@@ -96,8 +96,8 @@ TEST(ArrayViews, ExpressionDType)
   a_u2 = a.ucast<uint16_t>();
   EXPECT_EQ(ndt::make_fixed_dim(
                 2, ndt::make_fixed_dim(
-                       3, ndt::convert_type::make(ndt::type::make<uint16_t>(),
-                                            ndt::type::make<uint32_t>()))),
+                       3, ndt::convert_type::make(ndt::make_type<uint16_t>(),
+                                            ndt::make_type<uint32_t>()))),
             a_u2.get_type());
 
   // Wrong size, so should throw
@@ -107,9 +107,9 @@ TEST(ArrayViews, ExpressionDType)
   EXPECT_EQ(ndt::make_fixed_dim(
                 2, ndt::make_fixed_dim(
                        3, ndt::view_type::make(
-                              ndt::type::make<int16_t>(),
-                              ndt::convert_type::make(ndt::type::make<uint16_t>(),
-                                                ndt::type::make<uint32_t>())))),
+                              ndt::make_type<int16_t>(),
+                              ndt::convert_type::make(ndt::make_type<uint16_t>(),
+                                                ndt::make_type<uint32_t>())))),
             b.get_type());
   EXPECT_EQ(2u, b.get_shape().size());
   EXPECT_EQ(2, b.get_shape()[0]);

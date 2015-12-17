@@ -260,7 +260,7 @@ ndt::type ndt::struct_type::apply_linear_index(intptr_t nindices, const irange *
       // Make an "N * string" array without copying the actual
       // string text data. TODO: encapsulate this into a function.
       string *string_arr_ptr;
-      type stp = string_type::make();
+      type stp = ndt::make_type<ndt::string_type>();
       type tp = make_fixed_dim(dimension_size, stp);
       nd::array tmp_field_names = nd::empty(tp);
       string_arr_ptr = reinterpret_cast<string *>(tmp_field_names.data());
@@ -592,7 +592,7 @@ nd::array dynd::struct_concat(nd::array lhs, nd::array rhs)
   intptr_t lhs_n = lhs_tp.extended<ndt::struct_type>()->get_field_count();
   intptr_t rhs_n = rhs_tp.extended<ndt::struct_type>()->get_field_count();
   intptr_t res_n = lhs_n + rhs_n;
-  nd::array res_field_names = nd::empty(res_n, ndt::string_type::make());
+  nd::array res_field_names = nd::empty(res_n, ndt::make_type<ndt::string_type>());
   nd::array res_field_types = nd::empty(res_n, ndt::make_type<ndt::type_type>());
   res_field_names(irange(0, lhs_n)).vals() = lhs_tp.extended<ndt::struct_type>()->get_field_names();
   res_field_names(irange(lhs_n, res_n)).vals() = rhs_tp.extended<ndt::struct_type>()->get_field_names();

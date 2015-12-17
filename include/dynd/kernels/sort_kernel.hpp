@@ -50,7 +50,7 @@ namespace nd {
 
       const ndt::type child_src_tp[2] = {src0_element_tp, src0_element_tp};
       const callable &less = nd::less::get();
-      return less.get()->instantiate(less.get()->static_data(), data, ckb, ckb_offset, ndt::type::make<bool1>(), NULL,
+      return less.get()->instantiate(less.get()->static_data(), data, ckb, ckb_offset, ndt::make_type<bool1>(), NULL,
                                      2, child_src_tp, NULL, kernel_request_single, ectx, nkwd, kwds, tp_vars);
     }
   };
@@ -61,7 +61,7 @@ namespace ndt {
 
   template <>
   struct traits<nd::sort_kernel> {
-    static type equivalent() { return callable_type::make(type::make<void>(), {type("Fixed * Scalar")}); }
+    static type equivalent() { return callable_type::make(make_type<void>(), {type("Fixed * Scalar")}); }
   };
 
 } // namespace dynd::ndt

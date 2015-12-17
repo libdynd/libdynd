@@ -35,10 +35,10 @@ TEST(Callable, Assignment)
 {
   // Create an callable for converting string to int
   nd::callable af =
-      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+      make_callable_from_assignment(ndt::make_type<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
-  ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
+  ASSERT_EQ(ndt::make_type<int>(), af.get_type()->get_return_type());
   ASSERT_EQ(ndt::fixed_string_type::make(16), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};
@@ -188,11 +188,11 @@ TEST(Callable, Assignment_CallInterface)
 {
   // Test with the unary operation prototype
   nd::callable af =
-      make_callable_from_assignment(ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
+      make_callable_from_assignment(ndt::make_type<int>(), ndt::make_type<ndt::string_type>(), assign_error_default);
 
   // Call it through the call() interface
   nd::array b = af("12345678");
-  EXPECT_EQ(ndt::type::make<int>(), b.get_type());
+  EXPECT_EQ(ndt::make_type<int>(), b.get_type());
   EXPECT_EQ(12345678, b.as<int>());
 
   // Call it with some incompatible arguments
@@ -200,11 +200,11 @@ TEST(Callable, Assignment_CallInterface)
   EXPECT_THROW(af(false), invalid_argument);
 
   // Test with the expr operation prototype
-  af = make_callable_from_assignment(ndt::type::make<int>(), ndt::string_type::make(), assign_error_default);
+  af = make_callable_from_assignment(ndt::make_type<int>(), ndt::make_type<ndt::string_type>(), assign_error_default);
 
   // Call it through the call() interface
   b = af("12345678");
-  EXPECT_EQ(ndt::type::make<int>(), b.get_type());
+  EXPECT_EQ(ndt::make_type<int>(), b.get_type());
   EXPECT_EQ(12345678, b.as<int>());
 
   // Call it with some incompatible arguments
@@ -216,10 +216,10 @@ TEST(Callable, AssignmentAsExpr)
 {
   // Create an callable for converting string to int
   nd::callable af =
-      make_callable_from_assignment(ndt::type::make<int>(), ndt::fixed_string_type::make(16), assign_error_default);
+      make_callable_from_assignment(ndt::make_type<int>(), ndt::fixed_string_type::make(16), assign_error_default);
   // Validate that its types, etc are set right
   ASSERT_EQ(1, af.get_type()->get_narg());
-  ASSERT_EQ(ndt::type::make<int>(), af.get_type()->get_return_type());
+  ASSERT_EQ(ndt::make_type<int>(), af.get_type()->get_return_type());
   ASSERT_EQ(ndt::fixed_string_type::make(16), af.get_type()->get_pos_type(0));
 
   const char *src_arrmeta[1] = {NULL};

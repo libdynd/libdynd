@@ -170,19 +170,19 @@ namespace ndt {
 
   template <typename R>
   struct traits<R()> {
-    static type equivalent() { return callable_type::make(type::make<R>()); }
+    static type equivalent() { return callable_type::make(make_type<R>()); }
   };
 
   template <typename R, typename A0, typename... A>
   struct traits<R(A0, A...)> {
-    static type equivalent() { return callable_type::make(type::make<R>(), {type::make<A0>(), type::make<A>()...}); }
+    static type equivalent() { return callable_type::make(make_type<R>(), {make_type<A0>(), make_type<A>()...}); }
 
     template <typename... T>
     static type equivalent(const T &... names)
     {
-      type tp[1 + sizeof...(A)] = {type::make<A0>(), type::make<A>()...};
+      type tp[1 + sizeof...(A)] = {make_type<A0>(), make_type<A>()...};
 
-      return callable_type::make(type::make<R>(), nd::array(tp, 1 + sizeof...(A) - sizeof...(T)), {names...},
+      return callable_type::make(make_type<R>(), nd::array(tp, 1 + sizeof...(A) - sizeof...(T)), {names...},
                                  nd::array(tp + (1 + sizeof...(A) - sizeof...(T)), sizeof...(T)));
     }
   };

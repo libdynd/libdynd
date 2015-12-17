@@ -309,7 +309,7 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::type::make<bool1>()), nullptr, 0, nullptr,
+                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
                                                 nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
@@ -362,7 +362,7 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::type::make<bool1>()), nullptr, 0, nullptr,
+                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
                                                 nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
@@ -426,7 +426,7 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::type::make<bool1>()), nullptr, 0, nullptr,
+                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
                                                 nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
@@ -438,32 +438,32 @@ namespace ndt {
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct traits<nd::less_kernel<Src0TypeID, Src1TypeID>> {
-    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+    static type equivalent() { return callable_type::make(make_type<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct traits<nd::less_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+    static type equivalent() { return callable_type::make(make_type<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct traits<nd::equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+    static type equivalent() { return callable_type::make(make_type<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct traits<nd::not_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+    static type equivalent() { return callable_type::make(make_type<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct traits<nd::greater_equal_kernel<Src0TypeID, Src1TypeID>> {
-    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+    static type equivalent() { return callable_type::make(make_type<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <type_id_t Src0TypeID, type_id_t Src1TypeID>
   struct traits<nd::greater_kernel<Src0TypeID, Src1TypeID>> {
-    static type equivalent() { return callable_type::make(type::make<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
+    static type equivalent() { return callable_type::make(make_type<bool1>(), {type(Src0TypeID), type(Src1TypeID)}); }
   };
 
   template <typename FuncType>

@@ -204,15 +204,15 @@ size_t ndt::time_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, co
 void ndt::time_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
 
-  properties["hour"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["hour"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<time_get_hour_kernel>(ndt::type("(Any) -> Any")));
-  properties["minute"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["minute"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                                nd::callable::make<time_get_minute_kernel>(ndt::type("(Any) -> Any")));
-  properties["second"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["second"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                                nd::callable::make<time_get_second_kernel>(ndt::type("(Any) -> Any")));
   properties["microsecond"] = nd::functional::adapt(
-      ndt::type::make<int32_t>(), nd::callable::make<time_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
-  properties["tick"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+      ndt::make_type<int32_t>(), nd::callable::make<time_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
+  properties["tick"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<time_get_tick_kernel>(ndt::type("(Any) -> Any")));
 }
 

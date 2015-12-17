@@ -19,7 +19,7 @@ namespace nd {
   void with_1d_stride(const nd::array &a, F &&f)
   {
     static_assert(is_dynd_scalar<T>::value, "T must have the same representation in DyND and C++");
-    nd::array b = nd::asarray(a, ndt::type::make<T[]>());
+    nd::array b = nd::asarray(a, ndt::make_type<T[]>());
     auto ss = reinterpret_cast<const size_stride_t *>(b.get()->metadata());
     f(ss->dim_size, ss->stride / sizeof(T), reinterpret_cast<const T *>(b.data()));
   }

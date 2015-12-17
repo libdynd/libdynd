@@ -331,7 +331,7 @@ namespace nd {
         if (kwds_as_vector[j].is_null()) {
           ndt::type actual_tp = ndt::substitute(self_tp->get_kwd_type(j), tp_vars, false);
           if (actual_tp.is_symbolic()) {
-            actual_tp = ndt::option_type::make(ndt::type::make<void>());
+            actual_tp = ndt::option_type::make(ndt::make_type<void>());
           }
           kwds_as_vector[j] = empty(actual_tp);
           kwds_as_vector[j].assign_na();
@@ -582,7 +582,7 @@ namespace nd {
     {
       typedef as_apply_function_ck<func_type, func, arity_of<func_type>::value - sizeof...(T)> CKT;
 
-      ndt::type self_tp = ndt::type::make<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
+      ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
       return callable::make<CKT>(self_tp);
     }
@@ -603,7 +603,7 @@ namespace nd {
     {
       typedef as_apply_callable_ck<func_type, arity_of<func_type>::value - sizeof...(T)> ck_type;
 
-      ndt::type self_tp = ndt::type::make<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
+      ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
       return callable::make<ck_type>(self_tp, func);
     }
@@ -620,7 +620,7 @@ namespace nd {
     {
       typedef as_apply_callable_ck<func_type *, arity_of<func_type>::value - sizeof...(T)> ck_type;
 
-      ndt::type self_tp = ndt::type::make<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
+      ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type>::type>(std::forward<T>(names)...);
 
       return callable::make<ck_type>(self_tp, func);
     }
@@ -636,7 +636,7 @@ namespace nd {
     {
       typedef as_apply_member_function_ck<T *, R (T::*)(A...), sizeof...(A) - sizeof...(S)> ck_type;
 
-      ndt::type self_tp = ndt::type::make<typename funcproto_of<R (T::*)(A...)>::type>(std::forward<S>(names)...);
+      ndt::type self_tp = ndt::make_type<typename funcproto_of<R (T::*)(A...)>::type>(std::forward<S>(names)...);
 
       return callable::make<ck_type>(self_tp, typename ck_type::data_type(obj, mem_func));
     }
@@ -656,7 +656,7 @@ namespace nd {
     {
       typedef as_construct_then_apply_callable_ck<func_type, K...> ck_type;
 
-      ndt::type self_tp = ndt::type::make<typename funcproto_of<func_type, K...>::type>(std::forward<T>(names)...);
+      ndt::type self_tp = ndt::make_type<typename funcproto_of<func_type, K...>::type>(std::forward<T>(names)...);
 
       return callable::make<ck_type>(self_tp);
     }

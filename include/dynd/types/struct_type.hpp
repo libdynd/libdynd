@@ -104,7 +104,7 @@ namespace ndt {
     /** Makes an empty struct type */
     static type make(bool variadic = false)
     {
-      return make(nd::empty(0, string_type::make()), nd::empty(0, make_type<type_type>()), variadic);
+      return make(nd::empty(0, make_type<string_type>()), nd::empty(0, make_type<type_type>()), variadic);
     }
   };
 

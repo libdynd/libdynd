@@ -69,7 +69,7 @@ namespace nd {
       const char *child_src_arrmeta[2] = {n_arrmeta, n_arrmeta};
 
       return total_order::get().get()->instantiate(total_order::get().get()->static_data(), data, ckb, ckb_offset,
-                                                   ndt::type::make<int>(), NULL, 2, child_src_tp, child_src_arrmeta,
+                                                   ndt::make_type<int>(), NULL, 2, child_src_tp, child_src_arrmeta,
                                                    kernreq, ectx, 0, NULL, tp_vars);
     }
   };
@@ -80,7 +80,7 @@ namespace ndt {
 
   template <>
   struct traits<nd::binary_search_kernel> {
-    static type equivalent() { return callable_type::make(type::make<intptr_t>(), {type("Fixed * Scalar"), type("Scalar")}); }
+    static type equivalent() { return callable_type::make(make_type<intptr_t>(), {type("Fixed * Scalar"), type("Scalar")}); }
   };
 
 } // namespace dynd::ndt

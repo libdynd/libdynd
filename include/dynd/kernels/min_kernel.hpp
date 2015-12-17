@@ -68,7 +68,7 @@ namespace ndt {
   struct traits<nd::min_kernel<Src0TypeID>> {
     static type equivalent()
     {
-      return callable_type::make(ndt::type::make<typename nd::min_kernel<Src0TypeID>::dst_type>(), type(Src0TypeID));
+      return callable_type::make(ndt::make_type<typename nd::min_kernel<Src0TypeID>::dst_type>(), type(Src0TypeID));
     }
   };
 

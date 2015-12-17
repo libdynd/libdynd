@@ -381,8 +381,8 @@ namespace nd {
               "assignment is not implemented for CUDA global memory");
     #else
           std::stringstream ss;
-          ss << "assignment from " << ndt::type::make<src0_type>() << " to "
-             << ndt::type::make<dst_type>();
+          ss << "assignment from " << ndt::make_type<src0_type>() << " to "
+             << ndt::make_type<dst_type>();
           ss << "with error mode " << assign_error_nocheck << " is not
     implemented";
           throw std::runtime_error(ss.str());
@@ -473,8 +473,8 @@ namespace nd {
 
         if (static_cast<src0_type>(d) != s) {
           std::stringstream ss;
-          ss << "inexact value while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>() << " value " << d;
+          ss << "inexact value while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>() << " value " << d;
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = d;
@@ -524,8 +524,8 @@ namespace nd {
 
         if (static_cast<src0_type>(d) != s) {
           std::stringstream ss;
-          ss << "inexact value while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>() << " value " << d;
+          ss << "inexact value while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>() << " value " << d;
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = d;
@@ -576,8 +576,8 @@ namespace nd {
 
         if (static_cast<src0_type>(d) != s) {
           std::stringstream ss;
-          ss << "inexact value while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>() << " value " << d;
+          ss << "inexact value while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>() << " value " << d;
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = d;
@@ -610,8 +610,8 @@ namespace nd {
 
         if (s < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
@@ -633,15 +633,15 @@ namespace nd {
 
         if (s < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 
         if (floor(s) != s) {
           std::stringstream ss;
-          ss << "fractional part lost while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "fractional part lost while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
@@ -669,15 +669,15 @@ namespace nd {
 
         if (s.imag() != 0) {
           std::stringstream ss;
-          ss << "loss of imaginary component while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "loss of imaginary component while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
 
         if (s.real() < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s.real()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
@@ -699,22 +699,22 @@ namespace nd {
 
         if (s.imag() != 0) {
           std::stringstream ss;
-          ss << "loss of imaginary component while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "loss of imaginary component while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
 
         if (s.real() < std::numeric_limits<dst_type>::min() || std::numeric_limits<dst_type>::max() < s.real()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
           std::stringstream ss;
-          ss << "fractional part lost while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "fractional part lost while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
@@ -742,8 +742,8 @@ namespace nd {
 
         if (s < 0 || std::numeric_limits<dst_type>::max() < s) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
@@ -765,15 +765,15 @@ namespace nd {
 
         if (s < 0 || std::numeric_limits<dst_type>::max() < s) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 
         if (floor(s) != s) {
           std::stringstream ss;
-          ss << "fractional part lost while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "fractional part lost while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
@@ -801,15 +801,15 @@ namespace nd {
 
         if (s.imag() != 0) {
           std::stringstream ss;
-          ss << "loss of imaginary component while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "loss of imaginary component while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
 
         if (s.real() < 0 || std::numeric_limits<dst_type>::max() < s.real()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
@@ -831,22 +831,22 @@ namespace nd {
 
         if (s.imag() != 0) {
           std::stringstream ss;
-          ss << "loss of imaginary component while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "loss of imaginary component while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
 
         if (s.real() < 0 || std::numeric_limits<dst_type>::max() < s.real()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 
         if (std::floor(s.real()) != s.real()) {
           std::stringstream ss;
-          ss << "fractional part lost while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "fractional part lost while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s.real());
@@ -997,9 +997,9 @@ namespace nd {
           *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
           if (is_overflow_fp_status()) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::type::make<src0_type>()
+            ss << "overflow while assigning " << ndt::make_type<src0_type>()
                << " value ";
-            ss << s << " to " << ndt::type::make<dst_type>();
+            ss << s << " to " << ndt::make_type<dst_type>();
             throw std::overflow_error(ss.str());
           }
     #else
@@ -1007,9 +1007,9 @@ namespace nd {
           if (isfinite(sd) && (sd < -std::numeric_limits<dst_type>::max() ||
                                sd > std::numeric_limits<dst_type>::max())) {
             std::stringstream ss;
-            ss << "overflow while assigning " << ndt::type::make<src0_type>()
+            ss << "overflow while assigning " << ndt::make_type<src0_type>()
                << " value ";
-            ss << s << " to " << ndt::type::make<dst_type>();
+            ss << s << " to " << ndt::make_type<dst_type>();
             throw std::overflow_error(ss.str());
           }
           *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(sd);
@@ -1036,16 +1036,16 @@ namespace nd {
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
         if (is_overflow_fp_status()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 #else
         src0_type sd = s;
         if (isfinite(sd) && (sd < -std::numeric_limits<dst_type>::max() || sd > std::numeric_limits<dst_type>::max())) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(sd);
@@ -1078,15 +1078,15 @@ namespace nd {
         d = static_cast<dst_type>(s);
         if (is_overflow_fp_status()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 #else
         if (isfinite(s) && (s < -std::numeric_limits<dst_type>::max() || s > std::numeric_limits<dst_type>::max())) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
         d = static_cast<dst_type>(s);
@@ -1101,8 +1101,8 @@ namespace nd {
         //}
         if (d != s) {
           std::stringstream ss;
-          ss << "inexact precision loss while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "inexact precision loss while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = d;
@@ -1129,8 +1129,8 @@ namespace nd {
         }
         else {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<bool1>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<bool1>();
           throw std::overflow_error(ss.str());
         }
       }
@@ -1192,8 +1192,8 @@ namespace nd {
 
         if (is_overflow<dst_type>(s)) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
@@ -1228,8 +1228,8 @@ namespace nd {
 
         if (is_overflow<dst_type>(s)) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
@@ -1263,8 +1263,8 @@ namespace nd {
 
         if (is_overflow<dst_type>(s)) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
@@ -1299,8 +1299,8 @@ namespace nd {
 
         if (is_overflow<dst_type>(s)) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<dst_type>(s);
@@ -1334,8 +1334,8 @@ namespace nd {
 
         if (static_cast<src0_type>(d) != s) {
           std::stringstream ss;
-          ss << "inexact value while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>() << " value " << d;
+          ss << "inexact value while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>() << " value " << d;
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = d;
@@ -1385,8 +1385,8 @@ namespace nd {
 
         if (s.imag() != 0) {
           std::stringstream ss;
-          ss << "loss of imaginary component while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << *src << " to " << ndt::type::make<dst_type>();
+          ss << "loss of imaginary component while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << *src << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
 
@@ -1395,15 +1395,15 @@ namespace nd {
         d = static_cast<dst_type>(s.real());
         if (is_overflow_fp_status()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << *src << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << *src << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<dst_type>::max() || s.real() > std::numeric_limits<dst_type>::max()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << *src << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << *src << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         d = static_cast<dst_type>(s.real());
@@ -1440,8 +1440,8 @@ namespace nd {
 
         if (s.imag() != 0) {
           std::stringstream ss;
-          ss << "loss of imaginary component while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << *src << " to " << ndt::type::make<float>();
+          ss << "loss of imaginary component while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << *src << " to " << ndt::make_type<float>();
           throw std::runtime_error(ss.str());
         }
 
@@ -1450,15 +1450,15 @@ namespace nd {
         d = static_cast<float>(s.real());
         if (is_overflow_fp_status()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << s << " to " << ndt::type::make<float>();
+          ss << "overflow while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << s << " to " << ndt::make_type<float>();
           throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << s << " to " << ndt::type::make<float>();
+          ss << "overflow while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << s << " to " << ndt::make_type<float>();
           throw std::overflow_error(ss.str());
         }
         d = static_cast<float>(s.real());
@@ -1466,8 +1466,8 @@ namespace nd {
 
         if (d != s.real()) {
           std::stringstream ss;
-          ss << "inexact precision loss while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << *src << " to " << ndt::type::make<float>();
+          ss << "inexact precision loss while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << *src << " to " << ndt::make_type<float>();
           throw std::runtime_error(ss.str());
         }
 
@@ -1494,16 +1494,16 @@ namespace nd {
         d = static_cast<typename dst_type::value_type>(s);
         if (is_overflow_fp_status()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 #else
         if (isfinite(s) && (s < -std::numeric_limits<typename dst_type::value_type>::max() ||
                             s > std::numeric_limits<typename dst_type::value_type>::max())) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         d = static_cast<typename dst_type::value_type>(s);
@@ -1538,16 +1538,16 @@ namespace nd {
         d = static_cast<typename dst_type::value_type>(s);
         if (is_overflow_fp_status()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
 #else
         if (isfinite(s) && (s < -std::numeric_limits<typename dst_type::value_type>::max() ||
                             s > std::numeric_limits<typename dst_type::value_type>::max())) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "overflow while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::overflow_error(ss.str());
         }
         d = static_cast<typename dst_type::value_type>(s);
@@ -1555,8 +1555,8 @@ namespace nd {
 
         if (d != s) {
           std::stringstream ss;
-          ss << "inexact precision loss while assigning " << ndt::type::make<src0_type>() << " value ";
-          ss << s << " to " << ndt::type::make<dst_type>();
+          ss << "inexact precision loss while assigning " << ndt::make_type<src0_type>() << " value ";
+          ss << s << " to " << ndt::make_type<dst_type>();
           throw std::runtime_error(ss.str());
         }
 
@@ -1584,8 +1584,8 @@ namespace nd {
         *reinterpret_cast<dst_type *>(dst) = static_cast<complex<float>>(*reinterpret_cast<src0_type *>(src[0]));
         if (is_overflow_fp_status()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << *src << " to " << ndt::type::make<complex<float>>();
+          ss << "overflow while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << *src << " to " << ndt::make_type<complex<float>>();
           throw std::overflow_error(ss.str());
         }
 #else
@@ -1593,8 +1593,8 @@ namespace nd {
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
             s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << s << " to " << ndt::type::make<complex<float>>();
+          ss << "overflow while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << s << " to " << ndt::make_type<complex<float>>();
           throw std::overflow_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = static_cast<complex<float>>(s);
@@ -1633,16 +1633,16 @@ namespace nd {
         d = static_cast<complex<float>>(s);
         if (is_overflow_fp_status()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << *reinterpret_cast<src0_type *>(src[0]) << " to " << ndt::type::make<complex<float>>();
+          ss << "overflow while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << *reinterpret_cast<src0_type *>(src[0]) << " to " << ndt::make_type<complex<float>>();
           throw std::overflow_error(ss.str());
         }
 #else
         if (s.real() < -std::numeric_limits<float>::max() || s.real() > std::numeric_limits<float>::max() ||
             s.imag() < -std::numeric_limits<float>::max() || s.imag() > std::numeric_limits<float>::max()) {
           std::stringstream ss;
-          ss << "overflow while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << *reinterpret_cast<src0_type *>(src[0]) << " to " << ndt::type::make<complex<float>>();
+          ss << "overflow while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << *reinterpret_cast<src0_type *>(src[0]) << " to " << ndt::make_type<complex<float>>();
           throw std::overflow_error(ss.str());
         }
         d = static_cast<complex<float>>(s);
@@ -1657,8 +1657,8 @@ namespace nd {
         //}
         if (d.real() != s.real() || d.imag() != s.imag()) {
           std::stringstream ss;
-          ss << "inexact precision loss while assigning " << ndt::type::make<complex<double>>() << " value ";
-          ss << *reinterpret_cast<src0_type *>(src[0]) << " to " << ndt::type::make<complex<float>>();
+          ss << "inexact precision loss while assigning " << ndt::make_type<complex<double>>() << " value ";
+          ss << *reinterpret_cast<src0_type *>(src[0]) << " to " << ndt::make_type<complex<float>>();
           throw std::runtime_error(ss.str());
         }
         *reinterpret_cast<dst_type *>(dst) = d;
@@ -2024,7 +2024,7 @@ namespace nd {
         // instantiate src_is_avail
         nd::callable &is_avail = src_tp[0].extended<ndt::option_type>()->get_is_avail();
         ckb_offset =
-            is_avail.get()->instantiate(NULL, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc, src_tp,
+            is_avail.get()->instantiate(NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                         src_arrmeta, kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
         // instantiate dst_assign_na
         reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -2252,7 +2252,7 @@ namespace nd {
       self_type *self = self_type::make(ckb, kernreq, ckb_offset);
       // instantiate src_is_avail
       nd::callable &af = src_tp[0].extended<ndt::option_type>()->get_is_avail();
-      ckb_offset = af.get()->instantiate(NULL, NULL, ckb, ckb_offset, ndt::type::make<bool1>(), NULL, nsrc, src_tp,
+      ckb_offset = af.get()->instantiate(NULL, NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                          src_arrmeta, kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
       // instantiate value_assign
       reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb)->reserve(ckb_offset + sizeof(ckernel_prefix));
@@ -3175,10 +3175,10 @@ namespace nd {
           bool overflow = false, badparse = false;
           uint64_t value = parse::checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
           if (badparse) {
-            raise_string_cast_error(ndt::type::make<T>(), src_string_tp, src_arrmeta, src[0]);
+            raise_string_cast_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
           }
           else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
-            raise_string_cast_overflow_error(ndt::type::make<T>(), src_string_tp, src_arrmeta, src[0]);
+            raise_string_cast_overflow_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
           }
           result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
         }
@@ -3228,10 +3228,10 @@ namespace nd {
           bool overflow = false, badparse = false;
           uint128 value = parse::checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
           if (badparse) {
-            raise_string_cast_error(ndt::type::make<int128>(), src_string_tp, src_arrmeta, src[0]);
+            raise_string_cast_error(ndt::make_type<int128>(), src_string_tp, src_arrmeta, src[0]);
           }
           else if (overflow || overflow_check<int128>::is_overflow(value, negative)) {
-            raise_string_cast_overflow_error(ndt::type::make<int128>(), src_string_tp, src_arrmeta, src[0]);
+            raise_string_cast_overflow_error(ndt::make_type<int128>(), src_string_tp, src_arrmeta, src[0]);
           }
           result = negative ? -static_cast<int128>(value) : static_cast<int128>(value);
         }
@@ -3283,10 +3283,10 @@ namespace nd {
           bool overflow = false, badparse = false;
           uint64_t value = parse::checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
           if (badparse) {
-            raise_string_cast_error(ndt::type::make<T>(), src_string_tp, src_arrmeta, src[0]);
+            raise_string_cast_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
           }
           else if (overflow || (negative && value != 0) || overflow_check<T>::is_overflow(value)) {
-            raise_string_cast_overflow_error(ndt::type::make<T>(), src_string_tp, src_arrmeta, src[0]);
+            raise_string_cast_overflow_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
           }
           result = static_cast<T>(value);
         }
@@ -3335,10 +3335,10 @@ namespace nd {
           bool overflow = false, badparse = false;
           result = parse::checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
           if (badparse) {
-            raise_string_cast_error(ndt::type::make<int128>(), src_string_tp, src_arrmeta, src[0]);
+            raise_string_cast_error(ndt::make_type<int128>(), src_string_tp, src_arrmeta, src[0]);
           }
           else if (overflow || (negative && result != 0)) {
-            raise_string_cast_overflow_error(ndt::type::make<uint128>(), src_string_tp, src_arrmeta, src[0]);
+            raise_string_cast_overflow_error(ndt::make_type<uint128>(), src_string_tp, src_arrmeta, src[0]);
           }
         }
         *reinterpret_cast<uint128 *>(dst) = result;
@@ -3897,7 +3897,7 @@ namespace ndt {
     static type equivalent()
     {
       return callable_type::make(type(DstTypeID), {type(Src0TypeID)}, {"error_mode"},
-                                 {ndt::option_type::make(ndt::type::make<int>())});
+                                 {ndt::option_type::make(ndt::make_type<int>())});
     }
   };
 

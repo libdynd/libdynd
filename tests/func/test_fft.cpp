@@ -249,7 +249,7 @@ TEST_P(FFT1D, Inverse)
 TYPED_TEST_P(FFT1D, Zeros)
 {
   nd::array x = nd::zeros(TestFixture::SrcShape[0],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::fft(x);
 
@@ -261,7 +261,7 @@ TYPED_TEST_P(FFT1D, Zeros)
 TYPED_TEST_P(FFT1D, Ones)
 {
   nd::array x = nd::ones(TestFixture::SrcShape[0],
-                         ndt::type::make<typename TestFixture::SrcType>());
+                         ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::fft(x);
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
@@ -284,7 +284,7 @@ TYPED_TEST_P(FFT1D, KroneckerDelta)
   }
 
   nd::array x = nd::zeros(TestFixture::SrcShape[0],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   x(TestFixture::SrcShape[0] / 2).vals() = 1;
 
   nd::array y = nd::fft(x);
@@ -338,11 +338,11 @@ TEST(FFT1D, Shift)
 TYPED_TEST_P(RFFT1D, Linear)
 {
   nd::array x0 = nd::rand(TestFixture::SrcShape[0],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   nd::array x1 = nd::rand(TestFixture::SrcShape[0],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   nd::array x = nd::empty(TestFixture::SrcShape[0],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   x.vals() = x0 + x1;
 
   nd::array y0 = nd::rfft(x0);
@@ -360,7 +360,7 @@ TYPED_TEST_P(RFFT1D, Linear)
 TYPED_TEST_P(RFFT1D, Inverse)
 {
   nd::array x = nd::rand(TestFixture::SrcShape[0],
-                         ndt::type::make<typename TestFixture::SrcType>());
+                         ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = irfft(nd::rfft(x), TestFixture::SrcShape[0]);
   for (int i = 0; i < TestFixture::SrcShape[0]; ++i) {
@@ -374,7 +374,7 @@ TYPED_TEST_P(RFFT1D, Inverse)
 TYPED_TEST_P(RFFT1D, Zeros)
 {
   nd::array x = nd::zeros(TestFixture::SrcShape[0],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::rfft(x);
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
@@ -385,7 +385,7 @@ TYPED_TEST_P(RFFT1D, Zeros)
 TYPED_TEST_P(RFFT1D, Ones)
 {
   nd::array x = nd::ones(TestFixture::SrcShape[0],
-                         ndt::type::make<typename TestFixture::SrcType>());
+                         ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::rfft(x);
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
@@ -408,7 +408,7 @@ TYPED_TEST_P(RFFT1D, KroneckerDelta)
   }
 
   nd::array x = nd::zeros(TestFixture::SrcShape[0],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   x(TestFixture::SrcShape[0] / 2).vals() = 1;
 
   nd::array y = nd::rfft(x);
@@ -513,7 +513,7 @@ TEST_P(FFT2D, Inverse)
 TYPED_TEST_P(FFT2D, Zeros)
 {
   nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::fft(x);
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
@@ -548,7 +548,7 @@ TYPED_TEST_P(FFT2D, Zeros)
 TYPED_TEST_P(FFT2D, Ones)
 {
   nd::array x = nd::ones(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                         ndt::type::make<typename TestFixture::SrcType>());
+                         ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::fft(x);
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
@@ -576,7 +576,7 @@ TYPED_TEST_P(FFT2D, KroneckerDelta)
   }
 
   nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   x(TestFixture::SrcShape[0] / 2, TestFixture::SrcShape[1] / 2).vals() = 1;
 
   nd::array y = nd::fft(x);
@@ -679,11 +679,11 @@ TEST(FFT2D, Shift)
 TYPED_TEST_P(RFFT2D, Linear)
 {
   nd::array x0 = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   nd::array x1 = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   nd::array x = nd::empty(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   x.vals() = x0 + x1;
 
   nd::array y0 = nd::rfft(x0);
@@ -703,7 +703,7 @@ TYPED_TEST_P(RFFT2D, Linear)
 TYPED_TEST_P(RFFT2D, Inverse)
 {
   nd::array x = nd::rand(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                         ndt::type::make<typename TestFixture::SrcType>());
+                         ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y =
       irfft(nd::rfft(x), TestFixture::SrcShape[0], TestFixture::SrcShape[1]);
@@ -720,7 +720,7 @@ TYPED_TEST_P(RFFT2D, Inverse)
 TYPED_TEST_P(RFFT2D, Zeros)
 {
   nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::rfft(x);
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
@@ -733,7 +733,7 @@ TYPED_TEST_P(RFFT2D, Zeros)
 TYPED_TEST_P(RFFT2D, Ones)
 {
   nd::array x = nd::ones(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                         ndt::type::make<typename TestFixture::SrcType>());
+                         ndt::make_type<typename TestFixture::SrcType>());
 
   nd::array y = nd::rfft(x);
   for (int i = 0; i < TestFixture::DstShape[0]; ++i) {
@@ -759,7 +759,7 @@ TYPED_TEST_P(RFFT2D, KroneckerDelta)
   }
 
   nd::array x = nd::zeros(TestFixture::SrcShape[0], TestFixture::SrcShape[1],
-                          ndt::type::make<typename TestFixture::SrcType>());
+                          ndt::make_type<typename TestFixture::SrcType>());
   x(TestFixture::SrcShape[0] / 2, TestFixture::SrcShape[1] / 2).vals() = 1;
 
   nd::array y = nd::rfft(x);

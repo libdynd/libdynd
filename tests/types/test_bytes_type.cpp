@@ -82,8 +82,8 @@ TEST(BytesDType, Assign)
   EXPECT_EQ(a.get_type(), ndt::bytes_type::make(1));
   b = nd::empty(ndt::bytes_type::make(1));
   b.vals() = a;
-  c = b.view_scalars(ndt::string_type::make());
-  EXPECT_EQ(c.get_type(), ndt::string_type::make());
+  c = b.view_scalars(ndt::make_type<ndt::string_type>());
+  EXPECT_EQ(c.get_type(), ndt::make_type<ndt::string_type>());
   EXPECT_EQ("testing", c.as<std::string>());
 }
 

@@ -247,7 +247,7 @@ namespace ndt {
     static type equivalent()
     {
       std::map<std::string, ndt::type> tp_vars;
-      tp_vars["R"] = ndt::type::make<R>();
+      tp_vars["R"] = ndt::make_type<R>();
 
       return ndt::substitute(ndt::type("(a: ?R, b: ?R) -> R"), tp_vars, true);
     }

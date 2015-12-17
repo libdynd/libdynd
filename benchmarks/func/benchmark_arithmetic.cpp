@@ -20,9 +20,9 @@ static const int size = 10000; // 256 * 256
 
 static void BM_Func_Arithmetic_Add(benchmark::State &state)
 {
-  nd::array a = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(size, ndt::type::make<float>())}});
-  nd::array b = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(size, ndt::type::make<float>())}});
-  nd::array c = nd::empty(ndt::make_fixed_dim(size, ndt::type::make<float>()));
+  nd::array a = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(size, ndt::make_type<float>())}});
+  nd::array b = nd::random::uniform({}, {{"dst_tp", ndt::make_fixed_dim(size, ndt::make_type<float>())}});
+  nd::array c = nd::empty(ndt::make_fixed_dim(size, ndt::make_type<float>()));
   while (state.KeepRunning()) {
     nd::add(a, b);
   }

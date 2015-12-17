@@ -44,9 +44,9 @@ def make_special_vals(func_name, *args):
             if (prefix[-1] == '>'):
                 prefix += ' '
 
-            return 'dynd::ndt::type::make<{}>()'.format(prefix)
+            return 'dynd::ndt::make_type<{}>()'.format(prefix)
 
-        return 'dynd::ndt::type::make<{}>()'.format(prefix + suffix)
+        return 'dynd::ndt::make_type<{}>()'.format(prefix + suffix)
 
     def decl_asgn_static_array(name, vals):
         return 'static {} {}{} = {{\n        {}\n    }};\n'.format(ctype(vals), name, dims(vals),

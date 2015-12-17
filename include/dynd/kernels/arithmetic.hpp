@@ -277,7 +277,7 @@ namespace ndt {
 #define DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(NAME)                                                                      \
   template <type_id_t Src0TypeID>                                                                                      \
   struct traits<nd::NAME##_kernel<Src0TypeID>> {                                                                       \
-    static type equivalent() { return ndt::type::make<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>(); }   \
+    static type equivalent() { return ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID>::f)>(); }   \
   };
 
   DYND_DEF_UNARY_OP_KERNEL_EQUIVALENT(plus)
@@ -294,7 +294,7 @@ namespace ndt {
   struct traits<nd::NAME##_kernel<Src0TypeID, Src1TypeID>> {                                                           \
     static type equivalent()                                                                                           \
     {                                                                                                                  \
-      return ndt::type::make<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID, Src1TypeID>::f)>();                  \
+      return ndt::make_type<decltype(dynd::nd::detail::inline_##NAME<Src0TypeID, Src1TypeID>::f)>();                  \
     }                                                                                                                  \
   };
 
@@ -317,7 +317,7 @@ namespace ndt {
   struct traits<nd::logical_xor_kernel<Src0TypeID, Src1TypeID>> {
     static type equivalent()
     {
-      return ndt::type::make<decltype(&dynd::nd::detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f)>();
+      return ndt::make_type<decltype(&dynd::nd::detail::inline_logical_xor<Src0TypeID, Src1TypeID>::f)>();
     }
   };
 

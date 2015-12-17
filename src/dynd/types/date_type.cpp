@@ -230,11 +230,11 @@ void ndt::date_type::get_dynamic_type_functions(std::map<std::string, nd::callab
 
 void ndt::date_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
 {
-  properties["year"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["year"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<date_get_year_kernel>(ndt::type("(Any) -> Any")));
-  properties["month"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["month"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                               nd::callable::make<date_get_month_kernel>(ndt::type("(Any) -> Any")));
-  properties["day"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  properties["day"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                             nd::callable::make<date_get_day_kernel>(ndt::type("(Any) -> Any")));
 }
 
@@ -275,7 +275,7 @@ struct strftime_kernel : nd::base_kernel<strftime_kernel> {
       throw runtime_error("format string for strftime should not be empty");
     }
     return n.replace_dtype(
-        ndt::unary_expr_type::make(ndt::string_type::make(), n.get_dtype(), make_strftime_kernelgen(format)));
+        ndt::unary_expr_type::make(ndt::make_type<ndt::string_type>(), n.get_dtype(), make_strftime_kernelgen(format)));
   }
 };
 */
@@ -344,7 +344,7 @@ void ndt::date_type::get_dynamic_array_functions(std::map<std::string, nd::calla
 {
   functions["to_struct"] = nd::functional::adapt(ndt::type("{year: int16, month: int8, day: int8}"),
                                                  nd::callable::make<date_get_struct_kernel>(ndt::type("(Any) -> Any")));
-  functions["weekday"] = nd::functional::adapt(ndt::type::make<int32_t>(),
+  functions["weekday"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                                nd::callable::make<date_get_weekday_kernel>(ndt::type("(Any) -> Any")));
 
   //          "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),

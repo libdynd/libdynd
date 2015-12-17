@@ -38,7 +38,7 @@ const ndt::type &datetime_struct::type()
 {
   static ndt::type tp = ndt::struct_type::make(
       {"year", "month", "day", "hour", "minute", "second", "tick"},
-      {ndt::type::make<int16_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>(), ndt::type::make<int8_t>(),
-       ndt::type::make<int8_t>(),  ndt::type::make<int8_t>(), ndt::type::make<int32_t>()});
+      {ndt::make_type<int16_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>(), ndt::make_type<int8_t>(),
+       ndt::make_type<int8_t>(),  ndt::make_type<int8_t>(), ndt::make_type<int32_t>()});
   return tp;
 }

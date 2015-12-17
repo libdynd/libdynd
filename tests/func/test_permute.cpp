@@ -34,7 +34,7 @@ TEST(Permute, ReturnType)
   nd::callable af = nd::functional::apply(&func0);
   nd::callable paf = nd::functional::permute(af, {-1, 0});
 
-  nd::array res = nd::empty(ndt::type::make<double>());
+  nd::array res = nd::empty(ndt::make_type<double>());
   af(res, 15);
   EXPECT_TRUE((res == paf(15)).as<bool>());
 

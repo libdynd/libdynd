@@ -485,8 +485,8 @@ ndt::type_registry::type_registry() : m_size(0)
   insert("array", any_kind_type_id, nullptr, type());
   insert("bytes", any_kind_type_id, nullptr, bytes_type::make());
   insert("fixed_bytes", any_kind_type_id, nullptr, fixed_bytes_kind_type::make());
-  insert("char", any_kind_type_id, nullptr, char_type::make());
-  insert("string", any_kind_type_id, nullptr, string_type::make());
+  insert("char", any_kind_type_id, nullptr, make_type<char_type>());
+  insert("string", any_kind_type_id, nullptr, make_type<string_type>());
   insert("fixed_string", any_kind_type_id, nullptr, fixed_string_kind_type::make());
   insert("Categorical", any_kind_type_id, nullptr, categorical_kind_type::make());
   insert("date", any_kind_type_id, nullptr, date_type::make());
@@ -510,12 +510,12 @@ ndt::type_registry::type_registry() : m_size(0)
 
 ndt::type_registry::~type_registry()
 {
-/*
-  for (size_t i = builtin_type_id_count; i < m_size; ++i) {
-    delete[] m_infos[i].name;
-    delete[] m_infos[i].bases;
-  }
-*/
+  /*
+    for (size_t i = builtin_type_id_count; i < m_size; ++i) {
+      delete[] m_infos[i].name;
+      delete[] m_infos[i].bases;
+    }
+  */
 }
 
 size_t ndt::type_registry::size() const { return m_size; }
@@ -1079,7 +1079,7 @@ struct ndt::common_type::init {
   {
     children[front<TypeIDSequence>::value][back<TypeIDSequence>::value] = [](const ndt::type &DYND_UNUSED(tp0),
                                                                              const ndt::type &DYND_UNUSED(tp1)) {
-      return ndt::type::make<
+      return ndt::make_type<
           typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
                                     typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
     };

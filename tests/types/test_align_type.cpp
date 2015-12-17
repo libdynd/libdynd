@@ -22,7 +22,7 @@ TEST(AlignDType, Create)
 
   d = ndt::make_unaligned<float>();
   // The value has the native byte-order type
-  EXPECT_EQ(d.value_type(), ndt::type::make<float>());
+  EXPECT_EQ(d.value_type(), ndt::make_type<float>());
   // The storage is bytes with alignment 1
   EXPECT_EQ(d.storage_type(), ndt::make_fixed_bytes(4, 1));
   // The alignment of the type is 1
@@ -67,17 +67,17 @@ TEST(AlignDType, Chained)
 {
   // The unaligned type can give back an expression type as the value type,
   // make sure that is handled properly at the type object level.
-  ndt::type d = make_unaligned(ndt::byteswap_type::make(ndt::type::make<int>()));
-  EXPECT_EQ(ndt::byteswap_type::make(ndt::type::make<int>(),
+  ndt::type d = make_unaligned(ndt::byteswap_type::make(ndt::make_type<int>()));
+  EXPECT_EQ(ndt::byteswap_type::make(ndt::make_type<int>(),
                                      ndt::view_type::make(ndt::make_fixed_bytes(4, 4), ndt::make_fixed_bytes(4, 1))),
             d);
   EXPECT_EQ(ndt::make_fixed_bytes(4, 1), d.storage_type());
-  EXPECT_EQ(ndt::type::make<int>(), d.value_type());
+  EXPECT_EQ(ndt::make_type<int>(), d.value_type());
 }
 */
 
 TEST(AlignDType, CanonicalDType)
 {
   // The canonical type of an alignment result is always the aligned type
-  EXPECT_EQ((ndt::type::make<float>()), (ndt::make_unaligned<float>().get_canonical_type()));
+  EXPECT_EQ((ndt::make_type<float>()), (ndt::make_unaligned<float>().get_canonical_type()));
 }

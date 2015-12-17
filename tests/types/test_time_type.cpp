@@ -63,7 +63,7 @@ TEST(TimeDType, CreateFromString)
 
 TEST(TimeDType, ValueCreationAbstract)
 {
-  ndt::type d = ndt::time_type::make(tz_abstract), di = ndt::type::make<int64_t>();
+  ndt::type d = ndt::time_type::make(tz_abstract), di = ndt::make_type<int64_t>();
 
   EXPECT_EQ(0, nd::array("00:00").ucast(d).view_scalars(di).as<int64_t>());
   EXPECT_EQ(0, nd::array("12:00 am").ucast(d).view_scalars(di).as<int64_t>());

@@ -69,7 +69,7 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
     ckernel_builder<kernel_request_host> ckb;
     nd::callable &af = get_is_avail();
     type src_tp[1] = {type(this, true)};
-    af.get()->instantiate(NULL, NULL, &ckb, 0, type::make<bool1>(), NULL, 1, src_tp, &arrmeta, kernel_request_single,
+    af.get()->instantiate(NULL, NULL, &ckb, 0, make_type<bool1>(), NULL, 1, src_tp, &arrmeta, kernel_request_single,
                           ectx, 0, NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;

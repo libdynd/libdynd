@@ -244,8 +244,8 @@ date_ymd date_ymd::get_current_local_date()
 const ndt::type &date_ymd::type()
 {
   static ndt::type tp = ndt::struct_type::make({"year", "month", "day"},
-                                               {ndt::type::make<int16_t>(),
-                                                ndt::type::make<int8_t>(),
-                                                ndt::type::make<int8_t>()});
+                                               {ndt::make_type<int16_t>(),
+                                                ndt::make_type<int8_t>(),
+                                                ndt::make_type<int8_t>()});
   return tp;
 }
