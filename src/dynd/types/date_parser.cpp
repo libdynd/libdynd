@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/types/date_parser.hpp>
 #include <dynd/types/date_util.hpp>
 

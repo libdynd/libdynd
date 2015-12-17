@@ -8,7 +8,7 @@
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/typevar_type.hpp>
 #include <dynd/memblock/pod_memory_block.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/math.hpp>
 #include <dynd/option.hpp>
 
@@ -169,23 +169,25 @@ void ndt::option_type::transform_child_types(type_transform_fn_t transform_fn, i
   }
 }
 
-ndt::type ndt::option_type::get_canonical_type() const { return make_type<option_type>(m_value_tp.get_canonical_type()); }
+ndt::type ndt::option_type::get_canonical_type() const
+{
+  return make_type<option_type>(m_value_tp.get_canonical_type());
+}
 
 void ndt::option_type::set_from_utf8_string(const char *arrmeta, char *data, const char *utf8_begin,
                                             const char *utf8_end, const eval::eval_context *ectx) const
 {
   if (m_value_tp.get_kind() != string_kind && m_value_tp.get_kind() != dynamic_kind &&
-      parse::matches_option_type_na_token(utf8_begin, utf8_end)) {
+      matches_option_type_na_token(utf8_begin, utf8_end)) {
     assign_na(arrmeta, data, ectx);
   }
   else {
     if (m_value_tp.is_builtin()) {
       if (m_value_tp.unchecked_get_builtin_type_id() == bool_type_id) {
-        parse::string_to_bool(data, utf8_begin, utf8_end, false, ectx->errmode);
+        string_to_bool(data, utf8_begin, utf8_end, false, ectx->errmode);
       }
       else {
-        parse::string_to_number(data, m_value_tp.unchecked_get_builtin_type_id(), utf8_begin, utf8_end, false,
-                                ectx->errmode);
+        string_to_number(data, m_value_tp.unchecked_get_builtin_type_id(), utf8_begin, utf8_end, false, ectx->errmode);
       }
     }
     else {

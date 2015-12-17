@@ -6,7 +6,7 @@
 #include <string>
 #include <climits>
 
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/option_type.hpp>
@@ -16,7 +16,7 @@ using namespace std;
 using namespace dynd;
 
 // [a-zA-Z_][a-zA-Z0-9_]*
-bool parse::parse_name_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin, const char *&out_strend)
+bool dynd::parse_name_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin, const char *&out_strend)
 {
   const char *begin = rbegin;
   if (begin == end) {
@@ -39,8 +39,8 @@ bool parse::parse_name_no_ws(const char *&rbegin, const char *end, const char *&
 }
 
 // [a-zA-Z]+
-bool parse::parse_alpha_name_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin,
-                                   const char *&out_strend)
+bool dynd::parse_alpha_name_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin,
+                                  const char *&out_strend)
 {
   const char *begin = rbegin;
   if (begin == end) {
@@ -61,8 +61,8 @@ bool parse::parse_alpha_name_no_ws(const char *&rbegin, const char *end, const c
   return true;
 }
 
-bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin,
-                                           const char *&out_strend, bool &out_escaped)
+bool dynd::parse_doublequote_string_no_ws(const char *&rbegin, const char *end, const char *&out_strbegin,
+                                          const char *&out_strend, bool &out_escaped)
 {
   bool escaped = false;
   const char *begin = rbegin;
@@ -71,13 +71,13 @@ bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
   }
   for (;;) {
     if (begin == end) {
-      throw parse::parse_error(rbegin, "string has no ending quote");
+      throw parse_error(rbegin, "string has no ending quote");
     }
     char c = *begin++;
     if (c == '\\') {
       escaped = true;
       if (begin == end) {
-        throw parse::parse_error(rbegin, "string has no ending quote");
+        throw parse_error(rbegin, "string has no ending quote");
       }
       c = *begin++;
       switch (c) {
@@ -92,30 +92,30 @@ bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
         break;
       case 'u': {
         if (end - begin < 4) {
-          throw parse::parse_error(begin - 2, "invalid unicode escape sequence in string");
+          throw parse_error(begin - 2, "invalid unicode escape sequence in string");
         }
         for (int i = 0; i < 4; ++i) {
           char d = *begin++;
           if (!(('0' <= d && d <= '9') || ('A' <= d && d <= 'F') || ('a' <= d && d <= 'f'))) {
-            throw parse::parse_error(begin - 1, "invalid unicode escape sequence in string");
+            throw parse_error(begin - 1, "invalid unicode escape sequence in string");
           }
         }
         break;
       }
       case 'U': {
         if (end - begin < 8) {
-          throw parse::parse_error(begin - 2, "invalid unicode escape sequence in string");
+          throw parse_error(begin - 2, "invalid unicode escape sequence in string");
         }
         for (int i = 0; i < 8; ++i) {
           char d = *begin++;
           if (!(('0' <= d && d <= '9') || ('A' <= d && d <= 'F') || ('a' <= d && d <= 'f'))) {
-            throw parse::parse_error(begin - 1, "invalid unicode escape sequence in string");
+            throw parse_error(begin - 1, "invalid unicode escape sequence in string");
           }
         }
         break;
       }
       default:
-        throw parse::parse_error(begin - 2, "invalid escape sequence in string");
+        throw parse_error(begin - 2, "invalid escape sequence in string");
       }
     }
     else if (c == '"') {
@@ -128,7 +128,7 @@ bool parse::parse_doublequote_string_no_ws(const char *&rbegin, const char *end,
   }
 }
 
-void parse::unescape_string(const char *strbegin, const char *strend, std::string &out)
+void dynd::unescape_string(const char *strbegin, const char *strend, std::string &out)
 {
   out.resize(0);
   while (strbegin < strend) {
@@ -217,8 +217,7 @@ void parse::unescape_string(const char *strbegin, const char *strend, std::strin
   }
 }
 
-bool parse::parse_json_number_no_ws(const char *&rbegin, const char *end, const char *&out_nbegin,
-                                    const char *&out_nend)
+bool dynd::parse_json_number_no_ws(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend)
 {
   const char *begin = rbegin;
   if (begin == end) {
@@ -284,7 +283,7 @@ bool parse::parse_json_number_no_ws(const char *&rbegin, const char *end, const 
 }
 
 // [0-9][0-9]
-bool parse::parse_2digit_int_no_ws(const char *&begin, const char *end, int &out_val)
+bool dynd::parse_2digit_int_no_ws(const char *&begin, const char *end, int &out_val)
 {
   if (end - begin >= 2) {
     int d0 = begin[0], d1 = begin[1];
@@ -298,7 +297,7 @@ bool parse::parse_2digit_int_no_ws(const char *&begin, const char *end, int &out
 }
 
 // [0-9][0-9]?
-bool parse::parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &out_val)
+bool dynd::parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &out_val)
 {
   if (end - begin >= 2) {
     int d0 = begin[0], d1 = begin[1];
@@ -327,7 +326,7 @@ bool parse::parse_1or2digit_int_no_ws(const char *&begin, const char *end, int &
 }
 
 // [0-9][0-9][0-9][0-9]
-bool parse::parse_4digit_int_no_ws(const char *&begin, const char *end, int &out_val)
+bool dynd::parse_4digit_int_no_ws(const char *&begin, const char *end, int &out_val)
 {
   if (end - begin >= 4) {
     int d0 = begin[0], d1 = begin[1], d2 = begin[2], d3 = begin[3];
@@ -341,7 +340,7 @@ bool parse::parse_4digit_int_no_ws(const char *&begin, const char *end, int &out
 }
 
 // [0-9][0-9][0-9][0-9][0-9][0-9]
-bool parse::parse_6digit_int_no_ws(const char *&begin, const char *end, int &out_val)
+bool dynd::parse_6digit_int_no_ws(const char *&begin, const char *end, int &out_val)
 {
   if (end - begin >= 6) {
     int d0 = begin[0], d1 = begin[1], d2 = begin[2], d3 = begin[3], d4 = begin[4], d5 = begin[5];
@@ -474,12 +473,12 @@ inline static T unchecked_string_to_uint(const char *begin, const char *end)
   return result;
 }
 
-uint64_t parse::checked_string_to_uint64(const char *begin, const char *end, bool &out_overflow, bool &out_badparse)
+uint64_t dynd::checked_string_to_uint64(const char *begin, const char *end, bool &out_overflow, bool &out_badparse)
 {
   return checked_string_to_uint<uint64_t>(begin, end, out_overflow, out_badparse);
 }
 
-uint128 parse::checked_string_to_uint128(const char *begin, const char *end, bool &out_overflow, bool &out_badparse)
+uint128 dynd::checked_string_to_uint128(const char *begin, const char *end, bool &out_overflow, bool &out_badparse)
 {
   return checked_string_to_uint<uint128>(begin, end, out_overflow, out_badparse);
 }
@@ -492,8 +491,8 @@ static T checked_string_to_signed_int(const char *begin, const char *end)
     negative = true;
     ++begin;
   }
-  uint64_t uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
-  if (overflow || parse::overflow_check<T>::is_overflow(uvalue, negative)) {
+  uint64_t uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
+  if (overflow || overflow_check<T>::is_overflow(uvalue, negative)) {
     stringstream ss;
     ss << "overflow converting string ";
     ss.write(begin, end - begin);
@@ -512,22 +511,22 @@ static T checked_string_to_signed_int(const char *begin, const char *end)
   }
 }
 
-intptr_t parse::checked_string_to_intptr(const char *begin, const char *end)
+intptr_t dynd::checked_string_to_intptr(const char *begin, const char *end)
 {
   return checked_string_to_signed_int<intptr_t>(begin, end);
 }
 
-int64_t parse::checked_string_to_int64(const char *begin, const char *end)
+int64_t dynd::checked_string_to_int64(const char *begin, const char *end)
 {
   return checked_string_to_signed_int<int64_t>(begin, end);
 }
 
-uint64_t parse::unchecked_string_to_uint64(const char *begin, const char *end)
+uint64_t dynd::unchecked_string_to_uint64(const char *begin, const char *end)
 {
   return unchecked_string_to_uint<uint64_t>(begin, end);
 }
 
-uint128 parse::unchecked_string_to_uint128(const char *begin, const char *end)
+uint128 dynd::unchecked_string_to_uint128(const char *begin, const char *end)
 {
   return unchecked_string_to_uint<uint128>(begin, end);
 }
@@ -542,7 +541,7 @@ inline static double make_double_nan(bool negative)
   return nan.d;
 }
 
-double parse::checked_string_to_float64(const char *begin, const char *end, assign_error_mode errmode)
+double dynd::checked_string_to_float64(const char *begin, const char *end, assign_error_mode errmode)
 {
   bool negative = false;
   const char *pos = begin;
@@ -604,7 +603,7 @@ template <class T>
 static inline void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow,
                                            bool &badparse)
 {
-  overflow = overflow || parse::overflow_check<T>::is_overflow(uvalue, negative);
+  overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
   if (!overflow && !badparse) {
     *reinterpret_cast<T *>(out_int) =
         static_cast<T>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
@@ -614,7 +613,7 @@ static inline void assign_signed_int_value(char *out_int, uint64_t uvalue, bool 
 static inline void assign_signed_int128_value(char *out_int, uint128 uvalue, bool &negative, bool &overflow,
                                               bool &badparse)
 {
-  overflow = overflow || parse::overflow_check<int128>::is_overflow(uvalue, negative);
+  overflow = overflow || overflow_check<int128>::is_overflow(uvalue, negative);
   if (!overflow && !badparse) {
     *reinterpret_cast<int128 *>(out_int) = negative ? -static_cast<int128>(uvalue) : static_cast<int128>(uvalue);
   }
@@ -624,7 +623,7 @@ template <class T>
 static inline void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow,
                                              bool &badparse)
 {
-  overflow = overflow || negative || parse::overflow_check<T>::is_overflow(uvalue);
+  overflow = overflow || negative || overflow_check<T>::is_overflow(uvalue);
   if (!overflow && !badparse) {
     *reinterpret_cast<T *>(out_int) = static_cast<T>(uvalue);
   }
@@ -669,8 +668,8 @@ static float checked_float64_to_float32(double value, assign_error_mode errmode)
   return out.result;
 }
 
-void parse::string_to_number(char *out, type_id_t tid, const char *begin, const char *end, bool option,
-                             assign_error_mode errmode)
+void dynd::string_to_number(char *out, type_id_t tid, const char *begin, const char *end, bool option,
+                            assign_error_mode errmode)
 {
   uint64_t uvalue;
   const char *saved_begin = begin;
@@ -725,43 +724,43 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin, const 
   if (errmode != assign_error_nocheck) {
     switch (tid) {
     case int8_type_id:
-      uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
+      uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
       assign_signed_int_value<int8_t>(out, uvalue, negative, overflow, badparse);
       break;
     case int16_type_id:
-      uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
+      uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
       assign_signed_int_value<int16_t>(out, uvalue, negative, overflow, badparse);
       break;
     case int32_type_id:
-      uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
+      uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
       assign_signed_int_value<int32_t>(out, uvalue, negative, overflow, badparse);
       break;
     case int64_type_id:
-      uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
+      uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
       assign_signed_int_value<int64_t>(out, uvalue, negative, overflow, badparse);
       break;
     case int128_type_id: {
-      uint128 buvalue = parse::checked_string_to_uint128(begin, end, overflow, badparse);
+      uint128 buvalue = checked_string_to_uint128(begin, end, overflow, badparse);
       assign_signed_int128_value(out, buvalue, negative, overflow, badparse);
       break;
     }
     case uint8_type_id:
-      uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
+      uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
       negative = negative && (uvalue != 0);
       assign_unsigned_int_value<uint8_t>(out, uvalue, negative, overflow, badparse);
       break;
     case uint16_type_id:
-      uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
+      uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
       negative = negative && (uvalue != 0);
       assign_unsigned_int_value<uint16_t>(out, uvalue, negative, overflow, badparse);
       break;
     case uint32_type_id:
-      uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
+      uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
       negative = negative && (uvalue != 0);
       assign_unsigned_int_value<uint32_t>(out, uvalue, negative, overflow, badparse);
       break;
     case uint64_type_id:
-      uvalue = parse::checked_string_to_uint64(begin, end, overflow, badparse);
+      uvalue = checked_string_to_uint64(begin, end, overflow, badparse);
       negative = negative && (uvalue != 0);
       overflow = overflow || negative;
       if (!overflow && !badparse) {
@@ -769,7 +768,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin, const 
       }
       break;
     case uint128_type_id: {
-      uint128 buvalue = parse::checked_string_to_uint128(begin, end, overflow, badparse);
+      uint128 buvalue = checked_string_to_uint128(begin, end, overflow, badparse);
       negative = negative && (buvalue != 0);
       overflow = overflow || negative;
       if (!overflow && !badparse) {
@@ -824,47 +823,47 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin, const 
     // errmode == assign_error_nocheck
     switch (tid) {
     case int8_type_id:
-      uvalue = parse::unchecked_string_to_uint64(begin, end);
+      uvalue = unchecked_string_to_uint64(begin, end);
       *reinterpret_cast<int8_t *>(out) =
           static_cast<int8_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
       break;
     case int16_type_id:
-      uvalue = parse::unchecked_string_to_uint64(begin, end);
+      uvalue = unchecked_string_to_uint64(begin, end);
       *reinterpret_cast<int16_t *>(out) =
           static_cast<int16_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
       break;
     case int32_type_id:
-      uvalue = parse::unchecked_string_to_uint64(begin, end);
+      uvalue = unchecked_string_to_uint64(begin, end);
       *reinterpret_cast<int32_t *>(out) =
           static_cast<int32_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
       break;
     case int64_type_id:
-      uvalue = parse::unchecked_string_to_uint64(begin, end);
+      uvalue = unchecked_string_to_uint64(begin, end);
       *reinterpret_cast<int64_t *>(out) = negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue);
       break;
     case int128_type_id: {
-      uint128 buvalue = parse::unchecked_string_to_uint128(begin, end);
+      uint128 buvalue = unchecked_string_to_uint128(begin, end);
       *reinterpret_cast<int128 *>(out) = negative ? -static_cast<int128>(buvalue) : static_cast<int128>(buvalue);
       break;
     }
     case uint8_type_id:
-      uvalue = parse::unchecked_string_to_uint64(begin, end);
+      uvalue = unchecked_string_to_uint64(begin, end);
       *reinterpret_cast<uint8_t *>(out) = static_cast<uint8_t>(negative ? 0 : uvalue);
       break;
     case uint16_type_id:
-      uvalue = parse::unchecked_string_to_uint64(begin, end);
+      uvalue = unchecked_string_to_uint64(begin, end);
       *reinterpret_cast<uint16_t *>(out) = static_cast<uint16_t>(negative ? 0 : uvalue);
       break;
     case uint32_type_id:
-      uvalue = parse::unchecked_string_to_uint64(begin, end);
+      uvalue = unchecked_string_to_uint64(begin, end);
       *reinterpret_cast<uint32_t *>(out) = static_cast<uint32_t>(negative ? 0 : uvalue);
       break;
     case uint64_type_id:
-      uvalue = parse::unchecked_string_to_uint64(begin, end);
+      uvalue = unchecked_string_to_uint64(begin, end);
       *reinterpret_cast<uint64_t *>(out) = negative ? 0 : uvalue;
       break;
     case uint128_type_id: {
-      uint128 buvalue = parse::unchecked_string_to_uint128(begin, end);
+      uint128 buvalue = unchecked_string_to_uint128(begin, end);
       *reinterpret_cast<uint128 *>(out) = negative ? static_cast<uint128>(0) : buvalue;
       break;
     }
@@ -891,7 +890,7 @@ void parse::string_to_number(char *out, type_id_t tid, const char *begin, const 
   }
 }
 
-void parse::string_to_bool(char *out_bool, const char *begin, const char *end, bool option, assign_error_mode errmode)
+void dynd::string_to_bool(char *out_bool, const char *begin, const char *end, bool option, assign_error_mode errmode)
 {
   if (option && matches_option_type_na_token(begin, end)) {
     *out_bool = DYND_BOOL_NA;
@@ -977,7 +976,7 @@ void parse::string_to_bool(char *out_bool, const char *begin, const char *end, b
   throw invalid_argument(ss.str());
 }
 
-bool parse::matches_option_type_na_token(const char *begin, const char *end)
+bool dynd::matches_option_type_na_token(const char *begin, const char *end)
 {
   size_t size = end - begin;
   if (size == 0) {
@@ -1004,7 +1003,7 @@ bool parse::matches_option_type_na_token(const char *begin, const char *end)
 int dynd::parse_uint64(uint64_t &res, const char *begin, const char *end)
 {
   bool out_overflow = false, out_badparse = false;
-  res = parse::checked_string_to_uint64(begin, end, out_overflow, out_badparse);
+  res = checked_string_to_uint64(begin, end, out_overflow, out_badparse);
 
   return out_overflow || out_badparse;
 }
@@ -1031,7 +1030,7 @@ int dynd::parse_int64(int64_t &res, const char *begin, const char *end)
 int dynd::parse_double(double &res, const char *begin, const char *end)
 {
   try {
-    res = parse::checked_string_to_float64(begin, end, assign_error_nocheck);
+    res = checked_string_to_float64(begin, end, assign_error_nocheck);
   }
   catch (...) {
     return 1;

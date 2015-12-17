@@ -409,7 +409,7 @@ set(libdynd_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/src/dynd/git_version.cpp
     src/dynd/json_formatter.cpp
     src/dynd/json_parser.cpp
-    src/dynd/parser_util.cpp
+    src/dynd/parse.cpp
     src/dynd/shape_tools.cpp
     src/dynd/special.cpp
     src/dynd/string_encodings.cpp
@@ -449,7 +449,7 @@ set(libdynd_SRC
     include/dynd/json_parser.hpp
     include/dynd/irange.hpp
     include/dynd/option.hpp
-    include/dynd/parser_util.hpp
+    include/dynd/parse.hpp
     include/dynd/platform_definitions.hpp
     include/dynd/shortvector.hpp
     include/dynd/shape_tools.hpp

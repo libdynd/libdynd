@@ -10,7 +10,7 @@
 #include <dynd/kernels/option_assignment_kernels.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 
 using namespace std;
 using namespace dynd;

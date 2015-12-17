@@ -13,18 +13,18 @@
 #include <dynd/types/datetime_type.hpp>
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/option_type.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 
 using namespace std;
 using namespace dynd;
 
 namespace {
-class json_parse_error : public parse::parse_error {
+class json_parse_error : public parse_error {
   ndt::type m_type;
 
 public:
   json_parse_error(const char *position, const std::string &message, const ndt::type &tp)
-      : parse::parse_error(position, message), m_type(tp)
+      : parse_error(position, message), m_type(tp)
   {
   }
   virtual ~json_parse_error() throw() {}
@@ -96,33 +96,11 @@ nd::array dynd::parse_json(const ndt::type &tp, const nd::array &json, const eva
 static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&json_begin,
                        const char *json_end, const eval::eval_context *ectx);
 
-static const char *skip_whitespace(const char *begin, const char *end)
-{
-  while (begin < end && isspace(*begin)) {
-    ++begin;
-  }
-
-  return begin;
-}
-
-template <int N>
-static bool parse_token(const char *&begin, const char *end, const char(&token)[N])
-{
-  const char *begin_skipws = skip_whitespace(begin, end);
-  if (N - 1 <= end - begin_skipws && memcmp(begin_skipws, token, N - 1) == 0) {
-    begin = begin_skipws + N - 1;
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
 static void skip_json_value(const char *&begin, const char *end)
 {
-  begin = skip_whitespace(begin, end);
+  skip_whitespace(begin, end);
   if (begin == end) {
-    throw parse::parse_error(begin, "malformed JSON, expecting an element");
+    throw parse_error(begin, "malformed JSON, expecting an element");
   }
   char c = *begin;
   switch (c) {
@@ -133,12 +111,12 @@ static void skip_json_value(const char *&begin, const char *end)
       for (;;) {
         const char *strbegin, *strend;
         bool escaped;
-        begin = skip_whitespace(begin, end);
-        if (!parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-          throw parse::parse_error(begin, "expected string for name in object dict");
+        skip_whitespace(begin, end);
+        if (!parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+          throw parse_error(begin, "expected string for name in object dict");
         }
         if (!parse_token(begin, end, ":")) {
-          throw parse::parse_error(begin, "expected ':' separating name from value in object dict");
+          throw parse_error(begin, "expected ':' separating name from value in object dict");
         }
         skip_json_value(begin, end);
         if (!parse_token(begin, end, ",")) {
@@ -146,7 +124,7 @@ static void skip_json_value(const char *&begin, const char *end)
         }
       }
       if (!parse_token(begin, end, "}")) {
-        throw parse::parse_error(begin, "expected object separator ',' or terminator '}'");
+        throw parse_error(begin, "expected object separator ',' or terminator '}'");
       }
     }
     break;
@@ -161,42 +139,42 @@ static void skip_json_value(const char *&begin, const char *end)
         }
       }
       if (!parse_token(begin, end, "]")) {
-        throw parse::parse_error(begin, "expected array separator ',' or terminator ']'");
+        throw parse_error(begin, "expected array separator ',' or terminator ']'");
       }
     }
     break;
   case '"': {
     const char *strbegin, *strend;
     bool escaped;
-    if (!parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-      throw parse::parse_error(begin, "invalid string");
+    if (!parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+      throw parse_error(begin, "invalid string");
     }
     break;
   }
   case 't':
     if (!parse_token(begin, end, "true")) {
-      throw parse::parse_error(begin, "invalid json value");
+      throw parse_error(begin, "invalid json value");
     }
     break;
   case 'f':
     if (!parse_token(begin, end, "false")) {
-      throw parse::parse_error(begin, "invalid json value");
+      throw parse_error(begin, "invalid json value");
     }
     break;
   case 'n':
     if (!parse_token(begin, end, "null")) {
-      throw parse::parse_error(begin, "invalid json value");
+      throw parse_error(begin, "invalid json value");
     }
     break;
   default:
     if (c == '-' || ('0' <= c && c <= '9')) {
       const char *nbegin = NULL, *nend = NULL;
-      if (!parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
-        throw parse::parse_error(begin, "invalid number");
+      if (!parse_json_number_no_ws(begin, end, nbegin, nend)) {
+        throw parse_error(begin, "invalid number");
       }
     }
     else {
-      throw parse::parse_error(begin, "invalid json value");
+      throw parse_error(begin, "invalid json value");
     }
   }
 }
@@ -290,8 +268,8 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
     for (;;) {
       const char *strbegin, *strend;
       bool escaped;
-      begin = skip_whitespace(begin, end);
-      if (!parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+      skip_whitespace(begin, end);
+      if (!parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
         throw json_parse_error(begin, "expected string for name in object dict", tp);
       }
       if (!parse_token(begin, end, ":")) {
@@ -300,7 +278,7 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
       intptr_t i;
       if (escaped) {
         std::string name;
-        parse::unescape_string(strbegin, strend, name);
+        unescape_string(strbegin, strend, name);
         i = fsd->get_field_index(name);
       }
       else {
@@ -336,7 +314,8 @@ static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrme
         ss << "object dict does not contain the field ";
         print_escaped_utf8_string(ss, fsd->get_field_name(i));
         ss << " as required by the data type";
-        throw json_parse_error(skip_whitespace(saved_begin, end), ss.str(), tp);
+        skip_whitespace(saved_begin, end);
+        throw json_parse_error(saved_begin, ss.str(), tp);
       }
     }
   }
@@ -358,7 +337,7 @@ static bool parse_tuple_json_from_list(const ndt::type &tp, const char *arrmeta,
 
   // Loop through all the fields
   for (intptr_t i = 0; i != field_count; ++i) {
-    begin = skip_whitespace(begin, end);
+    skip_whitespace(begin, end);
     parse_json(fsd->get_field_type(i), arrmeta + arrmeta_offsets[i], out_data + data_offsets[i], begin, end, ectx);
     if (i != field_count - 1 && !parse_token(begin, end, ",")) {
       throw json_parse_error(begin, "expected list item separator ','", tp);
@@ -415,7 +394,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
       value = 0;
     }
   }
-  else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
+  else if (parse_json_number_no_ws(begin, end, nbegin, nend)) {
     if (nend - nbegin == 1) {
       if (*nbegin == '0') {
         value = 0;
@@ -425,14 +404,14 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
       }
     }
   }
-  else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
+  else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
     if (!escaped) {
-      parse::string_to_bool(&value, nbegin, nend, option, ectx->errmode);
+      string_to_bool(&value, nbegin, nend, option, ectx->errmode);
     }
     else {
       std::string s;
-      parse::unescape_string(nbegin, nend, s);
-      parse::string_to_bool(&value, s.data(), s.data() + s.size(), option, ectx->errmode);
+      unescape_string(nbegin, nend, s);
+      string_to_bool(&value, s.data(), s.data() + s.size(), option, ectx->errmode);
     }
   }
 
@@ -465,22 +444,22 @@ static void parse_number_json(const ndt::type &tp, const char *arrmeta, char *ou
   const char *begin = rbegin;
   const char *nbegin, *nend;
   bool escaped = false;
-  if (option && parse::parse_token_no_ws(begin, end, "null")) {
+  if (option && parse_token_no_ws(begin, end, "null")) {
     ndt::make_type<ndt::option_type>(tp).extended<ndt::option_type>()->assign_na(arrmeta, out_data, ectx);
   }
-  else if (parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
-    parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend, false, ectx->errmode);
+  else if (parse_json_number_no_ws(begin, end, nbegin, nend)) {
+    string_to_number(out_data, tp.get_type_id(), nbegin, nend, false, ectx->errmode);
   }
-  else if (parse::parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
+  else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
     // Interpret the data inside the string as an int
     try {
       if (!escaped) {
-        parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend, option, ectx->errmode);
+        string_to_number(out_data, tp.get_type_id(), nbegin, nend, option, ectx->errmode);
       }
       else {
         std::string s;
-        parse::unescape_string(nbegin, nend, s);
-        parse::string_to_number(out_data, tp.get_type_id(), nbegin, nend, option, ectx->errmode);
+        unescape_string(nbegin, nend, s);
+        string_to_number(out_data, tp.get_type_id(), nbegin, nend, option, ectx->errmode);
       }
     }
     catch (const std::exception &e) {
@@ -500,10 +479,10 @@ static void parse_string_json(const ndt::type &tp, const char *arrmeta, char *ou
                               const char *end, const eval::eval_context *ectx)
 {
   const char *begin = rbegin;
-  begin = skip_whitespace(begin, end);
+  skip_whitespace(begin, end);
   const char *strbegin, *strend;
   bool escaped;
-  if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+  if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
     const ndt::base_string_type *bsd = tp.extended<ndt::base_string_type>();
     try {
       if (!escaped) {
@@ -511,15 +490,17 @@ static void parse_string_json(const ndt::type &tp, const char *arrmeta, char *ou
       }
       else {
         std::string val;
-        parse::unescape_string(strbegin, strend, val);
+        unescape_string(strbegin, strend, val);
         bsd->set_from_utf8_string(arrmeta, out_data, val, ectx);
       }
     }
     catch (const std::exception &e) {
-      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+      skip_whitespace(rbegin, begin);
+      throw json_parse_error(rbegin, e.what(), tp);
     }
     catch (const dynd::dynd_exception &e) {
-      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+      skip_whitespace(rbegin, begin);
+      throw json_parse_error(rbegin, e.what(), tp);
     }
   }
   else {
@@ -532,7 +513,7 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta, char *
                                 const char *end, bool option, const eval::eval_context *ectx)
 {
   const char *begin = rbegin;
-  begin = skip_whitespace(begin, end);
+  skip_whitespace(begin, end);
   const char *strbegin, *strend;
   bool escaped;
   if (option && parse_token(begin, end, "null")) {
@@ -553,10 +534,10 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta, char *
     ss << "Unrecognized datetime type " << tp;
     throw runtime_error(ss.str());
   }
-  else if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+  else if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
     std::string val;
     if (escaped) {
-      parse::unescape_string(strbegin, strend, val);
+      unescape_string(strbegin, strend, val);
       strbegin = val.data();
       strend = strbegin + val.size();
     }
@@ -564,10 +545,12 @@ static void parse_datetime_json(const ndt::type &tp, const char *arrmeta, char *
       tp.extended()->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
     }
     catch (const std::exception &e) {
-      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+      skip_whitespace(rbegin, begin);
+      throw json_parse_error(rbegin, e.what(), tp);
     }
     catch (const dynd::dynd_exception &e) {
-      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+      skip_whitespace(rbegin, begin);
+      throw json_parse_error(rbegin, e.what(), tp);
     }
   }
   else {
@@ -580,7 +563,7 @@ static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta), ch
                        const char *end, bool option, const eval::eval_context *DYND_UNUSED(ectx))
 {
   const char *begin = rbegin;
-  begin = skip_whitespace(begin, end);
+  skip_whitespace(begin, end);
   const char *strbegin, *strend;
   bool escaped;
   if (option && parse_token(begin, end, "null")) {
@@ -595,10 +578,10 @@ static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta), ch
     ss << "Unrecognized type type \"" << tp << "\"";
     throw runtime_error(ss.str());
   }
-  else if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+  else if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
     std::string val;
     if (escaped) {
-      parse::unescape_string(strbegin, strend, val);
+      unescape_string(strbegin, strend, val);
       strbegin = val.data();
       strend = strbegin + val.size();
     }
@@ -606,10 +589,12 @@ static void parse_type(const ndt::type &tp, const char *DYND_UNUSED(arrmeta), ch
       *reinterpret_cast<ndt::type *>(out_data) = ndt::type(strbegin, strend);
     }
     catch (const std::exception &e) {
-      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+      skip_whitespace(rbegin, begin);
+      throw json_parse_error(rbegin, e.what(), tp);
     }
     catch (const dynd::dynd_exception &e) {
-      throw json_parse_error(skip_whitespace(rbegin, begin), e.what(), tp);
+      skip_whitespace(rbegin, begin);
+      throw json_parse_error(rbegin, e.what(), tp);
     }
   }
   else {
@@ -639,7 +624,7 @@ static void parse_dim_json(const ndt::type &tp, const char *arrmeta, char *out_d
 static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&begin,
                               const char *end, const eval::eval_context *ectx)
 {
-  begin = skip_whitespace(begin, end);
+  skip_whitespace(begin, end);
   const char *saved_begin = begin;
   if (tp.is_scalar()) {
     if (parse_token(begin, end, "null")) {
@@ -650,14 +635,14 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
       const ndt::type &value_tp = tp.extended<ndt::option_type>()->get_value_type();
       const char *strbegin, *strend;
       bool escaped;
-      if (parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+      if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
         try {
           if (!escaped) {
             tp.extended()->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
           }
           else {
             std::string val;
-            parse::unescape_string(strbegin, strend, val);
+            unescape_string(strbegin, strend, val);
             tp.extended()->set_from_utf8_string(arrmeta, out_data, val, ectx);
           }
           return;
@@ -676,11 +661,11 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
         else if (parse_token(begin, end, "false")) {
           *out_data = 0;
         }
-        else if (parse::parse_json_number_no_ws(begin, end, strbegin, strend)) {
-          if (parse::compare_range_to_literal(strbegin, strend, "1")) {
+        else if (parse_json_number_no_ws(begin, end, strbegin, strend)) {
+          if (compare_range_to_literal(strbegin, strend, "1")) {
             *out_data = 1;
           }
-          else if (parse::compare_range_to_literal(strbegin, strend, "0")) {
+          else if (compare_range_to_literal(strbegin, strend, "0")) {
             *out_data = 0;
           }
           else {
@@ -694,8 +679,8 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
       }
       else if (value_tp.get_kind() == sint_kind || value_tp.get_kind() == uint_kind ||
                value_tp.get_kind() == real_kind || value_tp.get_kind() == complex_kind) {
-        if (parse::parse_json_number_no_ws(begin, end, strbegin, strend)) {
-          parse::string_to_number(out_data, value_tp.get_type_id(), strbegin, strend, false, ectx->errmode);
+        if (parse_json_number_no_ws(begin, end, strbegin, strend)) {
+          string_to_number(out_data, value_tp.get_type_id(), strbegin, strend, false, ectx->errmode);
         }
         else {
           throw json_parse_error(begin, "expected a number", tp);
@@ -716,7 +701,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
 static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&begin, const char *end,
                        const eval::eval_context *ectx)
 {
-  begin = skip_whitespace(begin, end);
+  skip_whitespace(begin, end);
   switch (tp.get_kind()) {
   case dim_kind:
     parse_dim_json(tp, arrmeta, out_data, begin, end, ectx);
@@ -831,12 +816,12 @@ void dynd::validate_json(const char *json_begin, const char *json_end)
   try {
     const char *begin = json_begin, *end = json_end;
     ::skip_json_value(begin, end);
-    begin = skip_whitespace(begin, end);
+    skip_whitespace(begin, end);
     if (begin != end) {
-      throw parse::parse_error(begin, "unexpected trailing JSON text");
+      throw parse_error(begin, "unexpected trailing JSON text");
     }
   }
-  catch (const parse::parse_error &e) {
+  catch (const parse_error &e) {
     stringstream ss;
     std::string line_prev, line_cur;
     int line, column;
@@ -854,7 +839,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin, const char *json_e
     const char *begin = json_begin, *end = json_end;
     ndt::type tp = out.get_type();
     ::parse_json(tp, out.get()->metadata(), out.data(), begin, end, ectx);
-    begin = skip_whitespace(begin, end);
+    skip_whitespace(begin, end);
     if (begin != end) {
       throw json_parse_error(begin, "unexpected trailing JSON text", tp);
     }
@@ -870,7 +855,7 @@ void dynd::parse_json(nd::array &out, const char *json_begin, const char *json_e
     print_json_parse_error_marker(ss, line_prev, line_cur, line, column);
     throw invalid_argument(ss.str());
   }
-  catch (const parse::parse_error &e) {
+  catch (const parse_error &e) {
     stringstream ss;
     std::string line_prev, line_cur;
     int line, column;
@@ -896,9 +881,9 @@ nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin, const ch
 
 static ndt::type discover_type(const char *&begin, const char *end)
 {
-  begin = skip_whitespace(begin, end);
+  skip_whitespace(begin, end);
   if (begin == end) {
-    throw parse::parse_error(begin, "malformed JSON, expecting an element");
+    throw parse_error(begin, "malformed JSON, expecting an element");
   }
   char c = *begin;
   switch (c) {
@@ -913,13 +898,13 @@ static ndt::type discover_type(const char *&begin, const char *end)
     for (;;) {
       const char *strbegin, *strend;
       bool escaped;
-      begin = skip_whitespace(begin, end);
-      if (!parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-        throw parse::parse_error(begin, "expected string for name in object dict");
+      skip_whitespace(begin, end);
+      if (!parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+        throw parse_error(begin, "expected string for name in object dict");
       }
       names.emplace_back(strbegin, strend - strbegin);
       if (!parse_token(begin, end, ":")) {
-        throw parse::parse_error(begin, "expected ':' separating name from value in object dict");
+        throw parse_error(begin, "expected ':' separating name from value in object dict");
       }
       types.push_back(discover_type(begin, end));
       if (!parse_token(begin, end, ",")) {
@@ -927,7 +912,7 @@ static ndt::type discover_type(const char *&begin, const char *end)
       }
     }
     if (!parse_token(begin, end, "}")) {
-      throw parse::parse_error(begin, "expected object separator ',' or terminator '}'");
+      throw parse_error(begin, "expected object separator ',' or terminator '}'");
     }
     return ndt::struct_type::make(names, types);
   }
@@ -951,7 +936,7 @@ static ndt::type discover_type(const char *&begin, const char *end)
       types.push_back(tp);
     }
     if (!parse_token(begin, end, "]")) {
-      throw parse::parse_error(begin, "expected array separator ',' or terminator ']'");
+      throw parse_error(begin, "expected array separator ',' or terminator ']'");
     }
     if (common_tp.is_null()) {
       return ndt::tuple_type::make(types);
@@ -961,8 +946,8 @@ static ndt::type discover_type(const char *&begin, const char *end)
   case '"': {
     const char *strbegin, *strend;
     bool escaped;
-    if (!parse::parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-      throw parse::parse_error(begin, "invalid string");
+    if (!parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+      throw parse_error(begin, "invalid string");
     }
     return ndt::type(string_type_id);
   }
@@ -972,24 +957,24 @@ static ndt::type discover_type(const char *&begin, const char *end)
     if (parse_token(begin, end, "rue")) {
       return ndt::make_type<bool1>();
     }
-    throw parse::parse_error(begin, "invalid json value");
+    throw parse_error(begin, "invalid json value");
   case 'F':
   case 'f':
     ++begin;
     if (parse_token(begin, end, "alse")) {
       return ndt::make_type<bool1>();
     }
-    throw parse::parse_error(begin, "invalid json value");
+    throw parse_error(begin, "invalid json value");
   case 'n':
     if (parse_token(begin, end, "null")) {
       return ndt::make_type<ndt::option_type>(ndt::type("Any"));
     }
-    throw parse::parse_error(begin, "invalid json value");
+    throw parse_error(begin, "invalid json value");
   default:
     if (c == '-' || ('0' <= c && c <= '9')) {
       const char *nbegin = NULL, *nend = NULL;
-      if (!parse::parse_json_number_no_ws(begin, end, nbegin, nend)) {
-        throw parse::parse_error(begin, "invalid number");
+      if (!parse_json_number_no_ws(begin, end, nbegin, nend)) {
+        throw parse_error(begin, "invalid number");
       }
       int64_t int_val;
       if (!parse_int64(int_val, nbegin, nend)) {
@@ -999,10 +984,10 @@ static ndt::type discover_type(const char *&begin, const char *end)
       if (!parse_double(float_val, nbegin, nend)) {
         return ndt::make_type<double>();
       }
-      throw parse::parse_error(begin, "invalid json value");
+      throw parse_error(begin, "invalid json value");
     }
     else {
-      throw parse::parse_error(begin, "invalid json value");
+      throw parse_error(begin, "invalid json value");
     }
   }
 
@@ -1014,12 +999,12 @@ void ndt::json::discover(ndt::type &res, const char *json_begin, const char *jso
   try {
     const char *begin = json_begin, *end = json_end;
     res = ::discover_type(begin, end);
-    begin = skip_whitespace(begin, end);
+    skip_whitespace(begin, end);
     if (begin != end) {
-      throw parse::parse_error(begin, "unexpected trailing JSON text");
+      throw parse_error(begin, "unexpected trailing JSON text");
     }
   }
-  catch (const parse::parse_error &e) {
+  catch (const parse_error &e) {
     stringstream ss;
     std::string line_prev, line_cur;
     int line, column;

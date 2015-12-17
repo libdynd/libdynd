@@ -18,7 +18,7 @@
 #include <dynd/func/elwise.hpp>
 #include <dynd/exceptions.hpp>
 #include <dynd/array_iter.hpp>
-#include <dynd/parser_util.hpp>
+#include <dynd/parse.hpp>
 
 #include <datetime_strings.h>
 #include <datetime_localtime.h>
