@@ -274,7 +274,7 @@ namespace ndt {
 
   template <type_id_t Src0ValueTypeID>
   struct traits<nd::assign_na_kernel<Src0ValueTypeID>> {
-    static type equivalent() { return callable_type::make(option_type::make(Src0ValueTypeID)); }
+    static type equivalent() { return callable_type::make(make_type<option_type>(Src0ValueTypeID)); }
   };
 
 } // namespace dynd::ndt

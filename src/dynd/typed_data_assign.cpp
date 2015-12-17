@@ -177,7 +177,7 @@ void dynd::typed_data_assign(const ndt::type &dst_tp, const char *dst_arrmeta, c
   DYND_ASSERT_ALIGNED(dst, 0, dst_tp.get_data_alignment(), "dst type: " << dst_tp << ", src type: " << src_tp);
   DYND_ASSERT_ALIGNED(src, 0, src_dt.get_data_alignment(), "src type: " << src_tp << ", dst type: " << dst_tp);
 
-  nd::array kwd = nd::empty(ndt::option_type::make(ndt::make_type<int>()));
+  nd::array kwd = nd::empty(ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
   *reinterpret_cast<int *>(kwd.data()) = static_cast<int>(error_mode);
   std::map<std::string, ndt::type> tp_vars;
   nd::assign::get()->call(dst_tp, dst_arrmeta, dst_data, 1, &src_tp, &src_arrmeta, const_cast<char *const *>(&src_data),

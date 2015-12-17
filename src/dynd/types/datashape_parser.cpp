@@ -297,7 +297,7 @@ static ndt::type parse_option_parameters(const char *&rbegin, const char *end, m
   // TODO catch errors, convert them to datashape_parse_error so the position is
   // shown
   rbegin = begin;
-  return ndt::option_type::make(tp);
+  return ndt::make_type<ndt::option_type>(tp);
 }
 
 static string_encoding_t string_to_encoding(const char *error_begin, const std::string &estr)
@@ -1517,7 +1517,7 @@ static ndt::type parse_datashape(const char *&rbegin, const char *end, map<std::
     ndt::type val_tp = parse_datashape_nooption(begin, end, symtable);
     if (!val_tp.is_null()) {
       rbegin = begin;
-      return ndt::option_type::make(val_tp);
+      return ndt::make_type<ndt::option_type>(val_tp);
     }
     else {
       return ndt::type();

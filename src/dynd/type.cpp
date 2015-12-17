@@ -1095,10 +1095,10 @@ ndt::common_type::common_type()
 
   for (type_id_t tp_id : i2a<J>()) {
     children[option_type_id][tp_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
-      return option_type::make(ndt::common_type(tp0.extended<option_type>()->get_value_type(), tp1));
+      return make_type<option_type>(ndt::common_type(tp0.extended<option_type>()->get_value_type(), tp1));
     };
     children[tp_id][option_type_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
-      return option_type::make(ndt::common_type(tp0, tp1.extended<option_type>()->get_value_type()));
+      return make_type<option_type>(ndt::common_type(tp0, tp1.extended<option_type>()->get_value_type()));
     };
     children[any_kind_type_id][tp_id] = [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &tp1) { return tp1; };
     children[tp_id][any_kind_type_id] = [](const ndt::type &tp0, const ndt::type &DYND_UNUSED(tp1)) { return tp0; };

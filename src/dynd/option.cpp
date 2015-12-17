@@ -19,7 +19,7 @@ DYND_API nd::callable nd::assign_na::make()
                            datetime_type_id> type_ids;
 
   std::map<type_id_t, callable> children = callable::make_all<assign_na_kernel, type_ids>();
-  callable dim_children[2];
+  std::array<callable, 2> dim_children;
 
   auto t = ndt::type("() -> ?Any");
   callable self = functional::call<assign_na>(t);
@@ -55,7 +55,7 @@ DYND_API nd::callable nd::is_avail::make()
                            datetime_type_id> type_ids;
 
   std::map<type_id_t, callable> children = callable::make_all<is_avail_kernel, type_ids>();
-  callable dim_children[2];
+  std::array<callable, 2> dim_children;
 
   callable self = functional::call<is_avail>(ndt::type("(Any) -> Any"));
 

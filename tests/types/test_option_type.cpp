@@ -23,7 +23,7 @@ TEST(OptionType, Create)
 {
   ndt::type d;
 
-  d = ndt::option_type::make(ndt::make_type<int16_t>());
+  d = ndt::make_type<ndt::option_type>(ndt::make_type<int16_t>());
   EXPECT_EQ(option_type_id, d.get_type_id());
   EXPECT_EQ(option_kind, d.get_kind());
   EXPECT_EQ(2u, d.get_data_alignment());
@@ -37,7 +37,7 @@ TEST(OptionType, Create)
   EXPECT_EQ(d, ndt::type("?int16"));
   EXPECT_EQ(d, ndt::type("option[int16]"));
 
-  d = ndt::option_type::make(ndt::make_type<ndt::string_type>());
+  d = ndt::make_type<ndt::option_type>(ndt::make_type<ndt::string_type>());
   EXPECT_EQ(option_type_id, d.get_type_id());
   EXPECT_EQ(option_kind, d.get_kind());
   EXPECT_EQ(ndt::make_type<ndt::string_type>().get_data_alignment(), d.get_data_alignment());
@@ -49,7 +49,7 @@ TEST(OptionType, Create)
   EXPECT_EQ("?string", d.str());
 
   // No option of option allowed
-  EXPECT_THROW(ndt::option_type::make(ndt::option_type::make(ndt::make_type<int>())), type_error);
+  EXPECT_THROW(ndt::make_type<ndt::option_type>(ndt::make_type<ndt::option_type>(ndt::make_type<int>())), type_error);
   EXPECT_THROW(ndt::type("option[option[bool]]"), type_error);
 }
 

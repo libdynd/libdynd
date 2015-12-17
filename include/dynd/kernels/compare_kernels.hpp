@@ -308,8 +308,8 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
-                                                nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
+                                                nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
   };
@@ -361,8 +361,8 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
-                                                nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
+                                                nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
   };
@@ -425,8 +425,8 @@ namespace nd {
       self->assign_na_offset = ckb_offset - option_comp_offset;
       auto assign_na = nd::assign_na::get();
       ckb_offset = assign_na.get()->instantiate(assign_na.get()->static_data(), data, ckb, ckb_offset,
-                                                ndt::option_type::make(ndt::make_type<bool1>()), nullptr, 0, nullptr,
-                                                nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
+                                                ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), nullptr, 0,
+                                                nullptr, nullptr, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       return ckb_offset;
     }
   };

@@ -2106,7 +2106,7 @@ namespace nd {
         // Deal with some float32 to option[T] conversions where any NaN is
         // interpreted
         // as NA.
-        ndt::type src_tp_as_option = ndt::option_type::make(src_tp[0]);
+        ndt::type src_tp_as_option = ndt::make_type<ndt::option_type>(src_tp[0]);
         return assignment_kernel<option_type_id, option_kind, option_type_id, option_kind, ErrorMode>::instantiate(
             NULL, NULL, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc, &src_tp_as_option, src_arrmeta, kernreq,
             &eval::default_eval_context, nkwd, kwds, tp_vars);
@@ -3901,7 +3901,7 @@ namespace ndt {
     static type equivalent()
     {
       return callable_type::make(type(DstTypeID), {type(Src0TypeID)}, {"error_mode"},
-                                 {ndt::option_type::make(ndt::make_type<int>())});
+                                 {ndt::make_type<ndt::option_type>(ndt::make_type<int>())});
     }
   };
 

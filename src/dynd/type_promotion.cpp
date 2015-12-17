@@ -194,16 +194,17 @@ ndt::type dynd::promote_types_arithmetic(const ndt::type &tp0, const ndt::type &
   // the value underneath the option type promotes
   if (tp0_val.get_type_id() == option_type_id) {
     if (tp1_val.get_type_id() == option_type_id) {
-      return ndt::option_type::make(promote_types_arithmetic(tp0_val.extended<ndt::option_type>()->get_value_type(),
-                                                             tp1_val.extended<ndt::option_type>()->get_value_type()));
+      return ndt::make_type<ndt::option_type>(
+          promote_types_arithmetic(tp0_val.extended<ndt::option_type>()->get_value_type(),
+                                   tp1_val.extended<ndt::option_type>()->get_value_type()));
     }
     else {
-      return ndt::option_type::make(
+      return ndt::make_type<ndt::option_type>(
           promote_types_arithmetic(tp0_val.extended<ndt::option_type>()->get_value_type(), tp1_val));
     }
   }
   else if (tp1_val.get_type_id() == option_type_id) {
-    return ndt::option_type::make(
+    return ndt::make_type<ndt::option_type>(
         promote_types_arithmetic(tp0_val, tp1_val.extended<ndt::option_type>()->get_value_type()));
   }
 

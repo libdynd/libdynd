@@ -30,8 +30,6 @@ namespace ndt {
   public:
     option_type(const type &value_tp);
 
-    virtual ~option_type();
-
     size_t get_default_data_size() const { return m_value_tp.get_default_data_size(); }
 
     void get_vars(std::unordered_set<std::string> &vars) const;
@@ -77,8 +75,6 @@ namespace ndt {
                std::map<std::string, type> &tp_vars) const;
 
     void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
-
-    static type make(const type &value_tp);
   };
 
 } // namespace dynd::ndt
