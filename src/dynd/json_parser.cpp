@@ -977,8 +977,11 @@ static ndt::type discover_type(const char *&begin, const char *end)
         throw parse_error(begin, "invalid number");
       }
       int64_t int_val;
-      if (!parse_int64(int_val, nbegin, nend)) {
+      try {
+        parse_int64(int_val, nbegin, nend);
         return ndt::make_type<int64>();
+      }
+      catch (...) {
       }
       double float_val;
       if (!parse_double(float_val, nbegin, nend)) {

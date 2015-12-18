@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <dynd/parse.hpp>
 #include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/types/option_type.hpp>

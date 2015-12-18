@@ -109,6 +109,7 @@ set(tests_SRC
     test_iterator.cpp
     test_shape_tools.cpp
     test_type_sequence.cpp
+    test_parse.cpp
     test_platform.cpp
     ../thirdparty/gtest/gtest-all.cc
     ../thirdparty/gtest/gtest_main.cc

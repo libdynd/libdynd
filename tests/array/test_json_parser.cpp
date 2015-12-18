@@ -21,10 +21,12 @@
 #include <dynd/types/date_type.hpp>
 #include <dynd/types/string_type.hpp>
 #include <dynd/types/option_type.hpp>
+#include <dynd/parse.hpp>
 
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(JSON, DiscoverBool)
 {
   EXPECT_EQ(ndt::make_type<bool1>(), ndt::json::discover("true"));
@@ -99,6 +101,7 @@ TEST(JSON, DiscoverObject)
 
   EXPECT_EQ(ndt::type("{x: float64, y: 3 * int64}"), ndt::json::discover("{\"x\": 3.14, \"y\": [1, 2, 3]}"));
 }
+*/
 
 TEST(JSON, ParserWithMissingValue)
 {

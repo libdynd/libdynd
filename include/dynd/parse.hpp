@@ -9,10 +9,65 @@
 #include <stdexcept>
 
 #include <dynd/config.hpp>
-#include <dynd/types/type_id.hpp>
+#include <dynd/type.hpp>
+#include <dynd/types/string_type.hpp>
 #include <dynd/typed_data_assign.hpp>
+#include <dynd/string_encodings.hpp>
+
+#define DYND_BOOL_NA (2)
+#define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
+#define DYND_INT16_NA (std::numeric_limits<int16_t>::min())
+#define DYND_INT32_NA (std::numeric_limits<int32_t>::min())
+#define DYND_INT64_NA (std::numeric_limits<int64_t>::min())
+#define DYND_INT128_NA (std::numeric_limits<int128>::min())
+#define DYND_FLOAT16_NA_AS_UINT (0x7e0au)
+#define DYND_FLOAT32_NA_AS_UINT (0x7f8007a2U)
+#define DYND_FLOAT64_NA_AS_UINT (0x7ff00000000007a2ULL)
 
 namespace dynd {
+
+struct nocheck_t {
+};
+
+static const nocheck_t nocheck = nocheck_t();
+
+inline void raise_string_cast_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
+                                    const char *data)
+{
+  std::stringstream ss;
+  ss << "cannot cast string ";
+  string_tp.print_data(ss, arrmeta, data);
+  ss << " to " << dst_tp;
+  throw std::invalid_argument(ss.str());
+}
+
+inline void raise_string_cast_error(const ndt::type &dst_tp, const char *begin, const char *end)
+{
+  std::stringstream ss;
+  ss << "cannot cast string ";
+  ss.write(begin, end - begin);
+  ss << " to " << dst_tp;
+  throw std::invalid_argument(ss.str());
+}
+
+inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
+                                             const char *data)
+{
+  std::stringstream ss;
+  ss << "overflow converting string ";
+  string_tp.print_data(ss, arrmeta, data);
+  ss << " to " << dst_tp;
+  throw std::overflow_error(ss.str());
+}
+
+inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const char *begin, const char *end)
+{
+  std::stringstream ss;
+  ss << "overflow converting string ";
+  ss.write(begin, end - begin);
+  ss << " to " << dst_tp;
+  throw std::overflow_error(ss.str());
+}
 
 /**
  * A helper class to save/restore the state
@@ -408,6 +463,8 @@ inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&o
   return false;
 }
 
+float checked_float64_to_float32(double value, assign_error_mode errmode);
+
 /**
  * Without skipping whitespace, parses an integer with exactly two digits.
  * A leading zero is accepted.
@@ -470,20 +527,6 @@ DYND_API bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &
 DYND_API bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
- * Converts a string containing only an unsigned integer (no leading or
- * trailing space, etc) into a uint64, setting the output over flow or
- * bad parse flags if there are problems.
- */
-DYND_API uint64_t checked_string_to_uint64(const char *begin, const char *end, bool &out_overflow, bool &out_badparse);
-
-/**
- * Converts a string containing only an unsigned integer (no leading or
- * trailing space, etc) into a uint128, setting the output over flow or
- * bad parse flags if there are problems.
- */
-DYND_API uint128 checked_string_to_uint128(const char *begin, const char *end, bool &out_overflow, bool &out_badparse);
-
-/**
  * Converts a string containing only an integer (no leading or
  * trailing space, etc) into an intptr_t, raising an exception if
  * there are problems.
@@ -499,36 +542,153 @@ DYND_API int64_t checked_string_to_int64(const char *begin, const char *end);
 
 /**
  * Converts a string containing only an unsigned integer (no leading or
- * trailing space, etc) into a uint64, ignoring any problems.
+ * trailing space, etc), ignoring any problems.
  */
-DYND_API uint64_t unchecked_string_to_uint64(const char *begin, const char *end);
+template <typename T>
+std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
+{
+  T result = 0;
+  while (begin < end) {
+    char c = *begin;
+    if ('0' <= c && c <= '9') {
+      result = (result * 10u) + static_cast<uint32_t>(c - '0');
+    }
+    else if (c == 'e' || c == 'E') {
+      // Accept "1e5", "1e+5" integers with a positive exponent,
+      // a subset of floating point syntax. Note that "1.2e1"
+      // is not accepted as the value 12 by this code.
+      ++begin;
+      if (begin < end && *begin == '+') {
+        ++begin;
+      }
+      if (begin < end) {
+        int exponent = 0;
+        // Accept any number of zeros followed by at most
+        // two digits. Anything greater would overflow.
+        while (begin < end && *begin == '0') {
+          ++begin;
+        }
+        if (begin < end && '0' <= *begin && *begin <= '9') {
+          exponent = *begin++ - '0';
+        }
+        if (begin < end && '0' <= *begin && *begin <= '9') {
+          exponent = (10 * exponent) + (*begin++ - '0');
+        }
+        if (begin == end) {
+          // Apply the exponent in a naive way
+          for (int i = 0; i < exponent; ++i) {
+            result = result * 10u;
+          }
+        }
+      }
+      break;
+    }
+    else {
+      break;
+    }
+    ++begin;
+  }
+  return result;
+}
+
+template <typename T>
+T parse(const std::string &s, nocheck_t nocheck)
+{
+  return parse<T>(s.data(), s.data() + s.size(), nocheck);
+}
+
+template <typename T>
+T parse(const string &s, nocheck_t nocheck)
+{
+  return parse<T>(s.begin(), s.end(), nocheck);
+}
 
 /**
- * Converts a string containing only an unsigned integer (no leading or
- * trailing space, etc) into a uint128, ignoring any problems.
+ * Converts a string containing (no leading or trailing space, etc) to a type T,
+ * setting the output over flow or bad parse flags if there are problems.
  */
-DYND_API uint128 unchecked_string_to_uint128(const char *begin, const char *end);
+template <typename T>
+T parse(const char *begin, const char *end)
+{
+  T result = 0, prev_result = 0;
+  if (begin == end) {
+    raise_string_cast_error(ndt::make_type<T>(), begin, end);
+  }
+  while (begin < end) {
+    char c = *begin;
+    if ('0' <= c && c <= '9') {
+      result = (result * 10u) + static_cast<T>(c - '0');
+      if (result < prev_result) {
+        raise_string_cast_overflow_error(ndt::make_type<T>(), begin, end);
+      }
+    }
+    else {
+      if (c == '.') {
+        // Accept ".", ".0" with trailing decimal zeros as well
+        ++begin;
+        while (begin < end && *begin == '0') {
+          ++begin;
+        }
+        if (begin == end) {
+          break;
+        }
+      }
+      else if (c == 'e' || c == 'E') {
+        // Accept "1e5", "1e+5" integers with a positive exponent,
+        // a subset of floating point syntax. Note that "1.2e1"
+        // is not accepted as the value 12 by this code.
+        ++begin;
+        if (begin < end && *begin == '+') {
+          ++begin;
+        }
+        if (begin < end) {
+          int exponent = 0;
+          // Accept any number of zeros followed by at most
+          // two digits. Anything greater would overflow.
+          while (begin < end && *begin == '0') {
+            ++begin;
+          }
+          if (begin < end && '0' <= *begin && *begin <= '9') {
+            exponent = *begin++ - '0';
+          }
+          if (begin < end && '0' <= *begin && *begin <= '9') {
+            exponent = (10 * exponent) + (*begin++ - '0');
+          }
+          if (begin == end) {
+            prev_result = result;
+            // Apply the exponent in a naive way, but with
+            // overflow checking
+            for (int i = 0; i < exponent; ++i) {
+              result = result * 10u;
+              if (result < prev_result) {
+                raise_string_cast_overflow_error(ndt::make_type<T>(), begin, end);
+              }
+              prev_result = result;
+            }
+            return result;
+          }
+        }
+      }
+      raise_string_cast_error(ndt::make_type<T>(), begin, end);
+      break;
+    }
+    ++begin;
+    prev_result = result;
+  }
+  return result;
+}
 
-/**
- * Converts a string containing only a floating point number into
- * a float64/C double.
- */
-DYND_API double checked_string_to_float64(const char *begin, const char *end, assign_error_mode errmode);
+template <typename T>
+T parse(const std::string &s)
+{
+  return parse<T>(s.data(), s.data() + s.size());
+}
 
-/**
- * Converts a string containing a number (no leading or trailing space)
- * into a Num with the specified builtin type id, using the specified error
- * mode to handle errors. If ``option`` is true, writes to option[Num].
- *
- * \param out  The address of the Num or option[Num].
- * \param tid  The type id of the Num.
- * \param begin  The start of the UTF8 string buffer.
- * \param end  The end of the UTF8 string buffer.
- * \param option  If true, treat it as option[Num] instead of just Num.
- * \param errmode  The error handling mode.
- */
-DYND_API void string_to_number(char *out, type_id_t tid, const char *begin, const char *end, bool option,
-                               assign_error_mode errmode);
+template <typename T>
+T parse(const string &s)
+{
+  return parse<T>(s.begin(), s.end());
+}
 
 /**
  * Converts a string containing an boolean (no leading or trailing space)
@@ -574,6 +734,8 @@ struct DYND_API named_value {
   int value;
   DYND_CONSTEXPR named_value(const char *name_, int value_) : name(name_), value(value_) {}
 };
+
+double checked_string_to_float64(const char *begin, const char *end, assign_error_mode error_mode);
 
 /**
  * Without skipping whitespace, matches a case insensitive alphabetical
@@ -711,10 +873,361 @@ struct overflow_check<uint64_t> {
   inline static bool is_overflow(uint64_t DYND_UNUSED(value)) { return false; }
 };
 
-DYND_API int parse_int64(int64_t &res, const char *begin, const char *end);
+DYND_API void parse_int64(int64_t &res, const char *begin, const char *end);
 
-DYND_API int parse_uint64(uint64_t &res, const char *begin, const char *end);
+DYND_API void parse_uint64(uint64_t &res, const char *begin, const char *end);
 
 DYND_API int parse_double(double &res, const char *begin, const char *end);
+
+inline static double make_double_nan(bool negative)
+{
+  union {
+    uint64_t i;
+    double d;
+  } nan;
+  nan.i = negative ? 0xfff8000000000000ULL : 0x7ff8000000000000ULL;
+  return nan.d;
+}
+
+template <class T>
+void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow, bool &badparse)
+{
+  overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
+  if (!overflow && !badparse) {
+    *reinterpret_cast<T *>(out_int) =
+        static_cast<T>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
+  }
+}
+
+inline void assign_signed_int128_value(char *out_int, uint128 uvalue, bool &negative, bool &overflow, bool &badparse)
+{
+  overflow = overflow || overflow_check<int128>::is_overflow(uvalue, negative);
+  if (!overflow && !badparse) {
+    *reinterpret_cast<int128 *>(out_int) = negative ? -static_cast<int128>(uvalue) : static_cast<int128>(uvalue);
+  }
+}
+
+/**
+ * Converts a string containing only a floating point number into
+ * a float64/C double.
+ */
+template <assign_error_mode ErrorMode>
+double checked_string_to_float64(const char *begin, const char *end)
+{
+  bool negative = false;
+  const char *pos = begin;
+  if (pos < end && *pos == '-') {
+    negative = true;
+    ++pos;
+  }
+  // First check for various NaN/Inf inputs
+  size_t size = end - pos;
+  if (size == 3) {
+    if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
+      return make_double_nan(negative);
+    }
+    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
+      return negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
+    }
+  }
+  else if (size == 7) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
+        (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
+      return make_double_nan(negative);
+    }
+  }
+  else if (size == 6) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
+      if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
+        return make_double_nan(negative);
+      }
+      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
+               (pos[5] == 'F' || pos[5] == 'f')) {
+        return negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
+      }
+    }
+  }
+  else if (size == 8) {
+    if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
+        (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
+        (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
+      return negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
+    }
+  }
+
+  // TODO: use http://www.netlib.org/fp/dtoa.c
+  char *end_ptr;
+  std::string s(begin, end);
+  double value = strtod(s.c_str(), &end_ptr);
+  if (ErrorMode != assign_error_nocheck && (size_t)(end_ptr - s.c_str()) != s.size()) {
+    std::stringstream ss;
+    ss << "parse error converting string ";
+    print_escaped_utf8_string(ss, begin, end);
+    ss << " to float64";
+    throw std::invalid_argument(ss.str());
+  }
+
+  return value;
+}
+
+template <class T>
+void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow, bool &badparse)
+{
+  overflow = overflow || negative || overflow_check<T>::is_overflow(uvalue);
+  if (!overflow && !badparse) {
+    *reinterpret_cast<T *>(out_int) = static_cast<T>(uvalue);
+  }
+}
+
+/**
+ * Converts a string containing a number (no leading or trailing space)
+ * into a Num with the specified builtin type id, using the specified error
+ * mode to handle errors. If ``option`` is true, writes to option[Num].
+ *
+ * \param out  The address of the Num or option[Num].
+ * \param tid  The type id of the Num.
+ * \param begin  The start of the UTF8 string buffer.
+ * \param end  The end of the UTF8 string buffer.
+ * \param option  If true, treat it as option[Num] instead of just Num.
+ * \param errmode  The error handling mode.
+ */
+inline void string_to_number(char *out, type_id_t tid, const char *begin, const char *end, bool option,
+                             assign_error_mode errmode)
+{
+
+  uint64_t uvalue;
+  const char *saved_begin = begin;
+  bool negative = false, overflow = false, badparse = false;
+
+  if (option && matches_option_type_na_token(begin, end)) {
+    switch (tid) {
+    case int8_type_id:
+      *reinterpret_cast<int8_t *>(out) = DYND_INT8_NA;
+      return;
+    case int16_type_id:
+      *reinterpret_cast<int16_t *>(out) = DYND_INT16_NA;
+      return;
+    case int32_type_id:
+      *reinterpret_cast<int32_t *>(out) = DYND_INT32_NA;
+      return;
+    case int64_type_id:
+      *reinterpret_cast<int64_t *>(out) = DYND_INT64_NA;
+      return;
+    case int128_type_id:
+      *reinterpret_cast<int128 *>(out) = DYND_INT128_NA;
+      return;
+    case float16_type_id:
+      *reinterpret_cast<uint16_t *>(out) = DYND_FLOAT16_NA_AS_UINT;
+      return;
+    case float32_type_id:
+      *reinterpret_cast<uint32_t *>(out) = DYND_FLOAT32_NA_AS_UINT;
+      return;
+    case float64_type_id:
+      *reinterpret_cast<uint64_t *>(out) = DYND_FLOAT64_NA_AS_UINT;
+      return;
+    case complex_float32_type_id:
+      reinterpret_cast<uint32_t *>(out)[0] = DYND_FLOAT32_NA_AS_UINT;
+      reinterpret_cast<uint32_t *>(out)[1] = DYND_FLOAT32_NA_AS_UINT;
+      return;
+    case complex_float64_type_id:
+      reinterpret_cast<uint64_t *>(out)[0] = DYND_FLOAT64_NA_AS_UINT;
+      reinterpret_cast<uint64_t *>(out)[1] = DYND_FLOAT64_NA_AS_UINT;
+      return;
+    default:
+      break;
+    }
+    std::stringstream ss;
+    ss << "No NA value has been configured for option[" << ndt::type(tid) << "]";
+    throw type_error(ss.str());
+  }
+
+  if (begin < end && *begin == '-') {
+    negative = true;
+    ++begin;
+  }
+  if (errmode != assign_error_nocheck) {
+    switch (tid) {
+    case int8_type_id:
+      uvalue = parse<uint64_t>(begin, end);
+      assign_signed_int_value<int8_t>(out, uvalue, negative, overflow, badparse);
+      break;
+    case int16_type_id:
+      uvalue = parse<uint64_t>(begin, end);
+      assign_signed_int_value<int16_t>(out, uvalue, negative, overflow, badparse);
+      break;
+    case int32_type_id:
+      uvalue = parse<uint64_t>(begin, end);
+      assign_signed_int_value<int32_t>(out, uvalue, negative, overflow, badparse);
+      break;
+    case int64_type_id:
+      uvalue = parse<uint64_t>(begin, end);
+      assign_signed_int_value<int64_t>(out, uvalue, negative, overflow, badparse);
+      break;
+    case int128_type_id: {
+      uint128 buvalue = parse<uint128>(begin, end);
+      assign_signed_int128_value(out, buvalue, negative, overflow, badparse);
+      break;
+    }
+    case uint8_type_id:
+      uvalue = parse<uint64_t>(begin, end);
+      negative = negative && (uvalue != 0);
+      assign_unsigned_int_value<uint8_t>(out, uvalue, negative, overflow, badparse);
+      break;
+    case uint16_type_id:
+      uvalue = parse<uint64_t>(begin, end);
+      negative = negative && (uvalue != 0);
+      assign_unsigned_int_value<uint16_t>(out, uvalue, negative, overflow, badparse);
+      break;
+    case uint32_type_id:
+      uvalue = parse<uint64_t>(begin, end);
+      negative = negative && (uvalue != 0);
+      assign_unsigned_int_value<uint32_t>(out, uvalue, negative, overflow, badparse);
+      break;
+    case uint64_type_id:
+      uvalue = parse<uint64_t>(begin, end);
+      negative = negative && (uvalue != 0);
+      overflow = overflow || negative;
+      if (!overflow && !badparse) {
+        *reinterpret_cast<uint64_t *>(out) = uvalue;
+      }
+      break;
+    case uint128_type_id: {
+      uint128 buvalue = parse<uint128>(begin, end);
+      negative = negative && (buvalue != 0);
+      overflow = overflow || negative;
+      if (!overflow && !badparse) {
+        *reinterpret_cast<uint128 *>(out) = buvalue;
+      }
+      break;
+    }
+    case float16_type_id: {
+      double value = checked_string_to_float64(saved_begin, end, errmode);
+      *reinterpret_cast<uint16_t *>(out) = float16(value).bits();
+      break;
+    }
+    case float32_type_id: {
+      double value = checked_string_to_float64(saved_begin, end, errmode);
+      *reinterpret_cast<float *>(out) = checked_float64_to_float32(value, errmode);
+      break;
+    }
+    case float64_type_id: {
+      *reinterpret_cast<double *>(out) = checked_string_to_float64(saved_begin, end, errmode);
+      break;
+    }
+    default: {
+      std::stringstream ss;
+      ss << "cannot parse number, got invalid type id " << tid;
+      throw std::runtime_error(ss.str());
+    }
+    }
+    if (overflow) {
+      std::stringstream ss;
+      ss << "overflow converting string ";
+      print_escaped_utf8_string(ss, begin, end);
+      ss << " to ";
+      if (option) {
+        ss << "?";
+      }
+      ss << tid;
+      throw std::overflow_error(ss.str());
+    }
+    else if (badparse) {
+      std::stringstream ss;
+      ss << "parse error converting string ";
+      print_escaped_utf8_string(ss, begin, end);
+      ss << " to ";
+      if (option) {
+        ss << "?";
+      }
+      ss << tid;
+      throw std::invalid_argument(ss.str());
+    }
+  }
+  else {
+    // errmode == assign_error_nocheck
+    switch (tid) {
+    case int8_type_id:
+      uvalue = parse<uint64_t>(begin, end, nocheck);
+      *reinterpret_cast<int8_t *>(out) =
+          static_cast<int8_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
+      break;
+    case int16_type_id:
+      uvalue = parse<uint64_t>(begin, end, nocheck);
+      *reinterpret_cast<int16_t *>(out) =
+          static_cast<int16_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
+      break;
+    case int32_type_id:
+      uvalue = parse<uint64_t>(begin, end, nocheck);
+      *reinterpret_cast<int32_t *>(out) =
+          static_cast<int32_t>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
+      break;
+    case int64_type_id:
+      uvalue = parse<uint64_t>(begin, end, nocheck);
+      *reinterpret_cast<int64_t *>(out) = negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue);
+      break;
+    case int128_type_id: {
+      uint128 buvalue = parse<uint128>(begin, end, nocheck);
+      *reinterpret_cast<int128 *>(out) = negative ? -static_cast<int128>(buvalue) : static_cast<int128>(buvalue);
+      break;
+    }
+    case uint8_type_id:
+      uvalue = parse<uint64_t>(begin, end, nocheck);
+      *reinterpret_cast<uint8_t *>(out) = static_cast<uint8_t>(negative ? 0 : uvalue);
+      break;
+    case uint16_type_id:
+      uvalue = parse<uint64_t>(begin, end, nocheck);
+      *reinterpret_cast<uint16_t *>(out) = static_cast<uint16_t>(negative ? 0 : uvalue);
+      break;
+    case uint32_type_id:
+      uvalue = parse<uint64_t>(begin, end, nocheck);
+      *reinterpret_cast<uint32_t *>(out) = static_cast<uint32_t>(negative ? 0 : uvalue);
+      break;
+    case uint64_type_id:
+      uvalue = parse<uint64_t>(begin, end, nocheck);
+      *reinterpret_cast<uint64_t *>(out) = negative ? 0 : uvalue;
+      break;
+    case uint128_type_id: {
+      uint128 buvalue = parse<uint128>(begin, end, nocheck);
+      *reinterpret_cast<uint128 *>(out) = negative ? static_cast<uint128>(0) : buvalue;
+      break;
+    }
+    case float16_type_id: {
+      double value = checked_string_to_float64(saved_begin, end, errmode);
+      *reinterpret_cast<uint16_t *>(out) = float16(value).bits();
+      break;
+    }
+    case float32_type_id: {
+      double value = checked_string_to_float64(saved_begin, end, errmode);
+      *reinterpret_cast<float *>(out) = checked_float64_to_float32(value, errmode);
+      break;
+    }
+    case float64_type_id: {
+      *reinterpret_cast<double *>(out) = checked_string_to_float64(saved_begin, end, errmode);
+      break;
+    }
+    default: {
+      std::stringstream ss;
+      ss << "cannot parse number, got invalid type id " << tid;
+      throw std::runtime_error(ss.str());
+    }
+    }
+  }
+}
+
+inline double checked_string_to_float64(const char *begin, const char *end, assign_error_mode error_mode)
+{
+  switch (error_mode) {
+  case assign_error_nocheck:
+    return checked_string_to_float64<assign_error_nocheck>(begin, end);
+  case assign_error_inexact:
+    return checked_string_to_float64<assign_error_inexact>(begin, end);
+  case assign_error_overflow:
+    return checked_string_to_float64<assign_error_overflow>(begin, end);
+  case assign_error_fractional:
+    return checked_string_to_float64<assign_error_fractional>(begin, end);
+  case assign_error_default:
+    return checked_string_to_float64<assign_error_default>(begin, end);
+  }
+}
 
 } // namespace dynd

@@ -87,26 +87,6 @@ inline void to_lower(std::string &s)
   }
 }
 
-inline void raise_string_cast_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
-                                    const char *data)
-{
-  std::stringstream ss;
-  ss << "cannot cast string ";
-  string_tp.print_data(ss, arrmeta, data);
-  ss << " to " << dst_tp;
-  throw std::invalid_argument(ss.str());
-}
-
-inline void raise_string_cast_overflow_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
-                                             const char *data)
-{
-  std::stringstream ss;
-  ss << "overflow converting string ";
-  string_tp.print_data(ss, arrmeta, data);
-  ss << " to " << dst_tp;
-  throw std::overflow_error(ss.str());
-}
-
 template <typename DstType, typename SrcType>
 typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
                         bool>::type
@@ -3117,16 +3097,13 @@ namespace nd {
         }
         T result;
         if (ErrorMode == assign_error_nocheck) {
-          uint64_t value = unchecked_string_to_uint64(s.data(), s.data() + s.size());
+          uint64_t value = parse<uint64_t>(s.data(), s.data() + s.size(), nocheck);
           result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
         }
         else {
-          bool overflow = false, badparse = false;
-          uint64_t value = checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
-          if (badparse) {
-            raise_string_cast_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
-          }
-          else if (overflow || overflow_check<T>::is_overflow(value, negative)) {
+          bool overflow = false;
+          uint64_t value = parse<uint64_t>(s.data(), s.data() + s.size());
+          if (overflow || overflow_check<T>::is_overflow(value, negative)) {
             raise_string_cast_overflow_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
           }
           result = negative ? static_cast<T>(-static_cast<int64_t>(value)) : static_cast<T>(value);
@@ -3170,16 +3147,13 @@ namespace nd {
         }
         int128 result;
         if (ErrorMode == assign_error_nocheck) {
-          uint128 value = unchecked_string_to_uint128(s.data(), s.data() + s.size());
+          uint128 value = parse<uint128>(s.data(), s.data() + s.size(), nocheck);
           result = negative ? static_cast<int128>(0) : static_cast<int128>(value);
         }
         else {
-          bool overflow = false, badparse = false;
-          uint128 value = checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
-          if (badparse) {
-            raise_string_cast_error(ndt::make_type<int128>(), src_string_tp, src_arrmeta, src[0]);
-          }
-          else if (overflow || overflow_check<int128>::is_overflow(value, negative)) {
+          bool overflow = false;
+          uint128 value = parse<uint128>(s.data(), s.data() + s.size());
+          if (overflow || overflow_check<int128>::is_overflow(value, negative)) {
             raise_string_cast_overflow_error(ndt::make_type<int128>(), src_string_tp, src_arrmeta, src[0]);
           }
           result = negative ? -static_cast<int128>(value) : static_cast<int128>(value);
@@ -3197,6 +3171,17 @@ namespace nd {
       {
         assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], src_arrmeta[0]);
         return ckb_offset;
+      }
+    };
+
+    template <type_id_t DstTypeID>
+    struct assignment_kernel<DstTypeID, uint_kind, string_type_id, string_kind, assign_error_nocheck>
+        : base_kernel<assignment_kernel<DstTypeID, uint_kind, string_type_id, string_kind, assign_error_nocheck>, 1> {
+      typedef typename type_of<DstTypeID>::type dst_type;
+
+      void single(char *dst, char *const *src)
+      {
+        *reinterpret_cast<dst_type *>(dst) = parse<uint64_t>(*reinterpret_cast<string *>(src[0]), nocheck);
       }
     };
 
@@ -3224,21 +3209,12 @@ namespace nd {
           negative = true;
         }
         T result;
-        if (ErrorMode == assign_error_nocheck) {
-          uint64_t value = unchecked_string_to_uint64(s.data(), s.data() + s.size());
-          result = negative ? static_cast<T>(0) : static_cast<T>(value);
+        bool overflow = false;
+        uint64_t value = parse<uint64_t>(s.data(), s.data() + s.size());
+        if (overflow || (negative && value != 0) || overflow_check<T>::is_overflow(value)) {
+          raise_string_cast_overflow_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
         }
-        else {
-          bool overflow = false, badparse = false;
-          uint64_t value = checked_string_to_uint64(s.data(), s.data() + s.size(), overflow, badparse);
-          if (badparse) {
-            raise_string_cast_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
-          }
-          else if (overflow || (negative && value != 0) || overflow_check<T>::is_overflow(value)) {
-            raise_string_cast_overflow_error(ndt::make_type<T>(), src_string_tp, src_arrmeta, src[0]);
-          }
-          result = static_cast<T>(value);
-        }
+        result = static_cast<T>(value);
         *reinterpret_cast<T *>(dst) = result;
       }
 
@@ -3278,15 +3254,12 @@ namespace nd {
         }
         int128 result;
         if (ErrorMode == assign_error_nocheck) {
-          result = unchecked_string_to_uint128(s.data(), s.data() + s.size());
+          result = parse<uint128>(s.data(), s.data() + s.size(), nocheck);
         }
         else {
-          bool overflow = false, badparse = false;
-          result = checked_string_to_uint128(s.data(), s.data() + s.size(), overflow, badparse);
-          if (badparse) {
-            raise_string_cast_error(ndt::make_type<int128>(), src_string_tp, src_arrmeta, src[0]);
-          }
-          else if (overflow || (negative && result != 0)) {
+          bool overflow = false;
+          result = parse<uint128>(s.data(), s.data() + s.size());
+          if (overflow || (negative && result != 0)) {
             raise_string_cast_overflow_error(ndt::make_type<uint128>(), src_string_tp, src_arrmeta, src[0]);
           }
         }
@@ -3332,7 +3305,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], ErrorMode);
         trim(s);
-        double value = checked_string_to_float64(s.data(), s.data() + s.size(), ErrorMode);
+        double value = checked_string_to_float64<ErrorMode>(s.data(), s.data() + s.size());
         // Assign double -> float according to the error mode
         char *child_src[1] = {reinterpret_cast<char *>(&value)};
         dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
@@ -3369,7 +3342,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], ErrorMode);
         trim(s);
-        double value = checked_string_to_float64(s.data(), s.data() + s.size(), ErrorMode);
+        double value = checked_string_to_float64<ErrorMode>(s.data(), s.data() + s.size());
         *reinterpret_cast<double *>(dst) = value;
       }
 
