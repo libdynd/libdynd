@@ -13,7 +13,6 @@
 
 using namespace std;
 using namespace dynd;
-using namespace dynd::parse;
 
 // Fri Dec 19 15:10:11 1997, Fri 19 Dec 15:10:11 1997
 static bool parse_postgres_datetime(const char *&begin, const char *end,
@@ -216,7 +215,7 @@ static bool parse_date_time_datetime(const char *&begin, const char *end,
     return sbs.succeed();
 }
 
-bool parse::parse_datetime(const char *&begin, const char *end,
+bool dynd::parse_datetime(const char *&begin, const char *end,
                            date_parse_order_t ambig, int century_window,
                            datetime_struct &out_dt, const char *&out_tz_begin,
                            const char *&out_tz_end)

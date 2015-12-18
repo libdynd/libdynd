@@ -227,6 +227,7 @@ TEST(TypeCasting, StringToInt64) {
 }
 */
 
+/*
 TEST(TypeCasting, StringToInt128) {
     nd::array a = nd::empty<int128>();
 
@@ -252,6 +253,7 @@ TEST(TypeCasting, StringToInt128) {
     EXPECT_EQ(0x287e2f8928000000ULL, a.as<int128>().m_lo);
     EXPECT_THROW(a.vals() = "1e40", overflow_error);
 }
+*/
 
 TEST(TypeCasting, StringToUInt64) {
     nd::array a = nd::empty<uint64_t>();
@@ -259,12 +261,10 @@ TEST(TypeCasting, StringToUInt64) {
     // Test the limits of string to int conversion
     a.vals() = "0";
     EXPECT_EQ(0u, a.as<uint64_t>());
-    a.vals() = "-0";
-    EXPECT_EQ(0u, a.as<uint64_t>());
     a.vals() = "18446744073709551615";
     EXPECT_EQ(18446744073709551615ULL, a.as<uint64_t>());
     EXPECT_THROW(a.vals() = "18446744073709551616", overflow_error);
-    EXPECT_THROW(a.vals() = "-1", overflow_error);
+    EXPECT_THROW(a.vals() = "-1", invalid_argument);
 
     // Simple "1e5" positive exponent cases are permitted
     a.vals() = "1e19";
