@@ -82,7 +82,6 @@ DYND_API nd::callable nd::assign::make()
   children[{{int16_type_id, string_type_id}}] = callable::make<assignment_kernel<int16_type_id, string_type_id>>();
   children[{{int32_type_id, string_type_id}}] = callable::make<assignment_kernel<int32_type_id, string_type_id>>();
   children[{{int64_type_id, string_type_id}}] = callable::make<assignment_kernel<int64_type_id, string_type_id>>();
-  children[{{int128_type_id, string_type_id}}] = callable::make<assignment_kernel<int128_type_id, string_type_id>>();
   children[{{uint8_type_id, string_type_id}}] = callable::make<assignment_kernel<uint8_type_id, string_type_id>>();
   children[{{uint16_type_id, string_type_id}}] = callable::make<assignment_kernel<uint16_type_id, string_type_id>>();
   children[{{uint32_type_id, string_type_id}}] = callable::make<assignment_kernel<uint32_type_id, string_type_id>>();

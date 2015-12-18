@@ -358,13 +358,13 @@ bool dynd::parse_6digit_int_no_ws(const char *&begin, const char *end, int &out_
 template <class T>
 static T checked_string_to_signed_int(const char *begin, const char *end)
 {
-  bool negative = false, overflow = false;
+  bool negative = false;
   if (begin < end && *begin == '-') {
     negative = true;
     ++begin;
   }
   uint64_t uvalue = parse<uint64_t>(begin, end);
-  if (overflow || overflow_check<T>::is_overflow(uvalue, negative)) {
+  if (overflow_check<T>::is_overflow(uvalue, negative)) {
     stringstream ss;
     ss << "overflow converting string ";
     ss.write(begin, end - begin);
@@ -535,10 +535,7 @@ bool dynd::matches_option_type_na_token(const char *begin, const char *end)
   return false;
 }
 
-void dynd::parse_uint64(uint64_t &res, const char *begin, const char *end)
-{
-  res = parse<uint64_t>(begin, end);
-}
+void dynd::parse_uint64(uint64_t &res, const char *begin, const char *end) { res = parse<uint64_t>(begin, end); }
 
 void dynd::parse_int64(int64_t &res, const char *begin, const char *end)
 {

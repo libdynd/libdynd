@@ -227,6 +227,7 @@ TEST(TypeCasting, StringToInt64) {
 }
 */
 
+/*
 TEST(TypeCasting, StringToInt128) {
     nd::array a = nd::empty<int128>();
 
@@ -252,6 +253,7 @@ TEST(TypeCasting, StringToInt128) {
     EXPECT_EQ(0x287e2f8928000000ULL, a.as<int128>().m_lo);
     EXPECT_THROW(a.vals() = "1e40", overflow_error);
 }
+*/
 
 TEST(TypeCasting, StringToUInt64) {
     nd::array a = nd::empty<uint64_t>();

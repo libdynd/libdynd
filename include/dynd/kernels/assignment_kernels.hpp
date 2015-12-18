@@ -87,71 +87,6 @@ inline void to_lower(std::string &s)
   }
 }
 
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(std::numeric_limits<DstType>::min()) ||
-         src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(0) || static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(0);
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
-  return static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
 namespace nd {
 
   template <typename UIntType>
@@ -2769,56 +2704,6 @@ namespace nd {
       }
     };
 
-    template <assign_error_mode ErrorMode>
-    struct assignment_kernel<int128_type_id, sint_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<int128_type_id, sint_kind, string_type_id, string_kind, ErrorMode>, 1> {
-      ndt::type src_string_tp;
-      const char *src_arrmeta;
-
-      assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta)
-          : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta)
-      {
-      }
-
-      void single(char *dst, char *const *src)
-      {
-        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
-                            ->get_utf8_string(src_arrmeta, src[0], ErrorMode);
-        trim(s);
-        bool negative = false;
-        if (!s.empty() && s[0] == '-') {
-          s.erase(0, 1);
-          negative = true;
-        }
-        int128 result;
-        if (ErrorMode == assign_error_nocheck) {
-          uint128 value = parse<uint128>(s.data(), s.data() + s.size(), nocheck);
-          result = negative ? static_cast<int128>(0) : static_cast<int128>(value);
-        }
-        else {
-          bool overflow = false;
-          uint128 value = parse<uint128>(s.data(), s.data() + s.size());
-          if (overflow || overflow_check<int128>::is_overflow(value, negative)) {
-            raise_string_cast_overflow_error(ndt::make_type<int128>(), src_string_tp, src_arrmeta, src[0]);
-          }
-          result = negative ? -static_cast<int128>(value) : static_cast<int128>(value);
-        }
-        *reinterpret_cast<int128 *>(dst) = result;
-      }
-
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], src_arrmeta[0]);
-        return ckb_offset;
-      }
-    };
-
     template <type_id_t DstTypeID>
     struct assignment_virtual_kernel<DstTypeID, uint_kind, string_type_id, string_kind>
         : base_kernel<assignment_virtual_kernel<DstTypeID, uint_kind, string_type_id, string_kind>, 1> {
@@ -2839,54 +2724,6 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         *reinterpret_cast<dst_type *>(dst) = parse<dst_type>(*reinterpret_cast<string *>(src[0]), nocheck);
-      }
-    };
-
-    template <assign_error_mode ErrorMode>
-    struct assignment_kernel<uint128_type_id, uint_kind, string_type_id, string_kind, ErrorMode>
-        : base_kernel<assignment_kernel<uint128_type_id, uint_kind, string_type_id, string_kind, ErrorMode>, 1> {
-      ndt::type src_string_tp;
-      const char *src_arrmeta;
-
-      assignment_kernel(const ndt::type &src_string_tp, const char *src_arrmeta)
-          : src_string_tp(src_string_tp), src_arrmeta(src_arrmeta)
-      {
-      }
-
-      void single(char *dst, char *const *src)
-      {
-        std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
-                            ->get_utf8_string(src_arrmeta, src[0], ErrorMode);
-        trim(s);
-        bool negative = false;
-        if (!s.empty() && s[0] == '-') {
-          s.erase(0, 1);
-          negative = true;
-        }
-        int128 result;
-        if (ErrorMode == assign_error_nocheck) {
-          result = parse<uint128>(s.data(), s.data() + s.size(), nocheck);
-        }
-        else {
-          bool overflow = false;
-          result = parse<uint128>(s.data(), s.data() + s.size());
-          if (overflow || (negative && result != 0)) {
-            raise_string_cast_overflow_error(ndt::make_type<uint128>(), src_string_tp, src_arrmeta, src[0]);
-          }
-        }
-        *reinterpret_cast<uint128 *>(dst) = result;
-      }
-
-      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
-                                  intptr_t ckb_offset, const ndt::type &DYND_UNUSED(dst_tp),
-                                  const char *DYND_UNUSED(dst_arrmeta), intptr_t DYND_UNUSED(nsrc),
-                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
-                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t DYND_UNUSED(nkwd),
-                                  const nd::array *DYND_UNUSED(kwds),
-                                  const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        assignment_kernel::make(ckb, kernreq, ckb_offset, src_tp[0], src_arrmeta[0]);
-        return ckb_offset;
       }
     };
 
