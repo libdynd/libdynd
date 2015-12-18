@@ -582,10 +582,8 @@ DYND_API nd::callable nd::json::parse::make()
   children[option_type_id] = callable::make<parse_kernel<option_type_id>>();
   children[fixed_dim_type_id] = callable::make<parse_kernel<fixed_dim_type_id>>();
 
-  return functional::dispatch(ndt::callable_type::make(ndt::make_type<ndt::any_kind_type>(),
-                                                       {ndt::make_type<char *>(), ndt::make_type<char *>()}),
-                              [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
-                                         const ndt::type *DYND_UNUSED(src_tp)) mutable -> callable & {
-                                return children[dst_tp.get_type_id()];
-                              });
+  return functional::dispatch(
+      ndt::callable_type::make(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<string>()}),
+      [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp)) mutable
+      -> callable & { return children[dst_tp.get_type_id()]; });
 }

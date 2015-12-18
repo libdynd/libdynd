@@ -132,7 +132,7 @@ namespace ndt {
 
   template <type_id_t DstTypeID>
   struct traits<nd::json::parse_kernel<DstTypeID>> {
-    static type equivalent() { return callable_type::make(DstTypeID, {make_type<char *>(), make_type<char **>()}); }
+    static type equivalent() { return callable_type::make(DstTypeID, {make_type<char *>(), make_type<char *>()}); }
   };
 
 } // namespace dynd::ndt

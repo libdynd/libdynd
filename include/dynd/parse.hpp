@@ -1300,10 +1300,17 @@ namespace nd {
     extern struct parse : declfunc<parse> {
       //      using declfunc<parse>::operator();
 
+      array operator()(const char *begin, const char *end, const ndt::type &dst_tp)
+      {
+        ndt::type dst_tp2 = dst_tp;
+        char *arg_data[2] = {reinterpret_cast<char *>(&begin), reinterpret_cast<char *>(&end)};
+        return get()->call(dst_tp2, 0, nullptr, nullptr, arg_data, 0, nullptr,
+                           std::map<std::string, ndt::type>());
+      }
+
       array operator()(const char *begin, const ndt::type &dst_tp)
       {
-        char *end = const_cast<char *>(begin) + strlen(begin);
-        return declfunc<parse>::operator()({const_cast<char *>(begin), end}, {{"dst_tp", dst_tp}});
+        return (*this)(begin, begin + strlen(begin), dst_tp);
       }
 
       static callable make();
