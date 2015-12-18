@@ -123,6 +123,8 @@ namespace ndt {
     std::map<std::string, nd::callable> m_array_functions;
 
   public:
+    typedef size_stride_t metadata_type;
+
     fixed_dim_type(intptr_t dim_size, const type &element_tp);
 
     virtual ~fixed_dim_type();

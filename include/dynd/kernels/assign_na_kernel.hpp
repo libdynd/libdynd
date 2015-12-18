@@ -54,6 +54,24 @@ namespace nd {
       }
     };
 
+    template <type_id_t DstTypeID>
+    struct assign_na_kernel<DstTypeID, uint_kind> : base_kernel<assign_na_kernel<DstTypeID, uint_kind>, 0> {
+      typedef typename type_of<DstTypeID>::type dst_type;
+
+      void single(char *dst, char *const *DYND_UNUSED(src))
+      {
+        *reinterpret_cast<dst_type *>(dst) = std::numeric_limits<dst_type>::max();
+      }
+
+      void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
+                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
+      {
+        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
+          *reinterpret_cast<dst_type *>(dst) = std::numeric_limits<dst_type>::max();
+        }
+      }
+    };
+
     template <>
     struct assign_na_kernel<float32_type_id, real_kind> : base_kernel<assign_na_kernel<float32_type_id, real_kind>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))

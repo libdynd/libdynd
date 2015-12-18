@@ -387,6 +387,14 @@ namespace nd {
       return call(args.size(), args.begin(), kwds.size(), kwds.begin());
     }
 
+    template <typename DstType, typename... ArgTypes>
+    array operator()(ArgTypes &&... args)
+    {
+      array tmp[sizeof...(ArgTypes)] = {std::forward<ArgTypes>(args)...};
+      std::pair<const char *, array> kwds = {"dst_tp", ndt::make_type<DstType>()};
+      return call(sizeof...(ArgTypes), tmp, 1, &kwds);
+    }
+
     template <typename KernelType>
     static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type make()
     {
@@ -531,6 +539,12 @@ namespace nd {
 
   template <typename FuncType>
   struct declfunc {
+    template <typename DstType, typename... ArgTypes>
+    array operator()(ArgTypes &&... args)
+    {
+      return get().operator()<DstType>(std::forward<ArgTypes>(args)...);
+    }
+
     template <typename... ArgTypes>
     array operator()(ArgTypes &&... args)
     {

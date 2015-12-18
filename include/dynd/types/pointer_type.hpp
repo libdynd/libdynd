@@ -105,6 +105,8 @@ namespace ndt {
 
   template <typename T>
   struct traits<T *> {
+    static const bool is_same_layout = true;
+
     static type equivalent() { return pointer_type::make(make_type<T>()); }
   };
 

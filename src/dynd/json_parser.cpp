@@ -14,25 +14,12 @@
 #include <dynd/types/time_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/parse.hpp>
+#include <dynd/kernels/parse_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
 
-namespace {
-class json_parse_error : public parse_error {
-  ndt::type m_type;
-
-public:
-  json_parse_error(const char *position, const std::string &message, const ndt::type &tp)
-      : parse_error(position, message), m_type(tp)
-  {
-  }
-  virtual ~json_parse_error() throw() {}
-  const ndt::type &get_type() const { return m_type; }
-};
-} // anonymous namespace
-
-nd::array nd::json::parse(const ndt::type &tp, const std::string &str) { return parse_json(tp, str.data()); }
+nd::array nd::json::parse2(const ndt::type &tp, const std::string &str) { return parse_json(tp, str.data()); }
 
 static void json_as_buffer(const nd::array &json, nd::array &out_tmp_ref, const char *&begin, const char *&end)
 {
@@ -169,7 +156,7 @@ static void skip_json_value(const char *&begin, const char *end)
   default:
     if (c == '-' || ('0' <= c && c <= '9')) {
       const char *nbegin = NULL, *nend = NULL;
-      if (!parse_json_number_no_ws(begin, end, nbegin, nend)) {
+      if (!json::parse_number(begin, end, nbegin, nend)) {
         throw parse_error(begin, "invalid number");
       }
     }
@@ -394,7 +381,7 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
       value = 0;
     }
   }
-  else if (parse_json_number_no_ws(begin, end, nbegin, nend)) {
+  else if (json::parse_number(begin, end, nbegin, nend)) {
     if (nend - nbegin == 1) {
       if (*nbegin == '0') {
         value = 0;
@@ -436,43 +423,6 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
   else {
     throw json_parse_error(rbegin, "expected a boolean true or false", tp);
   }
-}
-
-static void parse_number_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&rbegin,
-                              const char *end, bool option, const eval::eval_context *ectx)
-{
-  const char *begin = rbegin;
-  const char *nbegin, *nend;
-  bool escaped = false;
-  if (option && parse_token_no_ws(begin, end, "null")) {
-    ndt::make_type<ndt::option_type>(tp).extended<ndt::option_type>()->assign_na(arrmeta, out_data, ectx);
-  }
-  else if (parse_json_number_no_ws(begin, end, nbegin, nend)) {
-    string_to_number(out_data, tp.get_type_id(), nbegin, nend, false, ectx->errmode);
-  }
-  else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
-    // Interpret the data inside the string as an int
-    try {
-      if (!escaped) {
-        string_to_number(out_data, tp.get_type_id(), nbegin, nend, option, ectx->errmode);
-      }
-      else {
-        std::string s;
-        unescape_string(nbegin, nend, s);
-        string_to_number(out_data, tp.get_type_id(), nbegin, nend, option, ectx->errmode);
-      }
-    }
-    catch (const std::exception &e) {
-      throw json_parse_error(rbegin, e.what(), tp);
-    }
-    catch (const dynd::dynd_exception &e) {
-      throw json_parse_error(rbegin, e.what(), tp);
-    }
-  }
-  else {
-    throw json_parse_error(rbegin, "expected a number", tp);
-  }
-  rbegin = begin;
 }
 
 static void parse_string_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&rbegin,
@@ -661,7 +611,7 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
         else if (parse_token(begin, end, "false")) {
           *out_data = 0;
         }
-        else if (parse_json_number_no_ws(begin, end, strbegin, strend)) {
+        else if (json::parse_number(begin, end, strbegin, strend)) {
           if (compare_range_to_literal(strbegin, strend, "1")) {
             *out_data = 1;
           }
@@ -679,8 +629,8 @@ static void parse_option_json(const ndt::type &tp, const char *arrmeta, char *ou
       }
       else if (value_tp.get_kind() == sint_kind || value_tp.get_kind() == uint_kind ||
                value_tp.get_kind() == real_kind || value_tp.get_kind() == complex_kind) {
-        if (parse_json_number_no_ws(begin, end, strbegin, strend)) {
-          string_to_number(out_data, value_tp.get_type_id(), strbegin, strend, false, ectx->errmode);
+        if (json::parse_number(begin, end, strbegin, strend)) {
+          string_to_number(out_data, value_tp.get_type_id(), strbegin, strend, ectx->errmode);
         }
         else {
           throw json_parse_error(begin, "expected a number", tp);
@@ -719,7 +669,7 @@ static void parse_json(const ndt::type &tp, const char *arrmeta, char *out_data,
   case uint_kind:
   case real_kind:
   case complex_kind:
-    parse_number_json(tp, arrmeta, out_data, begin, end, false, ectx);
+    parse_number_json(tp, out_data, begin, end, false, ectx);
     return;
   case string_kind:
     parse_string_json(tp, arrmeta, out_data, begin, end, ectx);
@@ -973,7 +923,7 @@ static ndt::type discover_type(const char *&begin, const char *end)
   default:
     if (c == '-' || ('0' <= c && c <= '9')) {
       const char *nbegin = NULL, *nend = NULL;
-      if (!parse_json_number_no_ws(begin, end, nbegin, nend)) {
+      if (!json::parse_number(begin, end, nbegin, nend)) {
         throw parse_error(begin, "invalid number");
       }
       int64_t int_val;

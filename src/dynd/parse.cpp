@@ -11,6 +11,9 @@
 #include <dynd/string_encodings.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/kernels/assignment_kernels.hpp>
+#include <dynd/kernels/parse_kernel.hpp>
+#include <dynd/functional.hpp>
+#include <dynd/types/any_kind_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -217,7 +220,7 @@ void dynd::unescape_string(const char *strbegin, const char *strend, std::string
   }
 }
 
-bool dynd::parse_json_number_no_ws(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend)
+bool dynd::json::parse_number(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend)
 {
   const char *begin = rbegin;
   if (begin == end) {
@@ -427,7 +430,7 @@ float dynd::checked_float64_to_float32(double value, assign_error_mode errmode)
 
 void dynd::string_to_bool(char *out_bool, const char *begin, const char *end, bool option, assign_error_mode errmode)
 {
-  if (option && matches_option_type_na_token(begin, end)) {
+  if (option && parse_na(begin, end)) {
     *out_bool = DYND_BOOL_NA;
     return;
   }
@@ -511,7 +514,7 @@ void dynd::string_to_bool(char *out_bool, const char *begin, const char *end, bo
   throw invalid_argument(ss.str());
 }
 
-bool dynd::matches_option_type_na_token(const char *begin, const char *end)
+bool dynd::parse_na(const char *begin, const char *end)
 {
   size_t size = end - begin;
   if (size == 0) {
@@ -557,11 +560,32 @@ void dynd::parse_int64(int64_t &res, const char *begin, const char *end)
 int dynd::parse_double(double &res, const char *begin, const char *end)
 {
   try {
-    res = checked_string_to_float64(begin, end, assign_error_nocheck);
+    res = parse<double>(begin, end);
   }
   catch (...) {
     return 1;
   }
 
   return 0;
+}
+
+DYND_API struct nd::json::parse nd::json::parse;
+
+DYND_API nd::callable nd::json::parse::make()
+{
+  std::map<type_id_t, callable> children;
+  children[uint8_type_id] = callable::make<parse_kernel<uint8_type_id>>();
+  children[uint16_type_id] = callable::make<parse_kernel<uint16_type_id>>();
+  children[uint32_type_id] = callable::make<parse_kernel<uint32_type_id>>();
+  children[uint64_type_id] = callable::make<parse_kernel<uint64_type_id>>();
+  //  children[int32_type_id] = callable::make<parse_kernel<int32_type_id>>();
+  children[option_type_id] = callable::make<parse_kernel<option_type_id>>();
+  children[fixed_dim_type_id] = callable::make<parse_kernel<fixed_dim_type_id>>();
+
+  return functional::dispatch(ndt::callable_type::make(ndt::make_type<ndt::any_kind_type>(),
+                                                       {ndt::make_type<char *>(), ndt::make_type<char *>()}),
+                              [children](const ndt::type &dst_tp, intptr_t DYND_UNUSED(nsrc),
+                                         const ndt::type *DYND_UNUSED(src_tp)) mutable -> callable & {
+                                return children[dst_tp.get_type_id()];
+                              });
 }

@@ -99,7 +99,12 @@ void nd::detail::check_arg(const ndt::callable_type *af_tp, intptr_t i, const nd
   }
 
   ndt::type expected_tp = af_tp->get_pos_type(i);
-  if (!expected_tp.match(NULL, actual_tp.value_type(), actual_arrmeta, tp_vars)) {
+  ndt::type candidate_tp = actual_tp;
+  if (actual_tp.get_type_id() != pointer_type_id) {
+    candidate_tp = candidate_tp.value_type();
+  }
+
+  if (!expected_tp.match(NULL, candidate_tp, actual_arrmeta, tp_vars)) {
     std::stringstream ss;
     ss << "positional argument " << i << " to callable does not match, ";
     ss << "expected " << expected_tp << ", received " << actual_tp;

@@ -1923,7 +1923,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         const string *std = reinterpret_cast<string *>(src[0]);
-        string_to_number(dst, m_tid, std->begin(), std->end(), true, m_errmode);
+        string_to_number(dst, m_tid, std->begin(), std->end(), m_errmode);
       }
     };
 
@@ -1941,7 +1941,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         const string *std = reinterpret_cast<string *>(src[0]);
-        if (matches_option_type_na_token(std->begin(), std->end())) {
+        if (parse_na(std->begin(), std->end())) {
           // It's not available, assign an NA
           ckernel_prefix *dst_assign_na = get_child(m_dst_assign_na_offset);
           kernel_single_t dst_assign_na_fn = dst_assign_na->get_function<kernel_single_t>();
@@ -2753,7 +2753,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], ErrorMode);
         trim(s);
-        double value = checked_string_to_float64<ErrorMode>(s.data(), s.data() + s.size());
+        double value = parse<double>(s.data(), s.data() + s.size());
         // Assign double -> float according to the error mode
         char *child_src[1] = {reinterpret_cast<char *>(&value)};
         dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
@@ -2790,7 +2790,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], ErrorMode);
         trim(s);
-        double value = checked_string_to_float64<ErrorMode>(s.data(), s.data() + s.size());
+        double value = parse<double>(s.data(), s.data() + s.size());
         *reinterpret_cast<double *>(dst) = value;
       }
 
