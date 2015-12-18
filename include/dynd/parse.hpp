@@ -870,7 +870,7 @@ template <class T>
 struct overflow_check {
   static bool is_overflow(uint64_t value, bool negative)
   {
-    if (negative && value == -static_cast<uint64_t>(std::numeric_limits<T>::min())) {
+    if (negative && value == static_cast<uint64_t>(-static_cast<int64_t>(std::numeric_limits<T>::min()))) {
       return false;
     }
 
