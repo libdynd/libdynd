@@ -1298,14 +1298,11 @@ namespace nd {
   namespace json {
 
     extern struct parse : declfunc<parse> {
-      //      using declfunc<parse>::operator();
-
-      array operator()(const char *begin, const char *end, const ndt::type &dst_tp)
+      array operator()(const char *begin, const char *end, const ndt::type &ret_tp)
       {
-        ndt::type dst_tp2 = dst_tp;
-        char *arg_data[2] = {reinterpret_cast<char *>(&begin), reinterpret_cast<char *>(&end)};
-        return get()->call(dst_tp2, 0, nullptr, nullptr, arg_data, 0, nullptr,
-                           std::map<std::string, ndt::type>());
+        ndt::type dst_tp2 = ret_tp;
+        char *args_data[2] = {reinterpret_cast<char *>(&begin), reinterpret_cast<char *>(&end)};
+        return get()->call(dst_tp2, 0, nullptr, nullptr, args_data, 0, nullptr, std::map<std::string, ndt::type>());
       }
 
       array operator()(const char *begin, const ndt::type &dst_tp)

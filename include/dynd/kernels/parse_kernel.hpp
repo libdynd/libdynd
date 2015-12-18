@@ -12,19 +12,82 @@ namespace dynd {
 namespace nd {
   namespace json {
 
+    template <typename T>
+    T _parse_number(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend)
+    {
+      const char *begin = rbegin;
+      if (begin == end) {
+        throw std::runtime_error("cannot convert");
+      }
+      // Optional minus sign
+      if (*begin == '-') {
+        ++begin;
+      }
+      if (begin == end) {
+        throw std::runtime_error("cannot convert");
+      }
+      // Either '0' or a non-zero digit followed by digits
+      if (*begin == '0') {
+        ++begin;
+      }
+      else if ('1' <= *begin && *begin <= '9') {
+        ++begin;
+        while (begin < end && ('0' <= *begin && *begin <= '9')) {
+          ++begin;
+        }
+      }
+      else {
+        throw std::runtime_error("cannot convert");
+      }
+      // Optional decimal point, followed by one or more digits
+      if (begin < end && *begin == '.') {
+        if (++begin == end) {
+          throw std::runtime_error("cannot convert");
+        }
+        if (!('0' <= *begin && *begin <= '9')) {
+          throw std::runtime_error("cannot convert");
+        }
+        ++begin;
+        while (begin < end && ('0' <= *begin && *begin <= '9')) {
+          ++begin;
+        }
+      }
+      // Optional exponent, followed by +/- and some digits
+      if (begin < end && (*begin == 'e' || *begin == 'E')) {
+        if (++begin == end) {
+          throw std::runtime_error("cannot convert");
+        }
+        // +/- is optional
+        if (*begin == '+' || *begin == '-') {
+          if (++begin == end) {
+            throw std::runtime_error("cannot convert");
+          }
+        }
+        // At least one digit is required
+        if (!('0' <= *begin && *begin <= '9')) {
+          throw std::runtime_error("cannot convert");
+        }
+        ++begin;
+        while (begin < end && ('0' <= *begin && *begin <= '9')) {
+          ++begin;
+        }
+      }
+      out_nbegin = rbegin;
+      out_nend = begin;
+      rbegin = begin;
+
+      return dynd::parse<T>(out_nbegin, out_nend);
+    }
+
     template <type_id_t RetTypeID>
     struct parse_kernel : base_kernel<parse_kernel<RetTypeID>> {
       typedef typename type_of<RetTypeID>::type ret_type;
 
       void single(char *ret, char *const *args)
       {
-        const char *&begin = *reinterpret_cast<const char **>(args[0]);
-        const char *&end = *reinterpret_cast<const char **>(args[1]);
-
         const char *nbegin, *nend;
-        if (parse_number(begin, end, nbegin, nend)) {
-          *reinterpret_cast<ret_type *>(ret) = dynd::parse<ret_type>(nbegin, nend);
-        }
+        *reinterpret_cast<ret_type *>(ret) = _parse_number<ret_type>(
+            *reinterpret_cast<const char **>(args[0]), *reinterpret_cast<const char **>(args[1]), nbegin, nend);
       }
     };
 
