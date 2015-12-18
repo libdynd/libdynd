@@ -40,10 +40,9 @@ namespace nd {
 
       void single(char *ret, char *const *args)
       {
-        const char *&begin = *reinterpret_cast<const char **>(args[0]);
-        const char *&end = *reinterpret_cast<const char **>(args[1]);
-
-        if (parse_na(begin, end)) {
+        //        const char *saved_args[2] = {*reinterpret_cast<const char **>(args[0]),
+        //                                   *reinterpret_cast<const char **>(args[1])};
+        if (parse_na(*reinterpret_cast<const char **>(args[0]), *reinterpret_cast<const char **>(args[1]))) {
           get_child()->single(ret, nullptr);
         }
         else {
@@ -80,6 +79,8 @@ namespace nd {
       ndt::type ret_tp;
       size_t size;
       intptr_t stride;
+
+      ~parse_kernel() { get_child()->destroy(); }
 
       parse_kernel(const ndt::type &ret_tp, size_t size, intptr_t stride) : ret_tp(ret_tp), size(size), stride(stride)
       {
