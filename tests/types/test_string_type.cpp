@@ -111,7 +111,8 @@ TEST(StringType, Basic)
 
   // Convert to a blockref string type with the same utf8 codec
   b = a.ucast(ndt::make_type<ndt::string_type>());
-  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(), ndt::fixed_string_type::make(7, string_encoding_utf_8)),
+  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(),
+                                    ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
@@ -119,7 +120,8 @@ TEST(StringType, Basic)
 
   // Convert to a blockref string type with the utf16 codec
   b = a.ucast(ndt::make_type<ndt::string_type>());
-  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(), ndt::fixed_string_type::make(7, string_encoding_utf_8)),
+  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(),
+                                    ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
@@ -127,7 +129,8 @@ TEST(StringType, Basic)
 
   // Convert to a blockref string type with the utf32 codec
   b = a.ucast(ndt::make_type<ndt::string_type>());
-  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(), ndt::fixed_string_type::make(7, string_encoding_utf_8)),
+  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(),
+                                    ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
@@ -135,7 +138,8 @@ TEST(StringType, Basic)
 
   // Convert to a blockref string type with the ascii codec
   b = a.ucast(ndt::make_type<ndt::string_type>());
-  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(), ndt::fixed_string_type::make(7, string_encoding_utf_8)),
+  EXPECT_EQ(ndt::convert_type::make(ndt::make_type<ndt::string_type>(),
+                                    ndt::fixed_string_type::make(7, string_encoding_utf_8)),
             b.get_type());
   b = b.eval();
   EXPECT_EQ(ndt::make_type<ndt::string_type>(), b.get_type());
@@ -329,34 +333,34 @@ TEST(StringType, StringToInteger)
   EXPECT_THROW(nd::array(nd::array("-2147483649").ucast<int32_t>().eval()), runtime_error);
   EXPECT_THROW(nd::array(nd::array("2147483648").ucast<int32_t>().eval()), runtime_error);
 
-/*
-  ToDo: Reenable this.
+  /*
+    ToDo: Reenable this.
 
-  EXPECT_EQ(-9223372036854775807LL - 1, nd::array("-9223372036854775808").ucast<int64_t>().as<int64_t>());
-  EXPECT_EQ(9223372036854775807LL, nd::array("9223372036854775807").ucast<int64_t>().as<int64_t>());
-  EXPECT_THROW(nd::array("-9223372036854775809").ucast<int64_t>().eval(), runtime_error);
-  EXPECT_THROW(nd::array("9223372036854775808").ucast<int64_t>().eval(), runtime_error);
-*/
+    EXPECT_EQ(-9223372036854775807LL - 1, nd::array("-9223372036854775808").ucast<int64_t>().as<int64_t>());
+    EXPECT_EQ(9223372036854775807LL, nd::array("9223372036854775807").ucast<int64_t>().as<int64_t>());
+    EXPECT_THROW(nd::array("-9223372036854775809").ucast<int64_t>().eval(), runtime_error);
+    EXPECT_THROW(nd::array("9223372036854775808").ucast<int64_t>().eval(), runtime_error);
+  */
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint8_t>().as<uint8_t>());
   EXPECT_EQ(255u, nd::array("255").ucast<uint8_t>().as<uint8_t>());
-  EXPECT_THROW(nd::array("-1").ucast<uint8_t>().eval(), runtime_error);
-  EXPECT_THROW(nd::array("256").ucast<uint8_t>().eval(), runtime_error);
+  EXPECT_THROW(nd::array("-1").ucast<uint8_t>().eval(), invalid_argument);
+  EXPECT_THROW(nd::array("256").ucast<uint8_t>().eval(), overflow_error);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint16_t>().as<uint16_t>());
   EXPECT_EQ(65535u, nd::array("65535").ucast<uint16_t>().as<uint16_t>());
-  EXPECT_THROW(nd::array("-1").ucast<uint16_t>().eval(), runtime_error);
-  EXPECT_THROW(nd::array("65536").ucast<uint16_t>().eval(), runtime_error);
+  EXPECT_THROW(nd::array("-1").ucast<uint16_t>().eval(), invalid_argument);
+  EXPECT_THROW(nd::array("65536").ucast<uint16_t>().eval(), overflow_error);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint32_t>().as<uint32_t>());
   EXPECT_EQ(4294967295ULL, nd::array("4294967295").ucast<uint32_t>().as<uint32_t>());
-  EXPECT_THROW(nd::array("-1").ucast<uint32_t>().eval(), runtime_error);
-  EXPECT_THROW(nd::array("4294967296").ucast<uint32_t>().eval(), runtime_error);
+  EXPECT_THROW(nd::array("-1").ucast<uint32_t>().eval(), invalid_argument);
+  EXPECT_THROW(nd::array("4294967296").ucast<uint32_t>().eval(), overflow_error);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint64_t>().as<uint64_t>());
   EXPECT_EQ(18446744073709551615ULL, nd::array("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
-  EXPECT_THROW(nd::array("-1").ucast<uint64_t>().eval(), runtime_error);
-  EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), runtime_error);
+  EXPECT_THROW(nd::array("-1").ucast<uint64_t>().eval(), invalid_argument);
+  EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), overflow_error);
 
   EXPECT_THROW(nd::array("").ucast<uint64_t>().eval(), invalid_argument);
   EXPECT_THROW(nd::array("-").ucast<uint64_t>().eval(), invalid_argument);
