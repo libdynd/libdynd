@@ -1225,6 +1225,7 @@ inline double checked_string_to_float64(const char *begin, const char *end, assi
     return checked_string_to_float64<assign_error_overflow>(begin, end);
   case assign_error_fractional:
     return checked_string_to_float64<assign_error_fractional>(begin, end);
+  default:
   case assign_error_default:
     return checked_string_to_float64<assign_error_default>(begin, end);
   }
