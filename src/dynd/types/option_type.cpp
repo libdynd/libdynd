@@ -45,6 +45,8 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
       return *reinterpret_cast<const int16_t *>(data) != DYND_INT16_NA;
     case int32_type_id:
       return *reinterpret_cast<const int32_t *>(data) != DYND_INT32_NA;
+    case uint32_type_id:
+      return *reinterpret_cast<const uint32_t *>(data) != DYND_UINT32_NA;
     case int64_type_id:
       return *reinterpret_cast<const int64_t *>(data) != DYND_INT64_NA;
     case int128_type_id:

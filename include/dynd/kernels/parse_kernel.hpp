@@ -12,19 +12,18 @@ namespace dynd {
 namespace nd {
   namespace json {
 
-    template <typename T>
-    T _parse_number(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend)
+    inline bool _parse_number(const char *&rbegin, const char *&end)
     {
       const char *begin = rbegin;
       if (begin == end) {
-        throw std::runtime_error("cannot convert");
+        return false;
       }
       // Optional minus sign
       if (*begin == '-') {
         ++begin;
       }
       if (begin == end) {
-        throw std::runtime_error("cannot convert");
+        return false;
       }
       // Either '0' or a non-zero digit followed by digits
       if (*begin == '0') {
@@ -37,15 +36,15 @@ namespace nd {
         }
       }
       else {
-        throw std::runtime_error("cannot convert");
+        return false;
       }
       // Optional decimal point, followed by one or more digits
       if (begin < end && *begin == '.') {
         if (++begin == end) {
-          throw std::runtime_error("cannot convert");
+          return false;
         }
         if (!('0' <= *begin && *begin <= '9')) {
-          throw std::runtime_error("cannot convert");
+          return false;
         }
         ++begin;
         while (begin < end && ('0' <= *begin && *begin <= '9')) {
@@ -55,39 +54,71 @@ namespace nd {
       // Optional exponent, followed by +/- and some digits
       if (begin < end && (*begin == 'e' || *begin == 'E')) {
         if (++begin == end) {
-          throw std::runtime_error("cannot convert");
+          return false;
         }
         // +/- is optional
         if (*begin == '+' || *begin == '-') {
           if (++begin == end) {
-            throw std::runtime_error("cannot convert");
+            return false;
           }
         }
         // At least one digit is required
         if (!('0' <= *begin && *begin <= '9')) {
-          throw std::runtime_error("cannot convert");
+          return false;
         }
         ++begin;
         while (begin < end && ('0' <= *begin && *begin <= '9')) {
           ++begin;
         }
       }
-      out_nbegin = rbegin;
-      out_nend = begin;
-      rbegin = begin;
 
-      return dynd::parse<T>(out_nbegin, out_nend);
+      end = begin;
+      return true;
+    }
+
+    inline bool _parse_na(const char *&begin, const char *end)
+    {
+      size_t size = end - begin;
+
+      if (size >= 4) {
+        if (((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'U' || begin[1] == 'u') &&
+             (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'L' || begin[3] == 'l'))) {
+          begin += 4;
+          return true;
+        }
+        if (begin[0] == 'N' && begin[1] == 'o' && begin[2] == 'n' && begin[3] == 'e') {
+          begin += 4;
+          return true;
+        }
+      }
+
+      if (size >= 2 && begin[0] == 'N' && begin[1] == 'A') {
+        begin += 2;
+        return true;
+      }
+
+      if (size == 0) {
+        return true;
+      }
+
+      return false;
     }
 
     template <type_id_t RetTypeID>
-    struct parse_kernel : base_kernel<parse_kernel<RetTypeID>> {
+    struct parse_kernel : base_kernel<parse_kernel<RetTypeID>, 2> {
       typedef typename type_of<RetTypeID>::type ret_type;
 
       void single(char *ret, char *const *args)
       {
-        const char *nbegin, *nend;
-        *reinterpret_cast<ret_type *>(ret) = _parse_number<ret_type>(
-            *reinterpret_cast<const char **>(args[0]), *reinterpret_cast<const char **>(args[1]), nbegin, nend);
+        const char *begin = *reinterpret_cast<const char **>(args[0]);
+        const char *end = *reinterpret_cast<const char **>(args[1]);
+
+        if (!_parse_number(begin, end)) {
+          throw std::runtime_error("JSON error");
+        }
+
+        *reinterpret_cast<ret_type *>(ret) = dynd::parse<ret_type>(begin, end);
+        *reinterpret_cast<const char **>(args[0]) = end;
       }
     };
 
@@ -103,10 +134,12 @@ namespace nd {
 
       void single(char *ret, char *const *args)
       {
-        //        const char *saved_args[2] = {*reinterpret_cast<const char **>(args[0]),
-        //                                   *reinterpret_cast<const char **>(args[1])};
-        if (parse_na(*reinterpret_cast<const char **>(args[0]), *reinterpret_cast<const char **>(args[1]))) {
+        const char *begin = *reinterpret_cast<const char **>(args[0]);
+        const char *end = *reinterpret_cast<const char **>(args[1]);
+
+        if (_parse_na(begin, end)) {
           get_child()->single(ret, nullptr);
+          *reinterpret_cast<const char **>(args[0]) = begin;
         }
         else {
           get_child(parse_offset)->single(ret, args);

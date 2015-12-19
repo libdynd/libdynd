@@ -19,6 +19,7 @@
 #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
 #define DYND_INT16_NA (std::numeric_limits<int16_t>::min())
 #define DYND_INT32_NA (std::numeric_limits<int32_t>::min())
+#define DYND_UINT32_NA (std::numeric_limits<uint32_t>::max())
 #define DYND_INT64_NA (std::numeric_limits<int64_t>::min())
 #define DYND_INT128_NA (std::numeric_limits<int128>::min())
 #define DYND_FLOAT16_NA_AS_UINT (0x7e0au)
@@ -31,6 +32,105 @@ struct nocheck_t {
 };
 
 static const nocheck_t nocheck = nocheck_t();
+
+/**
+ * A utility for checking whether a value would overflow when converted to
+ * the specified type.
+ *
+ * if (overflow_check<int8_t>(unsigned_value, is_negative)) {
+ *   throw overflow_error(...);
+ * }
+ *
+ * if (overflow_check<int8_t>(signed_value)) {
+ *   throw overflow_error(...);
+ * }
+ */
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(std::numeric_limits<DstType>::min()) ||
+         src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<
+    (sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value, bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(0) || static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<
+    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value, bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(0);
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<
+    (sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
+is_overflow(SrcType src)
+{
+  return static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<
+    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <class T>
+struct overflow_check {
+  static bool is_overflow(uint64_t value, bool negative)
+  {
+    if (negative && value == static_cast<uint64_t>(-static_cast<int64_t>(std::numeric_limits<T>::min()))) {
+      return false;
+    }
+
+    return (value & ~std::numeric_limits<T>::max()) != 0;
+  }
+};
+
+template <class T>
+void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow)
+{
+  overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
+  if (!overflow) {
+    *reinterpret_cast<T *>(out_int) =
+        static_cast<T>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
+  }
+}
 
 inline void raise_string_cast_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
                                     const char *data)
@@ -702,6 +802,23 @@ std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *
 }
 
 template <typename T>
+std::enable_if_t<std::is_same<T, int>::value, T> parse(const char *begin, const char *end)
+{
+  bool negative = false;
+  if (begin < end && *begin == '-') {
+    negative = true;
+    ++begin;
+  }
+
+  uint64_t uvalue = parse<uint64_t>(begin, end);
+  T out;
+  bool overflow = false;
+  assign_signed_int_value<T>(reinterpret_cast<char *>(&out), uvalue, negative, overflow);
+
+  return out;
+}
+
+template <typename T>
 T parse(const std::string &s)
 {
   return parse<T>(s.data(), s.data() + s.size());
@@ -810,110 +927,11 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char
   return false;
 }
 
-/**
- * A utility for checking whether a value would overflow when converted to
- * the specified type.
- *
- * if (overflow_check<int8_t>(unsigned_value, is_negative)) {
- *   throw overflow_error(...);
- * }
- *
- * if (overflow_check<int8_t>(signed_value)) {
- *   throw overflow_error(...);
- * }
- */
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(std::numeric_limits<DstType>::min()) ||
-         src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(0) || static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(0);
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
-  return static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
-template <class T>
-struct overflow_check {
-  static bool is_overflow(uint64_t value, bool negative)
-  {
-    if (negative && value == static_cast<uint64_t>(-static_cast<int64_t>(std::numeric_limits<T>::min()))) {
-      return false;
-    }
-
-    return (value & ~std::numeric_limits<T>::max()) != 0;
-  }
-};
-
 DYND_API void parse_int64(int64_t &res, const char *begin, const char *end);
 
 DYND_API void parse_uint64(uint64_t &res, const char *begin, const char *end);
 
 DYND_API int parse_double(double &res, const char *begin, const char *end);
-
-template <class T>
-void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow)
-{
-  overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
-  if (!overflow) {
-    *reinterpret_cast<T *>(out_int) =
-        static_cast<T>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
-  }
-}
 
 /**
  * Converts a string containing only a floating point number into
