@@ -879,9 +879,8 @@ std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const 
 
   // TODO: use http://www.netlib.org/fp/dtoa.c
   char *end_ptr;
-  std::string s(begin, end);
-  T value = strto<T>(s.c_str(), &end_ptr);
-  if (static_cast<size_t>(end_ptr - s.c_str()) != s.size()) {
+  T value = strto<T>(begin, &end_ptr);
+  if (end_ptr - begin != end - begin) {
     std::stringstream ss;
     ss << "parse error converting string ";
     ss.write(begin, end - begin);
