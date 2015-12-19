@@ -14,7 +14,6 @@
 #include <dynd/parse.hpp>
 
 using namespace std;
-using std::isnan;
 using namespace dynd;
 
 TEST(Parse, Int)
@@ -117,35 +116,35 @@ TEST(Parse, FloatInf)
 TEST(Parse, FloatNaN)
 {
   // NaN
-  EXPECT_TRUE(isnan(parse<float>("NaN")));
+  EXPECT_TRUE(std::isnan(parse<float>("NaN")));
   EXPECT_FALSE(signbit(parse<float>("NaN")));
 
   // +NaN
-  EXPECT_TRUE(isnan(parse<float>("+NaN")));
+  EXPECT_TRUE(std::isnan(parse<float>("+NaN")));
   EXPECT_FALSE(signbit(parse<float>("+NaN")));
 
   // -NaN
-  EXPECT_TRUE(isnan(parse<float>("-NaN")));
+  EXPECT_TRUE(std::isnan(parse<float>("-NaN")));
   EXPECT_TRUE(signbit(parse<float>("-NaN")));
 
   // nan
-  EXPECT_TRUE(isnan(parse<float>("nan")));
+  EXPECT_TRUE(std::isnan(parse<float>("nan")));
   EXPECT_FALSE(signbit(parse<float>("nan")));
 
   // +nan
-  EXPECT_TRUE(isnan(parse<float>("+nan")));
+  EXPECT_TRUE(std::isnan(parse<float>("+nan")));
   EXPECT_FALSE(signbit(parse<float>("+nan")));
 
   // -nan
-  EXPECT_TRUE(isnan(parse<float>("-nan")));
+  EXPECT_TRUE(std::isnan(parse<float>("-nan")));
   EXPECT_TRUE(signbit(parse<float>("-nan")));
 
   // 1.#QNAN
-  EXPECT_TRUE(isnan(parse<float>("1.#QNAN")));
+  EXPECT_TRUE(std::isnan(parse<float>("1.#QNAN")));
   EXPECT_FALSE(signbit(parse<float>("1.#QNAN")));
 
   // -1.#IND
-  EXPECT_TRUE(isnan(parse<float>("-1.#IND")));
+  EXPECT_TRUE(std::isnan(parse<float>("-1.#IND")));
   EXPECT_TRUE(signbit(parse<float>("-1.#IND")));
 }
 
@@ -199,27 +198,27 @@ TEST(Parse, DoubleInf)
 TEST(Parse, DoubleNaN)
 {
   // +NaN
-  EXPECT_TRUE(isnan(parse<double>("NaN")));
+  EXPECT_TRUE(std::isnan(parse<double>("NaN")));
   EXPECT_FALSE(signbit(parse<double>("NaN")));
 
   // -NaN
-  EXPECT_TRUE(isnan(parse<double>("-NaN")));
+  EXPECT_TRUE(std::isnan(parse<double>("-NaN")));
   EXPECT_TRUE(signbit(parse<double>("-NaN")));
 
   // +nan
-  EXPECT_TRUE(isnan(parse<double>("nan")));
+  EXPECT_TRUE(std::isnan(parse<double>("nan")));
   EXPECT_FALSE(signbit(parse<double>("nan")));
 
   // -nan
-  EXPECT_TRUE(isnan(parse<double>("-nan")));
+  EXPECT_TRUE(std::isnan(parse<double>("-nan")));
   EXPECT_TRUE(signbit(parse<double>("-nan")));
 
   // 1.#QNAN
-  EXPECT_TRUE(isnan(parse<double>("1.#QNAN")));
+  EXPECT_TRUE(std::isnan(parse<double>("1.#QNAN")));
   EXPECT_FALSE(signbit(parse<double>("1.#QNAN")));
 
   // -1.#IND
-  EXPECT_TRUE(isnan(parse<double>("-1.#IND")));
+  EXPECT_TRUE(std::isnan(parse<double>("-1.#IND")));
   EXPECT_TRUE(signbit(parse<double>("-1.#IND")));
 }
 

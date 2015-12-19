@@ -810,12 +810,12 @@ std::enable_if_t<std::is_same<T, int>::value, T> parse(const char *begin, const 
     ++begin;
   }
 
-  auto uvalue = parse<typename std::make_unsigned<T>::type>(begin, end);
-  T out = 0;
-  bool overflow = false;
-  assign_signed_int_value<T>(reinterpret_cast<char *>(&out), uvalue, negative, overflow);
+  auto value = parse<typename std::make_unsigned<T>::type>(begin, end);
+  if (!overflow_check<T>::is_overflow(value, negative)) {
+    return static_cast<T>(negative ? -static_cast<int64_t>(value) : static_cast<int64_t>(value));
+  }
 
-  return out;
+  return 0;
 }
 
 template <typename T>
