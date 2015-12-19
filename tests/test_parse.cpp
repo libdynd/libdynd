@@ -75,47 +75,47 @@ TEST(Parse, UInt32)
 TEST(Parse, FloatInf)
 {
   // Inf
-  EXPECT_TRUE(std::isinf(parse<float>("Inf")));
+  EXPECT_TRUE(isinf(parse<float>("Inf")));
   EXPECT_FALSE(signbit(parse<float>("Inf")));
 
   // +Inf
-  EXPECT_TRUE(std::isinf(parse<float>("+Inf")));
+  EXPECT_TRUE(isinf(parse<float>("+Inf")));
   EXPECT_FALSE(signbit(parse<float>("+Inf")));
 
   // -Inf
-  EXPECT_TRUE(std::isinf(parse<float>("-Inf")));
+  EXPECT_TRUE(isinf(parse<float>("-Inf")));
   EXPECT_TRUE(signbit(parse<float>("-Inf")));
 
   // inf
-  EXPECT_TRUE(std::isinf(parse<float>("inf")));
+  EXPECT_TRUE(isinf(parse<float>("inf")));
   EXPECT_FALSE(signbit(parse<float>("inf")));
 
   // +inf
-  EXPECT_TRUE(std::isinf(parse<float>("+inf")));
+  EXPECT_TRUE(isinf(parse<float>("+inf")));
   EXPECT_FALSE(signbit(parse<float>("+inf")));
 
   // -inf
-  EXPECT_TRUE(std::isinf(parse<float>("-inf")));
+  EXPECT_TRUE(isinf(parse<float>("-inf")));
   EXPECT_TRUE(signbit(parse<float>("-inf")));
 
   // Infinity
-  EXPECT_TRUE(std::isinf(parse<float>("Infinity")));
+  EXPECT_TRUE(isinf(parse<float>("Infinity")));
   EXPECT_FALSE(signbit(parse<float>("Infinity")));
 
   // +Infinity
-  EXPECT_TRUE(std::isinf(parse<float>("+Infinity")));
+  EXPECT_TRUE(isinf(parse<float>("+Infinity")));
   EXPECT_FALSE(signbit(parse<float>("+Infinity")));
 
   // -Infinity
-  EXPECT_TRUE(std::isinf(parse<float>("-Infinity")));
+  EXPECT_TRUE(isinf(parse<float>("-Infinity")));
   EXPECT_TRUE(signbit(parse<float>("-Infinity")));
 
   // 1.#INF
-  EXPECT_TRUE(std::isinf(parse<float>("1.#INF")));
+  EXPECT_TRUE(isinf(parse<float>("1.#INF")));
   EXPECT_FALSE(signbit(parse<float>("1.#INF")));
 
   // -1.#INF
-  EXPECT_TRUE(std::isinf(parse<float>("-1.#INF")));
+  EXPECT_TRUE(isinf(parse<float>("-1.#INF")));
   EXPECT_TRUE(signbit(parse<float>("-1.#INF")));
 }
 
