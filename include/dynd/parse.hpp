@@ -811,7 +811,7 @@ std::enable_if_t<std::is_same<T, int>::value, T> parse(const char *begin, const 
   }
 
   auto uvalue = parse<typename std::make_unsigned<T>::type>(begin, end);
-  T out;
+  T out = 0;
   bool overflow = false;
   assign_signed_int_value<T>(reinterpret_cast<char *>(&out), uvalue, negative, overflow);
 
