@@ -1324,7 +1324,7 @@ inline void parse_number_json(const ndt::type &tp, char *out_data, const char *&
 namespace nd {
   namespace json {
 
-    extern struct parse : declfunc<parse> {
+    extern DYND_API struct parse : declfunc<parse> {
       array operator()(const char *begin, const char *end, const ndt::type &ret_tp)
       {
         ndt::type dst_tp2 = ret_tp;
@@ -1337,7 +1337,7 @@ namespace nd {
         return (*this)(begin, begin + strlen(begin), dst_tp);
       }
 
-      static callable make();
+      static DYND_API callable make();
     } parse;
 
   } // namespace dynd::nd::json
