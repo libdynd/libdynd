@@ -18,6 +18,8 @@ using namespace dynd;
 
 TEST(Parse, Int)
 {
+  EXPECT_EQ(-2, parse<int>("-2"));
+  EXPECT_EQ(-1, parse<int>("-1"));
   EXPECT_EQ(0, parse<int>("0"));
   EXPECT_EQ(1, parse<int>("1"));
   EXPECT_EQ(2, parse<int>("2"));
@@ -62,6 +64,162 @@ TEST(Parse, UInt32)
 
   EXPECT_THROW(parse<uint32_t>("-1"), invalid_argument);
   EXPECT_EQ(0U, parse<uint32_t>("-1", nocheck));
+}
+
+TEST(Parse, FloatInf)
+{
+  // Inf
+  EXPECT_TRUE(isinf(parse<float>("Inf")));
+  EXPECT_FALSE(signbit(parse<float>("Inf")));
+
+  // +Inf
+  EXPECT_TRUE(isinf(parse<float>("+Inf")));
+  EXPECT_FALSE(signbit(parse<float>("+Inf")));
+
+  // -Inf
+  EXPECT_TRUE(isinf(parse<float>("-Inf")));
+  EXPECT_TRUE(signbit(parse<float>("-Inf")));
+
+  // inf
+  EXPECT_TRUE(isinf(parse<float>("inf")));
+  EXPECT_FALSE(signbit(parse<float>("inf")));
+
+  // +inf
+  EXPECT_TRUE(isinf(parse<float>("+inf")));
+  EXPECT_FALSE(signbit(parse<float>("+inf")));
+
+  // -inf
+  EXPECT_TRUE(isinf(parse<float>("-inf")));
+  EXPECT_TRUE(signbit(parse<float>("-inf")));
+
+  // Infinity
+  EXPECT_TRUE(isinf(parse<float>("Infinity")));
+  EXPECT_FALSE(signbit(parse<float>("Infinity")));
+
+  // +Infinity
+  EXPECT_TRUE(isinf(parse<float>("+Infinity")));
+  EXPECT_FALSE(signbit(parse<float>("+Infinity")));
+
+  // -Infinity
+  EXPECT_TRUE(isinf(parse<float>("-Infinity")));
+  EXPECT_TRUE(signbit(parse<float>("-Infinity")));
+
+  // 1.#INF
+  EXPECT_TRUE(isinf(parse<float>("1.#INF")));
+  EXPECT_FALSE(signbit(parse<float>("1.#INF")));
+
+  // -1.#INF
+  EXPECT_TRUE(isinf(parse<float>("-1.#INF")));
+  EXPECT_TRUE(signbit(parse<float>("-1.#INF")));
+}
+
+TEST(Parse, FloatNaN)
+{
+  // NaN
+  EXPECT_TRUE(isnan(parse<float>("NaN")));
+  EXPECT_FALSE(signbit(parse<float>("NaN")));
+
+  // +NaN
+  EXPECT_TRUE(isnan(parse<float>("+NaN")));
+  EXPECT_FALSE(signbit(parse<float>("+NaN")));
+
+  // -NaN
+  EXPECT_TRUE(isnan(parse<float>("-NaN")));
+  EXPECT_TRUE(signbit(parse<float>("-NaN")));
+
+  // nan
+  EXPECT_TRUE(isnan(parse<float>("nan")));
+  EXPECT_FALSE(signbit(parse<float>("nan")));
+
+  // +nan
+  EXPECT_TRUE(isnan(parse<float>("+nan")));
+  EXPECT_FALSE(signbit(parse<float>("+nan")));
+
+  // -nan
+  EXPECT_TRUE(isnan(parse<float>("-nan")));
+  EXPECT_TRUE(signbit(parse<float>("-nan")));
+
+  // 1.#QNAN
+  EXPECT_TRUE(isnan(parse<float>("1.#QNAN")));
+  EXPECT_FALSE(signbit(parse<float>("1.#QNAN")));
+
+  // -1.#IND
+  EXPECT_TRUE(isnan(parse<float>("-1.#IND")));
+  EXPECT_TRUE(signbit(parse<float>("-1.#IND")));
+}
+
+TEST(Parse, DoubleInf)
+{
+  // Inf
+  EXPECT_TRUE(isinf(parse<double>("Inf")));
+  EXPECT_FALSE(signbit(parse<double>("Inf")));
+
+  // +Inf
+  EXPECT_TRUE(isinf(parse<double>("+Inf")));
+  EXPECT_FALSE(signbit(parse<double>("+Inf")));
+
+  // -Inf
+  EXPECT_TRUE(isinf(parse<double>("-Inf")));
+  EXPECT_TRUE(signbit(parse<double>("-Inf")));
+
+  // inf
+  EXPECT_TRUE(isinf(parse<double>("inf")));
+  EXPECT_FALSE(signbit(parse<double>("inf")));
+
+  // +inf
+  EXPECT_TRUE(isinf(parse<double>("+inf")));
+  EXPECT_FALSE(signbit(parse<double>("+inf")));
+
+  // -inf
+  EXPECT_TRUE(isinf(parse<double>("-inf")));
+  EXPECT_TRUE(signbit(parse<double>("-inf")));
+
+  // Infinity
+  EXPECT_TRUE(isinf(parse<double>("Infinity")));
+  EXPECT_FALSE(signbit(parse<double>("Infinity")));
+
+  // +Infinity
+  EXPECT_TRUE(isinf(parse<double>("+Infinity")));
+  EXPECT_FALSE(signbit(parse<double>("+Infinity")));
+
+  // -Infinity
+  EXPECT_TRUE(isinf(parse<double>("-Infinity")));
+  EXPECT_TRUE(signbit(parse<double>("-Infinity")));
+
+  // 1.#INF
+  EXPECT_TRUE(isinf(parse<double>("1.#INF")));
+  EXPECT_FALSE(signbit(parse<double>("1.#INF")));
+
+  // -1.#INF
+  EXPECT_TRUE(isinf(parse<double>("-1.#INF")));
+  EXPECT_TRUE(signbit(parse<double>("-1.#INF")));
+}
+
+TEST(Parse, DoubleNaN)
+{
+  // +NaN
+  EXPECT_TRUE(isnan(parse<double>("NaN")));
+  EXPECT_FALSE(signbit(parse<double>("NaN")));
+
+  // -NaN
+  EXPECT_TRUE(isnan(parse<double>("-NaN")));
+  EXPECT_TRUE(signbit(parse<double>("-NaN")));
+
+  // +nan
+  EXPECT_TRUE(isnan(parse<double>("nan")));
+  EXPECT_FALSE(signbit(parse<double>("nan")));
+
+  // -nan
+  EXPECT_TRUE(isnan(parse<double>("-nan")));
+  EXPECT_TRUE(signbit(parse<double>("-nan")));
+
+  // 1.#QNAN
+  EXPECT_TRUE(isnan(parse<double>("1.#QNAN")));
+  EXPECT_FALSE(signbit(parse<double>("1.#QNAN")));
+
+  // -1.#IND
+  EXPECT_TRUE(isnan(parse<double>("-1.#IND")));
+  EXPECT_TRUE(signbit(parse<double>("-1.#IND")));
 }
 
 TEST(JSONParse, Number)

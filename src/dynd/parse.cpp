@@ -538,37 +538,6 @@ bool dynd::parse_na(const char *begin, const char *end)
   return false;
 }
 
-void dynd::parse_uint64(uint64_t &res, const char *begin, const char *end) { res = parse<uint64_t>(begin, end); }
-
-void dynd::parse_int64(int64_t &res, const char *begin, const char *end)
-{
-  bool negative = false;
-  if (begin < end && *begin == '-') {
-    negative = true;
-    ++begin;
-  }
-
-  uint64_t ures;
-  parse_uint64(ures, begin, end);
-
-  res = ures;
-  if (negative) {
-    res = -res;
-  }
-}
-
-int dynd::parse_double(double &res, const char *begin, const char *end)
-{
-  try {
-    res = parse<double>(begin, end);
-  }
-  catch (...) {
-    return 1;
-  }
-
-  return 0;
-}
-
 DYND_API struct nd::json::parse nd::json::parse;
 
 DYND_API nd::callable nd::json::parse::make()

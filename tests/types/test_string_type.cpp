@@ -366,50 +366,6 @@ TEST(StringType, StringToInteger)
   EXPECT_THROW(nd::array("-").ucast<uint64_t>().eval(), invalid_argument);
 }
 
-TEST(StringType, StringToFloat32SpecialValues)
-{
-  // +NaN with default payload
-  EXPECT_EQ(0x7fc00000u, nd::array("NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0x7fc00000u, nd::array("nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0x7fc00000u, nd::array("1.#QNAN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  // -NaN with default payload
-  EXPECT_EQ(0xffc00000u, nd::array("-NaN").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0xffc00000u, nd::array("-nan").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0xffc00000u, nd::array("-1.#IND").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  // +Inf
-  EXPECT_EQ(0x7f800000u, nd::array("Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0x7f800000u, nd::array("inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0x7f800000u, nd::array("Infinity").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0x7f800000u, nd::array("1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  // -Inf
-  EXPECT_EQ(0xff800000u, nd::array("-Inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0xff800000u, nd::array("-inf").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0xff800000u, nd::array("-Infinity").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-  EXPECT_EQ(0xff800000u, nd::array("-1.#INF").ucast<float>().view_scalars<uint32_t>().as<uint32_t>());
-}
-
-TEST(StringType, StringToFloat64SpecialValues)
-{
-  // +NaN with default payload
-  EXPECT_EQ(0x7ff8000000000000ULL, nd::array("NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0x7ff8000000000000ULL, nd::array("nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0x7ff8000000000000ULL, nd::array("1.#QNAN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  // -NaN with default payload
-  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-NaN").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-nan").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0xfff8000000000000ULL, nd::array("-1.#IND").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  // +Inf
-  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("Infinity").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0x7ff0000000000000ULL, nd::array("1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  // -Inf
-  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-Inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-inf").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-Infinity").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-  EXPECT_EQ(0xfff0000000000000ULL, nd::array("-1.#INF").ucast<double>().view_scalars<uint64_t>().as<uint64_t>());
-}
-
 TEST(StringType, Comparisons)
 {
   nd::array a, b;

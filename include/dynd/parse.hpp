@@ -810,12 +810,86 @@ std::enable_if_t<std::is_same<T, int>::value, T> parse(const char *begin, const 
     ++begin;
   }
 
-  uint64_t uvalue = parse<uint64_t>(begin, end);
+  auto uvalue = parse<typename std::make_unsigned<T>::type>(begin, end);
   T out;
   bool overflow = false;
   assign_signed_int_value<T>(reinterpret_cast<char *>(&out), uvalue, negative, overflow);
 
   return out;
+}
+
+template <typename T>
+T strto(const char *begin, char **end);
+
+template <>
+inline float strto(const char *begin, char **end)
+{
+  return std::strtof(begin, end);
+}
+
+template <>
+inline double strto(const char *begin, char **end)
+{
+  return std::strtod(begin, end);
+}
+
+template <typename T>
+std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const char *end)
+{
+  bool negative = false;
+  const char *pos = begin;
+  if (pos < end && *pos == '-') {
+    negative = true;
+    ++pos;
+  }
+  // First check for various NaN/Inf inputs
+  size_t size = end - pos;
+  if (size == 3) {
+    if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
+      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+    }
+    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
+      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+    }
+  }
+  else if (size == 7) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
+        (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
+      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+    }
+  }
+  else if (size == 6) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
+      if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
+        return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+      }
+      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
+               (pos[5] == 'F' || pos[5] == 'f')) {
+        return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+      }
+    }
+  }
+  else if (size == 8) {
+    if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
+        (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
+        (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
+      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+    }
+  }
+
+  // TODO: use http://www.netlib.org/fp/dtoa.c
+  char *end_ptr;
+  std::string s(begin, end);
+  T value = strto<T>(s.c_str(), &end_ptr);
+  if (static_cast<size_t>(end_ptr - s.c_str()) != s.size()) {
+    std::stringstream ss;
+    ss << "parse error converting string ";
+    ss.write(begin, end - begin);
+    ss << " to float64";
+    throw std::invalid_argument(ss.str());
+  }
+
+  return value;
 }
 
 template <typename T>
@@ -927,12 +1001,6 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char
   return false;
 }
 
-DYND_API void parse_int64(int64_t &res, const char *begin, const char *end);
-
-DYND_API void parse_uint64(uint64_t &res, const char *begin, const char *end);
-
-DYND_API int parse_double(double &res, const char *begin, const char *end);
-
 /**
  * Converts a string containing only a floating point number into
  * a float64/C double.
@@ -986,65 +1054,6 @@ std::enable_if_t<std::is_same<T, double>::value, T> parse(const char *begin, con
   char *end_ptr;
   std::string s(begin, end);
   return strtod(s.c_str(), &end_ptr);
-}
-
-template <typename T>
-std::enable_if_t<std::is_same<T, double>::value, T> parse(const char *begin, const char *end)
-{
-  bool negative = false;
-  const char *pos = begin;
-  if (pos < end && *pos == '-') {
-    negative = true;
-    ++pos;
-  }
-  // First check for various NaN/Inf inputs
-  size_t size = end - pos;
-  if (size == 3) {
-    if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
-      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-    }
-    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
-      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
-    }
-  }
-  else if (size == 7) {
-    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
-        (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
-      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-    }
-  }
-  else if (size == 6) {
-    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
-      if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
-        return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-      }
-      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
-               (pos[5] == 'F' || pos[5] == 'f')) {
-        return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
-      }
-    }
-  }
-  else if (size == 8) {
-    if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
-        (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
-        (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
-      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
-    }
-  }
-
-  // TODO: use http://www.netlib.org/fp/dtoa.c
-  char *end_ptr;
-  std::string s(begin, end);
-  T value = strtod(s.c_str(), &end_ptr);
-  if ((size_t)(end_ptr - s.c_str()) != s.size()) {
-    std::stringstream ss;
-    ss << "parse error converting string ";
-    print_escaped_utf8_string(ss, begin, end);
-    ss << " to float64";
-    throw std::invalid_argument(ss.str());
-  }
-
-  return value;
 }
 
 template <class T>

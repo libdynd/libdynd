@@ -829,6 +829,7 @@ nd::array dynd::parse_json(const ndt::type &tp, const char *json_begin, const ch
   return result;
 }
 
+/*
 static ndt::type discover_type(const char *&begin, const char *end)
 {
   skip_whitespace(begin, end);
@@ -946,7 +947,9 @@ static ndt::type discover_type(const char *&begin, const char *end)
 
   throw runtime_error("json parsing error");
 }
+*/
 
+/*
 void ndt::json::discover(ndt::type &res, const char *json_begin, const char *json_end)
 {
   try {
@@ -968,3 +971,4 @@ void ndt::json::discover(ndt::type &res, const char *json_begin, const char *jso
     throw invalid_argument(ss.str());
   }
 }
+*/
