@@ -6,14 +6,12 @@
 #include <string>
 #include <climits>
 
-#include <dynd/parse.hpp>
-#include <dynd/callable.hpp>
-#include <dynd/string_encodings.hpp>
-#include <dynd/types/option_type.hpp>
-#include <dynd/kernels/assignment_kernels.hpp>
-#include <dynd/kernels/parse_kernel.hpp>
 #include <dynd/functional.hpp>
+#include <dynd/parse.hpp>
+#include <dynd/string_encodings.hpp>
+#include <dynd/kernels/parse_kernel.hpp>
 #include <dynd/types/any_kind_type.hpp>
+#include <dynd/types/option_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -379,141 +377,6 @@ static T checked_string_to_signed_int(const char *begin, const char *end)
   }
 }
 
-intptr_t dynd::checked_string_to_intptr(const char *begin, const char *end)
-{
-  return checked_string_to_signed_int<intptr_t>(begin, end);
-}
-
-int64_t dynd::checked_string_to_int64(const char *begin, const char *end)
-{
-  return checked_string_to_signed_int<int64_t>(begin, end);
-}
-
-float dynd::checked_float64_to_float32(double value, assign_error_mode errmode)
-{
-  union {
-    float result;
-    char dst[4];
-  } out;
-  char *src[1] = {reinterpret_cast<char *>(&value)};
-  switch (errmode) {
-  case assign_error_nocheck:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_nocheck>::single_wrapper(NULL, reinterpret_cast<char *>(&out.dst),
-                                                                              src);
-    break;
-  case assign_error_overflow:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_overflow>::single_wrapper(NULL, reinterpret_cast<char *>(&out.dst),
-                                                                               src);
-    break;
-  case assign_error_fractional:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_fractional>::single_wrapper(NULL,
-                                                                                 reinterpret_cast<char *>(&out.dst),
-                                                                                 src);
-    break;
-  case assign_error_inexact:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_inexact>::single_wrapper(NULL, reinterpret_cast<char *>(&out.dst),
-                                                                              src);
-    break;
-  default:
-    dynd::nd::detail::assignment_kernel<float32_type_id, real_kind, float64_type_id, real_kind,
-                                        assign_error_fractional>::single_wrapper(NULL,
-                                                                                 reinterpret_cast<char *>(&out.dst),
-                                                                                 src);
-    break;
-  }
-  return out.result;
-}
-
-void dynd::string_to_bool(char *out_bool, const char *begin, const char *end, bool option, assign_error_mode errmode)
-{
-  if (option && parse_na(begin, end)) {
-    *out_bool = DYND_BOOL_NA;
-    return;
-  }
-  else {
-    size_t size = end - begin;
-    if (size == 1) {
-      char c = *begin;
-      if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
-        *out_bool = 0;
-        return;
-      }
-      else if (errmode == assign_error_nocheck || c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
-        *out_bool = 1;
-        return;
-      }
-    }
-    else if (size == 4) {
-      if (errmode == assign_error_nocheck) {
-        *out_bool = 1;
-        return;
-      }
-      else if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
-               (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
-        *out_bool = 1;
-        return;
-      }
-    }
-    else if (size == 5) {
-      if ((begin[0] == 'F' || begin[0] == 'f') && (begin[1] == 'A' || begin[1] == 'a') &&
-          (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'S' || begin[3] == 's') &&
-          (begin[4] == 'E' || begin[4] == 'e')) {
-        *out_bool = 0;
-        return;
-      }
-      else if (errmode == assign_error_nocheck) {
-        *out_bool = 1;
-        return;
-      }
-    }
-    else if (size == 0) {
-      if (errmode == assign_error_nocheck) {
-        *out_bool = 0;
-        return;
-      }
-    }
-    else if (size == 2) {
-      if ((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'O' || begin[1] == 'o')) {
-        *out_bool = 0;
-        return;
-      }
-      else if (errmode == assign_error_nocheck ||
-               ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
-        *out_bool = 1;
-        return;
-      }
-    }
-    else if (size == 3) {
-      if ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'F' || begin[1] == 'f') &&
-          (begin[2] == 'F' || begin[2] == 'f')) {
-        *out_bool = 0;
-        return;
-      }
-      else if (errmode == assign_error_nocheck ||
-               ((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
-                (begin[2] == 'S' || begin[2] == 's'))) {
-        *out_bool = 1;
-        return;
-      }
-    }
-  }
-
-  stringstream ss;
-  ss << "cannot cast string ";
-  print_escaped_utf8_string(ss, begin, end);
-  if (option) {
-    ss << " to ?bool";
-  }
-  else {
-    ss << " to bool";
-  }
-  throw invalid_argument(ss.str());
-}
-
 bool dynd::parse_na(const char *begin, const char *end)
 {
   size_t size = end - begin;
@@ -543,13 +406,15 @@ DYND_API struct nd::json::parse nd::json::parse;
 DYND_API nd::callable nd::json::parse::make()
 {
   std::map<type_id_t, callable> children;
+  children[bool_type_id] = callable::make<parse_kernel<bool_type_id>>();
+  children[int32_type_id] = callable::make<parse_kernel<int32_type_id>>();
   children[uint8_type_id] = callable::make<parse_kernel<uint8_type_id>>();
   children[uint16_type_id] = callable::make<parse_kernel<uint16_type_id>>();
   children[uint32_type_id] = callable::make<parse_kernel<uint32_type_id>>();
   children[uint64_type_id] = callable::make<parse_kernel<uint64_type_id>>();
-  children[int32_type_id] = callable::make<parse_kernel<int32_type_id>>();
   children[option_type_id] = callable::make<parse_kernel<option_type_id>>();
   children[fixed_dim_type_id] = callable::make<parse_kernel<fixed_dim_type_id>>();
+  children[var_dim_type_id] = callable::make<parse_kernel<var_dim_type_id>>();
 
   return functional::dispatch(
       ndt::callable_type::make(ndt::make_type<ndt::any_kind_type>(), {ndt::make_type<string>()}),

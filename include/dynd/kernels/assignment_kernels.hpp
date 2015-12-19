@@ -1912,7 +1912,7 @@ namespace nd {
       void single(char *dst, char *const *src)
       {
         const string *std = reinterpret_cast<string *>(src[0]);
-        string_to_bool(dst, std->begin(), std->end(), true, m_errmode);
+        *reinterpret_cast<bool1 *>(dst) = parse<bool>(std->begin(), std->end());
       }
     };
 
@@ -2500,7 +2500,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], assign_error_nocheck);
         trim(s);
-        string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_nocheck);
+        *reinterpret_cast<bool1 *>(dst) = parse<bool>(s.data(), s.data() + s.size(), nocheck);
       }
 
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
@@ -2534,7 +2534,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], assign_error_inexact);
         trim(s);
-        string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_inexact);
+        *reinterpret_cast<bool1 *>(dst) = parse<bool>(s.data(), s.data() + s.size());
       }
 
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
@@ -2568,7 +2568,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], assign_error_default);
         trim(s);
-        string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_default);
+        *reinterpret_cast<bool1 *>(dst) = parse<bool>(s.data(), s.data() + s.size());
       }
 
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
@@ -2602,7 +2602,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], assign_error_overflow);
         trim(s);
-        string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_overflow);
+        *reinterpret_cast<bool1 *>(dst) = parse<bool>(s.data(), s.data() + s.size());
       }
 
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
@@ -2636,7 +2636,7 @@ namespace nd {
         std::string s = reinterpret_cast<const ndt::base_string_type *>(src_string_tp.extended())
                             ->get_utf8_string(src_arrmeta, src[0], assign_error_fractional);
         trim(s);
-        string_to_bool(dst, s.data(), s.data() + s.size(), false, assign_error_fractional);
+        *reinterpret_cast<bool1 *>(dst) = parse<bool>(s.data(), s.data() + s.size());
       }
 
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,

@@ -759,7 +759,7 @@ static nd::array parse_integer_list(const char *&rbegin, const char *end)
   if (!parse_int_no_ws(begin, end, strbegin, strend)) {
     return nd::array();
   }
-  dlist.push_back(checked_string_to_int64(strbegin, strend));
+  dlist.push_back(parse<int64_t>(strbegin, strend));
   for (;;) {
     if (!parse_token_ds(begin, end, ',')) {
       if (parse_token_ds(begin, end, ']')) {
@@ -774,7 +774,7 @@ static nd::array parse_integer_list(const char *&rbegin, const char *end)
     if (!parse_int_no_ws(begin, end, strbegin, strend)) {
       throw datashape_parse_error(begin, "Expected an integer or a terminating ']'");
     }
-    dlist.push_back(checked_string_to_int64(strbegin, strend));
+    dlist.push_back(parse<int64_t>(strbegin, strend));
   }
 }
 
@@ -826,7 +826,7 @@ static nd::array parse_type_arg(const char *&rbegin, const char *end, map<std::s
   const char *strbegin, *strend;
   if (parse_int_no_ws(begin, end, strbegin, strend)) {
     rbegin = begin;
-    return checked_string_to_int64(strbegin, strend);
+    return parse<int64_t>(strbegin, strend);
   }
 
   std::string str;
@@ -1265,13 +1265,13 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       const char *bend = nend;
       if (parse_name_or_number(begin, end, nbegin, nend)) {
         if ('1' <= *nbegin && *nbegin <= '9') {
-          intptr_t exponent = checked_string_to_intptr(nbegin, nend);
+          intptr_t exponent = parse<intptr_t>(nbegin, nend);
           if (!parse_token_ds(begin, end, '*')) {
             throw datashape_parse_error(begin, "expected a '*' after dimensional power");
           }
           ndt::type element_tp = parse_datashape(begin, end, symtable);
           if ('0' <= *bbegin && *bbegin <= '9') {
-            intptr_t dim_size = checked_string_to_intptr(bbegin, bend);
+            intptr_t dim_size = parse<intptr_t>(bbegin, bend);
             result = ndt::make_fixed_dim(dim_size, element_tp, exponent);
           }
           else if (compare_range_to_literal(bbegin, bend, "var")) {
@@ -1291,7 +1291,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
           std::string exponent_name(nbegin, nend);
           if (parse_token_ds(begin, end, '*')) {
             if ('0' <= *bbegin && *bbegin <= '9') {
-              intptr_t dim_size = checked_string_to_intptr(bbegin, bend);
+              intptr_t dim_size = parse<intptr_t>(bbegin, bend);
               result = ndt::make_pow_dimsym(ndt::make_fixed_dim(dim_size, ndt::make_type<void>()), exponent_name,
                                             parse_datashape(begin, end, symtable));
             }
@@ -1328,7 +1328,7 @@ static ndt::type parse_datashape_nooption(const char *&rbegin, const char *end, 
       }
       // No type constructor args, just a dim type
       if ('0' <= *nbegin && *nbegin <= '9') {
-        intptr_t size = checked_string_to_intptr(nbegin, nend);
+        intptr_t size = parse<intptr_t>(nbegin, nend);
         result = ndt::make_fixed_dim(size, element_tp);
       }
       else if (compare_range_to_literal(nbegin, nend, "var")) {

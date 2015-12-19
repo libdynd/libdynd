@@ -16,6 +16,61 @@
 using namespace std;
 using namespace dynd;
 
+/*
+TEST(StringType, StringToBool)
+{
+  EXPECT_TRUE(nd::array("true").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array(" True").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array("TRUE ").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array("T").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array("yes  ").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array("Yes").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array("Y").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array(" on").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array("On").ucast<bool1>().as<bool>());
+  EXPECT_TRUE(nd::array("1").ucast<bool1>().as<bool>());
+
+  EXPECT_FALSE(nd::array("false").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array("False").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array("FALSE ").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array("F ").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array(" no").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array("No").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array("N").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array("off ").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array("Off").ucast<bool1>().as<bool>());
+  EXPECT_FALSE(nd::array("0 ").ucast<bool1>().as<bool>());
+
+  // By default, conversion to bool is not permissive
+  EXPECT_THROW(nd::array(nd::array("").ucast<bool1>().eval()), invalid_argument);
+  EXPECT_THROW(nd::array(nd::array("2").ucast<bool1>().eval()), invalid_argument);
+  EXPECT_THROW(nd::array(nd::array("flase").ucast<bool1>().eval()), invalid_argument);
+
+  // In "nocheck" mode, it's a bit more permissive
+  eval::eval_context tmp_ectx;
+  tmp_ectx.errmode = assign_error_nocheck;
+  EXPECT_FALSE(nd::array(nd::array("").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
+  EXPECT_TRUE(nd::array(nd::array("2").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
+  EXPECT_TRUE(nd::array(nd::array("flase").ucast<bool1>().eval(&tmp_ectx)).as<bool>());
+}
+*/
+
+TEST(Parse, Bool)
+{
+  EXPECT_TRUE(parse<bool1>("true", nocheck));
+  EXPECT_TRUE(parse<bool>("True", nocheck));
+  EXPECT_TRUE(parse<bool>("TRUE", nocheck));
+  EXPECT_TRUE(parse<bool>("T", nocheck));
+  EXPECT_TRUE(parse<bool>("yes", nocheck));
+  EXPECT_TRUE(parse<bool>("Yes", nocheck));
+  EXPECT_TRUE(parse<bool>("Y", nocheck));
+  EXPECT_TRUE(parse<bool>("on", nocheck));
+  EXPECT_TRUE(parse<bool>("On", nocheck));
+  EXPECT_TRUE(parse<bool>("1", nocheck));
+
+  EXPECT_FALSE(parse<bool>("false", nocheck));
+}
+
 TEST(Parse, Int)
 {
   EXPECT_EQ(-2, parse<int>("-2"));
@@ -246,6 +301,17 @@ TEST(Parse, DoubleNaN)
   EXPECT_TRUE(signbit(parse<double>("-1.#IND")));
 }
 
+TEST(JSONParse, Bool)
+{
+  EXPECT_ARRAY_EQ(true, nd::json::parse(ndt::make_type<bool1>(), "true"));
+  EXPECT_ARRAY_EQ(false, nd::json::parse(ndt::make_type<bool1>(), "false"));
+
+  EXPECT_THROW(nd::json::parse(ndt::make_type<bool1>(), "null"), invalid_argument);
+  EXPECT_THROW(nd::json::parse(ndt::make_type<bool1>(), "flase"), invalid_argument);
+  EXPECT_THROW(nd::json::parse(ndt::make_type<bool1>(), "\"flase\""), invalid_argument);
+  EXPECT_THROW(nd::json::parse(ndt::make_type<bool1>(), "\"\""), invalid_argument);
+}
+
 TEST(JSONParse, Number)
 {
   //  EXPECT_ARRAY_EQ(32, nd::json::parse("32", ndt::make_type<int>()));
@@ -275,10 +341,25 @@ TEST(JSONParse, Option)
 
 TEST(JSONParse, List)
 {
+  // Fixed-sized dimension
   EXPECT_ARRAY_EQ((nd::array{0u}),
                   nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<unsigned int>()), "[0]"));
   EXPECT_ARRAY_EQ((nd::array{0u, 1u}),
                   nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<unsigned int>()), "[0, 1]"));
+
+  // Variable-sized dimension
+  //  EXPECT_ARRAY_EQ((nd::array{0u, 1u}),
+  //                  nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<unsigned int>()), "[0, 1]"));
+
+  nd::array res = nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())).assign({0, 1});
+  EXPECT_ARRAY_EQ(res, nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>()), "[0, 1]"));
+
+  //  nd::array a = nd::json::parse(ndt::type("var * bool"), "[true, \"true\", 1, \"T\", \"y\", \"On\", \"yes\"]");
+  // std::exit(-1);
+  //  EXPECT_EQ(7, a.get_dim_size());
+  // for (intptr_t i = 0, i_end = a.get_dim_size(); i < i_end; ++i) {
+  // EXPECT_TRUE(a(i).as<bool>());
+  //  }
 }
 
 TEST(JSONParse, ListOfOption)

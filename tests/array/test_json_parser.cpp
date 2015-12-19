@@ -26,104 +26,9 @@
 using namespace std;
 using namespace dynd;
 
-/*
-TEST(JSON, DiscoverBool)
-{
-  EXPECT_EQ(ndt::make_type<bool1>(), ndt::json::discover("true"));
-  EXPECT_EQ(ndt::make_type<bool1>(), ndt::json::discover("false"));
-}
-
-TEST(JSON, DiscoverInt64)
-{
-  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("0"));
-  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("3"));
-  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("11"));
-
-  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("-1"));
-  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("-5"));
-}
-
-TEST(JSON, DiscoverFloat64)
-{
-  EXPECT_EQ(ndt::make_type<float64>(), ndt::json::discover("0.5"));
-  EXPECT_EQ(ndt::make_type<float64>(), ndt::json::discover("3.14"));
-}
-
-TEST(JSON, DiscoverString) { EXPECT_EQ(ndt::type(string_type_id), ndt::json::discover("\"Hello, world!\"")); }
-
-TEST(JSON, DiscoverOption) { EXPECT_EQ(ndt::type("?Any"), ndt::json::discover("null")); }
-
-TEST(JSON, DiscoverArray)
-{
-  EXPECT_EQ(ndt::type("()"), ndt::json::discover("[]"));
-
-  EXPECT_EQ(ndt::type("1 * int64"), ndt::json::discover("[0]"));
-  EXPECT_EQ(ndt::type("1 * string"), ndt::json::discover("[\"JSON\"]"));
-  EXPECT_EQ(ndt::type("1 * {x: int64, y: float64}"), ndt::json::discover("[{\"x\": 3, \"y\": 0.75}]"));
-  EXPECT_EQ(ndt::type("2 * int64"), ndt::json::discover("[11, -3]"));
-  EXPECT_EQ(ndt::type("5 * int64"), ndt::json::discover("[0, 1, 2, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * float64"), ndt::json::discover("[0, 1, 2.5, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * float64"), ndt::json::discover("[0.5, 1, 2, 3, 4]"));
-
-  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[null, 1, 2, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[0, 1, null, 3, 4]"));
-  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[0, 1, 2, 3, null]"));
-  EXPECT_EQ(ndt::type("3 * ?float64"), ndt::json::discover("[null, -7, 3.3]"));
-
-  EXPECT_EQ(ndt::type("(int64, string)"), ndt::json::discover("[2, \"Hello, world!\"]"));
-
-  EXPECT_EQ(ndt::type("2 * 1 * int64"), ndt::json::discover("[[10], [7]]"));
-  EXPECT_EQ(ndt::type("1 * 2 * int64"), ndt::json::discover("[[10, 7]]"));
-  EXPECT_EQ(ndt::type("2 * 2 * int64"), ndt::json::discover("[[0, 1], [2, 3]]"));
-  EXPECT_EQ(ndt::type("2 * 3 * int64"), ndt::json::discover("[[0, 1, 11], [2, 3, -4]]"));
-
-  EXPECT_EQ(ndt::type("2 * ?2 * int64"), ndt::json::discover("[null, [2, 3]]"));
-  EXPECT_EQ(ndt::type("2 * ?3 * int64"), ndt::json::discover("[[0, -1, 1], null]"));
-  EXPECT_EQ(ndt::type("2 * ?2 * float64"), ndt::json::discover("[[0, 1.2], null]"));
-
-  EXPECT_EQ(ndt::type("2 * var * int64"), ndt::json::discover("[[0, 1], [2]]"));
-  EXPECT_EQ(ndt::type("2 * var * var * int64"), ndt::json::discover("[[[0, 1], [2]], [[3]]]"));
-
-  EXPECT_EQ(ndt::type("2 * var * 3 * int64"), ndt::json::discover("[[[0, 1, 4], [2, 5, 3]], [[3, 1, 2]]]"));
-
-  EXPECT_EQ(ndt::type("2 * var * float64"), ndt::json::discover("[[0.5, 1], [2]]"));
-  EXPECT_EQ(ndt::type("2 * var * ?float64"), ndt::json::discover("[[0.5, 1], [null]]"));
-
-  EXPECT_EQ(ndt::type("2 * var * ?int64"), ndt::json::discover("[[0, null], [2]]"));
-}
-
-TEST(JSON, DiscoverObject)
-{
-  EXPECT_EQ(ndt::type("{}"), ndt::json::discover("{}"));
-
-  EXPECT_EQ(ndt::type("{a: int64}"), ndt::json::discover("{\"a\": 3}"));
-  EXPECT_EQ(ndt::type("{a: float64}"), ndt::json::discover("{\"a\": 3.14}"));
-
-  EXPECT_EQ(ndt::type("{x: float64, y: 3 * int64}"), ndt::json::discover("{\"x\": 3.14, \"y\": [1, 2, 3]}"));
-}
-*/
-
-TEST(JSON, ParserWithMissingValue)
-{
-  nd::array a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7}");
-  EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
-  EXPECT_TRUE(a.p("y").is_missing());
-
-  a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7, \"y\": 11.5}");
-  EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
-  EXPECT_ARRAY_VALS_EQ(a.p("y"), 11.5);
-
-  a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{}");
-  EXPECT_TRUE(a.p("x").is_missing());
-  EXPECT_TRUE(a.p("y").is_missing());
-}
-
 TEST(JSONParser, BuiltinsFromBool)
 {
   nd::array a;
-
-  EXPECT_ARRAY_EQ(true, parse_json(ndt::make_type<bool1>(), "true"));
-  EXPECT_ARRAY_EQ(false, parse_json(ndt::make_type<bool1>(), "false"));
 
   a = parse_json("var * bool", "[true, \"true\", 1, \"T\", \"y\", \"On\", \"yes\"]");
   EXPECT_EQ(7, a.get_dim_size());
@@ -149,20 +54,6 @@ TEST(JSONParser, BuiltinsFromBool)
   a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"\"");
   EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
   EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
-
-  // Handling of an NULL, invalid token, string with junk in it, empty string
-  EXPECT_THROW(parse_json(ndt::make_type<bool1>(), "null"), invalid_argument);
-  EXPECT_THROW(parse_json(ndt::make_type<bool1>(), "flase"), invalid_argument);
-  EXPECT_THROW(parse_json(ndt::make_type<bool1>(), "\"flase\""), invalid_argument);
-  EXPECT_THROW(parse_json(ndt::make_type<bool1>(), "\"\""), invalid_argument);
-  eval::eval_context ectx;
-  ectx.errmode = assign_error_nocheck;
-  a = parse_json(ndt::make_type<bool1>(), "null", &ectx);
-  EXPECT_FALSE(a.as<bool>());
-  a = parse_json(ndt::make_type<bool1>(), "\"flase\"", &ectx);
-  EXPECT_TRUE(a.as<bool>());
-  a = parse_json(ndt::make_type<bool1>(), "\"\"", &ectx);
-  EXPECT_FALSE(a.as<bool>());
 }
 
 TEST(JSONParser, BuiltinsFromInteger)
@@ -535,3 +426,95 @@ TEST(JSONParser, ListOfStruct)
                                "\"data\":{ \"when\":\"2013-12-25\", \"name\":\"Frank\"}}]"),
                invalid_argument);
 }
+
+TEST(JSON, ParserWithMissingValue)
+{
+  nd::array a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7}");
+  EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
+  EXPECT_TRUE(a.p("y").is_missing());
+
+  a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{\"x\": 7, \"y\": 11.5}");
+  EXPECT_ARRAY_VALS_EQ(a.p("x"), 7);
+  EXPECT_ARRAY_VALS_EQ(a.p("y"), 11.5);
+
+  a = parse_json(ndt::type("{x: ?int32, y: ?float64}"), "{}");
+  EXPECT_TRUE(a.p("x").is_missing());
+  EXPECT_TRUE(a.p("y").is_missing());
+}
+
+/*
+TEST(JSON, DiscoverBool)
+{
+  EXPECT_EQ(ndt::make_type<bool1>(), ndt::json::discover("true"));
+  EXPECT_EQ(ndt::make_type<bool1>(), ndt::json::discover("false"));
+}
+
+TEST(JSON, DiscoverInt64)
+{
+  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("0"));
+  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("3"));
+  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("11"));
+
+  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("-1"));
+  EXPECT_EQ(ndt::make_type<int64>(), ndt::json::discover("-5"));
+}
+
+TEST(JSON, DiscoverFloat64)
+{
+  EXPECT_EQ(ndt::make_type<float64>(), ndt::json::discover("0.5"));
+  EXPECT_EQ(ndt::make_type<float64>(), ndt::json::discover("3.14"));
+}
+
+TEST(JSON, DiscoverString) { EXPECT_EQ(ndt::type(string_type_id), ndt::json::discover("\"Hello, world!\"")); }
+
+TEST(JSON, DiscoverOption) { EXPECT_EQ(ndt::type("?Any"), ndt::json::discover("null")); }
+
+TEST(JSON, DiscoverArray)
+{
+  EXPECT_EQ(ndt::type("()"), ndt::json::discover("[]"));
+
+  EXPECT_EQ(ndt::type("1 * int64"), ndt::json::discover("[0]"));
+  EXPECT_EQ(ndt::type("1 * string"), ndt::json::discover("[\"JSON\"]"));
+  EXPECT_EQ(ndt::type("1 * {x: int64, y: float64}"), ndt::json::discover("[{\"x\": 3, \"y\": 0.75}]"));
+  EXPECT_EQ(ndt::type("2 * int64"), ndt::json::discover("[11, -3]"));
+  EXPECT_EQ(ndt::type("5 * int64"), ndt::json::discover("[0, 1, 2, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * float64"), ndt::json::discover("[0, 1, 2.5, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * float64"), ndt::json::discover("[0.5, 1, 2, 3, 4]"));
+
+  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[null, 1, 2, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[0, 1, null, 3, 4]"));
+  EXPECT_EQ(ndt::type("5 * ?int64"), ndt::json::discover("[0, 1, 2, 3, null]"));
+  EXPECT_EQ(ndt::type("3 * ?float64"), ndt::json::discover("[null, -7, 3.3]"));
+
+  EXPECT_EQ(ndt::type("(int64, string)"), ndt::json::discover("[2, \"Hello, world!\"]"));
+
+  EXPECT_EQ(ndt::type("2 * 1 * int64"), ndt::json::discover("[[10], [7]]"));
+  EXPECT_EQ(ndt::type("1 * 2 * int64"), ndt::json::discover("[[10, 7]]"));
+  EXPECT_EQ(ndt::type("2 * 2 * int64"), ndt::json::discover("[[0, 1], [2, 3]]"));
+  EXPECT_EQ(ndt::type("2 * 3 * int64"), ndt::json::discover("[[0, 1, 11], [2, 3, -4]]"));
+
+  EXPECT_EQ(ndt::type("2 * ?2 * int64"), ndt::json::discover("[null, [2, 3]]"));
+  EXPECT_EQ(ndt::type("2 * ?3 * int64"), ndt::json::discover("[[0, -1, 1], null]"));
+  EXPECT_EQ(ndt::type("2 * ?2 * float64"), ndt::json::discover("[[0, 1.2], null]"));
+
+  EXPECT_EQ(ndt::type("2 * var * int64"), ndt::json::discover("[[0, 1], [2]]"));
+  EXPECT_EQ(ndt::type("2 * var * var * int64"), ndt::json::discover("[[[0, 1], [2]], [[3]]]"));
+
+  EXPECT_EQ(ndt::type("2 * var * 3 * int64"), ndt::json::discover("[[[0, 1, 4], [2, 5, 3]], [[3, 1, 2]]]"));
+
+  EXPECT_EQ(ndt::type("2 * var * float64"), ndt::json::discover("[[0.5, 1], [2]]"));
+  EXPECT_EQ(ndt::type("2 * var * ?float64"), ndt::json::discover("[[0.5, 1], [null]]"));
+
+  EXPECT_EQ(ndt::type("2 * var * ?int64"), ndt::json::discover("[[0, null], [2]]"));
+}
+
+TEST(JSON, DiscoverObject)
+{
+  EXPECT_EQ(ndt::type("{}"), ndt::json::discover("{}"));
+
+  EXPECT_EQ(ndt::type("{a: int64}"), ndt::json::discover("{\"a\": 3}"));
+  EXPECT_EQ(ndt::type("{a: float64}"), ndt::json::discover("{\"a\": 3.14}"));
+
+  EXPECT_EQ(ndt::type("{x: float64, y: 3 * int64}"), ndt::json::discover("{\"x\": 3.14, \"y\": [1, 2, 3]}"));
+}
+*/

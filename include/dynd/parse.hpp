@@ -586,8 +586,6 @@ inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&o
   return false;
 }
 
-float checked_float64_to_float32(double value, assign_error_mode errmode);
-
 /**
  * Without skipping whitespace, parses an integer with exactly two digits.
  * A leading zero is accepted.
@@ -650,25 +648,72 @@ DYND_API bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &
 DYND_API bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
- * Converts a string containing only an integer (no leading or
- * trailing space, etc) into an intptr_t, raising an exception if
- * there are problems.
+ * Parses a string containing an boolean (no leading or trailing space), returning
+ * false if there are errors.
+ *
+ * \param begin  The start of the string.
+ * \param end  The end of the string.
  */
-DYND_API intptr_t checked_string_to_intptr(const char *begin, const char *end);
+template <typename T>
+std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
+{
+  size_t size = end - begin;
+  if (size == 1) {
+    char c = *begin;
+    if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
+      return T(0);
+    }
+    else if (c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
+      return T(1);
+    }
+  }
+  else if (size == 4) {
+    return T(1);
+    //    else if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
+    //           (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
+    //  return true;
+    //  }
+  }
+  else if (size == 5) {
+    if ((begin[0] == 'F' || begin[0] == 'f') && (begin[1] == 'A' || begin[1] == 'a') &&
+        (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'S' || begin[3] == 's') &&
+        (begin[4] == 'E' || begin[4] == 'e')) {
+      return T(0);
+    }
+    return T(1);
+  }
+  else if (size == 0) {
+    return T(0);
+  }
+  else if (size == 2) {
+    if ((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'O' || begin[1] == 'o')) {
+      return T(0);
+    }
+    else if (((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
+      return T(1);
+    }
+  }
+  else if (size == 3) {
+    if ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'F' || begin[1] == 'f') &&
+        (begin[2] == 'F' || begin[2] == 'f')) {
+      return T(0);
+    }
+    else if (((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
+              (begin[2] == 'S' || begin[2] == 's'))) {
+      return T(1);
+    }
+  }
 
-/**
- * Converts a string containing only an integer (no leading or
- * trailing space, etc) into an int64, raising an exception if
- * there are problems.
- */
-DYND_API int64_t checked_string_to_int64(const char *begin, const char *end);
+  return T(0);
+}
 
 /**
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc), ignoring any problems.
  */
 template <typename T>
-std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
+std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T>::value, T>
+parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
 {
   T result = 0;
   while (begin < end) {
@@ -715,9 +760,89 @@ std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *
 }
 
 template <typename T>
+std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const char *begin, const char *end,
+                                                                        nocheck_t DYND_UNUSED(nocheck))
+{
+  typedef typename std::make_unsigned<T>::type unsigned_type;
+
+  bool negative = false;
+  if (begin < end && *begin == '-') {
+    negative = true;
+    ++begin;
+  }
+
+  auto value = parse<unsigned_type>(begin, end);
+
+  if (negative && value == static_cast<unsigned_type>(std::numeric_limits<T>::min())) {
+    return std::numeric_limits<T>::min();
+  }
+
+  if (!is_overflow<T>(value)) {
+    return negative ? -static_cast<T>(value) : static_cast<T>(value);
+  }
+
+  return 0;
+}
+
+/**
+ * Converts a string containing only a floating point number into
+ * a float64/C double.
+ */
+template <typename T>
+std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const char *end,
+                                                       nocheck_t DYND_UNUSED(nocheck))
+{
+  bool negative = false;
+  const char *pos = begin;
+  if (pos < end && *pos == '-') {
+    negative = true;
+    ++pos;
+  }
+  // First check for various NaN/Inf inputs
+  size_t size = end - pos;
+  if (size == 3) {
+    if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
+      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+    }
+    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
+      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+    }
+  }
+  else if (size == 7) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
+        (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
+      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+    }
+  }
+  else if (size == 6) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
+      if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
+        return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+      }
+      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
+               (pos[5] == 'F' || pos[5] == 'f')) {
+        return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+      }
+    }
+  }
+  else if (size == 8) {
+    if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
+        (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
+        (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
+      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+    }
+  }
+
+  // TODO: use http://www.netlib.org/fp/dtoa.c
+  char *end_ptr;
+  std::string s(begin, end);
+  return strtod(s.c_str(), &end_ptr);
+}
+
+template <typename T>
 T parse(const std::string &s, nocheck_t nocheck)
 {
-  return parse<T>(s.data(), s.data() + s.size(), nocheck);
+  return parse<T>(s.c_str(), s.c_str() + s.size(), nocheck);
 }
 
 template <typename T>
@@ -726,12 +851,67 @@ T parse(const string &s, nocheck_t nocheck)
   return parse<T>(s.begin(), s.end(), nocheck);
 }
 
+template <typename T>
+std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *end)
+{
+  size_t size = end - begin;
+  if (size == 1) {
+    char c = *begin;
+    if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
+      return T(0);
+    }
+    else if (c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
+      return T(1);
+    }
+  }
+  else if (size == 4) {
+    if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
+        (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
+      return T(1);
+    }
+  }
+  else if (size == 5) {
+    if ((begin[0] == 'F' || begin[0] == 'f') && (begin[1] == 'A' || begin[1] == 'a') &&
+        (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'S' || begin[3] == 's') &&
+        (begin[4] == 'E' || begin[4] == 'e')) {
+      return T(0);
+    }
+  }
+  else if (size == 0) {
+  }
+  else if (size == 2) {
+    if ((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'O' || begin[1] == 'o')) {
+      return T(0);
+    }
+    else if (((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
+      return T(1);
+    }
+  }
+  else if (size == 3) {
+    if ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'F' || begin[1] == 'f') &&
+        (begin[2] == 'F' || begin[2] == 'f')) {
+      return T(0);
+    }
+    else if (((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
+              (begin[2] == 'S' || begin[2] == 's'))) {
+      return T(1);
+    }
+  }
+
+  std::stringstream ss;
+  ss << "cannot cast string ";
+  ss.write(begin, end - begin);
+  ss << " to bool";
+  throw std::invalid_argument(ss.str());
+}
+
 /**
  * Converts a string containing (no leading or trailing space, etc) to a type T,
  * setting the output over flow or bad parse flags if there are problems.
  */
 template <typename T>
-std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *end)
+std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T>::value, T> parse(const char *begin,
+                                                                                                   const char *end)
 {
   T result = 0, prev_result = 0;
   if (begin == end) {
@@ -801,6 +981,11 @@ std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *
   return result;
 }
 
+/**
+ * Converts a string containing only an integer (no leading or
+ * trailing spaces) into an integer, raising exceptions if
+ * there are problems.
+ */
 template <typename T>
 std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const char *begin, const char *end)
 {
@@ -812,32 +997,17 @@ std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const ch
     ++begin;
   }
 
-  auto value = parse<unsigned_type>(begin, end);
+  unsigned_type value = parse<unsigned_type>(begin, end);
 
   if (negative && value == static_cast<unsigned_type>(std::numeric_limits<T>::min())) {
     return std::numeric_limits<T>::min();
   }
 
-  if (!is_overflow<T>(value)) {
-    return negative ? -static_cast<T>(value) : static_cast<T>(value);
+  if (is_overflow<T>(value)) {
+    throw std::overflow_error("error");
   }
 
-  return 0;
-}
-
-template <typename T>
-T strto(const char *begin, char **end);
-
-template <>
-inline float strto(const char *begin, char **end)
-{
-  return std::strtof(begin, end);
-}
-
-template <>
-inline double strto(const char *begin, char **end)
-{
-  return std::strtod(begin, end);
+  return negative ? -static_cast<T>(value) : static_cast<T>(value);
 }
 
 template <typename T>
@@ -901,7 +1071,7 @@ std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const 
 template <typename T>
 T parse(const std::string &s)
 {
-  return parse<T>(s.data(), s.data() + s.size());
+  return parse<T>(s.c_str(), s.c_str() + s.size());
 }
 
 template <typename T>
@@ -909,20 +1079,6 @@ T parse(const string &s)
 {
   return parse<T>(s.begin(), s.end());
 }
-
-/**
- * Converts a string containing an boolean (no leading or trailing space)
- * into a bool, using the specified error mode to handle errors.
- * If ``option`` is true, writes to option[bool].
- *
- * \param out_bool  The address of the bool or option[bool].
- * \param begin  The start of the UTF8 string buffer.
- * \param end  The end of the UTF8 string buffer.
- * \param option  If true, treat it as option[int] instead of just int.
- * \param errmode  The error handling mode.
- */
-DYND_API void string_to_bool(char *out_bool, const char *begin, const char *end, bool option,
-                             assign_error_mode errmode);
 
 /**
  * Returns true if the string provided matches an option[T] missing value token,
@@ -1005,61 +1161,6 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char
   }
 
   return false;
-}
-
-/**
- * Converts a string containing only a floating point number into
- * a float64/C double.
- */
-template <typename T>
-std::enable_if_t<std::is_same<T, double>::value, T> parse(const char *begin, const char *end,
-                                                          nocheck_t DYND_UNUSED(nocheck))
-{
-  bool negative = false;
-  const char *pos = begin;
-  if (pos < end && *pos == '-') {
-    negative = true;
-    ++pos;
-  }
-  // First check for various NaN/Inf inputs
-  size_t size = end - pos;
-  if (size == 3) {
-    if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
-      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-    }
-    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
-      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
-    }
-  }
-  else if (size == 7) {
-    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
-        (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
-      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-    }
-  }
-  else if (size == 6) {
-    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
-      if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
-        return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
-      }
-      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
-               (pos[5] == 'F' || pos[5] == 'f')) {
-        return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
-      }
-    }
-  }
-  else if (size == 8) {
-    if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
-        (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
-        (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
-      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
-    }
-  }
-
-  // TODO: use http://www.netlib.org/fp/dtoa.c
-  char *end_ptr;
-  std::string s(begin, end);
-  return strtod(s.c_str(), &end_ptr);
 }
 
 template <class T>
@@ -1183,8 +1284,7 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       break;
     }
     case float32_type_id: {
-      double value = parse<double>(saved_begin, end);
-      *reinterpret_cast<float *>(out) = checked_float64_to_float32(value, errmode);
+      *reinterpret_cast<float *>(out) = parse<float>(saved_begin, end);
       break;
     }
     case float64_type_id: {
@@ -1255,8 +1355,7 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       break;
     }
     case float32_type_id: {
-      double value = parse<double>(saved_begin, end);
-      *reinterpret_cast<float *>(out) = checked_float64_to_float32(value, errmode);
+      *reinterpret_cast<float *>(out) = parse<float>(saved_begin, end);
       break;
     }
     case float64_type_id: {

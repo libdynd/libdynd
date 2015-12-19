@@ -393,12 +393,22 @@ static void parse_bool_json(const ndt::type &tp, const char *arrmeta, char *out_
   }
   else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
     if (!escaped) {
-      string_to_bool(&value, nbegin, nend, option, ectx->errmode);
+      if (ectx->errmode == assign_error_nocheck) {
+        value = parse<bool>(nbegin, nend, nocheck);
+      }
+      else {
+        value = parse<bool>(nbegin, nend);
+      }
     }
     else {
       std::string s;
       unescape_string(nbegin, nend, s);
-      string_to_bool(&value, s.data(), s.data() + s.size(), option, ectx->errmode);
+      if (ectx->errmode == assign_error_nocheck) {
+        value = parse<bool>(s.data(), s.data() + s.size(), nocheck);
+      }
+      else {
+        value = parse<bool>(s.data(), s.data() + s.size());
+      }
     }
   }
 

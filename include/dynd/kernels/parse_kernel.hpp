@@ -123,6 +123,18 @@ namespace nd {
     };
 
     template <>
+    struct parse_kernel<bool_type_id> : base_kernel<parse_kernel<bool_type_id>, 2> {
+      void single(char *ret, char *const *args)
+      {
+        const char *begin = *reinterpret_cast<const char **>(args[0]);
+        const char *end = *reinterpret_cast<const char **>(args[1]);
+
+        *reinterpret_cast<bool1 *>(ret) = dynd::parse<bool1>(begin, end);
+        //        *reinterpret_cast<const char **>(args[0]) = end;
+      }
+    };
+
+    template <>
     struct parse_kernel<option_type_id> : base_kernel<parse_kernel<option_type_id>> {
       intptr_t parse_offset;
 
@@ -217,6 +229,78 @@ namespace nd {
         const ndt::type &child_dst_tp = dst_tp.extended<ndt::fixed_dim_type>()->get_element_type();
         return json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset, child_dst_tp,
                                                dst_arrmeta + sizeof(ndt::fixed_dim_type::metadata_type), nsrc, src_tp,
+                                               src_arrmeta, kernreq, NULL, nkwd, kwds, tp_vars);
+      }
+    };
+
+    template <>
+    struct parse_kernel<var_dim_type_id> : base_kernel<parse_kernel<var_dim_type_id>> {
+      typedef ndt::var_dim_type::data_type ret_type;
+
+      ndt::type ret_tp;
+      intrusive_ptr<memory_block_data> blockref;
+      intptr_t stride;
+
+      parse_kernel(const ndt::type &ret_tp, const intrusive_ptr<memory_block_data> &blockref, intptr_t stride)
+          : ret_tp(ret_tp), blockref(blockref), stride(stride)
+      {
+      }
+
+      ~parse_kernel() { get_child()->destroy(); }
+
+      void single(char *ret, char *const *args)
+      {
+        if (!parse_token(args, "[")) {
+          throw json_parse_error(args, "expected list starting with '['", ret_tp);
+        }
+        skip_whitespace(args);
+
+        memory_block_data::api *allocator = blockref->get_api();
+        size_t size = 0, allocated_size = 8;
+        reinterpret_cast<ret_type *>(ret)->begin = allocator->allocate(blockref.get(), allocated_size);
+
+        ckernel_prefix *child = get_child();
+        for (char *data = reinterpret_cast<ret_type *>(ret)->begin;; data += stride) {
+          // Increase the allocated array size if necessary
+          if (size == allocated_size) {
+            allocated_size *= 2;
+            reinterpret_cast<ret_type *>(ret)->begin =
+                allocator->resize(blockref.get(), reinterpret_cast<ret_type *>(ret)->begin, allocated_size);
+          }
+          ++size;
+          reinterpret_cast<ndt::var_dim_type::data_type *>(ret)->size = size;
+
+          child->single(data, args);
+
+          if (!parse_token(args, ",")) {
+            break;
+          }
+          skip_whitespace(args);
+        }
+
+        if (!parse_token(args, "]")) {
+          throw json_parse_error(args, "array is too long, expected list terminator ']'", ret_tp);
+        }
+
+        // Shrink-wrap the memory to just fit the string
+        reinterpret_cast<ret_type *>(ret)->begin =
+            allocator->resize(blockref.get(), reinterpret_cast<ret_type *>(ret)->begin, size);
+        reinterpret_cast<ret_type *>(ret)->size = size;
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t nkwd, const nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
+      {
+        make(ckb, kernreq, ckb_offset, dst_tp,
+             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->blockref,
+             reinterpret_cast<const ndt::var_dim_type::metadata_type *>(dst_arrmeta)->stride);
+
+        const ndt::type &child_dst_tp = dst_tp.extended<ndt::var_dim_type>()->get_element_type();
+        return json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset, child_dst_tp,
+                                               dst_arrmeta + sizeof(ndt::var_dim_type::metadata_type), nsrc, src_tp,
                                                src_arrmeta, kernreq, NULL, nkwd, kwds, tp_vars);
       }
     };

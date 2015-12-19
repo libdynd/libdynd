@@ -185,7 +185,7 @@ void ndt::option_type::set_from_utf8_string(const char *arrmeta, char *data, con
   else {
     if (m_value_tp.is_builtin()) {
       if (m_value_tp.unchecked_get_builtin_type_id() == bool_type_id) {
-        string_to_bool(data, utf8_begin, utf8_end, false, ectx->errmode);
+        *reinterpret_cast<bool1 *>(data) = parse<bool>(utf8_begin, utf8_end);
       }
       else {
         string_to_number(data, m_value_tp.unchecked_get_builtin_type_id(), utf8_begin, utf8_end, ectx->errmode);
