@@ -14,6 +14,7 @@
 #include <dynd/parse.hpp>
 
 using namespace std;
+using std::isnan;
 using namespace dynd;
 
 TEST(Parse, Int)
