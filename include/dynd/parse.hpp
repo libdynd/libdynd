@@ -1331,16 +1331,16 @@ namespace nd {
   namespace json {
 
     extern DYND_API struct parse : declfunc<parse> {
-      array operator()(const char *begin, const char *end, const ndt::type &ret_tp)
+      array operator()(const ndt::type &ret_tp, const char *begin, const char *end)
       {
         ndt::type dst_tp2 = ret_tp;
         char *args_data[2] = {reinterpret_cast<char *>(&begin), reinterpret_cast<char *>(&end)};
         return get()->call(dst_tp2, 0, nullptr, nullptr, args_data, 0, nullptr, std::map<std::string, ndt::type>());
       }
 
-      array operator()(const char *begin, const ndt::type &dst_tp)
+      array operator()(const ndt::type &ret_tp, const char *begin )
       {
-        return (*this)(begin, begin + strlen(begin), dst_tp);
+        return (*this)(ret_tp, begin, begin + strlen(begin));
       }
 
       static DYND_API callable make();

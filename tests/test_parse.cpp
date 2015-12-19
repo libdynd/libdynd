@@ -232,11 +232,11 @@ TEST(JSONParse, Number)
 {
   //  EXPECT_ARRAY_EQ(32, nd::json::parse("32", ndt::make_type<int>()));
 
-  EXPECT_ARRAY_EQ(-1, nd::json::parse("-1", ndt::make_type<int>()));
-  EXPECT_ARRAY_EQ(7, nd::json::parse("7", ndt::make_type<int>()));
+  EXPECT_ARRAY_EQ(-1, nd::json::parse(ndt::make_type<int>(), "-1"));
+  EXPECT_ARRAY_EQ(7, nd::json::parse(ndt::make_type<int>(), "7"));
 
-  EXPECT_ARRAY_EQ(0u, nd::json::parse("0", ndt::make_type<unsigned int>())); // Minimum value
-  EXPECT_ARRAY_EQ(32u, nd::json::parse("32", ndt::make_type<unsigned int>()));
+  EXPECT_ARRAY_EQ(0u, nd::json::parse(ndt::make_type<unsigned int>(), "0")); // Minimum value
+  EXPECT_ARRAY_EQ(32u, nd::json::parse(ndt::make_type<unsigned int>(), "32"));
   //  EXPECT_ARRAY_EQ(numeric_limits<unsigned int>::max(), nd::json::parse("0", ndt::make_type<unsigned int>())); //
   //  Minimum value
 }
@@ -247,20 +247,20 @@ TEST(JSONParse, Option)
   nd::array a;
 
   tp = ndt::make_type<ndt::option_type>(ndt::make_type<int>());
-  a = nd::json::parse("null", tp);
+  a = nd::json::parse(tp, "null");
   EXPECT_EQ(tp, a.get_type());
   EXPECT_TRUE(a.is_missing());
 
-  EXPECT_TRUE(nd::json::parse("null", ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>())).is_missing());
-  EXPECT_FALSE(nd::json::parse("23", ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>())).is_missing());
+  EXPECT_TRUE(nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>()), "null").is_missing());
+  EXPECT_FALSE(nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>()), "23").is_missing());
 }
 
 TEST(JSONParse, List)
 {
   EXPECT_ARRAY_EQ((nd::array{0u}),
-                  nd::json::parse("[0]", ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<unsigned int>())));
+                  nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<unsigned int>()), "[0]"));
   EXPECT_ARRAY_EQ((nd::array{0u, 1u}),
-                  nd::json::parse("[0, 1]", ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<unsigned int>())));
+                  nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<unsigned int>()), "[0, 1]"));
 }
 
 TEST(JSONParse, ListOfOption)
@@ -269,24 +269,24 @@ TEST(JSONParse, ListOfOption)
   nd::array a;
 
   tp = ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
-  a = nd::json::parse("[0, 1]", tp);
+  a = nd::json::parse(tp, "[0, 1]");
   EXPECT_EQ(0, a(0).as<int>());
   EXPECT_EQ(1, a(1).as<int>());
 
   tp = ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
-  a = nd::json::parse("[null, 1, 2]", tp);
+  a = nd::json::parse(tp, "[null, 1, 2]");
   EXPECT_TRUE(a(0).is_missing());
   EXPECT_EQ(1, a(1).as<int>());
   EXPECT_EQ(2, a(2).as<int>());
 
   tp = ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
-  a = nd::json::parse("[0, null, 2]", tp);
+  a = nd::json::parse(tp, "[0, null, 2]");
   EXPECT_EQ(0, a(0).as<int>());
   EXPECT_TRUE(a(1).is_missing());
   EXPECT_EQ(2, a(2).as<int>());
 
   tp = ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<ndt::option_type>(ndt::make_type<int>()));
-  a = nd::json::parse("[0, 1, null]", tp);
+  a = nd::json::parse(tp, "[0, 1, null]");
   EXPECT_EQ(0, a(0).as<int>());
   EXPECT_EQ(1, a(1).as<int>());
   EXPECT_TRUE(a(2).is_missing());
@@ -294,8 +294,8 @@ TEST(JSONParse, ListOfOption)
 
 TEST(JSONParse, ListOfLists)
 {
-  EXPECT_ARRAY_EQ(
-      (nd::array{{0u, 1u}}),
-      nd::json::parse("[[0, 1]]", ndt::make_type<ndt::fixed_dim_type>(
-                                      1, ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<unsigned int>()))));
+  EXPECT_ARRAY_EQ((nd::array{{0u, 1u}}),
+                  nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(
+                                      1, ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<unsigned int>())),
+                                  "[[0, 1]]"));
 }
