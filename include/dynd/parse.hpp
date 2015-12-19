@@ -73,9 +73,9 @@ is_overflow(SrcType src)
 template <typename DstType, typename SrcType>
 typename std::enable_if<
     (sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
+is_overflow(SrcType src)
 {
-  return false;
+  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
 }
 
 template <typename DstType, typename SrcType>
@@ -804,15 +804,22 @@ std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *
 template <typename T>
 std::enable_if_t<std::is_same<T, int>::value, T> parse(const char *begin, const char *end)
 {
+  typedef typename std::make_unsigned<T>::type unsigned_type;
+
   bool negative = false;
   if (begin < end && *begin == '-') {
     negative = true;
     ++begin;
   }
 
-  auto value = parse<typename std::make_unsigned<T>::type>(begin, end);
-  if (!overflow_check<T>::is_overflow(value, negative)) {
-    return static_cast<T>(negative ? -static_cast<int64_t>(value) : static_cast<int64_t>(value));
+  auto value = parse<unsigned_type>(begin, end);
+
+  if (negative && value == static_cast<unsigned_type>(std::numeric_limits<T>::min())) {
+    return std::numeric_limits<T>::min();
+  }
+
+  if (!is_overflow<T>(value)) {
+    return negative ? -static_cast<T>(value) : static_cast<T>(value);
   }
 
   return 0;

@@ -30,6 +30,12 @@ TEST(Parse, Int)
   EXPECT_EQ(7, parse<int>("7"));
 }
 
+TEST(Parse, IntLimits)
+{
+  EXPECT_EQ(numeric_limits<int>::min(), parse<int>(to_string(numeric_limits<int>::min())));
+  EXPECT_EQ(numeric_limits<int>::max(), parse<int>(to_string(numeric_limits<int>::max())));
+}
+
 TEST(Parse, UInt16)
 {
   EXPECT_EQ(0, parse<uint16_t>("0"));
