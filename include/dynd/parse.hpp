@@ -1426,6 +1426,12 @@ inline void parse_number_json(const ndt::type &tp, char *out_data, const char *&
   rbegin = begin;
 }
 
+namespace json {
+
+  bool parse_bool(const char *&begin, const char *&end);
+
+} // namespace dynd::json
+
 namespace nd {
   namespace json {
 

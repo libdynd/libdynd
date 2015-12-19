@@ -401,6 +401,46 @@ bool dynd::parse_na(const char *begin, const char *end)
   return false;
 }
 
+bool json::parse_bool(const char *&begin, const char *&end)
+{
+  bool escaped;
+  const char *nbegin;
+  const char *nend;
+
+  if (parse_token(begin, end, "true")) {
+    return true;
+  }
+  else if (parse_token(begin, end, "false")) {
+    return false;
+  }
+  else if (json::parse_number(begin, end, nbegin, nend)) {
+    if (nend - nbegin == 1) {
+      if (*nbegin == '0') {
+        return false;
+      }
+      else if (*nbegin == '1') {
+        return true;
+      }
+    }
+  }
+  else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
+    if (!escaped) {
+      return parse<bool>(nbegin, nend);
+    }
+    else {
+      std::string s;
+      unescape_string(nbegin, nend, s);
+      return parse<bool>(s.data(), s.data() + s.size());
+    }
+  }
+
+  std::stringstream ss;
+  ss << "cannot cast string ";
+  ss.write(begin, end - begin);
+  ss << " to bool";
+  throw std::invalid_argument(ss.str());
+}
+
 DYND_API struct nd::json::parse nd::json::parse;
 
 DYND_API nd::callable nd::json::parse::make()

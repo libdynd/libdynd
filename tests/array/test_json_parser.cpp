@@ -26,36 +26,6 @@
 using namespace std;
 using namespace dynd;
 
-TEST(JSONParser, BuiltinsFromBool)
-{
-  nd::array a;
-
-  a = parse_json("var * bool", "[true, \"true\", 1, \"T\", \"y\", \"On\", \"yes\"]");
-  EXPECT_EQ(7, a.get_dim_size());
-  for (intptr_t i = 0, i_end = a.get_dim_size(); i < i_end; ++i) {
-    EXPECT_TRUE(a(i).as<bool>());
-  }
-  a = parse_json("var * bool", "[false, \"false\", 0, \"F\", \"n\", \"Off\", \"no\"]");
-  EXPECT_EQ(7, a.get_dim_size());
-  for (intptr_t i = 0, i_end = a.get_dim_size(); i < i_end; ++i) {
-    EXPECT_FALSE(a(i).as<bool>());
-  }
-
-  // Handling of NULL with option[bool]
-  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "null");
-  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
-  EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
-  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"NULL\"");
-  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
-  EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
-  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"NA\"");
-  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
-  EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
-  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"\"");
-  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), a.get_type());
-  EXPECT_EQ(DYND_BOOL_NA, *a.cdata());
-}
-
 TEST(JSONParser, BuiltinsFromInteger)
 {
   nd::array n;

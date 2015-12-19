@@ -325,41 +325,55 @@ TEST(JSONParse, Number)
   //  Minimum value
 }
 
+#define EXPECT_MISSING(TP, ACTUAL)                                                                                     \
+  EXPECT_EQ(TP, ACTUAL.get_type());                                                                                    \
+  EXPECT_TRUE(ACTUAL.is_missing());
+
 TEST(JSONParse, Option)
 {
-  ndt::type tp;
-  nd::array a;
+  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<bool>()),
+                 nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<bool>()), "null"));
+  //  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()),
+  //               nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"null\""));
+  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<bool>()),
+                 nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<bool>()), "NULL"));
+  //  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()),
+  //               nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"NULL\""));
+  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<bool>()),
+                 nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<bool>()), "NA"));
+  //  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()),
+  //               nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"NA\""));
 
-  tp = ndt::make_type<ndt::option_type>(ndt::make_type<int>());
-  a = nd::json::parse(tp, "null");
-  EXPECT_EQ(tp, a.get_type());
-  EXPECT_TRUE(a.is_missing());
+  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<int>()),
+                 nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<int>()), "null"));
 
-  EXPECT_TRUE(nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>()), "null").is_missing());
-  EXPECT_FALSE(nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>()), "23").is_missing());
+  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>()),
+                 nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>()), "null"));
 }
 
-TEST(JSONParse, List)
+TEST(JSONParse, FixedDim)
 {
-  // Fixed-sized dimension
   EXPECT_ARRAY_EQ((nd::array{0u}),
                   nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<unsigned int>()), "[0]"));
   EXPECT_ARRAY_EQ((nd::array{0u, 1u}),
                   nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<unsigned int>()), "[0, 1]"));
+}
 
-  // Variable-sized dimension
-  //  EXPECT_ARRAY_EQ((nd::array{0u, 1u}),
-  //                  nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<unsigned int>()), "[0, 1]"));
+TEST(JSONParse, VarDim)
+{
+  nd::array expected;
 
-  nd::array res = nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())).assign({0, 1});
-  EXPECT_ARRAY_EQ(res, nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>()), "[0, 1]"));
+  expected = nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())).assign({0, 1});
+  EXPECT_ARRAY_EQ(expected, nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>()), "[0, 1]"));
 
-  //  nd::array a = nd::json::parse(ndt::type("var * bool"), "[true, \"true\", 1, \"T\", \"y\", \"On\", \"yes\"]");
-  // std::exit(-1);
-  //  EXPECT_EQ(7, a.get_dim_size());
-  // for (intptr_t i = 0, i_end = a.get_dim_size(); i < i_end; ++i) {
-  // EXPECT_TRUE(a(i).as<bool>());
-  //  }
+  expected = nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool>()))
+                 .assign({true, true, true, true, true, true, true});
+  EXPECT_ARRAY_EQ(expected, nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool>()),
+                                            "[true, \"true\", 1, \"T\", \"y\", \"On\", \"yes\"]"));
+  expected = nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool>()))
+                 .assign({false, false, false, false, false, false, false});
+  EXPECT_ARRAY_EQ(expected, nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool>()),
+                                            "[false, \"false\", 0, \"F\", \"n\", \"Off\", \"no\"]"));
 }
 
 TEST(JSONParse, ListOfOption)

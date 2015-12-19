@@ -126,11 +126,8 @@ namespace nd {
     struct parse_kernel<bool_type_id> : base_kernel<parse_kernel<bool_type_id>, 2> {
       void single(char *ret, char *const *args)
       {
-        const char *begin = *reinterpret_cast<const char **>(args[0]);
-        const char *end = *reinterpret_cast<const char **>(args[1]);
-
-        *reinterpret_cast<bool1 *>(ret) = dynd::parse<bool1>(begin, end);
-        //        *reinterpret_cast<const char **>(args[0]) = end;
+        *reinterpret_cast<bool1 *>(ret) =
+            parse_bool(*reinterpret_cast<const char **>(args[0]), *reinterpret_cast<const char **>(args[1]));
       }
     };
 
