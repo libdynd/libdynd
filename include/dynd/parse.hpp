@@ -802,7 +802,7 @@ std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *
 }
 
 template <typename T>
-std::enable_if_t<std::is_same<T, int>::value, T> parse(const char *begin, const char *end)
+std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const char *begin, const char *end)
 {
   typedef typename std::make_unsigned<T>::type unsigned_type;
 
@@ -1338,7 +1338,7 @@ namespace nd {
         return get()->call(dst_tp2, 0, nullptr, nullptr, args_data, 0, nullptr, std::map<std::string, ndt::type>());
       }
 
-      array operator()(const ndt::type &ret_tp, const char *begin )
+      array operator()(const ndt::type &ret_tp, const char *begin)
       {
         return (*this)(ret_tp, begin, begin + strlen(begin));
       }
