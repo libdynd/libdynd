@@ -428,7 +428,10 @@ nd::array nd::array::assign(const array &rhs, assign_error_mode error_mode) cons
   return nd::assign({rhs}, {{"error_mode", static_cast<int>(error_mode)}, {"dst", *this}});
 }
 
-nd::array nd::array::assign_na() const { return nd::assign_na({}, {{"dst", *this}}); }
+nd::array nd::array::assign_na() const
+{
+  return nd::assign_na({}, {{"dst", *this}});
+}
 
 void nd::array::flag_as_immutable()
 {

@@ -32,7 +32,7 @@ namespace ndt {
 namespace nd {
   namespace json {
 
-    DYND_API array parse(const ndt::type &tp, const std::string &str);
+    DYND_API array parse2(const ndt::type &tp, const std::string &str);
 
   } // namespace dynd::nd::json
 } // namespace dynd::nd

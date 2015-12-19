@@ -651,6 +651,21 @@ class float128;
 #endif
 
 template <typename T>
+struct is_boolean {
+  static const bool value = false;
+};
+
+template <>
+struct is_boolean<bool> {
+  static const bool value = true;
+};
+
+template <>
+struct is_boolean<bool1> {
+  static const bool value = true;
+};
+
+template <typename T>
 struct is_integral : std::is_integral<T> {
 };
 
@@ -708,6 +723,21 @@ template <typename T>
 struct is_unsigned {
   static const bool value = std::is_unsigned<T>::value || std::is_same<T, uint128>::value;
 };
+
+template <typename T>
+T strto(const char *begin, char **end);
+
+template <>
+inline float strto(const char *begin, char **end)
+{
+  return std::strtof(begin, end);
+}
+
+template <>
+inline double strto(const char *begin, char **end)
+{
+  return std::strtod(begin, end);
+}
 
 template <typename T>
 T floor(T value)

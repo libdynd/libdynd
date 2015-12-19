@@ -45,6 +45,8 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
       return *reinterpret_cast<const int16_t *>(data) != DYND_INT16_NA;
     case int32_type_id:
       return *reinterpret_cast<const int32_t *>(data) != DYND_INT32_NA;
+    case uint32_type_id:
+      return *reinterpret_cast<const uint32_t *>(data) != DYND_UINT32_NA;
     case int64_type_id:
       return *reinterpret_cast<const int64_t *>(data) != DYND_INT64_NA;
     case int128_type_id:
@@ -177,17 +179,16 @@ ndt::type ndt::option_type::get_canonical_type() const
 void ndt::option_type::set_from_utf8_string(const char *arrmeta, char *data, const char *utf8_begin,
                                             const char *utf8_end, const eval::eval_context *ectx) const
 {
-  if (m_value_tp.get_kind() != string_kind && m_value_tp.get_kind() != dynamic_kind &&
-      matches_option_type_na_token(utf8_begin, utf8_end)) {
+  if (m_value_tp.get_kind() != string_kind && m_value_tp.get_kind() != dynamic_kind && parse_na(utf8_begin, utf8_end)) {
     assign_na(arrmeta, data, ectx);
   }
   else {
     if (m_value_tp.is_builtin()) {
       if (m_value_tp.unchecked_get_builtin_type_id() == bool_type_id) {
-        string_to_bool(data, utf8_begin, utf8_end, false, ectx->errmode);
+        *reinterpret_cast<bool1 *>(data) = parse<bool>(utf8_begin, utf8_end);
       }
       else {
-        string_to_number(data, m_value_tp.unchecked_get_builtin_type_id(), utf8_begin, utf8_end, false, ectx->errmode);
+        string_to_number(data, m_value_tp.unchecked_get_builtin_type_id(), utf8_begin, utf8_end, ectx->errmode);
       }
     }
     else {

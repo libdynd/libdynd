@@ -13,11 +13,13 @@
 #include <dynd/types/string_type.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/string_encodings.hpp>
+#include <dynd/callable.hpp>
 
 #define DYND_BOOL_NA (2)
 #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
 #define DYND_INT16_NA (std::numeric_limits<int16_t>::min())
 #define DYND_INT32_NA (std::numeric_limits<int32_t>::min())
+#define DYND_UINT32_NA (std::numeric_limits<uint32_t>::max())
 #define DYND_INT64_NA (std::numeric_limits<int64_t>::min())
 #define DYND_INT128_NA (std::numeric_limits<int128>::min())
 #define DYND_FLOAT16_NA_AS_UINT (0x7e0au)
@@ -30,6 +32,105 @@ struct nocheck_t {
 };
 
 static const nocheck_t nocheck = nocheck_t();
+
+/**
+ * A utility for checking whether a value would overflow when converted to
+ * the specified type.
+ *
+ * if (overflow_check<int8_t>(unsigned_value, is_negative)) {
+ *   throw overflow_error(...);
+ * }
+ *
+ * if (overflow_check<int8_t>(signed_value)) {
+ *   throw overflow_error(...);
+ * }
+ */
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(std::numeric_limits<DstType>::min()) ||
+         src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<
+    (sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value, bool>::type
+is_overflow(SrcType src)
+{
+  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value,
+                        bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(0) || static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<
+    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value, bool>::type
+is_overflow(SrcType src)
+{
+  return src < static_cast<SrcType>(0);
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<
+    (sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
+is_overflow(SrcType src)
+{
+  return static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
+}
+
+template <typename DstType, typename SrcType>
+typename std::enable_if<
+    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
+is_overflow(SrcType DYND_UNUSED(src))
+{
+  return false;
+}
+
+template <class T>
+struct overflow_check {
+  static bool is_overflow(uint64_t value, bool negative)
+  {
+    if (negative && value == static_cast<uint64_t>(-static_cast<int64_t>(std::numeric_limits<T>::min()))) {
+      return false;
+    }
+
+    return (value & ~std::numeric_limits<T>::max()) != 0;
+  }
+};
+
+template <class T>
+void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow)
+{
+  overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
+  if (!overflow) {
+    *reinterpret_cast<T *>(out_int) =
+        static_cast<T>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
+  }
+}
 
 inline void raise_string_cast_error(const ndt::type &dst_tp, const ndt::type &string_tp, const char *arrmeta,
                                     const char *data)
@@ -149,6 +250,11 @@ inline void skip_whitespace(const char *&rbegin, const char *end)
   rbegin = begin;
 }
 
+inline void skip_whitespace(char *const *src)
+{
+  skip_whitespace(*reinterpret_cast<const char **>(src[0]), *reinterpret_cast<const char **>(src[1]));
+}
+
 /**
  * Modifies `begin` to skip past any whitespace and comments starting with #.
  *
@@ -255,6 +361,12 @@ inline bool parse_token(const char *&rbegin, const char *end, char token)
   else {
     return false;
   }
+}
+
+template <int N>
+inline bool parse_token(char *const *src, const char(&token)[N])
+{
+  return parse_token(*reinterpret_cast<const char **>(src[0]), *reinterpret_cast<const char **>(src[1]), token);
 }
 
 /**
@@ -374,12 +486,23 @@ bool parse_doublequote_string_no_ws(const char *&rbegin, const char *end, const 
  */
 DYND_API void unescape_string(const char *strbegin, const char *strend, std::string &out);
 
-/**
- * Without skipping whitespace, parses a range of bytes following
- * the JSON number grammar, returning its range of bytes.
- */
-DYND_API bool parse_json_number_no_ws(const char *&rbegin, const char *end, const char *&out_nbegin,
-                                      const char *&out_nend);
+namespace json {
+
+  /**
+   * Without skipping whitespace, parses a range of bytes following
+   * the JSON number grammar, returning its range of bytes.
+   */
+  DYND_API bool parse_number(const char *&rbegin, const char *end, const char *&out_nbegin, const char *&out_nend);
+
+} // namespace dynd::json
+
+namespace nd {
+  namespace json {
+
+    using namespace dynd::json;
+
+  } // namespace dynd::nd::json
+} // namespace dynd::nd
 
 /**
  * Does an exact comparison of a byte range to a string literal.
@@ -463,8 +586,6 @@ inline bool parse_int_no_ws(const char *&rbegin, const char *end, const char *&o
   return false;
 }
 
-float checked_float64_to_float32(double value, assign_error_mode errmode);
-
 /**
  * Without skipping whitespace, parses an integer with exactly two digits.
  * A leading zero is accepted.
@@ -527,25 +648,72 @@ DYND_API bool parse_4digit_int_no_ws(const char *&rbegin, const char *end, int &
 DYND_API bool parse_6digit_int_no_ws(const char *&rbegin, const char *end, int &out_val);
 
 /**
- * Converts a string containing only an integer (no leading or
- * trailing space, etc) into an intptr_t, raising an exception if
- * there are problems.
+ * Parses a string containing an boolean (no leading or trailing space), returning
+ * false if there are errors.
+ *
+ * \param begin  The start of the string.
+ * \param end  The end of the string.
  */
-DYND_API intptr_t checked_string_to_intptr(const char *begin, const char *end);
+template <typename T>
+std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
+{
+  size_t size = end - begin;
+  if (size == 1) {
+    char c = *begin;
+    if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
+      return T(0);
+    }
+    else if (c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
+      return T(1);
+    }
+  }
+  else if (size == 4) {
+    return T(1);
+    //    else if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
+    //           (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
+    //  return true;
+    //  }
+  }
+  else if (size == 5) {
+    if ((begin[0] == 'F' || begin[0] == 'f') && (begin[1] == 'A' || begin[1] == 'a') &&
+        (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'S' || begin[3] == 's') &&
+        (begin[4] == 'E' || begin[4] == 'e')) {
+      return T(0);
+    }
+    return T(1);
+  }
+  else if (size == 0) {
+    return T(0);
+  }
+  else if (size == 2) {
+    if ((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'O' || begin[1] == 'o')) {
+      return T(0);
+    }
+    else if (((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
+      return T(1);
+    }
+  }
+  else if (size == 3) {
+    if ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'F' || begin[1] == 'f') &&
+        (begin[2] == 'F' || begin[2] == 'f')) {
+      return T(0);
+    }
+    else if (((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
+              (begin[2] == 'S' || begin[2] == 's'))) {
+      return T(1);
+    }
+  }
 
-/**
- * Converts a string containing only an integer (no leading or
- * trailing space, etc) into an int64, raising an exception if
- * there are problems.
- */
-DYND_API int64_t checked_string_to_int64(const char *begin, const char *end);
+  return T(0);
+}
 
 /**
  * Converts a string containing only an unsigned integer (no leading or
  * trailing space, etc), ignoring any problems.
  */
 template <typename T>
-std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
+std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T>::value, T>
+parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
 {
   T result = 0;
   while (begin < end) {
@@ -592,9 +760,89 @@ std::enable_if_t<is_unsigned<T>::value, T> parse(const char *begin, const char *
 }
 
 template <typename T>
+std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const char *begin, const char *end,
+                                                                        nocheck_t DYND_UNUSED(nocheck))
+{
+  typedef typename std::make_unsigned<T>::type unsigned_type;
+
+  bool negative = false;
+  if (begin < end && *begin == '-') {
+    negative = true;
+    ++begin;
+  }
+
+  auto value = parse<unsigned_type>(begin, end);
+
+  if (negative && value == static_cast<unsigned_type>(std::numeric_limits<T>::min())) {
+    return std::numeric_limits<T>::min();
+  }
+
+  if (!is_overflow<T>(value)) {
+    return negative ? -static_cast<T>(value) : static_cast<T>(value);
+  }
+
+  return 0;
+}
+
+/**
+ * Converts a string containing only a floating point number into
+ * a float64/C double.
+ */
+template <typename T>
+std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const char *end,
+                                                       nocheck_t DYND_UNUSED(nocheck))
+{
+  bool negative = false;
+  const char *pos = begin;
+  if (pos < end && *pos == '-') {
+    negative = true;
+    ++pos;
+  }
+  // First check for various NaN/Inf inputs
+  size_t size = end - pos;
+  if (size == 3) {
+    if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
+      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+    }
+    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
+      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+    }
+  }
+  else if (size == 7) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
+        (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
+      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+    }
+  }
+  else if (size == 6) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
+      if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
+        return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+      }
+      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
+               (pos[5] == 'F' || pos[5] == 'f')) {
+        return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+      }
+    }
+  }
+  else if (size == 8) {
+    if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
+        (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
+        (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
+      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+    }
+  }
+
+  // TODO: use http://www.netlib.org/fp/dtoa.c
+  char *end_ptr;
+  std::string s(begin, end);
+  return strtod(s.c_str(), &end_ptr);
+}
+
+template <typename T>
 T parse(const std::string &s, nocheck_t nocheck)
 {
-  return parse<T>(s.data(), s.data() + s.size(), nocheck);
+  return parse<T>(s.c_str(), s.c_str() + s.size(), nocheck);
 }
 
 template <typename T>
@@ -603,12 +851,67 @@ T parse(const string &s, nocheck_t nocheck)
   return parse<T>(s.begin(), s.end(), nocheck);
 }
 
+template <typename T>
+std::enable_if_t<is_boolean<T>::value, T> parse(const char *begin, const char *end)
+{
+  size_t size = end - begin;
+  if (size == 1) {
+    char c = *begin;
+    if (c == '0' || c == 'n' || c == 'N' || c == 'f' || c == 'F') {
+      return T(0);
+    }
+    else if (c == '1' || c == 'y' || c == 'Y' || c == 't' || c == 'T') {
+      return T(1);
+    }
+  }
+  else if (size == 4) {
+    if ((begin[0] == 'T' || begin[0] == 't') && (begin[1] == 'R' || begin[1] == 'r') &&
+        (begin[2] == 'U' || begin[2] == 'u') && (begin[3] == 'E' || begin[3] == 'e')) {
+      return T(1);
+    }
+  }
+  else if (size == 5) {
+    if ((begin[0] == 'F' || begin[0] == 'f') && (begin[1] == 'A' || begin[1] == 'a') &&
+        (begin[2] == 'L' || begin[2] == 'l') && (begin[3] == 'S' || begin[3] == 's') &&
+        (begin[4] == 'E' || begin[4] == 'e')) {
+      return T(0);
+    }
+  }
+  else if (size == 0) {
+  }
+  else if (size == 2) {
+    if ((begin[0] == 'N' || begin[0] == 'n') && (begin[1] == 'O' || begin[1] == 'o')) {
+      return T(0);
+    }
+    else if (((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'N' || begin[1] == 'n'))) {
+      return T(1);
+    }
+  }
+  else if (size == 3) {
+    if ((begin[0] == 'O' || begin[0] == 'o') && (begin[1] == 'F' || begin[1] == 'f') &&
+        (begin[2] == 'F' || begin[2] == 'f')) {
+      return T(0);
+    }
+    else if (((begin[0] == 'Y' || begin[0] == 'y') && (begin[1] == 'E' || begin[1] == 'e') &&
+              (begin[2] == 'S' || begin[2] == 's'))) {
+      return T(1);
+    }
+  }
+
+  std::stringstream ss;
+  ss << "cannot cast string ";
+  ss.write(begin, end - begin);
+  ss << " to bool";
+  throw std::invalid_argument(ss.str());
+}
+
 /**
  * Converts a string containing (no leading or trailing space, etc) to a type T,
  * setting the output over flow or bad parse flags if there are problems.
  */
 template <typename T>
-T parse(const char *begin, const char *end)
+std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T>::value, T> parse(const char *begin,
+                                                                                                   const char *end)
 {
   T result = 0, prev_result = 0;
   if (begin == end) {
@@ -678,10 +981,97 @@ T parse(const char *begin, const char *end)
   return result;
 }
 
+/**
+ * Converts a string containing only an integer (no leading or
+ * trailing spaces) into an integer, raising exceptions if
+ * there are problems.
+ */
+template <typename T>
+std::enable_if_t<is_signed<T>::value && is_integral<T>::value, T> parse(const char *begin, const char *end)
+{
+  typedef typename std::make_unsigned<T>::type unsigned_type;
+
+  bool negative = false;
+  if (begin < end && *begin == '-') {
+    negative = true;
+    ++begin;
+  }
+
+  unsigned_type value = parse<unsigned_type>(begin, end);
+
+  if (negative && value == static_cast<unsigned_type>(std::numeric_limits<T>::min())) {
+    return std::numeric_limits<T>::min();
+  }
+
+  if (is_overflow<T>(value)) {
+    throw std::overflow_error("error");
+  }
+
+  return negative ? -static_cast<T>(value) : static_cast<T>(value);
+}
+
+template <typename T>
+std::enable_if_t<is_floating_point<T>::value, T> parse(const char *begin, const char *end)
+{
+  bool negative = false;
+  const char *pos = begin;
+  if (pos < end && *pos == '-') {
+    negative = true;
+    ++pos;
+  }
+  // First check for various NaN/Inf inputs
+  size_t size = end - pos;
+  if (size == 3) {
+    if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
+      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+    }
+    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
+      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+    }
+  }
+  else if (size == 7) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
+        (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
+      return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+    }
+  }
+  else if (size == 6) {
+    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
+      if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
+        return negative ? -std::numeric_limits<T>::quiet_NaN() : std::numeric_limits<T>::quiet_NaN();
+      }
+      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
+               (pos[5] == 'F' || pos[5] == 'f')) {
+        return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+      }
+    }
+  }
+  else if (size == 8) {
+    if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
+        (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
+        (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
+      return negative ? -std::numeric_limits<T>::infinity() : std::numeric_limits<T>::infinity();
+    }
+  }
+
+  // TODO: use http://www.netlib.org/fp/dtoa.c
+  char *end_ptr;
+  T value = strto<T>(begin, &end_ptr);
+  if (end_ptr - begin != end - begin) {
+    std::stringstream ss;
+    ss << "parse error converting string ";
+    ss.write(begin, end - begin);
+    ss << " to float64";
+    throw std::invalid_argument(ss.str());
+  }
+
+  return value;
+}
+
 template <typename T>
 T parse(const std::string &s)
 {
-  return parse<T>(s.data(), s.data() + s.size());
+  return parse<T>(s.c_str(), s.c_str() + s.size());
 }
 
 template <typename T>
@@ -691,24 +1081,10 @@ T parse(const string &s)
 }
 
 /**
- * Converts a string containing an boolean (no leading or trailing space)
- * into a bool, using the specified error mode to handle errors.
- * If ``option`` is true, writes to option[bool].
- *
- * \param out_bool  The address of the bool or option[bool].
- * \param begin  The start of the UTF8 string buffer.
- * \param end  The end of the UTF8 string buffer.
- * \param option  If true, treat it as option[int] instead of just int.
- * \param errmode  The error handling mode.
- */
-DYND_API void string_to_bool(char *out_bool, const char *begin, const char *end, bool option,
-                             assign_error_mode errmode);
-
-/**
  * Returns true if the string provided matches an option[T] missing value token,
  * such as "", "NA", "NULL", "null", "None".
  */
-DYND_API bool matches_option_type_na_token(const char *begin, const char *end);
+DYND_API bool parse_na(const char *begin, const char *end);
 
 /**
  * A helper class for matching a bunch of names and getting an integer.
@@ -734,8 +1110,6 @@ struct DYND_API named_value {
   int value;
   DYND_CONSTEXPR named_value(const char *name_, int value_) : name(name_), value(value_) {}
 };
-
-double checked_string_to_float64(const char *begin, const char *end, assign_error_mode error_mode);
 
 /**
  * Without skipping whitespace, matches a case insensitive alphabetical
@@ -789,189 +1163,11 @@ inline bool parse_ci_alpha_str_named_value_no_ws(const char *&rbegin, const char
   return false;
 }
 
-/**
- * A utility for checking whether a value would overflow when converted to
- * the specified type.
- *
- * if (overflow_check<int8_t>(unsigned_value, is_negative)) {
- *   throw overflow_error(...);
- * }
- *
- * if (overflow_check<int8_t>(signed_value)) {
- *   throw overflow_error(...);
- * }
- */
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(std::numeric_limits<DstType>::min()) ||
-         src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src > static_cast<SrcType>(std::numeric_limits<DstType>::max());
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_signed<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<(sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value,
-                        bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(0) || static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_signed<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
-  return src < static_cast<SrcType>(0);
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) < sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType src)
-{
-  return static_cast<SrcType>(std::numeric_limits<DstType>::max()) < src;
-}
-
-template <typename DstType, typename SrcType>
-typename std::enable_if<
-    (sizeof(DstType) >= sizeof(SrcType)) && is_unsigned<DstType>::value && is_unsigned<SrcType>::value, bool>::type
-is_overflow(SrcType DYND_UNUSED(src))
-{
-  return false;
-}
-
 template <class T>
-struct overflow_check {
-  static bool is_overflow(uint64_t value, bool negative)
-  {
-    if (negative && value == static_cast<uint64_t>(-static_cast<int64_t>(std::numeric_limits<T>::min()))) {
-      return false;
-    }
-
-    return (value & ~std::numeric_limits<T>::max()) != 0;
-  }
-};
-
-DYND_API void parse_int64(int64_t &res, const char *begin, const char *end);
-
-DYND_API void parse_uint64(uint64_t &res, const char *begin, const char *end);
-
-DYND_API int parse_double(double &res, const char *begin, const char *end);
-
-inline static double make_double_nan(bool negative)
-{
-  union {
-    uint64_t i;
-    double d;
-  } nan;
-  nan.i = negative ? 0xfff8000000000000ULL : 0x7ff8000000000000ULL;
-  return nan.d;
-}
-
-template <class T>
-void assign_signed_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow, bool &badparse)
-{
-  overflow = overflow || overflow_check<T>::is_overflow(uvalue, negative);
-  if (!overflow && !badparse) {
-    *reinterpret_cast<T *>(out_int) =
-        static_cast<T>(negative ? -static_cast<int64_t>(uvalue) : static_cast<int64_t>(uvalue));
-  }
-}
-
-/**
- * Converts a string containing only a floating point number into
- * a float64/C double.
- */
-template <assign_error_mode ErrorMode>
-double checked_string_to_float64(const char *begin, const char *end)
-{
-  bool negative = false;
-  const char *pos = begin;
-  if (pos < end && *pos == '-') {
-    negative = true;
-    ++pos;
-  }
-  // First check for various NaN/Inf inputs
-  size_t size = end - pos;
-  if (size == 3) {
-    if ((pos[0] == 'N' || pos[0] == 'n') && (pos[1] == 'A' || pos[1] == 'a') && (pos[2] == 'N' || pos[2] == 'n')) {
-      return make_double_nan(negative);
-    }
-    else if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f')) {
-      return negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
-    }
-  }
-  else if (size == 7) {
-    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#') && (pos[3] == 'Q' || pos[3] == 'q') &&
-        (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'A' || pos[5] == 'a') && (pos[6] == 'N' || pos[6] == 'n')) {
-      return make_double_nan(negative);
-    }
-  }
-  else if (size == 6) {
-    if ((pos[0] == '1') && (pos[1] == '.') && (pos[2] == '#')) {
-      if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'D' || pos[5] == 'd')) {
-        return make_double_nan(negative);
-      }
-      else if ((pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') &&
-               (pos[5] == 'F' || pos[5] == 'f')) {
-        return negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
-      }
-    }
-  }
-  else if (size == 8) {
-    if ((pos[0] == 'I' || pos[0] == 'i') && (pos[1] == 'N' || pos[1] == 'n') && (pos[2] == 'F' || pos[2] == 'f') &&
-        (pos[3] == 'I' || pos[3] == 'i') && (pos[4] == 'N' || pos[4] == 'n') && (pos[5] == 'I' || pos[5] == 'i') &&
-        (pos[6] == 'T' || pos[6] == 't') && (pos[7] == 'Y' || pos[7] == 'y')) {
-      return negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity();
-    }
-  }
-
-  // TODO: use http://www.netlib.org/fp/dtoa.c
-  char *end_ptr;
-  std::string s(begin, end);
-  double value = strtod(s.c_str(), &end_ptr);
-  if (ErrorMode != assign_error_nocheck && (size_t)(end_ptr - s.c_str()) != s.size()) {
-    std::stringstream ss;
-    ss << "parse error converting string ";
-    print_escaped_utf8_string(ss, begin, end);
-    ss << " to float64";
-    throw std::invalid_argument(ss.str());
-  }
-
-  return value;
-}
-
-template <class T>
-void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow, bool &badparse)
+void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, bool &overflow)
 {
   overflow = overflow || negative || is_overflow<T>(uvalue);
-  if (!overflow && !badparse) {
+  if (!overflow) {
     *reinterpret_cast<T *>(out_int) = static_cast<T>(uvalue);
   }
 }
@@ -988,15 +1184,13 @@ void assign_unsigned_int_value(char *out_int, uint64_t uvalue, bool &negative, b
  * \param option  If true, treat it as option[Num] instead of just Num.
  * \param errmode  The error handling mode.
  */
-inline void string_to_number(char *out, type_id_t tid, const char *begin, const char *end, bool option,
-                             assign_error_mode errmode)
+inline void string_to_number(char *out, type_id_t tid, const char *begin, const char *end, assign_error_mode errmode)
 {
-
   uint64_t uvalue;
   const char *saved_begin = begin;
-  bool negative = false, overflow = false, badparse = false;
+  bool negative = false, overflow = false;
 
-  if (option && matches_option_type_na_token(begin, end)) {
+  if (parse_na(begin, end)) {
     switch (tid) {
     case int8_type_id:
       *reinterpret_cast<int8_t *>(out) = DYND_INT8_NA;
@@ -1012,9 +1206,6 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       return;
     case int128_type_id:
       *reinterpret_cast<int128 *>(out) = DYND_INT128_NA;
-      return;
-    case float16_type_id:
-      *reinterpret_cast<uint16_t *>(out) = DYND_FLOAT16_NA_AS_UINT;
       return;
     case float32_type_id:
       *reinterpret_cast<uint32_t *>(out) = DYND_FLOAT32_NA_AS_UINT;
@@ -1046,40 +1237,40 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
     switch (tid) {
     case int8_type_id:
       uvalue = parse<uint64_t>(begin, end);
-      assign_signed_int_value<int8_t>(out, uvalue, negative, overflow, badparse);
+      assign_signed_int_value<int8_t>(out, uvalue, negative, overflow);
       break;
     case int16_type_id:
       uvalue = parse<uint64_t>(begin, end);
-      assign_signed_int_value<int16_t>(out, uvalue, negative, overflow, badparse);
+      assign_signed_int_value<int16_t>(out, uvalue, negative, overflow);
       break;
     case int32_type_id:
       uvalue = parse<uint64_t>(begin, end);
-      assign_signed_int_value<int32_t>(out, uvalue, negative, overflow, badparse);
+      assign_signed_int_value<int32_t>(out, uvalue, negative, overflow);
       break;
     case int64_type_id:
       uvalue = parse<uint64_t>(begin, end);
-      assign_signed_int_value<int64_t>(out, uvalue, negative, overflow, badparse);
+      assign_signed_int_value<int64_t>(out, uvalue, negative, overflow);
       break;
     case uint8_type_id:
       uvalue = parse<uint64_t>(begin, end);
       negative = negative && (uvalue != 0);
-      assign_unsigned_int_value<uint8_t>(out, uvalue, negative, overflow, badparse);
+      assign_unsigned_int_value<uint8_t>(out, uvalue, negative, overflow);
       break;
     case uint16_type_id:
       uvalue = parse<uint64_t>(begin, end);
       negative = negative && (uvalue != 0);
-      assign_unsigned_int_value<uint16_t>(out, uvalue, negative, overflow, badparse);
+      assign_unsigned_int_value<uint16_t>(out, uvalue, negative, overflow);
       break;
     case uint32_type_id:
       uvalue = parse<uint64_t>(begin, end);
       negative = negative && (uvalue != 0);
-      assign_unsigned_int_value<uint32_t>(out, uvalue, negative, overflow, badparse);
+      assign_unsigned_int_value<uint32_t>(out, uvalue, negative, overflow);
       break;
     case uint64_type_id:
       uvalue = parse<uint64_t>(begin, end);
       negative = negative && (uvalue != 0);
       overflow = overflow || negative;
-      if (!overflow && !badparse) {
+      if (!overflow) {
         *reinterpret_cast<uint64_t *>(out) = uvalue;
       }
       break;
@@ -1087,23 +1278,17 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       uint128 buvalue = parse<uint128>(begin, end);
       negative = negative && (buvalue != 0);
       overflow = overflow || negative;
-      if (!overflow && !badparse) {
+      if (!overflow) {
         *reinterpret_cast<uint128 *>(out) = buvalue;
       }
       break;
     }
-    case float16_type_id: {
-      double value = checked_string_to_float64(saved_begin, end, errmode);
-      *reinterpret_cast<uint16_t *>(out) = float16(value).bits();
-      break;
-    }
     case float32_type_id: {
-      double value = checked_string_to_float64(saved_begin, end, errmode);
-      *reinterpret_cast<float *>(out) = checked_float64_to_float32(value, errmode);
+      *reinterpret_cast<float *>(out) = parse<float>(saved_begin, end);
       break;
     }
     case float64_type_id: {
-      *reinterpret_cast<double *>(out) = checked_string_to_float64(saved_begin, end, errmode);
+      *reinterpret_cast<double *>(out) = parse<double>(saved_begin, end);
       break;
     }
     default: {
@@ -1117,22 +1302,8 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       ss << "overflow converting string ";
       print_escaped_utf8_string(ss, begin, end);
       ss << " to ";
-      if (option) {
-        ss << "?";
-      }
       ss << tid;
       throw std::overflow_error(ss.str());
-    }
-    else if (badparse) {
-      std::stringstream ss;
-      ss << "parse error converting string ";
-      print_escaped_utf8_string(ss, begin, end);
-      ss << " to ";
-      if (option) {
-        ss << "?";
-      }
-      ss << tid;
-      throw std::invalid_argument(ss.str());
     }
   }
   else {
@@ -1183,18 +1354,12 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
       *reinterpret_cast<uint128 *>(out) = negative ? static_cast<uint128>(0) : buvalue;
       break;
     }
-    case float16_type_id: {
-      double value = checked_string_to_float64(saved_begin, end, errmode);
-      *reinterpret_cast<uint16_t *>(out) = float16(value).bits();
-      break;
-    }
     case float32_type_id: {
-      double value = checked_string_to_float64(saved_begin, end, errmode);
-      *reinterpret_cast<float *>(out) = checked_float64_to_float32(value, errmode);
+      *reinterpret_cast<float *>(out) = parse<float>(saved_begin, end);
       break;
     }
     case float64_type_id: {
-      *reinterpret_cast<double *>(out) = checked_string_to_float64(saved_begin, end, errmode);
+      *reinterpret_cast<double *>(out) = parse<double>(saved_begin, end);
       break;
     }
     default: {
@@ -1206,21 +1371,86 @@ inline void string_to_number(char *out, type_id_t tid, const char *begin, const 
   }
 }
 
-inline double checked_string_to_float64(const char *begin, const char *end, assign_error_mode error_mode)
-{
-  switch (error_mode) {
-  case assign_error_nocheck:
-    return checked_string_to_float64<assign_error_nocheck>(begin, end);
-  case assign_error_inexact:
-    return checked_string_to_float64<assign_error_inexact>(begin, end);
-  case assign_error_overflow:
-    return checked_string_to_float64<assign_error_overflow>(begin, end);
-  case assign_error_fractional:
-    return checked_string_to_float64<assign_error_fractional>(begin, end);
-  default:
-  case assign_error_default:
-    return checked_string_to_float64<assign_error_default>(begin, end);
+class json_parse_error : public parse_error {
+  ndt::type m_type;
+
+public:
+  json_parse_error(const char *position, const std::string &message, const ndt::type &tp)
+      : parse_error(position, message), m_type(tp)
+  {
   }
+
+  json_parse_error(char *const *src, const std::string &message, const ndt::type &tp)
+      : json_parse_error(*reinterpret_cast<const char **>(src[0]), message, tp)
+  {
+  }
+
+  virtual ~json_parse_error() throw() {}
+  const ndt::type &get_type() const { return m_type; }
+};
+
+inline void parse_number_json(const ndt::type &tp, char *out_data, const char *&rbegin, const char *end, bool option,
+                              const eval::eval_context *ectx)
+{
+  const char *begin = rbegin;
+  const char *nbegin, *nend;
+  bool escaped = false;
+  if (option && parse_token_no_ws(begin, end, "null")) {
+    ndt::make_type<ndt::option_type>(tp).extended<ndt::option_type>()->assign_na(NULL, out_data, ectx);
+  }
+  else if (json::parse_number(begin, end, nbegin, nend)) {
+    string_to_number(out_data, tp.get_type_id(), nbegin, nend, ectx->errmode);
+  }
+  else if (parse_doublequote_string_no_ws(begin, end, nbegin, nend, escaped)) {
+    // Interpret the data inside the string as an int
+    try {
+      if (!escaped) {
+        string_to_number(out_data, tp.get_type_id(), nbegin, nend, ectx->errmode);
+      }
+      else {
+        std::string s;
+        unescape_string(nbegin, nend, s);
+        string_to_number(out_data, tp.get_type_id(), nbegin, nend, ectx->errmode);
+      }
+    }
+    catch (const std::exception &e) {
+      throw json_parse_error(rbegin, e.what(), tp);
+    }
+    catch (const dynd::dynd_exception &e) {
+      throw json_parse_error(rbegin, e.what(), tp);
+    }
+  }
+  else {
+    throw json_parse_error(rbegin, "expected a number", tp);
+  }
+  rbegin = begin;
 }
 
+namespace json {
+
+  bool parse_bool(const char *&begin, const char *&end);
+
+} // namespace dynd::json
+
+namespace nd {
+  namespace json {
+
+    extern DYND_API struct parse : declfunc<parse> {
+      array operator()(const ndt::type &ret_tp, const char *begin, const char *end)
+      {
+        ndt::type dst_tp2 = ret_tp;
+        char *args_data[2] = {reinterpret_cast<char *>(&begin), reinterpret_cast<char *>(&end)};
+        return get()->call(dst_tp2, 0, nullptr, nullptr, args_data, 0, nullptr, std::map<std::string, ndt::type>());
+      }
+
+      array operator()(const ndt::type &ret_tp, const char *begin)
+      {
+        return (*this)(ret_tp, begin, begin + strlen(begin));
+      }
+
+      static DYND_API callable make();
+    } parse;
+
+  } // namespace dynd::nd::json
+} // namespace dynd::nd
 } // namespace dynd

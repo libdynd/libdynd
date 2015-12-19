@@ -830,6 +830,18 @@ namespace ndt {
     const type_info &operator[](type_id_t tp_id) const;
   } type_registry;
 
+  /*
+  #define DYND_BOOL_NA (2)
+  #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
+  #define DYND_INT16_NA (std::numeric_limits<int16_t>::min())
+  #define DYND_INT32_NA (std::numeric_limits<int32_t>::min())
+  #define DYND_INT64_NA (std::numeric_limits<int64_t>::min())
+  #define DYND_INT128_NA (std::numeric_limits<int128>::min())
+  #define DYND_FLOAT16_NA_AS_UINT (0x7e0au)
+  #define DYND_FLOAT32_NA_AS_UINT (0x7f8007a2U)
+  #define DYND_FLOAT64_NA_AS_UINT (0x7ff00000000007a2ULL)
+  */
+
   template <>
   struct traits<bool1> {
     static const bool is_same_layout = true;
@@ -849,6 +861,7 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(type_id_of<signed char>::value); }
+    static signed char sentinel() { return std::numeric_limits<signed char>::min(); }
   };
 
   template <>
