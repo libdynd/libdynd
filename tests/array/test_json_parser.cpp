@@ -57,29 +57,6 @@ TEST(JSONParser, BuiltinsFromInteger)
   EXPECT_EQ(3000000000ULL, n.as<uint64_t>());
 }
 
-TEST(JSONParser, OptionInt)
-{
-  nd::array a, b, c;
-
-  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<int8_t>()), "123");
-  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<int8_t>()), a.get_type());
-  EXPECT_EQ(123, a.as<int8_t>());
-  a = parse_json(ndt::make_type<ndt::option_type>(ndt::make_type<int8_t>()), "null");
-  EXPECT_EQ(ndt::make_type<ndt::option_type>(ndt::make_type<int8_t>()), a.get_type());
-  EXPECT_EQ(DYND_INT8_NA, *reinterpret_cast<const int8_t *>(a.cdata()));
-  EXPECT_THROW(a.as<int8_t>(), overflow_error);
-
-  a = parse_json("9 * ?int32", "[null, 3, null, -1000, 1, 3, null, null, null]");
-  EXPECT_EQ(ndt::type("9 * option[int32]"), a.get_type());
-  b = nd::empty("9 * int32");
-  EXPECT_THROW(b.vals() = a, overflow_error);
-  // Assigning from ?int32 to ?int64 should match exactly with parsing to ?int64
-  b = nd::empty("9 * ?int64");
-  b.vals() = a;
-  c = parse_json("9 * ?int64", "[null, 3, null, -1000, 1, 3, null, null, null]");
-  EXPECT_TRUE(nd::view(b, "9 * int64").equals_exact(nd::view(c, "9 * int64")));
-}
-
 /*
 TEST(JSONParser, OptionString)
 {

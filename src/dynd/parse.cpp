@@ -447,7 +447,10 @@ DYND_API nd::callable nd::json::parse::make()
 {
   std::map<type_id_t, callable> children;
   children[bool_type_id] = callable::make<parse_kernel<bool_type_id>>();
+  children[int8_type_id] = callable::make<parse_kernel<int8_type_id>>();
+  children[int16_type_id] = callable::make<parse_kernel<int16_type_id>>();
   children[int32_type_id] = callable::make<parse_kernel<int32_type_id>>();
+  children[int64_type_id] = callable::make<parse_kernel<int64_type_id>>();
   children[uint8_type_id] = callable::make<parse_kernel<uint8_type_id>>();
   children[uint16_type_id] = callable::make<parse_kernel<uint16_type_id>>();
   children[uint32_type_id] = callable::make<parse_kernel<uint32_type_id>>();
