@@ -79,7 +79,7 @@ char *dynd::iterdata_broadcasting_terminator_reset(iterdata_common *iterdata, ch
   return data;
 }
 
-ndt::type::type(type_id_t tp_id) : type((validate_type_id(tp_id), type_registry[tp_id].kind)) {}
+ndt::type::type(type_id_t tp_id) : type((validate_type_id(tp_id), type_registry[tp_id].kind_tp)) {}
 
 ndt::type::type(const std::string &rep) { type_from_datashape(rep).swap(*this); }
 

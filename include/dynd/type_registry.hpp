@@ -14,11 +14,11 @@ namespace ndt {
     const char *name;
     size_t nbases;
     const type_id_t *bases;
+    type kind_tp;
     type_make_t construct;
-    type kind;
 
-    type_info(const char *name, size_t nbases, const type_id_t *bases, type_make_t construct, const type &kind)
-        : name(name), nbases(nbases), bases(bases), construct(construct), kind(kind)
+    type_info(const char *name, size_t nbases, const type_id_t *bases, const type &kind_tp, type_make_t construct)
+        : name(name), nbases(nbases), bases(bases), kind_tp(kind_tp), construct(construct)
     {
     }
   };
@@ -33,7 +33,7 @@ namespace ndt {
 
     size_t size() const;
 
-    type_id_t insert(const char *name, type_id_t tp_id, type_make_t construct, const type &kind);
+    type_id_t insert(const char *name, type_id_t base_id, const type &kind_tp, type_make_t construct);
 
     const type_info &operator[](type_id_t tp_id) const;
   } type_registry;
