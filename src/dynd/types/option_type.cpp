@@ -67,14 +67,14 @@ bool ndt::option_type::is_avail(const char *arrmeta, const char *data, const eva
   }
   else {
     ckernel_builder<kernel_request_host> ckb;
-    nd::callable &af = nd::is_avail::get();
+    nd::callable &af = nd::is_missing::get();
     type src_tp[1] = {type(this, true)};
     af.get()->instantiate(af->static_data(), NULL, &ckb, 0, make_type<bool1>(), NULL, 1, src_tp, &arrmeta,
                           kernel_request_single, ectx, 0, NULL, std::map<std::string, type>());
     ckernel_prefix *ckp = ckb.get();
     char result;
     ckp->get_function<kernel_single_t>()(ckp, &result, const_cast<char **>(&data));
-    return result != 0;
+    return result == 0;
   }
 }
 

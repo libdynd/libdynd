@@ -103,9 +103,9 @@ TEST(OptionType, FloatNAvsNaN)
 
   parse_json(a, "[0, null, \"nan\"]");
   // This is matching R's behavior with floating point NaN
-  EXPECT_TRUE(nd::is_avail(a(0)).as<bool>());
-  EXPECT_FALSE(nd::is_avail(a(1)).as<bool>());
-  EXPECT_FALSE(nd::is_avail(a(2)).as<bool>());
+  EXPECT_FALSE(nd::is_missing(a(0)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(1)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(2)).as<bool>());
   // TODO: An isnan arrfunc should return false, NA, true
 }
 
@@ -121,9 +121,9 @@ TEST(OptionType, Float)
   b.vals() = a;
   EXPECT_EQ(12, b(0).as<int>());
   EXPECT_EQ(0, b(1).as<int>());
-  EXPECT_FALSE(nd::is_avail(b(2)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(b(2)).as<bool>());
   EXPECT_EQ(-99, b(3).as<int>());
-  EXPECT_FALSE(nd::is_avail(b(4)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(b(4)).as<bool>());
 }
 
 TEST(OptionType, Date)
@@ -131,16 +131,16 @@ TEST(OptionType, Date)
   nd::array a = nd::empty("5 * ?date");
 
   parse_json(a, "[null, \"2013-04-05\", \"NA\", \"\", \"Jan 3, 2020\"]");
-  EXPECT_FALSE(nd::is_avail(a(0)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(0)).as<bool>());
   EXPECT_EQ("2013-04-05", a(1).as<std::string>());
-  EXPECT_FALSE(nd::is_avail(a(2)).as<bool>());
-  EXPECT_FALSE(nd::is_avail(a(3)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(2)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(3)).as<bool>());
   EXPECT_EQ("2020-01-03", a(4).as<std::string>());
   // Assigning an empty string assigns NA
   a.vals_at(1) = "";
-  EXPECT_FALSE(nd::is_avail(a(1)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(1)).as<bool>());
   a.vals_at(4) = "NA";
-  EXPECT_FALSE(nd::is_avail(a(4)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(4)).as<bool>());
 }
 
 TEST(OptionType, Time)
@@ -148,16 +148,16 @@ TEST(OptionType, Time)
   nd::array a = nd::empty("5 * ?time");
 
   parse_json(a, "[null, \"3:45\", \"NA\", \"\", \"05:17:33.1234 PM\"]");
-  EXPECT_FALSE(nd::is_avail(a(0)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(0)).as<bool>());
   EXPECT_EQ("03:45", a(1).as<std::string>());
-  EXPECT_FALSE(nd::is_avail(a(2)).as<bool>());
-  EXPECT_FALSE(nd::is_avail(a(3)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(2)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(3)).as<bool>());
   EXPECT_EQ("17:17:33.1234", a(4).as<std::string>());
   // Assigning an empty string assigns NA
   a.vals_at(1) = "";
-  EXPECT_FALSE(nd::is_avail(a(1)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(1)).as<bool>());
   a.vals_at(4) = "NA";
-  EXPECT_FALSE(nd::is_avail(a(4)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(4)).as<bool>());
 }
 
 TEST(OptionType, DateTime)
@@ -166,16 +166,16 @@ TEST(OptionType, DateTime)
 
   parse_json(a, "[null, \"2013-04-05 3:45\", \"NA\", \"\","
                 " \"Jan 3, 2020 05:17:33.1234 PM\"]");
-  EXPECT_FALSE(nd::is_avail(a(0)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(0)).as<bool>());
   EXPECT_EQ("2013-04-05T03:45", a(1).as<std::string>());
-  EXPECT_FALSE(nd::is_avail(a(2)).as<bool>());
-  EXPECT_FALSE(nd::is_avail(a(3)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(2)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(3)).as<bool>());
   EXPECT_EQ("2020-01-03T17:17:33.1234", a(4).as<std::string>());
   // Assigning an empty string assigns NA
   a.vals_at(1) = "";
-  EXPECT_FALSE(nd::is_avail(a(1)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(1)).as<bool>());
   a.vals_at(4) = "NA";
-  EXPECT_FALSE(nd::is_avail(a(4)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(4)).as<bool>());
 }
 
 /*
@@ -185,7 +185,7 @@ TEST(OptionType, String)
 
   parse_json(a, "[null, \"testing\", \"NA\", \"\","
                 " \"valid\"]");
-  EXPECT_FALSE(nd::is_avail(a(0)).as<bool>());
+  EXPECT_TRUE(nd::is_missing(a(0)).as<bool>());
   EXPECT_EQ("testing", a(1).as<std::string>());
   EXPECT_EQ("NA", a(2).as<std::string>());
   EXPECT_EQ("", a(3).as<std::string>());

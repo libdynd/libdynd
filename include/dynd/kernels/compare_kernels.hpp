@@ -270,10 +270,10 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      auto is_avail = this->get_child();
+      auto is_missing = this->get_child();
       bool1 child_dst;
-      is_avail->single(reinterpret_cast<char *>(&child_dst), &src[0]);
-      if (child_dst) {
+      is_missing->single(reinterpret_cast<char *>(&child_dst), &src[0]);
+      if (!child_dst) {
         this->get_child(comp_offset)->single(dst, src);
       }
       else {
@@ -290,9 +290,9 @@ namespace nd {
       intptr_t option_comp_offset = ckb_offset;
       option_comparison_kernel::make(ckb, kernreq, ckb_offset);
 
-      auto is_avail = is_avail::get();
+      auto is_missing = is_missing::get();
       ckb_offset =
-          is_avail.get()->instantiate(is_avail.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+          is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                       src_tp, src_arrmeta, kernel_request_single, ectx, nkwd, kwds, tp_vars);
       option_comparison_kernel *self = option_comparison_kernel::get_self(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), option_comp_offset);
@@ -321,10 +321,10 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      auto is_avail = this->get_child();
+      auto is_missing = this->get_child();
       bool1 child_dst;
-      is_avail->single(reinterpret_cast<char *>(&child_dst), &src[1]);
-      if (child_dst) {
+      is_missing->single(reinterpret_cast<char *>(&child_dst), &src[1]);
+      if (!child_dst) {
         this->get_child(comp_offset)->single(dst, src);
       }
       else {
@@ -341,9 +341,9 @@ namespace nd {
       intptr_t option_comp_offset = ckb_offset;
       option_comparison_kernel::make(ckb, kernreq, ckb_offset);
 
-      auto is_avail = is_avail::get();
+      auto is_missing = is_missing::get();
       ckb_offset =
-          is_avail.get()->instantiate(is_avail.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
+          is_missing.get()->instantiate(is_missing.get()->static_data(), data, ckb, ckb_offset, dst_tp, dst_arrmeta, nsrc,
                                       &src_tp[1], &src_arrmeta[1], kernel_request_single, ectx, nkwd, kwds, tp_vars);
       option_comparison_kernel *self = option_comparison_kernel::get_self(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), option_comp_offset);
@@ -369,19 +369,19 @@ namespace nd {
   template <typename FuncType>
   struct option_comparison_kernel<FuncType, true, true>
       : base_kernel<option_comparison_kernel<FuncType, true, true>, 2> {
-    intptr_t is_avail_rhs_offset;
+    intptr_t is_missing_rhs_offset;
     intptr_t comp_offset;
     intptr_t assign_na_offset;
 
     void single(char *dst, char *const *src)
     {
-      auto is_avail_lhs = this->get_child();
-      auto is_avail_rhs = this->get_child(is_avail_rhs_offset);
-      bool1 child_dst_lhs;
-      bool1 child_dst_rhs;
-      is_avail_lhs->single(reinterpret_cast<char *>(&child_dst_lhs), &src[0]);
-      is_avail_rhs->single(reinterpret_cast<char *>(&child_dst_rhs), &src[1]);
-      if (child_dst_lhs && child_dst_rhs) {
+      auto is_missing_lhs = this->get_child();
+      auto is_missing_rhs = this->get_child(is_missing_rhs_offset);
+      bool child_dst_lhs;
+      bool child_dst_rhs;
+      is_missing_lhs->single(reinterpret_cast<char *>(&child_dst_lhs), &src[0]);
+      is_missing_rhs->single(reinterpret_cast<char *>(&child_dst_rhs), &src[1]);
+      if (!child_dst_lhs && !child_dst_rhs) {
         this->get_child(comp_offset)->single(dst, src);
       }
       else {
@@ -398,16 +398,16 @@ namespace nd {
       intptr_t option_comp_offset = ckb_offset;
       option_comparison_kernel::make(ckb, kernreq, ckb_offset);
 
-      auto is_avail_lhs = is_avail::get();
-      ckb_offset = is_avail_lhs.get()->instantiate(is_avail_lhs.get()->static_data(), data, ckb, ckb_offset, dst_tp,
+      auto is_missing_lhs = is_missing::get();
+      ckb_offset = is_missing_lhs.get()->instantiate(is_missing_lhs.get()->static_data(), data, ckb, ckb_offset, dst_tp,
                                                    dst_arrmeta, nsrc, &src_tp[0], &src_arrmeta[0],
                                                    kernel_request_single, ectx, nkwd, kwds, tp_vars);
       option_comparison_kernel *self = option_comparison_kernel::get_self(
           reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), option_comp_offset);
-      self->is_avail_rhs_offset = ckb_offset - option_comp_offset;
+      self->is_missing_rhs_offset = ckb_offset - option_comp_offset;
 
-      auto is_avail_rhs = is_avail::get();
-      ckb_offset = is_avail_rhs.get()->instantiate(is_avail_rhs.get()->static_data(), data, ckb, ckb_offset, dst_tp,
+      auto is_missing_rhs = is_missing::get();
+      ckb_offset = is_missing_rhs.get()->instantiate(is_missing_rhs.get()->static_data(), data, ckb, ckb_offset, dst_tp,
                                                    dst_arrmeta, nsrc, &src_tp[1], &src_arrmeta[1],
                                                    kernel_request_single, ectx, nkwd, kwds, tp_vars);
       self = option_comparison_kernel::get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb),

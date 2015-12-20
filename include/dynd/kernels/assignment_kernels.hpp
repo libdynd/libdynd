@@ -1794,11 +1794,11 @@ namespace nd {
         // Check whether the value is available
         // TODO: Would be nice to do this as a predicate
         //       instead of having to go through a dst pointer
-        ckernel_prefix *src_is_avail = this->get_child();
-        kernel_single_t src_is_avail_fn = src_is_avail->get_function<kernel_single_t>();
-        bool1 avail = bool1(false);
-        src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(&avail), src);
-        if (avail) {
+        ckernel_prefix *src_is_missing = this->get_child();
+        kernel_single_t src_is_missing_fn = src_is_missing->get_function<kernel_single_t>();
+        bool1 missing = bool1(false);
+        src_is_missing_fn(src_is_missing, reinterpret_cast<char *>(&missing), src);
+        if (!missing) {
           // It's available, copy using value assignment
           ckernel_prefix *value_assign = this->get_child(m_value_assign_offset);
           kernel_single_t value_assign_fn = value_assign->get_function<kernel_single_t>();
@@ -1815,52 +1815,52 @@ namespace nd {
       void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
       {
         // Three child ckernels
-        ckernel_prefix *src_is_avail = this->get_child();
-        kernel_strided_t src_is_avail_fn = src_is_avail->get_function<kernel_strided_t>();
+        ckernel_prefix *src_is_missing = this->get_child();
+        kernel_strided_t src_is_missing_fn = src_is_missing->get_function<kernel_strided_t>();
         ckernel_prefix *value_assign = this->get_child(m_value_assign_offset);
         kernel_strided_t value_assign_fn = value_assign->get_function<kernel_strided_t>();
         ckernel_prefix *dst_assign_na = this->get_child(m_dst_assign_na_offset);
         kernel_strided_t dst_assign_na_fn = dst_assign_na->get_function<kernel_strided_t>();
         // Process in chunks using the dynd default buffer size
-        bool1 avail[DYND_BUFFER_CHUNK_SIZE];
+        bool1 missing[DYND_BUFFER_CHUNK_SIZE];
         while (count > 0) {
           size_t chunk_size = std::min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
           count -= chunk_size;
-          src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(avail), 1, src, src_stride, chunk_size);
-          void *avail_ptr = avail;
+          src_is_missing_fn(src_is_missing, reinterpret_cast<char *>(missing), 1, src, src_stride, chunk_size);
+          void *missing_ptr = missing;
           char *src_copy = src[0];
           do {
             // Process a run of available values
-            void *next_avail_ptr = memchr(avail_ptr, 0, chunk_size);
-            if (!next_avail_ptr) {
+            void *next_missing_ptr = memchr(missing_ptr, 1, chunk_size);
+            if (!next_missing_ptr) {
               value_assign_fn(value_assign, dst, dst_stride, &src_copy, src_stride, chunk_size);
               dst += chunk_size * dst_stride;
               src += chunk_size * src_stride[0];
               break;
             }
-            else if (next_avail_ptr > avail_ptr) {
-              size_t segment_size = (char *)next_avail_ptr - (char *)avail_ptr;
+            else if (next_missing_ptr > missing_ptr) {
+              size_t segment_size = (char *)next_missing_ptr - (char *)missing_ptr;
               value_assign_fn(value_assign, dst, dst_stride, &src_copy, src_stride, segment_size);
               dst += segment_size * dst_stride;
               src_copy += segment_size * src_stride[0];
               chunk_size -= segment_size;
-              avail_ptr = next_avail_ptr;
+              missing_ptr = next_missing_ptr;
             }
             // Process a run of not available values
-            next_avail_ptr = memchr(avail_ptr, 1, chunk_size);
-            if (!next_avail_ptr) {
+            next_missing_ptr = memchr(missing_ptr, 0, chunk_size);
+            if (!next_missing_ptr) {
               dst_assign_na_fn(dst_assign_na, dst, dst_stride, NULL, NULL, chunk_size);
               dst += chunk_size * dst_stride;
               src_copy += chunk_size * src_stride[0];
               break;
             }
-            else if (next_avail_ptr > avail_ptr) {
-              size_t segment_size = (char *)next_avail_ptr - (char *)avail_ptr;
+            else if (next_missing_ptr > missing_ptr) {
+              size_t segment_size = (char *)next_missing_ptr - (char *)missing_ptr;
               dst_assign_na_fn(dst_assign_na, dst, dst_stride, NULL, NULL, segment_size);
               dst += segment_size * dst_stride;
               src_copy += segment_size * src_stride[0];
               chunk_size -= segment_size;
-              avail_ptr = next_avail_ptr;
+              missing_ptr = next_missing_ptr;
             }
           } while (chunk_size > 0);
         }
@@ -1883,8 +1883,8 @@ namespace nd {
         const ndt::type &src_val_tp = src_tp[0].extended<ndt::option_type>()->get_value_type();
         self_type *self = self_type::make(ckb, kernreq, ckb_offset);
         // instantiate src_is_avail
-        nd::callable &is_avail = nd::is_avail::get();
-        ckb_offset = is_avail.get()->instantiate(is_avail->static_data(), NULL, ckb, ckb_offset,
+        nd::callable &is_missing = nd::is_missing::get();
+        ckb_offset = is_missing.get()->instantiate(is_missing->static_data(), NULL, ckb, ckb_offset,
                                                  ndt::make_type<bool1>(), NULL, nsrc, src_tp, src_arrmeta, kernreq,
                                                  &eval::default_eval_context, nkwd, kwds, tp_vars);
         // instantiate dst_assign_na
@@ -2048,12 +2048,12 @@ namespace nd {
    * A ckernel which assigns option[S] to T.
    */
   struct DYND_API option_to_value_ck : nd::base_kernel<option_to_value_ck, 1> {
-    // The default child is the src_is_avail ckernel
+    // The default child is the src_is_missing ckernel
     size_t m_value_assign_offset;
 
     ~option_to_value_ck()
     {
-      // src_is_avail
+      // src_is_missing
       get_child()->destroy();
       // value_assign
       get_child(m_value_assign_offset)->destroy();
@@ -2061,14 +2061,14 @@ namespace nd {
 
     void single(char *dst, char *const *src)
     {
-      ckernel_prefix *src_is_avail = get_child();
-      kernel_single_t src_is_avail_fn = src_is_avail->get_function<kernel_single_t>();
+      ckernel_prefix *src_is_missing = get_child();
+      kernel_single_t src_is_missing_fn = src_is_missing->get_function<kernel_single_t>();
       ckernel_prefix *value_assign = get_child(m_value_assign_offset);
       kernel_single_t value_assign_fn = value_assign->get_function<kernel_single_t>();
       // Make sure it's not an NA
-      bool1 avail = bool1(false);
-      src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(&avail), src);
-      if (!avail) {
+      bool1 missing = bool1(false);
+      src_is_missing_fn(src_is_missing, reinterpret_cast<char *>(&missing), src);
+      if (missing) {
         throw std::overflow_error("cannot assign an NA value to a non-option type");
       }
       // Copy using value assignment
@@ -2078,18 +2078,20 @@ namespace nd {
     void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
     {
       // Two child ckernels
-      ckernel_prefix *src_is_avail = get_child();
-      kernel_strided_t src_is_avail_fn = src_is_avail->get_function<kernel_strided_t>();
+      ckernel_prefix *src_is_missing = get_child();
+      kernel_strided_t src_is_missing_fn = src_is_missing->get_function<kernel_strided_t>();
       ckernel_prefix *value_assign = get_child(m_value_assign_offset);
       kernel_strided_t value_assign_fn = value_assign->get_function<kernel_strided_t>();
       // Process in chunks using the dynd default buffer size
-      bool1 avail[DYND_BUFFER_CHUNK_SIZE];
+      bool1 missing[DYND_BUFFER_CHUNK_SIZE];
       char *src_copy = src[0];
       while (count > 0) {
         size_t chunk_size = std::min(count, (size_t)DYND_BUFFER_CHUNK_SIZE);
-        src_is_avail_fn(src_is_avail, reinterpret_cast<char *>(avail), 1, &src_copy, src_stride, chunk_size);
-        if (memchr(avail, 0, chunk_size) != NULL) {
-          throw std::overflow_error("cannot assign an NA value to a non-option type");
+        src_is_missing_fn(src_is_missing, reinterpret_cast<char *>(missing), 1, &src_copy, src_stride, chunk_size);
+        for (size_t i = 0; i < chunk_size; ++i) {
+          if (missing[i]) {
+            throw std::overflow_error("cannot assign an NA value to a non-option type");
+          }
         }
         value_assign_fn(value_assign, dst, dst_stride, &src_copy, src_stride, chunk_size);
         dst += chunk_size * dst_stride;
@@ -2113,8 +2115,8 @@ namespace nd {
       }
       const ndt::type &src_val_tp = src_tp[0].extended<ndt::option_type>()->get_value_type();
       self_type *self = self_type::make(ckb, kernreq, ckb_offset);
-      // instantiate src_is_avail
-      nd::callable &af = nd::is_avail::get();
+      // instantiate src_is_missing
+      nd::callable &af = nd::is_missing::get();
       ckb_offset =
           af.get()->instantiate(af->static_data(), NULL, ckb, ckb_offset, ndt::make_type<bool1>(), NULL, nsrc, src_tp,
                                 src_arrmeta, kernreq, &eval::default_eval_context, nkwd, kwds, tp_vars);
@@ -2187,8 +2189,7 @@ namespace nd {
 
     template <>
     struct assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>
-        : base_kernel<
-              assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>> {
+        : base_kernel<assignment_virtual_kernel<fixed_bytes_type_id, bytes_kind, fixed_bytes_type_id, bytes_kind>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,
@@ -3147,8 +3148,7 @@ namespace nd {
 
     template <assign_error_mode ErrorMode>
     struct assignment_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind, ErrorMode>
-        : base_kernel<
-              assignment_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind, ErrorMode>> {
+        : base_kernel<assignment_kernel<datetime_type_id, datetime_kind, datetime_type_id, datetime_kind, ErrorMode>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *src_tp,

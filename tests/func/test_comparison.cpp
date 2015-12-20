@@ -34,51 +34,51 @@ TEST(Comparison, OptionScalar)
 {
   nd::array NA = nd::empty(ndt::type("?int32"));
   NA.assign_na();
-  EXPECT_ALL_FALSE(nd::is_avail(NA < 1));
-  EXPECT_ALL_FALSE(nd::is_avail(NA > 1));
-  EXPECT_ALL_FALSE(nd::is_avail(NA >= 1));
-  EXPECT_ALL_FALSE(nd::is_avail(NA <= 1));
-  EXPECT_ALL_FALSE(nd::is_avail(NA == 1));
-  EXPECT_ALL_FALSE(nd::is_avail(NA != 1));
+  EXPECT_ALL_TRUE(nd::is_missing(NA < 1));
+  EXPECT_ALL_TRUE(nd::is_missing(NA > 1));
+  EXPECT_ALL_TRUE(nd::is_missing(NA >= 1));
+  EXPECT_ALL_TRUE(nd::is_missing(NA <= 1));
+  EXPECT_ALL_TRUE(nd::is_missing(NA == 1));
+  EXPECT_ALL_TRUE(nd::is_missing(NA != 1));
 
-  EXPECT_ALL_FALSE(nd::is_avail(1 < NA));
-  EXPECT_ALL_FALSE(nd::is_avail(1 > NA));
-  EXPECT_ALL_FALSE(nd::is_avail(1 >= NA));
-  EXPECT_ALL_FALSE(nd::is_avail(1 <= NA));
-  EXPECT_ALL_FALSE(nd::is_avail(1 == NA));
-  EXPECT_ALL_FALSE(nd::is_avail(1 != NA));
+  EXPECT_ALL_TRUE(nd::is_missing(1 < NA));
+  EXPECT_ALL_TRUE(nd::is_missing(1 > NA));
+  EXPECT_ALL_TRUE(nd::is_missing(1 >= NA));
+  EXPECT_ALL_TRUE(nd::is_missing(1 <= NA));
+  EXPECT_ALL_TRUE(nd::is_missing(1 == NA));
+  EXPECT_ALL_TRUE(nd::is_missing(1 != NA));
 
-  EXPECT_ALL_FALSE(nd::is_avail(NA < NA));
-  EXPECT_ALL_FALSE(nd::is_avail(NA > NA));
-  EXPECT_ALL_FALSE(nd::is_avail(NA >= NA));
-  EXPECT_ALL_FALSE(nd::is_avail(NA <= NA));
-  EXPECT_ALL_FALSE(nd::is_avail(NA == NA));
-  EXPECT_ALL_FALSE(nd::is_avail(NA != NA));
+  EXPECT_ALL_TRUE(nd::is_missing(NA < NA));
+  EXPECT_ALL_TRUE(nd::is_missing(NA > NA));
+  EXPECT_ALL_TRUE(nd::is_missing(NA >= NA));
+  EXPECT_ALL_TRUE(nd::is_missing(NA <= NA));
+  EXPECT_ALL_TRUE(nd::is_missing(NA == NA));
+  EXPECT_ALL_TRUE(nd::is_missing(NA != NA));
 }
 
 
 TEST(Comparison, OptionArray)
 {
   nd::array data = parse_json("5 * ?int32", "[null, 0, 40, null, 1]");
-  nd::array expected = nd::array{false, true, true, false, true};
-  EXPECT_ARRAY_EQ(nd::is_avail(data < 1), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data > 1), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data >= 1), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data <= 1), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data == 1), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data != 1), expected);
+  nd::array expected = nd::array{true, false, false, true, false};
+  EXPECT_ARRAY_EQ(nd::is_missing(data < 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data > 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data >= 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data <= 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data == 1), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data != 1), expected);
 
-  EXPECT_ARRAY_EQ(nd::is_avail(1 < data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(1 > data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(1 >= data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(1 <= data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(1 == data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(1 != data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(1 < data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(1 > data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(1 >= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(1 <= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(1 == data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(1 != data), expected);
 
-  EXPECT_ARRAY_EQ(nd::is_avail(data < data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data > data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data >= data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data <= data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data == data), expected);
-  EXPECT_ARRAY_EQ(nd::is_avail(data != data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data < data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data > data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data >= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data <= data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data == data), expected);
+  EXPECT_ARRAY_EQ(nd::is_missing(data != data), expected);
 }

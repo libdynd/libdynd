@@ -16,7 +16,6 @@
 #include <dynd/func/min.hpp>
 #include <dynd/func/max.hpp>
 
-
 using namespace std;
 using namespace dynd;
 
@@ -195,7 +194,7 @@ std::map<std::string, nd::callable> &func::get_regfunctions()
     registry["uniform"] = nd::random::uniform::get();
     registry["take"] = nd::take::get();
     registry["sum"] = nd::sum::get();
-    registry["is_avail"] = nd::is_avail::get();
+    registry["is_missing"] = nd::is_missing::get();
     registry["min"] = nd::min::get();
     registry["max"] = nd::max::get();
   }
