@@ -1032,7 +1032,7 @@ namespace ndt {
 
     struct init;
 
-    static child_type children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX];
+    static std::map<std::array<type_id_t, 2>, child_type> children;
 
   public:
     common_type();

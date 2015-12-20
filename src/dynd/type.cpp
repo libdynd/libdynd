@@ -48,7 +48,7 @@ namespace ndt {
     static struct {
       std::string name;
       type_make_t func;
-    } data[DYND_TYPE_ID_MAX + 1];
+    } data[101];
     static size_t size = dim_fragment_type_id + 1;
 
   } // namespace dynd::ndt::registry
@@ -977,12 +977,14 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
+std::map<std::array<type_id_t, 2>, ndt::common_type::child_type> ndt::common_type::children;
+
 struct ndt::common_type::init {
   template <typename TypeIDSequence>
   void on_each()
   {
-    children[front<TypeIDSequence>::value][back<TypeIDSequence>::value] = [](const ndt::type &DYND_UNUSED(tp0),
-                                                                             const ndt::type &DYND_UNUSED(tp1)) {
+    children[{{front<TypeIDSequence>::value, back<TypeIDSequence>::value}}] = [](const ndt::type &DYND_UNUSED(tp0),
+                                                                                 const ndt::type &DYND_UNUSED(tp1)) {
       return ndt::make_type<
           typename std::common_type<typename dynd::type_of<front<TypeIDSequence>::value>::type,
                                     typename dynd::type_of<back<TypeIDSequence>::value>::type>::type>();
@@ -998,16 +1000,16 @@ ndt::common_type::common_type()
   typedef type_id_sequence<int32_type_id, float64_type_id, int64_type_id, float32_type_id, fixed_dim_type_id> J;
 
   for (type_id_t tp_id : i2a<J>()) {
-    children[option_type_id][tp_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
+    children[{{option_type_id, tp_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
       return make_type<option_type>(ndt::common_type(tp0.extended<option_type>()->get_value_type(), tp1));
     };
-    children[tp_id][option_type_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
+    children[{{tp_id, option_type_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
       return make_type<option_type>(ndt::common_type(tp0, tp1.extended<option_type>()->get_value_type()));
     };
-    children[any_kind_type_id][tp_id] = [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &tp1) { return tp1; };
-    children[tp_id][any_kind_type_id] = [](const ndt::type &tp0, const ndt::type &DYND_UNUSED(tp1)) { return tp0; };
+    children[{{any_kind_type_id, tp_id}}] = [](const ndt::type &DYND_UNUSED(tp0), const ndt::type &tp1) { return tp1; };
+    children[{{tp_id, any_kind_type_id}}] = [](const ndt::type &tp0, const ndt::type &DYND_UNUSED(tp1)) { return tp0; };
   }
-  children[fixed_dim_type_id][fixed_dim_type_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
+  children[{{fixed_dim_type_id, fixed_dim_type_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
     if (tp0.extended<fixed_dim_type>()->get_fixed_dim_size() != tp1.extended<fixed_dim_type>()->get_fixed_dim_size()) {
       return ndt::var_dim_type::make(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
                                                       tp1.extended<fixed_dim_type>()->get_element_type()));
@@ -1016,24 +1018,22 @@ ndt::common_type::common_type()
                                ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
                                                 tp1.extended<fixed_dim_type>()->get_element_type()));
   };
-  children[fixed_dim_type_id][var_dim_type_id] = [](const ndt::type &tp0, const ndt::type &tp1) {
+  children[{{fixed_dim_type_id, var_dim_type_id}}] = [](const ndt::type &tp0, const ndt::type &tp1) {
     return ndt::var_dim_type::make(ndt::common_type(tp0.extended<fixed_dim_type>()->get_element_type(),
                                                     tp1.extended<fixed_dim_type>()->get_element_type()));
   };
-  children[var_dim_type_id][fixed_dim_type_id] = children[fixed_dim_type_id][var_dim_type_id];
+  children[{{var_dim_type_id, fixed_dim_type_id}}] = children[{{fixed_dim_type_id, var_dim_type_id}}];
 }
 
 ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp1) const
 {
-  child_type child = children[tp0.get_type_id()][tp1.get_type_id()];
+  child_type child = children[{{tp0.get_type_id(), tp1.get_type_id()}}];
   if (child == NULL) {
     return type();
   }
 
   return child(tp0, tp1);
 }
-
-ndt::common_type::child_type ndt::common_type::children[DYND_TYPE_ID_MAX][DYND_TYPE_ID_MAX];
 
 class ndt::common_type ndt::common_type;
 
