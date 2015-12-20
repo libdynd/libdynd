@@ -401,6 +401,7 @@ set(libdynd_SRC
     src/dynd/search.cpp
     src/dynd/sort.cpp
     src/dynd/type.cpp
+    src/dynd/type_registry.cpp
     src/dynd/typed_data_assign.cpp
     src/dynd/type_promotion.cpp
     src/dynd/exceptions.cpp
@@ -438,6 +439,7 @@ set(libdynd_SRC
     include/dynd/math.hpp
     include/dynd/sort.hpp
     include/dynd/type.hpp
+    include/dynd/type_registry.hpp
     include/dynd/type_sequence.hpp
     include/dynd/typed_data_assign.hpp
     include/dynd/type_promotion.hpp

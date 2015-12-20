@@ -97,6 +97,20 @@ enum type_id_t {
   // Means no type, just like in C. (Different from NumPy)
   void_type_id,
 
+  // "Any", matching any type (dimensions and dtype)
+  any_kind_type_id,
+
+  // "Scalar" matchines any scalar type
+  scalar_kind_type_id,
+  // ...
+  dim_kind_type_id,
+
+  bool_kind_type_id,
+  int_kind_type_id,
+  uint_kind_type_id,
+  float_kind_type_id,
+  complex_kind_type_id,
+
   // A pointer type
   pointer_type_id,
   // A dynamic array type
@@ -133,10 +147,11 @@ enum type_id_t {
   // A dimension made up of offsets
   //  offset_dim_type_id,
 
-  // A struct type with variable layout
-  struct_type_id,
   // A tuple type with variable layout
   tuple_type_id,
+  // A struct type with variable layout
+  struct_type_id,
+
   option_type_id,
 
   // A type that enforces C contiguity
@@ -163,10 +178,6 @@ enum type_id_t {
   kind_sym_type_id,
   // "Int", matching both UInt and SInt
   int_sym_type_id,
-  // "Any", matching any type (dimensions and dtype)
-  any_kind_type_id,
-  // "Scalar" matchines any scalar type
-  scalar_kind_type_id,
 
   // Symbolic types
   callable_type_id,
