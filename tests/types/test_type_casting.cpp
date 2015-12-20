@@ -263,7 +263,7 @@ TEST(TypeCasting, StringToUInt64) {
     EXPECT_EQ(0u, a.as<uint64_t>());
     a.vals() = "18446744073709551615";
     EXPECT_EQ(18446744073709551615ULL, a.as<uint64_t>());
-    EXPECT_THROW(a.vals() = "18446744073709551616", overflow_error);
+    EXPECT_THROW(a.vals() = "18446744073709551616", out_of_range);
     EXPECT_THROW(a.vals() = "-1", invalid_argument);
 
     // Simple "1e5" positive exponent cases are permitted
@@ -271,6 +271,6 @@ TEST(TypeCasting, StringToUInt64) {
     EXPECT_EQ(10000000000000000000ULL, a.as<uint64_t>());
     a.vals() = "1844e15";
     EXPECT_EQ(1844000000000000000ULL, a.as<uint64_t>());
-    EXPECT_THROW(a.vals() = "1845e20", overflow_error);
-    EXPECT_THROW(a.vals() = "1e20", overflow_error);
+    EXPECT_THROW(a.vals() = "1845e20", out_of_range);
+    EXPECT_THROW(a.vals() = "1e20", out_of_range);
 }

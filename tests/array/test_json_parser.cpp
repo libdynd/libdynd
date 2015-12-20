@@ -26,37 +26,6 @@
 using namespace std;
 using namespace dynd;
 
-TEST(JSONParser, BuiltinsFromInteger)
-{
-  nd::array n;
-
-  n = parse_json(ndt::make_type<int8_t>(), "123");
-  EXPECT_EQ(ndt::make_type<int8_t>(), n.get_type());
-  EXPECT_EQ(123, n.as<int8_t>());
-  n = parse_json(ndt::make_type<int16_t>(), "-30000");
-  EXPECT_EQ(ndt::make_type<int16_t>(), n.get_type());
-  EXPECT_EQ(-30000, n.as<int16_t>());
-  n = parse_json(ndt::make_type<int32_t>(), "500000");
-  EXPECT_EQ(ndt::make_type<int32_t>(), n.get_type());
-  EXPECT_EQ(500000, n.as<int32_t>());
-  n = parse_json(ndt::make_type<int64_t>(), "-3000000000");
-  EXPECT_EQ(ndt::make_type<int64_t>(), n.get_type());
-  EXPECT_EQ(-3000000000LL, n.as<int64_t>());
-
-  n = parse_json(ndt::make_type<uint8_t>(), "123");
-  EXPECT_EQ(ndt::make_type<uint8_t>(), n.get_type());
-  EXPECT_EQ(123u, n.as<uint8_t>());
-  n = parse_json(ndt::make_type<uint16_t>(), "50000");
-  EXPECT_EQ(ndt::make_type<uint16_t>(), n.get_type());
-  EXPECT_EQ(50000u, n.as<uint16_t>());
-  n = parse_json(ndt::make_type<uint32_t>(), "500000");
-  EXPECT_EQ(ndt::make_type<uint32_t>(), n.get_type());
-  EXPECT_EQ(500000u, n.as<uint32_t>());
-  n = parse_json(ndt::make_type<uint64_t>(), "3000000000");
-  EXPECT_EQ(ndt::make_type<uint64_t>(), n.get_type());
-  EXPECT_EQ(3000000000ULL, n.as<uint64_t>());
-}
-
 /*
 TEST(JSONParser, OptionString)
 {
@@ -88,36 +57,6 @@ TEST(JSONParser, OptionString)
   EXPECT_TRUE(nd::view(b, "9 * int").equals_exact(nd::view(c, "9 * int")));
 }
 */
-
-TEST(JSONParser, SignedIntegerLimits)
-{
-  nd::array n;
-
-  n = parse_json(ndt::make_type<int8_t>(), "-128");
-  EXPECT_EQ(-128, n.as<int8_t>());
-  n = parse_json(ndt::make_type<int8_t>(), "127");
-  EXPECT_EQ(127, n.as<int8_t>());
-  n = parse_json(ndt::make_type<int16_t>(), "-32768");
-  EXPECT_EQ(-32768, n.as<int16_t>());
-  n = parse_json(ndt::make_type<int16_t>(), "32767");
-  EXPECT_EQ(32767, n.as<int16_t>());
-  n = parse_json(ndt::make_type<int32_t>(), "-2147483648");
-  EXPECT_EQ(-2147483648LL, n.as<int32_t>());
-  n = parse_json(ndt::make_type<int32_t>(), "2147483647");
-  EXPECT_EQ(2147483647, n.as<int32_t>());
-  n = parse_json(ndt::make_type<int64_t>(), "-9223372036854775808");
-  EXPECT_EQ(-9223372036854775807LL - 1, n.as<int64_t>());
-  n = parse_json(ndt::make_type<int64_t>(), "9223372036854775807");
-  EXPECT_EQ(9223372036854775807LL, n.as<int64_t>());
-  EXPECT_THROW(parse_json(ndt::make_type<int8_t>(), "-129"), exception);
-  EXPECT_THROW(parse_json(ndt::make_type<int8_t>(), "128"), exception);
-  EXPECT_THROW(parse_json(ndt::make_type<int16_t>(), "-32769"), exception);
-  EXPECT_THROW(parse_json(ndt::make_type<int16_t>(), "32768"), exception);
-  EXPECT_THROW(parse_json(ndt::make_type<int32_t>(), "-2147483649"), exception);
-  EXPECT_THROW(parse_json(ndt::make_type<int32_t>(), "2147483648"), exception);
-  EXPECT_THROW(parse_json(ndt::make_type<int64_t>(), "-9223372036854775809"), exception);
-  EXPECT_THROW(parse_json(ndt::make_type<int64_t>(), "9223372036854775808"), exception);
-}
 
 TEST(JSONParser, UnsignedIntegerLimits)
 {
@@ -219,61 +158,6 @@ TEST(JSONParser, String)
   EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<std::string>());
 
   EXPECT_THROW(parse_json(ndt::make_type<ndt::string_type>(), "false"), invalid_argument);
-}
-
-TEST(JSONParser, ListBools)
-{
-  nd::array n;
-
-  n = parse_json(ndt::var_dim_type::make(ndt::make_type<bool1>()), "  [true, true, false, false]  ");
-  EXPECT_EQ(ndt::var_dim_type::make(ndt::make_type<bool1>()), n.get_type());
-  EXPECT_TRUE(n(0).as<bool>());
-  EXPECT_TRUE(n(1).as<bool>());
-  EXPECT_FALSE(n(2).as<bool>());
-  EXPECT_FALSE(n(3).as<bool>());
-
-  n = parse_json(ndt::make_fixed_dim(4, ndt::make_type<bool1>()), "  [true, true, false, false]  ");
-  EXPECT_EQ(ndt::make_fixed_dim(4, ndt::make_type<bool1>()), n.get_type());
-  EXPECT_TRUE(n(0).as<bool>());
-  EXPECT_TRUE(n(1).as<bool>());
-  EXPECT_FALSE(n(2).as<bool>());
-  EXPECT_FALSE(n(3).as<bool>());
-
-  EXPECT_THROW(parse_json(ndt::var_dim_type::make(ndt::make_type<bool1>()), "[true, true, false, false] 3.5"),
-               invalid_argument);
-  EXPECT_THROW(parse_json(ndt::make_fixed_dim(4, ndt::make_type<bool1>()), "[true, true, false, false] 3.5"),
-               invalid_argument);
-  EXPECT_THROW(parse_json(ndt::make_fixed_dim(3, ndt::make_type<bool1>()), "[true, true, false, false]"),
-               invalid_argument);
-  EXPECT_THROW(parse_json(ndt::make_fixed_dim(5, ndt::make_type<bool1>()), "[true, true, false, false]"),
-               invalid_argument);
-}
-
-TEST(JSONParser, NestedListInts)
-{
-  nd::array n;
-
-  n = parse_json(ndt::make_fixed_dim(3, ndt::var_dim_type::make(ndt::make_type<int>())),
-                 "  [[1,2,3], [4,5], [6,7,-10,1000] ]  ");
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::var_dim_type::make(ndt::make_type<int>())), n.get_type());
-  EXPECT_EQ(1, n(0, 0).as<int>());
-  EXPECT_EQ(2, n(0, 1).as<int>());
-  EXPECT_EQ(3, n(0, 2).as<int>());
-  EXPECT_EQ(4, n(1, 0).as<int>());
-  EXPECT_EQ(5, n(1, 1).as<int>());
-  EXPECT_EQ(6, n(2, 0).as<int>());
-  EXPECT_EQ(7, n(2, 1).as<int>());
-  EXPECT_EQ(-10, n(2, 2).as<int>());
-  EXPECT_EQ(1000, n(2, 3).as<int>());
-
-  n = parse_json(ndt::var_dim_type::make(ndt::make_fixed_dim(3, ndt::make_type<int>())), "  [[1,2,3], [4,5,2] ]  ");
-  EXPECT_EQ(ndt::var_dim_type::make(ndt::make_fixed_dim(3, ndt::make_type<int>())), n.get_type());
-  EXPECT_EQ(1, n(0, 0).as<int>());
-  EXPECT_EQ(2, n(0, 1).as<int>());
-  EXPECT_EQ(3, n(0, 2).as<int>());
-  EXPECT_EQ(4, n(1, 0).as<int>());
-  EXPECT_EQ(5, n(1, 1).as<int>());
-  EXPECT_EQ(2, n(1, 2).as<int>());
 }
 
 TEST(JSONParser, Struct)
