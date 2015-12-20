@@ -92,6 +92,7 @@ matrix:
     - export CC=clang-3.5
     - export CXX=clang++-3.5
     - travis_retry sudo pip install --install-option="--no-cython-compile" Cython==0.23
+    - travis_retry sudo pip install numpy
     before_script:
     - cd ..
     - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
