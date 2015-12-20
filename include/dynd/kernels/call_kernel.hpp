@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
   template <typename CallableType>
-  struct call_kernel : base_virtual_kernel<call_kernel<CallableType>> {
+  struct call_kernel : base_kernel<call_kernel<CallableType>> {
     static char *data_init(char *DYND_UNUSED(static_data), const ndt::type &dst_tp, intptr_t nsrc,
                            const ndt::type *src_tp, intptr_t nkwd, const nd::array *kwds,
                            const std::map<std::string, ndt::type> &tp_vars)

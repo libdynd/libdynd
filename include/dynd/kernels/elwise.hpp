@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/ellipsis_dim_type.hpp>
 #include <dynd/types/var_dim_type.hpp>
 #include <dynd/types/dim_fragment_type.hpp>
@@ -31,7 +31,7 @@ namespace nd {
      * an elwise callable.
      */
     template <int N>
-    struct elwise_virtual_ck : base_virtual_kernel<elwise_virtual_ck<N>> {
+    struct elwise_virtual_ck : base_kernel<elwise_virtual_ck<N>> {
       static void resolve_dst_type(char *static_data, char *DYND_UNUSED(data), ndt::type &dst_tp, intptr_t nsrc,
                                    const ndt::type *src_tp, intptr_t nkwd, const dynd::nd::array *kwds,
                                    const std::map<std::string, ndt::type> &tp_vars)

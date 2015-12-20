@@ -8,7 +8,6 @@
 #include <dynd/types/fixed_dim_kind_type.hpp>
 #include <dynd/func/reduction.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/kernels/sum_kernel.hpp>
 #include <dynd/kernels/mean_kernel.hpp>
 

@@ -7,7 +7,6 @@
 
 #include <dynd/parse.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/types/time_type.hpp>
 
@@ -154,7 +153,7 @@ namespace nd {
 
     template <>
     struct assign_na_kernel<fixed_dim_type_id, dim_kind>
-        : base_virtual_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind>> {
+        : base_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),

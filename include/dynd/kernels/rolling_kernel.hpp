@@ -8,7 +8,6 @@
 #include <dynd/arrmeta_holder.hpp>
 #include <dynd/callable.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -49,7 +48,7 @@ namespace nd {
       void single(char *dst, char *const *src);
     };
 
-    struct DYND_API rolling_ck : base_virtual_kernel<rolling_ck> {
+    struct DYND_API rolling_ck : base_kernel<rolling_ck> {
       struct static_data_type {
         callable window_op;
         intptr_t window_size;

@@ -333,7 +333,6 @@ set(libdynd_SRC
     include/dynd/kernels/assign_na_kernel.hpp
     include/dynd/kernels/assignment_kernels.hpp
     include/dynd/kernels/base_kernel.hpp
-    include/dynd/kernels/base_virtual_kernel.hpp
     include/dynd/kernels/byteswap_kernels.hpp
     include/dynd/kernels/ckernel_builder.hpp
     include/dynd/kernels/ckernel_common_functions.hpp
