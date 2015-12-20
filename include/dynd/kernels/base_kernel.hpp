@@ -7,8 +7,8 @@
 
 #include <typeinfo>
 
-#include <dynd/type.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
+#include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 namespace nd {
@@ -98,6 +98,14 @@ namespace nd {
                            const array *DYND_UNUSED(kwds), const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
     {
       return NULL;
+    }
+
+    static void resolve_dst_type(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), ndt::type &dst_tp,
+                                 intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
+                                 intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                                 const std::map<std::string, ndt::type> &tp_vars)
+    {
+      dst_tp = ndt::substitute(dst_tp, tp_vars, true);
     }
 
     static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,

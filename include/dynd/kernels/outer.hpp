@@ -85,7 +85,7 @@ namespace nd {
         base_callable *child = reinterpret_cast<callable *>(static_data)->get();
         const ndt::callable_type *child_tp = reinterpret_cast<callable *>(static_data)->get_type();
 
-        if (child->resolve_dst_type != NULL) {
+        if (child_tp->get_return_type().is_symbolic()) {
           child->resolve_dst_type(child->static_data(), NULL, dst_tp, nsrc, src_tp, nkwd, kwds, tp_vars);
         } else {
           dst_tp = ndt::substitute(child_tp->get_return_type(), tp_vars, false);
