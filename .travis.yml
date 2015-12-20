@@ -69,7 +69,7 @@ matrix:
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     script:
     - conda build conda.recipe
-  - language: python
+  - language: generic
     env: DYND_FFTW=OFF VERBOSE=1
     compiler: clang
     python: 2.7
