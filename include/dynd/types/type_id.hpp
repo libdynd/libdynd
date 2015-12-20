@@ -97,12 +97,8 @@ enum type_id_t {
   // Means no type, just like in C. (Different from NumPy)
   void_type_id,
 
-  // "Any", matching any type (dimensions and dtype)
-  any_kind_type_id,
-
-  // "Scalar" matchines any scalar type
-  scalar_kind_type_id,
-  // ...
+  any_kind_type_id,    // "Any", matching any type (dimensions and dtype)
+  scalar_kind_type_id, // "Scalar" matchines any scalar type
   dim_kind_type_id,
 
   bool_kind_type_id,
@@ -111,26 +107,13 @@ enum type_id_t {
   float_kind_type_id,
   complex_kind_type_id,
 
-  // A pointer type
-  pointer_type_id,
-  // A dynamic array type
-  array_type_id,
+  fixed_bytes_type_id, // A bytes buffer of a fixed size
+  bytes_type_id,       // blockref primitive types
 
-  // blockref primitive types
-  bytes_type_id,
-  // A bytes buffer of a fixed size
-  fixed_bytes_type_id,
+  fixed_string_type_id, // A NULL-terminated string buffer of a fixed size
+  char_type_id,         // A single string character
+  string_type_id,       // A variable-sized string type
 
-  // A single string character
-  char_type_id,
-
-  // A variable-sized string type
-  string_type_id,
-  // A NULL-terminated string buffer of a fixed size
-  fixed_string_type_id,
-
-  // A categorical (enum-like) type
-  categorical_type_id,
   // A 32-bit date type
   date_type_id,
   // A 64-bit time type
@@ -140,38 +123,40 @@ enum type_id_t {
   // A 32-bit date type limited to business days
   busdate_type_id,
 
-  // A fixed-sized strided array dimension type
-  fixed_dim_type_id,
-  // A variable-sized array dimension type
-  var_dim_type_id,
-  // A dimension made up of offsets
-  //  offset_dim_type_id,
-
   // A tuple type with variable layout
   tuple_type_id,
   // A struct type with variable layout
   struct_type_id,
 
+  // A fixed-sized strided array dimension type
+  fixed_dim_type_id,
+  // A variable-sized array dimension type
+  var_dim_type_id,
+  // A dimension made up of offsets
+  // offset_dim_type_id,
+
+  categorical_type_id, // A categorical (enum-like) type
   option_type_id,
+  pointer_type_id, // A pointer type
+
+  // Instances of this type are themselves types
+  type_type_id,
+  // A dynamic array type
+  array_type_id,
+  callable_type_id,
+
+  adapt_type_id, // Adapter type
+  expr_type_id,  // Advanced expression types
+  convert_type_id,
+  view_type_id,
 
   // A type that enforces C contiguity
   c_contiguous_type_id,
-
-  // Adapter types
-  adapt_type_id,
-  convert_type_id,
-  view_type_id,
 
   // A CUDA host memory type
   cuda_host_type_id,
   // A CUDA device (global) memory type
   cuda_device_type_id,
-
-  // Advanced expression types
-  expr_type_id,
-
-  // Instances of this type are themselves types
-  type_type_id,
 
   // Named symbolic types
   // Types matching a single type_kind_t, like Bool, UInt, SInt, Real, etc.
@@ -180,7 +165,6 @@ enum type_id_t {
   int_sym_type_id,
 
   // Symbolic types
-  callable_type_id,
   typevar_type_id,
   typevar_dim_type_id,
   typevar_constructed_type_id,
