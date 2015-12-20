@@ -180,8 +180,6 @@ enum type_id_t {
   // The number of types
   static_type_id_max = dim_fragment_type_id
 };
-#define DYND_BUILTIN_TYPE_ID_COUNT 19
-#define DYND_TYPE_ID_MAX 100
 
 template <type_id_t... I>
 using type_id_sequence = integer_sequence<type_id_t, I...>;
@@ -199,7 +197,7 @@ typedef type_id_sequence<fixed_dim_type_id, var_dim_type_id> dim_type_ids;
 
 inline void validate_type_id(type_id_t tp_id)
 {
-  if (tp_id > static_cast<type_id_t>(DYND_TYPE_ID_MAX)) {
+  if (tp_id > static_cast<type_id_t>(static_type_id_max)) {
     throw std::runtime_error("invalid type id");
   }
 }
