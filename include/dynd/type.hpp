@@ -804,32 +804,6 @@ namespace ndt {
     return type(new T(std::forward<ArgTypes>(args)...), false);
   }
 
-  struct type_info {
-    const char *name;
-    size_t nbases;
-    const type_id_t *bases;
-    type_make_t construct;
-    type kind;
-  };
-
-  extern class type_registry {
-    size_t m_size;
-    type_info m_infos[DYND_TYPE_ID_MAX + 1];
-
-  public:
-    type_registry();
-
-    ~type_registry();
-
-    size_t size() const;
-
-    type_id_t emplace(const char *name, size_t nbases, const type_id_t *bases, type_make_t construct, const type &kind);
-
-    type_id_t insert(const char *name, type_id_t tp_id, type_make_t construct, const type &kind);
-
-    const type_info &operator[](type_id_t tp_id) const;
-  } type_registry;
-
   /*
   #define DYND_BOOL_NA (2)
   #define DYND_INT8_NA (std::numeric_limits<int8_t>::min())
