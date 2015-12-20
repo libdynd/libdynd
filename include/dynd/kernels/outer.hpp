@@ -6,7 +6,7 @@
 #pragma once
 
 #include <dynd/arrmeta_holder.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/kernels/elwise.hpp>
 
 namespace dynd {
@@ -14,7 +14,7 @@ namespace nd {
   namespace functional {
 
     template <int N>
-    struct outer_ck : base_virtual_kernel<outer_ck<N>> {
+    struct outer_ck : base_kernel<outer_ck<N>> {
       static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                                   const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
                                   const ndt::type *src_tp, const char *const *src_arrmeta,

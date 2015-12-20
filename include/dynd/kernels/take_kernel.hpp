@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
 
 namespace dynd {
 namespace nd {
@@ -16,10 +15,7 @@ namespace nd {
     const char *m_dst_meta;
     intptr_t m_dim_size, m_src0_stride, m_mask_stride;
 
-    ~masked_take_ck()
-    {
-      get_child()->destroy();
-    }
+    ~masked_take_ck() { get_child()->destroy(); }
 
     void single(char *dst, char *const *src);
 
@@ -38,10 +34,7 @@ namespace nd {
     intptr_t m_dst_dim_size, m_dst_stride, m_index_stride;
     intptr_t m_src0_dim_size, m_src0_stride;
 
-    ~indexed_take_ck()
-    {
-      get_child()->destroy();
-    }
+    ~indexed_take_ck() { get_child()->destroy(); }
 
     void single(char *dst, char *const *src);
 
@@ -52,7 +45,7 @@ namespace nd {
                                 const std::map<std::string, ndt::type> &tp_vars);
   };
 
-  struct DYND_API take_ck : base_virtual_kernel<take_ck> {
+  struct DYND_API take_ck : base_kernel<take_ck> {
     static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                  const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                  const std::map<std::string, ndt::type> &tp_vars);

@@ -6,7 +6,6 @@
 #pragma once
 
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/types/fixed_string_type.hpp>
 
 namespace dynd {

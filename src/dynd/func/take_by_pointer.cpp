@@ -6,7 +6,6 @@
 #include <dynd/func/assignment.hpp>
 #include <dynd/func/take_by_pointer.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -54,7 +53,7 @@ struct take_by_pointer_ck : nd::base_kernel<take_by_pointer_ck, 2> {
   }
 };
 
-struct take_by_pointer_virtual_ck : nd::base_virtual_kernel<take_by_pointer_virtual_ck> {
+struct take_by_pointer_virtual_ck : nd::base_kernel<take_by_pointer_virtual_ck> {
   static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,

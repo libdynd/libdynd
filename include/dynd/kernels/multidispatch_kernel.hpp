@@ -9,7 +9,6 @@
 #include <unordered_map>
 
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
 #include <dynd/type.hpp>
 #include <dynd/callable.hpp>
 
@@ -65,7 +64,7 @@ namespace nd {
       return false;
     }
 
-    struct DYND_API old_multidispatch_ck : base_virtual_kernel<old_multidispatch_ck> {
+    struct DYND_API old_multidispatch_ck : base_kernel<old_multidispatch_ck> {
       static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                    const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                    const std::map<std::string, ndt::type> &tp_vars);
@@ -78,22 +77,22 @@ namespace nd {
     };
 
     template <typename DispatcherType>
-    struct multidispatch_kernel : base_virtual_kernel<multidispatch_kernel<DispatcherType>> {
+    struct multidispatch_kernel : base_kernel<multidispatch_kernel<DispatcherType>> {
       typedef DispatcherType static_data_type;
 
-/*
-      static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
-                             intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
-                             const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
-      {
-        DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
-        callable &child = dispatcher(dst_tp, nsrc, src_tp);
+      /*
+            static char *data_init(char *static_data, const ndt::type &dst_tp, intptr_t nsrc, const ndt::type *src_tp,
+                                   intptr_t DYND_UNUSED(nkwd), const array *DYND_UNUSED(kwds),
+                                   const std::map<std::string, ndt::type> &DYND_UNUSED(tp_vars))
+            {
+              DispatcherType &dispatcher = *reinterpret_cast<static_data_type *>(static_data);
+              callable &child = dispatcher(dst_tp, nsrc, src_tp);
 
-        std::cout << child << std::endl;
+              std::cout << child << std::endl;
 
-        return NULL;
-      }
-*/
+              return NULL;
+            }
+      */
 
       static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                    const ndt::type *src_tp, intptr_t nkwd, const array *kwds,

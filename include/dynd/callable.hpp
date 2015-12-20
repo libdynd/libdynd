@@ -60,22 +60,7 @@ namespace nd {
     DYND_HAS(instantiate);
 
     template <typename KernelType>
-    typename std::enable_if<has_member_single<KernelType, void(char *, char *const *)>::value, single_t>::type
-    get_single_t()
-    {
-      return single_t(&KernelType::single_wrapper::func, KernelType::single_wrapper::ir);
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<!has_member_single<KernelType, void(char *, char *const *)>::value, kernel_targets_t>::type
-    get_targets()
-    {
-      return kernel_targets_t{NULL, NULL, NULL};
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<has_member_single<KernelType, void(char *, char *const *)>::value, kernel_targets_t>::type
-    get_targets()
+    kernel_targets_t get_targets()
     {
       return kernel_targets_t{reinterpret_cast<void *>(static_cast<void (*)(ckernel_prefix *, char *, char *const *)>(
                                   KernelType::single_wrapper)),
@@ -83,19 +68,9 @@ namespace nd {
     }
 
     template <typename KernelType>
-    typename std::enable_if<has_member_single<KernelType, void(char *, char *const *)>::value,
-                            const volatile char *>::type
-    get_ir()
+    const volatile char *get_ir()
     {
       return KernelType::ir;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<!has_member_single<KernelType, void(char *, char *const *)>::value,
-                            const volatile char *>::type
-    get_ir()
-    {
-      return NULL;
     }
 
     template <typename KernelType>

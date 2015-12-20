@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 
 namespace dynd {
 namespace nd {
 
-  struct DYND_API copy_ck : base_virtual_kernel<copy_ck> {
+  struct DYND_API copy_ck : base_kernel<copy_ck> {
     static void resolve_dst_type(char *static_data, char *data, ndt::type &dst_tp, intptr_t nsrc,
                                  const ndt::type *src_tp, intptr_t nkwd, const array *kwds,
                                  const std::map<std::string, ndt::type> &tp_vars);

@@ -7,7 +7,7 @@
 #include <dynd/callable.hpp>
 #include <dynd/kernels/ckernel_common_functions.hpp>
 #include <dynd/kernels/base_kernel.hpp>
-#include <dynd/kernels/base_virtual_kernel.hpp>
+#include <dynd/kernels/base_kernel.hpp>
 #include <dynd/types/tuple_type.hpp>
 #include <dynd/types/option_type.hpp>
 #include <dynd/type.hpp>
@@ -20,7 +20,7 @@ namespace {
 ////////////////////////////////////////////////////////////////
 // Functions for the unary assignment as an callable
 
-struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
+struct unary_assignment_ck : nd::base_kernel<unary_assignment_ck> {
   static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
@@ -44,7 +44,7 @@ struct unary_assignment_ck : nd::base_virtual_kernel<unary_assignment_ck> {
 ////////////////////////////////////////////////////////////////
 // Functions for property access as an callable
 
-struct property_kernel : nd::base_virtual_kernel<property_kernel> {
+struct property_kernel : nd::base_kernel<property_kernel> {
   static intptr_t instantiate(char *static_data, char *DYND_UNUSED(data), void *ckb, intptr_t ckb_offset,
                               const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t DYND_UNUSED(nsrc),
                               const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,

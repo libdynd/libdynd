@@ -28,6 +28,8 @@ namespace nd {
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
                                                                                                                        \
+    static const kernel_request_t kernreq = kernel_request_call;                                                       \
+                                                                                                                       \
     __VA_ARGS__ apply_function_ck(args_type args, kwds_type kwds) : args_type(args), kwds_type(kwds) {}                \
                                                                                                                        \
     __VA_ARGS__ void single(char *dst, char *const *DYND_IGNORE_UNUSED(src))                                           \
@@ -77,6 +79,8 @@ namespace nd {
     typedef apply_function_ck self_type;                                                                               \
     typedef apply_args<type_sequence<A...>, index_sequence<I...>> args_type;                                           \
     typedef apply_kwds<type_sequence<K...>, index_sequence<J...>> kwds_type;                                           \
+                                                                                                                       \
+    static const kernel_request_t kernreq = kernel_request_call;                                                       \
                                                                                                                        \
     __VA_ARGS__ apply_function_ck(args_type args, kwds_type kwds) : args_type(args), kwds_type(kwds) {}                \
                                                                                                                        \

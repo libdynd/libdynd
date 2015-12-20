@@ -7,17 +7,12 @@
 
 #include <typeinfo>
 
+#include <dynd/array.hpp>
 #include <dynd/kernels/ckernel_builder.hpp>
 #include <dynd/types/substitute_typevars.hpp>
 
 namespace dynd {
 namespace nd {
-  namespace detail {
-
-    DYND_HAS_MEMBER(single);
-    DYND_HAS_MEMBER(strided);
-
-  } // namespace dynd::nd::detail
 
   template <typename PrefixType, typename SelfType>
   struct kernel_prefix_wrapper : PrefixType {
@@ -183,7 +178,7 @@ namespace nd {
       return self;                                                                                                     \
     }                                                                                                                  \
                                                                                                                        \
-    __VA_ARGS__ void call(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                     \
+    void call(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                                 \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
       ss << "void single(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();            \
@@ -204,10 +199,9 @@ namespace nd {
                                                                                                                        \
     __VA_ARGS__ static void DYND_EMIT_LLVM(single_wrapper)(ckernel_prefix * self, char *dst, char *const *src)         \
     {                                                                                                                  \
-      typedef typename std::conditional<detail::has_member_single<SelfType, void(char *, char *const *)>::value,       \
-                                        SelfType, base_kernel>::type type;                                             \
-      reinterpret_cast<type *>(self)->single(dst, src);                                                                \
+      reinterpret_cast<SelfType *>(self)->single(dst, src);                                                            \
     }                                                                                                                  \
+                                                                                                                       \
     __VA_ARGS__ static void strided_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,    \
                                             const intptr_t *src_stride, size_t count)                                  \
     {                                                                                                                  \
@@ -222,6 +216,11 @@ namespace nd {
                                                                                                                        \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType, 0> : base_kernel<SelfType> {                                                            \
+    void call(array *dst, array *const *DYND_UNUSED(src))                                                              \
+    {                                                                                                                  \
+      reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), nullptr);                           \
+    }                                                                                                                  \
+                                                                                                                       \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),                            \
                              const intptr_t *DYND_UNUSED(src_stride), size_t count)                                    \
     {                                                                                                                  \
@@ -236,6 +235,15 @@ namespace nd {
   template <typename SelfType, int N>                                                                                  \
   struct base_kernel<SelfType, N> : base_kernel<SelfType> {                                                            \
     static_assert(N > 0, "N must be greater or equal to 0");                                                           \
+                                                                                                                       \
+    void call(array *dst, array *const *src)                                                                           \
+    {                                                                                                                  \
+      char *src_data[N];                                                                                               \
+      for (int i = 0; i < N; ++i) {                                                                                    \
+        src_data[i] = const_cast<char *>(src[i]->cdata());                                                             \
+      }                                                                                                                \
+      reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), src_data);                          \
+    }                                                                                                                  \
                                                                                                                        \
     __VA_ARGS__ void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride,             \
                              size_t count)                                                                             \

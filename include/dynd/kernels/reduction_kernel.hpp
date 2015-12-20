@@ -49,7 +49,7 @@ namespace nd {
       }
     };
 
-    struct DYND_API reduction_virtual_kernel : base_virtual_kernel<reduction_virtual_kernel> {
+    struct DYND_API reduction_virtual_kernel : base_kernel<reduction_virtual_kernel> {
       struct static_data_type {
         callable child;
 
