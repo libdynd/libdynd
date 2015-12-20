@@ -99,8 +99,17 @@ enum type_id_t {
 
   // "Any", matching any type (dimensions and dtype)
   any_kind_type_id,
+
   // "Scalar" matchines any scalar type
   scalar_kind_type_id,
+  // ...
+  dim_kind_type_id,
+
+  bool_kind_type_id,
+  int_kind_type_id,
+  uint_kind_type_id,
+  float_kind_type_id,
+  complex_kind_type_id,
 
   // A pointer type
   pointer_type_id,

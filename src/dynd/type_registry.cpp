@@ -75,6 +75,13 @@ ndt::type_registry::type_registry()
 
   //
   insert("Scalar", any_kind_type_id, make_type<scalar_kind_type>(), nullptr);
+  insert("Dim", any_kind_type_id, type(), nullptr);
+
+  insert("Bool", scalar_kind_type_id, type(), nullptr);
+  insert("Int", scalar_kind_type_id, type(), nullptr);
+  insert("UInt", scalar_kind_type_id, type(), nullptr);
+  insert("Float", scalar_kind_type_id, type(), nullptr);
+  insert("Complex", scalar_kind_type_id, type(), nullptr);
 
   // ...
   insert("pointer", any_kind_type_id, pointer_type::make(any_kind_type::make()), nullptr);
