@@ -69,7 +69,7 @@ matrix:
     - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then conda install --yes anaconda-client; fi
     script:
     - conda build conda.recipe
-  - language: generic
+  - language: python
     env: DYND_FFTW=OFF VERBOSE=1
     compiler: clang
     python: 2.7
@@ -91,8 +91,7 @@ matrix:
     before_install:
     - export CC=clang-3.5
     - export CXX=clang++-3.5
-    - travis_retry sudo pip install --install-option="--no-cython-compile" Cython==0.23
-    - travis_retry sudo pip install numpy
+    - travis_retry pip install --install-option="--no-cython-compile" Cython==0.23
     before_script:
     - cd ..
     - travis_retry git clone --depth=1 https://github.com/libdynd/dynd-python.git
