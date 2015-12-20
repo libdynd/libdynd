@@ -347,7 +347,7 @@ set(libdynd_SRC
     include/dynd/kernels/expression_assignment_kernels.hpp
     include/dynd/kernels/expression_comparison_kernels.hpp
     include/dynd/kernels/fft_kernel.hpp
-    include/dynd/kernels/is_avail_kernel.hpp
+    include/dynd/kernels/is_missing_kernel.hpp
     include/dynd/kernels/max_kernel.hpp
     include/dynd/kernels/min_kernel.hpp
     include/dynd/kernels/multidispatch_kernel.hpp
