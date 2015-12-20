@@ -749,7 +749,7 @@ constexpr type_kind_t typekindof(type_id_t tp_id)
   case type_type_id:
     return type_kind;
   default:
-    throw std::runtime_error("error");
+    return custom_kind;
   }
 }
 
