@@ -31,7 +31,7 @@ namespace ndt {
     uintptr_t *get_arrmeta_data_offsets(char *arrmeta) const { return reinterpret_cast<uintptr_t *>(arrmeta); }
 
   public:
-    struct_type(const nd::array &field_names, const nd::array &field_types, bool variadic);
+    struct_type(const nd::array &field_names, const nd::array &field_types, bool variadic = false);
 
     virtual ~struct_type();
 

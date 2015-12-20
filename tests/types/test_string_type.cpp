@@ -345,22 +345,22 @@ TEST(StringType, StringToInteger)
   EXPECT_EQ(0u, nd::array("0").ucast<uint8_t>().as<uint8_t>());
   EXPECT_EQ(255u, nd::array("255").ucast<uint8_t>().as<uint8_t>());
   EXPECT_THROW(nd::array("-1").ucast<uint8_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("256").ucast<uint8_t>().eval(), overflow_error);
+  EXPECT_THROW(nd::array("256").ucast<uint8_t>().eval(), out_of_range);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint16_t>().as<uint16_t>());
   EXPECT_EQ(65535u, nd::array("65535").ucast<uint16_t>().as<uint16_t>());
   EXPECT_THROW(nd::array("-1").ucast<uint16_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("65536").ucast<uint16_t>().eval(), overflow_error);
+  EXPECT_THROW(nd::array("65536").ucast<uint16_t>().eval(), out_of_range);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint32_t>().as<uint32_t>());
   EXPECT_EQ(4294967295ULL, nd::array("4294967295").ucast<uint32_t>().as<uint32_t>());
   EXPECT_THROW(nd::array("-1").ucast<uint32_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("4294967296").ucast<uint32_t>().eval(), overflow_error);
+  EXPECT_THROW(nd::array("4294967296").ucast<uint32_t>().eval(), out_of_range);
 
   EXPECT_EQ(0u, nd::array("0").ucast<uint64_t>().as<uint64_t>());
   EXPECT_EQ(18446744073709551615ULL, nd::array("18446744073709551615").ucast<uint64_t>().as<uint64_t>());
   EXPECT_THROW(nd::array("-1").ucast<uint64_t>().eval(), invalid_argument);
-  EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), overflow_error);
+  EXPECT_THROW(nd::array("18446744073709551616").ucast<uint64_t>().eval(), out_of_range);
 
   EXPECT_THROW(nd::array("").ucast<uint64_t>().eval(), invalid_argument);
   EXPECT_THROW(nd::array("-").ucast<uint64_t>().eval(), invalid_argument);

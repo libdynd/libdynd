@@ -71,22 +71,27 @@ TEST(Parse, Bool)
   EXPECT_FALSE(parse<bool>("false", nocheck));
 }
 
+TEST(Parse, SignedChar)
+{
+  EXPECT_EQ(static_cast<signed char>(-1), parse<signed char>("-1"));
+  EXPECT_EQ(static_cast<signed char>(6), parse<signed char>("6"));
+
+  EXPECT_EQ(numeric_limits<signed char>::min(), parse<signed char>(to_string(numeric_limits<signed char>::min())));
+  EXPECT_EQ(numeric_limits<signed char>::max(), parse<signed char>(to_string(numeric_limits<signed char>::max())));
+}
+
+TEST(Parse, Short)
+{
+  EXPECT_EQ(numeric_limits<short>::min(), parse<short>(to_string(numeric_limits<short>::min())));
+  EXPECT_EQ(numeric_limits<short>::max(), parse<short>(to_string(numeric_limits<short>::max())));
+}
+
 TEST(Parse, Int)
 {
   EXPECT_EQ(-2, parse<int>("-2"));
-  EXPECT_EQ(-1, parse<int>("-1"));
-  EXPECT_EQ(0, parse<int>("0"));
-  EXPECT_EQ(1, parse<int>("1"));
-  EXPECT_EQ(2, parse<int>("2"));
-  EXPECT_EQ(3, parse<int>("3"));
-  EXPECT_EQ(4, parse<int>("4"));
   EXPECT_EQ(5, parse<int>("5"));
-  EXPECT_EQ(6, parse<int>("6"));
-  EXPECT_EQ(7, parse<int>("7"));
-}
+  EXPECT_EQ(17, parse<int>("17"));
 
-TEST(Parse, IntLimits)
-{
   EXPECT_EQ(numeric_limits<int>::min(), parse<int>(to_string(numeric_limits<int>::min())));
   EXPECT_EQ(numeric_limits<int>::max(), parse<int>(to_string(numeric_limits<int>::max())));
 }
@@ -97,16 +102,30 @@ TEST(Parse, LongLimits)
   EXPECT_EQ(numeric_limits<long>::max(), parse<long>(to_string(numeric_limits<long>::max())));
 }
 
-TEST(Parse, UIntLimits)
+TEST(Parse, LongLongLimits)
+{
+  EXPECT_EQ(numeric_limits<long long>::min(), parse<long long>(to_string(numeric_limits<long long>::min())));
+  EXPECT_EQ(numeric_limits<long long>::max(), parse<long long>(to_string(numeric_limits<long long>::max())));
+}
+
+TEST(Parse, UInt)
 {
   EXPECT_EQ(numeric_limits<unsigned int>::min(), parse<unsigned int>(to_string(numeric_limits<unsigned int>::min())));
   EXPECT_EQ(numeric_limits<unsigned int>::max(), parse<unsigned int>(to_string(numeric_limits<unsigned int>::max())));
+
+  EXPECT_THROW(parse<unsigned int>("-1"), invalid_argument);
+  EXPECT_THROW(parse<unsigned int>("-7"), invalid_argument);
 }
 
-TEST(Parse, UInt8Limits)
+TEST(Parse, UInt8)
 {
-  EXPECT_EQ(0, parse<uint8_t>("0"));
-  EXPECT_EQ(255, parse<uint8_t>("255"));
+  EXPECT_EQ(static_cast<uint8_t>(0), parse<uint8_t>("0"));
+  EXPECT_EQ(static_cast<uint8_t>(255), parse<uint8_t>("255"));
+
+  EXPECT_THROW(parse<uint8_t>("256"), out_of_range);
+  EXPECT_THROW(parse<uint8_t>("391602"), out_of_range);
+  EXPECT_THROW(parse<uint8_t>("-1"), invalid_argument);
+  EXPECT_THROW(parse<uint8_t>("-7"), invalid_argument);
 }
 
 TEST(Parse, UInt16)
@@ -120,7 +139,7 @@ TEST(Parse, UInt16)
   EXPECT_EQ(123, parse<uint16_t>("123"));
   EXPECT_EQ(123, parse<uint16_t>("123", nocheck));
 
-  EXPECT_THROW(parse<uint16_t>("65536"), overflow_error);
+  EXPECT_THROW(parse<uint16_t>("65536"), out_of_range);
   EXPECT_EQ(0, parse<uint16_t>("65536", nocheck));
 
   EXPECT_THROW(parse<uint16_t>("-1"), invalid_argument);
@@ -138,7 +157,7 @@ TEST(Parse, UInt32)
   EXPECT_EQ(123U, parse<uint32_t>("123"));
   EXPECT_EQ(123U, parse<uint32_t>("123", nocheck));
 
-  EXPECT_THROW(parse<uint32_t>("4294967296"), overflow_error);
+  EXPECT_THROW(parse<uint32_t>("4294967296"), out_of_range);
   EXPECT_EQ(0U, parse<uint32_t>("4294967296", nocheck));
 
   EXPECT_THROW(parse<uint32_t>("-1"), invalid_argument);
@@ -312,17 +331,25 @@ TEST(JSONParse, Bool)
   EXPECT_THROW(nd::json::parse(ndt::make_type<bool1>(), "\"\""), invalid_argument);
 }
 
-TEST(JSONParse, Number)
+TEST(JSONParse, Int)
 {
-  //  EXPECT_ARRAY_EQ(32, nd::json::parse("32", ndt::make_type<int>()));
-
+  EXPECT_ARRAY_EQ(static_cast<char>(123), nd::json::parse(ndt::make_type<signed char>(), "123"));
+  EXPECT_ARRAY_EQ(static_cast<short>(-30000), nd::json::parse(ndt::make_type<short>(), "-30000"));
   EXPECT_ARRAY_EQ(-1, nd::json::parse(ndt::make_type<int>(), "-1"));
   EXPECT_ARRAY_EQ(7, nd::json::parse(ndt::make_type<int>(), "7"));
+  EXPECT_ARRAY_EQ(500000, nd::json::parse(ndt::make_type<int>(), "500000"));
+  EXPECT_ARRAY_EQ(-3000000000LL, nd::json::parse(ndt::make_type<long long>(), "-3000000000"));
 
-  EXPECT_ARRAY_EQ(0u, nd::json::parse(ndt::make_type<unsigned int>(), "0")); // Minimum value
-  EXPECT_ARRAY_EQ(32u, nd::json::parse(ndt::make_type<unsigned int>(), "32"));
-  //  EXPECT_ARRAY_EQ(numeric_limits<unsigned int>::max(), nd::json::parse("0", ndt::make_type<unsigned int>())); //
-  //  Minimum value
+  //  std::cout << nd::json::parse(ndt::make_type<int>(), "\"123456\"") << std::endl;
+  // std::exit(-1);
+}
+
+TEST(JSONParse, UInt)
+{
+  EXPECT_ARRAY_EQ(static_cast<unsigned char>(123), nd::json::parse(ndt::make_type<unsigned char>(), "123"));
+  EXPECT_ARRAY_EQ(static_cast<unsigned short>(50000), nd::json::parse(ndt::make_type<unsigned short>(), "50000"));
+  EXPECT_ARRAY_EQ(500000U, nd::json::parse(ndt::make_type<unsigned int>(), "500000"));
+  EXPECT_ARRAY_EQ(3000000000ULL, nd::json::parse(ndt::make_type<unsigned long long>(), "3000000000"));
 }
 
 #define EXPECT_MISSING(TP, ACTUAL)                                                                                     \
@@ -368,16 +395,61 @@ inline int na()
   return DYND_INT32_NA;
 }
 
+TEST(ParseJSON, Struct)
+{
+  /*
+    nd::array n;
+    ndt::type sdt = ndt::struct_type::make(
+        {"id", "amount", "name", "when"},
+        {ndt::make_type<int>(), ndt::make_type<double>(), ndt::make_type<ndt::string_type>(), ndt::date_type::make()});
+
+    // A straightforward struct
+    n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,"
+                        " \"when\":\"2012-09-19\",\"name\":\"Jean\"}");
+    EXPECT_EQ(sdt, n.get_type());
+    EXPECT_EQ(24601, n(0).as<int>());
+    EXPECT_EQ(3.75, n(1).as<double>());
+    EXPECT_EQ("Jean", n(2).as<std::string>());
+    EXPECT_EQ("2012-09-19", n(3).as<std::string>());
+
+    // Default parsing policy discards extra JSON fields
+    n = parse_json(sdt, "{\"amount\":3.75,\"id\":24601,\"discarded\":[1,2,3],"
+                        " \"when\":\"2012-09-19\",\"name\":\"Jean\"}");
+    EXPECT_EQ(sdt, n.get_type());
+    EXPECT_EQ(24601, n(0).as<int>());
+    EXPECT_EQ(3.75, n(1).as<double>());
+    EXPECT_EQ("Jean", n(2).as<std::string>());
+    EXPECT_EQ("2012-09-19", n(3).as<std::string>());
+
+    // Every field must be populated, though
+    EXPECT_THROW(parse_json(sdt, "{\"amount\":3.75,\"discarded\":[1,2,3],"
+                                 " \"when\":\"2012-09-19\",\"name\":\"Jean\"}"),
+                 invalid_argument);
+  */
+}
+
 TEST(JSONParse, FixedDim)
 {
-  nd::array actual;
+  EXPECT_ARRAY_EQ((nd::array{true, true, false, false}),
+                  nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(4, ndt::make_type<bool>()),
+                                  "  [true, true, false, false]  "));
+
+  EXPECT_THROW(
+      nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(4, ndt::make_type<bool>()), "[true, true, false, false] 3.5"),
+      invalid_argument);
+  EXPECT_THROW(
+      nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<bool>()), "[true, true, false, false]"),
+      invalid_argument);
+  EXPECT_THROW(
+      nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(5, ndt::make_type<bool>()), "[true, true, false, false]"),
+      invalid_argument);
 
   EXPECT_ARRAY_EQ((nd::array{0u}),
                   nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<unsigned int>()), "[0]"));
   EXPECT_ARRAY_EQ((nd::array{0u, 1u}),
                   nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<unsigned int>()), "[0, 1]"));
 
-  actual =
+  nd::array actual =
       nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(9, ndt::make_type<ndt::option_type>(ndt::make_type<int>())),
                       "[null, 3, null, -1000, 1, 3, null, null, null]");
   EXPECT_TRUE(actual(0).is_missing());
@@ -390,24 +462,46 @@ TEST(JSONParse, FixedDim)
   EXPECT_TRUE(actual(7).is_missing());
   EXPECT_TRUE(actual(8).is_missing());
 
-/*
-  actual =
-      nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(9, ndt::make_type<ndt::option_type>(ndt::make_type<long>())),
-                      "[null, 3, null, -1000, 1, 3, null, null, null]");
-  EXPECT_TRUE(actual(0).is_missing());
-  EXPECT_EQ(3, actual(1).as<long>());
-  EXPECT_TRUE(actual(2).is_missing());
-  EXPECT_EQ(-1000, actual(3).as<long>());
-  EXPECT_EQ(1, actual(4).as<long>());
-  EXPECT_EQ(3, actual(5).as<long>());
-  EXPECT_TRUE(actual(6).is_missing());
-  EXPECT_TRUE(actual(7).is_missing());
-  EXPECT_TRUE(actual(8).is_missing());
-*/
+  /*
+    actual =
+        nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(9,
+    ndt::make_type<ndt::option_type>(ndt::make_type<long>())),
+                        "[null, 3, null, -1000, 1, 3, null, null, null]");
+    EXPECT_TRUE(actual(0).is_missing());
+    EXPECT_EQ(3, actual(1).as<long>());
+    EXPECT_TRUE(actual(2).is_missing());
+    EXPECT_EQ(-1000, actual(3).as<long>());
+    EXPECT_EQ(1, actual(4).as<long>());
+    EXPECT_EQ(3, actual(5).as<long>());
+    EXPECT_TRUE(actual(6).is_missing());
+    EXPECT_TRUE(actual(7).is_missing());
+    EXPECT_TRUE(actual(8).is_missing());
+  */
+
+  actual = nd::json::parse(ndt::make_fixed_dim(3, ndt::var_dim_type::make(ndt::make_type<int>())),
+                           "  [[1,2,3], [4,5], [6,7,-10,1000] ]  ");
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::var_dim_type::make(ndt::make_type<int>())), actual.get_type());
+  EXPECT_EQ(1, actual(0, 0).as<int>());
+  EXPECT_EQ(2, actual(0, 1).as<int>());
+  EXPECT_EQ(3, actual(0, 2).as<int>());
+  EXPECT_EQ(4, actual(1, 0).as<int>());
+  EXPECT_EQ(5, actual(1, 1).as<int>());
+  EXPECT_EQ(6, actual(2, 0).as<int>());
+  EXPECT_EQ(7, actual(2, 1).as<int>());
+  EXPECT_EQ(-10, actual(2, 2).as<int>());
+  EXPECT_EQ(1000, actual(2, 3).as<int>());
 }
 
 TEST(JSONParse, VarDim)
 {
+  EXPECT_ARRAY_EQ(
+      nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool>())).assign({true, true, false, false}),
+      nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool>()), "  [true, true, false, false]  "));
+
+  EXPECT_THROW(
+      nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool>()), "[true, true, false, false] 3.5"),
+      invalid_argument);
+
   nd::array expected;
 
   expected = nd::empty(ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())).assign({0, 1});
@@ -421,6 +515,18 @@ TEST(JSONParse, VarDim)
                  .assign({false, false, false, false, false, false, false});
   EXPECT_ARRAY_EQ(expected, nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<bool>()),
                                             "[false, \"false\", 0, \"F\", \"n\", \"Off\", \"no\"]"));
+
+  nd::array actual =
+      nd::json::parse(ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<int>())),
+                      "  [[1,2,3], [4,5,2] ]  ");
+  EXPECT_EQ(ndt::make_type<ndt::var_dim_type>(ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<int>())),
+            actual.get_type());
+  EXPECT_EQ(1, actual(0, 0).as<int>());
+  EXPECT_EQ(2, actual(0, 1).as<int>());
+  EXPECT_EQ(3, actual(0, 2).as<int>());
+  EXPECT_EQ(4, actual(1, 0).as<int>());
+  EXPECT_EQ(5, actual(1, 1).as<int>());
+  EXPECT_EQ(2, actual(1, 2).as<int>());
 }
 
 TEST(JSONParse, ListOfOption)

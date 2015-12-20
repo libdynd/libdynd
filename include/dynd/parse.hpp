@@ -719,7 +719,7 @@ parse(const char *begin, const char *end, nocheck_t DYND_UNUSED(nocheck))
   while (begin < end) {
     char c = *begin;
     if ('0' <= c && c <= '9') {
-      result = (result * 10u) + static_cast<uint32_t>(c - '0');
+      result = (result * 10u) + static_cast<T>(c - '0');
     }
     else if (c == 'e' || c == 'E') {
       // Accept "1e5", "1e+5" integers with a positive exponent,
@@ -922,7 +922,11 @@ std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T
     if ('0' <= c && c <= '9') {
       result = (result * 10u) + static_cast<T>(c - '0');
       if (result < prev_result) {
-        raise_string_cast_overflow_error(ndt::make_type<T>(), begin, end);
+        std::stringstream ss;
+        ss << "overflow converting string ";
+        ss.write(begin, end - begin);
+        ss << " to " << ndt::make_type<T>();
+        throw std::out_of_range(ss.str());
       }
     }
     else {
@@ -964,7 +968,11 @@ std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T
             for (int i = 0; i < exponent; ++i) {
               result = result * 10u;
               if (result < prev_result) {
-                raise_string_cast_overflow_error(ndt::make_type<T>(), begin, end);
+                std::stringstream ss;
+                ss << "overflow converting string ";
+                ss.write(begin, end - begin);
+                ss << " to " << ndt::make_type<T>();
+                throw std::out_of_range(ss.str());
               }
               prev_result = result;
             }
@@ -972,12 +980,16 @@ std::enable_if_t<is_unsigned<T>::value && is_integral<T>::value && !is_boolean<T
           }
         }
       }
-      raise_string_cast_error(ndt::make_type<T>(), begin, end);
-      break;
+      std::stringstream ss;
+      ss << "cannot cast string ";
+      ss.write(begin, end - begin);
+      ss << " to " << ndt::make_type<T>();
+      throw std::invalid_argument(ss.str());
     }
     ++begin;
     prev_result = result;
   }
+
   return result;
 }
 
@@ -1438,14 +1450,29 @@ namespace nd {
     extern DYND_API struct parse : declfunc<parse> {
       array operator()(const ndt::type &ret_tp, const char *begin, const char *end)
       {
+        skip_whitespace(begin, end);
+
         ndt::type dst_tp2 = ret_tp;
         char *args_data[2] = {reinterpret_cast<char *>(&begin), reinterpret_cast<char *>(&end)};
-        return get()->call(dst_tp2, 0, nullptr, nullptr, args_data, 0, nullptr, std::map<std::string, ndt::type>());
+        nd::array ret =
+            get()->call(dst_tp2, 0, nullptr, nullptr, args_data, 0, nullptr, std::map<std::string, ndt::type>());
+
+        skip_whitespace(begin, end);
+        if (begin != end) {
+          throw json_parse_error(begin, "unexpected trailing JSON text", ret_tp);
+        }
+
+        return ret;
       }
 
       array operator()(const ndt::type &ret_tp, const char *begin)
       {
-        return (*this)(ret_tp, begin, begin + strlen(begin));
+        return (*this)(ret_tp, begin, begin + std::strlen(begin));
+      }
+
+      array operator()(const ndt::type &ret_tp, const std::string &s)
+      {
+        return (*this)(ret_tp, s.c_str(), s.c_str() + s.size());
       }
 
       static DYND_API callable make();
