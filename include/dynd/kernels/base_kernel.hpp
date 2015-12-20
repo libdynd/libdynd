@@ -136,7 +136,7 @@ namespace nd {
    * as the reduction ckernel, more is known, in which case
    * CKP may be overriden.
    */
-  template <typename SelfType, int... N>
+  template <typename SelfType, size_t... N>
   struct base_kernel;
 
 /**
@@ -181,7 +181,7 @@ namespace nd {
     void call(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                                 \
     {                                                                                                                  \
       std::stringstream ss;                                                                                            \
-      ss << "void single(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();            \
+      ss << "void call(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();            \
       throw std::runtime_error(ss.str());                                                                              \
     }                                                                                                                  \
                                                                                                                        \
@@ -232,14 +232,12 @@ namespace nd {
     }                                                                                                                  \
   };                                                                                                                   \
                                                                                                                        \
-  template <typename SelfType, int N>                                                                                  \
+  template <typename SelfType, size_t N>                                                                               \
   struct base_kernel<SelfType, N> : base_kernel<SelfType> {                                                            \
-    static_assert(N > 0, "N must be greater or equal to 0");                                                           \
-                                                                                                                       \
     void call(array *dst, array *const *src)                                                                           \
     {                                                                                                                  \
       char *src_data[N];                                                                                               \
-      for (int i = 0; i < N; ++i) {                                                                                    \
+      for (size_t i = 0; i < N; ++i) {                                                                                 \
         src_data[i] = const_cast<char *>(src[i]->cdata());                                                             \
       }                                                                                                                \
       reinterpret_cast<SelfType *>(this)->single(const_cast<char *>(dst->cdata()), src_data);                          \
@@ -254,7 +252,7 @@ namespace nd {
       for (size_t i = 0; i != count; ++i) {                                                                            \
         self->single(dst, src_copy);                                                                                   \
         dst += dst_stride;                                                                                             \
-        for (int j = 0; j < N; ++j) {                                                                                  \
+        for (size_t j = 0; j < N; ++j) {                                                                               \
           src_copy[j] += src_stride[j];                                                                                \
         }                                                                                                              \
       }                                                                                                                \

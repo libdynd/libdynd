@@ -6,7 +6,7 @@
 #include <dynd/functional.hpp>
 #include <dynd/option.hpp>
 #include <dynd/kernels/assign_na_kernel.hpp>
-#include <dynd/kernels/is_avail_kernel.hpp>
+#include <dynd/kernels/is_missing_kernel.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -48,17 +48,17 @@ DYND_API nd::callable nd::assign_na::make()
 
 DYND_API struct nd::assign_na nd::assign_na;
 
-DYND_API nd::callable nd::is_avail::make()
+DYND_API nd::callable nd::is_missing::make()
 {
   typedef type_id_sequence<bool_type_id, int8_type_id, int16_type_id, int32_type_id, int64_type_id, int128_type_id,
                            float32_type_id, float64_type_id, complex_float32_type_id, complex_float64_type_id,
                            void_type_id, string_type_id, fixed_dim_type_id, date_type_id, time_type_id,
                            datetime_type_id> type_ids;
 
-  std::map<type_id_t, callable> children = callable::make_all<is_avail_kernel, type_ids>();
+  std::map<type_id_t, callable> children = callable::make_all<is_missing_kernel, type_ids>();
   std::array<callable, 2> dim_children;
 
-  callable self = functional::call<is_avail>(ndt::type("(Any) -> Any"));
+  callable self = functional::call<is_missing>(ndt::type("(Any) -> Any"));
 
   for (auto tp_id : {fixed_dim_type_id, var_dim_type_id}) {
     dim_children[tp_id - fixed_dim_type_id] = functional::elwise(self);
@@ -82,4 +82,4 @@ DYND_API nd::callable nd::is_avail::make()
                               });
 }
 
-DYND_API struct nd::is_avail nd::is_avail;
+DYND_API struct nd::is_missing nd::is_missing;
