@@ -11,7 +11,9 @@ namespace dynd {
 namespace nd {
 
   struct view_kernel : base_kernel<view_kernel> {
-    void single(array *dst, array *const *src)
+    static const kernel_request_t kernreq = kernel_request_call;
+
+    void call(array *dst, array *const *src)
     {
       const ndt::type &dst_tp = dst->get_type();
       if (!dst_tp.is_builtin()) {

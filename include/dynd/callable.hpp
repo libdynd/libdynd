@@ -60,21 +60,6 @@ namespace nd {
     DYND_HAS(instantiate);
 
     template <typename KernelType>
-    typename std::enable_if<!has_member_single<KernelType, void(array *, array *const *)>::value,
-                            kernel_request_t>::type
-    get_kernreq()
-    {
-      return kernel_request_single;
-    }
-
-    template <typename KernelType>
-    typename std::enable_if<has_member_single<KernelType, void(array *, array *const *)>::value, kernel_request_t>::type
-    get_kernreq()
-    {
-      return kernel_request_array;
-    }
-
-    template <typename KernelType>
     typename std::enable_if<has_member_single<KernelType, void(char *, char *const *)>::value, single_t>::type
     get_single_t()
     {
@@ -398,38 +383,36 @@ namespace nd {
     template <typename KernelType>
     static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type make()
     {
-      return callable(ndt::traits<KernelType>::equivalent(), detail::get_kernreq<KernelType>(),
-                      detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                      detail::get_instantiate<KernelType>());
+      return callable(ndt::traits<KernelType>::equivalent(), KernelType::kernreq, detail::get_targets<KernelType>(),
+                      detail::get_ir<KernelType>(), detail::get_data_init<KernelType>(),
+                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType>
     static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type make(const ndt::type &tp)
     {
-      return callable(tp, detail::get_kernreq<KernelType>(), detail::get_targets<KernelType>(),
-                      detail::get_ir<KernelType>(), detail::get_data_init<KernelType>(),
-                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
+      return callable(tp, KernelType::kernreq, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
+                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
+                      detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
     static typename std::enable_if<ndt::has_traits<KernelType>::value, callable>::type
     make(StaticDataType &&static_data)
     {
-      return callable(ndt::traits<KernelType>::equivalent(), detail::get_kernreq<KernelType>(),
-                      detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
-                      std::forward<StaticDataType>(static_data), detail::get_data_init<KernelType>(),
-                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
+      return callable(ndt::traits<KernelType>::equivalent(), KernelType::kernreq, detail::get_targets<KernelType>(),
+                      detail::get_ir<KernelType>(), std::forward<StaticDataType>(static_data),
+                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
+                      detail::get_instantiate<KernelType>());
     }
 
     template <typename KernelType, typename StaticDataType>
     static typename std::enable_if<!ndt::has_traits<KernelType>::value, callable>::type
     make(const ndt::type &tp, StaticDataType &&static_data)
     {
-      return callable(tp, detail::get_kernreq<KernelType>(), detail::get_targets<KernelType>(),
-                      detail::get_ir<KernelType>(), std::forward<StaticDataType>(static_data),
-                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
-                      detail::get_instantiate<KernelType>());
+      return callable(tp, KernelType::kernreq, detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
+                      std::forward<StaticDataType>(static_data), detail::get_data_init<KernelType>(),
+                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>());
     }
 
     template <template <int> class CKT, typename T>
@@ -486,7 +469,7 @@ namespace nd {
   template <typename CallableType, typename KernelType, typename... ArgTypes>
   std::enable_if_t<ndt::has_traits<KernelType>::value, callable> make_callable(ArgTypes &&... args)
   {
-    return callable(new CallableType(ndt::traits<KernelType>::equivalent(), detail::get_kernreq<KernelType>(),
+    return callable(new CallableType(ndt::traits<KernelType>::equivalent(), KernelType::kernreq,
                                      detail::get_targets<KernelType>(), detail::get_ir<KernelType>(),
                                      detail::get_data_init<KernelType>(), detail::get_resolve_dst_type<KernelType>(),
                                      detail::get_instantiate<KernelType>(), std::forward<ArgTypes>(args)...),
@@ -497,7 +480,7 @@ namespace nd {
   std::enable_if_t<!ndt::has_traits<KernelType>::value, callable> make_callable(const ndt::type &tp,
                                                                                 ArgTypes &&... args)
   {
-    return callable(new CallableType(tp, detail::get_kernreq<KernelType>(), detail::get_targets<KernelType>(),
+    return callable(new CallableType(tp, KernelType::kernreq, detail::get_targets<KernelType>(),
                                      detail::get_ir<KernelType>(), detail::get_data_init<KernelType>(),
                                      detail::get_resolve_dst_type<KernelType>(), detail::get_instantiate<KernelType>(),
                                      std::forward<ArgTypes>(args)...),

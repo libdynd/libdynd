@@ -34,34 +34,14 @@ struct kernel_targets_t {
 enum {
   /** Kernel function in host memory */
   kernel_request_host = 0x00000000,
-  /** Kernel function in CUDA device memory */
-  kernel_request_cuda_device = 0x00000001,
-/** Kernel function in both host memory and CUDA device memory */
-#ifdef DYND_CUDA
-  kernel_request_cuda_host_device = 0x00000002,
-#else
-  kernel_request_cuda_host_device = kernel_request_host,
-#endif
 
-  /** Kernel function kernel_single_t, "(T1, T2, ...) -> R" */
-  kernel_request_single = 0x00000008,
-  /** ... */
-  kernel_request_array = 0x00000020,
-  /** Kernel function kernel_strided_t, "(T1, T2, ...) -> R" */
-  kernel_request_strided = 0x00000010,
+  kernel_request_call = 0x00000000,
+  kernel_request_single = 0x00000001,
+  kernel_request_strided = 0x00000003,
 
-  /** ... */
-  kernel_request_memory = 0x00000007,
+  kernel_request_data_only = 0x00000001
 };
 typedef uint32_t kernel_request_t;
-
-inline kernel_request_t kernel_request_without_function(kernel_request_t kernreq) { return kernreq & 0x00000007; }
-
-/*
-kernel_request_t without_memory(kernel_request_t kernreq) {
-
-}
-*/
 
 /**
  * This is the struct which begins the memory layout

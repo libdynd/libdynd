@@ -55,8 +55,7 @@ static void BM_Func_Apply_Callable(benchmark::State &state)
   // nd::array b = 11;
   //  nd::array c = nd::empty(af.get_type()->get_return_type());
   while (state.KeepRunning()) {
-     overloads[int32_type_id];
-
+    overloads[int32_type_id];
   }
 }
 

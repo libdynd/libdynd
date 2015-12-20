@@ -45,14 +45,10 @@ namespace nd {
       return get_self(ckb, ckb_offset);
     }
 
-    static SelfType *reserve(void *ckb, kernel_request_t kernreq, intptr_t ckb_offset, size_t requested_capacity)
+    static SelfType *reserve(void *ckb, kernel_request_t DYND_UNUSED(kernreq), intptr_t ckb_offset,
+                             size_t requested_capacity)
     {
-      switch (kernreq & kernel_request_memory) {
-      case kernel_request_host:
-        return reserve(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), ckb_offset, requested_capacity);
-      default:
-        throw std::invalid_argument("unrecognized ckernel request");
-      }
+      return reserve(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), ckb_offset, requested_capacity);
     }
 
     /**
@@ -123,13 +119,8 @@ namespace nd {
                                                               intptr_t &inout_ckb_offset, A &&... args)
   {
     // Disallow requests from a different memory space
-    switch (kernreq & kernel_request_memory) {
-    case kernel_request_host:
-      return SelfType::make(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq, inout_ckb_offset,
-                            std::forward<A>(args)...);
-    default:
-      throw std::invalid_argument("unrecognized ckernel request for the wrong memory space");
-    }
+    return SelfType::make(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), kernreq, inout_ckb_offset,
+                          std::forward<A>(args)...);
   }
 
   /**
@@ -157,6 +148,8 @@ namespace nd {
 #define BASE_KERNEL(KERNREQ, ...)                                                                                      \
   template <typename SelfType>                                                                                         \
   struct base_kernel<SelfType> : kernel_prefix_wrapper<ckernel_prefix, SelfType> {                                     \
+    static const kernel_request_t kernreq = kernel_request_single;                                                     \
+                                                                                                                       \
     typedef kernel_prefix_wrapper<ckernel_prefix, SelfType> parent_type;                                               \
                                                                                                                        \
     /** Initializes just the ckernel_prefix function member. */                                                        \
@@ -165,13 +158,11 @@ namespace nd {
     {                                                                                                                  \
       SelfType *self = parent_type::init(rawself, kernreq, std::forward<A>(args)...);                                  \
       switch (kernreq) {                                                                                               \
-      case kernel_request_single:                                                                                      \
-        self->function =                                                                                               \
-            reinterpret_cast<void *>(static_cast<void (*)(ckernel_prefix *, char *, char *const *)>(single_wrapper));  \
+      case kernel_request_call:                                                                                        \
+        self->function = reinterpret_cast<void *>(call_wrapper);                                                       \
         break;                                                                                                         \
-      case kernel_request_array:                                                                                       \
-        self->function = reinterpret_cast<void *>(                                                                     \
-            static_cast<void (*)(ckernel_prefix *, array *, array * const *)>(single_wrapper));                        \
+      case kernel_request_single:                                                                                      \
+        self->function = reinterpret_cast<void *>(single_wrapper);                                                     \
         break;                                                                                                         \
       case kernel_request_strided:                                                                                     \
         self->function = reinterpret_cast<void *>(strided_wrapper);                                                    \
@@ -182,6 +173,18 @@ namespace nd {
       }                                                                                                                \
                                                                                                                        \
       return self;                                                                                                     \
+    }                                                                                                                  \
+                                                                                                                       \
+    __VA_ARGS__ void call(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                     \
+    {                                                                                                                  \
+      std::stringstream ss;                                                                                            \
+      ss << "void single(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();            \
+      throw std::runtime_error(ss.str());                                                                              \
+    }                                                                                                                  \
+                                                                                                                       \
+    __VA_ARGS__ static void call_wrapper(ckernel_prefix *self, array *dst, array *const *src)                          \
+    {                                                                                                                  \
+      reinterpret_cast<SelfType *>(self)->call(dst, src);                                                              \
     }                                                                                                                  \
                                                                                                                        \
     __VA_ARGS__ void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))                                     \
@@ -197,21 +200,6 @@ namespace nd {
                                         SelfType, base_kernel>::type type;                                             \
       reinterpret_cast<type *>(self)->single(dst, src);                                                                \
     }                                                                                                                  \
-                                                                                                                       \
-    __VA_ARGS__ void single(array *DYND_UNUSED(dst), array *const *DYND_UNUSED(src))                                   \
-    {                                                                                                                  \
-      std::stringstream ss;                                                                                            \
-      ss << "void single(array *dst, array *const *src) is not implemented in " << typeid(SelfType).name();            \
-      throw std::runtime_error(ss.str());                                                                              \
-    }                                                                                                                  \
-                                                                                                                       \
-    __VA_ARGS__ static void single_wrapper(ckernel_prefix *self, array *dst, array *const *src)                        \
-    {                                                                                                                  \
-      typedef typename std::conditional<detail::has_member_single<SelfType, void(array *, array * const *)>::value,    \
-                                        SelfType, base_kernel>::type type;                                             \
-      reinterpret_cast<type *>(self)->single(dst, src);                                                                \
-    }                                                                                                                  \
-                                                                                                                       \
     __VA_ARGS__ static void strided_wrapper(ckernel_prefix *self, char *dst, intptr_t dst_stride, char *const *src,    \
                                             const intptr_t *src_stride, size_t count)                                  \
     {                                                                                                                  \
