@@ -129,6 +129,12 @@ namespace nd {
 
     base_callable() : use_count(0), data_init(NULL), resolve_dst_type(NULL), instantiate(NULL) {}
 
+    base_callable(const ndt::type &tp, const base_callable &other)
+        : use_count(0), tp(tp), kernreq(other.kernreq), targets(other.targets), ir(other.ir),
+          data_init(other.data_init), resolve_dst_type(other.resolve_dst_type), instantiate(other.instantiate)
+    {
+    }
+
     base_callable(const ndt::type &tp, kernel_targets_t targets)
         : use_count(0), tp(tp), kernreq(kernel_request_single), targets(targets), data_init(&ckernel_prefix::data_init),
           resolve_dst_type(NULL), instantiate(&ckernel_prefix::instantiate)

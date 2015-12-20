@@ -335,7 +335,7 @@ namespace nd {
         }
 
         self_type::make(ckb, kernreq, ckb_offset, size, dst_stride, dynd::detail::make_array_wrapper<N>(src_stride));
-        kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;
+        kernreq = kernel_request_strided;
 
         // If there are still dimensions to broadcast, recursively lift more
         if (!finished) {
@@ -414,7 +414,7 @@ namespace nd {
         }
 
         self_type::make(ckb, kernreq, ckb_offset, size, dst_stride);
-        kernreq = (kernreq & kernel_request_memory) | kernel_request_strided;
+        kernreq = kernel_request_strided;
 
         bool finished = dst_ndim == 1;
 
