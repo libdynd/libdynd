@@ -977,6 +977,8 @@ void ndt::type::print_data(std::ostream &o, const char *arrmeta, const char *dat
   }
 }
 
+type_id_t ndt::type::get_base_type_id() const { return type_registry[get_type_id()].bases[0]; }
+
 std::map<std::array<type_id_t, 2>, ndt::common_type::child_type> ndt::common_type::children;
 
 struct ndt::common_type::init {

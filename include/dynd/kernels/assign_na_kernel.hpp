@@ -152,8 +152,7 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<fixed_dim_type_id, dim_kind>
-        : base_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind>> {
+    struct assign_na_kernel<fixed_dim_type_id, dim_kind> : base_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -283,7 +282,7 @@ namespace nd {
   } // namespace dynd::nd::detail
 
   template <type_id_t DstTypeID>
-  struct assign_na_kernel : detail::assign_na_kernel<DstTypeID, type_kind_of<DstTypeID>::value> {
+  struct assign_na_kernel : detail::assign_na_kernel<DstTypeID, typekindof(DstTypeID)> {
   };
 
 } // namespace dynd::nd

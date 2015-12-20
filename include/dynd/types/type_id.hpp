@@ -43,9 +43,6 @@ enum type_kind_t {
   // For tuples
   tuple_kind,
 
-  // For types whose value itself is dynamically typed
-  dynamic_kind,
-
   // For types whose value_type != the type, signals
   // that calculations should look at the value_type for
   // type promotion, etc.
@@ -693,6 +690,68 @@ template <>
 struct type_kind_of<type_type_id> {
   static const type_kind_t value = type_kind;
 };
+
+constexpr type_kind_t typekindof(type_id_t tp_id)
+{
+  switch (tp_id) {
+  case bool_type_id:
+    return bool_kind;
+  case int8_type_id:
+  case int16_type_id:
+  case int32_type_id:
+  case int64_type_id:
+  case int128_type_id:
+    return sint_kind;
+  case uint8_type_id:
+  case uint16_type_id:
+  case uint32_type_id:
+  case uint64_type_id:
+  case uint128_type_id:
+    return uint_kind;
+  case float16_type_id:
+  case float32_type_id:
+  case float64_type_id:
+  case float128_type_id:
+    return real_kind;
+  case complex_float32_type_id:
+  case complex_float64_type_id:
+    return complex_kind;
+  case void_type_id:
+    return void_kind;
+  case var_dim_type_id:
+  case fixed_dim_type_id:
+    return dim_kind;
+  case fixed_bytes_type_id:
+  case bytes_type_id:
+    return bytes_kind;
+  case fixed_string_type_id:
+  case string_type_id:
+    return string_kind;
+  case date_type_id:
+  case datetime_type_id:
+  case time_type_id:
+    return datetime_kind;
+  case tuple_type_id:
+    return tuple_kind;
+  case struct_type_id:
+    return struct_kind;
+  case option_type_id:
+    return option_kind;
+  case char_type_id:
+    return char_kind;
+  case categorical_type_id:
+    return custom_kind;
+  case pointer_type_id:
+  case convert_type_id:
+  case expr_type_id:
+  case view_type_id:
+    return expr_kind;
+  case type_type_id:
+    return type_kind;
+  default:
+    throw std::runtime_error("error");
+  }
+}
 
 namespace detail {
 
