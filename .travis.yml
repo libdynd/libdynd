@@ -72,7 +72,7 @@ matrix:
   - language: python
     env: DYND_FFTW=OFF VERBOSE=1
     compiler: clang
-    python: 2.7
+    python: 3.5
     addons:
       apt:
         sources:
@@ -89,7 +89,6 @@ matrix:
       - $HOME/.cache/pip
       - $HOME/dynd-python/build
     before_install:
-    - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
     - export CC=clang-3.5
     - export CXX=clang++-3.5
     - travis_retry pip install --install-option="--no-cython-compile" Cython==0.23
