@@ -103,6 +103,8 @@ matrix:
     - python setup.py install
     - cd ..
     - python -c "import dynd; dynd.test(exit=True)"
+    after_script:
+    - cd .
 
 language: cpp
 before_install:
@@ -114,7 +116,7 @@ script:
 - make -j4 || exit 1
 - ./tests/test_libdynd
 after_script:
-#- popd
+- popd
 - if [ $TRAVIS_BRANCH == "master" ] && [ $TRAVIS_PULL_REQUEST == "false" ] && [ ${CONDA:-false} == "true" ]; then anaconda --token $ANACONDA_TOKEN upload $(conda build --output conda.recipe) --user dynd --channel dev; fi
 - |
    declare exitCode;
