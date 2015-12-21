@@ -258,14 +258,14 @@ void ndt::base_type::get_scalar_properties_and_functions(std::map<std::string, n
     // additional properties of their own.
     size_t ndim = get_ndim();
     if (ndim == 0) {
-      get_dynamic_array_properties(properties);
-      get_dynamic_array_functions(functions);
+      properties = get_dynamic_array_properties();
+      functions = get_dynamic_array_functions();
     }
     else {
       type dt = get_type_at_dimension(NULL, ndim);
       if (!dt.is_builtin()) {
-        dt.extended()->get_dynamic_array_properties(properties);
-        dt.extended()->get_dynamic_array_functions(functions);
+        properties = dt.extended()->get_dynamic_array_properties();
+        functions = dt.extended()->get_dynamic_array_functions();
       }
       else {
         get_builtin_type_dynamic_array_properties(dt.get_type_id(), properties);
@@ -284,9 +284,15 @@ std::map<std::string, nd::callable> ndt::base_type::get_dynamic_type_functions()
   return std::map<std::string, nd::callable>();
 }
 
-void ndt::base_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &DYND_UNUSED(properties)) const {}
+std::map<std::string, nd::callable> ndt::base_type::get_dynamic_array_properties() const
+{
+  return std::map<std::string, nd::callable>();
+}
 
-void ndt::base_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const {}
+std::map<std::string, nd::callable> ndt::base_type::get_dynamic_array_functions() const
+{
+  return std::map<std::string, nd::callable>();
+}
 
 bool ndt::base_type::adapt_type(const type &DYND_UNUSED(operand_tp), const std::string &DYND_UNUSED(op),
                                 nd::callable &DYND_UNUSED(out_forward), nd::callable &DYND_UNUSED(out_reverse)) const

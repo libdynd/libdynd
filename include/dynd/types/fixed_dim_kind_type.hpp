@@ -70,8 +70,8 @@ namespace ndt {
                std::map<std::string, type> &tp_vars) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
-    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
-    void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
+    std::map<std::string, nd::callable> get_dynamic_array_properties() const;
+    std::map<std::string, nd::callable> get_dynamic_array_functions() const;
 
     virtual type with_element_type(const type &element_tp) const;
 

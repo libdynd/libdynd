@@ -201,9 +201,9 @@ size_t ndt::time_type::make_comparison_kernel(void *ckb, intptr_t ckb_offset, co
 
 ///////// properties on the nd::array
 
-void ndt::time_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::time_type::get_dynamic_array_properties() const
 {
-
+  std::map<std::string, nd::callable> properties;
   properties["hour"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<time_get_hour_kernel>(ndt::type("(Any) -> Any")));
   properties["minute"] = nd::functional::adapt(ndt::make_type<int32_t>(),
@@ -214,10 +214,15 @@ void ndt::time_type::get_dynamic_array_properties(std::map<std::string, nd::call
       ndt::make_type<int32_t>(), nd::callable::make<time_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
   properties["tick"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<time_get_tick_kernel>(ndt::type("(Any) -> Any")));
+
+  return properties;
 }
 
-void ndt::time_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
+std::map<std::string, nd::callable> ndt::time_type::get_dynamic_array_functions() const
 {
+  std::map<std::string, nd::callable> functions;
   functions["to_struct"] = nd::functional::adapt(ndt::type("{hour: int8, minute: int8, second: int8, tick: int32}"),
                                                  nd::callable::make<time_get_struct_kernel>(ndt::type("(Any) -> Any")));
+
+  return functions;
 }

@@ -42,19 +42,8 @@ namespace ndt {
                                                    const eval::eval_context *ectx) const;
 
     // Propagate properties and functions from the value type
-    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
-    {
-      if (!m_value_type.is_builtin()) {
-        m_value_type.extended()->get_dynamic_array_properties(properties);
-      }
-    }
-
-    void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
-    {
-      if (!m_value_type.is_builtin()) {
-        m_value_type.extended()->get_dynamic_array_functions(functions);
-      }
-    }
+    std::map<std::string, nd::callable> get_dynamic_array_properties() const;
+    std::map<std::string, nd::callable> get_dynamic_array_functions() const;
 
     /**
      * Makes an unaligned type to view the given type without alignment

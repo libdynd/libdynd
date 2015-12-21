@@ -231,14 +231,17 @@ std::map<std::string, nd::callable> ndt::date_type::get_dynamic_type_functions()
 
 ///////// properties on the nd::array
 
-void ndt::date_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::date_type::get_dynamic_array_properties() const
 {
+  std::map<std::string, nd::callable> properties;
   properties["year"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<date_get_year_kernel>(ndt::type("(Any) -> Any")));
   properties["month"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                               nd::callable::make<date_get_month_kernel>(ndt::type("(Any) -> Any")));
   properties["day"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                             nd::callable::make<date_get_day_kernel>(ndt::type("(Any) -> Any")));
+
+  return properties;
 }
 
 ///////// functions on the nd::array
@@ -343,13 +346,15 @@ static nd::array function_ndo_replace(const nd::array &n, int32_t year, int32_t 
 }
 */
 
-void ndt::date_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
+std::map<std::string, nd::callable> ndt::date_type::get_dynamic_array_functions() const
 {
+  std::map<std::string, nd::callable> functions;
   functions["to_struct"] = nd::functional::adapt(ndt::type("{year: int16, month: int8, day: int8}"),
                                                  nd::callable::make<date_get_struct_kernel>(ndt::type("(Any) -> Any")));
   functions["weekday"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                                nd::callable::make<date_get_weekday_kernel>(ndt::type("(Any) -> Any")));
 
+  return functions;
   //          "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
   //        "replace", gfunc::make_callable_with_default(&function_ndo_replace, "self", "year", "month", "day",
   //                                                   numeric_limits<int32_t>::max(), numeric_limits<int32_t>::max(),

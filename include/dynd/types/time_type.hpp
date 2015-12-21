@@ -51,8 +51,8 @@ namespace ndt {
                                   const type &src1_dt, const char *src1_arrmeta, comparison_type_t comptype,
                                   const eval::eval_context *ectx) const;
 
-    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
-    void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
+    std::map<std::string, nd::callable> get_dynamic_array_properties() const;
+    std::map<std::string, nd::callable> get_dynamic_array_functions() const;
 
     /** Returns type "time" (with abstract/naive time zone) */
     static const type &make()

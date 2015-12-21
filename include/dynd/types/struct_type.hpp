@@ -90,7 +90,7 @@ namespace ndt {
                                   const eval::eval_context *ectx) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_properties() const;
-    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
+    std::map<std::string, nd::callable> get_dynamic_array_properties() const;
 
     virtual bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                        std::map<std::string, type> &tp_vars) const;

@@ -359,7 +359,7 @@ std::map<std::string, nd::callable> ndt::type::get_array_properties() const
                                               array_properties);
   }
   else {
-    m_ptr->get_dynamic_array_properties(array_properties);
+    array_properties = m_ptr->get_dynamic_array_properties();
   }
 
   return array_properties;
@@ -369,7 +369,7 @@ std::map<std::string, nd::callable> ndt::type::get_array_functions() const
 {
   std::map<std::string, nd::callable> array_functions;
   if (!is_builtin()) {
-    m_ptr->get_dynamic_array_functions(array_functions);
+    array_functions = m_ptr->get_dynamic_array_functions();
   }
 
   return array_functions;

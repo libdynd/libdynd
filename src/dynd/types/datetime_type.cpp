@@ -625,8 +625,9 @@ std::map<std::string, nd::callable> ndt::datetime_type::get_dynamic_type_functio
 
 ///////// properties on the nd::array
 
-void ndt::datetime_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::datetime_type::get_dynamic_array_properties() const
 {
+  std::map<std::string, nd::callable> properties;
   properties["year"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<datetime_get_year_kernel>(ndt::type("(Any) -> Any")));
   properties["month"] = nd::functional::adapt(ndt::make_type<int32_t>(),
@@ -643,14 +644,18 @@ void ndt::datetime_type::get_dynamic_array_properties(std::map<std::string, nd::
       ndt::make_type<int32_t>(), nd::callable::make<datetime_get_microsecond_kernel>(ndt::type("(Any) -> Any")));
   properties["tick"] = nd::functional::adapt(ndt::make_type<int32_t>(),
                                              nd::callable::make<datetime_get_tick_kernel>(ndt::type("(Any) -> Any")));
+
+  return properties;
 }
 
-void ndt::datetime_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
+std::map<std::string, nd::callable> ndt::datetime_type::get_dynamic_array_functions() const
 {
+  std::map<std::string, nd::callable> functions;
   functions["to_struct"] = nd::functional::adapt(
       ndt::type("{year: int16, month: int8, day: int8, hour: int8, minute: int8, second: int8, tick: int32}"),
       nd::callable::make<datetime_get_struct_kernel>(ndt::type("(Any) -> Any")));
 
+  return functions;
   //      pair<std::string, nd::callable>(
   //        "strftime", nd::callable::make<strftime_kernel>(ndt::type("(self: Any, format: string) -> Any"))),
 }
