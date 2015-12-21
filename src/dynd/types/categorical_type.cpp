@@ -590,7 +590,7 @@ static ndt::type property_type_get_category_type(ndt::type d)
   return cd->get_category_type();
 }
 
-void ndt::categorical_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::categorical_type::get_dynamic_type_properties() const
 {
   struct categories_kernel : nd::base_property_kernel<categories_kernel> {
     categories_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
@@ -619,5 +619,5 @@ void ndt::categorical_type::get_dynamic_type_properties(std::map<std::string, nd
       {"storage_type", nd::functional::apply(&property_type_get_storage_type, "self")},
       {"category_type", nd::functional::apply(&property_type_get_category_type, "self")}};
 
-  properties = categorical_type_properties;
+  return categorical_type_properties;
 }

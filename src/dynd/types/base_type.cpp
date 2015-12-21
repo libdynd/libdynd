@@ -274,9 +274,15 @@ void ndt::base_type::get_scalar_properties_and_functions(std::map<std::string, n
   }
 }
 
-void ndt::base_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &DYND_UNUSED(properties)) const {}
+std::map<std::string, nd::callable> ndt::base_type::get_dynamic_type_properties() const
+{
+  return std::map<std::string, nd::callable>();
+}
 
-void ndt::base_type::get_dynamic_type_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const {}
+std::map<std::string, nd::callable> ndt::base_type::get_dynamic_type_functions() const
+{
+  return std::map<std::string, nd::callable>();
+}
 
 void ndt::base_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &DYND_UNUSED(properties)) const {}
 
@@ -321,23 +327,22 @@ DYND_API uint8_t ndt::detail::builtin_kinds[builtin_type_id_count] = {
     void_kind, bool_kind, sint_kind, sint_kind, sint_kind, sint_kind, sint_kind,    uint_kind,    uint_kind, uint_kind,
     uint_kind, uint_kind, real_kind, real_kind, real_kind, real_kind, complex_kind, complex_kind, void_kind};
 
-DYND_API uint8_t ndt::detail::builtin_data_alignments[builtin_type_id_count] = {
-    1,
-    1,
-    alignof(int8),
-    alignof(int16),
-    alignof(int32),
-    alignof(int64),
-    alignof(int128),
-    alignof(uint8),
-    alignof(uint16),
-    alignof(uint32),
-    alignof(uint64),
-    alignof(uint128),
-    alignof(float16),
-    alignof(float32),
-    alignof(float64),
-    alignof(float128),
-    alignof(dynd::complex<float>),
-    alignof(dynd::complex<double>),
-    1};
+DYND_API uint8_t ndt::detail::builtin_data_alignments[builtin_type_id_count] = {1,
+                                                                                1,
+                                                                                alignof(int8),
+                                                                                alignof(int16),
+                                                                                alignof(int32),
+                                                                                alignof(int64),
+                                                                                alignof(int128),
+                                                                                alignof(uint8),
+                                                                                alignof(uint16),
+                                                                                alignof(uint32),
+                                                                                alignof(uint64),
+                                                                                alignof(uint128),
+                                                                                alignof(float16),
+                                                                                alignof(float32),
+                                                                                alignof(float64),
+                                                                                alignof(float128),
+                                                                                alignof(dynd::complex<float>),
+                                                                                alignof(dynd::complex<double>),
+                                                                                1};

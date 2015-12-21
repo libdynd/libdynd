@@ -16,7 +16,8 @@ ndt::typevar_dim_type::typevar_dim_type(const std::string &name, const type &ele
 {
   if (m_name.empty()) {
     throw type_error("dynd typevar name cannot be null");
-  } else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
+  }
+  else if (!is_valid_typevar_name(m_name.c_str(), m_name.c_str() + m_name.size())) {
     stringstream ss;
     ss << "dynd typevar name ";
     print_escaped_utf8_string(ss, m_name);
@@ -53,7 +54,8 @@ bool ndt::typevar_dim_type::is_lossless_assignment(const type &dst_tp, const typ
   if (dst_tp.extended() == this) {
     if (src_tp.extended() == this) {
       return true;
-    } else if (src_tp.get_type_id() == typevar_dim_type_id) {
+    }
+    else if (src_tp.get_type_id() == typevar_dim_type_id) {
       return *dst_tp.extended() == *src_tp.extended();
     }
   }
@@ -65,9 +67,11 @@ bool ndt::typevar_dim_type::operator==(const base_type &rhs) const
 {
   if (this == &rhs) {
     return true;
-  } else if (rhs.get_type_id() != typevar_dim_type_id) {
+  }
+  else if (rhs.get_type_id() != typevar_dim_type_id) {
     return false;
-  } else {
+  }
+  else {
     const typevar_dim_type *tvt = static_cast<const typevar_dim_type *>(&rhs);
     return m_name == tvt->m_name && m_element_tp == tvt->m_element_tp;
   }
@@ -78,7 +82,8 @@ ndt::type ndt::typevar_dim_type::get_type_at_dimension(char **DYND_UNUSED(inout_
 {
   if (i == 0) {
     return type(this, true);
-  } else {
+  }
+  else {
     return m_element_tp.get_type_at_dimension(NULL, i - 1, total_ndim + 1);
   }
 }
@@ -121,7 +126,8 @@ bool ndt::typevar_dim_type::match(const char *arrmeta, const type &candidate_tp,
     // This typevar hasn't been seen yet
     tv_type = candidate_tp;
     return m_element_tp.match(arrmeta, candidate_tp.get_type_at_dimension(NULL, 1), NULL, tp_vars);
-  } else {
+  }
+  else {
     // Make sure the type matches previous
     // instances of the type var
     if (candidate_tp.get_type_id() != tv_type.get_type_id()) {
@@ -153,7 +159,7 @@ static ndt::type property_get_element_type(ndt::type dt)
   return dt.extended<ndt::typevar_dim_type>()->get_element_type();
 }
 
-void ndt::typevar_dim_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::typevar_dim_type::get_dynamic_type_properties() const
 {
   struct name_kernel : nd::base_property_kernel<name_kernel> {
     name_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
@@ -164,8 +170,8 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(std::map<std::string, nd
     void single(char *dst, char *const *DYND_UNUSED(src))
     {
       typed_data_assign(dst_tp, dst_arrmeta, dst, dst_tp,
-                      static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get()->metadata(),
-                      static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).cdata());
+                        static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).get()->metadata(),
+                        static_cast<nd::array>(tp.extended<typevar_dim_type>()->get_name()).cdata());
     }
 
     static void resolve_dst_type(char *DYND_UNUSED(static_data), char *data, ndt::type &dst_tp,
@@ -178,11 +184,11 @@ void ndt::typevar_dim_type::get_dynamic_type_properties(std::map<std::string, nd
     }
   };
 
+  std::map<std::string, nd::callable> properties;
   properties["name"] = nd::callable::make<name_kernel>(type("(self: type) -> Any"));
   properties["element_type"] = nd::functional::apply(&property_get_element_type, "self");
+
+  return properties;
 }
 
-ndt::type ndt::typevar_dim_type::with_element_type(const type &element_tp) const
-{
-  return make(m_name, element_tp);
-}
+ndt::type ndt::typevar_dim_type::with_element_type(const type &element_tp) const { return make(m_name, element_tp); }

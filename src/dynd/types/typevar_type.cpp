@@ -133,7 +133,7 @@ static nd::array property_get_name(const ndt::type &tp)
 }
 */
 
-void ndt::typevar_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::typevar_type::get_dynamic_type_properties() const
 {
   struct name_kernel : nd::base_property_kernel<name_kernel> {
     name_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
@@ -158,7 +158,10 @@ void ndt::typevar_type::get_dynamic_type_properties(std::map<std::string, nd::ca
     }
   };
 
+  std::map<std::string, nd::callable> properties;
   properties["name"] = nd::callable::make<name_kernel>(type("(self: type) -> Any"));
+
+  return properties;
 }
 
 bool ndt::is_valid_typevar_name(const char *begin, const char *end)

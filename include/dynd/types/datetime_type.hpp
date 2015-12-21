@@ -63,8 +63,8 @@ namespace ndt {
     {
     }
 
+    std::map<std::string, nd::callable> get_dynamic_type_functions() const;
     void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
-    void get_dynamic_type_functions(std::map<std::string, nd::callable> &functions) const;
     void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
 
     /** Returns type "datetime" (with abstract/naive time zone) */

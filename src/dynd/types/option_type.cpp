@@ -301,7 +301,10 @@ static ndt::type property_get_value_type(ndt::type tp)
   return pd->get_value_type();
 }
 
-void ndt::option_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::option_type::get_dynamic_type_properties() const
 {
+  std::map<std::string, nd::callable> properties;
   properties["value_type"] = nd::functional::apply(&property_get_value_type, "self");
+
+  return properties;
 }

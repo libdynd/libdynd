@@ -211,7 +211,7 @@ static ndt::type property_get_element_type(ndt::type dt)
   return dt.extended<ndt::ellipsis_dim_type>()->get_element_type();
 }
 
-void ndt::ellipsis_dim_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::ellipsis_dim_type::get_dynamic_type_properties() const
 {
   struct name_kernel : nd::base_property_kernel<name_kernel> {
     name_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
@@ -237,7 +237,10 @@ void ndt::ellipsis_dim_type::get_dynamic_type_properties(std::map<std::string, n
     }
   };
 
+  std::map<std::string, nd::callable> properties;
   properties["element_type"] = nd::functional::apply(&property_get_element_type, "self");
+
+  return properties;
 }
 
 ndt::type ndt::ellipsis_dim_type::with_element_type(const type &element_tp) const

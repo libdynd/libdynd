@@ -145,7 +145,10 @@ static ndt::type property_get_storage_type(ndt::type tp)
   return md->get_element_type();
 }
 
-void ndt::base_memory_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::base_memory_type::get_dynamic_type_properties() const
 {
+  std::map<std::string, nd::callable> properties;
   properties["storage_type"] = nd::functional::apply(&property_get_storage_type, "self");
+
+  return properties;
 }
