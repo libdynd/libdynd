@@ -61,25 +61,11 @@ bool ndt::adapt_type::operator==(const base_type &rhs) const
 std::map<std::string, nd::callable> ndt::adapt_type::get_dynamic_array_properties() const
 {
   const type &udt = m_value_tp.get_dtype();
-  if (!udt.is_builtin()) {
-    return udt.extended()->get_dynamic_array_properties();
-  }
-  else {
-    std::map<std::string, nd::callable> properties;
-    get_builtin_type_dynamic_array_properties(udt.get_type_id(), properties);
-    return properties;
-  }
+  return udt.get_array_properties();
 }
 
 std::map<std::string, nd::callable> ndt::adapt_type::get_dynamic_array_functions() const
 {
   const type &udt = m_value_tp.get_dtype();
-  if (!udt.is_builtin()) {
-    return udt.extended()->get_dynamic_array_functions();
-  }
-  else {
-    return std::map<std::string, nd::callable>();
-    // get_builtin_type_dynamic_array_functions(udt.get_type_id(),
-    // out_functions, out_count);
-  }
+  return udt.get_array_functions();
 }

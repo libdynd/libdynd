@@ -245,35 +245,6 @@ void ndt::base_type::foreach_leading(const char *DYND_UNUSED(arrmeta), char *DYN
   throw std::runtime_error(ss.str());
 }
 
-void ndt::base_type::get_scalar_properties_and_functions(std::map<std::string, nd::callable> &properties,
-                                                         std::map<std::string, nd::callable> &functions) const
-{
-  if ((get_flags() & type_flag_symbolic) == 0) {
-    // This copies properties from the first non-array data type dimension
-    // to
-    // the requested vectors. It is for use by array data types, which by
-    // convention
-    // expose the properties from the first non-array data types, and
-    // possibly add
-    // additional properties of their own.
-    size_t ndim = get_ndim();
-    if (ndim == 0) {
-      properties = get_dynamic_array_properties();
-      functions = get_dynamic_array_functions();
-    }
-    else {
-      type dt = get_type_at_dimension(NULL, ndim);
-      if (!dt.is_builtin()) {
-        properties = dt.extended()->get_dynamic_array_properties();
-        functions = dt.extended()->get_dynamic_array_functions();
-      }
-      else {
-        get_builtin_type_dynamic_array_properties(dt.get_type_id(), properties);
-      }
-    }
-  }
-}
-
 std::map<std::string, nd::callable> ndt::base_type::get_dynamic_type_properties() const
 {
   return std::map<std::string, nd::callable>();

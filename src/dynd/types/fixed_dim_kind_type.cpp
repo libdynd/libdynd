@@ -215,24 +215,12 @@ std::map<std::string, nd::callable> ndt::fixed_dim_kind_type::get_dynamic_type_p
 
 std::map<std::string, nd::callable> ndt::fixed_dim_kind_type::get_dynamic_array_properties() const
 {
-  if (m_element_tp.is_builtin()) {
-    std::map<std::string, nd::callable> properties;
-    get_builtin_type_dynamic_array_properties(m_element_tp.get_type_id(), properties);
-    return properties;
-  }
-  else {
-    return m_element_tp.extended()->get_dynamic_array_properties();
-  }
+  return m_element_tp.get_array_properties();
 }
 
 std::map<std::string, nd::callable> ndt::fixed_dim_kind_type::get_dynamic_array_functions() const
 {
-  if (m_element_tp.is_builtin()) {
-    return std::map<std::string, nd::callable>();
-  }
-  else {
-    return m_element_tp.extended()->get_dynamic_array_functions();
-  }
+  return m_element_tp.get_array_functions();
 }
 
 namespace {

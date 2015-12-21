@@ -475,13 +475,7 @@ nd::array nd::array::p(const char *name) const
 {
   if (!is_null()) {
     ndt::type dt = get_type();
-    std::map<std::string, nd::callable> properties;
-    if (!dt.is_builtin()) {
-      properties = dt.extended()->get_dynamic_array_properties();
-    }
-    else {
-      get_builtin_type_dynamic_array_properties(dt.get_type_id(), properties);
-    }
+    std::map<std::string, nd::callable> properties = dt.get_array_properties();
 
     callable p = properties[name];
     if (!p.is_null()) {

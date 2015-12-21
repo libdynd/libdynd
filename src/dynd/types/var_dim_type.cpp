@@ -28,8 +28,13 @@ ndt::var_dim_type::var_dim_type(const type &element_tp)
   // Propagate just the value-inherited flags from the element
   this->flags |= (element_tp.get_flags() & type_flags_value_inherited);
 
-  // Copy nd::array properties and functions from the first non-array dimension
-  get_scalar_properties_and_functions(m_array_properties, m_array_functions);
+  if ((get_flags() & type_flag_symbolic) == 0) {
+    std::map<std::string, nd::callable> element_properties = element_tp.get_array_properties();
+    m_array_properties.insert(element_properties.begin(), element_properties.end());
+
+    std::map<std::string, nd::callable> element_functions = element_tp.get_array_functions();
+    m_array_functions.insert(element_functions.begin(), element_functions.end());
+  }
 }
 
 ndt::var_dim_type::~var_dim_type() {}

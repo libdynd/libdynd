@@ -103,10 +103,6 @@ namespace ndt {
     int8_t strided_ndim; // The number of strided dimensions (strided/fixed/cfixed) in a row with no pointers, var dims,
                          // etc in between.
 
-    // Helper function for array dimension types
-    void get_scalar_properties_and_functions(std::map<std::string, nd::callable> &properties,
-                                             std::map<std::string, nd::callable> &functions) const;
-
   public:
     typedef uint32_t flags_type;
 
