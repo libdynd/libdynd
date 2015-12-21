@@ -51,23 +51,12 @@ namespace ndt {
     // Propagate properties and functions from the value type
     std::map<std::string, nd::callable> get_dynamic_array_properties() const
     {
-      if (!m_value_type.is_builtin()) {
-        return m_value_type.extended()->get_dynamic_array_properties();
-      }
-      else {
-        std::map<std::string, nd::callable> properties;
-        get_builtin_type_dynamic_array_properties(m_value_type.get_type_id(), properties);
-        return properties;
-      }
+      return m_value_type.get_array_properties();
     }
 
     std::map<std::string, nd::callable> get_dynamic_array_functions() const
     {
-      if (!m_value_type.is_builtin()) {
-        return m_value_type.extended()->get_dynamic_array_functions();
-      }
-
-      return std::map<std::string, nd::callable>();
+      return m_value_type.get_array_functions();
     }
 
     /**

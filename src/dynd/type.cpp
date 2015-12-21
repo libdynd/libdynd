@@ -351,12 +351,44 @@ std::map<std::string, nd::callable> ndt::type::get_functions() const
   return functions;
 }
 
+namespace {
+
+const std::map<std::string, nd::callable> &complex32_array_properties()
+{
+  static const std::map<std::string, nd::callable> complex_array_properties{
+      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float32_type_id>>())},
+      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float32_type_id>>())},
+      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float32_type_id>>())}};
+
+  return complex_array_properties;
+}
+
+const std::map<std::string, nd::callable> &complex64_array_properties()
+{
+  static const std::map<std::string, nd::callable> complex_array_properties{
+      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float64_type_id>>())},
+      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float64_type_id>>())},
+      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float64_type_id>>())}};
+
+  return complex_array_properties;
+}
+
+} // anonymous namespace
+
 std::map<std::string, nd::callable> ndt::type::get_array_properties() const
 {
   std::map<std::string, nd::callable> array_properties;
   if (is_builtin()) {
-    get_builtin_type_dynamic_array_properties(static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr)),
-                                              array_properties);
+    switch (static_cast<type_id_t>(reinterpret_cast<intptr_t>(m_ptr))) {
+    case complex_float32_type_id:
+      array_properties = complex32_array_properties();
+      break;
+    case complex_float64_type_id:
+      array_properties = complex64_array_properties();
+      break;
+    default:
+      break;
+    }
   }
   else {
     array_properties = m_ptr->get_dynamic_array_properties();
@@ -1038,42 +1070,3 @@ ndt::type ndt::common_type::operator()(const ndt::type &tp0, const ndt::type &tp
 }
 
 class ndt::common_type ndt::common_type;
-
-namespace {
-
-const std::map<std::string, nd::callable> &complex32_array_properties()
-{
-  static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float32_type_id>>())},
-      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float32_type_id>>())},
-      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float32_type_id>>())}};
-
-  return complex_array_properties;
-}
-
-const std::map<std::string, nd::callable> &complex64_array_properties()
-{
-  static const std::map<std::string, nd::callable> complex_array_properties{
-      {"real", nd::functional::elwise(nd::callable::make<nd::real_kernel<float64_type_id>>())},
-      {"imag", nd::functional::elwise(nd::callable::make<nd::imag_kernel<float64_type_id>>())},
-      {"conj", nd::functional::elwise(nd::callable::make<nd::conj_kernel<float64_type_id>>())}};
-
-  return complex_array_properties;
-}
-
-} // anonymous namespace
-
-void dynd::get_builtin_type_dynamic_array_properties(type_id_t builtin_type_id,
-                                                     std::map<std::string, nd::callable> &properties)
-{
-  switch (builtin_type_id) {
-  case complex_float32_type_id:
-    properties = complex32_array_properties();
-    break;
-  case complex_float64_type_id:
-    properties = complex64_array_properties();
-    break;
-  default:
-    break;
-  }
-}
