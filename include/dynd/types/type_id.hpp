@@ -43,9 +43,6 @@ enum type_kind_t {
   // For tuples
   tuple_kind,
 
-  // For types whose value itself is dynamically typed
-  dynamic_kind,
-
   // For types whose value_type != the type, signals
   // that calculations should look at the value_type for
   // type promotion, etc.
@@ -692,6 +689,194 @@ struct type_kind_of<view_type_id> {
 template <>
 struct type_kind_of<type_type_id> {
   static const type_kind_t value = type_kind;
+};
+
+template <type_id_t TypeID>
+struct base_type_id_of;
+
+template <>
+struct base_type_id_of<bool_type_id> {
+  static const type_id_t value = bool_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<int8_type_id> {
+  static const type_id_t value = int_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<int16_type_id> {
+  static const type_id_t value = int_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<int32_type_id> {
+  static const type_id_t value = int_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<int64_type_id> {
+  static const type_id_t value = int_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<int128_type_id> {
+  static const type_id_t value = int_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<uint8_type_id> {
+  static const type_id_t value = uint_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<uint16_type_id> {
+  static const type_id_t value = uint_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<uint32_type_id> {
+  static const type_id_t value = uint_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<uint64_type_id> {
+  static const type_id_t value = uint_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<uint128_type_id> {
+  static const type_id_t value = uint_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<float16_type_id> {
+  static const type_id_t value = float_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<float32_type_id> {
+  static const type_id_t value = float_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<float64_type_id> {
+  static const type_id_t value = float_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<float128_type_id> {
+  static const type_id_t value = float_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<complex_float32_type_id> {
+  static const type_id_t value = complex_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<complex_float64_type_id> {
+  static const type_id_t value = complex_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<void_type_id> {
+  static const type_id_t value = any_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<fixed_dim_type_id> {
+  static const type_id_t value = dim_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<var_dim_type_id> {
+  static const type_id_t value = dim_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<pointer_type_id> {
+  static const type_id_t value = any_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<fixed_bytes_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<bytes_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<fixed_string_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<string_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<date_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<time_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<datetime_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<tuple_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<struct_type_id> {
+  static const type_id_t value = tuple_type_id;
+};
+
+template <>
+struct base_type_id_of<option_type_id> {
+  static const type_id_t value = any_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<char_type_id> {
+  static const type_id_t value = scalar_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<categorical_type_id> {
+  static const type_id_t value = any_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<convert_type_id> {
+  static const type_id_t value = any_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<expr_type_id> {
+  static const type_id_t value = any_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<view_type_id> {
+  static const type_id_t value = any_kind_type_id;
+};
+
+template <>
+struct base_type_id_of<type_type_id> {
+  static const type_id_t value = any_kind_type_id;
 };
 
 namespace detail {

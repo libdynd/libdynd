@@ -7,7 +7,6 @@
 
 #include <iostream>
 #include <stdexcept>
-
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/types/base_string_type.hpp>
@@ -366,6 +365,8 @@ namespace ndt {
 
     /** The 'kind' of the type (int, uint, float, etc) */
     type_kind_t get_kind() const { return get_base_type_kind(m_ptr); }
+
+    type_id_t get_base_type_id() const;
 
     /** The alignment of the type */
     size_t get_data_alignment() const { return get_base_type_alignment(m_ptr); }

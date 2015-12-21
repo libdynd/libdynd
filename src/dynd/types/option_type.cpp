@@ -179,7 +179,7 @@ ndt::type ndt::option_type::get_canonical_type() const
 void ndt::option_type::set_from_utf8_string(const char *arrmeta, char *data, const char *utf8_begin,
                                             const char *utf8_end, const eval::eval_context *ectx) const
 {
-  if (m_value_tp.get_kind() != string_kind && m_value_tp.get_kind() != dynamic_kind && parse_na(utf8_begin, utf8_end)) {
+  if (m_value_tp.get_kind() != string_kind && parse_na(utf8_begin, utf8_end)) {
     assign_na(arrmeta, data, ectx);
   }
   else {
