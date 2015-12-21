@@ -530,9 +530,9 @@ void ndt::struct_type::create_array_properties()
   }
 }
 
-void ndt::struct_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::struct_type::get_dynamic_array_properties() const
 {
-  properties = m_array_properties;
+  return m_array_properties;
 }
 
 bool ndt::struct_type::match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,

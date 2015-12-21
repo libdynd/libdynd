@@ -428,10 +428,7 @@ nd::array nd::array::assign(const array &rhs, assign_error_mode error_mode) cons
   return nd::assign({rhs}, {{"error_mode", static_cast<int>(error_mode)}, {"dst", *this}});
 }
 
-nd::array nd::array::assign_na() const
-{
-  return nd::assign_na({}, {{"dst", *this}});
-}
+nd::array nd::array::assign_na() const { return nd::assign_na({}, {{"dst", *this}}); }
 
 void nd::array::flag_as_immutable()
 {
@@ -480,7 +477,7 @@ nd::array nd::array::p(const char *name) const
     ndt::type dt = get_type();
     std::map<std::string, nd::callable> properties;
     if (!dt.is_builtin()) {
-      dt.extended()->get_dynamic_array_properties(properties);
+      properties = dt.extended()->get_dynamic_array_properties();
     }
     else {
       get_builtin_type_dynamic_array_properties(dt.get_type_id(), properties);
@@ -503,8 +500,7 @@ nd::callable nd::array::find_dynamic_function(const char *function_name) const
 {
   ndt::type dt = get_type();
   if (!dt.is_builtin()) {
-    std::map<std::string, callable> functions;
-    dt->get_dynamic_array_functions(functions);
+    std::map<std::string, callable> functions = dt->get_dynamic_array_functions();
     return functions[function_name];
   }
 

@@ -493,7 +493,7 @@ static array_preamble *function___call__(const array_preamble *params, void *DYN
 }
 */
 
-void ndt::callable_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const
+std::map<std::string, nd::callable> ndt::callable_type::get_dynamic_array_functions() const
 {
   /*
     static pair<std::string, gfunc::callable> callable_array_functions[] = {pair<std::string, nd::callable>(
@@ -507,4 +507,6 @@ void ndt::callable_type::get_dynamic_array_functions(std::map<std::string, nd::c
   */
 
   //  *out_functions = callable_array_functions;
+
+  return std::map<std::string, nd::callable>();
 }

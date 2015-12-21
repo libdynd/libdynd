@@ -163,3 +163,21 @@ size_t ndt::view_type::make_value_to_operand_assignment_kernel(void *ckb, intptr
       ckb, ckb_offset, m_value_type.get_data_size(),
       std::min(m_value_type.get_data_alignment(), m_operand_type.get_data_alignment()), kernreq);
 }
+
+std::map<std::string, nd::callable> ndt::view_type::get_dynamic_array_properties() const
+{
+  if (!m_value_type.is_builtin()) {
+    return m_value_type.extended()->get_dynamic_array_properties();
+  }
+
+  return std::map<std::string, nd::callable>();
+}
+
+std::map<std::string, nd::callable> ndt::view_type::get_dynamic_array_functions() const
+{
+  if (!m_value_type.is_builtin()) {
+    return m_value_type.extended()->get_dynamic_array_functions();
+  }
+
+  return std::map<std::string, nd::callable>();
+}

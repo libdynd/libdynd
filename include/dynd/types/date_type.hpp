@@ -48,8 +48,8 @@ namespace ndt {
                                   const eval::eval_context *ectx) const;
 
     std::map<std::string, nd::callable> get_dynamic_type_functions() const;
-    void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
-    void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
+    std::map<std::string, nd::callable> get_dynamic_array_properties() const;
+    std::map<std::string, nd::callable> get_dynamic_array_functions() const;
 
     /** Returns type "date" */
     static const type &make()

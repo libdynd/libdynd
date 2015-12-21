@@ -410,9 +410,12 @@ struct dereference_kernel : nd::base_kernel<dereference_kernel> {
   }
 };
 
-void ndt::pointer_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
+std::map<std::string, nd::callable> ndt::pointer_type::get_dynamic_array_functions() const
 {
+  std::map<std::string, nd::callable> functions;
   functions["dereference"] = nd::callable::make<dereference_kernel>(ndt::type("(self: Any) -> Any"));
+
+  return functions;
 }
 
 namespace {

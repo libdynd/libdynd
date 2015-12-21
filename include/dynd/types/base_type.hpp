@@ -518,7 +518,7 @@ namespace ndt {
      *       first non-array data type in an array type, not just strictly of the
      *       non-array data type.
      */
-    virtual void get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const;
+    virtual std::map<std::string, nd::callable> get_dynamic_array_properties() const;
 
     /**
      * Additional dynamic functions exposed by any nd::array of this type as gfunc::callable.
@@ -528,7 +528,7 @@ namespace ndt {
      *       they are the first non-array data type in an array type, not
      *       just strictly of the non-array data type.
      */
-    virtual void get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const;
+    virtual std::map<std::string, nd::callable> get_dynamic_array_functions() const;
 
     /**
      * Produces forward and reverse callables for adapting the operand

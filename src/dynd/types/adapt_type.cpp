@@ -58,24 +58,27 @@ bool ndt::adapt_type::operator==(const base_type &rhs) const
   return false;
 }
 
-void ndt::adapt_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::adapt_type::get_dynamic_array_properties() const
 {
   const type &udt = m_value_tp.get_dtype();
   if (!udt.is_builtin()) {
-    udt.extended()->get_dynamic_array_properties(properties);
+    return udt.extended()->get_dynamic_array_properties();
   }
   else {
+    std::map<std::string, nd::callable> properties;
     get_builtin_type_dynamic_array_properties(udt.get_type_id(), properties);
+    return properties;
   }
 }
 
-void ndt::adapt_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
+std::map<std::string, nd::callable> ndt::adapt_type::get_dynamic_array_functions() const
 {
   const type &udt = m_value_tp.get_dtype();
   if (!udt.is_builtin()) {
-    udt.extended()->get_dynamic_array_functions(functions);
+    return udt.extended()->get_dynamic_array_functions();
   }
   else {
+    return std::map<std::string, nd::callable>();
     // get_builtin_type_dynamic_array_functions(udt.get_type_id(),
     // out_functions, out_count);
   }

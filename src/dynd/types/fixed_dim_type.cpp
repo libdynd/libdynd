@@ -628,14 +628,14 @@ std::map<std::string, nd::callable> ndt::fixed_dim_type::get_dynamic_type_proper
   return properties;
 }
 
-void ndt::fixed_dim_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::fixed_dim_type::get_dynamic_array_properties() const
 {
-  properties = m_array_properties;
+  return m_array_properties;
 }
 
-void ndt::fixed_dim_type::get_dynamic_array_functions(std::map<std::string, nd::callable> &functions) const
+std::map<std::string, nd::callable> ndt::fixed_dim_type::get_dynamic_array_functions() const
 {
-  functions = m_array_functions;
+  return m_array_functions;
 }
 
 ndt::type ndt::fixed_dim_type::with_element_type(const type &element_tp) const

@@ -573,9 +573,9 @@ static const std::map<std::string, nd::callable> &categorical_array_properties()
   return categorical_array_properties;
 }
 
-void ndt::categorical_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::categorical_type::get_dynamic_array_properties() const
 {
-  properties = categorical_array_properties();
+  return categorical_array_properties();
 }
 
 static ndt::type property_type_get_storage_type(ndt::type d)
