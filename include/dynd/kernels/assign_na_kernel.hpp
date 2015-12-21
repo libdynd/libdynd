@@ -14,11 +14,12 @@ namespace dynd {
 namespace nd {
   namespace detail {
 
-    template <type_id_t DstTypeID, type_kind_t DstTypeKind>
+    template <type_id_t DstTypeID, type_id_t DstBaseTypeID>
     struct assign_na_kernel;
 
     template <>
-    struct assign_na_kernel<bool_type_id, bool_kind> : base_kernel<assign_na_kernel<bool_type_id, bool_kind>, 0> {
+    struct assign_na_kernel<bool_type_id, bool_kind_type_id>
+        : base_kernel<assign_na_kernel<bool_type_id, bool_kind_type_id>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src)) { *dst = 2; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
@@ -36,7 +37,8 @@ namespace nd {
     };
 
     template <type_id_t RetTypeID>
-    struct assign_na_kernel<RetTypeID, sint_kind> : base_kernel<assign_na_kernel<RetTypeID, sint_kind>, 0> {
+    struct assign_na_kernel<RetTypeID, int_kind_type_id>
+        : base_kernel<assign_na_kernel<RetTypeID, int_kind_type_id>, 0> {
       typedef typename type_of<RetTypeID>::type ret_type;
 
       void single(char *dst, char *const *DYND_UNUSED(src))
@@ -54,7 +56,8 @@ namespace nd {
     };
 
     template <type_id_t DstTypeID>
-    struct assign_na_kernel<DstTypeID, uint_kind> : base_kernel<assign_na_kernel<DstTypeID, uint_kind>, 0> {
+    struct assign_na_kernel<DstTypeID, uint_kind_type_id>
+        : base_kernel<assign_na_kernel<DstTypeID, uint_kind_type_id>, 0> {
       typedef typename type_of<DstTypeID>::type dst_type;
 
       void single(char *dst, char *const *DYND_UNUSED(src))
@@ -72,7 +75,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<float32_type_id, real_kind> : base_kernel<assign_na_kernel<float32_type_id, real_kind>, 0> {
+    struct assign_na_kernel<float32_type_id, float_kind_type_id>
+        : base_kernel<assign_na_kernel<float32_type_id, float_kind_type_id>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *reinterpret_cast<uint32_t *>(dst) = DYND_FLOAT32_NA_AS_UINT;
@@ -88,7 +92,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<float64_type_id, real_kind> : base_kernel<assign_na_kernel<float64_type_id, real_kind>, 0> {
+    struct assign_na_kernel<float64_type_id, float_kind_type_id>
+        : base_kernel<assign_na_kernel<float64_type_id, float_kind_type_id>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         *reinterpret_cast<uint64_t *>(dst) = DYND_FLOAT64_NA_AS_UINT;
@@ -104,8 +109,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<complex_float32_type_id, complex_kind>
-        : base_kernel<assign_na_kernel<complex_float32_type_id, complex_kind>, 0> {
+    struct assign_na_kernel<complex_float32_type_id, complex_kind_type_id>
+        : base_kernel<assign_na_kernel<complex_float32_type_id, complex_kind_type_id>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         reinterpret_cast<uint32_t *>(dst)[0] = DYND_FLOAT32_NA_AS_UINT;
@@ -123,8 +128,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<complex_float64_type_id, complex_kind>
-        : base_kernel<assign_na_kernel<complex_float64_type_id, complex_kind>, 0> {
+    struct assign_na_kernel<complex_float64_type_id, complex_kind_type_id>
+        : base_kernel<assign_na_kernel<complex_float64_type_id, complex_kind_type_id>, 0> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         reinterpret_cast<uint64_t *>(dst)[0] = DYND_FLOAT64_NA_AS_UINT;
@@ -142,7 +147,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<void_type_id, void_kind> : base_kernel<assign_na_kernel<void_type_id, void_kind>, 0> {
+    struct assign_na_kernel<void_type_id, any_kind_type_id>
+        : base_kernel<assign_na_kernel<void_type_id, any_kind_type_id>, 0> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src)) {}
 
       void strided(char *DYND_UNUSED(dst), intptr_t DYND_UNUSED(dst_stride), char *const *DYND_UNUSED(src),
@@ -152,7 +158,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<fixed_dim_type_id, dim_kind> : base_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind>> {
+    struct assign_na_kernel<fixed_dim_type_id, dim_kind_type_id>
+        : base_kernel<assign_na_kernel<fixed_dim_type_id, dim_kind_type_id>> {
       static intptr_t instantiate(char *DYND_UNUSED(static_data), char *DYND_UNUSED(data), void *ckb,
                                   intptr_t ckb_offset, const ndt::type &dst_tp, const char *DYND_UNUSED(dst_arrmeta),
                                   intptr_t DYND_UNUSED(nsrc), const ndt::type *DYND_UNUSED(src_tp),
@@ -163,34 +170,34 @@ namespace nd {
       {
         switch (dst_tp.get_dtype().get_type_id()) {
         case bool_type_id:
-          assign_na_kernel<bool_type_id, bool_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<bool_type_id, bool_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case int8_type_id:
-          assign_na_kernel<int8_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<int8_type_id, int_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case int16_type_id:
-          assign_na_kernel<int16_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<int16_type_id, int_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case int32_type_id:
-          assign_na_kernel<int32_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<int32_type_id, int_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case int64_type_id:
-          assign_na_kernel<int64_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<int64_type_id, int_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case int128_type_id:
-          assign_na_kernel<int128_type_id, sint_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<int128_type_id, int_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case float32_type_id:
-          assign_na_kernel<float32_type_id, real_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<float32_type_id, float_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case float64_type_id:
-          assign_na_kernel<float64_type_id, real_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<float64_type_id, float_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case complex_float32_type_id:
-          assign_na_kernel<complex_float32_type_id, complex_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<complex_float32_type_id, complex_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         case complex_float64_type_id:
-          assign_na_kernel<complex_float64_type_id, complex_kind>::make(ckb, kernreq, ckb_offset);
+          assign_na_kernel<complex_float64_type_id, complex_kind_type_id>::make(ckb, kernreq, ckb_offset);
           return ckb_offset;
         default:
           throw type_error("fixed_dim_assign_na: expected built-in type");
@@ -199,7 +206,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<pointer_type_id, expr_kind> : base_kernel<assign_na_kernel<pointer_type_id, expr_kind>, 0> {
+    struct assign_na_kernel<pointer_type_id, any_kind_type_id>
+        : base_kernel<assign_na_kernel<pointer_type_id, any_kind_type_id>, 0> {
       void single(char *DYND_UNUSED(dst), char *const *DYND_UNUSED(src))
       {
         throw std::runtime_error("assign_na for pointers is not yet implemented");
@@ -213,8 +221,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<string_type_id, string_kind>
-        : base_kernel<assign_na_kernel<string_type_id, string_kind>, 1> {
+    struct assign_na_kernel<string_type_id, scalar_kind_type_id>
+        : base_kernel<assign_na_kernel<string_type_id, scalar_kind_type_id>, 1> {
       void single(char *dst, char *const *DYND_UNUSED(src))
       {
         string *std = reinterpret_cast<string *>(dst);
@@ -238,8 +246,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<date_type_id, datetime_kind>
-        : base_kernel<assign_na_kernel<date_type_id, datetime_kind>, 1> {
+    struct assign_na_kernel<date_type_id, scalar_kind_type_id>
+        : base_kernel<assign_na_kernel<date_type_id, scalar_kind_type_id>, 1> {
       void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<int32_t *>(dst) = DYND_DATE_NA; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
@@ -252,8 +260,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<time_type_id, datetime_kind>
-        : base_kernel<assign_na_kernel<time_type_id, datetime_kind>, 1> {
+    struct assign_na_kernel<time_type_id, scalar_kind_type_id>
+        : base_kernel<assign_na_kernel<time_type_id, scalar_kind_type_id>, 1> {
       void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<int64_t *>(dst) = DYND_TIME_NA; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
@@ -266,8 +274,8 @@ namespace nd {
     };
 
     template <>
-    struct assign_na_kernel<datetime_type_id, datetime_kind>
-        : base_kernel<assign_na_kernel<datetime_type_id, datetime_kind>, 1> {
+    struct assign_na_kernel<datetime_type_id, scalar_kind_type_id>
+        : base_kernel<assign_na_kernel<datetime_type_id, scalar_kind_type_id>, 1> {
       void single(char *dst, char *const *DYND_UNUSED(src)) { *reinterpret_cast<int64_t *>(dst) = DYND_DATETIME_NA; }
 
       void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
@@ -282,7 +290,7 @@ namespace nd {
   } // namespace dynd::nd::detail
 
   template <type_id_t DstTypeID>
-  struct assign_na_kernel : detail::assign_na_kernel<DstTypeID, typekindof(DstTypeID)> {
+  struct assign_na_kernel : detail::assign_na_kernel<DstTypeID, base_type_id_of<DstTypeID>::value> {
   };
 
 } // namespace dynd::nd
