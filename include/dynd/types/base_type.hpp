@@ -503,12 +503,12 @@ namespace ndt {
     /**
      * Additional dynamic properties exposed by the type as gfunc::callable.
      */
-    virtual void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
+    virtual std::map<std::string, nd::callable> get_dynamic_type_properties() const;
 
     /**
      * Additional dynamic functions exposed by the type as gfunc::callable.
      */
-    virtual void get_dynamic_type_functions(std::map<std::string, nd::callable> &functions) const;
+    virtual std::map<std::string, nd::callable> get_dynamic_type_functions() const;
 
     /**
      * Additional dynamic properties exposed by any nd::array of this type as gfunc::callable.

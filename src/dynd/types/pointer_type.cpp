@@ -341,9 +341,12 @@ static ndt::type property_get_target_type(ndt::type tp)
   return pd->get_target_type();
 }
 
-void ndt::pointer_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::pointer_type::get_dynamic_type_properties() const
 {
+  std::map<std::string, nd::callable> properties;
   properties["target_type"] = nd::functional::apply(&property_get_target_type, "self");
+
+  return properties;
 }
 
 struct dereference_kernel : nd::base_kernel<dereference_kernel> {

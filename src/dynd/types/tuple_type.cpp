@@ -39,7 +39,7 @@ ndt::tuple_type::tuple_type(type_id_t type_id, const nd::array &field_types, fla
     arrmeta_offset = get_field_count() * sizeof(size_t);
   }
   uintptr_t *arrmeta_offsets = reinterpret_cast<uintptr_t *>(m_arrmeta_offsets.data());
-this->data_alignment = 1;
+  this->data_alignment = 1;
   for (intptr_t i = 0, i_end = get_field_count(); i != i_end; ++i) {
     const type &ft = get_field_type(i);
     size_t field_alignment = ft.get_data_alignment();
@@ -543,7 +543,7 @@ static nd::array property_get_arrmeta_offsets(const ndt::type &tp)
 }
 */
 
-void ndt::tuple_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::tuple_type::get_dynamic_type_properties() const
 {
   struct field_types_kernel : nd::base_property_kernel<field_types_kernel> {
     field_types_kernel(const ndt::type &tp, const ndt::type &dst_tp, const char *dst_arrmeta)
@@ -590,8 +590,11 @@ void ndt::tuple_type::get_dynamic_type_properties(std::map<std::string, nd::call
     }
   };
 
+  std::map<std::string, nd::callable> properties;
   properties["field_types"] = nd::callable::make<field_types_kernel>(type("(self: type) -> Any"));
   properties["arrmeta_offsets"] = nd::callable::make<arrmeta_offsets_kernel>(type("(self: type) -> Any"));
+
+  return properties;
 }
 
 nd::array ndt::pack(intptr_t field_count, const nd::array *field_vals)

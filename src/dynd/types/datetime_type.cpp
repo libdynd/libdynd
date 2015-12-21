@@ -605,7 +605,7 @@ static nd::array fn_type_construct(const ndt::type &DYND_UNUSED(dt),
 }
 */
 
-void ndt::datetime_type::get_dynamic_type_functions(std::map<std::string, nd::callable> &DYND_UNUSED(functions)) const
+std::map<std::string, nd::callable> ndt::datetime_type::get_dynamic_type_functions() const
 {
   //  static pair<string, nd::callable> datetime_type_functions[] = {
   /*
@@ -619,6 +619,8 @@ void ndt::datetime_type::get_dynamic_type_functions(std::map<std::string, nd::ca
   //};
 
   //      sizeof(datetime_type_functions) / sizeof(datetime_type_functions[0]);
+
+  return std::map<std::string, nd::callable>();
 }
 
 ///////// properties on the nd::array

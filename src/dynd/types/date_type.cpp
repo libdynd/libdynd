@@ -220,10 +220,13 @@ nd::functional::elwise(nd::functional::apply(date_from_ymd));
 }
 */
 
-void ndt::date_type::get_dynamic_type_functions(std::map<std::string, nd::callable> &functions) const
+std::map<std::string, nd::callable> ndt::date_type::get_dynamic_type_functions() const
 {
+  std::map<std::string, nd::callable> functions;
   functions["today"] = nd::functional::apply(&fn_type_today, "self");
   functions["__construct__"] = nd::functional::apply(&fn_type_construct, "self", "year", "month", "day");
+
+  return functions;
 }
 
 ///////// properties on the nd::array

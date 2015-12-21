@@ -617,12 +617,15 @@ bool ndt::fixed_dim_type::match(const char *arrmeta, const type &candidate_tp, c
   }
 }
 
-void ndt::fixed_dim_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::fixed_dim_type::get_dynamic_type_properties() const
 {
+  std::map<std::string, nd::callable> properties;
   properties["fixed_dim_size"] =
       nd::functional::apply([](type self) { return self.extended<fixed_dim_type>()->get_fixed_dim_size(); }, "self");
   properties["element_type"] = nd::functional::apply(
       [](type self) { return type(self.extended<fixed_dim_type>()->get_element_type()); }, "self");
+
+  return properties;
 }
 
 void ndt::fixed_dim_type::get_dynamic_array_properties(std::map<std::string, nd::callable> &properties) const

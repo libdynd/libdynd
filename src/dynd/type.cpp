@@ -335,7 +335,7 @@ std::map<std::string, nd::callable> ndt::type::get_properties() const
 {
   std::map<std::string, nd::callable> properties;
   if (!is_builtin()) {
-    m_ptr->get_dynamic_type_properties(properties);
+    return m_ptr->get_dynamic_type_properties();
   }
 
   return properties;
@@ -345,7 +345,7 @@ std::map<std::string, nd::callable> ndt::type::get_functions() const
 {
   std::map<std::string, nd::callable> functions;
   if (!is_builtin()) {
-    m_ptr->get_dynamic_type_functions(functions);
+    return m_ptr->get_dynamic_type_functions();
   }
 
   return functions;

@@ -40,9 +40,9 @@ static const std::map<std::string, nd::callable> &base_string_type_properties()
   return base_string_type_properties;
 }
 
-void ndt::base_string_type::get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const
+std::map<std::string, nd::callable> ndt::base_string_type::get_dynamic_type_properties() const
 {
-  properties = base_string_type_properties();
+  return base_string_type_properties();
 }
 
 /*

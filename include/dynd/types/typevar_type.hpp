@@ -49,7 +49,7 @@ namespace ndt {
     bool match(const char *arrmeta, const type &candidate_tp, const char *candidate_arrmeta,
                std::map<std::string, type> &tp_vars) const;
 
-    void get_dynamic_type_properties(std::map<std::string, nd::callable> &properties) const;
+    std::map<std::string, nd::callable> get_dynamic_type_properties() const;
 
     /** Makes a typevar type with the specified types */
     static type make(const std::string &name) { return type(new typevar_type(name), false); }
