@@ -353,6 +353,17 @@ TEST(JSONParse, UInt)
   EXPECT_ARRAY_EQ(3000000000ULL, nd::json::parse(ndt::make_type<unsigned long long>(), "3000000000"));
 }
 
+TEST(JSONParse, String)
+{
+  EXPECT_ARRAY_EQ("testing one two three",
+                  nd::json::parse(ndt::make_type<ndt::string_type>(), "\"testing one two three\""));
+  EXPECT_ARRAY_EQ(
+      " \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 ",
+      nd::json::parse(ndt::make_type<ndt::string_type>(), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \""));
+
+  EXPECT_THROW(nd::json::parse(ndt::make_type<ndt::string_type>(), "false"), invalid_argument);
+}
+
 #define EXPECT_MISSING(TP, ACTUAL)                                                                                     \
   EXPECT_EQ(TP, ACTUAL.get_type());                                                                                    \
   EXPECT_TRUE(ACTUAL.is_missing());

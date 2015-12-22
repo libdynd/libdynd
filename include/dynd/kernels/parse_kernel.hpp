@@ -132,6 +132,87 @@ namespace nd {
     };
 
     template <>
+    struct parse_kernel<string_type_id> : base_kernel<parse_kernel<string_type_id>, 2> {
+      void single(char *res, char *const *args)
+      {
+        const char *&rbegin = *reinterpret_cast<const char **>(args[0]);
+        const char *begin = *reinterpret_cast<const char **>(args[0]);
+        const char *end = *reinterpret_cast<const char **>(args[1]);
+
+        skip_whitespace(begin, end);
+        const char *strbegin, *strend;
+        bool escaped;
+
+        if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+          std::string val;
+          unescape_string(strbegin, strend, val);
+          reinterpret_cast<string *>(res)->assign(strbegin, strend - strbegin);
+
+          /*
+                    try {
+                      if (!escaped) {
+                        bsd->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
+                      }
+                      else {
+                        std::string val;
+                        unescape_string(strbegin, strend, val);
+                        bsd->set_from_utf8_string(arrmeta, out_data, val, ectx);
+                      }
+                    }
+                    catch (const std::exception &e) {
+                      skip_whitespace(rbegin, begin);
+                      throw json_parse_error(rbegin, e.what(), tp);
+                    }
+                    catch (const dynd::dynd_exception &e) {
+                      skip_whitespace(rbegin, begin);
+                      throw json_parse_error(rbegin, e.what(), tp);
+                    }
+          */
+        }
+        else {
+          throw json_parse_error(begin, "expected a string", ndt::type());
+        }
+        rbegin = begin;
+      }
+    };
+
+    /*
+    static void parse_string_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&rbegin,
+                                  const char *end, const eval::eval_context *ectx)
+    {
+      const char *begin = rbegin;
+      skip_whitespace(begin, end);
+      const char *strbegin, *strend;
+      bool escaped;
+      if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+        const ndt::base_string_type *bsd = tp.extended<ndt::base_string_type>();
+        try {
+          if (!escaped) {
+            bsd->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
+          }
+          else {
+            std::string val;
+            unescape_string(strbegin, strend, val);
+            bsd->set_from_utf8_string(arrmeta, out_data, val, ectx);
+          }
+        }
+        catch (const std::exception &e) {
+          skip_whitespace(rbegin, begin);
+          throw json_parse_error(rbegin, e.what(), tp);
+        }
+        catch (const dynd::dynd_exception &e) {
+          skip_whitespace(rbegin, begin);
+          throw json_parse_error(rbegin, e.what(), tp);
+        }
+      }
+      else {
+        throw json_parse_error(begin, "expected a string", tp);
+      }
+      rbegin = begin;
+    }
+    */
+
+    template <>
     struct parse_kernel<option_type_id> : base_kernel<parse_kernel<option_type_id>> {
       intptr_t parse_offset;
 
@@ -178,87 +259,6 @@ namespace nd {
         return ckb_offset;
       }
     };
-
-    /*
-    static bool parse_struct_json_from_object(const ndt::type &tp, const char *arrmeta, char *out_data, const char
-    *&begin,
-                                              const char *end, const eval::eval_context *ectx)
-    {
-      const char *saved_begin = begin;
-      if (!parse_token(begin, end, "{")) {
-        return false;
-      }
-
-      const ndt::struct_type *fsd = tp.extended<ndt::struct_type>();
-      intptr_t field_count = fsd->get_field_count();
-      const size_t *data_offsets = fsd->get_data_offsets(arrmeta);
-      const size_t *arrmeta_offsets = fsd->get_arrmeta_offsets_raw();
-
-      // Keep track of which fields we've seen
-      shortvector<bool> populated_fields(field_count);
-      memset(populated_fields.get(), 0, sizeof(bool) * field_count);
-
-      // If it's not an empty object, start the loop parsing the elements
-      if (!parse_token(begin, end, "}")) {
-        for (;;) {
-          const char *strbegin, *strend;
-          bool escaped;
-          skip_whitespace(begin, end);
-          if (!parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
-            throw json_parse_error(begin, "expected string for name in object dict", tp);
-          }
-          if (!parse_token(begin, end, ":")) {
-            throw json_parse_error(begin, "expected ':' separating name from value in object dict", tp);
-          }
-          intptr_t i;
-          if (escaped) {
-            std::string name;
-            unescape_string(strbegin, strend, name);
-            i = fsd->get_field_index(name);
-          }
-          else {
-            i = fsd->get_field_index(strbegin, strend);
-          }
-          if (i == -1) {
-            // TODO: Add an error policy to this parser of whether to throw an error
-            //       or not. For now, just throw away fields not in the destination.
-            skip_json_value(begin, end);
-          }
-          else {
-            parse_json(fsd->get_field_type(i), arrmeta + arrmeta_offsets[i], out_data + data_offsets[i], begin, end,
-    ectx);
-            populated_fields[i] = true;
-          }
-          if (!parse_token(begin, end, ",")) {
-            break;
-          }
-        }
-        if (!parse_token(begin, end, "}")) {
-          throw json_parse_error(begin, "expected object dict separator ',' or terminator '}'", tp);
-        }
-      }
-
-      for (intptr_t i = 0; i < field_count; ++i) {
-        if (!populated_fields[i]) {
-          const ndt::type &field_tp = fsd->get_field_type(i);
-          if (field_tp.get_type_id() == option_type_id) {
-            field_tp.extended<ndt::option_type>()->assign_na(arrmeta + arrmeta_offsets[i], out_data + data_offsets[i],
-                                                             &eval::default_eval_context);
-          }
-          else {
-            stringstream ss;
-            ss << "object dict does not contain the field ";
-            print_escaped_utf8_string(ss, fsd->get_field_name(i));
-            ss << " as required by the data type";
-            skip_whitespace(saved_begin, end);
-            throw json_parse_error(saved_begin, ss.str(), tp);
-          }
-        }
-      }
-
-      return true;
-    }
-    */
 
     template <>
     struct parse_kernel<struct_type_id> : base_kernel<parse_kernel<struct_type_id>, 2> {

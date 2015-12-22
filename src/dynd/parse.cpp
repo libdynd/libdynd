@@ -455,6 +455,7 @@ DYND_API nd::callable nd::json::parse::make()
   children[uint16_type_id] = callable::make<parse_kernel<uint16_type_id>>();
   children[uint32_type_id] = callable::make<parse_kernel<uint32_type_id>>();
   children[uint64_type_id] = callable::make<parse_kernel<uint64_type_id>>();
+  children[string_type_id] = callable::make<parse_kernel<string_type_id>>();
   children[struct_type_id] = callable::make<parse_kernel<struct_type_id>>();
   children[option_type_id] = callable::make<parse_kernel<option_type_id>>();
   children[fixed_dim_type_id] = callable::make<parse_kernel<fixed_dim_type_id>>();

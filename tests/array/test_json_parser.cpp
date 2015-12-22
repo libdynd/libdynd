@@ -146,20 +146,6 @@ TEST(JSONParser, BuiltinsFromFloat)
   EXPECT_EQ(1.5e2, n.as<double>());
 }
 
-TEST(JSONParser, String)
-{
-  nd::array n;
-
-  n = parse_json(ndt::make_type<ndt::string_type>(), "\"testing one two three\"");
-  EXPECT_EQ(ndt::make_type<ndt::string_type>(), n.get_type());
-  EXPECT_EQ("testing one two three", n.as<std::string>());
-  n = parse_json(ndt::make_type<ndt::string_type>(), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \"");
-  EXPECT_EQ(ndt::make_type<ndt::string_type>(), n.get_type());
-  EXPECT_EQ(" \" \\ / \b \f \n \r \t   ", n.as<std::string>());
-
-  EXPECT_THROW(parse_json(ndt::make_type<ndt::string_type>(), "false"), invalid_argument);
-}
-
 TEST(JSONParser, Struct)
 {
   nd::array n;
