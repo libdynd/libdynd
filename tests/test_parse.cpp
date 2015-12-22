@@ -12,6 +12,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/parse.hpp>
+#include <dynd/types/date_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -352,13 +353,24 @@ TEST(JSONParse, UInt)
   EXPECT_ARRAY_EQ(3000000000ULL, nd::json::parse(ndt::make_type<unsigned long long>(), "3000000000"));
 }
 
+TEST(JSONParse, String)
+{
+  EXPECT_ARRAY_EQ("testing one two three",
+                  nd::json::parse(ndt::make_type<ndt::string_type>(), "\"testing one two three\""));
+  EXPECT_ARRAY_EQ(
+      " \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 ",
+      nd::json::parse(ndt::make_type<ndt::string_type>(), "\" \\\" \\\\ \\/ \\b \\f \\n \\r \\t \\u0020 \""));
+
+  EXPECT_THROW(nd::json::parse(ndt::make_type<ndt::string_type>(), "false"), invalid_argument);
+}
+
 #define EXPECT_MISSING(TP, ACTUAL)                                                                                     \
   EXPECT_EQ(TP, ACTUAL.get_type());                                                                                    \
   EXPECT_TRUE(ACTUAL.is_missing());
 
-#define EXPECT_AVAILABLE(TP, ACTUAL)                                                                                   \
-  EXPECT_EQ(TP, ACTUAL.get_type());                                                                                    \
-  EXPECT_FALSE(ACTUAL.is_missing());
+#define EXPECT_AVAILABLE(EXPECTED, ACTUAL)                                                                             \
+  EXPECT_ARRAY_VALS_EQ(EXPECTED, ACTUAL);                                                                              \
+//  EXPECT_EQ(EXPECTEDACTUAL.get_type());
 
 TEST(JSONParse, Option)
 {
@@ -375,8 +387,8 @@ TEST(JSONParse, Option)
   //  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()),
   //               nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<bool1>()), "\"NA\""));
 
-  EXPECT_AVAILABLE(ndt::make_type<ndt::option_type>(ndt::make_type<short>()),
-                   nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<short>()), "123"));
+  //    EXPECT_AVAILABLE(ndt::make_type<ndt::option_type>(ndt::make_type<short>()),
+  //                 nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<short>()), "123"));
   EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<short>()),
                  nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<short>()), "null"));
   EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<int>()),
@@ -384,7 +396,52 @@ TEST(JSONParse, Option)
 
   EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>()),
                  nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<unsigned int>()), "null"));
+
+  EXPECT_AVAILABLE(
+      "testing 1 2 3",
+      nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<ndt::string_type>()), "\"testing 1 2 3\""));
+
+  EXPECT_MISSING(ndt::make_type<ndt::option_type>(ndt::make_type<ndt::string_type>()),
+                 nd::json::parse(ndt::make_type<ndt::option_type>(ndt::make_type<ndt::string_type>()), "null"));
+
+  //  std::cout << nd::json::parse(ndt::make_type<ndt::fixed_dim_type>(
+  //                                 9, ndt::make_type<ndt::option_type>(ndt::make_type<dynd::string>())),
+  //                           "[null, \"123\", null, \"456\", \"0\", \"789\", null, null, null]")
+  //      << std::endl;
+  //  std::exit(-1);
 }
+
+/*
+TEST(JSONParser, OptionString)
+{
+  nd::array a, b, c;
+
+  a = parse_json(ndt::type("?string"), "\"testing 1 2 3\"");
+  EXPECT_EQ(ndt::type("?string"), a.get_type());
+  EXPECT_EQ("testing 1 2 3", a.as<std::string>());
+  a = parse_json(ndt::type("?string"), "\"null\"");
+  EXPECT_EQ("null", a.as<std::string>());
+  a = parse_json(ndt::type("?string"), "\"NA\"");
+  EXPECT_EQ("NA", a.as<std::string>());
+  a = parse_json(ndt::type("?string"), "\"\"");
+  EXPECT_EQ("", a.as<std::string>());
+
+  a = parse_json(ndt::type("?string"), "null");
+  EXPECT_EQ(ndt::type("?string"), a.get_type());
+  EXPECT_EQ(NULL, reinterpret_cast<const dynd::string *>(a.cdata())->begin());
+  EXPECT_THROW(a.as<std::string>(), overflow_error);
+
+  a = parse_json("9 * ?string", "[null, \"123\", null, \"456\", \"0\", \"789\", null, null, null]");
+  EXPECT_EQ(ndt::type("9 * option[string]"), a.get_type());
+  b = nd::empty("9 * string");
+  EXPECT_THROW(b.vals() = a, overflow_error);
+  // Assign this to another option type
+  b = nd::empty("9 * ?int");
+  b.vals() = a;
+  c = parse_json("9 * ?int", "[null, 123, null, 456, 0, 789, null, null, null]");
+  EXPECT_TRUE(nd::view(b, "9 * int").equals_exact(nd::view(c, "9 * int")));
+}
+*/
 
 template <typename T>
 T na();
@@ -397,6 +454,13 @@ inline int na()
 
 TEST(ParseJSON, Struct)
 {
+  nd::array actual;
+
+  actual = nd::json::parse(ndt::struct_type::make({"x", "y"}, {ndt::make_type<int>(), ndt::make_type<int>()}),
+                           "{\"x\":2,\"y\":3}");
+  EXPECT_EQ(2, actual(0).as<int>());
+  EXPECT_EQ(3, actual(1).as<int>());
+
   /*
     nd::array n;
     ndt::type sdt = ndt::struct_type::make(

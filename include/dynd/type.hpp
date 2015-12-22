@@ -10,6 +10,7 @@
 #include <dynd/types/base_type.hpp>
 #include <dynd/types/base_expr_type.hpp>
 #include <dynd/types/base_string_type.hpp>
+#include <dynd/string.hpp>
 #include <dynd/eval/eval_context.hpp>
 #include <dynd/exceptions.hpp>
 
@@ -977,6 +978,8 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(string_type_id); }
+
+    static string sentinel() { return string(); }
   };
 
   template <>

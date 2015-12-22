@@ -132,6 +132,87 @@ namespace nd {
     };
 
     template <>
+    struct parse_kernel<string_type_id> : base_kernel<parse_kernel<string_type_id>, 2> {
+      void single(char *res, char *const *args)
+      {
+        const char *&rbegin = *reinterpret_cast<const char **>(args[0]);
+        const char *begin = *reinterpret_cast<const char **>(args[0]);
+        const char *end = *reinterpret_cast<const char **>(args[1]);
+
+        skip_whitespace(begin, end);
+        const char *strbegin, *strend;
+        bool escaped;
+
+        if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+          std::string val;
+          unescape_string(strbegin, strend, val);
+          reinterpret_cast<string *>(res)->assign(strbegin, strend - strbegin);
+
+          /*
+                    try {
+                      if (!escaped) {
+                        bsd->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
+                      }
+                      else {
+                        std::string val;
+                        unescape_string(strbegin, strend, val);
+                        bsd->set_from_utf8_string(arrmeta, out_data, val, ectx);
+                      }
+                    }
+                    catch (const std::exception &e) {
+                      skip_whitespace(rbegin, begin);
+                      throw json_parse_error(rbegin, e.what(), tp);
+                    }
+                    catch (const dynd::dynd_exception &e) {
+                      skip_whitespace(rbegin, begin);
+                      throw json_parse_error(rbegin, e.what(), tp);
+                    }
+          */
+        }
+        else {
+          throw json_parse_error(begin, "expected a string", ndt::type());
+        }
+        rbegin = begin;
+      }
+    };
+
+    /*
+    static void parse_string_json(const ndt::type &tp, const char *arrmeta, char *out_data, const char *&rbegin,
+                                  const char *end, const eval::eval_context *ectx)
+    {
+      const char *begin = rbegin;
+      skip_whitespace(begin, end);
+      const char *strbegin, *strend;
+      bool escaped;
+      if (parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+        const ndt::base_string_type *bsd = tp.extended<ndt::base_string_type>();
+        try {
+          if (!escaped) {
+            bsd->set_from_utf8_string(arrmeta, out_data, strbegin, strend, ectx);
+          }
+          else {
+            std::string val;
+            unescape_string(strbegin, strend, val);
+            bsd->set_from_utf8_string(arrmeta, out_data, val, ectx);
+          }
+        }
+        catch (const std::exception &e) {
+          skip_whitespace(rbegin, begin);
+          throw json_parse_error(rbegin, e.what(), tp);
+        }
+        catch (const dynd::dynd_exception &e) {
+          skip_whitespace(rbegin, begin);
+          throw json_parse_error(rbegin, e.what(), tp);
+        }
+      }
+      else {
+        throw json_parse_error(begin, "expected a string", tp);
+      }
+      rbegin = begin;
+    }
+    */
+
+    template <>
     struct parse_kernel<option_type_id> : base_kernel<parse_kernel<option_type_id>> {
       intptr_t parse_offset;
 
@@ -174,6 +255,99 @@ namespace nd {
         ckb_offset = parse::get()->instantiate(parse::get()->static_data(), data, ckb, ckb_offset,
                                                dst_tp.extended<ndt::option_type>()->get_value_type(), dst_arrmeta, nsrc,
                                                src_tp, src_arrmeta, kernreq, NULL, nkwd, kwds, tp_vars);
+
+        return ckb_offset;
+      }
+    };
+
+    template <>
+    struct parse_kernel<struct_type_id> : base_kernel<parse_kernel<struct_type_id>, 2> {
+      ndt::type res_tp;
+      size_t field_count;
+      const size_t *data_offsets;
+      std::vector<intptr_t> child_offsets;
+
+      parse_kernel(const ndt::type &res_tp, size_t field_count, const size_t *data_offsets)
+          : res_tp(res_tp), field_count(field_count), data_offsets(data_offsets), child_offsets(field_count)
+      {
+      }
+
+      ~parse_kernel()
+      {
+        for (intptr_t offset : child_offsets) {
+          get_child(offset)->destroy();
+        }
+      }
+
+      void single(char *res, char *const *args)
+      {
+
+        const char *&begin = *reinterpret_cast<const char **>(args[0]);
+        const char *&end = *reinterpret_cast<const char **>(args[1]);
+
+        //        const char *saved_begin = *reinterpret_cast<const char **>(args[0]);
+        if (!parse_token(args, "{")) {
+          throw json_parse_error(args, "expected object dict starting with '{'", res_tp);
+        }
+
+        shortvector<bool> populated_fields(field_count);
+        memset(populated_fields.get(), 0, sizeof(bool) * field_count);
+
+        if (!parse_token(args, "}")) {
+          for (;;) {
+            const char *strbegin, *strend;
+            bool escaped;
+            skip_whitespace(args);
+            if (!parse_doublequote_string_no_ws(begin, end, strbegin, strend, escaped)) {
+              throw json_parse_error(args, "expected string for name in object dict", res_tp);
+            }
+            if (!parse_token(args, ":")) {
+              throw json_parse_error(args, "expected ':' separating name from value in object dict", res_tp);
+            }
+            intptr_t i;
+            if (escaped) {
+              std::string name;
+              unescape_string(strbegin, strend, name);
+              i = res_tp.extended<ndt::struct_type>()->get_field_index(name);
+            }
+            else {
+              i = res_tp.extended<ndt::struct_type>()->get_field_index(strbegin, strend);
+            }
+
+            get_child(child_offsets[i])->single(res + data_offsets[i], args);
+            populated_fields[i] = true;
+            if (!parse_token(args, ",")) {
+              break;
+            }
+          }
+        }
+
+        if (!parse_token(args, "}")) {
+          throw json_parse_error(args, "expected object dict separator ',' or terminator '}'", res_tp);
+        }
+      }
+
+      static intptr_t instantiate(char *DYND_UNUSED(static_data), char *data, void *ckb, intptr_t ckb_offset,
+                                  const ndt::type &dst_tp, const char *dst_arrmeta, intptr_t nsrc,
+                                  const ndt::type *src_tp, const char *const *src_arrmeta, kernel_request_t kernreq,
+                                  const eval::eval_context *DYND_UNUSED(ectx), intptr_t nkwd, const nd::array *kwds,
+                                  const std::map<std::string, ndt::type> &tp_vars)
+      {
+        size_t field_count = dst_tp.extended<ndt::struct_type>()->get_field_count();
+        const size_t *arrmeta_offsets = dst_tp.extended<ndt::struct_type>()->get_arrmeta_offsets_raw();
+
+        intptr_t self_offset = ckb_offset;
+        make(ckb, kernreq, ckb_offset, dst_tp, field_count,
+             dst_tp.extended<ndt::struct_type>()->get_data_offsets(dst_arrmeta));
+
+        for (size_t i = 0; i < field_count; ++i) {
+          get_self(reinterpret_cast<ckernel_builder<kernel_request_host> *>(ckb), self_offset)->child_offsets[i] =
+              ckb_offset - self_offset;
+          ckb_offset = json::parse::get()->instantiate(json::parse::get()->static_data(), data, ckb, ckb_offset,
+                                                       dst_tp.extended<ndt::struct_type>()->get_field_type(i),
+                                                       dst_arrmeta + arrmeta_offsets[i], nsrc, src_tp, src_arrmeta,
+                                                       kernreq, NULL, nkwd, kwds, tp_vars);
+        }
 
         return ckb_offset;
       }
