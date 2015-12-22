@@ -223,26 +223,7 @@ namespace nd {
     template <>
     struct assign_na_kernel<string_type_id, scalar_kind_type_id>
         : base_kernel<assign_na_kernel<string_type_id, scalar_kind_type_id>, 1> {
-      void single(char *dst, char *const *DYND_UNUSED(src))
-      {
-        string *std = reinterpret_cast<string *>(dst);
-        if (std->begin() != NULL) {
-          throw std::invalid_argument("Cannot assign an NA to a dynd string after "
-                                      "it has been allocated");
-        }
-      }
-
-      void strided(char *dst, intptr_t dst_stride, char *const *DYND_UNUSED(src),
-                   const intptr_t *DYND_UNUSED(src_stride), size_t count)
-      {
-        for (size_t i = 0; i != count; ++i, dst += dst_stride) {
-          string *std = reinterpret_cast<string *>(dst);
-          if (std->begin() != NULL) {
-            throw std::invalid_argument("Cannot assign an NA to a dynd string after "
-                                        "it has been allocated");
-          }
-        }
-      }
+      void single(char *res, char *const *DYND_UNUSED(args)) { reinterpret_cast<string *>(res)->clear(); }
     };
 
     template <>

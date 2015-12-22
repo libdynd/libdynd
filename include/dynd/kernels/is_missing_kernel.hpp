@@ -164,23 +164,7 @@ namespace nd {
     template <>
     struct is_missing_kernel<string_type_id, string_kind>
         : base_kernel<is_missing_kernel<string_type_id, string_kind>, 1> {
-      void single(char *dst, char *const *src)
-      {
-        string *std = *reinterpret_cast<string *const *>(src);
-        *dst = std->begin() == NULL;
-      }
-
-      void strided(char *dst, intptr_t dst_stride, char *const *src, const intptr_t *src_stride, size_t count)
-      {
-        char *src0 = src[0];
-        intptr_t src0_stride = src_stride[0];
-        for (size_t i = 0; i != count; ++i) {
-          string *std = reinterpret_cast<string *>(src0);
-          *dst = std->begin() == NULL;
-          dst += dst_stride;
-          src0 += src0_stride;
-        }
-      }
+      void single(char *dst, char *const *src) { *dst = reinterpret_cast<string *>(src[0])->begin() == NULL; }
     };
 
     template <>

@@ -26,38 +26,6 @@
 using namespace std;
 using namespace dynd;
 
-/*
-TEST(JSONParser, OptionString)
-{
-  nd::array a, b, c;
-
-  a = parse_json(ndt::type("?string"), "\"testing 1 2 3\"");
-  EXPECT_EQ(ndt::type("?string"), a.get_type());
-  EXPECT_EQ("testing 1 2 3", a.as<std::string>());
-  a = parse_json(ndt::type("?string"), "\"null\"");
-  EXPECT_EQ("null", a.as<std::string>());
-  a = parse_json(ndt::type("?string"), "\"NA\"");
-  EXPECT_EQ("NA", a.as<std::string>());
-  a = parse_json(ndt::type("?string"), "\"\"");
-  EXPECT_EQ("", a.as<std::string>());
-
-  a = parse_json(ndt::type("?string"), "null");
-  EXPECT_EQ(ndt::type("?string"), a.get_type());
-  EXPECT_EQ(NULL, reinterpret_cast<const dynd::string *>(a.cdata())->begin());
-  EXPECT_THROW(a.as<std::string>(), overflow_error);
-
-  a = parse_json("9 * ?string", "[null, \"123\", null, \"456\", \"0\", \"789\", null, null, null]");
-  EXPECT_EQ(ndt::type("9 * option[string]"), a.get_type());
-  b = nd::empty("9 * string");
-  EXPECT_THROW(b.vals() = a, overflow_error);
-  // Assign this to another option type
-  b = nd::empty("9 * ?int");
-  b.vals() = a;
-  c = parse_json("9 * ?int", "[null, 123, null, 456, 0, 789, null, null, null]");
-  EXPECT_TRUE(nd::view(b, "9 * int").equals_exact(nd::view(c, "9 * int")));
-}
-*/
-
 TEST(JSONParser, UnsignedIntegerLimits)
 {
   nd::array n;
