@@ -12,6 +12,7 @@
 #include "dynd_assertions.hpp"
 
 #include <dynd/parse.hpp>
+#include <dynd/types/date_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -397,6 +398,13 @@ inline int na()
 
 TEST(ParseJSON, Struct)
 {
+  nd::array actual;
+
+  actual = nd::json::parse(ndt::struct_type::make({"x", "y"}, {ndt::make_type<int>(), ndt::make_type<int>()}),
+                           "{\"x\":2,\"y\":3}");
+  EXPECT_EQ(2, actual(0).as<int>());
+  EXPECT_EQ(3, actual(1).as<int>());
+
   /*
     nd::array n;
     ndt::type sdt = ndt::struct_type::make(
