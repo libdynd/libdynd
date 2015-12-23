@@ -345,8 +345,8 @@ namespace nd {
 #endif
 
   template <typename ValueType, size_t Size>
-  struct init<ValueType[Size]> : detail::init_from_c_array<ValueType[Size], IS_TRIVIALLY_COPYABLE<ValueType>::value> {
-    using detail::init_from_c_array<ValueType[Size], IS_TRIVIALLY_COPYABLE<ValueType>::value>::init_from_c_array;
+  struct init<ValueType[Size]> : detail::init_from_c_array<ValueType[Size], IS_TRIVIALLY_COPYABLE(ValueType)> {
+    using detail::init_from_c_array<ValueType[Size], IS_TRIVIALLY_COPYABLE(ValueType)>::init_from_c_array;
   };
 
 } // namespace dynd::nd
