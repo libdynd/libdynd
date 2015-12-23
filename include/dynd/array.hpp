@@ -85,7 +85,7 @@ namespace nd {
      *
      */
     /** Construct a string from a NULL-terminated UTF8 string */
-    array(const char *cstr);
+//    array(const char *cstr);
     /** Construct a string from a UTF8 buffer and specified buffer size */
     array(const char *str, size_t size);
 
@@ -684,6 +684,16 @@ namespace nd {
     void operator()(char *data, const std::string &value) const
     {
       reinterpret_cast<string *>(data)->assign(value.data(), value.size());
+    }
+  };
+
+  template <>
+  struct init<const char *> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, const char *value) const
+    {
+      reinterpret_cast<string *>(data)->assign(value, strlen(value));
     }
   };
 

@@ -1049,6 +1049,15 @@ namespace ndt {
   };
 
   template <>
+  struct traits<const char *> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return type(string_type_id); }
+  };
+
+  template <>
   struct traits<type> {
     static const size_t ndim = 0;
 

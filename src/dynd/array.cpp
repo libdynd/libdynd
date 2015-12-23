@@ -255,12 +255,15 @@ static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::t
   return result;
 }
 
+/*
 nd::array::array(const char *cstr)
 {
   array temp =
       make_string_array(cstr, strlen(cstr), string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
   temp.swap(*this);
 }
+*/
+
 nd::array::array(const char *str, size_t size)
 {
   array temp = make_string_array(str, size, string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
