@@ -129,8 +129,6 @@ namespace nd {
 } // namespace dynd::nd
 
 namespace ndt {
-  DYND_HAS(equivalent);
-
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
@@ -810,7 +808,7 @@ namespace ndt {
    * Allocates and constructs a type with a use count of 1.
    */
   template <typename T, typename... ArgTypes>
-  typename std::enable_if<!has_traits<T>::value, type>::type make_type(ArgTypes &&... args)
+  typename std::enable_if<std::is_base_of<base_type, T>::value, type>::type make_type(ArgTypes &&... args)
   {
     return type(new T(std::forward<ArgTypes>(args)...), false);
   }
