@@ -338,10 +338,15 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
+#if __GNUG__ && __GNUC__ < 5
+#define IS_TRIVIALLY_COPYABLE(T) __has_trivial_copy(T)
+#else
+#define IS_TRIVIALLY_COPYABLE(T) std::is_trivially_copyable<T>::value
+#endif
+
   template <typename ValueType, size_t Size>
-  struct init<ValueType[Size]>
-      : detail::init_from_c_array<ValueType[Size], std::is_trivially_copyable<ValueType>::value> {
-    using detail::init_from_c_array<ValueType[Size], std::is_trivially_copyable<ValueType>::value>::init_from_c_array;
+  struct init<ValueType[Size]> : detail::init_from_c_array<ValueType[Size], IS_TRIVIALLY_COPYABLE<ValueType>::value> {
+    using detail::init_from_c_array<ValueType[Size], IS_TRIVIALLY_COPYABLE<ValueType>::value>::init_from_c_array;
   };
 
 } // namespace dynd::nd
