@@ -259,10 +259,44 @@ namespace ndt {
 namespace nd {
 
   template <typename T, int N>
-  struct traits<T[N]> {
-    static void init(const T(&value)[N], const char *DYND_UNUSED(metadata), char *data)
+  struct init<T[N]> {
+    intptr_t stride;
+    init<T> child;
+
+    init(const ndt::type &tp, const char *metadata)
+        : stride(reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(metadata)->stride),
+          child(tp.extended<ndt::base_dim_type>()->get_element_type(),
+                metadata + sizeof(ndt::fixed_dim_type::metadata_type))
     {
-      memcpy(data, value, N * sizeof(T));
+    }
+
+    void operator()(char *data, const T(&values)[N]) const
+    {
+      for (const T &value : values) {
+        child(data, value);
+        data += stride;
+      }
+    }
+  };
+
+  template <typename T>
+  struct init<std::initializer_list<T>> {
+    intptr_t stride;
+    init<T> child;
+
+    init(const ndt::type &tp, const char *metadata)
+        : stride(reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(metadata)->stride),
+          child(tp.extended<ndt::fixed_dim_type>()->get_element_type(),
+                metadata + sizeof(ndt::fixed_dim_type::metadata_type))
+    {
+    }
+
+    void operator()(char *data, const std::initializer_list<T> &values) const
+    {
+      for (const T &value : values) {
+        child(data, value);
+        data += stride;
+      }
     }
   };
 

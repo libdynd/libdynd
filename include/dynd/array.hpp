@@ -674,26 +674,14 @@ namespace nd {
   };
 
   template <typename T>
-  struct traits {
-    static void init(const T &value, const char *DYND_UNUSED(metadata), char *data)
+  struct init {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, const T &value) const
     {
       static_assert(ndt::traits<T>::is_same_layout, "must be layout compatible");
       *reinterpret_cast<T *>(data) = value;
     }
-
-    static void as(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) {}
-  };
-
-  template <typename T>
-  struct traits<std::initializer_list<T>> {
-    static void init(const std::initializer_list<T> &DYND_UNUSED(value), const char *DYND_UNUSED(metadata),
-                     char *DYND_UNUSED(data))
-    {
-      //      static_assert(ndt::traits<T>::is_same_layout, "must be layout compatible");
-      //    *reinterpret_cast<T *>(data) = value;
-    }
-
-    static void as(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) {}
   };
 
   /**
@@ -706,7 +694,9 @@ namespace nd {
   array::array(T &&value)
       : intrusive_ptr<memory_block_data>(empty(ndt::traits<typename remove_reference_then_cv<T>::type>::equivalent()))
   {
-    traits<typename remove_reference_then_cv<T>::type>::init(std::forward<T>(value), get()->metadata(), get()->data);
+    init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
+    init(get()->data, std::forward<T>(value));
+
     get()->flags =
         (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
   }

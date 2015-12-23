@@ -128,8 +128,7 @@ TYPED_TEST_P(Array, TwoDimConstructor)
       nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, ndt::make_type<float>()))));
   EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, ndt::make_type<float>()))),
             a.get_type());
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, ndt::make_type<float>())),
-            a.get_type().get_canonical_type());
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(1, ndt::make_type<float>())), a.get_type().get_canonical_type());
   EXPECT_FALSE(a.is_scalar());
   EXPECT_EQ(2u, a.get_shape().size());
   EXPECT_EQ(3, a.get_shape()[0]);
@@ -144,8 +143,7 @@ TYPED_TEST_P(Array, TwoDimConstructor)
   a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, ndt::make_type<float>()))));
   EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, ndt::make_type<float>()))),
             a.get_type());
-  EXPECT_EQ(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, ndt::make_type<float>())),
-            a.get_type().get_canonical_type());
+  EXPECT_EQ(ndt::make_fixed_dim(1, ndt::make_fixed_dim(3, ndt::make_type<float>())), a.get_type().get_canonical_type());
   EXPECT_FALSE(a.is_scalar());
   EXPECT_EQ(2u, a.get_shape().size());
   EXPECT_EQ(1, a.get_shape()[0]);
@@ -160,8 +158,7 @@ TYPED_TEST_P(Array, TwoDimConstructor)
   a = nd::empty(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_type<float>()))));
   EXPECT_EQ(TestFixture::MakeType(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_type<float>()))),
             a.get_type());
-  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_type<float>())),
-            a.get_type().get_canonical_type());
+  EXPECT_EQ(ndt::make_fixed_dim(3, ndt::make_fixed_dim(5, ndt::make_type<float>())), a.get_type().get_canonical_type());
   EXPECT_FALSE(a.is_scalar());
   EXPECT_EQ(2u, a.get_shape().size());
   EXPECT_EQ(3, a.get_shape()[0]);
@@ -641,6 +638,12 @@ TEST(Array, PrintBoolVector)
   stringstream ss;
   ss << a;
   EXPECT_EQ("array([True, True, True],\n      type=\"3 * bool\")", ss.str());
+}
+
+TEST(Array, CArrayConstructor)
+{
+  int values[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  EXPECT_ARRAY_EQ((nd::array{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}), values);
 }
 
 REGISTER_TYPED_TEST_CASE_P(Array, ScalarConstructor, OneDimConstructor, TwoDimConstructor, ThreeDimConstructor,
