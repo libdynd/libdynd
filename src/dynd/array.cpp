@@ -255,12 +255,6 @@ static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::t
   return result;
 }
 
-nd::array::array(const std::string &value)
-{
-  array temp = make_string_array(value.c_str(), value.size(), string_encoding_utf_8,
-                                 nd::read_access_flag | nd::immutable_access_flag);
-  temp.swap(*this);
-}
 nd::array::array(const char *cstr)
 {
   array temp =
@@ -271,50 +265,6 @@ nd::array::array(const char *str, size_t size)
 {
   array temp = make_string_array(str, size, string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
   temp.swap(*this);
-}
-
-nd::array nd::detail::make_from_vec<ndt::type>::make(const std::vector<ndt::type> &vec)
-{
-  ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_type<ndt::type_type>());
-  char *data_ptr = NULL;
-  array result(make_array_memory_block(dt.extended()->get_arrmeta_size(), sizeof(ndt::type) * vec.size(),
-                                       dt.get_data_alignment(), &data_ptr));
-  // The main array arrmeta
-  array_preamble *preamble = result.get();
-  preamble->data = data_ptr;
-  preamble->owner = NULL;
-  preamble->tp = dt;
-  preamble->flags = read_access_flag | immutable_access_flag;
-  // The arrmeta for the strided and type parts of the type
-  fixed_dim_type_arrmeta *sa_md = reinterpret_cast<fixed_dim_type_arrmeta *>(result.get()->metadata());
-  sa_md->dim_size = vec.size();
-  sa_md->stride = vec.empty() ? 0 : sizeof(ndt::type);
-  // The data
-  ndt::type *data = reinterpret_cast<ndt::type *>(data_ptr);
-  for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
-    new (data + i) ndt::type(vec[i]);
-  }
-  return result;
-}
-
-nd::array nd::detail::make_from_vec<std::string>::make(const std::vector<std::string> &vec)
-{
-  // Constructor detail for making an array from a vector of strings
-  size_t total_string_size = 0;
-  for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
-    total_string_size += vec[i].size();
-  }
-
-  ndt::type dt = ndt::make_fixed_dim(vec.size(), ndt::make_type<ndt::string_type>());
-  // Make an array memory block which contains both the string pointers and
-  // the string data
-  array result = nd::empty(dt);
-  string *data = reinterpret_cast<string *>(result.data());
-  for (size_t i = 0, i_end = vec.size(); i != i_end; ++i) {
-    size_t size = vec[i].size();
-    data[i].assign(vec[i].data(), size);
-  }
-  return result;
 }
 
 namespace {

@@ -1097,8 +1097,6 @@ namespace ndt {
 
   template <>
   struct traits<std::string> {
-    ~traits() = delete;
-
     static const size_t ndim = 0;
 
     static const bool is_same_layout = false;
@@ -1108,8 +1106,6 @@ namespace ndt {
 
   template <typename ValueType>
   struct traits<std::vector<ValueType>> {
-    ~traits() = delete;
-
     static const size_t ndim = traits<ValueType>::ndim + 1;
 
     static const bool is_same_layout = false;
