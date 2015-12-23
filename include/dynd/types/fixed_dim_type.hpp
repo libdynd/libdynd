@@ -338,15 +338,20 @@ namespace nd {
 
   } // namespace dynd::nd::detail
 
-#if __GNUG__ && __GNUC__ < 5
-#define IS_TRIVIALLY_COPYABLE(T) __has_trivial_copy(T)
-#else
-#define IS_TRIVIALLY_COPYABLE(T) std::is_trivially_copyable<T>::value
-#endif
+  /*
+  #if __GNUG__ && __GNUC__ < 5
+  #define IS_TRIVIALLY_COPYABLE(T) __has_trivial_copy(T)
+  #else
+  #define IS_TRIVIALLY_COPYABLE(T) std::is_trivially_copyable<T>::value
+  #endif
+  */
 
   template <typename ValueType, size_t Size>
-  struct init<ValueType[Size]> : detail::init_from_c_array<ValueType[Size], IS_TRIVIALLY_COPYABLE(ValueType)> {
-    using detail::init_from_c_array<ValueType[Size], IS_TRIVIALLY_COPYABLE(ValueType)>::init_from_c_array;
+  struct init<ValueType[Size]>
+      : detail::init_from_c_array<ValueType[Size],
+                                  std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout> {
+    using detail::init_from_c_array<ValueType[Size], std::is_pod<ValueType>::value &&
+                                                         ndt::traits<ValueType>::is_same_layout>::init_from_c_array;
   };
 
 } // namespace dynd::nd
