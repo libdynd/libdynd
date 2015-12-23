@@ -90,11 +90,6 @@ namespace nd {
     /** Construct a string from a UTF8 buffer and specified buffer size */
     array(const char *str, size_t size);
 
-    /**
-     * Constructs an array from a multi-dimensional C-style array.
-     */
-    template <class T, int N>
-    array(const T(&rhs)[N]);
     /** Specialize to treat char arrays as strings */
     template <int N>
     array(const char(&rhs)[N]);
@@ -104,8 +99,6 @@ namespace nd {
     template <int N>
     array(const std::string *(&rhs)[N]);
     /** Specialize to create 1D arrays of ndt::types */
-    template <int N>
-    array(const ndt::type(&rhs)[N]);
 
     /**
      * Constructs a 1D array from a pointer and a size.
@@ -674,26 +667,15 @@ namespace nd {
   };
 
   template <typename T>
-  struct traits {
-    static void init(const T &value, const char *DYND_UNUSED(metadata), char *data)
-    {
-      static_assert(ndt::traits<T>::is_same_layout, "must be layout compatible");
-      *reinterpret_cast<T *>(data) = value;
-    }
-
-    static void as(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) {}
-  };
+  struct init;
 
   template <typename T>
-  struct traits<std::initializer_list<T>> {
-    static void init(const std::initializer_list<T> &DYND_UNUSED(value), const char *DYND_UNUSED(metadata),
-                     char *DYND_UNUSED(data))
-    {
-      //      static_assert(ndt::traits<T>::is_same_layout, "must be layout compatible");
-      //    *reinterpret_cast<T *>(data) = value;
-    }
+  struct init {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-    static void as(const char *DYND_UNUSED(metadata), const char *DYND_UNUSED(data)) {}
+    void operator()(char *data, const T &value) const { *reinterpret_cast<T *>(data) = value; }
+
+    void operator()(char *data, T &&value) const { *reinterpret_cast<T *>(data) = value; }
   };
 
   /**
@@ -706,7 +688,9 @@ namespace nd {
   array::array(T &&value)
       : intrusive_ptr<memory_block_data>(empty(ndt::traits<typename remove_reference_then_cv<T>::type>::equivalent()))
   {
-    traits<typename remove_reference_then_cv<T>::type>::init(std::forward<T>(value), get()->metadata(), get()->data);
+    init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
+    init(get()->data, std::forward<T>(value));
+
     get()->flags =
         (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
   }
@@ -1365,30 +1349,6 @@ namespace nd {
 
   ///////////// C-style array constructor implementation
   ////////////////////////////
-
-  template <class T, int N>
-  nd::array::array(const T(&rhs)[N])
-  {
-    const int ndim = detail::ndim_from_array<T[N]>::value;
-    intptr_t shape[ndim];
-    size_t size = detail::fill_shape<T[N]>::fill(shape);
-
-    make_strided_array(ndt::type(static_cast<type_id_t>(detail::dtype_from_array<T>::type_id)), ndim, shape,
-                       default_access_flags, NULL)
-        .swap(*this);
-    DYND_MEMCPY(get()->data, reinterpret_cast<const void *>(&rhs), size);
-  }
-
-  template <int N>
-  nd::array::array(const ndt::type(&rhs)[N])
-  {
-    nd::empty(N, ndt::make_type<ndt::type_type>()).swap(*this);
-    ndt::type *out = reinterpret_cast<ndt::type *>(get()->data);
-    for (int i = 0; i < N; ++i) {
-      out[i] = rhs[i];
-    }
-    flag_as_immutable();
-  }
 
   template <int N>
   inline nd::array::array(const char(&rhs)[N])

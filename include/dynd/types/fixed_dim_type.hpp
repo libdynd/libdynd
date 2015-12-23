@@ -258,12 +258,92 @@ namespace ndt {
 
 namespace nd {
 
-  template <typename T, int N>
-  struct traits<T[N]> {
-    static void init(const T(&value)[N], const char *DYND_UNUSED(metadata), char *data)
+  /*
+    template <typename T, int N>
+    struct init<T[N]> {
+      intptr_t stride;
+      init<T, ndt::traits<T>::is_same_layout> child;
+
+      init(const ndt::type &tp, const char *metadata)
+          : stride(reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(metadata)->stride),
+            child(tp.extended<ndt::base_dim_type>()->get_element_type(),
+                  metadata + sizeof(ndt::fixed_dim_type::metadata_type))
+      {
+      }
+
+      void operator()(char *data, const T(&values)[N]) const
+      {
+        for (const T &value : values) {
+          child(data, value);
+          data += stride;
+        }
+      }
+    };
+  */
+
+  template <typename T>
+  struct init<std::initializer_list<T>> {
+    intptr_t stride;
+    init<T> child;
+
+    init(const ndt::type &tp, const char *metadata)
+        : stride(reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(metadata)->stride),
+          child(tp.extended<ndt::fixed_dim_type>()->get_element_type(),
+                metadata + sizeof(ndt::fixed_dim_type::metadata_type))
     {
-      memcpy(data, value, N * sizeof(T));
     }
+
+    void operator()(char *data, const std::initializer_list<T> &values) const
+    {
+      for (const T &value : values) {
+        child(data, value);
+        data += stride;
+      }
+    }
+  };
+
+  namespace detail {
+
+    template <typename CArrayType, bool IsTriviallyCopyable>
+    struct init_from_c_array;
+
+    template <typename ValueType, size_t Size>
+    struct init_from_c_array<ValueType[Size], true> {
+      init_from_c_array(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+      void operator()(char *data, const ValueType(&values)[Size]) const
+      {
+        memcpy(data, values, Size * sizeof(ValueType));
+      }
+    };
+
+    template <typename ValueType, size_t Size>
+    struct init_from_c_array<ValueType[Size], false> {
+      init<ValueType> child;
+
+      init_from_c_array(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::fixed_dim_type>()->get_element_type(),
+                  metadata + sizeof(ndt::fixed_dim_type::metadata_type))
+      {
+      }
+
+      void operator()(char *data, const ValueType(&values)[Size]) const
+      {
+        for (const ValueType &value : values) {
+          child(data, value);
+          data += sizeof(ValueType);
+        }
+      }
+    };
+
+  } // namespace dynd::nd::detail
+
+  template <typename ValueType, size_t Size>
+  struct init<ValueType[Size]>
+      : detail::init_from_c_array<ValueType[Size],
+                                  std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout> {
+    using detail::init_from_c_array<ValueType[Size], std::is_pod<ValueType>::value &&
+                                                         ndt::traits<ValueType>::is_same_layout>::init_from_c_array;
   };
 
 } // namespace dynd::nd
