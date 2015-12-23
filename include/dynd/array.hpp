@@ -84,7 +84,6 @@ namespace nd {
      * Constructs a zero-dimensional scalar from a C++ scalar.
      *
      */
-    array(const std::string &value);
     /** Construct a string from a NULL-terminated UTF8 string */
     array(const char *cstr);
     /** Construct a string from a UTF8 buffer and specified buffer size */
@@ -678,6 +677,16 @@ namespace nd {
     void operator()(char *data, T &&value) const { *reinterpret_cast<T *>(data) = value; }
   };
 
+  template <>
+  struct init<std::string> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, const std::string &value) const
+    {
+      reinterpret_cast<string *>(data)->assign(value.data(), value.size());
+    }
+  };
+
   /**
    * Constructs an uninitialized array of the given dtype. This is
    * the usual function to use for allocating such an array.
@@ -686,7 +695,7 @@ namespace nd {
 
   template <typename T, typename>
   array::array(T &&value)
-      : intrusive_ptr<memory_block_data>(empty(ndt::traits<typename remove_reference_then_cv<T>::type>::equivalent()))
+      : intrusive_ptr<memory_block_data>(empty(ndt::make_type<typename remove_reference_then_cv<T>::type>(value)))
   {
     init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
     init(get()->data, std::forward<T>(value));
@@ -1382,37 +1391,6 @@ namespace nd {
     for (intptr_t i = 0; i < dim_size; ++i) {
       lhs[i] = rhs[i];
     }
-  }
-
-  ///////////// std::vector constructor implementation /////////////////////////
-  namespace detail {
-    template <class T>
-    struct make_from_vec {
-      inline static typename std::enable_if<is_dynd_scalar<T>::value, array>::type make(const std::vector<T> &vec)
-      {
-        array result = nd::empty(vec.size(), ndt::make_type<T>());
-        if (!vec.empty()) {
-          DYND_MEMCPY(result.data(), &vec[0], vec.size() * sizeof(T));
-        }
-        return result;
-      }
-    };
-
-    template <>
-    struct make_from_vec<ndt::type> {
-      static DYND_API array make(const std::vector<ndt::type> &vec);
-    };
-
-    template <>
-    struct make_from_vec<std::string> {
-      static DYND_API array make(const std::vector<std::string> &vec);
-    };
-  } // namespace detail
-
-  template <class T>
-  array::array(const std::vector<T> &vec)
-  {
-    detail::make_from_vec<T>::make(vec).swap(*this);
   }
 
   ///////////// The array.as<type>() templated function
