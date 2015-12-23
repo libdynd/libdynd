@@ -129,8 +129,6 @@ namespace nd {
 } // namespace dynd::nd
 
 namespace ndt {
-  DYND_HAS(equivalent);
-
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
@@ -788,20 +786,51 @@ namespace ndt {
     friend DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
+  template <>
+  struct traits<void> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return type(type_id_of<void>::value); }
+  };
+
+  namespace detail {
+
+    /**
+     * Returns the equivalent type.
+     */
+    template <typename T, typename... ArgTypes>
+    auto make_type(int, ArgTypes &&... args) -> decltype(traits<T>::equivalent(std::forward<ArgTypes>(args)...))
+    {
+      return traits<T>::equivalent(std::forward<ArgTypes>(args)...);
+    }
+
+    /**
+     * Returns the equivalent type.
+     */
+    template <typename T, typename... ArgTypes>
+    auto make_type(char, ArgTypes &&... DYND_UNUSED(args)) -> decltype(traits<T>::equivalent())
+    {
+      return traits<T>::equivalent();
+    }
+
+  } // namespace dynd::ndt::detail
+
   /**
    * Returns the equivalent type.
    */
   template <typename T, typename... ArgTypes>
-  typename std::enable_if<has_traits<T>::value, type>::type make_type(ArgTypes &&... args)
+  auto make_type(ArgTypes &&... args) -> decltype(detail::make_type<T>(0, std::forward<ArgTypes>(args)...))
   {
-    return traits<T>::equivalent(std::forward<ArgTypes>(args)...);
+    return detail::make_type<T>(0, std::forward<ArgTypes>(args)...);
   }
 
   /**
    * Allocates and constructs a type with a use count of 1.
    */
   template <typename T, typename... ArgTypes>
-  typename std::enable_if<!has_traits<T>::value, type>::type make_type(ArgTypes &&... args)
+  std::enable_if_t<std::is_base_of<base_type, T>::value, type> make_type(ArgTypes &&... args)
   {
     return type(new T(std::forward<ArgTypes>(args)...), false);
   }
@@ -1009,15 +1038,6 @@ namespace ndt {
   };
 
   template <>
-  struct traits<void> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = false;
-
-    static type equivalent() { return type(type_id_of<void>::value); }
-  };
-
-  template <>
   struct traits<string> {
     static const size_t ndim = 0;
 
@@ -1073,6 +1093,31 @@ namespace ndt {
     static const bool is_same_layout = traits<T>::is_same_layout;
 
     static type equivalent() { return make_fixed_dim(N, make_type<T>()); }
+  };
+
+  template <>
+  struct traits<std::string> {
+    ~traits() = delete;
+
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return make_type<string>(); }
+  };
+
+  template <typename ValueType>
+  struct traits<std::vector<ValueType>> {
+    ~traits() = delete;
+
+    static const size_t ndim = traits<ValueType>::ndim + 1;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent(const std::vector<ValueType> &values)
+    {
+      return make_fixed_dim(values.size(), make_type<ValueType>());
+    }
   };
 
   // Need to handle const properly
