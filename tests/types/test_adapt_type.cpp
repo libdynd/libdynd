@@ -81,8 +81,8 @@ TEST(AdaptType, ByteswapEval)
 
   a = nd::empty(ndt::make_type<ndt::adapt_type>(
       ndt::make_type<dynd::complex<double>>(),
-      ndt::make_fixed_bytes(sizeof(dynd::complex<double>), alignof(dynd::complex<double>)), nd::pairwise_byteswap::get(),
-      nd::pairwise_byteswap::get()));
+      ndt::make_fixed_bytes(sizeof(dynd::complex<double>), alignof(dynd::complex<double>)),
+      nd::pairwise_byteswap::get(), nd::pairwise_byteswap::get()));
   a.assign(dynd::complex<double>(alias_cast<double>(0x112D4454FB210940LL), alias_cast<double>(0x002892B01FF771C2LL)));
   EXPECT_EQ(dynd::complex<double>(3.14159265358979, -1.2345678912345e12), a.view<dynd::complex<double>>());
 }

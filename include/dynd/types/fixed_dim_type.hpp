@@ -346,5 +346,15 @@ namespace nd {
                                                          ndt::traits<ValueType>::is_same_layout>::init_from_c_array;
   };
 
+  template <typename T>
+  struct init<std::vector<T>> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, const std::vector<T> &values) const
+    {
+      memcpy(data, values.data(), values.size() * sizeof(T));
+    }
+  };
+
 } // namespace dynd::nd
 } // namespace dynd

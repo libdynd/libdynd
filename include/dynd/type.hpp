@@ -788,11 +788,20 @@ namespace ndt {
     friend DYND_API std::ostream &operator<<(std::ostream &o, const type &rhs);
   };
 
+  template <>
+  struct traits<void> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return type(type_id_of<void>::value); }
+  };
+
   /**
    * Returns the equivalent type.
    */
   template <typename T, typename... ArgTypes>
-  typename std::enable_if<has_traits<T>::value, type>::type make_type(ArgTypes &&... args)
+  auto make_type(ArgTypes &&... args) -> decltype(traits<T>::equivalent(std::forward<ArgTypes>(args)...))
   {
     return traits<T>::equivalent(std::forward<ArgTypes>(args)...);
   }
@@ -1006,15 +1015,6 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(type_id_of<std::complex<T>>::value); }
-  };
-
-  template <>
-  struct traits<void> {
-    static const size_t ndim = 0;
-
-    static const bool is_same_layout = false;
-
-    static type equivalent() { return type(type_id_of<void>::value); }
   };
 
   template <>
