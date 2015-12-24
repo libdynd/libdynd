@@ -1104,7 +1104,7 @@ namespace ndt {
     static type equivalent() { return traits<T>::equivalent(); }
   };
 
-  template <typename T, int N>
+  template <typename T, size_t N>
   struct traits<T[N]> {
     static const size_t ndim = traits<T>::ndim + 1;
 
