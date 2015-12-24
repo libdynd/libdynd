@@ -1135,7 +1135,7 @@ namespace ndt {
   };
 
   // Need to handle const properly
-  template <typename T, int N>
+  template <typename T, size_t N>
   struct traits<const T[N]> {
     static const size_t ndim = traits<T[N]>::ndim;
 
