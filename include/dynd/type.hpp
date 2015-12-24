@@ -860,9 +860,9 @@ namespace ndt {
   struct traits<bool> {
     static const size_t ndim = 0;
 
-    static const bool is_same_layout = true;
+    static const bool is_same_layout = false;
 
-    static type equivalent() { return type(type_id_of<bool1>::value); }
+    static type equivalent() { return traits<bool1>::equivalent(); }
   };
 
   template <>

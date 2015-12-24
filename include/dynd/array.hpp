@@ -66,6 +66,13 @@ namespace nd {
   };
 
   template <>
+  struct init<bool> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, bool value) const { *reinterpret_cast<bool1 *>(data) = value; }
+  };
+
+  template <>
   struct init<std::string> {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
