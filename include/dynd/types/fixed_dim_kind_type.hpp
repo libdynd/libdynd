@@ -110,12 +110,6 @@ namespace ndt {
     static type equivalent() { return make_type<T[]>(); }
   };
 
-  // Produces type "Fixed ** <N> * <T>"
-  template <typename T, int N>
-  struct traits<nd::strided_vals<T, N>> {
-    static type equivalent() { return fixed_dim_kind_type::make(make_type<T>(), N); }
-  };
-
   template <typename ElementType>
   struct traits<fixed_dim<ElementType>> {
     static const bool is_same_layout = false;

@@ -1049,6 +1049,24 @@ namespace ndt {
   };
 
   template <>
+  struct traits<const char *> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return type(string_type_id); }
+  };
+
+  template <size_t N>
+  struct traits<char[N]> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return type(string_type_id); }
+  };
+
+  template <>
   struct traits<type> {
     static const size_t ndim = 0;
 
@@ -1086,7 +1104,7 @@ namespace ndt {
     static type equivalent() { return traits<T>::equivalent(); }
   };
 
-  template <typename T, int N>
+  template <typename T, size_t N>
   struct traits<T[N]> {
     static const size_t ndim = traits<T>::ndim + 1;
 
@@ -1117,7 +1135,7 @@ namespace ndt {
   };
 
   // Need to handle const properly
-  template <typename T, int N>
+  template <typename T, size_t N>
   struct traits<const T[N]> {
     static const size_t ndim = traits<T[N]>::ndim;
 
