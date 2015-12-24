@@ -35,6 +35,7 @@ TEST(AlignDType, Create)
   EXPECT_THROW(d = make_unaligned(ndt::make_type<ndt::type_type>()), dynd::type_error);
 }
 
+/*
 TEST(AlignDType, Basic)
 {
   nd::array a;
@@ -60,7 +61,6 @@ TEST(AlignDType, Basic)
   EXPECT_EQ(0x12345678abcdef01LL, a.as<int64_t>());
 }
 
-/*
 Todo: Reenable this?
 
 TEST(AlignDType, Chained)
