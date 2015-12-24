@@ -99,6 +99,16 @@ namespace nd {
     // Don't allow implicit construction from a raw pointer
     array(const void *);
 
+    template <typename T>
+    void init(T &&value)
+    {
+      nd::init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
+      init(get()->data, std::forward<T>(value));
+
+      get()->flags =
+          (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
+    }
+
   public:
     /**
       * Constructs an array with no data.
@@ -113,16 +123,16 @@ namespace nd {
     array(T &&value)
         : intrusive_ptr<memory_block_data>(empty(ndt::make_type<typename remove_reference_then_cv<T>::type>(value)))
     {
-      init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
-      init(get()->data, std::forward<T>(value));
-
-      get()->flags =
-          (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
+      init(std::forward<T>(value));
     }
 
     /** Constructs an array from a 1D initializer list */
     template <typename T>
-    array(const std::initializer_list<T> &il);
+    array(const std::initializer_list<T> &values)
+        : intrusive_ptr<memory_block_data>(empty(ndt::make_type<std::initializer_list<T>>(values)))
+    {
+      init(values);
+    }
 
     /** Constructs an array from a 2D initializer list */
     template <typename T>
@@ -158,15 +168,6 @@ namespace nd {
     array(const std::string *(&rhs)[N]);
 
     array(const ndt::type *rhs, intptr_t dim_size);
-
-    /** Constructs an array from a 1D const char * (string) initializer list */
-    array(const std::initializer_list<const char *> &il);
-
-    /** Constructs an array from a 1D ndt::type initializer list */
-    array(const std::initializer_list<ndt::type> &il);
-
-    /** Constructs an array from a 1D bool initializer list */
-    array(const std::initializer_list<bool> &il);
 
     explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock)
         : intrusive_ptr<memory_block_data>(ndobj_memblock)
@@ -1296,14 +1297,6 @@ namespace nd {
     };
   } // namespace detail
 
-  // Implementation of initializer list construction
-  template <class T>
-  dynd::nd::array::array(const std::initializer_list<T> &il)
-  {
-    intptr_t dim0 = il.size();
-    make_strided_array(ndt::make_type<T>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
-    DYND_MEMCPY(get()->data, il.begin(), sizeof(T) * dim0);
-  }
   template <class T>
   dynd::nd::array::array(const std::initializer_list<std::initializer_list<T>> &il)
   {
@@ -1327,31 +1320,6 @@ namespace nd {
     make_strided_array(ndt::make_type<T>(), 3, shape, nd::default_access_flags, NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get()->data);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-  }
-
-  inline dynd::nd::array::array(const std::initializer_list<const char *> &il)
-  {
-    make_strided_string_array(il.begin(), il.size()).swap(*this);
-  }
-
-  inline dynd::nd::array::array(const std::initializer_list<ndt::type> &il)
-  {
-    intptr_t dim0 = il.size();
-    make_strided_array(ndt::make_type<ndt::type_type>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
-    auto data_ptr = reinterpret_cast<ndt::type *>(get()->data);
-    for (intptr_t i = 0; i < dim0; ++i) {
-      data_ptr[i] = *(il.begin() + i);
-    }
-  }
-
-  inline dynd::nd::array::array(const std::initializer_list<bool> &il)
-  {
-    intptr_t dim0 = il.size();
-    make_strided_array(ndt::make_type<bool>(), 1, &dim0, nd::default_access_flags, NULL).swap(*this);
-    auto data_ptr = reinterpret_cast<bool1 *>(get()->data);
-    for (intptr_t i = 0; i < dim0; ++i) {
-      data_ptr[i] = *(il.begin() + i);
-    }
   }
 
   ///////////// C-style array constructor implementation

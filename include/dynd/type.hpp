@@ -1123,6 +1123,18 @@ namespace ndt {
   };
 
   template <typename ValueType>
+  struct traits<std::initializer_list<ValueType>> {
+    static const size_t ndim = traits<ValueType>::ndim + 1;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent(const std::initializer_list<ValueType> &values)
+    {
+      return make_fixed_dim(values.size(), make_type<ValueType>(*values.begin()));
+    }
+  };
+
+  template <typename ValueType>
   struct traits<std::vector<ValueType>> {
     static const size_t ndim = traits<ValueType>::ndim + 1;
 
