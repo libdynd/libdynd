@@ -29,6 +29,12 @@ namespace ndt {
 namespace nd {
   class DYND_API array;
 
+  /**
+   * Constructs an uninitialized array of the given dtype. This is
+   * the usual function to use for allocating such an array.
+   */
+  DYND_API array empty(const ndt::type &tp);
+
   enum array_access_flags {
     /** If an array is readable */
     read_access_flag = 0x01,
@@ -50,6 +56,42 @@ namespace nd {
   class array_vals;
   class array_vals_at;
 
+  template <typename T>
+  struct init {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, const T &value) const { *reinterpret_cast<T *>(data) = value; }
+
+    void operator()(char *data, T &&value) const { *reinterpret_cast<T *>(data) = value; }
+  };
+
+  template <>
+  struct init<std::string> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, const std::string &value) const
+    {
+      reinterpret_cast<string *>(data)->assign(value.data(), value.size());
+    }
+  };
+
+  template <>
+  struct init<const char *> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, const char *value) const
+    {
+      reinterpret_cast<string *>(data)->assign(value, strlen(value));
+    }
+  };
+
+  template <size_t N>
+  struct init<char[N]> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void operator()(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
+  };
+
   /**
    * This is the primary multi-dimensional array class.
    */
@@ -68,7 +110,36 @@ namespace nd {
       */
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
-    array(T &&value);
+    array(T &&value)
+        : intrusive_ptr<memory_block_data>(empty(ndt::make_type<typename remove_reference_then_cv<T>::type>(value)))
+    {
+      init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
+      init(get()->data, std::forward<T>(value));
+
+      get()->flags =
+          (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
+    }
+
+    /** Constructs an array from a 1D initializer list */
+    template <typename T>
+    array(const std::initializer_list<T> &il);
+
+    /** Constructs an array from a 2D initializer list */
+    template <typename T>
+    array(const std::initializer_list<std::initializer_list<T>> &il);
+
+    /** Constructs an array from a 3D initializer list */
+    template <typename T>
+    array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il);
+
+    /**
+     * Constructs a 1D array from a pointer and a size.
+     */
+    template <typename T>
+    array(const T *values, intptr_t size);
+
+    /** Construct a string from a UTF8 buffer and specified buffer size */
+    array(const char *str, size_t size);
 
     /**
       * Copy constructs an array.
@@ -80,41 +151,13 @@ namespace nd {
      */
     array(array &&other) = default;
 
-    /**
-     * Constructs a zero-dimensional scalar from a C++ scalar.
-     *
-     */
-    /** Construct a string from a NULL-terminated UTF8 string */
-//    array(const char *cstr);
-    /** Construct a string from a UTF8 buffer and specified buffer size */
-    array(const char *str, size_t size);
-
-    /** Specialize to treat char arrays as strings */
-    template <int N>
-    array(const char(&rhs)[N]);
     /** Specialize to create 1D arrays of strings */
     template <int N>
     array(const char *(&rhs)[N]);
     template <int N>
     array(const std::string *(&rhs)[N]);
-    /** Specialize to create 1D arrays of ndt::types */
 
-    /**
-     * Constructs a 1D array from a pointer and a size.
-     */
-    template <class T>
-    array(const T *rhs, intptr_t dim_size);
     array(const ndt::type *rhs, intptr_t dim_size);
-
-    /** Constructs an array from a 1D initializer list */
-    template <class T>
-    array(const std::initializer_list<T> &il);
-    /** Constructs an array from a 2D initializer list */
-    template <class T>
-    array(const std::initializer_list<std::initializer_list<T>> &il);
-    /** Constructs an array from a 3D initializer list */
-    template <class T>
-    array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il);
 
     /** Constructs an array from a 1D const char * (string) initializer list */
     array(const std::initializer_list<const char *> &il);
@@ -124,12 +167,6 @@ namespace nd {
 
     /** Constructs an array from a 1D bool initializer list */
     array(const std::initializer_list<bool> &il);
-
-    /**
-     * Constructs an array from a std::vector.
-     */
-    template <class T>
-    array(const std::vector<T> &vec);
 
     explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock)
         : intrusive_ptr<memory_block_data>(ndobj_memblock)
@@ -664,55 +701,6 @@ namespace nd {
     friend class array_vals;
     friend class array_vals_at;
   };
-
-  template <typename T>
-  struct init;
-
-  template <typename T>
-  struct init {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
-
-    void operator()(char *data, const T &value) const { *reinterpret_cast<T *>(data) = value; }
-
-    void operator()(char *data, T &&value) const { *reinterpret_cast<T *>(data) = value; }
-  };
-
-  template <>
-  struct init<std::string> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
-
-    void operator()(char *data, const std::string &value) const
-    {
-      reinterpret_cast<string *>(data)->assign(value.data(), value.size());
-    }
-  };
-
-  template <>
-  struct init<const char *> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
-
-    void operator()(char *data, const char *value) const
-    {
-      reinterpret_cast<string *>(data)->assign(value, strlen(value));
-    }
-  };
-
-  /**
-   * Constructs an uninitialized array of the given dtype. This is
-   * the usual function to use for allocating such an array.
-   */
-  DYND_API array empty(const ndt::type &tp);
-
-  template <typename T, typename>
-  array::array(T &&value)
-      : intrusive_ptr<memory_block_data>(empty(ndt::make_type<typename remove_reference_then_cv<T>::type>(value)))
-  {
-    init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
-    init(get()->data, std::forward<T>(value));
-
-    get()->flags =
-        (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
-  }
 
   DYND_API array as_struct();
   DYND_API array as_struct(std::size_t size, const char **names, const array *values);
@@ -1368,12 +1356,6 @@ namespace nd {
 
   ///////////// C-style array constructor implementation
   ////////////////////////////
-
-  template <int N>
-  inline nd::array::array(const char(&rhs)[N])
-  {
-    make_string_array(rhs, N, string_encoding_utf_8, nd::default_access_flags).swap(*this);
-  }
 
   template <int N>
   inline nd::array::array(const char *(&rhs)[N])
