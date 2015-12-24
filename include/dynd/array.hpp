@@ -116,6 +116,29 @@ namespace nd {
           (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
     }
 
+    template <typename ValueType>
+    void init(const ValueType *values, size_t size)
+    {
+      nd::init<ValueType> init(get()->tp, get()->metadata());
+
+      char *data = get()->data;
+      for (size_t i = 0; i < size; ++i) {
+        init(data, values[i]);
+        data += sizeof(ValueType);
+      }
+
+      get()->flags =
+          (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
+    }
+
+    void init(const char *value, size_t size)
+    {
+      reinterpret_cast<string *>(get()->data)->assign(value, size);
+
+      get()->flags =
+          (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
+    }
+
   public:
     /**
       * Constructs an array with no data.
@@ -152,11 +175,18 @@ namespace nd {
     /**
      * Constructs a 1D array from a pointer and a size.
      */
-    template <typename T>
-    array(const T *values, intptr_t size);
+    template <typename ValueType>
+    array(const ValueType *values, size_t size)
+        : intrusive_ptr<memory_block_data>(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>())))
+    {
+      init(values, size);
+    }
 
     /** Construct a string from a UTF8 buffer and specified buffer size */
-    array(const char *str, size_t size);
+    array(const char *value, size_t size) : intrusive_ptr<memory_block_data>(empty(ndt::make_type<const char *>()))
+    {
+      init(value, size);
+    }
 
     /**
       * Copy constructs an array.
@@ -173,8 +203,6 @@ namespace nd {
     array(const char *(&rhs)[N]);
     template <int N>
     array(const std::string *(&rhs)[N]);
-
-    array(const ndt::type *rhs, intptr_t dim_size);
 
     explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock)
         : intrusive_ptr<memory_block_data>(ndobj_memblock)
@@ -1342,22 +1370,6 @@ namespace nd {
   inline nd::array::array(const std::string *(&rhs)[N])
   {
     make_strided_string_array(rhs, N).swap(*this);
-  }
-
-  template <class T>
-  inline nd::array::array(const T *rhs, intptr_t dim_size)
-  {
-    nd::empty(dim_size, ndt::make_type<T>()).swap(*this);
-    DYND_MEMCPY(get()->data, reinterpret_cast<const void *>(&rhs), dim_size * sizeof(T));
-  }
-
-  inline nd::array::array(const ndt::type *rhs, intptr_t dim_size)
-  {
-    nd::empty(dim_size, ndt::make_type<ndt::type_type>()).swap(*this);
-    auto lhs = reinterpret_cast<ndt::type *>(get()->data);
-    for (intptr_t i = 0; i < dim_size; ++i) {
-      lhs[i] = rhs[i];
-    }
   }
 
   ///////////// The array.as<type>() templated function

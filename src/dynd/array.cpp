@@ -255,12 +255,6 @@ static nd::array make_array_clone_with_new_type(const nd::array &n, const ndt::t
   return result;
 }
 
-nd::array::array(const char *str, size_t size)
-{
-  array temp = make_string_array(str, size, string_encoding_utf_8, nd::read_access_flag | nd::immutable_access_flag);
-  temp.swap(*this);
-}
-
 namespace {
 static void as_storage_type(const ndt::type &dt, intptr_t DYND_UNUSED(arrmeta_offset), void *DYND_UNUSED(self),
                             ndt::type &out_transformed_tp, bool &out_was_transformed)
