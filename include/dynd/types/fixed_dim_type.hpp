@@ -290,7 +290,7 @@ namespace nd {
     struct init_from_c_array<ValueType[Size], true> {
       init_from_c_array(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-      void operator()(char *data, const ValueType(&values)[Size]) const
+      void single(char *data, const ValueType(&values)[Size]) const
       {
         memcpy(data, values, Size * sizeof(ValueType));
       }
@@ -306,10 +306,10 @@ namespace nd {
       {
       }
 
-      void operator()(char *data, const ValueType(&values)[Size]) const
+      void single(char *data, const ValueType(&values)[Size]) const
       {
         for (const ValueType &value : values) {
-          child(data, value);
+          child.single(data, value);
           data += sizeof(ValueType);
         }
       }
@@ -336,10 +336,10 @@ namespace nd {
     {
     }
 
-    void operator()(char *data, const std::vector<T> &values) const
+    void single(char *data, const std::vector<T> &values) const
     {
       for (const auto &value : values) {
-        child(data, value);
+        child.single(data, value);
         data += stride;
       }
     }
@@ -356,10 +356,10 @@ namespace nd {
     {
     }
 
-    void operator()(char *data, const std::initializer_list<T> &values) const
+    void single(char *data, const std::initializer_list<T> &values) const
     {
       for (const auto &value : values) {
-        child(data, value);
+        child.single(data, value);
         data += stride;
       }
     }

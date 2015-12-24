@@ -158,37 +158,6 @@ nd::array nd::make_strided_array_from_data(const ndt::type &uniform_tp, intptr_t
   return nd::array(result);
 }
 
-nd::array nd::make_pod_array(const ndt::type &pod_dt, const void *data)
-{
-  size_t size = pod_dt.get_data_size();
-  if (!pod_dt.is_pod()) {
-    stringstream ss;
-    ss << "Cannot make a dynd array from raw data using non-POD type " << pod_dt;
-    throw runtime_error(ss.str());
-  }
-  else if (pod_dt.get_arrmeta_size() != 0) {
-    stringstream ss;
-    ss << "Cannot make a dynd array from raw data using type " << pod_dt;
-    ss << " because it has non-empty dynd arrmeta";
-    throw runtime_error(ss.str());
-  }
-
-  // Allocate the array arrmeta and data in one memory block
-  char *data_ptr = NULL;
-  intrusive_ptr<memory_block_data> result = make_array_memory_block(0, size, pod_dt.get_data_alignment(), &data_ptr);
-
-  // Fill in the preamble arrmeta
-  array_preamble *ndo = reinterpret_cast<array_preamble *>(result.get());
-  ndo->tp = pod_dt;
-  ndo->data = data_ptr;
-  ndo->owner = NULL;
-  ndo->flags = nd::read_access_flag | nd::immutable_access_flag;
-
-  memcpy(data_ptr, data, size);
-
-  return nd::array(result);
-}
-
 nd::array nd::make_bytes_array(const char *data, size_t len, size_t alignment)
 {
   nd::array result = nd::empty(ndt::bytes_type::make(alignment));
@@ -206,11 +175,6 @@ nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t D
 
 nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t array_size)
 {
-  size_t total_string_length = 0;
-  for (size_t i = 0; i != array_size; ++i) {
-    total_string_length += strlen(cstr_array[i]);
-  }
-
   ndt::type stp = ndt::make_type<ndt::string_type>();
   ndt::type tp = ndt::make_fixed_dim(array_size, stp);
   nd::array result = nd::empty(tp);
@@ -219,25 +183,6 @@ nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t ar
     size_t size = strlen(cstr_array[i]);
     string_ptr->assign(cstr_array[i], size);
     ++string_ptr;
-  }
-  return result;
-}
-
-nd::array nd::make_strided_string_array(const std::string **str_array, size_t array_size)
-{
-  size_t total_string_length = 0;
-  for (size_t i = 0; i != array_size; ++i) {
-    total_string_length += str_array[i]->size();
-  }
-
-  ndt::type stp = ndt::make_type<ndt::string_type>();
-  ndt::type tp = ndt::make_fixed_dim(array_size, stp);
-  nd::array result = nd::empty(tp);
-  string *string_arr_ptr = reinterpret_cast<string *>(result.data());
-  for (size_t i = 0; i < array_size; ++i) {
-    size_t size = str_array[i]->size();
-    string_arr_ptr->assign(str_array[i]->data(), size);
-    ++string_arr_ptr;
   }
   return result;
 }

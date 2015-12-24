@@ -35,6 +35,16 @@ namespace nd {
    */
   DYND_API array empty(const ndt::type &tp);
 
+  /**
+   * \brief Creates a strided array of strings.
+   *
+   * \param cstr_array  An array of NULL-terminated UTF8 strings.
+   * \param array_size  The number of elements in `cstr_array`.
+   *
+   * \returns  An array of type "N * string".
+   */
+  DYND_API array make_strided_string_array(const char *const *cstr_array, size_t array_size);
+
   enum array_access_flags {
     /** If an array is readable */
     read_access_flag = 0x01,
@@ -56,29 +66,51 @@ namespace nd {
   class array_vals;
   class array_vals_at;
 
-  template <typename T>
+  template <typename ValueType>
   struct init {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-    void operator()(char *data, const T &value) const { *reinterpret_cast<T *>(data) = value; }
+    void single(char *data, const ValueType &value) const { *reinterpret_cast<ValueType *>(data) = value; }
 
-    void operator()(char *data, T &&value) const { *reinterpret_cast<T *>(data) = value; }
+    void contiguous(char *data, const ValueType *values, size_t size) const
+    {
+      for (size_t i = 0; i < size; ++i) {
+        single(data, values[i]);
+        data += sizeof(ValueType);
+      }
+    }
   };
 
   template <>
   struct init<bool> {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-    void operator()(char *data, bool value) const { *reinterpret_cast<bool1 *>(data) = value; }
+    void single(char *data, bool value) const { *reinterpret_cast<bool1 *>(data) = value; }
+
+    void contiguous(char *data, const bool *values, size_t size) const
+    {
+      for (size_t i = 0; i < size; ++i) {
+        single(data, values[i]);
+        data += sizeof(bool1);
+      }
+    }
   };
 
   template <>
   struct init<std::string> {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-    void operator()(char *data, const std::string &value) const
+    void single(char *data, const std::string &value) const
     {
       reinterpret_cast<string *>(data)->assign(value.data(), value.size());
+    }
+
+    void contiguous(char *data, const std::string *values, size_t size) const
+    {
+      for (size_t i = 0; i < size; ++i) {
+        single(data, values[i]);
+        data += sizeof(string);
+      }
     }
   };
 
@@ -86,9 +118,14 @@ namespace nd {
   struct init<const char *> {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-    void operator()(char *data, const char *value) const
+    void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, strlen(value)); }
+
+    void contiguous(char *data, const char *const *values, size_t size) const
     {
-      reinterpret_cast<string *>(data)->assign(value, strlen(value));
+      for (size_t i = 0; i < size; ++i) {
+        single(data, values[i]);
+        data += sizeof(const char *);
+      }
     }
   };
 
@@ -96,7 +133,7 @@ namespace nd {
   struct init<char[N]> {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-    void operator()(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
+    void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
   };
 
   /**
@@ -110,7 +147,7 @@ namespace nd {
     void init(T &&value)
     {
       nd::init<typename remove_reference_then_cv<T>::type> init(get()->tp, get()->metadata());
-      init(get()->data, std::forward<T>(value));
+      init.single(get()->data, std::forward<T>(value));
 
       get()->flags =
           (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
@@ -120,12 +157,7 @@ namespace nd {
     void init(const ValueType *values, size_t size)
     {
       nd::init<ValueType> init(get()->tp, get()->metadata());
-
-      char *data = get()->data;
-      for (size_t i = 0; i < size; ++i) {
-        init(data, values[i]);
-        data += sizeof(ValueType);
-      }
+      init.contiguous(get()->data, values, size);
 
       get()->flags =
           (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
@@ -200,9 +232,10 @@ namespace nd {
 
     /** Specialize to create 1D arrays of strings */
     template <int N>
-    array(const char *(&rhs)[N]);
-    template <int N>
-    array(const std::string *(&rhs)[N]);
+    array(const char *(&rhs)[N])
+    {
+      make_strided_string_array(rhs, N).swap(*this);
+    }
 
     explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock)
         : intrusive_ptr<memory_block_data>(ndobj_memblock)
@@ -877,10 +910,6 @@ namespace nd {
                                               const intrusive_ptr<memory_block_data> &data_reference,
                                               char **out_uniform_arrmeta = NULL);
 
-  /** Makes a POD (plain old data) array with data initialized by the provided
-   * pointer */
-  DYND_API array make_pod_array(const ndt::type &pod_dt, const void *data);
-
   /** Makes an array of 'bytes' type from the data */
   DYND_API array make_bytes_array(const char *data, size_t len, size_t alignment = 1);
 
@@ -929,17 +958,6 @@ namespace nd {
   {
     return make_utf32_array(&static_string[0], N);
   }
-
-  /**
-   * \brief Creates a strided array of strings.
-   *
-   * \param cstr_array  An array of NULL-terminated UTF8 strings.
-   * \param array_size  The number of elements in `cstr_array`.
-   *
-   * \returns  An array of type "N * string".
-   */
-  DYND_API array make_strided_string_array(const char *const *cstr_array, size_t array_size);
-  DYND_API array make_strided_string_array(const std::string **str_array, size_t array_size);
 
   inline array_vals array::vals() const { return array_vals(*this); }
 
@@ -1355,21 +1373,6 @@ namespace nd {
     make_strided_array(ndt::make_type<T>(), 3, shape, nd::default_access_flags, NULL).swap(*this);
     T *dataptr = reinterpret_cast<T *>(get()->data);
     detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-  }
-
-  ///////////// C-style array constructor implementation
-  ////////////////////////////
-
-  template <int N>
-  inline nd::array::array(const char *(&rhs)[N])
-  {
-    make_strided_string_array(rhs, N).swap(*this);
-  }
-
-  template <int N>
-  inline nd::array::array(const std::string *(&rhs)[N])
-  {
-    make_strided_string_array(rhs, N).swap(*this);
   }
 
   ///////////// The array.as<type>() templated function
