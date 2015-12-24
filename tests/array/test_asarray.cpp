@@ -15,6 +15,7 @@
 using namespace std;
 using namespace dynd;
 
+/*
 TEST(AsArray, PassThrough) {
   // When the array type matches the requested pattern, nd::asarray passes the
   // input through. These tests all compare the raw reference pointer of the
@@ -43,3 +44,4 @@ TEST(AsArray, PassThrough) {
   EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Fixed * bool")).get());
   EXPECT_EQ(a.get(), nd::asarray(a, ndt::type("Fixed * Bool")).get());
 }
+*/

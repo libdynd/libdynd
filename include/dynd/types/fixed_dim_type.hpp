@@ -281,27 +281,6 @@ namespace nd {
     };
   */
 
-  template <typename T>
-  struct init<std::initializer_list<T>> {
-    intptr_t stride;
-    init<T> child;
-
-    init(const ndt::type &tp, const char *metadata)
-        : stride(reinterpret_cast<const ndt::fixed_dim_type::metadata_type *>(metadata)->stride),
-          child(tp.extended<ndt::fixed_dim_type>()->get_element_type(),
-                metadata + sizeof(ndt::fixed_dim_type::metadata_type))
-    {
-    }
-
-    void operator()(char *data, const std::initializer_list<T> &values) const
-    {
-      for (const T &value : values) {
-        child(data, value);
-        data += stride;
-      }
-    }
-  };
-
   namespace detail {
 
     template <typename CArrayType, bool IsTriviallyCopyable>
@@ -358,6 +337,26 @@ namespace nd {
     }
 
     void operator()(char *data, const std::vector<T> &values) const
+    {
+      for (const auto &value : values) {
+        child(data, value);
+        data += stride;
+      }
+    }
+  };
+
+  template <typename T>
+  struct init<std::initializer_list<T>> {
+    init<T> child;
+    intptr_t stride;
+
+    init(const ndt::type &tp, const char *metadata)
+        : child(tp.extended<ndt::fixed_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
+          stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
+    {
+    }
+
+    void operator()(char *data, const std::initializer_list<T> &values) const
     {
       for (const auto &value : values) {
         child(data, value);
