@@ -173,20 +173,6 @@ nd::array nd::make_string_array(const char *str, size_t len, string_encoding_t D
   return result;
 }
 
-nd::array nd::make_strided_string_array(const char *const *cstr_array, size_t array_size)
-{
-  ndt::type stp = ndt::make_type<ndt::string_type>();
-  ndt::type tp = ndt::make_fixed_dim(array_size, stp);
-  nd::array result = nd::empty(tp);
-  string *string_ptr = reinterpret_cast<string *>(result.data());
-  for (size_t i = 0; i < array_size; ++i) {
-    size_t size = strlen(cstr_array[i]);
-    string_ptr->assign(cstr_array[i], size);
-    ++string_ptr;
-  }
-  return result;
-}
-
 /**
  * Clones the arrmeta and swaps in a new type. The type must
  * have identical arrmeta, but this function doesn't check that.
@@ -1088,7 +1074,7 @@ nd::array nd::as_struct(std::size_t size, const char **names, const array *value
     types[i] = values[i].get_type();
   }
 
-  array res = empty(ndt::struct_type::make(make_strided_string_array(names, size), array(types)));
+  array res = empty(ndt::struct_type::make(array(names, size), array(types)));
   for (std::size_t i = 0; i < size; ++i) {
     res(i).assign(values[i]);
   }

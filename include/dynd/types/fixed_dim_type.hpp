@@ -286,20 +286,25 @@ namespace nd {
     template <typename CArrayType, bool IsTriviallyCopyable>
     struct init_from_c_array;
 
+    /*
+        template <typename ValueType, size_t Size>
+        struct init_from_c_array<ValueType[Size], true> {
+          init_from_c_array(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+          void single(char *data, const ValueType(&values)[Size]) const { memcpy(data, values, Size *
+       sizeof(ValueType)); }
+        };
+    */
+
     template <typename ValueType, size_t Size>
     struct init_from_c_array<ValueType[Size], true> {
-      init_from_c_array(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
-
-      void single(char *data, const ValueType(&values)[Size]) const { memcpy(data, values, Size * sizeof(ValueType)); }
-    };
-
-    template <typename ValueType, size_t Size>
-    struct init_from_c_array<ValueType[Size], false> {
       nd::init<ValueType> child;
+      intptr_t stride;
 
       init_from_c_array(const ndt::type &tp, const char *metadata)
           : child(tp.extended<ndt::fixed_dim_type>()->get_element_type(),
-                  metadata + sizeof(ndt::fixed_dim_type::metadata_type))
+                  metadata + sizeof(ndt::fixed_dim_type::metadata_type)),
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
       {
       }
 
@@ -307,7 +312,28 @@ namespace nd {
       {
         for (const ValueType &value : values) {
           child.single(data, value);
-          data += sizeof(ValueType);
+          data += stride;
+        }
+      }
+    };
+
+    template <typename ValueType, size_t Size>
+    struct init_from_c_array<ValueType[Size], false> {
+      nd::init<ValueType> child;
+      intptr_t stride;
+
+      init_from_c_array(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::fixed_dim_type>()->get_element_type(),
+                  metadata + sizeof(ndt::fixed_dim_type::metadata_type)),
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
+      {
+      }
+
+      void single(char *data, const ValueType(&values)[Size]) const
+      {
+        for (const ValueType &value : values) {
+          child.single(data, value);
+          data += stride;
         }
       }
     };
