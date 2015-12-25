@@ -972,33 +972,6 @@ nd::array nd::array::view_scalars(const ndt::type &scalar_tp) const
   return make_array_clone_with_new_type(*this, viewed_tp);
 }
 
-std::string nd::detail::array_as_string(const nd::array &lhs, assign_error_mode errmode)
-{
-  if (!lhs.is_scalar()) {
-    throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
-  }
-
-  nd::array temp = lhs;
-  if (temp.get_type().get_kind() != string_kind) {
-    temp = temp.ucast(ndt::make_type<ndt::string_type>()).eval();
-  }
-  const ndt::base_string_type *esd = static_cast<const ndt::base_string_type *>(temp.get_type().extended());
-  return esd->get_utf8_string(temp.get()->metadata(), temp.get()->data, errmode);
-}
-
-ndt::type nd::detail::array_as_type(const nd::array &lhs)
-{
-  if (!lhs.is_scalar()) {
-    throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
-  }
-
-  nd::array temp = lhs;
-  if (temp.get_type().get_type_id() != type_type_id) {
-    temp = temp.ucast(ndt::make_type<ndt::type_type>()).eval();
-  }
-  return *reinterpret_cast<const ndt::type *>(temp.cdata());
-}
-
 void nd::array::debug_print(std::ostream &o, const std::string &indent) const
 {
   o << indent << "------ array\n";
