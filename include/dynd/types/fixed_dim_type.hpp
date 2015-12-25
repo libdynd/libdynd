@@ -312,7 +312,7 @@ namespace nd {
       }
     };
 
-    template <typename ContainerType, size_t Rank = ndt::traits<ContainerType>::ndim>
+    template <typename ContainerType, size_t Rank>
     struct init {
       typedef typename ContainerType::value_type value_type;
 
@@ -382,8 +382,9 @@ namespace nd {
   };
 
   template <typename T>
-  struct init<std::initializer_list<T>> : detail::init<std::initializer_list<T>> {
-    using detail::init<std::initializer_list<T>>::init;
+  struct init<std::initializer_list<T>>
+      : detail::init<std::initializer_list<T>, ndt::traits<std::initializer_list<T>>::ndim> {
+    using detail::init<std::initializer_list<T>, ndt::traits<std::initializer_list<T>>::ndim>::init;
   };
 
 } // namespace dynd::nd
