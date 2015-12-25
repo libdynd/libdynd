@@ -1038,18 +1038,18 @@ std::ostream &nd::operator<<(std::ostream &o, const array &rhs)
   return o;
 }
 
-nd::array nd::as_struct() { return empty(ndt::struct_type::make()); }
-
-nd::array nd::as_struct(std::size_t size, const char **names, const array *values)
+nd::array nd::as_struct(size_t size, const pair<const char *, array> *pairs)
 {
+  std::vector<const char *> names(size);
   std::vector<ndt::type> types(size);
-  for (std::size_t i = 0; i < size; ++i) {
-    types[i] = values[i].get_type();
+  for (size_t i = 0; i < size; ++i) {
+    names[i] = pairs[i].first;
+    types[i] = pairs[i].second.get_type();
   }
 
-  array res = empty(ndt::struct_type::make(array(names, size), array(types)));
-  for (std::size_t i = 0; i < size; ++i) {
-    res(i).assign(values[i]);
+  array res = empty(ndt::struct_type::make(names, types));
+  for (size_t i = 0; i < size; ++i) {
+    res(i).assign(pairs[i].second);
   }
 
   return res;
