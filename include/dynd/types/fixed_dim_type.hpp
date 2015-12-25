@@ -290,10 +290,7 @@ namespace nd {
     struct init_from_c_array<ValueType[Size], true> {
       init_from_c_array(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
-      void single(char *data, const ValueType(&values)[Size]) const
-      {
-        memcpy(data, values, Size * sizeof(ValueType));
-      }
+      void single(char *data, const ValueType(&values)[Size]) const { memcpy(data, values, Size * sizeof(ValueType)); }
     };
 
     template <typename ValueType, size_t Size>
@@ -312,6 +309,45 @@ namespace nd {
           child.single(data, value);
           data += sizeof(ValueType);
         }
+      }
+    };
+
+    template <typename ContainerType, size_t Rank = ndt::traits<ContainerType>::ndim>
+    struct init {
+      typedef typename ContainerType::value_type value_type;
+
+      init<value_type, Rank - 1> child;
+      intptr_t stride;
+
+      init(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::fixed_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
+      {
+      }
+
+      void single(char *data, const ContainerType &values) const
+      {
+        for (const value_type &value : values) {
+          child.single(data, value);
+          data += stride;
+        }
+      }
+    };
+
+    template <typename ContainerType>
+    struct init<ContainerType, 1> {
+      typedef typename ContainerType::value_type value_type;
+
+      nd::init<value_type> child;
+
+      init(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::fixed_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t))
+      {
+      }
+
+      void single(char *data, const ContainerType &values) const
+      {
+        child.contiguous(data, values.begin(), values.size());
       }
     };
 
@@ -346,23 +382,8 @@ namespace nd {
   };
 
   template <typename T>
-  struct init<std::initializer_list<T>> {
-    init<T> child;
-    intptr_t stride;
-
-    init(const ndt::type &tp, const char *metadata)
-        : child(tp.extended<ndt::fixed_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
-          stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
-    {
-    }
-
-    void single(char *data, const std::initializer_list<T> &values) const
-    {
-      for (const auto &value : values) {
-        child.single(data, value);
-        data += stride;
-      }
-    }
+  struct init<std::initializer_list<T>> : detail::init<std::initializer_list<T>> {
+    using detail::init<std::initializer_list<T>>::init;
   };
 
 } // namespace dynd::nd
