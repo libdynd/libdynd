@@ -10,8 +10,7 @@
 #include <string>
 
 #include <dynd/config.hpp>
-
-#include <dynd/type.hpp>
+#include <dynd/init.hpp>
 #include <dynd/typed_data_assign.hpp>
 #include <dynd/shortvector.hpp>
 #include <dynd/irange.hpp>
@@ -56,97 +55,69 @@ namespace nd {
   class array_vals;
   class array_vals_at;
 
-  template <typename ValueType>
-  struct init {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  namespace detail {
 
-    void single(char *data, const ValueType &value) const { *reinterpret_cast<ValueType *>(data) = value; }
+    template <typename CArrayType, bool IsTriviallyCopyable>
+    struct init_from_c_array;
 
-    void contiguous(char *data, const ValueType *values, size_t size) const
-    {
-      for (size_t i = 0; i < size; ++i) {
-        single(data, values[i]);
-        data += sizeof(ValueType);
+    /*
+        template <typename ValueType, size_t Size>
+        struct init_from_c_array<ValueType[Size], true> {
+          init_from_c_array(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+          void single(char *data, const ValueType(&values)[Size]) const { memcpy(data, values, Size *
+       sizeof(ValueType)); }
+        };
+    */
+
+    template <typename ValueType, size_t Size>
+    struct init_from_c_array<ValueType[Size], true> {
+      nd::init<ValueType> child;
+      intptr_t stride;
+
+      init_from_c_array(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
+      {
       }
-    }
-  };
 
-  template <>
-  struct init<bool> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
-
-    void single(char *data, bool value) const { *reinterpret_cast<bool1 *>(data) = value; }
-
-    void contiguous(char *data, const bool *values, size_t size) const
-    {
-      for (size_t i = 0; i < size; ++i) {
-        single(data, values[i]);
-        data += sizeof(bool1);
+      void single(char *data, const ValueType(&values)[Size]) const
+      {
+        for (const ValueType &value : values) {
+          child.single(data, value);
+          data += stride;
+        }
       }
-    }
-  };
+    };
 
-  template <>
-  struct init<std::string> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+    template <typename ValueType, size_t Size>
+    struct init_from_c_array<ValueType[Size], false> {
+      nd::init<ValueType> child;
+      intptr_t stride;
 
-    void single(char *data, const std::string &value) const
-    {
-      reinterpret_cast<string *>(data)->assign(value.data(), value.size());
-    }
-
-    void contiguous(char *data, const std::string *values, size_t size) const
-    {
-      for (size_t i = 0; i < size; ++i) {
-        single(data, values[i]);
-        data += sizeof(string);
+      init_from_c_array(const ndt::type &tp, const char *metadata)
+          : child(tp.extended<ndt::base_dim_type>()->get_element_type(), metadata + sizeof(size_stride_t)),
+            stride(reinterpret_cast<const size_stride_t *>(metadata)->stride)
+      {
       }
-    }
-  };
 
-  template <>
-  struct init<const char *> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
-
-    void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, strlen(value)); }
-
-    void contiguous(char *data, const char *const *values, size_t size) const
-    {
-      for (size_t i = 0; i < size; ++i) {
-        single(data, values[i]);
-        data += sizeof(string);
+      void single(char *data, const ValueType(&values)[Size]) const
+      {
+        for (const ValueType &value : values) {
+          child.single(data, value);
+          data += stride;
+        }
       }
-    }
-  };
+    };
 
-  template <size_t N>
-  struct init<char[N]> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+  } // namespace dynd::nd::detail
 
-    void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
-
-    void contiguous(char *data, const char *const *values, size_t size) const
-    {
-      for (size_t i = 0; i < size; ++i) {
-        single(data, values[i]);
-        data += sizeof(string);
-      }
-    }
-  };
-
-  template <size_t N>
-  struct init<const char[N]> {
-    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
-
-    void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
-
-    void contiguous(char *data, const char *const *values, size_t size) const
-    {
-      for (size_t i = 0; i < size; ++i) {
-        single(data, values[i]);
-        data += sizeof(string);
-      }
-    }
+  template <typename ValueType, size_t Size>
+  struct init<ValueType[Size]>
+      : detail::init_from_c_array<ValueType[Size],
+                                  std::is_pod<ValueType>::value && ndt::traits<ValueType>::is_same_layout> {
+    using detail::init_from_c_array<ValueType[Size], std::is_pod<ValueType>::value &&
+                                                         ndt::traits<ValueType>::is_same_layout>::init_from_c_array;
   };
 
   template <typename ValueType>
@@ -799,8 +770,12 @@ namespace nd {
     friend class array_vals_at;
   };
 
-  DYND_API array as_struct();
-  DYND_API array as_struct(std::size_t size, const char **names, const array *values);
+  DYND_API array as_struct(size_t size, const std::pair<const char *, array> *pairs);
+
+  inline array as_struct(const std::initializer_list<std::pair<const char *, array>> &pairs)
+  {
+    return as_struct(pairs.size(), pairs.begin());
+  }
 
   DYND_API array operator+(const array &a0);
   DYND_API array operator-(const array &a0);

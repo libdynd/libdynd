@@ -454,12 +454,9 @@ inline int na()
 
 TEST(ParseJSON, Struct)
 {
-  nd::array actual;
-
-  actual = nd::json::parse(ndt::struct_type::make({"x", "y"}, {ndt::make_type<int>(), ndt::make_type<int>()}),
-                           "{\"x\":2,\"y\":3}");
-  EXPECT_EQ(2, actual(0).as<int>());
-  EXPECT_EQ(3, actual(1).as<int>());
+  EXPECT_ARRAY_EQ(nd::as_struct({{"x", 2}, {"y", 3}}),
+                  nd::json::parse(ndt::struct_type::make({"x", "y"}, {ndt::make_type<int>(), ndt::make_type<int>()}),
+                                  "{\"x\":2,\"y\":3}"));
 
   /*
     nd::array n;
