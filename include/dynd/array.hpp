@@ -136,7 +136,7 @@ namespace nd {
   /**
    * This is the primary multi-dimensional array class.
    */
-  class DYND_API array : public intrusive_ptr<memory_block_data> {
+  class DYND_API array : public intrusive_ptr<array_preamble> {
     // Don't allow implicit construction from a raw pointer
     array(const void *);
 
@@ -172,7 +172,7 @@ namespace nd {
     template <typename T,
               typename = std::enable_if_t<ndt::has_traits<typename remove_reference_then_cv<T>::type>::value>>
     array(T &&value)
-        : intrusive_ptr<memory_block_data>(empty(ndt::type_for(value)))
+        : intrusive_ptr<array_preamble>(empty(ndt::type_for(value)))
     {
       init(std::forward<T>(value));
     }
@@ -180,7 +180,7 @@ namespace nd {
     /** Constructs an array from a 1D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<ValueType> &values)
-        : intrusive_ptr<memory_block_data>(empty(ndt::type_for(values)))
+        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
     {
       init(values);
     }
@@ -188,7 +188,7 @@ namespace nd {
     /** Constructs an array from a 2D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<ValueType>> &values)
-        : intrusive_ptr<memory_block_data>(empty(ndt::type_for(values)))
+        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
     {
       init(values);
     }
@@ -196,7 +196,7 @@ namespace nd {
     /** Constructs an array from a 3D initializer list */
     template <typename ValueType>
     array(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
-        : intrusive_ptr<memory_block_data>(empty(ndt::type_for(values)))
+        : intrusive_ptr<array_preamble>(empty(ndt::type_for(values)))
     {
       init(values);
     }
@@ -206,7 +206,7 @@ namespace nd {
      */
     template <typename ValueType>
     array(const ValueType *values, size_t size)
-        : intrusive_ptr<memory_block_data>(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>())))
+        : intrusive_ptr<array_preamble>(empty(ndt::make_fixed_dim(size, ndt::make_type<ValueType>())))
     {
       init(values, size);
     }
@@ -221,30 +221,29 @@ namespace nd {
      */
     array(array &&other) = default;
 
-    explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock)
-        : intrusive_ptr<memory_block_data>(ndobj_memblock)
+    explicit array(const intrusive_ptr<array_preamble> &ndobj_memblock) : intrusive_ptr<array_preamble>(ndobj_memblock)
     {
-      if (intrusive_ptr<memory_block_data>::get()->m_type != array_memory_block_type) {
+      if (intrusive_ptr<array_preamble>::get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
     }
 
-    explicit array(array_preamble *ndo, bool add_ref) : intrusive_ptr<memory_block_data>(ndo, add_ref) {}
+    explicit array(array_preamble *ndo, bool add_ref) : intrusive_ptr<array_preamble>(ndo, add_ref) {}
 
-    void set(const intrusive_ptr<memory_block_data> &ndobj_memblock)
+    void set(const intrusive_ptr<array_preamble> &ndobj_memblock)
     {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
-      intrusive_ptr<memory_block_data>::operator=(ndobj_memblock);
+      intrusive_ptr<array_preamble>::operator=(ndobj_memblock);
     }
 
-    void set(intrusive_ptr<memory_block_data> &&ndobj_memblock)
+    void set(intrusive_ptr<array_preamble> &&ndobj_memblock)
     {
       if (ndobj_memblock.get()->m_type != array_memory_block_type) {
         throw std::runtime_error("array can only be constructed from a memblock with array type");
       }
-      intrusive_ptr<memory_block_data>::operator=(std::move(ndobj_memblock));
+      intrusive_ptr<array_preamble>::operator=(std::move(ndobj_memblock));
     }
 
     /**
@@ -252,10 +251,7 @@ namespace nd {
      * array to NULL. The caller takes explicit ownership of the
      * reference.
      */
-    array_preamble *release()
-    {
-      return reinterpret_cast<array_preamble *>(intrusive_ptr<memory_block_data>::release());
-    }
+    array_preamble *release() { return reinterpret_cast<array_preamble *>(intrusive_ptr<array_preamble>::release()); }
 
     /**
      * Assignment operator.
@@ -268,12 +264,12 @@ namespace nd {
     array &operator=(array &&rhs) = default;
 
     /** Low level access to the array preamble */
-    array_preamble *get() const { return reinterpret_cast<array_preamble *>(intrusive_ptr<memory_block_data>::get()); }
+    array_preamble *get() const { return reinterpret_cast<array_preamble *>(intrusive_ptr<array_preamble>::get()); }
 
     array_preamble *operator->() const { return get(); }
 
     /** Returns true if the array is NULL */
-    inline bool is_null() const { return intrusive_ptr<memory_block_data>::get() == NULL; }
+    inline bool is_null() const { return intrusive_ptr<array_preamble>::get() == NULL; }
 
     char *data() const
     {
@@ -421,7 +417,7 @@ namespace nd {
         return get()->owner;
       }
       else {
-        return *this;
+        return intrusive_ptr<memory_block_data>(get(), true);
       }
     }
 

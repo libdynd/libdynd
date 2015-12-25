@@ -355,12 +355,12 @@ static nd::array view_from_bytes(const nd::array &arr, const ndt::type &tp)
 static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
 {
   // Allocate a result array to attempt the view in it
-  nd::array result(make_array_memory_block(tp.get_arrmeta_size()));
+  nd::array result(reinterpret_cast<array_preamble *>(make_array_memory_block(tp.get_arrmeta_size()).get()), true);
   // Copy the fields
   result.get()->data = arr.get()->data;
   if (!arr.get()->owner) {
     // Embedded data, need reference to the array
-    result.get()->owner = arr;
+    result.get()->owner = arr.get();
   }
   else {
     // Use the same data reference, avoid producing a chain
@@ -386,13 +386,15 @@ static nd::array view_concrete(const nd::array &arr, const ndt::type &tp)
       if (try_view(arr.get_type().extended<ndt::base_dim_type>()->get_element_type(),
                    arr.get()->metadata() + sizeof(ndt::var_dim_type::metadata_type),
                    tp.extended<ndt::base_dim_type>()->get_element_type(),
-                   result.get()->metadata() + sizeof(fixed_dim_type_arrmeta), arr)) {
+                   result.get()->metadata() + sizeof(fixed_dim_type_arrmeta),
+                   intrusive_ptr<memory_block_data>(arr.get(), true))) {
         return result;
       }
     }
   }
   // Otherwise try to copy the arrmeta as a view
-  else if (try_view(arr.get_type(), arr.get()->metadata(), tp, result.get()->metadata(), arr)) {
+  else if (try_view(arr.get_type(), arr.get()->metadata(), tp, result.get()->metadata(),
+                    intrusive_ptr<memory_block_data>(arr.get(), true))) {
     // If it succeeded, return it
     return result;
   }
