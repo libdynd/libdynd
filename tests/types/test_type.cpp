@@ -190,17 +190,17 @@ TEST(Type, TypeIDConstructor)
 
 TEST(Traits, InitializerList)
 {
-  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<int>()), ndt::make_type({0}));
-  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<int>()), ndt::make_type({10, -2}));
-  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(7, ndt::make_type<int>()), ndt::make_type({0, 1, 2, 3, 4, 5, 6}));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<int>()), ndt::type_for({0}));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<int>()), ndt::type_for({10, -2}));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(7, ndt::make_type<int>()), ndt::type_for({0, 1, 2, 3, 4, 5, 6}));
 
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<int>())),
-            ndt::make_type({{0, 1}, {2, 3}}));
+            ndt::type_for({{0, 1}, {2, 3}}));
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<int>())),
-            ndt::make_type({{0, 1, 2}, {3, 4, 5}}));
+            ndt::type_for({{0, 1, 2}, {3, 4, 5}}));
 
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())),
-            ndt::make_type({{0}, {1, 2}}));
+            ndt::type_for({{0}, {1, 2}}));
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())),
-            ndt::make_type({{0, 1}, {2}}));
+            ndt::type_for({{0, 1}, {2}}));
 }

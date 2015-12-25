@@ -827,25 +827,22 @@ namespace ndt {
     return detail::make_type<T>(0, std::forward<ArgTypes>(args)...);
   }
 
-  template <typename T, typename... ArgTypes>
-  type make_type(const std::initializer_list<T> &value, ArgTypes &&... args)
+  template <typename ValueType>
+  type type_for(const std::initializer_list<ValueType> &values)
   {
-    return detail::make_type<std::initializer_list<T>>(0, value, std::forward<ArgTypes>(args)...);
+    return make_type<std::initializer_list<ValueType>>(values);
   }
 
-  template <typename T, typename... ArgTypes>
-  type make_type(const std::initializer_list<std::initializer_list<T>> &value, ArgTypes &&... args)
+  template <typename ValueType>
+  type type_for(const std::initializer_list<std::initializer_list<ValueType>> &values)
   {
-    return detail::make_type<std::initializer_list<std::initializer_list<T>>>(0, value,
-                                                                              std::forward<ArgTypes>(args)...);
+    return make_type<std::initializer_list<std::initializer_list<ValueType>>>(values);
   }
 
-  template <typename T, typename... ArgTypes>
-  type make_type(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &value,
-                 ArgTypes &&... args)
+  template <typename ValueType>
+  type type_for(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
   {
-    return detail::make_type<std::initializer_list<std::initializer_list<std::initializer_list<T>>>>(
-        0, value, std::forward<ArgTypes>(args)...);
+    return make_type<std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>>>(values);
   }
 
   /**
