@@ -12,6 +12,8 @@
 #include <dynd/types/any_kind_type.hpp>
 #include <dynd/types/bytes_type.hpp>
 #include <dynd/types/fixed_bytes_kind_type.hpp>
+#include <dynd/types/fixed_dim_type.hpp>
+#include <dynd/types/fixed_dim_kind_type.hpp>
 
 using namespace std;
 using namespace dynd;
@@ -184,4 +186,21 @@ TEST(Type, TypeIDConstructor)
   EXPECT_EQ(ndt::bytes_type::make(), ndt::type(bytes_type_id));
   EXPECT_EQ(ndt::fixed_bytes_kind_type::make(), ndt::type(fixed_bytes_type_id));
   EXPECT_EQ(ndt::pointer_type::make(ndt::any_kind_type::make()), ndt::type(pointer_type_id));
+}
+
+TEST(Traits, InitializerList)
+{
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<int>()), ndt::make_type({0}));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<int>()), ndt::make_type({10, -2}));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(7, ndt::make_type<int>()), ndt::make_type({0, 1, 2, 3, 4, 5, 6}));
+
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<int>())),
+            ndt::make_type({{0, 1}, {2, 3}}));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::fixed_dim_type>(3, ndt::make_type<int>())),
+            ndt::make_type({{0, 1, 2}, {3, 4, 5}}));
+
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())),
+            ndt::make_type({{0}, {1, 2}}));
+  EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<ndt::var_dim_type>(ndt::make_type<int>())),
+            ndt::make_type({{0, 1}, {2}}));
 }
