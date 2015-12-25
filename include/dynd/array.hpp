@@ -124,7 +124,7 @@ namespace nd {
     {
       for (size_t i = 0; i < size; ++i) {
         single(data, values[i]);
-        data += sizeof(const char *);
+        data += sizeof(string);
       }
     }
   };
@@ -189,20 +189,30 @@ namespace nd {
     }
 
     /** Constructs an array from a 1D initializer list */
-    template <typename T>
-    array(const std::initializer_list<T> &values)
-        : intrusive_ptr<memory_block_data>(empty(ndt::make_type<std::initializer_list<T>>(values)))
+    template <typename ValueType>
+    array(const std::initializer_list<ValueType> &values)
+        : intrusive_ptr<memory_block_data>(empty(ndt::make_type<std::initializer_list<ValueType>>(values)))
     {
       init(values);
     }
 
     /** Constructs an array from a 2D initializer list */
-    template <typename T>
-    array(const std::initializer_list<std::initializer_list<T>> &il);
+    template <typename ValueType>
+    array(const std::initializer_list<std::initializer_list<ValueType>> &values)
+        : intrusive_ptr<memory_block_data>(
+              empty(ndt::make_type<std::initializer_list<std::initializer_list<ValueType>>>(values)))
+    {
+      init(values);
+    }
 
     /** Constructs an array from a 3D initializer list */
-    template <typename T>
-    array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il);
+    template <typename ValueType>
+    array(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
+        : intrusive_ptr<memory_block_data>(empty(
+              ndt::make_type<std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>>>(values)))
+    {
+      init(values);
+    }
 
     /**
      * Constructs a 1D array from a pointer and a size.
@@ -914,50 +924,6 @@ namespace nd {
   DYND_API array make_bytes_array(const char *data, size_t len, size_t alignment = 1);
 
   DYND_API array make_string_array(const char *str, size_t len, string_encoding_t encoding, uint64_t access_flags);
-  inline array make_ascii_array(const char *str, size_t len)
-  {
-    return make_string_array(str, len, string_encoding_ascii, nd::default_access_flags);
-  }
-  inline array make_utf8_array(const char *str, size_t len)
-  {
-    return make_string_array(str, len, string_encoding_utf_8, nd::default_access_flags);
-  }
-  inline array make_utf16_array(const uint16_t *str, size_t len)
-  {
-    return make_string_array(reinterpret_cast<const char *>(str), len * sizeof(uint16_t), string_encoding_utf_16,
-                             nd::default_access_flags);
-  }
-  inline array make_utf32_array(const uint32_t *str, size_t len)
-  {
-    return make_string_array(reinterpret_cast<const char *>(str), len * sizeof(uint32_t), string_encoding_utf_32,
-                             nd::default_access_flags);
-  }
-
-  template <int N>
-  inline array make_ascii_array(const char(&static_string)[N])
-  {
-    return make_ascii_array(&static_string[0], N);
-  }
-  template <int N>
-  inline array make_utf8_array(const char(&static_string)[N])
-  {
-    return make_utf8_array(&static_string[0], N);
-  }
-  template <int N>
-  inline array make_utf8_array(const unsigned char(&static_string)[N])
-  {
-    return make_utf8_array(reinterpret_cast<const char *>(&static_string[0]), N);
-  }
-  template <int N>
-  inline array make_utf16_array(const uint16_t(&static_string)[N])
-  {
-    return make_utf16_array(&static_string[0], N);
-  }
-  template <int N>
-  inline array make_utf32_array(const uint32_t(&static_string)[N])
-  {
-    return make_utf32_array(&static_string[0], N);
-  }
 
   inline array_vals array::vals() const { return array_vals(*this); }
 
@@ -1349,31 +1315,6 @@ namespace nd {
       }
     };
   } // namespace detail
-
-  template <class T>
-  dynd::nd::array::array(const std::initializer_list<std::initializer_list<T>> &il)
-  {
-    typedef std::initializer_list<std::initializer_list<T>> S;
-    intptr_t shape[2];
-
-    // Get and validate that the shape is regular
-    detail::initializer_list_shape<S>::compute(shape, il);
-    make_strided_array(ndt::make_type<T>(), 2, shape, nd::default_access_flags, NULL).swap(*this);
-    T *dataptr = reinterpret_cast<T *>(get()->data);
-    detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-  }
-  template <class T>
-  dynd::nd::array::array(const std::initializer_list<std::initializer_list<std::initializer_list<T>>> &il)
-  {
-    typedef std::initializer_list<std::initializer_list<std::initializer_list<T>>> S;
-    intptr_t shape[3];
-
-    // Get and validate that the shape is regular
-    detail::initializer_list_shape<S>::compute(shape, il);
-    make_strided_array(ndt::make_type<T>(), 3, shape, nd::default_access_flags, NULL).swap(*this);
-    T *dataptr = reinterpret_cast<T *>(get()->data);
-    detail::initializer_list_shape<S>::copy_data(&dataptr, il);
-  }
 
   ///////////// The array.as<type>() templated function
   ////////////////////////////
