@@ -188,7 +188,7 @@ TEST(Type, TypeIDConstructor)
   EXPECT_EQ(ndt::pointer_type::make(ndt::any_kind_type::make()), ndt::type(pointer_type_id));
 }
 
-TEST(Traits, InitializerList)
+TEST(TypeFor, InitializerList)
 {
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(1, ndt::make_type<int>()), ndt::type_for({0}));
   EXPECT_EQ(ndt::make_type<ndt::fixed_dim_type>(2, ndt::make_type<int>()), ndt::type_for({10, -2}));

@@ -149,6 +149,19 @@ namespace nd {
     }
   };
 
+  template <typename ValueType>
+  struct as {
+    void single(ValueType &value, char *data) const { value = *reinterpret_cast<ValueType *>(data); }
+  };
+
+  template <>
+  struct as<std::string> {
+    void single(std::string &value, char *data) const
+    {
+      value.assign(reinterpret_cast<string *>(data)->data(), reinterpret_cast<string *>(data)->size());
+    }
+  };
+
   /**
    * This is the primary multi-dimensional array class.
    */
@@ -739,11 +752,26 @@ namespace nd {
      * When this is a zero-dimensional array, converts it to a C++ scalar of the
      * requested template type. This function may be extended in the future for
      * 1D vectors (as<std::vector<T>>), matrices, etc.
-     *
-     * \param errmode  The assignment error mode to use.
      */
-    template <class T>
-    T as(assign_error_mode errmode = assign_error_default) const;
+    template <typename ValueType>
+    ValueType as(assign_error_mode error_mode = assign_error_fractional) const
+    {
+      ValueType value;
+      nd::as<ValueType> as;
+
+      ndt::type tp = ndt::make_type<ValueType>();
+      if (tp == get()->tp) {
+        as.single(value, get()->data);
+      }
+      else {
+        array a = empty(tp);
+        a.assign(*this, error_mode);
+
+        as.single(value, a.get()->data);
+      }
+
+      return value;
+    }
 
     /** Returns a copy of this array in default memory. */
     array to_host() const;
@@ -870,8 +898,6 @@ namespace nd {
       return *this;
     }
 
-    // TODO: Could also do +=, -=, *=, etc.
-
     friend class array;
     friend array_vals_at array::vals_at(const irange &) const;
     friend array_vals_at array::vals_at(const irange &, const irange &) const;
@@ -936,45 +962,6 @@ namespace nd {
     irange i[4] = {i0, i1, i2, i3};
     return array_vals_at(at_array(4, i, false));
   }
-
-  // Some C array metaprogramming used by empty<> as well as assignment
-  // from a C array
-  namespace detail {
-    template <class T>
-    struct dtype_from_array {
-      typedef T type;
-      enum { element_size = sizeof(T) };
-      enum { type_id = type_id_of<T>::value };
-    };
-    template <class T, int N>
-    struct dtype_from_array<T[N]> {
-      typedef typename dtype_from_array<T>::type type;
-      enum { element_size = dtype_from_array<T>::element_size };
-      enum { type_id = dtype_from_array<T>::type_id };
-    };
-
-    template <class T>
-    struct ndim_from_array {
-      enum { value = 0 };
-    };
-    template <class T, int N>
-    struct ndim_from_array<T[N]> {
-      enum { value = ndim_from_array<T>::value + 1 };
-    };
-
-    template <class T>
-    struct fill_shape {
-      inline static size_t fill(intptr_t *) { return sizeof(T); }
-    };
-    template <class T, int N>
-    struct fill_shape<T[N]> {
-      inline static size_t fill(intptr_t *out_shape)
-      {
-        out_shape[0] = N;
-        return N * fill_shape<T>::fill(out_shape + 1);
-      }
-    };
-  } // namespace detail
 
   /**
    * Constructs an uninitialized array with uninitialized arrmeta of the
@@ -1222,147 +1209,6 @@ namespace nd {
   inline array reshape(const array &a, intptr_t ndim, const intptr_t *shape)
   {
     return reshape(a, nd::array(shape, ndim));
-  }
-
-  ///////////// Initializer list constructor implementation
-  ////////////////////////////
-  namespace detail {
-    // Computes the number of dimensions in a nested initializer list
-    // constructor
-    template <class T>
-    struct initializer_list_ndim {
-      static const int value = 0;
-    };
-    template <class T>
-    struct initializer_list_ndim<std::initializer_list<T>> {
-      static const int value = initializer_list_ndim<T>::value + 1;
-    };
-
-    // Computes the array type of a nested initializer list constructor
-    template <class T>
-    struct initializer_list_type {
-      typedef T type;
-    };
-    template <class T>
-    struct initializer_list_type<std::initializer_list<T>> {
-      typedef typename initializer_list_type<T>::type type;
-    };
-
-    // Gets the shape of the nested initializer list constructor, and validates
-    // that
-    // it isn't ragged
-    template <class T>
-    struct initializer_list_shape;
-    // Base case, an initializer list parameterized by a non-initializer list
-    template <class T>
-    struct initializer_list_shape<std::initializer_list<T>> {
-      static void compute(intptr_t *out_shape, const std::initializer_list<T> &il) { out_shape[0] = il.size(); }
-      static void validate(const intptr_t *shape, const std::initializer_list<T> &il)
-      {
-        if ((intptr_t)il.size() != shape[0]) {
-          throw std::runtime_error("initializer list for array is ragged, must be "
-                                   "nested in a regular fashion");
-        }
-      }
-      static void copy_data(T **dataptr, const std::initializer_list<T> &il)
-      {
-        DYND_MEMCPY(*dataptr, il.begin(), il.size() * sizeof(T));
-        *dataptr += il.size();
-      }
-    };
-    // Recursive case, an initializer list parameterized by an initializer list
-    template <class T>
-    struct initializer_list_shape<std::initializer_list<std::initializer_list<T>>> {
-      static void compute(intptr_t *out_shape, const std::initializer_list<std::initializer_list<T>> &il)
-      {
-        out_shape[0] = il.size();
-        if (out_shape[0] > 0) {
-          // Recursively compute the rest of the shape
-          initializer_list_shape<std::initializer_list<T>>::compute(out_shape + 1, *il.begin());
-          // Validate the shape for the nested initializer lists
-          for (auto i = il.begin() + 1; i != il.end(); ++i) {
-            initializer_list_shape<std::initializer_list<T>>::validate(out_shape + 1, *i);
-          }
-        }
-      }
-      static void validate(const intptr_t *shape, const std::initializer_list<std::initializer_list<T>> &il)
-      {
-        if ((intptr_t)il.size() != shape[0]) {
-          throw std::runtime_error("initializer list for array is ragged, must be "
-                                   "nested in a regular fashion");
-        }
-        // Validate the shape for the nested initializer lists
-        for (auto i = il.begin(); i != il.end(); ++i) {
-          initializer_list_shape<std::initializer_list<T>>::validate(shape + 1, *i);
-        }
-      }
-      static void copy_data(typename initializer_list_type<T>::type **dataptr,
-                            const std::initializer_list<std::initializer_list<T>> &il)
-      {
-        for (auto i = il.begin(); i != il.end(); ++i) {
-          initializer_list_shape<std::initializer_list<T>>::copy_data(dataptr, *i);
-        }
-      }
-    };
-  } // namespace detail
-
-  ///////////// The array.as<type>() templated function
-  ////////////////////////////
-  namespace detail {
-    template <class T>
-    struct array_as_helper {
-      inline static typename std::enable_if<
-          is_dynd_scalar<T>::value || is_dynd_scalar<typename std::remove_pointer<T>::type>::value, T>::type
-      as(const array &lhs, const eval::eval_context *ectx)
-      {
-        T result;
-        if (!lhs.is_scalar()) {
-          throw std::runtime_error("can only convert arrays with 0 dimensions to scalars");
-        }
-        typed_data_assign(ndt::make_type<T>(), NULL, (char *)&result, lhs.get_type(), lhs.get()->metadata(),
-                          lhs.get()->data, ectx->errmode);
-        return result;
-      }
-    };
-
-    template <>
-    struct array_as_helper<bool> {
-      inline static bool as(const array &lhs, const eval::eval_context *ectx)
-      {
-        return static_cast<bool>(array_as_helper<bool1>::as(lhs, ectx));
-      }
-    };
-
-    DYND_API std::string array_as_string(const array &lhs, assign_error_mode errmode);
-    DYND_API ndt::type array_as_type(const array &lhs);
-
-    template <>
-    struct array_as_helper<std::string> {
-      static std::string as(const array &lhs, const eval::eval_context *ectx)
-      {
-        return array_as_string(lhs, ectx->errmode);
-      }
-    };
-
-    template <>
-    struct array_as_helper<ndt::type> {
-      static ndt::type as(const array &lhs, const eval::eval_context *DYND_UNUSED(ectx)) { return array_as_type(lhs); }
-    };
-
-    // Could do as<std::vector<T>> for 1D arrays, and other similiar conversions
-  } // namespace detail;
-
-  template <class T>
-  T array::as(assign_error_mode errmode) const
-  {
-    if (errmode == assign_error_default || errmode == eval::default_eval_context.errmode) {
-      return detail::array_as_helper<T>::as(*this, &eval::default_eval_context);
-    }
-    else {
-      eval::eval_context tmp_ectx(eval::default_eval_context);
-      tmp_ectx.errmode = errmode;
-      return detail::array_as_helper<T>::as(*this, &tmp_ectx);
-    }
   }
 
   /**
