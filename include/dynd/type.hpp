@@ -132,6 +132,7 @@ namespace ndt {
   typedef type (*type_make_t)(type_id_t tp_id, const nd::array &args);
 
   DYND_API type make_fixed_dim(size_t dim_size, const type &element_tp);
+  inline type make_var_dim(const type &element_tp);
 
   template <typename T>
   struct traits {
@@ -826,6 +827,30 @@ namespace ndt {
     return detail::make_type<T>(0, std::forward<ArgTypes>(args)...);
   }
 
+  template <typename ValueType>
+  type type_for(const ValueType &value)
+  {
+    return make_type<ValueType>(value);
+  }
+
+  template <typename ValueType>
+  type type_for(const std::initializer_list<ValueType> &values)
+  {
+    return make_type<std::initializer_list<ValueType>>(values);
+  }
+
+  template <typename ValueType>
+  type type_for(const std::initializer_list<std::initializer_list<ValueType>> &values)
+  {
+    return make_type<std::initializer_list<std::initializer_list<ValueType>>>(values);
+  }
+
+  template <typename ValueType>
+  type type_for(const std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>> &values)
+  {
+    return make_type<std::initializer_list<std::initializer_list<std::initializer_list<ValueType>>>>(values);
+  }
+
   /**
    * Allocates and constructs a type with a use count of 1.
    */
@@ -872,6 +897,7 @@ namespace ndt {
     static const bool is_same_layout = true;
 
     static type equivalent() { return type(type_id_of<signed char>::value); }
+
     static signed char sentinel() { return std::numeric_limits<signed char>::min(); }
   };
 
@@ -1066,6 +1092,15 @@ namespace ndt {
     static type equivalent() { return type(string_type_id); }
   };
 
+  template <size_t N>
+  struct traits<const char[N]> {
+    static const size_t ndim = 0;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent() { return type(string_type_id); }
+  };
+
   template <>
   struct traits<type> {
     static const size_t ndim = 0;
@@ -1122,30 +1157,6 @@ namespace ndt {
     static type equivalent() { return make_type<string>(); }
   };
 
-  template <typename ValueType>
-  struct traits<std::initializer_list<ValueType>> {
-    static const size_t ndim = traits<ValueType>::ndim + 1;
-
-    static const bool is_same_layout = false;
-
-    static type equivalent(const std::initializer_list<ValueType> &values)
-    {
-      return make_fixed_dim(values.size(), make_type<ValueType>(*values.begin()));
-    }
-  };
-
-  template <typename ValueType>
-  struct traits<std::vector<ValueType>> {
-    static const size_t ndim = traits<ValueType>::ndim + 1;
-
-    static const bool is_same_layout = false;
-
-    static type equivalent(const std::vector<ValueType> &values)
-    {
-      return make_fixed_dim(values.size(), make_type<ValueType>());
-    }
-  };
-
   // Need to handle const properly
   template <typename T, size_t N>
   struct traits<const T[N]> {
@@ -1154,6 +1165,80 @@ namespace ndt {
     static const bool is_same_layout = traits<T[N]>::is_same_layout;
 
     static type equivalent() { return make_type<T[N]>(); }
+  };
+
+  template <typename ContainerType, size_t NDim>
+  struct container_traits {
+    static const size_t ndim = NDim;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent(const ContainerType &values)
+    {
+      intptr_t shape[ndim];
+      container_traits::shape(shape, values);
+
+      type tp = value_type();
+      for (intptr_t i = ndim - 1; i >= 0; --i) {
+        if (shape[i] == -1) {
+          tp = make_var_dim(tp);
+        }
+        else {
+          tp = make_fixed_dim(shape[i], tp);
+        }
+      }
+
+      return tp;
+    }
+
+    static void shape(intptr_t *res, const ContainerType &values)
+    {
+      res[0] = values.size();
+
+      auto iter = values.begin();
+      ndt::traits<typename ContainerType::value_type>::shape(res + 1, *iter);
+
+      while (++iter != values.end()) {
+        intptr_t next_shape[ndim - 1];
+        ndt::traits<typename ContainerType::value_type>::shape(next_shape, *iter);
+
+        for (size_t i = 1; i < ndim; ++i) {
+          if (res[i] != next_shape[i - 1]) {
+            res[i] = -1;
+          }
+        }
+      }
+    }
+
+    static type value_type() { return container_traits<typename ContainerType::value_type, ndim - 1>::value_type(); }
+  };
+
+  template <typename ContainerType>
+  struct container_traits<ContainerType, 1> {
+    static const size_t ndim = 1;
+
+    static const bool is_same_layout = false;
+
+    static type equivalent(const ContainerType &values)
+    {
+      intptr_t size;
+      shape(&size, values);
+
+      return make_fixed_dim(size, value_type());
+    }
+
+    static void shape(intptr_t *res, const ContainerType &values) { res[0] = values.size(); }
+
+    static type value_type() { return traits<typename ContainerType::value_type>::equivalent(); }
+  };
+
+  template <typename ValueType>
+  struct traits<std::initializer_list<ValueType>>
+      : container_traits<std::initializer_list<ValueType>, traits<ValueType>::ndim + 1> {
+  };
+
+  template <typename ValueType>
+  struct traits<std::vector<ValueType>> : container_traits<std::vector<ValueType>, traits<ValueType>::ndim + 1> {
   };
 
   /**
