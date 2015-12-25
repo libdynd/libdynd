@@ -35,16 +35,6 @@ namespace nd {
    */
   DYND_API array empty(const ndt::type &tp);
 
-  /**
-   * \brief Creates a strided array of strings.
-   *
-   * \param cstr_array  An array of NULL-terminated UTF8 strings.
-   * \param array_size  The number of elements in `cstr_array`.
-   *
-   * \returns  An array of type "N * string".
-   */
-  DYND_API array make_strided_string_array(const char *const *cstr_array, size_t array_size);
-
   enum array_access_flags {
     /** If an array is readable */
     read_access_flag = 0x01,
@@ -134,6 +124,29 @@ namespace nd {
     init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
 
     void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
+
+    void contiguous(char *data, const char *const *values, size_t size) const
+    {
+      for (size_t i = 0; i < size; ++i) {
+        single(data, values[i]);
+        data += sizeof(string);
+      }
+    }
+  };
+
+  template <size_t N>
+  struct init<const char[N]> {
+    init(const ndt::type &DYND_UNUSED(tp), const char *DYND_UNUSED(metadata)) {}
+
+    void single(char *data, const char *value) const { reinterpret_cast<string *>(data)->assign(value, N - 1); }
+
+    void contiguous(char *data, const char *const *values, size_t size) const
+    {
+      for (size_t i = 0; i < size; ++i) {
+        single(data, values[i]);
+        data += sizeof(string);
+      }
+    }
   };
 
   /**
@@ -158,14 +171,6 @@ namespace nd {
     {
       nd::init<ValueType> init(get()->tp, get()->metadata());
       init.contiguous(get()->data, values, size);
-
-      get()->flags =
-          (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
-    }
-
-    void init(const char *value, size_t size)
-    {
-      reinterpret_cast<string *>(get()->data)->assign(value, size);
 
       get()->flags =
           (get()->tp.get_ndim() == 0) ? (nd::read_access_flag | nd::immutable_access_flag) : nd::readwrite_access_flags;
@@ -224,12 +229,6 @@ namespace nd {
       init(values, size);
     }
 
-    /** Construct a string from a UTF8 buffer and specified buffer size */
-    array(const char *value, size_t size) : intrusive_ptr<memory_block_data>(empty(ndt::make_type<const char *>()))
-    {
-      init(value, size);
-    }
-
     /**
       * Copy constructs an array.
       */
@@ -239,13 +238,6 @@ namespace nd {
      * Move constructs an array.
      */
     array(array &&other) = default;
-
-    /** Specialize to create 1D arrays of strings */
-    template <int N>
-    array(const char *(&rhs)[N])
-    {
-      make_strided_string_array(rhs, N).swap(*this);
-    }
 
     explicit array(const intrusive_ptr<memory_block_data> &ndobj_memblock)
         : intrusive_ptr<memory_block_data>(ndobj_memblock)
